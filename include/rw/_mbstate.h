@@ -131,23 +131,27 @@ _USING (::mbstate_t);
 #  if defined (_RWSTD_OS_LINUX)
 /*** Linux/glibc **********************************************************/
 
-     // define __mbstate_t at file scope (see /usr/include/wchar.h)
-#    ifndef __mbstate_t_defined
-#      define __mbstate_t_defined 1
+     // glibc keeps the conversion state in the private __mbstate_t and
+     // introduces the public mbstate_t as an alias for it in <wchar.h>
+     // (and <uchar.h>); the two are guarded independently so that
+     // <stdio.h> can see the former without introducing the latter
+#    ifndef _RWSTD_NO_BITS_TYPES___MBSTATE_T_H
 
-extern "C" {
+     // glibc 2.26 and beyond: the private type has a header of its own
+#      include <bits/types/__mbstate_t.h>
 
-typedef struct {
-    int __count;
-    union {
-        _RWSTD_WINT_T __wch;
-        char          __wchb [4];
-    } __value;
-} __mbstate_t;
+#    else   // if defined (_RWSTD_NO_BITS_TYPES___MBSTATE_T_H)
 
-}   // extern "C"
+     // earlier glibc: ask <wchar.h> for just the private type, the way
+     // <stdio.h> does for fpos_t; <features.h> must come first since
+     // the partial header relies on its macros without including it,
+     // and the system header must be named by path since <wchar.h>
+     // would resolve to our own wrapper
+#      include <features.h>
+#      define __need_mbstate_t
+#      include _RWSTD_ANSI_C_WCHAR_H
 
-#    endif   // __mbstate_t_defined
+#    endif   // _RWSTD_NO_BITS_TYPES___MBSTATE_T_H
 
 #    define _RWSTD_MBSTATE_T __mbstate_t
 
