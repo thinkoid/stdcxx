@@ -33,7 +33,7 @@
 #include <new>
 #include <valarray>
 
-void* operator new (std::size_t s) throw (std::bad_alloc)
+void* operator new (std::size_t s) _NEW_THROWS ((std::bad_alloc))
 {
     return std::memset (std::malloc (s), 0x55, s);
 }

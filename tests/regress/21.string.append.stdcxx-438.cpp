@@ -36,7 +36,7 @@
 #ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
    // disabled for compilers that can't reliably replace the operators
 
-void* operator new (std::size_t n) throw (std::bad_alloc)
+void* operator new (std::size_t n) _NEW_THROWS ((std::bad_alloc))
 {
     void* const ptr = std::malloc (n + sizeof n);
     if (!ptr)
@@ -47,7 +47,7 @@ void* operator new (std::size_t n) throw (std::bad_alloc)
     return (std::size_t*)ptr + 1;
 }
 
-void operator delete (void *ptr) throw ()
+void operator delete (void *ptr) _NEW_THROWS (())
 {
     if (ptr) {
         std::memset (ptr, -1, *((std::size_t*)ptr - 1));
