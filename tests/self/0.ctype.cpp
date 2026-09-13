@@ -237,7 +237,7 @@ test_is (charT*, const char *cname)
         '0', '1', '2', '3', 'a', 'b', 'c',
         0x100, 0x7fff, 0x8000, 0xffff,
 #if 2 < _RWSTD_INT_SIZE
-        0x10000, 0x7fffffff, 0x80000000, 0xffffffff,
+        0x10000, 0x7fffffff, int (0x80000000), int (0xffffffff),
 #else
         0x1ff, 0x700, 0x8fff, 0xf000,
 #endif
