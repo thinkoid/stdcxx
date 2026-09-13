@@ -1,0 +1,104 @@
+The queue for the stdcxx revival, in priority order, top first. Each
+entry states the fact, the intended fix, and the check that settles it.
+Finished entries leave this file; the ChangeLog remembers them. The
+notes under doc/notes carry the longer investigations.
+
+
+1. struct tm on glibc: characterize tm_gmtoff
+
+   glibc 2.20 (2014) moved tm_gmtoff and tm_zone from __USE_BSD to
+   __USE_MISC. Two tests (tests/self/0.printf.cpp,
+   tests/localization/22.locale.time.put.cpp) and the library itself
+   (src/time_put.cpp, latent behind __STRICT_ANSI__; src/memattr.cpp,
+   which defines __USE_BSD on its own for madvise) test the old macro.
+   Fix: a configuration test for tm_gmtoff in <time.h>, in the shape of
+   STRUCT_TM_IN_WCHAR_H.cpp, and the four sites branch on its macro.
+   Check: the two tests build and run; the library builds with and
+   without -std=c++17 (strict) at the same configuration.
+
+2. Algorithms test predicates with == false
+
+   Twenty-six sites in include/algorithm, include/algorithm.cc,
+   include/rw/_algobase.h, include/rw/_algobase.cc and
+   include/rw/_heap.cc spell a predicate test as pred (x) == false.
+   The test type conv_to_bool (tests/include/rw_alg_test.h) converts
+   only to a pointer-to-member and let the spelling through because
+   false was a null pointer constant in C++98; C++11 (CWG 903) closed
+   that, and the trap now fires on the library in 38 algorithms tests.
+   C++03 25 p8 said "testable as true"; C++11 says the value is used
+   as if (pred (*first)). Fix: spell it exactly that way, if (pred
+   (...)) and if (...) ; else where the negation is needed. This is a
+   library change: its own commit, the 38 tests as the gate, the full
+   suite before and after.
+
+3. Restore the test-suite baseline
+
+   With every test binary linking, run the suite in full and record
+   the result as the reference for everything after: assertion
+   counts per test, exit statuses, signals. The 2008 expectation is
+   the target; the last measured run on a current toolchain was
+   10,066,804 assertions with 1,417 failures, 3 non-zero exits and
+   12 signals, the failures clustered in 23.bitset.cons, the string
+   regression tests, 0.inputiter/0.outputiter/0.new, 21.cwchar and
+   the MT locale tests. Each cluster becomes an entry here.
+
+4. Test-case structs: size_t fields, NPOS sentinel
+
+   StringTestCase (tests/include/rw_strings.h) and ContainerTestCase
+   (tests/include/rw_containers.h) hold positions and counts in int
+   fields, and every table spells "not applicable" as -1, which
+   reaches the library as size_t and lands as npos: the sentinel and
+   npos are the same number by design. Fix, as one inert commit after
+   entry 3: retype off, size, off2 and size2 to _RWSTD_SIZE_T in both
+   structs, and change the sentinel to NPOS in those four positions
+   across the 171 TEST macro bodies and the rows that pass it; val and
+   bthrow stay int with their own -1. Check: identical assertion
+   counts for every string and container test before and after.
+
+5. The wide half of UserCtype
+
+   tests/src/ctype.cpp implements UserCtype<wchar_t> and
+   UserCtype<UserChar> only in part: ten members are "FIXME: implement
+   this" stubs, and make_char (tests/include/rw_char.h) takes only a
+   char. tests/self/0.ctype.cpp carries the matching FIXME and breaks
+   out of its table at UCHAR_MAX, so the wide entries of its character
+   table have never been exercised on any platform. Fix: finish the
+   helper, give make_char an int overload, remove the break. Check:
+   0.ctype exercises the whole table for all three character types.
+
+6. README section 5 and the configuration
+
+   The README recommends setting CPPOPTS and CXXOPTS on the make
+   command line to change compiler options. The configuration
+   directory is insulated from those variables by design: config.h is
+   a function of the compiler, its version and the build type, and
+   anything the configuration must see goes in the CONFIG file. A
+   dialect option passed only on the command line produces a config.h
+   for one language and a library built in another. Fix: document,
+   not patch; the per-platform manual step the README describes is a
+   defect of the configuration to move away from, not a behaviour to
+   propagate. Check: none; this is prose.
+
+7. std::locale MT-safety
+
+   22.locale.numpunct.mt fails intermittently. Hypotheses: unlocked
+   reads of the global and classic locale bodies, a facet-id race, or
+   a memory-ordering assumption that x86 hides. Instruments: a
+   ThreadSanitizer build of the library and the MT tests, and real
+   weakly-ordered hardware for the ordering hypothesis, never an
+   emulator. After entry 3, so the failure is measured against a
+   known baseline.
+
+8. The C++17 floor
+
+   The library is C++98 by design and characterizes the compiler
+   rather than assuming one. The intended step is to raise the
+   implementation floor to C++17: nullptr, noexcept in place of the
+   dynamic exception specifications the library still declares,
+   static_assert, override, inline variables for the facet statics,
+   <type_traits> for the hand-rolled traits, and the retirement of
+   the characterizations for compilers that no longer exist. This is
+   distinct from the conformance target, what the library provides to
+   its users, which is a roadmap of its own. Not before entry 3; the
+   0 to nullptr sweep is one inert commit on top of the floor change,
+   never sprinkled in ahead of it. Until then null is the literal 0.
