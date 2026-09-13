@@ -210,9 +210,9 @@ resize_size_val_test_cases [] = {
     TEST ("x@1412",           2284,   'a',  "x@1412a@872",     0),
     TEST ("x@2284",           3695,   'a',  "x@2284a@1411",    0),
 
-    TEST ("",                 NPOS,   'a',  "",                1),
-    TEST ("abc",              NPOS,   'a',  "abc",             1),
-    TEST ("x@3695",           NPOS,   'a',  "x@3695",          1),
+    TEST ("",           int (NPOS),   'a',  "",                1),
+    TEST ("abc",        int (NPOS),   'a',  "abc",             1),
+    TEST ("x@3695",     int (NPOS),   'a',  "x@3695",          1),
 
     TEST ("last",                4,   't',  "last",            0)
 
@@ -279,9 +279,9 @@ resize_size_test_cases [] = {
     TEST ("x@1412",           2284,   "x@1412",      0),
     TEST ("x@2284",           3695,   "x@2284",      0),
 
-    TEST ("",                 NPOS,   "",            1),
-    TEST ("abc",              NPOS,   "abc",         1),
-    TEST ("x@3695",           NPOS,   "x@3695",      1),
+    TEST ("",           int (NPOS),   "",            1),
+    TEST ("abc",        int (NPOS),   "abc",         1),
+    TEST ("x@3695",     int (NPOS),   "x@3695",      1),
 
     TEST ("last",                4,   "last",        0)
 
@@ -384,9 +384,9 @@ reserve_size_test_cases [] = {
     TEST ("x@1412",           2284,   0),
     TEST ("x@2284",           3695,   0),
 
-    TEST ("",                 NPOS,   1),
-    TEST ("abc",              NPOS,   1),
-    TEST ("x@3695",           NPOS,   1),
+    TEST ("",           int (NPOS),   1),
+    TEST ("abc",        int (NPOS),   1),
+    TEST ("x@3695",     int (NPOS),   1),
 
     TEST ("last",                4,   0)
 };
