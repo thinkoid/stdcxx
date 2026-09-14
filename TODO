@@ -7,19 +7,29 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO struct tm on glibc: characterize tm_gmtoff
+* TODO Sweep the reads of libc-private macros
 
-glibc 2.20 (2014) moved =tm_gmtoff= and =tm_zone= from =__USE_BSD= to
-=__USE_MISC=. Two tests (=tests/self/0.printf.cpp=,
-=tests/localization/22.locale.time.put.cpp=) and the library itself
-(=src/time_put.cpp=, latent behind =__STRICT_ANSI__=; =src/memattr.cpp=,
-which defines =__USE_BSD= on its own for =madvise=) test the old macro.
+Places where the tree coordinates with a C library through that
+library's own internals rather than through a configuration test.
+Fixed so far: the =__mbstate_t_defined= guard, and =__USE_BSD= with
+=__STRICT_ANSI__= as a proxy for "the extension is hidden" at the
+four =struct tm= sites (=TM_GMTOFF= characterizes the member
+instead). Known and remaining: the glibc version pin
+=__GLIBC_MINOR__= in =etc/config/src/LIMITS.cpp=. The
+=__GLIBC__= identity branches in =CTYPE_BITS.cpp=,
+=LOCALE_NAME_FMAT.cpp=, =src/assert.cpp= and three tests are a
+different thing, a configuration test choosing its own method per
+library, and stay unless one of them turns out to read internals
+too.
 
-Fix: a configuration test for =tm_gmtoff= in =<time.h>=, in the shape
-of =STRUCT_TM_IN_WCHAR_H.cpp=, and the four sites branch on its macro.
+Fix: census first, one entry here per site that reads an internal,
+each with the characterization that replaces it; the notes under
+=doc/notes= carry the pattern (=glibc-mbstate_t.md=,
+=strict-ansi.md=).
 
-Check: the two tests build and run; the library builds with and
-without =-std=c++17= (strict) at the same configuration.
+Check: no =__USE_*=, =__need_*=, =*_defined= guard or libc version
+number read anywhere outside =etc/config/src=, and none there
+either unless the test is characterizing that very macro.
 
 * TODO Algorithms test predicates with == false
 
@@ -46,7 +56,10 @@ last measured run on a current toolchain was 10,066,804 assertions
 with 1,417 failures, 3 non-zero exits and 12 signals, the failures
 clustered in =23.bitset.cons=, the string regression tests,
 =0.inputiter=, =0.outputiter=, =0.new=, =21.cwchar= and the MT locale
-tests. Each cluster becomes an entry here.
+tests. Each cluster becomes an entry here. One is known already:
+=0.printf= fails 4 of 1876 assertions at its =%{#ls}= and =%{Ac}=
+directives with "misaligned address", on both word widths, in the
+test driver's own formatter; the =%{t}= section passes.
 
 * TODO Test-case structs: size_t fields, NPOS sentinel
 

@@ -47,12 +47,6 @@
 #    include <time.h>
 #  endif
 #  include <unistd.h>     // for getpagesize(), sysconf()
-
-#  if defined (_RWSTD_OS_LINUX) && !defined (__USE_BSD)
-     // needed for caddr_t, madvise, and MADV_WILLNEED
-#    define __USE_BSD
-#  endif   // _RWSTD_OS_LINUX && !__USE_BSD
-
 #  include <sys/mman.h>   // for mincore()
 #  include <sys/types.h>
 #  if defined (_RWSTD_OS_SUNOS) && defined (_RWSTD_NO_POSIX_MADVISE)

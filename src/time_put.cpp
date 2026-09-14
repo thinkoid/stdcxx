@@ -2602,20 +2602,12 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 
             tpd.prec = 4;
 
-#if defined (__GLIBC__) && defined (_RWSTD_NO_PURE_C_HEADERS)
+#if !defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)
 
             // GNU glibc uses gmtoff and zone instead of timezone and
             // tzname when computing/formatting time zone information
 
-#  if defined (__STRICT_ANSI__) && !defined (__USE_BSD)
-
-            tpd.val = tmb->__tm_gmtoff;
-
-#  else   // if !defined (__STRICT_ANSI__) || defined (__USE_BSD)
-
             tpd.val = tmb->tm_gmtoff;
-
-#  endif   // __STRICT_ANSI__, __USE_BSD
 
             if (tpd.val) {
 
@@ -2631,7 +2623,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
             // to determine the global offset and consider the tm_isdst
             // flag (POSIX behavior)
 
-#endif   // __GLIBC__ && _RWSTD_NO_PURE_C_HEADERS
+#endif   // !_RWSTD_NO_TM_GMTOFF && _RWSTD_NO_PURE_C_HEADERS
 
             const char* const var = getenv ("TZ");
 

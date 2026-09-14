@@ -712,7 +712,7 @@ const std::tm* mktm (int sec = 0,            // [0,60]
     tmp.tm_yday  = yday;
     tmp.tm_isdst = isdst;
 
-#if defined (__linux__) && defined (_RWSTD_NO_PURE_C_HEADERS)
+#if !defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)
 
     // support for glibc extension:
 
@@ -721,24 +721,15 @@ const std::tm* mktm (int sec = 0,            // [0,60]
     // 
     // http://www.gnu.org/manual/glibc-2.2.3/html_node/libc_425.html#SEC434
 
-#  ifndef __USE_BSD
-
-    tmp.__tm_gmtoff = gmtoff;
-    tmp.__tm_zone   = zone;
-
-#  else   // if defined (__USE_BSD)
-
     tmp.tm_gmtoff = gmtoff;
     tmp.tm_zone   = zone;
-
-#  endif   // __USE_BSD
 
 #else
 
     _RWSTD_UNUSED (gmtoff);
     _RWSTD_UNUSED (zone);
 
-#endif   // __linux__ && _RWSTD_NO_PURE_C_HEADERS
+#endif   // !_RWSTD_NO_TM_GMTOFF && _RWSTD_NO_PURE_C_HEADERS
 
     return &tmp;
 }
@@ -1615,7 +1606,7 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  0), "%z", 0, 0, ' ', "-0543");
     TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  1), "%z", 0, 0, ' ', "-0654");
 
-#ifdef __GLIBC__
+#if !defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)
 
     rw_info (0, 0, __LINE__, "%%z: with tm::tm_gmtoff - GNU glibc extension");
 
@@ -1644,7 +1635,7 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  0,  10800), "%z", 0, 0, ' ', "%z");
     TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  1, -14400), "%z", 0, 0, ' ', "%z");
 
-#endif   // __GLIBC__
+#endif   // !_RWSTD_NO_TM_GMTOFF && _RWSTD_NO_PURE_C_HEADERS
 
 #ifdef _RWSTD_OS_SUNOS
 
