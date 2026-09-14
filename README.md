@@ -85,9 +85,12 @@ Nothing else. There is no autoconf, no CMake, and there will not be.
   `-std` or `-D` to make the tree compile.
 - The tree is C++98 and stays so until the floor is raised
   deliberately, as one decision. Null pointers are the literal `0`.
-- Commit messages are ChangeLog entries, in the style already in the
-  history. The `ChangeLog` file itself is empty: git holds the same
-  information.
+- Commit messages carry an `area: what it does` subject, the why in
+  prose, then the changes as GNU ChangeLog bullets, `* file (symbol):
+  change.`, in the grammar the history is written in. The `ChangeLog`
+  file itself is empty: git holds the same information. Commits before
+  September 2026 open with the ChangeLog date line instead of a
+  subject; they are left as they are.
 
 ## Layout
 
