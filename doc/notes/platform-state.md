@@ -1,6 +1,6 @@
 # Non-x86 platforms and compilers in stdcxx
 
-Survey date: 14 September 2026.
+As of 2026-09-14 (ec67fbd8).
 
 ## 0. tl;dr
 
@@ -18,6 +18,14 @@ the hardware it targets. Most other vendor toolchains in this tree
 belong to legacy environments. A surviving processor name or compiler
 brand does not establish a usable stdcxx platform: the architecture,
 operating system, compiler and runtime must still work together.
+
+The subsequent source assessment supports retiring the old platform
+integrations in favor of GCC, Clang and Visual Studio on x86/x86-64,
+targeting Linux and Windows. This is a project scope decision, not a
+claim that every retired platform is dead. GCC has a measured build
+baseline; Clang has a reproduced build failure, and current Visual
+Studio support remains unverified. No source trimming was performed.
+Chapters 8–10 give the removal scope, evidence and recommended sequence.
 
 ## 1. Scope and terminology
 
@@ -208,6 +216,197 @@ This survey makes no claim that the library has been built or tested on
 these current products. It is background for platform decisions, not a
 support matrix or a reason by itself to remove historical platform code.
 
+## 8. Assessment of the proposed narrower scope
+
+Assessment date: 14 September 2026. Source examined: `dfa9e3a1`; the
+subsequent `ec67fbd8` commit adds this document without changing code.
+The tests below used an isolated copy of the former revision. This
+assessment changes documentation only.
+
+**Recommendation: proceed with the narrower support policy, followed by
+a staged cleanup.** The source contains enough dedicated implementation
+and build machinery to make the reduction worthwhile. Keeping that
+machinery solely for historical completeness is not necessary. The
+portable configuration system, however, serves the retained targets and
+future ports; it should not be discarded with the vendor integrations.
+
+### 8.1. What can be retired
+
+The inventory found **37 dedicated file candidates, totaling 3,817
+lines**, including comments and license headers. This is a concrete
+lower bound, not an estimate of the final net deletion. Their includes,
+dispatch branches, generated-project inputs and documentation must be
+updated together before deleting the files.
+
+| Group | Files eligible for retirement under the proposed policy |
+|---|---|
+| Seven compiler override headers | `include/rw/_config-{acc,deccxx,eccp,icc,mipspro,sunpro,xlc}.h` |
+| Five architecture/vendor atomic headers | `include/rw/_atomic-{deccxx,mipspro,parisc,sparc,xlc}.h` |
+| Three retired threading backends | `include/rw/_mutex-{dce,os2,solaris}.h` |
+| Nine Unix compiler configurations | `etc/config/{acc,como,eccp,icc,mipspro,osf_cxx,reliant_cds,sunpro,vacpp}.config` |
+| Six assembly implementations | `atomic.s` and `atomic-64.s` in each of `src/ia64/`, `src/parisc/` and `src/sparc/` |
+| Seven Intel compiler Windows configurations | `etc/config/windows/icc-9.0.config`, and the ordinary and `-x64` configurations for 9.1, 10.0 and 10.1 |
+
+An identity search across `include`, `src`, `etc/config` and `tests`
+found retired compiler/platform references in **140 files**. This count
+includes comments and some dedicated files above: it is a review surface,
+not 140 independently obsolete files. Important mixed-file work includes:
+
+- Compiler and architecture dispatch in [_config.h][config], atomics,
+  mutexes, exception/runtime integration and test-driver identification.
+- OS ABI branches in [_mbstate.h][mbstate], file and locale operations,
+  floating-point handling and configuration probes.
+- Compiler discovery in [GNUmakefile][topmake], platform flags in
+  [gcc.config][gcc-config], and OS-specific linker/archive rules.
+- Template repositories and prelinking in [makefile.common][common],
+  [GNUmakefile.lib][libmake] and [GNUmakefile.cfg][cfgmake]. Their named
+  consumers include Sun, DEC and IBM; retiring those consumers enables
+  removal of whole build concepts, not just a few compiler flags.
+- Intel-specific Windows generation paths and retired-platform entries
+  in `etc/config/xfail.txt`.
+
+The historical README and investigation documents are records. Preserve
+their historical meaning; update the current support statement and build
+instructions rather than making past test results look like present ones.
+
+### 8.2. What must remain
+
+Keep GCC and Microsoft compiler/runtime integration, x86 and x86-64
+atomics, POSIX and Windows mutex backends, generic mutex-based atomic
+fallbacks, and the compiler/C-library characterization mechanism.
+Remove retired sub-branches from these components where appropriate;
+do not delete the whole component because its comments mention an old
+platform.
+
+Specific traps in this tree:
+
+- [_atomic-x64.h][atomic-x64] describes both IA64 and X64. Its MSVC x64
+  interlocked operations remain needed. It is not an Itanium-only file.
+- [_atomic-sync.h][atomic-sync] has Intel/IA64 branches but also the
+  GCC builtin implementation. [_atomic.h][atomic-dispatch] selects it
+  for retained GNU targets. Keep the shared implementation.
+- [_mutex-pthread.h][mutex-pthread] contains Tru64 and IRIX initializer
+  workarounds alongside the Linux backend. Keep the backend and its
+  `PTHREAD_MUTEX_INITIALIZER` path.
+- An old compiler's bug can have exposed a real library defect. Keep
+  regression tests that express required library behavior; retire only
+  obsolete environment-specific expectations and workarounds.
+- Feature tests for types, headers, functions, exceptions, TLS and
+  initialization are not made redundant by limiting the compiler brands.
+  The retained compilers still have different runtimes and modes.
+- x86-64 Linux and Windows have different data models (LP64 and LLP64).
+  Keep type-size and ABI characterization; pointer width is not a
+  substitute for the size of `long`.
+
+### 8.3. Preparing for ARM and RISC-V
+
+Retire named legacy integrations without introducing assumptions that
+all pointers, integers, floating-point representations or memory-ordering
+rules match x86. Keep portable C++ and mutex fallbacks. New architectures
+should need a small backend or capability probe, not restoration of old
+vendor conditionals.
+
+There is a concrete limitation to fix when that work begins:
+[_atomic.h][atomic-dispatch] chooses GNU builtins using both compiler
+version and an architecture list. The existing
+[ATOMIC_OPS.cpp][atomic-probe] does **not** generally characterize builtin
+atomic availability or ordering: it checks the argument type of Windows
+`InterlockedIncrement` on 32-bit Windows and otherwise returns success.
+A future builtin-based ARM/RISC-V backend needs an appropriate
+characterization and concurrency verification. Removing platform names
+alone does not establish correctness on weakly ordered processors.
+
+Neither ARM nor RISC-V was built or tested in this assessment. They are
+future targets, not part of the presently verified matrix.
+
+## 9. Measured state of the retained targets
+
+| Environment | Assessment result |
+|---|---|
+| Linux x86, GCC 16.2.1, `11s` | Configuration, static library and test-driver builds passed. A standalone smoke test passed. |
+| Linux x86-64, GCC 16.2.1, `15D` | Configuration, shared library and test-driver builds passed. A standalone smoke test passed; its dynamic dependencies contain stdcxx and no libstdc++. |
+| Linux x86-64, Clang 22.1.8, `15D` | Configuration completed using `CONFIG=gcc.config CXX=clang`. Library build failed; the failure was reproduced by building `ti_insert_int.o` alone. |
+| Linux x86, Clang | Not tested. The 64-bit failure already establishes that Clang needs work before it can be declared supported. |
+| Windows x86/x86-64, Visual Studio | Not tested: no native Windows/MSVC test environment was used. The retained build machinery needs a current-toolchain audit. |
+
+The smoke test exercised vector/string operations, classic-locale stream
+formatting and parsing, and an out-of-range exception. It is a limited
+runtime check, not a complete conformance, ABI or thread-safety test. The
+full suite was not run, and its previously recorded failures remain
+unresolved.
+
+The initial sandboxed 32-bit configuration was invalid: executables
+were terminated with SIGSYS, leaving missing configuration facts such
+as `_RWSTD_SIZE_T`. Repeating configuration outside the sandbox produced
+the successful baseline above. Do not mistake the failed sandbox run
+for a source regression.
+
+### 9.1. Clang needs explicit verification
+
+The reproduced diagnostic is:
+
+```text
+include/rw/_ioinsert.cc:42:21: error: implicit instantiation of undefined template 'std::basic_ostream<char>'
+```
+
+The include trace runs through `src/ti_insert_int.cpp`, `include/ostream`
+and `include/rw/_ioinsert.h`. The latter requests inserter instantiations
+while `basic_ostream` is still incomplete in this compilation. This is
+an existing failure, before any retirement changes; its repair was not
+attempted here.
+
+Clang reports `__GNUC__=4`, `__GNUC_MINOR__=2` and `__GNUG__=4` in this
+environment. Consequently it enters many GCC branches. GNU-compatible
+macros are useful for shared facilities, but are not evidence that GCC
+version workarounds or instantiation behavior apply to Clang. The
+configuration and explicit-instantiation paths need to be checked with
+the actual compiler, without pinning an older language dialect.
+
+### 9.2. Visual Studio retention is not current Windows support
+
+The configurations describe Visual Studio 2002–2008. The project
+generator creates `VisualStudio.VCProjectEngine` COM objects and emits
+`.vcproj` files. It also carries explicit `msvcprt`/`msvcprtd` default
+library exclusions. See [projectdef.js][projectdef]. These are real
+integration requirements to audit against the selected Visual Studio
+release, including SDK headers, CRT linkage, DLL exports and exception
+handling. A Linux `clang-cl` executable cannot verify that environment.
+
+Compiler names alone do not define a complete support matrix. A useful
+initial acceptance matrix is GCC and Clang on Linux, and MSVC on
+Windows, each in both widths. GCC/MinGW and Clang/clang-cl on Windows
+are additional combinations, not automatic consequences of that list.
+Likewise, retaining compiler brands does not require retaining every
+historical release: minimum versions should be stated when their
+corresponding version workarounds are evaluated for removal.
+
+## 10. Recommended implementation sequence
+
+1. State the narrowed OS, architecture and compiler matrix in current
+   documentation. Keep ARM/RISC-V as future work. Retain the historical
+   platform survey as the rationale and record.
+2. Establish reproducible retained-target baselines. GCC already has the
+   limited results above; repair and verify Clang, obtain Windows/MSVC
+   results, and record existing test-suite failures before broad cleanup.
+3. Retire the 37 dedicated candidates with their dispatch and build
+   references. Use small reviewable changes grouped by subsystem.
+4. Simplify mixed compiler/OS branches, template repository/prelink
+   machinery and retired thread backends. Preserve generic tests and
+   fallbacks. Do not combine this with raising the implementation's C++
+   language floor or redesigning containers/locales.
+5. Compare retained-target configuration results, library exports and
+   runtime results before and after. For changes intended to be inert,
+   compare generated code as well. Account for known failures explicitly
+   rather than treating a suite with failures as clean.
+6. Revisit remaining version workarounds against the chosen compiler
+   minimums. Add ARM/RISC-V later as explicit ports with suitable atomic
+   capability tests and verification on real weakly ordered hardware.
+
+The expected benefit is a smaller build system and fewer incompatible
+vendor/ABI branches to reason about. The assessment does not establish
+a runtime speedup. No source files were trimmed, no compiler fixes were
+made, and no new platform support was claimed or implemented.
+
 [power11]: https://newsroom.ibm.com/2025-07-08-ibm-power11-raises-the-bar-for-enterprise-it
 [t2080]: https://www.nxp.com/products/T2080
 [fujitsu]: https://docs.fujitsu/documents/002161/overview-of-sparc-servers-en.pdf
@@ -252,3 +451,13 @@ support matrix or a reason by itself to remove historical platform code.
 [gcc-config]: ../../etc/config/gcc.config
 [mbstate]: ../../include/rw/_mbstate.h
 [float-test]: ../../tests/support/18.numeric.special.float.cpp
+[topmake]: ../../GNUmakefile
+[common]: ../../etc/config/makefile.common
+[libmake]: ../../etc/config/GNUmakefile.lib
+[cfgmake]: ../../etc/config/GNUmakefile.cfg
+[atomic-x64]: ../../include/rw/_atomic-x64.h
+[atomic-sync]: ../../include/rw/_atomic-sync.h
+[atomic-dispatch]: ../../include/rw/_atomic.h
+[mutex-pthread]: ../../include/rw/_mutex-pthread.h
+[atomic-probe]: ../../etc/config/src/ATOMIC_OPS.cpp
+[projectdef]: ../../etc/config/windows/projectdef.js
