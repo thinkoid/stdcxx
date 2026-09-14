@@ -61,6 +61,43 @@ tests. Each cluster becomes an entry here. One is known already:
 directives with "misaligned address", on both word widths, in the
 test driver's own formatter; the =%{t}= section passes.
 
+* TODO Retire the platforms the tree cannot build on
+
+Decided 2026-09-14: the supported matrix is GCC and Clang on x86 and
+x86-64 Linux, with aarch64 Linux to follow. Windows and Visual Studio
+are retired with the rest; nobody builds there. The assessment in
+=doc/notes/platform-state.md=, chapters 8 to 10, is the inventory:
+37 dedicated files, the compiler override headers, the vendor atomic
+and mutex backends, the Unix and Windows compiler configurations and
+the assembly sources, plus the dispatch and build machinery in 140
+mixed files, where the template repositories and prelinking exist
+only for the retired consumers.
+
+Fix, after the baseline: the dedicated files first, one subsystem per
+commit, each with its dispatch branches and makefile references; then
+the mixed branches and the build concepts, with the traps the
+assessment lists in mind. The characterizations stay; what they
+retire is the floor decision, not this one.
+
+Check: the suite before and after is identical, configuration by
+configuration; the build directory still describes itself.
+
+* TODO Clang builds the library
+
+Clang 22 reports itself as GCC 4.2 and walks the GCC branches; the
+library build fails in =include/rw/_ioinsert.cc= with an implicit
+instantiation of an undefined =basic_ostream<char>=, reached from
+=src/ti_insert_int.cpp= through =include/ostream=. The explicit
+instantiation machinery is the most compiler-characterized corner of
+the tree, so the configuration and the instantiation paths need
+checking with the actual compiler, never with a pinned dialect.
+
+After the retirement, so the branches Clang walks are the surviving
+ones.
+
+Check: configuration, library, driver and tests build with
+=CXX=clang=; the suite matches the GCC baseline.
+
 * TODO Test-case structs: size_t fields, NPOS sentinel
 
 =StringTestCase= (=tests/include/rw_strings.h=) and =ContainerTestCase=
@@ -120,6 +157,16 @@ Instruments: a ThreadSanitizer build of the library and the MT tests,
 and real weakly-ordered hardware for the ordering hypothesis, never
 an emulator. After the baseline, so the failure is measured against a
 known reference.
+
+The hardware is aarch64 Linux. There =include/rw/_atomic.h= selects
+no backend: the GNU builtin branch is gated on an architecture list
+that names only i486, x86-64 and ia64, so the chain falls through to
+=_RWSTD_NO_ATOMIC_OPS= and every atomic operation becomes a mutex
+operation, serializing the paths the hunt wants unfenced. Before the
+MT tests run there, the builtin backend needs an aarch64 port: a
+characterization of the builtins in place of the architecture list,
+since the existing =ATOMIC_OPS.cpp= only characterizes the Windows
+=InterlockedIncrement= signature.
 
 * TODO The C++17 floor
 
