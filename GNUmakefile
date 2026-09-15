@@ -265,65 +265,13 @@ ifeq ($(in_topdir),1)
   # THIS BLOCK IS EVALUATED ONLY WHEN MAKE IS INVOKED IN TOPDIR
   ######################################################################
 
-  # try to determine configuration (unless specified on the command line)
-  # invoke $(SHELL) from within the $(shell) function to silence shell
-  # any error messages when the compiler isn't found
+  # use the gcc configuration unless one is specified on the command
+  # line (CONFIG=gcc.config CXX=clang for a compiler that takes the
+  # gcc options)
   ifeq ($(CONFIG),)
-    ifeq ($(shell $(SHELL) -c "g++ -v" >/dev/null 2>&1 \
-                  && echo $$?),0)
-      # use gcc on every OS by default
-      CONFIG = gcc.config
-    else
-      ifeq ($(OSNAME),AIX)
-        # check for VisualAge on AIX
-        # avoid comparing the exit status to 0 since VAC++ return 249...
-        ifneq ($(shell $(SHELL) -c "xlC -qversion" >/dev/null 2>&1; \
-                       echo $$?),127)
-          CONFIG = vacpp.config
-        endif
-      else
-        ifeq ($(OSNAME),HP-UX)
-          # check for aCC on HP-UX
-          ifeq ($(shell $(SHELL) -c "aCC -V" >/dev/null 2>&1 && echo $$?),0)
-            CONFIG = acc.config
-          endif
-        else
-          ifeq ($(OSNAME),IRIX64)
-            # check for MIPSpro on IRIX
-            ifeq ($(shell $(SHELL) -c "CC -v" >/dev/null 2>&1 && echo $$?),0)
-              CONFIG = mipspro.config
-            endif
-          else
-            ifeq ($(OSNAME),OSF1)
-              # check for Compaq C++ on Tru64 UNIX
-              ifeq ($(shell $(SHELL) -c "cxx -V" >/dev/null 2>&1; echo $$?),0)
-                CONFIG = osf_cxx.config
-              endif
-            else
-              ifeq ($(OSNAME),SunOS)
-                # check for SunPro on Solaris
-                ifeq ($(shell $(SHELL) -c "CC -V" >/dev/null 2>&1 \
-                              && echo $$?),0)
-                  CONFIG = sunpro.config
-                endif
-              endif   # SunOS
-            endif   # OSF1
-          endif   # IRIX64
-        endif   # HP-UX
-      endif   # AIX
-    endif   # gcc
-
-    ifeq ($(CONFIG),)
-      $(error "could not find a config file for this platform: $(OSNAME)")
-    else
-      $(warning "CONFIG not specified, using $(CONFIG)")
-    endif
-
+    CONFIG = gcc.config
+    $(warning "CONFIG not specified, using $(CONFIG)")
   endif   # ifeq ($(CONFIG),)
-
-  ifeq ($(CONFIG),)
-    $(error "CONFIG not defined")
-  endif
 
   # decode the BUILDTYPE value and set BUILDMODE correspondingly
   ifeq ($(BUILDTYPE),8s)
