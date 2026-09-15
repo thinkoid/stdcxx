@@ -172,9 +172,6 @@ rw_get_cpus ()
         "cat /proc/cpuinfo "
         "  | grep processor "
         "  | wc -l"
-#elif defined (_RWSTD_OS_FREEBSD)
-        // FreeBSD: /sbin/sysctl -n hw.ncpu
-        "/sbin/sysctl -n hw.ncpu"
 #else
         0
 #endif

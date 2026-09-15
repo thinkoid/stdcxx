@@ -38,9 +38,7 @@
 
 
 // known mbstate_t sizes on major platforms
-#if defined _RWSTD_OS_FREEBSD
-#  define KNOWN_SIZE   128
-#elif defined _RWSTD_OS_LINUX
+#if defined _RWSTD_OS_LINUX
 #  define KNOWN_SIZE   8
 #endif
 
