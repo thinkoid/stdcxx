@@ -413,9 +413,10 @@ Decided 14 September 2026, done 15 September 2026, on master from
 `dd1128a5` to `3232faa6`. The matrix is GCC and Clang on x86 and
 x86-64 Linux, with aarch64 Linux to follow; Windows and Visual Studio
 were retired with the rest, against the recommendation in chapter 8,
-because nobody builds there. Darwin and the BSDs were not part of the
-decision and their branches stay. The links above to files that no
-longer exist point at the last commit that had them.
+because nobody builds there. Darwin and the BSDs were not part of that
+decision and their branches stayed until later that day; the second
+table below has them. The links above to files that no longer exist
+point at the last commit that had them.
 
 One subsystem per commit, the dedicated files first, then the build
 concepts, then the mixed branches area by area:
@@ -455,6 +456,24 @@ tables are the pinned baselines row for row, except the rows the
 baseline itself marks as unstable: `23.bitset.cons`, whose count
 varies from run to run, and in 15D the seven locale MT rows that
 end differently on every run until the race is fixed.
+
+Darwin and the BSDs followed the same evening, in the same shape
+and against the same check, from `2ad45a84` to `e342c0f4`:
+
+| commit | what went |
+|---|---|
+| `2ad45a84` | the Darwin branches of the gcc configuration: the Mach-O link line and install names, the dylib suffix, the rpath spelling, the external iconv; the doubled run path in the test makefile |
+| `3e9183ed` | the Darwin source of the conversion state type, the FreeBSD value of `ENAMETOOLONG`, the Mach-O assembler directives in the x86-64 atomics; with them two survivors of the first pass, the SunOS `ENAMETOOLONG` and the HP-UX `wcsstr`, on identity macros the configuration derives from `uname` rather than from the compiler |
+| `d3bf3bcd` | the FreeBSD and NetBSD guesses of the locale name format characterization |
+| `ae4acac1` | the FreeBSD and Darwin `unsetenv`, the FreeBSD processor count, the FreeBSD `mbstate_t` size in the test suite |
+| `e342c0f4` | the FreeBSD locale name in the `money_get` example |
+
+Comments that name a BSD or Darwin to explain why a characterization
+has the shape it has, such as the `timezone` function of the BSDs or
+the header order Darwin's `<sys/mman.h>` needed, stay: they document
+the retained probe, not a platform branch. The nightly build scripts
+under `bin` name FreeBSD among the 2008 platforms as data, and are
+records like the rest of that directory.
 
 Not addressed here, on purpose: the GCC builtin atomics are still
 selected by an architecture list that names i486 and x86-64 only,

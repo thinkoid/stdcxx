@@ -77,12 +77,13 @@ Nothing else. There is no autoconf, no CMake, and there will not be.
 
 The supported matrix is GCC and Clang on x86 and x86-64 Linux, with
 aarch64 Linux to follow. Everything else the tree once built on, the
-vendor compilers and Unixes of 2008 and Windows with Visual Studio,
-was retired in September 2026: `doc/notes/platform-state.md` is the
-survey behind the decision and its last chapter the record of what
-went. Clang does not build the library yet; that is an entry in
-`TODO`. The characterizations stayed: what they detect is a property
-of the toolchain in front of them, not of a platform list.
+vendor compilers and Unixes of 2008, Darwin and the BSDs, and Windows
+with Visual Studio, was retired in September 2026:
+`doc/notes/platform-state.md` is the survey behind the decision and
+its last chapter the record of what went. Clang does not build the
+library yet; that is an entry in `TODO`. The characterizations
+stayed: what they detect is a property of the toolchain in front of
+them, not of a platform list.
 
 ## Rules of the tree
 
