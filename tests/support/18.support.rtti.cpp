@@ -27,12 +27,6 @@
  **************************************************************************/
 
 #include <rw/_defs.h> 
-#if defined (__IBMCPP__) && !defined (_RWSTD_NO_IMPLICIT_INCLUSION)
-// Disable implicit inclusion to work around 
-// a limitation in IBM's VisualAge 5.0.2.0 (see PR#26959) 
-
-#  define _RWSTD_NO_IMPLICIT_INCLUSION 
-#endif 
 
 /**************************************************************************/
 
@@ -96,13 +90,6 @@ run_test (int, char* [])
         _RWSTD_UNUSED (p_before);
         _RWSTD_UNUSED (p_name);
     }
-
-#if defined (__IBMCPP__) && !defined (__RTTI_TYPE_INFO__)
-
-    rw_warn (0, 0, __LINE__,
-             "not testing type_info; rtti is disabled");
-
-#else   // !__IBMCPP__ || __RTTI_TYPE_INFO__
 
     if (1) {
         // exercise 18.5.1, class type_info functionality
@@ -185,8 +172,6 @@ run_test (int, char* [])
                    "std::type_info::name (): \"%s\" == \"%s\"",
                    d1_name, d2_name);
     }
-
-#endif   // !__IBMCPP__ || __RTTI_TYPE_INFO__
 
     if (1) {
         // exercise 18.5.2, class bad_cast interface

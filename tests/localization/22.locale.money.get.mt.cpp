@@ -50,18 +50,8 @@ int opt_nloops = 100000;
 // of processors/cores later)
 int opt_nthreads = 1;
 
-#if !defined (_RWSTD_OS_HP_UX) || defined (_ILP32)
-
 // number of locales to use
 int opt_nlocales = MAX_THREADS;
-
-#else   // HP-UX in LP64 mode
-
-// work around a small cache size on HP-UX in LP64 mode
-// in LP64 mode (see STDCXX-812)
-int opt_nlocales = 9;
-
-#endif   // HP-UX 32/64 bit mode
 
 // should all threads share the same set of locale objects instead
 // of creating their own?

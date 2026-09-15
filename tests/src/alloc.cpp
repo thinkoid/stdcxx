@@ -34,133 +34,25 @@
 #include <rw_driver.h>   // for rw_error(), rw_fatal()
 
 
-#ifdef __CYGWIN__
-// use the Windows API on Cygwin
-#  define _WIN32
-#endif
+#include <unistd.h>     // for getpagesize(), sysconf()
+#include <sys/mman.h>   // for mmap()
+#include <sys/types.h>
 
-#ifndef _WIN32
-#  ifdef __SUNPRO_CC
-// working around SunOS bug #568
-#    include <time.h>
-#  endif
-#  include <unistd.h>     // for getpagesize(), sysconf()
-#  include <sys/mman.h>   // for mmap()
-#  include <sys/types.h>
-
-#  ifndef _SC_PAGE_SIZE
+#ifndef _SC_PAGE_SIZE
 // fall back on the alternative macro if it exists,
 // or use getpagesize() otherwise
-#    ifndef _SC_PAGESIZE
-#      define GETPAGESIZE()   getpagesize ()
-#    else
-#      define GETPAGESIZE()   sysconf (_SC_PAGESIZE)
-#    endif
+#  ifndef _SC_PAGESIZE
+#    define GETPAGESIZE()   getpagesize ()
 #  else
-#      define GETPAGESIZE()   sysconf (_SC_PAGE_SIZE)
-#  endif   // _SC_PAGE_SIZE
+#    define GETPAGESIZE()   sysconf (_SC_PAGESIZE)
+#  endif
+#else
+#    define GETPAGESIZE()   sysconf (_SC_PAGE_SIZE)
+#endif   // _SC_PAGE_SIZE
 
 // POSIX mprotect() and munmap() take void* but some legacy systems
 // still declare the functions to take char* (aliased as caddr_t)
 typedef _RWSTD_MUNMAP_ARG1_T CaddrT;
-
-#else   // ifdef _WIN32
-
-#  include <windows.h>    // for everything (ugh)
-#  include <sys/types.h>  // for off_t
-#  include <errno.h>      // for errno
-
-#  define GETPAGESIZE()   getpagesize ()
-
-typedef void* CaddrT;
-
-static long
-getpagesize ()
-{
-    static long pagesize_ = 0;
-
-    if (0 == pagesize_) {
-        SYSTEM_INFO info;
-        GetSystemInfo (&info);
-        pagesize_ = long (info.dwPageSize);
-    }
-
-    return pagesize_;
-}
-
-enum {
-    PROT_NONE  = 0,
-    PROT_READ  = 1 << 0,
-    PROT_WRITE = 1 << 1,
-    PROT_RDWR  = PROT_READ | PROT_WRITE,
-    PROT_EXEC  = 1 << 2
-};
-
-#define MAP_PRIVATE   0
-#define MAP_ANONYMOUS 0
-
-#define MAP_FAILED ((CaddrT)-1)
-
-static const DWORD
-_rw_prots [] = {
-    PAGE_NOACCESS,
-    PAGE_READONLY,
-    PAGE_READWRITE,
-    PAGE_READWRITE,
-    PAGE_EXECUTE,
-    PAGE_EXECUTE_READ,
-    PAGE_EXECUTE_READWRITE,
-    PAGE_EXECUTE_READWRITE
-};
-
-
-static inline DWORD
-_rw_translate_prot (int prot)
-{
-    if (0 <= prot && prot < sizeof _rw_prots / sizeof *_rw_prots)
-        return _rw_prots[prot];
-
-    return PAGE_NOACCESS;
-}
-
-
-static inline CaddrT
-mmap (CaddrT addr, size_t len, int prot, int, int, off_t)
-{
-    addr = VirtualAlloc (addr, len, MEM_RESERVE | MEM_COMMIT,
-        _rw_translate_prot (prot));
-
-    if (addr)
-        return addr;
-
-    errno = EINVAL;
-    return MAP_FAILED;
-}
-
-
-static inline int
-munmap (CaddrT addr, size_t)
-{
-    if (VirtualFree (addr, 0, MEM_RELEASE))
-        return 0;
-    
-    errno = EINVAL;
-    return -1;
-}
-
-
-static inline int
-mprotect (CaddrT addr, size_t len, int prot)
-{
-    DWORD flOldProt;
-    if (VirtualProtect (addr, len, _rw_translate_prot (prot), &flOldProt))
-        return 0;
-    
-    errno = EINVAL;
-    return -1;
-}
-
-#endif   // _WIN32
 
 #ifndef MAP_PRIVATE
 #  define MAP_PRIVATE     0

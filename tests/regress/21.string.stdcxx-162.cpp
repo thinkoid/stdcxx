@@ -32,9 +32,6 @@
 #ifdef _RWSTD_POSIX_THREADS
 #  include <pthread.h>
 #  define MUTEX   pthread_mutex_t
-#elif _RWSTD_SOLARIS_THREADS
-#  include <thread.h>
-#  define MUTEX   mutex_t
 #endif   // _RWSTD_POSIX_THREADS
 
 int main ()

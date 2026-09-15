@@ -34,23 +34,12 @@
 
 #include <fstream>
 
-#ifndef _WIN32
-
-#  ifdef __SUNPRO_CC
-     // working around a SunOS/SunPro bug (PR #26255)
-#    undef _TIME_T
-#  endif
-
-#  include <cstdlib>      // for exit()
-#  include <fcntl.h>      // for open(), O_XXX constants
-#  include <unistd.h>     // for fork()
-#  include <sys/stat.h>   // for mkfifo()
-#  include <sys/types.h>  // for pid_t
-#  include <sys/wait.h>   // for wait()
-#else
-#  include <fcntl.h>      // for O_XXX constants
-#  include <io.h>         // for open()
-#endif   // _WIN32
+#include <cstdlib>      // for exit()
+#include <fcntl.h>      // for open(), O_XXX constants
+#include <unistd.h>     // for fork()
+#include <sys/stat.h>   // for mkfifo()
+#include <sys/types.h>  // for pid_t
+#include <sys/wait.h>   // for wait()
 
 #ifndef SIGPIPE
 #  define SIGPIPE   13   /* HP-UX, Linux, and SunOS value */
@@ -1003,8 +992,6 @@ test_open (const char* tname)
     }
 
 
-#ifndef _WIN32
-
     //////////////////////////////////////////////////////////////////
     // exercise open (..., ios::ate)
 
@@ -1124,8 +1111,6 @@ test_open (const char* tname)
 
         REMOVE_FILE (tmpfname);
     }
-
-#endif   // _WIN32
 
 }
 

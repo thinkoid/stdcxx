@@ -33,7 +33,6 @@
 #include <new>
 #include <string>
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
    // disabled for compilers that can't reliably replace the operators
 
 void* operator new (std::size_t n) _NEW_THROWS ((std::bad_alloc))
@@ -54,8 +53,6 @@ void operator delete (void *ptr) _NEW_THROWS (())
         std::free ((std::size_t*)ptr - 1);
     }
 }
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
 struct InputIterator: std::iterator<std::input_iterator_tag, char>
 {

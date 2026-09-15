@@ -53,15 +53,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>   // for stat
 
-#ifndef _WIN32
-#  include <unistd.h>
-#  include <sys/wait.h>   // for WIFEXITED(), WIFSIGNALED(), WTERMSIG()
-#else
-#  include <io.h>
-#  ifdef _MSC_VER
-#    include <crtdbg.h> // for _malloc_dbg()
-#  endif
-#endif
+#include <unistd.h>
+#include <sys/wait.h>   // for WIFEXITED(), WIFSIGNALED(), WTERMSIG()
 
 #include <ios>        // for ios::*
 #include <limits>     // for numeric_limits
@@ -77,16 +70,11 @@
 #include <ctype.h>
 #include <wchar.h>    // for wcslen, ...
 
-#ifndef _WIN32
-#  include <clocale>
-#  ifndef LC_MESSAGES
-#    define LC_MESSAGES _RWSTD_LC_MESSAGES
-#  endif   // LC_MESSAGES
-#  define EXE_SUFFIX    ""
-#else   // if Windows
-#  define _RWSTD_NO_LANGINFO
-#  define EXE_SUFFIX    ".exe"
-#endif  // _WIN32
+#include <clocale>
+#ifndef LC_MESSAGES
+#  define LC_MESSAGES _RWSTD_LC_MESSAGES
+#endif   // LC_MESSAGES
+#define EXE_SUFFIX    ""
 
 #ifndef _RWSTD_NO_LANGINFO
 #  include <langinfo.h>
@@ -120,11 +108,7 @@
 #define TESTS_ETC_PATH "tests" SLASH "etc"
             
 // extension of the catalog file
-#ifndef _WIN32
-#  define RW_CAT_EXT ".cat"
-#else
-#  define RW_CAT_EXT ".dll"
-#endif
+#define RW_CAT_EXT ".cat"
 
 /**************************************************************************/
 
@@ -204,13 +188,8 @@ rw_localedef (const char *args,
 
     // check to see if the locale database already exists and
     // if so, return immediately the locale filename to the caller
-#if !defined (_MSC_VER)
     struct stat sb;
     if (!stat (locale_path, &sb)) {
-#else
-    struct _stat sb;
-    if (!_stat (locale_path, &sb)) {
-#endif
         return strrchr (locale_path, _RWSTD_PATH_SEP) + 1;
     }
 
@@ -347,13 +326,8 @@ rw_set_locale_root ()
     // remove temporary file if mkstemp() rw_tmpnam() called mkstemp()
     if (rw_system (SHELL_RM_RF " %s", locale_root)) {
 
-#ifdef _WIN32
-        // ignore errors on WIN32 where the stupid DEL command
-        // fails even with /Q /S when the files don't exist
-#else
         // assume a sane implementation of SHELL_RM_RF
         return 0;
-#endif   // _WIN32
     }
 
     if (rw_system ("mkdir %s", locale_root))
@@ -382,15 +356,8 @@ rw_locales (int loc_cat, const char* grep_exp, bool prepend_c_loc)
     static size_t total_size = grow_size; // the size of the array
     static int    last_cat   = loc_cat;   // last category
 
-#ifndef _MSC_VER
-#  define _QUIET_MALLOC(n)  malloc(n)
-#  define _QUIET_FREE(p)    free(p)
-#else
-    // prevent allocation from causing failures in tests that
-    // keep track of storage allocated in _NORMAL_BLOCKS
-#  define _QUIET_MALLOC(n) _malloc_dbg (n, _CLIENT_BLOCK, 0, 0)
-#  define _QUIET_FREE(p)   _free_dbg (p, _CLIENT_BLOCK);
-#endif
+#define _QUIET_MALLOC(n)  malloc(n)
+#define _QUIET_FREE(p)    free(p)
 
     // allocate first time through
     if (!slocname) {
@@ -474,19 +441,6 @@ rw_locales (int loc_cat, const char* grep_exp, bool prepend_c_loc)
             if (prepend_c_loc && !strcmp (linebuf, deflocname))
                 continue;
 
-#ifdef _RWSTD_OS_SUNOS
-
-            const char iso_8859_pfx[] = "iso_8859_";
-
-            // avoid locales named common and iso_8859_* on SunOS
-            // since they are known to cause setlocale() to fail
-            if (   !strcmp ("common", linebuf)
-                || sizeof iso_8859_pfx <= linelen 
-                && !memcmp (iso_8859_pfx, linebuf, sizeof iso_8859_pfx - 1))
-                continue;
-
-#endif   // _RWSTD_OS_SUNOS
-
             // if our buffer is full then dynamically allocate a new one
             size += linelen;
             if (total_size < size) {
@@ -505,13 +459,6 @@ rw_locales (int loc_cat, const char* grep_exp, bool prepend_c_loc)
                 locname  = slocname + size - linelen;
             }
 
-#ifdef _WIN64
-
-            // prevent a hang (OS/libc bug?)
-            strcpy (locname, linebuf);
-            locname += linelen;
-
-#else   // if !defined (_WIN64)
             if (loc_cat != _UNUSED_CAT) {
 
                 // set the C locale to verify that the name is valid
@@ -532,8 +479,6 @@ rw_locales (int loc_cat, const char* grep_exp, bool prepend_c_loc)
                 strcpy (locname, linebuf);
                 locname += linelen;
             }
-
-#endif   // _WIN64
 
         }
         *locname = '\0';
@@ -933,26 +878,11 @@ rw_create_catalog (const char * catname, const char * catalog)
     if (!f)
         return -1;
 
-#ifndef _WIN32
-
     for (int i = 1; *catalog; ++catalog, ++i) {
         fprintf (f, "$set %d This is Set %d\n", i, i);
         for (int j = 1; *catalog; catalog += strlen (catalog) + 1, ++j)
              fprintf (f, "%d %s\n", j, catalog);
     }
-
-#else   // if defined (_WIN32)
-
-    fprintf (f, "STRINGTABLE\nBEGIN\n");
-
-    for (int i = 1; *catalog; ++catalog) {
-        for (; *catalog; catalog += strlen (catalog) + 1, ++i)
-            fprintf (f, "%d \"%s\"\n", i, catalog);
-    }
-
-    fprintf (f, "END\n");
-
-#endif   // _WIN32
 
     fclose (f);
 

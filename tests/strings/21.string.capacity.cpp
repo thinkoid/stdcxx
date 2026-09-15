@@ -781,19 +781,9 @@ void test_capacity (charT, Traits*, Allocator*,
         break;
     }
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
     // verify that if exceptions are enabled and when capacity changes
     // at least one exception is thrown
     const std::size_t expect_throws = str_state.capacity_ < str.capacity ();
-
-#else   // if defined (_RWSTD_NO_REPLACEABLE_NEW_DELETE)
-
-    const std::size_t expect_throws = 
-        (StringIds::UserAlloc == func.alloc_id_) 
-      ? str_state.capacity_ < str.capacity () : 0;
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     rw_assert (expect_throws == throw_count, 0, tcase.line,
                "line %d: %{$FUNCALL}: expected exactly 1 %s exception "

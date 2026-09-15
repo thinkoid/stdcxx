@@ -61,88 +61,26 @@ static rw_signal_handler_t*
 _rw_alarm_handler;
 
 
-#ifdef _WIN32
-
-#include <windows.h>
-
-// CygWin doesn't seem to define alarm()...
-
-// thread procedure
-static DWORD WINAPI
-_rw_alarm_proc (LPVOID arg /* seconds */)
-{
-    Sleep (1000U * (ULONG)arg);
-
-    rw_fprintf (rw_stderr, "%s:%d alarm expired\n", __FILE__, __LINE__);
-
-    if (_rw_alarm_handler)
-        _rw_alarm_handler (0);
-    else
-        abort ();   // no SIGALRM on Win32
-
-    return 0;
-}
-
-
-// rough equivalent of POSIX alarm
-_TEST_EXPORT
-unsigned int
-rw_alarm (unsigned int nsec, rw_signal_handler_t* handler /* = 0 */)
-{
-    static HANDLE thread    = 0;   // thread handle (one alarm per process)
-    static unsigned pending = 0;   // previous alarm() argument
-    static time_t t0        = 0;   // start of previous alarm()
-    time_t unslept          = 0;   // seconds until previous alarm expires
-
-    if (thread) {
-        // previous alarm is still pending, cancel it
-        unslept = pending - (time (0) - t0);
-        TerminateThread (thread, 0);
-        CloseHandle (thread);
-        thread = 0;
-    }
-
-    pending = nsec;
-
-    if (nsec) {
-        time (&t0);   // keep track of when countdown started
-
-        if (handler) {
-            // take care not to overwrite any previously set handler
-            _rw_alarm_handler = handler;
-        }
-
-        DWORD tid;    // dummy (not used, required on Win95)
-        thread = CreateThread (0, 0, _rw_alarm_proc, (LPVOID)nsec, 0, &tid);
-        // thread handle will leak unless alarm (0) is called
-    }
-
-    return unsigned (unslept);
-}
-
-
-#else   // ifndef _WIN32
-
-#  include <signal.h>   // for SIGALRM, signal()
-#  include <unistd.h>   // for alarm(), write()
+#include <signal.h>   // for SIGALRM, signal()
+#include <unistd.h>   // for alarm(), write()
 
    // define macros in case they aren't #defined by
    // the system headers e.g., when using pure libc headers
-#  ifndef SIGALRM
-#    define SIGALRM   14   /* e.g., Solaris */
-#  endif
+#ifndef SIGALRM
+#  define SIGALRM   14   /* e.g., Solaris */
+#endif
 
-#  ifndef SIG_DFL
-#    define SIG_DFL (rw_signal_handler_t*)0
-#  endif   // SIG_DFL
+#ifndef SIG_DFL
+#  define SIG_DFL (rw_signal_handler_t*)0
+#endif   // SIG_DFL
 
-#  ifndef SIG_IGN
-#    define SIG_IGN (rw_signal_handler_t*)1
-#  endif   // SIG_IGN
+#ifndef SIG_IGN
+#  define SIG_IGN (rw_signal_handler_t*)1
+#endif   // SIG_IGN
 
-#  ifndef SIG_HOLD
-#    define SIG_HOLD (rw_signal_handler_t*)2
-#  endif   // SIG_HOLD
+#ifndef SIG_HOLD
+#  define SIG_HOLD (rw_signal_handler_t*)2
+#endif   // SIG_HOLD
 
 
 extern "C" {
@@ -225,4 +163,3 @@ rw_alarm (unsigned int nsec, rw_signal_handler_t* handler /* = 0 */)
 }
 
 
-#endif   // _WIN32

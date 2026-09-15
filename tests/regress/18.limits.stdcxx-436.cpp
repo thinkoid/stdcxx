@@ -32,11 +32,6 @@
 #undef __PURE_CNAME
 #include <stdio.h>   // for popen(), fscanf(), pclose(), ...
 
-#ifdef _WIN32
-#  define popen  _popen
-#  define pclose _pclose
-#endif  // _WIN32
-
 int main ()
 {
     // assumes getconf is in the path. on most unix systems it is in

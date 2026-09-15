@@ -358,19 +358,6 @@ void do_test (charT           /* dummy */,
             std::sprintf (cbuf, str, val);
             str = cbuf;
 
-#ifdef _WIN32
-
-            std::size_t len = std::strlen (str);
-
-            if (   ('e' == cbuf [len - 5] || 'E' == cbuf [len - 5])
-                && ('-' == cbuf [len - 4] || '+' == cbuf [len - 4])
-                && ('0' == cbuf [len - 3])) {
-                cbuf [len - 3] = cbuf [len - 2];
-                cbuf [len - 2] = cbuf [len - 1];
-                cbuf [len - 1] = cbuf [len];
-            }
-
-#endif   // _WIN32
         }
 
         // compare output produced by num_put with that produced by printf()
@@ -1346,12 +1333,7 @@ void llong_test (charT, const char *cname)
 
 #  define STDIO_FMAT   "%" _RWSTD_LLONG_PRINTF_PREFIX "d"
 
-#  ifndef _MSC_VER
-#    define LL(number)   number ## LL
-#  else   // if defined (_MSC_VER)
-     // MSVC 7.0 doesn't recognize the LL suffix
-#    define LL(number)   number ## I64
-#  endif   // _MSC_VER
+#  define LL(number)   number ## LL
 
     TEST (T,          LL (0), dec, 0, 0, ' ', "", STDIO_FMAT);
     TEST (T,          LL (1), dec, 0, 0, ' ', "", STDIO_FMAT);

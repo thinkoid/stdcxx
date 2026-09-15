@@ -28,9 +28,6 @@
 
 // disable implicit inclusion to work around a limitation in
 // IBM's VisualAge 5.0.2.0 (see PR#26959)
-#if defined __IBMCPP__ && !defined _RWSTD_NO_IMPLICIT_INCLUSION
-#  define _RWSTD_NO_IMPLICIT_INCLUSION
-#endif   // defined __IBMCPP__ && !defined _RWSTD_NO_IMPLICIT_INCLUSION
 
 #include <cmath>
 #include <cstddef> // for std::size_t

@@ -933,18 +933,7 @@ void test_functions ()
     /* const */ int tm_buf [16] = { 0 };
     const test_tm* tmb = (const test_tm*)&tm_buf;
 
-#ifdef _MSC_VER
-    // prevent MSVC parameter validation error:
-    // "Zero length output buffer passed to strftime"
-    size = 1;
-#endif
-
     TEST (test_size_t, wcsftime, (wstr, size, L"", tmb), WCSFTIME, -1);
-
-#ifdef _MSC_VER
-    // restore size
-    size = 0;
-#endif
 
     TEST (test_wint_t, btowc, (i), BTOWC, -1);
     TEST (int, wctob, (wi), WCTOB, -1);

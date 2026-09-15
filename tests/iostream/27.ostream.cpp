@@ -604,7 +604,6 @@ void test_sentry (charT)
                    cname);
 
 #ifndef _RWSTD_NO_EXCEPTIONS
-#  ifndef _RWSTD_NO_UNCAUGHT_EXCEPTION
 
         if (0 <= rw_opt_exceptions) {
 
@@ -636,7 +635,6 @@ void test_sentry (charT)
                        "is pending (language runtime library error)");
         }
 
-#  endif   // _RWSTD_NO_UNCAUGHT_EXCEPTION
 #endif   // _RWSTD_NO_EXCEPTIONS
 
     }

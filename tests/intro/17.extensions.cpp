@@ -32,9 +32,6 @@
 
 
 // working around a SunOS/SunPro bug (PR #26255)
-#if defined (__SUNPRO_CC) && (defined (__SunOS_5_8) || defined (__SunOS_5_9))
-#  include <time.h>
-#endif   // SunPro && SunOS 5.{8,9}
 
 #include <cassert>
 #include <cctype>
@@ -114,8 +111,6 @@ int count_pred_called = 0;
 int distance_called = 0;
 
 
-#if !defined (__SUNPRO_CC) || __SUNPRO_CC > 0x550
-
 template <class T, class U>
 void count (T, T, const U&, ...) { ++count_called; }
 
@@ -126,23 +121,6 @@ void count_if (T, T, U, ...) { ++count_pred_called; }
 
 template <class T>
 void distance (T, T, ...) { ++distance_called; }
-
-#else
-
-// working around a SunPro bug (PR #28678)
-
-template <class T, class U>
-void count (T, T, const U&, std::size_t&) { ++count_called; }
-
-
-template <class T, class U>
-void count_if (T, T, U, std::size_t&) { ++count_pred_called; }
-
-
-template <class T>
-void distance (T, T, std::size_t&) { ++distance_called; }
-
-#endif   // SunPro
 
 
 #if !defined (__GNUG__) || __GNUG__ > 2

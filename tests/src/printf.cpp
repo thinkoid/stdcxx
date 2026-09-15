@@ -53,11 +53,7 @@
 #  include <wctype.h>   // for iswalpha(), ...
 #endif   // _RWSTD_NO_WCTYPE_H
 
-#if defined (_WIN32)
-#  include <windows.h>   // for GetLastError(), OutputDebugString()
-#else
-#  include <dlfcn.h>
-#endif   // _WIN32
+#include <dlfcn.h>
 
 #include <ios>
 #include <iostream>
@@ -1490,20 +1486,6 @@ _rw_fmtfloating (const FmtSpec &spec, Buffer &buf, const void *pval)
 
     RW_ASSERT (size_t (len) < sizeof buffer);
 
-#if defined (_MSC_VER) || defined (__MINGW32__)
-
-    if (5 < len) {
-        // remove redundant zeros from the exponent (if present)
-        if (   ('e' == buffer [len - 5] || 'E' == buffer [len - 5])
-            && '0' == buffer [len - 3]) {
-            buffer [len - 3] = buffer [len - 2];
-            buffer [len - 2] = buffer [len - 1];
-            buffer [len - 1] = buffer [len];
-        }
-    }
-
-#endif   // _MSC_VER || __MINGW32__
-
 
     if (-1 < len && 0 == _rw_bufcat (buf, buffer, size_t (len)))
         return -1;
@@ -1610,39 +1592,6 @@ _rw_fmtfunptr (const FmtSpec &spec, Buffer &buf, funptr_t val)
     if (spec.mod == spec.mod_l) {
 
 #if 0   // disabled until this is implemented on other platforms
-#ifdef _RWSTD_OS_SUNOS
-
-        char buffer [256];
-
-        Dl_info dli;
-
-        // find the symbol corresponding to the address
-        if (dladdr ((void*)val, &dli)) {
-            if (!dli.dli_sname)
-                dli.dli_fname = "unknown";
-
-            const size_t sym_off = size_t (dli.dli_saddr);
-
-            // compute the offset of the address from the address
-            // of the symbol dladdr() found in the address space
-            // of the calling process
-            const size_t addr_off = size_t (val) < sym_off ?
-                sym_off - size_t (val) : size_t (val) - sym_off;
-
-            // format the address folowed by the name of the symbol
-            // followed by the offset
-            const int len = sprintf (buffer, "%#x=%s%c%lu",
-                                     size_t (val), dli.dli_sname,
-                                     size_t (val) < sym_off ? '-' : '+',
-                                     addr_off);
-            
-            FmtSpec newspec (spec);
-            newspec.mod_l = newspec.mod_none;
-
-            return _rw_fmtstr (newspec, buf, buffer, size_t (len));
-        }
-
-#endif   // _RWSTD_OS_SUNOS
 #endif   // 0/1
     }
 
@@ -2647,11 +2596,7 @@ _rw_vasnprintf_ext (FmtSpec    *pspec,
         break;
 
     case 'E':   // %{E} -- Windows GetLastError(), errno elsewhere
-#ifdef _WIN32
-        spec.param.int_ = -1 == spec.width ? GetLastError () : spec.width;
-#else   // if !defined (_WIN32)
         spec.param.int_ = -1 == spec.width ? errno : spec.width;
-#endif   // _WIN32
         len = _rw_fmtlasterror (spec, buf, spec.param.int_);
         break;
 
@@ -3377,11 +3322,6 @@ _rw_vfprintf (rw_file *file, const char *fmt, va_list va)
             // it's determined not to refer to a terminal device,
             // for example after it has been redirected to a file)
             fflush (stdio_file);
-
-#ifdef _WIN32
-            // write string to the attached debugger (if any)
-            OutputDebugString (buf);
-#endif   // _WIN32
 
         }
     }

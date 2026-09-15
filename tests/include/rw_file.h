@@ -33,17 +33,11 @@
 #include <rw_testdefs.h>   // for test config macros
 
 
-#ifndef _WIN32
    // POSIX special files:
    // http://www.opengroup.org/onlinepubs/007904975/basedefs/xbd_chap10.html
-#  define DEV_CONSOLE   "/dev/console"
-#  define DEV_NULL      "/dev/null"
-#  define DEV_TTY       "/dev/tty"
-#else   // if defined (_WIN32)
-#  define DEV_CONSOLE   "CON:"
-#  define DEV_NULL      "NUL:"
-#  define DEV_TTY       "CON:"
-#endif   // _WIN32
+#define DEV_CONSOLE   "/dev/console"
+#define DEV_NULL      "/dev/null"
+#define DEV_TTY       "/dev/tty"
 
 
 #if _RWSTD_PATH_SEP == '/'

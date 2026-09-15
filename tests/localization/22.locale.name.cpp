@@ -34,76 +34,26 @@
 void test_combined_name ()
 {
     const char name[] = {
-#ifdef _AIX
-        "LC_TIME=EN_US.UTF-8;"
-        "LC_NUMERIC=C;"
-        "LC_MONETARY=en_US;"
-        "LC_MESSAGES=EN_US.UTF-8;"
-        "LC_CTYPE=C;"
-        "LC_COLLATE=en_US.ISO8859-1;"
-#elif defined __hpux
-        "LC_TIME=en_US.utf8;"
-        "LC_NUMERIC=C;"
-        "LC_MONETARY=en_US.roman8;"
-        "LC_MESSAGES=en_US.utf8;"
-        "LC_CTYPE=C;"
-        "LC_COLLATE=en_US.iso88591;"
-#elif defined __linux
+#if defined __linux
         "LC_TIME=en_US.utf8;"
         "LC_NUMERIC=C;"
         "LC_MONETARY=en_US;"
         "LC_MESSAGES=en_US.utf8;"
         "LC_CTYPE=C;"
         "LC_COLLATE=en_US.iso88591;"
-#elif defined __osf__
-        "C"
-#elif defined __sun
-        "LC_TIME=en_US.UTF-8;"
-        "LC_NUMERIC=C;"
-        "LC_MONETARY=en_US;"
-        "LC_MESSAGES=en_US.UTF-8;"
-        "LC_CTYPE=C;"
-        "LC_COLLATE=en_US.ISO8859-1;"
-#elif defined _WIN32
-        "C"
 #else
         "C"
 #endif
     };
 
    const char expected_name[] = {
-#ifdef _AIX
-        "en_US.ISO8859-1 "   // LC_COLLATE
-        "C "                 // LC_CTYPE
-        "en_US "             // LC_MONETARY
-        "C "                 // LC_NUMERIC
-        "EN_US.UTF-8 "       // LC_TIME
-        "EN_US.UTF-8"        // LC_MESSAGES
-#elif defined __hpux
-        "en_US.iso88591 "    // LC_COLLATE
-        "C "                 // LC_CTYPE
-        "en_US.roman8 "      // LC_MONETARY
-        "C "                 // LC_NUMERIC
-        "en_US.utf8 "        // LC_TIME
-        "en_US.utf8"         // LC_MESSAGES
-#elif defined __linux
+#if defined __linux
         "LC_CTYPE=C;"
         "LC_NUMERIC=C;"
         "LC_TIME=en_US.utf8;"
         "LC_COLLATE=en_US.iso88591;"
         "LC_MONETARY=en_US;"
         "LC_MESSAGES=en_US.utf8"
-#elif defined __osf__
-        ""
-#elif defined __sun
-        "/C"                 // LC_COLLATE
-        "/C"                 // LC_CTYPE
-        "/en_US.UTF-8"       // LC_MONETARY
-        "/en_US.ISO8859-1"   // LC_NUMERIC
-        "/en_US"             // LC_TIME
-        "/en_US.UTF-8"       // LC_MESSAGES
-#elif defined _WIN32
-        "C" 
 #else
         "C"
 #endif

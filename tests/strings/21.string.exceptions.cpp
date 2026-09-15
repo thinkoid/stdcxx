@@ -71,14 +71,7 @@ String::size_type String::max_size () const
 }   // namespace std
 
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-#  include <rw_new.h>
-#else
-   // can't check for memory leaks using the replacement
-   // operators new and delete
-#  define rwt_check_leaks(psize, ignore) \
-          ((psize) ? *(std::size_t*)(psize) = 0 : 0)
-#endif
+#include <rw_new.h>
 
 
 /* static */ void

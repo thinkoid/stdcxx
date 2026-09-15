@@ -26,25 +26,12 @@
  * 
  **************************************************************************/
 
-#ifdef _MSC_VER
-   // silence warning C4244: 'argument' : conversion from 'T' to
-   // 'const std::allocator<_TypeT>::value_type', possible loss of data
-   // issued for deque::assign(InputIterator a, InputIterator b) and
-   // deque::insert(iterator, InputIterator a, InputIterator b) due
-   // the implicit conversion of a to size_type and b to value_type
-   // required by DR 438:
-   // http://www.open-std.org/jtc1/sc22/wg21/docs/lwg-defects.html#438
-#  pragma warning (disable: 4244)
-#endif
-
 #include <deque>     // for deque
 
 #include <cstdlib>   // for free()
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
    // disabled for MSVC since it can't reliably replace the operators
-#  include <rw_new.h>
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
+#include <rw_new.h>
 
 #include <rw_value.h>    // for UserClass
 #include <rw_driver.h>   // for rw_test(), ...
@@ -1268,7 +1255,6 @@ void test_erase ()
 /**************************************************************************/
 
 #ifndef _RWSTD_NO_EXPLICIT
-#  if !defined (_MSC_VER) || _MSC_VER > 1200
 
 struct DR_438
 {
@@ -1283,10 +1269,6 @@ struct DR_438
 
 bool DR_438::cast_used;
 
-#  else   // if MSVC <= 6.0
-       // avoid an MSVC 6.0 ICE on this code
-#    define NO_DR_438_TEST "this version of MSVC is too broken"
-#  endif   // !MSVC || MSVC > 6.0
 #else
 #  define NO_DR_438_TEST "_RWSTD_NO_EXPLICIT #defined"
 #endif   // _RWSTD_NO_EXPLICIT

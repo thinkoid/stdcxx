@@ -35,21 +35,12 @@
 #undef _RWSTD_NO_OPERATOR_DELETE_ARRAY
 
 
-#if defined (__IBMCPP__) && !defined (_RWSTD_NO_IMPLICIT_INCLUSION)
-  // disable implicit inclusion to work around 
-  // a limitation in IBM VisualAge 5.0.2.0 (PR #26959) 
-
-#  define _RWSTD_NO_IMPLICIT_INCLUSION 
-#endif
-
-#if !defined (_MSC_VER) || _MSC_VER > 1300
    // prevent out-of-line template definitions in .cc files from being
    // explicitly #included during the processing of library headers (faster
    // compilation) assumes that the test doesn't instantiate those templates
    // on types other than those they were explcitly instantiated on (will
    // have no effect if explicit instantiation is disabled or unsupported)
-#  define _RWSTD_NO_TEMPLATE_DEFINITIONS
-#endif   // !defined (_MSC_VER) || _MSC_VER > 1300
+#define _RWSTD_NO_TEMPLATE_DEFINITIONS
 
 
 struct LifetimeChecker
@@ -60,12 +51,6 @@ struct LifetimeChecker
 
 } lifetime_check;
 
-
-#ifdef _WIN32
-   // bring in <windows.h> as a compilation test to exercise
-   // any potential collisions with our declarations
-#  include <windows.h>
-#endif
 
 // include <iostream> *after* the definition of the global
 // lifetime_checker object to exercise initialization and
@@ -327,28 +312,18 @@ run_test (int, char*[])
                "iostream initialization called operator new() %d times, "
                "0 expected", init_new_calls);
 
-#ifdef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
-    rw_warn (0, 0, __LINE__,
-                "replacement operators new and delete not tested: "
-                "_RWSTD_NO_REPLACEABLE_NEW_DELETE #defined");
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
     return 0;
 }
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
+#include <new>
 
-#  include <new>
-
-#  ifndef _RWSTD_BAD_ALLOC
+#ifndef _RWSTD_BAD_ALLOC
      // #define if not #defined by <new> (SunPro #includes its
      // own <new> regardless of the preprocessor search path)
-#    define _RWSTD_BAD_ALLOC _STD::bad_alloc
-#  endif   // _RWSTD_BAD_ALLOC
+#  define _RWSTD_BAD_ALLOC _STD::bad_alloc
+#endif   // _RWSTD_BAD_ALLOC
 
 
 void* operator new (std::size_t n) _THROWS ((_RWSTD_BAD_ALLOC))
@@ -430,8 +405,6 @@ void operator delete[] (void *p) _THROWS (())
 {
     operator delete (p);
 }
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
 /**************************************************************************/
 

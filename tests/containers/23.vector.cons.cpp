@@ -241,18 +241,14 @@ void test_signatures (Vector*, T*, Allocator)
 
     MEMFUN (void, insert, (Iterator, SizeType, const T&));
 
-#if !defined (_MSC_VER) || _MSC_VER >= 1300
     // member function template insert
     MEMFUN (void, insert, (Iterator, InputIter<T>, InputIter<T>));
-#endif   // !defined (_MSC_VER) || _MSC_VER >= 1300
 
     MEMFUN (Iterator, erase, (Iterator));
     MEMFUN (Iterator, erase, (Iterator, Iterator));
 
     MEMFUN (void, swap, (Vector&));
     MEMFUN (void, clear, ());
-
-#if !defined (_MSC_VER) || _MSC_VER > 1300
 
 #define FUN(result, name, arg_list) do {  \
         result (*pf) arg_list = &name;    \
@@ -267,27 +263,6 @@ void test_signatures (Vector*, T*, Allocator)
     FUN (bool, std::operator>=, (const Vector&, const Vector&));
     FUN (bool, std::operator<=, (const Vector&, const Vector&));
     FUN (void, std::swap,       (Vector&, Vector&));
-
-#else   // MSVC <= 7.0
-
-    // working around a bug in MSVC 7 and prior (see PR #26625)
-
-    if (0 /* compile only */) {
-
-        Vector *pv = 0;
-        const Vector *pcv = 0;
-
-        bool b;
-        b = std::operator== (*pcv, *pcv);
-        b = std::operator<  (*pcv, *pcv);
-        b = std::operator!= (*pcv, *pcv);
-        b = std::operator>  (*pcv, *pcv);
-        b = std::operator>= (*pcv, *pcv);
-        b = std::operator<= (*pcv, *pcv);
-        std::swap (*pv, *pv);
-    }
-
-#endif   // MSVC <= 7.0
 
 }
 
@@ -413,14 +388,7 @@ void test_ctors ()
 
                 // destroy explicitly if ctor doesn't propagate exception
 
-#if !defined (__HP_aCC) || _RWSTD_HP_aCC_MINOR > 3800
-
                 p->~Vector ();
-#else
-                // work around aCC bug (see PR #25356)
-                p->~vector ();
-
-#endif   // HP aCC
 
             }
             catch (...) {
@@ -453,14 +421,7 @@ void test_ctors ()
 
                 // destroy explicitly if ctor doesn't propagate exception
 
-#if !defined (__HP_aCC) || _RWSTD_HP_aCC_MINOR > 3800
-
                 p->~Vector ();
-#else
-                // work around aCC bug (see PR #25356)
-                p->~vector ();
-
-#endif   // HP aCC
 
             }
             catch (...) {
@@ -602,8 +563,6 @@ void test_ctors (Vector*, T*, Alloc alloc)
         }
     }
 
-#if !defined (_MSC_VER) || _MSC_VER >= 1300
-
     if (1) {
 
         rw_info (0, 0, 0,
@@ -666,8 +625,6 @@ void test_ctors (Vector*, T*, Alloc alloc)
 
         alloc.deallocate (vals, rw_opt_nloops);
     }
-
-#endif   // !defined (_MSC_VER) || _MSC_VER >= 1300
 
 }
 

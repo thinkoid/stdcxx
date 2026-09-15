@@ -38,11 +38,6 @@
 #include <cstring>   // for strlen()
 
 
-#ifdef _MSC_VER
-   // verify that <new> et al can coexist with MSVC's <new.h>
-#  include <new.h>
-#endif
-
 /**************************************************************************/
 
 // detects recursive implementation of operator new (size_t, nothrow_t)
@@ -250,16 +245,12 @@ int run_test (int, char* [])
         new_handler_t original_handler
             = std::set_new_handler (my_new_handler);
 
-#if !defined (__EDG__) || __EDG_VERSION__ > 245 || defined (__DECCXX)
-
         // EDG eccp 2.45 standalone demo is known to fail
         rw_assert (original_handler == 0, 0, __LINE__,
                    "std::set_new_handler() unexpectedly returned "
                    "installed handler");
 
 #define _RWSTD_NO_EXT_OPERATOR_NEW
-
-#endif   // !__EDG__ || __EDG_VERSION__ > 245 || __DECCXX
 
         new_handler_t replacement_handler
             = std::set_new_handler (original_handler);
@@ -385,18 +376,7 @@ int run_test (int, char* [])
     //  is thrown. We'll use the replaced ::operator new() to
     //  control when a memory allocation request will fail.
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
     const bool test_rw_allocate = true;
-
-#else   // if defined (_RWSTD_NO_REPLACEABLE_NEW_DELETE)
-
-    // avoid tests that depend on the replacement operators new
-    // and delete on platforms like AIX or Win32 where they cannot
-    // be reliably replaced
-    const bool test_rw_allocate = false;
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     if (test_rw_allocate) {
 

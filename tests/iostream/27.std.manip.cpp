@@ -28,23 +28,20 @@
 
 #include <rw/_defs.h>
 
-#if !defined _MSC_VER || _MSC_VER > 1310
-
    // disabled for MSVC to work around its innumerable bugs
 
    // prevent the inclusion of non-essential public headers; only headers
    // necessary to compile each header #included here are #included
    // will produce errors if any templates defined in the header are
    // instantiated without the names they use having been completely defined
-#  define _RWSTD_NO_REDUNDANT_DEFINITIONS
+#define _RWSTD_NO_REDUNDANT_DEFINITIONS
 
    // prevent out-of-line template definitions in .cc files from being
    // explicitly #included during the processing of library headers (faster
    // compilation) assumes that the test doesn't instantiate those templates
    // on types other than those they were explcitly instantiated on (will
    // have no effect if explicit instantiation is disabled or unsupported)
-#  define _RWSTD_NO_TEMPLATE_DEFINITIONS
-#endif   // !defined _MSC_VER || _MSC_VER > 1310
+#define _RWSTD_NO_TEMPLATE_DEFINITIONS
 
 
 #include <climits>

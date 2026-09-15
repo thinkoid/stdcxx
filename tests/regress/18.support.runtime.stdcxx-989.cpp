@@ -37,11 +37,6 @@ int main ()
      // Linux on x86 (including x64 and derivatives)
 #    define expected_jmp_buf_size   (4 == sizeof (long) ? 156 : 200)
 #  endif
-#elif defined __sun
-#  ifdef __sparc
-     // Sun Solaris on SPARC
-#    define expected_jmp_buf_size   (sizeof (long) * 12)
-#  endif
 #endif
 
 #ifdef expected_jmp_buf_size

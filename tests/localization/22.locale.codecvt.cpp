@@ -26,11 +26,6 @@
  *
  **************************************************************************/
 
-#ifdef __SUNPRO_CC
-    // working around a SunPro/SunOS 5.8 bug (PR #26255)
-#  include <time.h>
-#endif   // __SUNPRO_CC
-
 #include <locale>
 
 #include <cassert>
@@ -46,13 +41,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifndef _WIN32
-#  include <iconv.h>      // for iconv(), iconv_open(), iconv_close()
-#  include <langinfo.h>   // for CODESET, nl_langinfo()
-#  include <unistd.h>
-#else
-#  include <direct.h>
-#endif
+#include <iconv.h>      // for iconv(), iconv_open(), iconv_close()
+#include <langinfo.h>   // for CODESET, nl_langinfo()
+#include <unistd.h>
 
 #define DEFINE_REPLACEMENT_NEW_AND_DELETE
 #include <rw_driver.h>
@@ -847,8 +838,6 @@ test_libstd_codecvt (const char* locale_name, const CodeCvtT& cc,
 
 /****************************************************************************/
 
-#if !defined _WIN32
-
 static unsigned int endian_test = 1;
 static bool big_endian = *(unsigned char*)&endian_test == 0;
 
@@ -894,11 +883,11 @@ rwtest_iconv_convert (iconv_t      fd,
     //  endian on little endian machines too
     std::size_t tmp = out_sz++ + 1;
 
-#  if defined _RWSTD_NO_ICONV_CONST_CHAR
+#if defined _RWSTD_NO_ICONV_CONST_CHAR
     char* par1 = _RWSTD_CONST_CAST (char*, in);
-#  else
+#else
     const char* par1 = in;
-#  endif //  defined _RWSTD_NO_ICONV_CONST_CHAR
+#endif //  defined _RWSTD_NO_ICONV_CONST_CHAR
     char* par2 = _RWSTD_REINTERPRET_CAST (char*, out);
 
     std::size_t res = iconv (fd, &par1, &in_sz, &par2, &out_sz);
@@ -907,8 +896,6 @@ rwtest_iconv_convert (iconv_t      fd,
     else
         out_sz = (tmp + 1 - out_sz) / sizeof (wchar_t);
 }
-
-#endif // defined _WIN32
 
 
 enum InternalEncoding {
@@ -936,13 +923,6 @@ rwtest_convert_to_internal (InternalEncoding conv,
 
     switch (conv) {
 
-#ifdef _WIN32
-
-    case use_UCS2:
-        // fall through...
-
-#endif   // _WIN32
-
     case use_libc: {
 
         std::mbstate_t state = std::mbstate_t ();
@@ -951,8 +931,6 @@ rwtest_convert_to_internal (InternalEncoding conv,
 
         break;
     }
-
-#ifndef _WIN32
 
     case use_UCS2:
     case use_UCS4: {
@@ -976,8 +954,6 @@ rwtest_convert_to_internal (InternalEncoding conv,
 
         break;
     }
-
-#endif   // _WIN32
 
     }
 
@@ -2462,10 +2438,8 @@ run_test (int /*unused*/, char* /*unused*/ [])
         { "fr_FR", "ISO-8859-1", "fr_FR.ISO-8859-1",  3920,  3920, 1, 1 },
         // multi-byte encodings (variable width, and max_length > 1)
         { "ja_JP", "Shift_JIS" , "ja_JP.Shift_JIS", 25115, 13001, 0, 2 },
-#if !defined _WIN32
         { "ja_JP", "EUC-JP"    , "ja_JP.EUC-JP",    20801, 14299, 0, 3 },
         { "ja_JP", "UTF-8"     , "ja_JP.UTF-8",     25056, 12000, 0, 6 },
-#endif // !defined _WIN32
 
         // terminate the array
         { 0, 0, 0, 0, 0, 0, 0 }

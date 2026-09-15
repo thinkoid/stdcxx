@@ -204,8 +204,6 @@ _rw_find_block (void *ptr, bool check_heap, const char *caller)
 
     if (caller && ptr && !res) {
 
-#if !defined (__DECCXX_VER) || __DECCXX_VER >= 60600000
-
         rw_error (0, 0, __LINE__,  
                   "%s:%d: %s (%#p): invalid pointer",
                   __FILE__, __LINE__, caller, ptr);
@@ -213,32 +211,6 @@ _rw_find_block (void *ptr, bool check_heap, const char *caller)
         _rw_print_heap ();
 
         abort ();
-
-#else   // Compaq C++ < 6.6
-
-        // working around a bug in Compaq C++ libcxx
-        // Classic Iostreams library (see bug #359)
-        if (static_dtors) {
-
-            rw_error (0, 0, __LINE__, 
-                      "%s:%d: %s (%#p): invalid pointer",
-                      __FILE__, __LINE__, caller, ptr);
-
-            _rw_print_heap ();
-
-            abort ();
-        }
-        else {
-
-            static int warned;
-
-            rw_warn (0 < warned++, 0, __LINE__,
-                     "%s:%d: %s (%#p): warning: invalid pointer; "
-                     "ignoring memory errors from here on out",
-                     __FILE__, __LINE__, caller, ptr);
-        }
-
-#endif   // Compaq C++ >= 6.6
 
     }
 

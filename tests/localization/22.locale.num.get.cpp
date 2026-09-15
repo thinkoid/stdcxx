@@ -1576,12 +1576,7 @@ test_llong (CharType ctype, const char *cname,
     rw_info (0, 0, 0, "extension: std::num_get<%s, %s>::get (..., %s&)",
              cname, iname, tname);
 
-#    ifndef _MSC_VER
-#      define LL(number)   number ## LL
-#    else   // if defined (_MSC_VER)
-       // MSVC 7.0 doesn't recognize the LL suffix
-#      define LL(number)   number ## I64
-#    endif   // _MSC_VER
+#    define LL(number)   number ## LL
 
     TEST (T,  LL (                  0),                    "0",   1, 0, Eof);
     TEST (T,  LL (                  1),                    "1",   1, 0, Eof);
@@ -1916,12 +1911,7 @@ test_ullong (CharType ctype, const char *cname,
     rw_info (0, 0, 0, "extension: std::num_get<%s, %s>::get (..., %s&)",
              cname, iname, tname);
 
-#    ifndef _MSC_VER
-#      define ULL(number)   number ## ULL
-#    else   // if defined (_MSC_VER)
-       // MSVC 7.0 doesn't recognize the LL suffix
-#      define ULL(number)   number ## UI64
-#    endif   // _MSC_VER
+#    define ULL(number)   number ## ULL
 
     TEST (T, ULL (                   0),                     "0",  1, 0, Eof);
     TEST (T, ULL (                   1),                     "1",  1, 0, Eof);

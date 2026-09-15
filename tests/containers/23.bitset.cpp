@@ -239,9 +239,7 @@ test_synopsis (std::bitset<0>*)
     MEMFUN (Reference&, flip, ());
 
     // 23.3.5.1 - verify bitset ctors
-#if    !defined (_RWSTD_NO_EXPLICIT) \
-    && (!defined (__SUNPRO_CC) || __SUNPRO_CC > 0x530) \
-    && (!defined (__GNUG__) || __GNUG__ >= 3)
+#if !defined (_RWSTD_NO_EXPLICIT) && (!defined (__GNUG__) || __GNUG__ >= 3)
     // working around a SunPro 5.2 bug (see PR #25959)
 
     // verify that bitset ctor is declared explicit
@@ -284,12 +282,11 @@ test_synopsis (std::bitset<0>*)
     MEMFUN (unsigned long, to_ulong, () const);
 
 #ifndef _RWSTD_NO_MEMBER_TEMPLATES
-#  if !defined (__HP_aCC) || __HP_aCC >= 60000
 
      // working around HP aCC bugs PR #23312 and bug #503
 
-#    define PARAMLIST_3(T)   T, std::char_traits<T>, std::allocator<T>
-#    define PARAMLIST_2(T)   T, std::char_traits<T>
+#  define PARAMLIST_3(T)   T, std::char_traits<T>, std::allocator<T>
+#  define PARAMLIST_2(T)   T, std::char_traits<T>
 
     // exercise the overloaded member template function and ordinary
     // member function to_string()
@@ -298,20 +295,19 @@ test_synopsis (std::bitset<0>*)
     MEMFUN (std::basic_string<PARAMLIST_3 (char) >,
             to_string, (char, char) const);
 
-#    ifndef _RWSTD_NO_WCHAR_T
+#  ifndef _RWSTD_NO_WCHAR_T
 
     MEMFUN (std::basic_string<PARAMLIST_3 (wchar_t) >,
             to_string<PARAMLIST_3 (wchar_t) >, (wchar_t, wchar_t) const);
 
-#    endif   // _RWSTD_NO_WCHAR_T
+#  endif   // _RWSTD_NO_WCHAR_T
 
     MEMFUN (std::basic_string<PARAMLIST_3 (int) >,
             to_string<PARAMLIST_3 (int) >, (int, int) const);
 
-#    undef PARAMLIST_3
-#    undef PARAMLIST_2
+#  undef PARAMLIST_3
+#  undef PARAMLIST_2
 
-#  endif   // !__HP_aCC || __HP_aCC >= 60000
 #endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
     MEMFUN (std::size_t, size, () const);
@@ -332,18 +328,9 @@ test_synopsis (std::bitset<0>*)
         _RWSTD_UNUSED (pf);               \
     } while (0)
 
-#if !defined (__IBMCPP__) || __IBMCPP__ > 502
     FUN (Bitset, std::operator&, (const Bitset&, const Bitset&));
     FUN (Bitset, std::operator|, (const Bitset&, const Bitset&));
     FUN (Bitset, std::operator^, (const Bitset&, const Bitset&));
-
-#else
-    // working around xlC 5.0.2.0 bug: PR #26561
-
-    FUN (Bitset, std::operator&,(const Bitset&,const Bitset&) _PTR_THROWS(()));
-    FUN (Bitset, std::operator|,(const Bitset&,const Bitset&) _PTR_THROWS(()));
-    FUN (Bitset, std::operator^,(const Bitset&,const Bitset&) _PTR_THROWS(()));
-#endif    
 
 
 #define PARAMLIST(T)   T, std::char_traits<T>
@@ -363,8 +350,6 @@ test_synopsis (std::bitset<0>*)
 
 #  endif   // _RWSTD_NO_WCHAR_T
 
-#  if !defined (_MSC_VER) || _MSC_VER > 1300
-
     // MSVC is too dumb to handle bitset inserters and extractors
     // parametrized on multiple template paramenters
     FUN (std::basic_istream< PARAMLIST (int) >&, std::operator>>,
@@ -372,7 +357,6 @@ test_synopsis (std::bitset<0>*)
     FUN (std::basic_ostream< PARAMLIST (int) >&, std::operator<<,
          (std::basic_ostream< PARAMLIST (int) >&, const Bitset&));
 
-#  endif   // !defined (_MSC_VER) || _MSC_VER > 1300
 #endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
 #undef PARAMLIST
@@ -1341,10 +1325,8 @@ run_test (int, char**)
     DO_TEST ( 255);
     DO_TEST ( 256);   // interesting case
 
-#if !defined(_MSC_VER) || _MSC_VER != 1300
     // FIXME: MSVC 514 can't compile bitset<257>!
     DO_TEST ( 257);   // interesting case
-#endif
 
     DO_TEST ( 258);   // interesting case
     DO_TEST ( 333);

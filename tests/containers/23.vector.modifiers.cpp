@@ -36,11 +36,9 @@
 #include <rw_value.h>   // for UserClass
 #include <rw_driver.h>
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
    // disabled for compilers such as IBM VAC++ or MSVC
    // that can't reliably replace the operators
-#  include <rw_new.h>
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
+#include <rw_new.h>
 
 /**************************************************************************/
 
@@ -108,11 +106,7 @@ void exception_loop (int line, const char *fcall, bool capchg,
     const std::size_t            capacity = vec.capacity ();
     const Vector::const_iterator begin    = vec.begin ();
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
     rwt_free_store* const pst = rwt_get_free_store (0);
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     // iterate for`n=throw_after' starting at the next call to operator
     // new, forcing each call to throw an exception, until the insertion
@@ -127,12 +121,9 @@ void exception_loop (int line, const char *fcall, bool capchg,
         // detect objects constructed but not destroyed after an exception
         const std::size_t count = UserClass::count_;
 
-#  ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
         // disable out of memory exceptions before copying iterators
         // (InputIter ctors may dynamically allocate memory)
         *pst->throw_at_calls_ [0] = std::size_t (-1);
-#  endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 #endif   // _RWSTD_NO_EXCEPTIONS
 
         // create "deep" copies of the iterators to thwart
@@ -141,11 +132,9 @@ void exception_loop (int line, const char *fcall, bool capchg,
         const Iterator end = copy_iter (last, (UserClass*)0);
 
 #ifndef _RWSTD_NO_EXCEPTIONS
-#  ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
         *pst->throw_at_calls_ [0] = pst->new_calls_ [0] + throw_after + 1;
 
-#  endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 #endif   // _RWSTD_NO_EXCEPTIONS
 
         _TRY {
@@ -155,7 +144,6 @@ void exception_loop (int line, const char *fcall, bool capchg,
             else if (-1 == n) {
 
 #ifndef _RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE
-#  ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
                 // disable exceptions if Iterator is not at least
                 // a ForwardIterator since the extension doesn't
                 // provide the strong exception safety guarantee
@@ -163,7 +151,6 @@ void exception_loop (int line, const char *fcall, bool capchg,
                 if (!is_forward (beg)) {
                     *pst->throw_at_calls_ [0] = std::size_t (-1);
                 }
-#  endif   //_RWSTD_NO_REPLACEABLE_NEW_DELETE
 #endif   // _RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE
 
                 vec.insert (it, beg, end);
@@ -212,7 +199,6 @@ void exception_loop (int line, const char *fcall, bool capchg,
     }   // for
 
 #ifndef _RWSTD_NO_EXCEPTIONS
-#  ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     // verify that if exceptions are enabled and when capacity changes
     // at least one exception is thrown
@@ -232,7 +218,6 @@ void exception_loop (int line, const char *fcall, bool capchg,
     //               "line %d: %s: unexpectedly threw an exception",
     //               __LINE__, fcall);
 
-#  endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 #else   // if defined (_RWSTD_NO_EXCEPTIONS)
 
     _RWSTD_UNUSED (t);
@@ -245,11 +230,7 @@ void exception_loop (int line, const char *fcall, bool capchg,
 
 #endif   // _RWSTD_NO_EXCEPTIONS
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
     *pst->throw_at_calls_ [0] = std::size_t (-1);
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     // compute the number of calls to UserClass copy ctor
     // and assignment operator
@@ -1004,8 +985,6 @@ void test_complexity ()
     
     }
 
-#if !defined (_MSC_VER) || _MSC_VER >= 1300
-
     v0.clear ();
     for (i = 0; i < rw_opt_nloops; i++) { 
         VectorSize v2_size = v2.size ();
@@ -1093,7 +1072,6 @@ void test_complexity ()
                    X_count - UserClass::count_ , num_destroy);
             
     }
-#endif   // !defined (_MSC_VER) || _MSC_VER >= 1300          
     
     rw_assert (success, 0, __LINE__, "vector<UserClass>::insert()");
     rw_assert (success, 0, __LINE__, "vector<UserClass>::erase()");

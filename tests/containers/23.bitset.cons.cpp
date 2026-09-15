@@ -788,10 +788,8 @@ run_test (int, char**)
     DO_TEST ( 255);
     DO_TEST ( 256);   // interesting case
 
-#if !defined(_MSC_VER) || _MSC_VER != 1300
     // FIXME: MSVC can't compile bitset<257>!
     DO_TEST ( 257);   // interesting case
-#endif
 
     DO_TEST ( 258);   // interesting case
     DO_TEST ( 333);

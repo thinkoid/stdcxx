@@ -50,14 +50,8 @@ void handle_FPE (int)
 }   // extern "C"
 
 
-#ifdef _MSC_VER
-   // use Structured Exception Handling to detect arithmetic exceptions
-#  define TRY           __try
-#  define EXCEPT(arg)   __except (arg)
-#else
-#  define TRY              if (1)
-#  define EXCEPT(ignore)   else if (0)
-#endif   // _MSC_VER
+#define TRY              if (1)
+#define EXCEPT(ignore)   else if (0)
 
 
 int main ()

@@ -45,15 +45,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifndef _WIN32
-#  include <langinfo.h>   // for CODESET
-#  include <unistd.h>     // for close(), open()
-#else
-#  include <io.h>         // for _commit()
-#  ifdef _MSC_VER
-#    include <crtdbg.h>   // for _CrtSetReportMode()
-#  endif
-#endif
+#include <langinfo.h>   // for CODESET
+#include <unistd.h>     // for close(), open()
 
 #include <assert.h>   // for assert
 #include <errno.h>    // for errno
@@ -70,14 +63,10 @@
 #endif
 
 #ifndef P_tmpdir
-#  ifndef _WIN32
      // P_tmpdir is an XSI (X/Open System Interfaces) extension
      // to POSIX which need not be provided by otherwise conforming
      // implementations
-#    define P_tmpdir "/tmp/"
-#  else   // _WIN32
-#    define P_tmpdir "\\"
-#  endif   // _WIN32
+#  define P_tmpdir "/tmp/"
 #endif
 
 #ifndef _RWSTD_NO_PURE_C_HEADERS
@@ -171,12 +160,7 @@ _TEST_EXPORT void pcs_write (void *fpv, const char *str)
     }
     else {
 
-#ifndef _WIN32
         const char* const codeset = nl_langinfo (CODESET);
-#else
-        // FIXME: determine the current code page
-        const char* const codeset = "UTF-8";
-#endif   // _WIN32
 
         fprintf (fp, "<code_set_name> \"%s\"\n", codeset);
         fprintf (fp, "<mb_cur_max> 1\n");
@@ -256,57 +240,12 @@ const char* rw_tmpnam (char *buf)
 #  undef TMP_TEMPLATE
 #else   // if defined (_RWSTD_NO_MKSTEMP)
 
-#  ifdef _WIN32
-
-    const char *tmpdir = getenv ("TMP");
-    if (0 == tmpdir || '\0' == *tmpdir) 
-        tmpdir = P_tmpdir;
-
-    // create a temporary file name
-    char* fname = tempnam (tmpdir, ".rwtest-tmp");
-
-    if (fname) {
-
-        static char tmpbuf [256];
-
-        if (0 == buf)
-            buf = tmpbuf;
-
-        _RWSTD_ASSERT (strlen (fname) < sizeof (tmpbuf));
-
-        // copy the generated temporary file name to the provided buffer
-        strcpy (buf, fname);
-
-        // free the storage allocated by tempnam()
-        free (fname);
-        fname = buf;
-    }
-    else {
-        fprintf (stderr, "%s:%d: tempnam(\"%s\", \"%s\") failed: %s\n",
-                 __FILE__, __LINE__,
-                 tmpdir, ".rwtest-tmp", strerror (errno));
-    }
-
-#  else
-#    if defined (__hpux) && defined (_RWSTD_REENTRANT)
-
-    // on HP-UX, in reentrant mode, tmpnam(0) fails by design
-
-    if (!buf) {
-        static char tmpbuf [L_tmpnam];
-        buf = tmpbuf;
-        *buf = '\0';
-    }
-
-#    endif   // __hpux && _REENTRANT
-
     const char* const fname = tmpnam (buf);
 
     if (!fname)
         fprintf (stderr, "%s:%d: tmpnam(\"%s\") failed: %s\n",
                  __FILE__, __LINE__, buf, strerror (errno));
 
-#  endif   // _WIN32
 #endif   // _RWSTD_NO_MKSTEMP
 
     return fname;
@@ -316,45 +255,6 @@ const char* rw_tmpnam (char *buf)
 _TEST_EXPORT
 size_t rw_fsize (const char *fname)
 {
-#ifdef _WIN32
-
-    // note: both method of obtaining the size of a file
-    // just written by a process may fail (i.e., the size
-    // will be 0)
-
-#  if 1
-
-    struct _stat sb;
-
-    if (-1 == _stat (fname, &sb))
-        return _RWSTD_SIZE_MAX;
-
-    return sb.st_size;
-
-#  else
-
-    // #include <windows.h> for CreateFile() and GetFileSize()
-    const HANDLE hfile =
-        CreateFile (fname,
-                    GENERIC_READ,
-                    0,                     // dwShareMode,
-                    0,                     // lpSecurityAttributes,
-                    OPEN_EXISTING,         // dwCreationDisposition,
-                    FILE_ATTRIBUTE_NORMAL, // dwFlagsAndAttributes,
-                    0);                    // hTemplateFile
-
-    if (INVALID_HANDLE_VALUE == hfile)
-        return _RWSTD_SIZE_MAX;
-
-    const size_t size = GetFileSize (hfile, 0);
-
-    CloseHandle (hfile);
-
-    return size;
-
-#  endif   // 0/1
-
-#else   // ifndef _WIN32
 
     struct stat sb;
 
@@ -362,8 +262,6 @@ size_t rw_fsize (const char *fname)
         return _RWSTD_SIZE_MAX;
 
     return sb.st_size;
-
-#endif   // _WIN32
 
 }
 
@@ -493,36 +391,10 @@ rw_nextfd (int *count)
 
         *count = 0;
 
-#ifdef _WIN32
-
-#  ifdef _MSC_VER
-        // save the report mode and disable "Invalid file descriptor"
-        // CRT assertions from _commit()
-        const int prev_mode = _CrtSetReportMode (_CRT_ASSERT, 0);
-#  endif
-
-        for (int i = 0; i != 256; ++i) {
-
-            const int ret = _commit (i);
-
-            if (-1 != ret || EBADF != errno)
-                ++*count;
-        }
-
-#  ifdef _MSC_VER
-        // restore the previous mode
-        if (-1 != prev_mode)
-            _CrtSetReportMode (_CRT_ASSERT, prev_mode);
-#  endif
-
-#else   // if not Windoze
-
         for (int i = 0; i != 256; ++i) {
             if (-1 != fcntl (i, F_GETFD))
                 ++*count;
         }
-
-#endif   // _WIN32
 
     }
 

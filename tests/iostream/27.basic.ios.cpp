@@ -30,9 +30,7 @@
 // necessary to compile each header #included here are #included
 // will produce errors if any templates defined in the header are
 // instantiated without the names they use having been completely defined
-#if !defined (_MSC_VER) || _MSC_VER > 1300
-#  define _RWSTD_NO_REDUNDANT_DEFINITIONS
-#endif
+#define _RWSTD_NO_REDUNDANT_DEFINITIONS
 
 // prevent out-of-line template definitions in .cc files from being explicitly
 // #included during the processing of library headers (faster compilation)

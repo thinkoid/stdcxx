@@ -32,8 +32,7 @@
 
 int main ()
 {
-#if    (defined __unix__ || defined __unix || defined unix) \
-    && !defined _RWSTD_EDG_ECCP
+#if (defined (__unix__) || defined (__unix) || defined (unix))
 
     // According to POSIX (SUSv3), the following macros are required
     // to be defined in <limits.h> (others, such as OPEN_MAX) are
@@ -138,14 +137,10 @@ int main ()
     assert (SCHAR_MAX  == +127);
     assert (SHRT_MAX   >= +32767);
 
-#if !defined (_RWSTD_EDG_ECCP) && !defined (_MSC_VER)
-
     // avoid exercising with the EDG eccp front end (strict mode)
     assert (LONG_BIT   >= 32);
     assert (SSIZE_MAX  >= _POSIX_SSIZE_MAX);
     assert (WORD_BIT   >= 32);
-
-#endif   // EDG eccp || MSVC || ICC/Windows
 
     assert (UCHAR_MAX  >= 255);
     assert (UINT_MAX   >= 4294967295);
@@ -158,16 +153,12 @@ int main ()
 
 #ifndef _RWSTD_NO_LONG_LONG
 
-#  if !defined __HP_aCC || 199901L <= __STDC_VERSION__
-
     // HP aCC defines LLONG_MAX and LLONG_MIN only in C99 mode
     // i.e., with -AC99
 
     assert (LLONG_MIN  != 0);
     assert (LLONG_MAX  >= +9223372036854775807LL);
     assert (ULLONG_MAX >= 18446744073709551615ULL);
-
-#  endif
 
 #endif   // _RWSTD_NO_LONG_LONG
 

@@ -26,11 +26,6 @@
  * 
  **************************************************************************/
 
-#ifdef __SUNPRO_CC
-    // working around a SunPro/SunOS 5.8 bug (PR #26255)
-#  include <time.h>
-#endif   // __SUNPRO_CC
-
 #include <locale>    // for codecvt
 
 #include <climits>   // for MB_LEN_MAX
@@ -563,15 +558,6 @@ test_wcodecvt_byname_libc_based ()
              locname, mb_cur_max, sequences);
 
     std::free (sequences);
-
-#ifdef _RWSTD_OS_SUNOS
-
-    if (!rw_warn (std::strcmp ("5.7", _RWSTD_OS_RELEASE), 0, __LINE__,
-                  "skipping tests due to a SunOS 5.7 libc bug")) {
-        return;
-    }
-
-#endif   // _RWSTD_OS_SUNOS
 
     char mb_string [256];
 

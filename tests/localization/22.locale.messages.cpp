@@ -42,27 +42,17 @@
 #include <cwchar>    // for mbsinit()
 
 #ifndef _RWSTD_NO_NEW_HEADER
-#  if defined (_WIN32)
-#    include <io.h>          // for _open()
-#    include <direct.h>      // for getcwd()
-#  else
-#    include <sys/types.h>
-#    include <sys/stat.h>
-#    include <unistd.h>      // for getcwd()
-#  endif
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  include <unistd.h>      // for getcwd()
 #  include <fcntl.h>         // for mode flags for _open
 #endif   // _RWSTD_NO_NEW_HEADER
 
 #undef open
 #undef close
 
-#if defined (_MSC_VER)
-#  define open(f,m) _open  (f, _##m)
-#  define close(f)  _close (f)
-#else
-#  define open(f,m) open  (f, m)
-#  define close(f)  close (f)
-#endif // defined (_MSC_VER)
+#define open(f,m) open  (f, m)
+#define close(f)  close (f)
 
 /***************************************************************************/
 
@@ -190,13 +180,8 @@ find_named_locale ()
 
 /***************************************************************************/
 
-#ifndef _WIN32
-#  define CAT_NAME "./rwstdmessages.cat"
-#  define MSG_NAME "rwstdmessages.msg"
-#else
-#  define CAT_NAME "rwstdmessages.dll"
-#  define MSG_NAME "rwstdmessages.rc"
-#endif
+#define CAT_NAME "./rwstdmessages.cat"
+#define MSG_NAME "rwstdmessages.msg"
 
 #define NLS_CAT_NAME "rwstdmessages"
 
@@ -206,16 +191,10 @@ find_named_locale ()
 
 int msg_id (int set, int id)
 {
-#ifdef _WIN32
-
-    return (set - 1) * 5 + id;
-
-#else
 
     _RWSTD_UNUSED (set);
     return id;
 
-#endif
 }
 
 /***************************************************************************/
@@ -453,14 +432,7 @@ void test_open_close (const char *loc_name, const char *cname)
     int fdcount [2];
     int next_fd [2];
 
-#ifndef _WIN32
     next_fd [0] = rw_nextfd (fdcount + 0);
-#else
-    // don't test file descriptor leaking on Win32 to avoid
-    // invalid parameter error
-    // catalog functions not uses file descriptors
-    next_fd [0] = fdcount [0] = 0;
-#endif
 
     rw_info (0, 0, __LINE__,
              "std::messages<%s>::open() and close() in locale(#%s)",
@@ -484,11 +456,7 @@ void test_open_close (const char *loc_name, const char *cname)
     close_catalog (msgs, cat, true, cname, __LINE__);
 
     // verify that no file descriptor has leaked
-#ifndef _WIN32
     next_fd [1] = rw_nextfd (fdcount + 1);
-#else
-    next_fd [1] = fdcount [1] = 0;
-#endif
 
     rw_assert (next_fd [1] == next_fd [0] && fdcount [0] == fdcount [1],
                0, __LINE__,
@@ -570,13 +538,11 @@ void test_get (const char *loc_name,
 #endif   // _RWSTD_NO_EXCEPTIONS
 
     // Bad set id
-#ifndef _WIN32
     // When we use resource files for the message catalogs
     // the set ids are ignored.
     rw_assert (msgs.get (cat, 777, 1, def) == def, 0, __LINE__,
                "messages<%s>::get(%d, 777, 1, %{#*Ac}) == %{#*Ac}",
                cname, cat, int (sizeof *def), def, int (sizeof *def), def);
-#endif   // _WIN32
 
     // Bad message id
     rw_assert (msgs.get (cat, 1, 777, def) == def, 0, __LINE__,
@@ -708,11 +674,7 @@ void stress_test (const char *cname)
 
         char msg_name [NCATS];
 
-#ifndef _WIN32
         std::sprintf (msg_name, "rwstdmessages_%d.msg", int (i));
-#else
-        std::sprintf (msg_name, "rwstdmessages_%d.rc", int (i));
-#endif
 
         rw_create_catalog (msg_name, catalog.c_str ());
 
@@ -817,15 +779,6 @@ void test_messages (charT, const char *cname, const char *locname)
 static int
 run_test (int, char*[])
 {
-
-#ifdef _RWSTD_OS_AIX
-
-    // must do this so that NLSPATH lookup works correctly for both
-    // the C and POSIX locales.
-    const int p = rw_putenv ("LC__FASTMSG=false");
-    rw_note (!p, 0, __LINE__, "failed to set LC__FASTMSG");
-    
-#endif    // _RWSTD_OS_AIX
 
 #ifdef _RWSTD_NO_DYNAMIC_CAST
 

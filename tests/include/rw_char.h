@@ -38,8 +38,7 @@
 
 struct UserChar   // user-defined character type (must be POD)
 {
-#if    !defined (_RWSTD_NO_LONG_DOUBLE) \
-    && !defined (__SUNPRO_CC) || __SUNPRO_CC > 0x540
+#if !defined (_RWSTD_NO_LONG_DOUBLE)
     long double f;    // exercise correct alignment
 #else
     // cannot use long double with SunPro due to a compiler

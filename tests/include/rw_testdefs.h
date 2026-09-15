@@ -43,17 +43,7 @@
 #endif   // _RWSTD_TEST_SRC
 
 
-#if defined (_MSC_VER) && (defined (RWDLL) || defined (_RWSHARED))
-#  ifndef _RWSTD_TEST_SRC
-     // using a shared lib, import names
-#    define _TEST_EXPORT   __declspec (dllimport)
-#  else
-     // building a shared (test) lib, export names
-#    define _TEST_EXPORT   __declspec (dllexport)
-#  endif   // _RWSTD_LIB_SRC
-#else
-#    define _TEST_EXPORT
-#endif   // archive/shared library
+#  define _TEST_EXPORT
 
 
 #if defined (_RWSTD_NO_NAMESPACE) && !defined std
@@ -165,11 +155,5 @@
 
 // convenience macro to get number of elements in a c style array
 #define RW_COUNT_OF(x) (sizeof(x) / sizeof(*x))
-
-#if defined (__INTEL_COMPILER) && __INTEL_COMPILER <= 1000
-   // disable warning #279: controlling expression is constant
-   // issued for the commonly used RW_ASSERT(!"not implemented")
-#  pragma warning (disable: 279)
-#endif   // Intel C++ 10.0 and prior
 
 #endif   // RW_TESTDEFS_H_INCLUDED

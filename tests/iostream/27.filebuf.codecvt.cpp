@@ -47,11 +47,6 @@
 
 
 #include <rw/_defs.h> 
-#if defined (__IBMCPP__) && !defined (_RWSTD_NO_IMPLICIT_INCLUSION)
-   // disable implicit inclusion to work around a limitation
-   // in IBM VisualAge
-#  define _RWSTD_NO_IMPLICIT_INCLUSION 
-#endif 
  
 
 #include <fstream>

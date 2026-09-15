@@ -47,27 +47,11 @@
 
 #include <fcntl.h>
 
-#ifndef _WIN32
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-#  include <unistd.h>
-#  include <sys/types.h>
-#  include <sys/wait.h>
-
-#  define DEV_TTY   "/dev/tty"
-
-#else   // ifdef _WIN32
-
-#  include <io.h>
-
-#  ifndef STDIN_FILENO
-#    define STDIN_FILENO  0
-#    define STDOUT_FILENO 1
-#    define STDERR_FILENO 2
-#  endif   // STDIN_FILENO
-
-#  define DEV_TTY   "CON:"
-
-#endif   // _WIN32
+#define DEV_TTY   "/dev/tty"
 
 static int _rw_child = 0;
 
@@ -170,13 +154,7 @@ do_test ()
 
 static int _rw_dup2(int fd1, int fd2)
 {
-#ifndef _WIN32
     return dup2 (fd1, fd2);
-#else
-    // on Windows dup2() returns 0 to indicate success and -1 to indicate error
-    const int ret = dup2 (fd1, fd2);
-    return (0 == ret) ? fd2 : ret;
-#endif
 }
 
 static int

@@ -1014,18 +1014,9 @@ void test_op_set (charT*, Traits*, Allocator*,
 
     if (OpSet (cstr) != func.which_) {
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
         // verify that if exceptions are enabled and when capacity changes
         // at least one exception is thrown
         expect_throws = str_state.capacity_ < str.capacity ();
-
-#else   // if defined (_RWSTD_NO_REPLACEABLE_NEW_DELETE)
-
-        expect_throws = StringIds::UserAlloc == func.alloc_id_ ?
-            str_state.capacity_ < str.capacity () : 0;
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     }
 

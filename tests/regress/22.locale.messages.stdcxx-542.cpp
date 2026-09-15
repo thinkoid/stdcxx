@@ -33,19 +33,9 @@
 #include <rw_locale.h>
 #include <rw_driver.h>
 
-#ifdef _MSC_VER
-#include <crtdbg.h>
-#endif
-
-#ifdef _WIN32
-#  define CATALOG "test"
-#  define MSG_EXT ".rc"
-#  define CAT_EXT ".dll"
-#else
-#  define CATALOG "./test"
-#  define MSG_EXT ".msg"
-#  define CAT_EXT ".cat"
-#endif
+#define CATALOG "./test"
+#define MSG_EXT ".msg"
+#define CAT_EXT ".cat"
 
 
 static int run_test (int, char**)
@@ -85,10 +75,6 @@ static int run_test (int, char**)
 
 int main (int argc, char* argv[])
 {
-#ifdef _MSC_VER
-    // disable GUI window from abort()
-    _CrtSetReportMode (_CRT_ERROR, _CRTDBG_MODE_DEBUG);
-#endif
 
     return rw_test (argc, argv, __FILE__,
                     "lib.locale.messages",

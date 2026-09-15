@@ -38,22 +38,10 @@
 
 
 // known mbstate_t sizes on major platforms
-#ifdef _RWSTD_OS_AIX
-#  define KNOWN_SIZE   sizeof(long)
-#elif defined _RWSTD_OS_HP_UX
-#  define KNOWN_SIZE   8
-#elif defined _RWSTD_OS_FREEBSD
+#if defined _RWSTD_OS_FREEBSD
 #  define KNOWN_SIZE   128
-#elif defined _RWSTD_OS_IRIX64
-#  define KNOWN_SIZE   1
 #elif defined _RWSTD_OS_LINUX
 #  define KNOWN_SIZE   8
-#elif defined _RWSTD_OS_OSF1
-#  define KNOWN_SIZE   24
-#elif defined _RWSTD_OS_SUNOS
-#  define KNOWN_SIZE   (sizeof(long) == 8 ? 32 : 24)
-#elif defined _RWSTD_OS_WINDOWS
-#  define KNOWN_SIZE   4
 #endif
 
 

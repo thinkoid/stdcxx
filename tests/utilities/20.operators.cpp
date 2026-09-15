@@ -32,20 +32,6 @@
 
 #include <rw/_config.h>
 
-#if defined (__IBMCPP__) && !defined (_RWSTD_NO_IMPLICIT_INCLUSION)
-// Disable implicit inclusion to work around 
-// a limitation in IBM's VisualAge 5.0.2.0 (see PR#26959) 
-
-#  define _RWSTD_NO_IMPLICIT_INCLUSION 
-#endif
-
-#if 0 // def _MSC_VER
-// disabled (warnings may be meaningful)
-#  pragma warning (disable: 4800)
-#  pragma warning (disable: 4805)
-#endif   // _MSC_VER
-
-
 #include <algorithm>
 #include <deque>
 #include <functional>
@@ -91,23 +77,10 @@ std::vector<int, std::allocator<int> >;
 
 /**************************************************************************/
 
-#if !defined (__SUNPRO_CC) || __SUNPRO_CC > 0x530
-#  define FUN(ignore, result, name, arg_list) do {  \
+#define FUN(ignore, result, name, arg_list) do {  \
           result (*pf) arg_list = &name;            \
           _RWSTD_UNUSED (pf);                       \
       } while (0)
-#else
-   // working around a SunPro 5.3 bug (see PR #25972) that prevents it
-   // from taking the address of a function template in template code
-#  define FUN(T, result, name, arg_list) do {                 \
-          typedef typename T::iterator       Iterator;        \
-          typedef typename T::const_iterator ConstIterator;   \
-          const Iterator      *pi  = 0;                       \
-          const ConstIterator *pci = 0;                       \
-          name (pi, pi);                                      \
-          name (pci, pci);                                    \
-      } while (0)
-#endif   // SunPro 5.3
 
 
 #define TEST_INEQUALITY(T)                                          \
@@ -445,7 +418,6 @@ run_test (int, char**)
     TEST_INEQUALITY (std::set<int>);
     TEST_INEQUALITY (std::multiset<int>);
 
-#if !defined (_MSC_VER) || _MSC_VER > 1300
     // prevent from testing with the braindead MSVC 6 and 7
     // as a workaround for compiler bugs (PR #16828, 22268)
 
@@ -456,7 +428,6 @@ run_test (int, char**)
 
     test_iterator (std::vector<int>(),
                    std::vector<int>::iterator ());
-#endif   // MSVC > 7.0
 
     TEST_OPERATORS (std::vector<bool>);
 
@@ -503,16 +474,12 @@ run_test (int, char**)
     TEST_BIDIRECTIONAL_ITERATORS (int);
     TEST_RANDOM_ACCESS_ITERATORS (int);
 
-#if !defined (__HP_aCC) || _RWSTD_HP_aCC_MINOR > 3600
-
     // working around an HP aCC bug (PR #28331)
     TEST_INPUT_ITERATORS (bool);
     TEST_OUTPUT_ITERATORS (bool);
     TEST_FORWARD_ITERATORS (bool);
     TEST_BIDIRECTIONAL_ITERATORS (bool);
     TEST_RANDOM_ACCESS_ITERATORS (bool);
-
-#endif   // HP aCC > x.36
 
     return 0;
 }

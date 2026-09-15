@@ -32,14 +32,12 @@
 #include <rw_driver.h>   // for rw_test()
 #include <rw_alg_test.h>
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
    // disabled for compilers that can't reliably replace the operators
 
    // replace operators new and delete with versions that invalidate
    // storage to detect problems due to deque iterators accessing
    // uninitialized pointers
-#  include <rw_new.h>
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
+#include <rw_new.h>
 
 /**************************************************************************/
 
@@ -263,12 +261,8 @@ void test_iterators (std::size_t N, int dir, T*)
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
 // replacement operator new is expensive, avoid long runtimes
 unsigned rw_opt_nloops = 6;      // for --nloops
-#else
-unsigned rw_opt_nloops = 10;     // for --nloops
-#endif
 
 int      rw_opt_no_fill;         // for --no-fill
 int      rw_opt_no_push_back;    // for --no-push_back

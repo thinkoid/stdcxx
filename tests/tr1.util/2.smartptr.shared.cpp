@@ -326,26 +326,10 @@ test_copy_ctor ()
     {   // template <class U> shared_ptr(const shared_ptr<U>&)
         Derived<int>* const pd = new Derived<int>;
 
-#if    !defined (_RWSTD_HP_aCC_MAJOR) || 6 <= _RWSTD_HP_aCC_MAJOR \
-    || 3 == _RWSTD_HP_aCC_MAJOR && __hpxstd98
-
         typedef volatile Derived<int> v_Derived_i;
         typedef volatile Base_0<int>  v_Base_0_i;
         typedef volatile Base_1<int>  v_Base_1_i;
         typedef volatile Base<int>    v_Base_i;
-
-#else   // HP aCC
-
-        // volatile disabled for HP aCC 3 without the +hpxstd98
-        // option available starting with aCC 3.74 to work around
-        // a compiler bug (see STDCXX-615)
-
-        typedef /* volatile */ Derived<int> v_Derived_i;
-        typedef /* volatile */ Base_0<int>  v_Base_0_i;
-        typedef /* volatile */ Base_1<int>  v_Base_1_i;
-        typedef /* volatile */ Base<int>    v_Base_i;
-
-#endif   // HP aCC
 
         std::tr1::shared_ptr<v_Derived_i> ptr_d (pd);
         std::tr1::shared_ptr<v_Base_0_i>  ptr_0 (ptr_d);

@@ -74,19 +74,8 @@ void handle_fpe (int)
 
 /**************************************************************************/
 
-#ifdef _MSC_VER
-   // silence useless MSVC warnings:
-   // 4800: 'int' : forcing value to bool 'true' or 'false'
-   // 4804: '/' : unsafe use of type 'bool' in operation
-#  pragma warning (disable: 4800 4804)
-
-   // use Structured Exception Handling to detect arithmetic exceptions
-#  define TRY           __try
-#  define EXCEPT(arg)   __except (arg)
-#else
-#  define TRY              if (1)
-#  define EXCEPT(ignore)   else if (0)
-#endif   // _MSC_VER
+#define TRY              if (1)
+#define EXCEPT(ignore)   else if (0)
 
 
 template <class numT>

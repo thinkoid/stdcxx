@@ -467,14 +467,13 @@ static int rw_opt_no_stress;          // for --no-stress
 
 int run_test (int, char**)
 {
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     // disable diagnostics issued by the replacement operator new
     // and delete defined by the test driver in response to deliberate
     // errors caused by this test
     rw_enable (rw_error, false);
 
-#  define TEST(name)                                            \
+#define TEST(name)                                            \
     if (rw_opt_no_ ## name)                                     \
         rw_note (0, 0, __LINE__, "%s test disabled", #name);    \
     else                                                        \
@@ -487,12 +486,6 @@ int run_test (int, char**)
     TEST (corruption);
     TEST (leaks);
     TEST (stress);
-
-#else    // _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
-    rw_note (0, 0, __LINE__, "Test disabled");
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     return 0;
 }

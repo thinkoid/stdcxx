@@ -30,12 +30,9 @@
 
 // disable implicit inclusion to work around a limitation in
 // IBM VAC++ 5.0.2.0 (PR #26959)
-#if defined __IBMCPP__ && !defined _RWSTD_NO_IMPLICIT_INCLUSION
-#  define _RWSTD_NO_IMPLICIT_INCLUSION
-#endif
 
 // make protected members accessible if possible
-#if defined _RWSTD_NO_EXPORT && !defined _MSC_VER
+#if defined (_RWSTD_NO_EXPORT)
 #  define protected public
 #endif
 
@@ -169,12 +166,9 @@ test_have_use_facet ()
     rw_info (0, __FILE__, __LINE__,
              "std::use_facet<Facet>(std::locale&) synopsis");
 
-#if !defined __HP_aCC || __HP_aCC > 33100
-
 // working around an HP aCC bug (see PR #23312)
 
-#  if    !(defined __GNUG__ || __GNUG__ > 2 || __GNUC_MINOR__ > 96) \
-      && !(defined _MSC_VER || _MSC_VER >= 0x1300)
+#if !(defined (__GNUG__) || __GNUG__ > 2 || __GNUC_MINOR__ > 96)
 
     // working around a gcc 2.9{5,6} ICE
     // working around an MSVC 6.0 bug (PR #26307)
@@ -182,9 +176,8 @@ test_have_use_facet ()
          std::use_facet<std::ctype<charT> >, (const std::locale&));
     FUN (bool, std::has_facet<std::ctype<charT> >, (const std::locale&));
 
-#  endif   // gcc > 2.96 && MSVC > 6.0
+#endif   // gcc > 2.96 && MSVC > 6.0
 
-#endif   // __HP_aCC > 33000
 }
 
 /***************************************************************************/
@@ -214,20 +207,16 @@ test_convenience_funs ()
 
 _RWSTD_NAMESPACE (std) {
 
-#if !defined _MSC_VER
-
 // verify that specializations are present in the lib
 _RWSTD_SPECIALIZED_CLASS class ctype<char>;
 _RWSTD_SPECIALIZED_CLASS class ctype_byname<char>;
 
-#  ifndef _RWSTD_NO_WCHAR_T
+#ifndef _RWSTD_NO_WCHAR_T
 
 _RWSTD_SPECIALIZED_CLASS class ctype<wchar_t>;
 _RWSTD_SPECIALIZED_CLASS class ctype_byname<wchar_t>;
 
-#  endif   // _RWSTD_NO_WCHAR_T
-
-#endif   // _MSC_VER
+#endif   // _RWSTD_NO_WCHAR_T
 
 }   // namespace std
 
@@ -721,25 +710,17 @@ test_locale ()
            _RWSTD_UNUSED (_RWSTD_PASTE (pf, __LINE__));                  \
          }  while (0)
 
-#if !defined __HP_aCC || __HP_aCC > 33100
-
     // working around an HP aCC bug (see PR #23312)
 
     // 22.1.1.2, p4
     MEMFUN (const std::locale&, operator=,(const std::locale&) _PTR_THROWS(()));
 
-#endif   // __HP_aCC > 33000
-
 #ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
-#  if !defined __HP_aCC || __HP_aCC > 33100
 
     // working around an HP aCC bug (see PR #23312)
 
     // 22.1.1.3, p1
     MEMFUN (std::locale, combine<Facet>, (const std::locale&) const);
-
-#  endif   // __HP_aCC > 33000
 
 #endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
@@ -924,10 +905,8 @@ test_ctype (const char* cname)
 #  define ADDR(ignore)   (void)0
 #endif
 
-#if !defined __IBMCPP__ || __IBMCPP__ > 800
     // working around an IBM VAC++ bug #559
     case std::ctype_base::mask (): break;
-#endif   // !VAC+ || VAC++ > 7.0
 
     case std::ctype_base::space:  ADDR (space); break;
     case std::ctype_base::print:  ADDR (print); break;

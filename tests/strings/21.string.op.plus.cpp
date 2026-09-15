@@ -558,19 +558,9 @@ void test_op_plus (charT, Traits*, Allocator*,
         break;
     }
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
     // verify that if exceptions are enabled and when capacity changes
     // at least one exception is thrown
     const std::size_t expect_throws = str_state.capacity_ < s_res.capacity ();
-
-#else   // if defined (_RWSTD_NO_REPLACEABLE_NEW_DELETE)
-
-    const std::size_t expect_throws = 
-        (StringIds::UserAlloc == func.alloc_id_) 
-      ? str_state.capacity_ < s_res.capacity () : 0;
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     // we may got no more 2 bad_allocs
     rw_assert (expect_throws <= throw_count && throw_count <= 2, 0, tcase.line,

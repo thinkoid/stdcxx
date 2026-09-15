@@ -142,150 +142,7 @@ std::size_t rw_strftime (char *buf, std::size_t bufsize,
     if (!tmb)
         tmb = &tmp;
 
-#if defined (_MSC_VER) || defined (__MINGW32__)
-
-    // ms crt aborts if you use out of range values in debug
-    if (tmb->tm_hour < 0 || 24 <= tmb->tm_hour)
-        return 0;
-
-    if (tmb->tm_min < 0 || 60 <= tmb->tm_min)
-        return 0;
-
-    if (tmb->tm_sec < 0 || 60 <= tmb->tm_sec)
-        return 0;
-
-    // create a new pattern buffer that is windows strftime compatible...
-    char patbuf [512];
-    char *fpat = patbuf;
-
-    // assumes tm_year is relative to 1900
-    const int year    = (tmb->tm_year + 1900);
-    const int century = (tmb->tm_year + 1900) / 100;
-
-    while (*pat) {
-
-        if (*pat == '%') {
-
-            // ensure we are not within 16 chars of the end of the
-            // local pattern buffer to avoid overflow
-            assert ((fpat + 16) < (patbuf + 512));
-
-            pat += 1; // step past %
-            switch (*pat)
-            {
-            case '\0':
-                // fails miserably if the last char is %
-                *fpat++ = '%'; *fpat++ = '%';
-                break;
-            case 'C':
-                // %C is replaced by the century number (the year divided by
-                // 100 and truncated to an integer) as a decimal number.
-                *fpat++ = '0' + (century / 10) % 10;
-                *fpat++ = '0' + (century % 10);
-                pat += 1;
-                break;
-            case 'D':
-                // %D same as %m/%d/%y. 
-                *fpat++ = '%'; *fpat++ = 'm'; *fpat++ = '/';
-                *fpat++ = '%'; *fpat++ = 'd'; *fpat++ = '/';
-                *fpat++ = '%'; *fpat++ = 'y'; pat += 1;
-                break;
-            case 'e':
-                // %e is replaced by the day of the month as a decimal
-                // number [1,31]; a single digit is preceded by a space.
-                if (tmb->tm_mday < 10)
-                    *fpat++ = ' ';
-                else
-                    *fpat++ = '0' + (tmb->tm_mday / 10) % 10;
-                *fpat++ = '0' + (tmb->tm_mday % 10);
-                pat += 1;
-                break;
-            case 'F':
-                // %F Equivalent to %Y - %m - %d (the ISO 8601:2000 standard
-                // date format). [ tm_year, tm_mon, tm_mday]
-                *fpat++ = '%'; *fpat++ = 'Y';
-                *fpat++ = ' '; *fpat++ = '-'; *fpat++ = ' ';
-                *fpat++ = '%'; *fpat++ = 'm';
-                *fpat++ = ' '; *fpat++ = '-'; *fpat++ = ' ';
-                *fpat++ = '%'; *fpat++ = 'd'; pat += 1;
-                break;
-            case 'g':
-                // %g Replaced by the last 2 digits of the week-based year
-                // as a decimal number [00,99]. [ tm_year, tm_wday, tm_yday] 
-                return 0;
-            case 'G':
-                // %G Replaced by the week-based year as a decimal number
-                // (for example, 1977). [ tm_year, tm_wday, tm_yday] 
-                return 0;
-            case 'h':
-                // %h same as %b. 
-                *fpat++ = '%'; *fpat++ = 'b'; pat += 1;
-                break;
-            case 'n':
-                // %n is replaced by a newline character. 
-                *fpat++ = '\n'; pat += 1;
-                break;
-            case 'r':
-                // %r is replaced by the time in a.m. and p.m. notation; in
-                // the POSIX locale this is equivalent to %I:%M:%S %p.
-                *fpat++ = '%'; *fpat++ = 'I'; *fpat++ = ':';
-                *fpat++ = '%'; *fpat++ = 'M'; *fpat++ = ':';
-                *fpat++ = '%'; *fpat++ = 'S'; *fpat++ = ' ';
-                *fpat++ = '%'; *fpat++ = 'p'; pat += 1;
-                break;
-            case 'R':
-                // %R is replaced by the time in 24 hour notation (%H:%M).
-                *fpat++ = '%'; *fpat++ = 'H'; *fpat++ = ':';
-                *fpat++ = '%'; *fpat++ = 'M'; pat += 1;
-                break;
-            case 't':
-                // %t is replaced by a tab character. 
-                *fpat++ = '\t'; pat += 1;
-                break;
-            case 'T':
-                // %T is replaced by the time (%H:%M:%S). 
-                *fpat++ = '%'; *fpat++ = 'H'; *fpat++ = ':';
-                *fpat++ = '%'; *fpat++ = 'M'; *fpat++ = ':';
-                *fpat++ = '%'; *fpat++ = 'S'; pat += 1;
-                break;
-            case 'u':
-                // %u is replaced by the weekday as a decimal number [1,7],
-                // with 1 representing Monday.
-                *fpat++ = '0' + (tmb->tm_wday + 1);                
-                pat += 1;
-                break;
-            case 'V':
-                // %V is replaced by the week number of the year (Monday as
-                // the first day of the week) as a decimal number [01,53].
-                // If the week containing 1 January has four or more days
-                // in the new year, then it is considered week 1. Otherwise,
-                // it is the last week of the previous year, and the next
-                // week is week 1. 
-                return 0;
-            default:
-                // copy percent and format
-                *fpat++ = '%';
-                *fpat++ = *pat++;
-                break;
-            }
-
-            *fpat = 0; // null terminate
-        }
-        else {
-            *fpat++ = *pat++;
-        }
-    }
-
-    // copy the null
-    *fpat = *pat;
-
-    const std::size_t n = std::strftime (buf, bufsize, patbuf, tmb);
-
-#else   // !_MSC_VER && !__MINGW32__
-
     const std::size_t n = std::strftime (buf, bufsize, pat, tmb);
-
-#endif   // _MSC_VER || __MINGW32__
 
     RW_ASSERT (n < bufsize);
 
@@ -298,12 +155,11 @@ std::size_t rw_strftime (wchar_t *wbuf, std::size_t bufsize,
 { 
     static const std::tm tmp = std::tm ();
 
-#if    !defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT) \
-    && !defined (_MSC_VER) && !defined (__MINGW32__)
+#if !defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT)
 
     std::size_t n = std::wcsftime (wbuf, bufsize, wpat, tmb ? tmb : &tmp);
 
-#else   // _RWSTD_NO_WCSFTIME || _MSC_VER || __MINGW32__
+#else   // _RWSTD_NO_WCSFTIME
 
     char pat [1024];
     char buf [1024];
@@ -312,7 +168,7 @@ std::size_t rw_strftime (wchar_t *wbuf, std::size_t bufsize,
     std::size_t n = rw_strftime (buf, bufsize, pat, tmb ? tmb : &tmp);
     widen (wbuf, buf);
 
-#endif   // _RWSTD_NO_WCSFTIME, _MSC_VER, __MINGW32__
+#endif   // !defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT)
 
     RW_ASSERT (n < bufsize);
 
@@ -1070,19 +926,6 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 12), "%k", 0, 0, ' ', "12");
     TEST (T (0, 0, 23), "%k", 0, 0, ' ', "23");
 
-#ifdef _RWSTD_OS_SUNOS
-    // on Solaris, in addition to the results hardcoded above,
-    // compare the output with that of strftime() and wcsftime()
-    TEST (T (0, 0,  0), "%k", 0, 0, ' ', "%k");
-    TEST (T (0, 0,  2), "%k", 0, 0, ' ', "%k");
-    TEST (T (0, 0,  9), "%k", 0, 0, ' ', "%k");
-    TEST (T (0, 0, 10), "%k", 0, 0, ' ', "%k");
-    TEST (T (0, 0, 11), "%k", 0, 0, ' ', "%k");
-    TEST (T (0, 0, 12), "%k", 0, 0, ' ', "%k");
-    TEST (T (0, 0, 13), "%k", 0, 0, ' ', "%k");
-    TEST (T (0, 0, 23), "%k", 0, 0, ' ', "%k");
-#endif   // SunOS
-
     // %l: the hour (12-hour clock) with single digits preceded by a blank
     rw_info (0, 0, __LINE__,
              "%%l: the hour (12-hour clock) with single digits "
@@ -1095,19 +938,6 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 13), "%l", 0, 0, ' ', " 1");
     TEST (T (0, 0, 21), "%l", 0, 0, ' ', " 9");
     TEST (T (0, 0, 23), "%l", 0, 0, ' ', "11");
-
-#ifdef _RWSTD_OS_SUNOS
-    // on Solaris, in addition to the results hardcoded above,
-    // compare the output with that of strftime() and wcsftime()
-    TEST (T (0, 0,  0), "%l", 0, 0, ' ', "%l");
-    TEST (T (0, 0,  2), "%l", 0, 0, ' ', "%l");
-    TEST (T (0, 0,  8), "%l", 0, 0, ' ', "%l");
-    TEST (T (0, 0, 11), "%l", 0, 0, ' ', "%l");
-    TEST (T (0, 0, 12), "%l", 0, 0, ' ', "%l");
-    TEST (T (0, 0, 13), "%l", 0, 0, ' ', "%l");
-    TEST (T (0, 0, 20), "%l", 0, 0, ' ', "%l");
-    TEST (T (0, 0, 23), "%l", 0, 0, ' ', "%l");
-#endif   // SunOS
 
     // %m: the month as a decimal number (01-12). [tm_mon]
     rw_info (0, 0, __LINE__, "%%m: the month");
@@ -1637,31 +1467,6 @@ void test_POSIX (charT, const char *tname)
 
 #endif   // !_RWSTD_NO_TM_GMTOFF && _RWSTD_NO_PURE_C_HEADERS
 
-#ifdef _RWSTD_OS_SUNOS
-
-    // exercise platform-specific behavior -- see man -s 5 environ
-    // and the /usr/share/lib/zoneinfo/ Solaris zone info database
-
-    rw_info (0, 0, __LINE__, "%%z: SunOS UZ/zone format [platform-specific]");
-
-    set_TZ ("TZ=US/Eastern");
-    TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  0), "%z", 0, 0, ' ', "+0500");
-    TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  1), "%z", 0, 0, ' ', "+0600");
-
-    set_TZ ("TZ=US/Central");
-    TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  0), "%z", 0, 0, ' ', "+0600");
-    TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  1), "%z", 0, 0, ' ', "+0700");
-
-    set_TZ ("TZ=US/Mountain");
-    TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  0), "%z", 0, 0, ' ', "+0700");
-    TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  1), "%z", 0, 0, ' ', "+0800");
-
-    set_TZ ("TZ=US/Pacific");
-    TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  0), "%z", 0, 0, ' ', "+0800");
-    TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  1), "%z", 0, 0, ' ', "+0900");
-
-#endif   // _RWSTD_OS_SUNOS
-
     //////////////////////////////////////////////////////////////////
     // %Z: the locale's time zone name or abbreviation, or by no
     //     characters if no time zone is determinable. [tm_isdst]
@@ -1690,7 +1495,7 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  1), "%Z", 0, 0, ' ', "DEF");
 
     // exercise time zone name of maximum length
-#if defined (TZNAME_MAX) && !defined (_MSC_VER)
+#if defined (TZNAME_MAX)
     // MSVC may define TZNAME_MAX (if _POSIX_ is defined),
     // but tzset() uses hardcoded value equal to 3 instead
 
@@ -1712,7 +1517,7 @@ void test_POSIX (charT, const char *tname)
 
     TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  0), "%Z", 0, 0, ' ', std_name);
     TEST (T (0, 0, 0, 1, 0, 0, 0, 0,  1), "%Z", 0, 0, ' ', dst_name);
-#endif   // TZNAME_MAX && !_MSC_VER
+#endif   // TZNAME_MAX
 
     //////////////////////////////////////////////////////////////////
     // %%: replaced by %

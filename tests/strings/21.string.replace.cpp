@@ -1076,18 +1076,9 @@ void test_replace (charT*, Traits*, Allocator*, const RangeBase<
         break;
     }
 
-#ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
-
     // verify that if exceptions are enabled and when capacity changes
     // at least one exception is thrown
     const std::size_t expect_throws = str_state.capacity_ < str.capacity ();
-
-#else   // if defined (_RWSTD_NO_REPLACEABLE_NEW_DELETE)
-
-    const std::size_t expect_throws = StringIds::UserAlloc == func.alloc_id_ ?
-        str_state.capacity_ < str.capacity () : 0;
-
-#endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
     // verify number of exceptions thrown
     // for range version the allocation may take place several times

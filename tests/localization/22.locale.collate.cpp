@@ -128,8 +128,6 @@ std::size_t c_xfrm (wchar_t* to, const wchar_t* from, std::size_t size)
 {
     std::size_t n = 0;
 
-#if !defined (_MSC_VER) || _MSC_VER > 1200
-
     wchar_t safety_buf [8] = { 0 };
 
     if (0 == to && 0 == size) {
@@ -143,27 +141,6 @@ std::size_t c_xfrm (wchar_t* to, const wchar_t* from, std::size_t size)
 
     if (to && to != safety_buf)
         n = std::wcslen (to);
-
-#else   // MSVC 6 and prior
-
-    // working around an MSVC 6.0 libc bug (PR #26437)
-    if (to) {
-        std::wcsxfrm (to, from, size);
-        n = std::wcslen (to);
-    }
-    else {
-        wchar_t tmp [1024];
-
-        n = std::wcslen (from);
-        _RWSTD_ASSERT (n < sizeof tmp / sizeof *tmp);
-        
-        std::wcscpy (tmp, from);
-        std::wcsxfrm (tmp, from, sizeof tmp / sizeof *tmp);
-        
-        n = std::wcslen (tmp);
-    }
-
-#endif   // MSVC 6
 
     return n;
 }

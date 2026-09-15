@@ -45,7 +45,7 @@ sig_handler (int)
 }
 
 // on Cygwin use setjmp
-#if !defined (__CYGWIN__) && defined (sigsetjmp)
+#if defined (sigsetjmp)
 #define SETJMP(env) sigsetjmp (env, 1)
 #else
 #define SETJMP(env) setjmp (env)

@@ -126,9 +126,6 @@ test_ctors (void*)
 
             // verify that the locales were created correctly
             if (   std::locale::none == cat
-#if defined (_MSC_VER) || defined (__MINGW32__)
-                || std::locale::messages == cat
-#endif
                 || first == next) {
                 RW_ASSERT (combined == first);
             }
@@ -141,9 +138,6 @@ test_ctors (void*)
             const std::locale combined_2 (first, next, cat);
 
             if (   std::locale::none == cat
-#if defined (_MSC_VER) || defined (__MINGW32__)
-                || std::locale::messages == cat
-#endif
                 || first == next) {
                 RW_ASSERT (combined_2 == first);
             }

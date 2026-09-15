@@ -31,12 +31,6 @@
 
 #include <rw/_defs.h>
 
-#if defined (__IBMCPP__) && !defined (_RWSTD_NO_IMPLICIT_INCLUSION)
-   // disable implicit inclusion to work around 
-   // a limitation in IBM's VisualAge 5.0.2.0 (see PR#26959) 
-#  define _RWSTD_NO_IMPLICIT_INCLUSION 
-#endif 
- 
 
 #include <limits>
 
@@ -80,52 +74,7 @@ volatile long double ldbl_zero = 0;
 
 /***********************************************************************/
 
-#if defined (_MSC_VER)
-
-const char* fpclass_name (int fpc)
-{
-    switch (fpc) {
-    case _FPCLASS_SNAN: return "_FPCLASS_SNAN";
-    case _FPCLASS_QNAN: return "_FPCLASS_QNAN";
-    case _FPCLASS_NINF: return "_FPCLASS_NINF";
-    case _FPCLASS_NN:   return "_FPCLASS_NN";
-    case _FPCLASS_ND:   return "_FPCLASS_ND";
-    case _FPCLASS_NZ:   return "_FPCLASS_NZ";
-    case _FPCLASS_PZ:   return "_FPCLASS_PZ";
-    case _FPCLASS_PD:   return "_FPCLASS_PD";
-    case _FPCLASS_PN:   return "_FPCLASS_PN";
-    case _FPCLASS_PINF: return "_FPCLASS_PINF";
-    }
-
-    static char buf [16];
-    std::sprintf (buf, "%#x", fpc);
-    return buf;
-}
-
-#elif defined (_RWSTD_OS_SUNOS)
-
-const char* fpclass_name (fpclass_t fpc)
-{
-    switch (fpc) {
-    case FP_SNAN:    return "FP_SNAN";
-    case FP_QNAN:    return "FP_QNAN";
-    case FP_NINF:    return "FP_NINF";
-    case FP_PINF:    return "FP_PINF";
-    case FP_NDENORM: return "FP_NDENORM";
-    case FP_PDENORM: return "FP_PDENORM";
-    case FP_NZERO:   return "FP_NZERO";
-    case FP_PZERO:   return "FP_PZERO";
-    case FP_NNORM:   return "FP_NNORM";
-    case FP_PNORM:   return "FP_PNORM";
-
-    }
-
-    static char buf [16];
-    std::sprintf (buf, "%#x", fpc);
-    return buf;
-}
-
-#elif defined (fpclassify)   // C99 classification
+#if defined (fpclassify)   // C99 classification
 
 const char* fpclass_name (int fpc)
 {
@@ -157,34 +106,6 @@ const char* fpclass_name (int fpc)
 
 /***********************************************************************/
 
-#ifdef _MSC_VER
-
-inline int _fpclass (float val)
-{
-    long lval = *_RWSTD_REINTERPRET_CAST (long*, &val);
-
-    if (0 == (lval & 0x7FFFFFFF))
-        return lval ? _FPCLASS_NZ : _FPCLASS_PZ;
-
-    if (0 == (lval & 0x7F800000))
-        return (lval & 0x80000000) ? _FPCLASS_ND : _FPCLASS_PD;
-
-    if (0x7F800000 == (lval & 0x7FFFFFFF))
-        return (lval & 0x80000000) ? _FPCLASS_NINF : _FPCLASS_PINF;
-
-    if (0x7F800000 == (lval & 0x7F800000))
-        return (lval & 0x00400000) ? _FPCLASS_QNAN : _FPCLASS_SNAN;
-
-    return (lval & 0x80000000) ? _FPCLASS_NN : _FPCLASS_PN;
-}
-
-inline int _fpclass (long double val)
-{
-    return _fpclass (double (val));
-}
-
-#endif
-
 template <class FloatT>
 void test_infinity (FloatT inf, FloatT max, const char *tname)
 {
@@ -200,36 +121,15 @@ void test_infinity (FloatT inf, FloatT max, const char *tname)
                    "numeric_limits<%s>::infinity()", tname);
     }
 
-#ifdef _MSC_VER
-
-    const int fpc = _fpclass (inf);
-    rw_assert (_FPCLASS_PINF == fpc, 0, __LINE__,
-               "_fpclass (numeric_limits<%s>::infinity()) == "
-               "%d (_FPCLASS_PINF), got %d (%s)",
-               tname, _FPCLASS_PINF, fpc, fpclass_name (fpc));
-
-#elif defined (_RWSTD_OS_SUNOS)
-
-    rw_assert (!finite (inf), 0, __LINE__,
-               "finite (numeric_limits<%s>::infinity()) == 0, "
-               "got non-zero", tname);
-
-    const fpclass_t fpc = fpclass (inf);
-    rw_assert (FP_PINF == fpclass (inf), 0, __LINE__,
-               "fpclass (numeric_limits<%s>::infinity()) == %d (FP_PINF), "
-               "got %d (%s)", tname, FP_PINF, fpc, fpclass_name (fpc));
-
-#else
-
-#  ifdef isinf
+#ifdef isinf
 
     rw_assert (isinf (inf), 0, __LINE__,
                "isinf (numeric_limits<%s>::infinity()) != 0, got 0",
                tname);
 
-#  endif   // isinf
+#endif   // isinf
 
-#  ifdef fpclassify
+#ifdef fpclassify
 
     const int fpc = fpclassify (inf);
     rw_assert (FP_INFINITE == fpc, 0, __LINE__,
@@ -237,9 +137,7 @@ void test_infinity (FloatT inf, FloatT max, const char *tname)
                "%d (FP_INFINITE), got %d (%s)", tname,
                FP_INFINITE, fpc, fpclass_name (fpc));
 
-#  endif   // fpclassify
-
-#endif
+#endif   // fpclassify
 
 }
 
@@ -266,40 +164,15 @@ void test_quiet_NaN (FloatT qnan, FloatT qnan2, const char *tname)
                "-numeric_limits<%1$s>::infinity()",
                tname);
 
-#ifdef _MSC_VER
-
-    rw_assert (0 != _isnan (qnan), 0, __LINE__,
-               "_isnan(numeric_limits<%s>::quiet_NaN()) != 0, got 0",
-               tname);
-
-    const int fpc = _fpclass (qnan);
-    rw_assert (_FPCLASS_QNAN == fpc, 0, __LINE__,
-               "_fpclass(numeric_limits<%s>::quiet_NaN()) == "
-               "%d (_FPCLASS_QNAN), got %d (%s)",
-               tname, _FPCLASS_QNAN, fpc, fpclass_name (fpc));
-
-#elif defined (_RWSTD_OS_SUNOS)
-
-    rw_assert (!finite (qnan), 0, __LINE__,
-               "finite(numeric_limits<%s>::quiet_NaN()) == 0, "
-               "got non-zero", tname);
-
-    const fpclass_t fpc = fpclass (qnan);
-    rw_assert (FP_QNAN == fpc, 0, __LINE__,
-               "fpclass(numeric_limits<%s>::infinity()) == %d (FP_QNAN), "
-               "got %d (%s)", tname, FP_QNAN, fpc, fpclass_name (fpc));
-
-#else
-
-#  ifdef isnan
+#ifdef isnan
 
     rw_assert (0 != isnan (qnan), 0, __LINE__,
                "isnan(numeric_limits<%s>::quiet_NaN()) != 0, got 0",
                tname);
 
-#  endif   // isnan
+#endif   // isnan
 
-#  ifdef fpclassify
+#ifdef fpclassify
 
     const int fpc = fpclassify (qnan);
     rw_assert (FP_NAN == fpc, 0, __LINE__,
@@ -307,9 +180,7 @@ void test_quiet_NaN (FloatT qnan, FloatT qnan2, const char *tname)
                "%d (FP_NAN), got %d (%s)", tname,
                FP_NAN, fpc, fpclass_name (fpc));
 
-#  endif   // fpclassify
-
-#endif
+#endif   // fpclassify
 
 }
 
@@ -336,40 +207,15 @@ void test_signaling_NaN (FloatT snan, FloatT snan2, const char *tname)
                "-numeric_limits<%1$s>::infinity()",
                tname);
 
-#ifdef _MSC_VER
-
-    rw_assert (0 != _isnan (snan), 0, __LINE__,
-               "_isnan (numeric_limits<%s>::signaling_NaN()) != 0, got 0",
-               tname);
-
-    const int fpc = _fpclass (snan);
-    rw_assert (_FPCLASS_SNAN == fpc, 0, __LINE__,
-               "_fpclass(numeric_limits<%s>::signaling_NaN()) == "
-               "%d (_FPCLASS_SNAN), got %d (%s)",
-               tname, _FPCLASS_SNAN, fpc, fpclass_name (fpc));
-
-#elif defined (_RWSTD_OS_SUNOS)
-
-    rw_assert (!finite (snan), 0, __LINE__,
-               "finite(numeric_limits<%s>::signaling_NaN()) == 0, "
-               "got non-zero", tname);
-
-    const fpclass_t fpc = fpclass (snan);
-    rw_assert (FP_SNAN == fpc, 0, __LINE__,
-               "fpclass(numeric_limits<%s>::signaling_NaN()) == %d "
-               "(FP_SNAN), got %d (%s)", tname,
-               FP_SNAN, fpc, fpclass_name (fpc));
-#else
-
-#  ifdef isnan
+#ifdef isnan
 
     rw_assert (0 != isnan (snan), 0, __LINE__,
                "isnan(numeric_limits<%s>::signaling_NaN()) != 0, got 0",
                tname);
 
-#  endif   // isnan
+#endif   // isnan
 
-#  ifdef fpclassify
+#ifdef fpclassify
 
     const int fpc = fpclassify (snan);
     rw_assert (FP_NAN == fpc, 0, __LINE__,
@@ -377,9 +223,7 @@ void test_signaling_NaN (FloatT snan, FloatT snan2, const char *tname)
                "%d (FP_NAN), got %d (%s)", tname,
                FP_NAN, fpc, fpclass_name (fpc));
 
-#  endif   // fpclassify
-
-#endif
+#endif   // fpclassify
 
 }
 
@@ -387,14 +231,6 @@ void test_signaling_NaN (FloatT snan, FloatT snan2, const char *tname)
 
 template <class T>
 struct limits_values;
-
-#if    defined (__alpha) && !defined (__linux__) \
-    && !defined (__VMS) && defined (__DECCXX) && defined (__PURE_CNAME)
-
-extern "C" unsigned int read_rnd ();
-#define read_rnd   read_rnd
-
-#endif   // __alpha && !__linux__ && !__VMS && __DECCXX && __PURE_CNAME
 
 /***********************************************************************/
 
@@ -417,24 +253,7 @@ struct limits_values<float>
 
     static float round_error () {
 
-#ifdef __osf__
-        int rounding = FLT_ROUNDS;
-#  ifdef read_rnd
-        if (rounding == std::round_indeterminate)
-            rounding = _RWSTD_STATIC_CAST (int, read_rnd ());
-#  endif   //  read_rnd
-
-        switch (rounding) {
-        case std::round_toward_zero:
-        case std::round_toward_infinity:
-        case std::round_toward_neg_infinity:
-            return 1.0f;
-        default:
-            return 0.5f;
-        }
-#else
         return 0.5f;
-#endif
 
     }
 
@@ -479,14 +298,7 @@ struct limits_values<float>
 
     static std::float_denorm_style has_denorm () {
 
-#if defined (_AIX)       \
-    || defined (__hpux)  \
-    || defined (__osf__) \
-    || defined (_MSC_VER)
-        return std::denorm_present;
-#else
         return std::denorm_indeterminate;
-#endif
     }
 
 
@@ -566,17 +378,6 @@ struct limits_values<float>
 
         snan.val = infinity ();
 
-#  ifdef __hpux
-
-        if (big_endian) {
-            snan.bits [sizeof snan.val - 2] = '\xc0';
-        }
-        else {
-            snan.bits [1] = '\xc0';
-        }
-
-#  else   // if !defined (__hpux)
-
         // convert infinity into a signaling NAN
         // (toggle any bit in signifcand)
         if (big_endian) {
@@ -585,8 +386,6 @@ struct limits_values<float>
         else {
             snan.bits [0] |= 1;
         }
-
-#  endif   // __hpux
 
         return snan.val;
 
@@ -611,9 +410,6 @@ struct limits_values<float>
 #if defined (__FLT_DENORM_MIN__)
         // gcc 3.x predefined macro
         return __FLT_DENORM_MIN__;
-#elif defined (__osf__)
-        const unsigned short pos_denorm [] = { 0x0001, 0x0000 };
-        return *_RWSTD_REINTERPRET_CAST (const float*, pos_denorm);
 #else
         // assume IEEE 754
 
@@ -636,19 +432,7 @@ struct limits_values<float>
 
     static bool is_iec559 () {
 
-#if defined (__osf__)
-
-        // Tru64 UNIX with Compaq C++: IEC 559 support is enabled
-        // by specifying the -ieee flag on the compiler command line
-
-#  ifdef _IEEE_FP
         return true;
-#  else
-        return false;
-#  endif   //  _IEEE_FP
-#else
-        return true;
-#endif
 
     }
 
@@ -662,11 +446,7 @@ struct limits_values<float>
 
     static std::float_round_style round_style () {
 
-#if defined (_AIX)
-        return std::round_to_nearest;
-#else
         return _RWSTD_STATIC_CAST (std::float_round_style, FLT_ROUNDS);
-#endif
     }
 
 };
@@ -694,23 +474,7 @@ struct limits_values<double>
 
     static double round_error () {
 
-#ifdef __osf__
-        int rounding = FLT_ROUNDS;
-#  ifdef read_rnd
-        if (rounding == std::round_indeterminate)
-            rounding = _RWSTD_STATIC_CAST (int, read_rnd ());
-#  endif   //  read_rnd
-        switch (rounding) {
-        case std::round_toward_zero:
-        case std::round_toward_infinity:
-        case std::round_toward_neg_infinity:
-            return 1.0;
-        default:
-            return 0.5;
-        }
-#else
         return 0.5;
-#endif
 
     }
 
@@ -747,14 +511,7 @@ struct limits_values<double>
 
 
     static std::float_denorm_style has_denorm () {
-#if defined (_AIX)       \
-    || defined (__hpux)  \
-    || defined (__osf__) \
-    || defined (_MSC_VER)
-        return std::denorm_present;
-#else
         return std::denorm_indeterminate;
-#endif
     }
 
 
@@ -834,17 +591,6 @@ struct limits_values<double>
 
         snan.val = infinity ();
 
-#  ifdef __hpux
-
-        if (big_endian) {
-            snan.bits [sizeof snan.val - 2] = '\xf8';
-        }
-        else {
-            snan.bits [1] = '\xf8';
-        }
-
-#  else   // if !defined (__hpux)
-
         // convert infinity into a signaling NAN
         // (toggle any bit in signifcand)
         if (big_endian) {
@@ -853,8 +599,6 @@ struct limits_values<double>
         else {
             snan.bits [0] |= 1;
         }
-
-#  endif   // __hpux
 
         return snan.val;
 
@@ -879,9 +623,6 @@ struct limits_values<double>
 #if defined (__DBL_DENORM_MIN__)
         // gcc 3.x predefined macro
         return __DBL_DENORM_MIN__;
-#elif defined (__osf__)
-        const unsigned short pos_denorm [] = { 0x0001, 0x0000 };
-        return *_RWSTD_REINTERPRET_CAST (const double*, pos_denorm);
 #else
         // assume IEEE 754
 
@@ -904,15 +645,7 @@ struct limits_values<double>
 
     static bool is_iec559 () {
 
-#if defined (__osf__)
-#  ifdef _IEEE_FP
         return true;
-#  else
-        return false;
-#  endif   //  _IEEE_FP
-#else
-        return true;
-#endif
 
     }
 
@@ -926,11 +659,7 @@ struct limits_values<double>
 
     static std::float_round_style round_style () {
 
-#if defined (_AIX)
-        return std::round_to_nearest;
-#else
         return _RWSTD_STATIC_CAST (std::float_round_style, FLT_ROUNDS);
-#endif
 
     }
 
@@ -958,23 +687,7 @@ struct limits_values<long double>
 
     static long double round_error () {
 
-#ifdef __osf__
-        int rounding = FLT_ROUNDS;
-#  ifdef read_rnd
-        if (rounding == std::round_indeterminate)
-            rounding = _RWSTD_STATIC_CAST (int, read_rnd ());
-#  endif   //  read_rnd
-        switch (rounding) {
-        case std::round_toward_zero:
-        case std::round_toward_infinity:
-        case std::round_toward_neg_infinity:
-            return 1.0;
-        default:
-            return 0.5;
-        }
-#else
         return 0.5;
-#endif
 
     }
 
@@ -1008,14 +721,7 @@ struct limits_values<long double>
 
 
     static std::float_denorm_style has_denorm () {
-#if defined (_AIX)       \
-    || defined (__hpux)  \
-    || defined (__osf__) \
-    || defined (_MSC_VER)
-        return std::denorm_present;
-#else
         return std::denorm_indeterminate;
-#endif
     }
 
     static bool has_denorm_loss () { return false; }
@@ -1094,17 +800,6 @@ struct limits_values<long double>
 
         snan.val = infinity ();
 
-#  ifdef __hpux
-
-        if (big_endian) {
-            snan.bits [sizeof snan.val - 3] = '\x80';
-        }
-        else {
-            snan.bits [2] = '\x80';
-        }
-
-#  else   // if !defined (__hpux)
-
         // convert infinity into a signaling NAN
         // (toggle any bit in signifcand)
         if (big_endian) {
@@ -1113,8 +808,6 @@ struct limits_values<long double>
         else {
             snan.bits [0] |= 1;
         }
-
-#  endif   // __hpux
 
         return snan.val;
 
@@ -1139,9 +832,6 @@ struct limits_values<long double>
 #if defined (__LDBL_DENORM_MIN__)
         // gcc 3.x predefined macro
         return __LDBL_DENORM_MIN__;
-#elif defined (__osf__)
-        const unsigned short pos_denorm [] = { 0x0001, 0x0000 };
-        return *_RWSTD_REINTERPRET_CAST (const long double*, pos_denorm);
 #else
         // assume IEEE 754
 
@@ -1162,15 +852,7 @@ struct limits_values<long double>
 
 
     static bool is_iec559 () {
-#if defined (__osf__)
-#  ifdef _IEEE_FP
         return true;
-#  else
-        return false;
-#  endif   //  _IEEE_FP
-#else
-        return true;
-#endif
     }
 
     static bool is_bounded () { return true; }
@@ -1180,11 +862,7 @@ struct limits_values<long double>
     static bool tinyness_before () { return false; }
 
     static std::float_round_style round_style () {
-#if defined (_AIX)
-        return std::round_to_nearest;
-#else
         return _RWSTD_STATIC_CAST (std::float_round_style, FLT_ROUNDS);
-#endif
     }
 };
 
@@ -1197,34 +875,15 @@ void test_limits (FloatT, const char *tname, const char *fmt)
     typedef limits_values<FloatT>       FVal;
 
     // self-test: assert that endianness is correctly computed
-#if defined (__alpha)
-    rw_warn (!big_endian, 0, __LINE__, "alpha is typically little-endian");
-#elif defined (_AIX)
-    rw_warn (big_endian, 0, __LINE__, "AIX is big-endian");
-#elif defined (__hpux) && defined (_BIG_ENDIAN)
-    rw_warn (big_endian, 0, __LINE__, "HP-UX is big-endian");
-#elif defined (__i386__)
+#if defined (__i386__)
     rw_warn (!big_endian, 0, __LINE__, "Intel x86 is little-endian");
-#elif defined (__sparc)
-    rw_warn (big_endian, 0, __LINE__, "SPARC is big-endian");
-#elif defined (_WIN64)
-    rw_warn (!big_endian, 0, __LINE__, "WIN64 is little-endian");
-#elif defined (_WIN32)
-    rw_warn (!big_endian, 0, __LINE__, "WIN32 is little-endian");
 #endif
 
 #ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
 
-#  if !defined (__EDG__) || __EDG_VERSION__ > 245
-#    define CHECK_CONST(const_int)   \
+#  define CHECK_CONST(const_int)   \
          enum { e = const_int };     \
          (void)&const_int
-#  else   // if EDG eccp < 3.0
-    // working around an EDG eccp 2.4x ICE (not in 3.0)
-#    define CHECK_CONST(const_int)                        \
-         switch (const_int) { case const_int: break; };   \
-         (void)&const_int
-#  endif   // __EDG__
 #else
    // static const integral members must be usable
    //  as constant integral expressions
@@ -1326,24 +985,6 @@ void test_limits (FloatT, const char *tname, const char *fmt)
         VERIFY_FUNCTION (denorm_min);
     }
 
-#ifdef _MSC_VER
-
-    if (sizeof (FloatT) > sizeof (float)) {
-        // for doubles and long doubles only, verify that denorm_min
-        // is properly classified
-
-        const FloatT denorm_min = FLim::denorm_min ();
-
-        const int fpc = _fpclass (double (denorm_min));
-
-        rw_assert (_FPCLASS_PD == fpc, 0, __LINE__,
-                   "_fpclass(numeric_limits<%s>::denorm_min()) == "
-                   "%d (_FPCLASS_PD), got %d (%s)",
-                   tname, _FPCLASS_PD, fpc, fpclass_name (fpc));
-    }
-
-#endif   // _MSC_VER
-
     VERIFY_DATA (is_iec559);         // 18.2.1.2, p52
     VERIFY_DATA (is_bounded);        //           p54
     VERIFY_DATA (is_modulo);         //           p56
@@ -1430,12 +1071,9 @@ run_test (int, char**)
 #ifndef _RWSTD_NO_LONG_DOUBLE
 
    // working around a SunPro 5.3 ICE (PR #25968)
-#  if !defined (__SUNPRO_CC) || __SUNPRO_CC > 0x530
 
     const char fmt[] = "%" _RWSTD_LDBL_PRINTF_PREFIX "g";
     test_limits ((long double)0.0, "long double", fmt);
-
-#  endif   // SunPro > 5.3
 
 #endif   //_RWSTD_NO_LONG_DOUBLE
 

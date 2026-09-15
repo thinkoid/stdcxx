@@ -40,10 +40,8 @@
 #include <cstdio>    // for remove(), size_t
 #include <fstream>   // for filebuf
 
-#if !defined (_WIN32) || defined (__CYGWIN__)
-#  include <sys/resource.h>   // for getrlimit(), rlim_t
-#  include <unistd.h>         // for close(), write(), ssize_t
-#endif   // !_WIN32 || __CYGWIN__
+#include <sys/resource.h>   // for getrlimit(), rlim_t
+#include <unistd.h>         // for close(), write(), ssize_t
 
 
 static int write_bytes (const char *fname, std::size_t nbytes)
@@ -90,7 +88,6 @@ static int write_bytes (const char *fname, std::size_t nbytes)
 
 int main ()
 {
-#if !defined (_WIN32) || defined (__CYGWIN__)
 
     const char fname[] = "testfile.text";
 
@@ -164,13 +161,6 @@ int main ()
     // if the call fails because the fd has already been closed)
     close (fd);
     std::remove (fname);
-
-#else   // Windows
-
-    // See about implementing using SetFileValidData():
-    // http://msdn.microsoft.com/en-us/library/aa365544(VS.85).aspx
-
-#endif   // !_WIN32 || __CYGWIN__
 
     return 0;
 }

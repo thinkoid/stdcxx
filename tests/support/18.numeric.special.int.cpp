@@ -459,26 +459,13 @@ void run_test (T*, const char *tname, const char *fmt)
     RW_ASSERT (0 != tname);
     RW_ASSERT (0 != fmt);
 
-#if !defined (__EDG__) || __EDG_VERSION__ > 245
-
-#  define ASSERT(expr, fmt)                                             \
+#define ASSERT(expr, fmt)                                             \
       /* verify that `expr' is a constant integral expression */        \
       { enum { is_const_integral_expression = limT::expr }; }           \
       rw_assert (limT::expr == int (Traits::expr), 0, __LINE__,         \
                  "std::numeric_limits<%s>::" #expr                      \
                  " == %{@}, got %{@}",                                  \
                  tname, fmt, Traits::expr, fmt, limT::expr)
-
-#else   // if EDG eccp < 3.0
-  // working around an EDG eccp 2.4x ICE
-#  define ASSERT(expr)                                                  \
-      /* verify that `expr' is a constant integral expression */        \
-      switch (limT::expr) { case limT::expr: break; };                  \
-      rw_assert (limT::expr == int (Traits::expr), 0, __LINE__,         \
-                 "std::numeric_limits<%s>::" #expr                      \
-                 "== %{@}, got %{@}",                                   \
-                 tname, fmt, Traits::expr, fmt, limT::expr)
-#endif   // EDG eccp < 3.0
 
 #define ASSERT_0(expr, fmt)                                             \
       rw_assert (!limT::expr, 0, __LINE__,                              \

@@ -28,12 +28,6 @@
 
 #include <rw/_defs.h>
 
-#if defined (__IBMCPP__) && !defined (_RWSTD_NO_IMPLICIT_INCLUSION)
-  // disable implicit inclusion to work around
-  // a limitation in IBM VisualAge 5.0.2.0 (see PR #26959)
-#  define _RWSTD_NO_IMPLICIT_INCLUSION 
-#endif
-
 #include <memory>
 
 /**************************************************************************/
@@ -173,12 +167,8 @@ void test_auto_ptr (T*, const char *tname)
         _RWSTD_UNUSED (pf);                                                \
     } while (0)
 
-#if !defined (__HP_aCC) || _RWSTD_HP_aCC_MAJOR > 5
-
     // working around a bug in aCC (see PR #24430)
     FUN (std::auto_ptr<T>&, T, operator=, (std::auto_ptr<T>&) _PTR_THROWS(()));
-
-#endif   // HP aCC > 5
 
     FUN (T&, T, operator*, () const _PTR_THROWS (()));
     
@@ -198,28 +188,18 @@ void test_auto_ptr (T*, const char *tname)
 
      // g++ 2.95.2 and HP aCC can't take the address of a template member
 
-#    if !defined (__HP_aCC) || _RWSTD_HP_aCC_MAJOR > 5
-
     // SunPro incorrectly warns here (see PR #27276)
     FUN (std::auto_ptr<Base>&, Base,
          operator=, (std::auto_ptr<Derived>&) _PTR_THROWS (()));
 
        // SunPro 5.4 can't decide between a ctor template
        // and a conversion operator (see PR #24476)
-#      if !defined (__SUNPRO_CC) || __SUNPRO_CC > 0x540
 
-#        if !defined (_RWSTD_MSVC) || _RWSTD_MSVC > 1310
     FUN (std::auto_ptr_ref<Base>, Derived,
          operator std::auto_ptr_ref<Base>, () _PTR_THROWS (()));
 
     FUN (std::auto_ptr<Base>, Derived,
          operator std::auto_ptr<Base>, () _PTR_THROWS (()));
-
-#        endif   // MSVC > 7.1
-
-#      endif   // SunPro > 5.4
-
-#    endif   // HP aCC > 5
 
 #  endif   // gcc > 3.2
 
@@ -293,13 +273,9 @@ test_auto_ptr_void ()
 
 #ifndef _RWSTD_NO_MEMBER_TEMPLATES
 
-#  if !defined (__HP_aCC) || 6 <=  _RWSTD_HP_aCC_MAJOR
-
     // working around an HP aCC 3 and 5 bug (STDCXX-655)
 
     ap1.operator=<void>(ap1);
-
-#  endif   // !HP aCC or HP aCC 6 and better
 
     std::auto_ptr<int> ap4;
     ap1 = ap4;
@@ -321,8 +297,6 @@ test_auto_ptr_void ()
 
 #ifndef _RWSTD_NO_MEMBER_TEMPLATES
 
-#  if !defined (__HP_aCC) || 6 <=  _RWSTD_HP_aCC_MAJOR
-
     // working around an HP aCC 3 and 5 bug (STDCXX-656)
 
     const std::auto_ptr_ref<void> ar = ap1.operator std::auto_ptr_ref<void>();
@@ -331,7 +305,6 @@ test_auto_ptr_void ()
     _RWSTD_UNUSED (ar);
     _RWSTD_UNUSED (ap5);
 
-#  endif   // !HP aCC or HP aCC 6 and better
 #endif // _RWSTD_NO_MEMBER_TEMPLATES
 
 }
@@ -377,16 +350,12 @@ test_auto_ptr_conversions ()
     rw_assert ((Base*)pd == ap3.get (), 0, __LINE__,
                "auto_ptr<>::auto_ptr(std::auto_ptr_ref)");
 
-#if !defined (__HP_aCC) || _RWSTD_HP_aCC_MAJOR > 5
-
     pd = new Derived;
     std::auto_ptr<Derived> ap4 (pd);
     ap3 = std::auto_ptr<Base> (ap4);
 
     rw_assert (0 == ap4.get () && (Base*)pd == ap3.get (), 0, __LINE__,
                "auto_ptr<>::operator auto_ptr<>()");
-
-#endif   // HP aCC > 5
 
     { 
         // see CWG issue 84 for some background on the sequence below
@@ -395,11 +364,7 @@ test_auto_ptr_conversions ()
         std::auto_ptr<Derived> pd1 (Derived::source ());
         std::auto_ptr<Derived> pd2 (pd1);
 
-#if !defined (__HP_aCC) || _RWSTD_HP_aCC_MAJOR > 5
-
         Derived::sink (Derived::source ());
-
-#endif   // HP aCC > 5
 
         pd1 = pd2;
         pd1 = Derived::source();

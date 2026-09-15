@@ -159,7 +159,6 @@ static MyNewInit mynew_init_tracker;
 
 
 #  ifndef _RWSTD_TEST_SRC
-#    ifndef _RWSTD_NO_REPLACEABLE_NEW_DELETE
 
 // prevent defining the replacement operator
 // when compiling in the test suite framework
@@ -175,7 +174,7 @@ void operator delete (void *ptr) _THROWS (())
 }
 
 
-#      if    !defined (_RWSTD_NO_OPERATOR_NEW_ARRAY) \
+#    if    !defined (_RWSTD_NO_OPERATOR_NEW_ARRAY) \
           || defined (_RWSTD_NO_EXT_OPERATOR_NEW)
 
 // replaceable only if we don't provide a definition in <new>
@@ -184,9 +183,9 @@ void* operator new[] (_RWSTD_SIZE_T n) _THROWS ((_RWSTD_BAD_ALLOC))
     return operator_new (n, true);
 }
 
-#      endif   // !_RWSTD_NO_OPERATOR_NEW_ARRAY || _RWSTD_NO_EXT_OPERATOR_NEW
+#    endif   // !_RWSTD_NO_OPERATOR_NEW_ARRAY || _RWSTD_NO_EXT_OPERATOR_NEW
 
-#      if   !defined (_RWSTD_NO_OPERATOR_DELETE_ARRAY) \
+#    if   !defined (_RWSTD_NO_OPERATOR_DELETE_ARRAY) \
           || defined (_RWSTD_NO_EXT_OPERATOR_NEW)
 
 // replaceable only if we don't provide a definition in <new>
@@ -196,7 +195,6 @@ void operator delete[] (void *ptr) _THROWS (())
 }
 
 
-#      endif   // !_NO_OPERATOR_DELETE_ARRAY || _NO_EXT_OPERATOR_NEW
-#    endif   // _RWSTD_NO_REPLACEABLE_NEW_DELETE
+#    endif   // !_NO_OPERATOR_DELETE_ARRAY || _NO_EXT_OPERATOR_NEW
 #  endif   // !_RWSTD_TEST_SRC
 #endif   // RW_NEW_H_INCLUDED

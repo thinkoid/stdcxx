@@ -42,9 +42,6 @@
 #endif   // __linux__
 
 // see Onyx PR #28150
-#if defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x540
-#  include <wchar.h>
-#endif // defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x540
 
 #include <locale>
 
@@ -58,12 +55,10 @@
 #include <cwctype>    // for iswxxx()
 
 
-#if !defined (_WIN32)
-#  if !defined (LC_MESSAGES)
-#    define LC_MESSAGES _RWSTD_LC_MESSAGES
-#  endif   // LC_MESSAGES
-#  include <langinfo.h>
-#endif  // _WIN32
+#if !defined (LC_MESSAGES)
+#  define LC_MESSAGES _RWSTD_LC_MESSAGES
+#endif   // LC_MESSAGES
+#include <langinfo.h>
 
 #include <rw_driver.h>
 #include <rw_file.h>     // for SLASH

@@ -54,18 +54,8 @@ int opt_nthreads = 1;
 // otherwise on the command line)
 int opt_nloops = 10000;
 
-#if !defined (_RWSTD_OS_HP_UX) || defined (_ILP32)
-
 // number of locales to use
 int opt_nlocales = MAX_THREADS;
-
-#else   // HP-UX in LP64 mode
-
-// work around a small cache size on HP-UX in LP64 mode
-// in LP64 mode (see STDCXX-812)
-int opt_nlocales = 9;
-
-#endif   // HP-UX 32/64 bit mode
 
 // should all threads share the same set of locale objects instead
 // of creating their own?
@@ -107,16 +97,10 @@ char my_catalog_names [64][MAX_CATALOGS];
 
 int msg_id (int set, int id)
 {
-#ifdef _WIN32
-
-    return (set - 1) * 5 + id;
-
-#else
 
     _RWSTD_UNUSED (set);
     return id;
 
-#endif
 }
 
 /**************************************************************************/
@@ -335,22 +319,14 @@ run_test (int, char**)
 
         char* msg_name = my_catalog_names [i];
 
-#ifndef _WIN32
         std::sprintf (msg_name, "rwstdmessages_%d.msg", i);
-#else
-        std::sprintf (msg_name, "rwstdmessages_%d.rc", i);
-#endif
 
         const int failed = rw_create_catalog (msg_name, catalog.c_str ());
         rw_fatal (!failed, 0, __LINE__,
                   "failed to create message catalog from %s",
                   msg_name);
 
-#ifndef _WIN32
         std::sprintf (msg_name, "./rwstdmessages_%d.cat", i);
-#else
-        std::sprintf (msg_name, "rwstdmessages_%d.dll", i);
-#endif
     }
 
     ///////////////////////////////////////////////////////////////////////

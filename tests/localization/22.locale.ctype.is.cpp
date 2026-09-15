@@ -42,9 +42,6 @@
 #endif   // __linux__
 
 // see Onyx PR #28150
-#if defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x540
-#  include <wchar.h>
-#endif // defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x540
 
 #include <locale>
 
@@ -58,12 +55,10 @@
 #include <cwctype>    // for iswxxx()
 
 
-#if !defined (_WIN32)
-#  if !defined (LC_MESSAGES)
-#    define LC_MESSAGES _RWSTD_LC_MESSAGES
-#  endif   // LC_MESSAGES
-#  include <langinfo.h>
-#endif  // _WIN32
+#if !defined (LC_MESSAGES)
+#  define LC_MESSAGES _RWSTD_LC_MESSAGES
+#endif   // LC_MESSAGES
+#include <langinfo.h>
 
 #include <rw_driver.h>
 #include <rw_file.h>        // for SLASH
@@ -593,8 +588,6 @@ void test_is_ch (charT, const char *cname)
                    "{ %s}, got { %s}",
                    uch, locname, is_C, is_CXX2);
 
-#ifndef _WIN32
-
         // exercise POSIX requirements only on POSIX platforms
 
         static const std::ctype_base::mask masks[] = {
@@ -727,8 +720,6 @@ void test_is_ch (charT, const char *cname)
                        "contains disallowed bits { %s }: { %s }",
                        ch, locname, m & all_disallowed, m);
         }
-
-#endif   // !WIN32 && !WIN64
 
     } END_LOCALE_LOOP (locname);
 }

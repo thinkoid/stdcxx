@@ -29,13 +29,6 @@
 // this may be the "native" header that comes with the compiler
 // do not assume that any of our stuff (i.e., macros) is available
 
-#if defined (__IBMCPP__) && !defined (_RWSTD_NO_IMPLICIT_INCLUSION)
-// Disable implicit inclusion to work around 
-// a limitation in IBM's VisualAge 5.0.2.0 (see PR#26959) 
-
-#  define _RWSTD_NO_IMPLICIT_INCLUSION 
-#endif
-
 #include <cstdlib>
 #include <cmath>
 
@@ -160,8 +153,6 @@ test_behavior ()
         char buf [sizeof (long double) * 2];
     } u;
 
-#if !defined (__SUNPRO_CC) || __SUNPRO_CC > 0x530
-
     // make sure functions do not overflow buffer
     clear_bytes (u.buf, sizeof u);
 
@@ -170,8 +161,6 @@ test_behavior ()
     rw_assert (   3000 == int (u.f * 1000) && 141592 == int (f * 1000000)
                && check_bits (u.buf + sizeof (u.f), sizeof (u) - sizeof (u.f)),
                __FILE__, __LINE__, "float std::modf (float)");
-
-#endif   // SunPro > 5.3
 
     clear_bytes (u.buf, sizeof u);
     const double d = std::modf (3.1415926, &u.d);
@@ -182,16 +171,12 @@ test_behavior ()
 
 #ifndef _RWSTD_NO_LONG_DOUBLE
 
-#  if !defined (__SUNPRO_CC) || __SUNPRO_CC > 0x530
-
     clear_bytes (u.buf, sizeof u);
     const long double l = std::modf (3.1415926L, &u.l);
 
     rw_assert (   3000 == int (u.l * 1000) && 1415926 == int (l * 10000000)
                && check_bits (u.buf + sizeof (u.l), sizeof (u) - sizeof (u.l)),
                __FILE__, __LINE__, "long double std::modf (long double)");
-
-#  endif   // SunPro > 5.3
 
 #endif   // _RWSTD_NO_LONG_DOUBLE
 

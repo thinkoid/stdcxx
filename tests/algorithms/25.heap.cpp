@@ -27,9 +27,6 @@
  **************************************************************************/
 
 // MSVC 6.0 gets an ICE in std::__adjust_heap() in <algorithm.cc>
-#if defined (_MSC_VER) && _MSC_VER <= 1300
-#  define _RWSTD_NO_EXPLICIT_INSTANTIATION
-#endif
 
 #include <algorithm>    // for make_heap, sort_heap, push_heap, pop_heap
 #include <cstring>      // for strlen, size_t

@@ -170,14 +170,8 @@ const void* bad_address (size_t size)
     }
     else {
 
-#ifndef _RWSTD_OS_HP_UX
         // the first page is usually unmapped
         addr = (char*)32;
-#else
-        // the first page on HP-UX is readable, this should give
-        // an invalid (inaccessible) address both on IPF and PA
-        addr = (char*)(0 - size_t (32));
-#endif   // _RWSTD_OS_HP_UX
 
     }
 

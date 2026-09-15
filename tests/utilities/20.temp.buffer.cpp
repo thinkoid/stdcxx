@@ -33,11 +33,6 @@
 #include <cstdio>      // for sprintf()
 #include <cstring>     // for memset()
 
-#ifdef _MSC_VER
-#  include <climits>     // for INT_MAX
-#  include <crtdbg.h>    // for _CrtSetReportMode()
-#endif
-
 #include <rw_new.h>
 #include <rw_printf.h>
 #include <rw_driver.h>
@@ -48,16 +43,6 @@
 # include <sys/resource.h>   // for setrlimit()
 # include <unistd.h>         // for sbrk()
 #endif   // _RWSTD_NO_SETRLIMIT
-
-#ifdef _AIX
-
-// declare the loader symbol _edata defined by the AIX loader:
-// The first address following the initialized data region.
-extern "C" {
-extern void* _edata;
-}   // extern "C"
-
-#endif   // _AIX
 
 /**************************************************************************/
 
@@ -91,17 +76,7 @@ void test_success (T*, const char *tname)
 
     static const unsigned pa_size = 32;
 
-#ifndef __HP_aCC
-
     std::pair<T*, std::ptrdiff_t> pa [pa_size];
-
-#else   // if defined (__HP_aCC)
-
-    // working around an HP aCC bug (PR #27302)
-    std::pair<T*, std::ptrdiff_t>* const pa =
-        new std::pair<T*, std::ptrdiff_t>[pa_size];
-
-#endif   // __HP_aCC
 
     // establish a checkpoint for memory leaks
     rwt_check_leaks (0, 0);
@@ -231,12 +206,6 @@ void test_success (T*, const char *tname)
                "temporary buffer leaked %d bytes in %d blocks",
                nbytes, nblocks);
 
-#ifdef __HP_aCC
-
-    delete[] pa;
-
-#endif   // __HP_aCC
-
 }
 
 /**************************************************************************/
@@ -299,20 +268,7 @@ void test_failure (T*, const char *tname)
     // set the soft limit to 0, leaving the hard limit unchanged
     struct rlimit rlim_new = rlim_old;
 
-#ifdef _AIX
-    {
-        // AIX setrlimit() fails to lower the limit for resource
-        // whose current usage is already higher than the new limit.
-        // Instead of setting the limit to 0, compute the current
-        // usage and use it to set the soft limit
-        const char* const brk_min = (char*)_edata;
-        const char* const brk_cur = (char*)sbrk (0);
-
-        rlim_new.rlim_cur = brk_cur - brk_min;
-    }
-#else   // if !defined (_AIX)
     rlim_new.rlim_cur = 0;
-#endif   // _AIX
 
     errno = 0;
 
@@ -443,16 +399,7 @@ run_test (int, char**)
     // exercise pointers to members
     test_get_temporary_buffer ((MemberPointer*)0, "void (struct::*)()");
 
-#if    (!defined (__IBMCPP__) || __IBMCPP__ > 700) \
-    && !defined (__HP_aCC)
-
-#  ifndef _MSC_VER
     const std::size_t MAX_SIZE = _RWSTD_PTRDIFF_MAX;
-#  else
-    // the MSVC and ICC/Windows has maximum size of
-    // the array equal to 0x7fffffff bytes
-    const std::size_t MAX_SIZE = INT_MAX;
-#  endif
 
     // avoid instantiating test on very large structs
     // to prevent failures (at compile or run-time) due
@@ -461,15 +408,6 @@ run_test (int, char**)
     test_failure ((BigStruct<MAX_SIZE - 1>*)0, 0);
     test_failure ((BigStruct<MAX_SIZE>*)0, 0);
 
-#else
-
-    // work around VAC++ 7.0 (and prior) bug #549
-    // work around HP aCC 3,5,6 bug #565
-    rw_warn (0, 0, __LINE__, "get_temp_buffer<large-struct>() "
-             "not tested due to a compiler bug");
-
-#endif   // VAC++ > 7.0
-
     return 0;
 }
 
@@ -477,11 +415,6 @@ run_test (int, char**)
 
 int main (int argc, char *argv[])
 {
-#ifdef _MSC_VER
-    // disable "Invalid allocation size: 4294967292 bytes"
-    // message box from malloc()
-    _CrtSetReportMode (_CRT_ERROR, _CRTDBG_MODE_DEBUG);
-#endif
 
     return rw_test (argc, argv, __FILE__,
                     "lib.temporary.buffer",

@@ -39,11 +39,6 @@
 #include <rw_driver.h>
 
 
-#ifdef __SUNPRO_CC
-   // included first to work around a SunPro 5.4 bug (PR #26255)
-#  include <time.h>
-#endif   // SunPro
-
 // include ANSI C headers prior to attempting to induce errors in case
 // the C library itself contains violations of this rule
 #include <assert.h>
@@ -78,30 +73,12 @@
 // include system headers included by the library
 #include <fcntl.h>
 
-#ifdef _WIN32
-#  include <io.h>
-#else
-#  include <unistd.h>
-#endif
+#include <unistd.h>
 
 #include _RWSTD_SYS_TYPES_H
 
-#if defined (_RWSTD_SOLARIS_THREADS)
-#  include <synch.h>
-#  include <thread.h>
-#elif defined (_RWSTD_POSIX_THREADS)
+#if defined (_RWSTD_POSIX_THREADS)
 #  include <pthread.h>
-#elif defined (_RWSTD_DCE_THREADS)
-#  if defined (_RWSTD_NO_DCE_PTHREAD_H)
-#    include <pthread.h>
-#  else
-#    include <dce/pthread.h>
-#  endif
-#elif defined (_WIN32)
-#  include <windows.h>
-#  if defined (_MSC_VER) && 1400 <= _MSC_VER
-#    include <intrin.h>
-#  endif   // 1400 <= _MSC_VER
 #endif
 
 
@@ -110,10 +87,8 @@
 #define b   !ERROR!
 #define c   !ERROR!
 
-#if !defined (__sgi)
    // a member of __huge_val in /usr/include/math.h and elsewhere
-#  define d !ERROR!
-#endif
+#define d !ERROR!
 
 #define e   !ERROR!
 #define f   !ERROR!
@@ -377,19 +352,15 @@
 #define __ls                    !ERROR!
 #define __lt                    !ERROR!
 
-#ifndef _MSC_VER
    // MSVC's libc defines __max in <stdlib.h>
-#  define __max                 !ERROR!
-#endif
+#define __max                 !ERROR!
 
 #define __md                    !ERROR!
 #define __method_call           !ERROR!
 #define __mi                    !ERROR!
 
-#ifndef _MSC_VER
    // MSVC's libc defines __min in <stdlib.h>
-#  define __min                 !ERROR!
-#endif
+#define __min                 !ERROR!
 
 #define __minus                 !ERROR!
 #define __ml                    !ERROR!
@@ -428,10 +399,8 @@
 #define __vn                    !ERROR!
 
 // symbols reserved by the ARM compiler
-#if !defined (sun) && !defined (__sun) && !defined (__sun__)
    // MB_CUR_MAX expands to __ctype on SunOS
-#  define __ctype               !ERROR!
-#endif
+#define __ctype               !ERROR!
 
 #define __ct                    !ERROR!
 
@@ -646,11 +615,6 @@
 #include <stdexcept>
 #include <streambuf>
 #include <string>
-
-#if defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x530
-   // working around a SunPro 5.3 bug (see PR #26025)
-#  undef rhs
-#endif   // SunPro > 5.3
 
 #include <typeinfo>
 

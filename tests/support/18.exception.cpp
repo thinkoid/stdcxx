@@ -26,11 +26,6 @@
  * 
  **************************************************************************/
 
-#ifdef __SUNPRO_CC
-    // working around a SunPro/SunOS 5.8 bug (PR #26255)
-#  include <time.h>
-#endif   // __SUNPRO_CC
-
 #include <exception>      // for bad_exception, exception
 #include <ios>            // for ios_base::failure
 #include <new>            // for bad_alloc
@@ -781,8 +776,6 @@ induce_exception (RuntimeExceptionId reid, const char *name)
 
 #  ifndef _RWSTD_NO_SETRLIMIT
 
-#    if !defined (__HP_aCC)
-
         // work around an HP aCC 5.xx (IPF) bug (PR #29014)
 
         // retrieve the current resource limits
@@ -797,7 +790,6 @@ induce_exception (RuntimeExceptionId reid, const char *name)
 
         try {
 
-#    endif   // __HP_aCC
 #  endif   // _RWSTD_NO_SETRLIMIT
 
             // try to allocate a huge amount of memory to induce bad_alloc
@@ -808,7 +800,6 @@ induce_exception (RuntimeExceptionId reid, const char *name)
             ::operator delete (p);
 
 #  ifndef _RWSTD_NO_SETRLIMIT
-#    if !defined (__HP_aCC)
 
         }
         catch (...) {
@@ -821,8 +812,6 @@ induce_exception (RuntimeExceptionId reid, const char *name)
             // rethrow bad_alloc
             throw;
         }
-
-#    endif   // __HP_aCC
 
         return E_error;
 

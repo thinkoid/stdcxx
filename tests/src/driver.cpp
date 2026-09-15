@@ -45,25 +45,16 @@
 #include <stdlib.h>    // for free, _set_invalid_parameter_handler()
 #include <string.h>    // for strchr, strcpy
 
-#ifdef _WIN32
-#  include <windows.h> // for SetErrorMode()
-#endif   // _WIN32
+#include <unistd.h>         // for isatty()
+#include <sys/resource.h>   // for setlimit()
 
-#ifdef _MSC_VER
-#  include <crtdbg.h>  // for _CrtSetReportMode(), _CrtSetDbgFlag()
-#endif   // _MSC_VER
+#ifndef RLIM_SAVED_CUR
+#  define RLIM_SAVED_CUR RLIM_INFINITY
+#endif   // RLIM_SAVED_CUR
 
-#ifndef _WIN32
-#  include <unistd.h>         // for isatty()
-#  include <sys/resource.h>   // for setlimit()
-
-#  ifndef RLIM_SAVED_CUR
-#    define RLIM_SAVED_CUR RLIM_INFINITY
-#  endif   // RLIM_SAVED_CUR
-
-#  ifndef RLIM_SAVED_MAX
-#    define RLIM_SAVED_MAX RLIM_INFINITY
-#  endif   // RLIM_SAVED_MAX
+#ifndef RLIM_SAVED_MAX
+#  define RLIM_SAVED_MAX RLIM_INFINITY
+#endif   // RLIM_SAVED_MAX
 
 // declare fileno in case it's not declared (for strict ANSI conformance)
 extern "C" {
@@ -71,11 +62,6 @@ extern "C" {
 _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 
 }   // extern "C"
-
-#else   // if Windows
-   // no isatty on Windoze
-#  define _RWSTD_NO_ISATTY
-#endif   // _WIN32
 
 // expand _TEST_EXPORT macros
 #define _RWSTD_TEST_SRC
@@ -90,29 +76,6 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 #  if defined (__DECCXX__)
 #    define RW_TEST_COMPILER "Compaq C++, __DECCXX__ = " \
             RW_TEST_STR (__DECCXX__)
-#  elif defined (__INTEL_COMPILER)
-#    if defined (__EDG_VERSION__)
-#      define RW_TEST_ICC_EDG_VER \
-              ", __EDG_VERSION__ = "  RW_TEST_STR (__EDG_VERSION__)
-#    else
-#      define RW_TEST_ICC_EDG_VER ""
-#    endif
-#    if defined (_MSC_VER)
-#      define RW_TEST_COMPILER "Intel C++, __INTEL_COMPILER = " \
-              RW_TEST_STR (__INTEL_COMPILER) ", _MSC_VER = " \
-              RW_TEST_STR (_MSC_VER) \
-              RW_TEST_ICC_EDG_VER
-#    elif defined (__INTEL_COMPILER_BUILD_DATE)
-#      define RW_TEST_COMPILER "Intel C++, __INTEL_COMPILER = " \
-              RW_TEST_STR (__INTEL_COMPILER) \
-              ", __INTEL_COMPILER_BUILD_DATE = " \
-              RW_TEST_STR (__INTEL_COMPILER_BUILD_DATE) \
-              RW_TEST_ICC_EDG_VER
-#    else
-#      define RW_TEST_COMPILER "Intel C++, __INTEL_COMPILER = " \
-              RW_TEST_STR (__INTEL_COMPILER) \
-              RW_TEST_ICC_EDG_VER
-#    endif
 #  elif defined (__GNUC__)
 #    if defined (__VERSION__)
 #      define RW_TEST_GCC_VER ", __VERSION__ = \"" __VERSION__ "\""
@@ -130,43 +93,6 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
               RW_TEST_STR (__GNUC__) "." RW_TEST_STR (__GNUC_MINOR__) 
               RW_TEST_GCC_VER
 #    endif
-#  elif defined (_COMPILER_VERSION) && defined (__sgi)
-#    define RW_TEST_COMPILER "SGI MIPSpro, _COMPILER_VERSION = " \
-            RW_TEST_STR (_COMPILER_VERSION)
-#  elif defined (__INTEL_COMPILER)
-#    if defined (_MSC_VER)
-#      define RW_TEST_COMPILER "Intel C++, __INTEL_COMPILER = " \
-              RW_TEST_STR (__INTEL_COMPILER) ", _MSC_VER = " \
-              RW_TEST_STR (_MSC_VER)
-#    else
-#      define RW_TEST_COMPILER "Intel C++, __INTEL_COMPILER = " \
-              RW_TEST_STR (__INTEL_COMPILER)
-#    endif
-#  elif defined (__HP_aCC)
-#    if defined (__EDG_VERSION__)
-#      define RW_TEST_ACC_EDG_VER \
-              ", __EDG_VERSION__ = "  RW_TEST_STR (__EDG_VERSION__)
-#    else
-#      define RW_TEST_ACC_EDG_VER ""
-#    endif
-#    define RW_TEST_COMPILER "HP aCC, __HP_aCC = " \
-            RW_TEST_STR (__HP_aCC) \
-            RW_TEST_ACC_EDG_VER
-#  elif defined (__IBMCPP__)
-#    define RW_TEST_COMPILER "IBM VisualAge C++, __IBMCPP__ = " \
-            RW_TEST_STR (__IBMCPP__)
-#  elif defined (_MSC_VER)
-#    define RW_TEST_COMPILER "MSVC, _MSC_VER = " \
-            RW_TEST_STR (_MSC_VER)
-#  elif defined (__SUNPRO_CC)
-#    define RW_TEST_COMPILER "SunPro, __SUNPRO_CC = " \
-            RW_TEST_STR (__SUNPRO_CC)
-#  elif defined (__EDG__)
-     // handle the vanilla EDG eccp last to avoid overriding
-     // the real compiler's macro (compilers such as Intel C++
-     // and HP aCC use eccp for their C++ front end) 
-#    define RW_TEST_COMPILER "EDG eccp, __EDG_VERSION__ = " \
-            RW_TEST_STR (__EDG_VERSION__)
 #  else
 #    define RW_TEST_COMPILER "unknown"
 #  endif
@@ -198,9 +124,7 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 #endif   // RW_TEST_LIBSTD
 
 #ifndef RW_TEST_HARDWARE
-#  if defined (__alpha__) || defined (__alpha)
-#    define RW_TEST_ARCH "alpha"
-#  elif defined (__x86_64__) || defined (__x86_64)
+#  if defined (__x86_64__) || defined (__x86_64)
 #    if defined (__LP64__) || defined (_LP64)
 #      define RW_TEST_ARCH "x86_64/LP64"
 #    else
@@ -212,8 +136,6 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 #    else
 #      define RW_TEST_ARCH "amd64/ILP32"
 #    endif
-#  elif defined (_PA_RISC2_0)
-#    define RW_TEST_ARCH "pa-risc 2.0"
 #  elif defined (_PA_RISC1_0)
 #    define RW_TEST_ARCH "pa-risc 1.0"
 #  elif defined (__hppa)
@@ -228,16 +150,6 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 #    define RW_TEST_ARCH "i386"
 #  elif defined (__i586__) || defined (__i586)
 #    define RW_TEST_ARCH "i586"
-#  elif defined (__ia64)
-#    define RW_TEST_ARCH "ia64"
-#  elif defined (__mips)
-#    define RW_TEST_ARCH "mips"
-#  elif defined (__sparcv9)
-#    define RW_TEST_ARCH "sparc-v9"
-#  elif defined (__sparcv8)
-#    define RW_TEST_ARCH "sparc-v8"
-#  elif defined (__sparc)
-#    define RW_TEST_ARCH "sparc"
 #  elif defined (_POWER)
 #    if defined (_ARCH_PWR5)
 #      define RW_TEST_ARCH "power-5"
@@ -260,40 +172,12 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 #    else
 #      define RW_TEST_ARCH "powerpc"
 #    endif
-#  elif defined (_WIN64)
-#    define RW_TEST_ARCH "ia64"
-#  elif defined (_WIN32)
-#    define RW_TEST_ARCH "i86"
 #  else
 #    define RW_TEST_ARCH "unknown"
 #  endif
 
 
-#  if defined (_AIX54)
-#    define RW_TEST_OS "aix-5.4 (or better)"
-#  elif defined (_AIX53)
-#    define RW_TEST_OS "aix-5.3"
-#  elif defined (_AIX52)
-#    define RW_TEST_OS "aix-5.2"
-#  elif defined (_AIX51)
-#    define RW_TEST_OS "aix-5.1"
-#  elif defined (_AIX50)
-#    define RW_TEST_OS "aix-5.0"
-#  elif defined (_AIX43)
-#    define RW_TEST_OS "aix-4.3"
-#  elif defined (_AIX41)
-#    define RW_TEST_OS "aix-4.1"
-#  elif defined (_AIX32)
-#    define RW_TEST_OS "aix-3.2"
-#  elif defined (_AIX)
-#    define RW_TEST_OS "aix"
-#  elif defined (__hpux)
-#    define RW_TEST_OS "hp-ux"
-#  elif defined (__osf__)
-#    define RW_TEST_OS "tru64-unix"
-#  elif defined (__sgi) && defined (__mips)
-#    define RW_TEST_OS "irix"
-#  elif defined (__linux__) || defined (__linux)
+#  if defined (__linux__) || defined (__linux)
 #    if defined (__ELF__)
 #      define LINUX_TYPE "linux-elf"
 #    else
@@ -307,22 +191,10 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 
 #  elif defined (__SunOS_5_11)
 #    define RW_TEST_OS "sunos-5.11"
-#  elif defined (__SunOS_5_10)
-#    define RW_TEST_OS "sunos-5.10"
-#  elif defined (__SunOS_5_9)
-#    define RW_TEST_OS "sunos-5.9"
-#  elif defined (__SunOS_5_8)
-#    define RW_TEST_OS "sunos-5.8"
 #  elif defined (__SunOS_5_7)
 #    define RW_TEST_OS "sunos-5.7"
 #  elif defined (__SunOS_5_6)
 #    define RW_TEST_OS "sunos-5.6"
-#  elif defined (__sun__)
-#    define RW_TEST_OS "sunos"
-#  elif defined (_WIN64)
-#    define RW_TEST_OS "win64"
-#  elif defined (_WIN32)
-#    define RW_TEST_OS "win32"
 #  else
 #    define RW_TEST_OS "unknown"
 #  endif
@@ -925,144 +797,7 @@ _rw_setopts_compat ()
 }
 
 
-#ifdef _WIN32
 
-#  if defined (_MSC_VER) && _MSC_VER >= 1400
-
-static void
-_rw_invalid_parameter (const wchar_t* /*expression*/,
-                       const wchar_t* /*function*/,
-                       const wchar_t* /*file*/,
-                       unsigned int   /*line*/,
-                       uintptr_t      /*pReserved*/)
-{
-    // empty handler - ignore invalid parameter validation
-}
-
-#  endif   // MSVC 8.0 and later
-
-static int
-_rw_opt_no_popups (int argc, char *argv[])
-{
-    static int opt_no_popups;
-
-    if (0 == argc) {
-        // query mode: return the value of the option
-        return opt_no_popups;
-    }
-
-    if (1 == argc && argv && 0 == argv [0]) {
-        // help mode: set argv[0] to the text of the help message
-
-        static const char helpstr[] = {
-            "Prevents the program from using message box popup window's for\n"
-            "error messages.\n"
-        };
-
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
-
-        return 0;
-    }
-
-    // set mode: enable the option
-    opt_no_popups = 1;
-
-    SetErrorMode (SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-
-#  ifdef _MSC_VER
-#    if _MSC_VER >= 1400
-    _set_invalid_parameter_handler (_rw_invalid_parameter);
-#    endif   // MSVC 8.0 and later
-
-    _CrtSetReportMode (_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
-    _CrtSetReportFile (_CRT_WARN, _CRTDBG_FILE_STDERR);
-    _CrtSetReportMode (_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
-    _CrtSetReportFile (_CRT_ERROR, _CRTDBG_FILE_STDERR);
-    _CrtSetReportMode (_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
-    _CrtSetReportFile (_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-#  endif   // _MSC_VER
-
-    return 0;
-}
-
-#endif   // _WIN32
-
-
-#if defined (_MSC_VER) && defined (_DEBUG)
-
-static int
-_rw_opt_debug_heap (int argc, char *argv[])
-{
-    static int opt_debug_heap;
-
-    if (0 == argc) {
-        // query mode: return the value of the option
-        return opt_debug_heap;
-    }
-
-    if (1 == argc && argv && 0 == argv [0]) {
-        // help mode: set argv[0] to the text of the help message
-
-        static const char helpstr[] = {
-            "Enables the heap consistency checking on every memory allocation\n"
-            "and deallocation request.\n"
-        };
-
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
-
-        return 0;
-    }
-
-    // set mode: enable the option
-    opt_debug_heap = 1;
-
-    _CrtSetDbgFlag (  _CRTDBG_ALLOC_MEM_DF
-                    | _CRTDBG_CHECK_ALWAYS_DF
-                    | _CRTDBG_LEAK_CHECK_DF);
-
-    return 0;
-}
-
-#endif   // _MSC_VER && _DEBUG
-
-
-#ifdef _WIN32
-
-static int
-_rw_setopts_windows ()
-{
-    int nopts =
-        rw_setopts ("|-no-popups ",
-                    _rw_opt_no_popups,
-                    0 /* detect missing handlers */);
-
-    if (1 > nopts) {
-        rw_fprintf (rw_stderr,
-                    "%s:%d: rw_setopts() failed\n", __FILE__, __LINE__);
-        abort ();
-        return 1;
-    }
-
-#  if defined (_MSC_VER) && defined (_DEBUG)
-
-    nopts =
-        rw_setopts ("|-debug-heap ",
-                    _rw_opt_debug_heap,
-                    0 /* detect missing handlers */);
-
-    if (1 > nopts) {
-        rw_fprintf (rw_stderr,
-                    "%s:%d: rw_setopts() failed\n", __FILE__, __LINE__);
-        abort ();
-        return 1;
-    }
-
-#  endif   // _MSC_VER && _DEBUG
-
-    return 0;
-}
-
-#endif   // _WIN32
 
 /************************************************************************/
 
@@ -1128,10 +863,6 @@ rw_vtest (int argc, char **argv,
     _rw_setopts_types ();
 
     _rw_setopts_lines ();
-
-#ifdef _WIN32
-    _rw_setopts_windows ();
-#endif   // _WIN32
 
     int status = rw_runopts (argc, argv);
 

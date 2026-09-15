@@ -112,7 +112,6 @@ struct conv_to_bool
         return conv_to_bool (val);
     }
 
-#if !defined (_MSC_VER) || _MSC_VER > 1300
     // unique pointer not compatible with any other
     typedef bool conv_to_bool::*UniquePtr;
 
@@ -122,13 +121,6 @@ struct conv_to_bool
     operator UniquePtr () const {
         return val_ ? &conv_to_bool::val_ : UniquePtr (0);
     }
-#else
-    typedef const void* UniquePtr;
-
-    operator UniquePtr () const {
-        return val_ ? &val_ : UniquePtr (0);
-    }
-#endif
 
 private:
     // not (publicly) Default-Constructible

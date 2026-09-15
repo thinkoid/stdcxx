@@ -30,42 +30,14 @@
 
 #include <rw_driver.h>
 
-#if defined (__HP_aCC) && _RWSTD_HP_aCC_MAJOR < 6
-
-// working around an HP aCC bug (see PR #25378)
-#  include <string>
-
-// working around an HP aCC bug (see PR #24417)
-_USING (namespace std);
-
-#endif   // HP aCC < 6
-
 /**************************************************************************/
-
-#ifdef _MSC_VER
-   // shut up the idiotic MSVC 6.0 warning C4099:
-   //   type name first seen using 'struct' now seen using  'class'
-#  pragma warning (disable: 4099)
-
-   // another bogus warning C4700:
-   //   local variable used without having been initialized
-#  pragma warning (disable: 4700)
-
-#  if _MSC_VER <= 1300
-     // work around a bug where the compiler thinks that what's a struct
-     // is really a class with all private members (PR #23795)
-#    define class struct
-#  endif
-#endif
 
 
 #ifndef _RWSTD_EXPLICIT_INSTANTIATION
 
    // explicitly instantiate
 
-#  if    !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD) \
-      && (!defined (_COMPILER_VERSION) || _COMPILER_VERSION > 730)        \
-      && (!defined (__EDG_VERSION__) || __EDG_VERSION__ > 244)
+#  if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD)
 
      // work around an EDG front end bug (see, for example, PR #25292)
 

@@ -42,9 +42,6 @@
 #endif   // __linux__
 
 // see Onyx PR #28150
-#if defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x540
-#  include <wchar.h>
-#endif // defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x540
 
 #include <locale>
 
@@ -58,12 +55,10 @@
 #include <cwctype>    // for iswxxx()
 
 
-#if !defined (_WIN32)
-#  if !defined (LC_MESSAGES)
-#    define LC_MESSAGES _RWSTD_LC_MESSAGES
-#  endif   // LC_MESSAGES
-#  include <langinfo.h>
-#endif  // _WIN32
+#if !defined (LC_MESSAGES)
+#  define LC_MESSAGES _RWSTD_LC_MESSAGES
+#endif   // LC_MESSAGES
+#include <langinfo.h>
 
 #include <rw_driver.h>
 #include <rw_file.h>     // for SLASH
@@ -287,13 +282,6 @@ bool cond1 (std::ctype_base::mask mask, char ch, const char *locname)
 
     if (0 == std::setlocale (LC_CTYPE, locname))
         return false;
-
-#ifdef __SUNPRO_CC
-
-    // working around a SunPro bug (PR #28150)
-    using std::wint_t;
-
-#endif   // __SUNPRO_CC
 
 #ifndef _RWSTD_NO_BTOWC
 
@@ -913,16 +901,6 @@ void test_narrow_widen (charT, const char *cname)
 
     BEGIN_LOCALE_LOOP (UCHAR_MAX, locname, i) {
 
-#if defined (_RWSTD_OS_SUNOS) && _RWSTD_OS_MAJOR == 5 && _RWSTD_OS_MINOR <= 10
-
-        // avoid a libc SIGSEGV in mbtowc() in zh_HK and zh_TW
-        // locales encoded using the BIG5 codeset (see bug #603)
-        if (   0 == std::strncmp ("zh_HK.BIG5", locname, 10)
-            || 0 == std::strncmp ("zh_TW.BIG5", locname, 10))
-            continue;
-
-#endif   // SunOS < 5.10
-
         {
             // verify that the global C locale stays unchanged
             const char* const curlocname = std::setlocale (LC_ALL, 0);
@@ -1111,8 +1089,6 @@ void test_is_ch (charT, const char *cname)
                    "{ %s}, got { %s}",
                    uch, locname, is_C, is_CXX2);
 
-#ifndef _WIN32
-
         // exercise POSIX requirements only on POSIX platforms
 
         static const std::ctype_base::mask masks[] = {
@@ -1245,8 +1221,6 @@ void test_is_ch (charT, const char *cname)
                        "contains disallowed bits { %s }: { %s }",
                        ch, locname, m & all_disallowed, m);
         }
-
-#endif   // !WIN32 && !WIN64
 
     } END_LOCALE_LOOP (locname);
 }
