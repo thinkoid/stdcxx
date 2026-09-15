@@ -508,6 +508,12 @@ _RWSTD_INSTANTIATE_2 (class _RWSTD_TI_EXPORT
 #endif   // _RWSTD_DEFINE_TEMPLATE_LAST (_BASIC_OSTREAM)
 
 
+#ifndef _RWSTD_IOINSERT_INCLUDED
+#  define _RWSTD_INCLUDE_IOINSERT
+#  include <rw/_ioinsert.h>
+#endif   // _RWSTD_IOINSERT_INCLUDED
+
+
 #ifndef _RWSTD_STRING_INSERTER_INCLUDED
 #  define _RWSTD_INCLUDE_STRING_INSERTER
 #  include <rw/_stringio.h>

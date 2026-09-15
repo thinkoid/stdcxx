@@ -31,12 +31,12 @@
  * 
  **************************************************************************/
 
-#ifndef _RWSTD_RW_IOINSERT_H_INCLUDED
-#define _RWSTD_RW_IOINSERT_H_INCLUDED
-
 #if __GNUG__ >= 3
 #  pragma GCC system_header
 #endif   // gcc >= 3
+
+#ifndef _RWSTD_RW_IOINSERT_H_INCLUDED
+#define _RWSTD_RW_IOINSERT_H_INCLUDED
 
 #ifndef _RWSTD_NO_REDUNDANT_DEFINITIONS
 #  ifndef _RWSTD_RW_IOITER_H_INCLUDED
@@ -92,6 +92,17 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits>&, const _StringT*,
              _RWSTD_STREAMSIZE, _RWSTD_STREAMSIZE);
 
 }   // namespace __rw
+
+
+#endif   // _RWSTD_RW_IOINSERT_H_INCLUDED
+
+
+// the definitions of the inserters and their instantiation directives
+// need a complete basic_ostream: <ostream> requests them after the
+// definition of the class, the same way it does the string inserter
+#if   !defined (_RWSTD_IOINSERT_INCLUDED) \
+    && defined (_RWSTD_INCLUDE_IOINSERT)
+#  define _RWSTD_IOINSERT_INCLUDED
 
 
 #if _RWSTD_DEFINE_TEMPLATE_FIRST (_INSERTER)
@@ -225,4 +236,4 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
 #endif   // _RWSTD_DEFINE_TEMPLATE_LAST (_INSERTER)
 
 
-#endif   // _RWSTD_RW_IOINSERT_H_INCLUDED
+#endif   // !_RWSTD_IOINSERT_INCLUDED
