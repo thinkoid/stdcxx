@@ -32,11 +32,11 @@
 template <class ch>
 struct my_traits : std::char_traits<ch>
 {
-    using std::char_traits<ch>::char_type;
-    using std::char_traits<ch>::int_type;
-    using std::char_traits<ch>::off_type; 
-    using std::char_traits<ch>::state_type;
-    using std::char_traits<ch>::pos_type;
+    using typename std::char_traits<ch>::char_type;
+    using typename std::char_traits<ch>::int_type;
+    using typename std::char_traits<ch>::off_type; 
+    using typename std::char_traits<ch>::state_type;
+    using typename std::char_traits<ch>::pos_type;
 
     using std::char_traits<ch>::eof;
     using std::char_traits<ch>::eq;

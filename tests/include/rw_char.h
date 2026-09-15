@@ -72,7 +72,8 @@ struct UserChar   // user-defined character type (must be POD)
 
 inline UserChar make_char (char c, UserChar*)
 {
-    const UserChar ch = { 0.0, c };
+    typedef unsigned char UChar;
+    const UserChar ch = { 0.0, UChar (c) };
     return ch;
 }
 

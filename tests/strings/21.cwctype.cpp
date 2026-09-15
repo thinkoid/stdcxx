@@ -292,7 +292,7 @@ enum {
 #define TEST_FUNCTION(name, ret)                     \
     template <class T> ret name (T) {           \
         missing_set |= bit_ ## name;            \
-        return -1;                              \
+        return ret (-1);                        \
     } typedef void rw_unused_typedef
 
 _RWSTD_NAMESPACE (std) {

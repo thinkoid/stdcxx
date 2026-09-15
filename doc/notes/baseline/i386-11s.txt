@@ -41,7 +41,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 20.specialized                                0    0     1756      0   100%
 20.specialized.stdcxx-390                  NOUT    0                       
 20.temp.buffer.mt                             0    0        0      0   100%
-20.temp.buffer                                0    0    10801      0   100%
+20.temp.buffer                                0    0    10792      0   100%
 21.c.strings.stdcxx-843                    NOUT    0                       
 21.cctype                                     0    0      281      0   100%
 21.char.traits.find.stdcxx-541             NOUT    0                       
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10068769
+  Assertions:            10068760
   Failed assertions:          737

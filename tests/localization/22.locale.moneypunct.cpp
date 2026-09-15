@@ -625,26 +625,38 @@ check_format (const std::lconv &lc)
 
         {
             // C90 positive local format
-            { lc.p_cs_precedes, lc.p_sep_by_space, lc.p_sign_posn },
+            { UChar (lc.p_cs_precedes),
+              UChar (lc.p_sep_by_space),
+              UChar (lc.p_sign_posn) },
 
             // C90 negative local format
-            { lc.n_cs_precedes, lc.n_sep_by_space, lc.n_sign_posn }
+            { UChar (lc.n_cs_precedes),
+              UChar (lc.n_sep_by_space),
+              UChar (lc.n_sign_posn) }
         },
 
 #ifndef _RWSTD_NO_LCONV_INT_FMAT
 
         {   // C99 positive international format
-            { lc.int_p_cs_precedes, lc.int_p_sep_by_space, lc.int_p_sign_posn},
+            { UChar (lc.int_p_cs_precedes),
+              UChar (lc.int_p_sep_by_space),
+              UChar (lc.int_p_sign_posn) },
 
             // C99 negative international format
-            { lc.int_n_cs_precedes, lc.int_n_sep_by_space, lc.int_n_sign_posn }
+            { UChar (lc.int_n_cs_precedes),
+              UChar (lc.int_n_sep_by_space),
+              UChar (lc.int_n_sign_posn) }
         }
 
 #else   // if defined (_RWSTD_NO_LCONV_INT_FMAT)
 
         {
-            { lc.p_cs_precedes, lc.p_sep_by_space, lc.p_sign_posn },
-            { lc.n_cs_precedes, lc.n_sep_by_space, lc.n_sign_posn }
+            { UChar (lc.p_cs_precedes),
+              UChar (lc.p_sep_by_space),
+              UChar (lc.p_sign_posn) },
+            { UChar (lc.n_cs_precedes),
+              UChar (lc.n_sep_by_space),
+              UChar (lc.n_sign_posn) }
         }
 
 #endif   // _RWSTD_NO_LCONV_INT_FMAT

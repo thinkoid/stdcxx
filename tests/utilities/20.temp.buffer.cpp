@@ -399,7 +399,11 @@ run_test (int, char**)
     // exercise pointers to members
     test_get_temporary_buffer ((MemberPointer*)0, "void (struct::*)()");
 
-    const std::size_t MAX_SIZE = _RWSTD_PTRDIFF_MAX;
+    // the largest array type a compiler accepts is an implementation
+    // limit well below PTRDIFF_MAX bytes (Clang draws it under 2^60);
+    // the overflow paths need only a size that any element count
+    // above one overflows
+    const std::size_t MAX_SIZE = _RWSTD_PTRDIFF_MAX / 8;
 
     // avoid instantiating test on very large structs
     // to prevent failures (at compile or run-time) due
