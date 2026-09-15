@@ -28,13 +28,6 @@
 
 #include <rw/_config.h>
 
-#if defined (__IBMCPP__) && !defined (_RWSTD_NO_IMPLICIT_INCLUSION)
-// Disable implicit inclusion to work around 
-// a limitation in IBM's VisualAge 5.0.2.0 (see PR#26959) 
-
-#  define _RWSTD_NO_IMPLICIT_INCLUSION 
-#endif
-
 #include <algorithm>    // for replace, replace_if, replace_copy, ...
 #include <vector>       // for vector
 #include <iterator>     // for ostream_iterator

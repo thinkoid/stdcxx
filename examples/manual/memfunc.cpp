@@ -27,15 +27,6 @@
  * 
  **************************************************************************/
 
-#if defined (__IBMCPP__)
-#  include <rw/_config.h>
-   // disable implicit inclusion to work around 
-   // a limitation in IBM VisualAge 5 (PR #26959) 
-#  ifndef _RWSTD_NO_IMPLICIT_INCLUSION
-#    define _RWSTD_NO_IMPLICIT_INCLUSION 
-#  endif   // _RWSTD_NO_IMPLICIT_INCLUSION
-#endif   // __IBMCPP__
-
 #include <algorithm>   // for for_each, stable_sort
 #include <cstddef>     // for size_t
 #include <functional>  // for greater

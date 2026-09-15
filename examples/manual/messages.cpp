@@ -33,11 +33,7 @@
 #include <rwstdmessages.h>
 #include <examples.h>
 
-#ifndef _WIN32
-#  define CAT_NAME   "./rwstdmessages.cat"
-#else
-#  define CAT_NAME   "rwstdmessages.dll"
-#endif
+#define CAT_NAME   "./rwstdmessages.cat"
 
 
 int main ()

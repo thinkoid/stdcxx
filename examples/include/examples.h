@@ -104,8 +104,6 @@ size_t distance (InputIter a, InputIter b)
 
 #ifdef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
 
-#if !defined (_MSC_VER) || _MSC_VER > 1300
-
 _RWSTD_NAMESPACE (std) { 
 
 #define has_facet fake_has_facet
@@ -150,10 +148,6 @@ struct use_facet
 };
 
 }   // namespace std
-
-#else   // if defined (_MSC_VER) && _MSC_VER <= 1300
-#  define _HAS_FACET(facet, locale)   has_facet (locale, (facet*)0)
-#endif   // !defined (_MSC_VER) || _MSC_VER > 1300
 
 #endif   // _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
 

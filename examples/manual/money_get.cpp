@@ -35,15 +35,9 @@
 
 
 // hardcode the name of the English US locale for known systems
-#if defined (__FreeBSD__) || defined (__osf__)
+#if defined (__FreeBSD__)
 // FreeBSD and Tru64 UNIX
 const char en_US[] = "en_US.ISO8859-1";
-#elif defined (__hpux)
-// HP-UX
-const char en_US[] = "en_US.iso88591";
-// Windows
-#elif defined (_WIN32)
-const char en_US[] = "English";
 #else
 // AIX, IRIX, Linux, Solaris
 const char en_US[] = "en_US";

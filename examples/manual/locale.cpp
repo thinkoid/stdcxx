@@ -28,10 +28,6 @@
 
 #include <rw/_defs.h>
 
-#if defined (_AIX) && defined (__IBMCPP__) && !defined (_RWSTD_NO_IMPLICIT_INCLUSION) 
-#  define _RWSTD_NO_IMPLICIT_INCLUSION 
-#endif
-
 #include <algorithm>   // for copy, sort
 #include <iostream>    // for cout
 #include <iterator>    // for ostream_iterator

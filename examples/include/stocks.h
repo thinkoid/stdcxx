@@ -47,36 +47,11 @@
 // and time values formated using standard and/or user-defined facets.
 
 
-#if defined (_AIX)
+#if defined (__linux__)
 #  define US_LOCALE             "en_US"
 #  define GERMAN_LOCALE         "de_DE"
 #  define FRENCH_LOCALE         "fr_FR"
 #  define JAPANESE_LOCALE       "ja_JP"
-#elif defined (__hpux)
-#  define US_LOCALE             "en_US.iso88591"
-#  define GERMAN_LOCALE         "de_DE.iso88591"
-#  define FRENCH_LOCALE         "fr_FR.iso88591"
-#  define JAPANESE_LOCALE       "ja_JP.eucJP"
-#elif defined (__linux__)
-#  define US_LOCALE             "en_US"
-#  define GERMAN_LOCALE         "de_DE"
-#  define FRENCH_LOCALE         "fr_FR"
-#  define JAPANESE_LOCALE       "ja_JP"
-#elif defined (__osf__)
-#  define US_LOCALE             "en_US.ISO8859-1"
-#  define GERMAN_LOCALE         "de_DE.ISO8859-1"
-#  define FRENCH_LOCALE         "fr_FR.ISO8859-1"
-#  define JAPANESE_LOCALE       "ja_JP"
-#elif defined (SNI)
-#  define US_LOCALE             "En"
-#  define GERMAN_LOCALE         "De"
-#  define FRENCH_LOCALE         "Fr_FR.850"
-#  define JAPANESE_LOCALE       "Ja_JP.932"
-#elif defined (_WIN32)
-#  define US_LOCALE             "us"
-#  define GERMAN_LOCALE         "german_germany.1252"
-#  define FRENCH_LOCALE         "french_france.1252"
-#  define JAPANESE_LOCALE       "japanese_japan.1252"
 #else   // POSIX simple names
 #  define US_LOCALE             "en_US"
 #  define GERMAN_LOCALE         "de_DE"
