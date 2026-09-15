@@ -223,13 +223,20 @@ rw_localedef (const char *args,
     const char* topdir = getenv (TOPDIR);
     if (!topdir || !*topdir) {
 
-        // try to get TOPDIR from __FILE__
-        char* const slash = strrchr (topdir_path_buf, _RWSTD_PATH_SEP);
+        // try to get TOPDIR from __FILE__ by stripping the file name
+        // and the two directories above it, tests/src
+        char* slash = 0;
 
-        if (slash) {
-            slash [-1] = '\0';
-            topdir     = topdir_path_buf;
+        for (int i = 0; i != 3; ++i) {
+            slash = strrchr (topdir_path_buf, _RWSTD_PATH_SEP);
+            if (0 == slash)
+                break;
+
+            *slash = '\0';
         }
+
+        if (slash)
+            topdir = topdir_path_buf;
     }
 
     if (!topdir || !*topdir) {
@@ -1119,13 +1126,20 @@ _rw_all_locales ()
         const char* topdir = getenv (TOPDIR);
         if (!topdir || !*topdir) {
 
-            // try to get TOPDIR from __FILE__
-            char* const slash = strrchr (topdir_path_buf, _RWSTD_PATH_SEP);
+            // try to get TOPDIR from __FILE__ by stripping the file name
+            // and the two directories above it, tests/src
+            char* slash = 0;
 
-            if (slash) {
-                slash [-1] = '\0';
-                topdir     = topdir_path_buf;
+            for (int i = 0; i != 3; ++i) {
+                slash = strrchr (topdir_path_buf, _RWSTD_PATH_SEP);
+                if (0 == slash)
+                    break;
+
+                *slash = '\0';
             }
+
+            if (slash)
+                topdir = topdir_path_buf;
         }
 
         if (!topdir || !*topdir) {

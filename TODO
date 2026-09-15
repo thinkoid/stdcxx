@@ -7,34 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO Restore the test-suite baseline
-
-With every test binary linking, run the suite in full and record the
-result as the reference for everything after: assertion counts per
-test, exit statuses, signals. The 2008 expectation is the target; the
-last measured run on a current toolchain was 10,066,804 assertions
-with 1,417 failures, 3 non-zero exits and 12 signals, the failures
-clustered in =23.bitset.cons=, the string regression tests,
-=0.inputiter=, =0.outputiter=, =0.new=, =21.cwchar= and the MT locale
-tests. Each cluster becomes an entry here. One is known already:
-=0.printf= fails 4 of 1876 assertions at its =%{#ls}= and =%{Ac}=
-directives with "misaligned address", on both word widths, in the
-test driver's own formatter; the =%{t}= section passes. Another:
-=23.bitset.cons= is nondeterministic on 64-bit builds, 240, 440 and
-680 failed assertions in three consecutive runs of one binary, and
-passes 2347 of 2347 on 32-bit; a run of the suite is not a reference
-for it until the cause is found.
-=22.locale.codecvt= fails 21 assertions on both widths, 20 of them
-reads of =tests/etc/codecvt.<locale>.in=, input files that never
-came over with the 2008 migration of the test and exist in no
-branch, and then aborts in its corrupt-=mbstate_t= section on the
-library's own assertion at =src/codecvt.cpp:142=, which a debug
-build type makes fatal. The tests read =TOPDIR= from the environment
-and the fallback that derives it from =__FILE__= truncates at the
-character before the last slash (=tests/src/locale.cpp:229= yields
-=tests/sr=); =make run= exports the variable, running a binary by
-hand does not.
-
 * TODO Retire the platforms the tree cannot build on
 
 Decided 2026-09-14: the supported matrix is GCC and Clang on x86 and
@@ -71,6 +43,119 @@ ones.
 
 Check: configuration, library, driver and tests build with
 =CXX=clang=; the suite matches the GCC baseline.
+
+* TODO The input files under tests/etc
+
+=22.locale.codecvt= reads =tests/etc/codecvt.<locale>.in= for five
+locales and =22.locale.collate= reads =tests/etc/collate.<locale>.in=
+for six; the directory exists in no branch, the files stayed behind
+in the 2008 migration of both tests from the vendor's repository.
+Twenty of the codecvt failures and both collate failures are these
+reads.
+
+Fix: regenerate the files from what the tests expect of them; the
+codecvt table fixes the byte and character count of each, the
+collate table names the encoding.
+
+Check: the file-based sections of both tests run and the twenty-two
+failures are gone, on both widths.
+
+* TODO 22.locale.codecvt on a corrupt mbstate_t and on an unset TOPDIR
+
+The test's last section passes a corrupt =mbstate_t= to the facets
+and expects an error result; the library's own assertion at
+=src/codecvt.cpp:142= fires first and a debug build type aborts the
+process, so the test never prints its summary. Separately, the test
+reads =TOPDIR= itself and uses the null pointer when the variable is
+unset, a segmentation fault in a bare run; the driver derives the
+directory from =__FILE__= in that case and the test should get it
+the same way.
+
+Fix: decide what a corrupt state should do in a debug build, either
+the assertion or the error result, then the test; give the test the
+driver's directory.
+
+Check: the test prints its summary in =11S= and =8S=; a bare run
+without =TOPDIR= reports no fault.
+
+* TODO 23.bitset.cons and 25.reverse in the archive 64-bit build
+
+In =11S= =23.bitset.cons= fails a different number of assertions on
+every run of one binary, 240, 440 and 680 in three consecutive runs,
+and =25.reverse= dies of a segmentation fault; both pass in =11s= and
+in =15D=, so the difference is the archive 64-bit library, not the
+width.
+
+Fix: find the uninitialized or out-of-bounds read the shared build
+happens to tolerate; the check tools will say where.
+
+Check: stable counts and a clean exit in =11S= under a memory
+checker.
+
+* TODO The driver's self-tests
+
+=0.inputiter=, =0.outputiter= and =0.new= abort without a message;
+=0.cmdopts=, =0.strncmp= and =0.valcmp= exit 0 but print outside the
+driver's format; =0.braceexp= exits 0 and prints nothing; =0.printf=
+fails four assertions and =0.char= one, all "misaligned address"
+from the =%{#ls}=, =%{Ac}= and =%{/*Gs}= directives; =0.fnmatch=
+fails one, =rw_fnmatch ("[a", "[a", 0)= returns 1 where the native
+=fnmatch= returns 0.
+
+Fix: one at a time, the aborts first since they hide their reason.
+
+Check: every =0.*= row exits 0 with the driver's summary.
+
+* TODO Strings: ranges into the string itself
+
+=21.string.assign=, =21.string.insert= and =21.string.replace= fail
+60, 150 and 240 assertions, all with a source range that is a
+reverse or bidirectional iterator into the string itself, and the
+regression tests =stdcxx-629=, =stdcxx-632= and =stdcxx-170= abort
+on the same cases ("ba" expected, "bb" got). =21.string.stdcxx-162=
+aborts in =15D= only: its assumption =sizeof (strref) <= sizeof
+(SmallRef)= does not hold when the reference count is atomic.
+
+Fix: the self-aliasing path of the iterator-range overloads; the
+regression tests are the gate.
+
+Check: the three tests at 100% and the three regressions exit 0.
+
+* TODO 21.cwchar aborts after passing
+
+All 65 assertions pass and the process dies at exit with "double
+free or corruption (top)".
+
+Fix: find the corruption; a memory checker run is the first step.
+
+Check: exit 0.
+
+* TODO Locale facets
+
+=22.locale.num.get= fails 204 assertions, the =wchar_t= overloads
+reading =unsigned long= consume the wrong count; =22.locale.time.get=
+fails 33, =get_date ("01/01/2000")= consumes 10 characters where 8
+are expected and =get_weekday ("torsdag")= is not recognized;
+=22.locale.money.get= fails 16, =long double= reads with =showbase=
+end in =failbit=.
+
+Fix: per facet, after reading each test against the library.
+
+Check: the three rows at 100% on both widths.
+
+* TODO Numerics
+
+=18.numeric.special.float= reports =has_denorm == 1= where the test
+expects =-1= (=denorm_indeterminate=) for =float= and =long double=,
+3 assertions in 64-bit and 6 in 32-bit; =26.c.math= fails the
+=modf= overloads for =float= and =long double= in 64-bit only;
+=26.valarray.transcend= fails 3 in 32-bit only; =17.extensions=
+fails 5 of 16 on =_RWSTD_NO_EXT_FAILURE= and its kin.
+
+Fix: each is a characterization question first, whether the config
+test or the test's expectation is out of date.
+
+Check: the rows at 100% on both widths.
 
 * TODO Test-case structs: size_t fields, NPOS sentinel
 
@@ -127,10 +212,20 @@ Check: none; this is prose.
 reads of the global and classic locale bodies, a facet-id race, or a
 memory-ordering assumption that x86 hides.
 
-Instruments: a ThreadSanitizer build of the library and the MT tests,
-and real weakly-ordered hardware for the ordering hypothesis, never
-an emulator. After the baseline, so the failure is measured against a
-known reference.
+Instruments: a ThreadSanitizer build of the library and the MT tests
+first, now that it reproduces here; then real weakly-ordered hardware
+for the ordering hypothesis, never an emulator.
+
+It is not intermittent any more. In =15D= on x86-64 the locale MT
+tests, =22.locale.codecvt.mt= through =22.locale.time.put.mt=, end
+differently on every run of the same binary: three bare runs of
+=22.locale.numpunct.mt= died on its own assertion in a thread (a
+thread reading another locale's =truename=, line 147), died of an
+uncaught =std::runtime_error= from a locale that failed to
+construct in a thread, and passed. =22.locale.cons.mt= reports its
+thread pool failing to start. The 15D baseline rows for these tests
+record symptoms, not a reference; =doc/notes/test-baseline.md=
+chapter 3.4 has the details.
 
 The hardware is aarch64 Linux. There =include/rw/_atomic.h= selects
 no backend: the GNU builtin branch is gated on an architecture list

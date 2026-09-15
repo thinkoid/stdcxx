@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * 22.codecvt.out.cpp - test exercising the std::codecvt::out()
+ * 22.locale.codecvt.do_out.cpp - test exercising the std::codecvt::out()
  *
  * $Id$
  *

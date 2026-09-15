@@ -24,11 +24,12 @@ everything the revival has not changed.
 
 ## Status
 
-The library builds clean. The test driver builds. The test suite
-builds except for a small number of tests whose remaining failures
-are listed in `TODO`, in priority order, with the fix intended for
-each. The suite has not yet been run in full against the current
-toolchain; restoring that baseline is the next milestone.
+The library builds clean. The test driver builds. Every test builds
+and the suite runs in full under its own harness. The results are
+pinned under `doc/notes/baseline` for each configuration measured,
+and `doc/notes/test-baseline.md` reads them: what fails, why where
+that is known, and what is intended for each. `TODO` carries the
+same failures as queue entries, in priority order.
 
 Investigations that earn a write-up live under `doc/notes`. The first
 one traces the library's `__mbstate_t` clash with glibc through three
