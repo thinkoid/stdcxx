@@ -31,22 +31,4 @@
 #  include "x86/atomic.s"
 #elif defined (__x86_64) || defined (__x86_64__)
 #  include "x86_64/atomic.s"
-#elif defined (__ia64) || defined (__ia64__)
-#  if defined (_LP64) || defined (__LP64__)
-#    include "ia64/atomic-64.s"
-#  else
-#    include "ia64/atomic.s"
-#  endif
-#elif defined (__parisc) || defined (__parisc__)
-#  if defined (__LP64__)
-#    include "parisc/atomic-64.s"
-#  else
-#    include "parisc/atomic.s"
-#  endif
-#elif defined (__sparc) || defined (__sparc__)
-#  if defined (__sparcv9) || defined (__sparcv9__)
-#    include "sparc/atomic-64.s"
-#  else
-#    include "sparc/atomic.s"
-#  endif
 #endif 

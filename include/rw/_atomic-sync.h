@@ -30,10 +30,6 @@
  * 
  **************************************************************************/
 
-#if defined (__ia64) && defined (__INTEL_COMPILER)
-#  include <ia64intrin.h>
-#endif
-
 _RWSTD_NAMESPACE (__rw) {
 
 inline char
@@ -204,7 +200,7 @@ __rw_atomic_exchange (unsigned int &__x, unsigned int __y, bool)
 }
 
 
-#if defined (__ia64) || defined (__x86_64)
+#if defined (__x86_64)
 #  if 4 < _RWSTD_LONG_SIZE
 
 inline long
@@ -313,9 +309,9 @@ __rw_atomic_exchange (unsigned _RWSTD_LONG_LONG &__x,
 #    define _RWSTD_NO_LLONG_ATOMIC_OPS
 #  endif   // _RWSTD_LONG_LONG && _RWSTD_LLONG_SIZE > _RWSTD_LONG_SIZE
 
-#else   // !__ia64 && !__x86_64
+#else   // !__x86_64
 #  define _RWSTD_NO_LONG_ATOMIC_OPS
 #  define _RWSTD_NO_LLONG_ATOMIC_OPS
-#endif   // __ia64 || __x86_64
+#endif   // __x86_64
 
 }   // namespace __rw
