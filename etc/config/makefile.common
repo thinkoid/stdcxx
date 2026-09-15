@@ -61,62 +61,6 @@ ifeq ($(ALL_FILES),"*")
 endif
 
 
-# SRCDIRS must be defined in GNUmakefile that includes this file
-ifeq ($(ONE_REPOSITORY),)
-
-  # using a separate template instantiation repository for each source
-  # and object file (i.e., when each source produces one executable)
-  ifneq ($(CXX_REPOSITORY),)
-
-    # define a function, CXX.repo, that returns the name of the template
-    # instantiation repository from the name of a source or object file
-    # and a unique suffix (so that each program has its own and the same
-    # names with different definitions do not cause conflicts)
-    #
-    # e.g., Compaq C++ where this will expand to something like
-    #     -ptr foo.ti
-    # or IBM VisualAge/XLC++ where it will be along the lines of
-    #    --qtempinc=foo.ti
-    # or
-    #    --qtemplateregistry=foo.ti
-    #
-    ifeq ($(findstring =,$(CXX_REPOSITORY)),=)
-      CXX.repo = $(CXX_REPOSITORY)$(basename $(notdir $(1))).ti
-    else
-      CXX.repo = $(CXX_REPOSITORY) $(basename $(notdir $(1))).ti
-    endif
-  else   # ifeq ($(CXX_REPOSITORY),)
-    ifeq ($(CXX),CC)
-      ifeq ($(findstring SunOS,$(PLATFORM)),SunOS)
-        # set SUNWS_CACHE_NAME to the basename of the file being compiled
-        # followed by .ti, to override the default template repository,
-        # SunWS_cache
-        tmp := $(CXX)
-        CXX =
-        CXX += SUNWS_CACHE_NAME=$(*F).ti
-        CXX += $(tmp)
-
-        tmp := $(LD)
-        LD   =
-        LD  += SUNWS_CACHE_NAME=$(*F).ti
-        LD  += $(tmp)
-      endif   # SunOS
-    endif   # SunPro
-  endif # neq ($(CXX_REPOSITORY),)
-else   # ifneq ($(ONE_REPOSITORY),)
-  ifneq ($(CXX_REPOSITORY),)
-
-    # using a template instantiation repository shared by all sources
-    # (i.e., when creating a single executable or library out of all
-    # the object files
-    ifeq ($(findstring =,$(CXX_REPOSITORY)),=)
-      CXX.repo = $(CXX_REPOSITORY)repository.ti
-    else
-      CXX.repo = $(CXX_REPOSITORY) repository.ti
-    endif
-  endif
-endif
-
 CPPFLAGS    += $(INCLUDES)
 CXXFLAGS    += $(WARNFLAGS)
 

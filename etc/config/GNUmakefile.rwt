@@ -42,7 +42,6 @@ TESTDIR      = $(TOPDIR)/tests
 SRCDIRS      = $(TESTDIR)/src
 
 # include common variables setting for all makefiles
-ONE_REPOSITORY = 1
 include ../makefile.common
 
 # Reset LIBSUFFIX to .a until we decide to build a dynamic library
@@ -56,20 +55,6 @@ INCLUDES    += -I$(TESTDIR)/include
 
 # VPATH to look for sources in (appended dir for test.cpp)
 VPATH       += $(TESTDIR)/src
-
-# For xlC 5.0.2.0
-ifneq ($(DEFAULT_SHROBJ),)
-  SOBJS = $(DEFAULT_SHROBJ)
-else
-  SOBJS = $(OBJS)
-endif
-
-
-# CXXPRELINK - command for compilers that use template
-# instantiation models that require a prelink stage
-ifneq ($(PRELINKFLAGS),)
-  CXXPRELINK = $(CXX) $(CPPFLAGS) $(PRELINKFLAGS) $(OBJS) $(LDFLAGS) $(LDLIBS)
-endif   # ($(PRELINKFLAGS),)
 
 ifneq ($(RPATH),)
   LDFLAGS += $(RPATH)$(LIBDIR)
@@ -91,17 +76,13 @@ realclean: clean dependclean
 # decide to build a shared library for rw test lib.
 ifeq ($(findstring shared,$(BUILDMODE)),shared)
 $(RWTESTLIB): $(OBJS)
-	@echo "$(CXXPRELINK)" >> $(LOGFILE)
-	$(CXXPRELINK) $(TEEOPTS)
-	@echo "$(AR) $(ARFLAGS) $(RWTESTLIB) $(SOBJS)" >> $(LOGFILE)
-	$(AR) $(ARFLAGS) $(RWTESTLIB) $(SOBJS)
+	@echo "$(AR) $(ARFLAGS) $(RWTESTLIB) $(OBJS)" >> $(LOGFILE)
+	$(AR) $(ARFLAGS) $(RWTESTLIB) $(OBJS)
 
 else
 $(RWTESTLIB): $(OBJS)
-	@echo "$(CXXPRELINK)" >> $(LOGFILE)
-	$(CXXPRELINK) $(TEEOPTS)
-	@echo "$(AR) $(ARFLAGS) $(RWTESTLIB) $(SOBJS)" >> $(LOGFILE)
-	$(AR) $(ARFLAGS) $(RWTESTLIB) $(SOBJS)
+	@echo "$(AR) $(ARFLAGS) $(RWTESTLIB) $(OBJS)" >> $(LOGFILE)
+	$(AR) $(ARFLAGS) $(RWTESTLIB) $(OBJS)
 
 endif # ($(findstring shared,$(BUILDMODE)),shared)
 

@@ -39,12 +39,7 @@ MSGFILES := rwstderr.msg
 LIBLINK := $(LIBNAME)
 
 ifeq ($(findstring shared,$(BUILDMODE)),shared)
-  ifneq ($(LIBSUFFIX),.dll)
-    LIB  := $(LIBLINK).$(LIBVER)
-  else
-    # on Cygwin use name libstd${BUILDTYPE}-X.Y.Z.dll
-    LIB  := $(basename $(LIBLINK))-$(LIBVER)$(LIBSUFFIX)
-  endif
+  LIB    := $(LIBLINK).$(LIBVER)
   TARGET := $(LIB) $(LIBLINK)
 else
   LIB    := $(LIBLINK)
@@ -60,24 +55,10 @@ SRCDIRS      = $(TOPDIR)/src
 OMIT_SRCS   += rwstderr.cpp
 
 # include common variables setting for all makefiles
-ONE_REPOSITORY = 1
 include ../makefile.common
 
 CXXFLAGS    += $(PICFLAGS)
 LDFLAGS     += $(LDSOFLAGS) $(MAPFLAGS) $(MAPFILE)
-
-# For AIX 5.1 xlC 5.0.2.0
-ifneq ($(DEFAULT_SHROBJ),)
-  SOBJS=$(DEFAULT_SHROBJ)
-else
-  SOBJS=$(OBJS)
-endif
-
-# CXXPRELINK - command for compilers that use template
-#              instantiation models that require a prelink stage
-ifneq ($(PRELINKFLAGS),)
-CXXPRELINK   = $(CXX) $(CPPFLAGS) $(LDFLAGS) $(PRELINKFLAGS) $(OBJS)
-endif   # ($(PRELINKFLAGS),)
 
 ########################################################################
 #  TARGETS
@@ -91,23 +72,12 @@ all: $(TARGET)
 # do any directory specific cleanup using the realclean target
 realclean: dependclean clean
 
-# build an archive or shared library (repository included for DEC cxx 6.2)
+# build an archive or shared library
 ifeq ($(findstring shared,$(BUILDMODE)),shared)
 
-  ifeq ($(findstring archive,$(BUILDMODE)),archive)
-  # shared archives are unique to IBM AIX
-  # IBM VisualAge/XLC++ on AIX first "preprocesses" object files
-  # with -qmkshrobj and then uses `ar' to create a shared archive
-$(LIB): $(OBJS)
-	@echo "$(CXXPRELINK) -o $(LIBBASE).o" >> $(LOGFILE)
-	$(CXXPRELINK) -o $(LIBBASE).o $(TEEOPTS)
-	@echo "$(AR) $(ARFLAGS) $@ $(LIBBASE).o" >> $(LOGFILE)
-	$(AR) $(ARFLAGS) $@ $(LIBBASE).o $(TEEOPTS)
-  else
 $(LIB): $(OBJS) $(MAPFILE)
 	@echo "$(LD) $(LDFLAGS) $< $(LDLIBS) -o $@" >> $(LOGFILE)
 	$(LD) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@ $(TEEOPTS)
-  endif   # shared archive
 
 $(LIBLINK): $(LIB)
 	@echo "ln -sf $< $@" >> $(LOGFILE)
@@ -115,14 +85,9 @@ $(LIBLINK): $(LIB)
 
 else
 
-# Compaq C++ needs all files from the repository
-SOBJS += $(shell [ -d repository.ti ] && echo repository.ti/*.o)
-
 $(LIB): $(OBJS)
-	@echo "$(CXXPRELINK)" >> $(LOGFILE)
-	$(CXXPRELINK) $(TEEOPTS)
-	@echo "$(AR) $(ARFLAGS) $(LIBNAME) $(SOBJS)" >> $(LOGFILE)
-	$(AR) $(ARFLAGS) $(LIBNAME) $(SOBJS) $(TEEOPTS)
+	@echo "$(AR) $(ARFLAGS) $(LIBNAME) $(OBJS)" >> $(LOGFILE)
+	$(AR) $(ARFLAGS) $(LIBNAME) $(OBJS) $(TEEOPTS)
 
 endif   # ($(findstring shared,$(BUILDMODE)),shared)
 

@@ -143,8 +143,6 @@
 #   PREFIX    - the root of the installation directory where the bin/
 #               include/ and lib/ subdirectories will be rooted
 #
-#   PRELINKFLAGS - flags passed to the prelinker
-#
 #   RUNFLAGS  - default options passed to runall.sh when running executables
 #   RUNOPTS   - additional options to pass to runall.sh (empty by default)
 #
@@ -154,9 +152,6 @@
 #
 #   WITH_PURIFY - set to `true' to build with purify. additional flags
 #                 can be specified in PURIFYFLAGS.
-#
-#   WITH_CADVISE - set to `true' to build with cadvise. additional flags
-#                  can be specified in CADVISEFLAGS.
 #
 ########################################################################
 
@@ -457,20 +452,6 @@ ifeq ($(in_topdir),1)
   # platform is determined as {OS-name}-{OS-version}-{hardware}
   PLATFORM := $(shell uname -srm | sed "s/[ \/]/-/g")
 
-  ifeq ($(OSNAME),SunOS)
-    # Sun recommends to use uname -p rather than the POSIX uname -m
-    PLATFORM := $(shell uname -srp | sed "s/[ \/]/-/g")
-  else
-    ifeq ($(OSNAME),AIX)
-      PLATFORM := $(shell uname -srv | awk '{ print $$1 "-" $$3 "." $$2 }')
-    else
-      ifeq ($(findstring CYGWIN,$(OSNAME)),CYGWIN)
-        PLATFORM := $(shell uname -sm | sed "s/[ \/]/-/g")
-      endif
-    endif
-  endif
-
-  # harmonize all the different Intel IA32 chips
   PLATFORM := $(subst i486,i86,$(PLATFORM))
   PLATFORM := $(subst i586,i86,$(PLATFORM))
   PLATFORM := $(subst i686,i86,$(PLATFORM))
@@ -548,7 +529,6 @@ $(MAKEFILE_IN): $(configpath)
           && echo "BUILDMODE  = $(BUILDMODE)"            >> $(MAKEFILE_IN)  \
           && echo "CXX        = $(CXX)"                  >> $(MAKEFILE_IN)  \
           && echo "CXXFLAGS   = $(CXXFLAGS)"             >> $(MAKEFILE_IN)  \
-          && echo "PRELINKFLAGS = $(PRELINKFLAGS)"       >> $(MAKEFILE_IN)  \
           && echo "PICFLAGS   = $(PICFLAGS)"             >> $(MAKEFILE_IN)  \
           && echo "CPPFLAGS   = $(CPPFLAGS)"             >> $(MAKEFILE_IN)  \
           && echo "WARNFLAGS  = $(WARNFLAGS)"            >> $(MAKEFILE_IN)  \
@@ -584,12 +564,8 @@ $(MAKEFILE_IN): $(configpath)
           && echo "OMIT_TST_SRCS = $(OMIT_TST_SRCS)"     >> $(MAKEFILE_IN)  \
           && echo "BUILDTAG   = $(BUILDTAG)"             >> $(MAKEFILE_IN)  \
           && echo "PLATFORM   = $(PLATFORM)"             >> $(MAKEFILE_IN)  \
-          && echo "DEFAULT_SHROBJ = $(DEFAULT_SHROBJ)"   >> $(MAKEFILE_IN)  \
-          && echo "WITH_CADVISE = $(WITH_CADVISE)"       >> $(MAKEFILE_IN)  \
-          && echo "CADVISEFLAGS = $(CADVISEFLAGS)"       >> $(MAKEFILE_IN)  \
           && echo "WITH_PURIFY = $(WITH_PURIFY)"         >> $(MAKEFILE_IN)  \
-          && echo "PURIFYFLAGS = $(PURIFYFLAGS)"         >> $(MAKEFILE_IN)  \
-          && echo "CXX_REPOSITORY = $(CXX_REPOSITORY)"   >> $(MAKEFILE_IN));
+          && echo "PURIFYFLAGS = $(PURIFYFLAGS)"         >> $(MAKEFILE_IN));
 
 # creates the build directory tree and generates makefile.in
 builddir: $(MAKEFILE_IN)

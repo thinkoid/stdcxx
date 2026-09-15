@@ -38,9 +38,8 @@
 ########################################################################
 
 clean: cleantarget
-	rm -rf a.out core *.o *.i *.ii *.ti *.sh *.sta *.out  \
-        *$(LIBSUFFIX) $(CATFILE)                              \
-        tempinc cxx_repository SunWS_cache 2>/dev/null
+	rm -rf a.out core *.o *.i *.ii *.sh *.sta *.out  \
+        *$(LIBSUFFIX) $(CATFILE) 2>/dev/null
 
 cleantarget:
 	rm -f $(TARGET)
@@ -76,17 +75,7 @@ ifeq ($(WITH_PURIFY),true)
 	PURIFYFLAGS += -log-file=stderr -view-file=$@.purify-view
   endif
 
-  ifneq ($(OSNAME),AIX)
-	PURIFY = purify $(PURIFYFLAGS)
-  endif
-endif
-
-ifeq ($(WITH_CADVISE),true)
-  ifeq ($(CADVISEFLAGS),)
-    CADVISEFLAGS = +w
-  endif
-
-  CADVISE = cadvise $(CADVISEFLAGS)
+  PURIFY = purify $(PURIFYFLAGS)
 endif
 
 ########################################################################
@@ -108,17 +97,17 @@ ifeq ($(NO_DOT_O),)
 
 # make the rule match for sources matching *.out.cpp
 %.out.o: %.out.cpp
-	$(CADVISE) $(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(call CXX.repo,$<) $<
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
 %.o: %.cpp
-	$(CADVISE) $(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(call CXX.repo,$<) $<
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
 # make the rule match for objects matching *.out.o
 %.out: %.out.o
-	$(PURIFY) $(LD) $< -o $@ $(LDFLAGS) $(LDLIBS) $(call CXX.repo,$<)
+	$(PURIFY) $(LD) $< -o $@ $(LDFLAGS) $(LDLIBS)
 
 %: %.o
-	$(PURIFY) $(LD) $< -o $@ $(LDFLAGS) $(LDLIBS) $(call CXX.repo,$<)
+	$(PURIFY) $(LD) $< -o $@ $(LDFLAGS) $(LDLIBS)
 
 # disable compilation and linking in the same step
 # %: %.cpp
@@ -221,7 +210,6 @@ endif   # eq ($(findstring clean,$(MAKECMDGOALS)),)
 # this is done by splitting up dependencies using tr so that there is just
 # one per line and then replacing the values of $(TOPDIR) and $(BUILDDIR)
 # with the actual make variable names themselves
-# move IBM xlC generated .u files to the respective .d files
 
 define makedep
     -@(if [ ! -f $@ ] ; then                                                 \
@@ -241,15 +229,6 @@ define makedep
            echo "$(CXX) $$depflags $(CPPFLAGS) $(CXXFLAGS) $<";              \
            $(CXX) $$depflags $(CPPFLAGS) $(CXXFLAGS) $<                      \
                | sed "$$sedexp1" | tr "@" "\n" | sed -n "$$sedexp2" >$@ ;    \
-           if [ ! -s $@ ]; then                                              \
-               depfile=$*.u;                                                 \
-               [ ! -s $$depfile ] && depfile=`basename $*.d`;                \
-               if [ -s $$depfile ] ; then                                    \
-                  sed "$$sedexp1" $$depfile | tr "@" "\n"                    \
-                                            | sed -n "$$sedexp2" > $@ ;      \
-               fi;                                                           \
-               rm -f $$depfile ;                                             \
-           fi ;                                                              \
            rm -f $*.i ;                                                      \
       fi)
 endef

@@ -47,23 +47,6 @@
 ##############################################################################
 
 
-OSNAME=`uname`
-
-if [ "$OSNAME" = "OSF1" -a "$BIN_SH" != "xpg4" ]; then
-    # make getopts work on Tru64 by setting the BIN_SH variable
-    # and re-executing self with the same command line arguments
-    BIN_SH=xpg4
-    export BIN_SH
-    exec $0 $*
-elif [ "$OSNAME" = "AIX" -a -z "$BASH_VERSION" ]; then
-    # use an alternate shell to work around a bug (?) in the AIX system
-    # shell that prevents it from trapping SIGHUP (and invoking the signal
-    # handler)
-    if [ -x /bin/bash ]; then
-        exec /bin/bash $0 $*
-    fi
-fi
-
 
 locale="./locale"
 localedef="./localedef"

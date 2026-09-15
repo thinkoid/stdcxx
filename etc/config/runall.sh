@@ -137,11 +137,6 @@ XOPTS="-D ."             # additional options to be passed to executable
 BUILDLOG=/dev/null       # log to append to results when posting
 TIMESTAMPS="-"           # times when lib and tests builds started
 
-case "`uname`" in
-    CYGWIN*)
-      DIFF_STRIP_CR="--strip-trailing-cr";; # strip trailing CR on CygWin
-esac
-
 
 ##############################################################################
 # FUNCTION DEFINITIONS
@@ -652,7 +647,7 @@ for i do
                 fi
 
                 if [ "$diff_file" != "" ] ; then
-                    diff $DIFF_STRIP_CR $diff_file $output >/dev/null 2>&1
+                    diff $diff_file $output >/dev/null 2>&1
                     if [ $? -eq 0 ] ; then
                         tst_pass=`expr $tst_pass + 1`
                     else

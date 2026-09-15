@@ -31,7 +31,6 @@ include ../makefile.in
 SRCDIRS = $(TOPDIR)/util
 
 # include common variables setting for all makefiles
-ONE_REPOSITORY = 1
 include ../makefile.common
 
 TARGET    = exec localedef locale gencat
@@ -62,10 +61,6 @@ RUNTARGET := $(filter %.sh,$(RUNTARGET))
 ifeq ($(RUNTARGET),)
   RUNTARGET := sanity_test.sh $(patsubst %,%.sh,$(LOCALES))
 endif
-
-ifneq ($(CXX_REPOSITORY),)
-  LDFLAGS += $(CPPFLAGS)
-endif   # ($(CXX_REPOSITORY),)
 
 # Don't want to link exec utility with stdlib, so create our own LDFLAGS var
 LDFLAGS.exec = $(filter-out -l$(LIBBASE),$(LDFLAGS))
