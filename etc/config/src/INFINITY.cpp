@@ -206,8 +206,6 @@ static flt_bits flt_snan ()
 
     val = flt_infinity ();
 
-#  if !defined (__hpux)
-
     // convert infinity into a signaling NAN (toggle any bit in signifcand)
     if (e == little_endian) {
         if (0.0f != val.val)
@@ -217,21 +215,6 @@ static flt_bits flt_snan ()
         if (0.0f != val.val)
             val.bits [sizeof (val.val) - 1] |= 1;
     }
-
-#  else   // if defined (__hpux)
-
-    // QNAN and SNAN on HP-UX are reversed...
-
-    if (e == little_endian) {
-        if (0.0f != val.val)
-            val.bits [1] = '\xc0';
-    }
-    else {
-        if (0.0f != val.val)
-            val.bits [sizeof val.val - 2] = '\xc0';
-    }
-
-#  endif   // __hpux
 
 #else   // if !defined (_RWSTD_NO_DBL_TRAPS)
 
@@ -413,8 +396,6 @@ static dbl_bits dbl_snan ()
 
     val = dbl_infinity ();
 
-#  if !defined (__hpux)
-
     // convert infinity into a signaling NAN (toggle any bit in signifcand)
     if (e == little_endian) {
         if (0.0 != val.val)
@@ -424,21 +405,6 @@ static dbl_bits dbl_snan ()
         if (0.0 != val.val)
             val.bits [sizeof val.val - 1] |= 1;
     }
-
-#  else   // if defined (__hpux)
-
-    // QNAN and SNAN on HP-UX are reversed...
-
-    if (e == little_endian) {
-        if (0.0 != val.val)
-            val.bits [1] = '\xf8';
-    }
-    else {
-        if (0.0 != val.val)
-            val.bits [sizeof val.val - 2] = '\xf8';
-    }
-
-#  endif   // __hpux
 
 #else   // if !defined (_RWSTD_NO_DBL_TRAPS)
 
@@ -673,8 +639,6 @@ static ldbl_bits ldbl_snan ()
 
     val = ldbl_infinity ();
 
-#  if !defined (__hpux)
-
     // convert infinity into a signaling NAN (toggle any bit in signifcand)
     if (e == little_endian) {
         if (0.0L != val.val)
@@ -684,20 +648,6 @@ static ldbl_bits ldbl_snan ()
         if (0.0L != val.val)
             val.bits [sizeof val.val - 1] |= 1;
     }
-
-#  else   // if defined (__hpux)
-
-    // QNAN and SNAN on HP-UX are reversed...
-    if (e == little_endian) {
-        if (0.0L != val.val)
-            val.bits [2] = '\x80';
-    }
-    else {
-        if (0.0L != val.val)
-            val.bits [sizeof val.val - 3] = '\x80';
-    }
-
-#  endif   // __hpux
 
 #else   // if !defined (_RWSTD_NO_DBL_TRAPS)
 

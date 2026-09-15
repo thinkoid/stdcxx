@@ -38,9 +38,6 @@
 #ifndef _RWSTD_NO_LONG_LONG
 #  define LONG_LONG long long
 #else   // if defined (_RWSTD_NO_LONG_LONG)
-#  if defined (_MSC_VER)
-#    define LONG_LONG   __int64
-#  endif   // _MSC_VER
 #endif   // _RWSTD_NO_LONG_LONG
 
 #include "types.h"   // for type_name()
@@ -162,10 +159,6 @@ const char* type_suffix (unsigned long) { return "UL"; }
 const char* type_suffix (long long) { return "LL"; }
 const char* type_suffix (unsigned long long) { return "ULL"; }
 #else
-#  if defined (_MSC_VER)
-const char* type_suffix (__int64) { return "L"; }
-const char* type_suffix (unsigned __int64) { return "UL"; }
-#  endif   // _MSC_VER
 #endif
 
 
@@ -328,24 +321,9 @@ int main ()
 
 #else   // if defined (_RWSTD_NO_LONG_LONG)
 
-#  if defined (_MSC_VER)
-
-#    define LLong __int64
-
-    printf ("#define _RWSTD_LLONG_SIZE  %2u\n", SIZEOF (LLong));
-
-    const char llong_name[] = "__int64";
-
-    MKLIMITS (LLong, "LLONG", "L", "__int64");
-    MKLIMITS (unsigned LLong, "ULLONG", "UL", "unsigned __int64");
-
-#    else
-
-#      define LLong long
+#    define LLong long
 
     const char llong_name[] = "long";
-
-#    endif   // _MSC_VER
 
 #endif   // _RWSTD_NO_LONG_LONG
 
@@ -369,19 +347,7 @@ int main ()
 
 #else   // if !defined (MB_LEN_MAX)
 
-#  if defined (_AIX)
-    printf ("#define _RWSTD_MB_LEN_MAX %d   /* known AIX libc value */\n", 4);
-#  elif defined (__hpux)
-    printf ("#define _RWSTD_MB_LEN_MAX %d   /* known HP-UX libc value */\n", 4);
-#  elif defined (__sgi) || defined (sgi)
-    printf ("#define _RWSTD_MB_LEN_MAX %d   /* known IRIX libc value */\n", 5);
-#  elif defined (__sun__) || defined (__sun) || defined (__sun)
-    printf ("#define _RWSTD_MB_LEN_MAX %d   /* known SunOS libc value */\n", 5);
-#  elif defined (_WIN32)
-    printf ("#define _RWSTD_MB_LEN_MAX %d   /* known WIN32 libc value */\n", 5);
-#  else
     printf ("#define _RWSTD_MB_LEN_MAX %d   /* guess */\n", 8);
-#  endif
 
 #endif   // MB_LEN_MAX
 

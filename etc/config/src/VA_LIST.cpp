@@ -51,12 +51,7 @@ GET_TYPE_NAME (unsigned long);
 GET_TYPE_NAME (long long);
 GET_TYPE_NAME (unsigned long long);
 
-#elif defined (_MSC_VER)
-
-GET_TYPE_NAME (__int64);
-GET_TYPE_NAME (unsigned __int64);
-
-#endif   // _RWSTD_NO_LONG_LONG, _MSC_VER
+#endif   // !defined (_RWSTD_NO_LONG_LONG)
 
 GET_TYPE_NAME (float);
 GET_TYPE_NAME (double);

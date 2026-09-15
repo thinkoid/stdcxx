@@ -52,14 +52,6 @@
 NAMESPACE (std) {
 
 
-#if defined (__EDG__) || defined (__sgi)
-   // let edg (or some of its derivatives) know about this fake type_info
-#  if !defined (__GNUG__) && !defined (__INTEL_COMPILER)
-#    pragma define_type_info
-#  endif
-#endif   // __EDG__
-
-
 struct type_info
 {
     virtual ~type_info ();

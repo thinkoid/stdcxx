@@ -24,11 +24,7 @@
 
 #include <stdio.h>
 
-#ifndef _WIN32
-#  include <sys/utsname.h>
-#else
-#  include <windows.h>
-#endif
+#include <sys/utsname.h>
 
 
 static int print_os_version ();
@@ -86,11 +82,7 @@ static char* capitalize (char *str)
 }
 
 
-
 #define ISDIGIT(x)   ((x) >= '0' && (x) <= '9')
-
-
-#ifndef _WIN32
 
 
 static void print_linux_release ()
@@ -171,7 +163,7 @@ static int print_os_version ()
     unsigned long num;
 
 #if !defined (SYS_NMLN)
-#  define SYS_NMLN   128
+#define SYS_NMLN   128
 #endif   // SYS_NMLN
 
     char str [SYS_NMLN * 2];
@@ -216,61 +208,3 @@ static int print_os_version ()
 }
 
 
-#else   // if defined (_WIN32)
-
-
-static int print_os_version ()
-{
-    OSVERSIONINFO osinfo;
-    osinfo.dwOSVersionInfoSize = sizeof osinfo;
-
-    const BOOL success = GetVersionEx (&osinfo);
-
-    printf ("#define _RWSTD_OS_WINDOWS\n");
-    printf ("#define _RWSTD_OS_SYSNAME \"WINDOWS\"\n");
-
-    if (!success)
-        return 1;
-
-    printf ("#define _RWSTD_OS_MAJOR %lu\n", osinfo.dwMajorVersion);
-    printf ("#define _RWSTD_OS_MINOR %lu\n", osinfo.dwMinorVersion);
-    printf ("#define _RWSTD_OS_MICRO %lu /* build number */\n",
-            osinfo.dwBuildNumber);
-
-    const char *flavor = 0;
-
-    if (4 == osinfo.dwMajorVersion) {
-        switch (osinfo.dwMinorVersion) {
-        case 0:
-            if (VER_PLATFORM_WIN32_NT == osinfo.dwPlatformId)
-                flavor = "NT";
-            else
-                flavor = "95";
-            break;
-                
-        case 10: flavor = "98"; break;
-        case 90: flavor = "ME"; break;
-        }
-    }
-    else if (5 == osinfo.dwMajorVersion) {
-        switch (osinfo.dwMinorVersion) {
-        case 0: flavor = "2000"; break;
-        case 1: flavor = "XP"; break;
-        case 2: flavor = "2003"; break;
-        }
-    }
-
-    if (flavor) {
-        printf ("#define _RWSTD_OS_RELEASE \"Windows %s\"\n", flavor);
-        printf ("#define _RWSTD_OS_WINDOWS_%s\n", flavor);
-    }
-    else {
-        printf ("#define _RWSTD_OS_RELEASE \"\"\n");
-    }
-
-    printf ("#define _RWSTD_OS_VERSION \"%s\"\n", osinfo.szCSDVersion);
-
-    return 0;
-}
-
-#endif   // _WIN32

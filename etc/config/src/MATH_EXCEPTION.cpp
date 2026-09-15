@@ -22,11 +22,6 @@
  * 
  **************************************************************************/
 
-#ifdef __osf__
-   // preemptive strike in case _OSF_SOURCE is #defined
-#  define _OSF_SOURCE
-#endif   // __osf__
-
 
 #include <math.h>
 

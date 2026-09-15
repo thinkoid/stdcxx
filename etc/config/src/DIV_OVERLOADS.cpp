@@ -32,11 +32,7 @@
 #include "config.h"
 
 #ifndef _RWSTD_NO_LONG_LONG
-#  if defined _MSC_VER
-#    define LONG_LONG   __int64
-#  else
-#    define LONG_LONG   long long
-#  endif
+#  define LONG_LONG   long long
 #endif   // _RWSTD_NO_LONG_LONG
 
 

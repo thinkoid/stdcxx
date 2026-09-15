@@ -22,33 +22,5 @@
  * 
  **************************************************************************/
 
-#ifdef _WIN32
-
-#  include <windows.h>
-
-#  ifdef _MSC_VER
-#    include <crtdbg.h>  // for _CrtSetReportMode()
-#  endif
-
-void nodbg ()
-{
-#  ifdef _MSC_VER
-    // prevent the Microsoft C library from popping up GUI windows
-    // on various failures and direct error messages to the console
-    // instead
-    _CrtSetReportMode (_CRT_WARN, _CRTDBG_MODE_DEBUG);
-    _CrtSetReportMode (_CRT_ERROR, _CRTDBG_MODE_DEBUG);
-    _CrtSetReportMode (_CRT_ASSERT, _CRTDBG_MODE_DEBUG);
-#  endif
-
-    // disable displaying the critical-error-handler
-    // and general-protection-fault message boxes
-    // windows.h included in thread.h
-    SetErrorMode (SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-}
-
-#else
-
 void nodbg () { }
 
-#endif   // _WIN32

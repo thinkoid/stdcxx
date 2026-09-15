@@ -25,13 +25,8 @@
 #include "nodbg.h"
 
 
-#if defined (_MSC_VER)
-#  define TRY             __try
-#  define EXCEPT(expr)    __except (expr)
-#else   // not MSVC
-#  define TRY               if (1)
-#  define EXCEPT(ignore)    else if (0)
-#endif   // _MSC_VER
+#define TRY               if (1)
+#define EXCEPT(ignore)    else if (0)
 
 
 int get_int (int);

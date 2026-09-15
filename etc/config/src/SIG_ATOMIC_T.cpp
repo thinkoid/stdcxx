@@ -32,9 +32,6 @@
 #ifndef _RWSTD_NO_LONG_LONG
 #  define LONG_LONG long long
 #else   // if defined (_RWSTD_NO_LONG_LONG)
-#  if defined (_MSC_VER)
-#    define LONG_LONG   __int64
-#  endif   // _MSC_VER
 #endif   // _RWSTD_NO_LONG_LONG
 
 #include "types.h"   // for type_name()

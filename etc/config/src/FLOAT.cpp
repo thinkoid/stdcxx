@@ -277,8 +277,6 @@ int main ()
 
     errno = 0;
 
-#    if !defined (__hpux) || !defined (_LONG_DOUBLE)
-
     // HP-UX strtold() returns struct long_double
     // the macro _LONG_DOUBLE is #defined when the struct is defined
     // note that gcc's replacement <stdlib.h> may actually define the
@@ -286,18 +284,6 @@ int main ()
 
     // determine whether strtold() sets errno on underflow
     const long double ld = strtold ("1.0e-9999", (char**)0);
-
-#    else   // HP-UX with _LONG_DOUBLE #defined
-
-    union {
-        long double ld;
-        long_double data;
-    } ldu;
-
-    ldu.data = strtold ("1.0e-9999", (char**)0);
-    const long double ld = ldu.ld;
-
-#    endif   // HP-UX, _LONG_DOUBLE
 
     if (ld < 0.0 || ld > 1.0 || !errno)
         printf ("#define _RWSTD_NO_STRTOLD_UFLOW\n");

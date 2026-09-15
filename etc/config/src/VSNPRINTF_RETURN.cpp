@@ -30,17 +30,8 @@
 
 
 #ifdef _RWSTD_NO_VSNPRINTF
-#  if !defined (_MSC_VER)
 
 extern "C" int vsnprintf (char*, size_t, const char*, va_list);
-
-#  else   // if defined (_MSC_VER)
-
-extern "C" int _vsnprintf (char*, size_t, const char*, va_list);
-
-#    define vsnprintf _vsnprintf
-
-#  endif   // MSVC
 
 #endif   // _RWSTD_NO_VSNPRINTF
 

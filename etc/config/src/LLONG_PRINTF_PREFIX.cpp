@@ -25,11 +25,7 @@
 #include <stdio.h>
 
 
-#if !defined (_MSC_VER)
-#  define long_long   long long
-#else
-#  define long_long   __int64
-#endif   // _MSC_VER
+#define long_long   long long
 
 // computes the largest positive long long that's a power of 2
 long_long get_big_num ()

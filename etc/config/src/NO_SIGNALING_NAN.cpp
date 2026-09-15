@@ -129,22 +129,7 @@ int main ()
     if (fetestexcept (all))
         return *pd != d;   // have a SNAN
 
-#elif defined (sun) || defined (__sun) || defined (__sun__)
-
-    fpsetsticky (0);
-
-    // any math operation should trap
-    d *= d;
-
-    if (fpgetsticky ())
-        return *pd != d;   // have a SNAN
-
-    d /= d;
-    
-    if (fpgetsticky ())
-        return *pd != d;   // have a SNAN
-
-#endif   // sun
+#endif   // defined (FE_DIVBYZERO) || defined (FE_INEXACT) || defined (FE_INVALID) || defined (FE_OVERFLOW) || defined (FE_UNDERFLOW)
 
     // NEGATIVE test: successful exit status indicates a failure
     return 0;

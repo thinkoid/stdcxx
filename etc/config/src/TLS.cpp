@@ -24,11 +24,7 @@
 
 #include <stdio.h>
 
-#if defined (_MSC_VER)
-#  define _RWSTD_THREAD __declspec (thread)
-#else
-#  define _RWSTD_THREAD __thread
-#endif
+#define _RWSTD_THREAD __thread
 
 #define STR(x) #x
 #define PRINT_MACRO(name) printf ("#define " #name " " STR (name) "\n")

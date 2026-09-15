@@ -129,11 +129,7 @@ int print_categories (const char*, int, int&, int&, int, char&, char&);
 int print_locale_name_format (int, int, int, int, int, char, char);
 
 
-#if !defined (_WIN32) || defined (__CYGWIN__)
 char cat_seps[] = " \n\t/\\:;#%";
-#else
-char cat_seps[] = "\n\t/\\:;#%";
-#endif
 
 
 int main ()
@@ -184,14 +180,6 @@ int main ()
     for (i = 0; i != nlocales; ++i) {
 
         locname = test_locale_names [i];
-
-#if defined (_MSC_VER) && _MSC_VER <= 1200
-
-        // work around an MSVC libc bug (PR #27990)
-        if (rw_strpbrk (locname, ".-"))
-            continue;
-
-#endif   // MSVC <= 6.0
 
         locname = setlocale (LC_ALL, locname);
         if (locname && strcmp (namebuf, locname))
@@ -292,13 +280,7 @@ static struct LC_vars
 // the known order of categories in combined locale names
 const int lc_cat_order[] = {
 
-#if defined (_AIX)
-    LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, LC_TIME, LC_MESSAGES,
-    -1, -1, -1, -1, -1, -1
-#elif defined (__FreeBSD__) || defined (__NetBSD__)
-    LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, LC_TIME, LC_MESSAGES,
-    -1, -1, -1, -1, -1, -1
-#elif defined (__hpux)
+#if defined (__FreeBSD__) || defined (__NetBSD__)
     LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, LC_TIME, LC_MESSAGES,
     -1, -1, -1, -1, -1, -1
 #elif defined (__GLIBC__)
@@ -310,24 +292,6 @@ const int lc_cat_order[] = {
 #  else
     -1, -1, -1, -1, -1, -1
 #  endif
-#elif defined (__osf__)
-    LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, LC_TIME, LC_MESSAGES,
-    -1, -1, -1, -1, -1, -1
-#elif defined (__sgi)
-    LC_CTYPE, LC_NUMERIC, LC_TIME, LC_COLLATE, LC_MONETARY, LC_MESSAGES,
-    -1, -1, -1, -1, -1, -1
-#elif    (defined (__sun__) || defined (__sun) || defined (sun)) \
-      && defined (__svr4__)
-    LC_CTYPE, LC_NUMERIC, LC_TIME, LC_COLLATE, LC_MONETARY, LC_MESSAGES,
-    -1, -1, -1, -1, -1, -1
-#elif defined (_WIN32)
-    LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, LC_TIME, -1,
-    -1, -1, -1, -1, -1, -1,
-#elif defined (__CYGWIN__)
-    // this is just a wild guess since localization support
-    // on CygWin seems to be very limited
-    LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, LC_TIME, -1,
-    -1, -1, -1, -1, -1, -1,
 #else
     -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1
@@ -560,17 +524,7 @@ int print_locale_name_format (int  guess,
 
     if (guess) {
 
-#if defined (_AIX)
-
-        setlocale_environ    = 1;
-        loc_name_use_cat     = 0;
-        loc_name_prepend_sep = 0;
-        loc_name_condense    = 0;
-        loc_name_cat_sep     = ' ';
-        loc_name_cat_eq      = '\0';
-        os_name              = "AIX";
-
-#elif defined (__FreeBSD__)
+#if defined (__FreeBSD__)
 
         setlocale_environ    = 1;
         loc_name_use_cat     = 0;
@@ -579,16 +533,6 @@ int print_locale_name_format (int  guess,
         loc_name_cat_sep     = '/';
         loc_name_cat_eq      = '\0';
         os_name              = "FreeBSD";
-
-#elif defined (__hpux)
-
-        setlocale_environ    = 1;
-        loc_name_use_cat     = 0;
-        loc_name_prepend_sep = 0;
-        loc_name_condense    = 0;
-        loc_name_cat_sep     = ' ';
-        loc_name_cat_eq      = '\0';
-        os_name              = "HP-UX";
 
 #elif defined (__GLIBC__)
 
@@ -609,60 +553,6 @@ int print_locale_name_format (int  guess,
         loc_name_cat_sep     = '\0';
         loc_name_cat_eq      = '\0';
         os_name              = "NetBSD";
-
-#elif defined (__osf__)
-
-        setlocale_environ    = 1;
-        loc_name_use_cat     = 0;
-        loc_name_prepend_sep = 0;
-        loc_name_condense    = 0;
-        loc_name_cat_sep     = ' ';
-        loc_name_cat_eq      = '\0';
-        os_name              = "Tru64 UNIX";
-
-#elif defined (__sgi)
-
-        setlocale_environ    = 1;
-        loc_name_use_cat     = 0;
-        loc_name_prepend_sep = 1;
-        loc_name_condense    = 1;
-        loc_name_cat_sep     = '/';
-        loc_name_cat_eq      = '\0';
-        os_name              = "SGI IRIX";
-
-#elif    (defined (__sun__) || defined (__sun) || defined (sun)) \
-      && defined (__svr4__)
-
-        setlocale_environ    = 1;
-        loc_name_use_cat     = 0;
-        loc_name_prepend_sep = 1;
-        loc_name_condense    = 1;
-        loc_name_cat_sep     = '/';
-        loc_name_cat_eq      = '\0';
-        os_name              = "SunOS";
-
-#elif defined (_WIN32)
-
-        setlocale_environ    = 0;
-        loc_name_use_cat     = 1;
-        loc_name_prepend_sep = 0;
-        loc_name_condense    = 1;
-        loc_name_cat_sep     = ';';
-        loc_name_cat_eq      = '=';
-        os_name              = "Windows";
-
-#elif defined (__CYGWIN__)
-
-        // guessing this might be the same as Windows
-        setlocale_environ    = 0;
-        loc_name_use_cat     = 1;
-        loc_name_prepend_sep = 0;
-        loc_name_condense    = 1;
-        loc_name_cat_sep     = ';';
-        loc_name_cat_eq      = '=';
-        // change the OS name to CygWin as soon as CygWin
-        // has implemented locale support
-        os_name              = "Windows";
 
 #else
 

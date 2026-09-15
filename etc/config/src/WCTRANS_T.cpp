@@ -24,17 +24,6 @@
 
 #include "config.h"
 
-#if    defined (__EDG__)                \
-    && !defined (__DECCXX)              \
-    && !defined (__HP_aCC)              \
-    && !defined (__INTEL_COMPILER)      \
-    && !defined (_SGI_COMPILER_VERSION)
-   // disable error #450-D: the type "long long" is nonstandard
-   // when using the vanilla EDG eccp in strict mode (i.e., w/o
-   // long long support)
-#  pragma diag_suppress 450
-#endif   // EDG eccp on Linux
-
 
 #ifndef _RWSTD_NO_WCHAR_H
 #  include <wchar.h>
