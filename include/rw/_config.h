@@ -319,6 +319,15 @@
 #  define _RWSTD_NO_EXT_OPERATOR_NEW
 #endif  // _RWSTD_LIB_SRC
 
+   // the library does provide the definitions of the replaceable
+   // operator new and delete variants the support library lacks
+   // (see memory.cpp): the clause above was undone for every compiler
+   // by a Visual C++ 6 workaround whose test, _MSC_VER <= 1300, held
+   // wherever the macro was not defined, and so was the definition
+   // in strict ANSI mode above; the workaround is gone, its effect
+   // is kept until the question is decided on its own
+#undef _RWSTD_NO_EXT_OPERATOR_NEW
+
 #ifdef _RWSTD_INSTANTIATE_TEMPLATES
    // instantiate templates (this macro is defined at the top of each
    // library source file (.cpp file) that explicitly instantiates class
