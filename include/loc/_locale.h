@@ -288,13 +288,6 @@ private:
 
     _RW::__rw_locale *_C_body;     // reference-counted body
 
-#if    defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x540
-
-   // working around a SunPro member access control bug (see PR #25910)
-public:
-
-#endif   // SunPro <= 5.4
-
     // (try to) retrieve a facet from a locale given an id
     // may initialize the id if it isn't initialized yet
     _RWSTD_MEMBER_EXPORT const facet*
@@ -368,12 +361,8 @@ __rw_get_std_facet (const _STD::locale  &__loc,
     if (!__facet)
         __facet = __loc._C_get_std_facet (__type, __ctor);
 
-#if !defined (__HP_aCC) || _RWSTD_HP_aCC_MINOR > 3800
-
     // working around an HP aCC ICE (PR #28838)
     _RWSTD_ASSERT (0 != __facet);
-
-#endif   // HP aCC
 
     return __facet;
 }

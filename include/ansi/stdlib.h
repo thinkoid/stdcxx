@@ -98,24 +98,6 @@ using std::wctomb;
 #else
 #  include _RWSTD_ANSI_C_STDLIB_H
 
-#  if    defined (__HP_aCC) \
-      && defined (_MATH_INCLUDED) && !defined (__MATH_INCLUDED)
-
-// hacking around an HP aCC quirk when using system headers
-// in /usr/include without the compiler's wrappers (i.e.,
-// when -I/usr/include is on the command line)
-
-extern "C" {
-
-inline int abs (int __x)
-{
-    return __x < 0 ? -__x : __x;
-}
-
-}   // extern "C"
-
-#  endif   // HP aCC && /usr/include/math.h included
-
 #  undef ldiv
 
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

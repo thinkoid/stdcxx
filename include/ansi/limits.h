@@ -120,12 +120,6 @@
 
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
-#if defined (__hpux__) || defined (__hpux) || defined (hpux)
-#  ifndef _POSIX_PATH_MAX
-#    define _POSIX_PATH_MAX 255
-#  endif   // _POSIX_PATH_MAX
-#endif   // HP-UX
-
 #if (MB_LEN_MAX != _RWSTD_MB_LEN_MAX)
 #  undef MB_LEN_MAX
 #  define MB_LEN_MAX _RWSTD_MB_LEN_MAX

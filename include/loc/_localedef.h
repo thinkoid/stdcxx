@@ -33,13 +33,6 @@
 #include <rw/_defs.h>
 
 
-#if 6 <= _RWSTD_HP_aCC_MAJOR
-   // suppress HP aCC 6 remarks
-   // 4298: addition result truncated before cast to bigger sized type
-   // 4299: multiply result truncated before cast to bigger sized type
-#  pragma diag_suppress 4298, 4299
-#endif   // aCC >= 6.0
-
 
 _RWSTD_NAMESPACE (__rw) { 
 

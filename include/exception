@@ -34,13 +34,6 @@
 #include <rw/_error.h>
 
 
-#if 0 // def __HP_aCC
-// HP aCC on HP-UX has <exception.h> whose contents HP prefers to ours
-// #  include </opt/aCC/include/exception.h>
-#  include <exception.h>
-#else   // if defined (__HP_aCC)
-
-
 #if    !defined (_RWSTD_NO_STD_EXCEPTION) \
     || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
@@ -68,20 +61,6 @@ public:
     // 18.6.1, p8
     virtual const char* what () const _THROWS (());
 
-#if defined (_MSC_VER)
-
-private:
-
-    const char *_C_name;
-    int         _C_flag;
-
-#elif defined (__INTEL_COMPILER)
-
-private:
-
-    const char *_C_name;
-
-#endif   // _MSC_VER
 };
 
 
@@ -184,7 +163,5 @@ _RWSTD_EXPORT extern bool
 uncaught_exception () _THROWS (());
 
 }   // namespace std
-
-#endif   // __HP_aCC
 
 #endif   // _RWSTD_EXCEPTION_INCLUDED

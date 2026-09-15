@@ -58,36 +58,7 @@ extern int* __errno_location ();
 
 }   // namespace std
 
-#elif defined (__sun__) || defined (__sun)
-
-_RWSTD_NAMESPACE (std) { 
-
-extern "C" {
-
-extern int errno;
-
-extern int* ___errno ();
-
-#ifdef _RWSTD_REENTRANT
-   // 17.4.1.2, p5 - errno may be a macro
-   // lwg issue 310 - errno must be a macro
-#  define errno (*_STD::___errno ())
-#else   // if !defined (_RWSTD_REENTRANT)
-#  define errno _STD::errno
-#endif   // _RWSTD_REENTRANT
-
-
-#define EDOM     33
-#define ERANGE   34
-
-// lwg issue 288
-#define EILSEQ   84
-
-}   // extern "C"
-
-}   // namespace std
-
-#else   // if !__linux__ && !__sun__
+#else   // !defined (__linux__)
 #  include _RWSTD_ANSI_C_ERRNO_H
 #endif   // __linux__
 

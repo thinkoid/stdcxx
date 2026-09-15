@@ -39,14 +39,6 @@
 #include _RWSTD_CMATH
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (push)
-   // disable conversion from 'double' to 'float', possible loss of data
-   // until a conforming <cmath> header with float and long double overloads
-   // for the C functions is provided
-#  pragma warning (disable: 4244)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (std) { 
 
@@ -2379,10 +2371,6 @@ valarray<_TypeT>::operator[] (const valarray<_RWSTD_SIZE_T> &__x)
 #  include <valarray.cc>
 #endif
 
-
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC
 
 
 #endif   // _RWSTD_VALARRAY_INCLUDED

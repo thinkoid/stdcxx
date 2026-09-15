@@ -50,17 +50,10 @@ bool operator== (const istream_iterator<_TypeT, _CharT, _Traits, _Distance>&,
                  const istream_iterator<_TypeT, _CharT, _Traits, _Distance>&);
 
 // 24.5.1
-#if !defined (_MSC_VER) || _MSC_VER > 1300
 
 template <class _TypeT, class _CharT = char,
           class _Traits = char_traits<_CharT>,
           class _Distance = _RWSTD_PTRDIFF_T>
-#else
-
-// prevent MSVC 6.0 ICE
-template <class _TypeT, class _CharT, class _Traits, class _Distance>
-
-#endif
 
 class istream_iterator
     : public iterator<input_iterator_tag, _TypeT, _Distance,

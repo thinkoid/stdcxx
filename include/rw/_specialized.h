@@ -141,14 +141,10 @@ __rw_destroy (_ForwardIterator __first, _ForwardIterator __last)
 }
 
 
-#ifndef _RWSTD_NO_PTR_VALUE_TEMPLATE_OVERLOAD
-
 // for compilers that don't optimize "empty" loops
 template <class _TypeT> 
 inline void __rw_destroy (_TypeT**, _TypeT**)
 { }
-
-#endif   // _RWSTD_NO_PTR_VALUE_TEMPLATE_OVERLOAD
 
 
 }   // namespace __rw

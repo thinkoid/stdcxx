@@ -53,15 +53,7 @@
 #  define _RWSTD_CMATH     <cmath>
 #  define _RWSTD_CSETJMP   <csetjmp>
 #  define _RWSTD_CSIGNAL   <csignal>
-
-#  ifdef _RWSTD_EDG_ECCP
-      // HACK: fool the vanilla EDG front-end into actually #including
-      // the file (it normally doesn't and treats <cstdarg> specially)
-#     define _RWSTD_CSTDARG <ansi/cstdarg>
-#  else   // if !defined (_RWSTD_EDG_ECCP)
-#     define _RWSTD_CSTDARG <cstdarg>
-#  endif   // _RWSTD_EDG_ECCP
-
+#  define _RWSTD_CSTDARG   <cstdarg>
 #  define _RWSTD_CSTDDEF   <cstddef>
 #  define _RWSTD_CSTDIO    <cstdio>
 #  define _RWSTD_CSTDLIB   <cstdlib>
@@ -114,90 +106,10 @@
 #endif   // _RWSTD_NO_NEW_HEADER
 
 
-#if defined(_WIN64)
-#  define _RWSTD_SYS_TYPES_H <basetsd.h>
-#elif defined(_WIN32)
-#  define _RWSTD_SYS_TYPES_H <rw/_defs.h>
-#else
-#  define _RWSTD_SYS_TYPES_H <sys/types.h>
-#endif   // _WIN32
+#define _RWSTD_SYS_TYPES_H <sys/types.h>
 
 // provide default #definitions of ANSI C library headers
-#if defined (_M_IA64)
-   // IA64/Itanium SDK paths
-#  if !defined (_RWSTD_NO_ASSERT_H) && !defined (_RWSTD_ANSI_C_ASSERT_H)
-     // pathname quoted in order to prevent the assert macro
-     // from expanding in the include directive
-#    define _RWSTD_ANSI_C_ASSERT_H "../include/crt/assert.h"
-#  endif
-#  if !defined (_RWSTD_NO_CTYPE_H) && !defined (_RWSTD_ANSI_C_CTYPE_H)
-#    define _RWSTD_ANSI_C_CTYPE_H <../include/crt/ctype.h>
-#  endif
-#  if !defined (_RWSTD_NO_ERRNO_H) && !defined (_RWSTD_ANSI_C_ERRNO_H)
-     // pathname quoted in order to prevent the errno macro
-     // from expanding in the include directive
-#    define _RWSTD_ANSI_C_ERRNO_H "../include/crt/errno.h"
-#  endif
-#  if !defined (_RWSTD_NO_FLOAT_H) && !defined (_RWSTD_ANSI_C_FLOAT_H)
-#    define _RWSTD_ANSI_C_FLOAT_H <../include/crt/float.h>
-#  endif
-#  if !defined (_RWSTD_NO_ISO646_H) && !defined (_RWSTD_ANSI_C_ISO646_H)
-#    define _RWSTD_ANSI_C_ISO646_H <../include/crt/iso646.h>
-#  endif  // _RWSTD_NO_ASSERT_H && _RWSTD_ANSI_C_ASSERT_H
-
-#  if !defined (_RWSTD_ANSI_C_LIMITS_H)
-#    if !defined (_RWSTD_NO_LIMITS_H)
-#      define _RWSTD_ANSI_C_LIMITS_H <../include/crt/limits.h>
-#    else
-#      define _RWSTD_ANSI_C_LIMITS_H <rw/_defs.h>
-#    endif
-#  endif  // _RWSTD_ANSI_C_LIMITS_H
-
-#  if !defined (_RWSTD_NO_LOCALE_H) && !defined (_RWSTD_ANSI_C_LOCALE_H)
-#    define _RWSTD_ANSI_C_LOCALE_H <../include/crt/locale.h>
-#  endif
-#  if !defined (_RWSTD_NO_MATH_H) && !defined (_RWSTD_ANSI_C_MATH_H)
-#    define _RWSTD_ANSI_C_MATH_H <../include/crt/math.h>
-#  endif
-#  if !defined (_RWSTD_NO_SETJMP_H) && !defined (_RWSTD_ANSI_C_SETJMP_H)
-     // pathname quoted in order to prevent the setjmp macro
-     // from expanding in the include directive
-#    define _RWSTD_ANSI_C_SETJMP_H "../include/crt/setjmp.h"
-#  endif
-#  if !defined (_RWSTD_NO_SIGNAL_H) && !defined (_RWSTD_ANSI_C_SIGNAL_H)
-#    define _RWSTD_ANSI_C_SIGNAL_H <../include/crt/signal.h>
-#  endif
-#  if !defined (_RWSTD_NO_STDARG_H) && !defined (_RWSTD_ANSI_C_STDARG_H)
-#    define _RWSTD_ANSI_C_STDARG_H <../include/crt/stdarg.h>
-#  endif
-#  if !defined (_RWSTD_NO_STDDEF_H) && !defined (_RWSTD_ANSI_C_STDDEF_H)
-#    define _RWSTD_ANSI_C_STDDEF_H <../include/crt/stddef.h>
-#  endif
-#  if !defined (_RWSTD_NO_STDIO_H) && !defined (_RWSTD_ANSI_C_STDIO_H)
-#    define _RWSTD_ANSI_C_STDIO_H <../include/crt/stdio.h>
-#  endif
-#  if !defined (_RWSTD_NO_STDLIB_H) && !defined (_RWSTD_ANSI_C_STDLIB_H)
-#    define _RWSTD_ANSI_C_STDLIB_H <../include/crt/stdlib.h>
-#  endif
-#  if !defined (_RWSTD_NO_STRING_H) && !defined (_RWSTD_ANSI_C_STRING_H)
-#    define _RWSTD_ANSI_C_STRING_H <../include/crt/string.h>
-#  endif
-#  if !defined (_RWSTD_NO_TIME_H) && !defined (_RWSTD_ANSI_C_TIME_H)
-#    define _RWSTD_ANSI_C_TIME_H <../include/crt/time.h>
-#  endif
-#  if !defined (_RWSTD_NO_WCHAR_H) && !defined (_RWSTD_ANSI_C_WCHAR_H)
-#    define _RWSTD_ANSI_C_WCHAR_H <../include/crt/wchar.h>
-#  endif
-
-#  if !defined (_RWSTD_ANSI_C_WCTYPE_H)
-#    if !defined (_RWSTD_NO_WCTYPE_H)
-#      define _RWSTD_ANSI_C_WCTYPE_H <../include/crt/wctype.h>
-#    else
-#      define _RWSTD_ANSI_C_WCTYPE_H <rw/_defs.h>
-#    endif
-#  endif   // _RWSTD_ANSI_C_WCTYPE_H
-
-#elif !defined (_RWSTD_NO_FORCE_RELATIVE_PATHS)
+#if !defined (_RWSTD_NO_FORCE_RELATIVE_PATHS)
 
 #  undef _RWSTD_ANSI_C_ASSERT_H
    // pathname quoted in order to prevent the assert macro
@@ -332,7 +244,7 @@
 #    endif
 #  endif   // _RWSTD_ANSI_C_WCTYPE_H
 
-#else   // if !_WIN64 && !_RWSTD_USE_USR_INCLUDE_HEADERS
+#else   // defined (_RWSTD_NO_FORCE_RELATIVE_PATHS)
 
 #  if !defined (_RWSTD_NO_ASSERT_H) && !defined (_RWSTD_ANSI_C_ASSERT_H)
      // pathname quoted in order to prevent the assert macro
@@ -405,7 +317,7 @@
 #      define _RWSTD_ANSI_C_WCTYPE_H <rw/_defs.h>
 #    endif
 #  endif   // _RWSTD_ANSI_C_WCTYPE_H
-#endif  // !_WIN64
+#endif  // !defined (_RWSTD_NO_FORCE_RELATIVE_PATHS)
 
 
 
@@ -458,34 +370,17 @@
 #endif   // _RWSTD_MINIMUM_STRINGBUF_CAPACITY
 
 // working around an HP aCC bug (PR #25354 and 22610)
-#if !defined (__HP_aCC)
-#  define _RWSTD_NEW_CAPACITY(ignore, what, from)   \
+#define _RWSTD_NEW_CAPACITY(ignore, what, from)   \
       _RW::__rw_new_capacity (from, what)
-#else
-#  define _RWSTD_NEW_CAPACITY(T, what, from)   \
-      _RW::__rw_new_capacity<T>(from, what)
-#endif   // HP aCC
 
 // set up MSVC DLL export/import directives
 // _DLL - defined by the compiler when either -MD or -MDd is used
 // RWDLL - defined for all Rogue Wave(R) products built as shared libs
 // _RWSHARED - defined for libstd built/used as a shared lib
-#if defined (_MSC_VER) && (defined (RWDLL) || defined (_RWSHARED))
-
-#  ifdef _RWSTD_LIB_SRC
-#    define _RWSTD_EXPORT            __declspec (dllexport)
-#  else
-#    define _RWSTD_EXPORT            __declspec (dllimport)
-#  endif   // _RWSTD_LIB_SRC
-
-#    define _RWSTD_CLASS_EXPORT    _RWSTD_EXPORT
-#    define _RWSTD_MEMBER_EXPORT   /* empty */
-#else
    // disable MSVC hacks
-#  define _RWSTD_EXPORT          /* empty */
-#  define _RWSTD_CLASS_EXPORT    /* empty */
-#  define _RWSTD_MEMBER_EXPORT   /* empty */
-#endif // _MSC_VER
+#define _RWSTD_EXPORT          /* empty */
+#define _RWSTD_CLASS_EXPORT    /* empty */
+#define _RWSTD_MEMBER_EXPORT   /* empty */
 
 #ifdef _RWSTD_NO_BOOL
 #  define bool    int
@@ -535,11 +430,7 @@
 
 
 // Work around a bug in MSVC (see PR# 28547); used in basic_string
-#if !defined (_MSC_VER) || _MSC_VER < 1300
-#  define _RWSTD_REDECLARED_DEFAULT(arg)   = arg
-#else   // if !(!defined (_MSC_VER) || (_MSC_VER < 1300))
-#  define _RWSTD_REDECLARED_DEFAULT(ignore)
-#endif   // !defined (_MSC_VER) || (_MSC_VER < 1300)
+#define _RWSTD_REDECLARED_DEFAULT(arg)   = arg
 
 
 // Macro for casting, using either the "old" method
@@ -666,25 +557,12 @@
             _RWSTD_ATOMIC_SWAP(x, y, mutex)
 #  endif    // _RWSTD_NO_EXT_REENTRANT_IO
 
-#  if defined (_PA_RISC2_0)
-
-#    define _RWSTD_STRING_ATOMIC_PREINCREMENT(x, mutex)              \
-            _RW::__rw_string_atomic_preincrement (x, mutex)
-
-#    define _RWSTD_STRING_ATOMIC_PREDECREMENT(x, mutex)              \
-            _RW::__rw_string_atomic_predecrement (x, mutex)
-
-#    define _RWSTD_STRING_ATOMIC_SWAP(x, y, mutex)                   \
-            _RW::__rw_string_atomic_exchange (x, y, mutex)
-
-#  else   // if !_PA_RISC2_0
-#    define _RWSTD_STRING_ATOMIC_PREINCREMENT(x, mutex)              \
+#  define _RWSTD_STRING_ATOMIC_PREINCREMENT(x, mutex)              \
             _RWSTD_ATOMIC_PREINCREMENT (x, mutex)
-#    define _RWSTD_STRING_ATOMIC_PREDECREMENT(x, mutex)              \
+#  define _RWSTD_STRING_ATOMIC_PREDECREMENT(x, mutex)              \
             _RWSTD_ATOMIC_PREDECREMENT (x, mutex)
-#    define _RWSTD_STRING_ATOMIC_SWAP(x, y, mutex)                   \
+#  define _RWSTD_STRING_ATOMIC_SWAP(x, y, mutex)                   \
             _RWSTD_ATOMIC_SWAP (x, y, mutex)
-#  endif   // !_PA_RISC2_0
 
    // thread-local storage
 #  ifndef _RWSTD_NO_TLS
@@ -1001,15 +879,7 @@
 // of the class (as required by 9.4.2, p4)
 #ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
 #  define _RWSTD_STATIC_CONST(type, init)    static const type init
-#  ifndef _RWSTD_NO_STATIC_CONST_MEMBER_DEFINITION
-#    define _RWSTD_DEFINE_STATIC_CONST(decl)   decl
-#  else   // if defined (_RWSTD_NO_STATIC_CONST_MEMBER_DEFINITION)
-     // disable defintion of static const integral members
-     // to work around compiler bugs such as those in MSVC
-     // or Intel C++/Windows that cause multiple definition
-     // linker errors (see PR #26562 and #30260)
-#    define _RWSTD_DEFINE_STATIC_CONST(ignore)   /* empty */
-#  endif   // _RWSTD_NO_STATIC_CONST_MEMBER_DEFINITION
+#  define _RWSTD_DEFINE_STATIC_CONST(decl)   decl
 #else   // if defined (_RWSTD_NO_STATIC_CONST_MEMBER_INIT)
 #  define _RWSTD_STATIC_CONST(ignore, init)  enum { init }
 #  define _RWSTD_DEFINE_STATIC_CONST(ignore)   /* empty */
@@ -1058,17 +928,8 @@
 #  define _RWSTD_DIFFERENCE_TYPE(iterT)   \
        (_TYPENAME _STD::iterator_traits< iterT >::difference_type*)0
 
-#  if defined (SNI) || defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x530
-     // hacking around the inability of Siemens CDS++ and SunPro 5.3
-     // to use the ctor syntax for type-dependent nested type names
-#    define _RWSTD_ITERATOR_CATEGORY(iterT, ignore) \
-         (const _TYPENAME _STD::iterator_traits< iterT >::iterator_category&) \
-         (_STD::forward_iterator_tag ())
-
-#  else
-#    define _RWSTD_ITERATOR_CATEGORY(iterT, ignore) \
+#  define _RWSTD_ITERATOR_CATEGORY(iterT, ignore) \
          _TYPENAME _STD::iterator_traits< iterT >::iterator_category ()
-#  endif
 
 #  define _RWSTD_REVERSE_ITERATOR(iterT, ign1, ign2, ign3) \
        _STD::reverse_iterator<iterT>
@@ -1142,12 +1003,7 @@
 
 #define _RWSTD_FILE_LINE   __FILE__ ":" _RWSTD_STRSTR (__LINE__)
 
-#if !defined (__DECCXX_VER) || __DECCXX_VER > 60290024
-#  define _RWSTD_REQUIRES(pred, args)   (pred) ? (void)0 : _RW::__rw_throw args
-#else
-   // working around a DEC cxx bug
-#  define _RWSTD_REQUIRES(pred, args)   if (pred) ; else _RW::__rw_throw args
-#endif
+#define _RWSTD_REQUIRES(pred, args)   (pred) ? (void)0 : _RW::__rw_throw args
 
 
 // function exception specification
@@ -1226,19 +1082,13 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 
 
-#ifdef __SUNPRO_CC
-   // help Sun C++ optimizer generate better code
-#  pragma does_not_return (__rw_assert_fail)
-#endif   // __SUNPRO_CC
-
 }   // extern "C++"
 
 }   // namespace __rw
 
 
 // for convenience
-#if    !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)          \
-    && (!defined (__SUNPRO_CC) || __SUNPRO_CC > 0x540)
+#if !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
 #  define _DISTANCE(first, last, ignore) _STD::distance (first, last)
 #else
 // working around a SunPro 5.{3,4} bug (see PR #25958)
@@ -1248,8 +1098,9 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 // enable only in debug mode and only id partial class specialization
 // is supported; prevent multiple definition of _RWSTD_NO_DEBUG_ITER
-#if    defined(_RWSTDDEBUG) && !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) \
-    && !defined (_RWSTD_NO_DEBUG_ITER) && !defined (SNI)
+#if   defined (_RWSTDDEBUG)                    \
+    && !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) \
+    && !defined (_RWSTD_NO_DEBUG_ITER)
 #  define _RWSTD_ASSERT_RANGE(first, last) \
       _RWSTD_ASSERT (_RW::__rw_valid_range (first, last))
 #  define _RWSTD_ASSERT_IN_RANGE(it, first, last) \
@@ -1291,11 +1142,7 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 // ssize_t is defined by POSIX.1
 #ifndef _RWSTD_SSIZE_T
-#  ifdef _WIN64
-#    define _RWSTD_SSIZE_T SSIZE_T
-#  else
-#    define _RWSTD_SSIZE_T long
-#  endif
+#  define _RWSTD_SSIZE_T long
 #endif   // _RWSTD_SSIZE_T
 
 
@@ -1313,14 +1160,7 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #endif   // _RWSTD_UWCHAR_INT_T
 
 
-#if defined(SNI)
-#  define _RWSTD_USING_SNI(name) _USING(__SNI::name)
-#  if defined(_RWSTD_STRICT_ANSI)
-#    define fileno(p)       (int) ((p)->_file)
-#  endif
-#else
-#  define _RWSTD_USING_SNI(ignore)    typedef void __rw_unused_type
-#endif
+#define _RWSTD_USING_SNI(ignore)    typedef void __rw_unused_type
 
 
 #ifndef _RWSTD_TMPBUF_SIZE
@@ -1376,14 +1216,6 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #    define _RWSTD_INSTANTIATE_FUN_3(ign1, ign2, ign3)   \
        typedef void __rw_unused_type
 #  endif   // _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
-#elif     defined (_MSC_VER)                          \
-      && !defined (_RWSTD_NO_EXPLICIT_INSTANTIATION)  \
-      && !defined (_RWSTD_NO_INSTANTIATE)
-
-#  define _RWSTD_INSTANTIATE(ign1, type)   (!_RWSTD_NO ## type)
-#  define _RWSTD_INSTANTIATE_1(arg)        extern template arg
-#  define _RWSTD_INSTANTIATE_2(a1, a2)     extern template a1, a2
-#  define _RWSTD_INSTANTIATE_3(a1, a2, a3) extern template a1, a2, a3
 #elif !defined (_RWSTD_NO_EXTERN_TEMPLATE)
    // use the extern template extension to declare template
    // specializations that are explicitly instantiated in

@@ -149,55 +149,7 @@ _RWSTD_NAMESPACE (std) {
 
 #    endif   // _RWSTD_NO_RUNTIME_IN_STD
 
-#    if defined (__HP_aCC)
-
-const char* type_info::name () const
-{
-    return _C_name;
-}
-
-#      ifdef _HP_IA64ABI
-
-bool type_info::before (const type_info &rhs) const
-{
-    return name () < rhs.name ();
-}
-
-bool type_info::operator== (const type_info &rhs) const
-{
-    return name () == rhs.name ();
-}
-
-bool type_info::operator!= (const type_info &rhs) const
-{
-    return !(*this == rhs);
-}
-
-#      endif   // _HP_IA64ABI
-
-#    elif defined (__INTEL_COMPILER) && !defined (_MSC_VER)
-
-const char* type_info::name () const
-{
-    return _C_name;
-}
-
-bool type_info::before (const type_info &rhs) const
-{
-    return name () < rhs.name ();
-}
-
-bool type_info::operator== (const type_info &rhs) const
-{
-    return name () == rhs.name ();
-}
-
-bool type_info::operator!= (const type_info &rhs) const
-{
-    return !(*this == rhs);
-}
-
-#    elif defined (__GNUG__) && !defined (_RWSTD_NO_HONOR_STD)
+#    if defined (__GNUG__) && !defined (_RWSTD_NO_HONOR_STD)
 
 // define member functions inline in namespace std (they are defined
 // as members of ::type_info (as opposed to std::type_info) in libstdc++
@@ -218,24 +170,7 @@ bool type_info::operator!= (const type_info &rhs) const
     return !(*this == rhs);
 }
 
-#    elif defined (__IBMCPP__)
-
-const char* type_info::name () const
-{
-    return _C_typeName;
-}
-
-bool type_info::operator== (const type_info &rhs) const
-{
-    return !this->before (rhs) && !rhs.before (*this);
-}
-
-bool type_info::operator!= (const type_info &rhs) const
-{
-    return !(*this == rhs);
-}
-
-#    endif   // __IBMCPP__
+#    endif   // defined (__GNUG__) && !defined (_RWSTD_NO_HONOR_STD)
 
 
 #    if defined (__GNUG__) && !defined (_RWSTD_NO_HONOR_STD)
@@ -248,43 +183,8 @@ bool type_info::before (const type_info &rhs) const
     return 0 > _RW::__rw_ticmp (*this, rhs);
 }
 
-#    elif defined (__IBMCPP__)
-
-bool type_info::before (const type_info &rhs) const
-{
-    return 0 > _RW::__rw_ticmp (*this, rhs);
-}
-
 #    endif   //  __GNUG__ && !_RWSTD_NO_HONOR_STD
 
-
-#    ifdef _MSC_VER
-
-const char* type_info::name () const
-{
-    return _C_name;
-}
-
-
-// define in global namespace just like MSVC wants it
-bool type_info::before (const type_info &rhs) const
-{
-    return 0 > _RW::__rw_ticmp (*this, rhs);
-}
-
-
-bool type_info::operator== (const type_info &rhs) const
-{
-    return 0 == _RW::__rw_ticmp (*this, rhs);
-}
-
-
-bool type_info::operator!= (const type_info &rhs) const
-{
-    return !(*this == rhs);
-}
-
-#    endif   // _MSC_VER
 
 #    ifndef _RWSTD_NO_RUNTIME_IN_STD
 

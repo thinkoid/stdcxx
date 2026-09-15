@@ -346,19 +346,10 @@ private:
     ios_base (const ios_base&);               // not defined
     ios_base& operator= (const ios_base&);    // not defined
 
-#if __EDG_VERSION__ < 245
-
     // working around an EDG eccp 2.3x bug (also derivatives,
     // such as MIPSpro, see PR #28631)
 public:
     struct _C_usr_data;
-
-#else
-
-protected:
-    struct _C_usr_data;
-
-#endif   // EDG < 2.45
 
 protected:
     _C_usr_data *_C_usr;      // user data (iword, pword, callbacks)

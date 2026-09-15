@@ -157,74 +157,6 @@ __rw_ldbl_denorm_min = { _RWSTD_LDBL_DENORM_MIN_BITS };
 }   // extern "C"/"C++"
 
 
-#  if _RWSTD_VER_MAJOR < 5 && defined (_MSC_VER) && defined (_DLL)
-
-// The constants below are defined with C++ linkage
-// to be exported as floating constants with mangled
-// names for binary compatibility with stdcxx 4.1.x
-
-extern const _FltBits
-__rw_flt_infinity_vc = { _RWSTD_FLT_INF_BITS };
-
-extern const _FltBits
-__rw_flt_qNaN_vc = { _RWSTD_FLT_QNAN_BITS };
-
-extern const _FltBits
-__rw_flt_sNaN_vc = { _RWSTD_FLT_SNAN_BITS };
-
-extern const _FltBits
-__rw_flt_denorm_min_vc = { _RWSTD_FLT_DENORM_MIN_BITS };
-
-
-extern const _DblBits
-__rw_dbl_infinity_vc = { _RWSTD_DBL_INF_BITS };
-
-extern const _DblBits
-__rw_dbl_qNaN_vc = { _RWSTD_DBL_QNAN_BITS };
-
-extern const _DblBits
-__rw_dbl_sNaN_vc = { _RWSTD_DBL_SNAN_BITS };
-
-extern const _DblBits
-__rw_dbl_denorm_min_vc = { _RWSTD_DBL_DENORM_MIN_BITS };
-
-
-#    ifndef _RWSTD_NO_LONG_DOUBLE
-
-extern const _LDblBits
-__rw_ldbl_infinity_vc = { _RWSTD_LDBL_INF_BITS };
-
-extern const _LDblBits
-__rw_ldbl_qNaN_vc = { _RWSTD_LDBL_QNAN_BITS };
-
-extern const _LDblBits
-__rw_ldbl_sNaN_vc = { _RWSTD_LDBL_SNAN_BITS };
-
-extern const _LDblBits
-__rw_ldbl_denorm_min_vc = { _RWSTD_LDBL_DENORM_MIN_BITS };
-
-#    endif   // _RWSTD_NO_LONG_DOUBLE
-
-
-#    pragma comment (linker, "/EXPORT:?__rw_flt_infinity@__rw@@3MB=?__rw_flt_infinity_vc@__rw@@3T_FltBits@1@B,DATA")
-#    pragma comment (linker, "/EXPORT:?__rw_flt_qNaN@__rw@@3MB=?__rw_flt_qNaN_vc@__rw@@3T_FltBits@1@B,DATA")
-#    pragma comment (linker, "/EXPORT:?__rw_flt_sNaN@__rw@@3MB=?__rw_flt_sNaN_vc@__rw@@3T_FltBits@1@B,DATA")
-#    pragma comment (linker, "/EXPORT:?__rw_flt_denorm_min@__rw@@3MB=?__rw_flt_denorm_min_vc@__rw@@3T_FltBits@1@B,DATA")
-
-#    pragma comment (linker, "/EXPORT:?__rw_dbl_infinity@__rw@@3NB=?__rw_dbl_infinity_vc@__rw@@3T_DblBits@1@B,DATA")
-#    pragma comment (linker, "/EXPORT:?__rw_dbl_qNaN@__rw@@3NB=?__rw_dbl_qNaN_vc@__rw@@3T_DblBits@1@B,DATA")
-#    pragma comment (linker, "/EXPORT:?__rw_dbl_sNaN@__rw@@3NB=?__rw_dbl_sNaN_vc@__rw@@3T_DblBits@1@B,DATA")
-#    pragma comment (linker, "/EXPORT:?__rw_dbl_denorm_min@__rw@@3NB=?__rw_dbl_denorm_min_vc@__rw@@3T_DblBits@1@B,DATA")
-
-#    ifndef _RWSTD_NO_LONG_DOUBLE
-#      pragma comment (linker, "/EXPORT:?__rw_ldbl_infinity@__rw@@3OB=?__rw_ldbl_infinity_vc@__rw@@3T_LDblBits@1@B,DATA")
-#      pragma comment (linker, "/EXPORT:?__rw_ldbl_qNaN@__rw@@3OB=?__rw_ldbl_qNaN_vc@__rw@@3T_LDblBits@1@B,DATA")
-#      pragma comment (linker, "/EXPORT:?__rw_ldbl_sNaN@__rw@@3OB=?__rw_ldbl_sNaN_vc@__rw@@3T_LDblBits@1@B,DATA")
-#      pragma comment (linker, "/EXPORT:?__rw_ldbl_denorm_min@__rw@@3OB=?__rw_ldbl_denorm_min_vc@__rw@@3T_LDblBits@1@B,DATA")
-#    endif   // _RWSTD_NO_LONG_DOUBLE
-
-#endif   // _RWSTD_VER_MAJOR < 5 && _MSC_VER && _DLL
-
 #else   // if defined (_RWSTD_NO_INFINITY)
 
 
@@ -250,15 +182,11 @@ _RWSTD_EXPORT extern const float __rw_flt_infinity =
 
     FLT_INFINITY;
 
-#  elif defined (__osf__)
-
-    0.0f;   // prevent SIGFPE at startup (PR #23163)
-
-#  else   // if !defined (__osf__)
+#  else   // !defined (INFINITY)
 
 _RWSTD_STATIC_CAST (float, atof ("INF"));
 
-#  endif   // __osf__
+#  endif   // defined (INFINITY)
 
 _RWSTD_EXPORT extern const double __rw_dbl_infinity = __rw_flt_infinity;
 
@@ -278,15 +206,11 @@ _RWSTD_EXPORT extern const float __rw_flt_qNaN =
 
     FLT_QNAN;
 
-#  elif defined (__osf__)
-
-    0.0;   // prevent SIGFPE at startup (PR #23163)
-
-#  else   // if !defined (__osf__)
+#  else   // !defined (NAN)
 
 _RWSTD_STATIC_CAST (float, atof ("NAN"));
 
-#  endif   // __osf__
+#  endif   // defined (NAN)
 
 _RWSTD_EXPORT extern const float __rw_flt_sNaN =
 

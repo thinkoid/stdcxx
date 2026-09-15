@@ -56,13 +56,9 @@ struct _RWSTD_EXPORT __rw_facet: __rw_synchronized
     // of standard types by the library
     typedef __rw_facet* (_C_ctor_t)(_RWSTD_SIZE_T, const char*);
 
-#if !defined (_MSC_VER) || 5 <= _RWSTD_VER_MAJOR
-
     // disabled for binary compatibility with stdcxx 4.1.x for MSVC
     // (the compiler mangles access specifiers into class members)
 protected:
-
-#endif   // !MSVC || 5 <= stdcxx version
 
     _EXPLICIT __rw_facet (_RWSTD_SIZE_T = 0) _THROWS (());
 

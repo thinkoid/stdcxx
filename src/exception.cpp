@@ -40,15 +40,7 @@
 
 #include <rw/_defs.h>
 
-#ifndef _RWSTD_EDG_ECCP
-#  include <stdarg.h>
-#else
-   // use "special" magic for the EDG eccp demo
-#  include <ansi/_cstdarg.h>
-
-_USING (_STD::va_list);
-
-#endif   // EDG eccp demo
+#include <stdarg.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -68,12 +60,6 @@ _USING (_STD::va_list);
 
 #include "podarray.h"   // for __rw_aligned_buffer
 
-
-#ifdef _MSC_VER
-   // MSVC's libc prepends an underscore
-#  define vsnprintf   _vsnprintf
-#  undef  _RWSTD_NO_VSNPRINTF
-#endif
 
 #if defined (_RWSTD_NO_VSNPRINTF) && !defined (_RWSTD_NO_VSNPRINTF_IN_LIBC)
 
@@ -107,15 +93,6 @@ _STD::unexpected_handler
 set_unexpected (_STD::unexpected_handler) _THROWS (());
 
 void unexpected ()  _RWSTD_GNUC_ATTRIBUTE ((__noreturn__));
-
-#ifdef _MSC_VER
-   // MSVC 7 and 8 reliably define __uncaught_exception
-   // uncaught_exception() only seems to be defined by some compiler
-   // magic that requires the compiler's native C++ Standard library
-   // headers
-#  undef _RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION
-#  define UNCAUGHT_EXCEPTION   __uncaught_exception
-#endif   // MSVC
 
 #ifndef UNCAUGHT_EXCEPTION
 #  define UNCAUGHT_EXCEPTION   uncaught_exception
@@ -286,16 +263,6 @@ _RWSTD_NAMESPACE (std) {
 
 exception::exception () _THROWS (())
 {
-#if defined (_MSC_VER)
-
-    _C_name = 0;
-    _C_flag = 0;
-
-#elif defined (__INTEL_COMPILER)
-
-    _C_name = "";
-
-#endif   // _MSC_VER
 }
 
 #endif   // _RWSTD_NO_EXCEPTION_DEFAULT_CTOR
@@ -304,16 +271,6 @@ exception::exception () _THROWS (())
 
 exception::exception (const exception&) _THROWS (())
 {
-#if defined (_MSC_VER)
-
-    _C_name = 0;
-    _C_flag = 0;
-
-#elif defined (__INTEL_COMPILER)
-
-    _C_name = "";
-
-#endif   // _MSC_VER
 }
 
 #endif   // _RWSTD_NO_EXCEPTION_COPY_CTOR

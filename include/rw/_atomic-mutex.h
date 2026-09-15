@@ -73,12 +73,7 @@ _TypeT __rw_atomic_exchange (_TypeT &__t, const _TypeU &__u,
 
     _TypeT __tmp = __t;
 
-#ifndef _WIN64
     __t = __u;
-#else
-    // silence MSVC conversion warnings (cast breaks SunPro 5.3 and prior)
-    __t = _RWSTD_STATIC_CAST (_TypeT, __u);
-#endif
 
     return __tmp;
 }

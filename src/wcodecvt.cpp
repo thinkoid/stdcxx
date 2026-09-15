@@ -32,17 +32,6 @@
 
 
 // working around a Compaq C++ bug (see PR #26778)
-#if __DECCXX_VER >= 60300000 && __DECCXX_VER < 60400000
-
-#  include <stdarg.h>
-_USING (std::va_list);
-
-// override autoconfigured macro whose value is incorrect
-// if <unistd.h> is #included before <iconv.h>
-#  include <unistd.h>
-#  define _RWSTD_NO_ICONV_CONST_CHAR
-
-#endif   // Compaq C++ 6.3
 
 #include <wchar.h>
 #include <limits.h>
@@ -50,12 +39,6 @@ _USING (std::va_list);
 #include <stdlib.h>   // for MB_CUR_MAX, mblen(), mbtowc()
 #include <string.h>   // for memcmp()
 #include <errno.h>
-
-#if    defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x540 \
-    && (defined (__SunOS_5_8) || defined (__SunOS_5_9))
-   // working around SunOS/SunPro header dependencies (see PR #26255)
-#  undef _TIME_T
-#endif   // SunPro <= 5.4 && SunOS 5.{8,9}
 
 #include <loc/_codecvt.h>
 #include <loc/_locale.h>

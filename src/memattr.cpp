@@ -36,39 +36,22 @@
 #  define EFAULT  14   // Linux value
 #endif   // EFAULT
 
-#ifdef __CYGWIN__
-   // use the Windows API on Cygwin
-#  define _WIN32
-#endif
-
-#ifndef _WIN32
-#  ifdef __SUNPRO_CC
-     // working around SunOS bug #568
-#    include <time.h>
-#  endif
-#  include <unistd.h>     // for getpagesize(), sysconf()
-#  include <sys/mman.h>   // for mincore()
-#  include <sys/types.h>
-#  if defined (_RWSTD_OS_SUNOS) && defined (_RWSTD_NO_POSIX_MADVISE)
-     // can't get a proper prototype for madvise with C++ defines in Solaris 10
-     extern "C" int madvise(caddr_t, size_t, int);
-#  endif
+#include <unistd.h>     // for getpagesize(), sysconf()
+#include <sys/mman.h>   // for mincore()
+#include <sys/types.h>
 
 
-#  ifndef _SC_PAGE_SIZE
+#ifndef _SC_PAGE_SIZE
      // fall back on the alternative macro if it exists,
      // or use getpagesize() otherwise
-#    ifndef _SC_PAGESIZE
-#      define GETPAGESIZE()   getpagesize ()
-#    else
-#      define GETPAGESIZE()   sysconf (_SC_PAGESIZE)
-#    endif
+#  ifndef _SC_PAGESIZE
+#    define GETPAGESIZE()   getpagesize ()
 #  else
-#      define GETPAGESIZE()   sysconf (_SC_PAGE_SIZE)
-#  endif   // _SC_PAGE_SIZE
+#    define GETPAGESIZE()   sysconf (_SC_PAGESIZE)
+#  endif
 #else
-#  include <windows.h>    // for everything (ugh)
-#endif   // _WIN32
+#    define GETPAGESIZE()   sysconf (_SC_PAGE_SIZE)
+#endif   // _SC_PAGE_SIZE
 
 #include <rw/_defs.h>
 
@@ -102,8 +85,6 @@ __rw_memattr (const void *addr, size_t nbytes, int attr)
     // of the three, in addition to 0 (PROT_NONE)
     _RWSTD_UNUSED (attr);
 
-#ifndef _WIN32
-
     const int errno_save = errno;
 
     // determine the system page size in bytes
@@ -125,65 +106,9 @@ __rw_memattr (const void *addr, size_t nbytes, int attr)
 
         const caddr_t next = _RWSTD_REINTERPRET_CAST (char*, page) + i * pgsz;
 
-#  ifdef _RWSTD_OS_SUNOS
+#if !defined (_RWSTD_NO_MADVISE)
 
-#    ifndef _RWSTD_NO_POSIX_MADVISE
-
-	const int advice = POSIX_MADV_WILLNEED;
-
-        // on Solaris use posix_madvise if available
-        if (-1 == posix_madvise (next, 1, advice)) {
-
-#    else
-
-	const int advice = MADV_WILLNEED;
-
-        // on Solaris use madvise if available
-        if (-1 == madvise (next, 1, advice)) {
-
-#    endif  // _RWSTD_NO_POSIX_MADVISE
-
-            const int err = errno;
-            errno = errno_save;
-
-            if (ENOMEM == err)
-                return next == page ? -1 : DIST (next, addr);
-        }
-
-#  elif defined (_RWSTD_OS_OSF1)
-
-        // use Tru64 mvalid()
-        if (-1 == mvalid (next, 1, PROT_READ)) {
-
-            const int err = errno;
-            errno = errno_save;
-
-            if (err)
-                return next == page ? -1 : DIST (next, addr);
-        }
-
-#  elif defined (_RWSTD_OS_IRIX64)
-
-        // as of 6.5, IRIX has no mincore() or mvalid() call,
-        // or posix_madvise(), and madvise() is unreliable
-        // use msync() instead
-        if (-1 == msync (next, 1, MS_ASYNC)) {
-
-            const int err = errno;
-            errno = errno_save;
-
-            if (err)
-                return next == page ? -1 : DIST (next, addr);
-        }
-
-#  elif !defined (_RWSTD_NO_MADVISE)
-
-#    ifdef _RWSTD_OS_IRIX64
-        // IRIX 6.5 recognizes only MADV_DONTNEED
-        const int advice = MADV_DONTNEED;
-#    else
         const int advice = MADV_WILLNEED;
-#    endif
 
         // on HP-UX, Linux, use madvise() as opposed to mincore()
         // since the latter fails for address ranges that aren't
@@ -195,24 +120,24 @@ __rw_memattr (const void *addr, size_t nbytes, int attr)
 
             bool bad_address;
 
-#    ifdef _RWSTD_OS_LINUX
+#  ifdef _RWSTD_OS_LINUX
             // Linux fails with EBADF when "the map exists,
             // but the area maps something that isn't a file"
             bad_address = EFAULT == err || ENOMEM == err;
-#    else   // not Linux
+#  else   // not Linux
             // EINVAL implies bad (e.g., unimplemented, such as
             // IRIX 6.5) advice, misaligned addr (not on page size
             // boundary), or zero size
             bad_address = !(0 == err || EINVAL == err);
-#    endif   // Linux
+#  endif   // Linux
 
             if (bad_address)
                 return next == page ? -1 : DIST (next, addr);
         }
 
-#  else
+#else
         _RWSTD_UNUSED (errno_save);
-#  endif
+#endif
 
         if (_RWSTD_SIZE_MAX == nbytes) {
 
@@ -239,33 +164,6 @@ __rw_memattr (const void *addr, size_t nbytes, int attr)
     }
 
     return _RWSTD_STATIC_CAST (_RWSTD_SSIZE_T, nbytes);
-
-#else   // ifdef _WIN32
-
-    LPVOID const ptr = _RWSTD_CONST_CAST (LPVOID, addr);
-
-    if (_RWSTD_SIZE_MAX == nbytes) {
-
-        // treat the address as a pointer to a NUL-terminated string
-        if (IsBadStringPtr (_RWSTD_STATIC_CAST (LPCSTR, ptr), nbytes))
-            return -1;
-
-        // compute the length of the string
-        nbytes = strlen (_RWSTD_STATIC_CAST (const char*, addr));
-
-        // disable read checking below (since it was done above)
-        attr &= ~_RWSTD_PROT_READ;
-    }
-
-    if ((attr & _RWSTD_PROT_READ) && IsBadReadPtr (ptr, nbytes))
-        return -1;
-
-    if ((attr & _RWSTD_PROT_WRITE) && IsBadWritePtr (ptr, nbytes))
-        return -1;
-
-    return _RWSTD_STATIC_CAST (_RWSTD_SSIZE_T, nbytes);
-
-#endif   // _RWSTD_NO_INCORE
 
 }
 

@@ -80,20 +80,5 @@ __rw_strtoll (const char*, int*, int) _THROWS (());
 #endif   // _RWSTD_LONG_LONG
 
 
-#ifdef __SUNPRO_CC
-
-   // tell the Sun C++ optimizer that the functions do not access
-   // for reading or writing any part of the program state (either
-   // visible at in the caller at the point of the call, or not)
-#  pragma no_side_effect (__rw_strtoul)
-#  pragma no_side_effect (__rw_strtol)
-
-#  ifdef _RWSTD_LONG_LONG
-#    pragma no_side_effect (__rw_strtoull)
-#    pragma no_side_effect (__rw_strtoll)
-#  endif   // _RWSTD_LONG_LONG
-
-#endif   // Sun C++
-
 
 }   // namespace __rw

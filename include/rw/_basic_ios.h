@@ -100,20 +100,10 @@ public:
 
 private:
 
-#  if !defined (__INTEL_COMPILER) || !defined (_WIN32)
-
     // SunPro 5.7 needs a data pointer and misoptimizes the conversion
     // operator when this is a pointer to a member function (bug #446)
     struct _C_uniq_type { int _C_foo;   /* never used */ };
     typedef int _C_uniq_type::*_C_uniq_ptr;
-
-#  else   // if __INTEL_COMPILER && _WIN32
-
-    // working around Intel C++ 8.1 -Zi bug #570 on Win32
-    struct _C_uniq_type { void _C_foo () { };   /* never used */ };
-    typedef void (_C_uniq_type::*_C_uniq_ptr)();
-
-#  endif   // __INTEL_COMPILER/_WIN32
 
 public:
 
@@ -340,11 +330,6 @@ basic_ios<_CharT, _Traits>::_C_bufmutex () const
 #endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (_BASIC_IOS)
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (push)
-#  pragma warning (disable: 4231)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (std) { 
 
@@ -364,10 +349,6 @@ _RWSTD_INSTANTIATE_2 (class _RWSTD_TI_EXPORT
 
 }   // namespace std
 
-
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC
 
 
 #if _RWSTD_DEFINE_TEMPLATE_LAST (_BASIC_IOS)

@@ -47,10 +47,6 @@
 
 #else
 
-#if !defined (__EDG__) || defined (__DECCXX) || defined (__INTEL_COMPILER)
-#  include _RWSTD_ANSI_C_STDARG_H
-#else   // vanilla EDG eccp
-#  include <../include/stdarg.h>
-#endif
+#include _RWSTD_ANSI_C_STDARG_H
 
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

@@ -48,11 +48,6 @@ struct __rw_select_int
 {
     typedef void* _SelectT;
 
-#if defined (__SUNPRO_CC) && __SUNPRO_CC <= 0x530
-
-    void* _C_selector;
-
-#endif   // SunPro
 };
 
 
@@ -87,14 +82,8 @@ _RWSTD_SPECIALIZE_IS_INT (wchar_t);
 #endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
 
-#if !defined (__SUNPRO_CC) || __SUNPRO_CC > 0x530
-#  define _RWSTD_DISPATCH(iter)   \
+#define _RWSTD_DISPATCH(iter)   \
        (_TYPENAME _RW::__rw_select_int< iter >::_SelectT (1L))
-
-#else
-   // working around a SunPro 5.3 a prior bug (PR #28739)
-#  define _RWSTD_DISPATCH(iter) _RW::__rw_select_int< iter >()._C_selector
-#endif
 
 
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
@@ -149,13 +138,6 @@ struct __rw_is_same
 
 }   // namespace __rw
 
-
-#  if defined (__IBMCPP__) && __IBMCPP__ <= 500
-
-// working around an xlC 5.0 bug
-_USING (__rw::__rw_select_int);
-
-#  endif   // VisualAge 5.0
 
 
 #endif   // _RWSTD_RW_SELECT_H_INCLUDED

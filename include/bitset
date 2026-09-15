@@ -58,10 +58,6 @@ __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
              _RWSTD_SIZE_T, _RWSTD_SIZE_T,
              const char*, const char*);
 
-#ifdef __SUNPRO_CC
-#  pragma no_side_effect (__rw_bitset)
-#endif   // Sun C++
-
 #ifndef _RWSTD_NO_WCHAR_T
 
 _RWSTD_SPECIALIZED_FUNCTION
@@ -72,9 +68,6 @@ __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
              _RWSTD_SIZE_T, _RWSTD_SIZE_T,
              const char*, const char*);
 
-#  ifdef __SUNPRO_CC
-#    pragma no_side_effect (__rw_bitset)
-#  endif   // Sun C++
 #endif   // _RWSTD_NO_WCHAR_T
 
 // helper, implements bitset::count()
@@ -87,10 +80,6 @@ __rw_shl (unsigned long*, _RWSTD_SIZE_T, _RWSTD_SIZE_T) _THROWS (());
 
 _RWSTD_EXPORT void
 __rw_shr (unsigned long*, _RWSTD_SIZE_T, _RWSTD_SIZE_T) _THROWS (());
-
-#ifdef __SUNPRO_CC
-#  pragma no_side_effect (__rw_bit_count, __rw_shl, __rw_shr)
-#endif   // Sun C++
 
 }   // namespace __rw
 
@@ -173,8 +162,7 @@ public:
         _C_from_ulong (__n);
     }
 
-#if    !defined (_RWSTD_NO_NONDEDUCED_CONTEXT) \
-    && (!defined (__SUNPRO_CC) || __SUNPRO_CC > 0x550)
+#if !defined (_RWSTD_NO_NONDEDUCED_CONTEXT)
 
     // 23.3.5.1, p3
     template <class _CharT, class _Traits, class _Allocator>
@@ -654,8 +642,6 @@ __rw_extract_bitset (_STD::basic_istream<_CharT, _Traits>&,
 }   // namespace __rw
 
 
-#if !defined (_MSC_VER) || _MSC_VER > 1300
-
 _RWSTD_NAMESPACE (std) {
 
 // 23.3.5.3, p8
@@ -676,44 +662,6 @@ operator>> (basic_istream<_CharT, _Traits>& __strm, bitset<_Size>& __x)
 }
 
 }   // namespace std
-
-#else   // if defined (_MSC_VER) && _MSC_VER <= 1300
-
-#  include <ostream>
-
-_RWSTD_NAMESPACE (std) {
-
-// MSVC 6.0 fails to compile (and with a fix to generate code) for the call
-// to extract_bitset below if `Size' is the last template parameter
-
-typedef _RWSTD_SIZE_T _Size_t;   // prevent an MSVC 6.0 ICE
-
-template <_Size_t _Size, class _CharT, class _Traits>
-inline basic_istream<_CharT, _Traits>&
-operator>> (basic_istream<_CharT, _Traits>& __strm, bitset<_Size>& __x)
-{
-    return _RW::__rw_extract_bitset (__strm, __x);
-}
-
-template <_Size_t _Size>
-inline ostream& operator<< (ostream &__strm, const bitset<_Size>& __x)
-{
-    return __strm << __x._RWSTD_BITSET_TO_STRING (char, char_traits<char>);
-}
-
-template <_Size_t _Size>
-inline wostream& operator<< (wostream &__strm, const bitset<_Size>& __x)
-{
-    const string __s = __x._RWSTD_BITSET_TO_STRING (char, char_traits<char>);
-    wstring __tmp (0, __s.length ());   // extension: allocate uninitialzed
-    for (string::size_type __i = 0; __i != __tmp.size (); ++__i)
-        __tmp [__i] = __s [__i];
-    return __strm << __tmp;
-}
-
-}   // namespace std
-
-#endif   // !defined (_MSC_VER) || _MSC_VER > 1300
 
 
 #ifdef _RWSTD_NO_IMPLICIT_INCLUSION

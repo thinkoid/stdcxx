@@ -45,28 +45,15 @@
 #include <string.h>   // for memcpy()
 
 
-#if defined (_WIN32) && !defined (__CYGWIN__)
-#  include <fcntl.h>
-#  include <io.h>
-#else
-#  include <unistd.h>
-#  include <fcntl.h>
-#endif   // _WIN32
+#include <unistd.h>
+#include <fcntl.h>
 
-#ifdef _WIN32
-#  define _BINARY _O_BINARY
-#else
-#  define _BINARY 0
-#endif
+#define _BINARY 0
 
 #ifndef ENAMETOOLONG
    // hardcode based on the known value on each platform
-#  ifdef _RWSTD_OS_AIX
-#    define ENAMETOOLONG    86
-#  elif defined _RWSTD_OS_FREEBSD
+#  if defined _RWSTD_OS_FREEBSD
 #    define ENAMETOOLONG    63
-#  elif defined _RWSTD_OS_HP_UX
-#    define ENAMETOOLONG   248
 #  elif defined _RWSTD_OS_LINUX
 #    define ENAMETOOLONG    36
 #  elif defined _RWSTD_OS_SUN_OS
@@ -81,12 +68,6 @@
 #include <rw/_file.h>
 #include <rw/_defs.h>
 
-
-#ifdef _RWSTD_MSVC
-   // shut up the braindead warning C4146: unary minus operator
-   // applied to unsigned type, result still unsigned
-#  pragma warning (disable: 4146)
-#endif   // _RWSTD_MSVC
 
 
 #if     defined (_RWSTD_NO_MKSTEMP) && !defined (_RWSTD_NO_MKSTEMP_IN_LIBC) \
@@ -124,12 +105,7 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 _RWSTD_NAMESPACE (__rw) {
 
 
-#if __SUNPRO_CC == 0x530 && defined (__SunOS_5_6)
-   // working around a SunPro 5.3 bug on SunOS 5.6 (PR #26283)
-#  define _RWSTD_FILENO(f) (f)->_file
-#else
-#  define _RWSTD_FILENO(f) fileno (f)
-#endif
+#define _RWSTD_FILENO(f) fileno (f)
 
 
 static const int __rw_io_modes [] = {
@@ -317,55 +293,6 @@ __rw_mkstemp (int modebits, long prot)
 
     modebits |= _RWSTD_O_EXCL | _RWSTD_O_CREAT;
 
-#  ifdef _WIN32
-
-#  ifndef P_tmpdir   // #defined in <stdio.h> by POSIX
-#    define P_tmpdir "\\"
-#  endif   // P_tmpdir
-
-    // use TMPDIR and fall back on P_tmpdir as per POSIX
-    const char *tmpdir = getenv ("TMP");
-    if (0 == tmpdir || '\0' == *tmpdir) 
-        tmpdir = P_tmpdir;
-
-    // tempnam(const char *dir, const char *prefix) will generate
-    // a unique file name for a directory chosen by the following rules:
-    //
-    // *  If the TMP environment variable is defined and set to a valid
-    //    directory name, unique file names will be generated for the
-    //    directory specified by TMP.
-    // *  If the TMP environment variable is not defined or if it is set
-    //    to the name of a directory that does not exist, tempnam will
-    //    use the dir parameter as the path for which it will generate
-    //    unique names.
-    // *  If the TMP environment variable is not defined or if it is set
-    //    to the name of a directory that does not exist, and if dir is
-    //    either NULL or set to the name of a directory that does not
-    //    exist, tempnam will use the current working directory to
-    //    generate unique names. Currently, if both TMP and dir specify
-    //    names of directories that do not exist, the tempnam function
-    //    call will fail.
-    //
-    // The name returned by tempnam will be a concatenation of prefix
-    // and a sequential number, which will combine to create a unique
-    // file name for the specified directory. tempnam generates file
-    // names that have no extension. tempnam uses malloc to allocate
-    // space for the filename; the program is responsible for freeing
-    // this space when it is no longer needed. 
-    char* const fname = tempnam (tmpdir, ".rwtmp");
-
-    if (!fname)
-        return -1;
-
-    // create a temporary file that will be deleted when
-    // the last file descriptor that refers to it is closed
-    fd = open (fname, modebits | _O_TEMPORARY, prot);
-
-    // deallocate storage allocated by tempnam()
-    free (fname);
-    
-#  else   // ifndef _WIN32
-
     char tmpbuf [L_tmpnam];
 
     const char* const fname = tmpnam (tmpbuf);
@@ -380,7 +307,6 @@ __rw_mkstemp (int modebits, long prot)
     if (fd >= 0)
         remove (fname);
 
-#  endif   // _WIN32
 #endif   // _RWSTD_NO_MKSTEMP
 
     return fd;
@@ -488,14 +414,6 @@ _RWSTD_EXPORT int
 __rw_fdmode (int fd)
 {
 // FIXME -- need to have equivalent of fcntl() on win32.
-#ifdef _WIN32
-
-    return fd == _RWSTD_STDIN_FILENO
-               ? _RWSTD_IOS_IN
-               : fd == _RWSTD_STDOUT_FILENO || fd == _RWSTD_STDERR_FILENO
-                   ? _RWSTD_IOS_OUT : _RWSTD_IOS_OUT | _RWSTD_IOS_IN;
-
-#else   // ifndef _WIN32
 
    const int m = fcntl (fd, _RWSTD_F_GETFL);
 
@@ -512,7 +430,6 @@ __rw_fdmode (int fd)
 
    return mode;
 
-#endif
 }
 
 
@@ -530,11 +447,6 @@ __rw_fmode (void *file, int flags)
     return __rw_fdmode (fd);
 }
 
-
-#if defined (_RWSTD_MSVC) && defined (_WIN64)
-// disable MSVC warning: conversion from '__int64' to 'long', possible loss of data
-#pragma warning (disable: 4244)
-#endif
 
 _RWSTD_EXPORT long
 __rw_fseek (void *file, int flags, ptrdiff_t offset, int origin)
@@ -584,11 +496,6 @@ __rw_fwrite (void *file, int flags, const void *buf, size_t size)
     return write (fd, buf, size);
 }
 
-#if defined (_RWSTD_MSVC) && defined (_WIN64)
-// restore MSVC warning: conversion from '__int64' to 'long', possible loss of data
-#pragma warning (default: 4244)
-#endif
-
 
 _RWSTD_EXPORT extern const void* __rw_std_streams[];
 
@@ -626,60 +533,6 @@ __rw_fflush (void *file, int flags)
     return 0;
 }
 
-
-#ifdef _RWSTD_EDG_ECCP
-
-   // undefine macros that expand to __rw_stderr et al
-   // before initializing the globals to their values
-#  undef stderr
-#  undef stdin
-#  undef stdout
-
-extern "C" {
-
-#  ifdef _RWSTD_OS_LINUX
-
-// Linux glibc defines stdin, stdout, and stderr as global objects
-// of type _IO_FILE but we fake the type using FILEs (it doesn't
-// matter since the type isn't mangled into object names)
-extern FILE *stdin;
-extern FILE *stdout;
-extern FILE *stderr;
-
-#  elif defined (_RWSTD_OS_SUNOS)
-
-// define a type that's as big as SunOS __FILE
-typedef struct  _RW_Sun_FILE {
-
-#    if 8 == _RWSTD_LONG_SIZE
-
-    int fill [4];   // 16 bytes
-
-#    else   // if (ILP32)
-
-    long fill [16];   // 128 bytes
-
-#    endif   // LP64/ILP32
-
-} __FILE;
-
-
-// Solaris file array
-extern struct __FILE __iob [FOPEN_MAX];
-
-#    define stderr   (FILE*)(__iob + 0)
-#    define stdin    (FILE*)(__iob + 1)
-#    define stdout   (FILE*)(__iob + 2)
-
-#  elif defined (_RWSTD_OS_WINDOWS)
-#    error "need stderr, stdin, and stdout"
-#  else
-#    error "need stderr, stdin, and stdout"
-#  endif
-
-}   // extern "C"
-
-#endif   // vanilla EDG eccp
 
 FILE* __rw_stderr = stderr;
 FILE* __rw_stdin  = stdin;

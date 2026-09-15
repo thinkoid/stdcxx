@@ -30,11 +30,6 @@
 
 #include <rw/_defs.h>
 
-#ifdef __SUNPRO_CC
-   // working around SunPro bug 568
-#  include <time.h>
-#endif
-
 #include <loc/_facet.h>
 #include <loc/_locale.h>
 

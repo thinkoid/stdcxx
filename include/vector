@@ -720,13 +720,8 @@ public:
 
     class reference {
 
-#if !defined (__INTEL_COMPILER) || !defined (_MSC_VER)
         // avoid MSVC 6.0 bug 576
         friend class iterator;
-#else   // if Intel C++ 8.1 with MSVC
-        // work around Intel C++ 8.1 bug 575
-        friend class _C_self::iterator;
-#endif   // Intel C++ with MSVC
 
         friend class const_iterator;
 
@@ -763,11 +758,7 @@ public:
       }
 
       bool operator< (const reference& __x) const {
-#ifndef _MSC_VER
           return bool(*this) < bool(__x);
-#else
-          return int(*this) < int(__x);
-#endif
       }
 
         bool operator!= (const reference& __x) const {
@@ -810,8 +801,6 @@ public:
 #if defined (__GNUG__)
         // gcc 3.0.1 and prior take 14.5.3, p9 literally
     public:
-#elif    defined (_MSC_VER) && _MSC_VER <= 1300 || defined (__APOGEE__)
-        friend class vector<bool, _Allocator>;
 #else
         friend class vector;
 #endif
@@ -824,17 +813,6 @@ public:
         // On Sun, gcc 3.1 does generate an incorrect copy constructor
         // that has as an effect an incompletely/incorrectly initialized 
         // iterator.
-#if    defined (__sun__) && defined (__GNUG__) \
-    || defined (__SUNPRO_CC) && defined (__amd64__)
-
-        // working around a gcc 3.1 bug on Solaris where the compiler
-        // generates bad code for the implicitly defined copy ctor
-        // also working around a Sun C++ 5.9 optimizer ICE on x86_64
-        // in wide (64-bit) mode (see STDCXX-551)
-
-        _C_iter (const _C_iter& __it)
-            : _C_p (__it._C_p), _C_offset (__it._C_offset) {}
-#endif   // gcc 3.1/Solaris || Sun C++ 5.9/x86_64
 
         void operator++ () {
             if (_C_offset++ == _RWSTD_WORD_BIT - 1) {
@@ -1116,10 +1094,8 @@ public:
         : allocator_type (__alloc), _C_begin(iterator()), _C_end(iterator()), 
         _C_bufend () { }
 
-#if !defined (__SUNPRO_CC) || __SUNPRO_CC > 0x530
     // working around a SunPro 5.3 bug (see PR #25962)
     _EXPLICIT
-#endif   // SunPro > 5.3
     vector (size_type __n, bool __val = bool (), 
        const _Allocator&  __alloc = allocator_type ())
         : allocator_type (__alloc), _C_bufend () {

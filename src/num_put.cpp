@@ -641,87 +641,6 @@ static inline void
 __rw_fix_flt (char *&end, size_t &len,
               unsigned flags, _RWSTD_STREAMSIZE prec)
 {
-#ifdef _WIN32
-
-    char* beg = end - len;
-
-    // workaround for the STDCXX-2 issue
-    if (   _RWSTD_IOS_FIXED != (flags & _RWSTD_IOS_FLOATFIELD)
-        && _RWSTD_IOS_SCIENTIFIC != (flags & _RWSTD_IOS_FLOATFIELD)
-        && 2 < len
-        && '0' == beg [0]
-        && ('.' == beg [1] || ',' == beg [1])) {
-
-        // for the 0.0 value the MSVC libc inserts redundant '0' character
-        // when %g format is used in sprintf()
-        const char* ptr;
-        for (ptr = beg + 2; ptr != end && '0' == *ptr; ++ptr) ;
-
-        if (ptr == end) {
-            const size_t exp_len =
-                0 > prec ? 7 : (1 < prec ? prec + 1 : 2);
-            if (exp_len < len) {
-                end = beg + exp_len;
-                len = exp_len;
-            }
-        }
-    }
-
-    if (len > 5) {
-        // make Win32 output conform to C99 printf() requirements
-        // on the exponent: The exponent always contains at least
-        // two digits, and only as many more digits as necessary
-        // to represent the exponent.
-        if (('e' == end [-5] || 'E' == end [-5]) && '0' == end [-3]) {
-            end [-3] = end [-2];
-            end [-2] = end [-1];
-            --len;
-            --end;
-        }
-        else if ('#' == end [-4]) {
-            // may be #INF or #IND
-            const bool cap = !!(flags & _RWSTD_IOS_UPPERCASE);
-
-            if ('F' == end [-1]) {
-                // assuming #INF
-                // normalize the format of infinity to conform to C99
-
-                const char str[] = "iInNfF";
-
-                end [-6] = str [cap + 0];
-                end [-5] = str [cap + 2];
-                end [-4] = str [cap + 4];
-            }
-            else {
-                // assuming #IND
-                // normalize the format of NaN to conform to C99
-
-                const char str[] = "nNaA";
-
-                end [-6] = str [cap + 0];
-                end [-5] = str [cap + 2];
-                end [-4] = str [cap + 0];
-            }
-
-            end -= 3;
-            len -= 3;
-        }
-        else if ('#' == end [-5]) {
-            // normalize the format of NaN to conform to C99
-
-            const char str[] = "nNaA";
-
-            const bool cap = !!(flags & _RWSTD_IOS_UPPERCASE);
-
-            end [-7] = str [cap + 0];
-            end [-6] = str [cap + 2];
-            end [-5] = str [cap + 0];
-            end -= 4;
-            len -= 4;
-        }
-    }
-
-#else
 
     _RWSTD_UNUSED (prec);
 
@@ -791,8 +710,6 @@ __rw_fix_flt (char *&end, size_t &len,
     if (sgn)
         ++len;
 
-#endif   // _WIN32
-
 }
 
 
@@ -823,13 +740,7 @@ __rw_put_num (char **pbuf, size_t bufsize,
     case __rw_facet::_C_short:
     case __rw_facet::_C_int:
     case __rw_facet::_C_long:
-#if defined (__INTEL_COMPILER) && defined (_WIN64)
-#  pragma warning (disable: 810)
-#endif
         len = __rw_itoa (buf, _RWSTD_REINTERPRET_CAST (long, pval), flags);
-#if defined (__INTEL_COMPILER) && defined (_WIN64)
-#  pragma warning (default: 810)
-#endif
         break;
 
     case __rw_facet::_C_ushort:
@@ -840,14 +751,8 @@ __rw_put_num (char **pbuf, size_t bufsize,
         // sign is only used in signed conversions; 7.19 6.1, p6
         // of C99: The result of a signed conversion always begins
         // with a plus or minus sign.)
-#if defined (__INTEL_COMPILER) && defined (_WIN64)
-#  pragma warning (disable: 810)
-#endif
         len = __rw_itoa (buf, _RWSTD_REINTERPRET_CAST (unsigned long, pval),
                          flags & ~_RWSTD_IOS_SHOWPOS);
-#if defined (__INTEL_COMPILER) && defined (_WIN64)
-#  pragma warning (default: 810)
-#endif
         break;
 
 #ifdef _RWSTD_LONG_LONG

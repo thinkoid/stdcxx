@@ -60,10 +60,6 @@ _RWSTD_NAMESPACE (std) {
 
 #include _RWSTD_ANSI_C_WCTYPE_H
 
-#ifdef __hpux
-#  include _RWSTD_ANSI_C_WCHAR_H
-#endif   // __hpux
-
 // #define WEOF when not #defined (see also <cwchar>)
 #if !defined WEOF
 #  ifndef _RWSTD_NO_WINT_T

@@ -47,12 +47,6 @@ _RWSTD_NAMESPACE (std) {
 
 
 #ifndef _RWSTD_NO_NAMESPACE
-#  if    defined (_RWSTD_EDG_ECCP) || defined (_RWSTD_SGI_MIPSPRO) \
-      || defined (__DECCXX)
-      // let EDG (and its derivatives) know about class type_info
-      // do not use with Intel C++ on Linux or Windows
-#    pragma define_type_info
-#  endif   // EDG eccp || Compaq C++ || SGI MIPSpro
 #endif   // _RWSTD_NO_NAMESPACE
 
 
@@ -81,48 +75,11 @@ protected:
 
 private:
 
-#ifdef __HP_aCC
-
-    const char *_C_name;
-
-#  ifndef _HP_IA64ABI
-
-    void       *_C_baseClassTable;
-    unsigned    _C_hashValue;
-
-#  endif   // _HP_IA64ABI
-
-#elif defined (__INTEL_COMPILER) && !defined (_MSC_VER)
-
-    const char *_C_name;
-
-#elif defined (__GNUG__)
+#if defined (__GNUG__)
 
     const char *_C_name;   // mangled name
 
-#elif defined (_MSC_VER)
-
-    void *_C_data;
-    char  _C_name [1];
-
-#elif defined (__SUNPRO_CC)
-
-    const void *_C_data;
-
-#elif defined (__IBMCPP__)
-
-#  ifdef _RWSTD_OS_LINUX
-
-    char *_C_name;   // mangled name (same as gcc libsupc++)
-
-#  else   // not Linux
-
-    char *_C_type_name;   // human readable name
-    char *_C_name;        // mangled name
-
-#  endif   // 
-
-#else   // DEC cxx, SGI MIPSpro, SNI CDS++, and other EDG derivatives
+#else   // !defined (__GNUG__)
 
     // no data
 

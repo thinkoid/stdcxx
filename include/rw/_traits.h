@@ -41,7 +41,7 @@
 #endif   // _RWSTD_RW_MBSTATE_H_INCLUDED
 
 
-#if defined (_RWSTDDEBUG) || defined (_RWSTD_EDG_ECCP)
+#if defined (_RWSTDDEBUG)
 
 // avoid including <cstring> and <cwchar> in debug mode or when using
 // the vanilla EDG eccp (i.e., in strict conformance mode) to prevent
@@ -83,9 +83,9 @@ _RWSTD_EXPORT _RWSTD_SIZE_T __rw_wcslen (const wchar_t*);
 #  define _RWSTD_WMEMMOVE  _RW::__rw_wmemmove
 #  define _RWSTD_WMEMSET   _RW::__rw_wmemset
 #  define _RWSTD_WCSLEN    _RW::__rw_wcslen
-#else   // if !defined (_RWSTDDEBUG) && !defined (_RWSTD_EDG_ECCP)
+#else   // !defined (_RWSTDDEBUG)
 
-#  if 4 <= __GNUG__ && !defined (__INTEL_COMPILER)
+#  if 4 <= __GNUG__
      // use gcc 4.x intrinsic functions
 #    define _RWSTD_MEMCPY    __builtin_memcpy
 #    define _RWSTD_MEMCMP    __builtin_memcmp

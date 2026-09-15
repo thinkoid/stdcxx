@@ -238,25 +238,6 @@ public:
 };
 
 
-#if defined (_MSC_VER) && _MSC_VER < 1310
-#  if _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _CHAR)
-
-// explicit instantiation followed by explicit specialization is illegal
-// according to 14.6.4.1, p7 but MSVC allows it (linker errors otherwise)
-
-_RWSTD_INSTANTIATE_2 (class _RWSTD_TI_EXPORT
-                      basic_ostream<char, char_traits<char> >);
-
-#  endif   // _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _CHAR)
-
-#  if _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _WCHAR_T)
-
-_RWSTD_INSTANTIATE_2 (class _RWSTD_TI_EXPORT
-                      basic_ostream<wchar_t, char_traits<wchar_t> >);
-
-#  endif   // _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _WCHAR_T)
-#endif   // defined (_MSC_VER) && _MSC_VER < 1310
-
 
 template<class _CharT, class _Traits>
 inline basic_ostream<_CharT, _Traits>&
@@ -499,88 +480,25 @@ flush (basic_ostream<_CharT, _Traits>& __strm)
 }
  
 
-#if defined (_MSC_VER) && _MSC_VER < 1310
-
-// working around an MSVC bug that causes it to pick the member
-// operator<<(const void*) over the above if overloaded in user code
-
-_RWSTD_SPECIALIZED_FUNCTION
-inline ostream& endl (ostream& __strm)
-{
-    return __strm.put (__strm.widen ('\n')).flush ();
-}
-
-
-_RWSTD_SPECIALIZED_FUNCTION
-inline ostream& ends (ostream& __strm)
-{
-    return __strm.put (char ());
-}
-
-
-_RWSTD_SPECIALIZED_FUNCTION
-inline ostream& flush (ostream& __strm)
-{
-    return __strm.flush ();
-}
-
-
-#  ifndef _RWSTD_NO_WCHAR_T
-
-_RWSTD_SPECIALIZED_FUNCTION
-inline wostream& endl (wostream& __strm)
-{
-    return __strm.put (__strm.widen ('\n')).flush ();
-}
-
-
-_RWSTD_SPECIALIZED_FUNCTION
-inline wostream& ends (wostream& __strm)
-{
-    return __strm.put (char ());
-}
-
-
-_RWSTD_SPECIALIZED_FUNCTION
-inline wostream& flush (wostream& __strm)
-{
-    return __strm.flush ();
-}
-
-#  endif   // _RWSTD_NO_WCHAR_T
-
-#else   // if !defined (_MSC_VER) || _MSC_VER >= 1310
-
 // working around an MSVC bug (both 6.0 and 7.0) that may cause:
 // - warning C4660: template-class specialization is already instantiated
 // - many linker errors for (inline or otherwise) members of basic_ostream
 
-#  ifdef _RWSTD_MSVC
-#    pragma warning (push)
-#    pragma warning (disable: 4231)
-#  endif   // _RWSTD_MSVC
 
-
-#  if _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _CHAR)
+#if _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _CHAR)
 
 _RWSTD_INSTANTIATE_2 (class _RWSTD_TI_EXPORT
                       basic_ostream<char, char_traits<char> >);
 
-#  endif   // _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _CHAR)
+#endif   // _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _CHAR)
 
-#  if _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _WCHAR_T)
+#if _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _WCHAR_T)
 
 _RWSTD_INSTANTIATE_2 (class _RWSTD_TI_EXPORT
                       basic_ostream<wchar_t, char_traits<wchar_t> >);
 
-#  endif   // _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _WCHAR_T)
+#endif   // _RWSTD_INSTANTIATE (_BASIC_OSTREAM, _WCHAR_T)
 
-
-#  ifdef _RWSTD_MSVC
-#    pragma warning (pop)
-#  endif   // _RWSTD_MSVC
-
-#endif   // !_MSC_VER || _MSC_VER >= 1310
 
 }   // namespace std
 

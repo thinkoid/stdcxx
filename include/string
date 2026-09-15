@@ -149,13 +149,7 @@ public:
 
 #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
-#ifndef _RWSTD_NO_STRING_NPOS_TYPE
     _RWSTD_STATIC_CONST (size_type, npos = size_type (_RWSTD_SIZE_MAX));
-#else   // if defined (_RWSTD_NO_STRING_NPOS_TYPE)
-    // working around an MSVC 7.0 bug (PR #26549)
-    // and an HP aCC extern template bug #333
-    _RWSTD_STATIC_CONST (_RWSTD_SIZE_T, npos = _RWSTD_SIZE_MAX);
-#endif
 
     // 21.3.1, p2
     _EXPLICIT basic_string (const allocator_type &__alloc = allocator_type ())
@@ -887,14 +881,8 @@ wstring;
 
 template <class _CharT, class _Traits , class _Allocator>
 
-#if    !defined (__GNUG__)                  \
-    || __GNUG__ > 3 || __GNUC_MINOR__ > 3   \
-    || !defined (__ia64__)
-
 // working around a gcc 3.2.3 inliner bug on IA64 (PR #29766)
 inline
-
-#endif   // !gcc || gcc > 3.3 || !IA64
 
 void basic_string<_CharT, _Traits, _Allocator>::
 _C_unlink (pointer __ptr)
@@ -1609,11 +1597,6 @@ __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (_STD::wstring) __size,
 #endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (_BASIC_STRING)
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (push)
-#  pragma warning (disable: 4231)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (std) { 
 
@@ -1635,10 +1618,6 @@ _RWSTD_INSTANTIATE_3 (class _RWSTD_TI_EXPORT
 
 }   // namespace std
 
-
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC
 
 
 #if _RWSTD_DEFINE_TEMPLATE_LAST (_BASIC_STRING)

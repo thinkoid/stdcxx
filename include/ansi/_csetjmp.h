@@ -48,18 +48,6 @@ typedef long jmp_buf [39];
 typedef long jmp_buf [25];
 #  endif
 
-#elif defined _RWSTD_OS_SUNOS
-
-// ILP32: sizeof (jmp_buf) == 48
-// ILP64: sizeof (jmp_buf) == 96
-typedef long jmp_buf [12];
-
-#elif defined _WIN64
-   // FIXME: add size
-#  error "jmp_buf size unknown on WIN64"
-#elif defined _WIN32
-   // FIXME: add size
-#  error "jmp_buf size unknown on WIN32"
 #endif
 
 int setjmp (jmp_buf);

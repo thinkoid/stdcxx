@@ -37,11 +37,9 @@
 // (C++) standard names
 #include "limits"
 
-#if _MSC_VER != 1300   // working around an MSVC 7.0 bug (PR #26562)
-#  undef _RWSTD_LIMITS_INCLUDED
-#  define _RWSTD_DEFINE_EXPORTS
+#undef _RWSTD_LIMITS_INCLUDED
+#define _RWSTD_DEFINE_EXPORTS
 
    // define static data members of specializations
    // again, use the quoted form of the #include directive
-#  include "limits"
-#endif   // MSVC != 7.0
+#include "limits"

@@ -32,17 +32,6 @@
 // disable Compaq C++ pure C headers
 #undef __PURE_CNAME
 
-#if (defined (__sun__) || defined (__sun) || defined (sun)) && defined (__EDG__)
-    // get tzset() from <time.h>
-#   define _XOPEN_SOURCE
-#endif
-
-#ifdef __CYGWIN__
-   // force CygWin <time.h> to define timezone as an int variable,
-   // not as a void function returning char*
-#  define timezonevar
-#endif   // __CYGWIN__
-
 
 #include <ctype.h>    // for isspace(), ...
 #include <stdio.h>    // for sprintf()
@@ -52,24 +41,16 @@
 #include <time.h>     // for strftime(), struct tm, tzset()
 #include <wchar.h>    // for wcsftime()
 
-#ifndef _MSC_VER
+#ifndef _RWSTD_NO_PURE_C_HEADERS
+#  include <locale.h>
+#  ifndef LC_MESSAGES
+#    define LC_MESSAGES _RWSTD_LC_MESSAGES
+#  endif   // LC_MESSAGES
+#endif   // _RWSTD_NO_PURE_C_HEADERS
 
-#  ifndef _RWSTD_NO_PURE_C_HEADERS
-#    include <locale.h>
-#    ifndef LC_MESSAGES
-#      define LC_MESSAGES _RWSTD_LC_MESSAGES
-#    endif   // LC_MESSAGES
-#  endif   // _RWSTD_NO_PURE_C_HEADERS
-
-#  ifndef _RWSTD_NO_NL_LANGINFO
-#    include <langinfo.h>             // for nl_langinfo()
-#  endif
-#else   // if defined (_MSC_VER)
-#  if defined (_RWSTD_MSVC) && defined (_WIN64)
-     // shut up MSVC/Win64 complaints about possible loss of data
-#    pragma warning (disable: 4244)
-#  endif
-#endif   // _MSC_VER
+#ifndef _RWSTD_NO_NL_LANGINFO
+#  include <langinfo.h>             // for nl_langinfo()
+#endif
 
 #include "access.h"
 
@@ -84,8 +65,8 @@
 #include "strtol.h"
 
 
-#if defined (__EDG__) || !defined (_RWSTD_NO_PURE_C_HEADERS)
-#  if defined (__linux__) || defined (__sun)
+#if !defined (_RWSTD_NO_PURE_C_HEADERS)
+#  if defined (__linux__)
 
 extern "C" {
 
@@ -96,8 +77,8 @@ extern void tzset () _LIBC_THROWS ();
 
 }   // extern "C"
 
-#  endif   // __linux__ || __sun
-#endif   // __EDG__ || !_RWSTD_NO_PURE_C_HEADERS
+#  endif   // __linux__
+#endif   // !_RWSTD_NO_PURE_C_HEADERS
 
 
 #ifdef _RWSTD_NO_DAYLIGHT
@@ -2816,11 +2797,9 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
         const wchar_t *fmtstr = 'z' == fmt ? L"%+*.*d" : L"%*.*d";
 
         res = swprintf (wbuf, 
-#if !defined (__MINGW32__) && (!defined (_MSC_VER) || 1400 <= _MSC_VER)
                         // MSVC 8.0 changed swprintf() to conform
                         // to the C standard signature
                         bufsize,
-#endif   // not MSVC || MSVC >= 8.0
                         fmtstr,
                         width < 0 ? tpd.width : width,
                         prec < 0 ? tpd.prec : prec, tpd.val);

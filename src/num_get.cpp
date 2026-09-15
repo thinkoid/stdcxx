@@ -72,12 +72,6 @@ extern "C" long double strtold (const char*, char**);
 #endif   // NO_STRTOLD && !NO_STRTOLD_IN_LIBC
 
 
-#ifdef _RWSTD_MSVC
-    // shut up useless MSVC warning: unary minus operator
-    // applied to unsigned type, result still unsigned
-#  pragma warning (disable: 4146)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (__rw) { 
 
@@ -687,43 +681,9 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 
             // assumes `buf' is formatted for the current locale
             // specifically, affects the value of decimal_point
-#      if !defined (_RWSTD_OS_HP_UX) || !defined (_LONG_DOUBLE)
 
             // not HP-UX or HP-UX with gcc
             ld = strtold (buf, &end);
-
-#      else   // UP-UX with _LONG_DOUBLE
-
-            // HP-UX strtold() returns struct long_double
-            // the macro _LONG_DOUBLE is #defined when the struct is defined
-            // note that gcc's replacement <stdlib.h> may actually define the
-            // function with the correct signature
-
-            union {
-                LDbl        ld;
-                long_double words;
-            } u;
-
-            u.words = strtold (buf, &end);
-            ld      = u.ld;
-
-#        ifndef __ia64
-
-            // inefficiently working around HP-UX/PA-RISC strtold("0")
-            // bug #615: strtold("0", &end) fails to set the end pointer
-            if (   end == buf
-                && 0 == errno
-                && (   '0' == *buf || '.' == *buf
-                    || /* '+' or '-' */ 43 == __rw_digit_map [UChar (*buf)])) {
-
-                char *tmpend;
-                if (   0.0 == strtod (buf, &tmpend)
-                    && '\0' == *tmpend && 0 == errno)
-                    end = tmpend;
-            }
-
-#        endif   // __ia64
-#      endif   // HP-UX, _LONG_DOUBLE
 
             err = errno;
 
@@ -734,12 +694,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
                 // set teporarily the global locale to "C" and reparse
                 __rw_setlocale loc ("C", _RWSTD_LC_NUMERIC);
 
-#      if !defined (_RWSTD_OS_HP_UX) || !defined (_LONG_DOUBLE)
                 ld = strtold (buf, &end);
-#      else   // HP-UX with _LONG_DOUBLE #defined
-                u.words = strtold (buf, &end);
-                ld      = u.ld;
-#      endif   // HP-UX, _LONG_DOUBLE
 
                 err = errno;
             }

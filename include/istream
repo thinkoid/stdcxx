@@ -592,11 +592,6 @@ public:
 #endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (_BASIC_ISTREAM)
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (push)
-#  pragma warning (disable: 4231)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (std) {
 
@@ -616,10 +611,6 @@ _RWSTD_INSTANTIATE_2 (class _RWSTD_TI_EXPORT
 
 }   // namespace std
 
-
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC
 
 
 #if _RWSTD_DEFINE_TEMPLATE_LAST (_BASIC_ISTREAM)

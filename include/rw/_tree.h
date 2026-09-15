@@ -160,12 +160,6 @@ public:
     __rw_tree_iter (_C_link_t __lnk)
         : _C_node (__lnk) {}        
 
-#ifdef SNI
-    difference_type operator- (const __rw_tree_iter&) const {
-        return 0;
-    }
-#endif
-    
     __rw_tree_iter& operator++ () {
         if (_C_link_t () != _C_node->_C_child [1]) {
             _C_node = _C_node_t::_C_min (_C_node->_C_child [1]);
@@ -585,7 +579,6 @@ public:
     iterator erase (iterator, iterator);
 
 // MSVC 6.0 thinks S<const T*> is the same as S<T*>...
-#if !defined (_MSC_VER) || _MSC_VER > 1300
 
     // map and set's iterator may be defined to be tree::const_iterator
     iterator insert (const_iterator __it, const value_type &__x, bool __dup) {
@@ -602,8 +595,6 @@ public:
         return erase (_C_make_iter (_ITER_NODE (__first)),
                       _C_make_iter (_ITER_NODE (__last)));
     }
-
-#endif   // _MSC_VER <= 1300
 
     void erase (const key_type*, const key_type*);
 

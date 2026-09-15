@@ -353,11 +353,6 @@ __rw_check_overflow_int (long __lval, _RWSTD_FMTFLAGS __flags,
 #endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (_NUM_GET)
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (push)
-#  pragma warning (disable: 4231)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (std) { 
 
@@ -375,10 +370,6 @@ _RWSTD_INSTANTIATE_1 (struct _RWSTD_TI_EXPORT num_get<wchar_t>);
 
 }   // namespace std
 
-
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC
 
 
 #if _RWSTD_DEFINE_TEMPLATE_LAST (_NUM_GET)

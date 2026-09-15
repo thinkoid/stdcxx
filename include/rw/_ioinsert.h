@@ -99,11 +99,6 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits>&, const _StringT*,
 #endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (_INSERTER)
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (push)
-#  pragma warning (disable: 4231)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (__rw) { 
 
@@ -223,10 +218,6 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
 
 }   // namespace __rw
 
-
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC
 
 
 #if _RWSTD_DEFINE_TEMPLATE_LAST (_INSERTER)

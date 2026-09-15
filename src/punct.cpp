@@ -49,11 +49,6 @@
 #include "punct.h"
 
 
-#if defined (_RWSTD_MSVC) && defined (_WIN64)
-  // shut up MSVC/Win64 complaints about possible loss of data
-#  pragma warning (disable: 4244)
-#endif   // MSVC/Win64
-
 
 _RWSTD_NAMESPACE (__rw) {
 

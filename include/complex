@@ -38,14 +38,6 @@
 #include _RWSTD_CMATH
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (push)
-   // disable conversion from 'double' to 'float', possible loss of data
-   // until a conforming <cmath> header with float and long double overloads
-   // for the C functions is provided
-#  pragma warning (disable: 4244)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (std) { 
 
@@ -141,15 +133,6 @@ public:
         return _C_re;
     }
 
-#if defined (_COMPILER_VERSION) && _COMPILER_VERSION <= 730
-
-    // working around a MIPSpro 7.3.1 bug (SGI serial #0800690BCFC2)
-    complex<value_type>& operator= (const complex<value_type>& __rhs) {
-        return (_C_re = __rhs._C_re), (_C_im = __rhs._C_im), *this;
-    }
-
-#endif   // _COMPILER_VERSION <= 730
-
 #ifndef _RWSTD_NO_MEMBER_TEMPLATE
 
     template <class _TypeT>
@@ -228,15 +211,6 @@ public:
     value_type real () const {
         return _C_re;
     }
-
-#if defined (_COMPILER_VERSION) && _COMPILER_VERSION <= 730
-
-    // working around a MIPSpro 7.3.1 bug (SGI serial #0800690BCFC2)
-    complex<value_type>& operator= (const complex<value_type>& __rhs) {
-        return (_C_re = __rhs._C_re), (_C_im = __rhs._C_im), *this;
-    }
-
-#endif   // _COMPILER_VERSION <= 730
 
 #ifndef _RWSTD_NO_MEMBER_TEMPLATE
 
@@ -331,15 +305,6 @@ public:
     _RWSTD_MEMBER_TEMPLATE (operator/=) {
         return *this = *this / complex<value_type>(__rhs);
     }
-
-#if defined (_COMPILER_VERSION) && _COMPILER_VERSION <= 730
-
-    // working around a MIPSpro 7.3.1 bug (SGI serial #0800690BCFC2)
-    complex<value_type>& operator= (const complex<value_type>& __rhs) {
-        return (_C_re = __rhs._C_re), (_C_im = __rhs._C_im), *this;
-    }
-
-#endif   // _COMPILER_VERSION <= 730
 
 #ifndef _RWSTD_NO_MEMBER_TEMPLATE
 
@@ -853,10 +818,6 @@ operator<< (basic_ostream<_CharT, _Traits>&, const complex<_TypeT>&);
 
 }   // namespace std
 
-
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC
 
 
 #if _RWSTD_DEFINE_TEMPLATE (_COMPLEX)

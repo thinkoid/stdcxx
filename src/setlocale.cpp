@@ -44,14 +44,7 @@
 #include "podarray.h"   // for __rw_charray
 #include "setlocale.h"
 
-#ifndef _MSC_VER
-#  include <limits.h>   // for PATH_MAX
-#  if defined (__INTERIX) && !defined (NAME_MAX)
-#    define NAME_MAX 255
-#  endif   // __INTERIX && !NAME_MAX
-#else   // if defined (_MSC_VER)
-#  include <windows.h>
-#endif   // _MSC_VER
+#include <limits.h>   // for PATH_MAX
 
 #include <sys/stat.h>
 

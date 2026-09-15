@@ -33,14 +33,4 @@
 #else
 #  include _RWSTD_ANSI_C_FLOAT_H
 
-#  if defined (__EDG__) && defined (__linux__) && !defined (__INTEL_COMPILER)
-
-     // avoid relying on dubious gcc extensions
-#    undef LDBL_MIN
-#    undef LDBL_MAX
-#    define LDBL_MIN _RWSTD_LDBL_MIN
-#    define LDBL_MAX _RWSTD_LDBL_MAX
-
-#  endif   // __EDG__ && __linux__ && !__INTEL_COMPILER
-
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

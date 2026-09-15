@@ -117,11 +117,6 @@ getline (basic_istream<_CharT, _Traits>&            __is,
 #  endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (_BASIC_ISTREAM)
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (push)
-#  pragma warning (disable: 4231)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (std) {
 
@@ -146,10 +141,6 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT wistream&
 
 }   // namespace std
 
-
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC
 
 
 #  if _RWSTD_DEFINE_TEMPLATE_LAST (_BASIC_ISTREAM)

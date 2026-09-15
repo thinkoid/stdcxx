@@ -41,18 +41,9 @@
 #include <rw/_defs.h>
 
 #ifndef _RWSTD_NO_NATIVE_IO
-#  ifdef _WIN32
-#    include <io.h>
-#    ifndef STDIN_FILENO
-#      define STDIN_FILENO  0
-#      define STDOUT_FILENO 1
-#      define STDERR_FILENO 2
-#    endif   // STDIN_FILENO
-#  else   // if !defined _WIN32
      // <unistd.h> must preceed other headers to avoid a namespace
      // issue ("time_t" vrs "std::time_t") on SunPro 5.3/SunOS 5.8
-#    include <unistd.h>
-#  endif   // _WIN32
+#  include <unistd.h>
 #else   // if defined _RWSTD_NO_NATIVE_IO
    // <stdio.h> must be included before <fstream> so that the FILE*
    // basic_filebuf ctor extensions get declared (they depend on the
@@ -75,16 +66,6 @@
 #include <stdio.h>    // fprintf(), stderr
 #include <stdlib.h>   // abort()
 
-
-#ifdef _MSC_VER
-   // force early intitalization of Standard Iostream Objects
-   // gives warning C4073: initializers put in library initialization
-   // area; disable it
-#  ifdef _RWSTD_MSVC
-#    pragma warning (disable: 4073)
-#  endif
-#  pragma init_seg (lib)
-#endif   // _MSC_VER
 
 
 // #defined  below

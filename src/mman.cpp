@@ -29,19 +29,14 @@
 #define _RWSTD_LIB_SRC
 #include <rw/_defs.h>
 
-#ifndef _MSC_VER
    // <unistd.h> is included here because of PR #26255
-#  include <unistd.h>
-#endif  // _MSC_VER
+#include <unistd.h>
 
 #include <sys/stat.h>
 
 #ifndef _RWSTD_NO_MMAP
 #  include <sys/mman.h>
-#elif defined (_WIN32)
-#  include <windows.h>
-#  include <io.h>
-#endif   // _MSC_VER
+#endif   // !defined (_RWSTD_NO_MMAP)
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -59,36 +54,24 @@ void* __rw_mmap (const char* fname, size_t *size)   // nothrow
     _RWSTD_ASSERT (0 != fname);
     _RWSTD_ASSERT (0 != size);
 
-#if !defined (_MSC_VER)
     struct stat sb;
     if (stat (fname, &sb) == -1)
-#else
-    struct _stat sb;
-    if (_stat (fname, &sb) == -1)
-#endif
         return 0;
 
     *size = sb.st_size;
 
 
-#ifndef _WIN32
     const int fd = open (fname, O_RDONLY);
    
     if (-1 == fd)
         return 0;
-
-#endif   // _WIN32
 
 #ifndef _RWSTD_NO_MMAP
 
     // On HPUX systems MAP_SHARED will prevent a second mapping of the same
     // file if the regions are overlapping; one solution is to make the 
     // mapping private.
-#if defined(__hpux)
-    void *data = mmap (0, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-#else
     void *data = mmap (0, sb.st_size, PROT_READ, MAP_SHARED, fd, 0);
-#endif // defined(__hpux__)
 
     close (fd);
 
@@ -98,29 +81,6 @@ void* __rw_mmap (const char* fname, size_t *size)   // nothrow
 
     if (MAP_FAILED == data)   // failure
         return 0;
-
-#elif defined (_WIN32)
-
-    HANDLE mmf = 
-        CreateFile (fname, GENERIC_READ, FILE_SHARE_READ, NULL,
-                    OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-
-    if (mmf == INVALID_HANDLE_VALUE)
-        return 0;
-                              
-    HANDLE mmfv = 
-        CreateFileMapping (mmf, NULL, PAGE_READONLY, 0, 0, NULL);
-    if (mmfv == INVALID_HANDLE_VALUE) {
-        CloseHandle (mmf);
-        return 0;
-    }
-
-    void * data = 
-        MapViewOfFile (mmfv, FILE_MAP_READ, 0, 0, sb.st_size);
-
-    // The handles can be safely closed
-    CloseHandle (mmf);
-    CloseHandle (mmfv);
 
 #else   // no mmap() or equivalent
 
@@ -141,7 +101,7 @@ void* __rw_mmap (const char* fname, size_t *size)   // nothrow
         }
     }
 
-#endif  // _MSC_VER
+#endif  // !defined (_RWSTD_NO_MMAP)
 
     return data;
 }
@@ -157,11 +117,9 @@ void __rw_munmap (const void* pcv, size_t size)   // nothrow
     // POSIX munmap() takes a void*, but not all platforms conform
 #ifndef _RWSTD_NO_MUNMAP
     munmap (_RWSTD_STATIC_CAST (_RWSTD_MUNMAP_ARG1_T, pv), size);
-#elif defined (_WIN32)
-    UnmapViewOfFile (pv);
 #else   // no munmap()
     operator delete (pv);
-#endif  // _MSC_VER
+#endif  // !defined (_RWSTD_NO_MUNMAP)
 }
 
 

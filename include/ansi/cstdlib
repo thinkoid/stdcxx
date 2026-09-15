@@ -196,9 +196,7 @@ inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
 
     using ::abort;
 
-#if    defined (_RWSTD_NO_ABS) && defined (_RWSTD_NO_ABS_INT) \
-    || defined (__HP_aCC) \
-    && defined (_MATH_INCLUDED) && !defined (__MATH_INCLUDED)
+#if defined (_RWSTD_NO_ABS) && defined (_RWSTD_NO_ABS_INT)
 
 // hacking around an HP aCC quirk when using system headers
 // in /usr/include without the compiler's wrappers (i.e.,

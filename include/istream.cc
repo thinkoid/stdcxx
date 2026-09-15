@@ -780,25 +780,5 @@ getline (char_type *__line, streamsize __size, char_type __delim)
 }
 
 
-#ifdef _RWSTD_NO_UNDEFINED_TEMPLATES
-
-template <class _CharT, class _Traits>
-basic_istream<_CharT, _Traits>::sentry::
-sentry (const sentry&)
-    : _RW::__rw_guard (0)
-{
-    _RWSTD_ASSERT (!"not callable");
-}
-
-template <class _CharT, class _Traits>
-void
-basic_istream<_CharT, _Traits>::sentry::
-operator= (const sentry&)
-{
-    _RWSTD_ASSERT (!"not callable");
-}
-
-#endif   // _RWSTD_NO_UNDEFINED_TEMPLATES
-
 
 }   // namespace std

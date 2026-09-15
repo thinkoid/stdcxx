@@ -32,7 +32,7 @@
 #undef assert
 
 #if !defined (NDEBUG)
-#  if defined (__GNUG__) || defined (__HP_aCC)
+#  if defined (__GNUG__)
 #    define assert(expr)                                                   \
      ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, \
                                                 __PRETTY_FUNCTION__))

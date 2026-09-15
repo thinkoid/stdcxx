@@ -30,27 +30,5 @@
 _RWSTD_NAMESPACE (std) {
 
 
-#ifdef _RWSTD_NO_UNDEFINED_TEMPLATES
-
-template <class _CharT, class _Traits>
-basic_ios<_CharT, _Traits>::
-basic_ios (const basic_ios<_CharT, _Traits>&)
-{
-    _RWSTD_ASSERT (!"not callable");
-}
-
-
-template <class _CharT, class _Traits>
-basic_ios<_CharT, _Traits>&
-basic_ios<_CharT, _Traits>::
-operator= (const basic_ios<_CharT, _Traits>&)
-{
-    _RWSTD_ASSERT (!"not callable");
-
-    return *this;
-}
-
-#endif   // _RWSTD_NO_UNDEFINED_TEMPLATES
-
 
 }   // namespace std

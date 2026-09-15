@@ -37,10 +37,4 @@
 
 #undef _RWSTD_NO_TEMPLATE_DEFINITIONS
 
-#ifdef _RWSTD_MSVC
-   // shut up the bogus MSVC warning C4661: no suitable definition
-   // provided for explicit template instantiation request
-#  pragma warning (disable: 4661)
-#endif   // _RWSTD_MSVC
-
 #include <sstream>

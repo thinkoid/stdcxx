@@ -35,13 +35,7 @@
 #include <rw/_defs.h>
 
 
-#ifdef __HP_aCC
-
-extern "C" void U_STACK_TRACE () _RWSTD_DECLARE_NOTHROW;
-
-#  define STACK_TRACE   U_STACK_TRACE
-
-#elif defined (__GLIBC__)
+#if defined (__GLIBC__)
 
 #  include <execinfo.h>
 
@@ -68,22 +62,11 @@ __rw_stack_trace (int fd) _RWSTD_DEFINE_NOTHROW
 
 #  define STACK_TRACE()   _RW::__rw_stack_trace (2)
 
-#elif    defined (_RWSTD_OS_SUNOS) \
-      && (5 < _RWSTD_OS_MAJOR || 5 == _RWSTD_OS_MAJOR && 8 < _RWSTD_OS_MINOR)
-
-// only Solaris 9 and better defines printstack() (in <ucontext.h>)
-// declare the function here instead of including the header to avoid
-// having to #define enabling macros (i.e., __EXTENSIONS__) and deal
-// with the breakage when using a strict compiler such as EDG eccp
-// with the long long extension (used in some system headers) disabled
-extern "C" int printstack (int) _RWSTD_DECLARE_NOTHROW;
-
-#    define STACK_TRACE()   printstack (2)
 #endif
 
 #ifndef STACK_TRACE
 #  define STACK_TRACE()   (void)0
-#endif   // __HP_aCC
+#endif   // !defined (STACK_TRACE)
 
 
 _RWSTD_NAMESPACE (__rw) { 

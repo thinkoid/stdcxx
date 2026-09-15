@@ -48,11 +48,6 @@
 #undef exception
 
 // MSVC provides its own complex macro
-#ifdef _MSC_VER
-#  ifdef complex
-#    undef complex
-#  endif
-#endif
 
 
 #endif   // _RWSTD_RW_MATH_H_INCLUDED

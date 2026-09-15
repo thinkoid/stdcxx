@@ -176,53 +176,6 @@ operator delete[] (void* __ptr, const _STD::nothrow_t&) _NEW_THROWS (())
 
 //**************************************************************************
 
-#ifdef _MSC_VER
-
-typedef int (*__rw_new_handler_t)(size_t);
-
-_RWSTD_DLLIMPORT __rw_new_handler_t _set_new_handler (__rw_new_handler_t);
-
-_RWSTD_NAMESPACE (__rw) {
-
-static _STD::new_handler __rw_new_handler /* = 0 */;
-
-static int __rw_new_handler_imp (size_t)
-{
-    _RWSTD_ASSERT (0 != __rw_new_handler);
-
-    __rw_new_handler ();
-
-    return 1;
-}
-
-}   // namespace __rw
-
-
-_RWSTD_NAMESPACE (std) {
-
-
-// 18.4.2.3 
-_RWSTD_EXPORT new_handler
-set_new_handler (new_handler handler) _THROWS (())
-{
-    // MSVC's set_new_handler(h) calls assert(h == 0)
-    // use the _set_new_handler() interface instead
-
-    _RWSTD_MT_STATIC_GUARD (new_handler);
-
-    new_handler save = _RW::__rw_new_handler;
-
-    _RW::__rw_new_handler = handler;
-
-    _set_new_handler (_RW::__rw_new_handler_imp);
-
-    return save;
-}
-
-}   // namespace std
-
-#endif   // _MSC_VER
-
 //**************************************************************************
 
 
@@ -255,12 +208,8 @@ _RWSTD_NAMESPACE (std) {
     && (    defined (_RWSTD_NO_GLOBAL_NOTHROW)   \
         || !defined (_RWSTD_NO_HONOR_STD))
 
-#  if __HP_aCC != 33000 && __HP_aCC != 33100
-
 // HP aCC 3.30 fails to emit data symbols for extern consts
 _RWSTD_EXPORT extern const nothrow_t nothrow = nothrow_t ();
-
-#  endif   // __HP_aCC
 
 #endif   // _RWSTD_NO_STD_NOTHROW && _RWSTD_NO_GLOBAL_NOTHROW || ...
 
@@ -301,14 +250,12 @@ bad_alloc (const bad_alloc &rhs) _THROWS (())
 #  endif   // _RWSTD_NO_BAD_ALLOC_COPY_CTOR
 
 #  ifdef _RWSTD_NO_BAD_ALLOC_DTOR
-#    if !__INTEL_COMPILER || __INTEL_COMPILER > 800
 
 /* virtual */ bad_alloc::
 ~bad_alloc () _THROWS (())
 {
     // empty
 }
-#    endif   // Intel C++ > 8.0
 #  endif   // _RWSTD_NO_BAD_ALLOC_DTOR
 
 #  ifdef _RWSTD_NO_BAD_ALLOC_ASSIGNMENT
@@ -325,15 +272,12 @@ operator= (const bad_alloc &rhs) _THROWS (())
 
 #  ifdef _RWSTD_NO_BAD_ALLOC_WHAT
 
-#    if !__INTEL_COMPILER || __INTEL_COMPILER > 800
-
 /* virtual */ const char* bad_alloc::
 what () const _THROWS (())
 {
     return _RWSTD_ERROR_BAD_ALLOC;
 }
 
-#    endif   // Intel C++ > 8.0
 #  endif   // _RWSTD_NO_BAD_ALLOC_WHAT
 
 #  if    !defined (_RWSTD_NO_STD_BAD_ALLOC)    \

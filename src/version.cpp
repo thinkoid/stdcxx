@@ -44,29 +44,3 @@ extern const char __rw_ident[] = {
 }   // namespace __rw
 
 
-#ifdef __HP_aCC
-#  pragma COPYRIGHT      "Rogue Wave Software, Inc."
-#  pragma COPYRIGHT_DATE "1994-2008"
-#  if 37300 <= __HP_aCC
-#    pragma VERSIONID      _RWSTD_VER_STR
-#  elif 0x04020000 == _RWSTD_VER
-     // work around an HP aCC 3.63 and prior ICE (see STCXXX-98)
-#    pragma VERSIONID      "4.2.0"
-#  elif 0x04020100 == _RWSTD_VER
-#    pragma VERSIONID      "4.2.1"
-#  elif 0x04020200 == _RWSTD_VER
-#    pragma VERSIONID      "4.2.2"
-#  elif 0x04020300 == _RWSTD_VER
-#    pragma VERSIONID      "4.2.3"
-#  elif 0x04030000 == _RWSTD_VER
-#    pragma VERSIONID      "4.3.0"
-#  elif 0x04030100 == _RWSTD_VER
-#    pragma VERSIONID      "4.3.1"
-#  elif 0x04030200 == _RWSTD_VER
-#    pragma VERSIONID      "4.3.2"
-#  elif 0x05000000 == _RWSTD_VER
-#    pragma VERSIONID      "5.0.0"
-#  endif   // HP aCC < 3.73
-#elif defined (__IBMCPP__)
-#  pragma comment (copyright, "(C) 1994-2008, Rogue Wave Software, Inc.")
-#endif   // __HP_aCC

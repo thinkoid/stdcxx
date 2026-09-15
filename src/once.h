@@ -59,7 +59,7 @@ struct __rw_once_t {
 #    ifndef _RWSTD_NO_SCHED_YIELD
 #      define _RWSTD_THREAD_YIELD()   sched_yield ()
 #    endif   // _RWSTD_NO_SCHED_YIELD
-#  else   // !_WIN32
+#  else   // !defined (_RWSTD_POSIX_THREADS)
 
 _RWSTD_NAMESPACE (__rw) {
 
@@ -68,7 +68,7 @@ struct __rw_once_t { int _C_init; };
 }   // namespace __rw
 
 #    define _RWSTD_ONCE_INIT   { 0 }
-#  endif   // _WIN32
+#  endif   // defined (_RWSTD_POSIX_THREADS)
 #else   // if !defined (_RWSTD_REENTRANT)
 
 _RWSTD_NAMESPACE (__rw) {

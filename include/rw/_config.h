@@ -109,7 +109,7 @@
 #      ifndef _RWSTD_USE_STRING_ATOMIC_OPS
 #        define _RWSTD_NO_STRING_ATOMIC_OPS
 #      endif   // _RWSTD_USE_STRING_ATOMIC_OPS
-#    endif   // _WIN32
+#    endif   // defined (_RWSTD_OS_LINUX)
 #  endif   // stdcxx < 5.0
 
 #endif   // AMD64/EM64T

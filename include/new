@@ -60,14 +60,10 @@ _RWSTD_NAMESPACE (std) {
 #endif   // !_RWSTD_NO_STD_NOTHROW_T || _RWSTD_NO_GLOBAL_NOTHROW_T
 
 
-#if !defined (_MSC_VER) || !defined (__NOTHROW_T_DEFINED)
-
    // disable definitions of nothrow_t in MSVC's <new.h>
-#  define __NOTHROW_T_DEFINED
+#define __NOTHROW_T_DEFINED
 
 struct nothrow_t { };
-
-#endif   // !_MSC_VER || !__NOTHROW_T_DEFINED
 
 
 #if !defined (_RWSTD_NO_STD_NOTHROW_T) || defined (_RWSTD_NO_GLOBAL_NOTHROW_T)
@@ -104,17 +100,8 @@ using ::nothrow_t;
 #endif   // _RWSTD_NO_STD_NOTHROW_T || !_RWSTD_NO_GLOBAL_NOTHROW_T
 
 
-#if __HP_aCC != 33000 && __HP_aCC != 33100
-
 // 18.4.1
 _RWSTD_EXPORT_NOTHROW extern const nothrow_t nothrow;
-
-#else   // if (__HP_aCC == 33000) || (__HP_aCC == 33100)
-
-// working around an HP aCC 3.30 bug (see PR #25382)
-const nothrow_t nothrow = nothrow_t ();
-
-#endif   // __HP_aCC == 33000 || __HP_aCC == 33100
 
 }   // namespace std
 
@@ -140,8 +127,6 @@ public:
     // 18.4.2.1, p4
     bad_alloc& operator= (const bad_alloc&) _THROWS (());
 
-#if !__INTEL_COMPILER || __INTEL_COMPILER > 800
-
     // prevent ld error when replacing operator new:
     // multiple definition of `operator new(unsigned long)'
 
@@ -149,8 +134,6 @@ public:
 
     // 18.4.2.1, p5
     virtual const char* what () const  _THROWS (());
-
-#endif   // Intel C++ > 8.0
 
 };
 
@@ -181,7 +164,7 @@ _USING (::bad_alloc);
 #endif   // _RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD
 
 
-#if !defined (_RWSTD_NO_STD_SET_NEW_HANDLER) || defined (_MSC_VER)
+#if !defined (_RWSTD_NO_STD_SET_NEW_HANDLER)
 
   // when using MSVC, declare set_new_handler() in namespace std
   // even though the runtime library doesn't define it there, so
@@ -196,11 +179,11 @@ _RWSTD_NAMESPACE (std) {
 typedef void (*new_handler) ();
 _RWSTD_EXPORT new_handler set_new_handler (new_handler) _THROWS (());
 
-#if !defined (_RWSTD_NO_STD_SET_NEW_HANDLER) || defined (_MSC_VER)
+#if !defined (_RWSTD_NO_STD_SET_NEW_HANDLER)
 
 }   // namespace std
 
-#else   // if !(!defined (_RWSTD_NO_STD_SET_NEW_HANDLER) || defined (_MSC_VER))
+#else   // !!defined (_RWSTD_NO_STD_SET_NEW_HANDLER)
 
 _RWSTD_NAMESPACE (std) {
 

@@ -166,8 +166,6 @@ public:
         return pair<iterator, bool>(__p.first, __p.second);
     }
 
-#if !defined (_MSC_VER) || _MSC_VER > 1300
-
     iterator insert (iterator __it, const value_type& __x) {
         return _C_rep.insert (__it, __x, false);
     }
@@ -179,28 +177,6 @@ public:
     void erase (iterator __first, iterator __last) {
         _C_rep.erase (__first, __last);
     }
-
-#else
-
-    // working around MSVC bugs
-    iterator insert (iterator __it, const value_type& __x) {
-        typedef _TYPENAME __rep_type::iterator _Iterator;
-        return _RWSTD_REINTERPRET_CAST (iterator&, _C_rep.insert (
-                   _RWSTD_REINTERPRET_CAST (_Iterator&, __it), __x, false));
-    }
-
-    void erase (iterator __it) {
-        typedef _TYPENAME __rep_type::iterator _Iterator;
-        _C_rep.erase (_RWSTD_REINTERPRET_CAST (_Iterator&, __it));
-    }
-
-    void erase (iterator __first, iterator __last) {
-        typedef _TYPENAME __rep_type::iterator _Iterator;
-        _C_rep.erase (_RWSTD_REINTERPRET_CAST (_Iterator&, __first),
-                      _RWSTD_REINTERPRET_CAST (_Iterator&, __last));
-    }
-
-#endif
 
     template<class _InputIter>
     void insert (_InputIter __first, _InputIter __last) {

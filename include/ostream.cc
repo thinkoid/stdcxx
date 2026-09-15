@@ -221,25 +221,4 @@ operator<< (basic_streambuf<char_type, traits_type> *__sb)
 }
 
 
-#ifdef _RWSTD_NO_UNDEFINED_TEMPLATES
-
-template <class _CharT, class _Traits>
-basic_ostream<_CharT, _Traits>::sentry::
-sentry (const sentry &__rhs)
-    : _RW::__rw_guard (0),
-      _C_strm (__rhs._C_strm)
-{
-    _RWSTD_ASSERT (!"not callable");
-}
-
-template <class _CharT, class _Traits>
-void
-basic_ostream<_CharT, _Traits>::sentry::
-operator= (const sentry&)
-{
-    _RWSTD_ASSERT (!"not callable");
-}
-
-#endif   // _RWSTD_NO_UNDEFINED_TEMPLATES
-
 }   // namespace std

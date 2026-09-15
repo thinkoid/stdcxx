@@ -225,36 +225,14 @@ struct __rw_is_enum
         static _TypeT _C_make_T ();
     };
 
-#if !defined (__HP_aCC) || __HP_aCC > 33000
-
     enum {
         _C_val =       sizeof (_C_yes)
                     == sizeof (_C_nest::_C_is (0, _C_nest::_C_make_T ()))
                  && !__rw_is_fundamental<_TypeT>::_C_val
     };
 
-#else
-
-    // prevent references from causing an error
-    typedef _TYPENAME __rw_is_reference<_TypeT>::_C_type _C_type;
-
-    // working around an HP aCC bug (see PR #25347)
-    // NOTE: this fails for classes due to another bug (PR #25384)
-    static const bool
-    _C_val =    sizeof (_C_yes) == sizeof (_C_nest::_C_is (0, _C_type ()))
-             && !__rw_is_fundamental<_TypeT>::_C_val;
-
-#endif   // __HP_aCC > 33000
-
 };
 
-
-#if defined (__HP_aCC) && __HP_aCC <= 33000
-
-template <class _TypeT>
-const bool __rw_is_enum<_TypeT>::_C_val;
-
-#endif   // __HP_aCC <= 33000
 
 
 _RWSTD_SPECIALIZED_CLASS

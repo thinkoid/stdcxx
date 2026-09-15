@@ -37,11 +37,6 @@
 
 #include <rw/_defs.h>
 
-#ifdef _WIN32
-#  define _RWSTD_USE_RC 1
-#  include <windows.h>
-#endif
-
 
 #define NL_SETD                 1    /* XPG3 Conformant Default set number. */
 #define NL_CAT_LOCALE           (-1) /* XPG4 requirement */

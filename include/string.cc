@@ -26,40 +26,20 @@
  * 
  **************************************************************************/
 
-#ifdef _RWSTD_MSVC
-   // shut up the dumb MSVC warning C4345:
-   // behavior change: an object with POD type constructed with
-   // an initializer of the form () will be default-initialized
-#  pragma warning (push)
-#  pragma warning (disable: 4345)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (std) {
 
 
 #ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-#  if !defined (_RWSTD_MSVC) || _RWSTD_MSVC > 1300
    // MSVC 7.0 allows initializers for static const integral members
    // but out-of-line definitions cause multiply defined symbol errors
    // (see PR #26562)
-
-#    ifndef _RWSTD_NO_STRING_NPOS_TYPE
 
 template <class _CharT, class _Traits, class _Allocator>
 const _TYPENAME basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 npos /* = SIZE_MAX */;
 
-#    else   // if defined (_RWSTD_NO_STRING_NPOS_TYPE)
-
-template <class _CharT, class _Traits, class _Allocator>
-const _RWSTD_SIZE_T
-basic_string<_CharT, _Traits, _Allocator>::
-npos /* = SIZE_MAX */;
-
-#    endif   // _RWSTD_NO_STRING_NPOS_TYPE
-#  endif   // MSVC > 7.0
 #endif   // _RWSTD_NO_STATIC_CONST_MEMBER_INIT
 
 
@@ -927,6 +907,3 @@ compare (size_type __pos, size_type __n1,
 }   // namespace std
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC

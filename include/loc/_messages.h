@@ -149,11 +149,6 @@ public:
 #endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (MESSAGES)
 
 
-#ifdef _RWSTD_MSVC
-#  pragma warning (push)
-#  pragma warning (disable: 4231)
-#endif   // _RWSTD_MSVC
-
 
 _RWSTD_NAMESPACE (std) { 
 
@@ -171,10 +166,6 @@ _RWSTD_INSTANTIATE_1 (class _RWSTD_TI_EXPORT messages<wchar_t>);
 
 }   // namespace std
 
-
-#ifdef _RWSTD_MSVC
-#  pragma warning (pop)
-#endif   // _RWSTD_MSVC
 
 
 #if _RWSTD_DEFINE_TEMPLATE_LAST (_MESSAGES)
