@@ -195,10 +195,6 @@ private:
     // the name of the codeset
     std::string code_set_name_;
 
-#if defined (_WIN32)
-    int codepage_;
-#endif // _WIN32
-
     // n_cmap maps the symbolic name to a narrow character value
     // rn_cmap does the opposite
     std::map <std::string, unsigned char> n_cmap_;

@@ -26,16 +26,8 @@
  * 
  **************************************************************************/
 
-#ifndef _WIN32
-#  include <unistd.h>      // for getcwd()
-#  include <sys/stat.h>    // for struct stat, stat()
-#else
-#  include <direct.h>      // for struct _stat
-#  include <io.h>
-#  include <windows.h>     // for _getcwd()
-#  include <sys/types.h>
-#  include <sys/stat.h>    // for struct stat, stat()
-#endif  // _WIN32
+#include <unistd.h>      // for getcwd()
+#include <sys/stat.h>    // for struct stat, stat()
 
 
 #include "path.h"
@@ -51,15 +43,9 @@
 
 static char* get_cwd (char* s, std::size_t l)
 {
-#if !defined (_MSC_VER)
     return getcwd (s, l);
-#else
-    return _getcwd (s, l);
-#endif
 }
 
-
-#if !defined (_WIN32) && !defined (__CYGWIN__)
 
 void
 create_symlink (const std::string &dir, 
@@ -102,8 +88,6 @@ create_symlink (const std::string &dir,
     }
 }
 
-#endif  // !_WIN32 && !__CYGWIN__
-
 
 inline int
 filemode (const char *path)
@@ -120,13 +104,7 @@ get_pathname (const std::string &fname,
               const std::string &other /* = std::string () */)
 {
     // use absolute path as given by fname
-#if !defined (_WIN32)
     if (fname.size () && _RWSTD_PATH_SEP == fname [0]) 
-#else
-    if (fname.size () && 
-        fname [1] && fname [1] == ':' && 
-        fname [2] && fname [2] == _RWSTD_PATH_SEP) 
-#endif
         return fname;
 
     std::string pathname;
@@ -134,13 +112,7 @@ get_pathname (const std::string &fname,
         other.substr (0,other.rfind (_RWSTD_PATH_SEP) + 1));
 
     // OR use the path given through "other", be it relative or absolute
-#if !defined (_WIN32)
     if (other.size () && _RWSTD_PATH_SEP == other [0]) {
-#else
-    if (other.size () && 
-        other [1] && other [1] == ':' && 
-        other [2] && other [2] == _RWSTD_PATH_SEP) {
-#endif
         // other is an absolute path; compose dirname(other) + fname
         (pathname += dir_other) += fname;
 
@@ -167,11 +139,7 @@ get_pathname (const std::string &fname,
         (pathname += dir_other) += fname;
     }
 
-#if !defined (_MSC_VER)
     if (S_ISREG (filemode (pathname.c_str ())))
-#else
-    if (S_IFREG & filemode (pathname.c_str ()))
-#endif // !defined (_MSC_VER)
         return pathname;
 
 
@@ -184,11 +152,7 @@ get_pathname (const std::string &fname,
         pathname = src_root;
         (((pathname += _RWSTD_PATH_SEP) += "src") += _RWSTD_PATH_SEP) += fname;
 
-#if !defined (_MSC_VER)
                 if (S_ISREG (filemode (pathname.c_str ())))
-#else
-                if (S_IFREG & filemode (pathname.c_str ()))
-#endif // !defined (_MSC_VER)
             return pathname;
     }
 
@@ -212,11 +176,7 @@ get_pathname (const std::string &fname,
     pathname.resize (std::strlen (pathname.data ()));
     pathname += fname;
 
-#if !defined (_MSC_VER)
     if (S_ISREG (filemode (pathname.c_str ())))
-#else
-    if (S_IFREG & filemode (pathname.c_str ()))
-#endif // !defined (_MSC_VER)
         return pathname;
 
     return fname;
@@ -225,33 +185,10 @@ get_pathname (const std::string &fname,
 
 int makedir (const char *name)
 {
-#ifdef _WIN32
-
-   if (   0 == CreateDirectory (name, NULL)
-        && GetLastError () != ERROR_ALREADY_EXISTS) {
-
-        LPVOID lpMsgBuf;
-
-        FormatMessage (  FORMAT_MESSAGE_ALLOCATE_BUFFER
-                       | FORMAT_MESSAGE_FROM_SYSTEM
-                       | FORMAT_MESSAGE_IGNORE_INSERTS,
-                       0,
-                       GetLastError (),
-                       MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
-                       (LPTSTR)&lpMsgBuf,
-                       0,
-                       0);
-
-        issue_diag (E_CALL, true, 0, (char*)lpMsgBuf);
-
-        return -1;
-    }
-    
-#else   // ifndef _WIN32
 
    if (-1 == mkdir (name, 0755)) {
 
-#  ifdef EEXIST
+#ifdef EEXIST
 
        if (errno != EEXIST) {
            issue_diag (E_CALL, true, 0, "failed to create directory %s: %s\n",
@@ -260,11 +197,9 @@ int makedir (const char *name)
            return -1;
        }
 
-#  endif   // EEXIST 
+#endif   // EEXIST 
 
    }
-
-#endif   // _WIN32
 
     return 0;
 }

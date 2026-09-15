@@ -34,10 +34,6 @@
 // #  define _RWSTD_NO_DEPRECATED_C_HEADERS
 // #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
-#ifdef __DECCXX
-#  undef __PURE_CNAME
-#endif   // __DECCXX
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>

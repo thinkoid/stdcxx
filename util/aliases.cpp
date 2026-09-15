@@ -28,13 +28,6 @@
 
 #include <rw/_defs.h>
 
-#ifdef _RWSTD_EDG_ECCP
-   // disable error #450-D: the type "long long" is nonstandard
-   // issued for uses of the type in Linux system headers (e.g.,
-   // pthreadtypes.h)
-#  pragma diag_suppress 450
-#endif   // vanilla EDG eccp demo
-
 #ifdef __linux__
    // on Linux define _XOPEN_SOURCE to get CODESET defined in <langinfo.h>
 #  define _XOPEN_SOURCE 500   /* SUS conformance */
@@ -55,11 +48,9 @@
 #include <vector>
 
 
-#ifndef _WIN32
-#  ifndef _RWSTD_NO_NL_LANGINFO
-#    include <langinfo.h>
-#  endif
-#endif  // _WIN32
+#ifndef _RWSTD_NO_NL_LANGINFO
+#  include <langinfo.h>
+#endif
 
 #include "aliases.h"
 
@@ -292,51 +283,7 @@ static const alias_t locale_aliases [] = {
     { 0, { 0 } }
 };
 
-#ifdef _WIN32
-
-struct codepage_t
-{
-    const char*  name;       // standard codeset name
-    unsigned int codepage;   // code page number
-};
-
-static const codepage_t codepages [] = {
-    { "ANSI_X3.4-1968", 20127 },
-    { "BIG5",             950 },
-    { "GBK",              936 },
-    { "GB2312",         20936 },
-    { "ISO-8859-1",     28591 },
-    { "ISO-8859-2",     28592 },
-    { "ISO-8859-3",     28593 },
-    { "ISO-8859-4",     28594 },
-    { "ISO-8859-5",     28595 },
-    { "ISO-8859-6",     28596 },
-    { "ISO-8859-7",     28597 },
-    { "ISO-8859-8",     28598 },
-    { "ISO-8859-9",     28599 },
-    { "ISO-8859-15",    28605 },
-    { "KOI8-R",         20866 },
-    { "KOI8-U",         21866 },
-    { "Shift_JIS",        932 },
-    { "UTF-8",          65001 },
-    { 0, 0 }
-};
-
-#endif  // _WIN32
-
 /****************************************************************************/
-#ifdef _WIN32
-
-unsigned int get_codepage (const std::string& cname)
-{
-    for (std::size_t i = 0; codepages [i].name; i++) {
-        if (0 == ci_compare (codepages [i].name, cname.c_str ()))
-            return codepages[i].codepage;
-    }
-    return 0;
-}
-
-#endif  // _WIN32
 
 /*****************************************************************************/
 
@@ -413,8 +360,6 @@ void get_cname_aliases (const std::string& name,
     if (aliases.empty ())
         aliases.push_back (name);
 }
-
-#ifndef _WIN32
 
 void get_lname_aliases (const std::string& name,
                         StringVector& aliases)
@@ -509,14 +454,6 @@ std::string get_C_encoding_locale (const std::string &codeset)
         // set the C locale and get the codeset name
         if (0 == std::setlocale (LC_CTYPE, locname))
             continue;
-
-#ifdef _RWSTD_OS_HP_UX
-
-        // skip the limited C.utf8 locale 
-        if (0 == std::strcmp ("C.utf8", locname))
-            continue;
-
-#endif   // _RWSTD_OS_HPUX
 
         
         const char* const cs = nl_langinfo (CODESET);
@@ -628,14 +565,6 @@ char* get_installed_locales (int loc_cat /* = LC_INVALID_CAT */)
                 locname = slocname + size - std::strlen (cmd) - 1;
             }
 
-#ifdef _WIN64
-
-            // prevent a hang (OS/libc bug?)
-            std::strcpy (locname, cmd);
-            locname += std::strlen (cmd) + 1;
-
-#else
-
             if (loc_cat != int (LC_INVALID_CAT)) {
 
                 // set the C locale to verify that the name is valid
@@ -657,8 +586,6 @@ char* get_installed_locales (int loc_cat /* = LC_INVALID_CAT */)
                 locname += std::strlen (cmd) + 1;
             }
 
-#endif   // _WIN64
-
         }
         *locname = '\0';
 
@@ -673,4 +600,3 @@ char* get_installed_locales (int loc_cat /* = LC_INVALID_CAT */)
     return slocname;
 }
 
-#endif   // _WIN32

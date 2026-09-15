@@ -35,11 +35,7 @@
 #include <sys/stat.h> /* for stat() */
 #include <sys/types.h> /* for size_t */
 
-#ifndef _WIN32
-#  include <unistd.h> /* for sleep() */
-#else
-#  include <windows.h> /* for Sleep() */
-#endif   /* _WIN32 */
+#include <unistd.h> /* for sleep() */
 
 
 #include "cmdopt.h" /* for exe_name, target_name */
@@ -47,11 +43,7 @@
 #include "util.h"
 
 
-#ifdef _WIN32
-#  define DEV_NULL   "NUL:"
-#else
-#  define DEV_NULL   "/dev/null"
-#endif   // _WIN32
+#define DEV_NULL   "/dev/null"
 
 
 void
@@ -238,8 +230,6 @@ output_name (const char* target)
 }
 
 
-#ifndef _WIN32
-
 void
 rw_sleep (int seconds)
 {
@@ -247,13 +237,11 @@ rw_sleep (int seconds)
 }
 
 
-#  ifndef _RWSTD_EDG_ECCP
-
-#    ifdef __cplusplus
+#ifdef __cplusplus
 
 extern "C" {
 
-#    endif   /* __cplusplus */
+#endif   /* __cplusplus */
 
 int
 rw_signal (int signo, void (*func)(int))
@@ -271,45 +259,9 @@ rw_signal (int signo, void (*func)(int))
     return 0 > sigaction (signo, &act, 0);
 }
 
-#    ifdef __cplusplus
+#ifdef __cplusplus
 
 }   /* extern "C" */
 
-#    endif   /* __cplusplus */
+#endif   /* __cplusplus */
 
-#  else   /* if defined (_RWSTD_EDG_ECCP) */
-
-#    ifdef __cplusplus
-
-extern "C" {
-
-#    endif   /* __cplusplus */
-
-int
-rw_signal (int signo, void (*func)(int))
-{
-    return SIG_ERR == signal (signo, func);
-}
-
-#    ifdef __cplusplus
-
-}   /* extern "C" */
-
-#    endif   /* __cplusplus */
-#  endif   /* _RWSTD_EDG_ECCP */
-#else   /* ifdef _WIN32 */
-
-void
-rw_sleep (int seconds)
-{
-    Sleep (seconds * 1000);
-}
-
-
-int
-rw_signal (int signo, void (*func)(int))
-{
-    return SIG_ERR == signal (signo, func);
-}
-
-#endif   /* _WIN32 */

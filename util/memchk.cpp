@@ -26,14 +26,8 @@
  * 
  **************************************************************************/
 
-#ifndef _WIN32
-#  include <fcntl.h>     // for open()
-#  include <unistd.h>    // for getpagesize(), write()
-#else   // if Windows
-#  include <fcntl.h>     // for POSIX compatibility APIs
-#  include <io.h>        // ditto
-#  include <windows.h>   // for all of Win32 junk
-#endif   // _WIN32
+#include <fcntl.h>     // for open()
+#include <unistd.h>    // for getpagesize(), write()
 
 #include <errno.h>       // for errno, EINTR
 #include <stddef.h>      // for size_t
@@ -68,16 +62,6 @@ extern "C" int mkstemp (char*) _LIBC_THROWS();
 #endif   // P_tmpdir
 
 
-#if defined (_RWSTD_EDG_ECCP) && !defined (_WIN32)
-
-extern "C" {
-
-int getpagesize ();
-
-}   // extern "C"
-
-#endif   // vanilla EDG eccp demo on UNIX
-
 
 static int page_size ()
 {
@@ -85,19 +69,7 @@ static int page_size ()
 
     if (0 == size) {
 
-#ifdef _WIN32
-
-        SYSTEM_INFO info;
-
-        GetSystemInfo (&info);
-
-        size = int (info.dwPageSize);
-
-#else   // any saner OS
-
         size = getpagesize ();
-
-#endif   // _WIN32
 
     }
 
@@ -116,28 +88,7 @@ size_t memchk (const void *addr, size_t nbytes)
         // operation away (as SunOS does, for instance)
         // fd = open ("/dev/null", O_WRONLY);
 
-#ifdef _WIN32
-
-        char* const fname = tempnam (P_tmpdir, ".rwmemchk.tmp");
-
-        if (!fname)
-            return size_t (-1);
-
-        // create a temporary file and have Win32 delete it when
-        // the last file descriptor that refers to it is closed
-        fd = open (fname, O_RDWR | O_CREAT | _O_TEMPORARY, 0666);
-
-        // free storage allocated by tempnam()
-        free (fname);
-
-        if (fd < 0) {
-            // error: unable to check addr
-            return size_t (-1);
-        }
-
-#else   // !_WIN32
-
-#  define TMP_TEMPLATE P_tmpdir "/rwmemchk-XXXXXX"
+#define TMP_TEMPLATE P_tmpdir "/rwmemchk-XXXXXX"
 
         char fname_buf [] = TMP_TEMPLATE;
 
@@ -149,8 +100,6 @@ size_t memchk (const void *addr, size_t nbytes)
         }
 
         unlink (fname_buf);
-
-#endif   // _WIN32
 
     }
 

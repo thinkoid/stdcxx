@@ -29,9 +29,7 @@
 
 #include <time.h> /* for clock_t */
 
-#ifndef _WIN32
-#  include <unistd.h> /* For _XOPEN_UNIX */
-#endif
+#include <unistd.h> /* For _XOPEN_UNIX */
 
 #ifdef _XOPEN_UNIX
 #  include <sys/resource.h> /* for struct rlimit */

@@ -40,27 +40,7 @@ usage_text[] = {
     "  -?, --help                 Give this help list\n"
 };
 
-#ifdef _WIN32
-#  define SLASH '\\'
-
-// replace file extension in str by new extension ext
-static void change_ext (std::string& str, const char* ext)
-{
-    const std::string::size_type npos = std::string::npos;
-    std::string::size_type dot_pos = str.find_last_of ('.');
-    std::string::size_type quote_pos =
-        npos == dot_pos ? str.find_last_of ('\"')
-        : str.find_first_of ('\"', dot_pos);
-    if (npos == quote_pos)
-        quote_pos = str.size ();
-    if (npos == dot_pos)
-        dot_pos = quote_pos;
-    str.replace (dot_pos, quote_pos - dot_pos, ext);
-}
-
-#else    // !_WIN32
-#  define SLASH '/'
-#endif   // _WIN32
+#define SLASH '/'
 
 int main (int argc, char *argv[])
 {
@@ -112,73 +92,6 @@ int main (int argc, char *argv[])
 
     std::string cmd;
 
-#ifdef _WIN32
-
-#  ifndef __MINGW32__
-
-    const char* const env_vars [] = {
-        "VS90COMNTOOLS", "VS80COMNTOOLS",
-        "VS71COMNTOOLS", "VSCOMNTOOLS"
-    };
-
-    for (size_t i = 0; i < sizeof (env_vars) / sizeof (*env_vars); ++i) {
-        if (const char* vcvarspath = std::getenv (env_vars [i])) {
-            cmd = vcvarspath;
-            cmd += "vsvars32.bat";
-            break;
-        }
-    }
-
-    if (std::string::npos != cmd.find (' ')) {
-        cmd.insert (cmd.begin (), 1, '\"');
-        cmd.push_back ('\"');
-    }
-
-    if (!cmd.empty ())
-        cmd += " && ";
-
-#  endif   // !__MINGW32__
-
-    const char* const dll_name = argv [0];
-    const char* const rc_name = argv [1];
-
-    std::string res_name (rc_name);
-    change_ext (res_name, ".res");
-
-#  ifdef __MINGW32__
-
-    cmd += "windres -O coff -i ";
-    cmd += rc_name;
-    cmd += " -o ";
-    cmd += res_name;
-    cmd += " && gcc -shared -mno-cygwin -o ";
-    cmd += dll_name;
-    cmd += ' ';
-    cmd += res_name;
-
-#  else
-
-#    ifndef _WIN64
-#      define PLATFORM "X86"
-#    else   // _WIN64
-#      define PLATFORM "X64"
-#    endif  // _WIN64
-
-    cmd += "rc ";
-    cmd += rc_name;
-    cmd += " && link /NOLOGO /DLL /NOENTRY /MACHINE:" PLATFORM " /OUT:";
-    cmd += dll_name;
-    cmd += ' ';
-    cmd += res_name;
-    
-#  endif   // __MINGW32__
-
-    const int ret = std::system (cmd.c_str ());
-
-    std::remove (res_name.c_str ());
-
-#else    // !_WIN32
-
     const char* const cat_name = argv [0];
     const char* const msg_name = argv [1];
 
@@ -188,8 +101,6 @@ int main (int argc, char *argv[])
     cmd += msg_name;
 
     const int ret = std::system (cmd.c_str ());
-
-#endif   // _WIN32
 
     return ret;
 }

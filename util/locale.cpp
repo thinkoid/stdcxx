@@ -33,13 +33,6 @@
 #  define _XOPEN_SOURCE 500   /* Single UNIX conformance */
 #endif   // __linux__
 
-#ifdef _RWSTD_EDG_ECCP
-   // disable error #450-D: the type "long long" is nonstandard
-   // issued for uses of the type in Linux system headers (e.g.,
-   // pthreadtypes.h)
-#  pragma diag_suppress 450
-#endif   // vanilla EDG eccp demo
-
 #include _RWSTD_SYS_TYPES_H
 
 #if _RWSTD_PATH_SEP == '/'
@@ -50,19 +43,14 @@
 #  define LS_1       "dir /B /A:D "
 #endif
 
-#ifndef _WIN32
-#  include <sys/mman.h>   // for mmap()
-#  include <unistd.h>     // for close ()
-#  ifndef _RWSTD_NO_ICONV
-#    include <iconv.h>
-#  endif
-#  ifndef _RWSTD_NO_NL_LANGINFO
-#    include <langinfo.h>
-#  endif
-#else
-#  include <io.h>         // for open()
-#  include <windows.h>
-#endif  // _WIN32
+#include <sys/mman.h>   // for mmap()
+#include <unistd.h>     // for close ()
+#ifndef _RWSTD_NO_ICONV
+#  include <iconv.h>
+#endif
+#ifndef _RWSTD_NO_NL_LANGINFO
+#  include <langinfo.h>
+#endif
 
 #include <limits.h>      // for INT_MAX, INT_MIN
 #include <sys/stat.h>
@@ -256,25 +244,10 @@ init_struct (const std::string &loc_path_root,
             // map the file to a pointer and if it succeeds
             // return the pointer, otherwise return 0
 
-#ifndef _WIN32
             void* const ret = mmap (0, st.st_size, PROT_READ | PROT_WRITE,
                                     MAP_PRIVATE, fd, 0);
             if (MAP_FAILED == ret)
                 return 0;
-
-#else
-            HANDLE file = CreateFile (loc_path.c_str (), GENERIC_READ,
-                                      FILE_SHARE_READ, 0,
-                                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL,
-                                      NULL);
-
-            HANDLE mapping = CreateFileMapping (file, 0, PAGE_READONLY,
-                                                0, 0, 0);
-
-            void* const ret = MapViewOfFile (mapping, FILE_MAP_READ, 0,
-                                             0, st.st_size);
-
-#endif  // _WIN32
 
             return ret;
         }
@@ -442,7 +415,6 @@ init_sections ()
 static const char*
 set_locale (int lc_cat, const char *locname, const std::string &charmap_name)
 {
-#ifndef _WIN32
 
     assert (0 != locname);
 
@@ -475,8 +447,6 @@ set_locale (int lc_cat, const char *locname, const std::string &charmap_name)
                     return names;
         }
     }
-
-#endif  // _WIN32
 
     return 0;
 }
@@ -593,11 +563,7 @@ get_charmap (int lc_cat)
         // search for a C library locale that uses the same encoding
         std::string std_encoding (charmap);
 
-# if !defined (_WIN32)
         std::string C_locale (get_C_encoding_locale (std_encoding));
-# else
-        std::string C_locale ("");
-# endif
 
         *cmap = new Charmap (C_locale.c_str (), charmap_path.c_str(),
                              0 == std::strcmp ("utf8.cm", charmap),
@@ -2367,38 +2333,6 @@ print_charmap_name (const char *section, int)
 }
 
 
-#ifdef _WIN32
-static BOOL CALLBACK
-EnumLocales (char* locale_id)
-{
-    const LCID lcid = std::strtoul (locale_id, 0, 16);
-
-    char buf [80];
-    const int bufsize = sizeof (buf) / sizeof (*buf);
-
-    std::string name;
-
-    if (GetLocaleInfo (lcid, LOCALE_SENGLANGUAGE, buf, bufsize))
-        name = buf;
-
-    if (GetLocaleInfo (lcid, LOCALE_SENGCOUNTRY, buf, bufsize)) {
-        name += '_';
-        name += buf;
-    }
-
-    if (   GetLocaleInfo (lcid, LOCALE_IDEFAULTANSICODEPAGE , buf, bufsize)
-        && std::strtoul (buf, 0, 10)) {
-        name += '.';
-        name += buf;
-    }
-
-    if (const char* locname = std::setlocale (LC_ALL, name.c_str ()))
-        std::cout << locname << '\n';
-
-    return TRUE;
-}
-#endif
-
 // print the available locales
 static void
 print_locale_names ()
@@ -2413,11 +2347,7 @@ print_locale_names ()
         std::system (cmd.c_str ());
     }
     else {
-#ifndef _WIN32
         std::system ("/usr/bin/locale -a");
-#else
-        EnumSystemLocales (EnumLocales, LCID_INSTALLED);
-#endif
     }
 }
 

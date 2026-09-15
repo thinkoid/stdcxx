@@ -34,9 +34,7 @@
 #include <limits.h>     /* for PATH_MAX */
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef _WIN32
-#  include <sys/wait.h>   /* for WIFEXITED(), ... */
-#endif
+#include <sys/wait.h>   /* for WIFEXITED(), ... */
 
 #include "cmdopt.h"
 #include "display.h"
@@ -296,29 +294,10 @@ check_target_ok (const char* target, struct target_status* status)
 
     path_len = strlen (target);
 
-#ifndef _WIN32
     /* Otherwise, check for the .o file on non-windows systems */
     tmp_name = (char*)RW_MALLOC (path_len + 3);
     memcpy (tmp_name, target, path_len + 1);
     strcat (tmp_name,".o");
-#else
-    /* Or the target\target.obj file on windows systems*/
-    {
-        const char* const target_name = get_target ();
-        size_t target_len = strlen (target_name);
-        size_t tmp_len = path_len + target_len - 2;
-        /* - 2 comes from removing 4 characters (extra .exe) and adding 2 
-           characters (\ directory seperator and trailing null) */
-        tmp_name = (char*)RW_MALLOC (tmp_len);
-        memcpy (tmp_name, target, path_len - 4);
-        tmp_name [path_len - 4] = default_path_sep;
-        memcpy (tmp_name + path_len - 3, target_name, target_len);
-        tmp_name [tmp_len - 4] = 'o';
-        tmp_name [tmp_len - 3] = 'b';
-        tmp_name [tmp_len - 2] = 'j';
-        tmp_name [tmp_len - 1] = '\0';
-    }
-#endif   /* _WIN32 */
 
     count_warnings (target, &status->l_warn, "warning:");
     count_warnings (tmp_name, &status->c_warn, "warning:");
@@ -397,11 +376,7 @@ rw_basename (const char* path)
     assert (0 != path);
 
     for (mark = pos = path; '\0' != *pos; ++pos)
-#ifndef _WIN32
         mark = (default_path_sep == *pos) ? pos + 1 : mark;
-#else
-        mark = (default_path_sep == *pos || '/' == *pos) ? pos + 1 : mark;
-#endif   /* _WIN32 */
 
     return mark;
 }

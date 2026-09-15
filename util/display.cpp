@@ -36,9 +36,7 @@
 
 #include <time.h>      /* for CLK_TCK, CLOCKS_PER_SEC */
 
-#ifndef _WIN32
-#  include <unistd.h>   /* for _SC_CLK_TCK, sysconf() */
-#endif
+#include <unistd.h>   /* for _SC_CLK_TCK, sysconf() */
 
 #if defined (_SC_CLK_TCK)
 

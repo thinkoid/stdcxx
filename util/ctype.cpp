@@ -690,7 +690,6 @@ process_ctype ()
             if (next.token != Scanner::tok_string)
                 issue_diag (E_SYNTAX, true, &next,
                             "expected string following \"copy\" directive\n"); 
-#if !defined (_WIN32) && !defined (__CYGWIN__)
 
             ctype_symlink_ = true;
 
@@ -711,8 +710,6 @@ process_ctype ()
                 f.close();
                 continue;
             }
-
-#endif  // !_WIN32 && !__CYGWIN__
 
             // bump up the nesting level
             nesting_level++;
@@ -891,8 +888,6 @@ write_ctype (std::string dir_name)
     
     }
 
-#if !defined (_WIN32) && !defined (__CYGWIN__)
-    
     if (ctype_symlink_) {
 
         std::string xname (ctype_filename_);
@@ -908,7 +903,5 @@ write_ctype (std::string dir_name)
         create_symlink (output_name_, xname, sname);
         return;
     }
-
-#endif  // !_WIN32 && !__CYGWIN__
 
 }

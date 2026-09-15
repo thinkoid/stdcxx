@@ -35,16 +35,11 @@
 #include <stdio.h> /* for *printf, fputs */
 #include <stdlib.h> /* for exit */
 #include <string.h> /* for str* */
-#ifndef _WIN32
-#  include <unistd.h> /* for sleep */
+#include <unistd.h> /* for sleep */
 
-#  if defined (_XOPEN_UNIX)
-#    include <sys/resource.h> /* for struct rlimit, RLIMIT_CORE, ... */
-#  endif
-
-#else
-#  include <windows.h> /* for Sleep */
-#endif   /* _WIN32 */
+#if defined (_XOPEN_UNIX)
+#  include <sys/resource.h> /* for struct rlimit, RLIMIT_CORE, ... */
+#endif
 
 #include "exec.h"
 #include "target.h"
@@ -54,28 +49,10 @@
 
 const char* exe_name; /**< Alias for process argv [0]. */
 
-#ifndef _WIN32
-
 const char escape_code = '\\';
 const char default_path_sep = '/';
 const char suffix_sep = '.';
 const size_t exe_suffix_len = 0;
-
-#else   /* Win32 */
-
-const char escape_code = '^';
-const char default_path_sep = '\\';
-const char suffix_sep = '.';
-const size_t exe_suffix_len = 4; /* strlen(".exe") == 4 */
-
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT 0x0500
-#  endif
-
-#  if _WIN32_WINNT >= 0x0500
-#    define RLIMIT_AS
-#  endif
-#endif
 
 static const char
 usage_text[] = {
@@ -461,28 +438,6 @@ eval_options (int argc, char **argv, struct target_opts* defaults,
     */
 #ifdef __GNUG__
     parse_warn_opts ("Gcc", defaults);
-#elif defined (__HP_aCC)
-    parse_warn_opts ("Acc", defaults);
-#elif defined (__IBMCPP__)
-    parse_warn_opts ("Xlc", defaults);
-#elif defined (__SUNPRO_CC)
-    parse_warn_opts ("Sunpro", defaults);
-#elif defined (SNI)
-    parse_warn_opts ("Cds", defaults);
-#elif defined (__APOGEE__) /* EDG variant that doesn't define __EDG__. */
-    parse_warn_opts ("Como", defaults);
-
-/* The following are EDG variants, that define __EDG__ */
-#elif defined (__DECCXX)
-    parse_warn_opts ("Cxx", defaults);
-#elif defined (_SGI_COMPILER_VERSION)
-    parse_warn_opts ("Mipspro", defaults);
-#elif defined (__INTEL_COMPILER)
-    parse_warn_opts ("Icc", defaults);
-
-/* So we need to check for __EDG__ after we check for them. */
-#elif defined (__EDG__)
-    parse_warn_opts ("Eccp", defaults);
 #endif
 
     if (1 == argc || '-' != argv [1][0])
