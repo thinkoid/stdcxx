@@ -35,12 +35,8 @@
 #include <stddef.h>     // for size_t
 #include <string.h>     // for memset()
 
-#ifndef _WIN32
-#  include <stdio.h>      // for FILE, fscanf(), popen()
-#  include <unistd.h>     // for sysconf(), _SC_NPROCESSORS_{CONF,ONLN}
-#else
-#  include <windows.h>    // for GetSystemInfo()
-#endif   // _WIN32
+#include <stdio.h>      // for FILE, fscanf(), popen()
+#include <unistd.h>     // for sysconf(), _SC_NPROCESSORS_{CONF,ONLN}
 
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 
@@ -84,13 +80,6 @@ _rw_timeout_handler (int)
 
 #if defined (_RWSTD_POSIX_THREADS)
 
-#  ifdef _RWSTD_EDG_ECCP
-     // disable error #450-D: the type "long long" is nonstandard
-     // issued for uses of the type in Linux system headers (e.g.,
-     // pthreadtypes.h)
-#    pragma diag_suppress 450
-#  endif   // vanilla EDG eccp demo
-
 #  include <pthread.h>
 
 _TEST_EXPORT int
@@ -99,16 +88,6 @@ rw_thread_create (rw_thread_t *thr_id,
                   rw_thread_proc *thr_proc,
                   void *thr_arg)
 {
-#ifdef _RWSTD_OS_SUNOS
-
-    static int concurrency_set;
-
-    if (0 == concurrency_set) {
-        pthread_setconcurrency (4);
-        concurrency_set = 1;
-    }
-
-#endif   // _RWSTD_OS_SUNOS
 
 
     rw_thread_t tmpid;
@@ -146,230 +125,13 @@ rw_thread_join (rw_thread_t thr_id, void **parg)
 
 /**************************************************************************/
 
-#elif defined (_RWSTD_SOLARIS_THREADS)
-#  include <thread.h>
-
-_TEST_EXPORT int
-rw_thread_create (rw_thread_t *thr_id,
-                  rw_thread_attr_t*,
-                  rw_thread_proc *thr_proc,
-                  void *thr_arg)
-{
-    static int concurrency_set;
-
-    if (0 == concurrency_set) {
-        thr_setconcurrency (4);
-        concurrency_set = 1;
-    }
-
-    rw_thread_t tmpid;
-
-    if (0 == thr_id) {
-        thr_id = &tmpid;
-    }
-
-    thread_t tid;
-
-    // set the thread number *before* creating the thread
-    // so that it's visible in thr_proc when it starts to
-    // run even before thr_create returns
-    thr_id->threadno = maxthreads;
-
-    const int result =
-        thr_create (0,          // stack_base
-                    0,          // stack_size
-                    thr_proc,   // start_func
-                    thr_arg,    // arg
-                    0,          // flags
-                    &tid);      // new_thread_ID
-
-    if (0 == result) {
-        thr_id->id     = (long)tid;
-        thr_id->handle = 0;
-        ++maxthreads;
-    }
-
-    return result;
-}
-
-
-_TEST_EXPORT int
-rw_thread_join (rw_thread_t thr_id, void **parg)
-{
-    const int result = thr_join ((thread_t)thr_id.id, 0, parg);
-
-    return result;
-}
-
-/**************************************************************************/
-
-#elif defined (_RWSTD_DEC_THREADS)
-
-#  include <setjmp.h>
-#  include <cma.h>
-
-_TEST_EXPORT int
-rw_thread_create (rw_thread_t *thr_id,
-                  rw_thread_attr_t*,
-                  rw_thread_proc *thr_proc,
-                  void *thr_arg)
-{
-    rw_thread_t tmpid;
-
-    if (0 == thr_id) {
-        thr_id = &tmpid;
-    }
-
-    int result = 0;
-
-    cma_t_thread tid;
-
-    // set the thread number *before* creating the thread
-    // so that it's visible in thr_proc when it starts to
-    // run even before cma_thread_create returns
-    thr_id->threadno = maxthreads;
-
-    TRY {
-        // cma_thread_create() returns void but throws an exception on error
-        cma_thread_create (&tid,        // new_thread
-                           0,           // attr
-                           thr_proc,    // start_routine
-                           &thr_arg);   // arg
-
-        thr_id->id     = tid.field1;
-        thr_id->handle = (void*)tid.field2;
-        ++maxthreads;
-    }
-    CATCH_ALL {
-        result = -1;
-    }
-    ENDTRY
-
-    return result;
-}
-
-
-_TEST_EXPORT int
-rw_thread_join (rw_thread_t thr_id, void **parg)
-{
-    int status = 0;
-
-    cma_t_thread tid = {
-        thr_id.id, (long)thr_id.handle
-    };
-
-    TRY {
-        // cma_thread_join() returns void but throws an exception on error
-        cma_thread_join (&tid, 0, parg);
-    }
-    CATCH_ALL {
-        status = -1;
-    }
-    ENDTRY
-
-    return status;
-}
-
-/**************************************************************************/
-
-#elif defined (_WIN32) && defined (_MT)
-#  ifdef __MINGW32__
-#    include <stdint.h>   // for uintptr_t
-#  endif
-#  include <process.h>    // for _beginthreadex()
-
-_TEST_EXPORT int
-rw_thread_create (rw_thread_t *thr_id,
-                  rw_thread_attr_t*,
-                  rw_thread_proc *thr_proc,
-                  void *thr_arg)
-{
-    int result = 0;
-
-    rw_thread_t tmpid;
-
-    if (0 == thr_id)
-        thr_id = &tmpid;
-
-    unsigned nid;   // numerical id
-
-    typedef unsigned int (__stdcall *win32_thr_proc_t)(void *);
-    win32_thr_proc_t win32_thr_proc =
-        _RWSTD_REINTERPRET_CAST (win32_thr_proc_t, thr_proc);
-
-    // set the thread number *before* creating the thread
-    // so that it's visible in thr_proc when it starts to
-    // run even before CreateThread returns
-    thr_id->threadno = maxthreads;
-
-    const uintptr_t hthread =
-        _beginthreadex (0,                // lpThreadAttributes
-                        0,                // dwStackSize
-                        win32_thr_proc,   // lpStartAddress
-                        thr_arg,          // lpParameter
-                        0,                // dwCreationFlags
-                        &nid);            // lpThreadId
-
-    if (!hthread) {
-        thr_id->id     = -1;
-        thr_id->handle = 0;
-        result         = -1;
-    }
-    else {
-        thr_id->id     = nid;
-        thr_id->handle = _RWSTD_REINTERPRET_CAST (void*, hthread);
-        ++maxthreads;
-    }
-
-    return result;
-}
-
-
-_TEST_EXPORT int
-rw_thread_join (rw_thread_t thr_id, void **parg)
-{
-    int result = 0;
-
-    const DWORD retcode = WaitForSingleObject (thr_id.handle, INFINITE);
-
-    if (WAIT_OBJECT_0 == retcode) {
-        if (parg) {
-            DWORD exit_code;
-
-            if (GetExitCodeThread (thr_id.handle, &exit_code))
-                *parg = (void*)exit_code;
-            else
-                result = -1;
-        }
-    }
-    else {
-        result = -1;
-    }
-
-    return result;
-}
-
-/**************************************************************************/
-
 #else   // unknown/missing threads environment
 
 #  include <errno.h>
 
 #  ifndef ENOTSUP
-#    if defined (_RWSTD_OS_AIX)
-#      define ENOTSUP    124
-#    elif defined (_RWSTD_OS_HP_UX)
-#      define ENOTSUP    252
-#    elif defined (_RWSTD_OS_IRIX64)
-#      define ENOTSUP   1008
-#    elif defined (_RWSTD_OS_LINUX)
+#    if defined (_RWSTD_OS_LINUX)
 #      define ENOTSUP    524
-#    elif defined (_RWSTD_OS_OSF1)
-#      define ENOTSUP     99
-#    elif defined (_RWSTD_OS_SUNOS)
-#      define ENOTSUP     48
-#    elif defined (_WIN32)
-#      define ENOTSUP ENOSYS
 #    else
 #      define ENOTSUP   9999
 #    endif
@@ -401,63 +163,40 @@ rw_thread_join (rw_thread_t, void**)
 _TEST_EXPORT int
 rw_get_cpus ()
 {
-#ifndef _WIN32
 
     const char* const cmd = {
         // shell command(s) to obtain the number of processors
 
-#  ifdef _RWSTD_OS_AIX
-        // AIX: /etc/lsdev -Cc processor | wc -l
-        "/etc/lsdev -Cc processor | /usr/bin/wc -l"
-#  elif defined (_RWSTD_OS_LINUX)
+#if defined (_RWSTD_OS_LINUX)
         // Linux: cat /proc/cpuinfo | grep processor | wc -l
         "cat /proc/cpuinfo "
         "  | grep processor "
         "  | wc -l"
-#  elif defined (_RWSTD_OS_FREEBSD)
+#elif defined (_RWSTD_OS_FREEBSD)
         // FreeBSD: /sbin/sysctl -n hw.ncpu
         "/sbin/sysctl -n hw.ncpu"
-#  elif defined (_RWSTD_OS_HP_UX)
-        // HP-UX: /etc/ioscan -k -C processor | grep processor | wc -l
-        "/etc/ioscan -k -C processor "
-        "  | /usr/bin/grep processor "
-        "  | /usr/bin/wc -l"
-#  elif defined (_RWSTD_OS_IRIX64)
-        // IRIX: hinv | /usr/bin/grep "^[1-9][0-9]* .* Processor"
-        "/sbin/hinv "
-        "  | /usr/bin/grep \"^[1-9][0-9]* .* Processor\""
-#  elif defined (_RWSTD_OS_OSF1)
-        // Tru64 UNIX: /usr/sbin/psrinfo | grep online | wc -l
-        "/usr/sbin/psrinfo "
-        "  | /usr/bin/grep on[-]*line "
-        "  | /usr/bin wc -l"
-#  elif defined (_RWSTD_OS_SUNOS)
-        // Solaris: /usr/bin/mpstat | wc -l
-        "/usr/bin/mpstat "
-        "  | /usr/bin/grep -v \"^CPU\" "
-        "  | /usr/bin/wc -l"
-#  else
+#else
         0
-#  endif
+#endif
 
     };
 
     int ncpus = -1;
 
-#  ifdef _SC_NPROCESSORS_ONLN
+#ifdef _SC_NPROCESSORS_ONLN
     // try to obtain the number of processors that are currently online
     // programmatically and fall back on the shell script above if it
     // fails
     ncpus = int (sysconf (_SC_NPROCESSORS_ONLN));
 
-#  elif defined (_SC_NPROCESSORS_CONF)
+#elif defined (_SC_NPROCESSORS_CONF)
 
     // try to obtain the number of processors the system is configured
     // with (not all of them are necessarily online) programmatically
     // and fall back on the shell script above if it fails
     ncpus = int (sysconf (_SC_NPROCESSORS_CONF));
 
-#  endif   // _SC_NPROCESSORS_CONF
+#endif   // _SC_NPROCESSORS_CONF
 
     if (ncpus < 1 && cmd) {
         // if the number of processors couldn't be determined using
@@ -479,13 +218,6 @@ rw_get_cpus ()
 
     return ncpus;
 
-#else    // _WIN32
-
-    SYSTEM_INFO info;
-    GetSystemInfo (&info);
-    return int (info.dwNumberOfProcessors);
-
-#endif   // _WIN32
 }
 
 /**************************************************************************/

@@ -30,18 +30,7 @@
 
 
 #ifdef _RWSTD_REENTRANT
-#  ifdef _RWSTD_OS_SUNOS
-
-#    include <pthread.h>
-#    include <thread.h>
-
-#    define _RWSTD_THREAD_ONCE(once, func)   pthread_once (once, func)
-#    define _RWSTD_THREAD_YIELD()            thr_yield ()
-#    define _RWSTD_ONCE_INIT                 PTHREAD_ONCE_INIT
-
-typedef pthread_once_t __rw_once_t;
-
-#  elif defined (_RWSTD_POSIX_THREADS)
+#  if defined (_RWSTD_POSIX_THREADS)
 
 #    include <pthread.h>
 
@@ -70,36 +59,6 @@ struct __rw_once_t {
 #    ifndef _RWSTD_NO_SCHED_YIELD
 #      define _RWSTD_THREAD_YIELD()   sched_yield ()
 #    endif   // _RWSTD_NO_SCHED_YIELD
-#  elif defined (_RWSTD_DCE_THREADS)
-
-#    if defined (_RWSTD_NO_DCE_PTHREAD_H)
-#      include <pthread.h>
-#    else
-#      include <dce/pthread.h>
-#    endif
-
-_RWSTD_NAMESPACE (__rw) {
-
-typedef pthread_once_t __rw_once_t;
-
-}   // namespace __rw
-
-#    define _RWSTD_THREAD_ONCE(once, func)   pthread_once (once, func)
-#    define _RWSTD_THREAD_YIELD()            pthread_yield ()
-#    define _RWSTD_ONCE_INIT                 PTHREAD_ONCE_INIT
-
-#  elif defined (_WIN32)
-
-#    include <windows.h>
-
-_RWSTD_NAMESPACE (__rw) {
-
-struct __rw_once_t { int _C_init; };
-
-}   // namespace __rw
-
-#    define _RWSTD_THREAD_YIELD()   Sleep (0)
-#    define _RWSTD_ONCE_INIT        { 0 }
 #  else   // !_WIN32
 
 _RWSTD_NAMESPACE (__rw) {
@@ -133,27 +92,8 @@ _RWSTD_NAMESPACE (__rw) {
 
 extern "C" {
 
-#if !defined (_RWSTD_MSVC) || !defined (_RWSTD_REENTRANT)
-
 _RWSTD_EXPORT int
 __rw_once (__rw_once_t*, void (*)());
-
-#else   // _RWSTD_MSVC && _RWSTD_REENTRANT
-
-// MSVC by default assumes that functions with C linkage don't
-// throw exceptions and issues warning "function assumed not
-// to throw an exception but does". Specifying an exception
-// specification using the throw(...) extension prevents this
-// problem.
-// Note: functions with C linkage passed as an argument to
-// __rw_once() should also be declared with the appropriate
-// exception specification if it throws an exception in order
-// to avoid resource leaks due to destructors of objects with
-// auto storage duration not being run otherwise.
-_RWSTD_EXPORT int
-__rw_once (__rw_once_t*, void (*)() throw (...)) throw (...);
-
-#endif   // !_RWSTD_MSVC || !_RWSTD_REENTRANT
 
 }   // extern "C"
 

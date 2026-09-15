@@ -60,20 +60,9 @@
 
 
 // work around SunOS 5.{8,9}/SunPro bug (see PR #26255)
-#  if defined (__SunOS_5_8) || defined (__SunOS_5_9)
-#    undef _TIME_T
-#  endif   // __SunOS_5_{8,9}
 
-#  if defined (_RWSTD_SOLARIS_THREADS)  // assuming Solaris 2.1 or greater
-#    include <rw/_mutex-solaris.h>
-#  elif defined (_RWSTD_POSIX_THREADS)
+#  if defined (_RWSTD_POSIX_THREADS)
 #    include <rw/_mutex-pthread.h>
-#  elif defined (_RWSTD_DCE_THREADS)
-#    include <rw/_mutex-dce.h>
-#  elif defined (_WIN32)
-#    include <rw/_mutex-win32.h>
-#  elif defined (__OS2__)
-#    include <rw/_mutex-os2.h>
 #  else
 #    error unknown thread environment
 #  endif
@@ -110,14 +99,9 @@ class _RWSTD_EXPORT __rw_mutex_base
 public:
 
     void _C_acquire () {
-#  if !defined (__HP_aCC) || __HP_aCC > 32700
         if (0 != _RWSTD_MUTEX_LOCK (_C_mutex))
             _RW::__rw_throw (_RWSTD_ERROR_RUNTIME_ERROR,
                              "synchronization error");
-#  else
-        // working around an HP aCC 3.27 bug JAGac88738
-        _RWSTD_MUTEX_LOCK (_C_mutex);
-#  endif   // !defined (__HP_aCC) || __HP_aCC > 32700
     }
 
     void _C_release ();

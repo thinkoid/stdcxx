@@ -83,11 +83,9 @@
 
 // -D _REENTRANT or any one of the other thread safety macros
 // used in the conditional below turns on thread safety features
-#if    defined (_REENTRANT)             \
-    || defined (_THREAD_SAFE)           \
-    || defined (_RWSTD_MULTI_THREAD)    \
-    || defined (_RWSTD_DCE_THREADS)     \
-    || defined (_RWSTD_SOLARIS_THREADS) \
+#if   defined (_REENTRANT)            \
+    || defined (_THREAD_SAFE)         \
+    || defined (_RWSTD_MULTI_THREAD)  \
     || defined (_RWSTD_POSIX_THREADS)
 #  ifndef _RWSTD_REENTRANT
 #    define _RWSTD_REENTRANT
@@ -147,22 +145,13 @@
 /********************** Threads *******************************************/
 
 #ifdef _RWSTD_REENTRANT
-#  if    !defined (_RWSTD_DCE_THREADS)   \
-      && !defined (_RWSTD_DEC_THREADS)   \
-      && !defined (_RWSTD_POSIX_THREADS) \
-      && !defined (_RWSTD_SOLARIS_THREADS)
+#  if !defined (_RWSTD_POSIX_THREADS)
 
    // default to POSIX threads except on Win32 or Win64
 
-#    ifndef _WIN32
-#      define _RWSTD_POSIX_THREADS
-#    endif   // _WIN32
+#    define _RWSTD_POSIX_THREADS
 #  endif   // _RWSTD_*_THREADS
 #endif   // _RWSTD_REENTRANT
-
-#ifdef _RWSTD_DCE_THREADS
-#  define _RWSTD_NO_STATIC_MUTEX_INIT
-#endif   // _RWSTD_DCE_THREADS
 
 /********************** Miscellaneous *************************************/
 

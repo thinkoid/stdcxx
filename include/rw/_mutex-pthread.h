@@ -30,14 +30,6 @@
  * 
  **************************************************************************/
 
-#if    defined (_RWSTD_EDG_ECCP) && defined (_RWSTD_OS_LINUX) \
-    && defined (_RWSTD_NO_LONG_LONG)
-   // disable error #450-D: the type "long long" is nonstandard
-   // when using the vanilla EDG eccp in strict mode (i.e., w/o
-   // long long support)
-#  pragma diag_suppress 450
-#endif   // EDG eccp on Linux
-
 // LinuxThreads man page:
 //   "Variables of type pthread_mutex_t can also be initialized
 //    statically, using the constants  PTHREAD_MUTEX_INITIALIZER
@@ -56,20 +48,4 @@
 #define _RWSTD_MUTEX_UNLOCK(mutex)    pthread_mutex_unlock (&mutex)
 #define _RWSTD_MUTEX_T                pthread_mutex_t
 
-#if defined (__GNUG__) && defined (__osf__)
-   // prevent g++ warnings about missing initializers
-   // see <pthread.h> for explanation of _PTHREAD_NOMETER_STATIC
-#  ifndef _PTHREAD_NOMETER_STATIC
-#    define _RWSTD_MUTEX_INITIALIZER \
-            { _PTHREAD_MSTATE_SLOW, _PTHREAD_MVALID | _PTHREAD_MVF_STA, \
-              0, 0, 0, 0, 0, 0 }
-#  else   // if defined (_PTHREAD_NOMETER_STATIC)
-#    define _RWSTD_MUTEX_INITIALIZER
-            { 0, _PTHREAD_MVALID | _PTHREAD_MVF_STA, 0, 0, 0, 0, 0, 0 }
-#  endif   // _PTHREAD_NOMETER_STATIC
-#elif defined (__GNUG__) && defined (__sgi__)
-   // prevent g++ warnings about a partly bracketed initializer
-#  define _RWSTD_MUTEX_INITIALIZER { PTHREAD_MUTEX_INITIALIZER }
-#else
-#  define _RWSTD_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
-#endif
+#define _RWSTD_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER

@@ -98,15 +98,12 @@
 #               the default value is 11s
 #
 #   BUILDMODE - (optional) a comma separated list of at most one of each of
-#                  debug, optimized, shared
-#                  threads, pthreads, dcethreads, wide
+#                  debug, optimized, shared, pthreads, wide
 #               where
 #               *  debug turns on debugging and disables optimization
 #               *  optimized enables optimization and disables debugging
 #               *  shared creates and links with a shared library
-#               *  threads uses Solaris threads for thread safety
 #               *  pthreads uses POSIX threads for thread safety
-#               *  dcethreads uses DCE threads for thread safety
 #               *  wide uses wide (typically 64-bit) memory model
 #               the default value is debug (same as 11s)
 #
@@ -434,31 +431,13 @@ ifeq ($(in_topdir),1)
     RPATH      =
   endif
 
-  # POSIX, Solaris, DCE threads
+  # POSIX threads
   ifeq ($(findstring pthreads,$(BUILDMODE)),pthreads)
     CPPFLAGS += $(MULTI_CPPFLAGS_POSIX)
     LDFLAGS  += $(MULTI_LDFLAGS_POSIX)
   else
-    ifeq ($(findstring dcethreads,$(BUILDMODE)),dcethreads)
-      ifneq ($(OSNAME),OSF1)
-        $(error "DCE threads not suported on this platform:" $(OSNAME))
-      endif
-
-      CPPFLAGS += $(MULTI_CPPFLAGS_DCE)
-      LDFLAGS  += $(MULTI_LDFLAGS_DCE)
-    else
-      ifeq ($(findstring threads,$(BUILDMODE)),threads)
-        ifneq ($(OSNAME),SunOS)
-          $(error "Solaris threads not suported on this platform: " $(OSNAME))
-        endif
-
-        CPPFLAGS +=  $(MULTI_CPPFLAGS_SOLARIS)
-        LDFLAGS  +=  $(MULTI_LDFLAGS_SOLARIS)
-      else
-        CPPFLAGS += $(SINGL_CPPFLAGS)
-        LDFLAGS   += $(SINGL_LDFLAGS)
-      endif
-    endif
+    CPPFLAGS += $(SINGL_CPPFLAGS)
+    LDFLAGS   += $(SINGL_LDFLAGS)
   endif
 
   # wide (typically 64-bit) mode
