@@ -227,6 +227,28 @@ thread pool failing to start. The 15D baseline rows for these tests
 record symptoms, not a reference; =doc/notes/test-baseline.md=
 chapter 3.4 has the details.
 
+A ThreadSanitizer build of 15D names the cause: =numpunct= caches
+the results of its virtuals in members of the shared facet with no
+synchronization (=include/loc/_numpunct.h:142= on), so two threads
+assign the same cached =std::string= and one frees the
+representation the other is copying; the facet's implementation
+data and the locale body's bookkeeping are initialized the same way.
+The facet has a mutex it does not take. One run: 31 data races, 5
+use-after-free, 4 destroyed mutexes. Two configuration facts sit
+beside it: on Linux/x86-64 the string reference count goes through
+a mutex per string for 4.1.x binary compatibility
+(=include/rw/_config.h:155=), and =_RWSTD_NO_THREAD_SAFE_LOCALE= is
+characterized and read nowhere. =doc/notes/locale-mt-race.md= has
+the reports and the intended fixes.
+
+Fix, after the retirement: guard the lazy initialization in every
+caching facet and in the facet data with the mutex the facet already
+has; decide the string atomics clause; find or retire the
+thread-safe-locale consumer.
+
+Check: the ThreadSanitizer build runs every =22.locale.*.mt= test
+with no report from the library, three runs each.
+
 The hardware is aarch64 Linux. There =include/rw/_atomic.h= selects
 no backend: the GNU builtin branch is gated on an architecture list
 that names only i486, x86-64 and ia64, so the chain falls through to
