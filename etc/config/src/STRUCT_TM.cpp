@@ -35,7 +35,8 @@
    // provide own equivalent when offsetof() macro doesn't work
    // (e.g., when using the EDG eccp front end with an incompatible
    // version of gcc)
-#  define OFF(T, m)   (((const char*)&((T*)0)->m) - ((const char*)(T*)0))
+#  define OFF(T, m)   \
+       ((size_t)(((const char*)&((T*)0)->m) - ((const char*)(T*)0)))
 #endif   // _RWSTD_NO_OFFSETOF
 
 // prevent IBM xlC 5.0 errors caused by using /usr/include/string.h
