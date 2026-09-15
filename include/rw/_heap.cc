@@ -49,11 +49,12 @@ template <class _RandomAccessIter, class _Dist, class _TypeT, class _Compare>
 void __push_heap (_RandomAccessIter __first, _Dist __holeIndex,
                   _Dist __topIndex, _TypeT __val, _Compare __comp)
 {
-    for (_Dist __parent = (__holeIndex - 1) / 2; 
-            __holeIndex > __topIndex
-         && !(__comp (*(__first + __parent), __val) == false);
+    for (_Dist __parent = (__holeIndex - 1) / 2; __holeIndex > __topIndex;
          __parent = ((__holeIndex = __parent) - 1) / 2) {
-        *(__first + __holeIndex) = *(__first + __parent);
+        if (__comp (*(__first + __parent), __val))
+            *(__first + __holeIndex) = *(__first + __parent);
+        else
+            break;
     }
 
     *(__first + __holeIndex) = __val;

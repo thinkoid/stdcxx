@@ -135,7 +135,7 @@ _FwdIter1 find_first_of (_FwdIter1 __first1, _FwdIter1 __last1,
 
     for (_FwdIter1 __next = __first1; !(__next == __last1); ++__next)
         for (_FwdIter2 __iter = __first2; !(__iter == __last2); ++__iter)
-            if (!(__pred (*__next, *__iter) == false))
+            if (__pred (*__next, *__iter))
                 return __next;
 
     return __last1;
@@ -170,7 +170,7 @@ _FwdIter adjacent_find (_FwdIter __first, _FwdIter __last,
         return __last;
 
     for (_FwdIter __next = __first; !(++__next == __last); __first = __next)
-        if (!(__pred (*__first, *__next) == false))
+        if (__pred (*__first, *__next))
             return __first;
 
     return __last;
@@ -234,7 +234,11 @@ _FwdIter1 __search (_FwdIter1 __first1, _FwdIter1 __last1,
     _FwdIter2 __cur2 = __first2;
 
     while (!(__cur2 == __last2)) {
-        if (__pred (*__cur1, *__cur2) == false) {
+        if (__pred (*__cur1, *__cur2)) {
+            ++__cur1;
+            ++__cur2;
+        }
+        else {
             ++__cur1;
             ++__cur2;
             if (__dist1-- == __dist2)
@@ -242,10 +246,6 @@ _FwdIter1 __search (_FwdIter1 __first1, _FwdIter1 __last1,
 
             __cur1 = ++__first1;
             __cur2 = __first2;
-        }
-        else {
-            ++__cur1;
-            ++__cur2;
         }
     }
 
@@ -313,17 +313,17 @@ _FwdIter __search_n (_FwdIter __first, _FwdIter __last,
     _FwdIter __current = __first;
 
     while (!(__current == __last)) {
-        if (__pred (*__current, __val) == false) {
+        if (__pred (*__current, __val)) {
+            if (++__matches == __count)
+                return __first;
+            ++__current;
+        }
+        else {
             if (__span < __matches + 1)
                 return __last;
             __span   -= __matches + 1;
             __matches = 0;
             __first   = ++__current;
-        }
-        else {
-            if (++__matches == __count)
-                return __first;
-            ++__current;
         }
     }
 
@@ -343,7 +343,7 @@ _OutputIter replace_copy_if (_Iter __first, _Iter __last,
     _RWSTD_ASSERT_RANGE (__first, __last);
 
     for (; !(__first == __last); ++__res, ++__first)
-        *__res = __pred (*__first) == false ? *__first : __new_value;
+        *__res = __pred (*__first) ? __new_value : *__first;
 
     return __res;
 }
@@ -372,11 +372,13 @@ _OutputIter remove_copy_if (_InputIter __first, _InputIter __last,
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    for (; !(__first == __last); ++__first)
-        if (__pred (*__first) == false) {
-            *__res = *__first;
-            ++__res;
-        }
+    for (; !(__first == __last); ++__first) {
+        if (__pred (*__first))
+            continue;
+
+        *__res = *__first;
+        ++__res;
+    }
     return __res;
 }
 
@@ -419,9 +421,12 @@ unique (_FwdIter __first, _FwdIter __last, _BinaryPredicate __pred)
 
     _FwdIter __next = ++__first;
 
-    while (!(++__next == __last))
-        if (__pred (*__next, *__first) == false)
-            break;
+    while (!(++__next == __last)) {
+        if (__pred (*__next, *__first))
+            continue;
+
+        break;
+    }
 
     return __unique_copy (__next, __last, __first, __pred,
                           _RWSTD_ITERATOR_CATEGORY (_FwdIter, __first));
@@ -480,9 +485,12 @@ _FwdIter __unique_copy (_InputIter __first, _InputIter __last,
     if (__first == __last)
         return __res;
 
-    for (*__res = *__first; !(++__first == __last); )
-        if (__pred (*__res, *__first) == false)
-            *++__res = *__first;
+    for (*__res = *__first; !(++__first == __last); ) {
+        if (__pred (*__res, *__first))
+            continue;
+
+        *++__res = *__first;
+    }
 
     return ++__res;
 }
@@ -502,11 +510,13 @@ _OutputIter __unique_copy (_InputIter __first, _InputIter __last,
 
     _TypeT __val = *__first;
 
-    for (*__res = __val; !(++__first == __last); )
-        if (__pred (__val, *__first) == false) {
-            __val = *__first;
-            *++__res = __val;
-        }
+    for (*__res = __val; !(++__first == __last); ) {
+        if (__pred (__val, *__first))
+            continue;
+
+        __val = *__first;
+        *++__res = __val;
+    }
 
     return ++__res;
 }
@@ -630,7 +640,7 @@ _BidirIter partition (_BidirIter __first, _BidirIter __last, _Predicate __pred)
         for ( ; ; ) {
             if (__first == __last)
                 return __first;
-            if (!(__pred (*__first) == false))
+            if (__pred (*__first))
                 ++__first;
             else
                 break;
@@ -639,10 +649,10 @@ _BidirIter partition (_BidirIter __first, _BidirIter __last, _Predicate __pred)
         for (--__last; ; ) {
             if (__first == __last)
                 return __first;
-            if (__pred (*__last) == false)
-                --__last;
-            else
+            if (__pred (*__last))
                 break;
+            else
+                --__last;
         }
         _STD::iter_swap (__first, __last);
     }
@@ -656,7 +666,7 @@ _BidirIter __inplace_stable_partition (_BidirIter __first, _BidirIter __last,
     _RWSTD_ASSERT_RANGE (__first, __last);
 
     if (__dist == 1)
-        return !(__pred (*__first) == false) ? __last : __first;
+        return __pred (*__first) ? __last : __first;
 
     _BidirIter __middle = __first;
     _STD::advance (__middle, __dist / 2);
@@ -691,7 +701,7 @@ _BidirIter __stable_partition_adaptive (_BidirIter __first, _BidirIter __last,
         _Pointer __res2 = __buf;
         for (; !(__first == __last) && __dist < __fill_pointer; ++__first)
         {
-            if (!(__pred (*__first) == false)) {
+            if (__pred (*__first)) {
                 *__res1 = *__first;
                 ++__res1;
             }
@@ -706,7 +716,7 @@ _BidirIter __stable_partition_adaptive (_BidirIter __first, _BidirIter __last,
             raw_storage_iterator<_Pointer, _TypeT> __res3 (__res2);
             for (; !(__first == __last); ++__first)
             {
-                if (!(__pred (*__first) == false)) {
+                if (__pred (*__first)) {
                     *__res1 = *__first;
                     ++__res1;
                 }
@@ -1632,8 +1642,10 @@ bool includes (_InputIter1 __first1, _InputIter1 __last1,
         if (__comp (*__first2, *__first1))
             return false;
 
-        if (__comp (*__first1, *__first2) == false)
-            ++__first2;
+        if (__comp (*__first1, *__first2))
+            continue;
+
+        ++__first2;
     }
 
     return __first2 == __last2;
@@ -1827,7 +1839,9 @@ bool next_permutation (_BidirIter __first, _BidirIter __last, _Compare __comp)
 
             _BidirIter __j = __last;
 
-            while (__comp (*__i, *--__j) == false) { /* no-op */ }
+            for ( ; ; )
+                if (__comp (*__i, *--__j))
+                    break;
 
             _STD::iter_swap (__i, __j);
 
@@ -1871,7 +1885,9 @@ bool prev_permutation (_BidirIter __first, _BidirIter __last, _Compare __comp)
 
             _BidirIter __j = __last;
 
-            while (__comp (*--__j, *__i) == false) { /* no-op */ }
+            for ( ; ; )
+                if (__comp (*--__j, *__i))
+                    break;
 
             _STD::iter_swap (__i, __j);
 

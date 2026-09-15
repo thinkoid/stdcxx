@@ -106,8 +106,9 @@ find_if (_InputIter __first, _InputIter __last, _Predicate __pred)
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    while (!(__first == __last) && __pred (*__first) == false)
-        ++__first;
+    for ( ; !(__first == __last); ++__first)
+        if (__pred (*__first))
+            break;
 
     return __first;
 }
@@ -200,7 +201,7 @@ count_if (_InputIter __first, _InputIter __last, _Predicate __pred)
 
     _TYPENAME iterator_traits<_InputIter>::difference_type __n = 0;
     for ( ; !(__first == __last); ++__first)
-        if (!(__pred (*__first) == false))
+        if (__pred (*__first))
             ++__n;
     return __n;
 }
@@ -231,7 +232,7 @@ inline void count_if (_InputIter __first, _InputIter __last,
     _RWSTD_ASSERT_RANGE (__first, __last);
 
     for ( ; !(__first == __last); ++__first)
-        if (!(__pred (*__first) == false))
+        if (__pred (*__first))
             ++__n;
 }
 
@@ -385,7 +386,7 @@ inline void replace_if (_FwdIter __first, _FwdIter __last,
     _RWSTD_ASSERT_RANGE (__first, __last);
 
     for (; !(__first == __last); ++__first)
-        if (!(__pred (*__first) == false))
+        if (__pred (*__first))
             *__first = __new_value;
 }
 

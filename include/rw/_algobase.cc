@@ -80,10 +80,13 @@ bool lexicographical_compare (_InputIter1 __first1, _InputIter1 __last1,
         if (__first1 == __last1)
             return !(__first2 == __last2);
 
-        if (__first2 == __last2 || !(__comp (*__first2, *__first1) == false))
+        if (__first2 == __last2)
             break;
 
-        if (!(__comp (*__first1, *__first2) == false))
+        if (__comp (*__first2, *__first1))
+            break;
+
+        if (__comp (*__first1, *__first2))
             return true;
     }
 

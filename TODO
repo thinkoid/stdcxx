@@ -7,22 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO Algorithms test predicates with == false
-
-Twenty-six sites in =include/algorithm=, =include/algorithm.cc=,
-=include/rw/_algobase.h=, =include/rw/_algobase.cc= and
-=include/rw/_heap.cc= spell a predicate test as =pred (x) == false=.
-The test type =conv_to_bool= (=tests/include/rw_alg_test.h=) converts
-only to a pointer-to-member and let the spelling through because
-=false= was a null pointer constant in C++98; C++11 (CWG 903) closed
-that, and the trap now fires on the library in 38 algorithms tests.
-C++03 25 p8 said "testable as true"; C++11 says the value is used as
-=if (pred (*first))=.
-
-Fix: spell it exactly that way, =if (pred (...))= and =if (...) ;
-else= where the negation is needed. This is a library change: its own
-commit, the 38 tests as the gate, the full suite before and after.
-
 * TODO Restore the test-suite baseline
 
 With every test binary linking, run the suite in full and record the
@@ -36,6 +20,10 @@ tests. Each cluster becomes an entry here. One is known already:
 =0.printf= fails 4 of 1876 assertions at its =%{#ls}= and =%{Ac}=
 directives with "misaligned address", on both word widths, in the
 test driver's own formatter; the =%{t}= section passes. Another:
+=23.bitset.cons= is nondeterministic on 64-bit builds, 240, 440 and
+680 failed assertions in three consecutive runs of one binary, and
+passes 2347 of 2347 on 32-bit; a run of the suite is not a reference
+for it until the cause is found.
 =22.locale.codecvt= fails 21 assertions on both widths, 20 of them
 reads of =tests/etc/codecvt.<locale>.in=, input files that never
 came over with the 2008 migration of the test and exist in no

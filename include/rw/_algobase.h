@@ -80,7 +80,7 @@ template <class _TypeT, class _Compare>
 inline const _TypeT&
 (max)(const _TypeT& __a, const _TypeT& __b, _Compare __cmp)
 {
-    return !(__cmp (__a, __b) == false) ? __b : __a;
+    return __cmp (__a, __b) ? __b : __a;
 }
 
 
@@ -230,10 +230,13 @@ mismatch (_InputIter1 __first1, _InputIter1 __last1,
 {
     _RWSTD_ASSERT_RANGE (__first1, __last1);
 
-    while (   !(__first1 == __last1)
-           && !(__pred (*__first1, *__first2) == false)) {
-        ++__first1;
-        ++__first2;
+    while (!(__first1 == __last1)) {
+        if (__pred (*__first1, *__first2)) {
+            ++__first1;
+            ++__first2;
+        }
+        else
+            break;
     }
     return pair<_InputIter1, _InputIter2> (__first1, __first2);
 }
