@@ -375,10 +375,6 @@ int main ()
     printf ("#define _RWSTD_MB_LEN_MAX %d   /* known HP-UX libc value */\n", 4);
 #  elif defined (__sgi) || defined (sgi)
     printf ("#define _RWSTD_MB_LEN_MAX %d   /* known IRIX libc value */\n", 5);
-#  elif defined (__GLIBC__) && __GLIBC_MINOR__ <= 1
-    printf ("#define _RWSTD_MB_LEN_MAX %d   /* known glibc 2.1 value */\n", 6);
-#  elif defined (__GLIBC__) && __GLIBC_MINOR__ >= 2
-    printf ("#define _RWSTD_MB_LEN_MAX %d   /* known glibc 2.2 value */\n", 16);
 #  elif defined (__sun__) || defined (__sun) || defined (__sun)
     printf ("#define _RWSTD_MB_LEN_MAX %d   /* known SunOS libc value */\n", 5);
 #  elif defined (_WIN32)

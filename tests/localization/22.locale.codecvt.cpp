@@ -2559,14 +2559,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
         if (-1 == first_good_locale)
             first_good_locale = _RWSTD_STATIC_CAST (int, i);
 
-        // FIXME: Until the LE (little endian) and BE (big endian) extra
-        // modifiers are implemented, the test is skipped for Linux distros
-        // such as Red Hat 6.2 that ship with glibc 2.1.1-6
-
-#  if !defined __GLIBC__ \
-      || __GLIBC__ == 2 && __GLIBC_MINOR__ > 1 \
-      || __GLIBC__ > 2
-
         // exercise the behavior of codecvt_byname<wchar_t, char, mbstate_t>
         // in constructed with one of the additional @UCS name modifiers
         TEST_UCS_MODIFIER (CodecvtBnW, "", use_libc,
@@ -2585,7 +2577,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
                            locales [i].locale_name, s, std::codecvt_base::ok,
                            locales [i].nchars);
 
-#  endif   // GLIBC version > 2.1
 #endif   // _RWSTD_NO_WCHAR_T
 
     }
