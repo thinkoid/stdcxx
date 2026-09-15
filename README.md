@@ -73,6 +73,17 @@ see goes in the compiler's config file under `etc/config`.
 GNU make, a C++ compiler, and the C library the compiler targets.
 Nothing else. There is no autoconf, no CMake, and there will not be.
 
+## Platforms
+
+The supported matrix is GCC and Clang on x86 and x86-64 Linux, with
+aarch64 Linux to follow. Everything else the tree once built on, the
+vendor compilers and Unixes of 2008 and Windows with Visual Studio,
+was retired in September 2026: `doc/notes/platform-state.md` is the
+survey behind the decision and its last chapter the record of what
+went. Clang does not build the library yet; that is an entry in
+`TODO`. The characterizations stayed: what they detect is a property
+of the toolchain in front of them, not of a platform list.
+
 ## Rules of the tree
 
 - Nothing here is easy pickings. Twenty years of curated changes,

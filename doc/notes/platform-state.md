@@ -407,6 +407,64 @@ vendor/ABI branches to reason about. The assessment does not establish
 a runtime speedup. No source files were trimmed, no compiler fixes were
 made, and no new platform support was claimed or implemented.
 
+## 11. Resolution
+
+Decided 14 September 2026, done 15 September 2026, on master from
+`dd1128a5` to `3232faa6`. The matrix is GCC and Clang on x86 and
+x86-64 Linux, with aarch64 Linux to follow; Windows and Visual Studio
+were retired with the rest, against the recommendation in chapter 8,
+because nobody builds there. Darwin and the BSDs were not part of the
+decision and their branches stay. The links above to files that no
+longer exist point at the last commit that had them.
+
+One subsystem per commit, the dedicated files first, then the build
+concepts, then the mixed branches area by area:
+
+| commit | what went |
+|---|---|
+| `dd1128a5` | the nine vendor compiler configurations under `etc/config` and the VisualAge version script; the makefile defaults to `gcc.config` |
+| `f860b01b` | `etc/config/windows`, the MASM sources, the resource file, the DLL export pragmas |
+| `6513a431` | the nine compiler override headers and the dispatch sections of `_config.h`; the Cygwin, MinGW, Tru64, Solaris and AIX sections of the GCC header |
+| `3760bce1` | the effect of the Visual C++ 6 operator new clause, kept explicitly: its test held on every other compiler too |
+| `0aeadf90` | the Compaq, MIPSpro, PA-RISC, SPARC and VisualAge atomic backends with the IA-64, PA-RISC and SPARC assembly; the dispatch and the retained backends reduced to the matrix |
+| `26a5ccc8` | the DCE, OS/2, Solaris and Win32 thread backends; POSIX threads is the one thread model |
+| `67c1f7b6` | template repositories, prelinking, AIX shared archives, the per-system branches of the gcc configuration and the rules, the workarounds in the run scripts |
+| `d743fa8d` | the mixed branches in 97 headers and sources, and the twelve `_RWSTD_` macros only the override headers had defined |
+| `12475dfe` | the mixed branches in 37 characterizations; the characterizations themselves stay |
+| `c2beb093` | the mixed branches in 18 utility sources |
+| `3e2f7ec5` | the mixed branches in 98 tests and driver sources |
+| `3232faa6` | the mixed branches in 9 examples |
+
+Every conditional on a retired identity was evaluated with the
+identity macros undefined and reduced to what remains: a branch that
+became false was removed, one that became true kept without its
+directive, a mixed condition rewritten. Two classes of identifier
+counted as retired: the compiler, system and processor macros, and
+the `_RWSTD_` macros that only the deleted override headers defined,
+none of them a characterization.
+
+The check, for every commit: a fresh configuration of 11S, 11s and
+15D writes the same `config.h` as before, and every translation unit
+of the library, the driver, the utilities, the tests and the
+examples, preprocessed with the flags the build uses, comes out as
+the same text up to the line numbers the assertion macros embed.
+The generated `makefile.in` lost five variables that described the
+retired build concepts and nothing else. At the end, fresh builds of
+the three configurations went through every phase, and their suite
+tables are the pinned baselines row for row, except the rows the
+baseline itself marks as unstable: `23.bitset.cons`, whose count
+varies from run to run, and in 15D the seven locale MT rows that
+end differently on every run until the race is fixed.
+
+Not addressed here, on purpose: the GCC builtin atomics are still
+selected by an architecture list that names i486 and x86-64 only,
+so aarch64 falls to the mutex fallback (the `std::locale` entry in
+`TODO` carries the port); the string atomics clause for binary
+compatibility with 4.1.x is a decision of its own; the version
+workarounds for old GCC releases wait for a stated minimum, step 6
+above; `bin/genxviews` and `etc/config/xfail.txt` name the 2008
+platforms as data and are records, like the original README.
+
 [power11]: https://newsroom.ibm.com/2025-07-08-ibm-power11-raises-the-bar-for-enterprise-it
 [t2080]: https://www.nxp.com/products/T2080
 [fujitsu]: https://docs.fujitsu/documents/002161/overview-of-sparc-servers-en.pdf
@@ -432,22 +490,22 @@ made, and no new platform support was claimed or implemented.
 [readme]: ../../README
 [config]: ../../include/rw/_config.h
 [driver]: ../../tests/src/driver.cpp
-[vacpp]: ../../etc/config/vacpp.config
-[atomic-xlc]: ../../include/rw/_atomic-xlc.h
-[sunpro]: ../../etc/config/sunpro.config
-[atomic-sparc]: ../../include/rw/_atomic-sparc.h
-[acc]: ../../etc/config/acc.config
-[config-acc]: ../../include/rw/_config-acc.h
-[parisc-asm]: ../../src/parisc/atomic.s
-[ia64-asm]: ../../src/ia64/atomic.s
-[icc]: ../../etc/config/icc.config
-[osf]: ../../etc/config/osf_cxx.config
-[atomic-dec]: ../../include/rw/_atomic-deccxx.h
-[mipspro]: ../../etc/config/mipspro.config
-[atomic-mips]: ../../include/rw/_atomic-mipspro.h
-[reliant]: ../../etc/config/reliant_cds.config
-[como]: ../../etc/config/como.config
-[eccp]: ../../etc/config/eccp.config
+[vacpp]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/vacpp.config
+[atomic-xlc]: https://github.com/thinkoid/stdcxx/blob/16df3c69/include/rw/_atomic-xlc.h
+[sunpro]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/sunpro.config
+[atomic-sparc]: https://github.com/thinkoid/stdcxx/blob/16df3c69/include/rw/_atomic-sparc.h
+[acc]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/acc.config
+[config-acc]: https://github.com/thinkoid/stdcxx/blob/16df3c69/include/rw/_config-acc.h
+[parisc-asm]: https://github.com/thinkoid/stdcxx/blob/16df3c69/src/parisc/atomic.s
+[ia64-asm]: https://github.com/thinkoid/stdcxx/blob/16df3c69/src/ia64/atomic.s
+[icc]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/icc.config
+[osf]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/osf_cxx.config
+[atomic-dec]: https://github.com/thinkoid/stdcxx/blob/16df3c69/include/rw/_atomic-deccxx.h
+[mipspro]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/mipspro.config
+[atomic-mips]: https://github.com/thinkoid/stdcxx/blob/16df3c69/include/rw/_atomic-mipspro.h
+[reliant]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/reliant_cds.config
+[como]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/como.config
+[eccp]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/eccp.config
 [gcc-config]: ../../etc/config/gcc.config
 [mbstate]: ../../include/rw/_mbstate.h
 [float-test]: ../../tests/support/18.numeric.special.float.cpp
@@ -460,4 +518,4 @@ made, and no new platform support was claimed or implemented.
 [atomic-dispatch]: ../../include/rw/_atomic.h
 [mutex-pthread]: ../../include/rw/_mutex-pthread.h
 [atomic-probe]: ../../etc/config/src/ATOMIC_OPS.cpp
-[projectdef]: ../../etc/config/windows/projectdef.js
+[projectdef]: https://github.com/thinkoid/stdcxx/blob/16df3c69/etc/config/windows/projectdef.js

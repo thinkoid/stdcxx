@@ -7,27 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO Retire the platforms the tree cannot build on
-
-Decided 2026-09-14: the supported matrix is GCC and Clang on x86 and
-x86-64 Linux, with aarch64 Linux to follow. Windows and Visual Studio
-are retired with the rest; nobody builds there. The assessment in
-=doc/notes/platform-state.md=, chapters 8 to 10, is the inventory:
-37 dedicated files, the compiler override headers, the vendor atomic
-and mutex backends, the Unix and Windows compiler configurations and
-the assembly sources, plus the dispatch and build machinery in 140
-mixed files, where the template repositories and prelinking exist
-only for the retired consumers.
-
-Fix, after the baseline: the dedicated files first, one subsystem per
-commit, each with its dispatch branches and makefile references; then
-the mixed branches and the build concepts, with the traps the
-assessment lists in mind. The characterizations stay; what they
-retire is the floor decision, not this one.
-
-Check: the suite before and after is identical, configuration by
-configuration; the build directory still describes itself.
-
 * TODO Clang builds the library
 
 Clang 22 reports itself as GCC 4.2 and walks the GCC branches; the
@@ -82,9 +61,10 @@ without =TOPDIR= reports no fault.
 
 In =11S= =23.bitset.cons= fails a different number of assertions on
 every run of one binary, 240, 440 and 680 in three consecutive runs,
-and =25.reverse= dies of a segmentation fault; both pass in =11s= and
-in =15D=, so the difference is the archive 64-bit library, not the
-width.
+and =25.reverse= dies of a segmentation fault; both pass in =11s=,
+and =25.reverse= in =15D= too, but =23.bitset.cons= has failed 240
+in a =15D= run as well (2026-09-15), so the count is unstable in
+both 64-bit builds and only the fault is specific to the archive.
 
 Fix: find the uninitialized or out-of-bounds read the shared build
 happens to tolerate; the check tools will say where.
