@@ -524,17 +524,7 @@ int print_locale_name_format (int  guess,
 
     if (guess) {
 
-#if defined (__FreeBSD__)
-
-        setlocale_environ    = 1;
-        loc_name_use_cat     = 0;
-        loc_name_prepend_sep = 0;
-        loc_name_condense    = 1;
-        loc_name_cat_sep     = '/';
-        loc_name_cat_eq      = '\0';
-        os_name              = "FreeBSD";
-
-#elif defined (__GLIBC__)
+#if defined (__GLIBC__)
 
         setlocale_environ    = 1;
         loc_name_use_cat     = 1;
@@ -543,16 +533,6 @@ int print_locale_name_format (int  guess,
         loc_name_cat_sep     = ';';
         loc_name_cat_eq      = '=';
         os_name              = "GNU libc";
-
-#elif defined (__NetBSD__)
-
-        setlocale_environ    = 0;
-        loc_name_use_cat     = 0;
-        loc_name_prepend_sep = 0;
-        loc_name_condense    = 1;
-        loc_name_cat_sep     = '\0';
-        loc_name_cat_eq      = '\0';
-        os_name              = "NetBSD";
 
 #else
 
