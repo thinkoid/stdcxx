@@ -52,12 +52,8 @@
 
 #ifndef ENAMETOOLONG
    // hardcode based on the known value on each platform
-#  if defined _RWSTD_OS_FREEBSD
-#    define ENAMETOOLONG    63
-#  elif defined _RWSTD_OS_LINUX
+#  if defined _RWSTD_OS_LINUX
 #    define ENAMETOOLONG    36
-#  elif defined _RWSTD_OS_SUN_OS
-#    define ENAMETOOLONG    78
 #  endif
 #endif   // ENAMETOOLONG
 

@@ -26,14 +26,8 @@
  * 
  **************************************************************************/
 
-#if defined (__MACH__)
-// Mac OS X Mach-O assembler: no .type, power of two alignment
-#  define ALIGN_DIR           .align 4
-#  define TYPE_DIR(ignore,ignore2) 
-#else
-#  define ALIGN_DIR           .align 16
-#  define TYPE_DIR(sym,attr)  .type sym, attr
-#endif // __MACH__
+#define ALIGN_DIR           .align 16
+#define TYPE_DIR(sym,attr)  .type sym, attr
 
     .text
     ALIGN_DIR

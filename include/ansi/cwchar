@@ -990,33 +990,6 @@ namespace std {
 using ::wcsstr;
 
 #  undef _RWSTD_NO_WCSSTR
-#else
-
-#  ifdef _RWSTD_OS_HPUX
-
-}   // namespace std
-
-extern "C" {
-
-inline wchar_t* wcsstr (wchar_t *__s1, const wchar_t *__s2)
-{
-    return wcswcs (__s1, __s2);
-}
-
-}   // extern "C"
-
-inline wchar_t* wcsstr (wchar_t *__s1, const wchar_t *__s2)
-{
-    return wcswcs (__s1, __s2);
-}
-
-namespace std {
-
-using ::wcsstr;
-
-#    undef _RWSTD_NO_WCSSTR
-#  endif   // _RWSTD_OS_HPUX
-
 #endif   // _RWSTD_NO_WCSSTR
 
 #ifndef _RWSTD_NO_WCSTOD

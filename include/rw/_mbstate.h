@@ -67,13 +67,6 @@
 
 #    define _RWSTD_MBSTATE_T __mbstate_t
 
-#  elif defined (_RWSTD_OS_DARWIN)
-/*** Apple Darwin/OS X ****************************************************/
-
-     // include a system header for __mbstate_t
-#    include <machine/_types.h>
-#    define _RWSTD_MBSTATE_T   __mbstate_t
-
 #  else   // !defined (_RWSTD_OS_LINUX)
 /*** generic OS ***********************************************************/
      
