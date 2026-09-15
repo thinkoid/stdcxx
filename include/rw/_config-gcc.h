@@ -113,12 +113,6 @@
 #  endif  // _RWSTD_ANSI_C_LIMITS_H
 #endif   // _RWSTD_OS_LINUX
 
-#ifdef _RWSTD_OS_AIX
-     // functions called from member functions of explicitly instantiated
-     // class templates aren't "implicitly" instantiated (compiler bug)
-#  define _RWSTD_NO_IMPLICIT_INSTANTIATION
-#endif
-
    // force using /usr/include/math.h 
    // prevent recursion caused by pulling in gcc's own "fixed" header
 #undef _RWSTD_ANSI_C_MATH_H
@@ -129,73 +123,3 @@
 #undef _RWSTD_NO_LIBC_IN_STD
 
 #undef _RWSTD_NO_DEPRECATED_LIBC_IN_STD
-
-/*** CygWin ***************************************************************/
-#ifdef __CYGWIN__
-     // use our own C++ libc headers
-#  undef _RWSTD_NO_NEW_HEADER
-     // libc is wrapped in namespaces std
-#  undef _RWSTD_NO_LIBC_IN_STD
-     // deprecated C++ libc headers don't introduce names into namespace std
-#  ifndef _RWSTD_NO_DEPRECATED_LIBC_IN_STD
-#    define _RWSTD_NO_DEPRECATED_LIBC_IN_STD
-#  endif
-
-#  ifdef _RWSHARED
-     // disable exporting tmeplate instantiations in shared builds
-     // see STDCXX-507
-#    define _RWSTD_NO_EXTERN_TEMPLATE
-
-     // operator new and delete is not reliably replaceable across
-     // shared library boundaries, which includes the shared library
-     // version of the language support library
-#    define _RWSTD_NO_REPLACEABLE_NEW_DELETE
-#  endif
-#endif   // __CYGWIN__
-
-/*** MinGW ****************************************************************/
-#ifdef __MINGW32__
-#  ifdef _RWSHARED
-     // disable exporting temeplate instantiations in shared builds
-     // see STDCXX-507
-#    define _RWSTD_NO_EXTERN_TEMPLATE
-#  endif
-
-   // operator new and delete is not reliably replaceable across
-   // shared library boundaries, which includes the shared library
-   // version of the language support library
-   // on MinGW the language support library is always shared
-#  define _RWSTD_NO_REPLACEABLE_NEW_DELETE
-#endif   // __MINGW32__
-
-/*** Tru64 UNIX ***********************************************************/
-#ifdef _RWSTD_OS_OSF1
-      // sizeof (long double) == sizeof (double), 'L' causes SIGSEGV
-#   define _RWSTD_LDBL_PRINTF_PREFIX   ""
-#   define _RWSTD_LDBL_SCANF_PREFIX    "l"
-
-#endif   // _RWSTD_OS_OSF1
-
-/*** Solaris **************************************************************/
-#ifdef _RWSTD_OS_SUNOS
-
-     // _SOLARIS_THREADS #defined when the -threads option is used on SunOS
-#  if defined (_SOLARIS_THREADS) && !defined (_RWSTD_SOLARIS_THREADS)
-#    define _RWSTD_SOLARIS_THREADS
-#  endif // _SOLARIS_THREADS && !_RWSTD_SOLARIS_THREADS
-
-     // _PTHREADS #defined when the -pthreads option is used on SunOS
-#  if defined (_PTHREADS) && !defined (_RWSTD_POSIX_THREADS)
-#    define _RWSTD_POSIX_THREADS
-#  endif // _PTHREADS && !_RWSTD_POSIX_THREADS
-
-#  if __GNUG__ == 3 && __GNUC_MINOR__ < 1
-       // Avoid gcc 3.0.1 header configuration confusion with wchar
-#    ifndef _RWSTD_NO_NEW_HEADER
-#      define _RWSTD_NO_NEW_HEADER
-#    endif
-#    ifndef _RWSTD_NO_LIBC_IN_STD
-#      define _RWSTD_NO_LIBC_IN_STD
-#    endif
-#  endif  // __GNUG__ == 3 && __GNUC_MINOR__ < 1
-#endif  // _RWSTD_OS_SUNOS

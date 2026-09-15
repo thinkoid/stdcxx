@@ -98,50 +98,6 @@
  * ARCHITECTURE-SPECIFIC OVERRIDES                                        *
  **************************************************************************/
 
-/*** Alpha ****************************************************************/
-
-#if defined (__alpha__) || defined (__alpha)
-
-   // this applies to both Tru64 UNIX and Linux on Alpha
-#  undef _RWSTD_IS_IEC559
-
-#  ifdef _IEEE_FP
-     // IEEE 754/IEC 559 conforming environment enabled
-     // using the Compaq C++ -ieee compiler command line
-     // option or with gcc -mieee
-#    define _RWSTD_IS_IEC559   true
-#  else
-     // OSF1 (Tru64 UNIX) Compaq C++ without -ieee
-#    define _RWSTD_IS_IEC559   false
-#  endif
-
-#endif   // Alpha
-
-/*** Itanium (IA64) *******************************************************/
-
-#if defined (__ia64__) || defined (__ia64)
-#endif   // IA64
-
-/*** MIPS *****************************************************************/
-
-#if defined (__mips__) || defined (__mips)
-#endif   // MIPS
-
-/*** PA-RISC **************************************************************/
-
-#if defined (__parisc__) || defined (__parsisc)
-#endif   // PA RISC
-
-/*** PowerPC **************************************************************/
-
-#if defined (__powerpc__) || defined (__powerpc)
-#endif   // PowerPC
-
-/*** SPARC ****************************************************************/
-
-#if defined (__sparc__) || defined (__sparc)
-#endif   // SPARC
-
 /*** AMD64/Intel EM64T ****************************************************/
 
 #if    defined (__amd64__) || defined (__amd64) \
@@ -164,42 +120,6 @@
  * COMPILER-SPECIFIC OVERRIDES                                            * 
  **************************************************************************/
 
-/*** Apogee C++ ***********************************************************/
-
-// Apogee C++ uses an EDG front end but doesn't define __EDG__
-
-#ifdef __APOGEE__
-#endif   // __APOGEE__
-
-/*** IBM VAC++ ************************************************************/
-
-#if defined (__IBMCPP__)
-#  include "_config-xlc.h"
-#endif   // __IBMCPP___
-
-/*** Compaq C++ ***********************************************************/
-
-// Compaq C++ uses an EDG front end and #defines __EDG__
-
-#ifdef __DECCXX
-#  include "_config-deccxx.h"
-#endif // __DECCXX
-
-/*** EDG eccp (this is the vanilla EDG front end) *************************/
-
-// NOTE: the __EDG__ macro is #defined by most EDG-based compilers
-
-#if    defined (__EDG__)                \
-    && !defined (__DECCXX)              \
-    && !defined (__HP_aCC)              \
-    && !defined (__INTEL_COMPILER)      \
-    && !defined (_SGI_COMPILER_VERSION)
-   // FIXME: make this more robust by detecting the EDG eccp demo
-   // during library configuration (and avoid relying on compiler
-   // specific macros)
-#  include "_config-eccp.h"
-#endif   // __EDG__
-
 /*** GCC ******************************************************************/
 
 #ifdef __GNUG__
@@ -208,103 +128,21 @@
 #  define _RWSTD_GNUC_ATTRIBUTE(ignore)
 #endif   // __GNUG__
 
-/*** HP aCC ***************************************************************/
-
-#ifdef __HP_aCC
-#  include "_config-acc.h"
-#endif   // __HP_aCC
-
-/*** Intel C++ ************************************************************/
-
-#if defined (__INTEL_COMPILER)
-#  include "_config-icc.h"
-#endif   // __INTEL_COMPILER
-
-/*** SGI MIPSpro **********************************************************/
-
-// SGI MIPSpro uses an EDG front end; it may or may not #define __EDG__
-// (starting with MIPSpro 7.4 the preprocessor does #define the macro
-// along with _SGI_COMPILER_VERSION)
-
-#ifdef _RWSTD_OS_IRIX64
-   // if _SGI_COMPILER_VERSION is not #defined, assume MIPSpro
-   // unless __GNUG__ is #defined
-#  if defined (_SGI_COMPILER_VERSION) || !defined (__GNUG__)
-#    include "_config-mipspro.h"
-#  endif   // _SGI_COMPILER_VERSION || !__GNUG__
-#endif   // _RWSTD_OS_IRIX64
-
-/*** MSVC *****************************************************************/
-
-#if defined (_MSC_VER) && !defined (__INTEL_COMPILER)
-#  define _RWSTD_MSVC _MSC_VER
-#  include "_config-msvc.h"
-#endif   // _MSC_VER && !__INTEL_COMPILER
-
-/*** Siemens CDS++ ********************************************************/
-
-#ifdef SNI
-#  define _RWSTD_NO_PTR_VALUE_TEMPLATE_OVERLOAD
-#  if __STDC__ == 1
-#    ifndef _RWSTD_STRICT_ANSI
-#      define _RWSTD_STRICT_ANSI
-#    endif
-#  endif
-
-#  if defined __SNI_THREAD_SUPPORT
-#    define _RWSTD_NO_MBRTOWC
-#    define _RWSTD_NO_WCRTOMB
-#  endif
-#endif   // SNI
-
-/*** SunPro aka Sun C++ ***************************************************/
-
-#ifdef __SUNPRO_CC
-#  include "_config-sunpro.h"
-#endif   // __SUNPRO_CC
-
 /**************************************************************************
  * OPERATING SYSTEM-SPECIFIC OVERRIDES                                    * 
  **************************************************************************/
 
-/*** OS2 ******************************************************************/
-
-#ifdef __OS2__
-#  define _RWSTD_NO_STATIC_MUTEX_INIT
-#endif   // __OS2__
-
-/*** Win{32,64} ***********************************************************/
-
-#ifdef _WIN32
-#  define _RWSTD_NO_STATIC_MUTEX_INIT
-#  define _RWSTD_PATH_SEP '\\'
-#  ifdef _RWSTD_LIB_SRC
-     // Don't use implicit TLS in our library on Windows because of the TLS
-     // might not be initialized when our library DLL or the DLL, that
-     // linked statically against our library, is loaded explicitly using
-     // LoadLibrary() function. (STDCXX-1023)
-#    ifndef _RWSTD_NO_TLS
-#      define _RWSTD_NO_TLS
-#    endif
-#    ifdef _RWSTD_THREAD
-#      undef _RWSTD_THREAD
-#    endif
-#  endif   // _RWSTD_LIB_SRC
-#endif   // _WIN32
-
-#ifndef _RWSTD_PATH_SEP
-#  define _RWSTD_PATH_SEP      '/'
-#endif   // _RWSTD_PATH_SEP
+#define _RWSTD_PATH_SEP      '/'
 
 /*** Non-10646 platforms **************************************************/
 
-#if !defined (_RWSTD_OS_LINUX) && !defined (_WIN32)
-   // Linux glibc and Windows use ISO 10646 (Unicode)
-   // as the internal wchar_t encoding in all locales
+#ifndef _RWSTD_OS_LINUX
+   // Linux glibc uses ISO 10646 (Unicode) as the internal
+   // wchar_t encoding in all locales
 #  ifndef _RWSTD_NO_ISO_10646_WCHAR_T
 #    define _RWSTD_NO_ISO_10646_WCHAR_T
 #  endif   // _RWSTD_NO_ISO_10646_WCHAR_T
-#endif   // !Linux && !Windoze
+#endif   // !_RWSTD_OS_LINUX
 
 /********************** Threads *******************************************/
 
@@ -332,10 +170,7 @@
 // or functions that contain static (local) variables
 #if !defined (__GNUG__) || __GNUG__ > 2 || __GNUG_MINOR__ > 96
 #  define _INLINE_VARARGS      inline
-#  if !defined (__HP_aCC) || __HP_aCC > 012100
-     // working around a known aCC 1.21 bug
-#    define _INLINE_WITH_STATICS inline
-#  endif   // !__HP_aCC || __HP_aCC > 012100
+#  define _INLINE_WITH_STATICS inline
 #endif   // !__GNUG__ || __GNUG__ > 2 || __GNUG_MINOR__ > 96
 
 #if    defined (_RWSTD_NO_COLLAPSE_TEMPLATE_STATICS)   \
@@ -349,12 +184,6 @@
 #endif   // NO_COLLAPSE_TEMPLATE_STATICS || NO_STATIC_TEMPLATE_MEMBER_INIT
 
 /********************** Environment ***************************************/
-
-// pa-risc2 atomic ops related
-#if defined(_PA_RISC2_0) && defined(__HP_aCC)
-#  define _RWSTD_STRING_REF_OFFSET             _RWSTD_INT_MAX
-#endif
-
 
 #if defined (_RWSTD_NO_WCHAR_T) && !defined (_RWSTD_NO_NATIVE_WCHAR_T)
 #  define _RWSTD_NO_NATIVE_WCHAR_T
@@ -406,7 +235,6 @@
 #endif
 
 #ifndef _RWSTD_NO_LONG_LONG
-   // Win32/64 #defines _RWSTD_LONG_LONG to __int64
 #  ifndef _RWSTD_LONG_LONG
 #    define _RWSTD_LONG_LONG long long
 #  endif   // _RWSTD_LONG_LONG
@@ -490,15 +318,6 @@
    // don't provide definitions of operator new in library 
 #  define _RWSTD_NO_EXT_OPERATOR_NEW
 #endif  // _RWSTD_LIB_SRC
-
-#if _MSC_VER <= 1300
-   // msvc60 expects a definition to be provided for all variants
-   // of operator new/delete that are declared. This means that either
-   // the operators must be defined - preventing redefinition in user code -
-   // or that they must be undeclared - preventing them from being called
-   // directly in user code. We have chosen the former option.
-#  undef _RWSTD_NO_EXT_OPERATOR_NEW
-#endif  // _MSC_VER
 
 #ifdef _RWSTD_INSTANTIATE_TEMPLATES
    // instantiate templates (this macro is defined at the top of each
