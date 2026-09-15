@@ -80,8 +80,11 @@ aarch64 Linux to follow. Everything else the tree once built on, the
 vendor compilers and Unixes of 2008, Darwin and the BSDs, and Windows
 with Visual Studio, was retired in September 2026:
 `doc/notes/platform-state.md` is the survey behind the decision and
-its last chapter the record of what went. Clang does not build the
-library yet; that is an entry in `TODO`. The characterizations
+its last chapter the record of what went. Both compilers build the
+library, the driver, the tests and the examples, and the suite gives
+the same table under both; the Clang configuration is
+`CONFIG=gcc.config CXX=clang` on the `config` line, and
+`doc/notes/clang.md` records what it took. The characterizations
 stayed: what they detect is a property of the toolchain in front of
 them, not of a platform list.
 

@@ -257,3 +257,28 @@ the test's expectation is the one out of date.
 
 The single-threaded builds run the MT tests with one thread, which
 is why they pass there and count nothing.
+
+## 5. The same suite under Clang
+
+The tables `x86_64-11S-clang.txt`, `i386-11s-clang.txt` and
+`x86_64-15D-clang.txt` are the same three configurations built with
+Clang (`CONFIG=gcc.config CXX=clang` on the `config` line), run the
+same way and pinned in the same shape; `clang.md` records what it
+took to get there. Row for row they are the GCC tables, with these
+exceptions:
+
+- `0.char` and `0.printf` pass every assertion under Clang. Their
+  "misaligned address" failures (chapter 3.6) are GCC's alone.
+  `0.printf` reports in its own format, so the harness says `FORMAT`
+  with exit 0, as it does for the three self-tests in chapter 1.
+- `23.bitset.cons` (chapter 3.5) passed all 2347 assertions under the
+  harness in the Clang run and failed 440 and 680 in bare runs of the
+  same binary, the counts GCC shows. The harness runs each test under
+  an address-space limit; the read depends on the process's memory,
+  not on the compiler.
+- `18.numeric.special.float` (chapter 3.10) fails 3 assertions in the
+  Clang 32-bit build, the 64-bit count, where GCC's 32-bit build fails
+  6.
+- The MT rows of 15D vary under Clang as they do under GCC (chapter
+  3.4) and are not a reference under either.
+
