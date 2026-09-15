@@ -34,14 +34,8 @@
 #include <examples.h>
 
 
-// hardcode the name of the English US locale for known systems
-#if defined (__FreeBSD__)
-// FreeBSD and Tru64 UNIX
-const char en_US[] = "en_US.ISO8859-1";
-#else
-// AIX, IRIX, Linux, Solaris
+// hardcode the name of the English US locale
 const char en_US[] = "en_US";
-#endif
 
 
 int main (int argc, char *argv[])
