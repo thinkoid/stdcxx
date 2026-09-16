@@ -7,28 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO 22.locale.codecvt on a corrupt mbstate_t and on an unset TOPDIR
-
-The test's last section passes a corrupt =mbstate_t= to the facets
-and expects an error result; the library's own assertion at
-=src/codecvt.cpp:142= fires first and a debug build type aborts the
-process, so the test never prints its summary. Separately, the test
-reads =TOPDIR= itself and uses the null pointer when the variable is
-unset, a segmentation fault in a bare run; the driver derives the
-directory from =__FILE__= in that case and the test should get it
-the same way.
-
-Before that section, one assertion fails in both widths: =out= of
-the three-character string "LBE" into a nine-byte buffer answers
-=partial= where the test expects =ok= (assertion 1582, line 1579).
-
-Fix: decide what a corrupt state should do in a debug build, either
-the assertion or the error result, then the test; give the test the
-driver's directory; read the =partial= against 22.2.1.5.2.
-
-Check: the test prints its summary in =11S= and =8S= with no failed
-assertion; a bare run without =TOPDIR= reports no fault.
-
 * TODO The narrow collate transform and multiples of 127
 
 =22.locale.collate= sorts the six word lists under =tests/etc= and

@@ -117,18 +117,12 @@ do_out (state_type         &state,
     from_next = from;
     to_next   = to;
 
-#ifdef _RWSTDDEBUG
-
     // verify that the conversion state is valid
     const int mbstate_valid = _RW::__rw_mbsinit (&state);
 
     _RWSTD_ASSERT (0 != mbstate_valid);
-
-#else   // if !defined (_RWSTDDEBUG)
-
-    _RWSTD_UNUSED (state);
-
-#endif   // _RWSTDDEBUG
+    if (!mbstate_valid)
+        return error;
 
     // be prepared to handle an overridden do_always_noconv()
     // that returns false (highly unlikely but possible)

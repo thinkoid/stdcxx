@@ -74,9 +74,9 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,068,233 | 838 | 2 | 10 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,068,871 | 838 | 2 | 9 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,071 | 838 | 13 | 11 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,068,550 | 838 | 2 | 9 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,069,188 | 838 | 2 | 8 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,372 | 838 | 12 | 11 |
 
 The 64-bit counts include `23.bitset.cons`, which varies from run
 to run (chapter 3.5); the number pinned is the one measured with the
@@ -120,10 +120,11 @@ Fact. `22.locale.codecvt.out` collided with the harness's output
 naming (chapter 1). Fix, applied: renamed to
 `22.locale.codecvt.do_out`.
 
-Open. `22.locale.codecvt` reads `TOPDIR` itself as well, reports the
-variable missing, and then uses the null pointer: a segmentation
-fault in a bare run without the variable. Intended: the test should
-take the directory from the driver.
+Fact. `22.locale.codecvt` read `TOPDIR` itself as well, reported the
+variable missing, and then used the null pointer: a segmentation
+fault in a bare run without the variable. Fix, applied: the driver's
+fallback is one function, `rw_topdir ()`, and the test takes the
+directory from it (`codecvt-invalid-state.md`, chapter 6).
 
 ### 3.2 The input files under `tests/etc`
 
@@ -145,8 +146,9 @@ own, repaired with them: its `length` check compared against a C
 locale it had not set, its `length` expectation counted characters
 where the standard counts bytes, and a synthetic charmap named after
 the native codeset made `localedef` reuse a single-byte stub for the
-`ja_JP.UTF-8` locale. One codecvt assertion remains before the abort
-of chapter 3.3, and predates the files. The collate test exposed a
+`ja_JP.UTF-8` locale. One codecvt assertion remained before the abort
+of chapter 3.3, predating the files; it is repaired with the abort.
+The collate test exposed a
 library defect: the narrow transform cannot spell a weight that is a
 multiple of 127, and the letter "l" in Croatian and ko kai in Thai
 sort last in the `char` half of the test, 101 lines; the `wchar_t`
@@ -155,14 +157,20 @@ half sorts all six lists as glibc does. That is a `TODO` entry.
 ### 3.3 `22.locale.codecvt` on a corrupt `mbstate_t`
 
 Fact. The test's last section passes a corrupt `mbstate_t` to the
-facets and expects an error result. The library's own assertion at
-`src/codecvt.cpp:142`, `0 != mbstate_valid`, fires first, and in a
-debug build type that aborts the process, so the test never prints
-its summary and the harness reports `ABRT`.
+facets, expects the library's assertion in a debug build and catches
+its `abort()` with a `SIGABRT` handler that jumps back; in an
+optimized build it expects the error result. glibc 2.41 changed
+`abort()` so that the jump left `SIGABRT` blocked and the second
+assertion killed the process, hence `ABRT` in every debug
+configuration. The `8S` run showed the optimized half of the
+contract met on half the library's paths, and the libc-backed wide
+facet looping inside glibc's `mbrtowc` on the corrupt state.
 
-Hypothesis. The test and the assertion disagree about what a corrupt
-state should do; an optimized build type would show the test's own
-verdict. Check: an `8S` run.
+Fix, applied. The handler saves and restores the signal mask; every
+facet path returns the error result when its state check fails, the
+assertion staying in debug builds; the thread-safe debug build skips
+the two libc-backed facets, whose check sits under the locale lock.
+`codecvt-invalid-state.md` has the whole of it.
 
 ### 3.4 The MT locale tests
 

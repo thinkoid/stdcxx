@@ -56,6 +56,14 @@ rw_locale (const char* /* args */, const char* /* fname */);
 
 #define LOCALE_ROOT_ENVAR   "RWSTD_LOCALE_ROOT"
 
+// returns the root of the source tree: the value of the TOPDIR
+// environment variable when it is set and not empty, otherwise the
+// directory derived from the pathname of the test driver's own source,
+// or 0 when neither is available
+_TEST_EXPORT const char*
+rw_topdir ();
+
+
 // creates a temporary directory and defines the RWSTD_LOCALE_ROOT
 // environment variable to the name of the directory; the directory
 // will be automatically removed on program exit as if by calling

@@ -1071,18 +1071,12 @@ do_out (state_type         &state,
     from_next = from;
     to_next   = to;
 
-#ifdef _RWSTDDEBUG
-
     // verify that the conversion state is valid
     const int mbstate_valid = _RW::__rw_mbsinit (&state);
 
     _RWSTD_ASSERT (0 != mbstate_valid);
-
-#else   // if !defined (_RWSTDDEBUG)
-
-    _RWSTD_UNUSED (state);
-
-#endif   // _RWSTDDEBUG
+    if (!mbstate_valid)
+        return error;
 
     // copy internal sequence to external
     for (; from_next != from_end && to_next != to_end; ++from_next, ++to_next)
@@ -1353,7 +1347,8 @@ do_in (state_type&         state,
                mbtowc (0, 0, 0) || _RW::__rw_mbsinit (&state);
 
             _RWSTD_ASSERT (mbstate_valid);
-            _RWSTD_UNUSED (mbstate_valid);
+            if (!mbstate_valid)
+                break;
 
 #endif   // _RWSTD_NO_MBTOWC
 
@@ -1366,8 +1361,8 @@ do_in (state_type&         state,
             // verify that the state is in its initial shift state
             const int mbstate_valid = _RW::__rw_mbsinit (&state);
             _RWSTD_ASSERT (mbstate_valid);
-
-            _RWSTD_UNUSED (mbstate_valid);
+            if (!mbstate_valid)
+                break;
 
             res = _RW::__rw_libstd_do_in (from_end, from_next,
                                           to_limit, to_next,
@@ -1442,7 +1437,8 @@ do_out (state_type         &state,
                mbtowc (0, 0, 0) || _RW::__rw_mbsinit (&state);
 
             _RWSTD_ASSERT (mbstate_valid);
-            _RWSTD_UNUSED (mbstate_valid);
+            if (!mbstate_valid)
+                break;
 
 #endif   // _RWSTD_NO_MBTOWC
             
@@ -1453,8 +1449,8 @@ do_out (state_type         &state,
             // verify that the state is in its initial shift state
             const int mbstate_valid = _RW::__rw_mbsinit (&state);
             _RWSTD_ASSERT (mbstate_valid);
-
-            _RWSTD_UNUSED (mbstate_valid);
+            if (!mbstate_valid)
+                break;
 
             // use own implementation
             res = _RW::__rw_libstd_do_out (from, from_end, from_next,
@@ -1581,7 +1577,8 @@ do_length (state_type&        state,
                 mbtowc (0, 0, 0) || _RW::__rw_mbsinit (&state);
 
             _RWSTD_ASSERT (mbstate_valid);
-            _RWSTD_UNUSED (mbstate_valid);
+            if (!mbstate_valid)
+                break;
 
 #endif   // _RWSTD_NO_MBTOWC
 
@@ -1591,8 +1588,8 @@ do_length (state_type&        state,
             // verify that the state is in its initial shift state
             const int mbstate_valid = _RW::__rw_mbsinit (&state);
             _RWSTD_ASSERT (mbstate_valid);
-
-            _RWSTD_UNUSED (mbstate_valid);
+            if (!mbstate_valid)
+                break;
 
             len = _RW::__rw_libstd_do_length (from, from_end,
                                               cmax, _C_flags, impl);

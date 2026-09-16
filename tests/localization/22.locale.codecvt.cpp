@@ -31,7 +31,7 @@
 #include <cassert>
 #include <climits>
 #include <clocale>
-#include <csetjmp>   // for longjmp(), setjmp(), ...
+#include <setjmp.h>  // for sigsetjmp(), siglongjmp(), ...
 #include <csignal>   // for SIGABRT, signal()
 #include <cstdlib>
 #include <cstring>
@@ -1132,13 +1132,17 @@ test_ucs_modifier (const char*       locale_name,
 
 /****************************************************************************/
 
-std::jmp_buf jmp_env;
+// the jump out of the handler must restore the signal mask: abort()
+// blocks SIGABRT for the handler and, in glibc 2.41 and later, no longer
+// unblocks it before raising, so a second abort() would find the signal
+// blocked, install the default disposition and terminate the process
+sigjmp_buf jmp_env;
 
 // called in response to abort() or failed assertions
 extern "C"
 void SIGABRT_handler (int /*unused*/)
 {
-    std::longjmp (jmp_env, 1);
+    siglongjmp (jmp_env, 1);
 }
 
 
@@ -1185,7 +1189,7 @@ test_mbstate_t (const CodeCvtT*, const char* name)
 
 #undef TEST
 #define TEST(resultT, result, fname, args)                                \
-    if (0 == setjmp (jmp_env)) {                                          \
+    if (0 == sigsetjmp (jmp_env, 1)) {                                    \
         std::signal (SIGABRT, SIGABRT_handler);                           \
         const resultT res = cvt.fname args;                               \
         rw_assert (!expect_abort && result == res, __FILE__, __LINE__,    \
@@ -1215,7 +1219,7 @@ test_mbstate_t (const CodeCvtT*, const char* name)
     // verify that functions gracefully handle null pointers
 #undef TEST
 #define TEST(resultT, result, fname, args)                                \
-    if (0 == setjmp (jmp_env)) {                                          \
+    if (0 == sigsetjmp (jmp_env, 1)) {                                    \
         std::signal (SIGABRT, SIGABRT_handler);                           \
         const resultT res = cvt.fname args;                               \
         rw_assert (result == res, __FILE__, __LINE__,                     \
@@ -1277,6 +1281,19 @@ test_invalid_args (const char* locname)
             break;
         }
     }
+
+#if defined (_RWSTDDEBUG) && defined (_RWSTD_REENTRANT)
+
+    // the libc based facets check the state after acquiring the global
+    // locale lock, and the jump out of the assertion's abort() leaves
+    // the lock held; the section is left to the other builds
+    rw_note (0, __FILE__, __LINE__,
+             "libc based facets with invalid arguments not exercised "
+             "in a thread safe debug build");
+
+    *non_c_locname = '\0';
+
+#endif   // _RWSTDDEBUG && _RWSTD_REENTRANT
 
     if (*non_c_locname) {
         // exercise the behavior of the derived facets when using
@@ -2088,7 +2105,7 @@ test_inout (const char* tname)
     TEST_IN_OUT ("0123",          4,  2, L"A",   1, 1, partial);
     TEST_IN_OUT ("01234",         5,  2, L"A",   1, 1, partial);
     TEST_IN_OUT ("012345",        6,  6, L"AC",  2, 2, ok);
-    TEST_IN_OUT ("123456789",     9,  9, L"BE",  3, 2, ok);
+    TEST_IN_OUT ("123456789",     9,  9, L"BE",  2, 2, ok);
     TEST_IN_OUT ("456789012345", 12, 12, L"EAC", 3, 3, ok);
 
     // the first one below is partial even though the external sequence
@@ -2459,13 +2476,15 @@ run_test (int /*unused*/, char* /*unused*/ [])
     // index of the first successfully built locale database
     int first_good_locale = -1;
 
-    const char* const topdir = std::getenv ("TOPDIR");
-    if (!topdir || !*topdir) {
-        rw_assert (false, __FILE__, __LINE__,
-                   "environment variable TOPDIR not set or empty");
-    }
+    // the root of the source tree, from TOPDIR or the driver's own
+    // location; without it the file conversions are skipped
+    const char* const topdir = rw_topdir ();
 
-    for (std::size_t i = 0; locales [i].src_name; i++) {
+    rw_assert (0 != topdir, __FILE__, __LINE__,
+               "environment variable TOPDIR not set or empty "
+               "and the source tree cannot be located");
+
+    for (std::size_t i = 0; topdir && locales [i].src_name; i++) {
 
         // Testing actual locale databases with input files
 
