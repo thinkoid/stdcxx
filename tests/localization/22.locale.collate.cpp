@@ -32,8 +32,8 @@
 #include <algorithm>  // for sort and unique
 #include <climits>    // for UCHAR_MAX
 #include <clocale>    // for LC_COLLATE, setlocale
-#include <cstdlib>    // for exit()
-#include <cstdio>     // for fprintf()
+#include <cstdlib>    // for getenv()
+#include <cstdio>     // for FILE, fopen(), fgets(), fclose()
 #include <cstring>    // for strcmp(), strcoll(), ...
 #include <cwchar>     // for wcscoll()
 
@@ -504,6 +504,15 @@ make_test_locale ()
 
         // the <ic> collating element will be equivalent to the letter <c>
         "<ic> <c> <LETTER> <c>\n"
+
+        // "<m>" and "<n>" tie on the first two levels and part only
+        // at the position level, where "<m>" has a weight the narrow
+        // transform must spell in more than one byte and "<n>" one it
+        // spells in a single byte below the first's final byte; with
+        // an IGNOREd character in front of "<n>" the two strings
+        // differ only in where the IGNOREd element sits
+        "<m> <m> <LETTER> \\d128\n"
+        "<n> <m> <LETTER> \\d2\n"
         "UNDEFINED IGNORE IGNORE IGNORE\n"
 
         "order_end\n"
@@ -608,6 +617,8 @@ check_libstd_test_locale (const char* charTname)
         TEST ('2',      18, IGNORE,      4, IGNORE, true);
         TEST ('3',      19, IGNORE,      4, IGNORE, true);
         TEST ('l',  IGNORE, IGNORE, IGNORE, IGNORE, true);
+        TEST ('m',      22, IGNORE,      2,    128, true);
+        TEST ('n',      22, IGNORE,      2,      2, true);
 
         // make sure that strings collate the way we expect them to
 
@@ -622,6 +633,11 @@ check_libstd_test_locale (const char* charTname)
 
         // the collating element "ic" should be equivalent to the letter 'c'
         test_string (charTname, co, "ic", "c", 0);
+
+        // at the position level a string whose first non-IGNOREd
+        // element comes after fewer IGNOREd ones collates first,
+        // whatever the weights: "m" (128) before "ln" (IGNORE, 2)
+        test_string (charTname, co, "m", "ln", -1);
 
 
         // two strings that compare identically must hash
@@ -705,9 +721,13 @@ test_weight_val (const char* charTname, const std::collate<charT>& co,
         for (int i = 0; i < 3; ++i) {
             for (int k = 0; k < 2; ++k) {
                 if (w [i][k] != IGNORE) {
-                    while (w [i][k] > _RWSTD_CHAR_MAX) {
-                        expected += charT (_RWSTD_CHAR_MAX);
-                        w [i][k] -= _RWSTD_CHAR_MAX;
+                    // the spelling of __rw_append_weight(): a run
+                    // byte of CHAR_MAX - 1 per full CHAR_MAX - 2, then
+                    // a final byte below the run byte; CHAR_MAX itself
+                    // is the IGNORE mark of the position orderings
+                    while (w [i][k] >= _RWSTD_CHAR_MAX - 1) {
+                        expected += charT (_RWSTD_CHAR_MAX - 1);
+                        w [i][k] -= _RWSTD_CHAR_MAX - 2;
                     }
                     expected += charT (w [i][k]);
                 }
@@ -785,7 +805,15 @@ check_libstd (const char* charTname)
     typedef std::allocator<charT>                       Allocator;
     typedef std::basic_string<charT, Traits, Allocator> String;
 
-    for (std::size_t i = 0; i < nlocales; ++i) {
+    // the root of the source tree, from TOPDIR or the driver's own
+    // location; without it the input files cannot be found
+    const char* const topdir = rw_topdir ();
+
+    rw_assert (0 != topdir, __FILE__, __LINE__,
+               "environment variable TOPDIR not set or empty "
+               "and the source tree cannot be located");
+
+    for (std::size_t i = 0; topdir && i < nlocales; ++i) {
 
         const char* const locname =
             rw_localedef ("-w --no_position",
@@ -828,13 +856,7 @@ check_libstd (const char* charTname)
             // out holds the strings located in the output file
             String out [1000];
 
-            const char* in_path = std::getenv ("TOPDIR");
-            if (!in_path || !*in_path) {
-                std::fprintf (stderr, "TOPDIR not defined or empty");
-                std::exit (1);
-            }
-
-            std::string path (in_path);
+            std::string path (topdir);
             path += SLASH TESTS_ETC_PATH SLASH;
             path += locales [i][2];
 

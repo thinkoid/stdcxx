@@ -7,29 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO The narrow collate transform and multiples of 127
-
-=22.locale.collate= sorts the six word lists under =tests/etc= and
-fails 36 lines of the Croatian list and 65 of the Thai one, in the
-=char= half of the test only; the =wchar_t= half sorts all six as
-glibc sorts them from the same definitions. In the narrow transform
-=__rw_append_weight= (=src/collate.cpp=) spells a weight as a run of
-=CHAR_MAX= bytes, one per 127, followed by the remainder; a weight
-that is a multiple of 127 ends in one more =CHAR_MAX= and nothing
-marks its end, and the next weight merges into it when the strings
-are compared. The primary weight of "l" in =hr_HR= is 1016, eight
-times 127, and that of ko kai in =th_TH= is 127; both letters sort
-last. =doc/notes/test-fixtures.md= chapter 4.4 has the probe.
-
-Fix: a prefix-free, monotone spelling of the weight, for instance a
-run of =CHAR_MAX= for each full 126 and a final byte in 1 to 126;
-transform strings are not persistent, so nothing depends on the
-present spelling.
-
-Check: the =char= half of =22.locale.collate= at 100% on both
-widths, and a probe that =transform= of a character with weight
-127k sorts before one with weight 127k + 1.
-
 * TODO 23.bitset.cons and 25.reverse in the archive 64-bit build
 
 In =11S= =23.bitset.cons= fails a different number of assertions on

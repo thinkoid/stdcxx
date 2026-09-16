@@ -172,12 +172,23 @@ __rw_append_weight (const _RW::__rw_collate_t *impl,
 
         if (wt && wt != _RWSTD_UINT_MAX) {
 
-            while (_RWSTD_CHAR_MAX < wt) {
-                out += char (_RWSTD_CHAR_MAX);
-                wt  -= _RWSTD_CHAR_MAX;
+            // spell the weight so that no spelling is a prefix of
+            // another and every spelling sorts below the IGNORE mark
+            // of the position orderings, which is CHAR_MAX: a run byte
+            // of CHAR_MAX - 1 for each full CHAR_MAX - 2 subtracted,
+            // then a final byte in 1 to CHAR_MAX - 2 that no run byte
+            // can be taken for.  do_compare () compares the whole
+            // transformed strings, so a weight whose spelling ended in
+            // a run byte would merge into the next, and one that opened
+            // with the mark's byte would tie with an IGNOREd element.
+            const unsigned run_byte = _RWSTD_CHAR_MAX - 1;
+
+            while (run_byte <= wt) {
+                out += char (run_byte);
+                wt  -= run_byte - 1;
             }
 
-            // the weight will fit a signed char
+            // the weight now fits a signed char
             // so add it to the out str
             out += char (wt);
         }

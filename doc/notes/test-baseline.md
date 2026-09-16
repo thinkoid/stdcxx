@@ -43,10 +43,19 @@ per program followed by a summary. The rule exports `TOPDIR`,
 `TMPDIR`, `TZ` and `LD_LIBRARY_PATH`; a test run by hand needs
 `TOPDIR` set to the source tree and the build's `tests` directory as
 the working directory, because the locale tests exec `../bin/localedef`.
+The thread-safe tables from the collate change on were run with a
+30-second timeout, which the change after it makes the default: the
+MT locale tests that hang (chapter 3.4) ran the 300-second limit out
+one after another, and the slowest honest test, `22.locale.codecvt`,
+takes 24 seconds in the 32-bit debug build. The timeout is the only
+option to set by hand; `RUNFLAGS` on the `make` command line replaces
+the whole variable and drops the `--compat` and `--ulimit` options
+the rules append to it, and the tables come out different.
 
 The status column is the exit code when the program produced the
 driver's output, otherwise one of the harness's words: `ABRT`,
-`SEGV` and the like for signals; `NOUT` for no output; `FORMAT` for
+`SEGV` and the like for signals; `HUP` for a program the harness
+killed at the timeout; `NOUT` for no output; `FORMAT` for
 output not in the driver's format; `EXEC` for a file that could not
 be executed; `COMP` for a test that did not build.
 
@@ -74,19 +83,20 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,068,550 | 838 | 2 | 9 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,069,188 | 838 | 2 | 8 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,372 | 838 | 12 | 11 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,068,455 | 735 | 2 | 9 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,069,093 | 735 | 2 | 8 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,037 | 975 | 9 | 16 |
 
 The 64-bit counts include `23.bitset.cons`, which varies from run
 to run (chapter 3.5); the number pinned is the one measured with the
-rest of the table, 0 failed in the 11S run pinned here where the
-first run had 440. The 15D counts include the MT locale tests, which
-are not stable either (chapter 3.4). The tables were pinned first
-with the two locale tests failing to read their input files and
-re-pinned with the files in place (chapter 3.2); the assertion
-totals moved by the collate test's new rows and the bitset test's
-run-to-run count.
+rest of the table, 0 failed in the 11S run pinned here and 240 in
+the 15D one. The 15D counts include the MT locale tests, which are
+not stable either (chapter 3.4), and that is the whole of the
+difference between the 15D row and the other two. The tables were
+pinned first with the two locale tests failing to read their input
+files, re-pinned with the files in place (chapter 3.2), and re-pinned
+again with the narrow transform repaired; each time the assertion
+totals moved by those rows and by the two unstable ones.
 
 The last measurement on a current toolchain before this one, made
 by hand in 2026-09 before every test linked, was 10,066,804
@@ -149,10 +159,14 @@ the native codeset made `localedef` reuse a single-byte stub for the
 `ja_JP.UTF-8` locale. One codecvt assertion remained before the abort
 of chapter 3.3, predating the files; it is repaired with the abort.
 The collate test exposed a
-library defect: the narrow transform cannot spell a weight that is a
-multiple of 127, and the letter "l" in Croatian and ko kai in Thai
-sort last in the `char` half of the test, 101 lines; the `wchar_t`
-half sorts all six lists as glibc does. That is a `TODO` entry.
+library defect: the narrow transform could not spell a weight that is
+a multiple of 127, and the letter "l" in Croatian and ko kai in Thai
+sorted last in the `char` half of the test, 101 lines, while the
+`wchar_t` half sorted all six lists as glibc does. Repaired since:
+the spelling is prefix-free and sorts below the IGNORE mark of the
+position orderings, which had been the same byte as its run byte
+(`collate-transform.md`); the test builds the mark's case, and its
+own `exit (1)` when `TOPDIR` was unset went with it.
 
 ### 3.3 `22.locale.codecvt` on a corrupt `mbstate_t`
 
@@ -253,7 +267,6 @@ expected. `22.locale.time.get` fails 33: `get_date ("01/01/2000")`
 consumes 10 characters where 8 are expected, and `get_weekday
 ("torsdag")` is not recognized. `22.locale.money.get` fails 16,
 `long double` reads with `showbase` ending in `failbit`.
-`22.locale.collate` fails 101, the narrow transform of chapter 3.2.
 
 Intended. Per facet, reading each test against the library.
 
