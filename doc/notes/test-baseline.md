@@ -38,13 +38,13 @@ Toolchain: GCC 16.2.1, glibc 2.44, x86-64 Linux, 2026-09-15.
 
 From a build directory's `tests` subdirectory, `make run` runs every
 built test through `bin/exec`, the harness, with the timeout the
-build's `makefile.in` sets (`RUNFLAGS = -t 300`), and prints one row
+build's `makefile.in` sets (`RUNFLAGS = -t 30`), and prints one row
 per program followed by a summary. The rule exports `TOPDIR`,
 `TMPDIR`, `TZ` and `LD_LIBRARY_PATH`; a test run by hand needs
 `TOPDIR` set to the source tree and the build's `tests` directory as
 the working directory, because the locale tests exec `../bin/localedef`.
-The thread-safe tables from the collate change on were run with a
-30-second timeout, which the change after it makes the default: the
+The timeout was 300 seconds from 2007 until the collate change,
+whose thread-safe tables were the first run at 30: the
 MT locale tests that hang (chapter 3.4) ran the 300-second limit out
 one after another, and the slowest honest test, `22.locale.codecvt`,
 takes 24 seconds in the 32-bit debug build. The timeout is the only

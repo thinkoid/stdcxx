@@ -546,7 +546,7 @@ $(MAKEFILE_IN): $(configpath)
           && echo "RPATH      = $(RPATH)"                >> $(MAKEFILE_IN)  \
           && [ "$(MAPFILE)" = "" ]                                          \
           || echo "MAPFILE    = $$""(TOPDIR)/$(MAPFILE)" >> $(MAKEFILE_IN)  \
-          && echo "RUNFLAGS   = -t 300"                  >> $(MAKEFILE_IN)  \
+          && echo "RUNFLAGS   = -t 30"                   >> $(MAKEFILE_IN)  \
           && echo "DEPENDDIR  = $(DEPENDDIR)"            >> $(MAKEFILE_IN)  \
           && echo "PHDIR      = $(PHDIR)"                >> $(MAKEFILE_IN)  \
           && echo "PHWARNFLAGS = $(PHWARNFLAGS)"         >> $(MAKEFILE_IN)  \
