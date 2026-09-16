@@ -71,7 +71,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.string.io                                  0    0   146395      0   100%
 21.string.io.stdcxx-206                    NOUT    0                       
 21.string.io.stdcxx-250                    NOUT    0                       
-21.string.iterators                           0    0     5725      0   100%
+21.string.iterators                           0    0     5725      6    99%
 21.string.op.plus.equal                       0    0     6687      0   100%
 21.string.op.plus                             0    0    13190      0   100%
 21.string.operators                           0    0    15852      0   100%
@@ -191,7 +191,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 25.random.shuffle.stdcxx-126               NOUT    0                       
 25.remove                                     0    0     4234      0   100%
 25.replace                                    0    0     3650      0   100%
-25.reverse                                 SEGV    0                       
+25.reverse                                    0    0      756      0   100%
 25.rotate                                     0    0      924      0   100%
 25.search                                     0    0     2100      0   100%
 25.set.difference                             0    0    16768      0   100%
@@ -270,9 +270,9 @@ atomic_xchg                                   0    0        0      0   100%
 PROGRAM SUMMARY:
   Programs:                   268
   Non-zero exit status:         2
-  Signalled:                    9
+  Signalled:                    8
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10068455
-  Failed assertions:          735
+  Assertions:            10069211
+  Failed assertions:          741

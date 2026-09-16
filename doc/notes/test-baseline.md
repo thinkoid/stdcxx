@@ -83,20 +83,19 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,068,455 | 735 | 2 | 9 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,069,211 | 741 | 2 | 8 |
 | 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,069,093 | 735 | 2 | 8 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,037 | 975 | 9 | 16 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,277 | 735 | 9 | 16 |
 
-The 64-bit counts include `23.bitset.cons`, which varies from run
-to run (chapter 3.5); the number pinned is the one measured with the
-rest of the table, 0 failed in the 11S run pinned here and 240 in
-the 15D one. The 15D counts include the MT locale tests, which are
-not stable either (chapter 3.4), and that is the whole of the
-difference between the 15D row and the other two. The tables were
-pinned first with the two locale tests failing to read their input
-files, re-pinned with the files in place (chapter 3.2), and re-pinned
-again with the narrow transform repaired; each time the assertion
-totals moved by those rows and by the two unstable ones.
+The 15D counts include the MT locale tests, which are not stable
+(chapter 3.4), and that is the whole of the difference between the
+15D row and the other two. Until chapter 3.5 was done the 64-bit
+counts also included `23.bitset.cons`, which varied from run to run;
+the tables were pinned first with the two locale tests failing to
+read their input files, re-pinned with the files in place (chapter
+3.2), again with the narrow transform repaired, and again with the
+bitset count settled; each time the assertion totals moved by those
+rows and by the unstable ones.
 
 The last measurement on a current toolchain before this one, made
 by hand in 2026-09 before every test linked, was 10,066,804
@@ -219,14 +218,43 @@ not a reference.
 
 ### 3.5 `23.bitset.cons` and `25.reverse` in 11S
 
-Fact. In 11S, `23.bitset.cons` fails 240, 440 and 680 assertions in
-three consecutive runs of one binary, and `25.reverse` dies of a
-segmentation fault. Both pass in 11s and in 15D, so the variable is
-the archive 64-bit library, not the word width.
+Fact. In 11S, `23.bitset.cons` failed 240, 440 and 680 assertions in
+three consecutive runs of one binary, and 0 in others, with the same
+walk in 15D and under Clang; `25.reverse` died of a segmentation
+fault in 11S only. Both passed in 11s.
 
-Hypothesis. An uninitialized or out-of-bounds read that the shared
-build's layout happens to tolerate. Check: the two tests in 11S
-under a memory checker.
+Cause, two unrelated test defects, neither in the library. The
+bitset test passes the exception it expects a constructor to throw
+as a small integer in the `const char*` parameter that otherwise
+carries the expected bit string, and told the two apart with `int
+(bitstr - (char*)0) < 3`: the pointer truncated to `int`. On a
+64-bit target a heap address with bit 31 set is negative after the
+truncation, so the test expected a throw from a valid call, and
+which strings sat above that line depended on where the address
+space randomization had put the heap. With randomization off the
+binary passed every time; under valgrind, likewise, and with no
+error reported, since nothing was uninitialized. The reverse test
+formatted "the mismatched element" as an assertion argument with
+`xsrc [nsrc - i - 1]`, evaluated whether the assertion fails or
+not; on success the loop leaves `i == nsrc` and the index is -1,
+one element before the array, which in the archive build was a
+buffer the driver had just freed (270 invalid reads under valgrind)
+or, at the start of a mapping, the fault. Both idioms date from the
+tests' first commits, 2006 and 2008.
+
+Fix, applied. The comparison at `ptrdiff_t` width; the mismatched
+element taken only when there is one. Check: eight runs of the
+bitset test with randomization on, 2347 of 2347 each; the reverse
+test under valgrind with no error and a clean exit, in 11S.
+
+The run that pinned the tables after this fix showed a new
+intermittent: `21.string.iterators` failed 6 of 5725 in 11S, all in
+the `UserChar` instantiation, `begin () const` and `end () - 1`
+returning a null element where the value was expected. The row had
+been clean in every earlier table and passed 22 further runs, bare,
+through the harness and under its address-space limit, with
+randomization on and off. The table keeps the 6 as measured; the
+`TODO` entry has the check.
 
 ### 3.6 The driver's self-tests
 

@@ -358,9 +358,14 @@ void test_string_ctor (std::bitset<N>*,
         "caught unknown exception"
     };
 
-    // compute which exception, if any, the ctor is expected to throw
-    const int except = int (bitstr - (char*)0) < 3 ?
-                       int (bitstr - (char*)0) : 0;
+    // compute which exception, if any, the ctor is expected to throw:
+    // the caller passes it as a small integer in place of the string;
+    // compare at the width of the pointer, since a real string's
+    // address truncated to int is negative, and so below 3, whenever
+    // bit 31 of the address is set, which on a 64-bit target depends
+    // on where the heap was placed
+    const std::ptrdiff_t code = bitstr - (char*)0;
+    const int except = code < 3 ? int (code) : 0;
 
     if (except && opt_no_exceptions)
         return;

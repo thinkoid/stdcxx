@@ -7,27 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO 23.bitset.cons and 25.reverse in the archive 64-bit build
-
-In =11S= =23.bitset.cons= fails a different number of assertions on
-every run of one binary, 240, 440 and 680 in three consecutive runs,
-and =25.reverse= dies of a segmentation fault; both pass in =11s=,
-and =25.reverse= in =15D= too, but =23.bitset.cons= has failed 240
-in a =15D= run as well (2026-09-15), so the count is unstable in
-both 64-bit builds and only the fault is specific to the archive.
-Built with Clang, =23.bitset.cons= passed all 2347 assertions under
-the harness once and failed 680 the next time, and fails 440 and
-680 in bare runs of the same binary; the GCC 64-bit build has passed
-all 2347 under the harness as well. The count varies with either
-compiler, under the harness and outside it; the read depends on the
-process's memory, not on the compiler.
-
-Fix: find the uninitialized or out-of-bounds read the shared build
-happens to tolerate; the check tools will say where.
-
-Check: stable counts and a clean exit in =11S= under a memory
-checker.
-
 * TODO The driver's self-tests
 
 =0.inputiter=, =0.outputiter= and =0.new= abort without a message;
@@ -60,6 +39,27 @@ Fix: the self-aliasing path of the iterator-range overloads; the
 regression tests are the gate.
 
 Check: the three tests at 100% and the three regressions exit 0.
+
+* TODO 21.string.iterators fails six assertions, once in a while
+
+In the =11S= suite run of 2026-09-16 that pinned the tables after
+the bitset and reverse repairs, =21.string.iterators= failed 6 of
+5725 assertions, all at its line 420 in the =UserChar= instantiation
+(=basic_string<UserChar, UserTraits<UserChar>, UserAlloc<UserChar>>=):
+=begin () const= and =end () - 1= on "a", "abc" and the strings that
+start with a NUL, returning a null element where the value was
+expected. The row was 5725/0 in every earlier table and in 22 runs
+afterwards: bare, through =bin/exec= with the suite's options, under
+=ulimit -v 1G=, with address space randomization on and off.
+
+Hypothesis: a read of something the =UserChar= string leaves
+uninitialized, or a stale value from a previous case, that the
+process's memory usually happens to hold right; the six rows are the
+first six cases of two tables, which points at state carried in from
+the case before. Check: a loop of the test under valgrind and under
+an address sanitizer build until it fails once with a report; if it
+never does under either, run it a few hundred times bare with the
+output kept and read the first failing case.
 
 * TODO 21.cwchar aborts after passing
 

@@ -104,7 +104,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.ctype.tolower                       0    0     1538      0   100%
 22.locale.ctype.toupper                       0    0     1028      0   100%
 22.locale.globals.mt                        HUP    0                       
-22.locale.messages.mt                         1    0                       
+22.locale.messages.mt                      ABRT    0                       
 22.locale.messages                            0    0      366      0   100%
 22.locale.messages.stdcxx-542                 0    0        0      0   100%
 22.locale.money.get.mt                        1    0                       
@@ -115,22 +115,22 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.moneypunct.mt                       1    0                       
 22.locale.moneypunct                          0    0      316      0   100%
 22.locale.name                                0    0        0      0   100%
-22.locale.num.get.mt                        HUP    0                       
+22.locale.num.get.mt                          1    0                       
 22.locale.num.get                             0    0    65412    204    99%
 22.locale.num.put.mt                        HUP    0                       
 22.locale.num.put                             0    2     1671      0   100%
 22.locale.num.put.stdcxx-2                 NOUT    0                       
-22.locale.numpunct.mt                      ABRT    0                       
+22.locale.numpunct.mt                       HUP    0                       
 22.locale.numpunct                            0    0       56      0   100%
 22.locale.statics.mt                         23    0                       
 22.locale.stdcxx-554                       NOUT    0                       
 22.locale.synopsis                            0    0       39      0   100%
-22.locale.time.get.mt                       HUP    0                       
+22.locale.time.get.mt                         1    0                       
 22.locale.time.get                            0   24     2120     33    98%
-22.locale.time.put.mt                         1    0                       
+22.locale.time.put.mt                       HUP    0                       
 22.locale.time.put                            0    0     2156      0   100%
 23.associative.stdcxx-16                   NOUT    0                       
-23.bitset.cons                                0    0     1907    440    76%
+23.bitset.cons                                0    0     2347      0   100%
 23.bitset.cons.stdcxx-297                  NOUT    0                       
 23.bitset                                     0    0  2537538      0   100%
 23.containers.stdcxx-152                   NOUT    0                       
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10068837
-  Failed assertions:         1174
+  Assertions:            10069277
+  Failed assertions:          734

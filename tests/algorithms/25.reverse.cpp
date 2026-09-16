@@ -149,12 +149,18 @@ void test_reverse (int line,
             break;
     }
 
+    // the mismatched element, if there is one: the loop leaves i at
+    // nsrc when the sequence is correct and the argument below is
+    // evaluated whether the assertion fails or not, so the index
+    // must not be formed then (it would be -1)
+    const int mismatch = i < nsrc ? xsrc [nsrc - i - 1].data_.val_ : 0;
+
     rw_assert (success, 0, line,
                "line %d: %s<%s>(\"%s\", ...) ==> "
                "\"%{X=*.*}\"; unexpected element value %#c at offset %zu",
                __LINE__, fname, itname, src,
                int (sizeof (*xsrc)), int (nsrc), int (i), xsrc,
-               xsrc [nsrc - i - 1].data_.val_, i);
+               mismatch, i);
 
     const std::size_t iter_swap_expect = nsrc / 2;
     success = iter_swap_calls == iter_swap_expect;
@@ -210,12 +216,18 @@ void test_reverse (int line,
             break;
     }
 
+    // the mismatched element, if there is one: the loop leaves i at
+    // nsrc when the sequence is correct and the argument below is
+    // evaluated whether the assertion fails or not, so the index
+    // must not be formed then (it would be -1)
+    const int mismatch = i < nsrc ? xdst [nsrc - i - 1].data_.val_ : 0;
+
     rw_assert (success, 0, line,
                "line %d: %s<%s>(\"%s\", ...) ==> "
                "\"%{X=*.*}\"; unexpected element value %#c at offset %zu",
                __LINE__, fname, itname, src,
                int (sizeof (*xsrc)), int (nsrc), int (i), xsrc,
-               xdst [nsrc - i - 1].data_.val_, i);
+               mismatch, i);
 
     success = T::n_total_op_assign_ - last_n_op_assign == nsrc;
     rw_assert (success, 0, line,

@@ -130,7 +130,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.time.put.mt                         0    0        0      0   100%
 22.locale.time.put                            0    0     2156      0   100%
 23.associative.stdcxx-16                   NOUT    0                       
-23.bitset.cons                                0    0     1667    680    59%
+23.bitset.cons                                0    0     2347      0   100%
 23.bitset.cons.stdcxx-297                  NOUT    0                       
 23.bitset                                     0    0  2537538      0   100%
 23.containers.stdcxx-152                   NOUT    0                       
@@ -191,7 +191,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 25.random.shuffle.stdcxx-126               NOUT    0                       
 25.remove                                     0    0     4234      0   100%
 25.replace                                    0    0     3650      0   100%
-25.reverse                                 SEGV    0                       
+25.reverse                                    0    0      756      0   100%
 25.rotate                                     0    0      924      0   100%
 25.search                                     0    0     2100      0   100%
 25.set.difference                             0    0    16768      0   100%
@@ -270,9 +270,9 @@ atomic_xchg                                   0    0        0      0   100%
 PROGRAM SUMMARY:
   Programs:                   268
   Non-zero exit status:         1
-  Signalled:                    9
+  Signalled:                    8
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10067775
-  Failed assertions:         1414
+  Assertions:            10069211
+  Failed assertions:          734
