@@ -1,0 +1,69 @@
+Un fichier d'entrée pour l'épreuve de la facette codecvt
+
+Ce fichier est lu par le test 22.locale.codecvt. Il contient un texte
+français dans le codage ISO-8859-1, où chaque caractère occupe un seul
+octet. Le test lit le fichier en entier, le convertit vers la
+représentation interne au moyen de la facette codecvt<wchar_t, char,
+mbstate_t>, reconvertit le résultat et le compare octet par octet à
+l'original. Le nombre d'octets lus et le nombre de caractères produits
+doivent correspondre aux valeurs inscrites dans la table du test ; pour
+un codage à largeur fixe d'un octet, les deux nombres sont égaux.
+
+Pourquoi un texte plutôt qu'une suite d'octets quelconque ? Parce que le
+test compare aussi la conversion à celle de la bibliothèque C dès que la
+locale correspondante est installée sur la machine. Un texte lisible,
+avec ses accents, ses cédilles et quelques signes de la moitié haute de
+la table, exerce précisément les endroits où deux implémentations
+pourraient diverger : élève, père, forêt, île, hôtel, naïve, garçon,
+Noël, leçon, façade, être, où, déjà, Zoé, Ève, Ångström vu de loin,
+«guillemets», un degré (°) Celsius, la moitié (½) et le signe de la
+multiplication (×).
+
+La facette codecvt fait le lien entre la représentation externe d'un
+caractère, telle qu'elle apparaît dans les fichiers, et la représentation
+interne, celle avec laquelle un programme calcule. Pour char des deux
+côtés, la conversion est l'identité et la facette répond noconv. Pour
+wchar_t, le résultat dépend de la locale : dans la locale classique,
+chaque octet devient un caractère large ; dans une locale nommée, c'est
+la table de caractères indiquée à localedef qui décide.
+
+La bibliothèque construit elle-même ses bases de locales à partir des
+sources placées sous etc/nls. Le test appelle localedef avec la source
+fr_FR et la table ISO-8859-1, dépose la base dans un répertoire
+temporaire et la charge sous le nom fr_FR.ISO-8859-1. Ce n'est qu'ensuite
+qu'il lit ce fichier.
+
+Ce fichier remplace un fichier plus ancien qui accompagnait le test dans
+son environnement d'origine et qui n'a pas survécu à la migration du test
+vers ce dépôt. De l'ancien fichier ne restent que deux nombres dans la
+table du test : la taille en octets et le nombre de caractères. Celui-ci
+est mesuré pour que les deux nombres soient de nouveau justes.
+
+Quiconque modifie le texte doit conserver la taille du fichier ou
+corriger la table du test. Un caractère de plus ou de moins fait échouer
+le test avec un message sur le nombre de caractères convertis, ce qui se
+repère vite mais reste agaçant. Un caractère absent d'ISO-8859-1 ne peut
+tout simplement pas figurer ici.
+
+La bibliothèque à laquelle ce test appartient est une implémentation
+complète de la bibliothèque standard de C++ telle que la décrit la norme
+de 2003, avec ses propres flux, ses propres locales, ses propres chaînes
+et ses propres conteneurs. Publiée sous licence libre en 2005,
+développée jusqu'en 2008, elle est restée sans entretien ensuite. Sa
+configuration éprouve le compilateur et la bibliothèque C avec quelques
+centaines de petits programmes au lieu de se fier aux numéros de
+version ; chaque trait absent ou modifié est détecté et signalé aux
+sources par une macro.
+
+À côté de ce fichier, quatre autres servent le même test : un texte
+allemand dans le même codage et trois fichiers japonais en Shift_JIS,
+EUC-JP et UTF-8, où le nombre d'octets et le nombre de caractères
+diffèrent, un caractère pouvant y occuper deux ou trois octets. Le test
+22.locale.collate lit dans le même répertoire six listes de mots triées
+selon la locale correspondante et vérifie que la facette collate
+reproduit cet ordre.
+
+Pour finir, quelques noms propres qui font travailler les accents :
+Orléans, Besançon, Nîmes, Angoulême, Château-Thierry, Évreux, Épinal,
+Saint-Étienne, Sète, Mâcon, Rhône, Saône, Vendôme, Liège, Genève,
+Neuchâtel, Québec et Montréal. Le fichier s'arrête bien là.

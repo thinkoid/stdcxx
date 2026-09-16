@@ -620,7 +620,9 @@ test_libstd_do_length (const char* locale_name, const CodeCvtT& cc,
 
     sze = cc.length ( state, pe, pe_limit, sze );
 
-    if (skip_C)
+    // if C library locale is available, then perform conversion and
+    // compare the results
+    if (skip_C || std::setlocale (LC_CTYPE, locale_name) == 0)
         return;
 
     std::mbstate_t C_state = std::mbstate_t ();
@@ -2109,7 +2111,7 @@ test_inout (const char* tname)
         const char* const codeset = nl_langinfo (CODESET);
 
         rw_info (0, __FILE__, __LINE__,
-                 "<code_set_name> %s (locale(\"%s\"))",
+                 "codeset %s of locale(\"%s\")",
                  codeset, interesting_locale_name);
 
         typedef unsigned char UChar;
@@ -2123,7 +2125,11 @@ test_inout (const char* tname)
                           "<U%04X> /x%02x\n", UChar (*pc), UChar (*pc));
         }
 
-        locname = create_codecvt (1, 1, charmap, codeset);
+        // the database takes the generated name, not the codeset's:
+        // localedef reuses a codecvt database that exists under the
+        // codeset's name, so a locale built later from the real
+        // charmap of the same name would get this one instead
+        locname = create_codecvt (1, 1, charmap);
 
         if (!locname) {
             rw_assert (false, __FILE__, __LINE__,
@@ -2525,7 +2531,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
                          std::codecvt_base::ok,  locales [i].nchars,
                          std::codecvt_base::ok,  locales [i].nbytes,
                          std::codecvt_base::noconv, locales [i].encoding,
-                         false, locales [i].nchars, locales [i].max_length);
+                         false, locales [i].nbytes, locales [i].max_length);
 
 
 

@@ -17,9 +17,11 @@ the harness's own table minus the timing columns.
   with the harness's output file so that it had never run. The rest
   are queue entries in `TODO`, each with a hypothesis and the check
   that settles it.
-- Two clusters are fixtures that never existed in this repository:
+- Two clusters were fixtures that never existed in this repository:
   the input files two locale tests read under `tests/etc` stayed
-  behind in the 2008 migration from the vendor's repository.
+  behind in the 2008 migration from the vendor's repository. They
+  are regenerated (`test-fixtures.md`), and what they found is in
+  chapter 3.2.
 - The thread-safety results are not a baseline yet, and that is the
   finding: in the thread-safe configuration the locale MT tests fail
   differently on every run of the same binary, an assertion in a
@@ -72,14 +74,19 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,067,691 | 1,177 | 2 | 10 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,068,769 | 737 | 2 | 9 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,068,969 | 737 | 14 | 10 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,068,233 | 838 | 2 | 10 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,068,871 | 838 | 2 | 9 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,071 | 838 | 13 | 11 |
 
-The 11S failure count includes `23.bitset.cons`, which varies from
-run to run (chapter 3.5); the number pinned is the one measured with
-the rest of the table. The 15D counts include the MT locale tests,
-which are not stable either (chapter 3.4).
+The 64-bit counts include `23.bitset.cons`, which varies from run
+to run (chapter 3.5); the number pinned is the one measured with the
+rest of the table, 0 failed in the 11S run pinned here where the
+first run had 440. The 15D counts include the MT locale tests, which
+are not stable either (chapter 3.4). The tables were pinned first
+with the two locale tests failing to read their input files and
+re-pinned with the files in place (chapter 3.2); the assertion
+totals moved by the collate test's new rows and the bitset test's
+run-to-run count.
 
 The last measurement on a current toolchain before this one, made
 by hand in 2026-09 before every test linked, was 10,066,804
@@ -129,9 +136,21 @@ commit, and their fixtures did not come with them. The reads are 20
 of the 21 codecvt failures and both collate failures, on every
 configuration.
 
-Intended. Regenerate the files from what the tests expect of them:
-the codecvt table fixes each file's byte and character count, the
-collate table names each file's encoding.
+Fix, applied. The files are regenerated from what the tests expect
+of them, the codecvt table fixing each file's byte and character
+count and the collate table its encoding; `test-fixtures.md` records
+their construction and the order oracle for the collate lists. With
+the files in place the codecvt test exposed three defects of its
+own, repaired with them: its `length` check compared against a C
+locale it had not set, its `length` expectation counted characters
+where the standard counts bytes, and a synthetic charmap named after
+the native codeset made `localedef` reuse a single-byte stub for the
+`ja_JP.UTF-8` locale. One codecvt assertion remains before the abort
+of chapter 3.3, and predates the files. The collate test exposed a
+library defect: the narrow transform cannot spell a weight that is a
+multiple of 127, and the letter "l" in Croatian and ko kai in Thai
+sort last in the `char` half of the test, 101 lines; the `wchar_t`
+half sorts all six lists as glibc does. That is a `TODO` entry.
 
 ### 3.3 `22.locale.codecvt` on a corrupt `mbstate_t`
 
@@ -226,7 +245,7 @@ expected. `22.locale.time.get` fails 33: `get_date ("01/01/2000")`
 consumes 10 characters where 8 are expected, and `get_weekday
 ("torsdag")` is not recognized. `22.locale.money.get` fails 16,
 `long double` reads with `showbase` ending in `failbit`.
-`22.locale.collate` fails 2, the fixtures of chapter 3.2.
+`22.locale.collate` fails 101, the narrow transform of chapter 3.2.
 
 Intended. Per facet, reading each test against the library.
 
@@ -272,10 +291,11 @@ exceptions:
   `0.printf` reports in its own format, so the harness says `FORMAT`
   with exit 0, as it does for the three self-tests in chapter 1.
 - `23.bitset.cons` (chapter 3.5) passed all 2347 assertions under the
-  harness in the Clang run and failed 440 and 680 in bare runs of the
-  same binary, the counts GCC shows. The harness runs each test under
-  an address-space limit; the read depends on the process's memory,
-  not on the compiler.
+  harness in the first Clang run, failed 680 in the next, and failed
+  440 and 680 in bare runs of the same binary, the counts GCC shows.
+  The count varies under the harness and outside it, with either
+  compiler; the read depends on the process's memory, not on the
+  compiler.
 - `18.numeric.special.float` (chapter 3.10) fails 3 assertions in the
   Clang 32-bit build, the 64-bit count, where GCC's 32-bit build fails
   6.

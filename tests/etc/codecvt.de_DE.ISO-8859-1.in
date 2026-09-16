@@ -1,0 +1,115 @@
+Eine Eingabedatei für die Prüfung der Facette codecvt
+
+Diese Datei wird vom Test 22.locale.codecvt gelesen. Sie enthält einen
+deutschen Text in der Kodierung ISO-8859-1, in der jedes Zeichen genau
+ein Byte belegt. Der Test liest die Datei als Ganzes, wandelt ihren
+Inhalt mit der Facette codecvt<wchar_t, char, mbstate_t> in die interne
+Darstellung um, wandelt das Ergebnis zurück und vergleicht es Byte für
+Byte mit dem Original. Dabei müssen die Zahl der gelesenen Bytes und die
+Zahl der erzeugten Zeichen mit den Werten übereinstimmen, die in der
+Tabelle des Tests eingetragen sind. Für eine Kodierung mit fester Breite
+von einem Byte sind beide Zahlen gleich.
+
+Warum ein Text und nicht eine beliebige Folge von Bytes? Weil der Test
+auch die Umwandlung mit der C-Bibliothek vergleicht, sobald das passende
+Gebietsschema auf dem Rechner eingerichtet ist. Ein lesbarer Text mit
+Umlauten, dem scharfen s und einigen Satzzeichen aus der oberen Hälfte
+der Tabelle übt genau die Stellen, an denen sich zwei Implementierungen
+unterscheiden könnten: Ärger, Öl, Übermut, Straße, Größe, Fußgänger,
+Käse, Möbel, Mühle, «Anführungszeichen», ein Grad (°) Celsius, die
+Hälfte (½) und das Zeichen für die Multiplikation (×).
+
+Die Facette codecvt vermittelt zwischen der äußeren Darstellung eines
+Zeichens, wie sie in Dateien und auf Leitungen vorkommt, und der inneren
+Darstellung, mit der ein Programm rechnet. Für char als innere und äußere
+Darstellung ist die Umwandlung die Identität, und die Facette meldet dies
+mit dem Ergebnis noconv. Für wchar_t als innere Darstellung hängt das
+Ergebnis vom Gebietsschema ab: im klassischen Gebietsschema wird jedes
+Byte zu einem breiten Zeichen erweitert, in einem benannten Gebietsschema
+entscheidet die Zeichentabelle, die bei der Erzeugung der Datenbank mit
+localedef angegeben wurde.
+
+Die Bibliothek erzeugt die Datenbanken der Gebietsschemata selbst. Ihre
+Quellen liegen unter etc/nls: die Definitionen der Sprachen und Länder
+unter src, die Zeichentabellen unter charmaps. Der Test ruft das
+Werkzeug localedef mit der Quelle de_DE und der Tabelle ISO-8859-1 auf,
+legt die Datenbank in einem temporären Verzeichnis ab und lädt sie über
+den Namen de_DE.ISO-8859-1. Erst dann liest er diese Datei.
+
+Die Prüfung selbst besteht aus mehreren Schritten. Zuerst wird die
+gesamte Datei mit der Methode in umgewandelt; das Ergebnis muss ok sein,
+und die Zahl der breiten Zeichen muss der erwarteten Zahl entsprechen.
+Dann wird die breite Folge mit der Methode out zurück in Bytes gewandelt;
+auch hier muss das Ergebnis ok sein, und die Zahl der Bytes muss der
+Größe der Datei entsprechen. Der Vergleich des Ergebnisses mit dem
+Original stellt sicher, dass die Umwandlung in beide Richtungen
+verlustfrei ist. Anschließend werden unshift, always_noconv, max_length,
+length und encoding befragt, und jede Antwort wird mit dem Wert aus der
+Tabelle verglichen: für ISO-8859-1 ist die Kodierung 1, die größte Länge
+eines Zeichens 1, und always_noconv liefert false, weil ein Byte und ein
+breites Zeichen nicht dieselbe Darstellung haben.
+
+Ist auf dem Rechner ein passendes Gebietsschema der C-Bibliothek
+vorhanden, dann wird jede Umwandlung zusätzlich mit mbstowcs und
+wcstombs wiederholt, und die Ergebnisse beider Bibliotheken müssen in
+Länge und Inhalt übereinstimmen. Fehlt das Gebietsschema, so entfällt
+dieser Vergleich, ohne dass der Test einen Fehler meldet. Auf den
+meisten Rechnern ist heute nur noch ein Gebietsschema in UTF-8
+eingerichtet, sodass dieser Teil selten läuft; er bleibt trotzdem
+wertvoll, wo er läuft.
+
+Diese Datei ersetzt eine ältere, die den Test in seiner ursprünglichen
+Umgebung begleitete und die Übernahme des Tests in dieses Verzeichnis
+nicht überstanden hat. Von der alten Datei sind nur die beiden Zahlen in
+der Tabelle des Tests geblieben, nämlich die Größe in Bytes und die Zahl
+der Zeichen. Diese Datei ist so bemessen, dass beide Zahlen wieder
+stimmen, und ihr Inhalt ist so gewählt, dass er die obere Hälfte der
+Zeichentabelle tatsächlich benutzt.
+
+Wer den Text ändert, muss die Größe der Datei erhalten oder die Tabelle
+im Test anpassen. Ein Zeichen mehr oder weniger lässt den Test mit einer
+Meldung über die Zahl der umgewandelten Zeichen scheitern, was zwar
+leicht zu erkennen, aber lästig ist. Ein Zeichen außerhalb von
+ISO-8859-1 lässt sich in dieser Datei gar nicht darstellen.
+
+Die Bibliothek, zu der dieser Test gehört, ist eine vollständige
+Implementierung der Standardbibliothek von C++, wie sie die Norm von
+2003 beschreibt, mit eigenen Datenströmen, eigenen Gebietsschemata,
+eigenen Zeichenketten und eigenen Behältern. Sie wurde 2005 unter einer
+freien Lizenz veröffentlicht, bis 2008 weiterentwickelt und danach nicht
+mehr gepflegt. Ihre Konfiguration prüft den Übersetzer und die
+C-Bibliothek mit einigen hundert kleinen Programmen, statt sich auf
+Versionsnummern zu verlassen; jedes fehlende oder veränderte Merkmal
+wird erkannt und über ein Makro an die Quellen gemeldet. Diese Prüfungen
+sind der Grund, warum der Baum nach vielen Jahren wieder übersetzt
+werden konnte.
+
+Neben dieser Datei gibt es vier weitere für denselben Test: eine
+französische in derselben Kodierung und drei japanische in Shift_JIS,
+EUC-JP und UTF-8. Bei den japanischen Dateien fallen die Zahl der Bytes
+und die Zahl der Zeichen auseinander, weil ein Zeichen dort zwei oder
+drei Bytes belegen kann; die Tabelle des Tests nennt für jede Datei
+beide Zahlen, dazu die größte Länge eines Zeichens und den Wert, den
+encoding liefern soll, nämlich 0 für Kodierungen mit veränderlicher
+Breite. Der Test 22.locale.collate liest aus demselben Verzeichnis sechs
+Wortlisten, die in der Reihenfolge des jeweiligen Gebietsschemas
+sortiert sind, und prüft, dass die Facette collate diese Reihenfolge
+herstellt.
+
+Ein Wort zur Wahl der Sprache. Der Text ist deutsch, weil das
+Gebietsschema deutsch ist, und er handelt von dem Test, der ihn liest,
+weil ein Text über etwas anderes hier nur Ballast wäre. Wer die Datei
+öffnet, erfährt aus ihr selbst, wozu sie dient, welche Zahlen sie
+einhalten muss und was geschieht, wenn man sie ändert. Das ist mehr, als
+man von einer Prüfdatei gewöhnlich erwarten darf, und es kostet nichts,
+denn der Test liest ohnehin jedes Byte, gleichgültig, was es bedeutet.
+Die Bytes über 127 sind dabei die wichtigen: Umlaute, das scharfe s, die
+Anführungszeichen und die wenigen Sonderzeichen oben; alles andere
+könnte ebenso gut ASCII sein und würde von jedem Übersetzer und jeder
+Bibliothek gleich behandelt.
+
+Zum Schluss noch einige Wörter, die in kaum einem anderen Alphabet
+vorkommen: Straßenbahn, Übungsstück, Öffnungszeiten, Ärmelkanal,
+Bürgermeister, Fräulein, Göttingen, Düsseldorf, Würzburg, Köln, Zürich,
+Nürnberg, Lübeck, Osnabrück, Saarbrücken, Tübingen, Mönchengladbach,
+Schwäbisch Gmünd und Garmisch-Partenkirchen. Damit ist die Datei gerade voll.

@@ -7,22 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO The input files under tests/etc
-
-=22.locale.codecvt= reads =tests/etc/codecvt.<locale>.in= for five
-locales and =22.locale.collate= reads =tests/etc/collate.<locale>.in=
-for six; the directory exists in no branch, the files stayed behind
-in the 2008 migration of both tests from the vendor's repository.
-Twenty of the codecvt failures and both collate failures are these
-reads.
-
-Fix: regenerate the files from what the tests expect of them; the
-codecvt table fixes the byte and character count of each, the
-collate table names the encoding.
-
-Check: the file-based sections of both tests run and the twenty-two
-failures are gone, on both widths.
-
 * TODO 22.locale.codecvt on a corrupt mbstate_t and on an unset TOPDIR
 
 The test's last section passes a corrupt =mbstate_t= to the facets
@@ -34,12 +18,39 @@ unset, a segmentation fault in a bare run; the driver derives the
 directory from =__FILE__= in that case and the test should get it
 the same way.
 
+Before that section, one assertion fails in both widths: =out= of
+the three-character string "LBE" into a nine-byte buffer answers
+=partial= where the test expects =ok= (assertion 1582, line 1579).
+
 Fix: decide what a corrupt state should do in a debug build, either
 the assertion or the error result, then the test; give the test the
-driver's directory.
+driver's directory; read the =partial= against 22.2.1.5.2.
 
-Check: the test prints its summary in =11S= and =8S=; a bare run
-without =TOPDIR= reports no fault.
+Check: the test prints its summary in =11S= and =8S= with no failed
+assertion; a bare run without =TOPDIR= reports no fault.
+
+* TODO The narrow collate transform and multiples of 127
+
+=22.locale.collate= sorts the six word lists under =tests/etc= and
+fails 36 lines of the Croatian list and 65 of the Thai one, in the
+=char= half of the test only; the =wchar_t= half sorts all six as
+glibc sorts them from the same definitions. In the narrow transform
+=__rw_append_weight= (=src/collate.cpp=) spells a weight as a run of
+=CHAR_MAX= bytes, one per 127, followed by the remainder; a weight
+that is a multiple of 127 ends in one more =CHAR_MAX= and nothing
+marks its end, and the next weight merges into it when the strings
+are compared. The primary weight of "l" in =hr_HR= is 1016, eight
+times 127, and that of ko kai in =th_TH= is 127; both letters sort
+last. =doc/notes/test-fixtures.md= chapter 4.4 has the probe.
+
+Fix: a prefix-free, monotone spelling of the weight, for instance a
+run of =CHAR_MAX= for each full 126 and a final byte in 1 to 126;
+transform strings are not persistent, so nothing depends on the
+present spelling.
+
+Check: the =char= half of =22.locale.collate= at 100% on both
+widths, and a probe that =transform= of a character with weight
+127k sorts before one with weight 127k + 1.
 
 * TODO 23.bitset.cons and 25.reverse in the archive 64-bit build
 
@@ -49,10 +60,12 @@ and =25.reverse= dies of a segmentation fault; both pass in =11s=,
 and =25.reverse= in =15D= too, but =23.bitset.cons= has failed 240
 in a =15D= run as well (2026-09-15), so the count is unstable in
 both 64-bit builds and only the fault is specific to the archive.
-Built with Clang, =23.bitset.cons= passes all 2347 assertions under
-the harness and fails 440 and 680 in bare runs of the same binary;
-the harness runs it under an address-space limit, so the read
-depends on the process's memory, not on the compiler.
+Built with Clang, =23.bitset.cons= passed all 2347 assertions under
+the harness once and failed 680 the next time, and fails 440 and
+680 in bare runs of the same binary; the GCC 64-bit build has passed
+all 2347 under the harness as well. The count varies with either
+compiler, under the harness and outside it; the read depends on the
+process's memory, not on the compiler.
 
 Fix: find the uninitialized or out-of-bounds read the shared build
 happens to tolerate; the check tools will say where.
