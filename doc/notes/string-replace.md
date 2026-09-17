@@ -405,5 +405,5 @@ gives it a pointer source should route through the workhorse instead.
 | growth policy | `include/rw/_defs.h` |
 | the tests | `tests/strings/21.string.{assign,insert,replace,append,cons}.cpp` |
 | the regressions | `tests/regress/21.string.*.stdcxx-{170,629,632,438}.cpp` |
-| the repair and its measurement | `test-baseline.md`, chapter 3.7; commits a1d757e3 and 937a2394 |
+| the repair and its measurement | `working/test-baseline.md`, chapter 3.7; commits a1d757e3 and 937a2394 |
 | the history | `git log -S__replace_aux -- include/string.cc`, the 2008 entries |

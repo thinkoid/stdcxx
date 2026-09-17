@@ -250,7 +250,7 @@ under GCC as well. The pinned tables carry the new counts, 10891 in
 ### 3.2 The tables
 
 The suite was run under the harness in the 11S, 11s and 15D Clang
-builds and pinned under `doc/notes/baseline/` beside the GCC tables,
+builds and pinned under `doc/notes/working/baseline/` beside the GCC tables,
 with `-clang` in the file names. Row for row they are the GCC tables,
 with these differences:
 

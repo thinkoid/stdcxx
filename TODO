@@ -4,8 +4,8 @@
 
 The queue, in priority order, top first. Each entry states the fact,
 the intended fix, and the check that settles it. Finished entries
-leave this file; git remembers them. The notes under =doc/notes=
-carry the longer investigations.
+leave this file; git remembers them. The notes under
+=doc/notes/working= carry the longer investigations.
 
 * TODO 21.string.iterators fails six assertions, once in a while
 
@@ -132,7 +132,7 @@ thread reading another locale's =truename=, line 147), died of an
 uncaught =std::runtime_error= from a locale that failed to
 construct in a thread, and passed. =22.locale.cons.mt= reports its
 thread pool failing to start. The 15D baseline rows for these tests
-record symptoms, not a reference; =doc/notes/test-baseline.md=
+record symptoms, not a reference; =doc/notes/working/test-baseline.md=
 chapter 3.4 has the details.
 
 A ThreadSanitizer build of 15D names the cause: =numpunct= caches
@@ -146,7 +146,7 @@ use-after-free, 4 destroyed mutexes. Two configuration facts sit
 beside it: on Linux/x86-64 the string reference count goes through
 a mutex per string for 4.1.x binary compatibility
 (=include/rw/_config.h:155=), and =_RWSTD_NO_THREAD_SAFE_LOCALE= is
-characterized and read nowhere. =doc/notes/locale-mt-race.md= has
+characterized and read nowhere. =doc/notes/working/locale-mt-race.md= has
 the reports and the intended fixes.
 
 =21.string.stdcxx-162= (=tests/regress=) aborts in =15D= on

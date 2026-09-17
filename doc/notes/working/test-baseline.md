@@ -3,7 +3,7 @@
 The whole suite, run under its own harness on the current toolchain,
 recorded once as the reference for everything after it: which tests
 fail, by how much, and why where that is known. The numbers are
-pinned under `doc/notes/baseline/`, one file per configuration, in
+pinned under `doc/notes/working/baseline/`, one file per configuration, in
 the harness's own table minus the timing columns.
 
 ## 0. tl;dr
