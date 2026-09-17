@@ -189,3 +189,76 @@ its users, which is a roadmap of its own.
 Not before the baseline; the =0= to =nullptr= sweep is one inert
 commit on top of the floor change, never sprinkled in ahead of it.
 Until then null is the literal =0=.
+
+* Documentation
+
+Documents that describe the library as it is, for a reader rather
+than for the record; they go under =doc/notes=, the investigations
+under =doc/notes/working=. Each entry names the document, what it
+must answer, and where the material already is. None has a check
+beyond a reading; they are prose. Roughly in order of payback.
+
+** TODO A tour of the locale subsystem
+
+Facets and their ids, the facet index scheme, =locale_body= and how
+=combine= and the global locale share bodies, the byname facets and
+the generated binary locale data they read. The MT race lives here
+(=doc/notes/working/locale-mt-race.md=) and a reader chasing it needs
+the map first. Shape: =string-replace.md=.
+
+** TODO Decision records
+
+One short file per irreversible choice the revival made: the platform
+retirement, the null-pointer literal, the commit shape, the Clang
+configuration, the compatibility mutex in the string body. The public
+tree has only the outcomes; the reasoning is in commit messages and
+private notes. Material: the commit messages and
+=doc/notes/working/platform-state.md=.
+
+** TODO A conformance record
+
+What of ISO/IEC 14882:2003 the library implements, where it knowingly
+deviates, which LWG issues it applied (the headers cite them by
+number), and which later library features it lacks. The roadmap the
+C++17 floor entry defers to. The most valuable to an outside reader
+and the most work.
+
+** TODO A build-system reference
+
+How the =BUILDTYPE= digits and letters map to flags, why =config.h= is
+a function of the compiler and =makefile.in= only, how a
+characterization is written and how its result gates code, the serial
+phases. The original =README= covers 2008; the revival's rules are
+spread over =README.md= and the commit messages.
+
+** TODO The characterization catalogue
+
+The probes under =etc/config/src=, each yielding a =_RWSTD_NO_*=
+macro: a table of macro, what it detects, which supported compiler
+trips it today, and whether it is still reachable. Shows at a glance
+what the C++17 floor could retire.
+
+** TODO An ABI and versioning note
+
+What the shared library exports, how the version macros and the
+=_RWSTD_VER= checks work, what changing the string body would break.
+The 4.1.x compatibility clause that keeps the per-string mutex is a
+binary-compatibility decision with no document behind it.
+
+** TODO A test-suite guide
+
+How the driver's =rw_assert= and =rw_test= work, the =TEST= table
+idiom and its =bthrow= column, how the harness classifies rows, how
+to write a regression against a table test. Fragments exist in
+=doc/notes/working/test-baseline.md=.
+
+** TODO A threading model note
+
+What the library promises under =_RWSTD_REENTRANT=, what the string's
+reference counting does and does not protect, the facet caching the
+ThreadSanitizer run named. The front matter for the MT entry.
+
+** TODO A tour of the streams
+
+The =basic_streambuf= buffering contract, the =ios_base= storage, how
+=filebuf= maps onto the C library. Shape: =string-replace.md=.
