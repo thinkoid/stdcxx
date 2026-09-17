@@ -595,6 +595,48 @@ public:
 
 #  endif   // _RWSTD_NO_STRING_OUTLINED_MEMBER_TEMPLATES
 
+    // the string's own pointer and iterator types go to the count
+    // overload, which handles a source within the buffer by allocating
+    // a new representation; every other type copies the source first
+    basic_string&
+    replace (iterator __first1, iterator __last1,
+             const_pointer __first2, const_pointer __last2, void*) {
+        // unnamed arg is used for overload resolution
+        return replace (_C_off (__first1), _C_off (__first1, __last1),
+                        __first2, size_type (__last2 - __first2));
+    }
+
+    basic_string&
+    replace (iterator __first1, iterator __last1,
+             pointer __first2, pointer __last2, void*) {
+        // unnamed arg is used for overload resolution; a pointer is
+        // an exact match for the member template and would bypass
+        // the const_pointer overload above
+        return replace (__first1, __last1,
+                        const_pointer (__first2), const_pointer (__last2),
+                        (void*)0);
+    }
+
+#  ifndef _RWSTD_NO_DEBUG_ITER
+
+    basic_string&
+    replace (iterator __first1, iterator __last1,
+             const_iterator __first2, const_iterator __last2, void*) {
+        // unnamed arg is used for overload resolution
+        return replace (__first1, __last1,
+                        __first2.base (), __last2.base (), (void*)0);
+    }
+
+    basic_string&
+    replace (iterator __first1, iterator __last1,
+             iterator __first2, iterator __last2, void*) {
+        // unnamed arg is used for overload resolution
+        return replace (__first1, __last1,
+                        __first2.base (), __last2.base (), (void*)0);
+    }
+
+#  endif   // _RWSTD_NO_DEBUG_ITER
+
     basic_string&
     replace (iterator __first, iterator __last,
              size_type __n, value_type __c, int) {

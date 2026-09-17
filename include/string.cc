@@ -499,10 +499,17 @@ replace (iterator __first1, iterator __last1,
         return __s.replace (__pos, __n, size_type (), value_type ());
     }
 
-     // use a (probably) faster algorithm if possible
+    // copy the source range first: it may lie within the string's own
+    // buffer, which __replace_aux overwrites as it reads (STDCXX-170);
+    // the string's own pointer and iterator types skip the copy through
+    // the non-template overloads in <string>
     if (_STD::__is_bidirectional_iterator (_RWSTD_ITERATOR_CATEGORY(_InputIter,
-                                                                    __last2)))
-        return __s.__replace_aux (__first1, __last1, __first2, __last2);
+                                                                    __last2))) {
+        _C_string_type __s3;
+        __s3.__replace_aux (__s3.begin (), __s3.begin (), __first2, __last2);
+
+        return __s.__replace_aux (__first1, __last1, __s3.begin (), __s3.end ());
+    }
 
     _C_string_type __s3;
     _TYPENAME _C_string_type::iterator __first3 = __s3.begin ();

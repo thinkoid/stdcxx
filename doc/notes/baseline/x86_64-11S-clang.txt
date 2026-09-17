@@ -48,11 +48,11 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.cwchar                                  ABRT    0                       
 21.cwctype                                    0    0      260      0   100%
 21.string.access                              0    0      980      0   100%
-21.string.append                              0    0    71471      0   100%
+21.string.append                              0    0    78471      0   100%
 21.string.append.stdcxx-1060               NOUT    0                       
 21.string.append.stdcxx-438                NOUT    0                       
-21.string.assign                              0    0    63016     60    99%
-21.string.assign.stdcxx-629                ABRT    0                       
+21.string.assign                              0    0    69736      0   100%
+21.string.assign.stdcxx-629                NOUT    0                       
 21.string.capacity                            0    0    55550      0   100%
 21.string.compare                             0    0     4448      0   100%
 21.string.cons.mt                             0    0       16      0   100%
@@ -66,8 +66,8 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.string.find.last.of                        0    0     7060      0   100%
 21.string.find                                0    0     7220      0   100%
 21.string.find.stdcxx-1035                 NOUT    0                       
-21.string.insert                              0    0    85964    150    99%
-21.string.insert.stdcxx-632                ABRT    0                       
+21.string.insert                              0    0    92579      0   100%
+21.string.insert.stdcxx-632                NOUT    0                       
 21.string.io                                  0    0   146395      0   100%
 21.string.io.stdcxx-206                    NOUT    0                       
 21.string.io.stdcxx-250                    NOUT    0                       
@@ -76,9 +76,9 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.string.op.plus                             0    0    13190      0   100%
 21.string.operators                           0    0    15852      0   100%
 21.string.push_back.mt                        0    0        2      0   100%
-21.string.replace                             0    0   172570    240    99%
+21.string.replace                             0    0   187410      0   100%
 21.string.replace.stdcxx-1063              NOUT    0                       
-21.string.replace.stdcxx-170               ABRT    0                       
+21.string.replace.stdcxx-170               NOUT    0                       
 21.string.replace.stdcxx-175               NOUT    0                       
 21.string.rfind                               0    0     6840      0   100%
 21.string.stdcxx-1009                      NOUT    0                       
@@ -270,9 +270,9 @@ atomic_xchg                                   0    0        0      0   100%
 PROGRAM SUMMARY:
   Programs:                   268
   Non-zero exit status:         0
-  Signalled:                    5
+  Signalled:                    2
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10069481
-  Failed assertions:          734
+  Assertions:            10104656
+  Failed assertions:          284

@@ -31,6 +31,9 @@ the harness's own table minus the timing columns.
 - The former 64-bit archive-only bitset and reverse failures are
   repaired (chapter 3.5), as are the driver's self-tests (chapter
   3.6) and the moneypunct test's own stack overwrite (chapter 3.9).
+- The one library defect the string tests exposed, a range source
+  inside the string being modified, is repaired (chapter 3.7): 450
+  failed assertions and three aborting regressions per table gone.
 
 Toolchain: GCC 16.2.1, glibc 2.44, x86-64 Linux. Tables refreshed
 2026-09-17, including the three corresponding Clang configurations.
@@ -89,9 +92,9 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,069,481 | 734 | 0 | 5 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,069,363 | 734 | 0 | 5 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,547 | 734 | 6 | 14 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,104,656 | 284 | 0 | 2 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,104,538 | 284 | 0 | 2 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,104,722 | 284 | 7 | 10 |
 
 The 15D counts include the MT locale tests, which are not stable
 (chapter 3.4), and that is the whole of the difference between the
@@ -105,7 +108,10 @@ rows and by the unstable ones. The 2026-09-17 refreshes incorporate
 the four driver self-test repairs (chapter 3.6), a clean
 `21.string.iterators` run, and the moneypunct repair in chapter 3.9;
 the last of the day pins the alignment and moneypunct repairs the
-morning tables still lacked.
+morning tables still lacked, and the final one the string repair in
+chapter 3.7, which also raises the assertion totals: the tests
+iterate every case once per allocation the operation makes, throwing
+at each, and the copying path makes one more.
 
 The last measurement on a current toolchain before this one, made
 by hand in 2026-09 before every test linked, was 10,066,804
@@ -471,10 +477,18 @@ list discussion of the time showed is ill-formed for iterators that
 return by value. Neither trunk nor 4.3.x fixed it afterwards, and
 STDCXX-170 is open upstream.
 
-Intended. Copy first on the generic path, as 21.3.5.6 specifies;
-non-template overloads for the pointer and string-iterator types
-that route to the count overload of `replace`, which already handles
-an overlapping source. The `TODO` entry has the gate.
+Repair, applied 2026-09-17. The generic path builds a temporary
+from the source first, as 21.3.5.6 specifies; non-template overloads
+for `pointer`, `const_pointer` and, under debug iterators, the
+string's own iterator types route to the count overload of
+`replace`, which already allocates a new representation when the
+source lies in the buffer. No address of a dereferenced iterator is
+formed in the template, so an iterator returning by value
+instantiates. Check: the three tests at 100% and the three
+regressions exit 0 in all six configurations; a 24-case probe that
+fails 11 rows against the previous headers passes; every other row
+of the six tables unchanged. The guarded `insert` overloads are now
+redundant and queued for removal.
 
 `21.string.stdcxx-162` was listed here. It is a probe of the string
 atomics decision, not of this path, and belongs to the MT entry

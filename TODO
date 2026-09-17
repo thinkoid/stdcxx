@@ -7,47 +7,24 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO Strings: ranges into the string itself
+* TODO Retire the guarded insert overloads
 
-=21.string.assign=, =21.string.insert= and =21.string.replace= fail
-60, 150 and 240 assertions, and the regression tests =stdcxx-629=,
-=stdcxx-632= and =stdcxx-170= abort on the same cases ("babc"
-expected, "aabc" got). Every failing case has a source range inside
-the string being modified.
+=insert (iterator, const_pointer, const_pointer, void*)= and, under
+debug iterators, the =const_iterator= and =iterator= forms
+(=include/string:431-455=) test the source against the buffer and
+copy through a temporary string when it lies inside. Since the
+string self-aliasing repair, =replace= handles every pointer and
+iterator source through its count overload, which allocates a new
+representation on overlap and copies nothing otherwise, and =insert=
+of a range is =replace= over an empty range at the point; the guards
+duplicate that at a higher cost, and only for =const_pointer=, since
+a =char*= argument bypassed them all along.
 
-The cause is read, not guessed. Every range overload of =assign=,
-=insert= and =append= is =replace= over the whole string, over an
-empty range at the point, or over an empty range at the end, and a
-bidirectional or random-access source goes to =__replace_aux=
-(=include/string.cc=), whose in-place branch moves the tail and then
-copies the source element by element with no overlap test. Which
-cases fail follows from where the write lands relative to the read:
-=assign= only through reverse iterators (a forward source at offset
-zero is always ahead of the write), =append= never (the write is past
-the end), =insert= and =replace= at the front for every iterator
-kind. The new-representation branch reads the old buffer before
-unlinking it, so forced growth is safe, and the input-iterator branch
-stages the source in a temporary, so it is safe by accident. =insert=
-already guards =const_pointer= with an address test and a copy
-through a temporary (=include/string:432=), but a =char*= argument
-matches the member template exactly and skips the guard; =replace=
-has no guard at all. The two 2008 attempts (bf077568, 966011ea, both
-reverted) took the address of =*first= inside the template, which is
-ill-formed for iterators that return by value; no later branch fixed
-it, and STDCXX-170 is still open upstream.
+Fix: delete the three overloads; =insert= falls to the member
+template and from there to =replace=.
 
-Fix: the generic bidirectional path copies the source into a
-temporary string first, as 21.3.5.6 specifies and as the input
-iterator path already does; non-template overloads for =pointer=,
-=const_pointer= and, under debug iterators, =iterator= and
-=const_iterator= route to the count overload of =replace=, which
-already handles an overlapping source by allocating a new
-representation. No address of =*first= in any template; a
-compile-only probe with a by-value =operator*= is part of the gate.
-
-Check: the three tests at 100% on both widths and both compilers,
-the three regressions exit 0, and the forward-iterator, pointer/count
-and forced-growth controls unchanged.
+Check: =21.string.insert= and =stdcxx-632= unchanged at 100%; the
+tables identical.
 
 * TODO 21.string.iterators fails six assertions, once in a while
 
