@@ -7,23 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO Standalone self-test output may not indicate a failure
-
-=0.cmdopts=, =0.strncmp= and =0.valcmp= exit 0 but print outside the
-driver's format; =0.braceexp= exits 0 and prints nothing. All four
-pass in direct GCC, Clang and =15D= runs and maintain their own
-failure counts and exit statuses. The harness's =FORMAT= and =NOUT=
-classifications may therefore not be failures at all. =0.printf=
-also uses its own output format when it passes.
-
-Fix, if needed: decide whether to standardize their reporting or
-retain these classifications as successful standalone tests.
-
-Check: preserve the existing checks and nonzero failure exits;
-verify that the harness distinguishes reporting format from test
-failure. Exit 0 alone does not prove success for tests that report
-failed assertions through the driver.
-
 * TODO Strings: ranges into the string itself
 
 =21.string.assign=, =21.string.insert= and =21.string.replace= fail

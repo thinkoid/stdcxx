@@ -53,19 +53,24 @@ option to set by hand; `RUNFLAGS` on the `make` command line replaces
 the whole variable and drops the `--compat` and `--ulimit` options
 the rules append to it, and the tables come out different.
 
-The status column is the exit code when the program produced the
-driver's output, otherwise one of the harness's words: `ABRT`,
-`SEGV` and the like for signals; `HUP` for a program the harness
-killed at the timeout; `NOUT` for no output; `FORMAT` for
-output not in the driver's format; `EXEC` for a file that could not
-be executed; `COMP` for a test that did not build.
+The status column distinguishes process failure from output classification.
+A nonzero exit or signal is reported before output parsing: `ABRT`,
+`SEGV` and the like name signals, and `HUP` denotes a timeout. After
+an unsignalled zero exit, the harness looks for the driver's summary;
+`NOUT` means no output and `FORMAT` means no recognized summary.
+`EXEC` denotes a file that could not be executed, and `COMP` a test
+that did not build. The runner's own zero exit means it completed,
+not that all its children passed; read the rows and program summary.
 
-Two kinds of row are not failures. The 82 regression tests under
-`tests/regress` are plain programs that assert and exit; they print
-nothing, so the harness reports `NOUT`, and their exit status is 0
-where they pass (verified for a sample by hand). Three of the
-driver's self-tests, `0.cmdopts`, `0.strncmp` and `0.valcmp`, print
-their own report and exit 0; the harness reports `FORMAT`.
+Some successful tests deliberately produce no driver summary. The 82
+regression tests under `tests/regress` are plain programs that assert
+and exit; they print nothing, so successful runs are reported as
+`NOUT` (verified for a sample by hand). Several driver self-tests
+also use independent reporting: chapter 3.6.2 records their contracts
+and why their successful rows are `FORMAT` or `NOUT`. These are
+specific known conventions, not a rule that every such row passes.
+A test using driver assertions still needs its assertion summary;
+exit zero alone does not establish success.
 
 The harness writes each program's output next to it as
 `<program>.out`. That naming is what collided with the test
@@ -306,12 +311,13 @@ as controls. The full suite was not rerun for that self-test-only repair. The
 subsequent fnmatch run below incorporates these results into all six
 pinned tables.
 
-Still open. `0.braceexp` exits 0 and prints nothing. `0.printf` fails 4
-of 1876 assertions and `0.char` 1 of 479, all "misaligned address"
-from the `%{#ls}`, `%{Ac}` and `%{/*Gs}` directives of the driver's
-formatter.
-
-The remaining self-test entries are separate items in `TODO`.
+The pinned tables still contain the GCC alignment failures: four in
+`0.printf` and one in `0.char`. Commit `57c34d96` repairs their empty
+wide-string inputs with named arrays to preserve alignment despite
+GCC PR127457. Targeted runs pass all 1876 and 479 assertions in the
+six configurations; the full-suite tables have not been refreshed
+for that repair. The standalone reporting question is resolved in
+chapter 3.6.2.
 
 #### 3.6.1 Replace the custom pattern matcher
 
@@ -375,6 +381,61 @@ the differences are the now-passing intermittent string-iterator row,
 the moneypunct abort discussed in chapter 3.9, and the already unstable
 MT locale rows. The suite still has the outstanding failures recorded
 here; successful `make run` completion is not an all-tests-pass claim.
+
+#### 3.6.2 Standalone self-test reporting
+
+Decision, 2026-09-17: retain the independent reporting. These programs
+exercise the test driver's support functions; they do not themselves
+exercise the external runner's output parser. None calls `rw_test`
+or reports its checks through `rw_assert`.
+
+| test | successful output | failure contract | successful runner row |
+|---|---|---|---|
+| `0.cmdopts` | diagnostics from deliberately rejected arguments | unexpected parser or callback results set exit status 1 | `FORMAT` |
+| `0.strncmp` | overload banners | a mismatch prints a diagnostic and sets exit status 2 | `FORMAT` |
+| `0.valcmp` | specialization banners | a mismatch prints a diagnostic and sets exit status 1 | `FORMAT` |
+| `0.braceexp` | none | a mismatch increments `nerrors`; main returns 1 if any occurred | `NOUT` |
+| `0.printf` | progress and its own assertion summary | failed checks print a summary and return 1 | `FORMAT` |
+
+The original comparison tests (`5b7a4c57`, December 2005) and option
+test (`c41878f4`, December 2005) already use independent exit status.
+The original brace-expansion test (`7749e93f`, February 2008, merged
+in `222c045b`) explicitly says "return 0 on success, 1 on failure"
+and prints only on failure. The banners and silent success are
+established conventions, not evidence of missing driver integration.
+
+Independence also fits the architecture. `0.cmdopts` clears and
+replaces the option registry that the normal driver uses, while
+`0.printf` tests the formatter used by normal driver diagnostics.
+Their libc reporting keeps the observation separate from those
+mechanisms. This rationale is inferred from the code, not an explicit
+historical requirement that every self-test avoid the driver; other
+self-tests use it.
+
+The runner preserves these failure contracts. `run_target` in
+`util/runall.cpp` calls `parse_output` only after a zero, unsignalled
+exit. `check_test` and `check_compat_test` in `util/output.cpp` then
+classify empty output as `ST_NO_OUTPUT`, or a missing summary as
+`ST_FORMAT`. The deliberate empty-output distinction was added in
+`21e213d9` (June 2007), with the comment "regression test?". It
+recognizes that silence can be a program's normal success behavior.
+
+Check, 2026-09-17. All five existing GCC `11S` binaries ran directly
+with exit zero. `0.cmdopts` printed only expected argument-rejection
+diagnostics to stderr; the comparison tests printed banners;
+`0.braceexp` was silent. Copies run through `bin/exec --compat -t 30`
+produced the classifications above. Two synthetic executable controls,
+one silent with exit 7 and one printing a diagnostic with exit 9,
+retained numeric statuses 7 and 9; the program summary counted two
+nonzero exits. The runner itself returned zero on completion.
+
+These controls verify classification precedence, not the sensitivity
+of every self-test check. Failure branches were inspected, not
+mutated. No rebuild or full-suite run was needed for this reporting
+decision, and the pinned tables remain measurements of their earlier
+runs. No test or runner behavior is changed.
+
+Investigation and resolution: OpenAI LeChuck.
 
 ### 3.7 Strings: ranges into the string itself
 
