@@ -31,7 +31,7 @@
 #include <cassert>
 #include <clocale>       // for LC_ALL, setlocale()
 #include <cstdio>        // for fprintf(), stderr
-#include <cstdlib>       // for getenv()
+#include <cstdlib>       // for free(), getenv(), malloc()
 #include <cstring>       // for memcmp(), strerror()
 
 #include <rw_driver.h>   // for rw_test()
@@ -241,12 +241,35 @@ runTest()
 
     // exercise named locales (including "C" and "POSIX")
     for (const char* s = rw_locales (); s && *s; s += std::strlen (s) + 1) {
-        if (check_moneypunct (s))
+        if (check_moneypunct (s)) {
             if (   !first_non_c
                 && std::strcmp ("C", s)
                 && std::strcmp ("POSIX", s)) {
                 first_non_c = s;
             }
+
+            // Exercise composite names independently of the environment.
+            // LC_NUMERIC does not affect the monetary values being tested.
+            std::setlocale (LC_ALL, s);
+            std::setlocale (LC_NUMERIC, "C");
+            const char *mixed = std::setlocale (LC_ALL, 0);
+            char buf [256], *pbuf = buf;
+            const std::size_t size = std::strlen (mixed) + 1;
+            if (sizeof buf < size)
+                pbuf = _RWSTD_STATIC_CAST (char*, std::malloc (size));
+
+            if (!rw_assert (0 != pbuf, 0, __LINE__,
+                            "malloc (%zu) failed", size))
+                return;
+
+            std::memcpy (pbuf, mixed, size);
+            const bool success = check_moneypunct (pbuf);
+            rw_assert (success, 0, __LINE__,
+                       "check_moneypunct (%#s) failed", pbuf);
+
+            if (pbuf != buf)
+                std::free (pbuf);
+        }
     }
 
     if (!first_non_c)
@@ -339,13 +362,25 @@ template <class charT>
 bool Test<charT>::
 check_moneypunct (const char *locname)
 {
+    char buf [256], *pbuf = buf;
+
     // (try to) set the global C locale
-    char locnamebuf [256];
     const char *loc = std::setlocale (LC_ALL, locname);
     if (!loc)
         return false;
 
-    loc = std::strcpy (locnamebuf, loc);
+    // Composite names have no fixed length; later setlocale calls may
+    // invalidate libc's storage.  See doc/notes/moneypunct-locale-name.md.
+    const std::size_t size = std::strlen (loc) + 1;
+    if (sizeof buf < size)
+        pbuf = _RWSTD_STATIC_CAST (char*, std::malloc (size));
+
+    if (!rw_assert (0 != pbuf, 0, __LINE__,
+                    "malloc (%zu) failed", size))
+        return false;
+
+    std::memcpy (pbuf, loc, size);
+    loc = pbuf;
 
     locname_ = loc;
 
@@ -362,13 +397,18 @@ check_moneypunct (const char *locname)
     if (!lc_monetary_)
         lc_monetary_ = "(null)";
 
+    bool success = true;
+
     _TRY {
 
         // get a pointer to lconv and copy data to a temporray buffer
         const std::lconv* const plconv = lconvdup (std::localeconv ());
 
-        if (!plconv)
+        if (!plconv) {
+            if (pbuf != buf)
+                std::free (pbuf);
             return false;
+        }
 
         // reset to default locale given by LC_LANG
         std::setlocale (LC_ALL, "");
@@ -434,9 +474,13 @@ check_moneypunct (const char *locname)
         operator delete (_RWSTD_CONST_CAST (std::lconv*, plconv));
     }
     _CATCH (...) {
-        return false;
+        success = false;
     }
-    return true;
+
+    if (pbuf != buf)
+        std::free (pbuf);
+
+    return success;
 }
 
 /**************************************************************************/

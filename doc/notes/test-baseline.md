@@ -417,6 +417,15 @@ is a separately queued defect, not a regression attributed to the
 matcher replacement. Valgrind reports no memory errors in either
 control, which does not exclude an overwrite within a stack frame.
 
+Repair, 2026-09-17. The suspected copy is confirmed: a 276-byte
+composite name plus its terminator overwrites the 256-byte array and
+the stack canary. The test now uses a stack buffer with a `malloc` fallback and
+explicitly exercises mixed-category names. Targeted direct and harness
+runs pass 540 assertions in all six configurations; with a C environment,
+500 pass. `moneypunct-locale-name.md` records the debugger evidence and
+the AddressSanitizer negative control. The pinned full-suite tables above
+still record the earlier abort; no full suite was rerun for this repair.
+
 Intended. Per facet, reading each test against the library.
 
 ### 3.10 Numerics

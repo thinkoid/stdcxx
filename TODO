@@ -87,36 +87,6 @@ Fix: find the corruption; a memory checker run is the first step.
 
 Check: exit 0.
 
-* TODO 22.locale.moneypunct aborts in the refreshed baseline
-
-The 2026-09-17 full runs abort in all six configurations with stack
-smashing detected, replacing the previous 316 passing assertions.
-The backtrace ends in =Test<char>::check_moneypunct= at
-=tests/localization/22.locale.moneypunct.cpp:440=, called at line 237
-for the native empty-name locale case, through =__stack_chk_fail=.
-The output stops after the driver's =locale -a= note, before its
-assertion summary. A direct debugger run reproduces the harness
-failure.
-
-In the GCC =11S= control, linking the same test object against the
-old =rw_fnmatch= parser reproduces the SIGABRT; the POSIX version
-also dies with SIGABRT. Thus it is independent of this matcher
-replacement, despite first appearing in its baseline refresh.
-
-Hypothesis: the unchecked copy of =setlocale='s result into the
-256-byte =locnamebuf= (declared at line 343, copied at line 348)
-overwrites the stack for a composite locale name. Neither the length
-of the returned name nor the offending write has been established.
-Valgrind reports zero memory errors in both controls despite the
-stack-canary abort; this does not exclude an overwrite within the
-stack frame.
-
-Fix: establish the overwritten object and remove the fixed-size
-assumption if confirmed; see =test-baseline.md=, chapter 3.9.
-
-Check: reproduce with both matchers, identify the write, then restore
-the test to a clean run with the triggering locale environment.
-
 * TODO Locale facets
 
 =22.locale.num.get= fails 204 assertions, the =wchar_t= overloads
