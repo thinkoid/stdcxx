@@ -29,8 +29,8 @@ the harness's own table minus the timing columns.
   a pass. The `std::locale` race the revival set out to find shows
   itself on x86-64, without waiting for weakly ordered hardware.
 - The former 64-bit archive-only bitset and reverse failures are
-  repaired (chapter 3.5). The latest run also exposes a separate
-  moneypunct self-test abort (chapter 3.9).
+  repaired (chapter 3.5), as are the driver's self-tests (chapter
+  3.6) and the moneypunct test's own stack overwrite (chapter 3.9).
 
 Toolchain: GCC 16.2.1, glibc 2.44, x86-64 Linux. Tables refreshed
 2026-09-17, including the three corresponding Clang configurations.
@@ -89,9 +89,9 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,068,941 | 735 | 1 | 6 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,068,823 | 735 | 1 | 6 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,007 | 735 | 8 | 14 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,069,481 | 734 | 0 | 5 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,069,363 | 734 | 0 | 5 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,547 | 734 | 6 | 14 |
 
 The 15D counts include the MT locale tests, which are not stable
 (chapter 3.4), and that is the whole of the difference between the
@@ -101,9 +101,11 @@ the tables were pinned first with the two locale tests failing to
 read their input files, re-pinned with the files in place (chapter
 3.2), again with the narrow transform repaired, and again with the
 bitset count settled; each time the assertion totals moved by those
-rows and by the unstable ones. The 2026-09-17 refresh incorporates
-the signal-recovery and fnmatch repairs (chapter 3.6), a clean
-`21.string.iterators` run, and the moneypunct abort in chapter 3.9.
+rows and by the unstable ones. The 2026-09-17 refreshes incorporate
+the four driver self-test repairs (chapter 3.6), a clean
+`21.string.iterators` run, and the moneypunct repair in chapter 3.9;
+the last of the day pins the alignment and moneypunct repairs the
+morning tables still lacked.
 
 The last measurement on a current toolchain before this one, made
 by hand in 2026-09 before every test linked, was 10,066,804
@@ -315,8 +317,10 @@ The pinned tables still contain the GCC alignment failures: four in
 `0.printf` and one in `0.char`. Commit `57c34d96` repairs their empty
 wide-string inputs with named arrays to preserve alignment despite
 GCC PR127457. Targeted runs pass all 1876 and 479 assertions in the
-six configurations; the full-suite tables have not been refreshed
-for that repair. The standalone reporting question is resolved in
+six configurations, and the full-suite tables refreshed later that
+day carry the rows: `0.char` 479 of 479, and `0.printf` `FORMAT`
+with exit 0, its own summary reporting all 1876 passed (chapter
+3.6.2). The standalone reporting question is resolved in
 chapter 3.6.2.
 
 #### 3.6.1 Replace the custom pattern matcher
@@ -484,8 +488,8 @@ the stack canary. The test now uses a stack buffer with a `malloc` fallback and
 explicitly exercises mixed-category names. Targeted direct and harness
 runs pass 540 assertions in all six configurations; with a C environment,
 500 pass. `moneypunct-locale-name.md` records the debugger evidence and
-the AddressSanitizer negative control. The pinned full-suite tables above
-still record the earlier abort; no full suite was rerun for this repair.
+the AddressSanitizer negative control. The full-suite tables refreshed later
+that day record 540 passing assertions in all six configurations.
 
 Intended. Per facet, reading each test against the library.
 
@@ -526,10 +530,12 @@ same way and pinned in the same shape; `clang.md` records what it
 took to get there. Row for row they are the GCC tables, with these
 exceptions:
 
-- `0.char` and `0.printf` pass every assertion under Clang. Their
-  "misaligned address" failures (chapter 3.6) are GCC's alone.
-  `0.printf` reports in its own format, so the harness says `FORMAT`
-  with exit 0, as it does for the three self-tests in chapter 1.
+- `0.char` and `0.printf` passed every assertion under Clang before
+  the alignment repair in chapter 3.6; their "misaligned address"
+  failures were GCC's alone. Since the repair the rows are the same
+  under both compilers: `0.printf` reports in its own format, so the
+  harness says `FORMAT` with exit 0, as it does for the self-tests
+  in chapter 3.6.2.
 - `23.bitset.cons` (chapter 3.5) passed all 2347 assertions under the
   harness in the first Clang run, failed 680 in the next, and failed
   440 and 680 in bare runs of the same binary, the counts GCC shows.
