@@ -4,11 +4,11 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 0.char                                        0    8      479      1    99%
 0.cmdopts                                FORMAT    0                       
 0.ctype                                       0   30     3313      0   100%
-0.fnmatch                                     1    0                       
-0.inputiter                                ABRT    0                       
+0.fnmatch                                  NOUT    0
+0.inputiter                                   0    0       20      0   100%
 0.locale                                      0    0        3      0   100%
-0.new                                      ABRT    0                       
-0.outputiter                               ABRT    0                       
+0.new                                         0    0       26      0   100%
+0.outputiter                                  0    0        0      0   100%
 0.printf                                      1    0                       
 0.process                                     0    0       17      0   100%
 0.strncmp                                FORMAT    0                       
@@ -89,7 +89,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.string.swap                                0    0     4134      0   100%
 22.locale.codecvt.do_out                      0    0     1494      0   100%
 22.locale.codecvt.length                      0    0      484      0   100%
-22.locale.codecvt.mt                          1    0                       
+22.locale.codecvt.mt                         31    0
 22.locale.codecvt                             0    0      301      0   100%
 22.locale.codecvt.stdcxx-435               NOUT    0                       
 22.locale.collate                             0    0      714      0   100%
@@ -112,8 +112,8 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.money.get.stdcxx-62              NOUT    0                       
 22.locale.money.put.mt                        1    0                       
 22.locale.money.put                           0    0     1328      0   100%
-22.locale.moneypunct.mt                     HUP    0                       
-22.locale.moneypunct                          0    0      316      0   100%
+22.locale.moneypunct.mt                       1    0
+22.locale.moneypunct                       ABRT    0
 22.locale.name                                0    0        0      0   100%
 22.locale.num.get.mt                        HUP    0                       
 22.locale.num.get                             0    0    65412    204    99%
@@ -127,7 +127,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.synopsis                            0    0       39      0   100%
 22.locale.time.get.mt                       HUP    0                       
 22.locale.time.get                            0   24     2120     33    98%
-22.locale.time.put.mt                         1    0                       
+22.locale.time.put.mt                       HUP    0
 22.locale.time.put                            0    0     2156      0   100%
 23.associative.stdcxx-16                   NOUT    0                       
 23.bitset.cons                                0    0     2347      0   100%
@@ -269,10 +269,10 @@ atomic_add                                    0    0       66      0   100%
 atomic_xchg                                   0    0       22      0   100%
 PROGRAM SUMMARY:
   Programs:                   268
-  Non-zero exit status:         9
-  Signalled:                   16
+  Non-zero exit status:         8
+  Signalled:                   14
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10069277
+  Assertions:            10069007
   Failed assertions:          735

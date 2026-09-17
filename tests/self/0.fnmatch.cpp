@@ -28,12 +28,6 @@
 #include <stdio.h>        // for fprintf(), stderr
 
 
-#ifdef _RWSTD_OS_LINUX
-#  include <fnmatch.h>    // for fnmatch()
-#  define FNMATCH(pat, str, arg) fnmatch (pat, str, arg)
-#endif   // _RWSTD_OS_LINUX
-
-
 // the number of failed tests
 static int nerrors;
 
@@ -42,20 +36,14 @@ test (int line, int exp, const char *pat, const char *str)
 {
     const int result = rw_fnmatch (pat, str, 0);
 
-#ifdef FNMATCH
-    const int native = FNMATCH (pat, str, 0);
-#else   // if !defined (FNMATCH)
-    const int native = exp;
-#endif   // FNMATCH
-
-    if (result != native || (-1 < exp && result != exp)) {
+    if (result != exp) {
 
         ++nerrors;
 
         fprintf (stderr,
                  "%d. rw_fnmatch(\"%s\", \"%s\", 0) ==> %d, "
-                 "expected (native:own) %d:%d\n",
-                 line, pat, str, result, native, exp);
+                 "expected %d\n",
+                 line, pat, str, result, exp);
     }
 }
 
@@ -444,9 +432,32 @@ int main ()
     TEST (1, "\\", "\\");
     TEST (1, "[",  "");
     TEST (1, "[",  "a");
-    TEST (1, "[",  "[");
+    TEST (0, "[",  "[");
     TEST (1, "[a", "");
-    TEST (1, "[a", "[a");
+    TEST (0, "[a", "[a");
+
+    // Pin the former bracket parser's defects with explicit expectations.
+    TEST (1, "[a", "a");
+    TEST (1, "[!a", "b");
+    TEST (0, "[-a]", "a");
+    TEST (0, "[]a]", "a");
+    TEST (0, "[a-]", "-");
+    TEST (0, "[!-b]", "a");
+    TEST (0, "[!]a]", "b");
+    TEST (0, "[\\ab-d]", "c");
+    TEST (0, "[!\\a]b", "xb");
+    TEST (0, "[a\\\\]b", "ab");
+    TEST (0, "[[:alpha:]]", "a");
+    TEST (0, "[[=a=]]", "a");
+    TEST (0, "[[.a.]]", "a");
+
+    // An exact allocation exposes reads past NUL to a memory checker.
+    char *pat = new char [3];
+    pat [0] = '[';
+    pat [1] = 'a';
+    pat [2] = '\0';
+    TEST (1, pat, "a");
+    delete[] pat;
 
     // return 0 on success, 1 on failure
     return !(0 == nerrors);

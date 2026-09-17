@@ -4,11 +4,11 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 0.char                                        0    8      479      0   100%
 0.cmdopts                                FORMAT    0                       
 0.ctype                                       0   30     3313      0   100%
-0.fnmatch                                     1    0                       
-0.inputiter                                ABRT    0                       
+0.fnmatch                                  NOUT    0
+0.inputiter                                   0    0       20      0   100%
 0.locale                                      0    0        3      0   100%
-0.new                                      ABRT    0                       
-0.outputiter                               ABRT    0                       
+0.new                                         0    0       26      0   100%
+0.outputiter                                  0    0        0      0   100%
 0.printf                                 FORMAT    0                       
 0.process                                     0    0       17      0   100%
 0.strncmp                                FORMAT    0                       
@@ -113,7 +113,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.money.put.mt                        0    0        6      0   100%
 22.locale.money.put                           0    0     1328      0   100%
 22.locale.moneypunct.mt                       0    0        0      0   100%
-22.locale.moneypunct                          0    0      316      0   100%
+22.locale.moneypunct                       ABRT    0
 22.locale.name                                0    0        0      0   100%
 22.locale.num.get.mt                          0    0        0      0   100%
 22.locale.num.get                             0    0    65412    204    99%
@@ -269,10 +269,10 @@ atomic_add                                    0    0        0      0   100%
 atomic_xchg                                   0    0        0      0   100%
 PROGRAM SUMMARY:
   Programs:                   268
-  Non-zero exit status:         1
-  Signalled:                    8
+  Non-zero exit status:         0
+  Signalled:                    6
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10069211
+  Assertions:            10068941
   Failed assertions:          734

@@ -28,11 +28,12 @@ the harness's own table minus the timing columns.
   thread, an uncaught exception, a thread pool that cannot start, or
   a pass. The `std::locale` race the revival set out to find shows
   itself on x86-64, without waiting for weakly ordered hardware.
-- The 64-bit archive build has two failures of its own, a
-  nondeterministic assertion count and a segmentation fault, that
-  the shared and 32-bit builds do not show.
+- The former 64-bit archive-only bitset and reverse failures are
+  repaired (chapter 3.5). The latest run also exposes a separate
+  moneypunct self-test abort (chapter 3.9).
 
-Toolchain: GCC 16.2.1, glibc 2.44, x86-64 Linux, 2026-09-15.
+Toolchain: GCC 16.2.1, glibc 2.44, x86-64 Linux. Tables refreshed
+2026-09-17, including the three corresponding Clang configurations.
 
 ## 1. Running the suite
 
@@ -83,9 +84,9 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,069,211 | 741 | 2 | 8 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,069,093 | 735 | 2 | 8 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,277 | 735 | 9 | 16 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,068,941 | 735 | 1 | 6 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,068,823 | 735 | 1 | 6 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,069,007 | 735 | 8 | 14 |
 
 The 15D counts include the MT locale tests, which are not stable
 (chapter 3.4), and that is the whole of the difference between the
@@ -95,7 +96,9 @@ the tables were pinned first with the two locale tests failing to
 read their input files, re-pinned with the files in place (chapter
 3.2), again with the narrow transform repaired, and again with the
 bitset count settled; each time the assertion totals moved by those
-rows and by the unstable ones.
+rows and by the unstable ones. The 2026-09-17 refresh incorporates
+the signal-recovery and fnmatch repairs (chapter 3.6), a clean
+`21.string.iterators` run, and the moneypunct abort in chapter 3.9.
 
 The last measurement on a current toolchain before this one, made
 by hand in 2026-09 before every test linked, was 10,066,804
@@ -253,8 +256,9 @@ the `UserChar` instantiation, `begin () const` and `end () - 1`
 returning a null element where the value was expected. The row had
 been clean in every earlier table and passed 22 further runs, bare,
 through the harness and under its address-space limit, with
-randomization on and off. The table keeps the 6 as measured; the
-`TODO` entry has the check.
+randomization on and off. The September 16 table kept the 6 as
+measured; the September 17 rerun passed. The `TODO` entry remains
+open because a clean run does not explain the intermittent failure.
 
 ### 3.6 The driver's self-tests
 
@@ -298,17 +302,79 @@ and `15D`. Every copy finished with exactly one failed assertion and
 the corresponding diagnostic. The iterator tests returned 1;
 `0.new` returned 0, as its callback always does, so its summary is
 the failure oracle. The original sources still abort when rebuilt
-as controls. These targeted results supersede the three rows in
-the pinned full-suite tables; the full suite was not rerun for this
-self-test-only repair.
+as controls. The full suite was not rerun for that self-test-only repair. The
+subsequent fnmatch run below incorporates these results into all six
+pinned tables.
 
 Still open. `0.braceexp` exits 0 and prints nothing. `0.printf` fails 4
 of 1876 assertions and `0.char` 1 of 479, all "misaligned address"
 from the `%{#ls}`, `%{Ac}` and `%{/*Gs}` directives of the driver's
-formatter. `0.fnmatch` fails one of its cases: `rw_fnmatch ("[a",
-"[a", 0)` returns 1 where the native `fnmatch` returns 0.
+formatter.
 
 The remaining self-test entries are separate items in `TODO`.
+
+#### 3.6.1 Replace the custom pattern matcher
+
+`rw_fnmatch` is part of the test-support library, not the standard
+library. Its only caller outside its self-test is `rw_locale_query`,
+which filters canonical locale names. The helper was introduced on
+trunk in December 2007 (STDCXX-683, `c6496b81`) alongside its header
+and self-test, then merged into 4.2.x in April 2008 (`222c045b`).
+A portable replacement for POSIX `fnmatch` served the former platform
+matrix. The supported targets are now Linux with GCC and Clang;
+libc supplies the function, and the self-test already depended on it.
+That portability rationale no longer warrants a second implementation.
+
+The deleted parser had several independent defects:
+
+- An unterminated bracket expression could return the pattern's NUL
+  as if it were a closing bracket. The caller advanced past it and
+  read beyond the allocation. Matching `[a` against `a` produced two
+  invalid reads under Valgrind and could falsely report a match.
+- Unmatched `[` did not fall back to a literal. The self-test itself
+  incorrectly expected failure for `[` against `[` and `[a` against
+  `[a`, contradicting its native oracle.
+- Leading literal `-` and `]` prevented later members from matching;
+  negated lists mishandled them too. A trailing `-` was treated as a
+  range operator instead of a literal.
+- Escape state never reset within brackets. Closing-bracket scans
+  checked only the previous byte rather than the parity of consecutive
+  backslashes, corrupting ranges and recognition of the closing `]`.
+- Named character classes, equivalence classes, collating symbols and
+  multibyte matching were absent despite the advertised POSIX contract.
+
+The helper now delegates to POSIX `fnmatch` with flags zero, preserving
+its assertions, ignored third argument and normalized 0/1 result.
+Native matching uses the current locale rather than matching bytes;
+this also supplies the missing character-class and multibyte semantics.
+No additional library dependency or compiler option is required.
+
+The self-test uses explicit expected results instead of comparing two
+calls to the same native function. Both incorrect expectations are
+corrected, and 14 checks cover the bracket defects and an exact-size
+heap allocation for memory checking, bringing the total to 337.
+
+The investigation's separate scratch comparison used 1,911,679 pairs
+of short ASCII patterns and strings. It found 14,476 disagreements,
+all involving brackets. This generated corpus is not part of the
+suite; it includes malformed inputs and is not a count of distinct
+POSIX violations. Concrete regression cases establish the defects.
+
+Check, 2026-09-17. The actual self-test passes all 337 cases directly
+and through the harness in `11S`, `11s` and `15D` under GCC and Clang.
+Its successful harness row is `NOUT`: it prints only failures and
+returns zero. Valgrind reports zero errors. As a negative control,
+linking the same self-test against the deleted parser produces 14
+failed cases and two invalid reads, including the exact allocation.
+
+Rebuilt the test-support library and all tests, then ran `make run`
+with the existing harness options in all six configurations: 268
+programs each, 1,608 executions. All six tables are re-pinned from
+those runs. Besides the fnmatch and previous signal-recovery repairs,
+the differences are the now-passing intermittent string-iterator row,
+the moneypunct abort discussed in chapter 3.9, and the already unstable
+MT locale rows. The suite still has the outstanding failures recorded
+here; successful `make run` completion is not an all-tests-pass claim.
 
 ### 3.7 Strings: ranges into the string itself
 
@@ -338,6 +404,18 @@ expected. `22.locale.time.get` fails 33: `get_date ("01/01/2000")`
 consumes 10 characters where 8 are expected, and `get_weekday
 ("torsdag")` is not recognized. `22.locale.money.get` fails 16,
 `long double` reads with `showbase` ending in `failbit`.
+
+New measurement, 2026-09-17. `22.locale.moneypunct`, previously 316
+passing assertions, now aborts in all six configurations with stack
+smashing detected. A backtrace places the abort at the return from
+`Test<char>::check_moneypunct`, called for the native empty locale
+name. That helper copies `setlocale`'s result into a 256-byte stack
+array with `strcpy`; whether a long composite locale name overwrites
+it is the next check. The identical test object linked against the
+deleted fnmatch parser also aborts, as does the POSIX version. This
+is a separately queued defect, not a regression attributed to the
+matcher replacement. Valgrind reports no memory errors in either
+control, which does not exclude an overwrite within a stack frame.
 
 Intended. Per facet, reading each test against the library.
 

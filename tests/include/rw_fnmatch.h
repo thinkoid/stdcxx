@@ -36,6 +36,9 @@
 // a Single Character, and Section 2.13.2, Patterns Matching Multiple
 // Characters. It checks the string specified by the string argument
 // to see if it matches the pattern specified by the pattern argument.
+// Delegates to POSIX fnmatch() in the current locale with flags 0.
+// The third argument is reserved and ignored. Returns 0 for a match,
+// 1 otherwise.
 
 _TEST_EXPORT int
 rw_fnmatch (const char*, const char*, int);
