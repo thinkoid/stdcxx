@@ -361,6 +361,9 @@ test_character ()
 static void
 test_string ()
 {
+    // GCC PR127457: pooling L"" with narrow literals can lose alignment.
+    static const wchar_t empty [] = { 0 };
+
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "\"%s\": character string");
 
@@ -469,7 +472,7 @@ test_string ()
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "extension: \"%{#ls}\": quoted wide character string");
 
-    TEST ("%{#ls}", L"",      0, 0, "\"\"");
+    TEST ("%{#ls}", empty,   0, 0, "\"\"");
     TEST ("%{#ls}", L"\1",    0, 0, "\"\\x01\"");
     TEST ("%{#ls}", L"\a",    0, 0, "\"\\a\"");
     TEST ("%{#ls}", L"\n",    0, 0, "\"\\n\"");
@@ -514,6 +517,9 @@ test_string ()
 static void
 test_chararray ()
 {
+    // GCC PR127457: pooling L"" with narrow literals can lose alignment.
+    static const wchar_t empty [] = { 0 };
+
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "extension: \"%{Ac}\": quoted character array");
 
@@ -561,13 +567,13 @@ test_chararray ()
 
     if (2 == wchar_size) {
         TEST ("%{2Ac}", 0,      0, 0, "(null)");
-        TEST ("%{2Ac}", L"",    0, 0, "L\"\"");
+        TEST ("%{2Ac}", empty,  0, 0, "L\"\"");
         TEST ("%{2Ac}", L"a",   0, 0, "L\"a\"");
         TEST ("%{2Ac}", L"ab",  0, 0, "L\"ab\"");
         TEST ("%{2Ac}", L"abc", 0, 0, "L\"abc\"");
 
-        TEST ("%{2.0Ac}", L"",    0, 0, "L\"\"");
-        TEST ("%{2.1Ac}", L"",    0, 0, "L\"\\0\"");
+        TEST ("%{2.0Ac}", empty,  0, 0, "L\"\"");
+        TEST ("%{2.1Ac}", empty,  0, 0, "L\"\\0\"");
 
         TEST ("%{2.0Ac}", L"a",   0, 0, "L\"\"");
         TEST ("%{2.1Ac}", L"a",   0, 0, "L\"a\"");
@@ -604,13 +610,13 @@ test_chararray ()
 
     if (4 == wchar_size) {
         TEST ("%{4Ac}", 0,      0, 0, "(null)");
-        TEST ("%{4Ac}", L"",    0, 0, "L\"\"");
+        TEST ("%{4Ac}", empty,  0, 0, "L\"\"");
         TEST ("%{4Ac}", L"a",   0, 0, "L\"a\"");
         TEST ("%{4Ac}", L"ab",  0, 0, "L\"ab\"");
         TEST ("%{4Ac}", L"abc", 0, 0, "L\"abc\"");
 
-        TEST ("%{4.0Ac}", L"",    0, 0, "L\"\"");
-        TEST ("%{4.1Ac}", L"",    0, 0, "L\"\\0\"");
+        TEST ("%{4.0Ac}", empty,  0, 0, "L\"\"");
+        TEST ("%{4.1Ac}", empty,  0, 0, "L\"\\0\"");
 
         TEST ("%{4.0Ac}", L"a",   0, 0, "L\"\"");
         TEST ("%{4.1Ac}", L"a",   0, 0, "L\"a\"");

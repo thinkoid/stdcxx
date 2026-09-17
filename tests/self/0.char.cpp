@@ -1111,6 +1111,9 @@ test_rw_match ()
 static void
 test_formatting ()
 {
+    // GCC PR127457: pooling L"" with narrow literals can lose alignment.
+    static const wchar_t empty [] = { 0 };
+
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "\"%s\": formatting directive", "%{/Gs}");
 
@@ -1141,7 +1144,7 @@ test_formatting ()
     TEST (">%{/.*Gs}<",  3, "x\0z", 0,     ">\"x\\0z\"<");
 
     TEST (">%{/*Gs}<",   wchsize, (wchar_t*)0, 0,      ">(null)<");
-    TEST (">%{/*Gs}<",   wchsize, L"",         0,      ">\"\"<");
+    TEST (">%{/*Gs}<",   wchsize, empty,       0,      ">\"\"<");
     TEST (">%{/*Gs}<",   wchsize, L"a",        0,      ">\"a\"<");
     TEST (">%{/*Gs}<",   wchsize, L"ab",       0,      ">\"ab\"<");
     TEST (">%{/*Gs}<",   wchsize, L"abc",      0,      ">\"abc\"<");

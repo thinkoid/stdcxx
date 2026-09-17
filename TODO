@@ -7,24 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO GCC merges empty wide literals without preserving alignment
-
-=0.printf= fails four assertions and =0.char= one, all "misaligned
-address" from the =%{#ls}=, =%{Ac}= and =%{/*Gs}= directives. GCC
-16.2.1 merges =L""= with the four zero bytes of ="\0\0\0"= without
-preserving wide-character alignment. A standalone reproducer shows
-this at both =-O0= and =-O2=; Clang keeps the wide literal aligned.
-The formatter correctly rejects the address.
-
-Fix: establish the compiler defect's scope and choose whether to
-work around it with a named wide-character array; retain the
-formatter's alignment check. Isolated GCC copies using such an
-array pass all 1876 and 479 assertions respectively.
-
-Check: the independent literal-alignment reproducer, then both
-self-tests at 100% under GCC and Clang, with the invalid-address
-checks still exercised.
-
 * TODO Standalone self-test output may not indicate a failure
 
 =0.cmdopts=, =0.strncmp= and =0.valcmp= exit 0 but print outside the
