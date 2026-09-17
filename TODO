@@ -7,23 +7,74 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO The driver's self-tests
+* TODO rw_fnmatch: malformed bracket expressions
 
-=0.inputiter=, =0.outputiter= and =0.new= abort without a message;
+Matching the pattern "[a" against "a" reads past the pattern's NUL
+and reports a match: two invalid reads confirmed under valgrind.
+The bracket helper returns the NUL as though it were a closing
+bracket, and its caller advances past it. The self-test also expects
+1 for both "[" against "[" and "[a" against "[a", while native
+=fnmatch= returns 0; correcting only the helper cannot satisfy both
+oracles.
+
+Fix: distinguish malformed bracket expressions from valid ones that
+do not match, treating an unmatched "[" literally; correct both
+expectations and cover the read past NUL.
+
+Check: =0.fnmatch= passes, agrees with native =fnmatch= on these
+cases, and the exact-size allocated pattern produces no invalid
+reads under valgrind.
+
+* TODO The assertion-catching self-tests leave SIGABRT blocked
+
+=0.inputiter=, =0.outputiter= and =0.new= catch expected assertions
+with =setjmp= and =longjmp=, leaving =SIGABRT= blocked after the
+first handler. glibc 2.41 removed the initial unblock in =abort()=
+that had masked this dependency, so the next expected assertion
+kills the process. The tests deliberately suppress its diagnostics.
+
+Fix: save and restore the signal mask with =sigsetjmp= and
+=siglongjmp=, as in the codecvt repair. Isolated copies with this
+change finish under GCC, Clang and =15D=; fresh controls abort.
+
+Check: all three finish with no failed assertions in the GCC and
+Clang builds, including =15D=, while still detecting missing and
+unexpected assertions.
+
+* TODO GCC merges empty wide literals without preserving alignment
+
+=0.printf= fails four assertions and =0.char= one, all "misaligned
+address" from the =%{#ls}=, =%{Ac}= and =%{/*Gs}= directives. GCC
+16.2.1 merges =L""= with the four zero bytes of ="\0\0\0"= without
+preserving wide-character alignment. A standalone reproducer shows
+this at both =-O0= and =-O2=; Clang keeps the wide literal aligned.
+The formatter correctly rejects the address.
+
+Fix: establish the compiler defect's scope and choose whether to
+work around it with a named wide-character array; retain the
+formatter's alignment check. Isolated GCC copies using such an
+array pass all 1876 and 479 assertions respectively.
+
+Check: the independent literal-alignment reproducer, then both
+self-tests at 100% under GCC and Clang, with the invalid-address
+checks still exercised.
+
+* TODO Standalone self-test output may not indicate a failure
+
 =0.cmdopts=, =0.strncmp= and =0.valcmp= exit 0 but print outside the
-driver's format; =0.braceexp= exits 0 and prints nothing; =0.printf=
-fails four assertions and =0.char= one, all "misaligned address"
-from the =%{#ls}=, =%{Ac}= and =%{/*Gs}= directives; =0.fnmatch=
-fails one, =rw_fnmatch ("[a", "[a", 0)= returns 1 where the native
-=fnmatch= returns 0.
+driver's format; =0.braceexp= exits 0 and prints nothing. All four
+pass in direct GCC, Clang and =15D= runs and maintain their own
+failure counts and exit statuses. The harness's =FORMAT= and =NOUT=
+classifications may therefore not be failures at all. =0.printf=
+also uses its own output format when it passes.
 
-Built with Clang, =0.char= and =0.printf= pass every assertion: the
-"misaligned address" failures are GCC's alone; the rest of the rows
-are the same under both compilers.
+Fix, if needed: decide whether to standardize their reporting or
+retain these classifications as successful standalone tests.
 
-Fix: one at a time, the aborts first since they hide their reason.
-
-Check: every =0.*= row exits 0 with the driver's summary.
+Check: preserve the existing checks and nonzero failure exits;
+verify that the harness distinguishes reporting format from test
+failure. Exit 0 alone does not prove success for tests that report
+failed assertions through the driver.
 
 * TODO Strings: ranges into the string itself
 
