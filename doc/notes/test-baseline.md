@@ -444,17 +444,41 @@ Investigation and resolution: OpenAI LeChuck.
 ### 3.7 Strings: ranges into the string itself
 
 Fact. `21.string.assign`, `21.string.insert` and `21.string.replace`
-fail 60, 150 and 240 assertions, every one with a source range that
-is a reverse or bidirectional iterator into the string being
-modified: `string ("abc").assign (rbegin-style range)` expected
-"ba", got "bb". The regression tests `stdcxx-629`, `stdcxx-632` and
-`stdcxx-170` abort on the same cases. `21.string.stdcxx-162` aborts
-in 15D only, on its assumption `sizeof (strref) <= sizeof (SmallRef)`,
-which does not hold when the reference count is atomic.
+fail 60, 150 and 240 assertions, every one with a source range
+inside the string being modified: `string ("abc").insert (begin (),
+begin () + 1, begin () + 2)` expected "babc", got "aabc". The
+regression tests `stdcxx-629`, `stdcxx-632` and `stdcxx-170` abort
+on the same cases.
 
-Hypothesis. The self-aliasing path of the iterator-range overloads
-copies from storage it has already overwritten. The regression tests
-are the gate.
+Cause, read 2026-09-17. Every range overload of `assign`, `insert`
+and `append` is `replace` over the whole string, over an empty range
+at the point, or over an empty range at the end, and a bidirectional
+or random-access source goes to `__replace_aux` in
+`include/string.cc`, whose in-place branch moves the tail and then
+copies the source element by element with no overlap test. The
+new-representation branch reads the old buffer before unlinking it,
+so forced growth is safe, and the input-iterator branch stages the
+source in a temporary for exception safety, so it is safe by
+accident. The failing kinds follow from where the write lands
+relative to the read: `assign` fails only through reverse iterators,
+`append` never, `insert` and `replace` at the front for every kind.
+`insert` guards `const_pointer` with an address test and a copy
+through a temporary string, but a `char*` argument is an exact match
+for the member template and skips the guard; `replace` has no guard.
+The tree tried twice in 2008 (bf077568 and 966011ea, both reverted):
+each took the address of `*first` inside the template, which the
+list discussion of the time showed is ill-formed for iterators that
+return by value. Neither trunk nor 4.3.x fixed it afterwards, and
+STDCXX-170 is open upstream.
+
+Intended. Copy first on the generic path, as 21.3.5.6 specifies;
+non-template overloads for the pointer and string-iterator types
+that route to the count overload of `replace`, which already handles
+an overlapping source. The `TODO` entry has the gate.
+
+`21.string.stdcxx-162` was listed here. It is a probe of the string
+atomics decision, not of this path, and belongs to the MT entry
+(chapter 3.4).
 
 ### 3.8 `21.cwchar` aborts after passing
 

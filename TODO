@@ -10,17 +10,44 @@ carry the longer investigations.
 * TODO Strings: ranges into the string itself
 
 =21.string.assign=, =21.string.insert= and =21.string.replace= fail
-60, 150 and 240 assertions, all with a source range that is a
-reverse or bidirectional iterator into the string itself, and the
-regression tests =stdcxx-629=, =stdcxx-632= and =stdcxx-170= abort
-on the same cases ("ba" expected, "bb" got). =21.string.stdcxx-162=
-aborts in =15D= only: its assumption =sizeof (strref) <= sizeof
-(SmallRef)= does not hold when the reference count is atomic.
+60, 150 and 240 assertions, and the regression tests =stdcxx-629=,
+=stdcxx-632= and =stdcxx-170= abort on the same cases ("babc"
+expected, "aabc" got). Every failing case has a source range inside
+the string being modified.
 
-Fix: the self-aliasing path of the iterator-range overloads; the
-regression tests are the gate.
+The cause is read, not guessed. Every range overload of =assign=,
+=insert= and =append= is =replace= over the whole string, over an
+empty range at the point, or over an empty range at the end, and a
+bidirectional or random-access source goes to =__replace_aux=
+(=include/string.cc=), whose in-place branch moves the tail and then
+copies the source element by element with no overlap test. Which
+cases fail follows from where the write lands relative to the read:
+=assign= only through reverse iterators (a forward source at offset
+zero is always ahead of the write), =append= never (the write is past
+the end), =insert= and =replace= at the front for every iterator
+kind. The new-representation branch reads the old buffer before
+unlinking it, so forced growth is safe, and the input-iterator branch
+stages the source in a temporary, so it is safe by accident. =insert=
+already guards =const_pointer= with an address test and a copy
+through a temporary (=include/string:432=), but a =char*= argument
+matches the member template exactly and skips the guard; =replace=
+has no guard at all. The two 2008 attempts (bf077568, 966011ea, both
+reverted) took the address of =*first= inside the template, which is
+ill-formed for iterators that return by value; no later branch fixed
+it, and STDCXX-170 is still open upstream.
 
-Check: the three tests at 100% and the three regressions exit 0.
+Fix: the generic bidirectional path copies the source into a
+temporary string first, as 21.3.5.6 specifies and as the input
+iterator path already does; non-template overloads for =pointer=,
+=const_pointer= and, under debug iterators, =iterator= and
+=const_iterator= route to the count overload of =replace=, which
+already handles an overlapping source by allocating a new
+representation. No address of =*first= in any template; a
+compile-only probe with a by-value =operator*= is part of the gate.
+
+Check: the three tests at 100% on both widths and both compilers,
+the three regressions exit 0, and the forward-iterator, pointer/count
+and forced-growth controls unchanged.
 
 * TODO 21.string.iterators fails six assertions, once in a while
 
@@ -163,6 +190,13 @@ a mutex per string for 4.1.x binary compatibility
 (=include/rw/_config.h:155=), and =_RWSTD_NO_THREAD_SAFE_LOCALE= is
 characterized and read nowhere. =doc/notes/locale-mt-race.md= has
 the reports and the intended fixes.
+
+=21.string.stdcxx-162= (=tests/regress=) aborts in =15D= on
+=sizeof (strref) <= sizeof (SmallRef)=: with =_RWSTD_REENTRANT= and
+string atomics disabled, every string body carries its own mutex,
+64 bytes against the 24 the test allows. Atomics would satisfy the
+test; the mutex is the 4.1.x-compatibility choice above. The row is
+this decision's probe and belongs to it, not to the strings entry.
 
 Fix, after the retirement: guard the lazy initialization in every
 caching facet and in the facet data with the mutex the facet already
