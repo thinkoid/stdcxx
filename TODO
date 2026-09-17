@@ -7,25 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under =doc/notes=
 carry the longer investigations.
 
-* TODO Retire the guarded insert overloads
-
-=insert (iterator, const_pointer, const_pointer, void*)= and, under
-debug iterators, the =const_iterator= and =iterator= forms
-(=include/string:431-455=) test the source against the buffer and
-copy through a temporary string when it lies inside. Since the
-string self-aliasing repair, =replace= handles every pointer and
-iterator source through its count overload, which allocates a new
-representation on overlap and copies nothing otherwise, and =insert=
-of a range is =replace= over an empty range at the point; the guards
-duplicate that at a higher cost, and only for =const_pointer=, since
-a =char*= argument bypassed them all along.
-
-Fix: delete the three overloads; =insert= falls to the member
-template and from there to =replace=.
-
-Check: =21.string.insert= and =stdcxx-632= unchanged at 100%; the
-tables identical.
-
 * TODO 21.string.iterators fails six assertions, once in a while
 
 In the =11S= suite run of 2026-09-16 that pinned the tables after
