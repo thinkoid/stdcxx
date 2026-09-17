@@ -25,22 +25,6 @@ Check: =0.fnmatch= passes, agrees with native =fnmatch= on these
 cases, and the exact-size allocated pattern produces no invalid
 reads under valgrind.
 
-* TODO The assertion-catching self-tests leave SIGABRT blocked
-
-=0.inputiter=, =0.outputiter= and =0.new= catch expected assertions
-with =setjmp= and =longjmp=, leaving =SIGABRT= blocked after the
-first handler. glibc 2.41 removed the initial unblock in =abort()=
-that had masked this dependency, so the next expected assertion
-kills the process. The tests deliberately suppress its diagnostics.
-
-Fix: save and restore the signal mask with =sigsetjmp= and
-=siglongjmp=, as in the codecvt repair. Isolated copies with this
-change finish under GCC, Clang and =15D=; fresh controls abort.
-
-Check: all three finish with no failed assertions in the GCC and
-Clang builds, including =15D=, while still detecting missing and
-unexpected assertions.
-
 * TODO GCC merges empty wide literals without preserving alignment
 
 =0.printf= fails four assertions and =0.char= one, all "misaligned

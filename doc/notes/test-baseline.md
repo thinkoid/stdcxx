@@ -258,14 +258,57 @@ randomization on and off. The table keeps the 6 as measured; the
 
 ### 3.6 The driver's self-tests
 
-Fact. `0.inputiter`, `0.outputiter` and `0.new` abort without a
-message. `0.braceexp` exits 0 and prints nothing. `0.printf` fails 4
+Fact. `0.inputiter`, `0.outputiter` and `0.new` aborted without a
+message. They deliberately trigger assertions to test the driver's
+iterators and replacement allocation functions, catch `SIGABRT`,
+and jump back with `longjmp`. The iterator tests close `stderr` and
+the allocation test disables its expected error diagnostics, which
+explains the silence.
+
+Cause. The signal is blocked while its handler runs. `setjmp` does
+not save the signal mask on glibc, and `longjmp` bypasses the normal
+handler return, leaving `SIGABRT` blocked. Reinstalling the handler
+does not unblock it. Before glibc 2.41, `abort()` unblocked the
+signal before raising it, repairing the mask for the next assertion.
+The change described in `codecvt-invalid-state.md`, chapter 2,
+removed that accommodation; the second assertion now terminates
+the process instead of reaching the handler.
+
+Fix, applied. All three tests use `sigjmp_buf`, save the mask with
+`sigsetjmp (env, 1)` in both the expected-success and expected-failure
+paths, and restore it with `siglongjmp`. The assertions and their
+expected outcomes stay the same.
+
+Check, 2026-09-17. Rebuilt and ran all three directly and through
+`make run RUN='0.inputiter 0.outputiter 0.new'` in `11S`, `11s` and
+`15D`, with both GCC and Clang. The three rows were `ABRT` before
+the repair; afterwards every configuration gives:
+
+| test | exit | assertions | failed |
+|---|---|---|---|
+| `0.inputiter` | 0 | 20 | 0 |
+| `0.outputiter` | 0 | 0 | 0 |
+| `0.new` | 0 | 26 | 0 |
+
+The output-iterator test counts diagnostics only when a case fails,
+so zero assertions is its successful result. Isolated copies of
+each repaired test were also made to miss an expected assertion and,
+separately, to raise an unexpected one, under GCC and Clang in `11S`
+and `15D`. Every copy finished with exactly one failed assertion and
+the corresponding diagnostic. The iterator tests returned 1;
+`0.new` returned 0, as its callback always does, so its summary is
+the failure oracle. The original sources still abort when rebuilt
+as controls. These targeted results supersede the three rows in
+the pinned full-suite tables; the full suite was not rerun for this
+self-test-only repair.
+
+Still open. `0.braceexp` exits 0 and prints nothing. `0.printf` fails 4
 of 1876 assertions and `0.char` 1 of 479, all "misaligned address"
 from the `%{#ls}`, `%{Ac}` and `%{/*Gs}` directives of the driver's
 formatter. `0.fnmatch` fails one of its cases: `rw_fnmatch ("[a",
 "[a", 0)` returns 1 where the native `fnmatch` returns 0.
 
-Intended. One at a time, the silent aborts first.
+The remaining self-test entries are separate items in `TODO`.
 
 ### 3.7 Strings: ranges into the string itself
 
@@ -350,4 +393,3 @@ exceptions:
   6.
 - The MT rows of 15D vary under Clang as they do under GCC (chapter
   3.4) and are not a reference under either.
-

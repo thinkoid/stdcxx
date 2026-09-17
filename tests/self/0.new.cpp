@@ -30,7 +30,7 @@
 
 #include <cstddef>    // for size_t
 
-#include <setjmp.h>   // for longjmp(), setjmp()
+#include <setjmp.h>   // for siglongjmp(), sigsetjmp()
 #include <signal.h>   // for SIGABRT, signal()
 
 #include <rw_new.h>
@@ -46,14 +46,16 @@ extern "C" {
 volatile int line;   // currently executed line
 volatile int fail;   // non-zero when line failed
 
-jmp_buf env;
+// restore the signal mask when jumping out of an expected assertion;
+// see doc/notes/test-baseline.md, section 3.6
+sigjmp_buf env;
 
 static void
 handle_ABRT (int)
 {
     fail = 0;
 
-    longjmp (env, 1);
+    siglongjmp (env, 1);
 }
 
 }
@@ -61,7 +63,7 @@ handle_ABRT (int)
 #define FAIL(code)                                              \
     fail = line = __LINE__;                                     \
     signal (SIGABRT, handle_ABRT);                              \
-    if (0 == setjmp (env)) {                                    \
+    if (0 == sigsetjmp (env, 1)) {                              \
         code;                                                   \
         exit_status = 1;                                        \
         rw_assert (0, __FILE__, line, "expected assertion");    \
@@ -72,7 +74,7 @@ handle_ABRT (int)
 #define PASS(code)                                              \
     fail = -1; line = __LINE__;                                 \
     signal (SIGABRT, handle_ABRT);                              \
-    if (0 == setjmp (env)) {                                    \
+    if (0 == sigsetjmp (env, 1)) {                              \
         code;                                                   \
     }                                                           \
     else if (fail != line) {                                    \

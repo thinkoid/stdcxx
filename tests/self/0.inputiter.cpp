@@ -43,13 +43,15 @@ extern "C" {
 int line;
 int fail;
 
-jmp_buf env;
+// restore the signal mask when jumping out of an expected assertion;
+// see doc/notes/test-baseline.md, section 3.6
+sigjmp_buf env;
 
 void handle_ABRT (int)
 {
     fail = 0;
 
-    longjmp (env, 1);
+    siglongjmp (env, 1);
 }
 
 }
@@ -57,7 +59,7 @@ void handle_ABRT (int)
 #define FAIL(code)                                      \
     fail = line = __LINE__;                             \
     signal (SIGABRT, handle_ABRT);                      \
-    if (0 == setjmp (env)) {                            \
+    if (0 == sigsetjmp (env, 1)) {                      \
         code;                                           \
         exit_status = 1;                                \
         rw_assert (0, 0, line, "expected assertion");   \
@@ -68,7 +70,7 @@ void handle_ABRT (int)
 #define PASS(code)                                      \
     fail = -1; line = __LINE__;                         \
     signal (SIGABRT, handle_ABRT);                      \
-    if (0 == setjmp (env))                              \
+    if (0 == sigsetjmp (env, 1))                        \
         code;                                           \
     else if (fail != line) {                            \
         exit_status = 1;                                \
