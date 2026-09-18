@@ -101,7 +101,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.ctype.narrow                        0    2      514      0   100%
 22.locale.ctype                               0    0     4948      0   100%
 22.locale.ctype.scan                          0    0      924      0   100%
-22.locale.ctype.tolower                       0    0     1538      0   100%
+22.locale.ctype.tolower                       0    0     1028      0   100%
 22.locale.ctype.toupper                       0    0     1028      0   100%
 22.locale.globals.mt                          0    0        0      0   100%
 22.locale.messages.mt                         0    0        0      0   100%
@@ -126,7 +126,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.stdcxx-554                       NOUT    0                       
 22.locale.synopsis                            0    0       39      0   100%
 22.locale.time.get.mt                         0    0        0      0   100%
-22.locale.time.get                            0   24     2120     33    98%
+22.locale.time.get                            0   24     2010      0   100%
 22.locale.time.put.mt                         0    0        0      0   100%
 22.locale.time.put                            0    0     2156      0   100%
 23.associative.stdcxx-16                   NOUT    0                       
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10104708
-  Failed assertions:           80
+  Assertions:            10104088
+  Failed assertions:           47

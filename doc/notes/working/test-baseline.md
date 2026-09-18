@@ -591,6 +591,30 @@ is at 65508/0 everywhere; the 96 more assertions are the grouping
 loop running all nine lengths instead of stopping at the first
 failure. `valgrind` on the test in 11S is clean.
 
+`22.locale.time.get`: 32 of the 33 were the driver's.
+`rw_locale_query` keeps its result in a static buffer whose length
+was never reset, so every call appended to the previous result and a
+query matching nothing returned the previous query's answer. The
+test asks for an English, a German and a Danish locale in turn; on a
+machine with `en_US` alone the German and Danish queries came back
+`en_US.utf8` and their sections ran under it, "Sonntag" consumed as
+the S of Sunday. With the length reset at entry the two sections are
+skipped where their locale is absent, as the test intends. The same
+defect inflated `22.locale.ctype.tolower`, which queries at every
+loop entry without caching the list: 1538 assertions to the 1028 of
+`toupper`, now equal. The last failure expected the English "%x" to
+be 8 characters, the length of "%m/%d/%y" on the vendor Unixes of
+2008; glibc's `en_US` has formatted the date as "%m/%d/%Y" since
+2000, as does the tree's own `en_US` source, and the length now
+comes from `strftime`, as the same function already sizes "%X". With
+German and Danish locales generated into a scratch directory
+(`localedef`, `LOCPATH`, and a `locale` shim on `PATH` that lists
+them, since glibc's `locale -a` never lists `LOCPATH`), the German
+section passes and the Danish one showed its seven abbreviated
+weekday rows counting three bytes, which "søn" and "lør" are not in
+UTF-8; they are locale-decided now, as the German rows were. The
+row is at 2010/0 everywhere, the 24 warnings unchanged.
+
 New measurement, 2026-09-17. `22.locale.moneypunct`, previously 316
 passing assertions, now aborts in all six configurations with stack
 smashing detected. A backtrace places the abort at the return from

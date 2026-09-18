@@ -1321,6 +1321,11 @@ rw_locale_query (int loc_cat, const char* query, size_t wanted)
     static size_t length   = 0;
     static size_t capacity = 0;
 
+    // the buffer is reused across calls: start each query's result
+    // at its beginning so that a query matching nothing does not
+    // return the result of the previous one
+    length = 0;
+
     _rw_locale_entry rejects;
     rejects.canonical_name [0] = '\0';
     rejects.locale_name    [0] = '\0';

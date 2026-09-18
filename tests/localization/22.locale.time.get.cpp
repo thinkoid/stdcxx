@@ -913,14 +913,24 @@ void test_english (charT, const char *cname, const char *locname)
     TEST (T (0, 0, 0, 0, 10), "%B", -1, "b", 0, -1);
     TEST (T (0, 0, 0, 0, 11), "%B", -1, "b", 0, -1);
 
+    int len;
+
     // exercise date (time_get::get_date())
     FUNCTION ("get_date");
-    TEST (T (0, 0, 0, 1, 0, 100), "%x", 8, "x", 0, Eof);
+
+    {
+        // determine the length of the date in the locale's format,
+        // "%x" is "%m/%d/%y" on some platforms and "%m/%d/%Y" on
+        // others (e.g., glibc)
+        char buf [32];
+        const std::tm tmb = mktm (0, 0, 0, 1, 0, 100);
+        len = int (std::strftime (buf, sizeof buf, "%x", &tmb));
+    }
+
+    TEST (T (0, 0, 0, 1, 0, 100), "%x", len, "x", 0, Eof);
 
     // exercise time (time_get::get_time())
     FUNCTION ("get_time");
-
-    int len;
 
     {
         // determine whether "%X" is equivalent to "%I:%M:%S %p"
@@ -1041,14 +1051,15 @@ void test_danish (charT, const char *cname, const char *locname)
     }
 
     // exercise abbreviated weekday names
+    // the length of <s><o/><n> and <l><o/><r> depends on the codeset
     FUNCTION ("get_weekday");
-    TEST (T (0, 0, 0, 0, 0, 0, 0), "%a", 3, "a", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, 0, 1), "%a", 3, "a", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, 0, 2), "%a", 3, "a", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, 0, 3), "%a", 3, "a", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, 0, 4), "%a", 3, "a", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, 0, 5), "%a", 3, "a", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, 0, 6), "%a", 3, "a", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0), "%a", -1, "a", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 1), "%a", -1, "a", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 2), "%a", -1, "a", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 3), "%a", -1, "a", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 4), "%a", -1, "a", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 5), "%a", -1, "a", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 6), "%a", -1, "a", 0, Eof);
 
     // avoid using <s><o/><n> or <s><o/><n><d><a><g> since it
     // contains the non-ASCII character <o/> (o with a slash)
