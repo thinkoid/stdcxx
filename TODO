@@ -187,6 +187,50 @@ Not before the baseline; the =0= to =nullptr= sweep is one inert
 commit on top of the floor change, never sprinkled in ahead of it.
 Until then null is the literal =0=.
 
+* TODO Strict ANSI as the rule, the additions outside the standard gone
+
+=_RWSTD_STRICT_ANSI= (=include/rw/_config.h:234=, selected also by
+=_RWSTD_NO_EXTENSIONS=) is an opt-in: it undefines =_RWSTD_LONG_LONG=
+and defines 30 =_RWSTD_NO_EXT_*= macros, and the original README
+calls the switch deprecated. The tree reads 38 distinct
+=_RWSTD_NO_EXT_*= names in 40 files under =include= and =src=, eight
+of which the strict block never sets, and the tests carry the same
+gates; =tests/intro/17.extensions= exercises the additions directly.
+
+Intent: strict conformance becomes the only configuration, and what
+leaves the code tree is strictly what the library adds outside the
+standard: members, classes, overloads and manipulator values that
+ISO/IEC 14882:2003 does not specify, such as the =ios_base::failure=
+subclasses, base-2 stream I/O and =ios_base::bin=, the
+=stringbuf::str (const char*)= overload, the deep-copy
+=basic_string::copy=, the extra =num_get=/=num_put=/=time_get=
+members, the =void= =count= and =distance= forms, the =setbase= bases
+beyond the required ones, the filebuf and stream-locking additions.
+Everything the =_RWSTD_NO_EXT_*= gates cover that is not such an
+addition is not part of the trim: an implementation choice the
+standard permits (the in-place =assign= and =insert= of =deque= and
+=vector=, the width kept on a failed insertion, the portable random
+sequence, the primary-template definitions), a later defect
+resolution the block disables under the extension name (LWG 559,
+cv-qualified =numeric_limits=; LWG 568, the safe stream conversion),
+and =long long=, which follows the C++17 floor entry. Those keep
+their present behaviour and lose only the macro.
+
+Fix, in order, one subsystem per commit with the suite tables as the
+oracle: first the 38 gates sorted into the two lists above, recorded
+in the commit that deletes =_RWSTD_STRICT_ANSI= and
+=_RWSTD_NO_EXTENSIONS= from =_config.h=; then per addition, the code
+path deleted with its macro, its test branches and its
+=17.extensions= cases; per kept behaviour, the macro and its dead
+branch deleted. The original README stays as it is, =README.md=
+records the policy. Sequencing against the C++17 floor to decide
+before the first commit.
+
+Check: =git grep _RWSTD_NO_EXT_= empty under =include=, =src= and
+=tests=; =17.extensions= reduced to nothing or retired; the suite
+tables re-pinned in all six configurations with no row but the
+extension rows moving; the examples build.
+
 * Documentation
 
 Documents that describe the library as it is, for a reader rather
