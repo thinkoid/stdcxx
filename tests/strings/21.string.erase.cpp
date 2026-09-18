@@ -419,7 +419,7 @@ void test_erase (charT, Traits*, Allocator*,
 
                 rw_assert (1 == match, 0, tcase.line,
                            "line %d. %{$FUNCALL} == %{#c}, got %{#c}",
-                           __LINE__, nres[tcase.off], *res_iter);
+                           __LINE__, nres [tcase.off], char_value (*res_iter));
             }
         }
         else {

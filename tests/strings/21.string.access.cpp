@@ -276,7 +276,7 @@ void test_access (charT, Traits*, Allocator*,
         const bool success = 1 == rw_match (exp_res, got, 1);
         rw_assert (success, 0, tcase.line,
                    "line %d. %{$FUNCALL} == %{#c}, got %{#c}",
-                   __LINE__, tcase.nres, *pres);
+                   __LINE__, tcase.nres, char_value (*pres));
     }
 
 #ifndef _RWSTD_NO_EXCEPTIONS

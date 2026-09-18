@@ -402,7 +402,8 @@ void test_iterators (charT*, Traits*, Allocator*,
                         rw_assert(success, 0, tcase.line,
                                   "line %d. %{$FUNCALL} expected last element "
                                   "is a null character %{#c}, got %{#c}",
-                                  __LINE__, null [0], ret_ptr[s_size]);
+                                  __LINE__, null [0],
+                                  char_value (ret_ptr [s_size]));
                     }
                 }
             } 
@@ -423,7 +424,7 @@ void test_iterators (charT*, Traits*, Allocator*,
                     rw_assert (success, 0, tcase.line,
                                "line %d. %{$FUNCALL}%{?} - 1%{;} expected "
                                "%{#c}, got %{#c}", __LINE__, 
-                               test_end_iters, exp_res [0], res);
+                               test_end_iters, exp_res [0], char_value (res));
                 } 
                 else {
                     bool success = true;

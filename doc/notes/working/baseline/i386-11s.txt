@@ -1,7 +1,7 @@
 NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 0.alloc                                       0    0       58      0   100%
 0.braceexp                                 NOUT    0                       
-0.char                                        0    8      479      0   100%
+0.char                                        0    8      487      0   100%
 0.cmdopts                                FORMAT    0                       
 0.ctype                                       0   30     3313      0   100%
 0.fnmatch                                  NOUT    0                       

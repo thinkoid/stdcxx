@@ -7,24 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under
 =doc/notes/working= carry the longer investigations.
 
-* TODO Test messages format a UserChar through %{#c}
-
-The string tests print a mismatched character with the =%{#c}=
-directive and pass the =charT= value itself. For =UserChar= that is
-a 32-byte struct handed to a variadic function, and the directive
-reads an =int= from the argument list: it prints whatever bytes it
-lands on, "null" in the =21.string.iterators= failure of 2026-09-16
-(the first bytes of the struct's =long double= member, always zero)
-and a random byte in a probe. The message sent the first reading of
-that failure after a null element that was never returned.
-
-Fix: format the character representation, the =c= member through a
-helper in =rw_char.h= or =Traits::to_int_type=, in every string test
-that formats a =charT=; or give the driver a directive for =UserChar=.
-
-Check: a forced mismatch in the =UserChar= instantiation prints the
-character.
-
 * TODO 21.cwchar aborts after passing
 
 All 65 assertions pass and the process dies at exit with "double

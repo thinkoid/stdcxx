@@ -92,6 +92,31 @@ inline wchar_t make_char (char c, wchar_t*)
 
 #endif   // _RWSTD_NO_WCHAR_T
 
+
+// the value of a character of any of the three types, as an int,
+// for the driver's %{#c} directive: the directive reads an int from
+// the argument list, and a UserChar is a struct that cannot be handed
+// to it directly
+inline int char_value (char c)
+{
+    typedef unsigned char UChar;
+    return int (UChar (c));
+}
+
+#ifndef _RWSTD_NO_WCHAR_T
+
+inline int char_value (wchar_t c)
+{
+    return int (c);
+}
+
+#endif   // _RWSTD_NO_WCHAR_T
+
+inline int char_value (const UserChar &c)
+{
+    return int (c.c);
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // 21.1.2, p2 of C++ 03:
 //

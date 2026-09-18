@@ -715,7 +715,8 @@ void test_capacity (charT, Traits*, Allocator*,
                     rw_assert (1 == match, 0, tcase.line,
                                "line %d. %{$FUNCALL} expected %c "
                                "at offset %zu, got %{#c}",
-                               __LINE__, c [0], tmp, str.data () [tmp]);
+                               __LINE__, c [0], tmp,
+                               char_value (str.data () [tmp]));
                 }
             }
         }

@@ -298,7 +298,10 @@ buffer, as its input buffer already had. Check: the sanitized builds
 of the three tests with stack locals report nothing; every string
 test and the two istream tests that share the streambuf run under
 valgrind with no error in 11S; the rows are unchanged in all six
-tables. The `%{#c}` artifact has its own `TODO` entry.
+tables. The `%{#c}` artifact is closed too: the string tests hand
+the directive `char_value ()` from `rw_char.h`, the value of the
+character as an `int` for each of the three character types, and
+`0.char` pins the helper against the directive.
 
 ### 3.6 The driver's self-tests
 

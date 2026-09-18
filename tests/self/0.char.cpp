@@ -1162,6 +1162,26 @@ test_formatting ()
     TEST (">%{/*Gs}<",   usrsize, US ("x\0z"),  0,           ">\"x\"<");
     TEST (">%{/*.*Gs}<", usrsize, 2,            US ("abc"),  ">\"ab\"<");
     TEST (">%{/*.*Gs}<", usrsize, 3,            US ("x\0z"), ">\"x\\0z\"<");
+
+    //////////////////////////////////////////////////////////////////
+    rw_info (0, 0, 0, "\"%s\": formatting directive, char_value()", "%{#c}");
+
+    // char_value() yields the int the directive reads from the argument
+    // list for each of the three character types; a UserChar itself
+    // cannot be passed to the directive
+    TEST (">%{#c}<", char_value ('a'),    0, 0, ">'a'<");
+    TEST (">%{#c}<", char_value ('\0'),   0, 0, ">'\\0'<");
+    TEST (">%{#c}<", char_value ('\x80'), 0, 0, ">'\\x80'<");
+
+    TEST (">%{#c}<", char_value (L'a'),    0, 0, ">'a'<");
+    TEST (">%{#c}<", char_value (L'\0'),   0, 0, ">'\\0'<");
+
+    TEST (">%{#c}<", char_value (make_char ('a',    (UserChar*)0)), 0, 0,
+          ">'a'<");
+    TEST (">%{#c}<", char_value (make_char ('\0',   (UserChar*)0)), 0, 0,
+          ">'\\0'<");
+    TEST (">%{#c}<", char_value (make_char ('\x80', (UserChar*)0)), 0, 0,
+          ">'\\x80'<");
 }
 
 /***********************************************************************/
