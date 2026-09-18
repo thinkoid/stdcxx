@@ -2138,7 +2138,11 @@ void test_floating_point (CharType ctype, const char *cname,
 
     PunctData::thousands_sep_ = ';';
 
-    typedef floatT F;
+    // the expected value of a row, spelled to the precision of the
+    // widest type: the string names a decimal, and its nearest long
+    // double is what the facet reads, one rounding away from the
+    // nearest float or double
+#define F(x)   floatT (x ## L)
 
     TEST (T, F (0.0),  "0",     1, 0, Eof);
     TEST (T, F (0.0),  "0.",    2, 0, Eof);
@@ -2190,7 +2194,7 @@ void test_floating_point (CharType ctype, const char *cname,
     TEST (T, F (1.0e+28), "10000000000000000000000000000",  29, 0, Eof);
     TEST (T, F (1.0e+29), "100000000000000000000000000000", 30, 0, Eof);
 
-#define VALSTR(x)   floatT (x), #x, int (std::strlen (#x))
+#define VALSTR(x)   F (x), #x, int (std::strlen (#x))
 
     // exercise various forms of floating point 0
 
@@ -2422,6 +2426,8 @@ void test_floating_point (CharType ctype, const char *cname,
     }
 
 }
+
+#undef F
 
 
 /**************************************************************************/

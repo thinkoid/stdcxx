@@ -373,7 +373,10 @@ void do_test (bool        intl,    // international?
                    flags, grouping, fmat,
                    err, err_expect);
 
-        rw_assert (2 > rw_ldblcmp (x, val), __FILE__, lineno,
+        // within one unit in the last place, either way
+        const int dist = rw_ldblcmp (x, val);
+
+        rw_assert (-2 < dist && dist < 2, __FILE__, lineno,
                    "money_get<%s>::get (%{*Ac}, ..., %b, ..., %s&), "
                    "got %Lg, expected %Lg, frac_digits = %d, "
                    "flags = %{If}s, grouping = %#s, pattern = %{LM}, "
@@ -417,11 +420,14 @@ void do_test (bool        intl,    // international?
             const char fmt[] = "%" _RWSTD_LDBL_PRINTF_PREFIX "g";
             int n = std::sscanf (narrow_buf, fmt, &x);
 
+            // within one unit in the last place, either way
+            const int dist = rw_ldblcmp (x, val);
+
             success = 
                 !(   (   err_expect & std::ios::failbit && !*grouping
                       && (1 == n || bs != initial))
                   || (   !(err_expect & std::ios::failbit)
-                      && 1 < rw_ldblcmp (x, val)));
+                      && (dist < -1 || 1 < dist)));
 
             rw_assert (success, __FILE__, lineno,
                        "money_get<%s>::get (%{*Ac}, ..., %b, ..., "
@@ -818,7 +824,7 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     // specifier that's last in the pattern doesn't confuse the facet into
     // extracting all the optional whitespace, leaving none to complete
     // the negative_sign
-    TEST (T, -109.1, "-109  ", 6, 0, eofbit, 0, "-1@$", "");
+    TEST (T, -109.0, "-109  ", 6, 0, eofbit, 0, "-1@$", "");
 
     // verify that optional space after value and before currency
     // symbol is treated correctly

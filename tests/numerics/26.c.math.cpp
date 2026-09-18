@@ -220,7 +220,12 @@ test_behavior ()
             const long double xl = std::pow (il, j);
             const long double yl = std::pow (il, jl);
 
-            rw_assert (rw_equal (xl, yl) || (!i && j < 0),
+            // the int overload computes the exact power and one rounded
+            // division where the C library's pow need not be correctly
+            // rounded: the two may differ by one unit in the last place
+            const int dist = rw_ldblcmp (xl, yl);
+
+            rw_assert ((-2 < dist && dist < 2) || (!i && j < 0),
                        0, __LINE__,
                        "std::pow (%d.0L, %d) = %Lg, "
                        "std::pow (%d.0L, %d.0L) = %Lg",

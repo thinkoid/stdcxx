@@ -812,6 +812,103 @@ rw_dblcmp (double x, double y)
 
 #ifndef _RWSTD_NO_LONG_DOUBLE
 
+#if    !defined (_RWSTD_NO_LONG_LONG) \
+    && (64 == _RWSTD_LDBL_MANT_DIG || 113 == _RWSTD_LDBL_MANT_DIG)
+   // an IEC 559 format wider than double, and the integer to take it apart
+#  define _RW_LDBL_ORDINAL
+#endif
+
+
+#ifdef _RW_LDBL_ORDINAL
+
+typedef unsigned _RWSTD_LONG_LONG _rw_uint64;
+
+
+// splits a long double into its sign and the ordinal of its magnitude:
+// the exponent and the significand read as one unsigned number, in a
+// high and a low part, so that adjacent representable values have
+// adjacent ordinals (the scheme rw_fltcmp and rw_dblcmp apply through
+// an integer of the same size); covers the extended format, a 64-bit
+// significand with an explicit integer bit in 12 or 16 bytes, and the
+// 128-bit interchange format
+static void
+_rw_ldbl_ordinal (long double val, bool &neg, _rw_uint64 &hi, _rw_uint64 &lo)
+{
+    unsigned char bytes [sizeof val];
+    memcpy (bytes, &val, sizeof val);
+
+    const int  one    = 1;
+    const bool little = 0 != *(const char*)&one;
+
+    // the bytes that carry the value, least significant first (the
+    // extended format pads its ten to the size of the object)
+    const size_t nbytes = 64 == _RWSTD_LDBL_MANT_DIG ? 10 : sizeof val;
+
+    _rw_uint64 word [2] = { 0, 0 };
+
+    for (size_t i = 0; i != nbytes; ++i) {
+        const size_t pos = little ? i : sizeof val - 1 - i;
+        word [i / 8] |= _rw_uint64 (bytes [pos]) << (8 * (i % 8));
+    }
+
+    lo = word [0];
+    hi = word [1];
+
+    if (64 == _RWSTD_LDBL_MANT_DIG) {
+        // sign and exponent in 16 bits; the explicit integer bit follows
+        // from the exponent and is dropped so that the significands of
+        // consecutive exponents adjoin
+        neg = 0 != (hi & 0x8000);
+        hi &= 0x7fff;
+        lo &= ~(_rw_uint64 (1) << 63);
+    }
+    else {
+        neg = 0 != (hi >> 63);
+        hi &= ~(_rw_uint64 (1) << 63);
+    }
+}
+
+
+// the distance between two ordinals, the larger first, at most INT_MAX
+static int
+_rw_ordinal_distance (_rw_uint64 hi1, _rw_uint64 lo1,
+                      _rw_uint64 hi2, _rw_uint64 lo2)
+{
+    const _rw_uint64 imax = _RWSTD_INT_MAX;
+
+    if (hi1 == hi2) {
+        const _rw_uint64 dist = lo1 - lo2;
+        return dist < imax ? int (dist) : _RWSTD_INT_MAX;
+    }
+
+    if (1 != hi1 - hi2)
+        return _RWSTD_INT_MAX;
+
+    // one unit of the high part plus lo1, less lo2
+
+#if 64 == _RWSTD_LDBL_MANT_DIG
+
+    // the unit is 2^63 ordinals, the low part being the significand
+    // less its integer bit
+    const _rw_uint64 dist = (_rw_uint64 (1) << 63) + lo1 - lo2;
+
+#else   // if 64 != _RWSTD_LDBL_MANT_DIG
+
+    // the unit is 2^64 ordinals: out of range unless lo1 < lo2, where
+    // the unsigned wrap-around of the difference supplies it
+    if (lo2 <= lo1)
+        return _RWSTD_INT_MAX;
+
+    const _rw_uint64 dist = lo1 - lo2;
+
+#endif   // _RWSTD_LDBL_MANT_DIG
+
+    return dist < imax ? int (dist) : _RWSTD_INT_MAX;
+}
+
+#endif   // _RW_LDBL_ORDINAL
+
+
 _TEST_EXPORT int
 rw_ldblcmp (long double x, long double y)
 {
@@ -820,6 +917,35 @@ rw_ldblcmp (long double x, long double y)
 
     if (x == y)
         return 0;
+
+#ifdef _RW_LDBL_ORDINAL
+
+    bool       xneg, yneg;
+    _rw_uint64 xhi, xlo, yhi, ylo;
+
+    _rw_ldbl_ordinal (x, xneg, xhi, xlo);
+    _rw_ldbl_ordinal (y, yneg, yhi, ylo);
+
+    if (xneg != yneg) {
+        // the distance runs through zero: the sum of the two magnitudes
+        const _rw_uint64 imax = _RWSTD_INT_MAX;
+        const _rw_uint64 sum  = xlo + ylo;
+
+        const int dist = xhi || yhi || sum < xlo || imax <= sum ?
+            _RWSTD_INT_MAX : int (sum);
+
+        return xneg ? -dist : dist;
+    }
+
+    const bool xlarger = xhi > yhi || (xhi == yhi && xlo > ylo);
+
+    const int dist = xlarger ? _rw_ordinal_distance (xhi, xlo, yhi, ylo)
+                             : _rw_ordinal_distance (yhi, ylo, xhi, xlo);
+
+    // the larger magnitude is the greater value unless both are negative
+    return xlarger != xneg ? dist : -dist;
+
+#else   // if !defined (_RW_LDBL_ORDINAL)
 
     // FIXME: use integer math as in the functions above
 
@@ -837,6 +963,8 @@ rw_ldblcmp (long double x, long double y)
         return 0;
 
     return x < y ? -1 : +1;
+
+#endif   // _RW_LDBL_ORDINAL
 }
 
 #endif   // _RWSTD_NO_LONG_DOUBLE
