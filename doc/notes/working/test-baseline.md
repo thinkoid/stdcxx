@@ -526,8 +526,38 @@ atomics decision, not of this path, and belongs to the MT entry
 
 ### 3.8 `21.cwchar` aborts after passing
 
-Fact. All 65 assertions pass and the process dies at exit with
-"double free or corruption (top)". Check: a memory checker run.
+Fact. All 65 assertions passed and the process died at exit with
+"double free or corruption (top)" in every configuration.
+
+Cause, from valgrind: a test defect that glibc turns into a double
+free. `test_file_functions` opened one stream on the null device for
+writing and called every file function on it in the order of the
+standard's synopsis, the input functions included. The last of them,
+`ungetwc` after unflushed output, has no contract: a stream opened for
+output takes no input, and on a stream opened for update 7.19.5.3, p6
+of C99 requires a flush or a positioning call between output and
+input. glibc's pushback on such a stream allocates a backup buffer and
+swaps it with the get area, whose base is the stream's buffer; the
+flush at exit writes the pending character and resets the get area
+to the buffer without leaving backup mode, so the swap back at exit
+leaves both pointers on the buffer, and the buffer is freed as the
+backup area and again as the buffer. The narrow pushback has the
+same shape and is benign: its second free is reached only under a
+memory checker's `__libc_freeres`. The wide free at exit dates from
+glibc 2.41 and the one on `fclose` from 2.44; a standalone C program
+with `fopen ("w")`, `fputwc`, `ungetwc` reproduces the abort on 2.44.
+
+Fix: the input functions get a second stream opened for reading, the
+order of the calls unchanged; both streams are closed. Check: exit 0,
+valgrind clean in 11S, the row at 100% in the three GCC
+configurations. Under Clang the row now shows what the abort hid: the
+const and non-const overloads of `wmemchr`, `wcspbrk`, `wcsrchr`,
+`wcsstr` and `wcschr` fail, 5 assertions and 5 warnings, because
+glibc's `<wchar.h>` declares its C++ overloads only for GCC 4.4 and
+later and Clang presents itself as GCC 4.2, while `<string.h>` has a
+Clang clause; the tree's characterization reports the overloads
+present. That is a configuration question with its own `TODO` entry;
+the Clang rows are pinned as measured.
 
 ### 3.9 Locale facets
 

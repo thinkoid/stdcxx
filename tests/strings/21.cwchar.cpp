@@ -1028,6 +1028,14 @@ void test_file_functions (int dummy, ...)
     // require that the types be complete (in case they are related
     // by inheritance and need to be adjusted)
     test_FILE* const fp = (test_FILE*)std::fopen (DEV_NULL, "w");
+
+    // the input functions get a stream of their own: a stream opened
+    // for output takes no input, and on one opened for update 7.19.5.3,
+    // p6 of C99 requires a flush or a positioning call between output
+    // and input; glibc's ungetwc() after unflushed output swaps the
+    // stream's buffer into the backup area and frees it twice at exit
+    test_FILE* const ifp = (test_FILE*)std::fopen (DEV_NULL, "r");
+
     test_va_list va;
     va_start (va, dummy);
 
@@ -1035,22 +1043,26 @@ void test_file_functions (int dummy, ...)
     // of C99 prohibits wide character I/O functions from being called
     // on a byte-oriented stream
     TEST (int, fwide, (fp, i), FWIDE, -1);
+    TEST (int, fwide, (ifp, i), FWIDE, -1);
 
     TEST (int, fwprintf, (fp, L""), FWPRINTF, -1);
     TEST (int, fwprintf, (fp, L"", uniqptr), FWPRINTF, -1);
 
-    TEST (int, fwscanf, (fp, L""), FWSCANF, -1);
-    TEST (int, fwscanf, (fp, L"", uniqptr), FWSCANF, -1);
+    TEST (int, fwscanf, (ifp, L""), FWSCANF, -1);
+    TEST (int, fwscanf, (ifp, L"", uniqptr), FWSCANF, -1);
 
     TEST (int, vfwprintf, (fp, L"", va), VFWPRINTF, -1);
 
-    TEST (test_wint_t, fgetwc, (fp), FGETWC, -1);
-    TEST (wchar_t*, fgetws, (wstr, i, fp), FGETWS, -1);
+    TEST (test_wint_t, fgetwc, (ifp), FGETWC, -1);
+    TEST (wchar_t*, fgetws, (wstr, i, ifp), FGETWS, -1);
     TEST (test_wint_t, fputwc, (L'\0', fp), FPUTWC, -1);
     TEST (int, fputws, (L"", fp), FPUTWS, -1);
-    TEST (test_wint_t, getwc, (fp), GETWC, -1);
+    TEST (test_wint_t, getwc, (ifp), GETWC, -1);
     TEST (test_wint_t, putwc, (L'\0', fp), PUTWC, -1);
-    TEST (test_wint_t, ungetwc, (wi, fp), UNGETWC, -1);
+    TEST (test_wint_t, ungetwc, (wi, ifp), UNGETWC, -1);
+
+    std::fclose ((std::FILE*)ifp);
+    std::fclose ((std::FILE*)fp);
 
     _RWSTD_UNUSED (str);
     _RWSTD_UNUSED (cstr);

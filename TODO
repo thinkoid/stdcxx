@@ -7,15 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under
 =doc/notes/working= carry the longer investigations.
 
-* TODO 21.cwchar aborts after passing
-
-All 65 assertions pass and the process dies at exit with "double
-free or corruption (top)".
-
-Fix: find the corruption; a memory checker run is the first step.
-
-Check: exit 0.
-
 * TODO Locale facets
 
 =22.locale.num.get= fails 204 assertions, the =wchar_t= overloads
@@ -43,6 +34,28 @@ Fix: each is a characterization question first, whether the config
 test or the test's expectation is out of date.
 
 Check: the rows at 100% on both widths.
+
+* TODO The C++ overloads of the wide string functions under Clang
+
+=21.cwchar= under Clang fails the const and non-const overloads of
+=wmemchr=, =wcspbrk=, =wcsrchr=, =wcsstr= and =wcschr=, 5 assertions
+and 5 warnings in the three Clang configurations; the abort at exit
+hid the rows until 2026-09-18. glibc's =<wchar.h>= declares its C++
+overloads only under =__GNUC_PREREQ (4, 4)=, and Clang presents
+itself as GCC 4.2, so Clang sees the C prototype alone; =<string.h>=
+carries a Clang clause and the narrow functions are fine. The tree's
+=<cwchar>= defines the overloads itself when =_RWSTD_NO_WCSCHR= is
+set, but the characterization, the =headers.inc= list walked by
+=libc_decl.sh=, calls =wcschr ((wchar_t*)0, 0)=, which either shape
+of the declaration satisfies, so the macro stays undefined and the
+header takes libc's word.
+
+Fix: a characterization that tells the two shapes apart, the const
+overload's return type against a =const wchar_t*= call, and the
+=<cwchar>= branch that already defines the overloads over the C
+function taking over when it fails; not a compiler-version test.
+
+Check: the =21.cwchar= row at 100% under Clang, unchanged under GCC.
 
 * TODO Test-case structs: size_t fields, NPOS sentinel
 
