@@ -127,7 +127,7 @@ static bool
 check_bits (const char *s, std::size_t size)
 {
     while (size-- && !s [size]);
-    return unsigned (-1) == size;
+    return std::size_t (-1) == size;
 }
 
 

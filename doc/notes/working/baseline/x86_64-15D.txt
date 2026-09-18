@@ -206,7 +206,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 25.upper.bound                                0    0      264      0   100%
 26.accumulate                                 0    0     2048      0   100%
 26.adjacent.diff                              0    0    12224      0   100%
-26.c.math                                     0    0     1143      3    99%
+26.c.math                                     0    0     1143      0   100%
 26.class.gslice                               0    0    46230      0   100%
 26.gslice.array.cassign                       0    0      400      0   100%
 26.indirect.array                             0    0      114      0   100%
@@ -275,4 +275,4 @@ PROGRAM SUMMARY:
   Linker warnings:              0
   Runtime warnings:            90
   Assertions:            10104280
-  Failed assertions:           31
+  Failed assertions:           28
