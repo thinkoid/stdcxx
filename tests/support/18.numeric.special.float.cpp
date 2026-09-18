@@ -298,7 +298,16 @@ struct limits_values<float>
 
     static std::float_denorm_style has_denorm () {
 
+#ifdef _RWSTD_NO_DBL_TRAPS
+        // half the smallest normal is a denormal where they are
+        // represented and zero where they are absent or flushed
+        volatile float smallest = FLT_MIN;
+        volatile float half     = smallest / 2;
+
+        return 0.0f == half ? std::denorm_absent : std::denorm_present;
+#else
         return std::denorm_indeterminate;
+#endif   // _RWSTD_NO_DBL_TRAPS
     }
 
 
@@ -511,7 +520,17 @@ struct limits_values<double>
 
 
     static std::float_denorm_style has_denorm () {
+
+#ifdef _RWSTD_NO_DBL_TRAPS
+        // half the smallest normal is a denormal where they are
+        // represented and zero where they are absent or flushed
+        volatile double smallest = DBL_MIN;
+        volatile double half     = smallest / 2;
+
+        return 0.0 == half ? std::denorm_absent : std::denorm_present;
+#else
         return std::denorm_indeterminate;
+#endif   // _RWSTD_NO_DBL_TRAPS
     }
 
 
@@ -721,7 +740,17 @@ struct limits_values<long double>
 
 
     static std::float_denorm_style has_denorm () {
+
+#ifdef _RWSTD_NO_DBL_TRAPS
+        // half the smallest normal is a denormal where they are
+        // represented and zero where they are absent or flushed
+        volatile long double smallest = LDBL_MIN;
+        volatile long double half     = smallest / 2;
+
+        return 0.0L == half ? std::denorm_absent : std::denorm_present;
+#else
         return std::denorm_indeterminate;
+#endif   // _RWSTD_NO_DBL_TRAPS
     }
 
     static bool has_denorm_loss () { return false; }
@@ -908,7 +937,7 @@ void test_limits (FloatT, const char *tname, const char *fmt)
         /* verify value */                                               \
         rw_assert (FLim::member == value, 0, __LINE__,                   \
                    "numeric_limits<%s>::" #member " == %i, got %i",      \
-                   tname, FVal::member (), value);                       \
+                   tname, value, FLim::member);                         \
     } while (0)
 
 // account for NaN != NaN
@@ -1025,8 +1054,9 @@ void test_limits (FloatT, const char *tname, const char *fmt)
         // 18.2.1.2, p36
         VERIFY_CONST (has_quiet_NaN, true);
 
-        // 18.2.1.2, p39
-        VERIFY_CONST (has_signaling_NaN, true);
+        // 18.2.1.2, p39; whether a signaling NaN survives a copy
+        // through the floating point unit is characterized, not assumed
+        VERIFY_DATA (has_signaling_NaN);
 
         // 18.2.1.2, p40 - 42
         VERIFY_DATA (has_denorm);

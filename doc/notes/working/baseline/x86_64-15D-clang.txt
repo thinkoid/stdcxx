@@ -23,7 +23,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 18.limits.stdcxx-937                       NOUT    0                       
 18.limits.traps                               0    0       16      0   100%
 18.limits.traps.stdcxx-624                 NOUT    0                       
-18.numeric.special.float                      0    0      134      3    97%
+18.numeric.special.float                      0    0      134      0   100%
 18.numeric.special.int                        0    0      420      0   100%
 18.setjmp                                     0    0        3      0   100%
 18.support.dynamic                            0    0       47      0   100%
@@ -275,4 +275,4 @@ PROGRAM SUMMARY:
   Linker warnings:              0
   Runtime warnings:            95
   Assertions:            10104275
-  Failed assertions:           33
+  Failed assertions:           30

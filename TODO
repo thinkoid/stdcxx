@@ -9,12 +9,9 @@ leave this file; git remembers them. The notes under
 
 * TODO Numerics
 
-=18.numeric.special.float= reports =has_denorm == 1= where the test
-expects =-1= (=denorm_indeterminate=) for =float= and =long double=,
-3 assertions in 64-bit and 6 in 32-bit with GCC, 3 in both with
-Clang, whose 32-bit build gives the 64-bit row;
-=26.valarray.transcend= fails 3 in 32-bit only; =17.extensions=
-fails 5 of 16 on =_RWSTD_NO_EXT_FAILURE= and its kin.
+=26.valarray.transcend= fails 3, =acos= and =asin= of =long double=,
+in every configuration; =17.extensions= fails 5 of 16 on
+=_RWSTD_NO_EXT_FAILURE= and its kin.
 
 Fix: each is a characterization question first, whether the config
 test or the test's expectation is out of date.
