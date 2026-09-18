@@ -568,6 +568,29 @@ consumes 10 characters where 8 are expected, and `get_weekday
 ("torsdag")` is not recognized. `22.locale.money.get` fails 16,
 `long double` reads with `showbase` ending in `failbit`.
 
+Read against the library, 2026-09-18, none of the three is what the
+fact says.
+
+`22.locale.num.get`: two causes. 108 of the failures are the test's:
+a 2008 commit silencing 64-bit conversion warnings rewrote `sizeof
+lmin - 1` as `INTSIZE (lmin - 1)`, the size of a pointer, at 22
+sites, the limit strings of `long`, `unsigned long` and `void*` and
+the `long double` cases, so they expected 8 characters consumed in
+64-bit and 4 in 32-bit for every type. The other 96 are the
+facet's: `num_get` collected digits in a 130-byte array on the
+stack, sized for the widest integer in base 2, and set `failbit`
+where the input outgrew it, under a FIXME from the 2005 import, while
+the test, from the same year, feeds it a `long double` of
+`LDBL_MAX_10_EXP + 1` zeros and a grouped `long` of 257 characters
+and more on purpose. The array and the array of group sizes beside it
+now move to one heap block of twice the size when full, the pointers
+into them carried over; the exit test is the tree's own, the pointer
+compared with the array and freed if it moved, held in a guard so
+that the early returns and an exception from a facet take it too. The row
+is at 65508/0 everywhere; the 96 more assertions are the grouping
+loop running all nine lengths instead of stopping at the first
+failure. `valgrind` on the test in 11S is clean.
+
 New measurement, 2026-09-17. `22.locale.moneypunct`, previously 316
 passing assertions, now aborts in all six configurations with stack
 smashing detected. A backtrace places the abort at the return from

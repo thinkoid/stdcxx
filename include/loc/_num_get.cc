@@ -50,6 +50,31 @@ _RWSTD_EXPORT extern const unsigned char __rw_digit_map[];
 // elements with a value greater than 7 do not correspond to a roman digit
 _RWSTD_EXPORT extern const unsigned char __rw_roman_inxs[];
 
+
+// the exit test of num_get::_C_get()'s buffers, the array on its
+// stack and the pointer that moves to the heap when the input
+// outgrows it: the heap block is freed when the pointer no longer
+// points at the array, on every exit from the function, an exception
+// from a facet included
+struct __rw_num_get_buffer
+{
+    const char *_C_buf;    // the array on the stack
+    char*      &_C_pbuf;   // the pointer to the buffer in use
+
+    __rw_num_get_buffer (const char *__buf, char *&__pbuf)
+        : _C_buf (__buf), _C_pbuf (__pbuf) { }
+
+    ~__rw_num_get_buffer () {
+        if (_C_buf != _C_pbuf)
+            delete[] _C_pbuf;
+    }
+
+private:
+
+    __rw_num_get_buffer (const __rw_num_get_buffer&);
+    void operator= (const __rw_num_get_buffer&);
+};
+
 }   // namespace __rw
 
 
@@ -196,7 +221,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     char *__pcur            = __buf;          // currently processed digit
     _RWSTD_SIZE_T __bufsize = sizeof __buf;   // size of allocated buffer
 
-    _RWSTD_UNUSED (__bufsize);
+    _RW::__rw_num_get_buffer __guard (__buf, __pbuf);   // frees __pbuf
 
     const ctype<char_type> &__ctp = _RWSTD_USE_FACET (ctype<char_type>, __loc);
 
@@ -211,7 +236,8 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     // buffer containing the sizes of thousands_sep-separated
     // groups of digits and a pointer to the next grouping
     char __grpbuf [sizeof __buf];
-    char *__pgrp = __grpbuf;
+    char *__pgrpbuf = __grpbuf;   // pointer to allocated group buffer
+    char *__pgrp    = __grpbuf;
 
     const char *__grpbeg = 0;   // the beginning of the last group
     const char *__grpend = 0;   // the end of the last group
@@ -252,10 +278,35 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
             break;
         }
 
-        if (__pcur == __buf + sizeof __buf - 1) {
-            // FIXME: handle long strings of digits
-            __err |= _RW::__rw_failbit;
-            break;
+        if (__pcur == __pbuf + __bufsize - 1) {
+            // the buffers are full: move both to a block on the heap
+            // twice their size, the digits first and the group sizes
+            // after them, and carry the pointers into them over; the
+            // group buffer grows with the digit buffer since a group
+            // takes at least one digit
+            const _RWSTD_SIZE_T __newsize = __bufsize * 2;
+
+            char* const __newbuf = new char [__newsize * 2];
+
+            char_traits<char>::copy (__newbuf, __pbuf, __bufsize);
+            char_traits<char>::copy (__newbuf + __newsize, __pgrpbuf,
+                                     __bufsize);
+
+            __pcur = __newbuf + (__pcur - __pbuf);
+            __pgrp = __newbuf + __newsize + (__pgrp - __pgrpbuf);
+
+            if (__grpbeg)
+                __grpbeg = __newbuf + (__grpbeg - __pbuf);
+
+            if (__grpend)
+                __grpend = __newbuf + (__grpend - __pbuf);
+
+            if (__buf != __pbuf)
+                delete[] __pbuf;
+
+            __pbuf    = __newbuf;
+            __pgrpbuf = __newbuf + __newsize;
+            __bufsize = __newsize;
         }
 
         const _CharT __wc = *__begin;
@@ -484,7 +535,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     *__pcur = '\0';
 
     // verify that the buffers haven't overflowed
-    _RWSTD_ASSERT (__pgrp < __grpbuf + sizeof __grpbuf);
+    _RWSTD_ASSERT (__pgrp < __pgrpbuf + __bufsize);
     _RWSTD_ASSERT (__pcur < __pbuf + __bufsize);
 
     // set the base determined above
@@ -497,7 +548,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     // 22.2.2.1.2, p11: Stage 3
     const int __errtmp =
         _RW::__rw_get_num (__pval, __pbuf, __type, __fl2,
-                           __grpbuf, __pgrp - __grpbuf,
+                           __pgrpbuf, __pgrp - __pgrpbuf,
                            __grouping.data (), __grouping.size ());
 
     __err |= _RWSTD_IOSTATE (__errtmp);

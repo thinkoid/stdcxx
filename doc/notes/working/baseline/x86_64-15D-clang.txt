@@ -116,7 +116,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.moneypunct                          0    0      540      0   100%
 22.locale.name                                0    0        0      0   100%
 22.locale.num.get.mt                          1    0                       
-22.locale.num.get                             0    0    65412    204    99%
+22.locale.num.get                             0    0    65508      0   100%
 22.locale.num.put.mt                        HUP    0                       
 22.locale.num.put                             0    2     1671      0   100%
 22.locale.num.put.stdcxx-2                 NOUT    0                       
@@ -270,9 +270,9 @@ atomic_xchg                                   0    0       22      0   100%
 PROGRAM SUMMARY:
   Programs:                   268
   Non-zero exit status:         7
-  Signalled:                   10
+  Signalled:                    9
   Compiler warnings:            0
   Linker warnings:              0
-  Runtime warnings:            90
-  Assertions:            10104722
-  Failed assertions:          284
+  Runtime warnings:            95
+  Assertions:            10104887
+  Failed assertions:           85

@@ -9,16 +9,14 @@ leave this file; git remembers them. The notes under
 
 * TODO Locale facets
 
-=22.locale.num.get= fails 204 assertions, the =wchar_t= overloads
-reading =unsigned long= consume the wrong count; =22.locale.time.get=
-fails 33, =get_date ("01/01/2000")= consumes 10 characters where 8
-are expected and =get_weekday ("torsdag")= is not recognized;
-=22.locale.money.get= fails 16, =long double= reads with =showbase=
-end in =failbit=.
+=22.locale.time.get= fails 33, =get_date ("01/01/2000")= consumes 10
+characters where 8 are expected and =get_weekday ("torsdag")= is not
+recognized; =22.locale.money.get= fails 16, =long double= reads with
+=showbase= end in =failbit=.
 
 Fix: per facet, after reading each test against the library.
 
-Check: the three rows at 100% on both widths.
+Check: the two rows at 100% on both widths.
 
 * TODO Numerics
 
