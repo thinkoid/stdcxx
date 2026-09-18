@@ -229,46 +229,6 @@ struct collate { /* empty */ };
 
 #endif   // _RWSTD_NO_EXT_COLLATE_PRIMARY
 
-
-#ifdef _RWSTD_NO_EXT_MONEYPUNCT_PRIMARY
-
-template <class charT, bool Intl>
-struct moneypunct { /* empty */ };
-
-#endif   // _RWSTD_NO_EXT_MONEYPUNCT_PRIMARY
-
-
-#ifdef _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
-
-template <class charT>
-struct numpunct { /* empty */ };
-
-#endif   // _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
-
-
-#ifdef _RWSTD_NO_EXT_TIME_GET_PRIMARY
-
-template <class charT, class InputIterator>
-struct time_get { /* empty */ };
-
-#endif   // _RWSTD_NO_EXT_TIME_GET_PRIMARY
-
-
-#ifdef _RWSTD_NO_EXT_TIME_PUT_PRIMARY
-
-template <class charT, class OutputIterator>
-struct time_put { /* empty */ };
-
-#endif   // _RWSTD_NO_EXT_TIME_PUT_PRIMARY
-
-
-#ifdef _RWSTD_NO_EXT_MESSAGES_PRIMARY
-
-template <class charT>
-struct messages { /* empty */ };
-
-#endif   // _RWSTD_NO_EXT_MESSAGES_PRIMARY
-
 }   // namespace std
 
 /***********************************************************************/
@@ -449,51 +409,6 @@ run_test (int /* unused */, char* /* unused */ [])
     rw_assert (0, __FILE__, __LINE__,
                "_RWSTD_NO_EXT_CTYPE_PRIMARY not #defined");
 #endif   // _RWSTD_NO_EXT_CTYPE_PRIMARY
-
-
-    // exercise _RWSTD_NO_EXT_MONEYPUNCT_PRIMARY
-    rw_info (0, 0, __LINE__, "_RWSTD_NO_EXT_MONEYPUNCT_PRIMARY");
-
-#ifndef _RWSTD_NO_EXT_MONEYPUNCT_PRIMARY
-    rw_assert (0, __FILE__, __LINE__,
-               "_RWSTD_NO_EXT_MONEYPUNCT_PRIMARY not #defined");
-#endif   // _RWSTD_NO_EXT_MONEYPUNCT_PRIMARY
-
-
-    // exercise _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
-    rw_info (0, 0, __LINE__, "_RWSTD_NO_EXT_NUMPUNCT_PRIMARY");
-
-#ifndef _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
-    rw_assert (0, __FILE__, __LINE__,
-               "_RWSTD_NO_EXT_NUMPUNCT_PRIMARY not #defined");
-#endif   // _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
-
-
-    // exercise _RWSTD_NO_EXT_TIME_GET_PRIMARY
-    rw_info (0, 0, __LINE__, "_RWSTD_NO_EXT_TIME_GET_PRIMARY");
-
-#ifndef _RWSTD_NO_EXT_TIME_GET_PRIMARY
-    rw_assert (0, __FILE__, __LINE__,
-               "_RWSTD_NO_EXT_TIME_GET_PRIMARY not #defined");
-#endif   // _RWSTD_NO_EXT_TIME_GET_PRIMARY
-
-
-    // exercise _RWSTD_NO_EXT_TIME_PUT_PRIMARY
-    rw_info (0, 0, __LINE__, "_RWSTD_NO_EXT_TIME_PUT_PRIMARY");
-
-#ifndef _RWSTD_NO_EXT_TIME_PUT_PRIMARY
-    rw_assert (0, __FILE__, __LINE__,
-               "_RWSTD_NO_EXT_TIME_PUT_PRIMARY not #defined");
-#endif   // _RWSTD_NO_EXT_TIME_PUT_PRIMARY
-
-
-    // exercise _RWSTD_NO_EXT_MESSAGES_PRIMARY
-    rw_info (0, 0, __LINE__, "_RWSTD_NO_EXT_MESSAGES_PRIMARY");
-
-#ifndef _RWSTD_NO_EXT_MESSAGES_PRIMARY
-    rw_assert (0, __FILE__, __LINE__,
-               "_RWSTD_NO_EXT_MESSAGES_PRIMARY not #defined");
-#endif   // _RWSTD_NO_EXT_MESSAGES_PRIMARY
 
     return 0;
 }

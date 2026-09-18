@@ -13,7 +13,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 0.process                                     0    0       17      0   100%
 0.strncmp                                FORMAT    0                       
 0.valcmp                                 FORMAT    0                       
-17.extensions                                 0    0       16      5    68%
+17.extensions                                 0    0       11      0   100%
 17.names                                      0    0        0      0   100%
 18.c.limits.stdcxx-988                     NOUT    0                       
 18.csetjmp                                    0    0        3      0   100%
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10104214
-  Failed assertions:           22
+  Assertions:            10104209
+  Failed assertions:           17

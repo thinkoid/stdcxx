@@ -7,16 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under
 =doc/notes/working= carry the longer investigations.
 
-* TODO Numerics
-
-=17.extensions= fails 5 of 16 on =_RWSTD_NO_EXT_FAILURE= and its
-kin.
-
-Fix: each is a characterization question first, whether the config
-test or the test's expectation is out of date.
-
-Check: the rows at 100% on both widths.
-
 * TODO The C++ overloads of the wide string functions under Clang
 
 =21.cwchar= under Clang fails the const and non-const overloads of

@@ -39,9 +39,15 @@ the harness's own table minus the timing columns.
   platform decides, and two facet limits, `num_get`'s 130-byte
   buffer and `money_get`'s whitespace ahead of a required symbol or
   sign tail.
+- The four Numerics rows are repaired (chapter 3.10): two test
+  defects from the 32-bit era, a pinned expectation made a
+  measurement, a signaling NaN answer the test now takes from the
+  characterization, and a driver comparison that had compared long
+  doubles by sign since 2005 and now counts the values between them.
 
 Toolchain: GCC 16.2.1, glibc 2.44, x86-64 Linux. Tables refreshed
-2026-09-18, including the three corresponding Clang configurations.
+2026-09-18, afternoon, including the three corresponding Clang
+configurations.
 
 ## 1. Running the suite
 
@@ -97,9 +103,9 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,104,214 | 31 | 0 | 1 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,104,096 | 31 | 0 | 1 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,104,280 | 31 | 7 | 9 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,104,209 | 17 | 0 | 1 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,104,091 | 17 | 0 | 1 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,104,275 | 17 | 7 | 9 |
 
 The 15D counts include the MT locale tests, which are not stable
 (chapter 3.4), and that is the whole of the difference between the
@@ -121,6 +127,9 @@ refresh records the three locale facet rows and
 `22.locale.ctype.tolower` (chapter 3.9); its summary lines also
 catch up with the `0.char` and `21.cwchar` rows that had been
 re-pinned by hand without them.
+The afternoon refresh of the same day records the four Numerics rows
+and `22.locale.num.get` (chapter 3.10); `17.extensions` asks five
+questions fewer, which is the drop in the assertion totals.
 
 The last measurement on a current toolchain before this one, made
 by hand in 2026-09 before every test linked, was 10,066,804
@@ -686,13 +695,93 @@ fails 5 of 16, on `_RWSTD_NO_EXT_FAILURE` and its kin.
 Hypothesis. Characterization questions: whether the config test or
 the test's expectation is the one out of date.
 
+Repair, 2026-09-18. The fact above was partly misread: `has_denorm`
+failed for all three types in every configuration, the 32-bit GCC
+build adding three `has_signaling_NaN` failures; the valarray row
+failed its 3 everywhere; the extension failures were the five
+`_RWSTD_NO_EXT_*_PRIMARY` macros. Four causes, none in the
+library's numerics:
+
+- `26.c.math`: the test's `check_bits` counts a `size_t` down past
+  zero and compares the exhausted counter with `unsigned (-1)`,
+  equal only where the two types have the same width. On LP64 every
+  call answered no, so the `modf` overloads failed for writing past
+  their argument, which they never did. The sentinel is
+  `std::size_t (-1)` now. The helper dates from 2005, before the
+  64-bit builds.
+- `18.numeric.special.float`: the test's expected `has_denorm` was
+  never a measurement but a pinned answer, `denorm_present` for
+  three retired platforms and `denorm_indeterminate` for all others,
+  where the library's answer comes from `INFINITY.cpp` reading the
+  value of the smallest denormal. The expectation is derived now
+  the way the test derives its other values: half the smallest
+  normal, stored through a volatile, is a denormal where they are
+  represented and zero where they are absent or flushed, under the
+  same `_RWSTD_NO_DBL_TRAPS` guard the characterization computes
+  under. The three further failures of the 32-bit GCC build were
+  `has_signaling_NaN`, asserted true under `is_iec559` by the test
+  and false by the library, whose `NO_SIGNALING_NAN.cpp` found none
+  there: under GCC's x87 code generation a signaling NaN copied
+  through the floating-point unit comes back quiet, `0x7ff0` in the
+  top bytes becoming `0x7ff8`, where SSE code generation, Clang's
+  default for i386 and everyone's for x86-64, preserves it. The
+  type has the representation and the compiler cannot carry it; the
+  library's answer describes what its `signaling_NaN()` returns.
+  The test verifies `has_signaling_NaN` against the characterization
+  under `is_iec559` as it already did outside it, so the 32-bit GCC
+  row runs 119 assertions with the signaling NaN section skipped
+  and the others 134. `VERIFY_CONST`'s message printed the trait's
+  value as the expected and the literal as the observed; it prints
+  the literal and the member now.
+- `26.valarray.transcend`: `acos` and `asin` over 0 to 9 are NaN
+  from 2 on, and the test compares element by element with
+  `rw_equal`. For float and double the driver compares
+  representations, so two NaNs of the same bits are equal; for long
+  double the sign-only `rw_ldblcmp` of the queue's own entry called
+  any NaN unequal. `rw_ldblcmp` compares representations now: the
+  exponent and significand read as one ordinal in two 64-bit parts,
+  so that the result is the number of representable values between
+  the arguments, as it is for float and double, for the x87
+  extended format (the explicit integer bit dropped so that the
+  significands of consecutive exponents adjoin) and the 128-bit
+  interchange format; other formats keep the relative-error path
+  and its FIXME. Verified against `nextafterl` through all four
+  driver libraries and, the same text retargeted at `__float128`
+  through libquadmath, for the 128-bit format. Two callers had been
+  written against the tolerant version. `26.c.math` compares
+  `pow (long double, int)`, the library's exact power followed by
+  one rounded division, with `powl`, which glibc does not round
+  correctly on x87: one unit in the last place apart for 24 of the
+  400 pairs, now the stated tolerance. `22.locale.money.get`
+  expected `-109.1` for the input `-109` at zero fraction digits, a
+  2005 typo beside its `-109.0` sibling that the sign-only
+  comparison had hidden, and its two checks were one-sided
+  (`2 > dist`, `1 < dist`); the row reads `-109.0` and the checks
+  accept one unit either way. With every expected value shifted two
+  units up, then down, 1704 of the row's 3888 assertions go red
+  each way. `22.locale.num.get` spelled the expected value of a
+  row as the type under test cast from a double literal, so its
+  long double rows expected a double's precision where the facet
+  reads the string with `strtold`: 240 rows within the tolerance
+  and not within one unit, the value itself exact in the facet
+  through all three iterator kinds. The literal carries the `L`
+  suffix now, its nearest long double being what the string
+  denotes; the float and double rows are unmoved.
+- `17.extensions`: the five failing assertions demanded
+  `_RWSTD_NO_EXT_MONEYPUNCT_PRIMARY` and its four siblings be
+  defined under strict ANSI. `rw/_config.h` has carried the five
+  commented out as "not implemented yet" since 2005, and the strict
+  ANSI entry in `TODO` keeps the primary templates and retires the
+  macros. The test no longer asks for gates the library never grew;
+  the bogus primary templates it defined behind the same macros
+  were dead code. 11 assertions remain.
+
+The four rows are at 100% in the six configurations.
+
 ## 4. Differences between configurations
 
 | test | 11s | 11S | 15D |
 |---|---|---|---|
-| `18.numeric.special.float` | 6 failed | 3 failed | 3 failed |
-| `26.c.math` | passes | 3 failed | 3 failed |
-| `26.valarray.transcend` | 3 failed | passes | passes |
 | `23.bitset.cons` | passes | varies | passes |
 | `25.reverse` | passes | `SEGV` | passes |
 | `21.string.stdcxx-162` | passes | passes | `ABRT` |
@@ -723,8 +812,10 @@ exceptions:
   The count varies under the harness and outside it, with either
   compiler; the read depends on the process's memory, not on the
   compiler.
-- `18.numeric.special.float` (chapter 3.10) fails 3 assertions in the
-  Clang 32-bit build, the 64-bit count, where GCC's 32-bit build fails
-  6.
+- `18.numeric.special.float` (chapter 3.10) runs 134 assertions in
+  the Clang 32-bit build, the 64-bit count, where GCC's 32-bit build
+  runs 119: the signaling NaN section is skipped where the
+  characterization found the value cannot be carried, which is
+  GCC's x87 code generation and not Clang's SSE.
 - The MT rows of 15D vary under Clang as they do under GCC (chapter
   3.4) and are not a reference under either.
