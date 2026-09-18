@@ -266,12 +266,39 @@ test under valgrind with no error and a clean exit, in 11S.
 The run that pinned the tables after this fix showed a new
 intermittent: `21.string.iterators` failed 6 of 5725 in 11S, all in
 the `UserChar` instantiation, `begin () const` and `end () - 1`
-returning a null element where the value was expected. The row had
-been clean in every earlier table and passed 22 further runs, bare,
-through the harness and under its address-space limit, with
-randomization on and off. The September 16 table kept the 6 as
-measured; the September 17 rerun passed. The `TODO` entry remains
-open because a clean run does not explain the intermittent failure.
+reported as returning a null element where the value was expected.
+The row had been clean in every earlier table and passed 22 further
+runs, bare, through the harness and under its address-space limit,
+with randomization on and off. The September 16 table kept the 6 as
+measured; the September 17 rerun passed.
+
+Cause, found 2026-09-18 with an address-sanitized build of the test
+and of the driver's `char.cpp`, and a test defect again. The test
+handed `rw_match` a single `char` on the stack as the expected value,
+and the directive parser behind `rw_match` looks past every
+character for a `@` repeat count, so it read the two bytes after the
+local. They were the low bytes of a stale pointer sharing the stack
+slot, randomized with the address space; a run in which they spelled
+`@` and a digit parsed a repeat count out of the neighbour and
+compared against what followed it. The "null element" was a second
+artifact: `%{#c}` reads an `int` from the argument list, and the
+`UserChar` result is a 32-byte struct passed in memory, so the
+directive printed the first bytes of its `long double` member. The
+same one-character idiom had been repaired in `21.string.access` and
+`21.string.copy` in 2007 and missed in `21.string.iterators`,
+`21.string.capacity` and `21.string.io`; the narrow overload parses
+its second argument too, which caught `21.string.access` reading one
+element past the accessed character and `21.string.io` one past the
+test streambuf's exactly sized output buffer.
+
+Fix, applied. Every buffer the string tests hand to `rw_match` is
+terminated: a two-element array for a single expected or observed
+character, a sentinel element after the test streambuf's output
+buffer, as its input buffer already had. Check: the sanitized builds
+of the three tests with stack locals report nothing; every string
+test and the two istream tests that share the streambuf run under
+valgrind with no error in 11S; the rows are unchanged in all six
+tables. The `%{#c}` artifact has its own `TODO` entry.
 
 ### 3.6 The driver's self-tests
 

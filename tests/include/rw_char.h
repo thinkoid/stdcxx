@@ -447,6 +447,9 @@ rw_narrow (char*         /* dst */,
 // len comparisons has been made
 // if (len == SIZE_MAX) is true elements are compared until the first
 // mismatch is found or until the NUL character is encountered
+// both strings must be NUL-terminated even when len is finite: the
+// directive parser looks past every character for a repeat count,
+// and the char overload parses s2 as well as s1
 // returns the number of matching elements
 _TEST_EXPORT _RWSTD_SIZE_T 
 rw_match (const char*   /* s1  */,

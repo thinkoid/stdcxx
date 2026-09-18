@@ -394,14 +394,15 @@ void test_iterators (charT*, Traits*, Allocator*,
                     if (func.which_ == StringIds::c_str_void) {
 
                         // check the last element is equal to char ()
-                        const char null = char ();
+                        const char null [2] = { char (), char () };
+                        const charT last [2] = { ret_ptr [s_size], charT () };
                         const bool success = 
-                            (1 == rw_match (&null, &ret_ptr[s_size], 1));
+                            (1 == rw_match (null, last, 1));
 
                         rw_assert(success, 0, tcase.line,
                                   "line %d. %{$FUNCALL} expected last element "
                                   "is a null character %{#c}, got %{#c}",
-                                  __LINE__, null, ret_ptr[s_size]);
+                                  __LINE__, null [0], ret_ptr[s_size]);
                     }
                 }
             } 
@@ -410,15 +411,19 @@ void test_iterators (charT*, Traits*, Allocator*,
 
                 if (s_size) {
 
-                    const char exp_res = 
-                        (NPOS != tcase.nres ? char (tcase.nres) : char ());
+                    const char exp_res [2] = {
+                        NPOS != tcase.nres ? char (tcase.nres) : char (),
+                        char ()
+                    };
 
-                    const bool success = (1 == rw_match (&exp_res, &res, 1));
+                    const charT got [2] = { res, charT () };
+
+                    const bool success = (1 == rw_match (exp_res, got, 1));
 
                     rw_assert (success, 0, tcase.line,
                                "line %d. %{$FUNCALL}%{?} - 1%{;} expected "
                                "%{#c}, got %{#c}", __LINE__, 
-                               test_end_iters, exp_res, res);
+                               test_end_iters, exp_res [0], res);
                 } 
                 else {
                     bool success = true;

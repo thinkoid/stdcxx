@@ -7,26 +7,23 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under
 =doc/notes/working= carry the longer investigations.
 
-* TODO 21.string.iterators fails six assertions, once in a while
+* TODO Test messages format a UserChar through %{#c}
 
-In the =11S= suite run of 2026-09-16 that pinned the tables after
-the bitset and reverse repairs, =21.string.iterators= failed 6 of
-5725 assertions, all at its line 420 in the =UserChar= instantiation
-(=basic_string<UserChar, UserTraits<UserChar>, UserAlloc<UserChar>>=):
-=begin () const= and =end () - 1= on "a", "abc" and the strings that
-start with a NUL, returning a null element where the value was
-expected. The row was 5725/0 in every earlier table and in 22 runs
-afterwards: bare, through =bin/exec= with the suite's options, under
-=ulimit -v 1G=, with address space randomization on and off.
+The string tests print a mismatched character with the =%{#c}=
+directive and pass the =charT= value itself. For =UserChar= that is
+a 32-byte struct handed to a variadic function, and the directive
+reads an =int= from the argument list: it prints whatever bytes it
+lands on, "null" in the =21.string.iterators= failure of 2026-09-16
+(the first bytes of the struct's =long double= member, always zero)
+and a random byte in a probe. The message sent the first reading of
+that failure after a null element that was never returned.
 
-Hypothesis: a read of something the =UserChar= string leaves
-uninitialized, or a stale value from a previous case, that the
-process's memory usually happens to hold right; the six rows are the
-first six cases of two tables, which points at state carried in from
-the case before. Check: a loop of the test under valgrind and under
-an address sanitizer build until it fails once with a report; if it
-never does under either, run it a few hundred times bare with the
-output kept and read the first failing case.
+Fix: format the character representation, the =c= member through a
+helper in =rw_char.h= or =Traits::to_int_type=, in every string test
+that formats a =charT=; or give the driver a directive for =UserChar=.
+
+Check: a forced mismatch in the =UserChar= instantiation prints the
+character.
 
 * TODO 21.cwchar aborts after passing
 

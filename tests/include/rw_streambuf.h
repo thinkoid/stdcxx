@@ -223,10 +223,14 @@ MyStreambuf (std::streamsize bufsize, int fail_set, int when)
     std::memset (throw_when_, 0, sizeof throw_when_);
 
     // allocate a (possibly wide) character buffer for output
-    buf_ = new charT [bufsize_];
+    buf_ = new charT [bufsize_ + 1];
 
     // invalidate the contents of the buffer
     traits_type::assign (buf_, bufsize_, make_char ('\xfe', buf_));
+
+    // terminate the buffer so that the directive parser in rw_match()
+    // can look past its last element (see rw_char.h)
+    buf_ [bufsize_] = charT ();
 
     // set the put area to 0 size to force a call to overflow()
     // on the first write attempt to the buffer 

@@ -710,12 +710,12 @@ void test_capacity (charT, Traits*, Allocator*,
 
                 for (std::size_t tmp = res_len; tmp < str.size (); tmp++) {
 
-                    char c = char ();
-                    match = rw_match (&c, str.data () + tmp, 1);
+                    const char c [2] = { char (), char () };
+                    match = rw_match (c, str.data () + tmp, 1);
                     rw_assert (1 == match, 0, tcase.line,
                                "line %d. %{$FUNCALL} expected %c "
                                "at offset %zu, got %{#c}",
-                               __LINE__, c, tmp, str.data () + tmp);
+                               __LINE__, c [0], tmp, str.data () [tmp]);
                 }
             }
         }

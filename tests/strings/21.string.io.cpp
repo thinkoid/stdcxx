@@ -60,7 +60,7 @@ static const char* const exceptions[] = {
 
 #define WHITESPACE " \f\n\r\t\v"
 
-const char SYMB_THROW = '!';
+const char SYMB_THROW [] = "!";
 
 // off   - width
 // size  - fmtflags
@@ -951,7 +951,7 @@ void test_io (charT*, Traits*, Allocator*,
     std::size_t* throw_on = new std::size_t [arg_throw_len + 1];
     std::size_t pthrow = 0;
     for (std::size_t k = 0; k < arg_throw_len; ++k) {
-        if (1 == rw_match (&SYMB_THROW, arg_throw + k, 1))
+        if (1 == rw_match (SYMB_THROW, arg_throw + k, 1))
             throw_on [pthrow++] = k + 1;
     }
     throw_on [pthrow] = NPOS;
