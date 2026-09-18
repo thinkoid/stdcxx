@@ -34,9 +34,14 @@ the harness's own table minus the timing columns.
 - The one library defect the string tests exposed, a range source
   inside the string being modified, is repaired (chapter 3.7): 450
   failed assertions and three aborting regressions per table gone.
+- The three locale facet rows are repaired (chapter 3.9): a test
+  macro misuse, a driver buffer that never reset, a date length the
+  platform decides, and two facet limits, `num_get`'s 130-byte
+  buffer and `money_get`'s whitespace ahead of a required symbol or
+  sign tail.
 
 Toolchain: GCC 16.2.1, glibc 2.44, x86-64 Linux. Tables refreshed
-2026-09-17, including the three corresponding Clang configurations.
+2026-09-18, including the three corresponding Clang configurations.
 
 ## 1. Running the suite
 
@@ -92,9 +97,9 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,104,656 | 284 | 0 | 2 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,104,538 | 284 | 0 | 2 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,104,722 | 284 | 7 | 10 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,104,214 | 31 | 0 | 1 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,104,096 | 31 | 0 | 1 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,104,280 | 31 | 7 | 9 |
 
 The 15D counts include the MT locale tests, which are not stable
 (chapter 3.4), and that is the whole of the difference between the
@@ -111,7 +116,11 @@ the last of the day pins the alignment and moneypunct repairs the
 morning tables still lacked, and the final one the string repair in
 chapter 3.7, which also raises the assertion totals: the tests
 iterate every case once per allocation the operation makes, throwing
-at each, and the copying path makes one more.
+at each, and the copying path makes one more. The 2026-09-18
+refresh records the three locale facet rows and
+`22.locale.ctype.tolower` (chapter 3.9); its summary lines also
+catch up with the `0.char` and `21.cwchar` rows that had been
+re-pinned by hand without them.
 
 The last measurement on a current toolchain before this one, made
 by hand in 2026-09 before every test linked, was 10,066,804
@@ -615,6 +624,35 @@ weekday rows counting three bytes, which "søn" and "lør" are not in
 UTF-8; they are locale-decided now, as the German rows were. The
 row is at 2010/0 everywhere, the 24 warnings unchanged.
 
+`22.locale.money.get`: two cases from the 2005 import of the test,
+whose comments describe the intended behaviour, against facet rules
+unchanged since the same import. Where `money_base::none` or
+`money_base::space` appears in the pattern the facet read all the
+whitespace it found, and where the currency symbol required after
+it, or the rest of a multicharacter sign, began with whitespace,
+nothing was left for them: a symbol of " " with `showbase` failed at
+the end of "103 ", a negative sign of "- " at the end of "-109  ".
+The standard makes the symbol and the rest of the sign required
+after the other components and the whitespace optional, and a
+reader of input iterators cannot tell the optional space from the
+symbol's until the run ends. The facet now credits the whitespace it
+read beyond the one character `space` requires to what follows:
+whitespace the symbol begins with, before any character of it is
+read from the input, and whitespace the rest of either sign begins
+with. A sign character, a value or a symbol character read from the
+input cancels the credit. A credited character satisfies a
+whitespace character of the symbol or sign by class rather than
+identity; no real locale's symbol or sign begins with whitespace,
+so outside the two cases the credit is never spent. The row is at
+3888/0 everywhere; the 8 more assertions are the string overload's
+value check, reached for the two cases now.
+
+Two findings on the way, queued in `TODO`: `money_get`'s own
+304-byte value buffer has no bound check at all, and a 20000-digit
+value dies of SIGSEGV; and the driver's `rw_ldblcmp` returns a sign,
+so the `long double` value assertions of `22.locale.money.get`
+cannot fail.
+
 New measurement, 2026-09-17. `22.locale.moneypunct`, previously 316
 passing assertions, now aborts in all six configurations with stack
 smashing detected. A backtrace places the abort at the return from
@@ -635,8 +673,6 @@ runs pass 540 assertions in all six configurations; with a C environment,
 500 pass. `moneypunct-locale-name.md` records the debugger evidence and
 the AddressSanitizer negative control. The full-suite tables refreshed later
 that day record 540 passing assertions in all six configurations.
-
-Intended. Per facet, reading each test against the library.
 
 ### 3.10 Numerics
 

@@ -80,6 +80,13 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
     bool __needws = false;   // whitespace required?
     bool __seendp = false;   // seen decimal point in input
 
+    // whitespace read where money_base::space or money_base::none
+    // appears in the pattern may be the beginning of the currency
+    // symbol or of the rest of a multicharacter sign that follow it
+    // (22.2.6.1.2, p2 and p3): the number of such characters still
+    // available to them
+    _RWSTD_SIZE_T __wscredit = 0;
+
     const ctype<_CharT> &__ctp = 
         _RWSTD_USE_FACET (ctype<_CharT>, __flags.getloc ());
 
@@ -135,6 +142,11 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
 
             if (__needws && !__nc)
                 __ebits |= _RW::__rw_failbit;
+
+            // beyond the one character money_base::space requires,
+            // the whitespace read here is available to the currency
+            // symbol and to the rest of the sign
+            __wscredit = __nc - (__needws && __nc);
             break;
         }
 
@@ -150,17 +162,33 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                 || __sign < 0 && __ns.size () > 1
                 || __sign > 0 && __ps.size () > 1) {
 
-                for (_SizeT __nc = 0; __nc != __cs.size ();
-                     ++__nc, ++__it) {
+                _SizeT __nread = 0;   // symbol characters read from input
+
+                for (_SizeT __nc = 0; __nc != __cs.size (); ++__nc) {
+
+                    // whitespace the symbol begins with may have been
+                    // read as the whitespace preceding it
+                    if (   __wscredit && !__nread
+                        && __ctp.is (ctype_base::space, __cs [__nc])) {
+                        --__wscredit;
+                        continue;
+                    }
+
                     if (__it == __end || !_Traits::eq (*__it, __cs [__nc])) {
 
                         // 22.2.6.1.2, p2: unless showbase is set,
                         //                 curr_symbol is optional
-                        if (__nc || __fl & _RW::__rw_showbase)
+                        if (__nread || __fl & _RW::__rw_showbase)
                             __ebits |= _RW::__rw_failbit;
                         break;
                     }
+
+                    ++__it;
+                    ++__nread;
                 }
+
+                if (__nread)
+                    __wscredit = 0;
             }
             break;
         }
@@ -183,16 +211,20 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
             if (__ps.size () && _Traits::eq (__c, __ps [0])) {
                 __sign = 1;
                 ++__it;
+                __wscredit = 0;
             }
             else if (__ns.size () && _Traits::eq (__c, __ns [0])) {
                 __sign = -1;
                 ++__it;
+                __wscredit = 0;
             }
 
             break;
         }
 
         case /* '\4' */ money_base::value: {
+
+            __wscredit = 0;
 
             const char_type __ts =
                 __gr.size () && __gr [0] && __gr [0] != _RWSTD_CHAR_MAX ?
@@ -261,15 +293,29 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
         if (__buf [1]) {
 
             // process the remainder of a multicharacter sign
-            const _SizeT __sizes [] = {
+            _SizeT __sizes [] = {
                 __ps.size () ? __ps.size () -1 : 0,
                 __ns.size () ? __ns.size () -1 : 0
             };
 
-            const char_type* const __names [] = {
+            const char_type* __names [] = {
                 __ps.data () + !!__sizes [0],
                 __ns.data () + !!__sizes [1]
             };
+
+            // whitespace the remainder of either sign begins with may
+            // have been read as the whitespace preceding it
+            for (_SizeT __k = 0; __sign && __k != 2; ++__k) {
+
+                _SizeT __n = 0;
+
+                while (   __n != __sizes [__k] && __n != __wscredit
+                       && __ctp.is (ctype_base::space, __names [__k][__n]))
+                    ++__n;
+
+                __names [__k] += __n;
+                __sizes [__k] -= __n;
+            }
 
             if (__sign && (__sizes [0] || __sizes [1])) {
 

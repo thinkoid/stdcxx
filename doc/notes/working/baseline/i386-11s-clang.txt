@@ -108,7 +108,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.messages                            0    0      366      0   100%
 22.locale.messages.stdcxx-542                 0    0        0      0   100%
 22.locale.money.get.mt                        0    0        0      0   100%
-22.locale.money.get                           0    0     3880     16    99%
+22.locale.money.get                           0    0     3888      0   100%
 22.locale.money.get.stdcxx-62              NOUT    0                       
 22.locale.money.put.mt                        0    0        6      0   100%
 22.locale.money.put                           0    0     1328      0   100%
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            95
-  Assertions:            10104098
-  Failed assertions:           49
+  Assertions:            10104106
+  Failed assertions:           33

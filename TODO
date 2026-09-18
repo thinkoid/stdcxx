@@ -7,15 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under
 =doc/notes/working= carry the longer investigations.
 
-* TODO Locale facets
-
-=22.locale.money.get= fails 16, =long double= reads with =showbase=
-end in =failbit=.
-
-Fix: per facet, after reading each test against the library.
-
-Check: the row at 100% on both widths.
-
 * TODO Numerics
 
 =18.numeric.special.float= reports =has_denorm == 1= where the test
@@ -69,6 +60,42 @@ their own =-1=.
 
 Check: identical assertion counts for every string and container test
 before and after.
+
+* TODO money_get's value buffer has no bound
+
+=money_get::_C_get= (=include/loc/_money_get.cc=) collects the digits
+of the value in a 304-byte array on the stack and writes into it
+without a check, the digits as they are read and the zeros
+=frac_digits= pads them with; a monetary value of more characters
+overruns the frame. A 20000-digit value read through
+=istreambuf_iterator= dies of SIGSEGV in 11S; =num_get= had the same
+array with a check that set =failbit= until its buffers moved to the
+heap on demand.
+
+Fix: the shape =num_get= has now, the array moved to a heap block
+of twice the size when full, the exit test in a guard; the
+group-size array beside it grows with it.
+
+Check: a value of ten thousand digits reads to the end with =eofbit=
+alone and the expected magnitude; the =22.locale.money.get= row
+unchanged.
+
+* TODO rw_ldblcmp compares long doubles by sign alone
+
+=rw_ldblcmp= (=tests/src/valcmp.cpp=) returns -1, 0 or 1, under a
+FIXME to use the integer arithmetic of =rw_fltcmp= and =rw_dblcmp=,
+which return the number of representable values between their
+arguments. =22.locale.money.get= tests its =long double= results
+with =2 > rw_ldblcmp (x, val)= and =1 < rw_ldblcmp (x, val)=, which
+no pair of values makes true or false respectively: every =long
+double= value assertion in that test passes whatever the facet
+returns, and its =-109.1= expected for =frac_digits= 0 never showed.
+
+Fix: the integer arithmetic for the 80-bit and 128-bit formats, and
+the comparison then reads as the =double= one does.
+
+Check: with an expected value perturbed by one unit in the last place
+the row goes red; unperturbed, the row is unchanged.
 
 * TODO The wide half of UserCtype
 
