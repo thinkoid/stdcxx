@@ -5,7 +5,9 @@ failed intermittently in 2008 and nobody found out why. On the
 current toolchain they fail on every run, differently each time, and
 a ThreadSanitizer build says why. This note records what the tool
 reports and what it means; the fixes wait until after the platform
-retirement, so that they land on the surviving code.
+retirement, so that they land on the surviving code. The 2012
+investigation of the same defect, its test programs and why it
+stalled are in `locale-mt-2012.md`.
 
 ## 0. tl;dr
 
@@ -107,10 +109,15 @@ virtual is called again, which the comment in the header calls
 avoiding "future initializations" and nothing worse.
 
 The facet has a mutex. `__rw_facet` derives from `__rw_synchronized`
-(`_facet.h:53`), and the lazy initialization does not take it. The
-same pattern is in every facet that caches: `moneypunct`, `ctype`,
-`codecvt` and the rest have their own copies of it, which is why the
-other locale MT tests fail the same way.
+(`_facet.h:53`), and the lazy initialization does not take it. No
+other facet caches a string. `moneypunct` has no cache: its
+accessors forward to the virtuals. `ctype<char>` and
+`ctype<wchar_t>` cache `narrow` and `widen` one character per table
+slot, and `codecvt<char, char, mbstate_t>` caches `always_noconv` in
+an `int`: scalars that every thread writes with the same value and
+through which nothing else is published. Those are data races in the
+language and harmless on the hardware; relaxed atomics would state
+them correctly at no cost.
 
 Hypothesis for the fix: guard the lazy initialization with the
 facet's own mutex, once per accessor, the double-checked shape the

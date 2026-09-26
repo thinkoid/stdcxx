@@ -139,9 +139,36 @@ string atomics disabled, every string body carries its own mutex,
 test; the mutex is the 4.1.x-compatibility choice above. The row is
 this decision's probe and belongs to it, not to the strings entry.
 
-Fix, after the retirement: guard the lazy initialization in every
-caching facet and in the facet data with the mutex the facet already
-has; decide the string atomics clause; find or retire the
+The same defects were investigated in 2012 (STDCXX-1056 and
+STDCXX-1071) and never fixed; =doc/notes/working/locale-mt-2012.md=
+has the record and the test programs.
+
+Fix, in three classes, each with its own evidence:
+
+1. Bugs, a failing test first. The =numpunct= cache
+   (=include/loc/_numpunct.h=): remove it, which also removes the
+   read-modify-write on =_C_flags= that an atomic spelling would
+   make costly. The facet data at =src/facet.cpp:288=: =__rw_mmap=
+   writes =_C_impsize= before the mapping exists and the caller
+   stores =_C_impdata= after, so for three system calls another
+   thread sees an initialized facet with no data; this one fails
+   on any hardware.
+2. Races by design, no test possible: the =ctype= =narrow= and
+   =widen= tables and =codecvt<char>::always_noconv= cache scalars
+   that every thread writes with the same value. Spell the accesses
+   as relaxed atomic loads and stores through the compiler builtins,
+   which compile to the same instructions as the plain ones, so the
+   fix has no runtime cost and ThreadSanitizer stops reporting them.
+3. Ordering the language requires without a failing test: the
+   publication of =_C_impdata= through =_C_impsize=
+   (=src/facet.cpp:253=, read in =include/loc/_facet.h:189=) needs a
+   release store and an acquire load; a litmus of that shape shows
+   no reordering on the aarch64 machine, so the evidence is the
+   memory model, not a failure. The facet slot store in
+   =locale::_C_get_std_facet= (=src/locale_core.cpp:193=) is a
+   candidate for the same class, pending its own litmus.
+
+Then decide the string atomics clause, and find or retire the
 thread-safe-locale consumer.
 
 Check: the ThreadSanitizer build runs every =22.locale.*.mt= test
