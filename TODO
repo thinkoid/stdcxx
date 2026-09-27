@@ -257,8 +257,17 @@ their races in a second or two: a few threads parked on a barrier,
 released together at the first use of a fresh object, round after
 round.
 
+The gated tests now number four (=22.locale.use_facet.mt=,
+=22.locale.time.put.libc.mt=, =22.locale.id.mt=,
+=22.locale.facet.mt=), and they overlap the old ones: the first use
+of a facet, its data and its reference counts are exercised by both.
+Each old test also covers several facets and operations at once, so a
+failure names a test and not a defect.
+
 Fix: rewrite the locale MT tests in that shape, or retire the ones
-the gated tests make redundant: 4 to 8 threads whatever the
+the gated tests make redundant, and split what remains finer, one
+race or one facet operation per program, so that a row of the table
+names what failed: 4 to 8 threads whatever the
 processor count, released from a barrier, many short rounds each on
 fresh state (a new locale or facet) so the first-use window opens
 again, a small thread stack; steady-state races are left to the
@@ -266,9 +275,11 @@ ThreadSanitizer build, which needs few iterations to see them. With
 a fixed small thread count the 1 GiB limit stays a meaningful guard
 and the 60-second timeout becomes a hang detector.
 
-Check: every locale MT test passes in a few seconds under the harness
-in 15D on any processor count, the 15D rows become a reference, and
-each test still fails against the library before the fix it covers.
+Check: a census of what each old test exercises against the gated
+ones, each old test kept, split or retired with the reason; every
+locale MT test passes in a few seconds under the harness in 15D on
+any processor count, the 15D rows become a reference, and each test
+still fails against the library before the fix it covers.
 
 * TODO Synchronization on atomic integer flags: a sweep
 
