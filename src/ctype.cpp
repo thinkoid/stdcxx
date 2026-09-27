@@ -801,11 +801,19 @@ do_widen (char ch) const
 {
 #if _RWSTD_UCHAR_MAX <= 255
 
-    if (_C_wide_tab [_UChar (ch)])
-        return _C_wide_tab [_UChar (ch)];
+    // widen() fills the same slot, relaxed for the same reason
+    // (include/loc/_ctype.h)
+    const char_type cached =
+        _RWSTD_ATOMIC_LOAD_RELAXED (_C_wide_tab [_UChar (ch)]);
 
-    return _RWSTD_CONST_CAST (ctype<char>*, this)->
-        _C_wide_tab [_UChar (ch)] = char_type (ch);
+    if (cached)
+        return cached;
+
+    _RWSTD_ATOMIC_STORE_RELAXED (
+        _RWSTD_CONST_CAST (ctype<char>*, this)->_C_wide_tab [_UChar (ch)],
+        char_type (ch));
+
+    return char_type (ch);
 #else
     return char_type (ch);
 #endif

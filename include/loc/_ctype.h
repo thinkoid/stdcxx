@@ -331,18 +331,21 @@ ctype<char>::narrow (char_type __c, char __dfault) const
 {
     const _RWSTD_SIZE_T __inx = _RWSTD_STATIC_CAST (unsigned char, __c);
 
-    // optimize away all but the first call to the virtual do_widen()
-
-    if (
+    // optimize away all but the first call to the virtual do_widen();
+    // threads that race to fill a slot store the same value in it, so
+    // relaxed accesses suffice (_RWSTD_ATOMIC_LOAD_RELAXED in _defs.h)
+    const char_type __cached =
 
 #if _RWSTD_CHAR_BIT > 8
 
-        __inx < sizeof _C_narrow_tab / sizeof *_C_narrow_tab &&
+        __inx >= sizeof _C_narrow_tab / sizeof *_C_narrow_tab ? 0 :
 
 #endif   // _RWSTD_CHAR_BIT > 8
 
-        _C_narrow_tab [__inx])
-        return _C_narrow_tab [__inx];
+        _RWSTD_ATOMIC_LOAD_RELAXED (_C_narrow_tab [__inx]);
+
+    if (__cached)
+        return __cached;
 
     // template argument provided to work around an HP aCC bug (PR #27087)
     ctype<char>* const __self = _RWSTD_CONST_CAST (ctype<char>*, this);
@@ -350,7 +353,7 @@ ctype<char>::narrow (char_type __c, char __dfault) const
     __c = do_narrow (__c, __dfault);
 
     if (__c != __dfault)
-        __self->_C_narrow_tab [__inx] = __c;
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_narrow_tab [__inx], __c);
 
     return __c;
 }
@@ -370,13 +373,20 @@ ctype<char>::widen (char __ch) const
 #endif
 
     if (__fits) {
-        if (_C_wide_tab [__inx])
-            return _C_wide_tab [__inx];
+        const char_type __cached =
+            _RWSTD_ATOMIC_LOAD_RELAXED (_C_wide_tab [__inx]);
+
+        if (__cached)
+            return __cached;
 
         // template argument provided to work around an HP aCC bug (PR #27087)
         ctype<char>* const __self = _RWSTD_CONST_CAST (ctype<char>*, this);
 
-        return __self->_C_wide_tab [__inx] = do_widen (__ch);
+        const char_type __wc = do_widen (__ch);
+
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_wide_tab [__inx], __wc);
+
+        return __wc;
     }
     else
         return do_widen (__ch);
@@ -548,18 +558,24 @@ ctype<wchar_t>::narrow (char_type __c, char __dfault) const
     const _RWSTD_UWCHAR_INT_T __inx =
         _RWSTD_STATIC_CAST (_RWSTD_UWCHAR_INT_T, __c);
 
-    // optimize away all but the first call to the virtual do_widen()
-    if (   __inx < sizeof _C_narrow_tab / sizeof *_C_narrow_tab
-        && _C_narrow_tab [__inx])
-        return _C_narrow_tab [__inx];
+    const bool __fits = __inx < sizeof _C_narrow_tab / sizeof *_C_narrow_tab;
+
+    // optimize away all but the first call to the virtual do_widen();
+    // threads that race to fill a slot store the same value in it, so
+    // relaxed accesses suffice (_RWSTD_ATOMIC_LOAD_RELAXED in _defs.h)
+    const char __cached =
+        __fits ? _RWSTD_ATOMIC_LOAD_RELAXED (_C_narrow_tab [__inx]) : '\0';
+
+    if (__cached)
+        return __cached;
 
     // template argument provided to work around an HP aCC bug (PR #27087)
     ctype<wchar_t>* const __self = _RWSTD_CONST_CAST (ctype<wchar_t>*, this);
 
     const char __ch = do_narrow (__c, __dfault);
 
-    if (__inx < sizeof _C_narrow_tab / sizeof *_C_narrow_tab && __ch != __dfault)
-        __self->_C_narrow_tab [__inx] = __ch;
+    if (__fits && __ch != __dfault)
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_narrow_tab [__inx], __ch);
 
     return __ch;
 }
@@ -579,13 +595,20 @@ ctype<wchar_t>::widen (char __ch) const
 #endif
 
     if (__fits) {
-        if (_C_wide_tab [__inx])
-            return _C_wide_tab [__inx];
+        const char_type __cached =
+            _RWSTD_ATOMIC_LOAD_RELAXED (_C_wide_tab [__inx]);
+
+        if (__cached)
+            return __cached;
 
         // template argument provided to work around an HP aCC bug (PR #27087)
         ctype<wchar_t>* const __self = _RWSTD_CONST_CAST (ctype<wchar_t>*, this);
 
-        return __self->_C_wide_tab [__inx] = do_widen (__ch);
+        const char_type __wc = do_widen (__ch);
+
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_wide_tab [__inx], __wc);
+
+        return __wc;
     }
     else
         return do_widen (__ch);

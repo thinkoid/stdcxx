@@ -163,10 +163,13 @@ Fix, in three classes, each with its own evidence:
    that outlive each locale.
 2. Races by design, no test possible: the =ctype= =narrow= and
    =widen= tables and =codecvt<char>::always_noconv= cache scalars
-   that every thread writes with the same value. Spell the accesses
-   as relaxed atomic loads and stores through the compiler builtins,
-   which compile to the same instructions as the plain ones, so the
-   fix has no runtime cost and ThreadSanitizer stops reporting them.
+   that every thread writes with the same value. The accesses are
+   relaxed atomic loads and stores through the compiler builtins
+   (=_RWSTD_ATOMIC_LOAD_RELAXED=, =_RWSTD_ATOMIC_STORE_RELAXED=),
+   plain moves on x86-64 with optimization. ThreadSanitizer no
+   longer pairs a cache access with another; what it still reports
+   at those lines pairs them with the facet's construction, which is
+   the publication in the third class.
 3. Ordering the language requires without a failing test: the
    publication of =_C_impdata= through =_C_impsize= is a release
    store and an acquire load (=_RWSTD_ATOMIC_STORE_RELEASE=,

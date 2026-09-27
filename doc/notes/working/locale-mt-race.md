@@ -116,8 +116,10 @@ accessors forward to the virtuals. `ctype<char>` and
 slot, and `codecvt<char, char, mbstate_t>` caches `always_noconv` in
 an `int`: scalars that every thread writes with the same value and
 through which nothing else is published. Those are data races in the
-language and harmless on the hardware; relaxed atomics would state
-them correctly at no cost.
+language and harmless on the hardware, and the accesses are now
+relaxed atomics, which state them correctly at no cost: the same
+plain loads and stores on x86-64, and under ThreadSanitizer no cache
+access pairs with another.
 
 Hypothesis for the fix: guard the lazy initialization with the
 facet's own mutex, once per accessor, the double-checked shape the

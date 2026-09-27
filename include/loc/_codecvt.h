@@ -272,18 +272,24 @@ inline bool
 codecvt<char, char, _RWSTD_MBSTATE_T>::
 always_noconv () const _THROWS (())
 {
-    // optimize away repeated calls to the virtual function
-    if (_C_always_noconv < 0) {
+    // optimize away repeated calls to the virtual function; threads
+    // that race to fill the cache store the same value in it, so
+    // relaxed accesses suffice (_RWSTD_ATOMIC_LOAD_RELAXED in _defs.h)
+    int __noconv = _RWSTD_ATOMIC_LOAD_RELAXED (_C_always_noconv);
+
+    if (__noconv < 0) {
 
         // typedef works around an HP aCC x.38 bug (PR #25832)
         typedef codecvt<char, char, _RWSTD_MBSTATE_T> _CodeCvt;
 
         _CodeCvt *__self = _RWSTD_CONST_CAST (_CodeCvt*, this);
 
-        __self->_C_always_noconv = do_always_noconv ();
+        __noconv = do_always_noconv ();
+
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_always_noconv, __noconv);
     }
 
-    return 1 == _C_always_noconv;
+    return 1 == __noconv;
 }
 
 
