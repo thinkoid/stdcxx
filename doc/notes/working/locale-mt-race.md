@@ -126,6 +126,15 @@ cache when the facet is constructed, which the standard's `do_`
 virtuals make awkward. The check is a ThreadSanitizer run of the
 locale MT tests with no report from the facet headers.
 
+Fixed otherwise: the cache is gone. The accessors call the virtuals,
+the forwarding of `moneypunct` and the binary-compatible patch of
+2012 (`locale-mt-2012.md`, chapter 4.3); the members stay, unused,
+until the next minor version. `22.locale.numpunct.mt`, which aborted
+on every run, passes, and so does `22.locale.num.put.mt`, which reads
+`grouping ()` through `num_put`. The cost the cache existed to save
+is one virtual call per accessor; chapter 5 of the primer has the
+2012 measurements on both sides.
+
 ## 4. Cause B: the facet's data and the locale body
 
 `__rw_facet::_C_data` (`_facet.h:193`) tests `_C_impsize` and calls

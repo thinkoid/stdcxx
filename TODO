@@ -164,12 +164,12 @@ has the record and the test programs.
 
 Fix, in three classes, each with its own evidence:
 
-1. Bugs, a failing test first. The =numpunct= cache
-   (=include/loc/_numpunct.h=): remove it, which also removes the
-   read-modify-write on =_C_flags= that an atomic spelling would
-   make costly. The facet data at =src/facet.cpp:288= is fixed, with its
-   test in =22.locale.codecvt.mt=; the reference leak of racing
-   =use_facet= calls has its own entry at the top of this file.
+1. Bugs, a failing test first. The =numpunct= cache is gone, its
+   members kept unused until the next minor version, and
+   =22.locale.numpunct.mt= passes. The facet data at
+   =src/facet.cpp:288= is fixed, with its test in
+   =22.locale.codecvt.mt=; the reference leak of racing =use_facet=
+   calls has its own entry at the top of this file.
 2. Races by design, no test possible: the =ctype= =narrow= and
    =widen= tables and =codecvt<char>::always_noconv= cache scalars
    that every thread writes with the same value. Spell the accesses

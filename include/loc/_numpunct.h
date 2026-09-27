@@ -112,8 +112,11 @@ protected:
 
 private:
 
-    int         _C_flags;           // bitmap of "cached data valid" flags
-    string      _C_grouping;        // cached results of virtual members
+    // unused: the public members once cached the results of the
+    // virtuals here, unsynchronized in a facet that threads share;
+    // kept for binary compatibility until the next minor version
+    int         _C_flags;
+    string      _C_grouping;
     string_type _C_truename;
     string_type _C_falsename;
     char_type   _C_decimal_point;
@@ -139,17 +142,7 @@ template <class _CharT>
 inline _TYPENAME numpunct<_CharT>::char_type
 numpunct<_CharT>::decimal_point () const
 {
-    if (!(_C_flags & _RW::__rw_dp)) {
-
-        numpunct* const __self = _RWSTD_CONST_CAST (numpunct*, this);
-
-        // [try to] get the decimal point first (may throw)
-        // then set a flag to avoid future initializations
-        __self->_C_decimal_point  = do_decimal_point ();
-        __self->_C_flags         |= _RW::__rw_dp;
-    }
-
-    return _C_decimal_point;
+    return do_decimal_point ();
 }
 
 
@@ -157,34 +150,14 @@ template <class _CharT>
 inline _TYPENAME numpunct<_CharT>::char_type
 numpunct<_CharT>::thousands_sep () const
 {
-    if (!(_C_flags & _RW::__rw_ts)) {
-
-        numpunct* const __self = _RWSTD_CONST_CAST (numpunct*, this);
-
-        // [try to] get the thousands_sep first (may throw)
-        // then set a flag to avoid future initializations
-        __self->_C_thousands_sep  = do_thousands_sep ();
-        __self->_C_flags         |= _RW::__rw_ts;
-    }
-
-    return _C_thousands_sep;
+    return do_thousands_sep ();
 }
 
 
 template <class _CharT>
 inline string numpunct<_CharT>::grouping () const
 {
-    if (!(_C_flags & _RW::__rw_gr)) {
-
-        numpunct* const __self = _RWSTD_CONST_CAST (numpunct*, this);
-
-        // [try to] get the grouping first (may throw)
-        // then set a flag to avoid future initializations
-        __self->_C_grouping  = do_grouping ();
-        __self->_C_flags    |= _RW::__rw_gr;
-    }
-
-    return _C_grouping;
+    return do_grouping ();
 }
 
 
@@ -192,17 +165,7 @@ template <class _CharT>
 inline _TYPENAME numpunct<_CharT>::string_type
 numpunct<_CharT>::truename () const
 {
-    if (!(_C_flags & _RW::__rw_tn)) {
-
-        numpunct* const __self = _RWSTD_CONST_CAST (numpunct*, this);
-
-        // [try to] get the true name first (may throw)
-        // then set a flag to avoid future initializations
-        __self->_C_truename  = do_truename ();
-        __self->_C_flags    |= _RW::__rw_tn;
-    }
-
-    return _C_truename;
+    return do_truename ();
 }
 
 
@@ -210,17 +173,7 @@ template <class _CharT>
 inline _TYPENAME numpunct<_CharT>::string_type
 numpunct<_CharT>::falsename () const
 {
-    if (!(_C_flags & _RW::__rw_fn)) {
-
-        numpunct* const __self = _RWSTD_CONST_CAST (numpunct*, this);
-
-        // [try to] get the false name first (may throw)
-        // then set a flag to avoid future initializations
-        __self->_C_falsename  = do_falsename ();
-        __self->_C_flags     |= _RW::__rw_fn;
-    }
-
-    return _C_falsename;
+    return do_falsename ();
 }
 
 // #endif _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
