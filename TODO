@@ -201,6 +201,21 @@ characterization of the builtins in place of the architecture list,
 since the existing =ATOMIC_OPS.cpp= only characterizes the Windows
 =InterlockedIncrement= signature.
 
+* TODO yi_US.CP1255 does not build on aarch64
+
+=make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=:
+=localedef= reports Error 308, "incomplete multibyte character in
+character map file: expecting 4 bytes, found 0". No note records the
+locales phase on x86-64, so whether it is aarch64-only is open.
+Hypothesis: =char= is unsigned on aarch64 and signed on x86, and the
+charmap reader depends on the sign of a byte.
+
+Fix: to be found.
+
+Check: =make locales= builds every locale in =etc/nls/gen_list= on
+aarch64, and the generated databases match the x86-64 ones byte for
+byte.
+
 * TODO The C++17 floor
 
 The library is C++98 by design and characterizes the compiler rather
