@@ -2498,6 +2498,38 @@ run_test (int /*unused*/, char* /*unused*/ [])
         if (!locname)
             continue;
 
+#ifndef _RWSTD_NO_WCHAR_T
+
+        // unshift () as the first call on the wide facet of a locale
+        // from the database must take the database's data, not fall
+        // through to the C library, which does not know the name
+        _TRY {
+            const std::locale loc (locname);
+
+            const CodecvtW &cc = std::use_facet<CodecvtW>(loc);
+
+            std::mbstate_t state = std::mbstate_t ();
+
+            char  ext [4];
+            char *ext_next = 0;
+
+            const std::codecvt_base::result res =
+                cc.unshift (state, ext, ext + sizeof ext, ext_next);
+
+            rw_assert (std::codecvt_base::noconv == res, __FILE__, __LINE__,
+                       "use_facet<codecvt<wchar_t, char, mbstate_t> >"
+                       "(locale (%#s)).unshift () as the first call == "
+                       "noconv, got %d", locname, int (res));
+        }
+        _CATCH (...) {
+            rw_assert (false, __FILE__, __LINE__,
+                       "use_facet<codecvt<wchar_t, char, mbstate_t> >"
+                       "(locale (%#s)).unshift () as the first call "
+                       "threw an exception", locname);
+        }
+
+#endif   // _RWSTD_NO_WCHAR_T
+
         // find the native locale name correspomding to the canonical
         // locale name hardcoded in the table above
         const char* const native_locname =

@@ -1498,9 +1498,13 @@ do_unshift (state_type&   state,
     // test the type of the encoding that the facet is interpreting
     switch (ISO2022_TYPE (_C_flags)) {
 
-    case _RW::stateless:
+    case _RW::stateless: {
 
-        if (USE_LIBC (_C_impdata, _C_flags)) {
+        // obtain the mapping of the database file
+        const _RW::__rw_codecvt_t* const impl =
+            _RWSTD_STATIC_CAST (const _RW::__rw_codecvt_t*, this->_C_data ());
+
+        if (USE_LIBC (impl, _C_flags)) {
 
             const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
             
@@ -1524,7 +1528,7 @@ do_unshift (state_type&   state,
             res = mbstate_valid ? noconv : error;
         }
         break;
-
+    }
     case _RW::iso2022_jp:
         res = _RW::__rw_iso2022jp_do_unshift (state, to_next, to_limit);
         break;
