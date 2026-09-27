@@ -13,10 +13,10 @@ library.** The implementation still has its C++98 foundation and
 C++03 interface. Raising the implementation floor to C++17 and
 implementing the C++17 library are separate projects.
 
-This first record describes the tree at `ae561914`: component
-coverage, concrete departures, selected defect resolutions checked
-against the code, and the broad gap to later libraries. Measurements
-are the existing September 17 baseline, not new runs for this document.
+This record describes the tree as of 2026-09-27: component coverage,
+concrete departures, selected defect resolutions checked against the
+code, and the broad gap to later libraries. Measurements are the
+pinned baseline tables of that date.
 
 ## 1. What the C++03 target covers
 
@@ -44,7 +44,9 @@ facilities meet compiler/runtime interfaces. Their presence cannot
 establish every required signature, value or runtime behavior.
 
 The supported platform scope is also narrower than the historical
-manual: GCC and Clang on x86 and x86-64 Linux, with aarch64 planned.
+manual: GCC and Clang on x86 and x86-64 Linux, with aarch64 next; the
+library builds and runs its suite there, but its atomic operations
+still fall back to mutexes.
 Compiler characterizations determine the active implementation paths.
 A conformance result must identify that configuration, not just the
 source revision.
@@ -113,19 +115,22 @@ resolutions.
 
 The [baseline record](working/test-baseline.md) covers six debug
 configurations: GCC and Clang, each with 64-bit archive, 32-bit archive
-and 64-bit reentrant shared builds. The pinned tables contain 268
-programs apiece. Five record 284 failed assertions; Clang's 32-bit
-table records 281. **These are test counts, not percentages of the
-standard implemented.** Assertions have unequal scope, and process
-failures can prevent later assertions from running.
+and 64-bit reentrant shared builds. The pinned tables contain 272
+programs apiece. The GCC tables record 17 failed assertions, all in
+three stream tests (`27.basic.ios` 1, `27.filebuf` 8, `27.std.manip`
+8); the Clang tables add 5 in `21.cwchar`, a C-library declaration
+question queued in `TODO`. **These are test counts, not percentages
+of the standard implemented.** Assertions have unequal scope, and
+process failures can prevent later assertions from running.
 
 | area | current evidence and its limit |
 |---|---|
 | String range self-aliasing | Repaired; the relevant assignment, insertion and replacement tests and regressions pass in the recorded six configurations. This is evidence for the repaired path, not every string requirement. |
-| Locale facets | `num_get`, `time_get` and `money_get` retain failed expectations. `TODO` calls for reading each test against the library before assigning blame. |
-| Numerics and extension controls | Limits, math, valarray and extension-test failures remain. Several are characterization or expectation questions rather than established library defects. |
-| Memory/lifetime symptoms | The intermittent string-iterator result and `21.cwchar` exit-time corruption remain unresolved in the queue. |
-| Reentrant locale use | The recorded sanitizer investigation identifies actual races and use-after-free. This is a defect in the offered threading behavior; C++03 did not itself specify the later C++ thread library and memory model. |
+| Locale facets | The `num_get`, `time_get` and `money_get` rows pass: the failures were test defects, a driver buffer, platform-decided lengths and two facet limits, repaired (`test-baseline.md`, chapter 3.9). `money_get`'s unbounded value buffer is queued. |
+| Numerics and extension controls | The limits, math, valarray and extension rows pass; the failures were test defects and a driver comparison (chapter 3.10). |
+| Memory/lifetime symptoms | The intermittent string-iterator result was the test driver reading past short buffers, and the `21.cwchar` exit-time corruption a test's use of a write-only stream; both are repaired. |
+| Streams | `27.basic.ios`, `27.filebuf` and `27.std.manip` fail 17 assertions; they have not yet been read against the library. |
+| Reentrant locale use | The sanitizer investigation found races and use-after-free in the locale; they are repaired, and each repair has a multithreaded test. The locale MT rows of the reentrant tables still vary with the machine: on many processors they measure the harness's memory and time limits, a test-design question queued in `TODO`. C++03 did not itself specify the later thread library and memory model. |
 | Test infrastructure | Several repaired failures belonged to tests or their driver. Known successful `NOUT` and `FORMAT` rows have individual reporting contracts; neither label alone proves success. |
 
 The tables do not cover every optimization mode, configuration switch,
@@ -176,3 +181,4 @@ The work separates naturally into three tracks:
    decisions belong here as well as new interfaces.
 
 Written by OpenAI LeChuck.
+Brought up to date with the tree of 2026-09-27 by Claude.

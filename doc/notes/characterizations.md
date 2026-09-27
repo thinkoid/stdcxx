@@ -8,7 +8,7 @@ represents data**. Only the first group is broadly made redundant by
 a newer implementation-language floor. Sizes, layouts, calling
 interfaces and runtime behavior remain platform questions.
 
-The source census contains 204 named C++ probes, nine supporting C++
+The source census contains 205 named C++ probes, nine supporting C++
 translation units, one shell driver and 19 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -50,7 +50,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 204 named probes are discoverable by
+three different things.** All 205 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -69,11 +69,19 @@ conditions as well. No preprocessing or build was performed here.
 
 `ATOMIC_OPS.cpp` currently has a `main` that simply returns zero.
 The vendor-backend retirement left it as a success stub. Its
-commented-out `_RWSTD_NO_ATOMIC_OPS` **does not characterize GNU atomic
-builtins or memory ordering**. Backend selection still occurs in
-`include/rw/_atomic.h`; the architecture gate there matters to an
-aarch64 port. Older investigation prose describing the former
-Windows probe no longer describes this source.
+commented-out `_RWSTD_NO_ATOMIC_OPS` **does not characterize the GNU
+`__sync` built-ins** the read-modify-write backend uses. Backend
+selection still occurs in `include/rw/_atomic.h`, by an architecture
+list; `TODO` queues a characterization of those built-ins in its
+place for the aarch64 port. Older investigation prose describing the
+former Windows probe no longer describes this source.
+
+`ATOMIC_BUILTINS.cpp` is the newest probe and the one that does
+characterize atomics: a release store and an acquire load of a
+`size_t` through the `__atomic` built-ins, compiled, linked without
+`libatomic` and run. Its answer gates the ordered load and store
+macros in `include/rw/_defs.h`, which publish facet data and facets
+and fill the scalar caches of `ctype` and `codecvt`.
 
 `THREAD_SAFE_LOCALE` asks whether each thread has an independent C
 locale environment.
@@ -134,6 +142,7 @@ Token-pasted and script-generated names need family-level inspection.
 | probe / macro suffix | question | direct readers |
 |---|---|---|
 | [ABS_OVERLOADS](../../etc/config/src/ABS_OVERLOADS.cpp) / `NO_ABS_OVERLOADS` + output | overloads of abs() | none |
+| [ATOMIC_BUILTINS](../../etc/config/src/ATOMIC_BUILTINS.cpp) / `NO_ATOMIC_BUILTINS` | `__atomic` release store and acquire load on `size_t` | L; `include/rw/_defs.h` |
 | [ATOMIC_OPS](../../etc/config/src/ATOMIC_OPS.cpp) / `NO_ATOMIC_OPS` | Success stub; does not exercise atomics | L; `include/rw/_atomic.h` |
 | [BAD_ALLOC_ASSIGNMENT](../../etc/config/src/BAD_ALLOC_ASSIGNMENT.cpp) / `NO_BAD_ALLOC_ASSIGNMENT` | bad_alloc assignment operator | L; `src/memory.cpp` |
 | [BAD_ALLOC_COPY_CTOR](../../etc/config/src/BAD_ALLOC_COPY_CTOR.cpp) / `NO_BAD_ALLOC_COPY_CTOR` | bad_alloc copy ctor | L; `src/memory.cpp` |
@@ -355,3 +364,4 @@ requires examining their consumers, emitted families and dependencies
 together.
 
 Written by OpenAI LeChuck.
+Brought up to date with the tree of 2026-09-27 by Claude.

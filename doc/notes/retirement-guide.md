@@ -139,7 +139,8 @@ preprocessor directives, then read the history before changing it.
 
 | site | observed mechanism | sweep treatment |
 |---|---|---|
-| `src/locale_body.cpp`, `src/locale_combine.cpp` | Element loops replace bulk pointer initialization/copy for an old GCC/SPARC optimizer defect; the conditions extend beyond that original compiler. | Reachable workaround, not dead code. Choose the ordinary pointer operation for the supported targets and preserve representation assumptions. |
+| `src/locale_body.cpp` | An element loop replaces bulk pointer initialization for an old GCC/SPARC optimizer defect; the conditions extend beyond that original compiler. | Reachable workaround, not dead code. Choose the ordinary pointer operation for the supported targets and preserve representation assumptions. |
+| `src/locale_combine.cpp` | The body copies once had the same workaround; they are now loops for a different reason, one acquire load per slot, because another thread may fill a slot of the source body. | Not a workaround any more. Keep the per-slot loads; a bulk copy would reintroduce the race. |
 | `include/loc/_locale.h` facet constructor | A cast through `size_t**` is justified by an old compiler bug. | Re-express the intended member assignment without changing facet-id setup or constness of the actual object. |
 | `include/rw/_strref.h`, `_C_size` | A named union carries a compiler workaround, but its `_CharT` member also establishes alignment. | Removing the name does not authorize removing the union's alignment role or changing the body layout. |
 | `include/rw/_mutex.h` | Historical indirections, a named union and explicit static-member instantiation support old compilers. | Separate syntax workarounds from mutex initialization, lifetime and shared-library identity. |
@@ -190,8 +191,9 @@ The per-string mutex for 4.1.x binary compatibility, string reference
 counting, facet layout and exported instantiations are representation
 or ABI decisions. Keep them out of an allegedly inert syntax sweep.
 Similarly, a private probe without consumers can be retired, but the
-atomic success stub needs a replacement characterization if the port
-requires facts it never measures.
+atomic success stub needs a replacement characterization, and the
+aarch64 entry in `TODO` queues one: the `__sync` built-ins at each
+width, in place of the architecture list in `_atomic.h`.
 
 ## 5. Work order for a sweep
 
@@ -243,9 +245,9 @@ options and source-local definitions as well as `config.h`. Review
 the complete conditional, not just the matching line. Compiler-brand
 tests and unconditional workarounds need the same treatment.
 
-Validation belongs to the eventual implementation pass. Use isolated
-builds under `~/build/stdcxx-build-codex`; do not reconfigure or clean
-another working build. Start from fresh configuration after probe or
+Validation belongs to the eventual implementation pass. Use build
+directories of its own; do not reconfigure or clean another working
+build. Start from fresh configuration after probe or
 configuration changes, with phases serial and parallelism within a
 phase. Header changes need forced test recompilation because the
 existing test build can miss their dependencies.
@@ -266,3 +268,4 @@ guide; its classifications are source-based starting points for the
 sweep.
 
 Written by OpenAI LeChuck.
+Brought up to date with the tree of 2026-09-27 by Claude.

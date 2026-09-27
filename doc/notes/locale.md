@@ -14,7 +14,7 @@ behind an interface that looks read-only. Reference counting,
 repository locking and lazy initialization are separate parts of the
 threading story.
 
-This is an architectural overview of the tree at `ae561914`.
+This is an architectural overview of the tree as of 2026-09-27.
 
 ## 1. The handle, the body and the facets
 
@@ -58,6 +58,9 @@ Standard ids select fixed slots: the numeric id is one greater than
 the array index. User ids are assigned on demand; lookup searches the
 user-facet array. A derived facet can inherit a standard facet's id
 and replace that service, or declare its own id and add a service.
+A user id is generated on first use, once per facet type: the first
+thread to find it unset generates it under a static lock, and the
+others take that value.
 
 `use_facet<T>` resolves the type to a lookup path and returns a
 reference. For a standard facet, the common path is an indexed pointer
@@ -87,7 +90,13 @@ be represented as a managed named locale report `"*"`.
 
 **Composition produces a new locale value; it does not edit the
 source collection.** Internally, however, both collections may still
-materialize shared facets on demand.
+materialize shared facets on demand. That is the one change a live
+body sees: a standard slot goes from null to its facet, once, under
+the body's lock, and never changes again until the body is destroyed.
+Lookup can therefore read a slot without the lock, and a copy of a
+collection can take its slots one at a time: each read sees either
+null, which the new body fills on its own first use with the same
+managed facet, or the final pointer.
 
 Default construction takes a reference to the current C++ global
 body. `locale::global` replaces that body and returns the old locale;
@@ -201,10 +210,14 @@ conversion tables. Named facets locate those files through the locale
 root and map them for reading; `include/loc/_localedef.h` describes the binary
 layouts. On Linux the mapping uses read-only `mmap`.
 
-The facet base caches the mapping pointer and size. Individual facets
-can cache derived results as well: `numpunct`, for example, remembers
-the decimal point, grouping and boolean names returned by its
-virtuals. **Mapped data and mutable facet caches are different layers.**
+The facet base caches the mapping pointer and size. A few facets cache
+derived scalars as well: `ctype` remembers each character's `narrow`
+and `widen` results in a table, and `codecvt<char, char>` its
+`always_noconv` answer. `numpunct` once cached its decimal point,
+grouping and boolean names; its accessors now call the virtuals every
+time, the members kept unused until the next minor version for binary
+compatibility. **Mapped data and mutable facet caches are different
+layers.**
 
 The C library is another backend, with selection and fallback varying
 by facet and implementation options. Paths that temporarily change
@@ -218,26 +231,30 @@ The important boundaries in a reentrant build are:
 
 | mechanism | purpose and boundary |
 |---|---|
-| Body and facet reference counts | Preserve shared ownership; updates use the library's atomic abstraction. They do not synchronize arbitrary writes inside a facet. |
-| Locale and facet repository locks | Serialize repository operations and reuse. Repeated standard-facet lookup reads the body's slot directly. |
-| Lazy facet data | `_C_get_data` takes the facet mutex and checks again before loading, but `_C_data` and the initial check read state outside that lock. |
-| Cached facet results | Accessors such as `numpunct::truename` populate shared members and flags without taking the facet mutex. |
+| Body and facet reference counts | Preserve shared ownership; every update of a facet's count uses the same lock-free operation. They do not synchronize arbitrary writes inside a facet. |
+| Locale and facet repository locks | Serialize repository operations and reuse. |
+| Standard facet slots | Filled once, under the body's lock, with a release store; lookup, copying, combining and comparison read them unlocked, with acquire loads where the facet is then used. |
+| Lazy facet data | `_C_get_data` takes the facet mutex and checks again before loading; the size, or the data pointer itself where the data is built from the C library later, is stored with release, and the unlocked reads are acquire loads. |
+| Cached scalars | The `ctype` and `codecvt` caches are filled with relaxed atomic accesses: every thread stores the same value and nothing else is published through them. |
 | C locale lock | Covers participating `setlocale` operations, a separate source of serialization. |
 
 **Shared lifetime does not imply safe publication or safe cache
-initialization.** The fast paths are meant to avoid repeated locking
-and computation, but the current implementation has races at these
-boundaries. The recorded ThreadSanitizer investigation found races
-in punctuation caches, implementation-data publication and body
-bookkeeping, including use-after-free during cached string assignment.
-See [the investigation](working/locale-mt-race.md) for its measurements.
+initialization.** The fast paths avoid repeated locking and
+computation, and each needs its own publication. The ThreadSanitizer
+investigation found races in punctuation caches, implementation-data
+publication and body bookkeeping, including use-after-free during
+cached string assignment; see [the investigation](working/locale-mt-race.md).
+Those are repaired as the table above describes, and a run of the
+locale MT tests under the sanitizer reports nothing from the facets
+or bodies. The initialization of the global locale, a counter and a
+`volatile` spin, is the remaining candidate, queued with the other
+flag-based initializations in `TODO`.
 
-The distinctions matter when reading that record: the data-loading
-slow path *does* take a mutex; its unlocked checks are part of the
-problem. A lock inside initialization alone does not establish that
-another thread can safely read the initialized state. This overview
-describes the mechanisms, without treating their intended shortcuts
-as a thread-safety guarantee.
+A lock inside initialization alone does not establish that another
+thread can safely read the initialized state: the data-loading slow
+path always took a mutex, and its unlocked checks were the problem.
+On aarch64 the library's atomic operations are still mutex operations
+until the builtin backend is ported (`TODO`).
 
 ## 7. Where to look
 
@@ -254,3 +271,4 @@ as a thread-safety guarantee.
 | Database production and layouts | `util/localedef.cpp`, `include/loc/_localedef.h` |
 
 Written by OpenAI LeChuck.
+Brought up to date with the tree of 2026-09-27 by Claude.

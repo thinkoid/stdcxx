@@ -15,16 +15,17 @@ library's small atomic interface obscures the distinction: the same
 macro can select a hardware operation, an ordinary operation under a
 mutex, or an ordinary operation with no synchronization at all.
 
-The clearest existing failure is the locale cache: two threads assign
-the same cached string, although its representation's reference count
-is protected. Initialization counters and mixed synchronization of
-counts are further audit priorities. **Making every increment stronger
-would not repair these protocols.**
+The clearest failure was the locale cache: two threads assigned the
+same cached string, although its representation's reference count was
+protected. It is repaired, together with the publication of facet data
+and of the facets themselves, the facet id race and a mixed
+synchronization of facet counts (chapters 4 and 5). Initialization
+counters and the aarch64 backend remain. **Making every increment
+stronger would not have repaired these protocols.**
 
-This note describes the source model and guides the queued MT work.
-It distinguishes the [recorded locale investigation](working/locale-mt-race.md)
-from source-level concerns that still need targeted verification. No
-new runtime results are claimed here.
+This note describes the source model and guides the remaining MT work.
+The [locale investigation](working/locale-mt-race.md) records the
+measurements; the `22.locale.*.mt` tests pin the repairs.
 
 ## 1. What reentrant mode means
 
@@ -101,11 +102,20 @@ mechanism**. See [GCC's volatile semantics](https://gcc.gnu.org/onlinedocs/gcc/V
 
 ## 3. The abstraction hides several different mechanisms
 
-The entry points are `_RWSTD_ATOMIC_PREINCREMENT`,
+The read-modify-write entry points are `_RWSTD_ATOMIC_PREINCREMENT`,
 `_RWSTD_ATOMIC_PREDECREMENT` and `_RWSTD_ATOMIC_SWAP`. Increment and
 decrement return the new value; exchange returns the previous value.
-There is no corresponding general atomic load, store or
-compare-and-exchange interface, and no explicit ordering argument.
+They take no ordering argument.
+
+Loads and stores with an explicit ordering came later:
+`_RWSTD_ATOMIC_STORE_RELEASE` and `_RWSTD_ATOMIC_LOAD_ACQUIRE` publish
+data through a flag or a pointer, and `_RWSTD_ATOMIC_STORE_RELAXED`
+and `_RWSTD_ATOMIC_LOAD_RELAXED` state a race that orders nothing,
+such as a cache every thread fills with the same value. They expand
+to the GNU `__atomic` built-ins where `ATOMIC_BUILTINS.cpp` finds them
+and to ordinary accesses otherwise or in a nonreentrant build
+([_defs.h](../../include/rw/_defs.h)). There is still no
+compare-and-exchange.
 
 ### 3.1 Backend selection and the meaning of `false`
 
@@ -114,7 +124,9 @@ backend on the specified GNU/x86 configurations, x86 assembly helpers
 on other matching branches, and mutex fallback otherwise. Width
 adapters and missing-width fallbacks add another dispatch layer.
 Selection follows preprocessor conditions, not simply the machine's
-ability to execute atomic instructions.
+ability to execute atomic instructions: on aarch64 every operation
+falls back to a mutex, and `TODO` queues a characterization of the
+built-ins in place of the architecture list.
 
 | call form in a reentrant build | mechanism |
 |---|---|
@@ -208,43 +220,53 @@ mutex. Global replacement retains the incoming body before handing
 off the previous global reference; ordinary copies retain an already
 owned body. Those ownership transitions must survive any redesign.
 
-An additional source-level concern is **mixed count synchronization**:
-[locale_combine.cpp](../../src/locale_combine.cpp) increments facet
-counts with the facet mutex, while the facet helpers in
-[locale_body.h](../../src/locale_body.h) pass `false`. The body's
-member count helpers also take its mutex, whereas other body-count
-sites pass `false`. An audit must establish which paths can overlap
-on the same object. The differing overloads are evidence of an audit
-obligation, not by themselves a new reproduced race.
+Facet counts had **mixed synchronization**: the two constructors in
+[locale_combine.cpp](../../src/locale_combine.cpp) that build a body
+from another incremented them under the facet's mutex, while the
+helpers in [locale_body.h](../../src/locale_body.h) and every other
+site pass `false`. The two do not exclude each other, and a test that
+builds and destroys locales from a shared one in several threads
+(`22.locale.facet.mt`) lost updates in most runs. All facet-count
+updates now go through `_C_add_ref` and `_C_remove_ref`. The body's
+own mutex-taking count helpers have no callers; body counts pass
+`false` everywhere.
 
 ### 4.3 Lazy caches are writes, including through `const`
 
-The existing [locale MT record](working/locale-mt-race.md) identifies
-concurrent lazy initialization of `numpunct` members. Accessors in
-[_numpunct.h](../../include/loc/_numpunct.h) test `_C_flags`, obtain
-a value, assign the cache and update the flag. Two threads can both
-enter; for cached strings, both assign the same string object. The
-reported use-after-free and destroyed-mutex accesses explain why
-count-level protection was insufficient.
+The [locale MT record](working/locale-mt-race.md) identified
+concurrent lazy initialization of `numpunct` members: accessors in
+[_numpunct.h](../../include/loc/_numpunct.h) tested `_C_flags`,
+obtained a value, assigned the cache and updated the flag. Two threads
+could both enter; for cached strings, both assigned the same string
+object, and the use-after-free and destroyed-mutex reports followed.
+The accessors now call the virtuals every time; the members stay,
+unused, until the next minor version.
 
-An atomic flags word alone would still permit both initializers to
-write the cache. An election bit set before initialization would let
-readers arrive before completion. A sound protocol must distinguish
-uninitialized, being initialized and ready, including failure/retry,
-or use a lock covering both access and initialization.
+An atomic flags word alone would still have permitted both
+initializers to write the cache, and an election bit set before
+initialization would have let readers arrive before completion. A
+sound protocol distinguishes uninitialized, being initialized and
+ready, or uses a lock covering both access and initialization, or,
+as here, removes the cache.
 
-There is a useful qualification to the older investigation:
 `__rw_facet::_C_get_data()` in [facet.cpp](../../src/facet.cpp)
-**does acquire the facet mutex on its slow path**. Its initial
-`_C_impsize` check, and the fast path in
-[_facet.h](../../include/loc/_facet.h), are outside that mutex.
-The question is publication to those readers, not absence of every
-lock. Keeping an ordinary unlocked first check and merely writing
-the flag last is not sufficient.
+**acquires the facet mutex on its slow path**; its initial check and
+the fast path in [_facet.h](../../include/loc/_facet.h) are outside
+that mutex. The question was publication to those readers, not the
+absence of a lock. `_C_impsize` is now stored with release after
+`_C_impdata`, and read with acquire; where the data is built from the
+C library after the size is already set, `_C_impdata` itself is the
+published pointer, stored with release under `__rw_setlocale` and
+read with acquire, including under the facet mutex, which does not
+exclude those builders.
 
-The body's lazy standard-facet pointers and facet bookkeeping need
-the same examination. A reference count keeps a facet alive; it does
-not make its mutable cache immutable.
+The body's standard-facet slots follow the same rule: filled once
+under the body's lock with a release store, read unlocked with
+acquire. The `ctype` `narrow` and `widen` tables and
+`codecvt<char, char>::always_noconv` stay caches, because every thread
+stores the same value and nothing else is published through them;
+their accesses are relaxed atomics. A reference count keeps a facet
+alive; it does not make its mutable cache immutable.
 
 ## 5. Initialization: election is not completion
 
@@ -257,7 +279,7 @@ that counter to stand for the readiness of unrelated state.
 | Fallback `__rw_once`, [once.cpp](../../src/once.cpp) | Atomic increment elects a caller, ordinary volatile `init = 1000` announces completion, and waiters poll. The separate mutex fallback also has an ordinary unlocked first check. Neither pattern gains publication merely from its initial increment. |
 | Fallback static mutex construction, [_mutex.h](../../include/rw/_mutex.h) | Placement construction follows a counter election; an ordinary volatile update signals completion. With no usable integer atomic operation, even election uses ordinary increment. This branch is conditional on missing static mutex initialization. |
 | `ios_base::Init`, [iostream.cpp](../../src/iostream.cpp) | First increment initializes streams; later increments return immediately. Counting initializer objects does not itself wait for stream initialization. Establish startup reachability and ordering before claiming concurrent construction is covered. |
-| `__rw_facet_id::_C_init`, [facet.cpp](../../src/facet.cpp) | A global atomic generator supplies distinct candidate IDs; the individual object's `_C_id` is checked and assigned ordinarily. Unique allocation does not serialize concurrent installation into the same ID object. |
+| `__rw_facet_id::_C_init`, [facet.cpp](../../src/facet.cpp) | Repaired: threads racing the first use of a facet type each generated an id and the last store won. The id is now generated once, under a static lock with a recheck, stored with release and read with acquire; `22.locale.id.mt` counts the ids 500 types take. |
 
 The normal POSIX `__rw_once` route delegates to `pthread_once`, as
 selected in [once.h](../../src/once.h). Do not attribute fallback
@@ -295,15 +317,15 @@ multiple participants and therefore supplies no such exclusion.
    storage, all access paths, selected overloads, lock identity,
    ownership preconditions and the invariant it is meant to preserve.
    Include ordinary accesses and destruction, not only macro calls.
-2. **Repair the demonstrated cache protocol.** Start with shared
-   locale caches and safe acquisition of their representations. Use
-   the existing locale investigation as evidence, with the slow-path
-   locking qualification above. Keep count optimization a separate
-   decision.
-3. **Unify synchronization for each counter.** Check mixed mutex and
-   hardware paths before replacing the wrappers. An atomic field must
-   not retain conflicting ordinary accesses; a mutex-based field
-   needs the same mutex at every overlapping access.
+2. **Repair the demonstrated cache protocol.** Done for the locale:
+   the `numpunct` cache is gone, facet data, facets and ids are
+   published with release and acquire, the scalar caches are relaxed
+   atomics. Count optimization remains a separate decision.
+3. **Unify synchronization for each counter.** Done for facet counts.
+   An atomic field must not retain conflicting ordinary accesses; a
+   mutex-based field needs the same mutex at every overlapping access.
+   The string counts and their ordinary accesses (chapter 4.1) are
+   still to audit.
 4. **Give initialization a completion protocol.** Prefer a supported
    native once mechanism or another fully specified mechanism. Cover
    readers, exceptions and bootstrap dependencies. Removing `volatile`
@@ -325,6 +347,10 @@ where supported. Use the locale MT tests and ThreadSanitizer for the
 known paths; separately exercise reachable fallback configurations.
 Any ordering argument intended to survive beyond x86 needs evidence
 beyond an x86 stress run. A clean run supports a protocol review; it
-does not replace one.
+does not replace one. The locale tests that pin the repairs release a
+few threads together on fresh state, round after round, rather than
+repeat an operation on warm state: a first-use race shows in seconds
+that way, and not at all once everything is cached.
 
 Written by OpenAI LeChuck.
+Brought up to date with the tree of 2026-09-27 by Claude.
