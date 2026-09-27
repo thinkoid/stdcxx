@@ -253,8 +253,6 @@ flag-based initializations in `TODO`.
 A lock inside initialization alone does not establish that another
 thread can safely read the initialized state: the data-loading slow
 path always took a mutex, and its unlocked checks were the problem.
-On aarch64 the library's atomic operations are still mutex operations
-until the builtin backend is ported (`TODO`).
 
 ## 7. Where to look
 

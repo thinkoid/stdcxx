@@ -32,6 +32,8 @@
 
 _RWSTD_NAMESPACE (__rw) {
 
+#ifndef _RWSTD_NO_CHAR_ATOMIC_OPS
+
 inline char
 __rw_atomic_preincrement (char &__x, bool)
 {
@@ -55,6 +57,10 @@ __rw_atomic_preincrement (unsigned char &__x, bool)
     return __sync_add_and_fetch (&__x, 1);
 }
 
+#endif   // _RWSTD_NO_CHAR_ATOMIC_OPS
+
+
+#ifndef _RWSTD_NO_SHORT_ATOMIC_OPS
 
 inline short
 __rw_atomic_preincrement (short &__x, bool)
@@ -70,6 +76,8 @@ __rw_atomic_preincrement (unsigned short &__x, bool)
     _RWSTD_COMPILE_ASSERT (2 == sizeof (unsigned short));
     return __sync_add_and_fetch (&__x, 1);
 }
+
+#endif   // _RWSTD_NO_SHORT_ATOMIC_OPS
 
 
 inline int
@@ -87,6 +95,8 @@ __rw_atomic_preincrement (unsigned int &__x, bool)
     return __sync_add_and_fetch (&__x, 1);
 }
 
+
+#ifndef _RWSTD_NO_CHAR_ATOMIC_OPS
 
 inline char
 __rw_atomic_predecrement (char &__x, bool)
@@ -111,6 +121,10 @@ __rw_atomic_predecrement (unsigned char &__x, bool)
     return __sync_sub_and_fetch (&__x, 1);
 }
 
+#endif   // _RWSTD_NO_CHAR_ATOMIC_OPS
+
+
+#ifndef _RWSTD_NO_SHORT_ATOMIC_OPS
 
 inline short
 __rw_atomic_predecrement (short &__x, bool)
@@ -126,6 +140,8 @@ __rw_atomic_predecrement (unsigned short &__x, bool)
     _RWSTD_COMPILE_ASSERT (2 == sizeof (unsigned short));
     return __sync_sub_and_fetch (&__x, 1);
 }
+
+#endif   // _RWSTD_NO_SHORT_ATOMIC_OPS
 
 
 inline int
@@ -143,6 +159,8 @@ __rw_atomic_predecrement (unsigned int &__x, bool)
     return __sync_sub_and_fetch (&__x, 1);
 }
 
+
+#ifndef _RWSTD_NO_CHAR_ATOMIC_OPS
 
 inline char
 __rw_atomic_exchange (char &__x, char __y, bool)
@@ -167,6 +185,10 @@ __rw_atomic_exchange (unsigned char &__x, unsigned char __y, bool)
     return __sync_lock_test_and_set (&__x, __y);
 }
 
+#endif   // _RWSTD_NO_CHAR_ATOMIC_OPS
+
+
+#ifndef _RWSTD_NO_SHORT_ATOMIC_OPS
 
 inline short
 __rw_atomic_exchange (short &__x, short __y, bool)
@@ -182,6 +204,8 @@ __rw_atomic_exchange (unsigned short &__x, unsigned short __y, bool)
     _RWSTD_COMPILE_ASSERT (2 == sizeof (unsigned short));
     return __sync_lock_test_and_set (&__x, __y);
 }
+
+#endif   // _RWSTD_NO_SHORT_ATOMIC_OPS
 
 
 inline int
@@ -200,8 +224,7 @@ __rw_atomic_exchange (unsigned int &__x, unsigned int __y, bool)
 }
 
 
-#if defined (__x86_64)
-#  if 4 < _RWSTD_LONG_SIZE
+#if 4 < _RWSTD_LONG_SIZE && !defined (_RWSTD_NO_LONG_ATOMIC_OPS)
 
 inline long
 __rw_atomic_preincrement (long &__x, bool)
@@ -250,12 +273,14 @@ __rw_atomic_exchange (unsigned long &__x, unsigned long __y, bool)
     return __sync_lock_test_and_set (&__x, __y);
 }
 
-#  else
-#    define _RWSTD_NO_LONG_ATOMIC_OPS
-#  endif   // 4 < _RWSTD_LONG_SIZE
+#else
+#  define _RWSTD_NO_LONG_ATOMIC_OPS
+#endif   // 4 < _RWSTD_LONG_SIZE && !_RWSTD_NO_LONG_ATOMIC_OPS
 
 
-#  if defined (_RWSTD_LONG_LONG) && (_RWSTD_LLONG_SIZE > _RWSTD_LONG_SIZE)
+#if    defined (_RWSTD_LONG_LONG)                \
+    && _RWSTD_LLONG_SIZE > _RWSTD_LONG_SIZE       \
+    && !defined (_RWSTD_NO_LLONG_ATOMIC_OPS)
 
 inline _RWSTD_LONG_LONG
 __rw_atomic_preincrement (_RWSTD_LONG_LONG &__x, bool)
@@ -305,13 +330,8 @@ __rw_atomic_exchange (unsigned _RWSTD_LONG_LONG &__x,
     return __sync_lock_test_and_set (&__x, __y);
 }
 
-#  else
-#    define _RWSTD_NO_LLONG_ATOMIC_OPS
-#  endif   // _RWSTD_LONG_LONG && _RWSTD_LLONG_SIZE > _RWSTD_LONG_SIZE
-
-#else   // !__x86_64
-#  define _RWSTD_NO_LONG_ATOMIC_OPS
+#else
 #  define _RWSTD_NO_LLONG_ATOMIC_OPS
-#endif   // __x86_64
+#endif   // _RWSTD_LONG_LONG && LLONG_SIZE > LONG_SIZE && !NO_LLONG_ATOMIC_OPS
 
 }   // namespace __rw

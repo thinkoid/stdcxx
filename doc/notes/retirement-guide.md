@@ -191,9 +191,9 @@ The per-string mutex for 4.1.x binary compatibility, string reference
 counting, facet layout and exported instantiations are representation
 or ABI decisions. Keep them out of an allegedly inert syntax sweep.
 Similarly, a private probe without consumers can be retired, but the
-atomic success stub needs a replacement characterization, and the
-aarch64 entry in `TODO` queues one: the `__sync` built-ins at each
-width, in place of the architecture list in `_atomic.h`.
+atomic success stub characterizes nothing: the `__sync` built-ins
+are characterized at each width by `CHAR_ATOMIC_OPS.cpp` through
+`LLONG_ATOMIC_OPS.cpp`, and `_atomic.h` selects its backend on them.
 
 ## 5. Work order for a sweep
 

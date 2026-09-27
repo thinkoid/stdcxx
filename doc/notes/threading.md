@@ -20,7 +20,7 @@ same cached string, although its representation's reference count was
 protected. It is repaired, together with the publication of facet data
 and of the facets themselves, the facet id race and a mixed
 synchronization of facet counts (chapters 4 and 5). Initialization
-counters and the aarch64 backend remain. **Making every increment
+counters remain. **Making every increment
 stronger would not have repaired these protocols.**
 
 This note describes the source model and guides the remaining MT work.
@@ -120,13 +120,15 @@ compare-and-exchange.
 ### 3.1 Backend selection and the meaning of `false`
 
 [_atomic.h](../../include/rw/_atomic.h) selects the GNU `__sync`
-backend on the specified GNU/x86 configurations, x86 assembly helpers
-on other matching branches, and mutex fallback otherwise. Width
-adapters and missing-width fallbacks add another dispatch layer.
-Selection follows preprocessor conditions, not simply the machine's
-ability to execute atomic instructions: on aarch64 every operation
-falls back to a mutex, and `TODO` queues a characterization of the
-built-ins in place of the architecture list.
+backend where the configuration found the built-ins working on `int`,
+x86 assembly helpers on other matching branches, and mutex fallback
+otherwise. Width adapters and missing-width fallbacks add another
+dispatch layer: each width follows its own characterization,
+`CHAR_ATOMIC_OPS.cpp` through `LLONG_ATOMIC_OPS.cpp`, and a width
+whose characterization fails is served by the mutex templates. On
+aarch64 GCC and Clang compile the built-ins to calls to the compiler
+runtime's outline helpers, which choose the LSE instructions or an
+exclusive load and store loop at run time.
 
 | call form in a reentrant build | mechanism |
 |---|---|

@@ -70,11 +70,15 @@ conditions as well. No preprocessing or build was performed here.
 `ATOMIC_OPS.cpp` currently has a `main` that simply returns zero.
 The vendor-backend retirement left it as a success stub. Its
 commented-out `_RWSTD_NO_ATOMIC_OPS` **does not characterize the GNU
-`__sync` built-ins** the read-modify-write backend uses. Backend
-selection still occurs in `include/rw/_atomic.h`, by an architecture
-list; `TODO` queues a characterization of those built-ins in its
-place for the aarch64 port. Older investigation prose describing the
-former Windows probe no longer describes this source.
+`__sync` built-ins** the read-modify-write backend uses; five probes
+do, one per width. `CHAR_ATOMIC_OPS.cpp`, `SHORT_ATOMIC_OPS.cpp`,
+`INT_ATOMIC_OPS.cpp`, `LONG_ATOMIC_OPS.cpp` and `LLONG_ATOMIC_OPS.cpp`
+run the three built-ins `include/rw/_atomic-sync.h` uses on a value
+that carries across every byte of the type, compiled, linked without
+libatomic and run. `include/rw/_atomic.h` selects the backend when
+the `int` probe passes, and the backend leaves out each width whose
+probe failed. Older investigation prose describing the former Windows
+probe no longer describes this source.
 
 `ATOMIC_BUILTINS.cpp` is the newest probe and the one that does
 characterize atomics: a release store and an acquire load of a
