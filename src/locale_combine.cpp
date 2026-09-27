@@ -180,15 +180,17 @@ _C_construct (const __rw_locale &rhs, const __rw_facet *pfacet)
     }
 
     // increment reference counts for facets (including the newly added one)
+    // with the same lock-free operation that every other update of a
+    // facet's count uses, _C_add_ref() and _C_remove_ref(): the atomic
+    // helpers taking a mutex are atomic only with respect to each other,
+    // not to the lock-free ones (include/rw/_atomic-mutex.h)
     for (inx = 0; inx != _C_n_std_facets; ++inx) {
         if (_C_std_facets [inx])
-            _RWSTD_ATOMIC_PREINCREMENT (_C_std_facets [inx]->_C_ref,
-                                        _C_std_facets [inx]->_C_mutex);
+            _C_add_ref (*_C_std_facets [inx]);
     }
     
     for (inx = 0; inx != _C_n_usr_facets; ++inx) {
-        _RWSTD_ATOMIC_PREINCREMENT (_C_usr_facets [inx]->_C_ref,
-                                    _C_usr_facets [inx]->_C_mutex);
+        _C_add_ref (*_C_usr_facets [inx]);
     }
 }
 
@@ -242,8 +244,7 @@ _C_construct (const __rw_locale &one, const __rw_locale &other, int cat)
 
         if (_C_std_facets [i]) {
             // bump up the facet's reference count of *this' facet
-            _RWSTD_ATOMIC_PREINCREMENT (_C_std_facets [i]->_C_ref,
-                                        _C_std_facets [i]->_C_mutex);
+            _C_add_ref (*_C_std_facets [i]);
         }
     }
 
@@ -252,8 +253,7 @@ _C_construct (const __rw_locale &one, const __rw_locale &other, int cat)
 
         _RWSTD_ASSERT (_C_usr_facets [j]);
 
-        _RWSTD_ATOMIC_PREINCREMENT (_C_usr_facets [j]->_C_ref,
-                                    _C_usr_facets [j]->_C_mutex);
+        _C_add_ref (*_C_usr_facets [j]);
     }
 
     __rw_chararray locname;

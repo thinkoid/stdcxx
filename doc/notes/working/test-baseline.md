@@ -8,7 +8,7 @@ the harness's own table minus the timing columns.
 
 ## 0. tl;dr
 
-- Every test builds. The harness runs 271 programs per configuration
+- Every test builds. The harness runs 272 programs per configuration
   in about a minute for the single-threaded builds and about ten for
   the thread-safe one.
 - The failures cluster into a dozen causes. Two were defects of the
@@ -103,9 +103,9 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 271 | 10,105,613 | 17 | 0 | 1 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 271 | 10,105,495 | 17 | 0 | 1 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 271 | 10,105,679 | 17 | 9 | 7 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 272 | 10,105,653 | 17 | 0 | 1 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 272 | 10,105,535 | 17 | 0 | 1 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,105,719 | 17 | 9 | 7 |
 
 The 15D counts include the MT locale tests, which are not stable
 (chapter 3.4), and that is the whole of the difference between the

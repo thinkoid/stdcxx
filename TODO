@@ -168,21 +168,16 @@ Fix, in three classes, each with its own evidence:
    won; it now generates the id once under a static lock, and
    =22.locale.id.mt= counts the ids 500 fresh facet types take.
 
-   Candidate, no test yet: a facet's reference count is incremented
-   under the facet's mutex where a locale body is built from another
-   (=src/locale_combine.cpp=, the four =_RWSTD_ATOMIC_PREINCREMENT=
-   calls in the two =_C_construct= overloads that pass =_C_mutex=),
-   and incremented and decremented with the lock-free built-ins
-   everywhere else (=__rw_locale::_C_add_ref= and =_C_remove_ref=,
-   which pass =false=); =include/rw/_atomic-mutex.h= says the
-   operations are atomic with respect to each other only when they
-   are passed the same mutex. A locked =++= and a lock-free decrement
-   of the same count can lose an update: a facet that leaks, or one
-   deleted while a locale still holds it. ThreadSanitizer paired the
-   two in the gated probe of the slot readers. Check: build locales
-   from a shared one in some threads while others release their
-   references to the same facet, rounds gated, then count the facets
-   left and the references against the locales alive.
+   A facet's reference count was incremented under the facet's own
+   mutex where a locale body is built from another (the two
+   =__rw_locale::_C_construct= overloads, =src/locale_combine.cpp=)
+   and with the lock-free built-ins everywhere else, and the two are
+   not atomic with respect to each other
+   (=include/rw/_atomic-mutex.h=): updates were lost, facets leaked
+   or died early. All four increments now go through
+   =__rw_locale::_C_add_ref=, and =22.locale.facet.mt= builds and
+   destroys locales from a shared one in eight threads and counts
+   the destructions of the shared facet.
 2. Races by design, no test possible: the =ctype= =narrow= and
    =widen= tables and =codecvt<char>::always_noconv= cache scalars
    that every thread writes with the same value. The accesses are
