@@ -184,13 +184,30 @@ locale::_C_get_std_facet (facet::_C_facet_type  type,
 #ifndef _RWSTD_REENTRANT
 
     // verify that initialization happens exactly once per thread
-    // i.e., multiple threads may safely assign the same `pfacet'
-    // to the same slot
     _RWSTD_ASSERT (!_C_body->_C_std_facets [inx]);
 
 #endif   // _RWSTD_REENTRANT
 
-    _C_body->_C_std_facets [inx] = pfacet;
+    // threads that race to fill the same slot each hold a reference
+    // from _C_manage() to the same facet; the one that fills the slot
+    // keeps its reference, the others return theirs, since the body
+    // releases each slot once (doc/notes/working/facet-first-use.md)
+    bool filled;
+
+    {
+        _RWSTD_MT_GUARD (&_C_body->_C_mutex);
+
+        filled = 0 == _C_body->_C_std_facets [inx];
+
+        if (filled)
+            _C_body->_C_std_facets [inx] = pfacet;
+    }
+
+    if (!filled) {
+        // the facet outlives the call: the slot holds a reference
+        _RW::__rw_facet::_C_manage (pfacet, pfacet->_C_type,
+                                    pfacet->_C_name, 0);
+    }
 
     return pfacet;
 }

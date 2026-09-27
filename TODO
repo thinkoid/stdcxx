@@ -7,25 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under
 =doc/notes/working= carry the longer investigations.
 
-* TODO Racing first use_facet calls leak facet references
-
-=locale::_C_get_std_facet= (=src/locale_core.cpp=) fills an empty
-slot of the locale body with no lock; each of k racing threads takes
-a reference from =__rw_facet::_C_manage=, all store the same pointer,
-and the body's destructor releases the slot once. k - 1 references
-leak and the named facet is never destroyed: 2 to 12 racing threads
-keep one facet alive for 2000 rounds that construct and destroy the
-locale. =doc/notes/working/facet-first-use.md=, chapter 1.
-
-Fix: store under the body's mutex if the slot is still empty,
-otherwise return the extra reference through =_C_manage=; the
-choice between that and filling the whole slot under the lock is in
-the note.
-
-Check: a test in which N threads race the first =use_facet= on a
-fresh named locale and the facet is observed to die with the locale;
-how to observe it through the public interface is to be designed.
-
 * TODO The C++ overloads of the wide string functions under Clang
 
 =21.cwchar= under Clang fails the const and non-const overloads of
@@ -168,8 +149,8 @@ Fix, in three classes, each with its own evidence:
    members kept unused until the next minor version, and
    =22.locale.numpunct.mt= passes. The facet data at
    =src/facet.cpp:288= is fixed, with its test in
-   =22.locale.codecvt.mt=; the reference leak of racing =use_facet=
-   calls has its own entry at the top of this file.
+   =22.locale.codecvt.mt=, and so is the reference leak of racing
+   first =use_facet= calls, with =22.locale.use_facet.mt=.
 2. Races by design, no test possible: the =ctype= =narrow= and
    =widen= tables and =codecvt<char>::always_noconv= cache scalars
    that every thread writes with the same value. Spell the accesses
@@ -182,7 +163,7 @@ Fix, in three classes, each with its own evidence:
    release store and an acquire load; a litmus of that shape shows
    no reordering on the aarch64 machine, so the evidence is the
    memory model, not a failure. The facet slot store in
-   =locale::_C_get_std_facet= (=src/locale_core.cpp:193=) is a
+   =locale::_C_get_std_facet= (=src/locale_core.cpp:203=) is a
    candidate for the same class, pending its own litmus.
 
 Then decide the string atomics clause, and find or retire the
@@ -215,6 +196,27 @@ Fix: to be found.
 Check: =make locales= builds every locale in =etc/nls/gen_list= on
 aarch64, and the generated databases match the x86-64 ones byte for
 byte.
+
+* TODO Keep instantiated facets until the program ends
+
+A named facet dies with the last locale that holds it, and the next
+locale of the same name constructs it again: the constructor, the
+mapping of its database, the lazy initialization of its data. Until
+the reference leak of racing =use_facet= calls was fixed, any race
+kept the facet alive for the rest of the process, an accidental and
+unbounded cache. In 15D on aarch64 the locale MT tests that construct
+locales in a loop run slower with the leak fixed (5-run means, real
+time: =22.locale.ctype.mt= 19.5 s to 22.2 s, =22.locale.numpunct.mt=
+24.1 s to 26.4 s, =22.locale.globals.mt= 2.6 s to 3.6 s).
+
+Fix: explore a facet repository that keeps every facet it
+instantiates until the program terminates: what it costs in memory
+and mappings, how the reference counts and =~__rw_locale= change,
+and what it does to the lifetime of the facet data.
+
+Check: to be designed with the fix; the timings above as the
+baseline, and =22.locale.use_facet.mt= must still find no block
+outliving its round, or be retired with the design.
 
 * TODO The C++17 floor
 

@@ -448,9 +448,9 @@ test_first_use ()
         // are constructed anew
         const std::locale loc (namebuf);
 
-        // fill the locale's slot from this thread alone: threads that
-        // race to fill it leak references to the facet, which then
-        // outlives the locale and is never constructed again
+        // fill the locale's slot from this thread alone, so that the
+        // threads race only the facet's data; the race to fill the
+        // slot is 22.locale.use_facet.mt's
         // (doc/notes/working/facet-first-use.md, chapter 1)
         (void)std::use_facet<CodeCvt>(loc);
 

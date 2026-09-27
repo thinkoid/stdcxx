@@ -19,7 +19,9 @@ Each hides the other, which is why the second one looked rare.
   once, all k take a reference and store the same pointer; the body's
   destructor releases the slot once. k - 1 references leak: the named
   facet is never destroyed, and every later locale of the same name
-  shares it.
+  shares it. The racing threads now fill the slot under the body's
+  lock and the losers return their references;
+  `22.locale.use_facet.mt` carries the case.
 - **The facet data is published before it exists.**
   `__rw_facet::_C_get_data` (`src/facet.cpp`) maps the codeset
   database of a wide `codecvt_byname` with
@@ -36,10 +38,10 @@ Each hides the other, which is why the second one looked rare.
   round, 2000 rounds: with the slot filled by one thread first, 2685,
   2674 and 2698 of 24000 first conversions threw (about 11%); with
   the data stored before the size, none did. The data is now stored
-  first, and `22.locale.codecvt.mt` carries the case. Left to race, the slot
-  leak keeps the facet alive after the first round, the data is
-  never mapped again, and the second defect shows only in the first
-  round of a process.
+  first, and `22.locale.codecvt.mt` carries the case. Before the slot
+  fix, left to race, the leak kept the facet alive after the first
+  round, the data was never mapped again, and the second defect
+  showed only in the first round of a process.
 - Both sites date from the initial import of the library (2005). The
   second defect was pointed out on the dev list in 2012
   (`locale-mt-2012.md`, chapter 2.2, item 3) and could not be shown
@@ -110,10 +112,10 @@ which isolates the cause to the slot.
 - Every later locale of the same name shares the leaked facet, with
   whatever state it has. The locale's lifetime rules no longer hold.
 
-### 1.4. Fix, to decide
+### 1.4. The fix
 
 The body has a mutex (`__rw_locale::_C_mutex`, `src/locale_body.h`),
-used today for its reference count. Two shapes:
+used until now for its reference count. Two shapes were open:
 
 1. Obtain the facet from `_C_manage` outside the body's lock, then
    under it store the pointer if the slot is still empty, and
@@ -121,10 +123,40 @@ used today for its reference count. Two shapes:
 2. Do the whole fill under the body's lock, re-checking the slot
    after acquiring it.
 
-The first keeps `_C_manage`'s static lock and the body's lock from
-nesting. Either way the unlocked read in `use_facet` stays, and the
-slot store must then publish the facet with release ordering (chapter
-3).
+The first is the fix: it keeps `_C_manage`'s static lock and the
+body's lock from nesting, and the body's lock is held for one load
+and one store. A thread that finds the slot filled returns its
+reference after releasing the body's lock; the release cannot destroy
+the facet, since the slot holds a reference to the same object. The
+unlocked read in `use_facet` stays, and with it the ordering question
+of chapter 3.
+
+With the leak gone, a named facet dies with the last locale that
+holds it, and the next locale of its name constructs it and maps its
+database again. That is the intended lifetime for now. The leak had
+been an accidental cache, and the locale MT tests that construct
+locales in a loop pay for its loss: 5-run means of real time in 15D,
+`22.locale.ctype.mt` 19.5 s to 22.2 s, `22.locale.numpunct.mt` 24.1 s
+to 26.4 s, `22.locale.globals.mt` 2.6 s to 3.6 s, the rest within
+noise. Keeping every instantiated facet until the program ends is
+queued in `TODO` as an exploration.
+
+### 1.5. The test
+
+`22.locale.use_facet.mt` observes the facet's death through the test
+driver's replacement `operator new` (`rw_new.h`): each round
+constructs a fresh named locale, N threads race the first
+`use_facet<codecvt<wchar_t, char, mbstate_t> >` on it, the locale is
+destroyed, and no block allocated in the round may remain. The
+replacement operators keep no lock, which is why the test is a
+program of its own: its threads allocate only the facet and the
+facet repository, both under `_C_manage`'s lock. The threads spin
+until all have started (the idiom of `22.locale.statics.mt`); without
+that, one run in ten raced 200 rounds without a leak. With it, on the
+aarch64 machine, 13 of 13 runs before the fix (12 and 2 threads)
+found a 152-byte block, the facet, outliving the locale in round 0;
+14 of 14 after the fix (12, 2 and 1 threads) found none in 200
+rounds.
 
 ## 2. The facet data published early
 
