@@ -118,9 +118,11 @@ tests record symptoms, not a reference;
 =doc/notes/working/test-baseline.md= chapter 3.4 has the details. On
 32 processors they record the harness as well: the tests run one
 thread per processor, the pool fails to start under the harness's
-1 GiB address-space limit, and a test that starts outruns its
-30-second timeout. Whether to change the limit or the default thread
-count is open.
+1 GiB address-space limit, and a test that starts can outrun the
+harness's timeout, 60 seconds, since each threaded section runs to
+the test's own 60-second soft timeout. Whether to change the limit or
+the default thread count, and how an MT test should be shaped so that
+it provokes contention quickly instead of by repetition, is open.
 
 A ThreadSanitizer build of 15D names the cause: =numpunct= caches
 the results of its virtuals in members of the shared facet with no

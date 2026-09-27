@@ -53,7 +53,7 @@ three corresponding Clang configurations.
 
 From a build directory's `tests` subdirectory, `make run` runs every
 built test through `bin/exec`, the harness, with the timeout the
-build's `makefile.in` sets (`RUNFLAGS = -t 30`), and prints one row
+build's `makefile.in` sets (`RUNFLAGS = -t 60`), and prints one row
 per program followed by a summary. The rule exports `TOPDIR`,
 `TMPDIR`, `TZ` and `LD_LIBRARY_PATH`; a test run by hand needs
 `TOPDIR` set to the source tree and the build's `tests` directory as
@@ -105,7 +105,7 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 270 | 10,104,609 | 17 | 0 | 1 |
 | 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 270 | 10,104,491 | 17 | 0 | 1 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 270 | 10,104,675 | 17 | 8 | 8 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 270 | 10,104,675 | 17 | 9 | 7 |
 
 The 15D counts include the MT locale tests, which are not stable
 (chapter 3.4), and that is the whole of the difference between the
@@ -249,10 +249,15 @@ the stack of the 24th thread fails to map (`ENOMEM`), and
 `rw_thread_pool` reports the pool failing to start, the `ERROR` rows
 and exit status 1 of the tables. Under the same limit 16 threads
 start. Run bare, where it does start, `22.locale.numpunct.mt` with
-32 threads passes in two minutes, four times the harness's 30-second
-timeout, the `HUP` rows. On the 12-core aarch64 machine the pool
-starts, and of these tests only `22.locale.time.get.mt` still runs
-past the timeout.
+32 threads passes in two minutes. The tests are meant to run that
+long: each threaded section stops at the test's own soft timeout, 60
+seconds by default, and a test has up to three sections. The
+harness's timeout, 300 seconds since 2007, was cut to 30 on
+2026-09-16 on the belief that these tests hung, which gave the `HUP`
+rows; it is 60 seconds since 2026-09-27, and a test that runs every
+section to its soft timeout still ends in `HUP`. Run bare at 16
+threads under the same address-space limit, all sixteen locale MT
+tests pass, in 2 to 143 seconds.
 
 Hypothesis. This is the `std::locale` MT-safety defect the revival
 set out to find, `22.locale.numpunct.mt` being the test it was
