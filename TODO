@@ -182,6 +182,28 @@ characterization of the builtins in place of the architecture list,
 since the existing =ATOMIC_OPS.cpp= only characterizes the Windows
 =InterlockedIncrement= signature.
 
+* TODO Synchronization on atomic integer flags: a sweep
+
+Several one-time initializations elect their initializer with an
+atomic increment of an integer and publish completion through a
+plain write to a =volatile= flag that the other threads spin on:
+=src/locale_body.cpp:815= (the global locale: =ginit += 1000= after
+=_C_manage=, readers wait on =ginit < 1000= and read =global= with
+no acquire, and =global= is tested unlocked before the flag),
+=include/rw/_mutex.h:286= (the static mutex, with a non-atomic
+fallback where atomics are absent), =src/once.cpp:125= and
+=src/iostream.cpp:247=. =volatile= orders neither the flag against
+the data it guards nor the spin against the reads after it. The list
+is a start, not a census.
+
+Fix: a thorough sweep, later. Census every site that synchronizes
+on an atomic or =volatile= integer, then decide each one: a release
+store and acquire load through the compiler builtins, the site's
+mutex, or =__rw_once=.
+
+Check: the census in a note, each site with its decision; the
+ThreadSanitizer build reports none of them.
+
 * TODO yi_US.CP1255 does not build on aarch64
 
 =make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=:
