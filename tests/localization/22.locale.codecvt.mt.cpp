@@ -30,7 +30,8 @@
 #include <iterator>   // for ostreambuf_iterator
 #include <locale>     // for locale, codecvt
 
-#include <cstring>    // for strlen()
+#include <clocale>    // for setlocale(), LC_CTYPE
+#include <cstring>    // for strcpy(), strlen()
 #include <cwchar>     // for codecvt
 
 #include <rw_locale.h>
@@ -348,7 +349,126 @@ thread_func (void*)
     return 0;
 }
 
+/**************************************************************************/
+
+// the locale whose wide codecvt facet the threads use for the first time
+static const std::locale* first_use_locale;
+
+// converts through the facet of `first_use_locale', which no thread
+// has converted through yet; the first use maps the facet's database
+// (doc/notes/working/facet-first-use.md, chapter 2)
+static void*
+first_use_func (void*)
+{
+    typedef std::codecvt<wchar_t, char, std::mbstate_t> CodeCvt;
+
+    const char     src [] = "abc";
+    wchar_t        dst [4] = { 0 };
+    const char*    from_next = 0;
+    wchar_t*       to_next   = 0;
+    std::mbstate_t state = std::mbstate_t ();
+
+    try {
+        const CodeCvt& cvt = std::use_facet<CodeCvt>(*first_use_locale);
+
+        const std::codecvt_base::result res =
+            cvt.in (state, src, src + 3, from_next, dst, dst + 3, to_next);
+
+        rw_assert (std::codecvt_base::ok == res, 0, __LINE__,
+                   "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
+                   "== ok, got %d, on first use", int (res));
+
+        rw_assert (   L'a' == dst [0] && L'b' == dst [1]
+                   && L'c' == dst [2], 0, __LINE__,
+                   "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
+                   "== L\"abc\", got %{#*ls}, on first use", 3, dst);
+    }
+    catch (const std::exception& ex) {
+        rw_assert (false, 0, __LINE__,
+                   "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
+                   "threw on first use: %s", ex.what ());
+    }
+    catch (...) {
+        rw_assert (false, 0, __LINE__,
+                   "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
+                   "threw an unknown exception on first use");
+    }
+
+    return 0;
+}
+
 }   // extern "C"
+
+/**************************************************************************/
+
+// the number of locales test_first_use constructs, one per round
+int opt_first_use_rounds = 200;
+
+static int
+test_first_use ()
+{
+    typedef std::codecvt<wchar_t, char, std::mbstate_t> CodeCvt;
+
+    // a locale that only the library's database has: a thread that
+    // finds the facet's data missing falls back to the C library,
+    // which must not know the name for the conversion to fail
+    rw_set_locale_root ();
+
+    const char* const locname = rw_localedef ("-w", "de_DE", "ISO-8859-1", 0);
+
+    if (0 == locname) {
+        rw_warn (false, 0, __LINE__,
+                 "failed to build locale de_DE.ISO-8859-1; "
+                 "skipping the first use test");
+        return 0;
+    }
+
+    char namebuf [64];
+    std::strcpy (namebuf, locname);
+
+    if (std::setlocale (LC_CTYPE, namebuf)) {
+        std::setlocale (LC_CTYPE, "C");
+        rw_note (false, 0, __LINE__,
+                 "the C library knows %#s; skipping the first use test",
+                 namebuf);
+        return 0;
+    }
+
+    rw_info (0, 0, 0,
+             "exercising the first use of std::codecvt<wchar_t, char> "
+             "in %#s from %d thread%{?}s%{;}, %d locale%{?}s%{;}",
+             namebuf, opt_nthreads, 1 != opt_nthreads,
+             opt_first_use_rounds, 1 != opt_first_use_rounds);
+
+    int result = 0;
+
+    for (int i = 0; 0 == result && i != opt_first_use_rounds; ++i) {
+
+        // each round a new locale, so that the facet and its data
+        // are constructed anew
+        const std::locale loc (namebuf);
+
+        // fill the locale's slot from this thread alone: threads that
+        // race to fill it leak references to the facet, which then
+        // outlives the locale and is never constructed again
+        // (doc/notes/working/facet-first-use.md, chapter 1)
+        (void)std::use_facet<CodeCvt>(loc);
+
+        first_use_locale = &loc;
+
+        result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
+                                 first_use_func, 0,
+                                 std::size_t (opt_timeout));
+
+        rw_error (result == 0, 0, __LINE__,
+                  "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
+                  opt_nthreads, first_use_func);
+
+        first_use_locale = 0;
+    }
+
+    return result;
+}
 
 /**************************************************************************/
 
@@ -538,6 +658,17 @@ run_test (int, char**)
     rw_error (result == 0, 0, __LINE__,
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
+
+    ///////////////////////////////////////////////////////////////////////
+
+#ifdef _RWSTD_REENTRANT
+
+    // last: it points RWSTD_LOCALE_ROOT at a directory of its own;
+    // only with threads, since a single one cannot race
+    if (0 == result)
+        result = test_first_use ();
+
+#endif   // _RWSTD_REENTRANT
 
     return result;
 }

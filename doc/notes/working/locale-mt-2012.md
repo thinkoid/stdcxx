@@ -166,11 +166,13 @@ Three problems were identified:
    acquire: it reads `_C_impsize` with no lock.
 2. The two loads in `_C_data` have no load-load ordering. A thread
    may see `_C_impsize` set and a stale `_C_impdata`.
-3. The `codecvt_byname` path ends with
+3. The `codecvt_byname` path ended with
    `_C_impdata = __rw_get_facet_data (cat, _C_impsize, 0, codeset);`.
    `_C_impsize` is an output parameter written inside the call,
-   before `_C_impdata` is assigned the return value, so the flag is
-   published before the data even in program order.
+   before `_C_impdata` is assigned the return value, so the flag was
+   published before the data even in program order. This one fails
+   on any hardware; it is fixed, with a test, and
+   `facet-first-use.md` has the account.
 
 The 2012 conclusion: a store-store barrier between the writes and a
 load-load barrier between the reads are needed, and the library has

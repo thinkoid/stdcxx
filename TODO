@@ -7,6 +7,25 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The notes under
 =doc/notes/working= carry the longer investigations.
 
+* TODO Racing first use_facet calls leak facet references
+
+=locale::_C_get_std_facet= (=src/locale_core.cpp=) fills an empty
+slot of the locale body with no lock; each of k racing threads takes
+a reference from =__rw_facet::_C_manage=, all store the same pointer,
+and the body's destructor releases the slot once. k - 1 references
+leak and the named facet is never destroyed: 2 to 12 racing threads
+keep one facet alive for 2000 rounds that construct and destroy the
+locale. =doc/notes/working/facet-first-use.md=, chapter 1.
+
+Fix: store under the body's mutex if the slot is still empty,
+otherwise return the extra reference through =_C_manage=; the
+choice between that and filling the whole slot under the lock is in
+the note.
+
+Check: a test in which N threads race the first =use_facet= on a
+fresh named locale and the facet is observed to die with the locale;
+how to observe it through the public interface is to be designed.
+
 * TODO The C++ overloads of the wide string functions under Clang
 
 =21.cwchar= under Clang fails the const and non-const overloads of
@@ -148,11 +167,9 @@ Fix, in three classes, each with its own evidence:
 1. Bugs, a failing test first. The =numpunct= cache
    (=include/loc/_numpunct.h=): remove it, which also removes the
    read-modify-write on =_C_flags= that an atomic spelling would
-   make costly. The facet data at =src/facet.cpp:288=: =__rw_mmap=
-   writes =_C_impsize= before the mapping exists and the caller
-   stores =_C_impdata= after, so for three system calls another
-   thread sees an initialized facet with no data; this one fails
-   on any hardware.
+   make costly. The facet data at =src/facet.cpp:288= is fixed, with its
+   test in =22.locale.codecvt.mt=; the reference leak of racing
+   =use_facet= calls has its own entry at the top of this file.
 2. Races by design, no test possible: the =ctype= =narrow= and
    =widen= tables and =codecvt<char>::always_noconv= cache scalars
    that every thread writes with the same value. Spell the accesses
