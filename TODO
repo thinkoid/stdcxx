@@ -176,9 +176,20 @@ Fix, in three classes, each with its own evidence:
    =_RWSTD_ATOMIC_LOAD_ACQUIRE=, characterized by
    =ATOMIC_BUILTINS.cpp=); a litmus of that shape shows no
    reordering on the aarch64 machine, so the evidence is the memory
-   model, not a failure. The facet slot store in
-   =locale::_C_get_std_facet= (=src/locale_core.cpp:203=) is a
-   candidate for the same class, pending its own litmus. The three
+   model, not a failure. The facet slot in the locale body is
+   filled once, under the body's lock, by =locale::_C_get_std_facet=
+   with a release store, and read with acquire where no lock is
+   held, in =__rw_get_std_facet= (=include/loc/_locale.h=) and
+   =__rw_locale::_C_is_managed=; =_C_manage= stores a standard
+   facet's type id in the static =Facet::id= only when it changes,
+   the first time, before the facet is published, where it rewrote
+   the same value on every construction against readers of other
+   facets of the type. No litmus was run for the slot; the evidence
+   is the memory model and ThreadSanitizer, whose reports from a
+   round of the locale MT tests went from 979 to 6, the same six in
+   three rounds, none of them this class: four in the test driver,
+   one in a test, and the global locale's =ginit= flag of the sweep
+   entry below. The three
    builders of facet data from the C library, =__rw_get_timepunct=,
    =__rw_get_numpunct= and =__rw_get_moneypunct=, run after
    =_C_get_data= has stored =_C_impsize = size_t (-1)=, so
@@ -187,6 +198,15 @@ Fix, in three classes, each with its own evidence:
    the facet is shared is an acquire load, the re-check under the
    facet's own lock included, since that lock does not exclude the
    builders.
+
+   Candidates not reported yet: =__rw_locale::_C_construct= copies
+   the slots of a shared body with =memcpy= and no lock
+   (=src/locale_combine.cpp=), a copy racing with a slot being
+   filled; and =__rw_facet_id::_C_init= (=src/facet.cpp=) tests and
+   then sets a user facet's id with no lock, so two threads racing
+   the first =use_facet= of a user facet may generate two ids for
+   one type. Check for the second: that race from N threads, the
+   ids compared.
 
 Then decide the string atomics clause, and find or retire the
 thread-safe-locale consumer.

@@ -54,6 +54,15 @@ TOPDIR=<source tree> TSAN_OPTIONS="log_path=tsan halt_on_error=0" ./22.locale.nu
 The resulting `config.h` is identical to the plain 15D one, so the
 instrumented library is the same library.
 
+The later runs take every `22.locale.*.mt` test the same way, bare,
+with `--nthreads=8`, and `--nloops=2000` where the test has the
+option. Two of them cannot run under the sanitizer:
+`22.locale.use_facet.mt` and `22.locale.time.put.libc.mt` count
+blocks through the test driver's replacement `operator new`, whose
+guard check aborts ("trailing guard corruption") against the
+sanitizer's allocator in every build, before and after the fixes, as
+it does under AddressSanitizer; without the sanitizer both pass.
+
 ## 2. The reports
 
 Each data race is a pair of accesses to the same memory from two
@@ -146,6 +155,20 @@ locale body's bookkeeping of managed facets
 (`locale_body.cpp:1136`, `locale_body.h:254`) against
 `_C_get_std_facet` and `_C_manage`. Same species as A, one level
 down. Same intended fix; the body has a mutex too.
+
+Fixed otherwise: not with the mutexes but with the order of the stores
+and the loads. `_C_impsize` and `_C_impdata` are published with
+release stores and read with acquire loads, the data built from the C
+library included, and so is the facet pointer in the locale body's
+slot; the standard facet's type id, which `_C_manage` wrote on every
+construction, is written only when it changes (`facet-first-use.md`,
+chapter 3). With the caches of chapter 3 and the scalar caches of
+`ctype` and `codecvt` done as well, one round of the locale MT tests
+under ThreadSanitizer gives 6 reports where it gave 1,490 before the
+second and third classes of the fix: four in the test driver, one in a
+test, and one in the double-checked initialization of the global
+locale (`locale_body.cpp:807`), which the sweep of atomic integer
+flags in `TODO` covers.
 
 ## 5. The configuration facts
 

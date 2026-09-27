@@ -356,7 +356,11 @@ __rw_get_std_facet (const _STD::locale  &__loc,
 
     _RWSTD_ASSERT (0 != __pfacets);
 
-    const __rw_facet *__facet = __pfacets->__facets [__type >> 1];
+    // a slot is filled at most once, with a release store that
+    // publishes the facet to readers that take no lock
+    // (src/locale_core.cpp)
+    const __rw_facet *__facet =
+        _RWSTD_ATOMIC_LOAD_ACQUIRE (__pfacets->__facets [__type >> 1]);
 
     if (!__facet)
         __facet = __loc._C_get_std_facet (__type, __ctor);

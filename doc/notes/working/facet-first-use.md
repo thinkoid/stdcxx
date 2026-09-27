@@ -287,7 +287,13 @@ with acquire where no lock is held (`_C_data` and the first check in
 `_C_get_data`), through `_RWSTD_ATOMIC_STORE_RELEASE` and
 `_RWSTD_ATOMIC_LOAD_ACQUIRE`, which `etc/config/src/ATOMIC_BUILTINS.cpp`
 characterizes. On aarch64 GCC spells them `stlr` and `ldar`; on x86-64
-both are ordinary moves. The slot remains.
+both are ordinary moves.
+
+The slot is done too: `locale::_C_get_std_facet` fills it under the
+body's lock with a release store, and `__rw_get_std_facet` and
+`__rw_locale::_C_is_managed`, which read it with no lock, load it
+with acquire. At optimization on x86-64 the `use_facet` path compiles
+to the same instructions as before.
 
 The builders of facet data from the C library (`__rw_get_numpunct`,
 `__rw_get_moneypunct`, `__rw_get_timepunct`) run when the database

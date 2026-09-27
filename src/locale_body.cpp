@@ -1127,13 +1127,18 @@ _C_is_managed (int cat) const _THROWS (())
         // the locale is not managed
         for (size_t i = 0, catinx = 0; i != _C_n_std_facets; ++i) {
 
-            if (0 == _C_std_facets [i]) {
+            // another thread may fill the slot at any time, with a
+            // release store (locale::_C_get_std_facet())
+            const __rw_facet* const pfacet =
+                _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_std_facets [i]);
+
+            if (0 == pfacet) {
                 // skip facets that are not installed
                 continue;
             }
 
             const __rw_facet::_C_facet_type facet_type =
-                _C_get_facet_type (*_C_std_facets [i]);
+                _C_get_facet_type (*pfacet);
 
             switch (facet_type) {
             case __rw_facet::_C_money_get:
@@ -1183,8 +1188,7 @@ _C_is_managed (int cat) const _THROWS (())
             }
 
             // get the facet name (or "C" if null)
-            const char* const facet_name =
-                _C_std_facets [i]->_C_get_name ();
+            const char* const facet_name = pfacet->_C_get_name ();
 
             _RWSTD_ASSERT (0 != facet_name);
             _RWSTD_ASSERT (0 != locname);

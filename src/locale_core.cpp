@@ -191,7 +191,9 @@ locale::_C_get_std_facet (facet::_C_facet_type  type,
     // threads that race to fill the same slot each hold a reference
     // from _C_manage() to the same facet; the one that fills the slot
     // keeps its reference, the others return theirs, since the body
-    // releases each slot once (doc/notes/working/facet-first-use.md)
+    // releases each slot once (doc/notes/working/facet-first-use.md);
+    // the store is a release, since __rw_get_std_facet() and
+    // __rw_locale::_C_is_managed() read the slot with no lock
     bool filled;
 
     {
@@ -200,7 +202,8 @@ locale::_C_get_std_facet (facet::_C_facet_type  type,
         filled = 0 == _C_body->_C_std_facets [inx];
 
         if (filled)
-            _C_body->_C_std_facets [inx] = pfacet;
+            _RWSTD_ATOMIC_STORE_RELEASE (_C_body->_C_std_facets [inx],
+                                         pfacet);
     }
 
     if (!filled) {

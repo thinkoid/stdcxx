@@ -496,9 +496,14 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
 
             _RWSTD_ASSERT (0 != pfacet);
 
-            // set the facet's numeric id
-            *__rw_access::_C_get_pid (*pfacet) =
-                _RWSTD_STATIC_CAST (size_t, (type + 1) / 2);
+            // set the facet's numeric id, shared by every facet of the
+            // type; only the first store changes it, and it precedes
+            // the facet's publication, so later ones are skipped rather
+            // than race with readers of other facets of the same type
+            const size_t id = _RWSTD_STATIC_CAST (size_t, (type + 1) / 2);
+
+            if (*__rw_access::_C_get_pid (*pfacet) != id)
+                *__rw_access::_C_get_pid (*pfacet) = id;
 
             if (__rw_access::_C_get_type (*pfacet) != type) {
                 // set the type of the facet if not already set
