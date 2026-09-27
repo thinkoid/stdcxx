@@ -226,6 +226,37 @@ characterization of the builtins in place of the architecture list,
 since the existing =ATOMIC_OPS.cpp= only characterizes the Windows
 =InterlockedIncrement= signature.
 
+* TODO MT tests that provoke contention instead of waiting for it
+
+The sixteen =22.locale.*.mt= tests run one thread per processor, up
+to 32, for 10,000 to 200,000 iterations per thread, each threaded
+section until its own 60-second soft timeout. After the first
+iteration everything they touch is cached, so the rest measures the
+library's locks in steady state: at 32 threads =22.locale.numpunct.mt=
+keeps about one core busy for two minutes. On 32 processors the
+harness's 1 GiB address-space limit (=etc/config/GNUmakefile.tst=,
+2007, for build machines shared with other products) cannot hold 32
+threads' 8 MiB stacks and 64 MiB =malloc= arenas, so the pool fails
+to start, and a test that starts outruns the 60-second harness
+timeout. The two tests written the other way,
+=22.locale.use_facet.mt= and =22.locale.time.put.libc.mt=, find
+their races in a second or two: a few threads parked on a barrier,
+released together at the first use of a fresh object, round after
+round.
+
+Fix: rewrite the locale MT tests in that shape, or retire the ones
+the gated tests make redundant: 4 to 8 threads whatever the
+processor count, released from a barrier, many short rounds each on
+fresh state (a new locale or facet) so the first-use window opens
+again, a small thread stack; steady-state races are left to the
+ThreadSanitizer build, which needs few iterations to see them. With
+a fixed small thread count the 1 GiB limit stays a meaningful guard
+and the 60-second timeout becomes a hang detector.
+
+Check: every locale MT test passes in a few seconds under the harness
+in 15D on any processor count, the 15D rows become a reference, and
+each test still fails against the library before the fix it covers.
+
 * TODO Synchronization on atomic integer flags: a sweep
 
 Several one-time initializations elect their initializer with an
