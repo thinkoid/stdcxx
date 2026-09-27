@@ -185,9 +185,12 @@ public:
 
     // returns a pointer to the facet's implementation data
     // if it exists, 0 otherwise; a non-zero `impsize' publishes
-    // `impdata', hence the acquire load (src/facet.cpp)
+    // `impdata', hence the acquire load (src/facet.cpp), and so
+    // does `impdata' itself when the data is built from the C
+    // library after `impsize' is set (src/punct.cpp)
     const void* _C_data () const {
-        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize) ? _C_impdata
+        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize)
+            ? _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata)
             : _RWSTD_CONST_CAST (__rw_facet*, this)->_C_get_data ();
     }
 

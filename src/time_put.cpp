@@ -1040,12 +1040,16 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 #  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_NL_LANGINFO
 
-    // set `impdata' and `impsize' (base dtor will delete)
-    __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet))
-        = pun;
+    // set `impdata' and `impsize' (base dtor will delete); the stores
+    // publish the data to threads that hold neither lock and read the
+    // two members with acquire loads (__rw_facet::_C_data)
+    _RWSTD_ATOMIC_STORE_RELEASE (
+        __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        pun);
 
-    __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet))
-        = _RWSTD_SIZE_MAX;
+    _RWSTD_ATOMIC_STORE_RELEASE (
+        __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        _RWSTD_SIZE_MAX);
 
     // call self recursively on already initialized `impdata'
     return __rw_get_timepunct (pfacet, flags, inx);

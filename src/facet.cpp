@@ -164,9 +164,12 @@ void __rw_facet::_C_set_name (const char *name, char *buf, size_t size)
 const void* __rw_facet::_C_get_data ()
 {
     // check initialization; the acquire load pairs with the release
-    // stores below, which publish `impdata' through `impsize'
+    // stores below, which publish `impdata' through `impsize'; the
+    // builders of data from the C library run once `impsize' is set,
+    // under a lock of their own, and publish `impdata' itself with a
+    // release store (src/punct.cpp), so it is read with acquire
     if (_RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize))
-        return _C_impdata;
+        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata);
 
     // `pid' may be 0 if the facet has not been obtained
     // by a call to use_facet (but instead constructed
@@ -174,14 +177,15 @@ const void* __rw_facet::_C_get_data ()
     // in a locale object); in that case, locale database
     // mapping for the facet is not available
     if (!_C_pid)
-        return _C_impdata;
+        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata);
 
     // lock the object
     _RWSTD_MT_GUARD (&_C_mutex);
 
-    // check again for initialization
-    if (_C_impsize)
-        return _C_impdata;
+    // check again for initialization; the object's lock does not
+    // exclude the builders, hence the atomic loads
+    if (_RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize))
+        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata);
 
     __rw_chararray locname (_C_name && _C_name [0] ? _C_name : "C");
 

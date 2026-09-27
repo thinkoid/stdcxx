@@ -219,12 +219,16 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
 
     memcpy (s + num->falsename_off [winx] + fnsz, grp, grsz);
 
-    // set `impdata' and `impsize' (facet base dtor will delete)
-    __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)) =
-        pun;
+    // set `impdata' and `impsize' (facet base dtor will delete); the
+    // stores publish the data to threads that hold neither lock and
+    // read the two members with acquire loads (__rw_facet::_C_data)
+    _RWSTD_ATOMIC_STORE_RELEASE (
+        __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        pun);
 
-    __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)) =
-        (size_t)(-1);
+    _RWSTD_ATOMIC_STORE_RELEASE (
+        __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        (size_t)(-1));
 
     // call self recursively on already initialized `impdata'
     return __rw_get_numpunct (pfacet, flags);
@@ -547,12 +551,16 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
     else
         memset (mon->neg_format [intl], none, sizeof *pat);
 
-    // set `impdata' and `impsize' (facet base dtor will delete)
-    __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)) =
-        pun;
+    // set `impdata' and `impsize' (facet base dtor will delete); the
+    // stores publish the data to threads that hold neither lock and
+    // read the two members with acquire loads (__rw_facet::_C_data)
+    _RWSTD_ATOMIC_STORE_RELEASE (
+        __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        pun);
 
-    __rw_access::_C_get_impsize(*_RWSTD_CONST_CAST (__rw_facet*, pfacet)) =
-        (size_t)(-1);
+    _RWSTD_ATOMIC_STORE_RELEASE (
+        __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        (size_t)(-1));
 
     // call self recursively on already initialized `impdata'
     return __rw_get_moneypunct (pfacet, flags);

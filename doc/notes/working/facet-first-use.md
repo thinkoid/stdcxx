@@ -289,6 +289,17 @@ with acquire where no lock is held (`_C_data` and the first check in
 characterizes. On aarch64 GCC spells them `stlr` and `ldar`; on x86-64
 both are ordinary moves. The slot remains.
 
+The builders of facet data from the C library (`__rw_get_numpunct`,
+`__rw_get_moneypunct`, `__rw_get_timepunct`) run when the database
+has no data for the facet, after `_C_get_data` has stored
+`_C_impsize = size_t (-1)`: the flag is already set, and `_C_impdata`
+itself is what publishes their data. They store it, and the size
+again, with release under `__rw_setlocale`, and every read of the two
+members once the facet is shared is an acquire load, including the
+re-check under the facet's own lock, which does not exclude the
+builders. ThreadSanitizer paired their stores with those reads until
+then, and with the reads of the data they build.
+
 ## 4. The reproducer
 
 One process, N worker threads parked on a barrier. Each round the

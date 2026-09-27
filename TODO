@@ -178,14 +178,15 @@ Fix, in three classes, each with its own evidence:
    reordering on the aarch64 machine, so the evidence is the memory
    model, not a failure. The facet slot store in
    =locale::_C_get_std_facet= (=src/locale_core.cpp:203=) is a
-   candidate for the same class, pending its own litmus. So are the
-   three builders of facet data from the C library,
-   =__rw_get_timepunct=, =__rw_get_numpunct= and
-   =__rw_get_moneypunct=: =_C_get_data= has already stored
-   =_C_impsize = size_t (-1)= when they run, so the flag is set
-   before the data and =_C_impdata= itself is what publishes it, a
-   plain store under =__rw_setlocale= against the plain load of the
-   unlocked first check.
+   candidate for the same class, pending its own litmus. The three
+   builders of facet data from the C library, =__rw_get_timepunct=,
+   =__rw_get_numpunct= and =__rw_get_moneypunct=, run after
+   =_C_get_data= has stored =_C_impsize = size_t (-1)=, so
+   =_C_impdata= itself publishes their data: they store it, and the
+   size again, with release, and every read of the two members once
+   the facet is shared is an acquire load, the re-check under the
+   facet's own lock included, since that lock does not exclude the
+   builders.
 
 Then decide the string atomics clause, and find or retire the
 thread-safe-locale consumer.
