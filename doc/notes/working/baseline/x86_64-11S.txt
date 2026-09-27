@@ -127,8 +127,10 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.synopsis                            0    0       39      0   100%
 22.locale.time.get.mt                         0    0        0      0   100%
 22.locale.time.get                            0   24     2010      0   100%
+22.locale.time.put.libc.mt                    0    0      200      0   100%
 22.locale.time.put.mt                         0    0        0      0   100%
 22.locale.time.put                            0    0     2156      0   100%
+22.locale.use_facet.mt                        0    0      200      0   100%
 23.associative.stdcxx-16                   NOUT    0                       
 23.bitset.cons                                0    0     2347      0   100%
 23.bitset.cons.stdcxx-297                  NOUT    0                       
@@ -268,11 +270,11 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 atomic_add                                    0    0        0      0   100%
 atomic_xchg                                   0    0        0      0   100%
 PROGRAM SUMMARY:
-  Programs:                   268
+  Programs:                   270
   Non-zero exit status:         0
   Signalled:                    1
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10104209
+  Assertions:            10104609
   Failed assertions:           17

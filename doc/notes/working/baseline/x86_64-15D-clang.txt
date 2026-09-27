@@ -110,25 +110,27 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.money.get.mt                        1    0                       
 22.locale.money.get                           0    0     3888      0   100%
 22.locale.money.get.stdcxx-62              NOUT    0                       
-22.locale.money.put.mt                        1    0                       
+22.locale.money.put.mt                      HUP    0                       
 22.locale.money.put                           0    0     1328      0   100%
 22.locale.moneypunct.mt                       1    0                       
 22.locale.moneypunct                          0    0      540      0   100%
 22.locale.name                                0    0        0      0   100%
-22.locale.num.get.mt                          1    0                       
+22.locale.num.get.mt                        HUP    0                       
 22.locale.num.get                             0    0    65508      0   100%
 22.locale.num.put.mt                        HUP    0                       
 22.locale.num.put                             0    2     1671      0   100%
 22.locale.num.put.stdcxx-2                 NOUT    0                       
-22.locale.numpunct.mt                       HUP    0                       
+22.locale.numpunct.mt                         1    0                       
 22.locale.numpunct                            0    0       56      0   100%
 22.locale.statics.mt                         23    0                       
 22.locale.stdcxx-554                       NOUT    0                       
 22.locale.synopsis                            0    0       39      0   100%
 22.locale.time.get.mt                       HUP    0                       
 22.locale.time.get                            0   24     2010      0   100%
+22.locale.time.put.libc.mt                    0    0      200      0   100%
 22.locale.time.put.mt                       HUP    0                       
 22.locale.time.put                            0    0     2156      0   100%
+22.locale.use_facet.mt                        0    0      200      0   100%
 23.associative.stdcxx-16                   NOUT    0                       
 23.bitset.cons                                0    0     2347      0   100%
 23.bitset.cons.stdcxx-297                  NOUT    0                       
@@ -268,11 +270,11 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 atomic_add                                    0    0       66      0   100%
 atomic_xchg                                   0    0       22      0   100%
 PROGRAM SUMMARY:
-  Programs:                   268
-  Non-zero exit status:         8
-  Signalled:                    8
+  Programs:                   270
+  Non-zero exit status:         7
+  Signalled:                    9
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            95
-  Assertions:            10104270
+  Assertions:            10104670
   Failed assertions:           22

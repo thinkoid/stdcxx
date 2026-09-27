@@ -8,7 +8,7 @@ the harness's own table minus the timing columns.
 
 ## 0. tl;dr
 
-- Every test builds. The harness runs 268 programs per configuration
+- Every test builds. The harness runs 270 programs per configuration
   in about a minute for the single-threaded builds and about ten for
   the thread-safe one.
 - The failures cluster into a dozen causes. Two were defects of the
@@ -46,8 +46,8 @@ the harness's own table minus the timing columns.
   doubles by sign since 2005 and now counts the values between them.
 
 Toolchain: GCC 16.2.1, glibc 2.44, x86-64 Linux. Tables refreshed
-2026-09-18, afternoon, including the three corresponding Clang
-configurations.
+2026-09-27 from build directories configured afresh, including the
+three corresponding Clang configurations.
 
 ## 1. Running the suite
 
@@ -103,9 +103,9 @@ an archive and `d` a shared library, lowercase 32-bit and uppercase
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 10,104,209 | 17 | 0 | 1 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 10,104,091 | 17 | 0 | 1 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 10,104,275 | 17 | 7 | 9 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 270 | 10,104,609 | 17 | 0 | 1 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 270 | 10,104,491 | 17 | 0 | 1 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 270 | 10,104,675 | 17 | 8 | 8 |
 
 The 15D counts include the MT locale tests, which are not stable
 (chapter 3.4), and that is the whole of the difference between the
@@ -130,6 +130,11 @@ re-pinned by hand without them.
 The afternoon refresh of the same day records the four Numerics rows
 and `22.locale.num.get` (chapter 3.10); `17.extensions` asks five
 questions fewer, which is the drop in the assertion totals.
+The 2026-09-27 refresh adds two MT programs, `22.locale.use_facet.mt`
+and `22.locale.time.put.libc.mt`, 200 assertions each, which pass in
+every configuration; no other row moves outside 15D, and the 15D
+rows of the other locale MT tests are what chapter 3.4 says they
+are on this machine.
 
 The last measurement on a current toolchain before this one, made
 by hand in 2026-09 before every test linked, was 10,066,804
@@ -230,19 +235,31 @@ assertion in a thread, `0 == rw_strncmp (tn.c_str (),
 data.truename_.c_str ())` at line 147, a thread reading another
 locale's `truename`; the second died of an uncaught
 `std::runtime_error` thrown in a thread, a locale that failed to
-construct; the third passed. `22.locale.cons.mt` reports its thread
-pool failing to start within a millisecond. Each test runs 32
-threads over the locales it generates with `localedef`; a copy run
-where `localedef` is not reachable passes with 4 assertions, which
-is how "passes when run alone" first misled this note.
+construct; the third passed. Each test runs 32 threads over the
+locales it generates with `localedef`; a copy run where `localedef`
+is not reachable passes with 4 assertions, which is how "passes when
+run alone" first misled this note.
+
+The thread count is the number of processors, 32 on the machine the
+tables come from, and two limits of the harness stand in its way.
+The harness runs every test under a 1 GiB address-space limit
+(`--ulimit=as:1073741824`, `etc/config/GNUmakefile.tst`), and each
+thread takes an 8 MiB stack and a 64 MiB `malloc` arena from it:
+the stack of the 24th thread fails to map (`ENOMEM`), and
+`rw_thread_pool` reports the pool failing to start, the `ERROR` rows
+and exit status 1 of the tables. Under the same limit 16 threads
+start. Run bare, where it does start, `22.locale.numpunct.mt` with
+32 threads passes in two minutes, four times the harness's 30-second
+timeout, the `HUP` rows. On the 12-core aarch64 machine the pool
+starts, and of these tests only `22.locale.time.get.mt` still runs
+past the timeout.
 
 Hypothesis. This is the `std::locale` MT-safety defect the revival
 set out to find, `22.locale.numpunct.mt` being the test it was
 first seen in, and it reproduces on x86-64 in a debug shared build:
 facet data read under no lock, or a facet id race, with the exact
 symptom depending on the interleaving. The thread pool failure is
-the same defect seen from the pool, or a second one; the errno of
-the failing `pthread_create` says which.
+neither: it is the address-space limit above.
 
 Intended. The entry for it is the MT entry in `TODO`. The
 instruments are a ThreadSanitizer build of the library and the MT

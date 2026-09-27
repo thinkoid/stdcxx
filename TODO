@@ -113,10 +113,14 @@ differently on every run of the same binary: three bare runs of
 =22.locale.numpunct.mt= died on its own assertion in a thread (a
 thread reading another locale's =truename=, line 147), died of an
 uncaught =std::runtime_error= from a locale that failed to
-construct in a thread, and passed. =22.locale.cons.mt= reports its
-thread pool failing to start. The 15D baseline rows for these tests
-record symptoms, not a reference; =doc/notes/working/test-baseline.md=
-chapter 3.4 has the details.
+construct in a thread, and passed. The 15D baseline rows for these
+tests record symptoms, not a reference;
+=doc/notes/working/test-baseline.md= chapter 3.4 has the details. On
+32 processors they record the harness as well: the tests run one
+thread per processor, the pool fails to start under the harness's
+1 GiB address-space limit, and a test that starts outruns its
+30-second timeout. Whether to change the limit or the default thread
+count is open.
 
 A ThreadSanitizer build of 15D names the cause: =numpunct= caches
 the results of its virtuals in members of the shared facet with no
