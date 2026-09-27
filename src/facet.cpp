@@ -163,8 +163,9 @@ void __rw_facet::_C_set_name (const char *name, char *buf, size_t size)
 
 const void* __rw_facet::_C_get_data ()
 {
-    // check initialization
-    if (_C_impsize)
+    // check initialization; the acquire load pairs with the release
+    // stores below, which publish `impdata' through `impsize'
+    if (_RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize))
         return _C_impdata;
 
     // `pid' may be 0 if the facet has not been obtained
@@ -245,19 +246,19 @@ const void* __rw_facet::_C_get_data ()
 
             // set `impsize' to non-zero value to avoid subsequent
             // attempts at reinitialization
-            _C_impsize = size_t (-1);
+            _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, size_t (-1));
             return 0;
         }
 
         if (!is_wcodecvt_byname || (pstr && pdata)) {
             _C_impdata = pdata; 
-            _C_impsize = sz;
+            _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, sz);
             return _C_impdata;
         }
     }
     else if (!is_wcodecvt_byname) {
         _C_impdata = pdata;
-        _C_impsize = sz;
+        _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, sz);
         return _C_impdata;
     }
 
@@ -293,7 +294,7 @@ const void* __rw_facet::_C_get_data ()
         __rw_get_facet_data (cat, cvtsize, 0, codeset);
 
     _C_impdata = cvtdata;
-    _C_impsize = cvtsize;
+    _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, cvtsize);
 
     // unmap the LC_CTYPE database
     __rw_munmap (pdata, sz);

@@ -184,9 +184,10 @@ public:
     static int _C_opts;
 
     // returns a pointer to the facet's implementation data
-    // if it exists, 0 otherwise
+    // if it exists, 0 otherwise; a non-zero `impsize' publishes
+    // `impdata', hence the acquire load (src/facet.cpp)
     const void* _C_data () const {
-        return _C_impsize ? _C_impdata
+        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize) ? _C_impdata
             : _RWSTD_CONST_CAST (__rw_facet*, this)->_C_get_data ();
     }
 

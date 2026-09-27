@@ -282,6 +282,13 @@ defined. On the aarch64 machine a litmus test of the `_C_data` shape
 reordering in 60 million rounds, so this part has no failing test;
 it is the third class of the fix list in `TODO`.
 
+The second site is done: `_C_impsize` is stored with release and read
+with acquire where no lock is held (`_C_data` and the first check in
+`_C_get_data`), through `_RWSTD_ATOMIC_STORE_RELEASE` and
+`_RWSTD_ATOMIC_LOAD_ACQUIRE`, which `etc/config/src/ATOMIC_BUILTINS.cpp`
+characterizes. On aarch64 GCC spells them `stlr` and `ldar`; on x86-64
+both are ordinary moves. The slot remains.
+
 ## 4. The reproducer
 
 One process, N worker threads parked on a barrier. Each round the

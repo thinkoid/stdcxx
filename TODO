@@ -150,7 +150,17 @@ Fix, in three classes, each with its own evidence:
    =22.locale.numpunct.mt= passes. The facet data at
    =src/facet.cpp:288= is fixed, with its test in
    =22.locale.codecvt.mt=, and so is the reference leak of racing
-   first =use_facet= calls, with =22.locale.use_facet.mt=.
+   first =use_facet= calls, with =22.locale.use_facet.mt=. Still
+   without a test: =__rw_get_timepunct= (=src/time_put.cpp=) builds
+   a facet's data from the C library when the database has none, but
+   =_C_get_data= has already stored =_C_impsize = size_t (-1)=, so the
+   flag is set before the data and the pointer store publishes it
+   with nothing ordering it; and two threads that find the data
+   missing both build it, serialized by =__rw_setlocale= with no
+   second check, the second overwriting and leaking the first. The
+   check: N threads racing the first =time_put= call on a facet of a
+   locale only the C library knows, no block outliving the locale
+   (=rw_new.h=, as in =22.locale.use_facet.mt=).
 2. Races by design, no test possible: the =ctype= =narrow= and
    =widen= tables and =codecvt<char>::always_noconv= cache scalars
    that every thread writes with the same value. Spell the accesses
@@ -158,11 +168,12 @@ Fix, in three classes, each with its own evidence:
    which compile to the same instructions as the plain ones, so the
    fix has no runtime cost and ThreadSanitizer stops reporting them.
 3. Ordering the language requires without a failing test: the
-   publication of =_C_impdata= through =_C_impsize=
-   (=src/facet.cpp:253=, read in =include/loc/_facet.h:189=) needs a
-   release store and an acquire load; a litmus of that shape shows
-   no reordering on the aarch64 machine, so the evidence is the
-   memory model, not a failure. The facet slot store in
+   publication of =_C_impdata= through =_C_impsize= is a release
+   store and an acquire load (=_RWSTD_ATOMIC_STORE_RELEASE=,
+   =_RWSTD_ATOMIC_LOAD_ACQUIRE=, characterized by
+   =ATOMIC_BUILTINS.cpp=); a litmus of that shape shows no
+   reordering on the aarch64 machine, so the evidence is the memory
+   model, not a failure. The facet slot store in
    =locale::_C_get_std_facet= (=src/locale_core.cpp:203=) is a
    candidate for the same class, pending its own litmus.
 

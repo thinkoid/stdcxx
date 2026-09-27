@@ -605,6 +605,19 @@
 
 #endif   // _RWSTD_REENTRANT
 
+// a release store of a flag makes the data written before it visible
+// to a thread that reads the flag with an acquire load and takes no
+// lock; without the built-ins both are ordinary accesses
+#if defined (_RWSTD_REENTRANT) && !defined (_RWSTD_NO_ATOMIC_BUILTINS)
+#  define _RWSTD_ATOMIC_STORE_RELEASE(x, y)                          \
+          __atomic_store_n (&(x), (y), __ATOMIC_RELEASE)
+#  define _RWSTD_ATOMIC_LOAD_ACQUIRE(x)                              \
+          __atomic_load_n (&(x), __ATOMIC_ACQUIRE)
+#else   // !_RWSTD_REENTRANT || _RWSTD_NO_ATOMIC_BUILTINS
+#  define _RWSTD_ATOMIC_STORE_RELEASE(x, y)   ((x) = (y))
+#  define _RWSTD_ATOMIC_LOAD_ACQUIRE(x)       (x)
+#endif   // _RWSTD_REENTRANT && !_RWSTD_NO_ATOMIC_BUILTINS
+
 // thread-local storage declaration
 #ifndef _RWSTD_THREAD
 #  define _RWSTD_THREAD   /* empty */
