@@ -686,17 +686,17 @@ locale (_RW::__rw_locale &rhs, const facet *pfacet)
 const locale::facet* locale::
 _C_get_facet (const id &fid) const
 {
-    // initialize id if not yet initialized
-    if (!fid._C_id)
-        fid._C_init ();
+    // initialize id if not yet initialized, and use the value the
+    // initialization returns rather than read the member again
+    const size_t facet_id = fid._C_init ();
 
     // properly initialized facet id's are non-zero
-    _RWSTD_ASSERT (0 != fid._C_id);
+    _RWSTD_ASSERT (0 != facet_id);
 
     _RWSTD_ASSERT (0 != _C_body);
 
     // find the index at which the facet is stored in one of the facet arrays
-    const size_t inx = _C_body->_C_get_facet_inx (fid._C_id);
+    const size_t inx = _C_body->_C_get_facet_inx (facet_id);
     if (size_t (-1) == inx)
         return 0;
 
@@ -713,7 +713,7 @@ _C_get_facet (const id &fid) const
         _RWSTD_ASSERT (pfacet->_C_pid);
 
         // make sure the static Facet::id matches its (non-static) id member
-        _RWSTD_ASSERT (*pfacet->_C_pid == fid._C_id);
+        _RWSTD_ASSERT (*pfacet->_C_pid == facet_id);
     }
 
     return pfacet;

@@ -162,7 +162,11 @@ Fix, in three classes, each with its own evidence:
    second overwriting and leaking the first; the builder now checks
    again under =__rw_setlocale=, as the two in =src/punct.cpp= have
    since 2007, and =22.locale.time.put.libc.mt= counts the blocks
-   that outlive each locale.
+   that outlive each locale. =__rw_facet_id::_C_init= tested and then
+   set a user-defined facet's id with no lock, so threads racing the
+   first use of a facet type each generated an id and the last store
+   won; it now generates the id once under a static lock, and
+   =22.locale.id.mt= counts the ids 500 fresh facet types take.
 
    Candidate, no test yet: a facet's reference count is incremented
    under the facet's mutex where a locale body is built from another
@@ -223,12 +227,6 @@ Fix, in three classes, each with its own evidence:
    facet is used and relaxed where only the pointers are compared;
    a gated probe of 500 rounds showed =_C_construct='s copy racing
    the fill under ThreadSanitizer before and not after.
-
-   Candidate not reported yet: =__rw_facet_id::_C_init=
-   (=src/facet.cpp=) tests and then sets a user facet's id with no
-   lock, so two threads racing the first =use_facet= of a user
-   facet may generate two ids for one type. Check: that race from N
-   threads, the ids compared.
 
 Then decide the string atomics clause, and find or retire the
 thread-safe-locale consumer.

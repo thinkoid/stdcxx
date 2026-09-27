@@ -616,28 +616,36 @@ static size_t __rw_id_gen = __rw_facet::_C_last_type + 1;
 
 size_t __rw_facet_id::_C_init () const _THROWS (())
 {
-    // return immediately if already initialized
+    // return immediately if already initialized; the id is stored
+    // once, with release, below
+    const size_t id = _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_id);
+    if (id)
+        return id;
+
+    // threads that race the first use of a facet type all find the
+    // id 0; without the lock each generated an id of its own and the
+    // last store won, while the others went on with ids that no
+    // longer matched the facets installed under them
+    _RWSTD_MT_STATIC_GUARD (__rw_facet_id);
+
     if (_C_id)
         return _C_id;
-
-    // atomically increment id generator
-    // the above initialization is already guarded and the initialization
-    // of standard facets has a chance of completing at the step above
 
     // generate a unique id
     const size_t new_id = _RWSTD_ATOMIC_PREINCREMENT (__rw_id_gen, false);
 
 #ifndef _RWSTD_NO_MUTABLE
 
-    _C_id = new_id;
+    _RWSTD_ATOMIC_STORE_RELEASE (_C_id, new_id);
 
 #else   // if defined (_RWSTD_NO_MUTABLE)
 
-    _RWSTD_CONST_CAST (__rw_facet_id*, this)->_C_id = new_id;
+    _RWSTD_ATOMIC_STORE_RELEASE (
+        _RWSTD_CONST_CAST (__rw_facet_id*, this)->_C_id, new_id);
 
 #endif   // _RWSTD_NO_MUTABLE
 
-    return _C_id;
+    return new_id;
 }
 
 }   // namespace __rw
