@@ -181,8 +181,8 @@ Fix, in three classes, each with its own evidence:
    model, not a failure. The facet slot in the locale body is
    filled once, under the body's lock, by =locale::_C_get_std_facet=
    with a release store, and read with acquire where no lock is
-   held, in =__rw_get_std_facet= (=include/loc/_locale.h=) and
-   =__rw_locale::_C_is_managed=; =_C_manage= stores a standard
+   held, in =__rw_get_std_facet= (=include/loc/_locale.h=),
+   =__rw_locale::_C_is_managed= and =locale::_C_get_facet=; =_C_manage= stores a standard
    facet's type id in the static =Facet::id= only when it changes,
    the first time, before the facet is published, where it rewrote
    the same value on every construction against readers of other

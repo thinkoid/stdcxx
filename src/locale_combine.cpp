@@ -702,8 +702,11 @@ _C_get_facet (const id &fid) const
     if (size_t (-1) == inx)
         return 0;
 
+    // another thread may fill a standard facet's slot at any time,
+    // with a release store (locale::_C_get_std_facet()); the slots
+    // of user-defined facets are only filled by the constructors
     const locale::facet* const pfacet = inx < _RW::__rw_locale::_C_n_std_facets
-        ? _C_body->_C_std_facets [inx]
+        ? _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_body->_C_std_facets [inx])
         : _C_body->_C_usr_facets [inx - _RW::__rw_locale::_C_n_std_facets];
 
     if (pfacet) {
