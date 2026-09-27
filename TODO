@@ -229,15 +229,41 @@ thread-safe-locale consumer.
 Check: the ThreadSanitizer build runs every =22.locale.*.mt= test
 with no report from the library, three runs each.
 
-The hardware is aarch64 Linux. There =include/rw/_atomic.h= selects
-no backend: the GNU builtin branch is gated on an architecture list
-that names only i486, x86-64 and ia64, so the chain falls through to
-=_RWSTD_NO_ATOMIC_OPS= and every atomic operation becomes a mutex
-operation, serializing the paths the hunt wants unfenced. Before the
-MT tests run there, the builtin backend needs an aarch64 port: a
-characterization of the builtins in place of the architecture list,
-since the existing =ATOMIC_OPS.cpp= only characterizes the Windows
-=InterlockedIncrement= signature.
+On aarch64 the atomic operations are mutex operations until the next
+entry is done.
+
+* TODO The atomic operations on aarch64
+
+=include/rw/_atomic.h= includes the GNU builtin backend,
+=<rw/_atomic-sync.h>= (=__sync_add_and_fetch=, =__sync_sub_and_fetch=,
+=__sync_lock_test_and_set= on integers of 1, 2, 4 and 8 bytes), only
+where the compiler predefines =__i486__= or =__x86_64=; everywhere
+else the chain ends in =_RWSTD_NO_ATOMIC_OPS=, and every atomic
+increment, decrement and exchange in the library becomes a lock and
+unlock of a mutex: one static mutex per type for the operations that
+pass =false=, the object's own for those that pass a mutex. On
+aarch64 Linux that is every reference count, every one-time
+initialization flag and every string body in 15D, serialized, and
+the MT results there measure the mutexes, not the library. The
+existing characterization, =ATOMIC_OPS.cpp=, tests only the Windows
+=InterlockedIncrement= signature; =ATOMIC_BUILTINS.cpp= (the
+=__atomic= release and acquire accesses) already runs on aarch64.
+
+Fix: characterize the =__sync= operations the backend uses, at each
+width, compiled, linked without =libatomic= and run, and gate
+=<rw/_atomic-sync.h>= on the result in place of the architecture
+list, the widths that fail defining =_RWSTD_NO_{CHAR,SHORT,INT,LONG,
+LLONG}_ATOMIC_OPS= as the backend already expects; no =-march= or
+=-D= on the command line. The x86-64 clause of =rw/_config.h= that
+keeps string reference counts under a mutex for binary compatibility
+with 4.1.x has no aarch64 counterpart to honor.
+
+Check: on aarch64 the 15D =config.h= gains the new macros and the
+library's atomic operations compile to exclusive or LSE instructions
+with no mutex call (disassembly of =_C_add_ref= and a string copy);
+x86-64 =config.h= and objects unchanged; the aarch64 suite matches
+its mutex-backend run but for the MT rows, and the locale MT tests
+and =22.locale.facet.mt= pass there.
 
 * TODO MT tests that provoke contention instead of waiting for it
 
