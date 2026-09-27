@@ -60,14 +60,25 @@ bool locale::operator== (const locale &rhs) const
     // facet objects
     if (!_C_body->_C_n_usr_facets && !rhs._C_body->_C_n_usr_facets) {
 
+        // another thread may fill a slot of either body at any time
+        // (locale::_C_get_std_facet()); only the pointers are compared,
+        // so relaxed loads suffice
+        bool same_facets = true;
+
+        for (_RWSTD_SIZE_T i = 0;
+             same_facets && i != _C_body->_C_n_std_facets; ++i) {
+            same_facets =
+                   _RWSTD_ATOMIC_LOAD_RELAXED (_C_body->_C_std_facets [i])
+                == _RWSTD_ATOMIC_LOAD_RELAXED (rhs._C_body->_C_std_facets [i]);
+        }
+
         // in order to compare equal, both bodies must have the same
         // sets of facets (some slots may still be uninitialized) and
         // not have different names
         const bool eql =
            _C_body->_C_std_facet_bits == rhs._C_body->_C_std_facet_bits
         && _C_body->_C_byname_facet_bits == rhs._C_body->_C_byname_facet_bits
-        && !memcmp (_C_body->_C_std_facets, rhs._C_body->_C_std_facets,
-                    _C_body->_C_n_std_facets * sizeof *_C_body->_C_std_facets)
+        && same_facets
         && !strcmp (_C_body->_C_name, rhs._C_body->_C_name);
 
         // at least some standard facets must have been replaced in order

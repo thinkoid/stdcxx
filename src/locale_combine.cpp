@@ -104,22 +104,12 @@ _C_construct (const __rw_locale &rhs, const __rw_facet *pfacet)
     // called from ctor only, members are not initialized
     _C_ref = 1;
 
-    // copy standard facets from other locale
-#if defined (__i386__) || !defined (__GNUG__) || __GNUG__ < 3
-
-    memcpy (_C_std_facets, rhs._C_std_facets,
-            _C_n_std_facets * sizeof *_C_std_facets);
-
-#else   // !i86  || !gcc 3.x
-
-    // Working around a bug (most probably) identical to the one described 
-    // and fixed in __rw_locale::__rw_locale, but related to the use of
-    // memcpy.
-
+    // copy standard facets from other locale; `rhs' may be shared, and
+    // another thread may fill one of its slots at any time, with a
+    // release store (locale::_C_get_std_facet()), hence the acquire
+    // loads one slot at a time
     for (size_t i = 0; i != _C_n_std_facets; i++)
-        _C_std_facets [i] = rhs._C_std_facets [i];
-
-#endif   // i86/gcc 3.x
+        _C_std_facets [i] = _RWSTD_ATOMIC_LOAD_ACQUIRE (rhs._C_std_facets [i]);
 
     _RWSTD_ASSERT (!pfacet || pfacet->_C_pid);
 
@@ -218,9 +208,12 @@ _C_construct (const __rw_locale &one, const __rw_locale &other, int cat)
     // allocate only if internal buffer is insufficient
     _C_usr_facets = _C_n_usr_facets ?  new __rw_facet* [_C_n_usr_facets] : 0;
 
-    // copy standard facets to `one' from `other'
-    memcpy (_C_std_facets, one._C_std_facets,
-            _C_n_std_facets * sizeof *_C_std_facets);
+    // copy standard facets to `one' from `other'; either may be shared,
+    // and another thread may fill one of their slots at any time, with
+    // a release store (locale::_C_get_std_facet()), hence the acquire
+    // loads one slot at a time, here and below
+    for (size_t i = 0; i != _C_n_std_facets; ++i)
+        _C_std_facets [i] = _RWSTD_ATOMIC_LOAD_ACQUIRE (one._C_std_facets [i]);
 
     // copy user-defined facets (if any)
     memcpy (_C_usr_facets, one._C_usr_facets,
@@ -243,7 +236,8 @@ _C_construct (const __rw_locale &one, const __rw_locale &other, int cat)
 
         if (cat & c) {
             // assign/overwrite corresponding facets
-            _C_std_facets [i] = other._C_std_facets [i];
+            _C_std_facets [i] =
+                _RWSTD_ATOMIC_LOAD_ACQUIRE (other._C_std_facets [i]);
         }
 
         if (_C_std_facets [i]) {
@@ -358,9 +352,13 @@ _C_combine (const __rw_facet *pfacet) const
                 if (facet_inx == i)
                     continue;
 
+                // the body may be shared, and another thread may fill
+                // the slot at any time (locale::_C_get_std_facet())
+                const __rw_facet* const pf =
+                    _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_std_facets [i]);
+
                 const char* const ones_facet_locname =
-                      _C_std_facets [i] ? _C_std_facets [i]->_C_name
-                    ? _C_std_facets [i]->_C_name : "C" : one_locname;
+                      pf ? pf->_C_name ? pf->_C_name : "C" : one_locname;
 
                 if (strcmp (facet_locname, ones_facet_locname)) {
                     managed = false;
