@@ -75,137 +75,27 @@ README stays as it was.
 
 Check: none; this is prose.
 
-* TODO std::locale MT-safety
+* TODO std::locale MT-safety: what remains
 
-=22.locale.numpunct.mt= fails intermittently. Hypotheses: unlocked
-reads of the global and classic locale bodies, a facet-id race, or a
-memory-ordering assumption that x86 hides.
+The locale races are fixed; =doc/notes/analysis-locale-mt-race.md=
+chapter 7 lists the fixes and their tests. ThreadSanitizer reports
+six on a round of the locale MT tests: four in the test driver, one
+in a test, and the global locale's =ginit= flag, which the sweep
+entry below covers.
 
-Instruments: a ThreadSanitizer build of the library and the MT tests
-first, now that it reproduces here; then real weakly-ordered hardware
-for the ordering hypothesis, never an emulator.
+Open:
+- The string reference count. 15D keeps one mutex per string body
+  for 4.1.x binary compatibility (=_RWSTD_NO_STRING_ATOMIC_OPS=,
+  =include/rw/_config.h:108=). =21.string.stdcxx-162= aborts on it in
+  15D: the body is 64 bytes, the test allows 24. Decide: atomics now,
+  or the mutex until the next minor version.
+- =_RWSTD_NO_THREAD_SAFE_LOCALE=. =THREAD_SAFE_LOCALE.cpp=
+  characterizes it; nothing reads it. Find the consumer it was meant
+  for, or retire the test.
 
-It is not intermittent any more. In =15D= on x86-64 the locale MT
-tests, =22.locale.codecvt.mt= through =22.locale.time.put.mt=, end
-differently on every run of the same binary: three bare runs of
-=22.locale.numpunct.mt= died on its own assertion in a thread (a
-thread reading another locale's =truename=, line 147), died of an
-uncaught =std::runtime_error= from a locale that failed to
-construct in a thread, and passed. The 15D baseline rows for these
-tests record symptoms, not a reference;
-=doc/notes/ref-test-baseline.md= chapter 3.4 has the details. On
-32 processors they record the harness as well: the tests run one
-thread per processor, the pool fails to start under the harness's
-1 GiB address-space limit, and a test that starts can outrun the
-harness's timeout, 60 seconds, since each threaded section runs to
-the test's own 60-second soft timeout. Whether to change the limit or
-the default thread count, and how an MT test should be shaped so that
-it provokes contention quickly instead of by repetition, is open.
-
-A ThreadSanitizer build of 15D names the cause: =numpunct= caches
-the results of its virtuals in members of the shared facet with no
-synchronization (=include/loc/_numpunct.h:142= on), so two threads
-assign the same cached =std::string= and one frees the
-representation the other is copying; the facet's implementation
-data and the locale body's bookkeeping are initialized the same way.
-The facet has a mutex it does not take. One run: 31 data races, 5
-use-after-free, 4 destroyed mutexes. Two configuration facts sit
-beside it: on Linux/x86-64 the string reference count goes through
-a mutex per string for 4.1.x binary compatibility
-(=include/rw/_config.h:155=), and =_RWSTD_NO_THREAD_SAFE_LOCALE= is
-characterized and read nowhere. =doc/notes/analysis-locale-mt-race.md= has
-the reports and the intended fixes.
-
-=21.string.stdcxx-162= (=tests/regress=) aborts in =15D= on
-~sizeof (strref) <= sizeof (SmallRef)~: with =_RWSTD_REENTRANT= and
-string atomics disabled, every string body carries its own mutex,
-64 bytes against the 24 the test allows. Atomics would satisfy the
-test; the mutex is the 4.1.x-compatibility choice above. The row is
-this decision's probe and belongs to it, not to the strings entry.
-
-The same defects were investigated in 2012 (STDCXX-1056 and
-STDCXX-1071) and never fixed; =doc/notes/analysis-locale-mt-2012.md=
-has the record and the test programs.
-
-Fix, in three classes, each with its own evidence:
-
-1. Bugs, a failing test first. The =numpunct= cache is gone, its
-   members kept unused until the next minor version, and
-   =22.locale.numpunct.mt= passes. The facet data at
-   =src/facet.cpp:288= is fixed, with its test in
-   =22.locale.codecvt.mt=, and so is the reference leak of racing
-   first =use_facet= calls, with =22.locale.use_facet.mt=. Two
-   threads that found a facet's data missing both built it from the
-   C library in =__rw_get_timepunct= (=src/time_put.cpp=), the
-   second overwriting and leaking the first; the builder now checks
-   again under =__rw_setlocale=, as the two in =src/punct.cpp= have
-   since 2007, and =22.locale.time.put.libc.mt= counts the blocks
-   that outlive each locale. =__rw_facet_id::_C_init= tested and then
-   set a user-defined facet's id with no lock, so threads racing the
-   first use of a facet type each generated an id and the last store
-   won; it now generates the id once under a static lock, and
-   =22.locale.id.mt= counts the ids 500 fresh facet types take.
-
-   A facet's reference count was incremented under the facet's own
-   mutex where a locale body is built from another (the two
-   =__rw_locale::_C_construct= overloads, =src/locale_combine.cpp=)
-   and with the lock-free built-ins everywhere else, and the two are
-   not atomic with respect to each other
-   (=include/rw/_atomic-mutex.h=): updates were lost, facets leaked
-   or died early. All four increments now go through
-   =__rw_locale::_C_add_ref=, and =22.locale.facet.mt= builds and
-   destroys locales from a shared one in eight threads and counts
-   the destructions of the shared facet.
-2. Races by design, no test possible: the =ctype= =narrow= and
-   =widen= tables and =codecvt<char>::always_noconv= cache scalars
-   that every thread writes with the same value. The accesses are
-   relaxed atomic loads and stores through the compiler builtins
-   (=_RWSTD_ATOMIC_LOAD_RELAXED=, =_RWSTD_ATOMIC_STORE_RELAXED=),
-   plain moves on x86-64 with optimization. ThreadSanitizer no
-   longer pairs a cache access with another; what it still reports
-   at those lines pairs them with the facet's construction, which is
-   the publication in the third class.
-3. Ordering the language requires without a failing test: the
-   publication of =_C_impdata= through =_C_impsize= is a release
-   store and an acquire load (=_RWSTD_ATOMIC_STORE_RELEASE=,
-   =_RWSTD_ATOMIC_LOAD_ACQUIRE=, characterized by
-   =ATOMIC_BUILTINS.cpp=); a litmus of that shape shows no
-   reordering on the aarch64 machine, so the evidence is the memory
-   model, not a failure. The facet slot in the locale body is
-   filled once, under the body's lock, by =locale::_C_get_std_facet=
-   with a release store, and read with acquire where no lock is
-   held, in =__rw_get_std_facet= (=include/loc/_locale.h=),
-   =__rw_locale::_C_is_managed= and =locale::_C_get_facet=; =_C_manage= stores a standard
-   facet's type id in the static =Facet::id= only when it changes,
-   the first time, before the facet is published, where it rewrote
-   the same value on every construction against readers of other
-   facets of the type. No litmus was run for the slot; the evidence
-   is the memory model and ThreadSanitizer, whose reports from a
-   round of the locale MT tests went from 979 to 6, the same six in
-   three rounds, none of them this class: four in the test driver,
-   one in a test, and the global locale's =ginit= flag of the sweep
-   entry below. The three
-   builders of facet data from the C library, =__rw_get_timepunct=,
-   =__rw_get_numpunct= and =__rw_get_moneypunct=, run after
-   =_C_get_data= has stored =_C_impsize = size_t (-1)=, so
-   =_C_impdata= itself publishes their data: they store it, and the
-   size again, with release, and every read of the two members once
-   the facet is shared is an acquire load, the re-check under the
-   facet's own lock included, since that lock does not exclude the
-   builders.
-
-   The constructors that copy a shared body's slots
-   (=__rw_locale::_C_construct=, both overloads), =_C_combine= and
-   =locale::operator==== read them one at a time, acquire where the
-   facet is used and relaxed where only the pointers are compared;
-   a gated probe of 500 rounds showed =_C_construct='s copy racing
-   the fill under ThreadSanitizer before and not after.
-
-Then decide the string atomics clause, and find or retire the
-thread-safe-locale consumer.
-
-Check: the ThreadSanitizer build runs every =22.locale.*.mt= test
-with no report from the library, three runs each.
+Check: the ThreadSanitizer build of 15D runs every =22.locale.*.mt=
+test three times with no report from the library; the
+=21.string.stdcxx-162= row follows the decision.
 
 * TODO MT tests that provoke contention instead of waiting for it
 

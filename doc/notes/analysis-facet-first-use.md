@@ -280,7 +280,7 @@ races: a release store and an acquire load are what make them
 defined. On the aarch64 machine a litmus test of the `_C_data` shape
 (`analysis-locale-mt-2012.md`, chapter 7, and the working notes) showed no
 reordering in 60 million rounds, so this part has no failing test;
-it is the third class of the fix list in `TODO`.
+`analysis-locale-mt-race.md`, chapter 7, lists it with the other fixes.
 
 The second site is done: `_C_impsize` is stored with release and read
 with acquire where no lock is held (`_C_data` and the first check in

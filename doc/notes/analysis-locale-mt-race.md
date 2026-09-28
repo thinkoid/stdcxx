@@ -165,7 +165,7 @@ construction, is written only when it changes (`analysis-facet-first-use.md`,
 chapter 3). With the caches of chapter 3 and the scalar caches of
 `ctype` and `codecvt` done as well, one round of the locale MT tests
 under ThreadSanitizer gives 6 reports where it gave 1,490 before the
-second and third classes of the fix: four in the test driver, one in a
+ordering fixes of chapter 7: four in the test driver, one in a
 test, and one in the double-checked initialization of the global
 locale (`locale_body.cpp:807`), which the sweep of atomic integer
 flags in `TODO` covers.
@@ -200,3 +200,25 @@ the retirement, run the locale MT tests, and expect the report to
 name exactly the sites in chapters 3 and 4. Weakly ordered hardware
 is still wanted afterwards, for the ordering questions a fix on x86
 cannot answer, but it is no longer needed to see the defect.
+
+## 7. What was fixed
+
+2026-09-26 and 27. Each row is one cause, its commit and its evidence.
+
+| cause | fix | commit | evidence |
+|---|---|---|---|
+| A: `numpunct` caches | call the virtuals; the members stay, unused, until the next minor version | 2e196ebb | `22.locale.numpunct.mt` |
+| B: wide `codecvt` data | store the data before its size | 8c4282ee | `22.locale.codecvt.mt` |
+| racing first `use_facet` | return the extra references | 2bbdf7c9 | `22.locale.use_facet.mt` |
+| facet data publication | release store of `_C_impsize`, acquire loads | 4e559c9b | memory model; no reordering in an aarch64 litmus |
+| `time_put` data built twice | re-check under `__rw_setlocale` | 81ef680c | `22.locale.time.put.libc.mt` |
+| `ctype` and `codecvt` scalar caches | relaxed atomic loads and stores | bf6dc721 | none possible |
+| data built from the C library | release stores | 9a482a4f | ThreadSanitizer |
+| facet slot in the locale body | release store; acquire reads | ae1fbe04, c1f10248, afda987c | ThreadSanitizer |
+| user-defined facet id | generated once, under a lock | 46aa42c3 | `22.locale.id.mt` |
+| facet reference count | one atomic operation everywhere | dcb5dc92 | `22.locale.facet.mt` |
+
+One round of the locale MT tests under ThreadSanitizer gives six
+reports: four in the test driver, one in a test, and the global
+locale's `ginit` flag. The 15D rows of the older locale MT tests now
+measure the harness only (`ref-test-baseline.md`, chapter 3.4).
