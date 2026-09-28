@@ -7,7 +7,7 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The =analysis-= notes under
 =doc/notes= carry the longer investigations.
 
-* TODO Test-case structs: size_t fields, NPOS sentinel
+* TODO Test-case structs: =size_t= fields, =NPOS= sentinel
 
 =StringTestCase= (=tests/include/rw_strings.h=) and =ContainerTestCase=
 (=tests/include/rw_containers.h=) hold positions and counts in =int=
@@ -24,7 +24,7 @@ their own =-1=.
 Check: identical assertion counts for every string and container test
 before and after.
 
-* TODO money_get's value buffer has no bound
+* TODO =money_get='s value buffer has no bound
 
 =money_get::_C_get= (=include/loc/_money_get.cc=) collects the digits
 of the value in a 304-byte array on the stack and writes into it
@@ -117,7 +117,7 @@ characterized and read nowhere. =doc/notes/analysis-locale-mt-race.md= has
 the reports and the intended fixes.
 
 =21.string.stdcxx-162= (=tests/regress=) aborts in =15D= on
-=sizeof (strref) <= sizeof (SmallRef)=: with =_RWSTD_REENTRANT= and
+~sizeof (strref) <= sizeof (SmallRef)~: with =_RWSTD_REENTRANT= and
 string atomics disabled, every string body carries its own mutex,
 64 bytes against the 24 the test allows. Atomics would satisfy the
 test; the mutex is the 4.1.x-compatibility choice above. The row is
@@ -249,7 +249,7 @@ locale MT test passes in a few seconds under the harness in 15D on
 any processor count, the 15D rows become a reference, and each test
 still fails against the library before the fix it covers.
 
-* TODO One atomic backend, the __atomic built-ins
+* TODO One atomic backend, the =__atomic= built-ins
 
 The atomic operations have three backends besides the mutex
 templates: the GNU =__sync= built-ins (=<rw/_atomic-sync.h>=), x86
@@ -304,7 +304,7 @@ mutex, or =__rw_once=.
 Check: the census in a note, each site with its decision; the
 ThreadSanitizer build reports none of them.
 
-* TODO yi_US.CP1255 does not build on aarch64
+* TODO =yi_US.CP1255= does not build on aarch64
 
 =make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=:
 =localedef= reports Error 308, "incomplete multibyte character in
