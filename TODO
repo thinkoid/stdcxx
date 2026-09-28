@@ -271,6 +271,39 @@ locale MT test passes in a few seconds under the harness in 15D on
 any processor count, the 15D rows become a reference, and each test
 still fails against the library before the fix it covers.
 
+* TODO One atomic backend, the __atomic built-ins
+
+The atomic operations have three backends besides the mutex
+templates: the GNU =__sync= built-ins (=<rw/_atomic-sync.h>=), x86
+assembly (=<rw/_atomic-x86.h>= over =src/x86/atomic.s=) and x86-64
+assembly (=<rw/_atomic-x64.h>= over =src/x86_64/atomic.s=). Since the
+per-width characterizations the =__sync= branch serves every build of
+the matrix, 32-bit x86 included, where the former =__i486__= test
+never matched a default =-m32= compile and every threaded build ran
+the out-of-line assembly; the assembly branches are reached only by a
+compiler whose =int= characterization fails. The =__sync= contract is
+a full barrier for the arithmetic and an acquire barrier only for
+=__sync_lock_test_and_set=, which =_RWSTD_ATOMIC_SWAP= inherits and x86
+hides behind =xchg=. The library exports the assembly routines,
+=__rw_atomic_add= and =__rw_atomic_xchg= at 8, 16, 32 and (x86-64) 64
+bits, and binaries built for 32-bit x86 before the characterizations
+call them.
+
+Fix: one backend over the =__atomic= built-ins with explicit orders,
+none weaker than today's contract: =__ATOMIC_SEQ_CST= for the
+increments, the decrements and the exchange; weakening an order is
+the next entry's business, site by site. The five characterizations
+test the =__atomic= operations the backend uses, and the macros they
+define stay. =<rw/_atomic-x86.h>=, =<rw/_atomic-x64.h>= and their
+dispatch branches go. =src/atomic.s= and the two assembly sources stay
+built and exported until the next minor version, which may break the
+binary interface; then they go with their symbols.
+
+Check: x86-64 and aarch64 suites unchanged against their tables; the
+disassembly shows =lock xadd= and =xchg= on x86-64 and 32-bit x86, and
+=ldaddal= and =swpal= behind the outline helpers on aarch64; the
+exported symbols of the library unchanged.
+
 * TODO Synchronization on atomic integer flags: a sweep
 
 Several one-time initializations elect their initializer with an

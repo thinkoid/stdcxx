@@ -45,8 +45,8 @@ establish every required signature, value or runtime behavior.
 
 The supported platform scope is also narrower than the historical
 manual: GCC and Clang on x86 and x86-64 Linux, with aarch64 next; the
-library builds and runs its suite there, but its atomic operations
-still fall back to mutexes.
+library builds and runs its suite there, with lock-free atomic
+operations, but no suite tables are pinned for it yet.
 Compiler characterizations determine the active implementation paths.
 A conformance result must identify that configuration, not just the
 source revision.

@@ -194,6 +194,12 @@ Similarly, a private probe without consumers can be retired, but the
 atomic success stub characterizes nothing: the `__sync` built-ins
 are characterized at each width by `CHAR_ATOMIC_OPS.cpp` through
 `LLONG_ATOMIC_OPS.cpp`, and `_atomic.h` selects its backend on them.
+The x86 and x86-64 assembly backends are reached only where the `int`
+characterization fails. Their headers can go with the dispatch
+branches, but `src/x86/atomic.s` and `src/x86_64/atomic.s` define
+exported symbols that 32-bit binaries built before the
+characterizations call; they are a binary interface decision and wait
+for the next minor version (`TODO`, one atomic backend).
 
 ## 5. Work order for a sweep
 

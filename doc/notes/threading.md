@@ -121,8 +121,11 @@ compare-and-exchange.
 
 [_atomic.h](../../include/rw/_atomic.h) selects the GNU `__sync`
 backend where the configuration found the built-ins working on `int`,
-x86 assembly helpers on other matching branches, and mutex fallback
-otherwise. Width adapters and missing-width fallbacks add another
+the x86 and x86-64 assembly helpers where it did not, and mutex
+fallback otherwise. The architecture test the characterization
+replaced named `__i486__`, which a default `-m32` compile does not
+predefine, so until then every threaded 32-bit x86 build ran the
+out-of-line assembly; it now runs the built-ins inline. Width adapters and missing-width fallbacks add another
 dispatch layer: each width follows its own characterization,
 `CHAR_ATOMIC_OPS.cpp` through `LLONG_ATOMIC_OPS.cpp`, and a width
 whose characterization fails is served by the mutex templates. On
@@ -172,7 +175,11 @@ contract; for example, [x86/atomic.s](../../src/x86/atomic.s) uses
 locked `xadd` and memory `xchg`. Mutex fallback supplies ordering
 through participating lock/unlock operations. These implementations
 must be evaluated separately rather than assigned one undocumented
-universal barrier guarantee.
+universal barrier guarantee. `TODO` queues one backend over the
+`__atomic` built-ins with explicit orders in place of all three; the
+library exports the assembly routines, and 32-bit binaries built
+before the characterizations call them, so the assembly sources stay
+until the next minor version.
 
 **Even a full barrier cannot make an unprotected compound operation
 indivisible.** It also does not convert every ordinary access elsewhere
