@@ -114,7 +114,7 @@ families whose individual members depend on the producer.
 
 | producer | information emitted |
 |---|---|
-| `libc_decl.sh` | Header availability and native paths (`NO_*_H`, `ANSI_C_*_H`); function declarations and link availability (`NO_function`, `NO_function_IN_LIBC`). Names are generated from its header/function lists. |
+| `libc_decl.sh` | Header availability and native paths (`NO_*_H`, `ANSI_C_*_H`). Names are generated from its header list. Until a44256a6 it also probed every function's declaration and link availability; `history-libc-declarations.md` records how. |
 | `LIMITS` | Integer bounds, sizes, fixed/least-width types, character width, multibyte limit and two's-complement answer. |
 | `FLOAT`, `INFINITY` | Floating-point constants, special-value byte representations, denormal support and string-to-floating underflow behavior. |
 | `SIZE_T`, `SIG_ATOMIC_T`, `WINT_T`, `WCTYPE_T`, `WCTRANS_T`, `VA_LIST`, `UNISTD_DECL` | Underlying typedefs, ranges, signal/stdio constants, `va_list` shape and POSIX types/constants. |

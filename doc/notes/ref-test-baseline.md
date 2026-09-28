@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-09-27 (dcb5dc92).
+As of 2026-09-28 (a44256a6).
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change after it: which tests fail, by
@@ -11,15 +11,14 @@ harness's own table without the timing columns.
 ## 0. The short version
 
 - Every test builds. The harness runs 272 programs per configuration.
-- 17 assertions fail in every GCC configuration, 22 under Clang. Most
-  failures of the first tables are repaired. Chapter 3 has each one.
+- 17 assertions fail in every configuration, under both compilers.
+  Most failures of the first tables are repaired. Chapter 3 has each
+  one.
 - What still fails, by cause:
   - `27.basic.ios`, `27.filebuf` and `27.std.manip`, 17 assertions,
     and the regression test `27.ostream.inserters.stdcxx-51`, which
     aborts. All configurations. Not investigated; chapter 3.11 records
     what they report. None has a `TODO` entry.
-  - `21.cwchar` under Clang, 5 assertions. A configuration gap,
-    analysed in `analysis-glibc-wchar-proto.md`; `TODO` entry 1.
   - `21.string.stdcxx-162` in 15D. A probe of the string atomics
     decision in the MT entry of `TODO`.
   - The locale MT rows of 15D. They measure two limits of the
@@ -109,20 +108,12 @@ uppercase 64-bit.
 
 Chapter 4 lists where the three differ.
 
-The tables were last measured in full on 2026-09-27, at ddc3352f,
-from build directories configured afresh. Four commits since then
-changed rows, each checked in all six configurations:
-
-| commit | change |
-|---|---|
-| efa441f7 | 15D and 15D-clang re-measured at the 60-second timeout |
-| 719aecff | `22.locale.codecvt` +5 assertions, the `do_unshift` test |
-| 46aa42c3 | `22.locale.id.mt` added, 999 assertions |
-| dcb5dc92 | `22.locale.facet.mt` added, 40 assertions |
-
-Nothing after dcb5dc92 can move a row. a976e3b9 changed the atomic
-operations; on x86-64 it leaves every library object's code
-identical, and the 32-bit tables are single-threaded builds.
+The tables were last measured in full on 2026-09-28, at a44256a6,
+from build directories configured afresh. The measurement closed the
+removal of the C library function probes (f43be017..a44256a6). Every
+row matched the earlier tables but two kinds: `21.cwchar` under
+Clang, now repaired (chapter 3.8), and the harness rows of 15D, which
+vary from run to run (chapter 3.4).
 
 Earlier refreshes followed each repair in chapter 3, and each moved
 only that repair's rows and the unstable MT rows of 15D.
@@ -572,13 +563,15 @@ reading; the order of the calls is unchanged, and both streams are
 closed. Check: exit 0, valgrind clean in 11S, the row at 100% in the
 three GCC configurations.
 
-Under Clang the row now shows what the abort hid: 61 assertions,
+Under Clang the row then showed what the abort hid: 61 assertions,
 5 failed, 5 warnings, on the const and non-const overloads of
 `wmemchr`, `wcspbrk`, `wcsrchr`, `wcsstr` and `wcschr`. glibc's
 `<wchar.h>` declares the C++ overloads only for GCC 4.4 and later,
-and Clang presents itself as 4.2. `analysis-glibc-wchar-proto.md`
-measures it and proposes the repair; `TODO` entry 1 holds it. The
-Clang rows are pinned as measured.
+and Clang presents itself as 4.2. The library now defines
+`__CORRECT_ISO_CPP_WCHAR_H_PROTO` before it includes glibc's header,
+and glibc declares the overloads under Clang too (1f6e5dd2). The row
+is 66 assertions, 0 failed, 0 warnings under both compilers.
+`analysis-glibc-wchar-proto.md` has the history.
 
 ### 3.9 Locale facets
 
@@ -835,15 +828,12 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 10,105,648 | 22 | 0 | 1 |
-| 11s-clang | 10,105,545 | 22 | 0 | 1 |
-| 15D-clang | 10,105,714 | 22 | 10 | 6 |
+| 11S-clang | 10,105,653 | 17 | 0 | 1 |
+| 11s-clang | 10,105,550 | 17 | 0 | 1 |
+| 15D-clang | 10,105,719 | 17 | 10 | 6 |
 
 Row for row they are the GCC tables, with these exceptions:
 
-- **`21.cwchar`**: 61 assertions, 5 failed, 5 warnings, in all three.
-  These are the five extra failed assertions. Chapter 3.8 and
-  `analysis-glibc-wchar-proto.md`.
 - **`18.numeric.special.float`** runs 134 assertions in the 32-bit
   Clang build, where GCC's runs 119. Clang generates SSE code for
   i386, which carries a signaling NaN (chapter 3.10).

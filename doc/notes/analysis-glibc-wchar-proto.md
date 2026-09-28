@@ -13,7 +13,7 @@ not see it. It traces how glibc's two headers came apart, what is
 pending upstream, and what the other C++ libraries do. It weighs
 three repairs and records the one chosen. It lists the defects found
 in the dormant arms on the way. It assumes
-`primer-libc-declarations.md`, which explains `_RWSTD_NO_<F>` and
+`history-libc-declarations.md`, which explains `_RWSTD_NO_<F>` and
 `_RWSTD_NO_<F>_IN_LIBC`.
 
 ## 0. The short version
@@ -402,7 +402,8 @@ The three repairs:
 Chosen: A, with the macro defined by the library before glibc's
 `<wchar.h>` is included. That is libc++'s opt-in, without libc++'s
 overloads. `std` then holds glibc's pair through `using ::f;`, under
-both compilers.
+both compilers. It landed in 1f6e5dd2, with the removal of the
+function probes.
 
 ## 10. The define in the library
 

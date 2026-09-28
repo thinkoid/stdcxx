@@ -7,94 +7,6 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The =analysis-= notes under
 =doc/notes= carry the longer investigations.
 
-* TODO Rip out the C library function probes
-
-=libc_decl.sh= probes every function listed in =headers.inc= twice:
-declared in the header, and exported by libc. The answers are
-=_RWSTD_NO_<F>= and =_RWSTD_NO_<F>_IN_LIBC=, and the headers and
-sources choose among three arms on them: re-export, declare, or
-define. =doc/notes/primer-libc-declarations.md= has the mechanism.
-
-It served the vendor libcs of 2005. Those platforms are retired. On
-glibc one function takes the second probe, =gets=, and the right
-answer for it is "not in =std=". Every other arm is code no test
-compiles, and it holds known defects, nine in the wide headers
-alone (the analysis below, chapter 11). The probes cannot see a declaration's type, which is why
-=21.cwchar= fails 5 assertions under Clang: glibc gives Clang the C
-prototype of =wcschr=, =wcspbrk=, =wcsrchr=, =wcsstr= and =wmemchr=,
-not the C++ pair (=doc/notes/analysis-glibc-wchar-proto.md=).
-
-The Clang fix needs no probe either. glibc declares the pair when
-=__CORRECT_ISO_CPP_WCHAR_H_PROTO= is defined, and its guard only ever
-defines the macro. The library defines it before it includes glibc's
-=<wchar.h>=, as libc++ does, and keeps =using ::f;= for the five.
-Measured: correct types and unambiguous unqualified calls under both
-compilers. A pair of the library's own in =std= makes unqualified
-calls under =using namespace std;= ambiguous, also measured. The
-analysis, chapters 9 and 10, has both.
-
-Size: 1048 references to the function macros in 37 files. Most are
-in =include/ansi/= (=cwchar=, =cmath=, =wchar.h=, =cstdio=,
-=cstring=, =cwctype=); then =src/wctype.cpp=, =src/wcodecvt.cpp=,
-=src/collate.cpp=, =src/time_put.cpp=, =include/rw/_traits.h=,
-=include/rw/_defs.h=; and =tests/strings/21.cwchar.cpp= (52), a
-dozen locale tests, =tests/src/= and =util/memchk.cpp=.
-
-Fix:
-- Out: the function half of =libc_decl.sh=, the function lists of
-  =headers.inc=, both macros for every listed function, and every
-  arm that reads them. The four dormant defects go with the arms.
-  =gets= is not in =std=. =21.cwchar= stops reporting the macros.
-- In: =__CORRECT_ISO_CPP_WCHAR_H_PROTO= defined, under =#ifndef=,
-  ahead of glibc's header in =<cwchar>= and =<wchar.h>=. The five
-  wide functions stay =using ::f;=.
-- Keep: the header half of =libc_decl.sh=. =_RWSTD_ANSI_C_<H>_H= is
-  how the wrappers include the real headers without finding
-  themselves; =#include_next= is a separate question. Keep the
-  exported =__rw_wmemcpy= family in =src/string.cpp=: debug builds
-  use it unconditionally, and exported symbols stay until the next
-  minor version.
-- Trap, cleared: =_RWSTD_NO_CTIME= names both the =<ctime>= header
-  and the =ctime ()= function. Nothing reads it. The header half
-  keeps writing it.
-
-Method: one subsystem per commit, each collapse inert by the check
-below, so no separate groom: math, the string functions, stdio,
-stdlib, the wide functions and =<wchar.h>=, =<cwctype>=, the
-sources, =_defs.h= with =_traits.h= and =_num_get.cc=, the tests
-and =util/=, and the script last. The script goes last because the
-configuration writes =// #define _RWSTD_NO_<X>= into =config.h= for
-any macro a characterization still reads; =FLOAT.cpp=,
-=VSNPRINTF_RETURN.cpp=, =WCSFTIME_WCHAR_T_FMAT.cpp= and
-=EQUAL_CTYPE_MASK.cpp= go with it. Every commit is built and checked
-in =11S= only. When the set is done, certify across the six tracked
-configurations.
-
-Done: math (=<cmath>=: the 44 =_IN_LIBM= blocks keep their first
-arm; the =pow= declaration keeps its =_RWSTD_NO_POW_DBL= half); the
-string functions (=<cstring>=: =using ::f;= for all 22; =<string.h>=:
-the five global const wrappers go); stdio (=<cstdio>=: =using ::f;=
-for 40 functions; =gets= is not in =std=); stdlib (=<cstdlib>=, =<stdlib.h>=); the wide functions (=<cwchar>=:
-=using ::f;= for 52; =<wchar.h>=: the dormant prototypes go; both
-define =__CORRECT_ISO_CPP_WCHAR_H_PROTO= before glibc's header);
-=<cwctype>= (=using ::f;= for 17); the sources (=src/=: each site
-keeps its first arm; =fits_char= and four includes the dropped arms
-alone needed go); =_defs.h=, =_traits.h=, =_num_get.cc=; the tests and =util/memchk.cpp=
-(=21.cwchar= no longer reports the macros); the script and the four
-characterizations that read the macros.
-
-Check, per commit, in =11S=, against the previous commit's build:
-=config.h= loses only the removed macros; every object's code is
-identical where the commit is meant to be inert, with =__LINE__= and
-=__FILE__= masked where lines moved; the same again recompiled
-without =_RWSTDDEBUG= at =-O2=, because the six tracked
-configurations are debug builds and none compiles the release
-branches of =_traits.h=; the suite table is identical.
-
-Check, certification: the six tables identical but for =21.cwchar=
-under Clang, which goes to 66 assertions, 0 failed, 0 warnings. That
-row can only be seen under Clang, so it waits for this step.
-
 * TODO Test-case structs: size_t fields, NPOS sentinel
 
 =StringTestCase= (=tests/include/rw_strings.h=) and =ContainerTestCase=
@@ -488,6 +400,44 @@ Check: =git grep _RWSTD_NO_EXT_= empty under =include=, =src= and
 =tests=; =17.extensions= reduced to nothing or retired; the suite
 tables re-pinned in all six configurations with no row but the
 extension rows moving; the examples build.
+
+* TODO Leftovers beside the removed function probes
+
+The removal of the C library function probes (f43be017..a44256a6)
+kept to the code that read the probe macros. The census
+for it found dead or stale code next to them. None of it is compiled
+differently by any tracked configuration.
+
+- =_RWSTD_NO_USING_LIBC_IN_STD= is defined nowhere. Fifteen headers
+  test it around their =namespace std= blocks.
+- =src/file.cpp= declares =mkstemp= and =fileno= under
+  =#ifndef _RWSTD_NO_PURE_C_HEADERS=, which the file defines three
+  lines above; the blocks cannot be compiled.
+- =_cstdio.h= declares =gets= in =std= and =stdio.h= exports it, both
+  in pure-headers mode only. The default mode leaves it out, as
+  C++14 does.
+- =_RWSTD_FMT_TYPE=, =_RWSTD_FMT_ASSGN=, =_STRTOLL= and =_STRTOULL=
+  in =_defs.h= have had no user since the 2005 import.
+  =_RWSTD_WCSFTIME_ARG3_T= has no reader outside its
+  characterization. =config.h= carries =_RWSTD_NO_ABS_INT=; nothing
+  reads it.
+- =<cmath>='s =_FABSF= calls =fabsf= without the =::= of its 43
+  siblings. The 44 =_<F>F= and =_<F>L= macros could be inlined into
+  the overloads that call them.
+- =21.cwchar= exercises none of =wcscoll=, =wcsncat=, =vswprintf=,
+  =vwprintf=, =getwchar=, =putwchar=.
+- =libc_decl.sh= only looks for headers now; its name says more.
+  =headers.inc= holds one list, for one script.
+- Hypothesis: =__rw_get_timepunct= calls =wcsftime= with wide literal
+  formats whatever =_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT= says; on a C
+  library whose third parameter is =const char*= it would not
+  compile. Check: =git log -L= on those calls for a platform note.
+
+Fix: one commit per item, each inert on the six configurations
+except the =21.cwchar= coverage, which adds assertions.
+
+Check: the per-commit check of the removal (=config.h=, object code,
+the non-debug recompile, the suite table) in =11S=.
 
 * Documentation
 

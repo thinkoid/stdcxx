@@ -20,7 +20,10 @@ characterization for it, and let the tree branch on the answer.
 The original `README` is kept untouched beside this file. It is the
 complete manual for the library's layout, configuration macros, build
 system and platform notes as of 4.2.2, and it remains accurate for
-everything the revival has not changed.
+everything the revival has not changed. Section 8.3.4's function
+macros, `_RWSTD_NO_<F>`, `_RWSTD_NO_<F>_IN_LIBC` and `_IN_LIBM`, are
+gone since a44256a6; `doc/notes/history-libc-declarations.md` records
+what they did.
 
 ## Status
 
@@ -37,7 +40,8 @@ is, for a reader rather than for the record, and are kept current;
 the first is the walk through `basic_string` and its `replace`
 family. `analysis-` documents are investigations, the record of work
 on failures, written as it happened. `primer-` documents explain the
-platform the library stands on; `plan-` documents survey work not
+platform the library stands on; `history-` documents record machinery
+the tree no longer has; `plan-` documents survey work not
 yet done. Of the analyses, the first traces the library's `__mbstate_t` clash with glibc through three
 epochs of the C library's headers.
 

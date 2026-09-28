@@ -1,6 +1,7 @@
 # Declared, or only defined: how the configuration asks the C library
 
-As of 2026-09-28 (5f3b424b).
+As of 2026-09-28 (5f3b424b). The function probes are gone since
+a44256a6; this note is the record of how they worked.
 
 A C library can export a function its headers do not declare. A
 dialect switch hides it, a standard revision withdraws it, or a
