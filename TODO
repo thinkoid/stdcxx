@@ -46,8 +46,8 @@ Fix:
   arm that reads them. The four dormant defects go with the arms.
   =gets= is not in =std=. =21.cwchar= stops reporting the macros.
 - In: =__CORRECT_ISO_CPP_WCHAR_H_PROTO= defined, under =#ifndef=,
-  before each =#include _RWSTD_ANSI_C_WCHAR_H= in =<cwchar>= and
-  =<wchar.h>=. The five wide functions stay =using ::f;=.
+  ahead of glibc's header in =<cwchar>= and =<wchar.h>=. The five
+  wide functions stay =using ::f;=.
 - Keep: the header half of =libc_decl.sh=. =_RWSTD_ANSI_C_<H>_H= is
   how the wrappers include the real headers without finding
   themselves; =#include_next= is a separate question. Keep the
@@ -74,7 +74,9 @@ Done: math (=<cmath>=: the 44 =_IN_LIBM= blocks keep their first
 arm; the =pow= declaration keeps its =_RWSTD_NO_POW_DBL= half); the
 string functions (=<cstring>=: =using ::f;= for all 22; =<string.h>=:
 the five global const wrappers go); stdio (=<cstdio>=: =using ::f;=
-for 40 functions; =gets= is not in =std=); stdlib (=<cstdlib>=, =<stdlib.h>=).
+for 40 functions; =gets= is not in =std=); stdlib (=<cstdlib>=, =<stdlib.h>=); the wide functions (=<cwchar>=:
+=using ::f;= for 52; =<wchar.h>=: the dormant prototypes go; both
+define =__CORRECT_ISO_CPP_WCHAR_H_PROTO= before glibc's header).
 
 Check, per commit, in =11S=, against the previous commit's build:
 =config.h= loses only the removed macros; every object's code is
