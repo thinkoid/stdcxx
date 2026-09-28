@@ -497,23 +497,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
         // store UCHAR_MAX if group length exceeds the size of char
         _RWSTD_PTRDIFF_T __len;
 
-        if (__grpend) {
-
-#if defined (_RWSTD_NO_STRTOLD) && defined (_RWSTD_NO_STRTOLD_IN_LIBC)
-
-            // detect invalid formats in case strtold() is not
-            // available (scanf() will not detect these)
-
-            if (   'e' == __pcur [-1]
-                || '-' == __pcur [-1] || '+' == __pcur [-1]) {
-                __err |= _RW::__rw_failbit;
-                return __begin;
-            }
-
-#endif   // _RWSTD_NO_STRTOLD && _RWSTD_NO_STRTOLD_IN_LIBC
-
-        }
-        else
+        if (0 == __grpend)
             __grpend = __pcur;
 
         __len = __grpbeg ?

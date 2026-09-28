@@ -917,20 +917,15 @@
 
 
 // Selection of vendor dependent "format" string argument to wcsftime()
-#ifndef _RWSTD_NO_WCSFTIME
-   // 7.24.5.1 of C99 - wcsftime()'s 3rd arg is const wchar* [restrict]
-   //                   HP-UX 11 (and perhaps others) still uses const char*
-#  ifndef _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT
-#     define _RWSTD_FMT_TYPE(arg)  const wchar_t* arg
-#     define _RWSTD_FMT_ASSGN(str) L##str
-#  else
-#     define _RWSTD_FMT_TYPE(arg)  const char* arg
-#     define _RWSTD_FMT_ASSGN(str) str
-#  endif
-#else   // if defined (_RWSTD_NO_WCSFTIME)
-#  define _RWSTD_FMT_TYPE(arg)     const char* arg
-#  define _RWSTD_FMT_ASSGN(str)    str
-#endif // _RWSTD_NO_WCSFTIME
+// 7.24.5.1 of C99 - wcsftime()'s 3rd arg is const wchar* [restrict]
+//                   HP-UX 11 (and perhaps others) still uses const char*
+#ifndef _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT
+#  define _RWSTD_FMT_TYPE(arg)  const wchar_t* arg
+#  define _RWSTD_FMT_ASSGN(str) L##str
+#else
+#  define _RWSTD_FMT_TYPE(arg)  const char* arg
+#  define _RWSTD_FMT_ASSGN(str) str
+#endif   // _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT
 
 
 // _Iterator typedefs
@@ -1189,20 +1184,8 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #  define _RWSTD_TMPBUF_SIZE 4096
 #endif
 
-#ifndef _RWSTD_NO_STRTOLL
-#  define _STRTOLL           strtoll
-#else
-   // libc has no strtoll, use strtol instead
-#  define _STRTOLL           (_RWSTD_LONG_LONG)strtol
-#endif   // _RWSTD_NO_STRTOLL
-
-
-#ifndef _RWSTD_NO_STRTOULL
-#  define _STRTOULL          strtoull
-#else
-   // libc has no strtoull, use strtoul instead
-#  define _STRTOULL          (unsigned _RWSTD_LONG_LONG)strtoul
-#endif   // _RWSTD_NO_STRTOULL
+#define _STRTOLL           strtoll
+#define _STRTOULL          strtoull
 
 
 #ifdef _RWSTD_LIB_SRC
@@ -1392,15 +1375,6 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #    endif   // _RWSTD_LIB_SRC
 #  endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION
 #endif
-
-
-// define if neither wctrans() function declaration exists
-// (temporary until a reliable wctrans_t test is put in place)
-#if !defined (_RWSTD_NO_WCTRANS_T)
-#  if defined (_RWSTD_NO_WCTRANS) && defined (_RWSTD_NO_TOWCTRANS)
-#    define _RWSTD_NO_WCTRANS_T
-#  endif
-#endif   // _RWSTD_NO_WCTRANS_T
 
 
 #ifndef _RWSTD_NO_SPECIALIZATION_ON_RETURN_TYPE

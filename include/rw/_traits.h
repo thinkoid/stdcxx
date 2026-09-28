@@ -113,95 +113,12 @@ _RWSTD_EXPORT _RWSTD_SIZE_T __rw_wcslen (const wchar_t*);
 
 #  include _RWSTD_CWCHAR    // wmemcmp(), ...
 
-#  ifndef _RWSTD_NO_WMEMCPY
-#    define _RWSTD_WMEMCPY   _RWSTD_C::wmemcpy
-#  elif !defined (_RWSTD_NO_WCHAR_T)
-
-_RWSTD_NAMESPACE (__rw) {
-
-_RWSTD_EXPORT wchar_t*
-__rw_wmemcpy (wchar_t*, const wchar_t*, _RWSTD_SIZE_T);
-
-
-}   // namespace __rw
-
-#    define _RWSTD_WMEMCPY   _RW::__rw_wmemcpy
-#  endif   // _RWSTD_NO_WMEMCPY
-
-#  ifndef _RWSTD_NO_WMEMCMP
-#    define _RWSTD_WMEMCMP   wmemcmp
-#  elif !defined (_RWSTD_NO_WCHAR_T)
-
-_RWSTD_NAMESPACE (__rw) {
-
-_RWSTD_EXPORT int
-__rw_wmemcmp (const wchar_t*, const wchar_t*, _RWSTD_SIZE_T);
-
-
-}   // namespace __rw
-
-#    define _RWSTD_WMEMCMP   _RW::__rw_wmemcmp
-#  endif   // _RWSTD_NO_WMEMCMP
-
-#  ifndef _RWSTD_NO_WMEMMOVE
-#    define _RWSTD_WMEMMOVE  _RWSTD_C::wmemmove
-#  elif !defined (_RWSTD_NO_WCHAR_T)
-
-_RWSTD_NAMESPACE (__rw) {
-
-_RWSTD_EXPORT wchar_t*
-__rw_wmemmove (wchar_t*, const wchar_t*, _RWSTD_SIZE_T);
-
-
-}   // namespace __rw
-
-#    define _RWSTD_WMEMMOVE   _RW::__rw_wmemmove
-#  endif   // _RWSTD_NO_WMEMMOVE
-
-#  ifndef _RWSTD_NO_WMEMSET
-#    define _RWSTD_WMEMSET   _RWSTD_C::wmemset
-#  elif !defined (_RWSTD_NO_WCHAR_T)
-
-_RWSTD_NAMESPACE (__rw) {
-
-_RWSTD_EXPORT wchar_t*
-__rw_wmemset (wchar_t*, wchar_t, _RWSTD_SIZE_T);
-
-
-}   // namespace __rw
-
-#    define _RWSTD_WMEMSET   _RW::__rw_wmemset
-#  endif   // _RWSTD_NO_WMEMSET
-
-#  ifndef _RWSTD_NO_WCSLEN
-#    define _RWSTD_WCSLEN    _RWSTD_C::wcslen
-#  elif !defined (_RWSTD_NO_WCHAR_T)
-
-_RWSTD_NAMESPACE (__rw) {
-
-_RWSTD_EXPORT _RWSTD_SIZE_T
-__rw_wcslen (const wchar_t*);
-
-
-}   // namespace __rw
-
-#    define _RWSTD_WCSLEN   _RW::__rw_wcslen
-#  endif   // _RWSTD_NO_WCSLEN
-
-#  ifndef _RWSTD_NO_WMEMCHR
-#    define _RWSTD_WMEMCHR   _RWSTD_C::wmemchr
-#  elif !defined (_RWSTD_NO_WCHAR_T)
-
-_RWSTD_NAMESPACE (__rw) {
-
-_RWSTD_EXPORT const wchar_t*
-__rw_wmemchr (const wchar_t*, wchar_t, _RWSTD_SIZE_T);
-
-
-}   // namespace __rw
-
-#    define _RWSTD_WMEMCHR   _RW::__rw_wmemchr
-#  endif   // _RWSTD_NO_WMEMCHR
+#  define _RWSTD_WMEMCPY   _RWSTD_C::wmemcpy
+#  define _RWSTD_WMEMCMP   wmemcmp
+#  define _RWSTD_WMEMMOVE  _RWSTD_C::wmemmove
+#  define _RWSTD_WMEMSET   _RWSTD_C::wmemset
+#  define _RWSTD_WCSLEN    _RWSTD_C::wcslen
+#  define _RWSTD_WMEMCHR   _RWSTD_C::wmemchr
 
 #endif   // !_RWSTDDEBUG && !(vanilla EDG eccp demo)
 

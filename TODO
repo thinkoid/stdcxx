@@ -79,7 +79,7 @@ for 40 functions; =gets= is not in =std=); stdlib (=<cstdlib>=, =<stdlib.h>=); t
 define =__CORRECT_ISO_CPP_WCHAR_H_PROTO= before glibc's header);
 =<cwctype>= (=using ::f;= for 17); the sources (=src/=: each site
 keeps its first arm; =fits_char= and four includes the dropped arms
-alone needed go).
+alone needed go); =_defs.h=, =_traits.h=, =_num_get.cc=.
 
 Check, per commit, in =11S=, against the previous commit's build:
 =config.h= loses only the removed macros; every object's code is
