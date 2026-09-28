@@ -36,7 +36,7 @@
 #include <wchar.h>
 #include <limits.h>
 #include <locale.h>
-#include <stdlib.h>   // for MB_CUR_MAX, mblen(), mbtowc()
+#include <stdlib.h>   // for MB_CUR_MAX, mbtowc()
 #include <string.h>   // for memcmp()
 #include <errno.h>
 
@@ -49,82 +49,6 @@
 #include "iso2022.h"
 #include "setlocale.h"
 #include "use_facet.h"
-
-
-// declare mbrlen() if it's not declared in the system headers
-// but is known to be defined in the libc binary
-#if defined (_RWSTD_NO_MBRLEN) && !defined (_RWSTD_NO_MBRLEN_IN_LIBC)
-
-#  undef _RWSTD_NO_MBRLEN
-
-extern "C" size_t
-mbrlen (const char*, size_t, _RWSTD_MBSTATE_T*) _LIBC_THROWS();
-
-#endif   // _RWSTD_NO_MBRLEN && !_RWSTD_NO_MBRLEN_IN_LIBC
-
-
-// declare mblen() if it's not declared in the system headers
-// but is known to be defined in the libc binary
-#if defined (_RWSTD_NO_MBLEN) && !defined (_RWSTD_NO_MBLEN_IN_LIBC)
-
-#  undef _RWSTD_NO_MBLEN
-
-extern "C" int
-mblen (const char*, size_t) _LIBC_THROWS();
-
-#endif   // _RWSTD_NO_MBLEN && !_RWSTD_NO_MBLEN_IN_LIBC
-
-
-// declare mbtowc() if it's not declared in the system headers
-// but is known to be defined in the libc binary
-#if defined (_RWSTD_NO_MBTOWC) && !defined (_RWSTD_NO_MBTOWC_IN_LIBC)
-
-#  undef _RWSTD_NO_MBTOWC
-
-extern "C" int
-mbtowc (wchar_t*, const char*, size_t) _LIBC_THROWS();
-
-#endif   // _RWSTD_NO_MBTOWC && !_RWSTD_NO_MBTOWC_IN_LIBC
-
-
-// declare wcsrtombs() if it's not declared in the system headers
-// but is known to be defined in the libc binary
-#if defined (_RWSTD_NO_WCSRTOMBS) && !defined (_RWSTD_NO_WCSRTOMBS_IN_LIBC)
-
-#  undef _RWSTD_NO_WCSRTOMBS
-
-extern "C" size_t
-wcsrtombs (char*, const wchar_t**, size_t, _RWSTD_MBSTATE_T*) _LIBC_THROWS();
-
-#endif   // _RWSTD_NO_WCSRTOMBS && !_RWSTD_NO_WCSRTOMBS_IN_LIBC
-
-
-// declare wcrtomb() if it's not declared in the system headers
-// but is known to be defined in the libc binary
-#if defined (_RWSTD_NO_WCRTOMB) && !defined (_RWSTD_NO_WCRTOMB_IN_LIBC)
-
-#  undef _RWSTD_NO_WCRTOMB
-
-extern "C" size_t
-wcrtomb (char*, wchar_t, _RWSTD_MBSTATE_T*) _LIBC_THROWS();
-
-#endif   // _RWSTD_NO_WCRTOMB && !_RWSTD_NO_WCRTOMB_IN_LIBC
-
-
-// declare wctomb() if it's not declared in the system headers
-// but is known to be defined in the libc binary
-#if defined (_RWSTD_NO_WCTOMB) && !defined (_RWSTD_NO_WCTOMB_IN_LIBC)
-
-#  undef _RWSTD_NO_WCTOMB
-
-extern "C" {
-
-_RWSTD_DLLIMPORT int
-wctomb (char*, wchar_t) _LIBC_THROWS();
-
-}   // extern "C"
-
-#endif   // _RWSTD_NO_WCTOMB && !_RWSTD_NO_WCTOMB_IN_LIBC
 
 
 // utf8 encoding maximum size
@@ -226,18 +150,7 @@ __rw_n_ucsmods = sizeof __rw_ucsmods / sizeof *__rw_ucsmods;
 static inline int
 __rw_mbsinit (const StateT *psrc)
 {
-#ifndef _RWSTD_NO_MBSINIT
-
     return mbsinit (psrc);
-
-#else   // if defined (_RWSTD_NO_MBSINIT)
-
-    // commented out to work around an HP aCC 1.21 bug
-    /* static */ const StateT state = StateT ();
-    return !psrc || 0 == memcmp (psrc, &state, sizeof state);
-
-#endif   // _RWSTD_NO_MBSINIT
-
 }
 
 
@@ -262,33 +175,8 @@ __rw_libc_mbrlen (_RWSTD_MBSTATE_T &state,
     if ('\0' == *str)
         return 0 < emax;
 
-#ifndef _RWSTD_NO_MBRLEN
-
     // `emax' is the maximum number of elements of type char in `str'
     return mbrlen (str, emax, &state);
-
-#elif !defined (_RWSTD_NO_MBLEN)
-
-    _RWSTD_UNUSED (state);
-
-    return mblen (str, emax);
-
-#else   // if defined (_RWSTD_NO_MBLEN)
-
-    _RWSTD_UNUSED (state);
-
-    // this is bogus but it's the best we can do given the absence
-    // of libc support for this functionality (more likely than not,
-    // this code will never end up getting executed because we'll
-    // never get this far)
-    const char *next = str;
-
-    for (; *next && emax; ++next, --emax);
-        
-    return next - str;
-
-#endif   // _RWSTD_NO_MBRLEN
-
 }
 
 
@@ -352,13 +240,7 @@ __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
         // the number of bytes that form the next multibyte character
         size_t nbytes;
 
-#ifndef _RWSTD_NO_MBRTOWC
         nbytes = mbrtowc (pdst, psrc, src_len, &state);
-#elif !defined (_RWSTD_NO_MBTOWC)
-        nbytes = mbtowc (pdst, psrc, src_len);
-#else
-        nbytes = _RWSTD_SIZE_MAX;
-#endif
 
         // -1 indicates an invalid sequence (i.e., error)
         if (nbytes == size_t (-1)) {
@@ -454,24 +336,10 @@ __rw_libc_do_out (_RWSTD_MBSTATE_T &state,
         // sequence, not including the terminating NUL
         size_t dst_len = 0;
 
-#ifndef _RWSTD_NO_WCRTOMB
-
         // convert the next source character (note that it would be
         // unsafe to use wcsrtombs() since the source sequence may
         // not be NUL terminated)
         dst_len = wcrtomb (tmpdst, *from_next, &state);
-
-#elif !defined (_RWSTD_NO_WCTOMB)
-
-        _RWSTD_UNUSED (state);
-        dst_len = wctomb (tmpdst, *from_next);
-
-#else   // error
-
-        _RWSTD_UNUSED (state);
-        dst_len = _RWSTD_SIZE_MAX;
-
-#endif   // _RWSTD_NO_WCRTOMB, _RWSTD_NO_WCTOMB
 
         // -1 is returned as an indication of an illegal sequence
         if (_RWSTD_SIZE_MAX == dst_len) {
@@ -528,13 +396,7 @@ __rw_libc_do_unshift (_RWSTD_MBSTATE_T& state, char*& to_next, char* to_limit)
 
     size_t ret;
 
-#ifndef _RWSTD_NO_WCRTOMB
     ret = wcrtomb (tmp, wchar_t (0), &state);
-#elif !defined (_RWSTD_NO_WCTOMB)
-    ret = wctomb (tmp, wchar_t (0));
-#else
-    ret = _RWSTD_SIZE_MAX;
-#endif
 
     if (_RWSTD_SIZE_MAX == ret)
         return  _STD::codecvt_base::error;
@@ -1339,8 +1201,6 @@ do_in (state_type&         state,
             // use libc locale
             const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
-#ifndef _RWSTD_NO_MBTOWC
-
             // verify that either the encoding is stateful
             // or the state is in its initial shift state
             const bool mbstate_valid =
@@ -1349,8 +1209,6 @@ do_in (state_type&         state,
             _RWSTD_ASSERT (mbstate_valid);
             if (!mbstate_valid)
                 break;
-
-#endif   // _RWSTD_NO_MBTOWC
 
             res = _RW::__rw_libc_do_in (state, 
                                         from, from_end, from_next,
@@ -1429,8 +1287,6 @@ do_out (state_type         &state,
             // use libc locale
             const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
-#ifndef _RWSTD_NO_MBTOWC
-
             // verify that either the encoding is stateful
             // or the state is in its initial shift state
             const bool mbstate_valid =
@@ -1440,8 +1296,6 @@ do_out (state_type         &state,
             if (!mbstate_valid)
                 break;
 
-#endif   // _RWSTD_NO_MBTOWC
-            
             res = _RW::__rw_libc_do_out (state, from, from_end, from_next,
                                          to, to_limit, to_next);
         }
@@ -1573,8 +1427,6 @@ do_length (state_type&        state,
             // use libc locale
             const _RW::__rw_setlocale clocale (this->_C_name, LC_CTYPE);
 
-#ifndef _RWSTD_NO_MBTOWC
-
             // verify that either the encoding is stateful
             // or the state is in its initial shift state
             const bool mbstate_valid =
@@ -1583,8 +1435,6 @@ do_length (state_type&        state,
             _RWSTD_ASSERT (mbstate_valid);
             if (!mbstate_valid)
                 break;
-
-#endif   // _RWSTD_NO_MBTOWC
 
             len = _RW::__rw_libc_do_length (state, from, from_end, cmax);
         }

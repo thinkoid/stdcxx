@@ -43,7 +43,7 @@
 #include <limits>     // for numeric_limits
 
 #include <limits.h>
-#include <stdlib.h>   // for size_t, wcstombs()
+#include <stdlib.h>   // for size_t
 #include <string.h>   // for memchr(), memcpy()
 
 #ifndef _RWSTD_NO_WCHAR_H
@@ -68,54 +68,7 @@
 #endif   // _RWSTD_MB_LEN_MAX
 
 
-#if defined (_RWSTD_NO_WCSCOLL) && !defined (_RWSTD_NO_WCSCOLL_IN_LIBC)
-
-extern "C" {
-
-// declare if not declared in the system header(s)
-int wcscoll (const wchar_t*, const wchar_t*) _LIBC_THROWS ();
-
-#  undef _RWSTD_NO_WCSCOLL
-
-}   // extern "C"
-
-#endif   // _RWSTD_NO_WCSCOLL && !_RWSTD_NO_WCSCOLL_IN_LIBC
-
-
-#ifdef _RWSTD_NO_WCSXFRM
-#  ifndef _RWSTD_NO_WCSXFRM_IN_LIBC
-
-extern "C" {
-
-// declare if not declared in the system header(s)
-size_t wcsxfrm (wchar_t*, const wchar_t*, size_t) _LIBC_THROWS ();
-
-#    define _RWSTD_WCSXFRM   wcsxfrm
-#    undef _RWSTD_NO_WCSXFRM
-
-}   // extern "C"
-
-#  else
-#    define _RWSTD_WCSXFRM   _RW::__rw_wcsxfrm
-#  endif   // _RWSTD_NO_WCSXFRM_IN_LIBC
-#else
-#    define _RWSTD_WCSXFRM   wcsxfrm
-#endif   // _RWSTD_NO_WCSXFRM
-
-
-#if defined (_RWSTD_NO_WCSTOMBS) && !defined (_RWSTD_NO_WCSTOMBS_IN_LIBC)
-
-extern "C" {
-
-// declare if not declared in the system header(s)
-_RWSTD_DLLIMPORT size_t
-wcstombs (char*, const wchar_t*, size_t) _LIBC_THROWS ();
-
-#  undef _RWSTD_NO_WCSTOMBS
-
-}   // extern "C"
-
-#endif   // _RWSTD_NO_WCSTOMBS && !_RWSTD_NO_WCSTOMBS_IN_LIBC
+#define _RWSTD_WCSXFRM   wcsxfrm
 
 
 // for convenience
@@ -599,98 +552,6 @@ __rw_strnxfrm (const char *src, size_t nchars)
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-#  ifdef _RWSTD_NO_WCSXFRM
-
-// implements wcsxfrm() using wcstombs() and strxfrm() on platforms
-// such as some versions of BSD where the function isn't defined in
-// the C Standard Library
-static size_t
-__rw_wcsxfrm (wchar_t *dst, const wchar_t *src, size_t dstsize)
-{
-    // src must be non-null
-    _RWSTD_ASSERT (0 != src);
-
-    // dst is permitted to be null only when (dstsize == 0)
-    _RWSTD_ASSERT (0 == dstsize || dst);
-
-#    ifndef _RWSTD_NO_WCSTOMBS
-
-    // convert wide string to a multibyte string before tranforming it
-    // using strxfrm() and widening the result into the destination buffer
-
-    const size_t srclen = _RWSTD_WCSLEN (src);
-
-    // compute the size of the temporary nearrow buffer where to narrow
-    // the source wide string to
-    const size_t needbytes =
-        (dstsize ? dstsize : srclen) * MB_LEN_MAX;
-
-    char narrow_buf [256];
-    char* const nbuf =
-        sizeof narrow_buf < needbytes ? new char [needbytes + 1] : narrow_buf;
-
-    size_t result;
-
-    const size_t nmbchars = wcstombs (nbuf, src, needbytes);
-
-    if (_RWSTD_SIZE_MAX == nmbchars)
-        result = _RWSTD_SIZE_MAX;
-    else {
-        // allocate a small buffer 8 times the size of the multibyte
-        // buffer (where 8 is a guess at the maximum number of bytes
-        // needed to transform the longest multibyte character)
-        char xfrm_buf [sizeof narrow_buf * 8];
-        const size_t xbufsize = sizeof xfrm_buf;
-        const size_t xbufneed = needbytes * 8;
-
-        // allocate a larger buffer if the small statically buffer
-        // isn't big enough
-        char* const xbuf =
-            xbufsize < xbufneed ? new char [xbufneed + 1] : xfrm_buf;
-
-        // transform the multibyte character string into the narrow
-        // buffer, storing the returned value
-        result = strxfrm (xbuf, nbuf, xbufneed);
-
-        if (_RWSTD_SIZE_MAX != result && dstsize) {
-            // widen the bytes (not characters) of the transformed string
-            // if the transformation was successful and the size of the
-            // destination buffer is non-zero
-
-            if (result < dstsize)
-                dstsize = result;
-
-            for (size_t i = 0; i != dstsize; ++i)
-                dst [i] = wchar_t (UChar (xbuf [i]));
-        }
-
-        // free the transformation buffer if dynamically allocated
-        if (xbuf != xfrm_buf)
-            delete[] xbuf;
-    }
-
-    // free the multibyte buffer if dynamically allocated
-    if (nbuf != narrow_buf)
-        delete[] nbuf;
-
-    return result;
-
-#    else   // if defined (_RWSTD_NO_WCSTOMBS)
-
-    _RWSTD_UNUSED (dst);
-    _RWSTD_UNUSED (src);
-    _RWSTD_UNUSED (dstsize);
-
-    // fail when there is no way to convert a wchar_t array
-    // to a multibyte string
-    return _RWSTD_SIZE_MAX;
-
-#    endif   // _RWSTD_NO_WCSTOMBS
-
-}
-
-#  endif   // _RWSTD_NO_WCSXFRM
-
 
 // same as wcsxfrm() except that it takes the number of characters
 // in an array that may contain embedded NULs; these are inserted
@@ -1064,31 +925,10 @@ do_compare (const char_type *__lo1, const char_type *__hi1,
     const size_t __len1 = __hi1 - __lo1;
     const size_t __len2 = __hi2 - __lo2;
 
-#ifndef _RWSTD_NO_WMEMCMP
-
     const int cmp = wmemcmp (__lo1, __lo2, __len1 < __len2 ? __len1 : __len2);
 
     if (cmp)
         return cmp < 0 ? -1 : 1;
-
-#else   // if defined (_RWSTD_NO_WMEMCMP)
-
-    for (size_t __len = __len1 < __len2 ? __len1 : __len2;
-         __len--; ++__lo1, ++__lo2) {
-
-        typedef string_type::traits_type _Traits;
-        typedef _Traits::int_type        _Int;
-
-        // avoid arithmetic on unknown char types
-        const _Int __i1 = _Traits::to_int_type (*__lo1);
-        const _Int __i2 = _Traits::to_int_type (*__lo2);
-        
-        // use int_type to prevent signed versus unsigned char comparison
-        if (!_Traits::eq_int_type (__i1, __i2)) 
-            return __i1 < __i2 ? -1 : 1;
-    }
-
-#endif   // _RWSTD_NO_WMEMCMP
 
     return __len1 < __len2 ? -1 : __len2 < __len1 ? +1 : 0;
 }
@@ -1144,8 +984,6 @@ do_compare (const wchar_t* low1, const wchar_t* high1,
         // adjust return value
         return cmp < 0 ? -1 : cmp ? 1 : 0;
     }
-
-#ifndef _RWSTD_NO_WCSCOLL
 
     // use the system C library to compare the strings
     _RW::__rw_setlocale clocale (this->_C_name, _RWSTD_LC_COLLATE);
@@ -1227,19 +1065,6 @@ do_compare (const wchar_t* low1, const wchar_t* high1,
         delete [] pwbuf;
 
     return cmp;
-
-#else   // if defined (_RWSTD_NO_WCSCOLL)
-
-    // transform strings first and compare the transformed results
-    const string_type s1 = do_transform (low1, high1);
-    const string_type s2 = do_transform (low2, high2);
-
-    const int cmp = s1.compare (s2);
-    
-    // adjust return value
-    return cmp < 0 ? -1 : cmp ? 1 : 0;
-
-#endif   // _RWSTD_NO_WCSCOLL
 
 }
 

@@ -32,7 +32,6 @@
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-#include <ctype.h>
 #include <limits.h>
 #include <locale.h>
 
@@ -40,7 +39,6 @@
 #  include <wchar.h>   // for wctob()
 #endif   // _RWSTD_NO_WCHAR_H
 
-#include <stdlib.h>   // for wctomb()
 #include <string.h>   // for memset()
 #include <wctype.h>   // for iswspace(), ...
 
@@ -136,101 +134,53 @@ __rw_get_mask (__rw_ctype_t    *impl,
 
         int m = 0;
 
-        // does the value of *beg fit into the range of an unsigned char?
-        const bool fits_char =
-            _RWSTD_STATIC_CAST (size_t, *beg) <= _RWSTD_UCHAR_MAX;
-
-        // `fits_char' is not used if all wide character
-        // classification functions use below are present
-        _RWSTD_UNUSED (fits_char);
-
         if (mask & __rw_space) {
-#ifndef _RWSTD_NO_ISWSPACE
             if ((::iswspace)(*beg))
-#else
-            if (fits_char && (::isspace)(*beg))
-#endif   // _RWSTD_NO_ISWSPACE
                 m |= __rw_space;
         }
 
         if (mask & __rw_print) {
-#ifndef _RWSTD_NO_ISWPRINT
             if ((::iswprint)(*beg))
-#else
-            if (fits_char && (::isprint)(*beg))
-#endif   // _RWSTD_NO_ISWPRINT
                 m |= __rw_print;
         }
 
         if (mask & __rw_cntrl) {
-#ifndef _RWSTD_NO_ISWCNTRL
             if ((::iswcntrl)(*beg))
-#else
-            if (fits_char && (::iscntrl)(*beg))
-#endif   // _RWSTD_NO_ISWCNTRL
                 m |= __rw_cntrl;
         }
 
         if (mask & __rw_upper) {
-#ifndef _RWSTD_NO_ISWUPPER
             if ((::iswupper)(*beg))
-#else
-            if (fits_char && (::isupper)(*beg))
-#endif   // _RWSTD_NO_ISWUPPER
                 m |= __rw_upper;
         }
 
         if (mask & __rw_lower) {
-#ifndef _RWSTD_NO_ISWLOWER
             if ((::iswlower)(*beg))
-#else
-            if (fits_char && (::islower)(*beg))
-#endif   // _RWSTD_NO_ISWLOWER
                 m |= __rw_lower;
         }
 
         if (mask & __rw_alpha) {
-#ifndef _RWSTD_NO_ISWALPHA
             if ((::iswalpha)(*beg))
-#else
-            if (fits_char && (::isalpha)(*beg))
-#endif   // _RWSTD_NO_ISWALPHA
                 m |= __rw_alpha;
         }
 
         if (mask & __rw_digit) {
-#ifndef _RWSTD_NO_ISWDIGIT
             if ((::iswdigit)(*beg))
-#else
-            if (fits_char && (::isdigit)(*beg))
-#endif
                 m |= __rw_digit;
         }
 
         if (mask & __rw_punct) {
-#ifndef _RWSTD_NO_ISWPUNCT
             if ((::iswpunct)(*beg))
-#else
-            if (fits_char && (::ispunct)(*beg))
-#endif   // _RWSTD_NO_ISWPUNCT
                 m |= __rw_punct;
         }
 
         if (mask & __rw_xdigit) {
-#ifndef _RWSTD_NO_ISWXDIGIT
             if ((::iswxdigit)(*beg))
-#else
-            if (fits_char && (::isxdigit) (*beg))
-#endif   // _RWSTD_NO_ISWXDIGIT
                 m |= __rw_xdigit;
         }
 
         if (mask & __rw_graph) {
-#ifndef _RWSTD_NO_ISWGRAPH
             if ((::iswgraph)(*beg))
-#else
-            if (fits_char && (::isgraph)(*beg))
-#endif   // _RWSTD_NO_ISWGRAPH
                 m |= __rw_graph;
         }
 
@@ -276,22 +226,9 @@ __rw_toupper (__rw_ctype_t* impl,
     }
     else {
 
-#ifndef _RWSTD_NO_TOWUPPER
-
         const __rw_setlocale clocale (locname, LC_CTYPE);
 
         c = (::towupper)(c);
-
-#else   // if defined (_RWSTD_NO_TOWUPPER)
-
-        if (_RWSTD_STATIC_CAST (size_t, c) <= _RWSTD_UCHAR_MAX) {
-
-            const __rw_setlocale clocale (locname, LC_CTYPE);
-
-            c = (::toupper)(c);
-        }
-
-#endif   // _RWSTD_NO_TOWUPPER
 
     }
 
@@ -331,22 +268,9 @@ __rw_tolower (__rw_ctype_t* impl,
     }
     else {
 
-#ifndef _RWSTD_NO_TOWLOWER
-
         const __rw_setlocale clocale (locname, LC_CTYPE);
 
         c = (::towlower)(c);
-
-#else   // if defined (_RWSTD_NO_TOWLOWER)
-
-        if (_RWSTD_STATIC_CAST (size_t, c) <= _RWSTD_UCHAR_MAX) {
-
-            const __rw_setlocale clocale (locname, LC_CTYPE);
-
-            c = (::tolower)(c);
-        }
-
-#endif   // _RWSTD_NO_TOWLOWER
 
     }
 
@@ -660,89 +584,41 @@ ctype_byname (const char *name, size_t refs)
 
             int m = 0;
 
-#ifndef _RWSTD_NO_ISWSPACE
             if ((::iswspace)(i))
-#else
-            if ((::isspace)(i))
-#endif   // _RWSTD_NO_ISWSPACE
                 m |= _RW::__rw_space;
 
-#ifndef _RWSTD_NO_ISWPRINT
             if ((::iswprint)(i))
-#else
-            if ((::isprint)(i))
-#endif   // _RWSTD_NO_ISWPRINT
                 m |= _RW::__rw_print;
 
-#ifndef _RWSTD_NO_ISWCNTRL
             if ((::iswcntrl)(i))
-#else
-            if ((::iscntrl)(i))
-#endif   // _RWSTD_NO_ISWCNTRL
                 m |= _RW::__rw_cntrl;
 
-#ifndef _RWSTD_NO_ISWUPPER
             if ((::iswupper)(i))
-#else
-            if ((::isupper)(i))
-#endif   // _RWSTD_NO_ISWUPPER
                 m |= _RW::__rw_upper;
 
-#ifndef _RWSTD_NO_ISWLOWER
             if ((::iswlower)(i))
-#else
-            if ((::islower)(i))
-#endif   // _RWSTD_NO_ISWLOWER
                 m |= _RW::__rw_lower;
 
-#ifndef _RWSTD_NO_ISWALPHA
             if ((::iswalpha)(i))
-#else
-            if ((::isalpha)(i))
-#endif   // _RWSTD_NO_ISWALPHA
                 m |= _RW::__rw_alpha;
 
-#ifndef _RWSTD_NO_ISWDIGIT
             if ((::iswdigit)(i))
-#else
-            if ((::isdigit)(i))
-#endif   // _RWSTD_NO_ISWDIGIT
                 m |= _RW::__rw_digit;
 
-#ifndef _RWSTD_NO_ISWPUNCT
             if ((::iswpunct)(i))
-#else
-            if ((::ispunct)(i))
-#endif   // _RWSTD_NO_ISWPUNCT
                 m |= _RW::__rw_punct;
 
-#ifndef _RWSTD_NO_ISWXDIGIT
             if ((::iswxdigit)(i))
-#else
-            if ((::isxdigit)(i))
-#endif   // _RWSTD_NO_ISWXDIGIT
                 m |= _RW::__rw_xdigit;
 
-#ifndef _RWSTD_NO_ISWGRAPH
             if ((::iswgraph)(i))
-#else
-            if ((::isgraph)(i))
-#endif   // _RWSTD_NO_ISWGRAPH
                 m |= _RW::__rw_graph;
 
             _RWSTD_CONST_CAST (mask*, _C_mask_tab) [i]  = mask (m);
 
-#ifndef _RWSTD_NO_TOWUPPER
             const size_t upr = size_t ((::towupper)(i));
-#else   // if defined (_RWSTD_NO_TOWUPPER)
-            const size_t upr = size_t ((::toupper)(i));
-#endif   // _RWSTD_NO_TOWUPPER
 
-#ifndef _RWSTD_NO_TOWLOWER
             const size_t lwr = size_t ((::towlower)(i));
-#else   // if defined (_RWSTD_NO_TOWLOWER)
-            const size_t lwr = size_t ((::tolower)(i));
-#endif   // _RWSTD_NO_TOWLOWER
 
             // optimize (and avoid warnings) when wint_t is unsigned
             _C_upper_tab [i] = upr <= size_t (_RWSTD_UCHAR_MAX) ?
@@ -932,24 +808,11 @@ do_narrow (char_type c, char dfault) const
     char ch = 0;
     if (0 == cvt || (this->_C_opts & this->_C_use_libc)) {
 
-#ifndef _RWSTD_NO_WCTOB
-
         const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
         const int tmp = wctob (c);
 
         ch = tmp < 0 ? dfault : char (tmp);
-
-#elif !defined (_RWSTD_NO_WCTOMB)
-
-        char tmp [_RWSTD_MB_LEN_MAX];
-        ch = 1 == wctomb (tmp, c) ? *tmp : dfault;
-
-#else   // if defined (_RWSTD_NO_WCTOMB)
-
-        ch = dfault;
-
-#endif   // _RWSTD_NO_WCTOB, _RWSTD_NO_WCTOMB
 
     }
     else {
@@ -1054,18 +917,10 @@ do_widen (char c) const
 
     if (0 == cvt || (this->_C_opts & this->_C_use_libc)) {
 
-#ifndef _RWSTD_NO_BTOWC
-
         const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
         // prevent sign extension if `c' is negative
         ch = btowc (u_c);
-
-#else   // if defined (_RWSTD_NO_BTOWC)
-
-        ch = char_type (u_c);
-
-#endif   // _RWSTD_NO_BTOWC
 
     }
     else {

@@ -31,14 +31,12 @@
 
 #include "setlocale.h"
 #include "strtol.h"
-#include "punct.h"      // for __rw_get_stdio_fmat
 
 #include <ios>          // for ios_base, needed by <rw/_punct.h>
 #include <loc/_num_get.h>
 
 #include <errno.h>      // for ERANGE, errno
 #include <float.h>      // for {DBL,FLT,LDBL}_{MIN,MAX}
-#include <stdio.h>      // for printf()
 #include <stdlib.h>     // for strtod()
 #include <string.h>     // for memcpy()
 
@@ -52,24 +50,6 @@
 // actual value of EINVAL on both Linux and SunOS is 22
 #  define _RWSTD_EINVAL 22
 #endif   // EINVAL
-
-
-
-#if defined (_RWSTD_NO_STRTOF) && !defined (_RWSTD_NO_STRTOF_IN_LIBC)
-
-#  undef _RWSTD_NO_STRTOF
-
-extern "C" float strtof (const char*, char**);
-
-#endif   // NO_STRTOF && !NO_STRTOF_IN_LIBC
-
-#if defined (_RWSTD_NO_STRTOLD) && !defined (_RWSTD_NO_STRTOLD_IN_LIBC)
-
-#  undef _RWSTD_NO_STRTOLD
-
-extern "C" long double strtold (const char*, char**);
-
-#endif   // NO_STRTOLD && !NO_STRTOLD_IN_LIBC
 
 
 
@@ -530,8 +510,6 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
         switch (type) {
         case __rw_facet::_C_float: {
 
-#ifndef _RWSTD_NO_STRTOF
-
             // assumes `buf' is formatted for the current locale
             // specifically, affects the value of decimal_point
             float f = strtof (_RWSTD_CONST_CAST (char*, buf), &end);
@@ -562,79 +540,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 
             break;
 
-#else   // if defined (_RWSTD_NO_STRTOF)
-
-            // assumes `buf' is formatted for the current locale
-            // specifically, affects the value of decimal_point
-            double d = strtod (buf, &end);
-            err = errno;
-
-            // restore errno if it was reset above
-            if (ERANGE == errno_save)
-                errno = ERANGE;
-
-            _RWSTD_ASSERT (0 != end);
-
-            if ('.' == *end || end == buf && '.' == buf [1]) {
-                // on failure caused by an unrecognized decimal point
-                // set teporarily the global locale to "C" and reparse
-                __rw_setlocale loc ("C", _RWSTD_LC_NUMERIC);
-
-                d = strtod (buf, &end);
-            }
-
-            if (*end)
-                return _RWSTD_IOS_FAILBIT;
-
-            // handle (benign) overflow and underflow
-
-            if (d < -double (_RWSTD_FLT_MAX)) {
-                // negative overflow (magnitude is too large to represent)
-                // store negative infinity and set failbit
-                d   = -__rw_flt_infinity;
-                err = _RWSTD_IOS_FAILBIT;
-            }
-            else if (d > double (_RWSTD_FLT_MAX)) {
-                // positive overflow (magnitude is too large to represent)
-                // store positive infinity and set failbit
-                d   = __rw_flt_infinity;
-                err = _RWSTD_IOS_FAILBIT;
-            }
-            else if (d > 0.0 && d < double (_RWSTD_FLT_MIN)) {
-                // positive underflow (magnitude is too small to represent)
-                // store FLT_MIN and clear failbit
-                d   = _RWSTD_FLT_MIN;
-                err = 0;
-            }
-            else if (d < 0.0 && d > -double (_RWSTD_FLT_MIN)) {
-                // negative underflow (magnitude is too small to represent)
-                // store -FLT_MIN and clear failbit
-                d   = -_RWSTD_FLT_MIN;
-                err = 0;
-            }
-            else
-                err = 0;
-
-            *_RWSTD_STATIC_CAST (float*, pval) =
-                _RWSTD_STATIC_CAST (float, d);
-            break;
-
-#endif   // _RWSTD_NO_STRTOF
-
         }
-
-#ifdef _RWSTD_NO_STRTOLD
-#  if DBL_DIG == LDBL_DIG && DBL_MAX_EXP == LDBL_MAX_EXP
-
-     // strtold() is not defined and the size and domain of long double
-     // is the same as that of double; use strtod() instead of sscanf()
-     // for better precision
-#    define LDBL_SAME_AS_DBL
-
-        case __rw_facet::_C_ldouble:
-
-#  endif   // DBL_DIG == LDBL_DIG && DBL_MAX_EXP == LDBL_MAX_EXP
-#endif   // _RWSTD_NO_STRTOLD
 
         case __rw_facet::_C_double: {
             // assumes `buf' is formatted for the current locale
@@ -667,17 +573,13 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
         }
 
 
-#ifndef LDBL_SAME_AS_DBL
-
         case __rw_facet::_C_ldouble: {
 
             typedef long double LDbl;
 
-#  ifndef _RWSTD_NO_LONG_DOUBLE
+#ifndef _RWSTD_NO_LONG_DOUBLE
 
             LDbl ld;
-
-#    ifndef _RWSTD_NO_STRTOLD
 
             // assumes `buf' is formatted for the current locale
             // specifically, affects the value of decimal_point
@@ -706,41 +608,14 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
             if (*end)
                 return _RWSTD_IOS_FAILBIT;
 
-#    else   // if defined (!_RWSTD_NO_STRTOLD)
-
-            flags &=
-            ~(_RWSTD_IOS_SHOWBASE | _RWSTD_IOS_SHOWPOS | _RWSTD_IOS_SHOWPOINT);
-
-            char fmatbuf [32];
-
-            const char* const fmt =
-                __rw_get_stdio_fmat (fmatbuf, type, flags, -1 /* ignore */);
-
-            // assumes `buf' is formatted for the current locale
-            // specifically, affects the value of decimal_point
-            const int n = sscanf (buf, fmt, pval);
-
-            // restore errno if it was reset above
-            if (ERANGE == errno_save)
-                errno = errno_save;
-
-            if (1 != n)
-                return _RWSTD_IOS_FAILBIT;
-
-            ld = *_RWSTD_STATIC_CAST (LDbl*, pval);
-
-#    endif   // _RWSTD_NO_STRTOLD
-
             *_RWSTD_STATIC_CAST (LDbl*, pval) =
                 __rw_validate (ld, LDbl (_RWSTD_LDBL_MIN),
                                __rw_ldbl_infinity, *buf, err);
 
-#  endif   // _RWSTD_LONG_DOUBLE
+#endif   // _RWSTD_LONG_DOUBLE
 
             break;
         }
-
-#endif   //  LDBL_SAME_AS_DBL
         }
     }
 

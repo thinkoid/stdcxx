@@ -61,23 +61,7 @@
 #include "podarray.h"   // for __rw_aligned_buffer
 
 
-#if defined (_RWSTD_NO_VSNPRINTF) && !defined (_RWSTD_NO_VSNPRINTF_IN_LIBC)
-
-// vsnprintf() not declared, but it is defined in libc
-extern "C" _RWSTD_DLLIMPORT int
-vsnprintf (char*, _RWSTD_SIZE_T, const char*, va_list) _LIBC_THROWS();
-
-// use vsnprintf()
-#  undef _RWSTD_NO_VSNPRINTF
-#endif // _NO_VSNPRINTF && !_NO_VSNPRINTF_IN_LIBC || !_RWSTD_NO_PURE_C_HEADERS
-
-
-#ifndef _RWSTD_NO_VSNPRINTF
-#  define _RWSTD_VSNPRINTF(buf, size, fmat, va)  vsnprintf (buf, size, fmat, va)
-#else
-    // unsafely work around the lack of vsnprintf by using vsprintf()
-#  define _RWSTD_VSNPRINTF(buf, ignore, fmat, va)  vsprintf (buf, fmat, va)
-#endif   // _RWSTD_NO_VSNPRINTF
+#define _RWSTD_VSNPRINTF(buf, size, fmat, va)  vsnprintf (buf, size, fmat, va)
 
 
 // declare global versions of exception handlers; will be
@@ -418,14 +402,8 @@ __rw_vfmtwhat (char          *buf,      // (allocate if 0)
     _RWSTD_ASSERT (0 != fmat);
     _RWSTD_ASSERT (0 == buf || bufsize);
 
-#ifndef _RWSTD_NO_VSNPRINTF
     // initial size of buffer, may be increased as needed
     _RWSTD_SIZE_T size = bufsize ? bufsize : 256;
-#else
-    // unsafely work around the lack of vsnprintf by using vsprintf()
-    _RWSTD_SIZE_T size = bufsize ? bufsize : strlen (fmat);
-    size = size < 1024 ? 1024 : size * 2;
-#endif   // _RWSTD_NO_VSNPRINTF
 
     if (!buf) {
 

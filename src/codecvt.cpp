@@ -35,7 +35,7 @@
 
 #include <limits.h>
 #include <locale.h>
-#include <string.h>   // for memcmp()
+#include <string.h>   // for memmove()
 #include <errno.h>
 #include <wchar.h>    // for mbsinit()
 
@@ -56,18 +56,7 @@ _RWSTD_NAMESPACE (__rw) {
 static inline int
 __rw_mbsinit (const StateT *ps)
 {
-#ifndef _RWSTD_NO_MBSINIT
-
     return ::mbsinit (ps);
-
-#else   // if defined (_RWSTD_NO_MBSINIT)
-
-    // commented out to work around an HP aCC 1.21 bug
-    /* static */ const StateT state = StateT ();
-    return !ps || 0 == memcmp (ps, &state, sizeof state);
-
-#endif   // _RWSTD_NO_MBSINIT
-
 }
 
 

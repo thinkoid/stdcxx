@@ -39,7 +39,7 @@
 
 #include <errno.h>    // for ENAMETOOLONG, ERANGE, errno
 #include <stddef.h>   // for ptrdiff_t
-#include <stdio.h>    // for P_tmpdir, std{err,in,out}, remove(), tmpnam()
+#include <stdio.h>    // for P_tmpdir, std{err,in,out}, remove()
 #include <stdlib.h>   // for mkstemp(), strtoul(), size_t
 #include <ctype.h>    // for isalpha(), isspace(), toupper()
 #include <string.h>   // for memcpy()
@@ -66,8 +66,7 @@
 
 
 
-#if     defined (_RWSTD_NO_MKSTEMP) && !defined (_RWSTD_NO_MKSTEMP_IN_LIBC) \
-    || !defined (_RWSTD_NO_PURE_C_HEADERS)
+#ifndef _RWSTD_NO_PURE_C_HEADERS
 
 extern "C" {
 
@@ -78,24 +77,19 @@ _RWSTD_DLLIMPORT int mkstemp (char*);
 
 }   // extern "C"
 
-#  undef _RWSTD_NO_MKSTEMP
-
-#endif   // _RWSTD_NO_MKSTEMP[_IN_LIBC] || !_NO_PURE_C_HEADERS
+#endif   // _RWSTD_NO_PURE_C_HEADERS
 
 
-#if     defined (_RWSTD_NO_FILENO) && !defined (_RWSTD_NO_FILENO_IN_LIBC) \
-    || !defined (_RWSTD_NO_PURE_C_HEADERS)
+#ifndef _RWSTD_NO_PURE_C_HEADERS
 
 // declare fileno in case it's not declared (for strict ANSI conformance)
 extern "C" {
 
 _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 
-#  undef _RWSTD_NO_FILENO
-
 }   // extern "C"
 
-#endif   // _NO_FILENO && !_NO_FILENO_IN_LIBC || !_NO_PURE_C_HEADERS
+#endif   // _RWSTD_NO_PURE_C_HEADERS
 
 
 _RWSTD_NAMESPACE (__rw) {
@@ -238,8 +232,6 @@ __rw_mkstemp (int modebits, long prot)
 {
     int fd;
 
-#ifndef _RWSTD_NO_MKSTEMP
-
     // mkstemp() opens a temporary file for reading and writing
     _RWSTD_UNUSED (modebits);
     _RWSTD_UNUSED (prot);
@@ -284,26 +276,6 @@ __rw_mkstemp (int modebits, long prot)
     // it's explicitly closed or until the process exits
     if (fd >= 0)
         remove (pathbuf);
-
-#else   // if defined (_RWSTD_NO_MKSTEMP)
-
-    modebits |= _RWSTD_O_EXCL | _RWSTD_O_CREAT;
-
-    char tmpbuf [L_tmpnam];
-
-    const char* const fname = tmpnam (tmpbuf);
-
-    if (!fname)
-        return -1;
-
-    fd = open (fname, modebits, prot);
-
-    // remove the file, forcing the OS to delete it when
-    // the last file descriptor that refers to it is closed
-    if (fd >= 0)
-        remove (fname);
-
-#endif   // _RWSTD_NO_MKSTEMP
 
     return fd;
 }

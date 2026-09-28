@@ -87,20 +87,6 @@ extern void tzset () _LIBC_THROWS ();
 #endif   // _RWSTD_NO_DAYLIGHT
 
 
-#if defined (_RWSTD_NO_WCSFTIME) && !defined (_RWSTD_NO_WCSFTIME_IN_LIBC)
-#  if defined _RWSTD_WCSFTIME_ARG3_T
-
-#    undef _RWSTD_NO_WCSFTIME
-
-extern "C" {
-
-size_t wcsftime (wchar_t*, size_t, _RWSTD_WCSFTIME_ARG3_T, const struct tm*);
-
-}
-#  endif   // _RWSTD_WCSFTIME_ARG3_T
-#endif   // _RWSTD_NO_WCSFTIME && !_RWSTD_NO_WCSFTIME_IN_LIBC
-
-
 _RWSTD_NAMESPACE (__rw) {
 
 
@@ -712,8 +698,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         if (align)
             off += sizeof (wchar_t) - align;
 
-#    ifndef _RWSTD_NO_WCSFTIME
-
         wchar_t *pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
         len = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%a", &t);
 
@@ -727,48 +711,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         pun->day_off [1][t.tm_wday] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
         off                         += (len + 1) * sizeof (wchar_t);
 
-#    else   // if defined (_RWSTD_NO_WCSFTIME)
-
-        // widen the narrow (multibyte) string into the allocated buffer
-        // (at an appropriately aligned offset) and set its offset
-        const char *str =
-            _RWSTD_STATIC_CAST (const char*, pun->abday (t.tm_wday, 0));
-
-        wchar_t *pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
-        size_t size =
-            mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
-
-        if (_RWSTD_SIZE_MAX == size) {
-            // conversion failure - should not happen
-            *pwbuf = L'\0';
-            size   = 1;
-        }
-        else {
-            _RWSTD_ASSERT (L'\0' == pwbuf [size]);
-            size += 1;
-        }
-
-        pun->abday_off [1][t.tm_wday] = off;
-        off                          += size * sizeof (wchar_t);
-
-        str   = _RWSTD_STATIC_CAST (const char*, pun->day (t.tm_wday, 0));
-        pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
-        size  = mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
-
-        if (_RWSTD_SIZE_MAX == size) {
-            // conversion failure - should not happen
-            *pwbuf = L'\0';
-            size   = 1;
-        }
-        else {
-            _RWSTD_ASSERT (L'\0' == pwbuf [size]);
-            size += 1;
-        }
-
-        pun->day_off [1][t.tm_wday] = off;
-        off                        += size * sizeof (wchar_t);
-
-#    endif   // _RWSTD_NO_WCSFTIME
 #  endif   // _RWSTD_NO_WCHAR_T
 
     }
@@ -794,8 +736,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         if (align)
             off += sizeof (wchar_t) - align;
 
-#    ifndef _RWSTD_NO_WCSFTIME
-
         wchar_t *pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
         len = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%b", &t);
 
@@ -809,47 +749,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         pun->mon_off [1][t.tm_mon]  = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
         off                        += (len + 1) * sizeof (wchar_t);
 
-#    else   // if defined (_RWSTD_NO_WCSFTIME)
-
-        // widen the narrow (multibyte) string into the allocated buffer
-        // (at an appropriately aligned offset) and set its offset
-        const char *str =
-            _RWSTD_STATIC_CAST (const char*, pun->abmon (t.tm_mon, 0));
-        wchar_t *pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
-        size_t size =
-            mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
-
-        if (_RWSTD_SIZE_MAX == size) {
-            // conversion failure - should not happen
-            *pwbuf = L'\0';
-            size   = 1;
-        }
-        else {
-            _RWSTD_ASSERT (L'\0' == pwbuf [size]);
-            size += 1;
-        }
-
-        pun->abmon_off [1][t.tm_mon] = off;
-        off                         += size * sizeof (wchar_t);
-
-        str   = _RWSTD_STATIC_CAST (const char*, pun->mon (t.tm_mon, 0));
-        pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
-        size  = mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
-
-        if (_RWSTD_SIZE_MAX == size) {
-            // conversion failure - should not happen
-            *pwbuf = L'\0';
-            size   = 1;
-        }
-        else {
-            _RWSTD_ASSERT (L'\0' == pwbuf [size]);
-            size += 1;
-        }
-
-        pun->mon_off [1][t.tm_mon] = off;
-        off                       += size * sizeof (wchar_t);
-
-#    endif   // _RWSTD_NO_WCSFTIME
 #  endif   // _RWSTD_NO_WCHAR_T
 
     }
@@ -913,8 +812,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     wchar_t    *pwbuf;
     size_t      size;
 
-#    ifndef _RWSTD_NO_WCSFTIME
-
     t.tm_hour = 1;
     pwbuf     = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
     len       = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%p", &t);
@@ -926,44 +823,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     len       = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%p", &t);
     pun->am_pm_off [1][1] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
     off += (len + 1) * sizeof (wchar_t);
-
-#    else   // if defined (_RWSTD_NO_WCSFTIME)
-
-    str   = _RWSTD_STATIC_CAST (const char*, pun->am_pm (0, 0));
-    pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
-    size  = mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
-
-    if (_RWSTD_SIZE_MAX == size) {
-        // conversion failure - should not happen
-        *pwbuf = L'\0';
-        size   = 1;
-    }
-    else {
-        _RWSTD_ASSERT (L'\0' == pwbuf [size]);
-        size += 1;
-    }
-
-    pun->am_pm_off [1][0] = off;
-    off                  += size * sizeof (wchar_t);
-
-    str   = _RWSTD_STATIC_CAST (const char*, pun->am_pm (1, 0));
-    pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
-    size  = mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
-
-    if (_RWSTD_SIZE_MAX == size) {
-        // conversion failure - should not happen
-        *pwbuf = L'\0';
-        size   = 1;
-    }
-    else {
-        _RWSTD_ASSERT (L'\0' == pwbuf [size]);
-        size += 1;
-    }
-
-    pun->am_pm_off [1][1] = off;
-    off                  += size * sizeof (wchar_t);
-
-#    endif   // _RWSTD_NO_WCSFTIME
 
     // convert "%x" to its wide equivalent
     str   = _RWSTD_STATIC_CAST (const char*, pun->d_fmt (0));
@@ -2804,8 +2663,6 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
 
     if (_RWSTD_INT_MIN != tpd.val) {
 
-#ifndef _RWSTD_NO_SWPRINTF
-
         const wchar_t *fmtstr = 'z' == fmt ? L"%+*.*d" : L"%*.*d";
 
         res = swprintf (wbuf, 
@@ -2815,27 +2672,6 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
                         fmtstr,
                         width < 0 ? tpd.width : width,
                         prec < 0 ? tpd.prec : prec, tpd.val);
-
-#else   // if defined (_RWSTD_NO_SWPRINTF)
-
-        const char *fmtstr = 'z' == fmt ? "%+*.*d" : "%*.*d";
-
-        char buf [64];
-
-        res = size_t (sprintf (buf, fmtstr,
-                               width < 0 ? tpd.width : width,
-                               prec < 0 ? tpd.prec : prec, tpd.val));
-
-        _RWSTD_ASSERT (res < sizeof buf);
-
-        wchar_t *dst = wbuf;
-
-        for (const char *s = buf; *s; ++s, ++dst)
-            *dst = _RWSTD_STATIC_CAST (unsigned char, *s);
-
-        res = dst - wbuf;
-
-#endif   // _RWSTD_NO_SWPRINTF
 
     }
     else {
@@ -2864,44 +2700,28 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
         }
         else {
 
-#if !defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT) && !defined (_RWSTD_NO_WCSFTIME)
+#ifndef _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT
 
             wchar_t fmtstr [4] = { L'%', fmt, L'\0', L'\0' };
 
-#else   // if _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT || _RWSTD_NO_WCSFTIME
+#else   // if defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT)
 
             // work around incorrect wcsftime() declarations some
             // platforms
             char fmtstr [4] = { '%', fmt, '\0', '\0' };
 
-#endif   // !_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT && !_RWSTD_NO_WCSFTIME
+#endif   // _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT
 
             if (mod) {
                 fmtstr [1] = mod;
                 fmtstr [2] = fmt;
             }
 
-#ifndef _RWSTD_NO_WCSFTIME
-
             // use wcsftime() for locale-independent formatting
             res = wcsftime (wbuf, bufsize, fmtstr, tmb);
 
             _RWSTD_ASSERT (res < bufsize);
 
-#else   // if defined (_RWSTD_NO_WCSFTIME)
-
-            char buf [256];
-
-            // use strftime() for locale-independent formatting
-            res = strftime (buf, sizeof buf, fmtstr, tmb);
-
-            if (res <= sizeof buf) {
-                // widen narrow (not multibyte) result into wide buffer
-                for (size_t i = 0; i != res; ++i)
-                    wbuf [i] = _RWSTD_STATIC_CAST (unsigned char, buf [i]);
-            }
-
-#endif   // _RWSTD_NO_WCSFTIME
         }
     }
 

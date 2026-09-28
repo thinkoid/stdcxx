@@ -41,30 +41,11 @@
 #include "punct.h"    // for __rw_get_stdio_fmat
 
 
-#ifndef _RWSTD_NO_SNPRINTF
-   // cast away constness of the format argument to prevent errors
-   // on platforms such as HP-UX 11.00 that incorrectly declare it
-   // without the const qualifier
-#  define _SNPRINTF(buf, size, fmt, arg)   \
-     snprintf (buf, size, _RWSTD_CONST_CAST (char*, fmt), arg)
-#else   // _RWSTD_NO_SNPRINTF
-#  ifndef _RWSTD_NO_SNPRINTF_IN_LIBC
-
-#    undef snprintf
-#    define snprintf                         _RWSTD_LIBC_SYM (snprintf)
-#    define _SNPRINTF(buf, size, fmt, arg)   snprintf (buf, size, fmt, arg)
-
-extern "C" {
-
-_RWSTD_DLLIMPORT int
-snprintf (char*, size_t, const char*, ...) _LIBC_THROWS ();
-
-}   // extern "C"
-
-#  else   // if defined (_RWSTD_NO_SNPRINTF_IN_LIBC)
-#    define _SNPRINTF(buf, ignore, fmt, arg) sprintf (buf, fmt, arg)
-#  endif   // _RWSTD_NO_SNPRINTF_IN_LIBC
-#endif   // _RWSTD_NO_SNPRINTF
+// cast away constness of the format argument to prevent errors
+// on platforms such as HP-UX 11.00 that incorrectly declare it
+// without the const qualifier
+#define _SNPRINTF(buf, size, fmt, arg)   \
+    snprintf (buf, size, _RWSTD_CONST_CAST (char*, fmt), arg)
 
 
 _RWSTD_NAMESPACE (__rw) { 
