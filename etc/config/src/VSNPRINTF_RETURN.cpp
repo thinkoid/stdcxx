@@ -29,13 +29,6 @@
 #include "config.h"
 
 
-#ifdef _RWSTD_NO_VSNPRINTF
-
-extern "C" int vsnprintf (char*, size_t, const char*, va_list);
-
-#endif   // _RWSTD_NO_VSNPRINTF
-
-
 int my_snprintf (char *buf, size_t size, const char *fmat, ...)
 {
     va_list va;

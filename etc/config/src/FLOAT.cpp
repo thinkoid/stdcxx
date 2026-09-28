@@ -65,50 +65,6 @@ enum {
 
 #include "float_defs.h"   // for FLT_XXX, DBL_XXX, LDBL_XXX constants
 
-#ifndef _RWSTD_NO_LIBC_EXCEPTION_SPEC
-#  define LIBC_THROWS()   throw ()
-#else
-#  define LIBC_THROWS()   /* empty */
-#endif   // _RWSTD_NO_LIBC_EXCEPTION_SPEC
-
-
-extern "C" {
-
-#ifdef _RWSTD_NO_STRTOF
-#  ifndef _RWSTD_NO_STRTOF_IN_LIBC
-
-#    undef _RWSTD_NO_STRTOF
-
-float strtof (const char*, char**) LIBC_THROWS ();
-
-#  endif   // _RWSTD_NO_STRTOF_IN_LIBC
-#endif   // _RWSTD_NO_STRTOF
-
-#ifdef _RWSTD_NO_STRTOD
-#  ifndef _RWSTD_NO_STRTOD_IN_LIBC
-
-#    undef _RWSTD_NO_STRTOD
-
-double strtod (const char*, char**) LIBC_THROWS ();
-
-#  endif   // _RWSTD_NO_STRTOD_IN_LIBC
-#endif   // _RWSTD_NO_STRTOD
-
-#ifndef _RWSTD_NO_LONG_DOUBLE
-#  ifdef _RWSTD_NO_STRTOLD
-#    ifndef _RWSTD_NO_STRTOLD_IN_LIBC
-
-#      undef _RWSTD_NO_STRTOLD
-
-long double strtold (const char*, char**) LIBC_THROWS ();
-
-#    endif   // _RWSTD_NO_STRTOLD_IN_LIBC
-#  endif   // _RWSTD_NO_STRTOLD
-#endif   // _RWSTD_NO_LONG_DOUBLE
-
-}
-
-
 #ifndef _RWSTD_NO_HONOR_STD
 #  ifdef _RWSTD_NO_STD_TERMINATE
 #    include "terminate.h"
@@ -240,8 +196,6 @@ int main ()
 #  define ERANGE -1
 #endif   // ERANGE
 
-#ifndef _RWSTD_NO_STRTOF
-
     errno = 0;
 
     // determine whether strtof() sets errno on underflow
@@ -253,10 +207,6 @@ int main ()
     else
         printf ("// #define _RWSTD_NO_STRTOF_UFLOW    // %d%s\n",
                 errno, ERANGE == errno ? " (ERANGE)" : "");
-
-#endif   // _RWSTD_NO_STRTOF
-
-#ifndef _RWSTD_NO_STRTOD
 
     errno = 0;
 
@@ -270,10 +220,7 @@ int main ()
         printf ("// #define _RWSTD_NO_STRTOD_UFLOW    // %d%s\n",
                 errno, ERANGE == errno ? " (ERANGE)" : "");
 
-#endif   // _RWSTD_NO_STRTOD
-
 #ifndef _RWSTD_NO_LONG_DOUBLE
-#  ifndef _RWSTD_NO_STRTOLD
 
     errno = 0;
 
@@ -291,7 +238,6 @@ int main ()
         printf ("// #define _RWSTD_NO_STRTOLD_UFLOW   // %d%s\n",
                 errno, ERANGE == errno ? " (ERANGE)" : "");
 
-#  endif   // _RWSTD_NO_STRTOLD
 #endif   // _RWSTD_NO_LONG_DOUBLE
 
     return 0;

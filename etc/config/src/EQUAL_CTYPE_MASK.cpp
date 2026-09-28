@@ -37,60 +37,38 @@ int main ()
 
     for (int i = 0; i < 256; ++i) {
 
-#ifndef _RWSTD_NO_ISWSPACE
         if (!!isspace (i)  != !!iswspace (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWPRINT
         if (!!isprint (i)  != !!iswprint (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWCNTRL
         if (!!iscntrl (i)  != !!iswcntrl (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWUPPER
         if (!!isupper (i)  != !!iswupper (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWLOWER
         if (!!islower (i)  != !!iswlower (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWALPHA
         if (!!isalpha (i)  != !!iswalpha (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWDIGIT
         if (!!isdigit (i)  != !!iswdigit (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWPUNCT
         if (!!ispunct (i)  != !!iswpunct (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWXDIGIT
         if (!!isxdigit (i) != !!iswxdigit (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWALNUM
         if (!!isalnum (i)  != !!iswalnum (i))
             return 1;
-#endif
 
-#ifndef _RWSTD_NO_ISWGRAPH
         if (!!isgraph (i)  != !!iswgraph (i))
             return 1;
-#endif
     }
 
     return 0;
