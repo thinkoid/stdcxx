@@ -7,27 +7,77 @@ the intended fix, and the check that settles it. Finished entries
 leave this file; git remembers them. The =analysis-= notes under
 =doc/notes= carry the longer investigations.
 
-* TODO The C++ overloads of the wide string functions under Clang
+* TODO Rip out the C library function probes
 
-=21.cwchar= under Clang fails the const and non-const overloads of
-=wmemchr=, =wcspbrk=, =wcsrchr=, =wcsstr= and =wcschr=, 5 assertions
-and 5 warnings in the three Clang configurations; the abort at exit
-hid the rows until 2026-09-18. glibc's =<wchar.h>= declares its C++
-overloads only under =__GNUC_PREREQ (4, 4)=, and Clang presents
-itself as GCC 4.2, so Clang sees the C prototype alone; =<string.h>=
-carries a Clang clause and the narrow functions are fine. The tree's
-=<cwchar>= defines the overloads itself when =_RWSTD_NO_WCSCHR= is
-set, but the characterization, the =headers.inc= list walked by
-=libc_decl.sh=, calls =wcschr ((wchar_t*)0, 0)=, which either shape
-of the declaration satisfies, so the macro stays undefined and the
-header takes libc's word.
+=libc_decl.sh= probes every function listed in =headers.inc= twice:
+declared in the header, and exported by libc. The answers are
+=_RWSTD_NO_<F>= and =_RWSTD_NO_<F>_IN_LIBC=, and the headers and
+sources choose among three arms on them: re-export, declare, or
+define. =doc/notes/primer-libc-declarations.md= has the mechanism.
 
-Fix: a characterization that tells the two shapes apart, the const
-overload's return type against a =const wchar_t*= call, and the
-=<cwchar>= branch that already defines the overloads over the C
-function taking over when it fails; not a compiler-version test.
+It served the vendor libcs of 2005. Those platforms are retired. On
+glibc one function takes the second probe, =gets=, and the right
+answer for it is "not in =std=". Every other arm is code no test
+compiles, and it holds four known defects (the analysis below,
+chapter 8). The probes cannot see a declaration's type, which is why
+=21.cwchar= fails 5 assertions under Clang: glibc gives Clang the C
+prototype of =wcschr=, =wcspbrk=, =wcsrchr=, =wcsstr= and =wmemchr=,
+not the C++ pair (=doc/notes/analysis-wide-string-overloads.md=).
 
-Check: the =21.cwchar= row at 100% under Clang, unchanged under GCC.
+The Clang fix needs no probe either. A pair defined unconditionally
+in =std= is const-correct against both of glibc's shapes, measured
+under GCC and Clang:
+
+#+begin_src c++
+inline const wchar_t* wcschr (const wchar_t *__s, wchar_t __c)
+{
+    return ::wcschr (__s, __c);
+}
+
+inline wchar_t* wcschr (wchar_t *__s, wchar_t __c)
+{
+    return const_cast<wchar_t*> (::wcschr (static_cast<const wchar_t*> (__s), __c));
+}
+#+end_src
+
+This supersedes the characterization in chapter 7 of the analysis.
+
+Size: 1048 references to the function macros in 37 files. Most are
+in =include/ansi/= (=cwchar=, =cmath=, =wchar.h=, =cstdio=,
+=cstring=, =cwctype=); then =src/wctype.cpp=, =src/wcodecvt.cpp=,
+=src/collate.cpp=, =src/time_put.cpp=, =include/rw/_traits.h=,
+=include/rw/_defs.h=; and =tests/strings/21.cwchar.cpp= (52), a
+dozen locale tests, =tests/src/= and =util/memchk.cpp=.
+
+Fix:
+- Out: the function half of =libc_decl.sh=, the function lists of
+  =headers.inc=, both macros for every listed function, and every
+  arm that reads them. The four dormant defects go with the arms.
+  =gets= is not in =std=. =21.cwchar= stops reporting the macros.
+- In: the five wide overload pairs in =std=, unconditionally.
+- Keep: the header half of =libc_decl.sh=. =_RWSTD_ANSI_C_<H>_H= is
+  how the wrappers include the real headers without finding
+  themselves; =#include_next= is a separate question. Keep the
+  exported =__rw_wmemcpy= family in =src/string.cpp=: debug builds
+  use it unconditionally, and exported symbols stay until the next
+  minor version.
+- Trap: =_RWSTD_NO_CTIME= names both the =<ctime>= header and the
+  =ctime ()= function. Sort its readers by hand.
+
+Method: a major change. Groom first, then one subsystem per commit:
+the wide functions and =<wchar.h>=, =<cwctype>=, the string
+functions, stdio, stdlib, math (=_IN_LIBM=), the sources, the tests,
+and the script last. Every commit is built and checked in =11S=
+only. When the set is done, certify across the six tracked
+configurations.
+
+Check, per commit, in =11S=: =config.h= loses only the removed
+macros; library objects keep identical =.text= where the commit is
+meant to be inert; the suite table is identical.
+
+Check, certification: the six tables identical but for =21.cwchar=
+under Clang, which goes to 66 assertions, 0 failed, 0 warnings. That
+row can only be seen under Clang, so it waits for this step.
 
 * TODO Test-case structs: size_t fields, NPOS sentinel
 
