@@ -73,7 +73,8 @@ configurations.
 Done: math (=<cmath>=: the 44 =_IN_LIBM= blocks keep their first
 arm; the =pow= declaration keeps its =_RWSTD_NO_POW_DBL= half); the
 string functions (=<cstring>=: =using ::f;= for all 22; =<string.h>=:
-the five global const wrappers go).
+the five global const wrappers go); stdio (=<cstdio>=: =using ::f;=
+for 40 functions; =gets= is not in =std=).
 
 Check, per commit, in =11S=, against the previous commit's build:
 =config.h= loses only the removed macros; every object's code is
