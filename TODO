@@ -76,7 +76,8 @@ string functions (=<cstring>=: =using ::f;= for all 22; =<string.h>=:
 the five global const wrappers go); stdio (=<cstdio>=: =using ::f;=
 for 40 functions; =gets= is not in =std=); stdlib (=<cstdlib>=, =<stdlib.h>=); the wide functions (=<cwchar>=:
 =using ::f;= for 52; =<wchar.h>=: the dormant prototypes go; both
-define =__CORRECT_ISO_CPP_WCHAR_H_PROTO= before glibc's header).
+define =__CORRECT_ISO_CPP_WCHAR_H_PROTO= before glibc's header);
+=<cwctype>= (=using ::f;= for 17).
 
 Check, per commit, in =11S=, against the previous commit's build:
 =config.h= loses only the removed macros; every object's code is
