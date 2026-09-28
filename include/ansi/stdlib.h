@@ -64,22 +64,7 @@ using std::ldiv;
 using std::malloc;
 using std::mblen;
 using std::mbstowcs;
-
-
-#ifndef _RWSTD_NO_MBTOWC
 using std::mbtowc;
-#elif !defined (_RWSTD_NO_MBTOWC_IN_LIBC)
-
-#  ifndef _RWSTD_NO_WCHAR_T
-
-extern "C" int mbtowc (wchar_t*, const char*, size_t);
-
-#    undef _RWSTD_NO_MBTOWC
-
-#  endif   // _RWSTD_NO_WCHAR_T
-#endif   // _RWSTD_NO_MBTOWC
-
-
 using std::qsort;
 using std::rand;
 using std::realloc;

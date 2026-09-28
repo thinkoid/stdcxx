@@ -59,14 +59,12 @@ inline long abs (long __x)
 #endif   // _RWSTD_NO_ABS_LONG
 
 #ifdef _RWSTD_NO_DIV_LONG
-#  ifndef _RWSTD_NO_LDIV
 
 inline ldiv_t div (long __x, long __y)
 {
     return ldiv (__x, __y);
 }
 
-#  endif   // _RWSTD_NO_LDIV
 #endif   // _RWSTD_NO_DIV_LONG
 
 
@@ -143,14 +141,12 @@ inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
 #endif   // _RWSTD_LONG_LONG
 
 #ifdef _RWSTD_NO_DIV_LONG
-#  ifndef _RWSTD_NO_LDIV
 
     inline ldiv_t div (long __x, long __y)
     {
         return ldiv (__x, __y);
     }
 
-#  endif   // _RWSTD_NO_LDIV
 #endif   // _RWSTD_NO_DIV_LONG
 
 #ifndef _RWSTD_NO_EXTERN_C_COMPATIBILITY
@@ -189,36 +185,10 @@ inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
     // working around MSVC6 PR# 27677
     using ::size_t;
     using ::div_t;
-
-#ifndef _RWSTD_NO_LDIV
     using ::ldiv_t;
-#endif   // _RWSTD_NO_LDIV
 
     using ::abort;
-
-#if defined (_RWSTD_NO_ABS) && defined (_RWSTD_NO_ABS_INT)
-
-// hacking around an HP aCC quirk when using system headers
-// in /usr/include without the compiler's wrappers (i.e.,
-// when -I/usr/include is on the command line)
-
-}   // namespace std
-
-extern "C" {
-
-inline int abs (int __x)
-{
-    return __x < 0 ? -__x : __x;
-}
-
-}   // extern "C"
-
-namespace std {
-
-#endif   // _RWSTD_NO_ABS && _RWSTD_NO_ABS_INT ...
-
     using ::abs;
-
     using ::atexit;
     using ::atof;
     using ::atoi;
@@ -234,11 +204,7 @@ namespace std {
     using ::malloc;
     using ::mblen;
     using ::mbstowcs;
-
-#ifndef _RWSTD_NO_MBTOWC
     using ::mbtowc;
-#endif   // _RWSTD_NO_MBTOWC
-
     using ::qsort;
     using ::rand;
     using ::realloc;
