@@ -1,11 +1,14 @@
 # -*- mode: org -*-
 #+TITLE: The queue for the stdcxx revival
 #+STARTUP: overview
+#+OPTIONS: toc:nil
 
 The queue, in priority order, top first. Each entry states the fact,
 the fix and the check that settles it. Finished entries leave; git
 keeps them. The =analysis-= notes under =doc/notes= carry the longer
 investigations.
+
+#+TOC: headlines 2
 
 * TODO Test-case structs: =size_t= fields, =NPOS= sentinel
 
