@@ -64,6 +64,9 @@ and the script last. Every commit is built and checked in =11S=
 only. When the set is done, certify across the six tracked
 configurations.
 
+Done: math (=<cmath>=: the 44 =_IN_LIBM= blocks keep their first
+arm; the =pow= declaration keeps its =_RWSTD_NO_POW_DBL= half).
+
 Check, per commit, in =11S=: =config.h= loses only the removed
 macros; library objects keep identical =.text= where the commit is
 meant to be inert; the suite table is identical.
