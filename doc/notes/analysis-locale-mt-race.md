@@ -7,7 +7,7 @@ a ThreadSanitizer build says why. This note records what the tool
 reports and what it means; the fixes wait until after the platform
 retirement, so that they land on the surviving code. The 2012
 investigation of the same defect, its test programs and why it
-stalled are in `locale-mt-2012.md`.
+stalled are in `analysis-locale-mt-2012.md`.
 
 ## 0. tl;dr
 
@@ -139,7 +139,7 @@ locale MT tests with no report from the facet headers.
 
 Fixed otherwise: the cache is gone. The accessors call the virtuals,
 the forwarding of `moneypunct` and the binary-compatible patch of
-2012 (`locale-mt-2012.md`, chapter 4.3); the members stay, unused,
+2012 (`analysis-locale-mt-2012.md`, chapter 4.3); the members stay, unused,
 until the next minor version. `22.locale.numpunct.mt`, which aborted
 on every run, passes, and so does `22.locale.num.put.mt`, which reads
 `grouping ()` through `num_put`. The cost the cache existed to save
@@ -161,7 +161,7 @@ and the loads. `_C_impsize` and `_C_impdata` are published with
 release stores and read with acquire loads, the data built from the C
 library included, and so is the facet pointer in the locale body's
 slot; the standard facet's type id, which `_C_manage` wrote on every
-construction, is written only when it changes (`facet-first-use.md`,
+construction, is written only when it changes (`analysis-facet-first-use.md`,
 chapter 3). With the caches of chapter 3 and the scalar caches of
 `ctype` and `codecvt` done as well, one round of the locale MT tests
 under ThreadSanitizer gives 6 reports where it gave 1,490 before the

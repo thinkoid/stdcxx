@@ -395,7 +395,7 @@ and would fail it with a weight of 129.
 Across the six pinned configurations the collate row is the only
 row of the suite that moves, apart from the rows that vary from run
 to run and varied again -- `23.bitset.cons` in the 64-bit builds and
-the MT locale tests in the thread-safe ones, `test-baseline.md`
+the MT locale tests in the thread-safe ones, `ref-test-baseline.md`
 chapters 3.4 and 3.5. Where those held still the assertion totals
 fall by exactly the 95 assertions the collate row loses.
 

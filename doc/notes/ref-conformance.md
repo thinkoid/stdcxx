@@ -79,7 +79,7 @@ Copy-on-write strings and the compatibility mutex in their bodies are
 implementation choices within the historical design, not automatically
 C++03 defects. Their suitability for a later standard's iterator,
 invalidation and concurrency requirements requires a separate audit.
-The [string tour](string-replace.md) explains the current representation.
+The [string tour](ref-string-replace.md) explains the current representation.
 
 ## 3. Defect resolutions present in the implementation
 
@@ -113,7 +113,7 @@ resolutions.
 
 ## 4. What the measured failures establish
 
-The [baseline record](working/test-baseline.md) covers six debug
+The [baseline record](ref-test-baseline.md) covers six debug
 configurations: GCC and Clang, each with 64-bit archive, 32-bit archive
 and 64-bit reentrant shared builds. The pinned tables contain 272
 programs apiece. The GCC tables record 17 failed assertions, all in
@@ -126,7 +126,7 @@ process failures can prevent later assertions from running.
 | area | current evidence and its limit |
 |---|---|
 | String range self-aliasing | Repaired; the relevant assignment, insertion and replacement tests and regressions pass in the recorded six configurations. This is evidence for the repaired path, not every string requirement. |
-| Locale facets | The `num_get`, `time_get` and `money_get` rows pass: the failures were test defects, a driver buffer, platform-decided lengths and two facet limits, repaired (`test-baseline.md`, chapter 3.9). `money_get`'s unbounded value buffer is queued. |
+| Locale facets | The `num_get`, `time_get` and `money_get` rows pass: the failures were test defects, a driver buffer, platform-decided lengths and two facet limits, repaired (`ref-test-baseline.md`, chapter 3.9). `money_get`'s unbounded value buffer is queued. |
 | Numerics and extension controls | The limits, math, valarray and extension rows pass; the failures were test defects and a driver comparison (chapter 3.10). |
 | Memory/lifetime symptoms | The intermittent string-iterator result was the test driver reading past short buffers, and the `21.cwchar` exit-time corruption a test's use of a write-only stream; both are repaired. |
 | Streams | `27.basic.ios`, `27.filebuf` and `27.std.manip` fail 17 assertions; they have not yet been read against the library. |

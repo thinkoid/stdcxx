@@ -551,7 +551,7 @@ See the [C++ draft's nonlocal-jump rule][cpp-jump].
 For stdcxx's assertion tests, this distinction matters directly:
 restoring `SIGABRT`'s mask can repair the repeatability of the trap,
 but cannot make a jump across a held locale lock safe. The separate
-[codecvt investigation](codecvt-invalid-state.md) records that case.
+[codecvt investigation](analysis-codecvt-invalid-state.md) records that case.
 An isolated child process can test expected fatal behavior without
 resuming the potentially compromised execution of the child.
 

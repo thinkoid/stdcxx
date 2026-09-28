@@ -44,7 +44,7 @@ Each hides the other, which is why the second one looked rare.
   showed only in the first round of a process.
 - Both sites date from the initial import of the library (2005). The
   second defect was pointed out on the dev list in 2012
-  (`locale-mt-2012.md`, chapter 2.2, item 3) and could not be shown
+  (`analysis-locale-mt-2012.md`, chapter 2.2, item 3) and could not be shown
   to fail then; the first was not known.
 
 Machine: aarch64 Linux (Snapdragon X Elite, 12 cores), GCC 16.2.1,
@@ -278,7 +278,7 @@ both defects fixed the stores happen in the right order in the
 program, but the C++ memory model still calls the unlocked reads data
 races: a release store and an acquire load are what make them
 defined. On the aarch64 machine a litmus test of the `_C_data` shape
-(`locale-mt-2012.md`, chapter 7, and the working notes) showed no
+(`analysis-locale-mt-2012.md`, chapter 7, and the working notes) showed no
 reordering in 60 million rounds, so this part has no failing test;
 it is the third class of the fix list in `TODO`.
 

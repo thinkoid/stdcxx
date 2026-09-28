@@ -24,7 +24,7 @@ counters remain. **Making every increment
 stronger would not have repaired these protocols.**
 
 This note describes the source model and guides the remaining MT work.
-The [locale investigation](working/locale-mt-race.md) records the
+The [locale investigation](analysis-locale-mt-race.md) records the
 measurements; the `22.locale.*.mt` tests pin the repairs.
 
 ## 1. What reentrant mode means
@@ -216,7 +216,7 @@ Changing that policy can remove overhead and alter representation.
 
 ### 4.2 Locale bodies and facets
 
-The [locale tour](locale.md) describes the ownership graph around
+The [locale tour](ref-locale.md) describes the ownership graph around
 `__rw_locale::_C_manage`. Retaining an existing body avoids rebuilding
 its facet collection. Repositories separately coordinate finding,
 inserting and retiring shared bodies and facets. The count and the
@@ -242,7 +242,7 @@ own mutex-taking count helpers have no callers; body counts pass
 
 ### 4.3 Lazy caches are writes, including through `const`
 
-The [locale MT record](working/locale-mt-race.md) identified
+The [locale MT record](analysis-locale-mt-race.md) identified
 concurrent lazy initialization of `numpunct` members: accessors in
 [_numpunct.h](../../include/loc/_numpunct.h) tested `_C_flags`,
 obtained a value, assigned the cache and updated the flag. Two threads

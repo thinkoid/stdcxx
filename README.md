@@ -26,17 +26,19 @@ everything the revival has not changed.
 
 The library builds clean. The test driver builds. Every test builds
 and the suite runs in full under its own harness. The results are
-pinned under `doc/notes/working/baseline` for each configuration
-measured, and `doc/notes/working/test-baseline.md` reads them: what fails, why where
+pinned under `doc/notes/baseline` for each configuration
+measured, and `doc/notes/ref-test-baseline.md` reads them: what fails, why where
 that is known, and what is intended for each. `TODO` carries the
 same failures as queue entries, in priority order.
 
-Investigations that earn a write-up live under `doc/notes/working`:
-they are the record of work on failures, written as it happened.
-Documents that describe the library as it is, for a reader rather
-than for the record, live under `doc/notes` itself; the first is the
-walk through `basic_string` and its `replace` family. Of the
-investigations, the first traces the library's `__mbstate_t` clash with glibc through three
+The write-ups live under `doc/notes`, one directory, the kind in
+the file name's prefix. `ref-` documents describe the library as it
+is, for a reader rather than for the record, and are kept current;
+the first is the walk through `basic_string` and its `replace`
+family. `analysis-` documents are investigations, the record of work
+on failures, written as it happened. `primer-` documents explain the
+platform the library stands on; `plan-` documents survey work not
+yet done. Of the analyses, the first traces the library's `__mbstate_t` clash with glibc through three
 epochs of the C library's headers.
 
 ## Building
@@ -83,12 +85,12 @@ The supported matrix is GCC and Clang on x86 and x86-64 Linux, with
 aarch64 Linux to follow. Everything else the tree once built on, the
 vendor compilers and Unixes of 2008, Darwin and the BSDs, and Windows
 with Visual Studio, was retired in September 2026:
-`doc/notes/working/platform-state.md` is the survey behind the decision and
+`doc/notes/plan-platform-state.md` is the survey behind the decision and
 its last chapter the record of what went. Both compilers build the
 library, the driver, the tests and the examples, and the suite gives
 the same table under both; the Clang configuration is
 `CONFIG=gcc.config CXX=clang` on the `config` line, and
-`doc/notes/working/clang.md` records what it took. The characterizations
+`doc/notes/analysis-clang.md` records what it took. The characterizations
 stayed: what they detect is a property of the toolchain in front of
 them, not of a platform list.
 
@@ -122,7 +124,7 @@ them, not of a platform list.
 | `tests/` | the test suite; `include/` and `src/` hold the test driver |
 | `examples/` | example and tutorial programs |
 | `util/` | the locale utilities and the test harness's `exec` |
-| `doc/` | the original HTML manuals; `notes/` for the revival's reference documents and `notes/working/` for its investigations |
+| `doc/` | the original HTML manuals; `notes/` for the revival's write-ups, the kind in the file name's prefix, and `notes/baseline/` for the pinned suite tables |
 | `TODO` | the queue, in priority order |
 | `README` | the original manual, untouched |
 

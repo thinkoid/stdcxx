@@ -356,7 +356,7 @@ static const std::locale* first_use_locale;
 
 // converts through the facet of `first_use_locale', which no thread
 // has converted through yet; the first use maps the facet's database
-// (doc/notes/working/facet-first-use.md, chapter 2)
+// (doc/notes/analysis-facet-first-use.md, chapter 2)
 static void*
 first_use_func (void*)
 {
@@ -451,7 +451,7 @@ test_first_use ()
         // fill the locale's slot from this thread alone, so that the
         // threads race only the facet's data; the race to fill the
         // slot is 22.locale.use_facet.mt's
-        // (doc/notes/working/facet-first-use.md, chapter 1)
+        // (doc/notes/analysis-facet-first-use.md, chapter 1)
         (void)std::use_facet<CodeCvt>(loc);
 
         first_use_locale = &loc;

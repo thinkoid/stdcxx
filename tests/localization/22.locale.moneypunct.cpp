@@ -370,7 +370,8 @@ check_moneypunct (const char *locname)
         return false;
 
     // Composite names have no fixed length; later setlocale calls may
-    // invalidate libc's storage.  See doc/notes/moneypunct-locale-name.md.
+    // invalidate libc's storage.  See
+    // doc/notes/analysis-moneypunct-locale-name.md.
     const std::size_t size = std::strlen (loc) + 1;
     if (sizeof buf < size)
         pbuf = _RWSTD_STATIC_CAST (char*, std::malloc (size));

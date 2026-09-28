@@ -243,7 +243,7 @@ initialization.** The fast paths avoid repeated locking and
 computation, and each needs its own publication. The ThreadSanitizer
 investigation found races in punctuation caches, implementation-data
 publication and body bookkeeping, including use-after-free during
-cached string assignment; see [the investigation](working/locale-mt-race.md).
+cached string assignment; see [the investigation](analysis-locale-mt-race.md).
 Those are repaired as the table above describes, and a run of the
 locale MT tests under the sanitizer reports nothing from the facets
 or bodies. The initialization of the global locale, a counter and a

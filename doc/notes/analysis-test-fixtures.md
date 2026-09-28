@@ -26,7 +26,7 @@ in the tree were made, and what running them found.
   transform could not spell a weight that is a multiple of 127, so
   the letter "l" in Croatian and the letter ko kai in Thai sorted
   last. That became a `TODO` entry, since done
-  (`collate-transform.md`). The other four lists sort as glibc sorts
+  (`analysis-collate-transform.md`). The other four lists sort as glibc sorts
   them, including Czech "ch" and Danish "aa".
 
 ## 1. What the tests read
@@ -246,7 +246,7 @@ monotone, for instance a run of `0x7f` for each full 126 with a
 final byte in 1 to 126; transform strings are not persistent, so
 the change has no compatibility cost.
 
-Done since, in the shape above: `collate-transform.md`.
+Done since, in the shape above: `analysis-collate-transform.md`.
 
 ### 4.5 What remains in the codecvt row
 

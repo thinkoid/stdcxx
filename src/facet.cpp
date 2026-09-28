@@ -292,7 +292,7 @@ const void* __rw_facet::_C_get_data ()
     // map the codecvt database into locals: __rw_get_facet_data sets
     // the size before the mapping exists, and a non-zero _C_impsize
     // is what _C_data() takes to mean _C_impdata is ready
-    // (doc/notes/working/facet-first-use.md, chapter 2)
+    // (doc/notes/analysis-facet-first-use.md, chapter 2)
     size_t cvtsize = 0;
     const void* const cvtdata =
         __rw_get_facet_data (cat, cvtsize, 0, codeset);

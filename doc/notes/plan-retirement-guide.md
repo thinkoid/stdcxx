@@ -21,7 +21,7 @@ implementation language does not itself remove C++03 interfaces.
 
 This document identifies source evidence and a work order. It contains
 no compiler-result matrix and authorizes no source edits by itself.
-The [characterization catalogue](characterizations.md) is the inventory
+The [characterization catalogue](ref-characterizations.md) is the inventory
 of producers; this guide follows the mechanisms beyond their producers.
 
 ## 1. What counts as proof of reachability

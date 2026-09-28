@@ -47,7 +47,7 @@ volatile int line;   // currently executed line
 volatile int fail;   // non-zero when line failed
 
 // restore the signal mask when jumping out of an expected assertion;
-// see doc/notes/test-baseline.md, section 3.6
+// see doc/notes/ref-test-baseline.md, section 3.6
 sigjmp_buf env;
 
 static void

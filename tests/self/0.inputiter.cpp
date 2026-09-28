@@ -44,7 +44,7 @@ int line;
 int fail;
 
 // restore the signal mask when jumping out of an expected assertion;
-// see doc/notes/test-baseline.md, section 3.6
+// see doc/notes/ref-test-baseline.md, section 3.6
 sigjmp_buf env;
 
 void handle_ABRT (int)

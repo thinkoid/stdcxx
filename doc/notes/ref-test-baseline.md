@@ -3,7 +3,7 @@
 The whole suite, run under its own harness on the current toolchain,
 recorded once as the reference for everything after it: which tests
 fail, by how much, and why where that is known. The numbers are
-pinned under `doc/notes/working/baseline/`, one file per configuration, in
+pinned under `doc/notes/baseline/`, one file per configuration, in
 the harness's own table minus the timing columns.
 
 ## 0. tl;dr
@@ -20,7 +20,7 @@ the harness's own table minus the timing columns.
 - Two clusters were fixtures that never existed in this repository:
   the input files two locale tests read under `tests/etc` stayed
   behind in the 2008 migration from the vendor's repository. They
-  are regenerated (`test-fixtures.md`), and what they found is in
+  are regenerated (`analysis-test-fixtures.md`), and what they found is in
   chapter 3.2.
 - The thread-safety results are not a baseline yet, and that is the
   finding: in the thread-safe configuration the locale MT tests fail
@@ -172,7 +172,7 @@ Fact. `22.locale.codecvt` read `TOPDIR` itself as well, reported the
 variable missing, and then used the null pointer: a segmentation
 fault in a bare run without the variable. Fix, applied: the driver's
 fallback is one function, `rw_topdir ()`, and the test takes the
-directory from it (`codecvt-invalid-state.md`, chapter 6).
+directory from it (`analysis-codecvt-invalid-state.md`, chapter 6).
 
 ### 3.2 The input files under `tests/etc`
 
@@ -187,7 +187,7 @@ configuration.
 
 Fix, applied. The files are regenerated from what the tests expect
 of them, the codecvt table fixing each file's byte and character
-count and the collate table its encoding; `test-fixtures.md` records
+count and the collate table its encoding; `analysis-test-fixtures.md` records
 their construction and the order oracle for the collate lists. With
 the files in place the codecvt test exposed three defects of its
 own, repaired with them: its `length` check compared against a C
@@ -203,7 +203,7 @@ sorted last in the `char` half of the test, 101 lines, while the
 `wchar_t` half sorted all six lists as glibc does. Repaired since:
 the spelling is prefix-free and sorts below the IGNORE mark of the
 position orderings, which had been the same byte as its run byte
-(`collate-transform.md`); the test builds the mark's case, and its
+(`analysis-collate-transform.md`); the test builds the mark's case, and its
 own `exit (1)` when `TOPDIR` was unset went with it.
 
 ### 3.3 `22.locale.codecvt` on a corrupt `mbstate_t`
@@ -222,7 +222,7 @@ Fix, applied. The handler saves and restores the signal mask; every
 facet path returns the error result when its state check fails, the
 assertion staying in debug builds; the thread-safe debug build skips
 the two libc-backed facets, whose check sits under the locale lock.
-`codecvt-invalid-state.md` has the whole of it.
+`analysis-codecvt-invalid-state.md` has the whole of it.
 
 ### 3.4 The MT locale tests
 
@@ -357,7 +357,7 @@ not save the signal mask on glibc, and `longjmp` bypasses the normal
 handler return, leaving `SIGABRT` blocked. Reinstalling the handler
 does not unblock it. Before glibc 2.41, `abort()` unblocked the
 signal before raising it, repairing the mask for the next assertion.
-The change described in `codecvt-invalid-state.md`, chapter 2,
+The change described in `analysis-codecvt-invalid-state.md`, chapter 2,
 removed that accommodation; the second assertion now terminates
 the process instead of reaching the handler.
 
@@ -701,7 +701,7 @@ composite name plus its terminator overwrites the 256-byte array and
 the stack canary. The test now uses a stack buffer with a `malloc` fallback and
 explicitly exercises mixed-category names. Targeted direct and harness
 runs pass 540 assertions in all six configurations; with a C environment,
-500 pass. `moneypunct-locale-name.md` records the debugger evidence and
+500 pass. `analysis-moneypunct-locale-name.md` records the debugger evidence and
 the AddressSanitizer negative control. The full-suite tables refreshed later
 that day record 540 passing assertions in all six configurations.
 
@@ -818,7 +818,7 @@ is why they pass there and count nothing.
 The tables `x86_64-11S-clang.txt`, `i386-11s-clang.txt` and
 `x86_64-15D-clang.txt` are the same three configurations built with
 Clang (`CONFIG=gcc.config CXX=clang` on the `config` line), run the
-same way and pinned in the same shape; `clang.md` records what it
+same way and pinned in the same shape; `analysis-clang.md` records what it
 took to get there. Row for row they are the GCC tables, with these
 exceptions:
 

@@ -5,7 +5,7 @@ In 2012 the project spent two months on the thread safety of
 and closed nothing. This note is the primer for picking the work up:
 what was reported, what was established, what was disputed, what the
 test programs were and where they live, and why no fix landed. The
-current evidence is in `locale-mt-race.md`; this note is its
+current evidence is in `analysis-locale-mt-race.md`; this note is its
 prehistory.
 
 ## 0. tl;dr
@@ -172,7 +172,7 @@ Three problems were identified:
    before `_C_impdata` is assigned the return value, so the flag was
    published before the data even in program order. This one fails
    on any hardware; it is fixed, with a test, and
-   `facet-first-use.md` has the account.
+   `analysis-facet-first-use.md` has the account.
 
 The 2012 conclusion: a store-store barrier between the writes and a
 load-load barrier between the reads are needed, and the library has
@@ -312,7 +312,7 @@ load.
 
 - The tree reproduces the cache defect without help: the 15D
   `22.locale.numpunct.mt` fails on every run on x86-64, and a
-  ThreadSanitizer build names the cache (`locale-mt-race.md`).
+  ThreadSanitizer build names the cache (`analysis-locale-mt-race.md`).
 - ThreadSanitizer implements the C++11 memory model rather than a
   lock-set heuristic, so its reports are races in the language's
   sense. Under that model exhibit E is a data race (an unsynchronized
@@ -323,7 +323,7 @@ load.
   which publishes a second variable through the flag, was never
   covered by it, and was conceded as a defect.
 - The revival is not bound to the 4.x binary interface (the 4.1.x
-  string clause is already an open decision in `locale-mt-race.md`).
+  string clause is already an open decision in `analysis-locale-mt-race.md`).
 - `std::atomic` with acquire and release orderings expresses the
   facet data publication directly, once the C++17 floor lands; before
   it, the GCC and Clang `__atomic` builtins do.
