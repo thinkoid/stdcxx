@@ -317,8 +317,9 @@ the reference leak of racing =use_facet= calls was fixed, any race
 kept the facet alive for the rest of the process, an accidental and
 unbounded cache. In 15D on aarch64 the locale MT tests that construct
 locales in a loop run slower with the leak fixed (5-run means, real
-time: =22.locale.ctype.mt= 19.5 s to 22.2 s, =22.locale.numpunct.mt=
-24.1 s to 26.4 s, =22.locale.globals.mt= 2.6 s to 3.6 s).
+time, the atomic operations lock-free: =22.locale.ctype.mt= 11.9 s to
+13.0 s, =22.locale.numpunct.mt= 15.1 s to 16.7 s,
+=22.locale.globals.mt= 8.3 s to 9.3 s).
 
 Fix: explore a facet repository that keeps every facet it
 instantiates until the program terminates: what it costs in memory
