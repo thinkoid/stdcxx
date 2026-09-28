@@ -18,29 +18,20 @@ define. =doc/notes/primer-libc-declarations.md= has the mechanism.
 It served the vendor libcs of 2005. Those platforms are retired. On
 glibc one function takes the second probe, =gets=, and the right
 answer for it is "not in =std=". Every other arm is code no test
-compiles, and it holds four known defects (the analysis below,
-chapter 8). The probes cannot see a declaration's type, which is why
+compiles, and it holds known defects, nine in the wide headers
+alone (the analysis below, chapter 11). The probes cannot see a declaration's type, which is why
 =21.cwchar= fails 5 assertions under Clang: glibc gives Clang the C
 prototype of =wcschr=, =wcspbrk=, =wcsrchr=, =wcsstr= and =wmemchr=,
-not the C++ pair (=doc/notes/analysis-wide-string-overloads.md=).
+not the C++ pair (=doc/notes/analysis-glibc-wchar-proto.md=).
 
-The Clang fix needs no probe either. A pair defined unconditionally
-in =std= is const-correct against both of glibc's shapes, measured
-under GCC and Clang:
-
-#+begin_src c++
-inline const wchar_t* wcschr (const wchar_t *__s, wchar_t __c)
-{
-    return ::wcschr (__s, __c);
-}
-
-inline wchar_t* wcschr (wchar_t *__s, wchar_t __c)
-{
-    return const_cast<wchar_t*> (::wcschr (static_cast<const wchar_t*> (__s), __c));
-}
-#+end_src
-
-This supersedes the characterization in chapter 7 of the analysis.
+The Clang fix needs no probe either. glibc declares the pair when
+=__CORRECT_ISO_CPP_WCHAR_H_PROTO= is defined, and its guard only ever
+defines the macro. The library defines it before it includes glibc's
+=<wchar.h>=, as libc++ does, and keeps =using ::f;= for the five.
+Measured: correct types and unambiguous unqualified calls under both
+compilers. A pair of the library's own in =std= makes unqualified
+calls under =using namespace std;= ambiguous, also measured. The
+analysis, chapters 9 and 10, has both.
 
 Size: 1048 references to the function macros in 37 files. Most are
 in =include/ansi/= (=cwchar=, =cmath=, =wchar.h=, =cstdio=,
@@ -54,7 +45,9 @@ Fix:
   =headers.inc=, both macros for every listed function, and every
   arm that reads them. The four dormant defects go with the arms.
   =gets= is not in =std=. =21.cwchar= stops reporting the macros.
-- In: the five wide overload pairs in =std=, unconditionally.
+- In: =__CORRECT_ISO_CPP_WCHAR_H_PROTO= defined, under =#ifndef=,
+  before each =#include _RWSTD_ANSI_C_WCHAR_H= in =<cwchar>= and
+  =<wchar.h>=. The five wide functions stay =using ::f;=.
 - Keep: the header half of =libc_decl.sh=. =_RWSTD_ANSI_C_<H>_H= is
   how the wrappers include the real headers without finding
   themselves; =#include_next= is a separate question. Keep the

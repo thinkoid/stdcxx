@@ -19,7 +19,7 @@ harness's own table without the timing columns.
     aborts. All configurations. Not investigated; chapter 3.11 records
     what they report. None has a `TODO` entry.
   - `21.cwchar` under Clang, 5 assertions. A configuration gap,
-    analysed in `analysis-wide-string-overloads.md`; `TODO` entry 1.
+    analysed in `analysis-glibc-wchar-proto.md`; `TODO` entry 1.
   - `21.string.stdcxx-162` in 15D. A probe of the string atomics
     decision in the MT entry of `TODO`.
   - The locale MT rows of 15D. They measure two limits of the
@@ -576,7 +576,7 @@ Under Clang the row now shows what the abort hid: 61 assertions,
 5 failed, 5 warnings, on the const and non-const overloads of
 `wmemchr`, `wcspbrk`, `wcsrchr`, `wcsstr` and `wcschr`. glibc's
 `<wchar.h>` declares the C++ overloads only for GCC 4.4 and later,
-and Clang presents itself as 4.2. `analysis-wide-string-overloads.md`
+and Clang presents itself as 4.2. `analysis-glibc-wchar-proto.md`
 measures it and proposes the repair; `TODO` entry 1 holds it. The
 Clang rows are pinned as measured.
 
@@ -843,7 +843,7 @@ Row for row they are the GCC tables, with these exceptions:
 
 - **`21.cwchar`**: 61 assertions, 5 failed, 5 warnings, in all three.
   These are the five extra failed assertions. Chapter 3.8 and
-  `analysis-wide-string-overloads.md`.
+  `analysis-glibc-wchar-proto.md`.
 - **`18.numeric.special.float`** runs 134 assertions in the 32-bit
   Clang build, where GCC's runs 119. Clang generates SSE code for
   i386, which carries a signaling NaN (chapter 3.10).

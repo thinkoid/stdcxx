@@ -41,7 +41,7 @@ GCC 16.2.1, Clang 22.1.8 and glibc 2.44.
 - **Neither probe sees the type.** The first accepts either shape of
   an overloaded function, by design. The second never sees a
   prototype. A header that declares a function with the wrong C++
-  signature reads as "declared". `analysis-wide-string-overloads.md`
+  signature reads as "declared". `analysis-glibc-wchar-proto.md`
   is about that gap.
 
 ## 1. The problem it solves
@@ -291,8 +291,8 @@ is no const overload.
 
 Under Clang, glibc's `<wchar.h>` is in that state. The probes report
 "declared". The headers re-export the C prototype unchanged.
-`analysis-wide-string-overloads.md` has the measurement and a
-characterization that asks the missing question.
+`analysis-glibc-wchar-proto.md` has the measurement, glibc's
+history, and the repair.
 
 ### 6.2 Its own dormant arms
 
