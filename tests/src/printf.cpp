@@ -2347,12 +2347,7 @@ _rw_fmtwstr (const FmtSpec &spec, Buffer &buf,
 
     if (_RWSTD_SIZE_MAX == len) {
 
-#ifndef _RWSTD_NO_WCSLEN
         len = wcslen (wstr);
-#else   // if defined (_RWSTD_NO_WCSLEN)
-        len = 0;
-        for (const wchar_t *pwc = wstr; *pwc; ++pwc, ++len);
-#endif   // _RWSTD_NO_WCSLEN
 
     }
 

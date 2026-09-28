@@ -283,20 +283,7 @@ bool cond1 (std::ctype_base::mask mask, char ch, const char *locname)
     if (0 == std::setlocale (LC_CTYPE, locname))
         return false;
 
-#ifndef _RWSTD_NO_BTOWC
-
     const std::wint_t wc = std::btowc (UChar (ch));
-
-#elif !defined (_RWSTD_NO_MBSTOWCS)
-
-    wchar_t tmp;
-    const std::wint_t wc = 1 == std::mbstowcs (&tmp, &ch, 1) ? tmp : WEOF;
-
-#else
-
-    const std::wint_t wc = WEOF;
-
-#endif   // _RWSTD_NO_BTOWC, _RWSTD_NO_MBSTOWCS
 
     const bool result =
         WEOF == wc || libc_is (mask, ch, 0) || !libc_is (mask, wchar_t (wc), 0);
@@ -496,20 +483,7 @@ wchar_t widen (wchar_t, char ch, const char *locname)
 
     wchar_t result;
 
-#ifndef _RWSTD_NO_BTOWC
-
     result = std::btowc (UChar (ch));
-
-#elif !defined (_RWSTD_NO_MBTOWC)
-
-    if (1 != std::mbtowc (&result, &ch, 1))
-        result = wchar_t (WEOF);
-
-#else
-
-    result = UChar (ch);
-
-#endif   // _RWSTD_NO_BTOWC, _RWSTD_NO_MBTOWC
 
     if (locname)
         std::setlocale (LC_CTYPE, curlocname);
@@ -527,20 +501,7 @@ char narrow (wchar_t ch, const char *locname)
 
     char result [MB_LEN_MAX];
 
-#ifndef _RWSTD_NO_WCTOB
-
     result [0] = std::wctob (ch);
-
-#elif !defined (_RWSTD_NO_WCTOMB)
-
-    if (1 != std::wctomb (result, ch))
-        result [0] = '\377';
-
-#else
-
-    result [0] = char (ch);
-
-#endif   // _RWSTD_NO_WCTOB, _RWSTD_NO_WCTOMB
 
     if (locname)
         std::setlocale (LC_CTYPE, curlocname);
@@ -556,20 +517,7 @@ bool cond3 (std::ctype_base::mask mask, wchar_t ch, const char *locname)
     if (0 == std::setlocale (LC_CTYPE, locname))
         return false;
 
-#ifndef _RWSTD_NO_WCTOB
-
     const int byte = std::wctob (ch);
-
-#elif !defined (_RWSTD_NO_WCTOMB)
-
-    char buf [MB_LEN_MAX];
-    const int byte = 1 == std::wctomb (buf, ch) ? buf [0] : EOF;
-
-#else
-
-    const int byte = EOF;
-
-#endif   // _RWSTD_NO_WCTOB, _RWSTD_NO_WCTOMB
 
     const bool result =
         EOF == byte || !libc_is (mask, char (byte), 0) || libc_is (mask, ch, 0);

@@ -193,7 +193,6 @@ _TEST_EXPORT void pcs_write (void *fpv, const char *str)
 _TEST_EXPORT
 const char* rw_tmpnam (char *buf)
 {
-#ifndef _RWSTD_NO_MKSTEMP
 #  define TMP_TEMPLATE      "tmpfile-XXXXXX"
 
     const char *tmpdir = getenv ("TMPDIR");
@@ -238,15 +237,6 @@ const char* rw_tmpnam (char *buf)
     const char* const fname = buf;
 
 #  undef TMP_TEMPLATE
-#else   // if defined (_RWSTD_NO_MKSTEMP)
-
-    const char* const fname = tmpnam (buf);
-
-    if (!fname)
-        fprintf (stderr, "%s:%d: tmpnam(\"%s\") failed: %s\n",
-                 __FILE__, __LINE__, buf, strerror (errno));
-
-#endif   // _RWSTD_NO_MKSTEMP
 
     return fname;
 }

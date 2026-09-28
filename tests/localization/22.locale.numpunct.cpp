@@ -148,17 +148,7 @@ wchar_t widen (wchar_t, const char *s)
 {
     wchar_t wc = 0;
 
-#  ifndef _RWSTD_NO_MBTOWC
-
     const int n = s && *s ? std::mbtowc (&wc, s, std::strlen (s)) : 0;
-
-#  else   // if defined (_RWSTD_NO_MBTOWC)
-
-    const int n = 1;
-
-    wc = s ? wchar_t (_RWSTD_STATIC_CAST (unsigned char, *s)) : 0;
-
-#  endif   // _RWSTD_NO_MBTOWC
 
     return n > 0 ? wc : n ? -1 : 0;
 }

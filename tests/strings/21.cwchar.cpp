@@ -26,65 +26,6 @@
  * 
  **************************************************************************/
 
-// used in the EVAL() macro below purely to make diagnostic messages
-// more informative (i.e., to display which config macros are defined
-// when a function isn't declared -- it may not make sense to declare
-// some functions if they are not defined in the C library)
-enum {
-    _RWSTD_NO_BTOWC = 1, _RWSTD_NO_BTOWC_IN_LIBC = 1,
-    _RWSTD_NO_FGETWC = 1, _RWSTD_NO_FGETWC_IN_LIBC = 1,
-    _RWSTD_NO_FGETWS = 1, _RWSTD_NO_FGETWS_IN_LIBC = 1,
-    _RWSTD_NO_FPUTWC = 1, _RWSTD_NO_FPUTWC_IN_LIBC = 1,
-    _RWSTD_NO_FPUTWS = 1, _RWSTD_NO_FPUTWS_IN_LIBC = 1,
-    _RWSTD_NO_FWIDE = 1, _RWSTD_NO_FWIDE_IN_LIBC = 1,
-    _RWSTD_NO_FWPRINTF = 1, _RWSTD_NO_FWPRINTF_IN_LIBC = 1,
-    _RWSTD_NO_FWSCANF = 1, _RWSTD_NO_FWSCANF_IN_LIBC = 1,
-    _RWSTD_NO_GETWC = 1, _RWSTD_NO_GETWC_IN_LIBC = 1,
-    _RWSTD_NO_GETWCHAR = 1, _RWSTD_NO_GETWCHAR_IN_LIBC = 1,
-    _RWSTD_NO_MBRLEN = 1, _RWSTD_NO_MBRLEN_IN_LIBC = 1,
-    _RWSTD_NO_MBRTOWC = 1, _RWSTD_NO_MBRTOWC_IN_LIBC = 1,
-    _RWSTD_NO_MBSINIT = 1, _RWSTD_NO_MBSINIT_IN_LIBC = 1,
-    _RWSTD_NO_MBSRTOWCS = 1, _RWSTD_NO_MBSRTOWCS_IN_LIBC = 1,
-    _RWSTD_NO_PUTWC = 1, _RWSTD_NO_PUTWC_IN_LIBC = 1,
-    _RWSTD_NO_PUTWCHAR = 1, _RWSTD_NO_PUTWCHAR_IN_LIBC = 1,
-    _RWSTD_NO_SWPRINTF = 1, _RWSTD_NO_SWPRINTF_IN_LIBC = 1,
-    _RWSTD_NO_SWSCANF = 1, _RWSTD_NO_SWSCANF_IN_LIBC = 1,
-    _RWSTD_NO_UNGETWC = 1, _RWSTD_NO_UNGETWC_IN_LIBC = 1,
-    _RWSTD_NO_VFWPRINTF = 1, _RWSTD_NO_VFWPRINTF_IN_LIBC = 1,
-    _RWSTD_NO_VSWPRINTF = 1, _RWSTD_NO_VSWPRINTF_IN_LIBC = 1,
-    _RWSTD_NO_VWPRINTF = 1, _RWSTD_NO_VWPRINTF_IN_LIBC = 1,
-    _RWSTD_NO_WCRTOMB = 1, _RWSTD_NO_WCRTOMB_IN_LIBC = 1,
-    _RWSTD_NO_WCSCAT = 1, _RWSTD_NO_WCSCAT_IN_LIBC = 1,
-    _RWSTD_NO_WCSCHR = 1, _RWSTD_NO_WCSCHR_IN_LIBC = 1,
-    _RWSTD_NO_WCSCMP = 1, _RWSTD_NO_WCSCMP_IN_LIBC = 1,
-    _RWSTD_NO_WCSCOLL = 1, _RWSTD_NO_WCSCOLL_IN_LIBC = 1,
-    _RWSTD_NO_WCSCPY = 1, _RWSTD_NO_WCSCPY_IN_LIBC = 1,
-    _RWSTD_NO_WCSCSPN = 1, _RWSTD_NO_WCSCSPN_IN_LIBC = 1,
-    _RWSTD_NO_WCSFTIME = 1, _RWSTD_NO_WCSFTIME_IN_LIBC = 1,
-    _RWSTD_NO_WCSLEN = 1, _RWSTD_NO_WCSLEN_IN_LIBC = 1,
-    _RWSTD_NO_WCSNCAT = 1, _RWSTD_NO_WCSNCAT_IN_LIBC = 1,
-    _RWSTD_NO_WCSNCMP = 1, _RWSTD_NO_WCSNCMP_IN_LIBC = 1,
-    _RWSTD_NO_WCSNCPY = 1, _RWSTD_NO_WCSNCPY_IN_LIBC = 1,
-    _RWSTD_NO_WCSPBRK = 1, _RWSTD_NO_WCSPBRK_IN_LIBC = 1,
-    _RWSTD_NO_WCSRCHR = 1, _RWSTD_NO_WCSRCHR_IN_LIBC = 1,
-    _RWSTD_NO_WCSRTOMBS = 1, _RWSTD_NO_WCSRTOMBS_IN_LIBC = 1,
-    _RWSTD_NO_WCSSPN = 1, _RWSTD_NO_WCSSPN_IN_LIBC = 1,
-    _RWSTD_NO_WCSSTR = 1, _RWSTD_NO_WCSSTR_IN_LIBC = 1,
-    _RWSTD_NO_WCSTOD = 1, _RWSTD_NO_WCSTOD_IN_LIBC = 1,
-    _RWSTD_NO_WCSTOK = 1, _RWSTD_NO_WCSTOK_IN_LIBC = 1,
-    _RWSTD_NO_WCSTOL = 1, _RWSTD_NO_WCSTOL_IN_LIBC = 1,
-    _RWSTD_NO_WCSTOUL = 1, _RWSTD_NO_WCSTOUL_IN_LIBC = 1,
-    _RWSTD_NO_WCSXFRM = 1, _RWSTD_NO_WCSXFRM_IN_LIBC = 1,
-    _RWSTD_NO_WCTOB = 1, _RWSTD_NO_WCTOB_IN_LIBC = 1,
-    _RWSTD_NO_WMEMCHR = 1, _RWSTD_NO_WMEMCHR_IN_LIBC = 1,
-    _RWSTD_NO_WMEMCMP = 1, _RWSTD_NO_WMEMCMP_IN_LIBC = 1,
-    _RWSTD_NO_WMEMCPY = 1, _RWSTD_NO_WMEMCPY_IN_LIBC = 1,
-    _RWSTD_NO_WMEMMOVE = 1, _RWSTD_NO_WMEMMOVE_IN_LIBC = 1,
-    _RWSTD_NO_WMEMSET = 1, _RWSTD_NO_WMEMSET_IN_LIBC = 1,
-    _RWSTD_NO_WPRINTF = 1, _RWSTD_NO_WPRINTF_IN_LIBC = 1,
-    _RWSTD_NO_WSCANF = 1, _RWSTD_NO_WSCANF_IN_LIBC = 1
-};
-
 /**************************************************************************/
 
 #include <cwchar>
@@ -838,11 +779,6 @@ GET_TYPE_NAME (wchar_t*);
 GET_TYPE_NAME (const wchar_t*);
 
 
-#define EVAL2(macro)         !!(macro - 1)
-#define EVAL(name)           EVAL2 (_RWSTD_NO_ ## name + 0)
-#define EVAL_IN_LIBC(name)   EVAL (name ## _IN_LIBC)
-
-
 static int rw_opt_no_macros;     // for --no-macros
 static int rw_opt_no_types;      // for --no-types
 static int rw_opt_no_functions;  // for --no-functions
@@ -851,7 +787,7 @@ static int rw_opt_no_overloads;  // for --no-overloads
 
 void test_functions ()
 {
-#define TEST(T, fun, args, macro, overload)                             \
+#define TEST(T, fun, args, overload)                                    \
     do {                                                                \
         cstr = (str = array);                                           \
         wcstr = (wstr = warray);                                        \
@@ -865,10 +801,8 @@ void test_functions ()
         rw_warn (0 == ncalls, 0, __LINE__,                              \
                  "%s::%s("                                              \
                  "%{?}%{:}/* %{?}non-%{;}const overload */%{;}) "       \
-                 "not declared (_RWSTD_NO_%s = %d, "                    \
-                 "_RWSTD_NO_%s_IN_LIBC = %d)",                          \
-                 std_name, #fun, overload < 0, 0 == overload,           \
-                 #macro, EVAL (macro), #macro, EVAL_IN_LIBC (macro));   \
+                 "not declared",                                        \
+                 std_name, #fun, overload < 0, 0 == overload);          \
         if (0 == ncalls)                                                \
             rw_assert (0 == return_type_name, 0, __LINE__, "%s::%s("    \
                        "%{?}%{:}/* %{?}non-%{;}const overload */%{;}) " \
@@ -894,85 +828,85 @@ void test_functions ()
     const test_wint_t wi = 0;
 
     const int i = 0;
-    TEST (int, wprintf, (L""), WPRINTF, -1);
-    TEST (int, wprintf, (L"", uniqptr), WPRINTF, -1);
+    TEST (int, wprintf, (L""), -1);
+    TEST (int, wprintf, (L"", uniqptr), -1);
 
-    TEST (int, wscanf, (L""), WSCANF, -1);
-    TEST (int, wscanf, (L"", uniqptr), WSCANF, -1);
+    TEST (int, wscanf, (L""), -1);
+    TEST (int, wscanf, (L"", uniqptr), -1);
 
-    TEST (int, swprintf, (wstr, size, L""), SWPRINTF, -1);
-    TEST (int, swprintf, (wstr, size, L"", uniqptr), SWPRINTF, -1);
+    TEST (int, swprintf, (wstr, size, L""), -1);
+    TEST (int, swprintf, (wstr, size, L"", uniqptr), -1);
 
-    TEST (int, swscanf, (wstr, L""), SWSCANF, -1);
-    TEST (int, swscanf, (wstr, L"", uniqptr), SWSCANF, -1);
+    TEST (int, swscanf, (wstr, L""), -1);
+    TEST (int, swscanf, (wstr, L"", uniqptr), -1);
 
-    TEST (double, wcstod, (L"", &wstr), WCSTOD, -1);
-    TEST (long, wcstol, (L"", &wstr, i), WCSTOL, -1);
-    TEST (unsigned long, wcstoul, (L"", &wstr, i), WCSTOUL, -1);
+    TEST (double, wcstod, (L"", &wstr), -1);
+    TEST (long, wcstol, (L"", &wstr, i), -1);
+    TEST (unsigned long, wcstoul, (L"", &wstr, i), -1);
 
-    TEST (wchar_t*, wcscpy, (wstr, L""), WCSCPY, -1);
-    TEST (wchar_t*, wcsncpy, (wstr, L"", size), WCSNCPY, -1);
-    TEST (wchar_t*, wcscat, (wstr, L""), WCSCAT, -1);
-    TEST (int, wcscmp, (wstr, L""), WCSCMP, -1);
-    TEST (int, wcsncmp, (wstr, L"", size), WCSNCMP, -1);
-    TEST (test_size_t, wcsxfrm, (wstr, L"", size), WCSXFRM, -1);
+    TEST (wchar_t*, wcscpy, (wstr, L""), -1);
+    TEST (wchar_t*, wcsncpy, (wstr, L"", size), -1);
+    TEST (wchar_t*, wcscat, (wstr, L""), -1);
+    TEST (int, wcscmp, (wstr, L""), -1);
+    TEST (int, wcsncmp, (wstr, L"", size), -1);
+    TEST (test_size_t, wcsxfrm, (wstr, L"", size), -1);
 
-    TEST (test_size_t, wcscspn, (L"", L""), WCSCSPN, -1);
+    TEST (test_size_t, wcscspn, (L"", L""), -1);
 
-    TEST (test_size_t, wcsspn, (L"", L""), WCSSPN, -1);
-    TEST (wchar_t*, wcstok, (wstr, L"", &wstr), WCSTOK, -1);
+    TEST (test_size_t, wcsspn, (L"", L""), -1);
+    TEST (wchar_t*, wcstok, (wstr, L"", &wstr), -1);
 
-    TEST (test_size_t, wcslen, (L""), WCSLEN, -1);
-    TEST (int, wmemcmp, (L"", L"", size), WMEMCMP, -1);
-    TEST (wchar_t*, wmemcpy, (wstr, L"", size), WMEMCPY, -1);
-    TEST (wchar_t*, wmemmove, (wstr, L"", size), WMEMMOVE, -1);
-    TEST (wchar_t*, wmemset, (wstr, L'\0', size), WMEMSET, -1);
+    TEST (test_size_t, wcslen, (L""), -1);
+    TEST (int, wmemcmp, (L"", L"", size), -1);
+    TEST (wchar_t*, wmemcpy, (wstr, L"", size), -1);
+    TEST (wchar_t*, wmemmove, (wstr, L"", size), -1);
+    TEST (wchar_t*, wmemset, (wstr, L'\0', size), -1);
 
     // const commented to prevent MSVC 7.0 error:
     // error C2147: 'tm_buf' : const automatic array must be fully initialized
     /* const */ int tm_buf [16] = { 0 };
     const test_tm* tmb = (const test_tm*)&tm_buf;
 
-    TEST (test_size_t, wcsftime, (wstr, size, L"", tmb), WCSFTIME, -1);
+    TEST (test_size_t, wcsftime, (wstr, size, L"", tmb), -1);
 
-    TEST (test_wint_t, btowc, (i), BTOWC, -1);
-    TEST (int, wctob, (wi), WCTOB, -1);
+    TEST (test_wint_t, btowc, (i), -1);
+    TEST (int, wctob, (wi), -1);
 
     test_mbstate_t state = test_mbstate_t ();
 
-    TEST (int, mbsinit, (&state), MBSINIT, -1);
-    TEST (test_size_t, mbrlen, ("", size, &state), MBRLEN, -1);
-    TEST (test_size_t, mbrtowc, (wstr, "", size, &state), MBRTOWC, -1);
-    TEST (test_size_t, wcrtomb, (str, L'\0', &state), WCRTOMB, -1);
+    TEST (int, mbsinit, (&state), -1);
+    TEST (test_size_t, mbrlen, ("", size, &state), -1);
+    TEST (test_size_t, mbrtowc, (wstr, "", size, &state), -1);
+    TEST (test_size_t, wcrtomb, (str, L'\0', &state), -1);
 
-    TEST (test_size_t, mbsrtowcs, (wstr, &cstr, size, &state), MBSRTOWCS, -1);
-    TEST (test_size_t, wcsrtombs, (str, &wcstr, size, &state), WCSRTOMBS, -1);
+    TEST (test_size_t, mbsrtowcs, (wstr, &cstr, size, &state), -1);
+    TEST (test_size_t, wcsrtombs, (str, &wcstr, size, &state), -1);
 
     if (rw_opt_no_overloads) {
         // exercise the traditional C (const-incorrect) functions
-        TEST (/* const */ wchar_t*, wmemchr, (L"", L'\0', size), WMEMCHR, -1);
-        TEST (/* const */ wchar_t*, wcspbrk, (wcstr, L""), WCSPBRK, -1);
-        TEST (/* const */ wchar_t*, wcsrchr, (L"", L'\0'), WCSRCHR, -1);
-        TEST (/* const */ wchar_t*, wcsstr, (L"", L""), WCSSTR, -1);
-        TEST (/* const */ wchar_t*, wcschr, (L"", L'\0'), WCSCHR, -1);
+        TEST (/* const */ wchar_t*, wmemchr, (L"", L'\0', size), -1);
+        TEST (/* const */ wchar_t*, wcspbrk, (wcstr, L""), -1);
+        TEST (/* const */ wchar_t*, wcsrchr, (L"", L'\0'), -1);
+        TEST (/* const */ wchar_t*, wcsstr, (L"", L""), -1);
+        TEST (/* const */ wchar_t*, wcschr, (L"", L'\0'), -1);
     }
     else {
         // exercise const and non-const overloads that C++ replaces
         // the traditional C functions with
-        TEST (const wchar_t*, wmemchr, (L"", L'\0', size), WMEMCHR, 1);
-        TEST (wchar_t*, wmemchr, (wstr, L'\0', size), WMEMCHR, 0);
+        TEST (const wchar_t*, wmemchr, (L"", L'\0', size), 1);
+        TEST (wchar_t*, wmemchr, (wstr, L'\0', size), 0);
 
-        TEST (const wchar_t*, wcspbrk, (wcstr, L""), WCSPBRK, 1);
-        TEST (wchar_t*, wcspbrk, (wstr, L""), WCSPBRK, 0);
+        TEST (const wchar_t*, wcspbrk, (wcstr, L""), 1);
+        TEST (wchar_t*, wcspbrk, (wstr, L""), 0);
 
-        TEST (const wchar_t*, wcsrchr, (L"", L'\0'), WCSRCHR, 1);
-        TEST (wchar_t*, wcsrchr, (wstr, L'\0'), WCSRCHR, 0);
+        TEST (const wchar_t*, wcsrchr, (L"", L'\0'), 1);
+        TEST (wchar_t*, wcsrchr, (wstr, L'\0'), 0);
 
-        TEST (const wchar_t*, wcsstr, (L"", L""), WCSSTR, 1);
-        TEST (wchar_t*, wcsstr, (wstr, L""), WCSSTR, 0);
+        TEST (const wchar_t*, wcsstr, (L"", L""), 1);
+        TEST (wchar_t*, wcsstr, (wstr, L""), 0);
 
-        TEST (const wchar_t*, wcschr, (L"", L'\0'), WCSCHR, 1);
-        TEST (wchar_t*, wcschr, (wstr, L'\0'), WCSCHR, 0);
+        TEST (const wchar_t*, wcschr, (L"", L'\0'), 1);
+        TEST (wchar_t*, wcschr, (wstr, L'\0'), 0);
     }
 }
 
@@ -1042,24 +976,24 @@ void test_file_functions (int dummy, ...)
     // call fwide() first before any prior output since 7.19.2, p5
     // of C99 prohibits wide character I/O functions from being called
     // on a byte-oriented stream
-    TEST (int, fwide, (fp, i), FWIDE, -1);
-    TEST (int, fwide, (ifp, i), FWIDE, -1);
+    TEST (int, fwide, (fp, i), -1);
+    TEST (int, fwide, (ifp, i), -1);
 
-    TEST (int, fwprintf, (fp, L""), FWPRINTF, -1);
-    TEST (int, fwprintf, (fp, L"", uniqptr), FWPRINTF, -1);
+    TEST (int, fwprintf, (fp, L""), -1);
+    TEST (int, fwprintf, (fp, L"", uniqptr), -1);
 
-    TEST (int, fwscanf, (ifp, L""), FWSCANF, -1);
-    TEST (int, fwscanf, (ifp, L"", uniqptr), FWSCANF, -1);
+    TEST (int, fwscanf, (ifp, L""), -1);
+    TEST (int, fwscanf, (ifp, L"", uniqptr), -1);
 
-    TEST (int, vfwprintf, (fp, L"", va), VFWPRINTF, -1);
+    TEST (int, vfwprintf, (fp, L"", va), -1);
 
-    TEST (test_wint_t, fgetwc, (ifp), FGETWC, -1);
-    TEST (wchar_t*, fgetws, (wstr, i, ifp), FGETWS, -1);
-    TEST (test_wint_t, fputwc, (L'\0', fp), FPUTWC, -1);
-    TEST (int, fputws, (L"", fp), FPUTWS, -1);
-    TEST (test_wint_t, getwc, (ifp), GETWC, -1);
-    TEST (test_wint_t, putwc, (L'\0', fp), PUTWC, -1);
-    TEST (test_wint_t, ungetwc, (wi, ifp), UNGETWC, -1);
+    TEST (test_wint_t, fgetwc, (ifp), -1);
+    TEST (wchar_t*, fgetws, (wstr, i, ifp), -1);
+    TEST (test_wint_t, fputwc, (L'\0', fp), -1);
+    TEST (int, fputws, (L"", fp), -1);
+    TEST (test_wint_t, getwc, (ifp), -1);
+    TEST (test_wint_t, putwc, (L'\0', fp), -1);
+    TEST (test_wint_t, ungetwc, (wi, ifp), -1);
 
     std::fclose ((std::FILE*)ifp);
     std::fclose ((std::FILE*)fp);

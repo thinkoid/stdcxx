@@ -68,16 +68,9 @@ template <class T>
 rwtest_mbstowcs (std::mbstate_t& state, T* pi,
                  const char* pe, std::size_t srclen)
 {
-#  ifndef _RWSTD_NO_MBSRTOWCS
 
     return std::mbsrtowcs (pi, &pe, srclen, &state);
 
-#  else   // if defined _RWSTD_NO_MBSRTOWCS
-
-    _RWSTD_UNUSED (state);
-    return std::mbstowcs (pi, pe, srclen);
-
-#  endif   // _RWSTD_NO_MBSRTOWCS
 }
 
 
@@ -94,16 +87,9 @@ inline std::size_t
 rwtest_wcstombs (std::mbstate_t& state, const charT* pi,
                  char* pe, std::size_t srclen)
 {
-#  ifndef _RWSTD_NO_WCSRTOMBS
 
     return std::wcsrtombs (pe, &pi, srclen, &state);
 
-#  else   // if defined _RWSTD_NO_WCSRTOMBS)
-
-    _RWSTD_UNUSED (state);
-    return std::wcstombs (pe, pi, srclen);
-
-#  endif   // _RWSTD_NO_WCSRTOMBS
 }
 
 _RWSTD_SPECIALIZED_FUNCTION
@@ -128,16 +114,8 @@ rwtest_mbslen (std::mbstate_t& state,
 
     while (total < cmax && pe < limit)
     {
-#ifndef _RWSTD_NO_MBRLEN
 
         ret = std::mbrlen (pe, min (_RWSTD_MB_LEN_MAX, limit - pe), &state);
-
-#else   // if defined _RWSTD_NO_MBRLEN
-
-        _RWSTD_UNUSED (state);
-        ret = std::mblen (pe, min (_RWSTD_MB_LEN_MAX, limit - pe));
-
-#endif   // _RWSTD_NO_MBRLEN
 
         if (ret >= std::size_t (-2))
             break;

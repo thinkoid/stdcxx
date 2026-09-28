@@ -96,17 +96,8 @@ protected:
 
         used_ = true;
 
-#ifndef _RWSTD_NO_MBSINIT
-
         if (check_state_)
             valid_state_ = std::mbsinit (&state) != 0;
-
-#else   // if (_RWSTD_NO_MBSINIT)
-
-        if (check_state_)
-            valid_state_ = true;
-
-#endif   // _RWSTD_NO_MBSINIT
 
         const result res =
             Base::do_in (state, from, from_end, from_next,

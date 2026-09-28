@@ -56,18 +56,11 @@
 // set in main() instead of here to avoid Solaris 7 putenv() bug (PR #30017)
 const char* locale_root;
 
-#if defined (_RWSTD_NO_TZSET) && !defined (_RWSTD_NO_TZSET_IN_LIBC)
-#  undef _RWSTD_NO_TZSET
-extern "C" _RWSTD_DLLIMPORT void tzset () _LIBC_THROWS();
-#endif   // _RWSTD_NO_TZSET && !_RWSTD_NO_TZSET_IN_LIBC
-
 inline void set_TZ (const char* str)
 {
     rw_putenv (str);
 
-#ifndef _RWSTD_NO_TZSET
     tzset ();
-#endif
 }
 
 /**************************************************************************/
@@ -159,7 +152,7 @@ std::size_t rw_strftime (wchar_t *wbuf, std::size_t bufsize,
 
     std::size_t n = std::wcsftime (wbuf, bufsize, wpat, tmb ? tmb : &tmp);
 
-#else   // _RWSTD_NO_WCSFTIME
+#else   // if defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT)
 
     char pat [1024];
     char buf [1024];

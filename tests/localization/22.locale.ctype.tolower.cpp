@@ -184,20 +184,7 @@ wchar_t widen (wchar_t, char ch, const char *locname)
 
     wchar_t result;
 
-#ifndef _RWSTD_NO_BTOWC
-
     result = std::btowc (UChar (ch));
-
-#elif !defined (_RWSTD_NO_MBTOWC)
-
-    if (1 != std::mbtowc (&result, &ch, 1))
-        result = wchar_t (WEOF);
-
-#else
-
-    result = UChar (ch);
-
-#endif   // _RWSTD_NO_BTOWC, _RWSTD_NO_MBTOWC
 
     if (locname)
         std::setlocale (LC_CTYPE, curlocname);

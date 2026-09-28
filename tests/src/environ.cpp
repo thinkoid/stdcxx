@@ -51,16 +51,6 @@ _RWSTD_DLLIMPORT int putenv (char*) _LIBC_THROWS ();
 #endif   // _RWSTD_NO_PUTENV_CONST_CHAR
 
 
-#ifdef _RWSTD_NO_UNSETENV
-#  ifndef _RWSTD_NO_UNSETENV_IN_LIBC
-
-_RWSTD_DLLIMPORT int unsetenv (const char*) _LIBC_THROWS ();
-
-#    undef _RWSTD_NO_UNSETENV
-
-#  endif   // _RWSTD_NO_UNSETENV_IN_LIBC
-#endif   // _RWSTD_NO_UNSETENV
-
 }   // extern "C"
 
 
@@ -162,31 +152,7 @@ rw_putenv (const char* str, int sep /* = -1 */)
         else if ((var = getenv (envvar))) {
             // try to remove variable from the environment
 
-#ifndef _RWSTD_NO_UNSETENV
             ret = unsetenv (envvar);
-#else   // ifdef _RWSTD_NO_UNSETENV
-            switch (mode) {
-            case 0:
-                ret = putenv (envvar);
-                break;
-            case 1:
-                ret = putenv (envvar);
-                if (!getenv (envvar)) {
-                    mode = 0;
-                    break;
-                }
-                mode = 2;
-                // fall through
-            case 2:
-                // on Windows append '=' character to remove
-                // the environment variable
-                envvar [varlen] = '=';
-                envvar [varlen + 1] = '\0';
-                ret = putenv (envvar);
-                envvar [varlen] = '\0';
-                break;
-            }
-#endif   // _RWSTD_NO_UNSETENV
 
             if (0 == ret) {
                 // see if the variable has been removed

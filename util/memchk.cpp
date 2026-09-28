@@ -43,14 +43,11 @@
 #endif   // EINTR
 
 
-#if defined (_RWSTD_NO_MKSTEMP) || !defined (_RWSTD_NO_PURE_C_HEADERS)
-#  ifndef _RWSTD_NO_MKSTEMP_IN_LIBC
+#ifndef _RWSTD_NO_PURE_C_HEADERS
 
 extern "C" int mkstemp (char*) _LIBC_THROWS();
 
-#    undef _RWSTD_NO_MKSTEMP
-#  endif   // _RWSTD_NO_MKSTEMP_IN_LIBC
-#endif   // _RWSTD_NO_MKSTEMP || !_RWSTD_NO_PURE_C_HEADERS
+#endif   // _RWSTD_NO_PURE_C_HEADERS
 
 
 #ifndef P_tmpdir

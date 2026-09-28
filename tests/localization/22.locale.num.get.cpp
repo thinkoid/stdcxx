@@ -2559,16 +2559,7 @@ test_flt (CharType ctype, const char *cname,
 
     PunctData::thousands_sep_ = ';';
 
-#  if    !defined (_RWSTD_NO_STRTOF) || !defined (_RWSTD_NO_STRTOF_IN_LIBC) \
-      || !defined (_RWSTD_NO_STRTOD) || !defined (_RWSTD_NO_STRTOD_IN_LIBC)
-
     const bool test_locale = true;
-
-#  else
-
-    const bool test_locale = false;
-
-#  endif   // _RWSTD_NO_STRTO{D,F}(_IN_LIBC)
 
     test_floating_point (ctype, cname, itype, iname, float (), test_locale);
 
@@ -2697,15 +2688,7 @@ test_dbl (CharType ctype, const char *cname,
     rw_info (0, 0, 0, "std::num_get<%s, %s>::get (..., %s&)",
              cname, iname, tname);
 
-#  if !defined (_RWSTD_NO_STRTOD) || !defined (_RWSTD_NO_STRTOD_IN_LIBC)
-
     const bool test_locale = true;
-
-#  else
-
-    const bool test_locale = false;
-
-#  endif   // _RWSTD_NO_STRTOD(_IN_LIBC)
 
     test_floating_point (ctype, cname, itype, iname, double (), test_locale);
 
@@ -2804,15 +2787,7 @@ test_ldbl (CharType ctype, const char *cname,
     rw_info (0, 0, 0, "std::num_get<%s, %s>::get (..., %s&)",
              cname, iname, tname);
 
-#    if !defined (_RWSTD_NO_STRTOLD) || !defined (_RWSTD_NO_STRTOLD_IN_LIBC)
-
     const bool test_locale = true;
-
-#    else
-
-    const bool test_locale = false;
-
-#    endif   // _RWSTD_NO_STRTOLD(_IN_LIBC)
 
     test_floating_point (ctype, cname, itype, iname, 0.0L, test_locale);
 
