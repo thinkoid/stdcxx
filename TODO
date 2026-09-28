@@ -54,22 +54,34 @@ Fix:
   exported =__rw_wmemcpy= family in =src/string.cpp=: debug builds
   use it unconditionally, and exported symbols stay until the next
   minor version.
-- Trap: =_RWSTD_NO_CTIME= names both the =<ctime>= header and the
-  =ctime ()= function. Sort its readers by hand.
+- Trap, cleared: =_RWSTD_NO_CTIME= names both the =<ctime>= header
+  and the =ctime ()= function. Nothing reads it. The header half
+  keeps writing it.
 
-Method: a major change. Groom first, then one subsystem per commit:
-the wide functions and =<wchar.h>=, =<cwctype>=, the string
-functions, stdio, stdlib, math (=_IN_LIBM=), the sources, the tests,
-and the script last. Every commit is built and checked in =11S=
-only. When the set is done, certify across the six tracked
+Method: one subsystem per commit, each collapse inert by the check
+below, so no separate groom: math, the string functions, stdio,
+stdlib, the wide functions and =<wchar.h>=, =<cwctype>=, the
+sources, =_defs.h= with =_traits.h= and =_num_get.cc=, the tests
+and =util/=, and the script last. The script goes last because the
+configuration writes =// #define _RWSTD_NO_<X>= into =config.h= for
+any macro a characterization still reads; =FLOAT.cpp=,
+=VSNPRINTF_RETURN.cpp=, =WCSFTIME_WCHAR_T_FMAT.cpp= and
+=EQUAL_CTYPE_MASK.cpp= go with it. Every commit is built and checked
+in =11S= only. When the set is done, certify across the six tracked
 configurations.
 
 Done: math (=<cmath>=: the 44 =_IN_LIBM= blocks keep their first
-arm; the =pow= declaration keeps its =_RWSTD_NO_POW_DBL= half).
+arm; the =pow= declaration keeps its =_RWSTD_NO_POW_DBL= half); the
+string functions (=<cstring>=: =using ::f;= for all 22; =<string.h>=:
+the five global const wrappers go).
 
-Check, per commit, in =11S=: =config.h= loses only the removed
-macros; library objects keep identical =.text= where the commit is
-meant to be inert; the suite table is identical.
+Check, per commit, in =11S=, against the previous commit's build:
+=config.h= loses only the removed macros; every object's code is
+identical where the commit is meant to be inert, with =__LINE__= and
+=__FILE__= masked where lines moved; the same again recompiled
+without =_RWSTDDEBUG= at =-O2=, because the six tracked
+configurations are debug builds and none compiles the release
+branches of =_traits.h=; the suite table is identical.
 
 Check, certification: the six tables identical but for =21.cwchar=
 under Clang, which goes to 66 assertions, 0 failed, 0 warnings. That
