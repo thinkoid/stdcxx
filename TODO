@@ -3,54 +3,47 @@
 #+STARTUP: overview
 
 The queue, in priority order, top first. Each entry states the fact,
-the intended fix, and the check that settles it. Finished entries
-leave this file; git remembers them. The =analysis-= notes under
-=doc/notes= carry the longer investigations.
+the fix and the check that settles it. Finished entries leave; git
+keeps them. The =analysis-= notes under =doc/notes= carry the longer
+investigations.
 
 * TODO Test-case structs: =size_t= fields, =NPOS= sentinel
 
 =StringTestCase= (=tests/include/rw_strings.h=) and =ContainerTestCase=
 (=tests/include/rw_containers.h=) hold positions and counts in =int=
-fields, and every table spells "not applicable" as =-1=, which reaches
-the library as =size_t= and lands as =npos=: the sentinel and =npos=
-are the same number by design.
+fields. The tables write "not applicable" as =-1=. It reaches the
+library as =size_t= and becomes =npos=, by design.
 
-Fix, as one inert commit after the baseline: retype =off=, =size=,
-=off2= and =size2= to =_RWSTD_SIZE_T= in both structs, and change the
-sentinel to =NPOS= in those four positions across the 171 =TEST= macro
-bodies and the rows that pass it; =val= and =bthrow= stay =int= with
-their own =-1=.
+Fix, one inert commit: =off=, =size=, =off2= and =size2= become
+=_RWSTD_SIZE_T= in both structs, and the sentinel in those four
+positions becomes =NPOS=, across the 171 =TEST= macro bodies and the
+rows that pass it. =val= and =bthrow= stay =int=, with their own =-1=.
 
-Check: identical assertion counts for every string and container test
-before and after.
+Check: every string and container test keeps its assertion count.
 
 * TODO =money_get='s value buffer has no bound
 
-=money_get::_C_get= (=include/loc/_money_get.cc=) collects the digits
-of the value in a 304-byte array on the stack and writes into it
-without a check, the digits as they are read and the zeros
-=frac_digits= pads them with; a monetary value of more characters
-overruns the frame. A 20000-digit value read through
-=istreambuf_iterator= dies of SIGSEGV in 11S; =num_get= had the same
-array with a check that set =failbit= until its buffers moved to the
-heap on demand.
+=money_get::_C_get= (=include/loc/_money_get.cc=) writes the digits
+of the value, and the zeros =frac_digits= pads them with, into a
+304-byte array on the stack. Nothing checks the bound. A longer value
+overruns the frame: 20000 digits read through =istreambuf_iterator=
+die of SIGSEGV in 11S.
 
-Fix: the shape =num_get= has now, the array moved to a heap block
-of twice the size when full, the exit test in a guard; the
+Fix: the shape =num_get= has. The array moves to a heap block of
+twice the size when full, and the exit test sits in a guard. The
 group-size array beside it grows with it.
 
 Check: a value of ten thousand digits reads to the end with =eofbit=
-alone and the expected magnitude; the =22.locale.money.get= row
+alone and the expected magnitude. The =22.locale.money.get= row is
 unchanged.
 
 * TODO The wide half of UserCtype
 
 =tests/src/ctype.cpp= implements =UserCtype<wchar_t>= and
-=UserCtype<UserChar>= only in part: ten members are "FIXME: implement
-this" stubs, and =make_char= (=tests/include/rw_char.h=) takes only a
-=char=. =tests/self/0.ctype.cpp= carries the matching FIXME and breaks
-out of its table at =UCHAR_MAX=, so the wide entries of its character
-table have never been exercised on any platform.
+=UserCtype<UserChar>= in part: ten members are "FIXME: implement
+this" stubs. =make_char= (=tests/include/rw_char.h=) takes only a
+=char=. =tests/self/0.ctype.cpp= stops its table at =UCHAR_MAX=, so
+the wide entries have never run.
 
 Fix: finish the helper, give =make_char= an =int= overload, remove the
 break.
@@ -60,18 +53,16 @@ types.
 
 * TODO README section 5 and the configuration
 
-The original README recommends setting =CPPOPTS= and =CXXOPTS= on the
-make command line to change compiler options. The configuration
-directory is insulated from those variables by design: =config.h= is a
-function of the compiler, its version and the build type, and
-anything the configuration must see goes in the =CONFIG= file. A
-dialect option passed only on the command line produces a =config.h=
-for one language and a library built in another.
+The original README says to set =CPPOPTS= and =CXXOPTS= on the make
+command line to change compiler options. The configuration does not
+see them, by design. =config.h= is a function of the compiler, its
+version and the build type; what the configuration must see goes in
+the =CONFIG= file. A dialect option given only on the command line
+configures one language and builds the library in another.
 
-Fix: document, not patch; the per-platform manual step the README
-describes is a defect of the configuration to move away from, not a
-behaviour to propagate. =README.md= already says so; the original
-README stays as it was.
+Fix: prose, no patch. The per-platform manual step the README
+describes is a defect to move away from. =README.md= says so; the
+original README stays as it is.
 
 Check: none; this is prose.
 
@@ -99,204 +90,182 @@ test three times with no report from the library; the
 
 * TODO MT tests that provoke contention instead of waiting for it
 
-The sixteen =22.locale.*.mt= tests run one thread per processor, up
-to 32, for 10,000 to 200,000 iterations per thread, each threaded
-section until its own 60-second soft timeout. After the first
-iteration everything they touch is cached, so the rest measures the
-library's locks in steady state: at 32 threads =22.locale.numpunct.mt=
-keeps about one core busy for two minutes. On 32 processors the
-harness's 1 GiB address-space limit (=etc/config/GNUmakefile.tst=,
-2007, for build machines shared with other products) cannot hold 32
-threads' 8 MiB stacks and 64 MiB =malloc= arenas, so the pool fails
-to start, and a test that starts outruns the 60-second harness
-timeout. The two tests written the other way,
-=22.locale.use_facet.mt= and =22.locale.time.put.libc.mt=, find
-their races in a second or two: a few threads parked on a barrier,
-released together at the first use of a fresh object, round after
-round.
+The older =22.locale.*.mt= tests run one thread per processor, up to
+32, for 10,000 to 200,000 iterations each. Each threaded section runs
+to its own 60-second soft timeout. After the first iteration
+everything they touch is cached, and the rest measures the locks at
+rest. On 32 processors they also measure the harness: its 1 GiB
+address-space limit (=etc/config/GNUmakefile.tst=) cannot hold 32
+threads' stacks and =malloc= arenas, and a test that starts outlasts
+the harness's 60-second timeout. Each test covers several facets, so
+a failure names a test, not a defect.
 
-The gated tests now number four (=22.locale.use_facet.mt=,
-=22.locale.time.put.libc.mt=, =22.locale.id.mt=,
-=22.locale.facet.mt=), and they overlap the old ones: the first use
-of a facet, its data and its reference counts are exercised by both.
-Each old test also covers several facets and operations at once, so a
-failure names a test and not a defect.
+The four gated tests, =22.locale.use_facet.mt=,
+=22.locale.time.put.libc.mt=, =22.locale.id.mt= and
+=22.locale.facet.mt=, find their races in seconds. A few threads wait
+on a barrier and start together at the first use of a fresh object,
+round after round. They overlap the older tests.
 
-Fix: rewrite the locale MT tests in that shape, or retire the ones
-the gated tests make redundant, and split what remains finer, one
-race or one facet operation per program, so that a row of the table
-names what failed: 4 to 8 threads whatever the
-processor count, released from a barrier, many short rounds each on
-fresh state (a new locale or facet) so the first-use window opens
-again, a small thread stack; steady-state races are left to the
-ThreadSanitizer build, which needs few iterations to see them. With
-a fixed small thread count the 1 GiB limit stays a meaningful guard
-and the 60-second timeout becomes a hang detector.
+Fix: rewrite the older tests in that shape, or retire those the gated
+tests cover, one race or one facet operation per program: 4 to 8
+threads whatever the processor count, a barrier, many short rounds on
+fresh state, a small thread stack. Steady-state races are left to the
+ThreadSanitizer build. With a small fixed thread count the 1 GiB
+limit stays a guard and the timeout becomes a hang detector.
 
-Check: a census of what each old test exercises against the gated
-ones, each old test kept, split or retired with the reason; every
-locale MT test passes in a few seconds under the harness in 15D on
-any processor count, the 15D rows become a reference, and each test
-still fails against the library before the fix it covers.
+Check: a census of what each older test covers against the gated
+ones, each kept, split or retired with the reason. Every locale MT
+test passes in seconds under the harness in 15D on any processor
+count, and the 15D rows become a reference. Each test still fails
+against the library before the fix it covers.
 
 * TODO One atomic backend, the =__atomic= built-ins
 
 The atomic operations have three backends besides the mutex
 templates: the GNU =__sync= built-ins (=<rw/_atomic-sync.h>=), x86
-assembly (=<rw/_atomic-x86.h>= over =src/x86/atomic.s=) and x86-64
-assembly (=<rw/_atomic-x64.h>= over =src/x86_64/atomic.s=). Since the
-per-width characterizations the =__sync= branch serves every build of
-the matrix, 32-bit x86 included, where the former =__i486__= test
-never matched a default =-m32= compile and every threaded build ran
-the out-of-line assembly; the assembly branches are reached only by a
-compiler whose =int= characterization fails. The =__sync= contract is
-a full barrier for the arithmetic and an acquire barrier only for
-=__sync_lock_test_and_set=, which =_RWSTD_ATOMIC_SWAP= inherits and x86
-hides behind =xchg=. The library exports the assembly routines,
-=__rw_atomic_add= and =__rw_atomic_xchg= at 8, 16, 32 and (x86-64) 64
-bits, and binaries built for 32-bit x86 before the characterizations
-call them.
+assembly (=<rw/_atomic-x86.h>=, =src/x86/atomic.s=) and x86-64
+assembly (=<rw/_atomic-x64.h>=, =src/x86_64/atomic.s=). The =__sync=
+branch serves every configuration of the matrix, 32-bit x86 included.
+The assembly runs only when the =int= characterization fails. =__sync=
+is a full barrier for the arithmetic and an acquire barrier only for
+=__sync_lock_test_and_set=, which =_RWSTD_ATOMIC_SWAP= inherits; x86
+hides the difference behind =xchg=. The library exports the assembly
+routines, =__rw_atomic_add= and =__rw_atomic_xchg= at 8, 16, 32 and
+(x86-64) 64 bits. 32-bit binaries built before a976e3b9 call them.
 
 Fix: one backend over the =__atomic= built-ins with explicit orders,
-none weaker than today's contract: =__ATOMIC_SEQ_CST= for the
-increments, the decrements and the exchange; weakening an order is
-the next entry's business, site by site. The five characterizations
-test the =__atomic= operations the backend uses, and the macros they
-define stay. =<rw/_atomic-x86.h>=, =<rw/_atomic-x64.h>= and their
-dispatch branches go. =src/atomic.s= and the two assembly sources stay
-built and exported until the next minor version, which may break the
-binary interface; then they go with their symbols.
+none weaker than today: =__ATOMIC_SEQ_CST= for the increments, the
+decrements and the exchange. Weakening an order is the next entry's
+business, site by site. The five characterizations test the
+=__atomic= operations the backend uses; their macros stay.
+=<rw/_atomic-x86.h>=, =<rw/_atomic-x64.h>= and their dispatch branches
+go. =src/atomic.s= and the two assembly sources stay built and
+exported until the next minor version, which may break the binary
+interface. Then they go with their symbols.
 
-Check: x86-64 and aarch64 suites unchanged against their tables; the
-disassembly shows =lock xadd= and =xchg= on x86-64 and 32-bit x86, and
-=ldaddal= and =swpal= behind the outline helpers on aarch64; the
-exported symbols of the library unchanged.
+Check: the x86-64 and aarch64 suites unchanged against their tables.
+The disassembly shows =lock xadd= and =xchg= on x86-64 and 32-bit x86,
+and =ldaddal= and =swpal= behind the outline helpers on aarch64. The
+library's exported symbols unchanged.
 
 * TODO Synchronization on atomic integer flags: a sweep
 
-Several one-time initializations elect their initializer with an
-atomic increment of an integer and publish completion through a
-plain write to a =volatile= flag that the other threads spin on:
-=src/locale_body.cpp:815= (the global locale: =ginit += 1000= after
-=_C_manage=, readers wait on =ginit < 1000= and read =global= with
-no acquire, and =global= is tested unlocked before the flag),
-=include/rw/_mutex.h:286= (the static mutex, with a non-atomic
-fallback where atomics are absent), =src/once.cpp:125= and
-=src/iostream.cpp:247=. =volatile= orders neither the flag against
-the data it guards nor the spin against the reads after it. The list
-is a start, not a census.
+Some one-time initializations elect their initializer with an atomic
+increment. They publish completion with a plain write to a =volatile=
+flag the other threads spin on. =volatile= orders neither the flag
+against the data it guards nor the spin against the reads after it.
+Known sites:
+- =src/locale_body.cpp:815=, the global locale. =ginit += 1000= comes
+  after =_C_manage=; readers wait on =ginit < 1000= and read =global=
+  with no acquire, and =global= is tested unlocked before the flag.
+- =include/rw/_mutex.h:286=, the static mutex, with a non-atomic
+  fallback where atomics are absent.
+- =src/once.cpp:125= and =src/iostream.cpp:247=.
+The list is a start, not a census.
 
-Fix: a thorough sweep, later. Census every site that synchronizes
-on an atomic or =volatile= integer, then decide each one: a release
-store and acquire load through the compiler builtins, the site's
-mutex, or =__rw_once=.
+Fix: census every site that synchronizes on an atomic or =volatile=
+integer. Decide each: a release store and an acquire load through the
+compiler built-ins, the site's mutex, or =__rw_once=.
 
-Check: the census in a note, each site with its decision; the
+Check: the census in a note, each site with its decision. The
 ThreadSanitizer build reports none of them.
 
 * TODO =yi_US.CP1255= does not build on aarch64
 
-=make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=:
+=make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=.
 =localedef= reports Error 308, "incomplete multibyte character in
-character map file: expecting 4 bytes, found 0". No note records the
-locales phase on x86-64, so whether it is aarch64-only is open.
+character map file: expecting 4 bytes, found 0". Nothing records the
+locales phase on x86-64, so whether it fails only on aarch64 is open.
 Hypothesis: =char= is unsigned on aarch64 and signed on x86, and the
 charmap reader depends on the sign of a byte.
 
 Fix: to be found.
 
 Check: =make locales= builds every locale in =etc/nls/gen_list= on
-aarch64, and the generated databases match the x86-64 ones byte for
-byte.
+aarch64, and the databases match the x86-64 ones byte for byte.
 
 * TODO Keep instantiated facets until the program ends
 
-A named facet dies with the last locale that holds it, and the next
-locale of the same name constructs it again: the constructor, the
-mapping of its database, the lazy initialization of its data. Until
-the reference leak of racing =use_facet= calls was fixed, any race
-kept the facet alive for the rest of the process, an accidental and
-unbounded cache. In 15D on aarch64 the locale MT tests that construct
-locales in a loop run slower with the leak fixed (5-run means, real
-time, the atomic operations lock-free: =22.locale.ctype.mt= 11.9 s to
-13.0 s, =22.locale.numpunct.mt= 15.1 s to 16.7 s,
-=22.locale.globals.mt= 8.3 s to 9.3 s).
+A named facet dies with the last locale that holds it. The next locale
+of that name builds it again: the constructor, the mapping of its
+database, the initialization of its data. The locale MT tests that
+build locales in a loop pay for it. 15D on aarch64, lock-free atomics,
+5-run means of real time, before and after 2bbdf7c9 stopped the
+=use_facet= leak that had kept facets alive by accident:
+=22.locale.ctype.mt= 11.9 s to 13.0 s, =22.locale.numpunct.mt= 15.1 s
+to 16.7 s, =22.locale.globals.mt= 8.3 s to 9.3 s.
 
 Fix: explore a facet repository that keeps every facet it
-instantiates until the program terminates: what it costs in memory
-and mappings, how the reference counts and =~__rw_locale= change,
-and what it does to the lifetime of the facet data.
+instantiates until the program ends: its cost in memory and mappings,
+what it changes in the reference counts and =~__rw_locale=, and what
+it does to the lifetime of the facet data.
 
-Check: to be designed with the fix; the timings above as the
-baseline, and =22.locale.use_facet.mt= must still find no block
-outliving its round, or be retired with the design.
+Check: designed with the fix. The timings above are the baseline, and
+=22.locale.use_facet.mt= still finds no block outliving its round, or
+leaves with the design.
 
 * TODO The C++17 floor
 
-The library is C++98 by design and characterizes the compiler rather
-than assuming one. The intended step is to raise the implementation
-floor to C++17: =nullptr=, =noexcept= in place of the dynamic
-exception specifications the library still declares, =static_assert=,
+The library is C++98 and characterizes the compiler. The intended
+step raises the implementation floor to C++17: =nullptr=, =noexcept=
+in place of the dynamic exception specifications, =static_assert=,
 =override=, inline variables for the facet statics, =<type_traits>=
-for the hand-rolled traits, and the retirement of the
-characterizations for compilers that no longer exist. This is
-distinct from the conformance target, what the library provides to
-its users, which is a roadmap of its own.
+for the hand-rolled traits, and the characterizations for compilers
+that no longer exist retired. This is not the conformance target,
+what the library gives its users; that is a roadmap of its own.
 
-Not before the baseline; the =0= to =nullptr= sweep is one inert
-commit on top of the floor change, never sprinkled in ahead of it.
-Until then null is the literal =0=.
+The =0= to =nullptr= sweep is one inert commit on top of the floor
+change, never ahead of it. Until then null is the literal =0=.
 
 * TODO Strict ANSI as the rule, the additions outside the standard gone
 
-=_RWSTD_STRICT_ANSI= (=include/rw/_config.h:234=, selected also by
-=_RWSTD_NO_EXTENSIONS=) is an opt-in: it undefines =_RWSTD_LONG_LONG=
-and defines 30 =_RWSTD_NO_EXT_*= macros, and the original README
-calls the switch deprecated. The tree reads 38 distinct
-=_RWSTD_NO_EXT_*= names in 40 files under =include= and =src=, eight
-of which the strict block never sets, and the tests carry the same
-gates; =tests/intro/17.extensions= exercises the additions directly.
+=_RWSTD_STRICT_ANSI= (=include/rw/_config.h:234=, also selected by
+=_RWSTD_NO_EXTENSIONS=) is opt-in. It undefines =_RWSTD_LONG_LONG= and
+defines 30 =_RWSTD_NO_EXT_*= macros. The original README calls the
+switch deprecated. The tree reads 38 =_RWSTD_NO_EXT_*= names in 40
+files under =include= and =src=; the strict block never sets eight of
+them. The tests carry the same gates, and =tests/intro/17.extensions=
+exercises the additions.
 
-Intent: strict conformance becomes the only configuration, and what
-leaves the code tree is strictly what the library adds outside the
-standard: members, classes, overloads and manipulator values that
-ISO/IEC 14882:2003 does not specify, such as the =ios_base::failure=
-subclasses, base-2 stream I/O and =ios_base::bin=, the
-=stringbuf::str (const char*)= overload, the deep-copy
-=basic_string::copy=, the extra =num_get=/=num_put=/=time_get=
-members, the =void= =count= and =distance= forms, the =setbase= bases
-beyond the required ones, the filebuf and stream-locking additions.
-Everything the =_RWSTD_NO_EXT_*= gates cover that is not such an
-addition is not part of the trim: an implementation choice the
-standard permits (the in-place =assign= and =insert= of =deque= and
-=vector=, the width kept on a failed insertion, the portable random
-sequence, the primary-template definitions), a later defect
-resolution the block disables under the extension name (LWG 559,
-cv-qualified =numeric_limits=; LWG 568, the safe stream conversion),
-and =long long=, which follows the C++17 floor entry. Those keep
-their present behaviour and lose only the macro.
+Intent: strict conformance becomes the only configuration. What
+leaves is what the library adds beyond ISO/IEC 14882:2003: members,
+classes, overloads and manipulator values the standard does not
+specify. Among them the =ios_base::failure= subclasses, base-2 stream
+I/O and =ios_base::bin=, =stringbuf::str (const char*)=, the
+deep-copy =basic_string::copy=, the extra =num_get=, =num_put= and
+=time_get= members, the =void= forms of =count= and =distance=, the
+=setbase= bases beyond the required ones, the filebuf and
+stream-locking additions.
 
-Fix, in order, one subsystem per commit with the suite tables as the
-oracle: first the 38 gates sorted into the two lists above, recorded
-in the commit that deletes =_RWSTD_STRICT_ANSI= and
-=_RWSTD_NO_EXTENSIONS= from =_config.h=; then per addition, the code
-path deleted with its macro, its test branches and its
-=17.extensions= cases; per kept behaviour, the macro and its dead
-branch deleted. The original README stays as it is, =README.md=
-records the policy. Sequencing against the C++17 floor to decide
-before the first commit.
+The rest of what the gates cover keeps its behaviour and loses only
+its macro: choices the standard permits (the in-place =assign= and
+=insert= of =deque= and =vector=, the width kept on a failed
+insertion, the portable random sequence, the primary-template
+definitions), later defect resolutions the block disables under the
+extension name (LWG 559, cv-qualified =numeric_limits=; LWG 568, the
+safe stream conversion), and =long long=, which follows the C++17
+floor.
 
-Check: =git grep _RWSTD_NO_EXT_= empty under =include=, =src= and
-=tests=; =17.extensions= reduced to nothing or retired; the suite
-tables re-pinned in all six configurations with no row but the
-extension rows moving; the examples build.
+Fix, one subsystem per commit, the suite tables as the oracle. First,
+the 38 gates sorted into the two lists, recorded in the commit that
+deletes =_RWSTD_STRICT_ANSI= and =_RWSTD_NO_EXTENSIONS= from
+=_config.h=. Then, per addition, the code path goes with its macro,
+its test branches and its =17.extensions= cases; per kept behaviour,
+the macro and its dead branch go. The original README stays;
+=README.md= records the policy. The order against the C++17 floor is
+decided before the first commit.
+
+Check: =git grep _RWSTD_NO_EXT_= is empty under =include=, =src= and
+=tests=. =17.extensions= is reduced to nothing or retired. The suite
+tables are re-pinned in all six configurations with no row moving but
+the extension rows. The examples build.
 
 * TODO Leftovers beside the removed function probes
 
 The removal of the C library function probes (f43be017..a44256a6)
-kept to the code that read the probe macros. The census
-for it found dead or stale code next to them. None of it is compiled
-differently by any tracked configuration.
+kept to the code that read the probe macros. Its census found dead
+or stale code beside them. No tracked configuration compiles any of
+it differently.
 
 - =_RWSTD_NO_USING_LIBC_IN_STD= is defined nowhere. Fifteen headers
   test it around their =namespace std= blocks.
@@ -331,84 +300,83 @@ the non-debug recompile, the suite table) in =11S=.
 
 * Documentation
 
-Documents that describe the library as it is, for a reader rather
-than for the record; they go under =doc/notes= with the =ref-=
-prefix, beside the =analysis-= investigations. Each entry names the
-document, what it must answer, and where the material already is.
-None has a check beyond a reading; they are prose. Roughly in order
-of payback.
+Documents that describe the library as it is, for a reader, not for
+the record. They go under =doc/notes= with the =ref-= prefix. Each
+entry names the document, what it must answer and where the material
+is. They are prose: no check beyond a reading. Roughly in order of
+payback.
 
 ** TODO A tour of the locale subsystem
 
-Written: =doc/notes/ref-locale.md=, current as of
-2026-09-27; the entry leaves after a reading.
+Written: =doc/notes/ref-locale.md=, current as of 2026-09-27. The
+entry leaves after a reading.
 
-Facets and their ids, the facet index scheme, =locale_body= and how
+Facets and their ids, the facet index scheme, =locale_body=, how
 =combine= and the global locale share bodies, the byname facets and
-the generated binary locale data they read. The MT race lives here
-(=doc/notes/analysis-locale-mt-race.md=) and a reader chasing it needs
-the map first. Shape: =ref-string-replace.md=.
+the binary locale data they read. A reader of
+=doc/notes/analysis-locale-mt-race.md= needs this map first. Shape:
+=ref-string-replace.md=.
 
 ** TODO Decision records
 
-One short file per irreversible choice the revival made: the platform
+One short file per irreversible choice of the revival: the platform
 retirement, the null-pointer literal, the commit shape, the Clang
-configuration, the compatibility mutex in the string body. The public
-tree has only the outcomes; the reasoning is in commit messages and
-private notes. Material: the commit messages and
+configuration, the compatibility mutex in the string body. The tree
+has the outcomes; the reasons are in commit messages and private
+notes. Material: the commit messages and
 =doc/notes/plan-platform-state.md=.
 
 ** TODO A conformance record
 
-Written: =doc/notes/ref-conformance.md=, current as of
-2026-09-27; the entry leaves after a reading.
+Written: =doc/notes/ref-conformance.md=, current as of 2026-09-27.
+The entry leaves after a reading.
 
-What of ISO/IEC 14882:2003 the library implements, where it knowingly
-deviates, which LWG issues it applied (the headers cite them by
+What of ISO/IEC 14882:2003 the library implements, where it deviates
+knowingly, which LWG issues it applies (the headers cite them by
 number), and which later library features it lacks. The roadmap the
-C++17 floor entry defers to. The most valuable to an outside reader
+C++17 floor entry defers to. The most useful to an outside reader,
 and the most work.
 
 ** TODO A build-system reference
 
-How the =BUILDTYPE= digits and letters map to flags, why =config.h= is
-a function of the compiler and =makefile.in= only, how a
+How the =BUILDTYPE= digits and letters map to flags, why =config.h=
+is a function of the compiler and =makefile.in= only, how a
 characterization is written and how its result gates code, the serial
-phases. The original =README= covers 2008; the revival's rules are
+phases. The original =README= describes 2008; the revival's rules are
 spread over =README.md= and the commit messages.
 
 ** TODO The characterization catalogue
 
 Written: =doc/notes/ref-characterizations.md=, current as of
-2026-09-27; the entry leaves after a reading.
+2026-09-27. The entry leaves after a reading.
 
 The probes under =etc/config/src=, each yielding a =_RWSTD_NO_*=
 macro: a table of macro, what it detects, which supported compiler
-trips it today, and whether it is still reachable. Shows at a glance
-what the C++17 floor could retire.
+trips it today, and whether it is still reachable. It shows what the
+C++17 floor could retire.
 
 ** TODO An ABI and versioning note
 
 What the shared library exports, how the version macros and the
-=_RWSTD_VER= checks work, what changing the string body would break.
-The 4.1.x compatibility clause that keeps the per-string mutex is a
+=_RWSTD_VER= checks work, what a change to the string body would
+break. The 4.1.x clause that keeps the per-string mutex is a
 binary-compatibility decision with no document behind it.
 
 ** TODO A test-suite guide
 
 How the driver's =rw_assert= and =rw_test= work, the =TEST= table
 idiom and its =bthrow= column, how the harness classifies rows, how
-to write a regression against a table test. Fragments exist in
+to write a regression against a table test. Fragments are in
 =doc/notes/ref-test-baseline.md=.
 
 ** TODO A threading model note
 
-Written: =doc/notes/ref-threading.md=, current as of
-2026-09-27; the entry leaves after a reading.
+Written: =doc/notes/ref-threading.md=, current as of 2026-09-27. The
+entry leaves after a reading.
 
 What the library promises under =_RWSTD_REENTRANT=, what the string's
-reference counting does and does not protect, the facet caching the
-ThreadSanitizer run named. The front matter for the MT entry.
+reference counting protects and what it does not, the facet caches
+ThreadSanitizer named. The front matter for the MT entry.
 
 ** TODO A tour of the streams
 
