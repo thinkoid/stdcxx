@@ -283,6 +283,10 @@ void do_test (bool        intl,    // international?
         return;
     }
 
+    // holds the pattern set_pattern() returns: fmat points into it
+    // to the end of the function
+    std::money_base::pattern user_pat;
+
     if (!fmat) {
         // if fmat isn't set, use the default pattern
         static const std::money_base::pattern pat = { {
@@ -292,8 +296,10 @@ void do_test (bool        intl,    // international?
 
         fmat = pat.field;
     }
-    else
-        fmat = set_pattern (fmat).field;
+    else {
+        user_pat = set_pattern (fmat);
+        fmat     = user_pat.field;
+    }
 
     // local format? (the opposite of interantional)
     const bool locl = !intl;

@@ -146,13 +146,15 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
             }
         }
 
-        if (1 == __nmatch && __pos + 1 == __sizes [__inx])
+        if (1 == __nmatch && __badval != __inx && __pos + 1 == __sizes [__inx])
             return ++__it;
     }
 
 __endloop:
 
-    if (__matchmax < __nmatch || __pos < __sizes [__inx])
+    // no match leaves `inx' at `badval', which is no index into `sizes'
+    if (   __matchmax < __nmatch
+        || (__badval != __inx && __pos < __sizes [__inx]))
         __inx = __badval;
 
     if (__ctp && __badval == __inx && !__err && __num != __badval) {

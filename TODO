@@ -10,32 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO Two overruns under AddressSanitizer in =22.locale.money.get=
-
-An AddressSanitizer build of the test reports two defects, one from
-the 2005 import, one from 2007. Neither shows in the tables, whose
-six configurations are debug builds.
-
-- =__rw_match_name= (=include/loc/_punct.cc:155=), after its loop,
-  reads =__sizes [__inx]= to decide whether the match is complete.
-  When no name matched, =__inx= is =__badval=, =SIZE_MAX=, and the
-  read lands one element before the array. Either outcome leaves
-  =__inx= at =__badval=, so only the read is wrong. The rows with a
-  multicharacter sign reach it through =money_get=, under both
-  character types. =num_get= and =time_get= call the same function.
-- =do_test= points =fmat= into the temporary that =set_pattern=
-  returns (=tests/localization/22.locale.money.get.cpp:296=) and
-  reads it on the lines after. At =-O2= the storage is reused: an
-  optimized build (8S) fails 464 of the row's assertions on garbage
-  patterns.
-
-Fix: test =__inx= against =__badval= before the read. In the test,
-hold the pattern in a local.
-
-Check: the AddressSanitizer build of the test reports nothing. The
-=22.locale.money.get=, =22.locale.num.get= and =22.locale.time.get=
-rows are unchanged. The =22.locale.money.get= row passes in 8S.
-
 * TODO A 32-bit size wrap in the growth of =money_get='s buffers
 
 When =money_get::_C_get= (=include/loc/_money_get.cc=) moves its
