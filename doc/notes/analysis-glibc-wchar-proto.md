@@ -37,8 +37,8 @@ in the dormant arms on the way. It assumes
   2013 opened the string guards to every C++ compiler. 2014 closed
   them again for want of asm labels. 2019 reopened `<string.h>` for
   Clang 3.5 and later. Each change touched the string headers only.
-  The record shows an omission, not a decision. Nothing is pending
-  upstream for `<wchar.h>`.
+  The record shows an omission, not a decision. glibc bug 34692
+  reports it, and a patch is on libc-alpha (2026-09-29).
 - **libc++ opts in from outside.** Its `<wchar.h>` defines
   `__CORRECT_ISO_CPP_WCHAR_H_PROTO` before it includes glibc's.
   libstdc++ adds the non-const overload only, a half repair.
@@ -253,7 +253,9 @@ not pass. A browser can.
 
 ## 6. What is pending upstream
 
-Nothing for `<wchar.h>`. glibc mainline at cbf59b8366 (2026-09-28)
+glibc bug 34692, filed 2026-09-29, reports the `<wchar.h>` guard. A
+patch sent to libc-alpha the same day gives `<wchar.h>` the
+`<string.h>` condition. glibc mainline at cbf59b8366 (2026-09-28)
 has the 2009 guard.
 
 The nearest work is an open series on libc-alpha from November 2025.
@@ -533,12 +535,17 @@ can carry both.
 The venue is libc-alpha. A reply to the open series of chapter 6, as
 the `<wchar.h>` twin of patch 16/35, may be the shortest route.
 
-Whether to file is open. The library's repair does not depend on it.
+Filed 2026-09-29 as bug 34692. The patch went to libc-alpha on its
+own, not as a reply to the series. It changes `<wchar.h>` only;
+`<strings.h>` is not reported. The library's repair does not depend
+on either.
 
 ## References
 
 - glibc commits d8387c7b7b, 3f637079f5, 8e2e833ac4, 953ceff17a,
   cab4d74b01; glibc mainline at cbf59b8366.
+- glibc bug 34692:
+  <https://sourceware.org/bugzilla/show_bug.cgi?id=34692>
 - The 2009 libstdc++ half:
   <https://gcc.gnu.org/legacy-ml/gcc-patches/2009-01/msg01457.html>
 - The open series, patches 16/35 and 17/35:
