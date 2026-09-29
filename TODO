@@ -24,21 +24,31 @@ rows that pass it. =val= and =bthrow= stay =int=, with their own =-1=.
 
 Check: every string and container test keeps its assertion count.
 
-* TODO =money_get='s value buffer has no bound
+* TODO Two overruns under AddressSanitizer in =22.locale.money.get=
 
-=money_get::_C_get= (=include/loc/_money_get.cc=) writes the digits
-of the value, and the zeros =frac_digits= pads them with, into a
-304-byte array on the stack. Nothing checks the bound. A longer value
-overruns the frame: 20000 digits read through =istreambuf_iterator=
-die of SIGSEGV in 11S.
+An AddressSanitizer build of the test reports two defects, one from
+the 2005 import, one from 2007. Neither shows in the tables, whose
+six configurations are debug builds.
 
-Fix: the shape =num_get= has. The array moves to a heap block of
-twice the size when full, and the exit test sits in a guard. The
-group-size array beside it grows with it.
+- =__rw_match_name= (=include/loc/_punct.cc:155=), after its loop,
+  reads =__sizes [__inx]= to decide whether the match is complete.
+  When no name matched, =__inx= is =__badval=, =SIZE_MAX=, and the
+  read lands one element before the array. Either outcome leaves
+  =__inx= at =__badval=, so only the read is wrong. The rows with a
+  multicharacter sign reach it through =money_get=, under both
+  character types. =num_get= and =time_get= call the same function.
+- =do_test= points =fmat= into the temporary that =set_pattern=
+  returns (=tests/localization/22.locale.money.get.cpp:296=) and
+  reads it on the lines after. At =-O2= the storage is reused: an
+  optimized build (8S) fails 464 of the row's assertions on garbage
+  patterns.
 
-Check: a value of ten thousand digits reads to the end with =eofbit=
-alone and the expected magnitude. The =22.locale.money.get= row is
-unchanged.
+Fix: test =__inx= against =__badval= before the read. In the test,
+hold the pattern in a local.
+
+Check: the AddressSanitizer build of the test reports nothing. The
+=22.locale.money.get=, =22.locale.num.get= and =22.locale.time.get=
+rows are unchanged. The =22.locale.money.get= row passes in 8S.
 
 * TODO The wide half of UserCtype
 

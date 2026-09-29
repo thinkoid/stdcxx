@@ -972,6 +972,14 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     TEST (T, -LDBL (1234567890.0),
           "$-12;34;56;78;90", 16, 0, eofbit, 0, 0, "$", "\2");
 
+    // input that outgrows the buffers on the facet's stack: digits,
+    // empty groups, and zeros that pad the fraction to frac_digits
+    TEST (T, 5.0,          "0@9998.5", 10000, 0, eofbit, 1);
+    TEST (T, 1.0,          "1;@4000",   4001, 0, eofbit | failbit,
+          0, 0, "", "\1");
+    TEST (T, LDBL (1e305), "1",            1, 0, eofbit, 305);
+    TEST (T, 0.0,          "0",            1, 0, eofbit, 4000);
+
 #undef T
 
 }

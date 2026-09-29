@@ -658,11 +658,23 @@ whitespace, so outside the two cases the credit is never spent. The
 row is 3888/0 everywhere. The 8 extra assertions are the string
 overload's value check, reached for the two cases now.
 
-Found on the way. `money_get`'s own 304-byte value buffer has no
-bound check; a 20000-digit value dies of SIGSEGV. It is queued in
-`TODO`. The driver's `rw_ldblcmp` returned a sign, so the
+Found on the way. The driver's `rw_ldblcmp` returned a sign, so the
 `long double` value assertions could not fail; it is repaired in
-chapter 3.10.
+chapter 3.10. `money_get` kept the digits of the value in a 304-byte
+stack array and the sizes of their groups in a second one. Nothing
+checked either bound. Three inputs overran them: a long value, a long
+run of thousands separators, and a large `frac_digits`. Each
+separator records a group, empty or not, and the zeros that pad the
+value to `frac_digits` are written after the loop that reads it. A
+20000-digit value died of SIGSEGV.
+
+Fix, applied. The arrays move to one heap block when either runs
+short, as in `num_get`. The block leaves room for the padding. Four
+rows pin the three inputs: a value of 10000 characters, 4000
+separators, and `frac_digits` of 305 and 4000. Against the old facet
+three of them abort with stack smashing detected. The 305 row
+overruns by four bytes, which only AddressSanitizer sees. The row is
+3952/0 everywhere.
 
 `22.locale.moneypunct`, measured 2026-09-17. The row, previously 316
 passing assertions, aborted in all six configurations with stack

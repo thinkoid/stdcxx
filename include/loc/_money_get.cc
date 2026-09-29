@@ -42,6 +42,31 @@ _RWSTD_EXPORT int
 __rw_check_grouping (const char*, _RWSTD_SIZE_T,
                      const char*, _RWSTD_SIZE_T);
 
+
+// the exit test of money_get::_C_get()'s buffers, the array on its
+// stack and the pointer that moves to the heap when the input
+// outgrows it: the heap block is freed when the pointer no longer
+// points at the array, on every exit from the function, an exception
+// from a facet included
+struct __rw_money_get_buffer
+{
+    const char *_C_buf;    // the array on the stack
+    char*      &_C_pbuf;   // the pointer to the buffer in use
+
+    __rw_money_get_buffer (const char *__buf, char *&__pbuf)
+        : _C_buf (__buf), _C_pbuf (__pbuf) { }
+
+    ~__rw_money_get_buffer () {
+        if (_C_buf != _C_pbuf)
+            delete[] _C_pbuf;
+    }
+
+private:
+
+    __rw_money_get_buffer (const __rw_money_get_buffer&);
+    void operator= (const __rw_money_get_buffer&);
+};
+
 }   // namespace __rw
 
 
@@ -91,14 +116,19 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
         _RWSTD_USE_FACET (ctype<_CharT>, __flags.getloc ());
 
     char __buf [304];
-    char *__pcur = __buf;
+    char *__pbuf            = __buf;          // pointer to allocated buffer
+    char *__pcur            = __buf;          // currently processed digit
+    _RWSTD_SIZE_T __bufsize = sizeof __buf;   // size of allocated buffer
+
+    _RW::__rw_money_get_buffer __guard (__buf, __pbuf);   // frees __pbuf
 
     typedef _TYPENAME string_type::traits_type _Traits;
 
-    char __grpbuf [sizeof __buf];    // holds sizes of discovered groups
-    char       *__pgrp = __grpbuf;   // current group
-    const char *__grpstart = 0;      // the start of the last group
-    const char *__grpend   = 0;      // the end of the last group
+    char __grpbuf [sizeof __buf];       // holds sizes of discovered groups
+    char       *__pgrpbuf = __grpbuf;   // pointer to allocated group buffer
+    char       *__pgrp    = __grpbuf;   // current group
+    const char *__grpstart = 0;         // the start of the last group
+    const char *__grpend   = 0;         // the end of the last group
 
 
     int __sign = 0;    // the sign of the result if detected (-1, 0, or +1)
@@ -232,7 +262,48 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
 
             int __fd = __pun.frac_digits ();
 
-            for (; __it != __end; ++__it) {
+            for (; ; ++__it) {
+
+                // the digit buffer needs room for the next digit, the
+                // zeros that pad the fraction to frac_digits and the
+                // NUL; the group buffer for the next group, the last
+                // one and the NUL; a group may be empty, so the two
+                // fill at their own pace; when either runs short, both
+                // move to one block on the heap, digits first and group
+                // sizes after, and the pointers into them move along
+                const _SizeT __npad = 0 < __fd ? _SizeT (__fd) : 0;
+
+                if (   _SizeT (__pbuf + __bufsize - __pcur) < __npad + 2
+                    || __pgrpbuf + __bufsize - __pgrp < 3) {
+
+                    const _SizeT __newsize = (__bufsize + __npad) * 2;
+
+                    char* const __newbuf = new char [__newsize * 2];
+
+                    char_traits<char>::copy (__newbuf, __pbuf,
+                                             __pcur - __pbuf);
+                    char_traits<char>::copy (__newbuf + __newsize, __pgrpbuf,
+                                             __pgrp - __pgrpbuf);
+
+                    __pcur = __newbuf + (__pcur - __pbuf);
+                    __pgrp = __newbuf + __newsize + (__pgrp - __pgrpbuf);
+
+                    if (__grpstart)
+                        __grpstart = __newbuf + (__grpstart - __pbuf);
+
+                    if (__grpend)
+                        __grpend = __newbuf + (__grpend - __pbuf);
+
+                    if (__buf != __pbuf)
+                        delete[] __pbuf;
+
+                    __pbuf    = __newbuf;
+                    __pgrpbuf = __newbuf + __newsize;
+                    __bufsize = __newsize;
+                }
+
+                if (__it == __end)
+                    break;
 
                 // read and narrow a character (note that narrow() may
                 // yield the same narrow char for more than one wide
@@ -258,7 +329,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                         __len = __pcur - __grpstart;
                     else {
                         __grpstart = __pcur;
-                        __len      = __pcur - __buf - 1;
+                        __len      = __pcur - __pbuf - 1;
                     }
 
                     typedef unsigned char _UChar;
@@ -270,7 +341,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                     break;
             }
 
-            if (__pcur - __buf > 1) {
+            if (__pcur - __pbuf > 1) {
                 // append zeros to a non-empty string of digits
                 // up to the number of frac_digits
                 while (__fd-- > 0)
@@ -290,7 +361,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
 
     if (!(__ebits & _RW::__rw_failbit)) {
 
-        if (__buf [1]) {
+        if (__pbuf [1]) {
 
             // process the remainder of a multicharacter sign
             _SizeT __sizes [] = {
@@ -337,7 +408,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                     // does not form the complete (positive or negative)
                     // sign
                     __ebits = _RW::__rw_failbit;
-                    __buf [1]  = '\0';
+                    __pbuf [1] = '\0';
                 }
                 else if (!_Traits::eq (*__ps.data (), *__ns.data ())) {
 
@@ -351,17 +422,17 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
 
                     // if both signs begin with the same character,
                     // the result is positive (22.2.6.1.2, p3)
-                    *__buf = __inx ? '-' : '+';
+                    *__pbuf = __inx ? '-' : '+';
                     __sign = -int (__inx);
                 }
             }
             else if (__sign < 0) {
-                *__buf = '-';
+                *__pbuf = '-';
             }
 
             if (__pstr && !(__ebits & _RW::__rw_failbit)) {
                 // skip over the leading sign and any redundant zeros after it
-                const char *__start = __buf + 1;
+                const char *__start = __pbuf + 1;
                 for (; '0' == *__start && '0' == __start [1]; ++__start);
 
                 // invert the sign if negative
@@ -401,13 +472,14 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                 // and (optionally) check grouping
 
                 const int __errtmp =
-                    _RW::__rw_get_num (__pval, __buf, _C_ldouble, 0,
-                                       __grpbuf, __pgrp - __grpbuf,
+                    _RW::__rw_get_num (__pval, __pbuf, _C_ldouble, 0,
+                                       __pgrpbuf, __pgrp - __pgrpbuf,
                                        __grs, __grn);
 
                 __ebits |= _RWSTD_IOSTATE (__errtmp);
             }
-            else if (0 > _RW::__rw_check_grouping (__grpbuf, __pgrp - __grpbuf,
+            else if (0 > _RW::__rw_check_grouping (__pgrpbuf,
+                                                   __pgrp - __pgrpbuf,
                                                    __grs, __grn))
                 __ebits |= _RW::__rw_failbit;
         }
