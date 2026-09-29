@@ -10,33 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO =make <test>= ignores the test's dependencies
-
-Every object in a build directory has a dependency file,
-=.depend/<name>.d=, that lists the headers it includes. With no goal,
-=makefile.rules= includes all of them. With goals it includes only
-theirs, an optimization from 2005 (=f4574b75=). It names the file
-=$(basename goal).d=. =basename= strips the last suffix: for =foo.o=
-that leaves =foo=, as intended. A test's name has dots of its own:
-=22.locale.money.get= gives =22.locale.money.d=, which does not exist,
-and =-include= skips it without a word. =make 22.locale.money.get=
-then sees only the source, the object and the executable. A changed
-library header does not rebuild the test, and the stale binary runs
-the old code.
-
-=make= with no goal is correct: after a change to =_money_get.cc= it
-rebuilds the three =money_get= tests. A goal of
-=22.locale.money.get.o= is correct too. =make run= builds nothing; it
-runs the binaries that are there.
-
-Fix: name the dependency file from the whole goal as well as from its
-basename, both under =-include=. The missing one costs nothing.
-
-Check: =make -n -W include/loc/_money_get.cc 22.locale.money.get= in a
-build's =tests= plans to rebuild the object; before the fix it reports
-the test up to date. Goals of a test object, a library object and an
-example plan what they planned before.
-
 * TODO A 32-bit size wrap in the growth of =num_get='s buffers
 
 A hypothesis. =num_get::_C_get= (=include/loc/_num_get.cc=) grows its

@@ -193,9 +193,11 @@ ifeq ($(findstring clean,$(MAKECMDGOALS)),)
     DEPS += $(patsubst %$(AS_EXT),$(DEPENDDIR)/%.d,$(filter %$(AS_EXT),$(SRCS)))
   else
     # as a (potentially significant) optimization, include
-    # only the dependencies for the explicitly specified goals
-    DEPS += $(addprefix $(DEPENDDIR)/,$(basename $(MAKECMDGOALS)))
-    DEPS += $(addsuffix .d,$(DEPS))
+    # only the dependencies for the explicitly specified goals;
+    # the basename names those of an object (foo.o), the goal
+    # itself those of a program with dots in its name (foo.bar)
+    DEPS += $(patsubst %,$(DEPENDDIR)/%.d,$(sort $(MAKECMDGOALS) \
+                                                 $(basename $(MAKECMDGOALS))))
   endif
 
   # (try to) include the dependency file(s), failing gracefully
