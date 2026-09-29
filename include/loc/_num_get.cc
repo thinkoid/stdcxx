@@ -283,7 +283,13 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
             // twice their size, the digits first and the group sizes
             // after them, and carry the pointers into them over; the
             // group buffer grows with the digit buffer since a group
-            // takes at least one digit
+            // takes at least one digit; the block is __bufsize * 4
+            // bytes, and a size that size_t cannot hold wraps to a
+            // short block the copies overrun, so fail as new fails
+            // for a block too large
+            if (_RWSTD_SIZE_MAX / 4 < __bufsize)
+                _RW::__rw_throw (_RWSTD_ERROR_FIRST + 3 /* == bad_alloc */);
+
             const _RWSTD_SIZE_T __newsize = __bufsize * 2;
 
             char* const __newbuf = new char [__newsize * 2];

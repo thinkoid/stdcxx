@@ -10,27 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO A 32-bit size wrap in the growth of =num_get='s buffers
-
-A hypothesis. =num_get::_C_get= (=include/loc/_num_get.cc=) grows its
-buffers the way =money_get= did: one heap block of =bufsize * 4=
-bytes, digits in the first half and group sizes in the second.
-=bufsize= starts at 130 and doubles, and nothing checks the product.
-With a 32-bit =size_t= the 24th growth wraps. =bufsize= is then
-1090519040 and the live block holds 2.18 GB; the request of
-4362076160 bytes comes out as 64 MiB, and the copy of the digits
-overruns it. Input alone reaches it, with about 10^9 digits. A 32-bit
-process may hold a block of that size under a 64-bit kernel. Not
-tried. =money_get= has the guard since =edca50a1=.
-
-Fix: the same guard before the =new=: when =bufsize > SIZE_MAX / 4=,
-throw =bad_alloc= through =__rw_throw=.
-
-Check: settle reachability first. An i386 build on x86_64 feeds about
-1.1 * 10^9 digits to =num_get=. If the block is reached, the same
-input gets =bad_alloc= after the fix. If no 32-bit process can hold
-it, the entry leaves with that finding.
-
 * TODO The wide half of UserCtype
 
 =tests/src/ctype.cpp= implements =UserCtype<wchar_t>= and
