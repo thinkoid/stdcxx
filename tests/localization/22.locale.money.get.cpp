@@ -30,6 +30,7 @@
 #include <locale>
 
 #include <cstdio>     // for sscanf()
+#include <new>        // for bad_alloc
 
 #include <rw_cmdopt.h>   // for rw_enabled()
 #include <rw_driver.h>   // for rw_assert(), rw_test(), ...
@@ -449,6 +450,95 @@ void do_test (bool        intl,    // international?
 
     delete[] PunctData<charT>::curr_symbol_ [intl];
     delete[] next;
+}
+
+/**************************************************************************/
+
+// with a 32-bit size_t, a frac_digits of 2^30 wraps the size of the
+// block the facet's buffers move to: expect bad_alloc, not an overrun
+// of the short block the facet would get
+template <class charT>
+void do_test_size_wrap (bool        intl,    // international?
+                        charT       which,   // which overload to exercise
+                        const char *cname,   // the name of the charT type
+                        const char *tname,   // the name of the value type
+                        int         lineno)  // line number
+{
+    if (!rw_enabled (lineno)) {
+        rw_note (0, __FILE__, __LINE__, "test on line %d disabled", lineno);
+        return;
+    }
+
+    // with a wider size_t nothing wraps: the facet would ask for
+    // 8 GiB and pad the fraction with 2^30 zeros
+    if (4 < sizeof (std::size_t)) {
+        rw_note (0, __FILE__, lineno,
+                 "size_t is wider than 32 bits, nothing wraps");
+        return;
+    }
+
+#ifndef _RWSTD_NO_EXCEPTIONS
+
+    const int frac_digits = 1 << 30;
+
+    PunctData<charT>::format_ [intl][0]     = std::money_base::pattern ();
+    PunctData<charT>::format_ [intl][1]     = set_pattern ("$-@1");
+    PunctData<charT>::curr_symbol_ [intl]   = 0;
+    PunctData<charT>::positive_sign_ [intl] = 0;
+    PunctData<charT>::negative_sign_ [intl] = 0;
+    PunctData<charT>::grouping_ [intl]      = "";
+    PunctData<charT>::frac_digits_ [intl]   = frac_digits;
+
+    Ios<charT> io;
+    MoneyGet<charT> mg;
+
+    if (intl)
+        io.imbue (std::locale (io.getloc (), new Punct<charT, true>(0)));
+    else
+        io.imbue (std::locale (io.getloc (), new Punct<charT, false>(0)));
+
+    // one digit is enough for the padding to overrun a short block
+    const charT digit [] = { '1', '\0' };
+
+    std::ios_base::iostate err = std::ios_base::goodbit;
+
+    const char* const expected = "bad_alloc";
+    const char*       caught   = "nothing";
+
+    try {
+        if (0 == which) {
+            LongDouble x = 0;
+            mg.get (digit, digit + 1, intl, io, err, x);
+        }
+        else {
+            typename std::money_get<charT, const charT*>::string_type bs;
+            mg.get (digit, digit + 1, intl, io, err, bs);
+        }
+    }
+    catch (const std::bad_alloc&) {
+        caught = expected;
+    }
+    catch (...) {
+        caught = "another exception";
+    }
+
+    rw_assert (expected == caught, __FILE__, lineno,
+               "money_get<%s>::get (%{*Ac}, ..., %b, ..., %s&), "
+               "frac_digits = %d, threw %s, expected %s",
+               cname, int (sizeof *digit), digit, intl, tname,
+               frac_digits, caught, expected);
+
+#else   // if defined (_RWSTD_NO_EXCEPTIONS)
+
+    rw_note (0, __FILE__, lineno, "exceptions disabled");
+
+    _RWSTD_UNUSED (intl);
+    _RWSTD_UNUSED (which);
+    _RWSTD_UNUSED (cname);
+    _RWSTD_UNUSED (tname);
+
+#endif   // _RWSTD_NO_EXCEPTIONS
+
 }
 
 /**************************************************************************/
@@ -985,6 +1075,9 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
           0, 0, "", "\1");
     TEST (T, LDBL (1e305), "1",            1, 0, eofbit, 305);
     TEST (T, 0.0,          "0",            1, 0, eofbit, 4000);
+
+    // a frac_digits that wraps the size of the buffers
+    do_test_size_wrap (T);
 
 #undef T
 

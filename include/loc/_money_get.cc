@@ -276,6 +276,16 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                 if (   _SizeT (__pbuf + __bufsize - __pcur) < __npad + 2
                     || __pgrpbuf + __bufsize - __pgrp < 3) {
 
+                    // the block is (__bufsize + __npad) * 4 bytes; a
+                    // size that size_t cannot hold wraps to a short
+                    // block the writes overrun, so fail as new fails for
+                    // a block too large; __bufsize alone may exceed
+                    // SIZE_MAX / 4, and the subtraction would wrap too
+                    if (   _RWSTD_SIZE_MAX / 4 < __bufsize
+                        || _RWSTD_SIZE_MAX / 4 - __bufsize < __npad)
+                        _RW::__rw_throw (_RWSTD_ERROR_FIRST + 3
+                                         /* == bad_alloc */);
+
                     const _SizeT __newsize = (__bufsize + __npad) * 2;
 
                     char* const __newbuf = new char [__newsize * 2];
