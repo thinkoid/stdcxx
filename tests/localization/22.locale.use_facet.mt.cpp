@@ -73,7 +73,7 @@ race_func (void*)
 
     // spin until all threads have been created so that they find
     // the slot empty at the same time
-    while (nstarted < opt_nthreads);
+    while (_RWSTD_ATOMIC_LOAD_RELAXED (nstarted) < opt_nthreads);
 
     (void)std::use_facet<CodeCvt>(*race_locale);
 

@@ -105,7 +105,7 @@ race_func (void *arg)
 
     // spin until all threads have been created so that they find
     // the facet data missing at the same time
-    while (nstarted < opt_nthreads);
+    while (_RWSTD_ATOMIC_LOAD_RELAXED (nstarted) < opt_nthreads);
 
     MyStreambuf& sb = thread_data [inx].sb;
     sb.pubsetp (thread_data [inx].buf, sizeof thread_data [inx].buf);

@@ -31,7 +31,7 @@
 #include <locale>     // for locale, codecvt
 
 #include <clocale>    // for setlocale(), LC_CTYPE
-#include <cstring>    // for strcpy(), strlen()
+#include <cstring>    // for memset(), strcpy(), strlen(), strncpy()
 #include <cwchar>     // for codecvt
 
 #include <rw_locale.h>
@@ -354,16 +354,27 @@ thread_func (void*)
 // the locale whose wide codecvt facet the threads use for the first time
 static const std::locale* first_use_locale;
 
+// what each thread saw in the current round, in a slot of its own;
+// the driver's diagnostics are not thread-safe, so the main thread
+// reads the slots after the join and asserts
+static struct FirstUseData {
+    int     threw;       // 1 for a std::exception, 2 for anything else
+    int     res;         // the result of in ()
+    wchar_t dst [4];     // the characters in () produced
+    char    what [512];  // the exception's what ()
+} first_use_data [MAX_THREADS];
+
 // converts through the facet of `first_use_locale', which no thread
 // has converted through yet; the first use maps the facet's database
 // (doc/notes/analysis-facet-first-use.md, chapter 2)
 static void*
-first_use_func (void*)
+first_use_func (void* arg)
 {
     typedef std::codecvt<wchar_t, char, std::mbstate_t> CodeCvt;
 
+    FirstUseData& data = first_use_data [long (arg)];
+
     const char     src [] = "abc";
-    wchar_t        dst [4] = { 0 };
     const char*    from_next = 0;
     wchar_t*       to_next   = 0;
     std::mbstate_t state = std::mbstate_t ();
@@ -371,27 +382,15 @@ first_use_func (void*)
     try {
         const CodeCvt& cvt = std::use_facet<CodeCvt>(*first_use_locale);
 
-        const std::codecvt_base::result res =
-            cvt.in (state, src, src + 3, from_next, dst, dst + 3, to_next);
-
-        rw_assert (std::codecvt_base::ok == res, 0, __LINE__,
-                   "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
-                   "== ok, got %d, on first use", int (res));
-
-        rw_assert (   L'a' == dst [0] && L'b' == dst [1]
-                   && L'c' == dst [2], 0, __LINE__,
-                   "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
-                   "== L\"abc\", got %{#*ls}, on first use", 3, dst);
+        data.res = cvt.in (state, src, src + 3, from_next,
+                           data.dst, data.dst + 3, to_next);
     }
     catch (const std::exception& ex) {
-        rw_assert (false, 0, __LINE__,
-                   "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
-                   "threw on first use: %s", ex.what ());
+        data.threw = 1;
+        std::strncpy (data.what, ex.what (), sizeof data.what - 1);
     }
     catch (...) {
-        rw_assert (false, 0, __LINE__,
-                   "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
-                   "threw an unknown exception on first use");
+        data.threw = 2;
     }
 
     return 0;
@@ -455,14 +454,49 @@ test_first_use ()
         (void)std::use_facet<CodeCvt>(loc);
 
         first_use_locale = &loc;
+        std::memset (first_use_data, 0, sizeof first_use_data);
+
+        void* args [MAX_THREADS];
+        for (int j = 0; j != opt_nthreads; ++j)
+            args [j] = (void*)long (j);
 
         result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                                 first_use_func, 0,
+                                 first_use_func, args,
                                  std::size_t (opt_timeout));
 
         rw_error (result == 0, 0, __LINE__,
-                  "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
+                  "rw_thread_pool(0, %d, 0, %{#f}, ...) failed",
                   opt_nthreads, first_use_func);
+
+        for (int j = 0; 0 == result && j != opt_nthreads; ++j) {
+
+            const FirstUseData& data = first_use_data [j];
+
+            if (1 == data.threw) {
+                rw_assert (false, 0, __LINE__,
+                           "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
+                           "threw on first use in round %d, thread %d: %s",
+                           i, j, data.what);
+            }
+            else if (2 == data.threw) {
+                rw_assert (false, 0, __LINE__,
+                           "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
+                           "threw an unknown exception on first use "
+                           "in round %d, thread %d", i, j);
+            }
+            else {
+                rw_assert (std::codecvt_base::ok == data.res, 0, __LINE__,
+                           "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
+                           "== ok, got %d, on first use in round %d, "
+                           "thread %d", data.res, i, j);
+
+                rw_assert (   L'a' == data.dst [0] && L'b' == data.dst [1]
+                           && L'c' == data.dst [2], 0, __LINE__,
+                           "codecvt<wchar_t, char, mbstate_t>::in (\"abc\") "
+                           "== L\"abc\", got %{#*ls}, on first use "
+                           "in round %d, thread %d", 3, data.dst, i, j);
+            }
+        }
 
         first_use_locale = 0;
     }

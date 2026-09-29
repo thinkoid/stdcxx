@@ -218,7 +218,7 @@ cannot answer, but it is no longer needed to see the defect.
 | user-defined facet id | generated once, under a lock | 46aa42c3 | `22.locale.id.mt` |
 | facet reference count | one atomic operation everywhere | dcb5dc92 | `22.locale.facet.mt` |
 
-One round of the locale MT tests under ThreadSanitizer gives six
-reports: four in the test driver, one in a test, and the global
-locale's `ginit` flag. The 15D rows of the older locale MT tests now
-measure the harness only (`ref-test-baseline.md`, chapter 3.4).
+One round of the locale MT tests under ThreadSanitizer gives one
+report, the global locale's `ginit` flag. The 15D rows of the older
+locale MT tests now measure the harness only (`ref-test-baseline.md`,
+chapter 3.4).

@@ -226,9 +226,8 @@ a test where one could fail; `22.locale.use_facet.mt`,
 `22.locale.time.put.libc.mt`, `22.locale.id.mt` and
 `22.locale.facet.mt` are theirs, and pass everywhere.
 ThreadSanitizer reports from a round of the locale MT tests went
-from 979 to 6: four in the test driver, one in a test, and the
-global locale's `ginit` flag, which the `TODO` entry on atomic
-integer flags covers.
+from 979 to 1, the global locale's `ginit` flag, which the `TODO`
+entry on atomic integer flags covers.
 `analysis-locale-mt-race.md` and the MT entry of `TODO` have the
 detail.
 

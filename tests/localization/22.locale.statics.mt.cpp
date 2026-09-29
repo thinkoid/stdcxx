@@ -80,7 +80,7 @@ test_classic (void*)
     // the odds that at least two of them will hit the tested function
     // (and the lazy one-time initialization done by it) at the same
     // time
-    while (nthreads < opt_nthreads);
+    while (_RWSTD_ATOMIC_LOAD_RELAXED (nthreads) < opt_nthreads);
 
     const std::locale classic (std::locale::classic ());
 

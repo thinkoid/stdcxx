@@ -43,9 +43,8 @@ Check: none; this is prose.
 
 The locale races are fixed; =doc/notes/analysis-locale-mt-race.md=
 chapter 7 lists the fixes and their tests. ThreadSanitizer reports
-six on a round of the locale MT tests: four in the test driver, one
-in a test, and the global locale's =ginit= flag, which the sweep
-entry below covers.
+one on a round of the locale MT tests: the global locale's =ginit=
+flag, which the sweep entry below covers.
 
 Open:
 - The string reference count. 15D keeps one mutex per string body
@@ -128,9 +127,14 @@ increment. They publish completion with a plain write to a =volatile=
 flag the other threads spin on. =volatile= orders neither the flag
 against the data it guards nor the spin against the reads after it.
 Known sites:
-- =src/locale_body.cpp:815=, the global locale. =ginit += 1000= comes
-  after =_C_manage=; readers wait on =ginit < 1000= and read =global=
-  with no acquire, and =global= is tested unlocked before the flag.
+- =src/locale_body.cpp:807-830=, the global locale. The builder
+  stores =global= at 817 with no release, then =ginit += 1000= as a
+  plain read-modify-write. Readers wait on =ginit < 1000= with no
+  acquire and read =global= at 830; on aarch64 they can read 0.
+  =global= is also tested unlocked at 807, against the store under
+  the lock at 841: the one ThreadSanitizer report. The election
+  exists because =_C_manage (0, "C")= takes the same static guard,
+  and the mutex is not recursive.
 - =include/rw/_mutex.h:286=, the static mutex, with a non-atomic
   fallback where atomics are absent.
 - =src/once.cpp:125= and =src/iostream.cpp:247=.
