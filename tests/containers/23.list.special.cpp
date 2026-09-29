@@ -50,7 +50,7 @@ cont_cont_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg)                                \
-    { __LINE__, -1, -1, -1, -1, -1,                   \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1,           \
     str, sizeof str - 1, arg, sizeof arg - 1,         \
     0, 0, 0                                           \
     }

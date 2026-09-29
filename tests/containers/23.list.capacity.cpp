@@ -55,10 +55,10 @@ static const ContainerTestCase
 size_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str, res) {                    \
-        __LINE__, -1, -1, -1, -1, -1,       \
-        str, sizeof str - 1, 0, 0,          \
-        0, res, -1                          \
+#define TEST(str, res) {                      \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        0, res, -1                            \
     }
 
     //    +--------------------------------------- controlled sequence
@@ -109,10 +109,10 @@ static const ContainerTestCase
 max_size_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str) {                         \
-        __LINE__, -1, -1, -1, -1, -1,       \
-        str, sizeof str - 1, 0, 0,          \
-        0, 0, -1                            \
+#define TEST(str) {                           \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        0, 0, -1                              \
     }
 
     //    +------------------------------ controlled sequence
@@ -146,7 +146,7 @@ resize_size_val_test_cases [] = {
 
 #undef TEST
 #define TEST(str, size, val, res, bthrow) {    \
-        __LINE__, -1, size, -1, -1, val,       \
+        __LINE__, NPOS, size, NPOS, NPOS, val, \
         str, sizeof str - 1, 0, 0,             \
         res, sizeof res - 1, bthrow            \
     }
@@ -211,10 +211,10 @@ static const ContainerTestCase
 resize_size_test_cases [] = {
 
 #undef TEST
-#define TEST(str, size, res, bthrow) {      \
-        __LINE__, -1, size, -1, -1, -1,     \
-        str, sizeof str - 1, 0, 0,          \
-        res, sizeof res - 1, bthrow         \
+#define TEST(str, size, res, bthrow) {        \
+        __LINE__, NPOS, size, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        res, sizeof res - 1, bthrow           \
     }
 
     //    +------------------------------------------ controlled sequence
@@ -275,10 +275,10 @@ static const ContainerTestCase
 clear_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str) {                         \
-        __LINE__, -1, -1, -1, -1, -1,       \
-        str, sizeof str - 1, 0, 0,          \
-        "", 0, -1                           \
+#define TEST(str) {                           \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        "", 0, -1                             \
     }
 
     //    +------------------------------ controlled sequence
@@ -317,7 +317,7 @@ empty_void_test_cases [] = {
 
 #undef TEST
 #define TEST(str, res) {                 \
-    __LINE__, -1, -1, -1, -1, -1,    \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1,  \
     str, sizeof str - 1, 0, 0,       \
     0, res, -1                       \
 }

@@ -57,7 +57,7 @@ void_test_cases [] = {
 
 #undef TEST
 #define TEST(dummy) {                            \
-        __LINE__, -1, -1, -1, -1, -1,            \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,    \
         0, 0, dummy, sizeof dummy - 1,           \
         "", 0, 0                                 \
     }
@@ -81,7 +81,7 @@ cptr_test_cases [] = {
 
 #undef TEST
 #define TEST(arg, res) {                            \
-        __LINE__, -1, -1, -1, -1, -1,               \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,       \
         0, 0, arg, sizeof arg - 1,                  \
         res, sizeof res - 1, 0                      \
     }
@@ -126,7 +126,7 @@ cstr_test_cases [] = {
 
 #undef TEST
 #define TEST(arg, res) {                            \
-        __LINE__, -1, -1, -1, -1, -1,               \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,       \
         0, 0, arg, sizeof arg - 1,                  \
         res, sizeof res - 1, 0                      \
     }
@@ -174,7 +174,7 @@ cptr_size_test_cases [] = {
 
 #undef TEST
 #define TEST(arg, size, res) {                      \
-        __LINE__, -1, size, -1, -1, -1,             \
+        __LINE__, NPOS, size, NPOS, NPOS, -1,       \
         0, 0, arg, sizeof arg - 1,                  \
         res, sizeof res - 1, 0                      \
     }
@@ -224,7 +224,7 @@ cstr_size_test_cases [] = {
 
 #undef TEST
 #define TEST(arg, off, res, bthrow) {               \
-        __LINE__, off, -1, -1, -1, -1,              \
+        __LINE__, off, NPOS, NPOS, NPOS, -1,        \
         0, 0, arg, sizeof arg - 1,                  \
         res, sizeof res - 1, bthrow                 \
     }
@@ -290,7 +290,7 @@ cstr_size_size_test_cases [] = {
 
 #undef TEST
 #define TEST(arg, off, size, res, bthrow) {         \
-        __LINE__, -1, -1, off, size, -1,            \
+        __LINE__, NPOS, NPOS, off, size, -1,        \
         0, 0, arg, sizeof arg - 1,                  \
         res, sizeof res - 1, bthrow                 \
     }
@@ -347,7 +347,7 @@ size_val_test_cases [] = {
 
 #undef TEST
 #define TEST(size, val, res) {                      \
-        __LINE__, -1, size, -1, -1, val,            \
+        __LINE__, NPOS, size, NPOS, NPOS, val,      \
         0, 0, 0, 0,                                 \
         res, sizeof res - 1, 0                      \
     }
@@ -387,7 +387,7 @@ cptr_op_set_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, res, bthrow) {               \
-        __LINE__, -1, -1, -1, -1, -1,               \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,       \
         str, sizeof str - 1, arg, sizeof arg - 1,   \
         res, sizeof res - 1, bthrow                 \
     }
@@ -452,7 +452,7 @@ cstr_op_set_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, res, bthrow) {               \
-        __LINE__, -1, -1, -1, -1, -1,               \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,       \
         str, sizeof str - 1, arg, sizeof arg - 1,   \
         res, sizeof res - 1, bthrow                 \
     }
@@ -516,10 +516,10 @@ static const StringTestCase
 val_op_set_test_cases [] = {
 
 #undef TEST
-#define TEST(str, val, res) {                 \
-        __LINE__, -1, -1, -1, -1, val,        \
-        str, sizeof str - 1, 0, 0,            \
-        res, sizeof res - 1, 0                \
+#define TEST(str, val, res) {                   \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, val,  \
+        str, sizeof str - 1, 0, 0,              \
+        res, sizeof res - 1, 0                  \
     }
 
     //    +----------------------------------- initial sequence
@@ -629,9 +629,9 @@ void test_cons (charT*, Traits*, Allocator*, const RangeBase<
     /* const */ String arg (tdata.arg_, tdata.arglen_);
 
     // offset and extent function arguments
-    const std::size_t arg_off  = -1 != tcase.off ? 
+    const std::size_t arg_off  = NPOS != tcase.off ?
         std::size_t (tcase.off) : std::size_t (tcase.off2);
-    const std::size_t arg_size = -1 != tcase.size ? 
+    const std::size_t arg_size = NPOS != tcase.size ?
         std::size_t (tcase.size) : std::size_t (tcase.size2);
 
     // string function argument

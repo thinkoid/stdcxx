@@ -48,7 +48,7 @@ begin_void_test_cases [] = {
 
 #undef TEST
 #define TEST(lst, res) {                    \
-    __LINE__, -1, -1, -1, -1, -1,           \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1,   \
     lst, sizeof (lst) - 1,                  \
     0, 0, 0, res, 0                         \
 }
@@ -77,7 +77,7 @@ end_void_test_cases [] = {
 
 #undef TEST
 #define TEST(lst, res) {                    \
-    __LINE__, -1, -1, -1, -1, -1,           \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1,   \
     lst, sizeof (lst) - 1,                  \
     0, 0, 0, res, 0                         \
 }
@@ -105,10 +105,10 @@ static const ContainerTestCase
 get_allocator_void_test_cases [] = {
 
 #undef TEST
-#define TEST(lst) {                   \
-    __LINE__, -1, -1, -1, -1, -1,     \
-    lst, sizeof (lst) - 1,            \
-    0, 0, 0, 0, 0                     \
+#define TEST(lst) {                       \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+    lst, sizeof (lst) - 1,                \
+    0, 0, 0, 0, 0                         \
 }
 
     //    +------------------------------------------ controlled sequence

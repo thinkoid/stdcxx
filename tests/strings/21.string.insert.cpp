@@ -53,9 +53,9 @@ static const StringTestCase
 size_cptr_test_cases [] = {
 
 #undef TEST
-#define TEST(str, off, arg, res, bthrow) {                      \
-        __LINE__, off, -1, -1, -1, -1, str, sizeof str - 1,     \
-        arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
+#define TEST(str, off, arg, res, bthrow) {                        \
+        __LINE__, off, NPOS, NPOS, NPOS, -1, str, sizeof str - 1, \
+        arg, sizeof arg - 1, res, sizeof res - 1, bthrow          \
     }
 
     //    +----------------------------------------- controlled sequence
@@ -133,9 +133,9 @@ static const StringTestCase
 size_cstr_test_cases [] = {
 
 #undef TEST
-#define TEST(str, off, arg, res, bthrow) {                      \
-        __LINE__, off, -1, -1, -1, -1, str, sizeof str - 1,     \
-        arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
+#define TEST(str, off, arg, res, bthrow) {                        \
+        __LINE__, off, NPOS, NPOS, NPOS, -1, str, sizeof str - 1, \
+        arg, sizeof arg - 1, res, sizeof res - 1, bthrow          \
     }
 
     //    +----------------------------------------- controlled sequence
@@ -217,7 +217,7 @@ iter_range_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, arg, off2, size2, res, bthrow) {                 \
-        __LINE__, off, -1, off2, size2, -1, str, sizeof str - 1,        \
+        __LINE__, off, NPOS, off2, size2, -1, str, sizeof str - 1,      \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow                \
     }
 
@@ -318,8 +318,8 @@ static const StringTestCase
 size_cptr_size_test_cases [] = {
 
 #undef TEST
-#define TEST(str, off, arg, size2, res, bthrow) {               \
-        __LINE__, off, -1, -1, size2, -1, str, sizeof str - 1,  \
+#define TEST(str, off, arg, size2, res, bthrow) {                   \
+        __LINE__, off, NPOS, NPOS, size2, -1, str, sizeof str - 1,  \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow }
 
     //    +----------------------------------------- controlled sequence
@@ -413,9 +413,9 @@ iter_size_val_test_cases [] = {
 #define size_size_val_test_cases iter_size_val_test_cases
 
 #undef TEST
-#define TEST(str, off, size2, val, res, bthrow) {               \
-        __LINE__, off, -1, -1, size2, val, str, sizeof str - 1, \
-        0, 0, res, sizeof res - 1, bthrow                       \
+#define TEST(str, off, size2, val, res, bthrow) {                   \
+        __LINE__, off, NPOS, NPOS, size2, val, str, sizeof str - 1, \
+        0, 0, res, sizeof res - 1, bthrow                           \
     }
 
     //    +---------------------------------------- controlled sequence
@@ -493,7 +493,7 @@ iter_val_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, val, res, bthrow)                                \
-    { __LINE__, off, -1, -1, -1, val, str, sizeof str - 1, 0,           \
+    { __LINE__, off, NPOS, NPOS, NPOS, val, str, sizeof str - 1, 0,     \
       0, res, sizeof res - 1, bthrow }
 
     //    +----------------------------------------- controlled sequence

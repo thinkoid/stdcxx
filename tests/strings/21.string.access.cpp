@@ -55,7 +55,7 @@ op_index_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, res) {                    \
-        __LINE__, off, -1, -1, -1, -1,           \
+        __LINE__, off, NPOS, NPOS, NPOS, -1,     \
         str, sizeof str - 1,                     \
         0, 0, 0, res, 0                          \
     }
@@ -100,7 +100,7 @@ op_index_const_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, res) {                    \
-        __LINE__, off, -1, -1, -1, -1,           \
+        __LINE__, off, NPOS, NPOS, NPOS, -1,     \
         str, sizeof str - 1,                     \
         0, 0, 0, res, 0                          \
     }
@@ -155,7 +155,7 @@ at_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, res, bthrow) {           \
-        __LINE__, off, -1, -1, -1, -1,          \
+        __LINE__, off, NPOS, NPOS, NPOS, -1,    \
         str, sizeof str - 1,                    \
         0, 0, 0, res, bthrow                    \
     }

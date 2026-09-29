@@ -162,6 +162,13 @@ struct ContainerIds {
 
 /**************************************************************************/
 
+// npos; also marks a position or count field of a test case
+// that does not apply to the function under test
+static const _RWSTD_SIZE_T
+NPOS = _RWSTD_SIZE_MAX;
+
+/**************************************************************************/
+
 struct ContainerFunc
 {
     ContainerIds::ElemId      elem_id_;
@@ -179,11 +186,11 @@ struct ContainerTestCase
 {
     int            line;      // test case line number
 
-    int            off;       // offset (position argument)
-    int            size;      // size (count argument)
+    _RWSTD_SIZE_T  off;       // offset (position argument)
+    _RWSTD_SIZE_T  size;      // size (count argument)
 
-    int            off2;      // offset 2 (position argument)
-    int            size2;     // size 2 (count argument)
+    _RWSTD_SIZE_T  off2;      // offset 2 (position argument)
+    _RWSTD_SIZE_T  size2;     // size 2 (count argument)
 
     int            val;       // value (single character to append)
 

@@ -59,7 +59,7 @@ iter_iter_cptr_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, size, arg, res, bthrow) {                \
-        __LINE__, off, size, -1, -1, -1,                        \
+        __LINE__, off, size, NPOS, NPOS, -1,                    \
         str, sizeof str - 1,                                    \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
     }
@@ -169,7 +169,7 @@ iter_iter_cstr_test_cases [] = {
 
 #undef TEST
 #define TEST(s, off, size, arg, res, bthrow) {                  \
-        __LINE__, off, size, -1, -1, -1,                        \
+        __LINE__, off, size, NPOS, NPOS, -1,                    \
         s, sizeof s - 1,                                        \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
     }
@@ -283,7 +283,7 @@ iter_iter_cptr_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, size, arg, count, res, bthrow) {         \
-        __LINE__, off, size, -1, count, -1,                     \
+        __LINE__, off, size, NPOS, count, -1,                   \
         str, sizeof str - 1,                                    \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
     }
@@ -385,8 +385,8 @@ iter_iter_cptr_size_test_cases [] = {
     TEST ("x@4096",    0, 4095, 0 /* self */, 4095, "x@4096",          0),
     TEST ("x@4096",    0, 4095, 0 /* self */,    1, "xx",              0),
 
-    TEST ("ab",        0,    1, "abc",          -1, "ab",              3),
-    TEST ("a@16",      0,    1, "abc",          -1, "a@16",            3),
+    TEST ("ab",        0,    1, "abc",        NPOS, "ab",              3),
+    TEST ("a@16",      0,    1, "abc",        NPOS, "a@16",            3),
 
     TEST ("last",      4,    0, "test",          4, "lasttest",        0)
 };
@@ -426,40 +426,40 @@ iter_iter_range_test_cases [] = {
     //    |            |   |  |           |   |  |                   |
     //    V            V   V  V           V   V  V                   V
     TEST ("",          0,  0, "",         0,  0, "",                 0),
-    TEST ("",          0,  0, "",         0, -1, "",                 0),
+    TEST ("",          0,  0, "",         0, NPOS, "",                 0),
     TEST ("",          0,  0, "",         0,  1, "",                 0),
 
     TEST ("",          0,  1, "",         0,  0, "",                 0),
     TEST ("",          0,  1, "",         0,  1, "",                 0),
-    TEST ("",          0,  1, "",         0, -1, "",                 0),
+    TEST ("",          0,  1, "",         0, NPOS, "",                 0),
 
-    TEST ("",          0, -1, "",         0,  0, "",                 0),
-    TEST ("",          0, -1, "",         0,  1, "",                 0),
-    TEST ("",          0, -1, "",         0, -1, "",                 0),
+    TEST ("",          0, NPOS, "",         0,  0, "",                 0),
+    TEST ("",          0, NPOS, "",         0,  1, "",                 0),
+    TEST ("",          0, NPOS, "",         0, NPOS, "",                 0),
 
     TEST ("1",         0,  0, "",         0,  0, "1",                0),
-    TEST ("2",         0,  0, "",         0, -1, "2",                0),
+    TEST ("2",         0,  0, "",         0, NPOS, "2",                0),
     TEST ("3",         0,  0, "",         0,  1, "3",                0),
 
     TEST ("4",         0,  1, "",         0,  0, "",                 0),
     TEST ("5",         0,  1, "",         0,  1, "",                 0),
-    TEST ("6",         0,  1, "",         0, -1, "",                 0),
+    TEST ("6",         0,  1, "",         0, NPOS, "",                 0),
 
-    TEST ("7",         0, -1, "",         0,  0, "",                 0),
-    TEST ("8",         0, -1, "",         0,  1, "",                 0),
-    TEST ("9",         0, -1, "",         0, -1, "",                 0),
+    TEST ("7",         0, NPOS, "",         0,  0, "",                 0),
+    TEST ("8",         0, NPOS, "",         0,  1, "",                 0),
+    TEST ("9",         0, NPOS, "",         0, NPOS, "",                 0),
 
     TEST ("1",         0,  0, "9",        0,  0, "1",                0),
-    TEST ("2",         0,  0, "8",        0, -1, "82",               0),
+    TEST ("2",         0,  0, "8",        0, NPOS, "82",               0),
     TEST ("3",         0,  0, "7",        0,  1, "73",               0),
 
     TEST ("4",         0,  1, "6",        0,  0, "",                 0),
     TEST ("5",         0,  1, "5",        0,  1, "5",                0),
-    TEST ("6",         0,  1, "4",        0, -1, "4",                0),
+    TEST ("6",         0,  1, "4",        0, NPOS, "4",                0),
 
-    TEST ("7",         0, -1, "3",        0,  0, "",                 0),
-    TEST ("8",         0, -1, "2",        0,  1, "2",                0),
-    TEST ("9",         0, -1, "1",        0, -1, "1",                0),
+    TEST ("7",         0, NPOS, "3",        0,  0, "",                 0),
+    TEST ("8",         0, NPOS, "2",        0,  1, "2",                0),
+    TEST ("9",         0, NPOS, "1",        0, NPOS, "1",                0),
 
     TEST ("",          0,  0, "abc",      0,  3, "abc",              0),
 
@@ -515,22 +515,22 @@ iter_iter_range_test_cases [] = {
 
     ///////////////////////////////////////////////////////////////////////
     // very long strings
-    TEST ("a",         0,     0, "b",      0, -1, "ba",               0),
-    TEST ("a@0",       0,     0, "b@0",    0, -1, "",                 0),
-    TEST ("a@0",       0,     0, "b@1",    0, -1, "b",                0),
-    TEST ("a@1",       0,     0, "b@0",    0, -1, "a",                0),
-    TEST ("a@1",       0,     0, "b@1",    0, -1, "ba",               0),
-    TEST ("a@2",       0,     0, "b@2",    0, -1, "bbaa",             0),
+    TEST ("a",         0,     0, "b",      0, NPOS, "ba",               0),
+    TEST ("a@0",       0,     0, "b@0",    0, NPOS, "",                 0),
+    TEST ("a@0",       0,     0, "b@1",    0, NPOS, "b",                0),
+    TEST ("a@1",       0,     0, "b@0",    0, NPOS, "a",                0),
+    TEST ("a@1",       0,     0, "b@1",    0, NPOS, "ba",               0),
+    TEST ("a@2",       0,     0, "b@2",    0, NPOS, "bbaa",             0),
 
-    TEST ("a@1000",    0,     0, "b@1000", 0, -1, "b@1000a@1000",     0),
-    TEST ("a@1000",    0,     1, "b@1001", 0, -1, "b@1001a@999",      0),
-    TEST ("a@1000",    0,     2, "b@1002", 0, -1, "b@1002a@998",      0),
-    TEST ("a@1000",    1,   998, "b@1003", 0, -1, "ab@1003a",         0),
-    TEST ("a@1000",    2,   996, "b@1004", 0, -1, "aab@1004aa",       0),
-    TEST ("a@1000",  500,   250, "b@1005", 0, -1, "a@500b@1005a@250", 0),
-    TEST ("a@1000",  998,     1, "b@1006", 0, -1, "a@998b@1006a",     0),
-    TEST ("a@2000", 1000,    -1, "b",      0, -1, "a@1000b",          0),
-    TEST ("a@2000", 1000,   999, "bb",     0, -1, "a@1000bba",        0),
+    TEST ("a@1000",    0,     0, "b@1000", 0, NPOS, "b@1000a@1000",     0),
+    TEST ("a@1000",    0,     1, "b@1001", 0, NPOS, "b@1001a@999",      0),
+    TEST ("a@1000",    0,     2, "b@1002", 0, NPOS, "b@1002a@998",      0),
+    TEST ("a@1000",    1,   998, "b@1003", 0, NPOS, "ab@1003a",         0),
+    TEST ("a@1000",    2,   996, "b@1004", 0, NPOS, "aab@1004aa",       0),
+    TEST ("a@1000",  500,   250, "b@1005", 0, NPOS, "a@500b@1005a@250", 0),
+    TEST ("a@1000",  998,     1, "b@1006", 0, NPOS, "a@998b@1006a",     0),
+    TEST ("a@2000", 1000,  NPOS, "b",      0, NPOS, "a@1000b",          0),
+    TEST ("a@2000", 1000,   999, "bb",     0, NPOS, "a@1000bba",        0),
 
     TEST ("x@4096",    0,  4095, "ab",       0, 2, "abx",             0),
     TEST ("x@4096",    1,  4094, "ab",       0, 2, "xabx",            0),
@@ -573,32 +573,32 @@ iter_iter_range_test_cases [] = {
     // self-referential replacement
     TEST ("",          0,  0, 0,          0,  0, "",                 0),
     TEST ("",          0,  0, 0,          0,  1, "",                 0),
-    TEST ("",          0,  0, 0,          0, -1, "",                 0),
+    TEST ("",          0,  0, 0,          0, NPOS, "",                 0),
 
     TEST ("",          0,  1, 0,          0,  0, "",                 0),
     TEST ("",          0,  1, 0,          0,  1, "",                 0),
-    TEST ("",          0,  1, 0,          0, -1, "",                 0),
+    TEST ("",          0,  1, 0,          0, NPOS, "",                 0),
 
-    TEST ("",          0, -1, 0,          0,  0, "",                 0),
-    TEST ("",          0, -1, 0,          0,  1, "",                 0),
-    TEST ("",          0, -1, 0,          0, -1, "",                 0),
+    TEST ("",          0, NPOS, 0,          0,  0, "",                 0),
+    TEST ("",          0, NPOS, 0,          0,  1, "",                 0),
+    TEST ("",          0, NPOS, 0,          0, NPOS, "",                 0),
 
     TEST ("1",         0,  0, 0,          0,  0, "1",                0),
-    TEST ("2",         0,  0, 0,          0, -1, "22",               0),
+    TEST ("2",         0,  0, 0,          0, NPOS, "22",               0),
     TEST ("3",         0,  0, 0,          0,  1, "33",               0),
 
     TEST ("4",         0,  1, 0,          0,  0, "",                 0),
     TEST ("5",         0,  1, 0,          0,  1, "5",                0),
-    TEST ("6",         0,  1, 0,          0, -1, "6",                0),
+    TEST ("6",         0,  1, 0,          0, NPOS, "6",                0),
 
-    TEST ("7",         0, -1, 0,          0,  0, "",                 0),
-    TEST ("8",         0, -1, 0,          0,  1, "8",                0),
-    TEST ("9",         0, -1, 0,          0, -1, "9",                0),
+    TEST ("7",         0, NPOS, 0,          0,  0, "",                 0),
+    TEST ("8",         0, NPOS, 0,          0,  1, "8",                0),
+    TEST ("9",         0, NPOS, 0,          0, NPOS, "9",                0),
 
     TEST ("x@4096",    0,  0, 0,          0,  0, "x@4096",           0),
     TEST ("x@4096",    0,  1, 0,          0,  1, "x@4096",           0),
     TEST ("x@4096",    0,  2, 0,          0,  2, "x@4096",           0),
-    TEST ("x@4096",    0, -1, 0,          0, -1, "x@4096",           0),
+    TEST ("x@4096",    0, NPOS, 0,          0, NPOS, "x@4096",           0),
 
     TEST ("abc",       0, 0, 0,           1, 1,  "babc",             0),
     TEST ("abc",       2, 0, 0,           0, 2,  "ababc",            0),
@@ -622,7 +622,7 @@ iter_iter_size_val_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, size, count, val, res, bthrow) { \
-        __LINE__, off, size, -1, count, val,            \
+        __LINE__, off, size, NPOS, count, val,          \
         str, sizeof str - 1,                            \
         0, 0, res, sizeof res - 1, bthrow               \
     }
@@ -715,8 +715,8 @@ iter_iter_size_val_test_cases [] = {
 
     TEST ("a",          0,   1, 4095, 'x', "x@4095",       0),
 
-    TEST ("ab",        0, 1,-1, 'c',  "ab",                3),
-    TEST ("a@16",      0, 1,-1, 'c',  "a@16",              3),
+    TEST ("ab",        0, 1,NPOS, 'c',  "ab",                3),
+    TEST ("a@16",      0, 1,NPOS, 'c',  "a@16",              3),
 
     TEST ("last",      4, 0, 4, 't', "lasttttt",           0)
 };
@@ -843,7 +843,7 @@ void test_replace (charT*, Traits*, Allocator*, const RangeBase<
     const std::size_t arg_size = std::size_t (tcase.size);
     const std::size_t arg_off2 = std::size_t (tcase.off2);
     const std::size_t arg_size2 =
-        0 <= tcase.size2 ? tcase.size2 : str.max_size () + 1;
+        NPOS != tcase.size2 ? tcase.size2 : str.max_size () + 1;
 
     // string function argument
     const charT* const arg_ptr = tcase.arg ? arg.data () : str.data ();

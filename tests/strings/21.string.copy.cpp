@@ -54,7 +54,7 @@ ptr_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, size, res) {                \
-        __LINE__, -1, size, -1, -1, -1,       \
+        __LINE__, NPOS, size, NPOS, NPOS, -1, \
         str, sizeof str - 1, 0, 0,            \
         res, sizeof res - 1, 0                \
     }
@@ -98,7 +98,7 @@ ptr_size_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, size, off, res, bthrow)  {    \
-        __LINE__, off, size, -1, -1, -1,        \
+        __LINE__, off, size, NPOS, NPOS, -1,    \
         str, sizeof str - 1, 0, 0,              \
         res, sizeof res - 1, bthrow             \
     }

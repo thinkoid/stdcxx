@@ -52,7 +52,7 @@ iter_iter_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, size, res) {                                        \
-        __LINE__, off, size, -1, -1, -1, str, sizeof str - 1,              \
+        __LINE__, off, size, NPOS, NPOS, -1, str, sizeof str - 1,          \
         0, 0, res, sizeof res - 1, 0 }
 
     //    +----------------------------------------- controlled sequence
@@ -133,7 +133,7 @@ iter_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, res) {                                      \
-        __LINE__, off, -1, -1, -1, -1, str, sizeof str - 1,        \
+        __LINE__, off, NPOS, NPOS, NPOS, -1, str, sizeof str - 1,  \
         0, 0, res, sizeof res - 1, 0 }
 
     //    +-------------------------------------- controlled sequence
@@ -182,7 +182,7 @@ pop_front_test_cases [] = {
 
 #undef TEST
 #define TEST(str, res) {                                            \
-    __LINE__, -1, -1, -1, -1, -1, str, sizeof str - 1,              \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1, str, sizeof str - 1,      \
     0, 0, res, sizeof res - 1, 0 }
 
     //    +----------------------------------------- controlled sequence
@@ -216,7 +216,7 @@ pop_back_test_cases [] = {
 
 #undef TEST
 #define TEST(str, res) {                                            \
-    __LINE__, -1, -1, -1, -1, -1, str, sizeof str - 1,              \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1, str, sizeof str - 1,      \
     0, 0, res, sizeof res - 1, 0 }
 
     //    +----------------------------------------- controlled sequence

@@ -52,7 +52,7 @@ iter_range_test_cases [] = {
 
 #undef TEST
 #define TEST(lst, off, arg, off2, size2, res, bthrow) {                 \
-        __LINE__, off, -1, off2, size2, -1, lst, sizeof lst - 1,        \
+        __LINE__, off, NPOS, off2, size2, -1, lst, sizeof lst - 1,      \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow                \
     }
 
@@ -145,9 +145,9 @@ static const ContainerTestCase
 iter_size_cref_test_cases [] = {
 
 #undef TEST
-#define TEST(lst, off, size, val, res, bthrow) {               \
-        __LINE__, off, size, -1, -1, val, lst, sizeof lst - 1, \
-        0, 0, res, sizeof res - 1, bthrow                      \
+#define TEST(lst, off, size, val, res, bthrow) {                   \
+        __LINE__, off, size, NPOS, NPOS, val, lst, sizeof lst - 1, \
+        0, 0, res, sizeof res - 1, bthrow                          \
     }
 
     //    +---------------------------------------- controlled sequence
@@ -225,7 +225,7 @@ iter_cref_test_cases [] = {
 
 #undef TEST
 #define TEST(lst, off, val, res, bthrow)                                \
-    { __LINE__, off, -1, -1, -1, val, lst, sizeof lst - 1, 0,           \
+    { __LINE__, off, NPOS, NPOS, NPOS, val, lst, sizeof lst - 1, 0,     \
       0, res, sizeof res - 1, bthrow }
 
     //    +----------------------------------------- controlled sequence
@@ -284,7 +284,7 @@ push_front_test_cases [] = {
 
 #undef TEST
 #define TEST(str, val, res) {                                       \
-    __LINE__, -1, -1, -1, -1, val, str, sizeof str - 1,             \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, val, str, sizeof str - 1,     \
     0, 0, res, sizeof res - 1, 0 }
 
     //    +----------------------------------------- controlled sequence
@@ -319,7 +319,7 @@ push_back_test_cases [] = {
 
 #undef TEST
 #define TEST(str, val, res) {                                       \
-    __LINE__, -1, -1, -1, -1, val, str, sizeof str - 1,             \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, val, str, sizeof str - 1,     \
     0, 0, res, sizeof res - 1, 0 }
 
     //    +----------------------------------------- controlled sequence

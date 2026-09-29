@@ -55,7 +55,7 @@ cptr_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, res)                 \
-    { __LINE__, -1, -1, -1, -1, -1,         \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
       str, sizeof str - 1, arg,             \
       sizeof arg - 1, 0, res, 0             \
     }
@@ -131,7 +131,7 @@ cstr_test_cases [] = {
 
 #undef TEST     
 #define TEST(str, arg, res)                 \
-    { __LINE__, -1, -1, -1, -1, -1,         \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
       str, sizeof str - 1, arg,             \
       sizeof arg - 1, 0, res, 0             \
     }
@@ -210,7 +210,7 @@ cptr_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, off, res)            \
-    { __LINE__, off, -1, -1, -1, -1,        \
+    { __LINE__, off, NPOS, NPOS, NPOS, -1,  \
       str, sizeof str - 1, arg,             \
       sizeof arg - 1, 0, res, 0             \
     }
@@ -305,7 +305,7 @@ cptr_size_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, off, size, res, bthrow)      \
-    { __LINE__, off, size, -1, -1, -1,              \
+    { __LINE__, off, size, NPOS, NPOS, -1,          \
       str, sizeof str - 1, arg,                     \
       sizeof arg - 1, 0, res, bthrow                \
     }
@@ -405,10 +405,10 @@ cptr_size_size_test_cases [] = {
     TEST ("abcdefghij", "abc",        10,  3, NPOS,       0),
     TEST ("abcdefghij", "cba",        10,  1, NPOS,       0),
 
-    TEST ("",           "cba",         0, -1, NPOS,       0),
-    TEST ("abcdefghij", "cba",         0, -1,    0,       0),
-    TEST ("x@4096",     "xxx",         0, -1,    0,       0),
-    TEST ("abcdefghij", "ax@4096",     0, -1,    0,       0),
+    TEST ("",           "cba",         0, NPOS, NPOS,       0),
+    TEST ("abcdefghij", "cba",         0, NPOS,  0,       0),
+    TEST ("x@4096",     "xxx",         0, NPOS,  0,       0),
+    TEST ("abcdefghij", "ax@4096",     0, NPOS,  0,       0),
 
     TEST ("last test", "test",         0,  4,    2,       0)
 };
@@ -422,7 +422,7 @@ cstr_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, off, res)            \
-    { __LINE__, off, -1, -1, -1, -1,        \
+    { __LINE__, off, NPOS, NPOS, NPOS, -1,  \
       str, sizeof str - 1, arg,             \
       sizeof arg - 1, 0, res, 0             \
     }
@@ -520,7 +520,7 @@ val_test_cases [] = {
 
 #undef TEST
 #define TEST(str, val, res)             \
-    { __LINE__, -1, -1, -1, -1,         \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, \
       val, str, sizeof str - 1,         \
       0, 0, 0, res, 0                   \
     }
@@ -564,7 +564,7 @@ val_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, val, off, res)        \
-    { __LINE__, off, -1, -1, -1,        \
+    { __LINE__, off, NPOS, NPOS, NPOS,  \
       val, str, sizeof str - 1,         \
       0, 0, 0, res, 0                   \
     }
@@ -653,7 +653,7 @@ void test_find_first_of (charT, Traits*, Allocator*,
     const String&      arg_str = tcase.arg ? s_arg : s_str;
     const charT        arg_val = make_char (char (tcase.val), (charT*)0);
 
-    std::size_t size = tcase.size >= 0 ? tcase.size : s_arg.max_size () + 1;
+    std::size_t size = NPOS != tcase.size ? tcase.size : s_arg.max_size () + 1;
 
 #ifndef _RWSTD_NO_EXCEPTIONS
 

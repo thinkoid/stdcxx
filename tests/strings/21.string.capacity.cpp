@@ -63,10 +63,10 @@ size_void_test_cases [] = {
 #define length_void_test_cases  size_void_test_cases 
 
 #undef TEST
-#define TEST(str, res) {                    \
-        __LINE__, -1, -1, -1, -1, -1,       \
-        str, sizeof str - 1, 0, 0,          \
-        0, res, -1                          \
+#define TEST(str, res) {                      \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        0, res, -1                            \
     }
 
     //    +--------------------------------------- controlled sequence
@@ -118,10 +118,10 @@ static const StringTestCase
 max_size_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str) {                         \
-        __LINE__, -1, -1, -1, -1, -1,       \
-        str, sizeof str - 1, 0, 0,          \
-        0, 0, -1                            \
+#define TEST(str) {                           \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        0, 0, -1                              \
     }
 
     //    +------------------------------ controlled sequence
@@ -156,7 +156,7 @@ resize_size_val_test_cases [] = {
 
 #undef TEST
 #define TEST(str, size, val, res, bthrow) {    \
-        __LINE__, -1, size, -1, -1, val,       \
+        __LINE__, NPOS, size, NPOS, NPOS, val, \
         str, sizeof str - 1, 0, 0,             \
         res, sizeof res - 1, bthrow            \
     }
@@ -210,9 +210,9 @@ resize_size_val_test_cases [] = {
     TEST ("x@1412",           2284,   'a',  "x@1412a@872",     0),
     TEST ("x@2284",           3695,   'a',  "x@2284a@1411",    0),
 
-    TEST ("",           int (NPOS),   'a',  "",                1),
-    TEST ("abc",        int (NPOS),   'a',  "abc",             1),
-    TEST ("x@3695",     int (NPOS),   'a',  "x@3695",          1),
+    TEST ("",                 NPOS,   'a',  "",                1),
+    TEST ("abc",              NPOS,   'a',  "abc",             1),
+    TEST ("x@3695",           NPOS,   'a',  "x@3695",          1),
 
     TEST ("last",                4,   't',  "last",            0)
 
@@ -226,10 +226,10 @@ static const StringTestCase
 resize_size_test_cases [] = {
 
 #undef TEST
-#define TEST(str, size, res, bthrow) {      \
-        __LINE__, -1, size, -1, -1, -1,     \
-        str, sizeof str - 1, 0, 0,          \
-        res, sizeof res - 1, bthrow         \
+#define TEST(str, size, res, bthrow) {        \
+        __LINE__, NPOS, size, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        res, sizeof res - 1, bthrow           \
     }
 
     //    +------------------------------------------ controlled sequence
@@ -279,9 +279,9 @@ resize_size_test_cases [] = {
     TEST ("x@1412",           2284,   "x@1412",      0),
     TEST ("x@2284",           3695,   "x@2284",      0),
 
-    TEST ("",           int (NPOS),   "",            1),
-    TEST ("abc",        int (NPOS),   "abc",         1),
-    TEST ("x@3695",     int (NPOS),   "x@3695",      1),
+    TEST ("",                 NPOS,   "",            1),
+    TEST ("abc",              NPOS,   "abc",         1),
+    TEST ("x@3695",           NPOS,   "x@3695",      1),
 
     TEST ("last",                4,   "last",        0)
 
@@ -295,10 +295,10 @@ static const StringTestCase
 capacity_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str) {                         \
-        __LINE__, -1, -1, -1, -1, -1,       \
-        str, sizeof str - 1, 0, 0,          \
-        0, 0, -1                            \
+#define TEST(str) {                           \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        0, 0, -1                              \
     }
 
     //    +------------------------------ controlled sequence
@@ -336,10 +336,10 @@ static const StringTestCase
 reserve_size_test_cases [] = {
 
 #undef TEST
-#define TEST(str, size, bthrow) {           \
-        __LINE__, -1, size, -1, -1, -1,     \
-        str, sizeof str - 1, 0, 0,          \
-        0, 0, bthrow                        \
+#define TEST(str, size, bthrow) {             \
+        __LINE__, NPOS, size, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        0, 0, bthrow                          \
     }
 
     //    +--------------------------------------- controlled sequence
@@ -384,9 +384,9 @@ reserve_size_test_cases [] = {
     TEST ("x@1412",           2284,   0),
     TEST ("x@2284",           3695,   0),
 
-    TEST ("",           int (NPOS),   1),
-    TEST ("abc",        int (NPOS),   1),
-    TEST ("x@3695",     int (NPOS),   1),
+    TEST ("",                 NPOS,   1),
+    TEST ("abc",              NPOS,   1),
+    TEST ("x@3695",           NPOS,   1),
 
     TEST ("last",                4,   0)
 };
@@ -399,10 +399,10 @@ static const StringTestCase
 reserve_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str) {                      \
-        __LINE__, -1, 0, -1, -1, -1,     \
-        str, sizeof str - 1, 0, 0,       \
-        0, 0, -1                         \
+#define TEST(str) {                        \
+        __LINE__, NPOS, 0, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,         \
+        0, 0, -1                           \
     }
 
     //    +----------------------------- controlled sequence
@@ -436,10 +436,10 @@ static const StringTestCase
 clear_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str) {                         \
-        __LINE__, -1, -1, -1, -1, -1,       \
-        str, sizeof str - 1, 0, 0,          \
-        "", 0, -1                           \
+#define TEST(str) {                           \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+        str, sizeof str - 1, 0, 0,            \
+        "", 0, -1                             \
     }
 
     //    +------------------------------ controlled sequence
@@ -477,10 +477,10 @@ static const StringTestCase
 empty_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str, res) {                 \
-        __LINE__, -1, -1, -1, -1, -1,    \
-        str, sizeof str - 1, 0, 0,       \
-        0, res, -1                       \
+#define TEST(str, res) {                       \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,  \
+        str, sizeof str - 1, 0, 0,             \
+        0, res, -1                             \
     }
 
     //    +------------------------------ controlled sequence

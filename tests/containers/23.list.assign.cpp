@@ -51,7 +51,7 @@ range_test_cases [] = {
 
 #undef TEST
 #define TEST(lst, arg, off, size, res, bthrow) {                \
-        __LINE__, -1, -1, off, size, -1,                        \
+        __LINE__, NPOS, NPOS, off, size, -1,                    \
         lst, sizeof lst - 1,                                    \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
     }
@@ -138,7 +138,7 @@ size_cref_test_cases [] = {
 
 #undef TEST
 #define TEST(lst, size, val, res, bthrow) {     \
-        __LINE__, -1, size, -1, -1, val,        \
+        __LINE__, NPOS, size, NPOS, NPOS, val,  \
         lst, sizeof lst - 1,                    \
         0, 0, res, sizeof res - 1, bthrow       \
     }
@@ -309,7 +309,7 @@ void test_assign (T*, Allocator*,
     // construct the list object to be modified
     List lst (tdata.str_, tdata.str_ + tdata.strlen_);
 
-    std::size_t size = tcase.size >= 0 ? tcase.size : 0;
+    std::size_t size = NPOS != tcase.size ? tcase.size : 0;
 
     rwt_free_store* const pst = rwt_get_free_store (0);
     SharedAlloc*    const pal = SharedAlloc::instance ();

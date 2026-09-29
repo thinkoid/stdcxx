@@ -563,11 +563,6 @@ struct StringIds: ContainerIds {
 
 /**************************************************************************/
 
-static const _RWSTD_SIZE_T
-NPOS = _RWSTD_SIZE_MAX;
-
-/**************************************************************************/
-
 struct StringFunc
 {
     StringIds::CharId     char_id_;
@@ -585,11 +580,11 @@ struct StringTestCase
 {
     int            line;      // test case line number
 
-    int            off;       // offset (position argument)
-    int            size;      // size (count argument)
+    _RWSTD_SIZE_T  off;       // offset (position argument)
+    _RWSTD_SIZE_T  size;      // size (count argument)
 
-    int            off2;      // offset 2 (position argument)
-    int            size2;     // size 2 (count argument)
+    _RWSTD_SIZE_T  off2;      // offset 2 (position argument)
+    _RWSTD_SIZE_T  size2;     // size 2 (count argument)
 
     int            val;       // value (single character to append)
 

@@ -54,7 +54,7 @@ void_test_cases [] = {
 
 #undef TEST
 #define TEST(dummy) {                            \
-        __LINE__, -1, -1, -1, -1, -1,            \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,    \
         0, 0, dummy, sizeof dummy - 1,           \
         "", 0, 0                                 \
     }
@@ -76,7 +76,7 @@ ccont_test_cases [] = {
 
 #undef TEST
 #define TEST(arg, res) {                            \
-        __LINE__, -1, -1, -1, -1, -1,               \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,       \
         0, 0, arg, sizeof arg - 1,                  \
         res, sizeof res - 1, 0                      \
     }
@@ -124,7 +124,7 @@ range_test_cases [] = {
 
 #undef TEST
 #define TEST(arg, off, size, res, bthrow) {         \
-        __LINE__, -1, -1, off, size, -1,            \
+        __LINE__, NPOS, NPOS, off, size, -1,        \
         0, 0, arg, sizeof arg - 1,                  \
         res, sizeof res - 1, bthrow                 \
     }
@@ -176,7 +176,7 @@ size_test_cases [] = {
 
 #undef TEST
 #define TEST(size, res) {                      \
-        __LINE__, -1, size, -1, -1, 0,         \
+        __LINE__, NPOS, size, NPOS, NPOS, 0,   \
         0, 0, 0, 0,                            \
         res, sizeof res - 1, 0                 \
     }
@@ -210,7 +210,7 @@ size_cref_test_cases [] = {
 
 #undef TEST
 #define TEST(size, val, res) {                      \
-    __LINE__, -1, size, -1, -1, val,            \
+    __LINE__, NPOS, size, NPOS, NPOS, val,      \
     0, 0, 0, 0,                                 \
     res, sizeof res - 1, 0                      \
 }
@@ -250,7 +250,7 @@ ccont_op_set_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, res, bthrow) {               \
-    __LINE__, -1, -1, -1, -1, -1,               \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1,       \
     str, sizeof str - 1, arg, sizeof arg - 1,   \
     res, sizeof res - 1, bthrow                 \
 }

@@ -54,7 +54,7 @@ cptr_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, res, bthrow) {                           \
-        __LINE__, -1, -1, -1, -1, -1,                           \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,                   \
         str, sizeof str - 1,                                    \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
     }
@@ -119,7 +119,7 @@ cstr_test_cases [] = {
 
 #undef TEST
 #define TEST(s, arg, res, bthrow) {                             \
-        __LINE__, -1, -1, -1, -1, -1,                           \
+        __LINE__, NPOS, NPOS, NPOS, NPOS, -1,                   \
         s, sizeof s - 1,                                        \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
     }
@@ -192,7 +192,7 @@ cptr_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, size, res, bthrow) {                     \
-        __LINE__, -1, size, -1, -1, -1,                         \
+        __LINE__, NPOS, size, NPOS, NPOS, -1,                   \
         str, sizeof str - 1,                                    \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
     }
@@ -259,7 +259,7 @@ cptr_size_test_cases [] = {
     TEST ("x@872",         "x@873",   873,  "x@873",         0),
     TEST ("x@873",         "x@3695", 2284,  "x@2284",        0),
 
-    TEST ("",              "",         -1,  "",              2),
+    TEST ("",              "",       NPOS,  "",              2),
 
     TEST ("last",          "test",      4, "test",           0)
 };
@@ -277,7 +277,7 @@ range_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, off, size, res, bthrow) {                \
-        __LINE__, -1, -1, off, size, -1,                        \
+        __LINE__, NPOS, NPOS, off, size, -1,                    \
         str, sizeof str - 1,                                    \
         arg, sizeof arg - 1, res, sizeof res - 1, bthrow        \
     }
@@ -369,7 +369,7 @@ size_val_test_cases [] = {
 
 #undef TEST
 #define TEST(str, size, val, res, bthrow) {     \
-        __LINE__, -1, size, -1, -1, val,        \
+        __LINE__, NPOS, size, NPOS, NPOS, val,  \
         str, sizeof str - 1,                    \
         0, 0, res, sizeof res - 1, bthrow       \
     }
@@ -421,7 +421,7 @@ size_val_test_cases [] = {
     TEST ("x@3695",      207, 'x', "x@207",         0),
     TEST ("x@540",      3695, 'x', "x@3695",        0),
 
-    TEST ("",             -1, 'x',  "",             2),
+    TEST ("",           NPOS, 'x',  "",             2),
 
     TEST ("last",          4, 't',  "tttt",         0)
 };
@@ -526,8 +526,8 @@ void test_assign (charT*, Traits*, Allocator*, const RangeBase<
     /* const */ String str (tdata.str_, tdata.strlen_);
     const       String arg (tdata.arg_, tdata.arglen_);
 
-    std::size_t size  = tcase.size  >= 0 ? tcase.size  : str.max_size () + 1;
-    std::size_t size2 = tcase.size2 >= 0 ? tcase.size2 : str.max_size () + 1;
+    std::size_t size  = NPOS != tcase.size  ? tcase.size  : str.max_size () + 1;
+    std::size_t size2 = NPOS != tcase.size2 ? tcase.size2 : str.max_size () + 1;
 
     // save the state of the string object before the call
     // to detect wxception safety violations (changes to

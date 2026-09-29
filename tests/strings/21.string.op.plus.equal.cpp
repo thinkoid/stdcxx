@@ -56,8 +56,8 @@ static const StringTestCase
 cptr_test_cases [] = {
 
 #undef TEST
-#define TEST(str, src, res, bthrow)                            \
-    { __LINE__, -1, -1, -1, -1, -1, str, sizeof str - 1, src,  \
+#define TEST(str, src, res, bthrow)                                    \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1, str, sizeof str - 1, src,  \
       sizeof src - 1, res, sizeof res - 1, bthrow }
 
     //    +----------------------------------------- controlled sequence
@@ -124,8 +124,8 @@ static const StringTestCase
 cstr_test_cases [] = {
 
 #undef TEST
-#define TEST(str, src, res, bthrow)                            \
-    { __LINE__, -1, -1, -1, -1, -1, str, sizeof str - 1, src,  \
+#define TEST(str, src, res, bthrow)                                    \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1, str, sizeof str - 1, src,  \
       sizeof src - 1, res, sizeof res - 1, bthrow }
 
     //    +----------------------------------------- controlled sequence
@@ -193,8 +193,8 @@ static const StringTestCase
 val_test_cases [] = {
 
 #undef TEST
-#define TEST(str, val, res, bthrow)                              \
-    { __LINE__, -1, -1, -1, -1, val, str, sizeof str - 1, 0, 0,  \
+#define TEST(str, val, res, bthrow)                                      \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, val, str, sizeof str - 1, 0, 0,  \
       res, sizeof res - 1, bthrow }
 
     //    +---------------------------------- controlled sequence

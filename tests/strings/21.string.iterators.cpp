@@ -51,7 +51,7 @@ begin_void_test_cases [] = {
 
 #undef TEST
 #define TEST(str, res) {                    \
-    __LINE__, -1, -1, -1, -1, -1,           \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1,   \
     str, sizeof (str) - 1,                  \
     0, 0, 0, res, 0                         \
 }
@@ -79,7 +79,7 @@ end_void_test_cases [] = {
 
 #undef TEST
 #define TEST(str, res) {                    \
-    __LINE__, -1, -1, -1, -1, -1,           \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1,   \
     str, sizeof (str) - 1,                  \
     0, 0, 0, res, 0                         \
 }
@@ -106,10 +106,10 @@ static const StringTestCase
 c_str_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str) {                   \
-    __LINE__, -1, -1, -1, -1, -1,     \
-    str, sizeof (str) - 1, 0, 0,      \
-    str, sizeof (str) - 1, 0          \
+#define TEST(str) {                       \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+    str, sizeof (str) - 1, 0, 0,          \
+    str, sizeof (str) - 1, 0              \
 }
 
     //    +-------------------------------- controlled sequence
@@ -168,10 +168,10 @@ static const StringTestCase
 get_allocator_void_test_cases [] = {
 
 #undef TEST
-#define TEST(str) {                   \
-    __LINE__, -1, -1, -1, -1, -1,     \
-    str, sizeof (str) - 1,            \
-    0, 0, 0, 0, 0                     \
+#define TEST(str) {                       \
+    __LINE__, NPOS, NPOS, NPOS, NPOS, -1, \
+    str, sizeof (str) - 1,                \
+    0, 0, 0, 0, 0                         \
 }
 
     //    +------------------------------------------ controlled sequence

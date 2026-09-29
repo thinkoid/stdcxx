@@ -10,20 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO Test-case structs: =size_t= fields, =NPOS= sentinel
-
-=StringTestCase= (=tests/include/rw_strings.h=) and =ContainerTestCase=
-(=tests/include/rw_containers.h=) hold positions and counts in =int=
-fields. The tables write "not applicable" as =-1=. It reaches the
-library as =size_t= and becomes =npos=, by design.
-
-Fix, one inert commit: =off=, =size=, =off2= and =size2= become
-=_RWSTD_SIZE_T= in both structs, and the sentinel in those four
-positions becomes =NPOS=, across the 171 =TEST= macro bodies and the
-rows that pass it. =val= and =bthrow= stay =int=, with their own =-1=.
-
-Check: every string and container test keeps its assertion count.
-
 * TODO Two overruns under AddressSanitizer in =22.locale.money.get=
 
 An AddressSanitizer build of the test reports two defects, one from
@@ -310,6 +296,21 @@ except the =21.cwchar= coverage, which adds assertions.
 
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
+
+* TODO A missing brace in a =replace= call formatter
+
+The case =replace_iter_iter_size_val= of the call formatter
+(=tests/src/21.strings.cpp=) spells its second conditional
+=%{? + %zu%{;}=, without the brace that closes =%{?}=. Each argument
+after it is printed one place early. Row 645 of =21.string.replace=
+passes a count of 1 and ='c'=; its diagnostics read
+=replace (begin(), begin(), 0, '\x01')=. The calls and the assertions
+are right; only the text is wrong. The defect dates from 2006.
+
+Fix: =%{?} + %zu%{;}=.
+
+Check: under =--trace=, the rows of that overload print the count and
+the character they pass. The suite table does not move.
 
 * Documentation
 

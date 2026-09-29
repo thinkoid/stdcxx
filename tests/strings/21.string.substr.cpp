@@ -54,7 +54,7 @@ void_test_cases [] = {
 
 #undef TEST
 #define TEST(str, res)                                                   \
-    { __LINE__, -1, -1, -1, -1, -1, str, sizeof str - 1, 0, 0,           \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1, str, sizeof str - 1, 0, 0,   \
       res, sizeof res - 1, 0 }
 
     //    +------------------------------------- controlled sequence
@@ -87,7 +87,7 @@ size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, res, bthrow)                                         \
-    { __LINE__, off, -1, -1, -1, -1, str, sizeof str - 1, 0, 0,             \
+    { __LINE__, off, NPOS, NPOS, NPOS, -1, str, sizeof str - 1, 0, 0,       \
       res, sizeof res - 1, bthrow }
 
     //    +--------------------------------------- controlled sequence
@@ -142,7 +142,7 @@ size_size_test_cases [] = {
 
 #undef TEST
 #define TEST(str, off, size, res, bthrow)                                    \
-    { __LINE__, off, size, -1, -1, -1, str, sizeof str - 1, 0, 0,            \
+    { __LINE__, off, size, NPOS, NPOS, -1, str, sizeof str - 1, 0, 0,        \
       res, sizeof res - 1, bthrow }
 
     //    +------------------------------------------ controlled sequence

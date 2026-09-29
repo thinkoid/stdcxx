@@ -67,7 +67,7 @@ cptr_cstr_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, res)                         \
-    { __LINE__, -1, -1, -1, -1, -1,                 \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1,         \
       str, sizeof str - 1, arg, sizeof arg - 1,     \
       0, (std::size_t) res, 0                       \
     }
@@ -138,7 +138,7 @@ cstr_cstr_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, res)                         \
-    { __LINE__, -1, -1, -1, -1, -1,                 \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1,         \
       str, sizeof str - 1, arg, sizeof arg - 1,     \
       0, (std::size_t) res, 0                       \
     }
@@ -221,7 +221,7 @@ cstr_cptr_test_cases [] = {
 
 #undef TEST
 #define TEST(str, arg, res)                         \
-    { __LINE__, -1, -1, -1, -1, -1,                 \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1,         \
       str, sizeof str - 1, arg, sizeof arg - 1,     \
       0, (std::size_t) res, 0                       \
     }

@@ -57,7 +57,7 @@ cptr_cstr_test_cases [] = {
 
 #undef TEST
 #define TEST(str, src, res, bthrow)                 \
-    { __LINE__, -1, -1, -1, -1, -1,                 \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1,         \
       str, sizeof str - 1, src, sizeof src - 1,     \
       res, sizeof res - 1, bthrow                   \
     }
@@ -120,7 +120,7 @@ cstr_cstr_test_cases [] = {
 
 #undef TEST
 #define TEST(str, src, res, bthrow)                 \
-    { __LINE__, -1, -1, -1, -1, -1,                 \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1,         \
       str, sizeof str - 1, src, sizeof src - 1,     \
       res, sizeof res - 1, bthrow                   \
     }
@@ -186,7 +186,7 @@ cstr_cptr_test_cases [] = {
 
 #undef TEST
 #define TEST(str, src, res, bthrow)                 \
-    { __LINE__, -1, -1, -1, -1, -1,                 \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, -1,         \
       str, sizeof str - 1, src, sizeof src - 1,     \
       res, sizeof res - 1, bthrow                   \
     }
@@ -248,7 +248,7 @@ cstr_val_test_cases [] = {
 
 #undef TEST
 #define TEST(arg, val, res)                         \
-    { __LINE__, -1, -1, -1, -1, val,                \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, val,        \
       0, 0, arg, sizeof arg - 1,                    \
       res, sizeof res - 1, 0                        \
     }
@@ -298,7 +298,7 @@ val_cstr_test_cases [] = {
 
 #undef TEST
 #define TEST(val, arg, res)                         \
-    { __LINE__, -1, -1, -1, -1, val,                \
+    { __LINE__, NPOS, NPOS, NPOS, NPOS, val,        \
       "", 0, arg, sizeof arg - 1,                   \
       res, sizeof res - 1, 0                        \
     }

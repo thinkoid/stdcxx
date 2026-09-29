@@ -251,27 +251,27 @@ extractor_test_cases [] = {
     //    V                V    V      V      V        V   V   V   V
                                                 
 #undef TEST3                                    
-#define TEST3(arg, width, flags, res)                                  \
-    TEST ("",              arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("ab",            arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("abc",           arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("<U0>",          arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("<U0>@2ab",      arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("a<U0>@2b",      arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("ab<U0>@2",      arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("a<U0>b<U0>@2c", arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("<U0>ab<U0>@2c", arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("x@4096",        arg, width, flags, Good,    res, 0, -1, 0), \
-    TEST ("",              arg, width, flags, NotGood, res, 0, -1, 1), \
-    TEST ("ab",            arg, width, flags, NotGood, res, 0, -1, 1), \
-    TEST ("abc",           arg, width, flags, NotGood, res, 0, -1, 1), \
-    TEST ("<U0>",          arg, width, flags, NotGood, res, 0, -1, 1), \
-    TEST ("<U0>@2ab",      arg, width, flags, NotGood, res, 0, -1, 1), \
-    TEST ("a<U0>@2b",      arg, width, flags, NotGood, res, 0, -1, 1), \
-    TEST ("ab<U0>@2",      arg, width, flags, NotGood, res, 0, -1, 1), \
-    TEST ("a<U0>b<U0>@2c", arg, width, flags, NotGood, res, 0, -1, 1), \
-    TEST ("<U0>ab<U0>@2c", arg, width, flags, NotGood, res, 0, -1, 1), \
-    TEST ("x@4096",        arg, width, flags, NotGood, res, 0, -1, 1)
+#define TEST3(arg, width, flags, res)                                    \
+    TEST ("",              arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("ab",            arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("abc",           arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("<U0>",          arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("<U0>@2ab",      arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("a<U0>@2b",      arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("ab<U0>@2",      arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("a<U0>b<U0>@2c", arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("<U0>ab<U0>@2c", arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("x@4096",        arg, width, flags, Good,    res, 0, NPOS, 0), \
+    TEST ("",              arg, width, flags, NotGood, res, 0, NPOS, 1), \
+    TEST ("ab",            arg, width, flags, NotGood, res, 0, NPOS, 1), \
+    TEST ("abc",           arg, width, flags, NotGood, res, 0, NPOS, 1), \
+    TEST ("<U0>",          arg, width, flags, NotGood, res, 0, NPOS, 1), \
+    TEST ("<U0>@2ab",      arg, width, flags, NotGood, res, 0, NPOS, 1), \
+    TEST ("a<U0>@2b",      arg, width, flags, NotGood, res, 0, NPOS, 1), \
+    TEST ("ab<U0>@2",      arg, width, flags, NotGood, res, 0, NPOS, 1), \
+    TEST ("a<U0>b<U0>@2c", arg, width, flags, NotGood, res, 0, NPOS, 1), \
+    TEST ("<U0>ab<U0>@2c", arg, width, flags, NotGood, res, 0, NPOS, 1), \
+    TEST ("x@4096",        arg, width, flags, NotGood, res, 0, NPOS, 1)
 
     //     +------------------------------------------------- sequence in stream
     //     |                            +-------------------- stream width
@@ -490,27 +490,27 @@ getline_test_cases [] = {
     //    V                V    V   V       V        V    V  V   V
 
 #undef TEST3
-#define TEST3(arg, res)                                              \
-    TEST ("",              arg, 0,  Skipws, Good,    res, 0, -1, 0), \
-    TEST ("ab",            arg, 1,  0,      Good,    res, 0, -1, 0), \
-    TEST ("abc",           arg, 2,  Skipws, Good,    res, 0, -1, 0), \
-    TEST ("<U0>",          arg, 3,  0,      Good,    res, 0, -1, 0), \
-    TEST ("<U0>@2ab",      arg, 4,  Skipws, Good,    res, 0, -1, 0), \
-    TEST ("a<U0>@2b",      arg, 5,  0,      Good,    res, 0, -1, 0), \
-    TEST ("ab<U0>@2",      arg, 6,  Skipws, Good,    res, 0, -1, 0), \
-    TEST ("a<U0>b<U0>@2c", arg, 7,  0,      Good,    res, 0, -1, 0), \
-    TEST ("<U0>ab<U0>@2c", arg, 8,  Skipws, Good,    res, 0, -1, 0), \
-    TEST ("x@4096",        arg, 9,  0,      Good,    res, 0, -1, 0), \
-    TEST ("",              arg, 10, Skipws, NotGood, res, 0, -1, 1), \
-    TEST ("ab",            arg, 11, 0,      NotGood, res, 0, -1, 1), \
-    TEST ("abc",           arg, 12, Skipws, NotGood, res, 0, -1, 1), \
-    TEST ("<U0>",          arg, 13, 0,      NotGood, res, 0, -1, 1), \
-    TEST ("<U0>@2ab",      arg, 14, Skipws, NotGood, res, 0, -1, 1), \
-    TEST ("a<U0>@2b",      arg, 15, 0,      NotGood, res, 0, -1, 1), \
-    TEST ("ab<U0>@2",      arg, 16, Skipws, NotGood, res, 0, -1, 1), \
-    TEST ("a<U0>b<U0>@2c", arg, 17, 0,      NotGood, res, 0, -1, 1), \
-    TEST ("<U0>ab<U0>@2c", arg, 18, Skipws, NotGood, res, 0, -1, 1), \
-    TEST ("x@4096",        arg, 19, 0,      NotGood, res, 0, -1, 1)
+#define TEST3(arg, res)                                                \
+    TEST ("",              arg, 0,  Skipws, Good,    res, 0, NPOS, 0), \
+    TEST ("ab",            arg, 1,  0,      Good,    res, 0, NPOS, 0), \
+    TEST ("abc",           arg, 2,  Skipws, Good,    res, 0, NPOS, 0), \
+    TEST ("<U0>",          arg, 3,  0,      Good,    res, 0, NPOS, 0), \
+    TEST ("<U0>@2ab",      arg, 4,  Skipws, Good,    res, 0, NPOS, 0), \
+    TEST ("a<U0>@2b",      arg, 5,  0,      Good,    res, 0, NPOS, 0), \
+    TEST ("ab<U0>@2",      arg, 6,  Skipws, Good,    res, 0, NPOS, 0), \
+    TEST ("a<U0>b<U0>@2c", arg, 7,  0,      Good,    res, 0, NPOS, 0), \
+    TEST ("<U0>ab<U0>@2c", arg, 8,  Skipws, Good,    res, 0, NPOS, 0), \
+    TEST ("x@4096",        arg, 9,  0,      Good,    res, 0, NPOS, 0), \
+    TEST ("",              arg, 10, Skipws, NotGood, res, 0, NPOS, 1), \
+    TEST ("ab",            arg, 11, 0,      NotGood, res, 0, NPOS, 1), \
+    TEST ("abc",           arg, 12, Skipws, NotGood, res, 0, NPOS, 1), \
+    TEST ("<U0>",          arg, 13, 0,      NotGood, res, 0, NPOS, 1), \
+    TEST ("<U0>@2ab",      arg, 14, Skipws, NotGood, res, 0, NPOS, 1), \
+    TEST ("a<U0>@2b",      arg, 15, 0,      NotGood, res, 0, NPOS, 1), \
+    TEST ("ab<U0>@2",      arg, 16, Skipws, NotGood, res, 0, NPOS, 1), \
+    TEST ("a<U0>b<U0>@2c", arg, 17, 0,      NotGood, res, 0, NPOS, 1), \
+    TEST ("<U0>ab<U0>@2c", arg, 18, Skipws, NotGood, res, 0, NPOS, 1), \
+    TEST ("x@4096",        arg, 19, 0,      NotGood, res, 0, NPOS, 1)
 
     //     +------------------------------------------------- sequence in stream
     //     |                         +----------------------- expected result 
@@ -708,27 +708,27 @@ getline_val_test_cases [] = {
     //    V                V    V   V       V        V    V      V   V
 
 #undef TEST3
-#define TEST3(arg, delim, res)                                           \
-    TEST ("",              arg, 0,  Skipws, Good,    res, delim, -1, 0), \
-    TEST ("ab",            arg, 1,  0,      Good,    res, delim, -1, 0), \
-    TEST ("abc",           arg, 2,  Skipws, Good,    res, delim, -1, 0), \
-    TEST ("<U0>",          arg, 3,  0,      Good,    res, delim, -1, 0), \
-    TEST ("<U0>@2ab",      arg, 4,  Skipws, Good,    res, delim, -1, 0), \
-    TEST ("a<U0>@2b",      arg, 5,  0,      Good,    res, delim, -1, 0), \
-    TEST ("ab<U0>@2",      arg, 6,  Skipws, Good,    res, delim, -1, 0), \
-    TEST ("a<U0>b<U0>@2c", arg, 7,  0,      Good,    res, delim, -1, 0), \
-    TEST ("<U0>ab<U0>@2c", arg, 8,  Skipws, Good,    res, delim, -1, 0), \
-    TEST ("x@4096",        arg, 9,  0,      Good,    res, delim, -1, 0), \
-    TEST ("",              arg, 10, Skipws, NotGood, res, delim, -1, 1), \
-    TEST ("ab",            arg, 11, 0,      NotGood, res, delim, -1, 1), \
-    TEST ("abc",           arg, 12, Skipws, NotGood, res, delim, -1, 1), \
-    TEST ("<U0>",          arg, 13, 0,      NotGood, res, delim, -1, 1), \
-    TEST ("<U0>@2ab",      arg, 14, Skipws, NotGood, res, delim, -1, 1), \
-    TEST ("a<U0>@2b",      arg, 15, 0,      NotGood, res, delim, -1, 1), \
-    TEST ("ab<U0>@2",      arg, 16, Skipws, NotGood, res, delim, -1, 1), \
-    TEST ("a<U0>b<U0>@2c", arg, 17, 0,      NotGood, res, delim, -1, 1), \
-    TEST ("<U0>ab<U0>@2c", arg, 18, Skipws, NotGood, res, delim, -1, 1), \
-    TEST ("x@4096",        arg, 19, 0,      NotGood, res, delim, -1, 1)
+#define TEST3(arg, delim, res)                                             \
+    TEST ("",              arg, 0,  Skipws, Good,    res, delim, NPOS, 0), \
+    TEST ("ab",            arg, 1,  0,      Good,    res, delim, NPOS, 0), \
+    TEST ("abc",           arg, 2,  Skipws, Good,    res, delim, NPOS, 0), \
+    TEST ("<U0>",          arg, 3,  0,      Good,    res, delim, NPOS, 0), \
+    TEST ("<U0>@2ab",      arg, 4,  Skipws, Good,    res, delim, NPOS, 0), \
+    TEST ("a<U0>@2b",      arg, 5,  0,      Good,    res, delim, NPOS, 0), \
+    TEST ("ab<U0>@2",      arg, 6,  Skipws, Good,    res, delim, NPOS, 0), \
+    TEST ("a<U0>b<U0>@2c", arg, 7,  0,      Good,    res, delim, NPOS, 0), \
+    TEST ("<U0>ab<U0>@2c", arg, 8,  Skipws, Good,    res, delim, NPOS, 0), \
+    TEST ("x@4096",        arg, 9,  0,      Good,    res, delim, NPOS, 0), \
+    TEST ("",              arg, 10, Skipws, NotGood, res, delim, NPOS, 1), \
+    TEST ("ab",            arg, 11, 0,      NotGood, res, delim, NPOS, 1), \
+    TEST ("abc",           arg, 12, Skipws, NotGood, res, delim, NPOS, 1), \
+    TEST ("<U0>",          arg, 13, 0,      NotGood, res, delim, NPOS, 1), \
+    TEST ("<U0>@2ab",      arg, 14, Skipws, NotGood, res, delim, NPOS, 1), \
+    TEST ("a<U0>@2b",      arg, 15, 0,      NotGood, res, delim, NPOS, 1), \
+    TEST ("ab<U0>@2",      arg, 16, Skipws, NotGood, res, delim, NPOS, 1), \
+    TEST ("a<U0>b<U0>@2c", arg, 17, 0,      NotGood, res, delim, NPOS, 1), \
+    TEST ("<U0>ab<U0>@2c", arg, 18, Skipws, NotGood, res, delim, NPOS, 1), \
+    TEST ("x@4096",        arg, 19, 0,      NotGood, res, delim, NPOS, 1)
 
     //     +------------------------------------------------- sequence in stream
     //     |                         +----------------------- delim
@@ -1144,7 +1144,7 @@ void test_io (charT*, Traits*, Allocator*,
                     || (   func.which_ == StringIds::inserter_ostream_cstr
                         && ret_state != Good)
 #endif  // _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
-                    ? tcase.off : tcase.val;
+                    ? std::streamsize (tcase.off) : std::streamsize (tcase.val);
 
                 success = width == ret_width;
                 rw_assert (success, 0, tcase.line,
@@ -1153,7 +1153,7 @@ void test_io (charT*, Traits*, Allocator*,
             }
 
             // tcase.size2 is the expected iostate
-            if (0 <= tcase.size2) {
+            if (NPOS != tcase.size2) {
 
                 // verify the iostate
                 const Iostate res_state = 
