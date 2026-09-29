@@ -36,6 +36,25 @@ Check: the AddressSanitizer build of the test reports nothing. The
 =22.locale.money.get=, =22.locale.num.get= and =22.locale.time.get=
 rows are unchanged. The =22.locale.money.get= row passes in 8S.
 
+* TODO A 32-bit size wrap in the growth of =money_get='s buffers
+
+When =money_get::_C_get= (=include/loc/_money_get.cc=) moves its
+buffers to the heap, it asks for =(bufsize + npad) * 4= bytes, where
+=npad= is the facet's =frac_digits ()=. With a 32-bit =size_t= the
+product wraps once =frac_digits= reaches about 2^30. A =frac_digits=
+of 2^30 yields a block of 1216 bytes, which the code treats as two
+halves of 2^31 + 608 bytes; the next group size lands 2 GiB past the
+block. Only a user =moneypunct= returns such a value: the library's
+facets take it from =localeconv=. On x86_64 the request is 8 GiB and
+=new= answers it honestly.
+
+Fix: before the =new=, throw =bad_alloc= through the library's own
+path when =npad > SIZE_MAX / 4 - bufsize=.
+
+Check: a row in =22.locale.money.get= with a user =moneypunct= whose
+=frac_digits= is 2^30 gets =bad_alloc= in =11s= and =11s-clang= and
+overruns nothing under AddressSanitizer. No other row moves.
+
 * TODO The wide half of UserCtype
 
 =tests/src/ctype.cpp= implements =UserCtype<wchar_t>= and
