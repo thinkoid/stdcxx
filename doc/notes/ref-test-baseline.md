@@ -683,8 +683,9 @@ overruns the block. The facet now throws `bad_alloc` where the size
 would wrap. A user `moneypunct` returning 2^30 pins it: against the
 old facet the row dies of SIGSEGV. With a 64-bit `size_t` nothing
 wraps and the case is skipped with a note. The row is 3960/0 in the
-i386 configurations. In the x86_64 ones it is 3952/0 with 8 warnings,
-the notes of the 8 skipped cases.
+i386 configurations and 3952/0 in the x86_64 ones. The harness runs
+the tests in compatibility mode, which counts warnings but not notes,
+so the 8 skipped cases add no warnings.
 
 `22.locale.moneypunct`, measured 2026-09-17. The row, previously 316
 passing assertions, aborted in all six configurations with stack
