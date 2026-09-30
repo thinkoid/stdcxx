@@ -52,9 +52,6 @@ Open:
   =include/rw/_config.h:108=). =21.string.stdcxx-162= aborts on it in
   15D: the body is 64 bytes, the test allows 24. Decide: atomics now,
   or the mutex until the next minor version.
-- =_RWSTD_NO_THREAD_SAFE_LOCALE=. =THREAD_SAFE_LOCALE.cpp=
-  characterizes it; nothing reads it. Find the consumer it was meant
-  for, or retire the test.
 
 Check: the ThreadSanitizer build of 15D runs every =22.locale.*.mt=
 test three times with no report from the library; the

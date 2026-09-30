@@ -87,13 +87,9 @@ characterize atomics: a release store and an acquire load of a
 macros in `include/rw/_defs.h`, which publish facet data and facets
 and fill the scalar caches of `ctype` and `codecvt`.
 
-`THREAD_SAFE_LOCALE` asks whether each thread has an independent C
-locale environment.
-The exact macro has no reader in the scanned implementation, build
-or test sources. It neither measures C++ facet races nor enables a
-repair for them. `THREAD_SAFE_ERRNO` likewise has no direct reader
-of its status macro. These are stronger retirement-review candidates
-than useful value generators whose status marker happens to be unused.
+`THREAD_SAFE_ERRNO` has no direct reader of its status macro. It is a
+stronger retirement-review candidate than a useful value generator
+whose status marker happens to be unused.
 
 `CONST_CAST` and `REINTERPRET_CAST` have no direct readers of their
 negative status macros either. By contrast, the `FLOAT`, `LIMITS`,
@@ -331,7 +327,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [TEMPLATE_ON_RETURN_TYPE](../../etc/config/src/TEMPLATE_ON_RETURN_TYPE.cpp) / `NO_TEMPLATE_ON_RETURN_TYPE` | template overloads on return type | L/E; `include/bitset` |
 | [THREAD_SAFE_ERRNO](../../etc/config/src/THREAD_SAFE_ERRNO.cpp) / `NO_THREAD_SAFE_ERRNO` | if errno is thread safe | none |
 | [THREAD_SAFE_EXCEPTIONS](../../etc/config/src/THREAD_SAFE_EXCEPTIONS.cpp) / `NO_THREAD_SAFE_EXCEPTIONS` | if exceptions are thread safe | T; `tests/localization/22.locale.globals.mt.cpp` |
-| [THREAD_SAFE_LOCALE](../../etc/config/src/THREAD_SAFE_LOCALE.cpp) / `NO_THREAD_SAFE_LOCALE` | if locale is thread safe | none |
 | [TIMEZONE](../../etc/config/src/TIMEZONE.cpp) / `NO_TIMEZONE` | int timezone in &lt;time.h&gt; | L; `src/time_put.cpp` |
 | [TLS](../../etc/config/src/TLS.cpp) / `NO_TLS` + output | thread-local storage | L; `include/rw/_defs.h` |
 | [TM_GMTOFF](../../etc/config/src/TM_GMTOFF.cpp) / `NO_TM_GMTOFF` | tm_gmtoff in struct tm in &lt;time.h&gt; | L/T; `src/time_put.cpp` |

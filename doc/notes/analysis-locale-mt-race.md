@@ -29,8 +29,8 @@ stalled are in `analysis-locale-mt-2012.md`.
   string reference count goes through a mutex per string, not the
   atomic builtins, because a 2007 clause keeps binary compatibility
   with stdcxx 4.1.x. The revival is not bound by that promise.
-- A characterization nobody reads: `_RWSTD_NO_THREAD_SAFE_LOCALE` is
-  answered by a config test and consumed nowhere.
+- A characterization nobody read: `_RWSTD_NO_THREAD_SAFE_LOCALE`.
+  Its consumer never landed, and the test is retired (chapter 5).
 
 Toolchain: GCC 16.2.1, glibc 2.44, x86-64 Linux, 2026-09-15.
 
@@ -184,12 +184,19 @@ The revival does not ship binaries compatible with 4.1.x; the clause
 is a decision to make, after the retirement, with the string tests as
 the gate.
 
-`etc/config/src/THREAD_SAFE_LOCALE.cpp` determines whether each
-thread has its own C locale environment or the process shares one;
-`config.h` records the answer as `_RWSTD_NO_THREAD_SAFE_LOCALE`, and
-no file in the tree reads the macro. Either something was meant to
-consume it and never did, or the test outlived its consumer; the
-history will say which.
+`etc/config/src/THREAD_SAFE_LOCALE.cpp` asked whether each thread has
+its own C locale environment or the process shares one. `config.h`
+recorded the answer as `_RWSTD_NO_THREAD_SAFE_LOCALE`, and no file in
+the tree read the macro. The test arrived on 2007-06-19, the day
+after a survey of the thread-safety tests for the 4.2.0 release went
+to the dev list. Its consumer never landed. The one candidate is the
+lock in `src/setlocale.cpp`, which a per-thread C locale would make
+unnecessary. POSIX makes `setlocale` act on the whole process; a
+per-thread locale is what `uselocale` sets. The answer is the same on
+every configuration of the matrix: 2000 runs of the test in 15D, 2000
+times shared. The test itself raced: its first thread read the locale
+name while the main thread set it. The test is retired; `config.h`
+loses the one line and nothing else changes.
 
 ## 6. Where this leaves the MT tests
 
