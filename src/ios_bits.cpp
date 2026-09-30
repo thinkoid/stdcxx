@@ -56,13 +56,6 @@ _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::adjustfield);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::basefield);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::floatfield);
 
-#ifndef _RWSTD_NO_EXT_REENTRANT_IO
-
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::nolock);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::nolockbuf);
-
-#endif   // _RWSTD_NO_EXT_REENTRANT_IO
-
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::iostate ios_base::goodbit);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::iostate ios_base::badbit);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::iostate ios_base::eofbit);

@@ -125,8 +125,6 @@ enum __rw_fmtflags {
     __rw_basefield   = _RWSTD_IOS_BASEFIELD,
     __rw_adjustfield = _RWSTD_IOS_ADJUSTFIELD,
     __rw_floatfield  = _RWSTD_IOS_FLOATFIELD,
-    __rw_nolock      = _RWSTD_IOS_NOLOCK,
-    __rw_nolockbuf   = _RWSTD_IOS_NOLOCKBUF,
     __rw_sync_stdio  = _RWSTD_IOS_SYNC_STDIO
 };
 
@@ -148,7 +146,8 @@ enum __rw_iostate {
 
 
     __rw_nothrow = _RWSTD_IOS_NOTHROW,
-    __rw_rethrow = _RWSTD_IOS_RETHROW
+    __rw_rethrow = _RWSTD_IOS_RETHROW,
+    __rw_locked  = _RWSTD_IOS_LOCKED
 };
 
 _RWSTD_DEFINE_BITMASK_OPERATORS (__rw_iostate);

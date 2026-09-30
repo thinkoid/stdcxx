@@ -235,8 +235,6 @@ std::tm mktm (int sec = 0, int min = 0, int hour = 0,
 #define Adjustfield std::ios_base::adjustfield
 #define Basefield   std::ios_base::basefield
 #define Floatfield  std::ios_base::floatfield
-#define Nolock      std::ios_base::nolock
-#define Nolockbuf   std::ios_base::nolockbuf
 
 // capitalize to prevent EDG eccp from expanding the macros
 // in .cc files when implicit inclusion is used (causes errors

@@ -493,8 +493,6 @@ test (int lineno, Manip m, int iarg, charT carg)
 #define Adjustfield std::ios_base::adjustfield
 #define Basefield   std::ios_base::basefield
 #define Floatfield  std::ios_base::floatfield
-#define Nolock      std::ios_base::nolock
-#define Nolockbuf   std::ios_base::nolockbuf
 
 
 template <class charT, class Traits>
@@ -536,13 +534,6 @@ static void do_test ()
     TEST (resetiosflags, Adjustfield, charT ());
     TEST (resetiosflags, Basefield, charT ());
     TEST (resetiosflags, Floatfield, charT ());
-
-#ifndef _RWSTD_NO_EXT_REENTRANT_IO
-
-    TEST (resetiosflags, Nolock, charT ());
-    TEST (resetiosflags, Nolockbuf, charT ());
-
-#endif   // _RWSTD_NO_EXT_REENTRANT_IO
 
 
     TEST (resetiosflags, Oct | Dec,       charT ());
@@ -593,8 +584,6 @@ static void do_test ()
     TEST (setiosflags, Adjustfield, charT ());
     TEST (setiosflags, Basefield, charT ());
     TEST (setiosflags, Floatfield, charT ());
-    TEST (setiosflags, Nolock, charT ());
-    TEST (setiosflags, Nolockbuf, charT ());
 
     if (!nfailed)
         rw_assert (true, __FILE__, __LINE__,

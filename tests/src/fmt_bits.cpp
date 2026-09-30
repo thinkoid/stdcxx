@@ -168,14 +168,6 @@ _rw_fmtflags (const FmtSpec &spec, Buffer &buf, int bits)
         BITNAME (std::ios, unitbuf),
         BITNAME (std::ios, uppercase),
 
-#ifndef _RWSTD_NO_EXT_REENTRANT_IO
-
-        // extension: allow unsychronized access to stream and/or its buffer
-        BITNAME (std::ios, nolock),
-        BITNAME (std::ios, nolockbuf),
-
-#endif   // _RWSTD_NO_EXT_REENTRANT_IO
-
         { "std::ios::fmtflags(0)", "fmtflags(0)", std::ios::fmtflags () }
 
     };

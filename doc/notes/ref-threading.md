@@ -47,18 +47,24 @@ that any two operations on any object can overlap.** Distinguish:
 - Shared library infrastructure: repositories, lazy caches and global
   state need their own synchronization, even when reached through
   different user objects or through `const` functions.
-- Streams with locking enabled: the library supplies additional
-  operation-level locking, subject to its configuration and flags.
+- The standard stream objects: the library locks each operation on
+  them. A user's stream is not locked.
 
-The historical [Level 2 contract](../stdlibug/44-1.html) describes
-optional internal protection for iostreams and locales. Its flag
-description contradicts itself: **the source treats `nolock` and
-`nolockbuf` as disabling their respective locks when set**. Ordinary
-streams start with locking disabled on the extension-enabled path;
-standard-stream initialization clears those bits when the configured
-defaults permit it. See [ios.cpp](../../src/ios.cpp),
+**A user's stream and its buffer are not locked.** Concurrent access
+to one stream object may race, as C++11 permits
+([iostreams.threadsafety]). `ios_base::_C_init`, which
+`basic_ios<>::init` calls, sets `_C_nolock` for every stream.
+`ios_base::Init` clears it on the eight standard objects, whose
+sentries and state changes then take the stream's and the buffer's
+mutex. C++11 asks that of a standard object synchronized with stdio
+([iostream.objects]). See [ios.cpp](../../src/ios.cpp),
 [iostream.cpp](../../src/iostream.cpp) and
 [_basic_ios.h](../../include/rw/_basic_ios.h).
+
+The historical [Level 2 contract](../stdlibug/44-1.html) describes the
+flags `nolock` and `nolockbuf` that once selected the locking of each
+stream. They are gone; a user who shares a stream between threads
+synchronizes it.
 
 Even with stream locking, a sequence of insertions is not one
 indivisible transaction. The [stream locking description](../stdlibug/44-2.html)
@@ -140,7 +146,7 @@ exclusive load and store loop at run time.
 | Scalar with an explicit `__rw_mutex_base&` | Ordinary scalar operation under that mutex. |
 | `_RWSTD_THREAD_*`, with TLS available | Ordinary operation on thread-local storage. |
 | `_RWSTD_THREAD_*`, without TLS | Corresponding atomic wrapper on shared storage. |
-| `_RWSTD_ATOMIC_IO_SWAP` | With the locking extension enabled, ordinary exchange if `nolock` is set; otherwise the selected atomic wrapper with its supplied mutex. Without that extension, the atomic wrapper is unconditional. |
+| `_RWSTD_ATOMIC_IO_SWAP` | Ordinary exchange on an unlocked stream (`_C_nolock` set, a user's stream); otherwise the selected atomic wrapper with its supplied mutex. |
 
 **`false` is an overload tag, not a request for relaxed ordering or
 for no locking.** Conversely, an explicit mutex does not merely

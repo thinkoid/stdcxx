@@ -545,17 +545,12 @@
 #  define _RWSTD_ATOMIC_SWAP(x, y, mutex)                            \
           _RW::__rw_atomic_exchange  (x, y, mutex)
 
-#  ifndef _RWSTD_NO_EXT_REENTRANT_IO
-// conditional swap used in iostreams
-#    define _RWSTD_ATOMIC_IO_SWAP(x, y, mutex)                       \
-            ((this->flags () & _RWSTD_IOS_NOLOCK) ?                  \
-                _RW::__rw_ordinary_exchange  (x, y)                  \
-             :  _RW::__rw_atomic_exchange  (x, y, mutex))
-
-#  else   // if defined (_RWSTD_NO_EXT_REENTRANT_IO)
-#    define _RWSTD_ATOMIC_IO_SWAP(x, y, mutex)                       \
-            _RWSTD_ATOMIC_SWAP(x, y, mutex)
-#  endif    // _RWSTD_NO_EXT_REENTRANT_IO
+// conditional swap used in iostreams: an unlocked stream (a user's
+// stream, as opposed to the standard objects) exchanges without a lock
+#  define _RWSTD_ATOMIC_IO_SWAP(x, y, mutex)                         \
+          (this->_C_nolock ?                                         \
+              _RW::__rw_ordinary_exchange  (x, y)                    \
+           :  _RW::__rw_atomic_exchange  (x, y, mutex))
 
 #  define _RWSTD_STRING_ATOMIC_PREINCREMENT(x, mutex)              \
             _RWSTD_ATOMIC_PREINCREMENT (x, mutex)
@@ -692,10 +687,6 @@
 #define _RWSTD_IOS_SKIPWS       0x01000
 #define _RWSTD_IOS_UNITBUF      0x02000
 #define _RWSTD_IOS_UPPERCASE    0x04000
-// NOLOCK[BUF] used rather than LOCK[BUF] to maintain functional compatibility
-// with release 2.2 (which was always safe when these bits were cleared)
-#define _RWSTD_IOS_NOLOCK       0x10000
-#define _RWSTD_IOS_NOLOCKBUF    0x20000
 // SYNC_STDIO is set for stream objects that may need to be synchronized
 // with stdio (by default the standard iostream objects such as cout)
 #define _RWSTD_IOS_SYNC_STDIO   0x40000
@@ -714,6 +705,7 @@
 #define _RWSTD_IOS_FAILBIT       0x04
 #define _RWSTD_IOS_NOTHROW       0x08   // prevents clear() from throwing
 #define _RWSTD_IOS_RETHROW       0x10   // clear() rethrows if appropriate
+#define _RWSTD_IOS_LOCKED        0x20   // _C_set(): the caller holds the lock
 
 // ios_base::openmode constants
 #define _RWSTD_IOS_APP           0x01

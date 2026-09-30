@@ -259,7 +259,7 @@ basic_ios<_CharT, _Traits>::fill (char_type __ch)
     // convert to int type before swapping
     const int_type __c = traits_type::to_int_type (__ch);
 
-    _RWSTD_MT_GUARD (flags () & _RWSTD_IOS_NOLOCK ? 0 : &_C_mutex);
+    _RWSTD_MT_GUARD (this->_C_nolock ? 0 : &_C_mutex);
 
     // save the previous value of the fill character
     traits_type::assign (__ch, traits_type::to_char_type (_C_fill));
@@ -274,7 +274,7 @@ template<class _CharT, class _Traits>
 inline locale
 basic_ios<_CharT, _Traits>::imbue (const locale& __loc)
 {
-    _RWSTD_MT_GUARD (flags () & _RWSTD_IOS_NOLOCK ? 0 : &_C_mutex);
+    _RWSTD_MT_GUARD (this->_C_nolock ? 0 : &_C_mutex);
 
     const locale __tmp = _C_unsafe_imbue (__loc);
 
@@ -305,20 +305,8 @@ template<class _CharT, class _Traits>
 inline _RW::__rw_mutex*
 basic_ios<_CharT, _Traits>::_C_bufmutex () const
 {
-#if !defined (_RWSTD_REENTRANT) || defined (_RWSTD_NO_EXT_REENTRANT_IO)
-
-    // unconditionally return pointer to buffer's mutex
-    // (real or fake if not in an MT environment)
-    return rdbuf () ? &rdbuf ()->_C_mutex : 0;
-
-#else
-
-    // return pointer to buffer's mutex unless the object is in
-    // a state where buffer locking is disabled)
-    return flags () & _RWSTD_IOS_NOLOCKBUF || !rdbuf ()
-        ? 0 : &rdbuf ()->_C_mutex;
-
-#endif   // !_RWSTD_REENTRANT || !_RWSTD_NO_EXT_REENTRANT_IO
+    // the buffer of an unlocked stream is not locked either
+    return this->_C_nolock || !rdbuf () ? 0 : &rdbuf ()->_C_mutex;
 }
 
 

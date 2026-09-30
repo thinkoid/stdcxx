@@ -106,7 +106,7 @@ locale ios_base::imbue (const locale &loc)
 {
     // outlined to hide implementation details
 
-    _RWSTD_MT_GUARD (flags () & _RW::__rw_nolock ? 0 : &_C_mutex);
+    _RWSTD_MT_GUARD (_C_nolock ? 0 : &_C_mutex);
 
     return _C_unsafe_imbue (loc);
 }
@@ -139,15 +139,11 @@ void ios_base::_C_init (void *sb)
     _C_prec   = 6;
     _C_except = 0;
 
-#if     defined (_RWSTD_REENTRANT)             \
-    && !defined (_RWSTD_NO_EXT_REENTRANT_IO)   \
-    && !defined (_RWSTD_NO_REENTRANT_IO_DEFAULT)
-
-    // disable locking of iostream objects and their associated buffers
-    // standard iostream objects will override in ios_base::Init::Init()
-    _C_fmtfl  |= _RW::__rw_nolock | _RW::__rw_nolockbuf;
-
-#endif   // _RWSTD_REENTRANT && !_RWSTD_NO_REENTRANT_IO && ...
+    // a stream and its buffer are not locked: concurrent access to
+    // one stream object may race (C++11, [iostreams.threadsafety]);
+    // ios_base::Init::Init() locks the standard objects, which may
+    // not ([iostream.objects])
+    _C_nolock = 1;
 }
 
 
@@ -174,9 +170,10 @@ locale ios_base::_C_unsafe_imbue (const locale &loc)
 void* ios_base::
 _C_set (unsigned state, unsigned except, void *rdbuf)
 {
-    _RWSTD_MT_GUARD ((_C_fmtfl | except) & _RW::__rw_nolock ? 0 : &_C_mutex);
+    // the caller that passes __rw_locked holds the lock already
+    _RWSTD_MT_GUARD (_C_nolock || (except & _RW::__rw_locked) ? 0 : &_C_mutex);
 
-    except &= ~_RW::__rw_nolock;
+    except &= ~_RW::__rw_locked;
 
     if (!rdbuf)
         state |= badbit;
@@ -273,7 +270,7 @@ void* ios_base::_C_tie () const
 
 void* ios_base::_C_tie (void *pstrm)
 {
-    _RWSTD_MT_GUARD (flags () & _RW::__rw_nolock ? 0 : &_C_mutex);
+    _RWSTD_MT_GUARD (_C_nolock ? 0 : &_C_mutex);
 
     void *save = 0;
 

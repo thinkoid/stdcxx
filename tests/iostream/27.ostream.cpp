@@ -663,8 +663,6 @@ void test_sentry (charT)
 #define Adjustfield std::ios_base::adjustfield
 #define Basefield   std::ios_base::basefield
 #define Floatfield  std::ios_base::floatfield
-#define Nolock      std::ios_base::nolock
-#define Nolockbuf   std::ios_base::nolockbuf
 
 #define Bad         std::ios_base::badbit
 #define Eof         std::ios_base::eofbit

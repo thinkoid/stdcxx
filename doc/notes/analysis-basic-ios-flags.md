@@ -225,6 +225,17 @@ rejected: a mutex per operation on every stream, for a guarantee the
 standard asks of eight. The `rdstate` message of chapter 1 is repaired
 with the row.
 
+Measured after the removal, 2026-09-30. All six configurations build.
+15D ran in full: `27.basic.ios` passes, 7 of 7, and no other row
+moves. The single-threaded builds and 15D-clang ran the rows that
+named the extension, every `27.*` test among them: no row moves but
+`27.basic.ios` in 15D-clang. A probe in 15D counts the calls to
+`pthread_mutex_lock` through an interposed definition. A fresh user
+stream has `flags ()` `0x1002`, `skipws | dec`, and 1000 insertions
+into it take no lock. The same 1000 insertions into `std::cout` take
+2001. As a control, the user stream with its lock state set to locked
+takes 2000: the probe sees locking where there is some.
+
 Check, when the locking slice lands: the row at 100% in the six
 configurations, and a copy of the test that sets a bit outside the
 standard's after construction fails it.

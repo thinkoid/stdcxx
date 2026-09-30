@@ -545,8 +545,6 @@ void direct_use_test (charT, const char *cname)
 #define adjustfield std::ios_base::adjustfield
 #define basefield   std::ios_base::basefield
 #define floatfield  std::ios_base::floatfield
-#define nolock      std::ios_base::nolock
-#define nolockbuf   std::ios_base::nolockbuf
 
 #define Bad         std::ios_base::badbit
 #define Eof         std::ios_base::eofbit

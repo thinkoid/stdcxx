@@ -562,8 +562,6 @@ void do_test_size_wrap (bool        intl,    // international?
 #define adjustfield std::ios_base::adjustfield
 #define basefield   std::ios_base::basefield
 #define floatfield  std::ios_base::floatfield
-#define nolock      std::ios_base::nolock
-#define nolockbuf   std::ios_base::nolockbuf
 
 #define badbit      std::ios_base::badbit
 #define eofbit      std::ios_base::eofbit

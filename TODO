@@ -10,41 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO =27.basic.ios=: =flags ()= after construction
-
-=test_ctors= (=tests/iostream/27.basic.ios.cpp:251=) asserts that a
-=basic_ios<char>= constructed with a null buffer has =flags () ==
-skipws | dec=, the postcondition of =init= (27.4.4.1). The row passes
-in the single-threaded builds. In the thread-safe ones it fails:
-=flags ()= also carries =nolock | nolockbuf=, the locking extension's
-default for a user's stream (=doc/notes/analysis-basic-ios-flags.md=).
-STDCXX-950 (2008) proposed masking them in the test; the patch never
-landed. The numeric base bits went with the =setbase= extension.
-
-Decided 2026-09-30: the locking extension goes, and its default
-stays. In thread-safe builds a user's stream is unlocked and the eight
-standard objects are locked, as C++11 asks: concurrent access to a
-stream object may race ([iostreams.threadsafety]), a synchronized
-standard object's I/O may not ([iostream.objects]). Every stream
-locked, the library's =_RWSTD_NO_EXT_REENTRANT_IO= path, is rejected:
-a mutex per operation on every stream, for a guarantee the standard
-asks of eight.
-
-Fix: =ios_base::nolock=, =nolockbuf=, =_RWSTD_IOS_NOLOCK=,
-=_RWSTD_IOS_NOLOCKBUF=, =_RWSTD_NO_EXT_REENTRANT_IO= and
-=_RWSTD_NO_REENTRANT_IO_DEFAULT= go. The lock state moves from
-=fmtflags= to a member of =ios_base= of its own, set for the standard
-objects by =ios_base::Init=, with no public interface. The guards
-(=_basic_ios.h=, =_RWSTD_ATOMIC_IO_SWAP=, =_C_bufmutex=, =iostore.cpp=)
-read the member. The =rdstate ()= check above the failing one prints
-=flags ()= as its observed value; repair the message with it.
-
-Check: the row at 100% in the six configurations; in 15D a fresh user
-stream has no bits beyond the standard's and takes no lock, and
-=std::cout= locks. Partial measurement agreed: all six build, 15D runs
-in full, the single-threaded builds run the rows that named the
-extension; the nightly run covers the rest.
-
 * TODO =27.filebuf=: =detach ()=
 
 =detach ()= is a library addition to =basic_filebuf=. Four checks
@@ -260,8 +225,8 @@ leaves with the design.
 
 =_RWSTD_STRICT_ANSI= (=include/rw/_config.h:234=, also selected by
 =_RWSTD_NO_EXTENSIONS=) is opt-in. It undefines =_RWSTD_LONG_LONG= and
-defines 28 =_RWSTD_NO_EXT_*= macros. The original README calls the
-switch deprecated. The tree reads 36 =_RWSTD_NO_EXT_*= names in 38
+defines 27 =_RWSTD_NO_EXT_*= macros. The original README calls the
+switch deprecated. The tree reads 35 =_RWSTD_NO_EXT_*= names in 36
 files under =include= and =src=; the strict block never sets eight of
 them. The tests carry the same gates, and =tests/intro/17.extensions=
 exercises the additions.
@@ -272,8 +237,7 @@ classes, overloads and manipulator values the standard does not
 specify. Among them the =ios_base::failure= subclasses,
 =stringbuf::str (const char*)=, the deep-copy =basic_string::copy=,
 the extra =num_get=, =num_put= and =time_get= members, the =void=
-forms of =count= and =distance=, the filebuf and stream-locking
-additions.
+forms of =count= and =distance=, the filebuf additions.
 
 The rest of what the gates cover keeps its behaviour and loses only
 its macro: choices the standard permits (the in-place =assign= and
@@ -286,8 +250,9 @@ compiler provides and C++11 made standard.
 
 Fix, one subsystem per commit, the suite tables as the oracle. The
 =setbase= bases and =bin= went first, ahead of the sort
-(=doc/notes/analysis-numeric-base.md=). The stream-locking additions
-go next, as the =27.basic.ios= entry decides. Then the 36 gates sorted
+(=doc/notes/analysis-numeric-base.md=), then the stream-locking
+additions, their default kept
+(=doc/notes/analysis-basic-ios-flags.md=). Then the 35 gates sorted
 into the two lists, recorded in the commit that deletes
 =_RWSTD_STRICT_ANSI= and =_RWSTD_NO_EXTENSIONS= from =_config.h=.
 Then, per addition, the code path goes with its macro, its test

@@ -250,8 +250,6 @@
 #  define _RWSTD_NO_EXT_NUM_PUT
    // no support for extended member overloads
 #  define _RWSTD_NO_EXT_TIME_GET
-   // no support for optional mt-locking in iostreams
-#  define _RWSTD_NO_EXT_REENTRANT_IO
    // allocator<const T> not possible
 #  define _RWSTD_NO_EXT_CONST_ALLOCATOR
    // missing operator new or delete not defined

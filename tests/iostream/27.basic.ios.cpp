@@ -244,8 +244,8 @@ test_ctors (charT /* unused */, const char* cname)
                "basic_ios<%s>::tie () == 0", cname);
 
     rw_assert (io0.badbit == io0.rdstate (), __FILE__, __LINE__,
-               "basic_ios<%s>::rdstate () == %{If}, got %{If}",
-               cname, io0.badbit, io0.flags ());
+               "basic_ios<%s>::rdstate () == %{Is}, got %{Is}",
+               cname, io0.badbit, io0.rdstate ());
 
     rw_assert ((io0.skipws | io0.dec) == io0.flags (),
                __FILE__, __LINE__,

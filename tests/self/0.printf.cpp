@@ -889,10 +889,6 @@ test_ios_bitmasks ()
     TEST ("[%{If}]",  std::ios::skipws,      0, 0, "[skipws]");
     TEST ("[%{If}]",  std::ios::unitbuf,     0, 0, "[unitbuf]");
     TEST ("[%{If}]",  std::ios::uppercase,   0, 0, "[uppercase]");
-#ifndef _RWSTD_NO_EXT_REENTRANT_IO
-    TEST ("[%{If}]",  std::ios::nolock,      0, 0, "[nolock]");
-    TEST ("[%{If}]",  std::ios::nolockbuf,   0, 0, "[nolockbuf]");
-#endif   // _RWSTD_NO_EXT_REENTRANT_IO
 
     TEST ("[%{#If}]",  0,                     0, 0, "[std::ios::fmtflags(0)]");
     TEST ("[%{#If}]",  std::ios::adjustfield, 0, 0, "[std::ios::adjustfield]");
@@ -912,10 +908,6 @@ test_ios_bitmasks ()
     TEST ("[%{#If}]",  std::ios::skipws,      0, 0, "[std::ios::skipws]");
     TEST ("[%{#If}]",  std::ios::unitbuf,     0, 0, "[std::ios::unitbuf]");
     TEST ("[%{#If}]",  std::ios::uppercase,   0, 0, "[std::ios::uppercase]");
-#ifndef _RWSTD_NO_EXT_REENTRANT_IO
-    TEST ("[%{#If}]",  std::ios::nolock,      0, 0, "[std::ios::nolock]");
-    TEST ("[%{#If}]",  std::ios::nolockbuf,   0, 0, "[std::ios::nolockbuf]");
-#endif   // _RWSTD_NO_EXT_REENTRANT_IO
 
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "extension: \"%{Ie}\": std::ios_base::event");

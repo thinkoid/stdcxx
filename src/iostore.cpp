@@ -179,7 +179,7 @@ void ios_base::_C_fire_event (event ev, bool reentrant)
 
             if (!cba) {
                 // clear may throw...
-                _C_set (_C_state | badbit, _C_except | _RW::__rw_nolock,
+                _C_set (_C_state | badbit, _C_except | _RW::__rw_locked,
                         _C_rdbuf);
                 return;
             }
@@ -190,8 +190,8 @@ void ios_base::_C_fire_event (event ev, bool reentrant)
             // copy into temporary buffer
             memcpy (cba, _C_usr->_C_cbarray, cbsize * sizeof *cba);
 
-            // unlock only if stream state allows it
-            if (!(flags () & _RW::__rw_nolock))
+            // unlock only if the stream is locked
+            if (!_C_nolock)
                 _C_unlock ();
         }
 
@@ -208,9 +208,8 @@ void ios_base::_C_fire_event (event ev, bool reentrant)
         if (reentrant) {
             return_temporary_buffer (cba);
 
-            // lock only if stream state allows it (stream state
-            // may have been modified by one of the callbacks)
-            if (!(flags () & _RW::__rw_nolock))
+            // lock only if the stream is locked
+            if (!_C_nolock)
                 _C_lock ();
         }
     }
@@ -219,9 +218,8 @@ void ios_base::_C_fire_event (event ev, bool reentrant)
             return_temporary_buffer (cba);
 
             // lock only if `cba' was successfully allocated (or copied)
-            // and the stream state allows it (stream state may have been
-            // modified by one of the callbacks)
-            if (cba && !(flags () & _RW::__rw_nolock))
+            // and the stream is locked
+            if (cba && !_C_nolock)
                 _C_lock ();
         }
         _RETHROW;
@@ -254,12 +252,9 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
 
     char srcbuf [16];    // buffer to copy `src' to
 
-    // flags to copy from `rhs'
-    const fmtflags flagmask = ~(_RW::__rw_nolock | _RW::__rw_nolockbuf);
-
     _TRY {
         // lock `rhs', *this not locked yet
-        _RWSTD_MT_GUARD (rhs.flags () & _RW::__rw_nolock
+        _RWSTD_MT_GUARD (rhs._C_nolock
                          ? 0 : &_RWSTD_CONST_CAST (ios_base&, rhs)._C_mutex);
 
         if (rhs._C_usr) {
@@ -324,7 +319,7 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
     }
 
     // `rhs' unlocked, lock *this
-    _RWSTD_MT_GUARD (flags () & _RW::__rw_nolock ? 0 : &_C_mutex);
+    _RWSTD_MT_GUARD (_C_nolock ? 0 : &_C_mutex);
 
     _TRY {
         if (_C_usr) {
@@ -394,8 +389,8 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
         _C_usr = 0;
     }
 
-    // copy all but masked flags(), leave masked flags alone
-    _C_fmtfl = (fmtfl & flagmask) | (_C_fmtfl & ~flagmask);
+    // copy the flags; the lock state is not a format flag and stays
+    _C_fmtfl = fmtfl;
     _C_prec  = prec;
     _C_wide  = wide;
     _C_loc   = loc;
@@ -425,13 +420,13 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
     _C_except = except;
 
     // leave state alone but throw an exception if necessary
-    _C_set (_C_state, _C_except | _RW::__rw_nolock, _C_rdbuf);
+    _C_set (_C_state, _C_except | _RW::__rw_locked, _C_rdbuf);
 }
 
 
 long& ios_base::iword (int inx)
 {
-    _RWSTD_MT_GUARD (flags () & _RW::__rw_nolock ? 0 : &_C_mutex);
+    _RWSTD_MT_GUARD (_C_nolock ? 0 : &_C_mutex);
 
     if (!_C_usr)
         _C_usr = _C_usr_data::_C_alloc (&ios_base::_C_fire_event);
@@ -450,7 +445,7 @@ long& ios_base::iword (int inx)
         return (_C_usr->_C_iarray = ia)[inx];
     }
 
-    _C_set (_C_state | badbit, _C_except | _RW::__rw_nolock, _C_rdbuf);
+    _C_set (_C_state | badbit, _C_except | _RW::__rw_locked, _C_rdbuf);
 
     // returns a reference to a dummy object on failure (27.4.2.5, p3)
     static long dummy_iword;
@@ -461,7 +456,7 @@ long& ios_base::iword (int inx)
 
 void*& ios_base::pword (int inx)
 { 
-    _RWSTD_MT_GUARD (flags () & _RW::__rw_nolock ? 0 : &_C_mutex);
+    _RWSTD_MT_GUARD (_C_nolock ? 0 : &_C_mutex);
 
     if (!_C_usr)
         _C_usr = _C_usr_data::_C_alloc (&ios_base::_C_fire_event);
@@ -480,7 +475,7 @@ void*& ios_base::pword (int inx)
         return (_C_usr->_C_parray = pa)[inx];
     }
 
-    _C_set (_C_state | badbit, _C_except | _RW::__rw_nolock, _C_rdbuf);
+    _C_set (_C_state | badbit, _C_except | _RW::__rw_locked, _C_rdbuf);
 
     // returns a reference to a dummy object on failure (27.4.2.5, p3)
     static void *dummy_pword;
@@ -494,7 +489,7 @@ register_callback (event_callback fun, int inx)
 {
     _RWSTD_ASSERT (0 != fun);
 
-    _RWSTD_MT_GUARD (flags () & _RW::__rw_nolock ? 0 : &_C_mutex);
+    _RWSTD_MT_GUARD (_C_nolock ? 0 : &_C_mutex);
 
     if (!_C_usr)
         _C_usr = _C_usr_data::_C_alloc (&ios_base::_C_fire_event);
@@ -524,7 +519,7 @@ register_callback (event_callback fun, int inx)
     }
     else {
         // not required by 27.4.2.6
-        _C_set (_C_state | badbit, _C_except | _RW::__rw_nolock, _C_rdbuf);
+        _C_set (_C_state | badbit, _C_except | _RW::__rw_locked, _C_rdbuf);
     }
 }
 

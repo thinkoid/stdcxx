@@ -274,17 +274,12 @@ ios_base::Init::Init ()
     pcerr->_C_fmtfl |= _RW::__rw_sync_stdio;
     pclog->_C_fmtfl |= _RW::__rw_sync_stdio;
 
-#if     defined (_RWSTD_REENTRANT)             \
-    && !defined (_RWSTD_NO_EXT_REENTRANT_IO)   \
-    && !defined (_RWSTD_NO_REENTRANT_IO_DEFAULT)
-
-    // override MT-safety setting done in basic_ios<>::init()
-    pcin->_C_fmtfl  &= ~(nolock | nolockbuf);
-    pcout->_C_fmtfl &= ~(nolock | nolockbuf);
-    pcerr->_C_fmtfl &= ~(nolock | nolockbuf);
-    pclog->_C_fmtfl &= ~(nolock | nolockbuf);
-
-#endif   // _RWSTD_REENTRANT && !_RWSTD_NO_EXT_REENTRANT_IO && ...
+    // the standard objects are locked ([iostream.objects]), unlike the
+    // streams basic_ios<>::init() leaves unlocked
+    pcin->_C_nolock  = 0;
+    pcout->_C_nolock = 0;
+    pcerr->_C_nolock = 0;
+    pclog->_C_nolock = 0;
 
 
 #ifndef _RWSTD_NO_WCHAR_T
@@ -313,17 +308,11 @@ ios_base::Init::Init ()
     pwcerr->_C_fmtfl |= _RW::__rw_sync_stdio;
     pwclog->_C_fmtfl |= _RW::__rw_sync_stdio;
 
-#  if     defined (_RWSTD_REENTRANT)             \
-      && !defined (_RWSTD_NO_EXT_REENTRANT_IO)   \
-      && !defined (_RWSTD_NO_REENTRANT_IO_DEFAULT)
-
-    // override MT-safety setting done in basic_ios<>::init()
-    pwcin->_C_fmtfl  &= ~(nolock | nolockbuf);
-    pwcout->_C_fmtfl &= ~(nolock | nolockbuf);
-    pwcerr->_C_fmtfl &= ~(nolock | nolockbuf);
-    pwclog->_C_fmtfl &= ~(nolock | nolockbuf);
-
-#  endif   // _RWSTD_REENTRANT && !_RWSTD_NO_EXT_REENTRANT_IO && ...
+    // the standard objects are locked ([iostream.objects])
+    pwcin->_C_nolock  = 0;
+    pwcout->_C_nolock = 0;
+    pwcerr->_C_nolock = 0;
+    pwclog->_C_nolock = 0;
 
 #endif   // _RWSTD_NO_WCHAR_T
 }

@@ -353,13 +353,9 @@ run_test (int /* unused */, char* /* unused */ [])
                " std::ios_base::bin found");
 
 
-    // exercise _RWSTD_NO_EXT_REENTRANT_IO
-    rw_info (0, 0, __LINE__, "_RWSTD_NO_EXT_REENTRANT_IO");
-
-#ifndef _RWSTD_NO_EXT_REENTRANT_IO
-    rw_assert (0, __FILE__, __LINE__,
-               "_RWSTD_NO_EXT_REENTRANT_IO not #defined");
-#endif
+    // std::ios_base::nolock and nolockbuf are gone with the locking
+    // extension
+    rw_info (0, 0, __LINE__, "std::ios_base::nolock, nolockbuf");
 
     rw_assert (IosBase::check_nolock (), __FILE__, __LINE__,
                "_RWSTD_NO_EXTENSIONS #defined and "

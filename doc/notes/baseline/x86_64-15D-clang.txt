@@ -232,7 +232,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 26.valarray.transcend.stdcxx-315           NOUT    0                       
 26.valarray.unary.stdcxx-314               NOUT    0                       
 27.basic.ios.copyfmt.stdcxx-766            NOUT    0                       
-27.basic.ios                                  0    0        7      1    85%
+27.basic.ios                                  0    0        7      0   100%
 27.basic.ios.tie.stdcxx-804                NOUT    0                       
 27.basic_ios.copyfmt.stdcxx-1058         FORMAT    0                       
 27.cstdio.stdcxx-195                       NOUT    0                       
@@ -279,4 +279,4 @@ PROGRAM SUMMARY:
   Linker warnings:              0
   Runtime warnings:            90
   Assertions:            10116629
-  Failed assertions:            9
+  Failed assertions:            8

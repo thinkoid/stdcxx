@@ -396,8 +396,6 @@ int type_test (int         lineno,
 #define Adjustfield std::ios_base::adjustfield
 #define Basefield   std::ios_base::basefield
 #define Floatfield  std::ios_base::floatfield
-#define Nolock      std::ios_base::nolock
-#define Nolockbuf   std::ios_base::nolockbuf
 
 #define Eofbit      std::ios_base::eofbit
 #define Failbit     std::ios_base::failbit

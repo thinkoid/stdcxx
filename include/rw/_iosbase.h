@@ -121,16 +121,6 @@ struct _RWSTD_EXPORT ios_base: _RW::__rw_synchronized
     _RWSTD_STATIC_CONST (fmtflags, adjustfield = _RW::__rw_adjustfield);
     _RWSTD_STATIC_CONST (fmtflags, floatfield = _RW::__rw_floatfield);
 
-#ifndef _RWSTD_NO_EXT_REENTRANT_IO
-
-    // extension: never locks the object in MT environments
-    _RWSTD_STATIC_CONST (fmtflags, nolock = _RW::__rw_nolock);
-
-    // extension: never locks stream buffer in MT environments
-    _RWSTD_STATIC_CONST (fmtflags, nolockbuf = _RW::__rw_nolockbuf);
-
-#endif   // _RWSTD_NO_EXT_REENTRANT_IO
-
     // 27.4.2.1.3
     typedef _RWSTD_BITMASK_ENUM (_RW::__rw_iostate) iostate;
 
@@ -325,6 +315,7 @@ protected:
     unsigned           _C_fmtfl;    // formatting flags
     unsigned char      _C_state;    // stream state
     unsigned char      _C_except;   // active exceptions
+    unsigned char      _C_nolock;   // non-zero: stream and buffer unlocked
     
     static bool _C_sync_with_stdio;
 
