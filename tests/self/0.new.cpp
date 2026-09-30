@@ -47,7 +47,7 @@ volatile int line;   // currently executed line
 volatile int fail;   // non-zero when line failed
 
 // restore the signal mask when jumping out of an expected assertion;
-// see doc/notes/ref-test-baseline.md, section 3.6
+// a longjmp out of the handler leaves SIGABRT blocked
 sigjmp_buf env;
 
 static void

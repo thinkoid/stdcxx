@@ -13,7 +13,7 @@ library.** The implementation still has its C++98 foundation and
 C++03 interface. Raising the implementation floor to C++17 and
 implementing the C++17 library are separate projects.
 
-This record describes the tree as of 2026-09-27: component coverage,
+This record describes the tree as of 2026-09-30: component coverage,
 concrete departures, selected defect resolutions checked against the
 code, and the broad gap to later libraries. Measurements are the
 pinned baseline tables of that date.
@@ -116,20 +116,20 @@ resolutions.
 The [baseline record](ref-test-baseline.md) covers six debug
 configurations: GCC and Clang, each with 64-bit archive, 32-bit archive
 and 64-bit reentrant shared builds. The pinned tables contain 272
-programs apiece. The GCC tables record 17 failed assertions, all in
-three stream tests (`27.basic.ios` 1, `27.filebuf` 8, `27.std.manip`
-8); the Clang tables add 5 in `21.cwchar`, a C-library declaration
-question queued in `TODO`. **These are test counts, not percentages
-of the standard implemented.** Assertions have unequal scope, and
+programs apiece. Every table records the same 17 failed assertions,
+all in three stream tests (`27.basic.ios` 1, `27.filebuf` 8,
+`27.std.manip` 8), and one aborted stream regression test,
+`27.ostream.inserters.stdcxx-51`. **These are test counts, not
+percentages of the standard implemented.** Assertions have unequal scope, and
 process failures can prevent later assertions from running.
 
 | area | current evidence and its limit |
 |---|---|
 | String range self-aliasing | Repaired; the relevant assignment, insertion and replacement tests and regressions pass in the recorded six configurations. This is evidence for the repaired path, not every string requirement. |
-| Locale facets | The `num_get`, `time_get` and `money_get` rows pass: the failures were test defects, a driver buffer, platform-decided lengths and two facet limits, repaired (`ref-test-baseline.md`, chapter 3.9). `money_get`'s unbounded value buffer is queued. |
-| Numerics and extension controls | The limits, math, valarray and extension rows pass; the failures were test defects and a driver comparison (chapter 3.10). |
+| Locale facets | The `num_get`, `time_get` and `money_get` rows pass. `num_get` and `money_get` grow their digit buffers instead of failing or overrunning, and `money_get` throws `bad_alloc` where the buffer size would wrap. |
+| Numerics and extension controls | The limits, math, valarray and extension rows pass; the failures were test defects and a driver comparison. |
 | Memory/lifetime symptoms | The intermittent string-iterator result was the test driver reading past short buffers, and the `21.cwchar` exit-time corruption a test's use of a write-only stream; both are repaired. |
-| Streams | `27.basic.ios`, `27.filebuf` and `27.std.manip` fail 17 assertions; they have not yet been read against the library. |
+| Streams | `27.basic.ios`, `27.filebuf` and `27.std.manip` fail 17 assertions, and `27.ostream.inserters.stdcxx-51` aborts; they have not yet been read against the library. |
 | Reentrant locale use | The sanitizer investigation found races and use-after-free in the locale; they are repaired, and each repair has a multithreaded test. The locale MT rows of the reentrant tables still vary with the machine: on many processors they measure the harness's memory and time limits, a test-design question queued in `TODO`. C++03 did not itself specify the later thread library and memory model. |
 | Test infrastructure | Several repaired failures belonged to tests or their driver. Known successful `NOUT` and `FORMAT` rows have individual reporting contracts; neither label alone proves success. |
 
@@ -181,4 +181,4 @@ The work separates naturally into three tracks:
    decisions belong here as well as new interfaces.
 
 Written by OpenAI LeChuck.
-Brought up to date with the tree of 2026-09-27 by Claude.
+Brought up to date with the tree of 2026-09-30 by Claude.

@@ -236,4 +236,4 @@ cannot answer, but it is no longer needed to see the defect.
 One round of the locale MT tests under ThreadSanitizer gives one
 report, the global locale's `ginit` flag. The 15D rows of the older
 locale MT tests now measure the harness only (`ref-test-baseline.md`,
-chapter 3.4).
+chapter 3.3).

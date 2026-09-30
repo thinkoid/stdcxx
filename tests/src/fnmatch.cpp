@@ -36,7 +36,6 @@ rw_fnmatch (const char *pattern, const char *string, int)
     RW_ASSERT (pattern);
     RW_ASSERT (string);
 
-    // The supported platforms provide POSIX matching; see
-    // doc/notes/ref-test-baseline.md, section 3.6.1.
+    // The supported platforms provide POSIX matching.
     return 0 != ::fnmatch (pattern, string, 0);
 }

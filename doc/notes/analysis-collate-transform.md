@@ -395,9 +395,10 @@ and would fail it with a weight of 129.
 Across the six pinned configurations the collate row is the only
 row of the suite that moves, apart from the rows that vary from run
 to run and varied again -- `23.bitset.cons` in the 64-bit builds and
-the MT locale tests in the thread-safe ones, `ref-test-baseline.md`
-chapters 3.4 and 3.5. Where those held still the assertion totals
-fall by exactly the 95 assertions the collate row loses.
+the MT locale tests in the thread-safe ones. 0d38b6cd steadied the
+first; `ref-test-baseline.md`, chapter 3.3, has the second. Where
+those held still the assertion totals fall by exactly the 95
+assertions the collate row loses.
 
 The test's own `TOPDIR` handling changed in the same commit. It read
 the environment variable directly and called `exit (1)` when it was
