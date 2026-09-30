@@ -359,6 +359,30 @@ be had: =etc/config/eccp.config= in dd1128a5,
 =_iosbase.h=, =_traits.h= and five characterizations survive, and so
 do the =eccp= rows of =etc/config/xfail.txt=.
 
+A first attempt, on EDG 7.0 in strict mode, found:
+- The default dialect of =eccp= is C++03 (=__cplusplus= is
+  =199711L=), not a GNU mode. No dialect option is needed.
+- The C headers are a property of the =eccp= installation, not of the
+  tree. The tree before the retirement never named them. With glibc,
+  the freestanding headers (=float.h=, =stddef.h=, =stdarg.h=) are
+  gcc's, and gcc's =float.h= reads macros that gcc predefines and
+  =eccp= does not in strict mode (=__DBL_DIG__= and the rest). The old
+  =float_defs.h= typed those values in by hand.
+- The retirement also removed the prelink step before =ar= (the
+  commit says only the retired compilers used it; =eccp.config= did).
+- =eccp= reads source as UTF-8 only. Five sources carry ISO-8859-1
+  bytes: =etc/config/src/locale_names.h= (=LOCALE_NAME_FMAT= fails, so
+  no =_RWSTD_LC_*= constants), =tests/algorithms/25.search.cpp=,
+  =tests/iostream/27.istream.readsome.cpp=,
+  =tests/iostream/27.istream.sentry.cpp=,
+  =tests/localization/22.locale.money.get.cpp=. An octal escape is
+  the same byte to every compiler.
+- Strict mode hides XSI and BSD names: =S_IFDIR= in
+  =src/setlocale.cpp=, =caddr_t= in =src/memattr.cpp=.
+- =va_start= on a =std::va_list= fails in =src/exception.cpp=.
+Unclear still: how the installation and the build were set up when
+the tree built with =eccp=.
+
 Fix: build EDG with its =eccp= driver. Restore =eccp.config= from
 =dd1128a5^= and bring it current: strict mode (=-A=), exceptions
 (=-x=), the prelinker, the thread library. The characterizations
