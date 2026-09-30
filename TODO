@@ -150,6 +150,32 @@ test passes in seconds under the harness in 15D on any processor
 count, and the 15D rows become a reference. Each test still fails
 against the library before the fix it covers.
 
+* TODO Run the suites in parallel
+
+The six suites run one after another, about 26 minutes on 32
+processors. 14 of them are timeouts: seven older locale MT tests run
+into the harness's 60 seconds in each thread-safe suite. The rest is a
+minute or two per suite, most of it in a few long tests. The suites
+are already isolated from each other: separate build directories,
+each program's output beside it, and a =TMPDIR= of its own for every
+=make run= (=etc/config/makefile.rules=). They share only the
+processors, and only the 15D MT rows depend on the load.
+
+Fix, in order:
+- The MT entry above. It removes the timeouts and the load
+  sensitivity.
+- The configurations' suites at once: the four single-threaded ones
+  now, the thread-safe ones with them once the MT entry lands. A
+  command for =doc/notes/ref-test-baseline.md=, not a tool to
+  maintain.
+- One configuration's list split across several harness runs, only if
+  a single-threaded suite grows past a few minutes. Within one run the
+  tests share =TMPDIR= and the locales =localedef= builds; each shard
+  needs its own, and the census of what else they share comes first.
+
+Check: the six tables of a parallel run identical to those of a
+serial one, three runs over; the wall time recorded beside the tables.
+
 * TODO One atomic backend, the =__atomic= built-ins
 
 The atomic operations have three backends besides the mutex
