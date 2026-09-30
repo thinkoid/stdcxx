@@ -200,31 +200,6 @@ _rw_fmtiostate (const FmtSpec &spec, Buffer &buf, int bits)
 _rw_fmtopenmode (const FmtSpec &spec, Buffer &buf, int bits)
 {
     static const Bitnames names [] = {
-
-#ifndef _RWSTD_NO_EXTENSIONS
-
-        { "std::ios::nocreate", "nocreate", std::ios::nocreate },
-        { "std::ios::noreplace", "noreplace", std::ios::noreplace },
-
-#else   // if defined (_RWSTD_NO_EXTENSIONS)
-
-        { "__rw:::__rw_nocreate", "__rw_nocreate", _RW::__rw_nocreate },
-        { "__rw::__rw_noreplace", "__rw_noreplace", _RW::__rw_noreplace },
-
-#endif   // _RWSTD_NO_EXTENSIONS
-
-#ifndef _RWSTD_NO_EXT_STDIO
-
-        { "std::ios::stdio", "stdio", std::ios::stdio },
-        { "std::ios::native", "native", std::ios::native },
-
-#else   // if defined (_RWSTD_NO_EXT_STDIO)
-
-        { "__rw::__rw_stdio", "__rw_stdio", _RW::__rw_stdio },
-        { "__rw::__rw_native", "__rw_native", _RW::__rw_native },
-
-#endif   // _RWSTD_NO_EXT_STDIO
-
         BITNAME (std::ios, app),
         BITNAME (std::ios, binary),
         BITNAME (std::ios, in),

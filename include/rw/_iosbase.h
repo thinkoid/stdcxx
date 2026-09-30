@@ -159,28 +159,6 @@ struct _RWSTD_EXPORT ios_base: _RW::__rw_synchronized
     // open and seek to end immediately after opening 
     _RWSTD_STATIC_CONST (openmode, ate = _RW::__rw_ate);
 
-#ifndef _RWSTD_STRICT_ANSI
-
-    // extensions for compatibility with Classic Iostreams
-
-    // do not create a file if it doesn't exist
-    _RWSTD_STATIC_CONST (openmode, nocreate = _RW::__rw_nocreate);
-
-    // do not replace an existing file
-    _RWSTD_STATIC_CONST (openmode, noreplace = _RW::__rw_noreplace);
-
-#endif   // _RWSTD_STRICT_ANSI
-
-#ifndef _RWSTD_NO_EXT_STDIO
-
-    // use the C stdio library for all file I/O
-    _RWSTD_STATIC_CONST (openmode, stdio = _RW::__rw_stdio);
-
-    // use the native OS calls for all file I/O
-    _RWSTD_STATIC_CONST (openmode, native = _RW::__rw_native);
-
-#endif   // _RWSTD_NO_EXT_STDIO
-
     typedef _RWSTD_BITMASK_ENUM (_RW::__rw_seekdir) seekdir;
 
     // 27.4.2.1.5, p1

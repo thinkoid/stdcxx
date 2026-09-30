@@ -234,7 +234,6 @@
 #ifdef _RWSTD_STRICT_ANSI
    // long long is not in ANSI C++ yet (although it is in ANSI C99)
 #  undef  _RWSTD_LONG_LONG
-#  define _RWSTD_NO_EXT_FILEBUF
 #  define _RWSTD_NO_EXT_VECTOR_BOOL_REF_OPS
 #  define _RWSTD_NO_EXT_LOCALE
 #  define _RWSTD_NO_EXT_DEEP_STRING_COPY

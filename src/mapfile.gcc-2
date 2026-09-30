@@ -256,8 +256,8 @@ global:
     always_noconv__CQ23stdt7codecvt3ZcZcZ11__mbstate_t;
     before__CQ23std9type_infoRCQ23std9type_info;
     classic__Q23std6locale;
-    close__Q23stdt13basic_filebuf2ZcZQ23stdt11char_traits1Zcb;
-    close__Q23stdt13basic_filebuf2ZwZQ23stdt11char_traits1Zwb;
+    close__Q23stdt13basic_filebuf2ZcZQ23stdt11char_traits1Zc;
+    close__Q23stdt13basic_filebuf2ZwZQ23stdt11char_traits1Zw;
     do_always_noconv__CQ23stdt7codecvt3ZcZcZ11__mbstate_t;
     do_always_noconv__CQ23stdt7codecvt3ZwZcZ11__mbstate_t;
     do_encoding__CQ23stdt7codecvt3ZcZcZ11__mbstate_t;
@@ -310,8 +310,8 @@ global:
     narrow__CQ23stdt5ctype1ZwPCwT1cPc;
     narrow__CQ23stdt5ctype1Zwwc;
     next_ind__Q23std6gslice;
-    open__Q23stdt13basic_filebuf2ZcZQ23stdt11char_traits1ZcPCcQ24__rw13__rw_openmodel;
-    open__Q23stdt13basic_filebuf2ZwZQ23stdt11char_traits1ZwPCcQ24__rw13__rw_openmodel;
+    open__Q23stdt13basic_filebuf2ZcZQ23stdt11char_traits1ZcPCcQ24__rw13__rw_openmode;
+    open__Q23stdt13basic_filebuf2ZwZQ23stdt11char_traits1ZwPCcQ24__rw13__rw_openmode;
     out__CQ23stdt7codecvt3ZcZcZ11__mbstate_tR11__mbstate_tPCcT2RPCcPcT5RPc;
     out__CQ23stdt7codecvt3ZwZcZ11__mbstate_tR11__mbstate_tPCwT2RPCwPcT5RPc;
     overflow__Q23std12strstreambufi;

@@ -94,9 +94,9 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 272 | 10,103,755 | 0 | 0 | 1 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 272 | 10,103,645 | 0 | 0 | 1 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,116,621 | 0 | 0 | 9 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 272 | 10,103,645 | 0 | 0 | 1 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 272 | 10,103,535 | 0 | 0 | 1 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,116,511 | 0 | 0 | 9 |
 
 Chapter 4 lists where the three differ.
 
@@ -107,9 +107,9 @@ and the `setbase` extension and `bin` were removed
 extension the same day, 15D was measured again in full and the other
 five in the rows that named the extension; only `27.basic.ios` moved,
 in the two thread-safe tables (`analysis-basic-ios-flags.md`). After
-the repair of `basic_filebuf::detach ()`, also that day, the four
-single-threaded configurations were measured again in full and the two
-thread-safe ones in their `27.*` rows; only `27.filebuf` moved.
+the removal of the file stream additions, also that day, five
+configurations were measured again in full and 15D-clang in its
+`27.*` rows; only `27.filebuf` moved.
 
 ## 3. What fails
 
@@ -214,9 +214,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 10,103,755 | 0 | 0 | 1 |
-| 11s-clang | 10,103,660 | 0 | 0 | 1 |
-| 15D-clang | 10,116,621 | 0 | 0 | 9 |
+| 11S-clang | 10,103,645 | 0 | 0 | 1 |
+| 11s-clang | 10,103,550 | 0 | 0 | 1 |
+| 15D-clang | 10,116,511 | 0 | 0 | 9 |
 
 Row for row they are the GCC tables, with one exception.
 `18.numeric.special.float` runs 134 assertions in the 32-bit Clang

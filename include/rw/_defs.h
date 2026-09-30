@@ -714,17 +714,12 @@
 #define _RWSTD_IOS_OUT           0x08
 #define _RWSTD_IOS_TRUNC         0x10
 #define _RWSTD_IOS_ATE           0x20
-#define _RWSTD_IOS_NOCREATE      0x40   // filebuf extension
-#define _RWSTD_IOS_NOREPLACE     0x80   // filebuf extension
-#define _RWSTD_IOS_STDIO         0x100  // filebuf extension
-#define _RWSTD_IOS_NATIVE        0x200  // filebuf extension
+#define _RWSTD_IOS_STDIO         0x100  // internal: filebuf uses stdio
 
 #define _RWSTD_IOS_OPENMODE_MASK                 \
   (  _RWSTD_IOS_APP      | _RWSTD_IOS_BINARY     \
    | _RWSTD_IOS_IN       | _RWSTD_IOS_OUT        \
-   | _RWSTD_IOS_TRUNC    | _RWSTD_IOS_ATE        \
-   | _RWSTD_IOS_NOCREATE | _RWSTD_IOS_NOREPLACE  \
-   | _RWSTD_IOS_STDIO    | _RWSTD_IOS_NATIVE)
+   | _RWSTD_IOS_TRUNC    | _RWSTD_IOS_ATE)
 
 #if    !defined (_RWSTD_NO_STATIC_IOSTREAM_INIT)  \
     && !defined (_RWSTD_NO_IOSTREAM_OBJECT_REFS)

@@ -37,12 +37,11 @@
 #  define _RWSTD_NO_DEPRECATED_C_HEADERS
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
-#include <errno.h>    // for ENAMETOOLONG, ERANGE, errno
+#include <errno.h>    // for ERANGE, errno
 #include <stddef.h>   // for ptrdiff_t
-#include <stdio.h>    // for P_tmpdir, std{err,in,out}, remove()
-#include <stdlib.h>   // for mkstemp(), strtoul(), size_t
+#include <stdio.h>    // for std{err,in,out}
+#include <stdlib.h>   // for strtoul(), size_t
 #include <ctype.h>    // for isalpha(), isspace(), toupper()
-#include <string.h>   // for memcpy()
 
 
 #include <unistd.h>
@@ -50,34 +49,9 @@
 
 #define _BINARY 0
 
-#ifndef ENAMETOOLONG
-   // hardcode based on the known value on each platform
-#  if defined _RWSTD_OS_LINUX
-#    define ENAMETOOLONG    36
-#  endif
-#endif   // ENAMETOOLONG
-
-#ifndef PATH_MAX
-#  define PATH_MAX   1024
-#endif
-
 #include <rw/_file.h>
 #include <rw/_defs.h>
 
-
-
-#ifndef _RWSTD_NO_PURE_C_HEADERS
-
-extern "C" {
-
-#undef mkstemp
-#define mkstemp _RWSTD_LIBC_SYM (mkstemp)
-
-_RWSTD_DLLIMPORT int mkstemp (char*);
-
-}   // extern "C"
-
-#endif   // _RWSTD_NO_PURE_C_HEADERS
 
 
 #ifndef _RWSTD_NO_PURE_C_HEADERS
@@ -174,9 +148,7 @@ static const char __rw_stdio_modes [][4] = {
 
 
 static const int
-__rw_openmode_mask =
-    ~(  _RWSTD_IOS_ATE | _RWSTD_IOS_STDIO
-      | _RWSTD_IOS_NOCREATE | _RWSTD_IOS_NOREPLACE);
+__rw_openmode_mask = ~(_RWSTD_IOS_ATE | _RWSTD_IOS_STDIO);
 
 
 // converts iostream open mode to POSIX file access mode
@@ -189,18 +161,7 @@ __rw_io_mode (int openmode)
     if (sizeof __rw_io_modes / sizeof *__rw_io_modes <= inx)
         return -1;
 
-    int fdmode = __rw_io_modes [inx];
-
-    // nocreate: open fails if the file does not exist
-    if (openmode & _RWSTD_IOS_NOCREATE)
-        fdmode &= ~_RWSTD_O_CREAT;
-
-    // noreplace: open for writing fails if the file exists
-    if (   (openmode & (_RWSTD_IOS_OUT | _RWSTD_IOS_NOREPLACE))
-        == (_RWSTD_IOS_OUT | _RWSTD_IOS_NOREPLACE))
-        fdmode |= _RWSTD_O_EXCL;
-
-    return fdmode;
+    return __rw_io_modes [inx];
 }
 
 
@@ -215,9 +176,6 @@ __rw_stdio_mode (int openmode)
     if (sizeof __rw_stdio_modes / sizeof *__rw_stdio_modes <= inx)
         return "";   // error -- bad mode
 
-    if (openmode & (_RWSTD_IOS_NOCREATE | _RWSTD_IOS_NOREPLACE))
-        return "";   // error -- not implemented
-
     const char* const stdio_mode = __rw_stdio_modes [inx];
 
     // verify postcondition: function never returns null
@@ -227,63 +185,13 @@ __rw_stdio_mode (int openmode)
 }
 
 
-static int
-__rw_mkstemp (int modebits, long prot)
-{
-    int fd;
-
-    // mkstemp() opens a temporary file for reading and writing
-    _RWSTD_UNUSED (modebits);
-    _RWSTD_UNUSED (prot);
-
-#  ifndef P_tmpdir   // #defined in <stdio.h> by POSIX
-#    define P_tmpdir "/tmp"
-#  endif   // P_tmpdir
-
-    // use TMPDIR and fall back on P_tmpdir as per POSIX
-    const char *tmpdir = getenv ("TMPDIR");
-    if (0 == tmpdir || '\0' == *tmpdir) 
-        tmpdir = P_tmpdir;
-
-    // template for temporary file name
-    static const char rwtmpXXXXXX[] = "/.rwtmpXXXXXX";
-
-    // buffer for temporary pathname
-    char pathbuf [PATH_MAX];
-
-    // check to see if the buffer is large enough
-    const size_t len = strlen (tmpdir);
-    if (sizeof pathbuf < len + sizeof rwtmpXXXXXX) {
-
-#  ifdef ENAMETOOLONG
-        // fail according to POSIX rules
-        errno = ENAMETOOLONG;
-#  endif   // ENAMETOOLONG
-
-        return -1;
-    }
-
-    // construct a template for temporary pathname
-    memcpy (pathbuf, tmpdir, len);
-    memcpy (pathbuf + len, rwtmpXXXXXX, sizeof rwtmpXXXXXX);
-
-    // call mkstemp() to create a temporary file and fill
-    // pathbuf with its pathname
-    fd = mkstemp (pathbuf);
-
-    // immediately delete the temporary file on success
-    // the open descriptor will refer to the file until
-    // it's explicitly closed or until the process exits
-    if (fd >= 0)
-        remove (pathbuf);
-
-    return fd;
-}
-
-
 _RWSTD_EXPORT void*
 __rw_fopen (const char *fname, int openmode, long prot)
 {
+    // the null pointer names no file
+    if (!fname)
+        return 0;
+
     if (openmode & _RWSTD_IOS_STDIO) {
 
         // convert the iostream open mode to the C stdio file open mode
@@ -295,20 +203,8 @@ __rw_fopen (const char *fname, int openmode, long prot)
         if ('\0' == *fmode)
             return 0;
 
-        FILE *file;
-
-        if (fname) {
-            // open the named file using C stdio
-            file = fopen (fname, fmode);
-        }
-        else {
-            // FIXME: check openmode to make sure it's valid for "w+"
-
-            // extension: create a temporary file for update ("w+")
-            // that will be automatically deleted when all references
-            // to the file are closed
-            file = tmpfile ();
-        }
+        // open the named file using C stdio
+        FILE* const file = fopen (fname, fmode);
 
         if (0 == file)
             return 0;
@@ -322,17 +218,8 @@ __rw_fopen (const char *fname, int openmode, long prot)
     if (fdmode < 0)
         return 0;
 
-    int fd;
-
-    if (fname) {
-        // open the named file
-        fd = open (fname, fdmode, prot);
-    }
-    else {
-        // extension: create a temporary file that will be deleted
-        // when the last file descriptor that refers to it is closed
-        fd = __rw_mkstemp (fdmode, prot);
-    }
+    // open the named file
+    const int fd = open (fname, fdmode, prot);
 
     if (fd < 0)
         return 0;

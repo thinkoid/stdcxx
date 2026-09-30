@@ -42,8 +42,7 @@ int main ()
     assert (6 == fb.sputn ("ABCDEF", 6));
     assert (0 != fb.close ());
 
-    assert (0 != fb.open (tmpfname,
-                          std::ios::in | std::ios::out | std::ios::stdio));
+    assert (0 != fb.open (tmpfname, std::ios::in | std::ios::out));
 
     assert (3 == fb.sputn ("abc", 3));
     assert (-1 != fb.pubsync ());
@@ -64,8 +63,7 @@ int main ()
     assert (6 == wfb.sputn (L"ABCDEF", 6));
     assert (0 != wfb.close ());
 
-    assert (0 != wfb.open (tmpfname,
-                           std::ios::in | std::ios::out | std::ios::stdio));
+    assert (0 != wfb.open (tmpfname, std::ios::in | std::ios::out));
 
     assert (3 == wfb.sputn (L"abc", 3));
     assert (-1 != wfb.pubsync ());

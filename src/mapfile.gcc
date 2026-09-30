@@ -271,9 +271,7 @@ global:
     _ZNKSt10moneypunctIwLb1EE16do_thousands_sepEv;
     _ZNKSt10moneypunctIwLb1EE8groupingEv;
     _ZNKSt13bad_exception4whatEv;
-    _ZNKSt13basic_filebufIcSt11char_traitsIcEE2fdEv;
     _ZNKSt13basic_filebufIcSt11char_traitsIcEE7is_openEv;
-    _ZNKSt13basic_filebufIwSt11char_traitsIwEE2fdEv;
     _ZNKSt13basic_filebufIwSt11char_traitsIwEE7is_openEv;
     _ZNKSt13basic_istreamIwSt11char_traitsIwEE6gcountEv;
     _ZNKSt13basic_istreamIwSt11char_traitsIwEE6sentrycvbEv;
@@ -746,11 +744,9 @@ global:
     _ZNSt13bad_exceptionD1Ev;
     _ZNSt13bad_exceptionD2Ev;
     _ZNSt13bad_exceptionaSERKS_;
-    _ZNSt13basic_filebufIcSt11char_traitsIcEE4openEPKcN4__rw13__rw_openmodeEl;
+    _ZNSt13basic_filebufIcSt11char_traitsIcEE4openEPKcN4__rw13__rw_openmodeE;
     _ZNSt13basic_filebufIcSt11char_traitsIcEE4syncEv;
-    _ZNSt13basic_filebufIcSt11char_traitsIcEE5closeEb;
-    _ZNSt13basic_filebufIcSt11char_traitsIcEE6attachEi;
-    _ZNSt13basic_filebufIcSt11char_traitsIcEE6detachEv;
+    _ZNSt13basic_filebufIcSt11char_traitsIcEE5closeEv;
     _ZNSt13basic_filebufIcSt11char_traitsIcEE6setbufEPci;
     _ZNSt13basic_filebufIcSt11char_traitsIcEE7seekoffEiN4__rw12__rw_seekdirENS3_13__rw_openmodeE;
     _ZNSt13basic_filebufIcSt11char_traitsIcEE7seekposESt4fposI11__mbstate_tEN4__rw13__rw_openmodeE;
@@ -764,11 +760,9 @@ global:
     _ZNSt13basic_filebufIcSt11char_traitsIcEEC2Ev;
     _ZNSt13basic_filebufIcSt11char_traitsIcEED1Ev;
     _ZNSt13basic_filebufIcSt11char_traitsIcEED2Ev;
-    _ZNSt13basic_filebufIwSt11char_traitsIwEE4openEPKcN4__rw13__rw_openmodeEl;
+    _ZNSt13basic_filebufIwSt11char_traitsIwEE4openEPKcN4__rw13__rw_openmodeE;
     _ZNSt13basic_filebufIwSt11char_traitsIwEE4syncEv;
-    _ZNSt13basic_filebufIwSt11char_traitsIwEE5closeEb;
-    _ZNSt13basic_filebufIwSt11char_traitsIwEE6attachEi;
-    _ZNSt13basic_filebufIwSt11char_traitsIwEE6detachEv;
+    _ZNSt13basic_filebufIwSt11char_traitsIwEE5closeEv;
     _ZNSt13basic_filebufIwSt11char_traitsIwEE6setbufEPwi;
     _ZNSt13basic_filebufIwSt11char_traitsIwEE7seekoffEiN4__rw12__rw_seekdirENS3_13__rw_openmodeE;
     _ZNSt13basic_filebufIwSt11char_traitsIwEE7seekposESt4fposI11__mbstate_tEN4__rw13__rw_openmodeE;

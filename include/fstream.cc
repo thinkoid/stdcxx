@@ -33,7 +33,7 @@ _RWSTD_NAMESPACE (std) {
 template<class _CharT, class _Traits>
 basic_filebuf<_CharT, _Traits>*
 basic_filebuf<_CharT, _Traits>::
-open (const char *__name, ios_base::openmode __mode, long __prot)
+open (const char *__name, ios_base::openmode __mode)
 {
     _RWSTD_ASSERT (this->_C_is_valid ());
 
@@ -41,7 +41,9 @@ open (const char *__name, ios_base::openmode __mode, long __prot)
     if ((__mode & ~_RWSTD_IOS_OPENMODE_MASK) || is_open ())
         return 0;
 
-    _C_file = _RW::__rw_fopen (__name, __mode, __prot);
+    // a file the call creates gets the permissions fopen() gives it,
+    // 0666 less the process's umask
+    _C_file = _RW::__rw_fopen (__name, __mode, 0666);
 
     if (!_C_file)
         return 0;
@@ -64,7 +66,8 @@ open (const char *__name, ios_base::openmode __mode, long __prot)
 
     _C_beg_pos = _C_cur_pos = __pos;
 
-    this->_C_state &= ~_RWSTD_IOS_OPENMODE_MASK;
+    // a file opened by name uses descriptors, not stdio
+    this->_C_state &= ~(_RWSTD_IOS_OPENMODE_MASK | _RWSTD_IOS_STDIO);
     this->_C_state |= __mode;
 
     return this;
@@ -74,10 +77,8 @@ open (const char *__name, ios_base::openmode __mode, long __prot)
 template<class _CharT, class _Traits>
 basic_filebuf<_CharT, _Traits>*
 basic_filebuf<_CharT, _Traits>::
-close (bool __close_file /* = true */)
+close ()
 {
-    // close_file is false when close() is called from detach()
-
     _RWSTD_ASSERT (this->_C_is_valid ());
 
     if (!is_open ())
@@ -97,40 +98,30 @@ close (bool __close_file /* = true */)
             __retval = 0;   // failure
     }
     _CATCH (...) {
-        // either overflow() or codecvt::unshift() threw
+        // either overflow() or codecvt::unshift() threw; close the
+        // file anyway, as LWG issue 622 requires
+        _RW::__rw_fclose (_C_file, this->_C_state);
 
-        if (__close_file) {
-            _RW::__rw_fclose (_C_file, this->_C_state);
+        _C_file    = 0;
+        _C_cur_pos = _C_beg_pos = pos_type (off_type (-1));
 
-            // zero out the file pointer except when detaching fd
-            _C_file    = 0;
-            _C_cur_pos = _C_beg_pos = pos_type (off_type (-1));
-
-            // reset input/output sequences to prevent any
-            // subsequent I/O attempts on closed file
-            this->setg (0, 0, 0);
-            this->setp (0, 0);
-        }
+        // reset input/output sequences to prevent any
+        // subsequent I/O attempts on closed file
+        this->setg (0, 0, 0);
+        this->setp (0, 0);
 
         // rethrow the caught exception
         _RETHROW;
     }
 
-    if (__close_file) {
-        if (_RW::__rw_fclose (_C_file, this->_C_state))
-            __retval = 0;
-    }
-    else if (!__retval) {
-        // detach() leaves the file associated when the flush fails
-        return __retval;
-    }
+    if (_RW::__rw_fclose (_C_file, this->_C_state))
+        __retval = 0;
 
-    // disassociate from the file, closed or (detached) left open
     _C_file    = 0;
     _C_cur_pos = _C_beg_pos = pos_type (off_type (-1));
 
     // reset input/output sequences to prevent any
-    // subsequent I/O attempts on the file
+    // subsequent I/O attempts on closed file
     this->setg (0, 0, 0);
     this->setp (0, 0);
 

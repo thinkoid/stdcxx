@@ -28,30 +28,14 @@
  
 #include <fstream>    // for filebuf, ifstream, istream
 #include <iostream>   // for cout, endl
-#include <cstdio>     // for tmpnam(), remove()
+#include <cstdio>     // for remove()
 
 #include <examples.h>
 
 int main ()
 {
-#ifndef _RWSTD_NO_EXT_FILEBUF
-
-    // use an extension of this implementation: NULL file name argument
-    // creates a temporary file; closing the file stream object or its
-    // associated filebuf removes the temporary file
-    const char* const fname = 0;
-    
-#else   // if defined (_RWSTD_NO_EXT_FILEBUF)
-
-    char fnamebuf [L_tmpnam];
-
-    // create a temporary filename
-    const char* const fname = std::tmpnam (fnamebuf);
-
-    if (!fname)
-        return 1;
-
-#endif   // _RWSTD_NO_EXT_FILEBUF
+    // the name of a temporary file in the current directory
+    const char fname[] = "filebuf.tmp";
 
     // create a filebuf object for reading and writing of a temporary file
     std::filebuf outbuf;
@@ -77,13 +61,8 @@ int main ()
     // close the filebuf object before removing the underlying file
     outbuf.close ();
   
-    if (fname) {
-        // remove the temporary file if it has a name
-        // otherwise, if fname is NULL, the temporary file will
-        // have already been automatically removed by the call
-        // to close() above
-        std::remove (fname);
-    }
+    // remove the temporary file
+    std::remove (fname);
 
     return 0;
 }

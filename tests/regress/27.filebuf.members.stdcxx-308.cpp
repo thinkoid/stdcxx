@@ -41,33 +41,23 @@
 #include <fstream>   // for filebuf
 
 #include <sys/resource.h>   // for getrlimit(), rlim_t
-#include <unistd.h>         // for close(), write(), ssize_t
+#include <unistd.h>         // for close(), dup(), write(), ssize_t
 
 
 static int write_bytes (const char *fname, std::size_t nbytes)
 {
+    // open() takes the lowest free file descriptor (POSIX); find it
+    // before the filebuf opens its file
+    const int fd = dup (STDIN_FILENO);
+
+    if (0 <= fd)
+        close (fd);
+
     std::filebuf fb;
 
     if (   0 == fb.pubsetbuf (0, nbytes + 1)
         || 0 == fb.open (fname, std::ios::out))
         return -1;
-
-#if     defined _RWSTD_VER              \
-    && !defined _RWSTD_NO_EXT_FILEBUF   \
-    && !defined _RWSTD_NO_NATIVE_IO
-
-
-    // use the filebuf::fd() extension to get the filebuf's
-    // associated file descriptor
-    const int fd = fb.fd ();
-
-#else   // if !RWSTD_NO_EXT_FILEBUF && !_RWSTD_NO_NATIVE_IO
-
-    // assume fd is the next available file descriptor after
-    // STDIN_FILENO, _FILENO_STDOUT, and STDERR_FILENO
-    const int fd = 3;
-
-#endif   // _RWSTD_NO_EXT_FILEBUF || _RWSTD_NO_NATIVE_IO
 
     if (0 < fd) {
         // fill up the filebuf's character buffer without

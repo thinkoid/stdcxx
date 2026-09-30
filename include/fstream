@@ -114,109 +114,56 @@ public:
         basic_filebuf::setbuf (0, _RWSTD_DEFAULT_BUFSIZE);
     }
 
-#if     defined (_RWSTD_NO_EXT_FILEBUF)            \
-    && !defined (_RWSTD_NO_STATIC_IOSTREAM_INIT)   \
-    && (!defined (__GNUG__) || 2 < __GNUG__ || 96 < __GNUC_MINOR__)
+#ifndef _RWSTD_NO_STATIC_IOSTREAM_INIT
+#  if !defined (__GNUG__) || 2 < __GNUG__ || 96 < __GNUC_MINOR__
 
 private:
 
     // g++ 2.95 error: `std::ios_base::Init' does not declare a template type
     friend struct ios_base::Init;
 
-#endif   // _RWSTD_NO_EXT_FILEBUF && !_RWSTD_NO_STATIC_IOSTREAM_INIT
+#  endif   // gcc > 2.95
+#endif   // _RWSTD_NO_STATIC_IOSTREAM_INIT
 
-    // ctor extensions - associate this with an open file and
-    // optionally set buffer size and caller-allocated buffer
-    // NOTE: passed in buffer will NOT be deallocated
+    // ios_base::Init builds the standard objects' buffers on their
+    // file descriptors, or on their FILE pointers where file streams
+    // use stdio; with _RWSTD_NO_STATIC_IOSTREAM_INIT the buffers are
+    // objects at namespace scope, and the constructors stay public
+    // NOTE: the passed in buffer will NOT be deallocated
 
 #ifndef _RWSTD_NO_NATIVE_IO
 
     _EXPLICIT
-    basic_filebuf (int __fd, char_type* __buf   = 0,
-                   _RWSTD_STREAMSIZE __bufsz = _RWSTD_DEFAULT_BUFSIZE)
+    basic_filebuf (int __fd, char_type* __buf, _RWSTD_STREAMSIZE __bufsz)
         : _Streambuf (ios_base::openmode (_RW::__rw_fdmode (__fd))),
           _C_file (0), _C_cur_pos (), _C_beg_pos (), _C_pbacksize (0) {
         _C_open (__fd, 0, __buf, __bufsz);
     }
 
-#endif   // _RWSTD_NO_NATIVE_IO
+#elif defined (stdin)   // && _RWSTD_NO_NATIVE_IO
 
-public:
-
-#if !defined(_RWSTD_NO_EXT_FILEBUF) || defined(_RWSTD_NO_NATIVE_IO)
-
-    // extension enabled only if the macro stdin is also #defined
-    // i.e., if the header <cstdio> or <stdio.h> has been #included
-
-#  ifdef stdin
+    // FILE is declared where the macro stdin is, i.e., where the
+    // header <cstdio> or <stdio.h> has been #included
 
     _EXPLICIT
-    basic_filebuf (FILE *__fptr, char_type* __buf = 0,
-                   _RWSTD_STREAMSIZE __bufsz = _RWSTD_DEFAULT_BUFSIZE)
+    basic_filebuf (FILE *__fptr, char_type* __buf, _RWSTD_STREAMSIZE __bufsz)
         : _Streambuf (),
           _C_file (0), _C_cur_pos (), _C_beg_pos (), _C_pbacksize (0) {
-        open (__fptr, __buf, __bufsz);
+        _C_open (-1, __fptr, __buf, __bufsz);
     }
 
-#  endif   // stdin
-#endif   // !_RWSTD_NO_EXT_FILEBUF || _RWSTD_NO_NATIVE_IO
+#endif   // _RWSTD_NO_NATIVE_IO, stdin
+
+public:
 
     // 27.8.1.2, p3
     virtual ~basic_filebuf ();
 
-    // 27.8.1.3, p2 (last optional argument is an extension)
-    basic_filebuf* open (const char*, ios_base::openmode, long = 0666);
-    
-#ifndef _RWSTD_NO_EXT_FILEBUF
+    // 27.8.1.3, p2
+    basic_filebuf* open (const char*, ios_base::openmode);
 
-    // extensions - associate *this with an open file descriptor
-    // and optionally set buffer size and caller-allocated buffer
-    // NOTE: passed in buffer will NOT be deallocated
-
-#  ifndef _RWSTD_NO_NATIVE_IO
-
-    basic_filebuf* open (int __fd, char_type *__buf = 0,
-          _RWSTD_STREAMSIZE __bufsz = _RWSTD_DEFAULT_BUFSIZE) {
-        return _C_open (__fd, 0, __buf, __bufsz);
-    }
-
-#  endif   // _RWSTD_NO_NATIVE_IO
-
-#  ifdef stdin
-
-    // extension enabled only if the macro stdin is also #defined
-    // i.e., if the header <cstdio> or <stdio.h> has been #included
-
-    basic_filebuf* open (FILE *__file, char_type *__buf = 0,
-          _RWSTD_STREAMSIZE __bufsz = _RWSTD_DEFAULT_BUFSIZE) {
-        return _C_open (-1, __file, __buf, __bufsz);
-    }
-
-#  endif   // stdin
-
-#  ifndef _RWSTD_NO_NATIVE_IO
-
-    // extension - return the associated file descriptor
-    int fd () const {
-        return _RW::__rw_fileno (_C_file, this->_C_state);
-    }
-
-    // extension - associate *this with an open file descriptor
-    basic_filebuf* attach (int __fd) {
-        return _C_open (__fd, 0, this->_C_buffer, this->_C_bufsize);
-    }
-
-    // extension - flush and detach from file descriptor without closing it
-    int detach () {
-        const int __fd = fd ();
-        return close (false) ? __fd : -1;
-    }
-
-#  endif   // _RWSTD_NO_NATIVE_IO
-#endif   // _RWSTD_NO_EXT_FILEBUF
-
-    // 27.8.1.3, p6, argument is an extension
-    basic_filebuf* close (bool = true);
+    // 27.8.1.3, p6
+    basic_filebuf* close ();
 
     // 27.8.1.3, p1
     bool is_open () const {
@@ -390,40 +337,11 @@ public:
 
     _EXPLICIT
     basic_ifstream (const char        *__name,
-                    ios_base::openmode __mode = ios_base::in,
-                    long               __prot = 0666)
+                    ios_base::openmode __mode = ios_base::in)
         : basic_istream<char_type, traits_type> (rdbuf ()) {
-        open (__name, __mode, __prot);
+        open (__name, __mode);
     }
 
-#ifndef  _RWSTD_NO_EXT_FILEBUF
-
-    // extensions - associate this with an open file and set buffer
-
-#  ifndef _RWSTD_NO_NATIVE_IO
-
-    _EXPLICIT
-    basic_ifstream (int __fd, char_type *__buf = 0,
-                    _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE)
-        : basic_istream<char_type, traits_type> (rdbuf ()) {
-        open (__fd, __buf, __n);
-    }
-
-#  endif   // _RWSTD_NO_NATIVE_IO
-
-#  ifdef stdin
-
-    _EXPLICIT
-    basic_ifstream (FILE *__fptr, char_type *__buf = 0,
-                    _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE)
-        : basic_istream<char_type, traits_type> (rdbuf ()) {
-        open (__fptr, __buf, __n);
-    }
-
-#  endif   // stdin
-
-#endif   // _RWSTD_NO_EXT_FILEBUF
-    
     // NOTE: the pointer returned from rdbuf() may be different from
     //       the one passed to basic_ios<>::rdbuf (basic_filebuf<>*)
 
@@ -438,37 +356,10 @@ public:
     }
 
     void open (const char         *__name,
-               ios_base::openmode  __mode = ios_base::in,
-               long                __prot = 0666) {
-        this->clear (rdbuf ()->open (__name, __mode |= ios_base::in, __prot)
+               ios_base::openmode  __mode = ios_base::in) {
+        this->clear (rdbuf ()->open (__name, __mode |= ios_base::in)
                      ? ios_base::goodbit : ios_base::failbit);
     }
-
-#ifndef  _RWSTD_NO_EXT_FILEBUF
-
-    // extensions - associate this with an open file and set buffer
-
-#  ifndef _RWSTD_NO_NATIVE_IO
-
-    void open (int __fd, char_type *__buf=0,
-               _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE) {
-        this->clear (rdbuf ()->open (__fd, __buf, __n) ?
-                     ios_base::goodbit : ios_base::failbit);
-    }
-
-#  endif   // _RWSTD_NO_NATIVE_IO
-
-#  ifdef stdin
-
-    void open (FILE *__fptr, char_type *__buf=0,
-               _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE) {
-        this->clear (rdbuf ()->open (__fptr, __buf, __n) ?
-                     ios_base::goodbit : ios_base::failbit);
-    }
-
-#  endif   // stdin
-
-#endif   // _RWSTD_NO_EXT_FILEBUF
 
     void close () {
         if (!rdbuf ()->close ())
@@ -500,40 +391,11 @@ public:
         : basic_ostream<char_type, traits_type> (rdbuf ()) { }
 
     _EXPLICIT basic_ofstream (const char         *__name,
-                              ios_base::openmode  __mode = ios_base::out,
-                              long                __prot = 0666)
+                              ios_base::openmode  __mode = ios_base::out)
         : basic_ostream<char_type, traits_type> (rdbuf ()) {
-        open (__name, __mode, __prot);
+        open (__name, __mode);
     }
 
-#ifndef _RWSTD_NO_EXT_FILEBUF
-
-    // extensions - associate this with an open file and set buffer
-
-#  ifndef _RWSTD_NO_NATIVE_IO
-
-    _EXPLICIT
-    basic_ofstream (int __fd, char_type *__buf = 0,
-                    _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE)
-        : basic_ostream<char_type, traits_type> (rdbuf ()) {
-        open (__fd, __buf, __n);
-    }
-
-#  endif   // _RWSTD_NO_NATIVE_IO
-    
-#  ifdef stdin
-
-    _EXPLICIT
-    basic_ofstream (FILE *__fptr, char_type *__buf = 0,
-                    _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE)
-        : basic_ostream<char_type, traits_type> (rdbuf ()) {
-        open (__fptr, __buf, __n);
-    }
-
-#  endif   // stdin
-
-#endif   // _RWSTD_NO_EXT_FILEBUF
-    
     // NOTE: the pointer returned from rdbuf() may be different from
     //       the one passed to basic_ios<>::rdbuf (basic_filebuf<>*)
 
@@ -548,38 +410,11 @@ public:
     }
      
     void open (const char         *__name,
-               ios_base::openmode  __mode = ios_base::out,
-               long                __prot = 0666) {
-        this->clear (rdbuf ()->open (__name, __mode |= ios_base::out, __prot)
+               ios_base::openmode  __mode = ios_base::out) {
+        this->clear (rdbuf ()->open (__name, __mode |= ios_base::out)
                      ? ios_base::goodbit : ios_base::failbit);
     }
 
-#ifndef _RWSTD_NO_EXT_FILEBUF
-
-    // extensions - associate this with an open file and set buffer
-
-#  ifndef _RWSTD_NO_NATIVE_IO
-
-    void open (int  __fd, char_type *__buf=0,
-               _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE) {
-        this->clear (rdbuf ()->open (__fd, __buf, __n) ?
-                     ios_base::goodbit : ios_base::failbit);
-    }
-
-#  endif   // _RWSTD_NO_NATIVE_IO
-
-#  ifdef stdin
-
-    void open (FILE *__fp, char_type *__buf=0,
-               _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE) {
-        this->clear (rdbuf ()->open (__fp, __buf, __n) ?
-                     ios_base::goodbit : ios_base::failbit);
-    }
-
-#  endif   // stdin
-
-#endif   // _RWSTD_NO_EXT_FILEBUF
-    
     void close() {
         if (!rdbuf ()->close ())
             this->setstate (ios_base::failbit);
@@ -611,39 +446,10 @@ public:
 
     _EXPLICIT
     basic_fstream (const char         *__name,
-                   ios_base::openmode  __mode = _RW::__rw_in_out,
-                   long                __prot = 0666)
+                   ios_base::openmode  __mode = _RW::__rw_in_out)
         : basic_iostream<char_type, traits_type>(rdbuf ()) {
-        open (__name, __mode, __prot);
+        open (__name, __mode);
     }
-
-#ifndef _RWSTD_NO_EXT_FILEBUF
-
-    // extensions - associate this with an open file and set buffer
-
-#  ifndef _RWSTD_NO_NATIVE_IO
-
-    _EXPLICIT
-    basic_fstream (int __fd, char_type *__buf = 0,
-                   _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE)
-        : basic_iostream<char_type, traits_type>(rdbuf ()) {
-        open (__fd, __buf, __n);
-    }
-
-#  endif // _RWSTD_NO_NATIVE_IO
-
-#  ifdef stdin
-
-    _EXPLICIT
-    basic_fstream (FILE *__fptr, char_type *__buf = 0,
-                   _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE)
-        : basic_iostream<char_type, traits_type>(rdbuf ()) {
-        open (__fptr, __buf, __n);
-    }
-
-#  endif   // stdin
-
-#endif   // _RWSTD_NO_EXT_FILEBUF
 
     // NOTE: the pointer returned from rdbuf() may be different from
     //       the one passed to basic_ios<>::rdbuf (basic_filebuf<>*)
@@ -659,37 +465,10 @@ public:
     }
 
     void open (const char         *__name,
-               ios_base::openmode  __mode = _RW::__rw_in_out,
-               long                __prot = 0666) {
-        this->clear (rdbuf ()->open (__name, __mode, __prot)
+               ios_base::openmode  __mode = _RW::__rw_in_out) {
+        this->clear (rdbuf ()->open (__name, __mode)
                      ? ios_base::goodbit : ios_base::failbit);
     }
-
-#ifndef _RWSTD_NO_EXT_FILEBUF
-
-    // extensions - associate this with an open file and set buffer"
-
-#  ifndef _RWSTD_NO_NATIVE_IO
-
-    void open (int __fd, char_type *__buf=0,
-               _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE) {
-        this->clear (rdbuf ()->open (__fd, __buf, __n) ?
-                     ios_base::goodbit : ios_base::failbit);
-    }
-
-#  endif   // _RWSTD_NO_NATIVE_IO
-
-#  ifdef stdin
-
-    void open (FILE *__fptr, char_type *__buf=0,
-               _RWSTD_STREAMSIZE __n = _RWSTD_DEFAULT_BUFSIZE) {
-        this->clear (rdbuf ()->open (__fptr, __buf, __n) ?
-                     ios_base::goodbit : ios_base::failbit);
-    }
-
-#  endif    // stdin
-
-#endif   // _RWSTD_NO_EXT_FILEBUF
 
     void close () {
         if (!rdbuf ()->close ())

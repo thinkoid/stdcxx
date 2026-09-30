@@ -210,9 +210,9 @@ leaves with the design.
 
 =_RWSTD_STRICT_ANSI= (=include/rw/_config.h:234=, also selected by
 =_RWSTD_NO_EXTENSIONS=) is opt-in. It undefines =_RWSTD_LONG_LONG= and
-defines 27 =_RWSTD_NO_EXT_*= macros. The original README calls the
-switch deprecated. The tree reads 35 =_RWSTD_NO_EXT_*= names in 36
-files under =include= and =src=; the strict block never sets eight of
+defines 26 =_RWSTD_NO_EXT_*= macros. The original README calls the
+switch deprecated. The tree reads 33 =_RWSTD_NO_EXT_*= names in 34
+files under =include= and =src=; the strict block never sets seven of
 them. The tests carry the same gates, and =tests/intro/17.extensions=
 exercises the additions.
 
@@ -222,7 +222,7 @@ classes, overloads and manipulator values the standard does not
 specify. Among them the =ios_base::failure= subclasses,
 =stringbuf::str (const char*)=, the deep-copy =basic_string::copy=,
 the extra =num_get=, =num_put= and =time_get= members, the =void=
-forms of =count= and =distance=, the filebuf additions.
+forms of =count= and =distance=.
 
 The rest of what the gates cover keeps its behaviour and loses only
 its macro: choices the standard permits (the in-place =assign= and
@@ -237,13 +237,13 @@ Fix, one subsystem per commit, the suite tables as the oracle. The
 =setbase= bases and =bin= went first, ahead of the sort
 (=doc/notes/analysis-numeric-base.md=), then the stream-locking
 additions, their default kept
-(=doc/notes/analysis-basic-ios-flags.md=). Then the 35 gates sorted
-into the two lists, recorded in the commit that deletes
-=_RWSTD_STRICT_ANSI= and =_RWSTD_NO_EXTENSIONS= from =_config.h=.
-Then, per addition, the code path goes with its macro, its test
-branches and its =17.extensions= cases; per kept behaviour, the macro
-and its dead branch go. The original README stays; =README.md=
-records the policy.
+(=doc/notes/analysis-basic-ios-flags.md=), then the file stream
+additions. Then the 33 gates sorted into the two lists, recorded in
+the commit that deletes =_RWSTD_STRICT_ANSI= and
+=_RWSTD_NO_EXTENSIONS= from =_config.h=. Then, per addition, the code
+path goes with its macro, its test branches and its =17.extensions=
+cases; per kept behaviour, the macro and its dead branch go. The
+original README stays; =README.md= records the policy.
 
 Check: =git grep _RWSTD_NO_EXT_= is empty under =include=, =src= and
 =tests=. =17.extensions= is reduced to nothing or retired. The suite
@@ -259,9 +259,9 @@ it differently.
 
 - =_RWSTD_NO_USING_LIBC_IN_STD= is defined nowhere. Fifteen headers
   test it around their =namespace std= blocks.
-- =src/file.cpp= declares =mkstemp= and =fileno= under
-  =#ifndef _RWSTD_NO_PURE_C_HEADERS=, which the file defines three
-  lines above; the blocks cannot be compiled.
+- =src/file.cpp= declares =fileno= under
+  =#ifndef _RWSTD_NO_PURE_C_HEADERS=, which the file defines above;
+  the block cannot be compiled.
 - =_cstdio.h= declares =gets= in =std= and =stdio.h= exports it, both
   in pure-headers mode only. The default mode leaves it out, as
   C++14 does.

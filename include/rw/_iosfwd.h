@@ -160,11 +160,7 @@ enum __rw_openmode {
     __rw_out       = _RWSTD_IOS_OUT,
     __rw_in_out    = _RWSTD_IOS_IN | _RWSTD_IOS_OUT,
     __rw_trunc     = _RWSTD_IOS_TRUNC,
-    __rw_ate       = _RWSTD_IOS_ATE,
-    __rw_nocreate  = _RWSTD_IOS_NOCREATE,
-    __rw_noreplace = _RWSTD_IOS_NOREPLACE,
-    __rw_stdio     = _RWSTD_IOS_STDIO,
-    __rw_native    = _RWSTD_IOS_NATIVE
+    __rw_ate       = _RWSTD_IOS_ATE
 };
 
 _RWSTD_DEFINE_BITMASK_OPERATORS (__rw_openmode);

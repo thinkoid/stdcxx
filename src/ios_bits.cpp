@@ -72,19 +72,5 @@ _RWSTD_DEFINE_STATIC_CONST (const ios_base::seekdir ios_base::beg);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::seekdir ios_base::cur);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::seekdir ios_base::end);
 
-#ifndef _RWSTD_STRICT_ANSI
-
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::nocreate);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::noreplace);
-
-#endif   // _RWSTD_STRICT_ANSI
-
-#ifndef _RWSTD_NO_EXT_STDIO
-
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::stdio);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::native);
-
-#endif   // _RWSTD_NO_EXT_STDIO
-
 
 }   // namespace std
