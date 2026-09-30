@@ -126,6 +126,76 @@ template <class charT, class Traits>
 struct StreamBuf: std::basic_streambuf<charT, Traits> { /* empty */ };
 
 
+// extracts a long from str after std::setbase (base)
+template <class charT>
+static long
+extract (const charT *str, int base)
+{
+    std::basic_istringstream<charT, std::char_traits<charT> > istrm (str);
+
+    long val = -1;
+
+    istrm >> std::setbase (base) >> val;
+
+    return val;
+}
+
+
+// clears basefield after std::hex or std::oct in one of the three
+// ways 27.4.2.2 and 27.6.3 provide; basefield must end up empty,
+// giving prefix-dependent input and decimal output
+template <class charT>
+static int
+test_basefield_clear (int lineno, std::ios_base::fmtflags base, int how)
+{
+    static const char* const hows [] = {
+        "unsetf (basefield)",
+        "setf (0, basefield)",
+        "resetiosflags (basefield)"
+    };
+
+    static const charT str [] = { '0', '1', '0', ' ', '1', '9', '\0' };
+    static const charT dec_255 [] = { '2', '5', '5', '\0' };
+
+    std::basic_stringstream<charT, std::char_traits<charT> > strm (str);
+
+    strm.setf (base, std::ios_base::basefield);
+
+    if (0 == how)
+        strm.unsetf (std::ios_base::basefield);
+    else if (1 == how)
+        strm.setf (std::ios_base::fmtflags (0), std::ios_base::basefield);
+    else
+        strm >> std::resetiosflags (std::ios_base::basefield);
+
+    const std::ios_base::fmtflags basefield =
+        strm.flags () & std::ios_base::basefield;
+
+    long val_010 = -1;
+    long val_19  = -1;
+
+    strm >> val_010 >> val_19;
+
+    std::basic_ostringstream<charT, std::char_traits<charT> > ostrm;
+
+    ostrm.flags (strm.flags ());
+    ostrm << 255;
+
+    const bool success =
+           0 == basefield && 8 == val_010 && 19 == val_19
+        && ostrm.str () == dec_255;
+
+    rw_assert (success, __FILE__, lineno,
+               "%{If} followed by %s: basefield %{If}, \"010 19\" "
+               "extracted as %ld and %ld, 255 inserted as %{*Ac}; "
+               "expected fmtflags(0), 8, 19, \"255\"",
+               int (base), hows [how], int (basefield), val_010, val_19,
+               int (sizeof (charT)), ostrm.str ().c_str ());
+
+    return !success;
+}
+
+
 template <class charT, class Traits>
 static int
 test (int lineno, Manip m, int iarg, charT carg)
@@ -226,80 +296,68 @@ test (int lineno, Manip m, int iarg, charT carg)
 
     case setbase: {   // exercise 27.6.3, p5
 
+        // the standard's f() sets basefield to oct, dec or hex for 8,
+        // 10 and 16 and clears it for every other value: decimal output
+        // and prefix-dependent input
+        const Fmtflags basefield =
+              8 == iarg ? std::ios_base::oct
+           : 10 == iarg ? std::ios_base::dec
+           : 16 == iarg ? std::ios_base::hex
+           : Fmtflags (0);
+
         out1 << std::setbase (iarg);
 
-        if (0 == iarg || 2 == iarg || 8 == iarg || 10 ==iarg || 16 == iarg) {
-            out2.setf (   8 == iarg ? std::ios_base::oct
-#ifndef _RWSTD_NO_EXT_BIN_IO
-                          :  2 == iarg ? std::ios_base::bin
-#endif   // _RWSTD_NO_EXT_BIN_IO
-                          : 10 == iarg ? std::ios_base::dec
-                          : 16 == iarg ? std::ios_base::hex
-                          : Fmtflags (0),
-                            std::ios_base::basefield);
-
-            if (out1.flags () != out2.flags ()) {
-                ++nfailed;
-                rw_assert (0, __FILE__, lineno,
-                           "std::setbase (%d)", iarg);
-            }
+        if ((out1.flags () & std::ios_base::basefield) != basefield) {
+            ++nfailed;
+            rw_assert (0, __FILE__, lineno,
+                       "std::setbase (%d) set basefield to %{If}, "
+                       "expected %{If}", iarg,
+                       int (out1.flags () & std::ios_base::basefield),
+                       int (basefield));
         }
+
+        // 1234 inserted in the base basefield selects
+        static const charT oct_1234 [] = { '2', '3', '2', '2', '\0' };
+        static const charT dec_1234 [] = { '1', '2', '3', '4', '\0' };
+        static const charT hex_1234 [] = { '4', 'd', '2', '\0' };
+
+        const charT* const ins =
+              8 == iarg ? oct_1234
+           : 16 == iarg ? hex_1234
+           : dec_1234;
 
         std::basic_ostringstream<charT, std::char_traits<charT> > ostrm;
 
-        static const struct {
-            charT str[12];
-        } num[] = {
-            { { '1', '2', '3', '4', '\0' } },   // dec
-            { { 'm', 'c', 'c', 'x', 'x', 'x', 'i', 'v', '\0' } },   // roman
-            { { '1', '0', '0', '1', '1', '0', '1', '0', '0', '1', '0', '\0' } },
-            { { '1', '2', '0', '0', '2', '0', '1', '\0' } },   // 3
-            { { '1', '0', '3', '1', '0', '2', '\0' } },        // 4
-            { { '1', '4', '4', '1', '4', '\0' } },             // 5
-            { { '5', '4', '1', '4', '\0' } },   // 6
-            { { '3', '4', '1', '2', '\0' } },   // 7
-            { { '2', '3', '2', '2', '\0' } },   // oct
-            { { '1', '6', '2', '1', '\0' } },   // 9
-            { { '1', '2', '3', '4', '\0' } },   // dec
-            { { 'a', '2', '2', '\0' } },        // 11
-            { { '8', '6', 'a', '\0' } },        // 12
-            { { '7', '3', 'c', '\0' } },        // 13
-            { { '6', '4', '2', '\0' } },        // 14
-            { { '5', '7', '4', '\0' } },        // 15
-            { { '4', 'd', '2', '\0' } },        // hex
-            { { '4', '4', 'a', '\0' } },        // 17
-            { { '3', 'e', 'a', '\0' } },        // 18
-            { { '3', '7', 'i', '\0' } },        // 19
-            { { '3', '1', 'e', '\0' } },        // 20
-            { { '2', 'g', 'g', '\0' } },        // 21
-            { { '2', 'c', '2', '\0' } },        // 22
-            { { '2', '7', 'f', '\0' } },        // 23
-            { { '2', '3', 'a', '\0' } },        // 24
-            { { '1', 'o', '9', '\0' } },        // 25
-            { { '1', 'l', 'c', '\0' } },        // 26
-            { { '1', 'i', 'j', '\0' } },        // 27
-            { { '1', 'g', '2', '\0' } },        // 28
-            { { '1', 'd', 'g', '\0' } },        // 29
-            { { '1', 'b', '4', '\0' } },        // 30
-            { { '1', '8', 'p', '\0' } },        // 31
-            { { '1', '6', 'i', '\0' } },        // 32
-            { { '1', '4', 'd', '\0' } },        // 33
-            { { '1', '2', 'a', '\0' } },        // 34
-            { { '1', '0', '9', '\0' } },        // 35
-            { { 'y', 'a', '\0' } }              // 36
-        };
+        ostrm << std::setbase (iarg) << 1234;
 
-        ostrm << std::setbase (iarg);
-        ostrm << 1234;
-
-        const int inx = iarg >= 0 && iarg <= 36 ? iarg : 0;
-
-        if (ostrm.str () != num [inx].str) {
+        if (ostrm.str () != ins) {
             ++nfailed;
-            rw_assert (0, __FILE__, __LINE__,
-                       "std::setbase (%d) inserted 1234 as \"%s\"; "
-                       "expected \"%s\"", iarg,
-                       ostrm.str ().data (), num [inx].str);
+            rw_assert (0, __FILE__, lineno,
+                       "std::setbase (%d) inserted 1234 as %{*Ac}; "
+                       "expected %{*Ac}", iarg,
+                       int (sizeof (charT)), ostrm.str ().c_str (),
+                       int (sizeof (charT)), ins);
+        }
+
+        // "010" and "19" extracted in that base: 8 and 1 in octal, 10
+        // and 19 in decimal, 16 and 25 in hex, 8 and 19 prefix-dependent
+        static const charT str_010 [] = { '0', '1', '0', '\0' };
+        static const charT str_19 []  = { '1', '9', '\0' };
+
+        const long ext_010 = 10 == iarg ? 10 : 16 == iarg ? 16 : 8;
+        const long ext_19  =  8 == iarg ? 1 : 16 == iarg ? 25 : 19;
+
+        const long got_010 = extract (str_010, iarg);
+        const long got_19  = extract (str_19, iarg);
+
+        if (got_010 != ext_010 || got_19 != ext_19) {
+            ++nfailed;
+            rw_assert (0, __FILE__, lineno,
+                       "std::setbase (%d) extracted %{*Ac} as %ld and "
+                       "%{*Ac} as %ld; expected %ld and %ld", iarg,
+                       int (sizeof (charT)), str_010, got_010,
+                       int (sizeof (charT)), str_19, got_19,
+                       ext_010, ext_19);
         }
 
         break;
@@ -565,44 +623,40 @@ static void do_test ()
 
     ntried = nfailed = 0;
 
-    TEST (setbase,  0, charT ());
-    TEST (setbase,  8, charT ());
-    TEST (setbase, 10, charT ());
-    TEST (setbase, 16, charT ());
-
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-    TEST (setbase, 2, charT ());
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
-
-#ifndef _RWSTD_NO_EXT_SETBASE
-
-    TEST (setbase,  0, charT ());   // autodetect
-    TEST (setbase,  1, charT ());   // roman
-    TEST (setbase,  2, charT ());   // bin
-    TEST (setbase,  3, charT ());
-    TEST (setbase,  4, charT ());
-    TEST (setbase,  5, charT ());
-    TEST (setbase,  6, charT ());
-    TEST (setbase,  7, charT ());
     TEST (setbase,  8, charT ());   // oct
-    TEST (setbase,  9, charT ());
     TEST (setbase, 10, charT ());   // dec
-    TEST (setbase, 11, charT ());
-    TEST (setbase, 12, charT ());
     TEST (setbase, 16, charT ());   // hex
+
+    // every other value clears basefield
+    TEST (setbase,  0, charT ());
+    TEST (setbase,  1, charT ());
+    TEST (setbase,  2, charT ());
+    TEST (setbase,  3, charT ());
+    TEST (setbase,  7, charT ());
+    TEST (setbase,  9, charT ());
+    TEST (setbase, 11, charT ());
     TEST (setbase, 17, charT ());
-    TEST (setbase, 36, charT ());   // 0-9, a-z
+    TEST (setbase, 36, charT ());
+    TEST (setbase, 37, charT ());
     TEST (setbase, -1, charT ());
     TEST (setbase, -2, charT ());
-
-#endif   // _RWSTD_NO_EXT_SETBASE
 
     if (!nfailed)
         rw_assert (true, __FILE__, __LINE__,
                    "std::setbase failed %d out "
                    "of %d assertions", nfailed, ntried);
+
+    /////////////////////////////////////////////////////////////////////
+    // exercise clearing basefield after std::hex and std::oct
+
+    rw_info (0, __FILE__, __LINE__,
+             "27.4.2.2, p6 and p8, 27.6.3, p3 - clearing basefield with "
+             "basic_stringstream<%s, %s >", cname, tname);
+
+    for (int how = 0; how != 3; ++how) {
+        test_basefield_clear<charT>(__LINE__, std::ios_base::hex, how);
+        test_basefield_clear<charT>(__LINE__, std::ios_base::oct, how);
+    }
 
     /////////////////////////////////////////////////////////////////////
     // exercise std::setfill
