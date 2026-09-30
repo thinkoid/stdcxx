@@ -11,10 +11,9 @@ harness's own table without the timing columns.
 ## 0. The short version
 
 - Every test builds. The harness runs 272 programs per configuration.
-- 8 assertions fail in every configuration, under both compilers.
+- No assertion fails, in any configuration, under either compiler.
 - What fails, by cause:
-  - `27.filebuf`, 8 assertions, and the regression test
-    `27.ostream.inserters.stdcxx-51`, which aborts. All
+  - The regression test `27.ostream.inserters.stdcxx-51` aborts. All
     configurations (chapter 3.1).
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
     interface and moves the minor version (chapter 3.2).
@@ -95,9 +94,9 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 272 | 10,103,763 | 8 | 0 | 1 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 272 | 10,103,653 | 8 | 0 | 1 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,116,629 | 8 | 0 | 9 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 272 | 10,103,755 | 0 | 0 | 1 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 272 | 10,103,645 | 0 | 0 | 1 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,116,621 | 0 | 0 | 9 |
 
 Chapter 4 lists where the three differ.
 
@@ -107,27 +106,21 @@ and the `setbase` extension and `bin` were removed
 (`analysis-numeric-base.md`). After the removal of the locking
 extension the same day, 15D was measured again in full and the other
 five in the rows that named the extension; only `27.basic.ios` moved,
-in the two thread-safe tables (`analysis-basic-ios-flags.md`).
+in the two thread-safe tables (`analysis-basic-ios-flags.md`). After
+the repair of `basic_filebuf::detach ()`, also that day, the four
+single-threaded configurations were measured again in full and the two
+thread-safe ones in their `27.*` rows; only `27.filebuf` moved.
 
 ## 3. What fails
 
-### 3.1 The iostreams rows
+### 3.1 `27.ostream.inserters.stdcxx-51`
 
-Two rows fail, GCC and Clang alike. Each has a `TODO` entry. What
-they report:
-
-- **`27.filebuf`, 8 assertions, every configuration.** Four checks of
-  `detach()`, for `char` and `wchar_t`: `is_open()` true after a
-  detach, `fd()` 3 where a negative value is expected, and the
-  destructor closing the detached descriptor.
-- **`27.ostream.inserters.stdcxx-51`, `ABRT`, every configuration.**
-  The test expects `qnan` and `snan`, and `QNAN` and `SNAN` under
-  `uppercase`, for quiet and signaling NaNs of all three floating
-  types. The library prints `nan` and `NAN` for both. The test's
-  `assert` at line 123 fails.
-
-These are the 8 failed assertions of every table. The abort is the
-only signalled program outside 15D.
+The row aborts in every configuration, GCC and Clang alike. It has a
+`TODO` entry. The test expects `qnan` and `snan`, and `QNAN` and
+`SNAN` under `uppercase`, for quiet and signaling NaNs of all three
+floating types. The library prints `nan` and `NAN` for both. The
+test's `assert` at line 123 fails. It is the only signalled program
+outside 15D.
 
 ### 3.2 `21.string.stdcxx-162` in 15D
 
@@ -221,9 +214,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 10,103,763 | 8 | 0 | 1 |
-| 11s-clang | 10,103,668 | 8 | 0 | 1 |
-| 15D-clang | 10,116,629 | 8 | 0 | 9 |
+| 11S-clang | 10,103,755 | 0 | 0 | 1 |
+| 11s-clang | 10,103,660 | 0 | 0 | 1 |
+| 15D-clang | 10,116,621 | 0 | 0 | 9 |
 
 Row for row they are the GCC tables, with one exception.
 `18.numeric.special.float` runs 134 assertions in the 32-bit Clang

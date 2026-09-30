@@ -10,21 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO =27.filebuf=: =detach ()=
-
-=detach ()= is a library addition to =basic_filebuf=. Four checks
-fail for =char= and for =wchar_t=: =is_open ()= is still true after a
-detach (=tests/iostream/27.filebuf.cpp:1485=, 1654), =fd ()= is still
-3 where a negative value is expected (1492), and the destructor closes
-the detached descriptor (1504).
-
-Fix: read =detach ()= against its contract in the header and the
-original README. The strict-ANSI entry removes the filebuf additions;
-if =detach ()= goes first, its test cases go with it.
-
-Check: the row at 100% in the six configurations; a descriptor
-detached from a =filebuf= stays open after the =filebuf= is destroyed.
-
 * TODO =27.ostream.inserters.stdcxx-51=: =qnan= and =snan=
 
 The regression test for STDCXX-51 expects =num_put= to print quiet

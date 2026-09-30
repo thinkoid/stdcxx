@@ -239,7 +239,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 27.filebuf.close.stdcxx-969                NOUT    0                       
 27.filebuf.codecvt                            0    0   205514      0   100%
 27.filebuf.members.stdcxx-308              NOUT    0                       
-27.filebuf                                    0    0      204      8    96%
+27.filebuf                                    0    0      196      0   100%
 27.filebuf.sgetn.stdcxx-161                NOUT    0                       
 27.filebuf.virtuals.stdcxx-522             NOUT    0                       
 27.forward                                    0    0       42      0   100%
@@ -278,5 +278,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10116629
-  Failed assertions:            8
+  Assertions:            10116621
+  Failed assertions:            0

@@ -116,8 +116,8 @@ resolutions.
 The [baseline record](ref-test-baseline.md) covers six debug
 configurations: GCC and Clang, each with 64-bit archive, 32-bit archive
 and 64-bit reentrant shared builds. The pinned tables contain 272
-programs apiece. Every table records the same 8 failed assertions,
-all in `27.filebuf`, and one aborted stream regression test,
+programs apiece. No table records a failed assertion; every table
+records one aborted stream regression test,
 `27.ostream.inserters.stdcxx-51`. **These are test counts, not
 percentages of the standard implemented.** Assertions have unequal scope, and
 process failures can prevent later assertions from running.
@@ -128,7 +128,7 @@ process failures can prevent later assertions from running.
 | Locale facets | The `num_get`, `time_get` and `money_get` rows pass. `num_get` and `money_get` grow their digit buffers instead of failing or overrunning, and `money_get` throws `bad_alloc` where the buffer size would wrap. |
 | Numerics and extension controls | The limits, math, valarray and extension rows pass; the failures were test defects and a driver comparison. |
 | Memory/lifetime symptoms | The intermittent string-iterator result was the test driver reading past short buffers, and the `21.cwchar` exit-time corruption a test's use of a write-only stream; both are repaired. |
-| Streams | `27.filebuf` fails 8 assertions and `27.ostream.inserters.stdcxx-51` aborts; they have not yet been read against the library. `basic_ios::flags ()` meets the postcondition of `init` in every configuration since the locking extension left the format flags. `setbase` and the clearing of `basefield` follow the standard since the `setbase` extension and `bin` were removed; `27.std.manip` pins them. |
+| Streams | `27.ostream.inserters.stdcxx-51` aborts: the library prints quiet and signaling NaNs alike, and the test expects distinct names; it has not yet been settled. `basic_filebuf::detach ()` disassociates the file again, as documented. `basic_ios::flags ()` meets the postcondition of `init` in every configuration since the locking extension left the format flags. `setbase` and the clearing of `basefield` follow the standard since the `setbase` extension and `bin` were removed; `27.std.manip` pins them. |
 | Reentrant locale use | The sanitizer investigation found races and use-after-free in the locale; they are repaired, and each repair has a multithreaded test. Seven locale MT rows of the reentrant tables time out: on many processors they measure the harness's time limit, a test-design question queued in `TODO`. C++03 did not itself specify the later thread library and memory model. |
 | Test infrastructure | Several repaired failures belonged to tests or their driver. Known successful `NOUT` and `FORMAT` rows have individual reporting contracts; neither label alone proves success. |
 

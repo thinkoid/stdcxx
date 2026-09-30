@@ -119,16 +119,20 @@ close (bool __close_file /* = true */)
     if (__close_file) {
         if (_RW::__rw_fclose (_C_file, this->_C_state))
             __retval = 0;
-
-        // zero out the file pointer except when detaching fd
-        _C_file    = 0;
-        _C_cur_pos = _C_beg_pos = pos_type (off_type (-1));
-
-        // reset input/output sequences to prevent any
-        // subsequent I/O attempts on closed file
-        this->setg (0, 0, 0);
-        this->setp (0, 0);
     }
+    else if (!__retval) {
+        // detach() leaves the file associated when the flush fails
+        return __retval;
+    }
+
+    // disassociate from the file, closed or (detached) left open
+    _C_file    = 0;
+    _C_cur_pos = _C_beg_pos = pos_type (off_type (-1));
+
+    // reset input/output sequences to prevent any
+    // subsequent I/O attempts on the file
+    this->setg (0, 0, 0);
+    this->setp (0, 0);
 
     return __retval;
 }
