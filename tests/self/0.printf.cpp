@@ -871,8 +871,6 @@ test_ios_bitmasks ()
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "extension: \"%{If}\": std::ios_base::fmtflags");
 
-#define BASE(n)   ((n)  << _RWSTD_IOS_BASEOFF)
-
     TEST ("[%{If}]",  0,                     0, 0, "[fmtflags(0)]");
     TEST ("[%{If}]",  std::ios::adjustfield, 0, 0, "[adjustfield]");
     TEST ("[%{If}]",  std::ios::basefield,   0, 0, "[basefield]");
@@ -891,50 +889,10 @@ test_ios_bitmasks ()
     TEST ("[%{If}]",  std::ios::skipws,      0, 0, "[skipws]");
     TEST ("[%{If}]",  std::ios::unitbuf,     0, 0, "[unitbuf]");
     TEST ("[%{If}]",  std::ios::uppercase,   0, 0, "[uppercase]");
-#ifndef _RWSTD_NO_EXT_BIN_IO
-    TEST ("[%{If}]",  std::ios::bin,         0, 0, "[bin]");
-#endif   // _RWSTD_NO_EXT_BIN_IO
 #ifndef _RWSTD_NO_EXT_REENTRANT_IO
     TEST ("[%{If}]",  std::ios::nolock,      0, 0, "[nolock]");
     TEST ("[%{If}]",  std::ios::nolockbuf,   0, 0, "[nolockbuf]");
 #endif   // _RWSTD_NO_EXT_REENTRANT_IO
-
-    TEST ("[%{If}]",  BASE (1),              0, 0, "[fmtflags(0) | base(1)]");
-    TEST ("[%{If}]",  BASE (2),              0, 0, "[fmtflags(0) | base(2)]");
-    TEST ("[%{If}]",  BASE (3),              0, 0, "[fmtflags(0) | base(3)]");
-    TEST ("[%{If}]",  BASE (4),              0, 0, "[fmtflags(0) | base(4)]");
-    TEST ("[%{If}]",  BASE (5),              0, 0, "[fmtflags(0) | base(5)]");
-    TEST ("[%{If}]",  BASE (6),              0, 0, "[fmtflags(0) | base(6)]");
-    TEST ("[%{If}]",  BASE (7),              0, 0, "[fmtflags(0) | base(7)]");
-    TEST ("[%{If}]",  BASE (8),              0, 0, "[fmtflags(0)]");
-    TEST ("[%{If}]",  BASE (9),              0, 0, "[fmtflags(0) | base(9)]");
-    TEST ("[%{If}]",  BASE (10),             0, 0, "[fmtflags(0)]");
-    TEST ("[%{If}]",  BASE (11),             0, 0, "[fmtflags(0) | base(11)]");
-    TEST ("[%{If}]",  BASE (12),             0, 0, "[fmtflags(0) | base(12)]");
-    TEST ("[%{If}]",  BASE (13),             0, 0, "[fmtflags(0) | base(13)]");
-    TEST ("[%{If}]",  BASE (14),             0, 0, "[fmtflags(0) | base(14)]");
-    TEST ("[%{If}]",  BASE (15),             0, 0, "[fmtflags(0) | base(15)]");
-    TEST ("[%{If}]",  BASE (16),             0, 0, "[fmtflags(0)]");
-    TEST ("[%{If}]",  BASE (17),             0, 0, "[fmtflags(0) | base(17)]");
-    TEST ("[%{If}]",  BASE (18),             0, 0, "[fmtflags(0) | base(18)]");
-    TEST ("[%{If}]",  BASE (19),             0, 0, "[fmtflags(0) | base(19)]");
-    TEST ("[%{If}]",  BASE (20),             0, 0, "[fmtflags(0) | base(20)]");
-    TEST ("[%{If}]",  BASE (21),             0, 0, "[fmtflags(0) | base(21)]");
-    TEST ("[%{If}]",  BASE (22),             0, 0, "[fmtflags(0) | base(22)]");
-    TEST ("[%{If}]",  BASE (23),             0, 0, "[fmtflags(0) | base(23)]");
-    TEST ("[%{If}]",  BASE (24),             0, 0, "[fmtflags(0) | base(24)]");
-    TEST ("[%{If}]",  BASE (25),             0, 0, "[fmtflags(0) | base(25)]");
-    TEST ("[%{If}]",  BASE (26),             0, 0, "[fmtflags(0) | base(26)]");
-    TEST ("[%{If}]",  BASE (27),             0, 0, "[fmtflags(0) | base(27)]");
-    TEST ("[%{If}]",  BASE (28),             0, 0, "[fmtflags(0) | base(28)]");
-    TEST ("[%{If}]",  BASE (29),             0, 0, "[fmtflags(0) | base(29)]");
-    TEST ("[%{If}]",  BASE (30),             0, 0, "[fmtflags(0) | base(30)]");
-    TEST ("[%{If}]",  BASE (31),             0, 0, "[fmtflags(0) | base(31)]");
-    TEST ("[%{If}]",  BASE (32),             0, 0, "[fmtflags(0) | base(32)]");
-    TEST ("[%{If}]",  BASE (33),             0, 0, "[fmtflags(0) | base(33)]");
-    TEST ("[%{If}]",  BASE (34),             0, 0, "[fmtflags(0) | base(34)]");
-    TEST ("[%{If}]",  BASE (35),             0, 0, "[fmtflags(0) | base(35)]");
-    TEST ("[%{If}]",  BASE (36),             0, 0, "[fmtflags(0) | base(36)]");
 
     TEST ("[%{#If}]",  0,                     0, 0, "[std::ios::fmtflags(0)]");
     TEST ("[%{#If}]",  std::ios::adjustfield, 0, 0, "[std::ios::adjustfield]");
@@ -954,86 +912,10 @@ test_ios_bitmasks ()
     TEST ("[%{#If}]",  std::ios::skipws,      0, 0, "[std::ios::skipws]");
     TEST ("[%{#If}]",  std::ios::unitbuf,     0, 0, "[std::ios::unitbuf]");
     TEST ("[%{#If}]",  std::ios::uppercase,   0, 0, "[std::ios::uppercase]");
-#ifndef _RWSTD_NO_EXT_BIN_IO
-    TEST ("[%{#If}]",  std::ios::bin,         0, 0, "[std::ios::bin]");
-#endif   // _RWSTD_NO_EXT_BIN_IO
 #ifndef _RWSTD_NO_EXT_REENTRANT_IO
     TEST ("[%{#If}]",  std::ios::nolock,      0, 0, "[std::ios::nolock]");
     TEST ("[%{#If}]",  std::ios::nolockbuf,   0, 0, "[std::ios::nolockbuf]");
 #endif   // _RWSTD_NO_EXT_REENTRANT_IO
-
-    TEST ("[%{#If}]",  BASE (1),              0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(1)]");
-    TEST ("[%{#If}]",  BASE (2),              0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(2)]");
-    TEST ("[%{#If}]",  BASE (3),              0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(3)]");
-    TEST ("[%{#If}]",  BASE (4),              0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(4)]");
-    TEST ("[%{#If}]",  BASE (5),              0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(5)]");
-    TEST ("[%{#If}]",  BASE (6),              0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(6)]");
-    TEST ("[%{#If}]",  BASE (7),              0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(7)]");
-    TEST ("[%{#If}]",  BASE (8),              0, 0,
-          "[std::ios::fmtflags(0)]");
-    TEST ("[%{#If}]",  BASE (9),              0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(9)]");
-    TEST ("[%{#If}]",  BASE (10),             0, 0,
-          "[std::ios::fmtflags(0)]");
-    TEST ("[%{#If}]",  BASE (11),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(11)]");
-    TEST ("[%{#If}]",  BASE (12),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(12)]");
-    TEST ("[%{#If}]",  BASE (13),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(13)]");
-    TEST ("[%{#If}]",  BASE (14),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(14)]");
-    TEST ("[%{#If}]",  BASE (15),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(15)]");
-    TEST ("[%{#If}]",  BASE (16),             0, 0,
-          "[std::ios::fmtflags(0)]");
-    TEST ("[%{#If}]",  BASE (17),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(17)]");
-    TEST ("[%{#If}]",  BASE (18),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(18)]");
-    TEST ("[%{#If}]",  BASE (19),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(19)]");
-    TEST ("[%{#If}]",  BASE (20),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(20)]");
-    TEST ("[%{#If}]",  BASE (21),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(21)]");
-    TEST ("[%{#If}]",  BASE (22),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(22)]");
-    TEST ("[%{#If}]",  BASE (23),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(23)]");
-    TEST ("[%{#If}]",  BASE (24),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(24)]");
-    TEST ("[%{#If}]",  BASE (25),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(25)]");
-    TEST ("[%{#If}]",  BASE (26),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(26)]");
-    TEST ("[%{#If}]",  BASE (27),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(27)]");
-    TEST ("[%{#If}]",  BASE (28),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(28)]");
-    TEST ("[%{#If}]",  BASE (29),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(29)]");
-    TEST ("[%{#If}]",  BASE (30),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(30)]");
-    TEST ("[%{#If}]",  BASE (31),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(31)]");
-    TEST ("[%{#If}]",  BASE (32),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(32)]");
-    TEST ("[%{#If}]",  BASE (33),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(33)]");
-    TEST ("[%{#If}]",  BASE (34),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(34)]");
-    TEST ("[%{#If}]",  BASE (35),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(35)]");
-    TEST ("[%{#If}]",  BASE (36),             0, 0,
-          "[std::ios::fmtflags(0) | std::ios::base(36)]");
 
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "extension: \"%{Ie}\": std::ios_base::event");

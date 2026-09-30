@@ -52,12 +52,6 @@ _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::skipws);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::unitbuf);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::uppercase);
 
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::bin);
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
-
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::adjustfield);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::basefield);
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::floatfield);

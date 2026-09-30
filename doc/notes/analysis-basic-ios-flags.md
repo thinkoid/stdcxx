@@ -217,10 +217,13 @@ chapter 8). The base bits go with them. After that slice the row
 passes in the single-threaded builds; in the thread-safe ones it still
 fails on `nolock | nolockbuf`.
 
-The locking extension waits for the decision of chapter 7: whether a
-user's stream stays unlocked by default, and where the lock state
-lives if it does. The `rdstate` message of chapter 1 is repaired with
-the row.
+Decided the same day for the locking extension: it goes, and its
+default stays. A user's stream stays unlocked and the standard objects
+locked, the shape C++11 asks for (chapter 7); the lock state moves out
+of `fmtflags` into a member of `ios_base`. Locking every stream was
+rejected: a mutex per operation on every stream, for a guarantee the
+standard asks of eight. The `rdstate` message of chapter 1 is repaired
+with the row.
 
 Check, when the locking slice lands: the row at 100% in the six
 configurations, and a copy of the test that sets a bit outside the

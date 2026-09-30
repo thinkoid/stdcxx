@@ -487,7 +487,6 @@ int do_test (int         lineno,          // line number
 #define skipws      std::ios_base::skipws
 #define unitbuf     std::ios_base::unitbuf
 #define uppercase   std::ios_base::uppercase
-#define bin         std::ios_base::bin
 #define adjustfield std::ios_base::adjustfield
 #define basefield   std::ios_base::basefield
 #define floatfield  std::ios_base::floatfield
@@ -828,81 +827,6 @@ test_shrt (CharType ctype, const char *cname,
     TEST (T, short (1),        "%hi",  1, 0, Eof, "%hi");
     TEST (T, short (SHRT_MAX), "%hi", -1, 0, Eof, "%hi");
     TEST (T, short (SHRT_MIN), "%hi", -1, 0, Eof, "%hi");
-
-    rw_info (0, 0, 0, "extension: base 1 (Roman)");
-
-#define BASE(n)   ((n)  << _RWSTD_IOS_BASEOFF)
-
-    TEST (T, short ( 0), "0",     1, BASE (1), Eof);
-    TEST (T, short ( 1), "i",     1, BASE (1), Eof);
-    TEST (T, short ( 2), "ii",    2, BASE (1), Eof);
-    TEST (T, short ( 3), "iii",   3, BASE (1), Eof);
-    TEST (T, short ( 4), "iiii",  4, BASE (1), Eof);
-    TEST (T, short ( 4), "iv",    2, BASE (1), Eof);
-    TEST (T, short ( 5), "v",     1, BASE (1), Eof);
-    TEST (T, short ( 6), "vi",    2, BASE (1), Eof);
-    TEST (T, short ( 7), "vii",   3, BASE (1), Eof);
-    TEST (T, short ( 8), "viii",  4, BASE (1), Eof);
-    TEST (T, short ( 9), "viiii", 5, BASE (1), Eof);
-    TEST (T, short ( 9), "ix",    2, BASE (1), Eof);
-    TEST (T, short (10), "x",     1, BASE (1), Eof);
-
-    TEST (T, short (  12), "XII",         3, BASE (1), Eof);
-    TEST (T, short ( 123), "CXXIII",      6, BASE (1), Eof);
-    TEST (T, short (1234), "MCCXXXIV",    8, BASE (1), Eof);
-    TEST (T, short (2345), "MMCCCXLV",    8, BASE (1), Eof); 
-    TEST (T, short (3456), "MMMCDLVI",    8, BASE (1), Eof);
-    TEST (T, short (4567), "MMMMDLXVII", 10, BASE (1), Eof); 
-    TEST (T, short (4999), "MMMMCMXCIX", 10, BASE (1), Eof); 
-    TEST (T, short (5000), "5000",        4, BASE (1), Eof); 
-    TEST (T, short (5678), "5678",        4, BASE (1), Eof); 
-
-    TEST (T, short (5001), "5001i",       4, BASE (1), Good); 
-    TEST (T, short (5002), "5002v",       4, BASE (1), Good); 
-    TEST (T, short (5003), "5003x",       4, BASE (1), Good); 
-    TEST (T, short (5004), "5004l",       4, BASE (1), Good); 
-    TEST (T, short (5005), "5005d",       4, BASE (1), Good); 
-    TEST (T, short (5006), "5006m",       4, BASE (1), Good); 
-
-    rw_info (0, 0, 0, "extension: base 2 (ios_base::bin, binary)");
-
-    TEST (T, short (  0), "0",      1, BASE (2), Eof);
-    TEST (T, short (  1), "1",      1, BASE (2), Eof);
-    TEST (T, short (  2), "10",     2, BASE (2), Eof);
-    TEST (T, short (  3), "11",     2, BASE (2), Eof);
-    TEST (T, short (  4), "100",    3, BASE (2), Eof);
-    TEST (T, short (  5), "101",    3, BASE (2), Eof);
-    TEST (T, short (  6), "110",    3, BASE (2), Eof);
-    TEST (T, short (  7), "111",    3, BASE (2), Eof);
-    TEST (T, short (  8), "1000",   4, BASE (2), Eof);
-    TEST (T, short (  9), "1001",   4, BASE (2), Eof);
-    TEST (T, short ( 10), "1010",   4, BASE (2), Eof);
-    TEST (T, short ( 11), "1011",   4, BASE (2), Eof);
-    TEST (T, short ( 12), "1100",   4, BASE (2), Eof);
-    TEST (T, short ( 13), "1101",   4, BASE (2), Eof);
-    TEST (T, short ( 14), "1110",   4, BASE (2), Eof);
-    TEST (T, short ( 15), "1111",   4, BASE (2), Eof);
-    TEST (T, short ( 16), "10000",  5, BASE (2), Eof);
-    TEST (T, short ( 17), "+10001", 6, BASE (2), Eof);
-    TEST (T, short (-18), "-10010", 6, BASE (2), Eof);
-
-    TEST (T, short (17), "100012",  5, BASE (2), Good);
-    TEST (T, short (18), "100103",  5, BASE (2), Good);
-    TEST (T, short (19), "100114",  5, BASE (2), Good);
-
-    rw_info (0, 0, 0, "extension: base 3");
-
-    TEST (T, short ( 0), "0",     1, BASE (3), Eof);
-    TEST (T, short ( 1), "1",     1, BASE (3), Eof);
-    TEST (T, short ( 2), "2",     1, BASE (3), Eof);
-    TEST (T, short ( 3), "10",    2, BASE (3), Eof);
-    TEST (T, short ( 4), "11",    2, BASE (3), Eof);
-    TEST (T, short ( 5), "12",    2, BASE (3), Eof);
-    TEST (T, short ( 6), "20",    2, BASE (3), Eof);
-    TEST (T, short ( 7), "21",    2, BASE (3), Eof);
-    TEST (T, short ( 8), "22",    2, BASE (3), Eof);
-
-    TEST (T, short ( 8), "223",   2, BASE (3), Good);
 
     if (rw_opt_no_errno) {
         rw_note (0, 0, 0, "errno test disabled");
@@ -1346,118 +1270,6 @@ test_long (CharType ctype, const char *cname,
     rw_assert (ERANGE == errno, 0, __LINE__,
                "errno unexpectedly changed from %d (%{#*m}) to %d (%{#m})",
                ERANGE, ERANGE, errno);
-
-    rw_info (0, 0, 0, "extension: base 1 (Roman)");
-
-#define BASE(n)   ((n)  << _RWSTD_IOS_BASEOFF)
-
-    TEST (T,    0L, "0",           1, BASE (1), Eof);
-    TEST (T,    1L, "i",           1, BASE (1), Eof);
-    TEST (T,    2L, "ii",          2, BASE (1), Eof);
-    TEST (T,    3L, "iii",         3, BASE (1), Eof);
-    TEST (T,    4L, "iiii",        4, BASE (1), Eof);
-    TEST (T,    4L, "iv",          2, BASE (1), Eof);
-    TEST (T,    5L, "v",           1, BASE (1), Eof);
-    TEST (T,    6L, "vi",          2, BASE (1), Eof);
-    TEST (T,    7L, "vii",         3, BASE (1), Eof);
-    TEST (T,    8L, "viii",        4, BASE (1), Eof);
-    TEST (T,    9L, "viiii",       5, BASE (1), Eof);
-    TEST (T,    9L, "ix",          2, BASE (1), Eof);
-    TEST (T,   10L, "x",           1, BASE (1), Eof);
-
-    TEST (T,   12L, "XII",         3, BASE (1), Eof);
-    TEST (T,  123L, "CXXIII",      6, BASE (1), Eof);
-    TEST (T, 1234L, "MCCXXXIV",    8, BASE (1), Eof);
-    TEST (T, 2345L, "MMCCCXLV",    8, BASE (1), Eof); 
-    TEST (T, 3456L, "MMMCDLVI",    8, BASE (1), Eof);
-    TEST (T, 4567L, "MMMMDLXVII", 10, BASE (1), Eof); 
-    TEST (T, 4999L, "MMMMCMXCIX", 10, BASE (1), Eof); 
-    TEST (T, 5000L, "5000",        4, BASE (1), Eof); 
-    TEST (T, 5678L, "5678",        4, BASE (1), Eof); 
-
-    TEST (T, 5001L, "5001i",       4, BASE (1), Good); 
-    TEST (T, 5002L, "5002v",       4, BASE (1), Good); 
-    TEST (T, 5003L, "5003x",       4, BASE (1), Good); 
-    TEST (T, 5004L, "5004l",       4, BASE (1), Good); 
-    TEST (T, 5005L, "5005d",       4, BASE (1), Good); 
-    TEST (T, 5006L, "5006m",       4, BASE (1), Good); 
-
-    rw_info (0, 0, 0, "extension: base 2 (ios_base::bin, binary)");
-
-    TEST (T,    0L, "0",           1, BASE (2), Eof);
-    TEST (T,    1L, "1",           1, BASE (2), Eof);
-    TEST (T,    2L, "10",          2, BASE (2), Eof);
-    TEST (T,    3L, "11",          2, BASE (2), Eof);
-    TEST (T,    4L, "100",         3, BASE (2), Eof);
-    TEST (T,    5L, "101",         3, BASE (2), Eof);
-    TEST (T,    6L, "110",         3, BASE (2), Eof);
-    TEST (T,    7L, "111",         3, BASE (2), Eof);
-    TEST (T,    8L, "1000",        4, BASE (2), Eof);
-    TEST (T,    9L, "1001",        4, BASE (2), Eof);
-    TEST (T,   10L, "1010",        4, BASE (2), Eof);
-    TEST (T,   11L, "1011",        4, BASE (2), Eof);
-    TEST (T,   12L, "1100",        4, BASE (2), Eof);
-    TEST (T,   13L, "1101",        4, BASE (2), Eof);
-    TEST (T,   14L, "1110",        4, BASE (2), Eof);
-    TEST (T,   15L, "1111",        4, BASE (2), Eof);
-    TEST (T,   16L, "10000",       5, BASE (2), Eof);
-    TEST (T,   17L, "+10001",      6, BASE (2), Eof);
-    TEST (T,  -18L, "-10010",      6, BASE (2), Eof);
-
-    TEST (T,   17L, "100012",      5, BASE (2), Good);
-    TEST (T,   18L, "100103",      5, BASE (2), Good);
-    TEST (T,   19L, "100114",      5, BASE (2), Good);
-
-    rw_info (0, 0, 0, "extension: base 3");
-
-    TEST (T,    0L, "0",           1, BASE (3), Eof);
-    TEST (T,    1L, "1",           1, BASE (3), Eof);
-    TEST (T,    2L, "2",           1, BASE (3), Eof);
-    TEST (T,    3L, "10",          2, BASE (3), Eof);
-    TEST (T,    4L, "11",          2, BASE (3), Eof);
-    TEST (T,    5L, "12",          2, BASE (3), Eof);
-    TEST (T,    6L, "20",          2, BASE (3), Eof);
-    TEST (T,    7L, "21",          2, BASE (3), Eof);
-    TEST (T,    8L, "22",          2, BASE (3), Eof);
-
-    TEST (T,    8L, "223",         2, BASE (3), Good);
-
-    rw_info (0, 0, 0, "extension: base 4");
-
-    TEST (T,    0L, "0",           1, BASE (4), Eof);
-    TEST (T,    1L, "1",           1, BASE (4), Eof);
-    TEST (T,    2L, "2",           1, BASE (4), Eof);
-    TEST (T,    3L, "3",           1, BASE (4), Eof);
-    TEST (T,    4L, "10",          2, BASE (4), Eof);
-    TEST (T,    5L, "11",          2, BASE (4), Eof);
-    TEST (T,    6L, "12",          2, BASE (4), Eof);
-    TEST (T,    7L, "13",          2, BASE (4), Eof);
-    TEST (T,    8L, "20",          2, BASE (4), Eof);
-    TEST (T,    9L, "21",          2, BASE (4), Eof);
-    TEST (T,   10L, "22",          2, BASE (4), Eof);
-    TEST (T,   11L, "23",          2, BASE (4), Eof);
-
-    TEST (T,   11L, "234",         2, BASE (4), Good);
-
-    rw_info (0, 0, 0, "extension: base 5");
-
-    TEST (T,    0L, "0",           1, BASE (5), Eof);
-    TEST (T,    1L, "1",           1, BASE (5), Eof);
-    TEST (T,    2L, "2",           1, BASE (5), Eof);
-    TEST (T,    3L, "3",           1, BASE (5), Eof);
-    TEST (T,    4L, "4",           1, BASE (5), Eof);
-    TEST (T,    5L, "10",          2, BASE (5), Eof);
-    TEST (T,    6L, "11",          2, BASE (5), Eof);
-    TEST (T,    7L, "12",          2, BASE (5), Eof);
-    TEST (T,    8L, "13",          2, BASE (5), Eof);
-    TEST (T,    9L, "14",          2, BASE (5), Eof);
-    TEST (T,   10L, "20",          2, BASE (5), Eof);
-    TEST (T,   11L, "21",          2, BASE (5), Eof);
-    TEST (T,   12L, "22",          2, BASE (5), Eof);
-    TEST (T,   13L, "23",          2, BASE (5), Eof);
-    TEST (T,   14L, "24",          2, BASE (5), Eof);
-
-    TEST (T,   14L, "245",         2, BASE (5), Good);
 
     if (rw_opt_no_errno) {
         rw_note (0, 0, 0, "errno test disabled");

@@ -490,7 +490,6 @@ test (int lineno, Manip m, int iarg, charT carg)
 #define Skipws      std::ios_base::skipws
 #define Unitbuf     std::ios_base::unitbuf
 #define Uppercase   std::ios_base::uppercase
-#define Bin         std::ios_base::bin
 #define Adjustfield std::ios_base::adjustfield
 #define Basefield   std::ios_base::basefield
 #define Floatfield  std::ios_base::floatfield
@@ -533,12 +532,6 @@ static void do_test ()
     TEST (resetiosflags, Skipws, charT ());
     TEST (resetiosflags, Unitbuf, charT ());
     TEST (resetiosflags, Uppercase, charT ());
-
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-    TEST (resetiosflags, Bin, charT ());
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
 
     TEST (resetiosflags, Adjustfield, charT ());
     TEST (resetiosflags, Basefield, charT ());
@@ -596,12 +589,6 @@ static void do_test ()
     TEST (setiosflags, Skipws, charT ());
     TEST (setiosflags, Unitbuf, charT ());
     TEST (setiosflags, Uppercase, charT ());
-
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-    TEST (setiosflags, Bin, charT ());
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
 
     TEST (setiosflags, Adjustfield, charT ());
     TEST (setiosflags, Basefield, charT ());

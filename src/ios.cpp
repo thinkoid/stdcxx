@@ -95,47 +95,8 @@ streamsize ios_base::precision (streamsize prec)
 
 ios_base::fmtflags ios_base::flags (fmtflags fl)
 {
-    const unsigned mask =
-        ~(unsigned (_RWSTD_IOS_BASEMASK) << _RWSTD_IOS_BASEOFF);
-
-    unsigned ifl = unsigned (fl);
-
-    switch (fl & basefield) {
-        // if basefield is set, clear the base mask and set
-        // the numeric base bits according to the basefield
-    case oct:
-        ifl = (ifl & mask) | 8U << _RWSTD_IOS_BASEOFF;
-        break;
-
-    case dec:
-        ifl = (ifl & mask) | 10U << _RWSTD_IOS_BASEOFF;
-        break;
-
-    case hex:
-        ifl = (ifl & mask) | 16U << _RWSTD_IOS_BASEOFF;
-        break;
-
-    case _RWSTD_IOS_BIN:
-        ifl = (ifl & mask) | 2U << _RWSTD_IOS_BASEOFF;
-        break;
-
-    case 0:
-        // if basefield is clear and the numeric base bits are set,
-        // set the basefield accordingly, making sure that when
-        // numeric base bits are set to 10, dec is left alone
-        // (necessary for autodected parsing to work correctly)
-        switch (ifl >> _RWSTD_IOS_BASEOFF) {
-        case  0: ifl |= 10U << _RWSTD_IOS_BASEOFF; break;
-        case  2: ifl |= _RWSTD_IOS_BIN; break;
-        case  8: ifl |= oct; break;
-        case 10: /* no-op */ break;
-        case 16: ifl |= hex; break;
-        }
-        break;
-
-    default:
-        ifl |= 10U << _RWSTD_IOS_BASEOFF;
-    }
+    // outlined to hide implementation details
+    const unsigned ifl = unsigned (fl);
 
     return fmtflags (_RWSTD_ATOMIC_IO_SWAP (_C_fmtfl, ifl, _C_mutex));
 }
@@ -170,7 +131,7 @@ void ios_base::_C_init (void *sb)
     // NOTE: `sb' may point to a yet uninitialized object
     //       it is unsafe to reference any of its members
 
-    const unsigned fmtfl = (10U << _RWSTD_IOS_BASEOFF) | skipws | dec;
+    const unsigned fmtfl = skipws | dec;
 
     _C_state  = (_C_rdbuf = sb) ? goodbit : badbit;
     _C_fmtfl  = fmtfl;

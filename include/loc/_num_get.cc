@@ -45,11 +45,6 @@ _RWSTD_EXPORT int
 // to any valid digit
 _RWSTD_EXPORT extern const unsigned char __rw_digit_map[];
 
-// array of 1-based indices for each 8-bit character into an internal
-// table of values of each roman digit, i.e., I, V, X, L, C, D, and M
-// elements with a value greater than 7 do not correspond to a roman digit
-_RWSTD_EXPORT extern const unsigned char __rw_roman_inxs[];
-
 
 // the exit test of num_get::_C_get()'s buffers, the array on its
 // stack and the pointer that moves to the heap when the input
@@ -242,13 +237,16 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     const char *__grpbeg = 0;   // the beginning of the last group
     const char *__grpend = 0;   // the end of the last group
 
-    int __base = unsigned (__fl) >> _RWSTD_IOS_BASEOFF;
+    // 22.2.2.1.2, p3: Stage 1: oct and hex select %o and %x, an empty
+    // basefield %i (the base determined by the prefix, 0 below), any
+    // other basefield %d; pointers are parsed in base 16
+    const unsigned __basefield = __fl & _RWSTD_IOS_BASEFIELD;
 
-    // switch to base-16 for pointer parsing
-    if (_RW::__rw_facet::_C_pvoid == __type)
-        __base = 16;
-    else if (10 == __base && !(__fl & _RWSTD_IOS_BASEFIELD))
-        __base = 0;
+    int __base =   _RW::__rw_facet::_C_pvoid == __type ? 16
+                 : 0                 == __basefield    ? 0
+                 : _RWSTD_IOS_OCT    == __basefield    ? 8
+                 : _RWSTD_IOS_HEX    == __basefield    ? 16
+                 : 10;
 
     int __subtype = __type;   // type of the number being parsed
 
@@ -450,7 +448,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
                     else
                         break;   // invalid character terminates input
                 }
-                else if (0 == __base) {
+                else {
 
                     // autodetect the base
 
@@ -469,20 +467,6 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
                     }
                     else
                         break;   // invalid character terminates input
-                }
-                else {
-                    if (_RW::__rw_roman_inxs [_UChar (__ch)] <= 7)
-                        *__pcur++ = __ch;
-                    else if (__pcur == __pbuf + 1 && __digit < 10) {
-                        *__pcur++ = __ch;
-                        // if the first character is a digit
-                        // switch to decimal (base-10) parsing
-                        __base = 10;
-                    }
-                    else {
-                        // invalid character terminates input
-                        break;
-                    }
                 }
             }
         }
@@ -528,12 +512,13 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     _RWSTD_ASSERT (__pgrp < __pgrpbuf + __bufsize);
     _RWSTD_ASSERT (__pcur < __pbuf + __bufsize);
 
-    // set the base determined above
+    // pass the base determined above to Stage 3 in basefield; input
+    // whose prefix settled no base is decimal
     const unsigned __fl2 =
           __fl & ~_RWSTD_IOS_BASEFIELD
-        & ~(   _RWSTD_STATIC_CAST (unsigned, _RWSTD_IOS_BASEMASK)
-            << _RWSTD_IOS_BASEOFF)
-        | __base << _RWSTD_IOS_BASEOFF;
+        | (   8 == __base ? _RWSTD_IOS_OCT
+           : 16 == __base ? _RWSTD_IOS_HEX
+           : _RWSTD_IOS_DEC);
 
     // 22.2.2.1.2, p11: Stage 3
     const int __errtmp =

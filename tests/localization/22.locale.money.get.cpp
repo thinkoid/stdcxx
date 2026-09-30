@@ -559,7 +559,6 @@ void do_test_size_wrap (bool        intl,    // international?
 #define skipws      std::ios_base::skipws
 #define unitbuf     std::ios_base::unitbuf
 #define uppercase   std::ios_base::uppercase
-#define bin         std::ios_base::bin
 #define adjustfield std::ios_base::adjustfield
 #define basefield   std::ios_base::basefield
 #define floatfield  std::ios_base::floatfield

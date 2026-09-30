@@ -122,7 +122,6 @@ enum __rw_fmtflags {
     __rw_skipws      = _RWSTD_IOS_SKIPWS,
     __rw_unitbuf     = _RWSTD_IOS_UNITBUF,
     __rw_uppercase   = _RWSTD_IOS_UPPERCASE,
-    __rw_bin         = _RWSTD_IOS_BIN,
     __rw_basefield   = _RWSTD_IOS_BASEFIELD,
     __rw_adjustfield = _RWSTD_IOS_ADJUSTFIELD,
     __rw_floatfield  = _RWSTD_IOS_FLOATFIELD,

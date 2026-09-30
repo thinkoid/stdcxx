@@ -69,7 +69,6 @@ global:
     _ZN4__rw15__rw_ct_num_putEjPKc;
     _ZN4__rw15__rw_deallocateEPvji;
     _ZN4__rw15__rw_put_groupsEPPcjjPKcS3_;
-    _ZN4__rw15__rw_roman_inxsE;
     _ZN4__rw15__rw_throw_procE;
     _ZN4__rw16__rw_assert_failEPKcS1_iS1_;
     _ZN4__rw16__rw_ct_numpunctEjPKc;

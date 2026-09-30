@@ -193,17 +193,6 @@ inline ios_base& oct (ios_base &__strm)
 }
 
 
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-// extension
-inline ios_base& bin (ios_base &__strm)
-{
-    return __strm.setf (ios_base::bin, ios_base::basefield), __strm;
-}
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
-
-
 // 27.4.5.4 - floatfield manipulators
 
 // 27.4.5.4, p1

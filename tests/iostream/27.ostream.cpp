@@ -660,7 +660,6 @@ void test_sentry (charT)
 #define Skipws      std::ios_base::skipws
 #define Unitbuf     std::ios_base::unitbuf
 #define Uppercase   std::ios_base::uppercase
-#define Bin         std::ios_base::bin
 #define Adjustfield std::ios_base::adjustfield
 #define Basefield   std::ios_base::basefield
 #define Floatfield  std::ios_base::floatfield

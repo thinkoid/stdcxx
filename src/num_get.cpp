@@ -167,73 +167,6 @@ __rw_check_grouping (const char *grps,   _RWSTD_SIZE_T ngrps,
 }
 
 
-// array of 1-based indices for each 8-bit character into an internal
-// table of values of each roman digit, i.e., I, V, X, L, C, D, and M
-// elements with value greater than 7 do not correspond to a roman digit
-_RWSTD_EXPORT extern const UChar
-__rw_roman_inxs[] = {
-    //        0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-    //       NUL SOH STX ETX EOT ENQ ACK BEL BS  TAB LF  VT  FF  CR  SO  SI
-    /*  0 */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    //       DLE DC1 DC2 DC3 DC4 NAK SYN ETB CAN EM  SUB ESC FS  GS  RS  US
-    /*  1 */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    //       SPC  !   "   #   $   %   '   '   (   )   *   +   ,   -   .   /
-    /*  2 */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    //        0   1   2   3   4   5   6   7   8   9   :   ;   <   =   >   ?
-    /*  3 */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    //        @   A   B   C   D   E   F   G   H   I   J   K   L   M   N   O
-    /*  4 */  9,  9,  9,  5,  6,  9,  9,  9,  9,  1,  9,  9,  4,  7,  9,  9,
-    //        P   Q   R   S   T   U   V   W   X   Y   Z   [   \   ]   ^   _
-    /*  5 */  9,  9,  9,  9,  9,  9,  2,  9,  3,  9,  9,  9,  9,  9,  9,  9,
-    //        `   a   b   c   d   e   f   g   h   i   j   k   l   m   n   o
-    /*  6 */  9,  9,  9,  5,  6,  9,  9,  9,  9,  1,  9,  9,  4,  7,  9,  9,
-    //        p   q   r   s   t   u   v   w   x   y   z   {   |   }   ~  DEL
-    /*  7 */  9,  9,  9,  9,  9,  9,  2,  9,  3,  9,  9,  9,  9,  9,  9,  9,
-    // extended ascii below
-    /*  8 */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    /*  9 */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    /*  a */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    /*  b */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    /*  c */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    /*  d */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    /*  e */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    /*  f */  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9
-};
-
-
-static const int __rw_roman_digits[] = {
-    //  1  2   3   4    5    6     7   8   9
-    -1, 1, 5, 10, 50, 100, 500, 1000, -1, -1
-};
-
-
-// parse a string ot roman digits, produce a non-zero numeric value
-// on success, 0 otherwise, set `end' to point one past the last
-// successfully interpreted character
-static unsigned long __rw_get_roman (const char *str)
-{
-    _RWSTD_ASSERT (str && *str);
-
-#define ROMAN_DIGIT(c) __rw_roman_digits [__rw_roman_inxs [UChar (c)]]
-
-    unsigned long val = 0;
-
-    for (; str [1]; ++str) {
-        const int digit_1 = ROMAN_DIGIT (str [0]);
-        const int digit_2 = ROMAN_DIGIT (str [1]);
-
-        if (digit_1 < digit_2)
-            val -= digit_1;
-        else
-            val += digit_1;
-    }
-
-    val += ROMAN_DIGIT (*str);
-
-    return val;
-}
-
-
 // validates a floating point value and errno value
 template <class FloatT>
 inline FloatT
@@ -280,10 +213,12 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
         //////////////////////////////////////////////////////////////
         // integral parsing (including void*)
 
-        int base = unsigned (flags) >> _RWSTD_IOS_BASEOFF;
+        // Stage 2 passes the base it determined in basefield
+        const int basefield = flags & _RWSTD_IOS_BASEFIELD;
 
-        if (!base)
-            base = 10;
+        const int base =   _RWSTD_IOS_OCT == basefield ? 8
+                         : _RWSTD_IOS_HEX == basefield ? 16
+                         : 10;
 
         union {
 #ifdef _RWSTD_LONG_LONG
@@ -297,22 +232,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
             unsigned long ul;
         } val;
 
-        if (1 == base) {
-            // treat numeric (i.e., non-Roman) input in base-1 as decimal
-            const UChar digit = __rw_digit_map [UChar (buf [1])];
-
-            if (digit < 10) {
-                val.ul = _RW::__rw_strtoul (buf, &err, 10);
-            }
-            else {
-                _RWSTD_ASSERT ('+' == *buf);
-
-                val.ul = __rw_get_roman (buf + 1);
-            }
-
-            val.l = _RWSTD_STATIC_CAST (long, val.ul);
-        }
-        else if (__rw_facet::_C_ullong == type) {
+        if (__rw_facet::_C_ullong == type) {
 
 #ifdef _RWSTD_LONG_LONG
 

@@ -240,14 +240,9 @@
 #  define _RWSTD_NO_EXT_DEEP_STRING_COPY
    // no support for exceptions derived from ios_base::failure
 #  define _RWSTD_NO_EXT_FAILURE
-   // no support for writing out integral values in base 2
-#  define _RWSTD_NO_EXT_BIN_IO
    // disable safe conversion of iostream objects only to bool
    // (and enable conversion to void*)
 #  define _RWSTD_NO_EXT_IOS_SAFE_CONVERSION
-   // std::setbase manipulator accepts only required bases (i.e.,
-   // 0, 8, 10, 16, and 2 unless _RWSTD_NO_EXT_BIN_IO is also #defined)
-#  define _RWSTD_NO_EXT_SETBASE
    // disable the str(const char*) overload in stringbuf and stringstreams
 #  define _RWSTD_NO_EXT_STRINGBUF_STR
    // no support for member overloads on all fundamental types

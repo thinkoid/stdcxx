@@ -11,11 +11,14 @@ harness's own table without the timing columns.
 ## 0. The short version
 
 - Every test builds. The harness runs 272 programs per configuration.
-- 17 assertions fail in every configuration, under both compilers.
+- 8 assertions fail in every configuration, under both compilers,
+  and a ninth in the thread-safe ones.
 - What fails, by cause:
-  - `27.basic.ios`, `27.filebuf` and `27.std.manip`, 17 assertions,
-    and the regression test `27.ostream.inserters.stdcxx-51`, which
-    aborts. All configurations. Not investigated (chapter 3.1).
+  - `27.filebuf`, 8 assertions, and the regression test
+    `27.ostream.inserters.stdcxx-51`, which aborts. All
+    configurations (chapter 3.1).
+  - `27.basic.ios` in 15D, 1 assertion: `flags ()` carries the
+    locking extension's bits (chapter 3.1).
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
     interface and moves the minor version (chapter 3.2).
   - Seven locale MT rows of 15D time out. They measure the harness's
@@ -95,41 +98,42 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 272 | 10,105,717 | 17 | 0 | 1 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 272 | 10,105,607 | 17 | 0 | 1 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,118,583 | 17 | 0 | 9 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 272 | 10,103,763 | 8 | 0 | 1 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 272 | 10,103,653 | 8 | 0 | 1 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,116,629 | 9 | 0 | 9 |
 
 Chapter 4 lists where the three differ.
 
-The 11S and 11s tables were pinned at 21c947a1 and measured again in
-full on 2026-09-30, at 5629ca96, from build directories configured
-afresh; every row matched. The 15D tables were pinned on 2026-09-30,
-with the address-space limit scaled to the processor count
-(chapter 3.3).
+The tables were pinned on 2026-09-30 from full rebuilds, after the
+address-space limit was scaled to the processor count (chapter 3.3)
+and the `setbase` extension and `bin` were removed
+(`analysis-numeric-base.md`).
 
 ## 3. What fails
 
 ### 3.1 The iostreams rows
 
-Four rows fail in every configuration, GCC and Clang alike. Each has
-a `TODO` entry. What they report, from a run in 11S on 2026-09-28:
+Three rows fail, GCC and Clang alike. Each has a `TODO` entry. What
+they report:
 
-- **`27.basic.ios`, 1 assertion.** "basic_ios<char>::flags () ==
-  dec | skipws, got dec | skipws". Expected and observed print the
-  same, so they differ in a bit the message does not name.
-- **`27.filebuf`, 8 assertions.** Four checks of `detach()`, for
-  `char` and `wchar_t`: `is_open()` true after a detach, `fd()` 3
-  where a negative value is expected, and the destructor closing the
-  detached descriptor.
-- **`27.std.manip`, 8 assertions.** All eight name `std::setbase (10)`.
-- **`27.ostream.inserters.stdcxx-51`, `ABRT`.** The test expects
-  `qnan` and `snan`, and `QNAN` and `SNAN` under `uppercase`, for
-  quiet and signaling NaNs of all three floating types. The library
-  prints `nan` and `NAN` for both. The test's `assert` at line 123
-  fails.
+- **`27.basic.ios`, 1 assertion, thread-safe builds only.**
+  "basic_ios<char>::flags () == dec | skipws, got dec | skipws |
+  nolock | nolockbuf". A user's stream is created unlocked, and the
+  locking extension keeps that state in the format flags
+  (`analysis-basic-ios-flags.md`; `TODO` has the decision).
+- **`27.filebuf`, 8 assertions, every configuration.** Four checks of
+  `detach()`, for `char` and `wchar_t`: `is_open()` true after a
+  detach, `fd()` 3 where a negative value is expected, and the
+  destructor closing the detached descriptor.
+- **`27.ostream.inserters.stdcxx-51`, `ABRT`, every configuration.**
+  The test expects `qnan` and `snan`, and `QNAN` and `SNAN` under
+  `uppercase`, for quiet and signaling NaNs of all three floating
+  types. The library prints `nan` and `NAN` for both. The test's
+  `assert` at line 123 fails.
 
-These are the 17 failed assertions of every table. The abort is the
-only signalled program outside 15D.
+These are the 8 failed assertions of every table and the ninth of
+the thread-safe ones. The abort is the only signalled program outside
+15D.
 
 ### 3.2 `21.string.stdcxx-162` in 15D
 
@@ -177,11 +181,12 @@ the harness, not a reference.
 |---|---|---|---|
 | `18.numeric.special.float` | 134 | 119 | 134 |
 | `20.temp.buffer` | 10891 | 10792 | 10891 |
-| `22.locale.num.put` | 1671 | 1667 | 1671 |
+| `22.locale.num.put` | 1485 | 1481 | 1485 |
 | `22.locale.money.get` | 3952 | 3960 | 3952 |
 | `22.locale.codecvt` | 322 | 322 | 306 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
 | `21.string.stdcxx-162` | `NOUT` | `NOUT` | `ABRT` |
+| `27.basic.ios` | 7, 0 failed | 7, 0 failed | 7, 1 failed |
 | `22.locale.codecvt.mt` | 0 | 0 | 12800 |
 | seven `22.locale.*.mt` | pass | pass | `HUP`, chapter 3.3 |
 
@@ -203,6 +208,7 @@ Reasons, in order:
   corrupt `mbstate_t`. Their state check sits under the locale lock.
 - The atomic operation tests count only in the thread-safe build.
 - `21.string.stdcxx-162`: chapter 3.2.
+- `27.basic.ios`: the lock bits of a thread-safe build (chapter 3.1).
 - `22.locale.codecvt.mt` counts only with more than one thread.
 - Seven older locale MT tests time out in 15D: chapter 3.3.
 
@@ -223,9 +229,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 10,105,717 | 17 | 0 | 1 |
-| 11s-clang | 10,105,622 | 17 | 0 | 1 |
-| 15D-clang | 10,118,583 | 17 | 0 | 9 |
+| 11S-clang | 10,103,763 | 8 | 0 | 1 |
+| 11s-clang | 10,103,668 | 8 | 0 | 1 |
+| 15D-clang | 10,116,629 | 9 | 0 | 9 |
 
 Row for row they are the GCC tables, with one exception.
 `18.numeric.special.float` runs 134 assertions in the 32-bit Clang

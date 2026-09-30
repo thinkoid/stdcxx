@@ -113,34 +113,6 @@ typedef unsigned _RWSTD_LONG_LONG _ULLong;
 
 
 static size_t
-__rw_btoa (char *buf, _ULLong i, unsigned base)
-{
-    _RWSTD_ASSERT (base && base <= 36);
-
-    const size_t dig = _STD::numeric_limits<_ULLong>::digits + 0U;
-
-    char*             end   = buf + dig;
-    const char* const begin = end;
-
-    _ULLong tmp;
-    do {
-        tmp = i / base;
-
-        // PA RISC has no integer divide, optimize the modulo operator
-        // this is also faster than computing the modulo on i86, and
-        // faster than calling ldiv()
-        *--end = __rw_digits [i - tmp * base];
-    } while ((i = tmp));
-
-    const size_t len = begin - end;
-
-    memmove (buf, end, len);
-
-    return len;
-}
-
-
-static size_t
 __rw_dtoa (char *buf, _ULLong i, unsigned flags)
 {
     // get the maximum number of decimal digits for an unsigned long
@@ -201,26 +173,24 @@ __rw_itoa (char *buf, _ULLong i, unsigned flags)
     const char* const pdigs = flags & _RWSTD_IOS_UPPERCASE ?
         __rw_digits + 36 : __rw_digits;
 
-    const _LLong base = (flags >> _RWSTD_IOS_BASEOFF) - _LLong (1);
-
-    int bits;
+    _LLong base;   // the value of the largest digit
+    int    bits;   // the number of bits in a digit
 
     char *end = buf;
 
-    switch (base) {
+    // 22.2.2.2.2, Stage 1: oct and hex select %o and %x, any
+    // other basefield %d
+    switch (flags & _RWSTD_IOS_BASEFIELD) {
 
-    case  1: bits = 1; break;
-    case  3: bits = 2; break;
-    case  7:
+    case _RWSTD_IOS_OCT:
+        base = 7;
         bits = 3;
         if (i && flags & _RWSTD_IOS_SHOWBASE)
             *end++ = '0';
         break;
 
-    case 9:
-        return __rw_dtoa (end, i, flags);
-
-    case 15:
+    case _RWSTD_IOS_HEX:
+        base = 15;
         bits = 4;
         if (i && flags & _RWSTD_IOS_SHOWBASE) {
             *end++ = '0';
@@ -228,12 +198,8 @@ __rw_itoa (char *buf, _ULLong i, unsigned flags)
         }
         break;
 
-    case 31: bits = 5; break;
-
     default:
-        _RWSTD_ASSERT (base >= 0 && base <= _RWSTD_UINT_MAX);
-
-        return __rw_btoa (buf, i, unsigned (base));
+        return __rw_dtoa (end, i, flags);
     }
 
     // maximum number of base-digits
@@ -267,7 +233,10 @@ __rw_itoa (char *buf, _ULLong i, unsigned flags)
 static inline size_t
 __rw_itoa (char *buf, _LLong i, unsigned flags)
 {
-    if (10 == flags >> _RWSTD_IOS_BASEOFF)
+    const unsigned basefield = flags & _RWSTD_IOS_BASEFIELD;
+
+    // octal and hexadecimal output converts the value as unsigned
+    if (_RWSTD_IOS_OCT != basefield && _RWSTD_IOS_HEX != basefield)
         return __rw_dtoa (buf, i, flags);
 
     return __rw_itoa (buf, _RWSTD_STATIC_CAST (_ULLong, i), flags);
@@ -275,34 +244,6 @@ __rw_itoa (char *buf, _LLong i, unsigned flags)
 
 
 #endif   // _RWSTD_LONG_LONG
-
-
-static size_t
-__rw_btoa (char *buf, unsigned long i, unsigned base)
-{
-    _RWSTD_ASSERT (base && base <= 36);
-
-    const size_t dig = _STD::numeric_limits<unsigned long>::digits + 0U;
-
-    char*             end   = buf + dig;
-    const char* const begin = end;
-
-    unsigned long tmp;
-    do {
-        tmp = i / base;
-
-        // PA RISC has no integer divide, optimize the modulo operator
-        // this is also faster than computing the modulo on i86, and
-        // faster than calling ldiv()
-        *--end = __rw_digits [i - tmp * base];
-    } while ((i = tmp));
-
-    const size_t len = begin - end;
-
-   memmove (buf, end, len);
-
-    return len;
-}
 
 
 static inline size_t
@@ -363,92 +304,39 @@ __rw_dtoa (char *buf, long i, unsigned flags)
 }
 
 
-// convert unsigned long to a roman number
-static size_t
-__rw_utor (char *buf, unsigned long i, unsigned flags)
-{
-    //                          01234560123456
-    static const char lit [] = "ivxlcdmIVXLCDM";
-
-    if (0 == i || i > 4999)
-        return __rw_dtoa (buf, i, flags);
-
-    const char* const pdigs = flags & _RWSTD_IOS_UPPERCASE ? lit + 7 : lit;
-
-    const char *begin = buf;
-
-    for (; i >= 1000; i -= 1000)
-        *buf++ = pdigs [6];   // 'M'
-
-    for (unsigned long j = 0, ord = 100; j != 6; j += 2, ord /= 10) {
-
-        unsigned long fact;
-
-        if (i >= (fact = 9 * ord)) {
-            *buf++ = pdigs [4 - j];   // {C,X,I}
-            *buf++ = pdigs [6 - j];   // {M,C,X}
-            i -= fact;
-        }
-        else if (i >= (fact = 5 * ord)) {
-            *buf++ = pdigs [5 - j];   // {D,L,V}
-            for (i -= fact; i >= ord; i -= ord)
-                *buf++ = pdigs [4 - j];   // {C,X,I}
-        }
-        else if (i >= (fact = 4 * ord)) {
-            *buf++ = pdigs [4 - j];   // {C,X,I}
-            *buf++ = pdigs [5 - j];   // {D,L,V}
-            i -= fact;
-        }
-        else {
-            for (; i >= ord; i -= ord)
-                *buf++ = pdigs [4 - j];   // {C,X,I}
-        }
-    }
-
-    return buf - begin;
-}
-
-
 static size_t
 __rw_itoa (char *buf, unsigned long i, unsigned flags)
 {
     const char* const pdigs = flags & _RWSTD_IOS_UPPERCASE ?
         __rw_digits + 36 : __rw_digits;
 
-    const unsigned basemask = (flags >> _RWSTD_IOS_BASEOFF) - 1;
-
-    int bits;
+    unsigned basemask;   // the value of the largest digit
+    int      bits;       // the number of bits in a digit
 
     char *end = buf;
 
-    switch (basemask) {
-    case unsigned (-1): case 9:
-        return __rw_dtoa (end, i, flags);
+    // 22.2.2.2.2, Stage 1: oct and hex select %o and %x, any
+    // other basefield %d
+    switch (flags & _RWSTD_IOS_BASEFIELD) {
 
-    case 0:
-        return __rw_utor (end, i, flags);
-
-    case  1: bits = 1; break;
-    case  3: bits = 2; break;
-    case  7:
-        bits = 3;
+    case _RWSTD_IOS_OCT:
+        basemask = 7;
+        bits     = 3;
         if (i && flags & _RWSTD_IOS_SHOWBASE)
             *end++ = '0';
         break;
 
-    case 15:
-        bits = 4;
+    case _RWSTD_IOS_HEX:
+        basemask = 15;
+        bits     = 4;
         if (i && flags & _RWSTD_IOS_SHOWBASE) {
             *end++ = '0';
             *end++ = pdigs [33];   // 'X' or 'x'
         }
         break;
 
-    case 31:
-        bits = 5; break;
-
     default:
-        return __rw_btoa (buf, i, basemask + 1);
+        return __rw_dtoa (end, i, flags);
     }
 
     int j;
@@ -481,7 +369,10 @@ __rw_itoa (char *buf, unsigned long i, unsigned flags)
 static inline size_t
 __rw_itoa (char *buf, long i, unsigned flags)
 {
-    if (10 == flags >> _RWSTD_IOS_BASEOFF)
+    const unsigned basefield = flags & _RWSTD_IOS_BASEFIELD;
+
+    // octal and hexadecimal output converts the value as unsigned
+    if (_RWSTD_IOS_OCT != basefield && _RWSTD_IOS_HEX != basefield)
         return __rw_dtoa (buf, i, flags);
 
     return __rw_itoa (buf, _RWSTD_STATIC_CAST (unsigned long, i), flags);

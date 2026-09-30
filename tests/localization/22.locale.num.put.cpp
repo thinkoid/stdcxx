@@ -542,7 +542,6 @@ void direct_use_test (charT, const char *cname)
 #define skipws      std::ios_base::skipws
 #define unitbuf     std::ios_base::unitbuf
 #define uppercase   std::ios_base::uppercase
-#define bin         std::ios_base::bin
 #define adjustfield std::ios_base::adjustfield
 #define basefield   std::ios_base::basefield
 #define floatfield  std::ios_base::floatfield
@@ -825,14 +824,6 @@ void long_test (charT, const char *cname)
     TEST (T,  -123456787L, dec | left, 0, 14, ' ', "\x8", "-1,23456787   ");
     TEST (T,  -123456788L, dec | left, 0, 14, ' ', "\x9", "-123456788    ");
 
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-    rw_info (0, 0, __LINE__, "std::ios::dec | std::ios::bin [extension]");
-
-    TEST (T, 33333333L, bin | dec, 0, 0, ' ', "", "%ld");
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
-
     //////////////////////////////////////////////////////////////////
     // explicit octal ouptut
     rw_info (0, 0, __LINE__, "std::ios::oct");
@@ -890,14 +881,6 @@ void long_test (charT, const char *cname)
     TEST (T, LONG_MAX, oct | showbase | showpos, 0, 0, ' ', "", "%#+lo");
     TEST (T, LONG_MIN, oct | showbase | showpos, 0, 0, ' ', "", "%#+lo",
           GET_FAIL);
-
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-    rw_info (0, 0, __LINE__, "std::ios::oct | std::ios::bin [extension]");
-
-    TEST (T, 22222222L, bin | oct, 0, 0, ' ', "", "%ld");
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
 
     //////////////////////////////////////////////////////////////////
     // explicit hexadecimal ouptut
@@ -957,20 +940,6 @@ void long_test (charT, const char *cname)
     rw_info (0, 0, __LINE__, "std::ios::hex | std::ios::dec | std::ios::oct");
 
     TEST (T, 11111111L, oct | dec | hex, 0, 0, ' ', "", "%ld");
-
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-    rw_info (0, 0, __LINE__, "std::ios::hex | std::ios::bin [extension]");
-
-    TEST (T, 44444444L, bin | hex, 0, 0, ' ', "", "%ld");
-
-    rw_info (0, 0, __LINE__, "std::ios::hex | std::ios::dec | "
-                  "std::ios::oct | std::ios::bin [extension]");
-
-    TEST (T, 55555555L, bin | oct | dec | hex, 0, 0, ' ', "", "%ld");
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
-
 
     //////////////////////////////////////////////////////////////////
     // extension: fixed and negative precision
@@ -1123,130 +1092,6 @@ void long_test (charT, const char *cname)
     TEST (T,  +1234567L,   FLAGS, 0, 10, '2', "", "+221234567");
     TEST (T,  -12345678L,  FLAGS, 0, 10, '3', "", "-312345678");
     TEST (T,  +123456789L, FLAGS, 0, 10, '4', "", "+123456789");
-
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-    // bin
-    rw_info (0, 0, __LINE__, "std::ios::bin [extension]");
-
-    TEST (T,     0L, bin, 0, 16, '.', "\4", "...............0");
-    TEST (T,     1L, bin, 0, 16, '.', "\4", "...............1");
-    TEST (T,     2L, bin, 0, 16, '.', "\4", "..............10");
-    TEST (T,     3L, bin, 0, 16, '.', "\4", "..............11");
-    TEST (T,     4L, bin, 0, 16, '.', "\4", ".............100");
-    TEST (T,     5L, bin, 0, 16, '.', "\4", ".............101");
-    TEST (T,     6L, bin, 0, 16, '.', "\4", ".............110");
-    TEST (T,     7L, bin, 0, 16, '.', "\4", ".............111");
-    TEST (T,     8L, bin, 0, 16, '.', "\4", "............1000");
-    TEST (T,     9L, bin, 0, 16, '.', "\4", "............1001");
-    TEST (T,  0x0aL, bin, 0, 16, '.', "\4", "............1010");
-    TEST (T,  0x0bL, bin, 0, 16, '.', "\4", "............1011");
-    TEST (T,  0x0cL, bin, 0, 16, '.', "\4", "............1100");
-    TEST (T,  0x0dL, bin, 0, 16, '.', "\4", "............1101");
-    TEST (T,  0x0eL, bin, 0, 16, '.', "\4", "............1110");
-    TEST (T,  0x0fL, bin, 0, 16, '.', "\4", "............1111");
-
-    TEST (T,  0xf0L, bin, 0, 16, '.', "\4", ".......1111,0000");
-    TEST (T,  0xf1L, bin, 0, 16, '.', "\4", ".......1111,0001");
-    TEST (T,  0xf2L, bin, 0, 16, '.', "\4", ".......1111,0010");
-    TEST (T,  0xf3L, bin, 0, 16, '.', "\4", ".......1111,0011");
-    TEST (T,  0xf4L, bin, 0, 16, '.', "\4", ".......1111,0100");
-    TEST (T,  0xf5L, bin, 0, 16, '.', "\4", ".......1111,0101");
-
-    TEST (T,  0x12345678L, bin, 0, 0, '.', "\4",
-             "1,0010,0011,0100,0101,0110,0111,1000");
-
-    TEST (T,  0xfedcba98L, bin, 0, 0, '\0', "\010",
-             "11111110,11011100,10111010,10011000");
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
-
-    // locale 3.0 extension
-
-#define BASE(n)   int (unsigned (n)  << _RWSTD_IOS_BASEOFF)
-
-    // bases 0 and 10 are both base 10
-    // base 1 is roman (values 1 through 4999)
-    // bases 2 through 36 are what they are
-    // anything else is unspecified
-
-    rw_info (0, 0, __LINE__, "base 1 (Roman), and 2 through 36 [extension]");
-
-    TEST (T,    1234L, BASE ( 0), 0, 0, '\0', "",  "1234");
-    TEST (T,    1234L, BASE ( 1), 0, 0, '\0', "",  "mccxxxiv");
-    TEST (T,  0x1234L, BASE ( 2), 0, 0, '\0', "",  "1001000110100");
-
-    TEST (T,   01234L, oct | BASE ( 8), 0, 0, '\0', "",  "1234");
-    TEST (T,    1234L, dec | BASE (10), 0, 0, '\0', "",  "1234");
-    TEST (T,  0x1234L, hex | BASE (16), 0, 0, '\0', "",  "1234");
-
-    TEST (T,    1234L, BASE ( 2), 0, 0, '\0', "",  "10011010010");
-    TEST (T,    1234L, BASE ( 3), 0, 0, '\0', "",  "1200201");
-    TEST (T,    1234L, BASE ( 4), 0, 0, '\0', "",  "103102");
-    TEST (T,    1234L, BASE ( 5), 0, 0, '\0', "",  "14414");
-    TEST (T,    1234L, BASE ( 6), 0, 0, '\0', "",  "5414");
-    TEST (T,    1234L, BASE ( 7), 0, 0, '\0', "",  "3412");
-    TEST (T,    1234L, BASE ( 9), 0, 0, '\0', "",  "1621");
-
-    TEST (T,    1234L, dec | BASE (10), 0, 0, '\0', "",  "1234");
-
-    TEST (T,    1234L, BASE (11), 0, 0, '\0', "",  "a22");
-    TEST (T,    1234L, BASE (12), 0, 0, '\0', "",  "86a");
-    TEST (T,    1234L, BASE (13), 0, 0, '\0', "",  "73c");
-    TEST (T,    1234L, BASE (14), 0, 0, '\0', "",  "642");
-    TEST (T,    1234L, BASE (15), 0, 0, '\0', "",  "574");
-
-    TEST (T,    1234L, hex | BASE (16), 0, 0, '\0', "",  "4d2");
-
-    TEST (T,    1234L, BASE (17), 0, 0, '\0', "",  "44a");
-    TEST (T,    1234L, BASE (18), 0, 0, '\0', "",  "3ea");
-    TEST (T,    1234L, BASE (19), 0, 0, '\0', "",  "37i");
-    TEST (T,    1234L, BASE (20), 0, 0, '\0', "",  "31e");
-    TEST (T,    1234L, BASE (21), 0, 0, '\0', "",  "2gg");
-    TEST (T,    1234L, BASE (22), 0, 0, '\0', "",  "2c2");
-    TEST (T,    1234L, BASE (23), 0, 0, '\0', "",  "27f");
-    TEST (T,    1234L, BASE (24), 0, 0, '\0', "",  "23a");
-    TEST (T,    1234L, BASE (25), 0, 0, '\0', "",  "1o9");
-    TEST (T,    1234L, BASE (26), 0, 0, '\0', "",  "1lc");
-    TEST (T,    1234L, BASE (27), 0, 0, '\0', "",  "1ij");
-    TEST (T,    1234L, BASE (28), 0, 0, '\0', "",  "1g2");
-    TEST (T,    1234L, BASE (29), 0, 0, '\0', "",  "1dg");
-    TEST (T,    1234L, BASE (30), 0, 0, '\0', "",  "1b4");
-    TEST (T,    1234L, BASE (31), 0, 0, '\0', "",  "18p");
-    TEST (T,    1234L, BASE (32), 0, 0, '\0', "",  "16i");
-    TEST (T,    1234L, BASE (33), 0, 0, '\0', "",  "14d");
-    TEST (T,    1234L, BASE (34), 0, 0, '\0', "",  "12a");
-    TEST (T,    1234L, BASE (35), 0, 0, '\0', "",  "109");
-    TEST (T,    1234L, BASE (36), 0, 0, '\0', "",  "ya");
-
-    // effect of non-empty grouping is unspecified
-    TEST (T,       0L, BASE (1), 0, 0, '\0', "",  "0");
-    TEST (T,       1L, BASE (1), 0, 0, '\0', "",  "i");
-    TEST (T,       2L, BASE (1), 0, 0, '\0', "",  "ii");
-    TEST (T,       3L, BASE (1), 0, 0, '\0', "",  "iii");
-    TEST (T,       4L, BASE (1), 0, 0, '\0', "",  "iv");
-    TEST (T,       5L, BASE (1), 0, 0, '\0', "",  "v");
-    TEST (T,       6L, BASE (1), 0, 0, '\0', "",  "vi");
-    TEST (T,       7L, BASE (1), 0, 0, '\0', "",  "vii");
-    TEST (T,       8L, BASE (1), 0, 0, '\0', "",  "viii");
-    TEST (T,       9L, BASE (1), 0, 0, '\0', "",  "ix");
-    TEST (T,      10L, BASE (1), 0, 0, '\0', "",  "x");
-    TEST (T,      50L, BASE (1), 0, 0, '\0', "",  "l");
-    TEST (T,     100L, BASE (1), 0, 0, '\0', "",  "c");
-    TEST (T,     500L, BASE (1), 0, 0, '\0', "",  "d");
-    TEST (T,    1000L, BASE (1), 0, 0, '\0', "",  "m");
-    TEST (T,      49L, BASE (1), 0, 0, '\0', "",  "xlix");
-    TEST (T,      88L, BASE (1), 0, 0, '\0', "",  "lxxxviii");
-    TEST (T,      99L, BASE (1), 0, 0, '\0', "",  "xcix");
-    TEST (T,    1999L, BASE (1), 0, 0, '\0', "",  "mcmxcix");
-    TEST (T,    2000L, BASE (1), 0, 0, '\0', "",  "mm");
-    TEST (T,    2001L, BASE (1), 0, 0, '\0', "",  "mmi");
-    TEST (T,    4999L, BASE (1), 0, 0, '\0', "",  "mmmmcmxcix");
-    TEST (T,    5000L, BASE (1), 0, 0, '\0', "",  "5000");
-
-    TEST (T,    1492L, BASE (1), 0, 10, '*', "",  "***mcdxcii");
-
-    TEST (T,  1776L, BASE (1) | uppercase, 0, 0, '\0', "", "MDCCLXXVI");
 }
 
 

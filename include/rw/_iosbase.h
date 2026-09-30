@@ -97,7 +97,7 @@ struct _RWSTD_EXPORT ios_base: _RW::__rw_synchronized
     _RWSTD_STATIC_CONST (fmtflags, scientific = _RW::__rw_scientific);
 
     // generates a prefix indicating the numeric base of generated integer
-    // output (bin - none, oct - "0", dec - none, hex - "0x")
+    // output (oct - "0", dec - none, hex - "0x")
     _RWSTD_STATIC_CONST (fmtflags, showbase = _RW::__rw_showbase);
 
     // generates a decimal-point character unconditionally in generated
@@ -116,14 +116,6 @@ struct _RWSTD_EXPORT ios_base: _RW::__rw_synchronized
     // replaces certain lowercase letters with their uppercase equivalents
     // in generated output
     _RWSTD_STATIC_CONST (fmtflags, uppercase = _RW::__rw_uppercase);
-
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-    // extension - converts integer input or generates integer output
-    // in binary base
-    _RWSTD_STATIC_CONST (fmtflags, bin = _RW::__rw_bin);
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
 
     _RWSTD_STATIC_CONST (fmtflags, basefield = _RW::__rw_basefield);
     _RWSTD_STATIC_CONST (fmtflags, adjustfield = _RW::__rw_adjustfield);
@@ -299,11 +291,6 @@ struct _RWSTD_EXPORT ios_base: _RW::__rw_synchronized
 
     // 27.4.2.7, p2
     virtual ~ios_base ();    
-
-    // returns a numeric base as per 22.2.2.1.2, p4
-    int _C_base () const {
-        return _RWSTD_STATIC_CAST (unsigned, flags ()) >> _RWSTD_IOS_BASEOFF;
-    }
 
 protected:
 

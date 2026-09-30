@@ -118,9 +118,9 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.moneypunct                          0    0      540      0   100%
 22.locale.name                                0    0        0      0   100%
 22.locale.num.get.mt                        HUP    0                       
-22.locale.num.get                             0    0    65508      0   100%
+22.locale.num.get                             0    0    63720      0   100%
 22.locale.num.put.mt                        HUP    0                       
-22.locale.num.put                             0    2     1671      0   100%
+22.locale.num.put                             0    2     1485      0   100%
 22.locale.num.put.stdcxx-2                 NOUT    0                       
 22.locale.numpunct.mt                       HUP    0                       
 22.locale.numpunct                            0    0       56      0   100%
@@ -256,7 +256,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 27.ostream.inserters.stdcxx-51             ABRT    0                       
 27.ostream                                    0    0     4876      0   100%
 27.ostream.unformatted.stdcxx-626          NOUT    0                       
-27.std.manip                                  0    0       28      8    71%
+27.std.manip                                  0    0       48      0   100%
 27.streambuf.buffer.stdcxx-808             NOUT    0                       
 27.streambuf.imbue.stdcxx-307              NOUT    0                       
 27.streambuf.sgetn.stdcxx-1026             NOUT    0                       
@@ -278,5 +278,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10118583
-  Failed assertions:           17
+  Assertions:            10116629
+  Failed assertions:            9

@@ -168,13 +168,6 @@ _rw_fmtflags (const FmtSpec &spec, Buffer &buf, int bits)
         BITNAME (std::ios, unitbuf),
         BITNAME (std::ios, uppercase),
 
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-        // extension: produce binary output (similar to oct, dec, and hex)
-        BITNAME (std::ios, bin),
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
-
 #ifndef _RWSTD_NO_EXT_REENTRANT_IO
 
         // extension: allow unsychronized access to stream and/or its buffer
@@ -189,41 +182,7 @@ _rw_fmtflags (const FmtSpec &spec, Buffer &buf, int bits)
 
     static const size_t count = sizeof names / sizeof *names;
 
-    const int base = (bits >> _RWSTD_IOS_BASEOFF) & _RWSTD_IOS_BASEMASK;
-
-    // zero out bits representingthe numeric base
-    bits &= ~(_RWSTD_IOS_BASEMASK << _RWSTD_IOS_BASEOFF);
-
-    int len = _rw_bmpfmt (spec, buf, names, count, bits);
-
-    if (0 < len && base && base != 8 && base != 10 && base != 16) {
-
-        // for numeric bases other than those required by the standard,
-        // use the text "base (%d)" to show the extended numeric base
-
-#ifndef _RWSTD_NO_EXT_BIN_IO
-
-        if (bits & std::ios::bin)
-            return len;
-
-#endif   // _RWSTD_NO_EXT_BIN_IO
-
-        const int n = rw_asnprintf (buf.pbuf, buf.pbufsize,
-                                    "%{+} | %{?}std::ios::%{;}base(%d)",
-                                    spec.fl_pound, base);
-
-        if (0 < n) {
-            // adjust length and the end offset after appending above
-            len        += n;
-            buf.endoff += n;
-        }
-        else {
-            // error (most likely ENOMEM)
-            len = n;
-        }
-    }
-
-    return len;
+    return _rw_bmpfmt (spec, buf, names, count, bits);
 }
 
 /********************************************************************/

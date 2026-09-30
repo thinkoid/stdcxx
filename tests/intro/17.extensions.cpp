@@ -345,13 +345,8 @@ run_test (int /* unused */, char* /* unused */ [])
                " class std::ios_base::failbit_set found");
 
 
-    // exercise _RWSTD_NO_EXT_BIN_IO
-    rw_info (0, 0, __LINE__, "_RWSTD_NO_EXT_BIN_IO");
-
-#ifndef _RWSTD_NO_EXT_BIN_IO
-    rw_assert (0, __FILE__, __LINE__,
-               "_RWSTD_NO_EXT_BIN_IO not #defined");
-#endif
+    // std::ios_base::bin is gone with base-2 I/O
+    rw_info (0, 0, __LINE__, "std::ios_base::bin");
 
     rw_assert (IosBase::check_bin (), __FILE__, __LINE__,
                "_RWSTD_NO_EXTENSIONS #defined and "

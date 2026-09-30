@@ -692,7 +692,6 @@
 #define _RWSTD_IOS_SKIPWS       0x01000
 #define _RWSTD_IOS_UNITBUF      0x02000
 #define _RWSTD_IOS_UPPERCASE    0x04000
-#define _RWSTD_IOS_BIN          0x08000
 // NOLOCK[BUF] used rather than LOCK[BUF] to maintain functional compatibility
 // with release 2.2 (which was always safe when these bits were cleared)
 #define _RWSTD_IOS_NOLOCK       0x10000
@@ -706,17 +705,8 @@
 #define _RWSTD_IOS_ADJUSTFIELD    \
         (_RWSTD_IOS_LEFT | _RWSTD_IOS_RIGHT | _RWSTD_IOS_INTERNAL)
 
-#ifndef _RWSTD_NO_EXT_BIN_IO
-#  define _RWSTD_IOS_BASEFIELD    \
-          (_RWSTD_IOS_DEC | _RWSTD_IOS_HEX | _RWSTD_IOS_OCT | _RWSTD_IOS_BIN)
-#else
-#  define _RWSTD_IOS_BASEFIELD    \
-          (_RWSTD_IOS_DEC | _RWSTD_IOS_HEX | _RWSTD_IOS_OCT)
-#endif   // _RWSTD_NO_EXT_BIN_IO
-
-// offset of most significant bits where numeric base is stored
-#define _RWSTD_IOS_BASEMASK      63
-#define _RWSTD_IOS_BASEOFF       26
+#define _RWSTD_IOS_BASEFIELD    \
+        (_RWSTD_IOS_DEC | _RWSTD_IOS_HEX | _RWSTD_IOS_OCT)
 
 #define _RWSTD_IOS_GOODBIT       0x00
 #define _RWSTD_IOS_BADBIT        0x01

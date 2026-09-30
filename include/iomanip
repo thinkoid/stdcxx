@@ -64,34 +64,13 @@ struct __rw_setbase
 {
     void operator() (_STD::ios_base &__strm, int __base) const {
 
-#ifndef _RWSTD_NO_EXT_SETBASE
-
-        if (__base < 0 || __base > 36)
-            __base = 0;
-
-#else   // if defined (_RWSTD_NO_EXT_SETBASE)
-
-        switch (__base) {
-        case 0: case 8: case 10: case 16: break;
-
-#  ifndef _RWSTD_NO_EXT_BIN_IO
-
-        case 2: break;
-
-#  endif   // _RWSTD_NO_EXT_BIN_IO
-
-        default: __base = 0;
-        }
-
-#endif   // _RWSTD_NO_EXT_SETBASE
-
-        const unsigned __ifl =
-            (  __strm.flags () & ~_STD::ios_base::basefield
-             & ~(   _RWSTD_STATIC_CAST (unsigned, _RWSTD_IOS_BASEMASK)
-                 << _RWSTD_IOS_BASEOFF))
-            | __base << _RWSTD_IOS_BASEOFF;
-
-        __strm.flags (_STD::ios_base::fmtflags (__ifl));
+        // 27.6.3, p5: 8, 10 and 16 select their base, any other
+        // value clears basefield
+        __strm.setf (   8 == __base ? _STD::ios_base::oct
+                     : 10 == __base ? _STD::ios_base::dec
+                     : 16 == __base ? _STD::ios_base::hex
+                     : _STD::ios_base::fmtflags (0),
+                     _STD::ios_base::basefield);
     }
 };
 

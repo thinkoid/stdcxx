@@ -59,7 +59,7 @@ be distinguished from unresolved defects.
 
 | choice in the tree | effect and source |
 |---|---|
-| Extra public facilities | Binary stream I/O, extended file-buffer operations, additional facet overloads and `basic_string::copy()` for a deep copy; documented in `README` §8.3.10 and controlled by `_RWSTD_NO_EXT_*` macros. |
+| Extra public facilities | Extended file-buffer operations, additional facet overloads and `basic_string::copy()` for a deep copy; documented in `README` §8.3.10 and controlled by `_RWSTD_NO_EXT_*` macros. |
 | Legacy algorithm overloads | Four-argument `count` and `count_if` accumulate into an output argument and return `void`, alongside the standard forms (`include/algorithm`). These are compatibility additions. |
 | Stream truth conversion | By default `basic_ios` converts to a private pointer-to-member type. `_RWSTD_NO_EXT_IOS_SAFE_CONVERSION` selects the C++03 `operator void*` form (`include/rw/_basic_ios.h`). The default is not C++11's explicit `operator bool`. |
 | Width after failed insertion | The string-insertion helper normally preserves width when writing fails; `_RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE` selects unconditional reset on its normal write-failure paths (`include/rw/_ioinsert.cc`). |
@@ -116,10 +116,10 @@ resolutions.
 The [baseline record](ref-test-baseline.md) covers six debug
 configurations: GCC and Clang, each with 64-bit archive, 32-bit archive
 and 64-bit reentrant shared builds. The pinned tables contain 272
-programs apiece. Every table records the same 17 failed assertions,
-all in three stream tests (`27.basic.ios` 1, `27.filebuf` 8,
-`27.std.manip` 8), and one aborted stream regression test,
-`27.ostream.inserters.stdcxx-51`. **These are test counts, not
+programs apiece. Every table records the same 8 failed assertions,
+all in `27.filebuf`, and one aborted stream regression test,
+`27.ostream.inserters.stdcxx-51`; the thread-safe tables add one in
+`27.basic.ios`. **These are test counts, not
 percentages of the standard implemented.** Assertions have unequal scope, and
 process failures can prevent later assertions from running.
 
@@ -129,7 +129,7 @@ process failures can prevent later assertions from running.
 | Locale facets | The `num_get`, `time_get` and `money_get` rows pass. `num_get` and `money_get` grow their digit buffers instead of failing or overrunning, and `money_get` throws `bad_alloc` where the buffer size would wrap. |
 | Numerics and extension controls | The limits, math, valarray and extension rows pass; the failures were test defects and a driver comparison. |
 | Memory/lifetime symptoms | The intermittent string-iterator result was the test driver reading past short buffers, and the `21.cwchar` exit-time corruption a test's use of a write-only stream; both are repaired. |
-| Streams | `27.basic.ios`, `27.filebuf` and `27.std.manip` fail 17 assertions, and `27.ostream.inserters.stdcxx-51` aborts; they have not yet been read against the library. |
+| Streams | `27.filebuf` fails 8 assertions and `27.ostream.inserters.stdcxx-51` aborts; they have not yet been read against the library. `27.basic.ios` fails in the thread-safe builds on the locking extension's flag bits. `setbase` and the clearing of `basefield` follow the standard since the `setbase` extension and `bin` were removed; `27.std.manip` pins them. |
 | Reentrant locale use | The sanitizer investigation found races and use-after-free in the locale; they are repaired, and each repair has a multithreaded test. Seven locale MT rows of the reentrant tables time out: on many processors they measure the harness's time limit, a test-design question queued in `TODO`. C++03 did not itself specify the later thread library and memory model. |
 | Test infrastructure | Several repaired failures belonged to tests or their driver. Known successful `NOUT` and `FORMAT` rows have individual reporting contracts; neither label alone proves success. |
 

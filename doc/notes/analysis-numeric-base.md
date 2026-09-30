@@ -304,6 +304,13 @@ The expectations were run first against libstdc++, which meets all of
 them. Against the library before the removal, 100 of the 120
 assertions fail, each as chapters 3 and 4 predict.
 
+Measured after the removal, 2026-09-30, from full rebuilds of the six
+configurations. `27.std.manip` passes all 48 of its assertions.
+`27.basic.ios` passes in the single-threaded builds. `22.locale.num.get`
+and `22.locale.num.put` lose the cases of the removed bases, and the
+driver's `0.printf` the cases that printed them. No other row moves,
+and the warnings of the tests' own sources are unchanged.
+
 `27.basic.ios` fails on the same bits for another reason: `flags ()`
 returns them, where the standard's postcondition allows
 `skipws | dec` only. `analysis-basic-ios-flags.md` has it.

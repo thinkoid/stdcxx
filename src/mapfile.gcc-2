@@ -58,7 +58,6 @@ global:
     _4__rw.__rw_flt_qNaN;
     _4__rw.__rw_flt_sNaN;
     _4__rw.__rw_ldbl_infinity;
-    _4__rw.__rw_roman_inxs;
     _4__rw.__rw_throw_proc;
     _C_assign__Q24__rw14__rw_exceptionPCcUi;
     _C_copyfmt__Q23std8ios_baseRCQ23std8ios_basePvPCvUi;
