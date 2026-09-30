@@ -345,6 +345,33 @@ Check: =21.string.stdcxx-162= passes in 15D. The exported symbols
 lose exactly the assembly routines. The suites are otherwise
 unchanged.
 
+* TODO EDG: restore it, compile for conformance
+
+The EDG front end is open source as of 2026-09:
+github.com/edgcpp/compiler, Apache 2.0 with the LLVM exceptions. It
+ships the =eccp= driver, the C-generating back end, the prelinker and
+a minimal runtime. It has no standard library. The tree used to build
+with =eccp= in strict mode. A conformance question was settled there
+before a bug was filed against another compiler. The platform
+retirement removed the configuration because the compiler could not
+be had: =etc/config/eccp.config= in dd1128a5,
+=include/rw/_config-eccp.h= in 6513a431. The =__EDG__= guards in
+=_iosbase.h=, =_traits.h= and five characterizations survive, and so
+do the =eccp= rows of =etc/config/xfail.txt=.
+
+Fix: build EDG with its =eccp= driver. Restore =eccp.config= from
+=dd1128a5^= and bring it current: strict mode (=-A=), exceptions
+(=-x=), the prelinker, the thread library. The characterizations
+describe the compiler. A macro of the override header comes back only
+where no characterization can express the gap, with its reason. Each
+strict-mode error in the library or the tests is read against the
+standard: a library defect is fixed here, a compiler defect is filed
+with EDG, and the leniency of GCC or Clang it exposes is recorded.
+
+Check: an =eccp= build directory configures, builds the library, the
+utilities and the tests, and runs the suite. Its table is pinned
+beside the six.
+
 * Documentation
 
 Documents that describe the library as it is, for a reader, not for
