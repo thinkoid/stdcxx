@@ -45,11 +45,10 @@ The older =22.locale.*.mt= tests run one thread per processor, up to
 32, for 10,000 to 200,000 iterations each. Each threaded section runs
 to its own 60-second soft timeout. After the first iteration
 everything they touch is cached, and the rest measures the locks at
-rest. On 32 processors they also measure the harness: its 1 GiB
-address-space limit (=etc/config/GNUmakefile.tst=) cannot hold 32
-threads' stacks and =malloc= arenas, and a test that starts outlasts
-the harness's 60-second timeout. Each test covers several facets, so
-a failure names a test, not a defect.
+rest. On 32 processors seven of them outlast the harness's 60-second
+timeout. The address-space limit grows with the processor count in
+thread-safe builds and no longer stops them. Each test covers several
+facets, so a failure names a test, not a defect.
 
 The four gated tests, =22.locale.use_facet.mt=,
 =22.locale.time.put.libc.mt=, =22.locale.id.mt= and
@@ -61,8 +60,8 @@ Fix: rewrite the older tests in that shape, or retire those the gated
 tests cover, one race or one facet operation per program: 4 to 8
 threads whatever the processor count, a barrier, many short rounds on
 fresh state, a small thread stack. Steady-state races are left to the
-ThreadSanitizer build. With a small fixed thread count the 1 GiB
-limit stays a guard and the timeout becomes a hang detector.
+ThreadSanitizer build. With a small fixed thread count the timeout
+becomes a hang detector.
 
 Check: a census of what each older test covers against the gated
 ones, each kept, split or retired with the reason. Every locale MT

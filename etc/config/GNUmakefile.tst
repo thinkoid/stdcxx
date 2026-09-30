@@ -90,9 +90,18 @@ ifneq ($(RPATH),)
   LDFLAGS += $(RPATH)$(LIBDIR):$(BUILDDIR)/rwtest
 endif
 
-RUNFLAGS += --compat -x "--compat -O -" --ulimit=as:1073741824
 # No test should use more than 1 GB of memory (See STDCXX-440).
-# The magic number 1073741824 is 1 GB in bytes.
+# The magic number 1073741824 is 1 GB in bytes. In thread-safe
+# builds the MT tests run a thread per processor, and each thread
+# maps an 8 MB stack and a 64 MB malloc arena: allow 128 MB more
+# (134217728 bytes) per processor there.
+ASLIMIT := 1073741824
+ifeq ($(findstring pthreads,$(BUILDMODE)),pthreads)
+  NCPUS   := $(shell getconf _NPROCESSORS_ONLN)
+  ASLIMIT := $(shell expr $(ASLIMIT) + $(NCPUS) \* 134217728)
+endif
+
+RUNFLAGS += --compat -x "--compat -O -" --ulimit=as:$(ASLIMIT)
 
 ########################################################################
 #  TARGETS

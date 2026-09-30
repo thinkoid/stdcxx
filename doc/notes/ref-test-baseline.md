@@ -18,8 +18,8 @@ harness's own table without the timing columns.
     aborts. All configurations. Not investigated (chapter 3.1).
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
     interface and waits for the next minor version (chapter 3.2).
-  - Fourteen locale MT rows of 15D. They measure two limits of the
-    harness, not the library (chapter 3.3).
+  - Seven locale MT rows of 15D time out. They measure the harness's
+    timeout, not the library (chapter 3.3).
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
 
@@ -97,13 +97,14 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 272 | 10,105,717 | 17 | 0 | 1 |
 | 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 272 | 10,105,607 | 17 | 0 | 1 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,105,783 | 17 | 9 | 7 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,118,583 | 17 | 0 | 9 |
 
 Chapter 4 lists where the three differ.
 
-The tables were pinned at 21c947a1. They were measured again in full
-on 2026-09-30, at 5629ca96, from build directories configured afresh.
-Every row matched but the 15D MT rows, which vary from run to run
+The 11S and 11s tables were pinned at 21c947a1 and measured again in
+full on 2026-09-30, at 5629ca96, from build directories configured
+afresh; every row matched. The 15D tables were pinned on 2026-09-30,
+with the address-space limit scaled to the processor count
 (chapter 3.3).
 
 ## 3. What fails
@@ -142,32 +143,34 @@ elsewhere.
 
 ### 3.3 The MT locale rows of 15D
 
-Fourteen older locale MT tests, `22.locale.codecvt.mt` through
-`22.locale.time.put.mt`, end in 15D with `1`, `9`, `23`, `31`, `ABRT`
-or `HUP`, and differently from run to run. They measure the harness:
+Seven older locale MT tests end in 15D with `HUP`:
+`22.locale.ctype.mt`, `money.put.mt`, `num.get.mt`, `num.put.mt`,
+`numpunct.mt`, `time.get.mt` and `time.put.mt`. A test runs one
+thread per processor, 32 on the machine the tables come from. It runs
+each threaded section to its own 60-second soft timeout, and has up to
+three sections. The harness's 60 seconds cut it short. Run bare at 16
+threads, all sixteen locale MT tests of ae1fbe04 pass, these seven
+among them, in 2 to 143 seconds.
 
-- **The address-space limit.** The harness runs every test under a
-  1 GiB limit (`--ulimit=as:1073741824`,
-  `etc/config/GNUmakefile.tst`). A test runs one thread per
-  processor, 32 on the machine the tables come from. Each thread
-  takes an 8 MiB stack and a 64 MiB `malloc` arena. The 24th stack
-  fails to map (`ENOMEM`), `rw_thread_pool` reports the pool failing
-  to start, and the test exits nonzero.
-- **The timeout.** A test that starts runs each threaded section to
-  its own 60-second soft timeout, and has up to three sections. The
-  harness's 60 seconds cut it short: `HUP`.
+The other seven older tests pass. `22.locale.codecvt.mt` counts
+12,800 assertions. `cons.mt`, `globals.mt`, `messages.mt`,
+`money.get.mt`, `moneypunct.mt` and `statics.mt` count none: their
+pass means every thread ran to the end without an error, a crash or a
+hang.
 
-Run bare at 16 threads under the same address-space limit, all
-sixteen locale MT tests of ae1fbe04 pass, these fourteen among them,
-in 2 to 143 seconds.
+The harness limits each test's address space to 1 GiB
+(`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
+that takes the machine's memory. In thread-safe builds the limit
+grows by 128 MiB per processor, since each thread maps an 8 MiB stack
+and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 
 The four gated MT tests, `22.locale.use_facet.mt`,
 `22.locale.time.put.libc.mt`, `22.locale.id.mt` and
 `22.locale.facet.mt`, pass in every configuration.
 
 The `TODO` entry "MT tests that provoke contention instead of waiting
-for it" covers these rows. Until it is done they record the harness,
-not a reference.
+for it" covers the timeouts. Until it is done the seven rows record
+the harness, not a reference.
 
 ## 4. Differences between configurations
 
@@ -180,7 +183,8 @@ not a reference.
 | `22.locale.codecvt` | 322 | 322 | 306 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
 | `21.string.stdcxx-162` | `NOUT` | `NOUT` | `ABRT` |
-| fourteen `22.locale.*.mt` | pass | pass | chapter 3.3 |
+| `22.locale.codecvt.mt` | 0 | 0 | 12800 |
+| seven `22.locale.*.mt` | pass | pass | `HUP`, chapter 3.3 |
 
 Reasons, in order:
 
@@ -200,7 +204,8 @@ Reasons, in order:
   corrupt `mbstate_t`. Their state check sits under the locale lock.
 - The atomic operation tests count only in the thread-safe build.
 - `21.string.stdcxx-162`: chapter 3.2.
-- The 15D rows of the older locale MT tests: chapter 3.3.
+- `22.locale.codecvt.mt` counts only with more than one thread.
+- Seven older locale MT tests time out in 15D: chapter 3.3.
 
 The single-threaded builds run each MT test with one thread. Most
 count nothing there. The newer ones count in every build:
@@ -208,7 +213,7 @@ count nothing there. The newer ones count in every build:
 `22.locale.id.mt` 999, `22.locale.facet.mt` 40,
 `21.string.cons.mt` 16, `21.string.push_back.mt` 2. These pass in
 15D too. `22.locale.money.put.mt` counts 6 in the single-threaded
-builds and is one of the fourteen in 15D.
+builds and is one of the seven in 15D.
 
 ## 5. The same suite under Clang
 
@@ -221,13 +226,10 @@ pinned the same way. `analysis-clang.md` records what it took.
 |---|---|---|---|---|
 | 11S-clang | 10,105,717 | 17 | 0 | 1 |
 | 11s-clang | 10,105,622 | 17 | 0 | 1 |
-| 15D-clang | 10,105,783 | 17 | 10 | 6 |
+| 15D-clang | 10,118,583 | 17 | 0 | 9 |
 
-Row for row they are the GCC tables, with these exceptions:
-
-- **`18.numeric.special.float`** runs 134 assertions in the 32-bit
-  Clang build, where GCC's runs 119. Clang generates SSE code for
-  i386, which carries a signaling NaN.
-- **The 15D MT rows** differ in their exit statuses, as they differ
-  from run to run under GCC. They measure the harness under either
-  compiler (chapter 3.3).
+Row for row they are the GCC tables, with one exception.
+`18.numeric.special.float` runs 134 assertions in the 32-bit Clang
+build, where GCC's runs 119. Clang generates SSE code for i386, which
+carries a signaling NaN. The two 15D tables are identical; the seven
+timeouts measure the harness under either compiler (chapter 3.3).

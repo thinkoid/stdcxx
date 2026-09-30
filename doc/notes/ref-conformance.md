@@ -130,7 +130,7 @@ process failures can prevent later assertions from running.
 | Numerics and extension controls | The limits, math, valarray and extension rows pass; the failures were test defects and a driver comparison. |
 | Memory/lifetime symptoms | The intermittent string-iterator result was the test driver reading past short buffers, and the `21.cwchar` exit-time corruption a test's use of a write-only stream; both are repaired. |
 | Streams | `27.basic.ios`, `27.filebuf` and `27.std.manip` fail 17 assertions, and `27.ostream.inserters.stdcxx-51` aborts; they have not yet been read against the library. |
-| Reentrant locale use | The sanitizer investigation found races and use-after-free in the locale; they are repaired, and each repair has a multithreaded test. The locale MT rows of the reentrant tables still vary with the machine: on many processors they measure the harness's memory and time limits, a test-design question queued in `TODO`. C++03 did not itself specify the later thread library and memory model. |
+| Reentrant locale use | The sanitizer investigation found races and use-after-free in the locale; they are repaired, and each repair has a multithreaded test. Seven locale MT rows of the reentrant tables time out: on many processors they measure the harness's time limit, a test-design question queued in `TODO`. C++03 did not itself specify the later thread library and memory model. |
 | Test infrastructure | Several repaired failures belonged to tests or their driver. Known successful `NOUT` and `FORMAT` rows have individual reporting contracts; neither label alone proves success. |
 
 The tables do not cover every optimization mode, configuration switch,
