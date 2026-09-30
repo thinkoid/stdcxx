@@ -17,7 +17,7 @@ harness's own table without the timing columns.
     and the regression test `27.ostream.inserters.stdcxx-51`, which
     aborts. All configurations. Not investigated (chapter 3.1).
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
-    interface and waits for the next minor version (chapter 3.2).
+    interface and moves the minor version (chapter 3.2).
   - Seven locale MT rows of 15D time out. They measure the harness's
     timeout, not the library (chapter 3.3).
 - A failure in the tables is a fact to record, not a regression to
@@ -136,10 +136,10 @@ only signalled program outside 15D.
 
 The test requires a string body of at most 24 bytes. In 15D every
 string body carries its own mutex, 64 bytes: the layout of every
-4.2.x release on Linux/x86-64. Atomic reference counts would satisfy
-the test and break that binary interface. They wait for the next
-minor version (`TODO`). The row is `ABRT` in 15D and `NOUT`, a pass,
-elsewhere.
+4.2.x release on Linux/x86-64. Atomic reference counts satisfy the
+test and break that binary interface. The revival does not keep it;
+the `TODO` entry on the next minor version makes the change. The row
+is `ABRT` in 15D and `NOUT`, a pass, elsewhere.
 
 ### 3.3 The MT locale rows of 15D
 

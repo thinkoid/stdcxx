@@ -45,6 +45,28 @@ the tree no longer has; `plan-` documents survey work not
 yet done. Of the analyses, the first traces the library's `__mbstate_t` clash with glibc through three
 epochs of the C library's headers.
 
+## Direction
+
+The target is the library of ISO/IEC 14882:2003, complete, with the
+suite clean. The revival does not raise the implementation language
+past C++98 and does not implement later standards. libstdc++, libc++
+and the Microsoft library already serve those.
+
+The library has three uses as it is:
+
+- A probe of the toolchain. A suite of ten million assertions against
+  a standard that stopped moving is a steady instrument: a new
+  compiler or C library shows up as a change in its tables.
+- A reference implementation to read. It is a complete C++03 library
+  with its own locales and its own configuration, tied to no compiler
+  vendor. The `ref-` documents under `doc/notes` describe it.
+- An oracle for other libraries. Most of the suite checks standard
+  behaviour. Run against another library, it would test that one;
+  `TODO` has the entry.
+
+The 4.2.x binary interface is not kept. The version rule stands: the
+first number is source compatibility, the second binary.
+
 ## Building
 
 The build is out of tree. From the source directory:
@@ -109,8 +131,7 @@ them, not of a platform list.
   by a configuration test under `etc/config/src` and gated by the
   `_RWSTD_NO_*` macro it yields. The compiler is never bent back with
   `-std` or `-D` to make the tree compile.
-- The tree is C++98 and stays so until the floor is raised
-  deliberately, as one decision. Null pointers are the literal `0`.
+- The tree is C++98 and stays so. Null pointers are the literal `0`.
 - Commit messages carry an `area: what it does` subject, the why in
   prose, then the changes as GNU ChangeLog bullets, `* file (symbol):
   change.`, in the grammar the history is written in. The `ChangeLog`

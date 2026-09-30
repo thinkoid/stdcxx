@@ -178,8 +178,8 @@ must be evaluated separately rather than assigned one undocumented
 universal barrier guarantee. `TODO` queues one backend over the
 `__atomic` built-ins with explicit orders in place of all three; the
 library exports the assembly routines, and 32-bit binaries built
-before the characterizations call them, so the assembly sources stay
-until the next minor version.
+before the characterizations call them. The assembly sources stay
+until the `TODO` entry on the next minor version removes them.
 
 **Even a full barrier cannot make an unprotected compound operation
 indivisible.** It also does not convert every ordinary access elsewhere
@@ -249,7 +249,7 @@ obtained a value, assigned the cache and updated the flag. Two threads
 could both enter; for cached strings, both assigned the same string
 object, and the use-after-free and destroyed-mutex reports followed.
 The accessors now call the virtuals every time; the members stay,
-unused, until the next minor version.
+unused, until the `TODO` entry on the next minor version removes them.
 
 An atomic flags word alone would still have permitted both
 initializers to write the cache, and an election bit set before

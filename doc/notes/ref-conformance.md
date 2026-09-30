@@ -9,9 +9,9 @@ is not a claim that every requirement has been verified: the revival
 has outstanding failures and no completed clause-by-clause audit.
 
 **Building with a modern compiler does not provide a modern standard
-library.** The implementation still has its C++98 foundation and
-C++03 interface. Raising the implementation floor to C++17 and
-implementing the C++17 library are separate projects.
+library.** The implementation has its C++98 foundation and C++03
+interface, and keeps both. The target is the C++03 library, complete,
+with the suite clean; later standards are not.
 
 This record describes the tree as of 2026-09-30: component coverage,
 concrete departures, selected defect resolutions checked against the
@@ -155,19 +155,19 @@ and [N4659](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf).
 They are a coarse inventory, not a complete list of additions or
 wording changes.
 
-Existing headers need work too. The inspected `string` and `vector`
+Existing headers differ too. The inspected `string` and `vector`
 interfaces lack the later move/initializer-list overloads and
 emplacement interfaces; `<memory>` supplies the historical allocator,
 raw-storage and `auto_ptr` facilities. Internal traits and atomic
-helpers do not supply public `<type_traits>` or `<atomic>`.
-**New headers alone would not modernize the existing contracts.**
+helpers do not supply public `<type_traits>` or `<atomic>`. The
+copy-on-write string itself is outside C++11. **New headers alone
+would not make a later library.**
 
 ## 6. Direction of the conformance work
 
-The queue's C++17 implementation floor permits newer language tools
-inside the library. It does not settle the user-visible conformance
-target, and this record does not make that decision on its behalf.
-The work separates naturally into three tracks:
+The target is C++03. The revival does not raise the implementation
+language past C++98 and does not implement later libraries; chapter 5
+is a record of the distance, not a plan. The work has three tracks:
 
 1. Establish the C++03 baseline: resolve current failures, distinguish
    test defects from library defects, and record the active extension
@@ -175,10 +175,10 @@ The work separates naturally into three tracks:
 2. Expand the defect-resolution ledger: compare each cited issue with
    its adopted wording, identify configuration gates, and attach a
    focused regression or an existing test that actually exercises it.
-3. Choose a later library target: inventory both new facilities and
-   changed contracts in existing ones, including ownership, allocators,
-   exceptions, invalidation and concurrency. Representation and ABI
-   decisions belong here as well as new interfaces.
+3. Run the suite against other libraries. Most of it checks standard
+   behaviour, not this library's additions. A disagreement with
+   libstdc++ or libc++ is a defect in one of them or a question the
+   standard leaves open (`TODO`).
 
 Written by OpenAI LeChuck.
 Brought up to date with the tree of 2026-09-30 by Claude.

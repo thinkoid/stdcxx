@@ -90,8 +90,8 @@ business, site by site. The five characterizations test the
 =__atomic= operations the backend uses; their macros stay.
 =<rw/_atomic-x86.h>=, =<rw/_atomic-x64.h>= and their dispatch branches
 go. =src/atomic.s= and the two assembly sources stay built and
-exported until the next minor version, which may break the binary
-interface. Then they go with their symbols.
+exported; the entry on the next minor version removes them with their
+symbols.
 
 Check: the x86-64 and aarch64 suites unchanged against their tables.
 The disassembly shows =lock xadd= and =xchg= on x86-64 and 32-bit x86,
@@ -160,19 +160,6 @@ Check: designed with the fix. The timings above are the baseline, and
 =22.locale.use_facet.mt= still finds no block outliving its round, or
 leaves with the design.
 
-* TODO The C++17 floor
-
-The library is C++98 and characterizes the compiler. The intended
-step raises the implementation floor to C++17: =nullptr=, =noexcept=
-in place of the dynamic exception specifications, =static_assert=,
-=override=, inline variables for the facet statics, =<type_traits>=
-for the hand-rolled traits, and the characterizations for compilers
-that no longer exist retired. This is not the conformance target,
-what the library gives its users; that is a roadmap of its own.
-
-The =0= to =nullptr= sweep is one inert commit on top of the floor
-change, never ahead of it. Until then null is the literal =0=.
-
 * TODO Strict ANSI as the rule, the additions outside the standard gone
 
 =_RWSTD_STRICT_ANSI= (=include/rw/_config.h:234=, also selected by
@@ -199,8 +186,8 @@ its macro: choices the standard permits (the in-place =assign= and
 insertion, the portable random sequence, the primary-template
 definitions), later defect resolutions the block disables under the
 extension name (LWG 559, cv-qualified =numeric_limits=; LWG 568, the
-safe stream conversion), and =long long=, which follows the C++17
-floor.
+safe stream conversion), and =long long=, which every supported
+compiler provides and C++11 made standard.
 
 Fix, one subsystem per commit, the suite tables as the oracle. First,
 the 38 gates sorted into the two lists, recorded in the commit that
@@ -208,8 +195,7 @@ deletes =_RWSTD_STRICT_ANSI= and =_RWSTD_NO_EXTENSIONS= from
 =_config.h=. Then, per addition, the code path goes with its macro,
 its test branches and its =17.extensions= cases; per kept behaviour,
 the macro and its dead branch go. The original README stays;
-=README.md= records the policy. The order against the C++17 floor is
-decided before the first commit.
+=README.md= records the policy.
 
 Check: =git grep _RWSTD_NO_EXT_= is empty under =include=, =src= and
 =tests=. =17.extensions= is reduced to nothing or retired. The suite
@@ -269,11 +255,27 @@ Fix: =%{?} + %zu%{;}=.
 Check: under =--trace=, the rows of that overload print the count and
 the character they pass. The suite table does not move.
 
+* TODO The suite against other libraries
+
+The suite tests the C++03 library through clauses 18 to 27. Most of
+its assertions check standard behaviour, not the library's additions.
+Run against libstdc++ and libc++, a disagreement is a defect in one of
+the three or a question the standard leaves open.
+
+Fix: build the driver and the tests of clauses 21 to 27 against
+another library. The tests that need the library's additions or its
+=_RWSTD_= macros are listed and left out, each with the reason.
+
+Check: the census of the tests that build, a table per library, and
+each disagreement read against the standard and filed where it
+belongs.
+
 * TODO The next minor version
 
 The version rule: the first number is source compatibility, the
 second binary compatibility. Three changes break the binary interface
-of 4.2.x and wait for the next minor version:
+of 4.2.x. The revival does not keep that interface, so they do not
+wait for a release; the minor version moves when they land:
 - The string reference count. Thread-safe builds on Linux/x86-64 keep
   a mutex in every string body (=_RWSTD_NO_STRING_ATOMIC_OPS=,
   =include/rw/_config.h:101-114=). The clause cites 4.1.x; its effect
@@ -286,9 +288,10 @@ of 4.2.x and wait for the next minor version:
 - =src/x86/atomic.s=, =src/x86_64/atomic.s= and the symbols they
   export, once the =__atomic= backend entry lands.
 
-Fix: when the version moves, all three go: delete the string clause
-rather than define the opt-in, remove the members, remove the
-sources and their symbols.
+Fix: all three go, and the minor version moves with them: delete the
+string clause rather than define the opt-in, remove the members,
+remove the sources and their symbols. The number is a decision of its
+own: 4.3 names the unreleased upstream branch in this repository.
 
 Check: =21.string.stdcxx-162= passes in 15D. The exported symbols
 lose exactly the assembly routines. The suites are otherwise
@@ -315,9 +318,10 @@ the binary locale data they read. A reader of
 
 ** TODO Decision records
 
-One short file per irreversible choice of the revival: the platform
-retirement, the null-pointer literal, the commit shape, the Clang
-configuration, the compatibility mutex in the string body. The tree
+One short file per irreversible choice of the revival: the C++03
+target, the platform retirement, the null-pointer literal, the commit
+shape, the Clang configuration, the compatibility mutex in the string
+body. The tree
 has the outcomes; the reasons are in commit messages and private
 notes. Material: the commit messages and
 =doc/notes/plan-platform-state.md=.
@@ -329,9 +333,8 @@ The entry leaves after a reading.
 
 What of ISO/IEC 14882:2003 the library implements, where it deviates
 knowingly, which LWG issues it applies (the headers cite them by
-number), and which later library features it lacks. The roadmap the
-C++17 floor entry defers to. The most useful to an outside reader,
-and the most work.
+number), and which later library features it lacks. The most useful
+to an outside reader, and the most work.
 
 ** TODO A build-system reference
 
@@ -348,15 +351,14 @@ Written: =doc/notes/ref-characterizations.md=, current as of
 
 The probes under =etc/config/src=, each yielding a =_RWSTD_NO_*=
 macro: a table of macro, what it detects, which supported compiler
-trips it today, and whether it is still reachable. It shows what the
-C++17 floor could retire.
+trips it today, and whether it is still reachable.
 
 ** TODO An ABI and versioning note
 
 What the shared library exports, how the version macros and the
 =_RWSTD_VER= checks work, what a change to the string body would
 break. The entry on the next minor version lists the changes that
-wait for it.
+break it.
 
 ** TODO A test-suite guide
 

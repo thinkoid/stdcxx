@@ -4,9 +4,11 @@
 
 Configuration asks three different questions: **what language machinery
 works, what the runtime and C library provide, and how the target
-represents data**. Only the first group is broadly made redundant by
-a newer implementation-language floor. Sizes, layouts, calling
-interfaces and runtime behavior remain platform questions.
+represents data**. The supported compilers answer the first group
+the same way; the tree keeps the probes and their branches, since it
+stays C++98 and the branches are its portability record. Sizes,
+layouts, calling interfaces and runtime behavior are platform
+questions.
 
 The source census contains 205 named C++ probes, nine supporting C++
 translation units, one shell driver and 19 other support files. The
@@ -57,12 +59,12 @@ read outside its producer. Determining whether a conditional branch
 is compiled requires following configuration overrides and surrounding
 conditions as well. No preprocessing or build was performed here.
 
-| group | consequence for a C++17 floor |
+| group | status on the supported compilers |
 |---|---|
-| Old language deficiencies: `BOOL`, `NAMESPACE`, `EXPLICIT`, `TYPENAME`, casts, member templates, partial specialization | Candidates for removing the unsupported-language branches together with their probes once the new compiler contract is adopted. Passing today alone is not the authorization to remove them. |
-| Obsolete mechanisms: exported templates, implicit inclusion, dynamic exception specifications | Retire or replace the mechanism and its consumers as one change. A currently failing probe can be doing exactly the right job of selecting the modern path. |
-| Runtime ABI: exception classes, allocation functions, RTTI members and namespace placement | Audit against the chosen runtime contract. A newer source-language floor does not supply missing link symbols or make historical ABI probes accurate descriptions of public API support. |
-| Platform facts: sizes, typedefs, floating point, C structures, conversion interfaces, locale naming | Retain characterization or deliberately replace it with an equally sound source of the information. These facts do not become universal in C++17. |
+| Old language deficiencies: `BOOL`, `NAMESPACE`, `EXPLICIT`, `TYPENAME`, casts, member templates, partial specialization | Every probe passes in the six configurations. Passing today is not a reason to remove a probe or its branch. |
+| Obsolete mechanisms: exported templates, implicit inclusion, dynamic exception specifications | The probes fail in the six configurations, and that is their job: a failing probe selects the path the compiler's dialect needs. |
+| Runtime ABI: exception classes, allocation functions, RTTI members and namespace placement | Questions about the runtime, not the language. A historical ABI probe is not a description of public API support. |
+| Platform facts: sizes, typedefs, floating point, C structures, conversion interfaces, locale naming | Retain characterization or deliberately replace it with an equally sound source of the information. |
 | No direct reader of a status macro | Inspect emitted values and other probe dependencies before considering retirement. A status marker can be unused while the producer remains essential. |
 
 ### 2.1 Cases that deserve individual treatment

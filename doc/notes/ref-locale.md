@@ -215,8 +215,8 @@ derived scalars as well: `ctype` remembers each character's `narrow`
 and `widen` results in a table, and `codecvt<char, char>` its
 `always_noconv` answer. `numpunct` once cached its decimal point,
 grouping and boolean names; its accessors now call the virtuals every
-time, the members kept unused until the next minor version for binary
-compatibility. **Mapped data and mutable facet caches are different
+time. The members stay, unused, in the 4.2.x layout until the `TODO`
+entry on the next minor version removes them. **Mapped data and mutable facet caches are different
 layers.**
 
 The C library is another backend, with selection and fallback varying
