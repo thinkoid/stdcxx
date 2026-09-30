@@ -10,34 +10,51 @@ investigations.
 
 #+TOC: headlines 2
 
+* TODO =27.std.manip=: =setbase (10)=, and =basefield= that will not clear
+
+Two library defects of the numeric base bits, in every configuration,
+under both compilers (=doc/notes/analysis-numeric-base.md=):
+- =setbase (10)= selects autodetection: after it a stream reads
+  ="010"= as 8. The eight failed assertions of the row.
+- After =std::hex=, =unsetf (basefield)=, =setf (0, basefield)= and
+  =resetiosflags (basefield)= leave =hex= set; =oct= likewise.
+The bits are the storage of the =setbase= extension (bases 1 and 3 to
+36) and of =bin=.
+
+Fix: remove the extension, =bin= included, the first slice of the
+strict-ANSI entry. =setbase= becomes the standard's function,
+=basefield= carries the base alone, and the base bits, the flags
+setter's reconciliation, =_C_base=, the Roman and arbitrary-base
+conversions of =num_get= and =num_put=, =ios_base::bin=, =std::bin=,
+=_RWSTD_NO_EXT_SETBASE= and =_RWSTD_NO_EXT_BIN_IO= go. The tests of
+the extension go with it.
+
+Check: =27.std.manip= pins the standard's rule for =setbase= and for
+clearing =basefield=; 100 of its 120 assertions fail before the
+removal. After it the row is at 100% in the six configurations and
+the suite tables move only in the rows of the removed tests.
+
 * TODO =27.basic.ios=: =flags ()= after construction
 
 =test_ctors= (=tests/iostream/27.basic.ios.cpp:251=) asserts that a
 =basic_ios<char>= constructed with a null buffer has =flags () ==
 skipws | dec=, the postcondition of =init= (27.4.4.1). It fails in every
-configuration. The message prints "dec | skipws" as both expected and
-observed: =%{If}= names the standard bits only, so the two differ in a
-bit it does not print. The =rdstate ()= assertion above it passes
-=flags ()= where it means =rdstate ()=, a message defect.
+configuration. =flags ()= returns the library's own bits beside the
+standard's: the numeric base, 10, in bits 26 to 31, and in thread-safe
+builds =nolock | nolockbuf=. STDCXX-950 (2008) proposed masking them in
+the test; the patch never landed. =doc/notes/analysis-basic-ios-flags.md=
+has the finding and the options.
 
-Fix: find the extra bit. Hypothesis: the library sets one of its own
-flags at construction. If the standard's value is right, the library
-changes; the message names every bit.
+Fix: remove what sets the bits. The base bits go with the =setbase=
+extension (the =27.std.manip= entry). The lock bits go with the
+locking extension, which needs a decision first: whether a user's
+stream stays unlocked by default, and where the lock state lives if
+it does. The =rdstate ()= check above it prints =flags ()= as its
+observed value; repair the message with it.
 
-Check: the row at 100% in the six configurations, and a flag set by
-hand after construction turns it red.
-
-* TODO =27.std.manip=: =setbase (10)=
-
-Eight assertions fail in every configuration, all =std::setbase (10)=:
-four at =tests/iostream/27.std.manip.cpp:570=, in the standard block,
-and four at 591, in the =_RWSTD_NO_EXT_SETBASE= block. 27.6.3, p5 sets
-=basefield= to =dec= for a base of 10. The other bases pass.
-
-Fix: read =test<>= for =setbase= against 27.6.3 and the library's
-=setbase=. Which side is wrong is not known.
-
-Check: the row at 100% in the six configurations.
+Check: the row at 100% in the six configurations, and a copy of the
+test that sets a bit outside the standard's after construction fails
+it.
 
 * TODO =27.filebuf=: =detach ()=
 
@@ -253,8 +270,9 @@ extension name (LWG 559, cv-qualified =numeric_limits=; LWG 568, the
 safe stream conversion), and =long long=, which every supported
 compiler provides and C++11 made standard.
 
-Fix, one subsystem per commit, the suite tables as the oracle. First,
-the 38 gates sorted into the two lists, recorded in the commit that
+Fix, one subsystem per commit, the suite tables as the oracle. The
+=setbase= bases and =bin= go first, ahead of the sort (the
+=27.std.manip= entry). Then the 38 gates sorted into the two lists, recorded in the commit that
 deletes =_RWSTD_STRICT_ANSI= and =_RWSTD_NO_EXTENSIONS= from
 =_config.h=. Then, per addition, the code path goes with its macro,
 its test branches and its =17.extensions= cases; per kept behaviour,
