@@ -39,24 +39,6 @@ original README stays as it is.
 
 Check: none; this is prose.
 
-* TODO std::locale MT-safety: what remains
-
-The locale races are fixed; =doc/notes/analysis-locale-mt-race.md=
-chapter 7 lists the fixes and their tests. ThreadSanitizer reports
-one on a round of the locale MT tests: the global locale's =ginit=
-flag, which the sweep entry below covers.
-
-Open:
-- The string reference count. 15D keeps one mutex per string body
-  for 4.1.x binary compatibility (=_RWSTD_NO_STRING_ATOMIC_OPS=,
-  =include/rw/_config.h:108=). =21.string.stdcxx-162= aborts on it in
-  15D: the body is 64 bytes, the test allows 24. Decide: atomics now,
-  or the mutex until the next minor version.
-
-Check: the ThreadSanitizer build of 15D runs every =22.locale.*.mt=
-test three times with no report from the library; the
-=21.string.stdcxx-162= row follows the decision.
-
 * TODO MT tests that provoke contention instead of waiting for it
 
 The older =22.locale.*.mt= tests run one thread per processor, up to
@@ -142,7 +124,8 @@ integer. Decide each: a release store and an acquire load through the
 compiler built-ins, the site's mutex, or =__rw_once=.
 
 Check: the census in a note, each site with its decision. The
-ThreadSanitizer build reports none of them.
+ThreadSanitizer build reports none of them, and three rounds of every
+=22.locale.*.mt= test in it report nothing from the library.
 
 * TODO =yi_US.CP1255= does not build on aarch64
 
@@ -287,6 +270,31 @@ Fix: =%{?} + %zu%{;}=.
 Check: under =--trace=, the rows of that overload print the count and
 the character they pass. The suite table does not move.
 
+* TODO The next minor version
+
+The version rule: the first number is source compatibility, the
+second binary compatibility. Three changes break the binary interface
+of 4.2.x and wait for the next minor version:
+- The string reference count. Thread-safe builds on Linux/x86-64 keep
+  a mutex in every string body (=_RWSTD_NO_STRING_ATOMIC_OPS=,
+  =include/rw/_config.h:101-114=). The clause cites 4.1.x; its effect
+  is the string layout of every 4.2.x release. =21.string.stdcxx-162=
+  aborts on it in 15D: the body is 64 bytes, the test allows 24. The
+  mutex is correct, only larger and slower.
+  =_RWSTD_USE_STRING_ATOMIC_OPS= selects the atomics today.
+- The =numpunct= cache members, unused since 2e196ebb
+  (=include/loc/_numpunct.h:117=).
+- =src/x86/atomic.s=, =src/x86_64/atomic.s= and the symbols they
+  export, once the =__atomic= backend entry lands.
+
+Fix: when the version moves, all three go: delete the string clause
+rather than define the opt-in, remove the members, remove the
+sources and their symbols.
+
+Check: =21.string.stdcxx-162= passes in 15D. The exported symbols
+lose exactly the assembly routines. The suites are otherwise
+unchanged.
+
 * Documentation
 
 Documents that describe the library as it is, for a reader, not for
@@ -348,8 +356,8 @@ C++17 floor could retire.
 
 What the shared library exports, how the version macros and the
 =_RWSTD_VER= checks work, what a change to the string body would
-break. The 4.1.x clause that keeps the per-string mutex is a
-binary-compatibility decision with no document behind it.
+break. The entry on the next minor version lists the changes that
+wait for it.
 
 ** TODO A test-suite guide
 
@@ -365,7 +373,7 @@ entry leaves after a reading.
 
 What the library promises under =_RWSTD_REENTRANT=, what the string's
 reference counting protects and what it does not, the facet caches
-ThreadSanitizer named. The front matter for the MT entry.
+ThreadSanitizer named. The front matter for the MT entries.
 
 ** TODO A tour of the streams
 

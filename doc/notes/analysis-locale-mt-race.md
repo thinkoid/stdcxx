@@ -27,8 +27,9 @@ stalled are in `analysis-locale-mt-2012.md`.
   without synchronization.
 - A configuration fact that shapes the reports: on Linux/x86-64 the
   string reference count goes through a mutex per string, not the
-  atomic builtins, because a 2007 clause keeps binary compatibility
-  with stdcxx 4.1.x. The revival is not bound by that promise.
+  atomic builtins. A 2007 clause cites 4.1.x; its effect is the
+  string layout of every 4.2.x release. It stays until the next minor
+  version (chapter 5).
 - A characterization nobody read: `_RWSTD_NO_THREAD_SAFE_LOCALE`.
   Its consumer never landed, and the test is retired (chapter 5).
 
@@ -172,7 +173,7 @@ flags in `TODO` covers.
 
 ## 5. The configuration facts
 
-`include/rw/_config.h:148-158`: on Linux/x86-64, unless
+`include/rw/_config.h:101-114`: on Linux/x86-64, unless
 `_RWSTD_USE_STRING_ATOMIC_OPS` is defined, `_RWSTD_NO_STRING_ATOMIC_OPS`
 is, "for binary compatibility with stdcxx 4.1.x" (2007-10-18). The
 effect is that `std::string` counts references under a mutex per
@@ -180,9 +181,16 @@ string through `_atomic-mutex.h`, although `_RWSTD_NO_ATOMIC_OPS` is
 not set and the `__sync` builtins are available and used everywhere
 else. It is not a race, but it is why mutexes appear inside string
 representations in the reports, and it costs every string a mutex.
-The revival does not ship binaries compatible with 4.1.x; the clause
-is a decision to make, after the retirement, with the string tests as
-the gate.
+The fix it disables, STDCXX-162, landed on trunk in 2006. The clause
+went in on the 4.2.0 branch before that release, and in 2008 the
+test's `ABRT` on Linux/x86-64 was marked expected in
+`etc/config/xfail.txt`. Every 4.2.x release has the mutex in the
+string body. The version rule makes the second number the binary
+interface, so removing the mutex waits for the next minor version.
+`TODO` lists it there with the other breaks. Until then
+`21.string.stdcxx-162` aborts in 15D, and
+`_RWSTD_USE_STRING_ATOMIC_OPS` gives the atomics to a program that
+needs no 4.2.x binary compatibility.
 
 `etc/config/src/THREAD_SAFE_LOCALE.cpp` asked whether each thread has
 its own C locale environment or the process shares one. `config.h`

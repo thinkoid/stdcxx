@@ -19,8 +19,8 @@ harness's own table without the timing columns.
     and the regression test `27.ostream.inserters.stdcxx-51`, which
     aborts. All configurations. Not investigated; chapter 3.11 records
     what they report. None has a `TODO` entry.
-  - `21.string.stdcxx-162` in 15D. A probe of the string atomics
-    decision in the MT entry of `TODO`.
+  - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
+    interface and waits for the next minor version (chapter 4).
   - The locale MT rows of 15D. They measure two limits of the
     harness, not the library (chapter 3.4).
 - Two harness defects are fixed: a wrong source directory when
@@ -30,8 +30,7 @@ harness's own table without the timing columns.
   repository. They are regenerated (chapter 3.2).
 - The `std::locale` race the revival set out to find is fixed. The
   MT tests that caught it pass when run bare at 16 threads.
-  `analysis-locale-mt-race.md` and the MT entry of `TODO` have the
-  work.
+  `analysis-locale-mt-race.md` has the work.
 - One library defect in strings is fixed: a source range inside the
   string being modified (chapter 3.7).
 - The locale facet rows (chapter 3.9) and the Numerics rows (chapter
@@ -228,8 +227,7 @@ a test where one could fail; `22.locale.use_facet.mt`,
 ThreadSanitizer reports from a round of the locale MT tests went
 from 979 to 1, the global locale's `ginit` flag, which the `TODO`
 entry on atomic integer flags covers.
-`analysis-locale-mt-race.md` and the MT entry of `TODO` have the
-detail.
+`analysis-locale-mt-race.md` has the detail.
 
 Fact, now. Fourteen older locale MT tests, `22.locale.codecvt.mt`
 through `22.locale.time.put.mt`, still end in 15D with `1`, `9`,
@@ -528,9 +526,8 @@ configurations; a 24-case probe that fails 11 rows against the old
 headers passes. The guarded `insert` overloads were redundant after
 that and are removed (937a2394), with the tables unchanged.
 
-`21.string.stdcxx-162` was listed here once. It probes the string
-atomics decision, not this path, and belongs to the MT entry of
-`TODO` (chapter 4).
+`21.string.stdcxx-162` was listed here once. It probes the layout
+of the string body, not this path (chapter 4).
 
 ### 3.8 `21.cwchar` aborts after passing
 
@@ -827,9 +824,10 @@ Reasons, in order:
 - 15D skips the libc-backed facets on a corrupt state (chapter 3.3).
 - The atomic operation tests count only in the thread-safe build.
 - `21.string.stdcxx-162` requires a string body of at most 24 bytes.
-  In 15D every string body carries its own mutex, 64 bytes, for 4.1.x
-  binary compatibility. Atomic reference counts would satisfy it. The
-  decision belongs to the MT entry of `TODO`.
+  In 15D every string body carries its own mutex, 64 bytes: the
+  layout of every 4.2.x release on Linux/x86-64. Atomic reference
+  counts would satisfy the test and break that binary interface.
+  They wait for the next minor version (`TODO`).
 - The 15D rows of the older locale MT tests measure the harness
   (chapter 3.4).
 

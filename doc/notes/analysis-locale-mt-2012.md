@@ -322,8 +322,9 @@ load.
   hardware and a wrong one about the language; the facet data case,
   which publishes a second variable through the flag, was never
   covered by it, and was conceded as a defect.
-- The revival is not bound to the 4.x binary interface (the 4.1.x
-  string clause is already an open decision in `analysis-locale-mt-race.md`).
+- The revival keeps the 4.2.x binary interface until the next minor
+  version. `TODO` lists the changes that wait for it, the string
+  clause among them.
 - `std::atomic` with acquire and release orderings expresses the
   facet data publication directly, once the C++17 floor lands; before
   it, the GCC and Clang `__atomic` builtins do.
