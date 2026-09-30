@@ -111,9 +111,8 @@ with the address-space limit scaled to the processor count
 
 ### 3.1 The iostreams rows
 
-Four rows fail in every configuration, GCC and Clang alike. They have
-no investigation and no `TODO` entry. What they report, from a run in
-11S on 2026-09-28:
+Four rows fail in every configuration, GCC and Clang alike. Each has
+a `TODO` entry. What they report, from a run in 11S on 2026-09-28:
 
 - **`27.basic.ios`, 1 assertion.** "basic_ios<char>::flags () ==
   dec | skipws, got dec | skipws". Expected and observed print the

@@ -10,6 +10,70 @@ investigations.
 
 #+TOC: headlines 2
 
+* TODO =27.basic.ios=: =flags ()= after construction
+
+=test_ctors= (=tests/iostream/27.basic.ios.cpp:251=) asserts that a
+=basic_ios<char>= constructed with a null buffer has =flags () ==
+skipws | dec=, the postcondition of =init= (27.4.4.1). It fails in every
+configuration. The message prints "dec | skipws" as both expected and
+observed: =%{If}= names the standard bits only, so the two differ in a
+bit it does not print. The =rdstate ()= assertion above it passes
+=flags ()= where it means =rdstate ()=, a message defect.
+
+Fix: find the extra bit. Hypothesis: the library sets one of its own
+flags at construction. If the standard's value is right, the library
+changes; the message names every bit.
+
+Check: the row at 100% in the six configurations, and a flag set by
+hand after construction turns it red.
+
+* TODO =27.std.manip=: =setbase (10)=
+
+Eight assertions fail in every configuration, all =std::setbase (10)=:
+four at =tests/iostream/27.std.manip.cpp:570=, in the standard block,
+and four at 591, in the =_RWSTD_NO_EXT_SETBASE= block. 27.6.3, p5 sets
+=basefield= to =dec= for a base of 10. The other bases pass.
+
+Fix: read =test<>= for =setbase= against 27.6.3 and the library's
+=setbase=. Which side is wrong is not known.
+
+Check: the row at 100% in the six configurations.
+
+* TODO =27.filebuf=: =detach ()=
+
+=detach ()= is a library addition to =basic_filebuf=. Four checks
+fail for =char= and for =wchar_t=: =is_open ()= is still true after a
+detach (=tests/iostream/27.filebuf.cpp:1485=, 1654), =fd ()= is still
+3 where a negative value is expected (1492), and the destructor closes
+the detached descriptor (1504).
+
+Fix: read =detach ()= against its contract in the header and the
+original README. The strict-ANSI entry removes the filebuf additions;
+if =detach ()= goes first, its test cases go with it.
+
+Check: the row at 100% in the six configurations; a descriptor
+detached from a =filebuf= stays open after the =filebuf= is destroyed.
+
+* TODO =27.ostream.inserters.stdcxx-51=: =qnan= and =snan=
+
+The regression test for STDCXX-51 expects =num_put= to print quiet
+NaNs as =qnan= and signaling NaNs as =snan= (=QNAN=, =SNAN= under
+=uppercase=), for all three floating types. The library prints =nan=
+for both, and the test's =assert= at line 123 aborts, in every
+configuration. =num_put= asks =__rw_isqnan= and =__rw_issnan=
+(=src/num_put.cpp:94=). On Linux both return =false=
+(=src/fpclass.h=): only the Windows and Solaris branches, retired in
+d743fa8d, classified the NaN. The test arrived the day of the file,
+2008-05-22, so it has failed on Linux since it was written.
+
+Fix: classify the NaN from its representation, the quiet bit of the
+IEC 559 formats, or settle what the test may expect. A signaling NaN
+loaded through the x87 unit comes back quiet (=18.numeric.special.float=
+in the 32-bit GCC build), so =snan= may be out of reach there.
+
+Check: the row passes in the six configurations; a quiet and a
+signaling NaN of each type print distinct names.
+
 * TODO The wide half of UserCtype
 
 =tests/src/ctype.cpp= implements =UserCtype<wchar_t>= and
