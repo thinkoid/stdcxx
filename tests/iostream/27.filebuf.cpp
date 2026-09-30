@@ -856,139 +856,44 @@ test_open (const char* tname)
     REMOVE_FILE (tmpfname);
 
     //////////////////////////////////////////////////////////////////
-    // exercise open ((const char*)0, ios::in)
+    // exercise open ((const char*)0, ...): the null pointer names no
+    // file; open() fails, allocates no file descriptor and leaves
+    // the object closed
 
-    for (std::size_t minx = 0; minx != niomodes; ++minx) {
+    const std::ios::openmode nullmodes[] = {
+        std::ios::in, std::ios::out, std::ios::in | std::ios::out
+    };
 
-        BEGIN_MODE (std::ios::in | iomodes [minx],
-                    ", file name = 0 [extension]");
+    const std::size_t nnullmodes = sizeof nullmodes / sizeof *nullmodes;
 
-        int fdcount [2];
-        int next_fd [2];
+    for (std::size_t ninx = 0; ninx != nnullmodes; ++ninx) {
+        for (std::size_t minx = 0; minx != niomodes; ++minx) {
 
-        next_fd [0] = rw_nextfd (fdcount + 0);
+            BEGIN_MODE (nullmodes [ninx] | iomodes [minx],
+                        ", file name = 0");
 
-        // verify that open() succeeds when the first argument
-        // is the null pointer (the call creates a temporary
-        // file and opens it for reading -- such a file may not
-        // be very useful but since it's harmless there's no
-        // reason it shouldn't be possible)
+            int fdcount [2];
+            int next_fd [2];
 
-        Filebuf fb;
-        fb.open ((const char*)0, mode);
+            next_fd [0] = rw_nextfd (fdcount + 0);
 
-        rw_assert (fb.is_open (), __FILE__, __LINE__,
-                   "basic_filebuf<%s>::is_open()", tname);
+            Filebuf fb;
+            const Filebuf* const pfb = fb.open ((const char*)0, mode);
 
-        // verify that a single file descriptor has been allocated
-        next_fd [1] = rw_nextfd (fdcount + 1);
+            rw_assert (0 == pfb && !fb.is_open (), __FILE__, __LINE__,
+                       "basic_filebuf<%s>::open ((const char*)0, %{Io}) "
+                       "== 0 and is_open () == false, got %p and %b",
+                       tname, mode, pfb, fb.is_open ());
 
-        rw_assert (   next_fd [0] + 1 == next_fd [1]
-                   && fdcount [0] + 1 == fdcount [1],
-                   __FILE__, __LINE__,
-                   "%d file descriptor leak(s) detected after construction",
-                   fdcount [1] - fdcount [0]);
+            next_fd [1] = rw_nextfd (fdcount + 1);
 
-        fb.close ();
-
-        // verify that a single file descriptor has been deallocated
-        next_fd [1] = rw_nextfd (fdcount + 1);
-
-        rw_assert (next_fd [0] == next_fd [1] && fdcount [0] == fdcount [1],
-                   __FILE__, __LINE__,
-                   "%d file descriptor leak(s) detected after close()",
-                   fdcount [1] - fdcount [0]);
-
-        // FIXME: verify that the temporary file has been deleted
-        //        from the file system
-    }
-
-    //////////////////////////////////////////////////////////////////
-    // exercise open ((const char*)0, ios::out)
-
-    for (std::size_t minx = 0; minx != niomodes; ++minx) {
-
-        BEGIN_MODE (std::ios::out | iomodes [minx],
-                    ", file name = 0 [extension]");
-
-        int fdcount [2];
-        int next_fd [2];
-
-        next_fd [0] = rw_nextfd (fdcount + 0);
-
-        // verify that open() succeeds when the first argument
-        // is the null pointer (the call creates a temporary
-        // file and opens it for writing)
-
-        Filebuf fb;
-        fb.open ((const char*)0, mode);
-
-        rw_assert (fb.is_open (), __FILE__, __LINE__,
-                   "basic_filebuf<%s>::is_open()", tname);
-
-        // verify that a single file descriptor has been allocated
-        next_fd [1] = rw_nextfd (fdcount + 1);
-
-        rw_assert (   next_fd [0] + 1 == next_fd [1]
-                   && fdcount [0] + 1 == fdcount [1],
-                   __FILE__, __LINE__,
-                   "%d file descriptor leak(s) detected after construction",
-                   fdcount [1] - fdcount [0]);
-
-        fb.close ();
-
-        // verify that a single file descriptor has been deallocated
-        next_fd [1] = rw_nextfd (fdcount + 1);
-
-        rw_assert (next_fd [0] == next_fd [1] && fdcount [0] == fdcount [1],
-                   __FILE__, __LINE__,
-                   "%d file descriptor leak(s) detected after close()",
-                   fdcount [1] - fdcount [0]);
-
-        // FIXME: verify that the temporary file has been deleted
-        //        from the file system
-    }
-
-    //////////////////////////////////////////////////////////////////
-    // exercise open ((const char*)0, ios::in | ios::out)
-
-    for (std::size_t minx = 0; minx != niomodes; ++minx) {
-
-        BEGIN_MODE (std::ios::in | std::ios::out | iomodes [minx],
-                    ", file name = 0 [extension]");
-
-        int fdcount [2];
-        int next_fd [2];
-
-        next_fd [0] = rw_nextfd (fdcount + 0);
-
-        Filebuf fb;
-        fb.open ((const char*)0, mode);
-
-        rw_assert (fb.is_open (), __FILE__, __LINE__,
-                   "basic_filebuf<%s>::is_open()", tname);
-
-        // verify that a single file descriptor has been allocated
-        next_fd [1] = rw_nextfd (fdcount + 1);
-
-        rw_assert (   next_fd [0] + 1 == next_fd [1]
-                   && fdcount [0] + 1 == fdcount [1],
-                   __FILE__, __LINE__,
-                   "%d file descriptor leak(s) detected after construction",
-                   fdcount [1] - fdcount [0]);
-
-        fb.close ();
-
-        // verify that a single file descriptor has been deallocated
-        next_fd [1] = rw_nextfd (fdcount + 1);
-
-        rw_assert (next_fd [0] == next_fd [1] && fdcount [0] == fdcount [1],
-                   __FILE__, __LINE__,
-                   "%d file descriptor leak(s) detected after close()",
-                   fdcount [1] - fdcount [0]);
-
-        // FIXME: verify that the temporary file has been deleted
-        //        from the file system
+            rw_assert (   next_fd [0] == next_fd [1]
+                       && fdcount [0] == fdcount [1],
+                       __FILE__, __LINE__,
+                       "%d file descriptor(s) allocated by "
+                       "basic_filebuf<%s>::open ((const char*)0, %{Io})",
+                       fdcount [1] - fdcount [0], tname, mode);
+        }
     }
 
 
