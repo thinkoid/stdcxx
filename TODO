@@ -373,7 +373,8 @@ A first attempt, on EDG 7.0 in strict mode, found:
 - gcc's =stddef.h= spells =offsetof= as =__builtin_offsetof=, a keyword
   EDG enters only when it emulates GNU, Microsoft or Clang, never in
   strict mode. The name is reserved, so strict mode may provide it;
-  that EDG does not is worth a report. Until EDG enters it,
+  reported as https://github.com/edgcpp/compiler/discussions/185.
+  Until EDG enters it,
   =eccp.config= defines
   ~__builtin_offsetof(T,M)=((__SIZE_TYPE__) __INTADDR__ (&((T *) 0)->M))~.
   =__INTADDR__= is EDG's own =offsetof= primitive, entered in every
