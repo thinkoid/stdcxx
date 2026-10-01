@@ -367,7 +367,17 @@ A first attempt, on EDG 7.0 in strict mode, found:
   the freestanding headers (=float.h=, =stddef.h=, =stdarg.h=) are
   gcc's, and gcc's =float.h= reads macros that gcc predefines and
   =eccp= does not in strict mode (=__DBL_DIG__= and the rest). The old
-  =float_defs.h= typed those values in by hand.
+  =float_defs.h= typed those values in by hand. The installation now
+  searches the resident gcc's headers and glibc's, and its macro table
+  carries those target facts for strict mode.
+- gcc's =stddef.h= spells =offsetof= as =__builtin_offsetof=, a keyword
+  EDG enters only when it emulates GNU, Microsoft or Clang, never in
+  strict mode. The name is reserved, so strict mode may provide it;
+  that EDG does not is worth a report. Until EDG enters it,
+  =eccp.config= defines
+  ~__builtin_offsetof(T,M)=((__SIZE_TYPE__) __INTADDR__ (&((T *) 0)->M))~.
+  =__INTADDR__= is EDG's own =offsetof= primitive, entered in every
+  mode. The definition leaves when EDG enters the keyword.
 - The retirement also removed the prelink step before =ar= (the
   commit says only the retired compilers used it; =eccp.config= did).
 - =eccp= reads source as UTF-8 only. Five sources carry ISO-8859-1
