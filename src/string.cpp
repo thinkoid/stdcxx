@@ -192,12 +192,13 @@ __rw_wmemcmp (const wchar_t *s1, const wchar_t *s2, size_t nwchars)
 {
     _RWSTD_ASSERT (0 == nwchars || (s1 && s2));
 
-    int result = 0;
+    // Subtraction can wrap for unsigned wchar_t or overflow for signed wchar_t.
+    for ( ; nwchars; ++s1, ++s2, --nwchars) {
+        if (*s1 != *s2)
+            return *s1 < *s2 ? -1 : 1;
+    }
 
-    for ( ; nwchars && !(result = *s1 - *s2); ++s1, ++s2, --nwchars)
-        /* no-op */;
-
-    return result;
+    return 0;
 }
 
 
