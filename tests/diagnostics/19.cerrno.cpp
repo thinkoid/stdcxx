@@ -78,9 +78,6 @@ void set_errno_value (int &errno_ref, int val) { errno_ref = val; }
 /**************************************************************************/
 
 static int
-errno_at_startup;
-
-static int
 run_test (int, char**)
 {
     rw_info (0, 0, 0, "exercising the contents of the <cerrno> header");
@@ -100,10 +97,6 @@ run_test (int, char**)
                && '\0' == errno_type [3],
                0, 0, 
                "the type of errno is int, got %s", errno_type);
-
-    // 7.5, p3 of C99: errno must be 0 at program startup
-    rw_assert (0 == errno_at_startup, 0, 0,
-               "errno == 0 at program startup, got %d", errno_at_startup);
 
 #ifndef EDOM
 #  define EDOM   33 /* Solaris value */
@@ -146,8 +139,8 @@ run_test (int, char**)
 
 int main (int argc, char *argv[])
 {
-    errno_at_startup = errno;
-
+    // Runtime initialization can change errno before main, so its value
+    // here cannot test the requirement that it be zero at program startup.
     return rw_test (argc, argv, __FILE__,
                     "lib.errno",
                     0 /* no comment */, run_test,
