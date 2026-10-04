@@ -10,26 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO =27.ostream.inserters.stdcxx-51=: =qnan= and =snan=
-
-The regression test for STDCXX-51 expects =num_put= to print quiet
-NaNs as =qnan= and signaling NaNs as =snan= (=QNAN=, =SNAN= under
-=uppercase=), for all three floating types. The library prints =nan=
-for both, and the test's =assert= at line 123 aborts, in every
-configuration. =num_put= asks =__rw_isqnan= and =__rw_issnan=
-(=src/num_put.cpp:94=). On Linux both return =false=
-(=src/fpclass.h=): only the Windows and Solaris branches, retired in
-d743fa8d, classified the NaN. The test arrived the day of the file,
-2008-05-22, so it has failed on Linux since it was written.
-
-Fix: classify the NaN from its representation, the quiet bit of the
-IEC 559 formats, or settle what the test may expect. A signaling NaN
-loaded through the x87 unit comes back quiet (=18.numeric.special.float=
-in the 32-bit GCC build), so =snan= may be out of reach there.
-
-Check: the row passes in the six configurations; a quiet and a
-signaling NaN of each type print distinct names.
-
 * TODO The wide half of UserCtype
 
 =tests/src/ctype.cpp= implements =UserCtype<wchar_t>= and

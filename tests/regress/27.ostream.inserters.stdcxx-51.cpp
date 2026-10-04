@@ -30,6 +30,23 @@
 #include <cstdio>
 #include <limits>
 #include <sstream>
+#include <string>
+
+
+// NaN conversions need not preserve the source sign or signaling state.
+// LWG 4101 proposes permitting, rather than requiring, sign preservation.
+// https://cplusplus.github.io/LWG/issue4101
+bool matches_output (const char *expected, std::string actual)
+{
+    for (std::string::size_type pos = 0;
+         (pos = actual.find ('-', pos)) != std::string::npos; ++pos) {
+        if (   0 == actual.compare (pos + 1, 3, "nan")
+            || 0 == actual.compare (pos + 1, 3, "NAN"))
+            actual.erase (pos, 1);
+    }
+
+    return expected == actual;
+}
 
 
 template <class FloatT>
@@ -65,13 +82,13 @@ bool test (const char *tname)
         "     0.0:  0\n"
         "  +/-1.0:  1 -1\n"
         "  +/-INF:  inf -inf\n"
-        "  +/-QNAN: qnan -qnan\n"
-        "  +/-SNAN: snan -snan\n"
+        "  +/-QNAN: nan nan\n"
+        "  +/-SNAN: nan nan\n"
     };
 
     bool pass = true;
 
-    if (expect != out.str ()) {
+    if (!matches_output (expect, out.str ())) {
         std::fprintf (stderr, "Expected (%s):\n%s\nGot:\n%s\n",
                       tname, expect, out.str ().c_str ());
         pass = false;
@@ -92,11 +109,11 @@ bool test (const char *tname)
         "     0.0:  0\n"
         "  +/-1.0:  1 -1\n"
         "  +/-INF:  INF -INF\n"
-        "  +/-QNAN: QNAN -QNAN\n"
-        "  +/-SNAN: SNAN -SNAN\n"
+        "  +/-QNAN: NAN NAN\n"
+        "  +/-SNAN: NAN NAN\n"
     };
 
-    if (EXPECT != out.str ()) {
+    if (!matches_output (EXPECT, out.str ())) {
         std::fprintf (stderr, "Expected (%s):\n%s\nGot:\n%s\n",
                       tname, EXPECT, out.str ().c_str ());
         pass = false;
