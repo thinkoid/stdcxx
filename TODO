@@ -10,6 +10,48 @@ investigations.
 
 #+TOC: headlines 2
 
+* TODO Retire =export= and implicit inclusion
+
+Decided 2026-10-07: the library does not use =export=. C++11 removed
+exported templates; EDG was the only front end to implement them.
+Implicit inclusion goes with it: no compiler the tree supports finds
+a template's =.cc= by name. =_config-gcc.h= declares GCC and Clang
+without it. Under =eccp= the =IMPLICIT_INCLUSION= characterization
+fails, and its export model reads the definitions through =.et= index
+files written when the defining translation unit is compiled, not by
+file name.
+
+The scaffolding:
+- =_EXPORT= (=include/rw/_defs.h:406=) and its 231 uses in 47 files,
+  nearly all under =include=; =_RWSTD_NO_EXPORT= in =_config-gcc.h=;
+  the =EXPORT= and =EXPORT_KEYWORD= characterizations.
+- =_RWSTD_NO_IMPLICIT_INCLUSION=: the guard on the =#include <x.cc>= at
+  the end of ten headers (=algorithm=, =bitset=, =deque=, =limits=,
+  =list=, =valarray=, =vector=, =rw/_algobase.h=, =rw/_heap.h=,
+  =rw/_tree.h=), the condition at =_defs.h:1270=, the define in
+  =_config-gcc.h=.
+- =_RWSTD_NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION=: the
+  branches at =_defs.h:1301= and =:1329=.
+- The characterizations =IMPLICIT_INCLUSION= and
+  =EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION= and their helpers
+  =implicit_inclusion_imp.{c,cc,h}= and
+  =instantiation_with_implicit_inclusion.{c,cc,h}=.
+- The macro list in =README= and the rows of
+  =doc/notes/ref-characterizations.md=.
+
+Fix: delete all of it, one subsystem per commit. The explicit
+instantiation machinery stays: =_RWSTD_DEFINE_TEMPLATE=, its =_FIRST=
+and =_LAST= forms, =_RWSTD_INSTANTIATE=, the =ti_*.cpp= units, the
+extern templates. Of =_defs.h:1270='s conditional, only the arms that
+assume implicit inclusion go. =IMPLICIT_INSTANTIATION= is a different
+characterization and stays.
+
+Check: GCC and Clang preprocess every library, test and example
+translation unit to identical output before and after, since =_EXPORT=
+is empty and implicit inclusion off for both; =config.h= loses only
+the retired macros; the six tables do not move. Under =eccp= the
+library builds without =--no_export=.
+
 * TODO The wide half of UserCtype
 
 =tests/src/ctype.cpp= implements =UserCtype<wchar_t>= and
@@ -402,22 +444,22 @@ the command line, and the GCC and Clang tables do not move.
 
 ** TODO =export= or the inclusion model
 
-=eccp= has =export= templates in strict C++03. The =EXPORT=
-characterization passes and the library compiles its =.cc= files in
-the export model. EDG then includes each =.cc= itself, and the
-explicit =#include <algorithm.cc>= under
-=_RWSTD_NO_IMPLICIT_INCLUSION= defines everything twice. The removed
-=_config-eccp.h= undefined =_RWSTD_NO_IMPLICIT_INCLUSION= when
-=export= was available. With that, the library compiles but for
-=src/punct.cpp=, where EDG fails an internal assertion (#2656, in
-=find_local_static_variable_init=) at line 113. With =--no_export=
-the library uses the inclusion model, as with GCC, and builds.
+=eccp= has =export= templates in strict C++03, and the =EXPORT=
+characterization passes. With =export= on, the first build failed with
+136 errors, 98 of them "already been defined" in the =.cc= files; the
+cause is not known. A three-file program with an exported template and
+its definition included explicitly compiles, links and runs, so the
+explicit =#include <x.cc>= is not enough to explain it. With
+=_RWSTD_NO_IMPLICIT_INCLUSION= undefined by hand, as the removed
+=_config-eccp.h= did, the library compiles but for =src/punct.cpp=,
+where EDG fails an internal assertion (#2656, in
+=find_local_static_variable_init=) at line 113. With =--no_export= the
+library builds.
 
-Fix: undecided. Restore the export path, with the override macro and
-the internal error reported to EDG, or build without =export=.
+Decided 2026-10-07: no =export=. The first entry of the queue retires
+it with implicit inclusion. This entry leaves with it.
 
-Check: the library builds in the chosen model, and the choice is in
-=eccp.config= or a characterization with its reason.
+Check: the =eccp= build needs no =--no_export=.
 
 ** TODO =FLOAT.cpp= under a strict compiler
 
