@@ -36,10 +36,19 @@ times while it builds the library under =eccp -A=. c++filt decodes
 the same names. All 22 have one shape, e.g.
 =_ZN4__rw12__rw_extractIcSt11char_traitsIcEtEERSt13basic_istreamIT_T0_ES7_RT1_=,
 =__rw::__rw_extract<char, std::char_traits<char>, unsigned short>=.
+The test programs draw it for about 2,100 more.
 
-Fix: reduce it and report it to EDG.
+A defect of EDG's tools, not of these names: on Linux =edg_decode=
+decodes no IA-64 mangled name at all, and the prelinker warns for
+every such name that contains =__=. A two-line program with a
+function template in a namespace =__n= reproduces it. The prelinker
+uses decoded names only in its messages; template instances are
+assigned and the library builds.
 
-Check: the report is filed and cited here.
+Fix: EDG's. The library needs no change.
+
+Check: the report is filed and cited here; a build with a front end
+that fixes it shows no decoding warnings.
 
 * TODO =27.ostream=: the prelinker's recompile defines statics twice
 
