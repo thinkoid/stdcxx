@@ -325,67 +325,247 @@ Check: =21.string.stdcxx-162= passes in 15D. The exported symbols
 lose exactly the assembly routines. The suites are otherwise
 unchanged.
 
-* TODO EDG: restore it, compile for conformance
+* EDG strict mode
 
-The EDG front end is open source as of 2026-09:
-github.com/edgcpp/compiler, Apache 2.0 with the LLVM exceptions. It
-ships the =eccp= driver, the C-generating back end, the prelinker and
-a minimal runtime. It has no standard library. The tree used to build
-with =eccp= in strict mode. A conformance question was settled there
-before a bug was filed against another compiler. The platform
-retirement removed the configuration because the compiler could not
-be had: =etc/config/eccp.config= in dd1128a5,
-=include/rw/_config-eccp.h= in 6513a431. The =__EDG__= guards in
-=_iosbase.h=, =_traits.h= and five characterizations survive, and so
-do the =eccp= rows of =etc/config/xfail.txt=.
+The tree builds with EDG's =eccp= in strict mode (=-A=) as a
+conformance check: a question is settled there before a bug goes to
+another compiler. The front end is open source as of 2026-09:
+github.com/edgcpp/compiler. These entries are outside the priority
+order. The first is the build; the rest are what it found. Each error
+is read against the standard: a library defect is fixed here, a
+compiler defect goes to EDG, and the leniency of GCC or Clang it
+exposes is recorded.
 
-A first attempt, on EDG 7.0 in strict mode, found:
-- The default dialect of =eccp= is C++03 (=__cplusplus= is
-  =199711L=), not a GNU mode. No dialect option is needed.
-- The C headers are a property of the =eccp= installation, not of the
-  tree. The tree before the retirement never named them. With glibc,
-  the freestanding headers (=float.h=, =stddef.h=, =stdarg.h=) are
-  gcc's, and gcc's =float.h= reads macros that gcc predefines and
-  =eccp= does not in strict mode (=__DBL_DIG__= and the rest). The old
-  =float_defs.h= typed those values in by hand. The installation now
-  searches the resident gcc's headers and glibc's, and its macro table
-  carries those target facts for strict mode.
-- gcc's =stddef.h= spells =offsetof= as =__builtin_offsetof=, a keyword
-  EDG enters only when it emulates GNU, Microsoft or Clang, never in
-  strict mode. The name is reserved, so strict mode may provide it;
-  reported as https://github.com/edgcpp/compiler/discussions/185.
-  Until EDG enters it,
-  =eccp.config= defines
-  ~__builtin_offsetof(T,M)=((__SIZE_TYPE__) __INTADDR__ (&((T *) 0)->M))~.
-  =__INTADDR__= is EDG's own =offsetof= primitive, entered in every
-  mode. The definition leaves when EDG enters the keyword.
-- The retirement also removed the prelink step before =ar= (the
-  commit says only the retired compilers used it; =eccp.config= did).
-- =eccp= reads source as UTF-8 only. Five sources carry ISO-8859-1
-  bytes: =etc/config/src/locale_names.h= (=LOCALE_NAME_FMAT= fails, so
-  no =_RWSTD_LC_*= constants), =tests/algorithms/25.search.cpp=,
-  =tests/iostream/27.istream.readsome.cpp=,
-  =tests/iostream/27.istream.sentry.cpp=,
-  =tests/localization/22.locale.money.get.cpp=. An octal escape is
-  the same byte to every compiler.
-- Strict mode hides XSI and BSD names: =S_IFDIR= in
-  =src/setlocale.cpp=, =caddr_t= in =src/memattr.cpp=.
-- =va_start= on a =std::va_list= fails in =src/exception.cpp=.
-Unclear still: how the installation and the build were set up when
-the tree built with =eccp=.
+A first build on 2026-10-06, at 6bb238b6 with EDG 7.0 over gcc 16 and
+glibc, took hand changes to the tree. It configured, built the
+library, the test driver and the utilities, and built 257 of 272 test
+programs. The suite ran without signals or non-zero exits: 10,049,711
+assertions, 16 failed.
 
-Fix: build EDG with its =eccp= driver. Restore =eccp.config= from
-=dd1128a5^= and bring it current: strict mode (=-A=), exceptions
-(=-x=), the prelinker, the thread library. The characterizations
-describe the compiler. A macro of the override header comes back only
-where no characterization can express the gap, with its reason. Each
-strict-mode error in the library or the tests is read against the
-standard: a library defect is fixed here, a compiler defect is filed
-with EDG, and the leniency of GCC or Clang it exposes is recorded.
+** TODO The =eccp= configuration
+
+The platform retirement removed =etc/config/eccp.config= (dd1128a5),
+=include/rw/_config-eccp.h= (6513a431) and the prelink step before
+=ar= (67c1f7b6; its message says only the retired compilers used it,
+but =eccp.config= did). The =__EDG__= guards in =_iosbase.h=,
+=_traits.h= and five characterizations survive, and so do the =eccp=
+rows of =etc/config/xfail.txt=.
+
+The default dialect of =eccp= is C++03 (=__cplusplus= is =199711L=).
+No dialect option is needed. The C headers are a property of the
+=eccp= installation, not of the tree: it searches the resident gcc's
+freestanding headers and glibc's, and its macro table carries the
+target facts gcc's =float.h= and =limits.h= read.
+
+gcc's =stddef.h= spells =offsetof= as =__builtin_offsetof=, a keyword
+EDG enters only when it emulates GNU, Microsoft or Clang. The name is
+reserved, so strict mode may provide it; reported as
+https://github.com/edgcpp/compiler/discussions/185. A =-D= cannot
+carry the stopgap: =libc_decl.sh= expands =$CPPFLAGS= unquoted, the
+shell splits the definition at its spaces, and every header probe
+fails. A file passed with =--preinclude_macros= works:
+~#define __builtin_offsetof(T, M) ((__SIZE_TYPE__) __INTADDR__ (&((T *) 0)->M))~.
+=__INTADDR__= is EDG's own =offsetof= primitive. The file leaves when
+EDG enters the keyword.
+
+Fix: restore =eccp.config= from =dd1128a5^= and bring it current:
+=-A -x=, the prelinker (~PRELINKFLAGS = --prelink_objects~, the step
+in =GNUmakefile.lib= and =GNUmakefile.rwt=, =*.ti= in the clean
+rules), =-lpthread=, the stopgap file. A macro of the override header
+comes back only where no characterization can express the gap, with
+its reason.
 
 Check: an =eccp= build directory configures, builds the library, the
 utilities and the tests, and runs the suite. Its table is pinned
 beside the six.
+
+** TODO The C99 functions the library calls
+
+The library calls =vsnprintf= (=src/exception.cpp=), =strtof= and
+=strtold= (=src/num_get.cpp=) and =snprintf= (=src/num_put.cpp=).
+C++03's C library is C90 with Amendment 1; none of the four is in it.
+Under =eccp -A= glibc does not declare them. Each had a fallback
+until 8760bf55: =vsprintf=, =strtod= clamped to =float=, =sscanf=.
+Its premise, that every tracked configuration takes the C library
+function, held for GCC and Clang only.
+
+The first build exposed them with
+~-D_XOPEN_SOURCE=500 -D_DEFAULT_SOURCE~ in =eccp.config=. That is a pin and cannot stay.
+
+Fix: undecided. The candidates: declare the functions where they are
+used, as =FLOAT.cpp= did; restore the fallbacks behind a
+characterization; or let the sources that need them state their
+feature level, as =tests/src/file.cpp= does.
+
+Check: the library builds under =eccp -A= with no feature macro on
+the command line, and the GCC and Clang tables do not move.
+
+** TODO =export= or the inclusion model
+
+=eccp= has =export= templates in strict C++03. The =EXPORT=
+characterization passes and the library compiles its =.cc= files in
+the export model. EDG then includes each =.cc= itself, and the
+explicit =#include <algorithm.cc>= under
+=_RWSTD_NO_IMPLICIT_INCLUSION= defines everything twice. The removed
+=_config-eccp.h= undefined =_RWSTD_NO_IMPLICIT_INCLUSION= when
+=export= was available. With that, the library compiles but for
+=src/punct.cpp=, where EDG fails an internal assertion (#2656, in
+=find_local_static_variable_init=) at line 113. With =--no_export=
+the library uses the inclusion model, as with GCC, and builds.
+
+Fix: undecided. Restore the export path, with the override macro and
+the internal error reported to EDG, or build without =export=.
+
+Check: the library builds in the chosen model, and the choice is in
+=eccp.config= or a characterization with its reason.
+
+** TODO =FLOAT.cpp= under a strict compiler
+
+The =FLOAT= characterization calls =strtof= and =strtold=, which
+strict C++03 does not declare. It fails, =config.h= has no
+=_RWSTD_FLT_*= macros, and =<limits>= does not compile. a44256a6
+removed the characterization's own declarations.
+
+Fix: declare the two functions in the characterization again, or
+probe underflow with =strtod= alone.
+
+Check: =FLOAT= passes under =eccp -A= and =config.h= carries the
+=_RWSTD_FLT_*= macros; the GCC and Clang =config.h= do not change.
+
+** TODO =__CORRECT_ISO_CPP_WCHAR_H_PROTO= needs GNU =__asm= labels
+
+=include/ansi/cwchar= and =include/ansi/wchar.h= define it
+unconditionally. glibc declares the overloads behind it with =__asm=
+labels, which strict mode rejects: 60 errors in six sources. Guarded
+on =__GNUC__=, the sources compile and =21.cwchar= finds the C
+prototypes only: five failed assertions on the const overloads.
+
+Fix: define the macro for compilers that accept glibc's declarations,
+and give the others the const-correct pair some other way.
+
+Check: the library builds under =eccp -A=; =21.cwchar= passes there
+and its GCC and Clang rows do not move.
+
+** TODO glibc's =signbit= in strict mode
+
+glibc's =<math.h>= gives a C++ compiler that is neither GCC 6+ nor
+Clang 3.3+ ~#define signbit(x) __builtin_signbitl (x)~. EDG has no
+such built-in in strict mode; =src/fpclass.h= fails. glibc exports
+=__signbit=. A report to glibc is a candidate, of the family of
+https://sourceware.org/bugzilla/show_bug.cgi?id=34692.
+
+Fix: undecided; =signbit= is C99 and not in C++03 either.
+
+Check: =src/fpclass.h= compiles under =eccp -A=.
+
+** TODO Tests that GCC and Clang let through
+
+Ten test programs do not compile under =eccp -A= for causes in the
+test:
+- =typeid= without =<typeinfo>=, ill-formed (5.2.8p6):
+  =tests/support/18.exception.cpp:883=,
+  =tests/support/18.support.rtti.cpp:99=.
+- =std::size_t= without =<cstddef>=: =tests/self/0.ctype.cpp:51=,
+  =tests/localization/22.locale.facet.mt.cpp:130=.
+- No newline at the end of the file:
+  =tests/numerics/26.gslice.array.cassign.cpp=.
+- =long long= unguarded: =tests/iostream/27.istream.fmat.arith.cpp:1028=.
+- POSIX names without a feature macro: =getcwd= in
+  =tests/localization/22.locale.messages.cpp:616=, =BC_BASE_MAX= in
+  =tests/regress/18.c.limits.stdcxx-988.cpp:53=.
+- A UTF-8 =à= in a narrow string literal, which =eccp= rejects as not
+  representable (#3439); the mapping is implementation-defined:
+  =tests/regress/22.locale.collate.stdcxx-1010.cpp:71=.
+- Template instantiation 435 deep:
+  =tests/localization/22.locale.id.mt.cpp:98=. C++03 Annex B
+  recommends at least 17.
+
+Fix: repair each test; the instantiation depth is a decision of its
+own.
+
+Check: each compiles under =eccp -A=, and the GCC and Clang tables do
+not move.
+
+** TODO Calls EDG matches to no function
+
+Four test programs fail with error #304, no instance of a function
+template or overloaded function matches the argument list:
+=tests/iostream/27.std.manip.cpp:518= (=test<charT, Traits>= called
+with =(int, Manip, fmtflags, char)=; the third parameter is =int=),
+=tests/iostream/27.filebuf.cpp:2019=,
+=tests/localization/22.locale.codecvt.cpp:680=,
+=tests/localization/22.locale.collate.cpp:1159=. Not read yet: the
+library, the test or the compiler.
+
+Fix: read each against the standard.
+
+Check: each compiles under =eccp -A=, or the cause is recorded.
+
+** TODO C that EDG generates and gcc rejects
+
+=eccp= compiles C++ to C and gcc compiles the C. Two test programs
+fail there:
+- =tests/algorithms/25.libc.cpp=: the generated C declares =_setjmp=
+  as =int (long *)=, glibc's =<setjmp.h>= as
+  =int (struct __jmp_buf_tag *)=.
+- =tests/iostream/27.ostream.cpp=: when the prelinker recompiles the
+  object to assign template instances, the generated C defines the
+  function-local string statics of =test_formatted<charT>= twice
+  (=_ZZ14test_formattedIcEvT_Es_0= and others).
+Both look like defects of the front end's C back end.
+
+Fix: reduce each and report it to EDG.
+
+Check: the report is filed and cited here, or the cause is found in
+the test.
+
+** TODO Run-time differences from GCC
+
+Under =eccp -A=:
+- =26.valarray.transcend=: nine failed assertions on the =float=
+  functions (=std::acos (valarray<float>)= and kin); =config.h= has
+  no =float= or =long double= overloads of the =<cmath>= functions.
+- =18.limits.traps=: =numeric_limits<bool>::traps= is true.
+- =18.support.dynamic=: =bad_alloc::what ()= returns a bad string.
+  The first question is whose =bad_alloc= runs, the library's or that
+  of EDG's runtime.
+- =22.locale.num.put= runs 1,399 assertions against 1,485.
+
+Fix: read each against the standard and the characterization that
+decides it.
+
+Check: the rows pass, or the reason is recorded.
+
+** TODO The configuration under =eccp= against GCC's
+
+=config.h= under =eccp -A= differs from GCC's 11S beyond the entries
+above: no atomic built-ins and no =_RWSTD_THREAD=; =STD_TYPE_INFO=
+fails (the characterization declares its own =type_info=; 12475dfe
+removed the =#pragma define_type_info= that served =eccp=); the
+special-member characterizations of the exception classes differ.
+=long long= and extern templates are absent, which is correct for
+C++03.
+
+Fix: read each difference against the standard and the
+characterization.
+
+Check: every difference is correct for C++03 or has an entry.
+
+** TODO The ISO-8859-1 sources
+
+=eccp= reads source as UTF-8 only. Five sources carry ISO-8859-1
+bytes: =etc/config/src/locale_names.h= (=LOCALE_NAME_FMAT= fails, so
+no =_RWSTD_LC_*= constants), =tests/algorithms/25.search.cpp=,
+=tests/iostream/27.istream.readsome.cpp=,
+=tests/iostream/27.istream.sentry.cpp=,
+=tests/localization/22.locale.money.get.cpp=. Only the first broke
+the first build. An octal escape is the same byte to every
+compiler.
+
+Fix: octal escapes.
+
+Check: the five are UTF-8 clean (=iconv -f utf-8=) and the tables do
+not move.
 
 * Documentation
 
