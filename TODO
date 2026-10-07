@@ -10,6 +10,65 @@ investigations.
 
 #+TOC: headlines 2
 
+* TODO =_setjmp= in the C that EDG generates for =25.libc=
+
+=eccp= compiles C++ to C and gcc compiles the C. For
+=tests/algorithms/25.libc.cpp= the generated C declares =_setjmp= as
+=int (long *)=; glibc's =<setjmp.h>= declares it
+=int (struct __jmp_buf_tag *)=. gcc rejects the conflict at
+=25.libc.cpp:118=, and the test does not build under =eccp -A=.
+
+A defect of the front end's C back end, in every mode: a translation
+unit that calls =setjmp= and has a =try= block. The =try= lowering
+declares its own =_setjmp= and does not look for the program's.
+glibc spells =setjmp (env)= as =_setjmp (env)=. Reported as
+https://github.com/edgcpp/compiler/discussions/234.
+
+Fix: EDG's. The test and the library need no change.
+
+Check: =25.libc= builds under =eccp -A= with a front end that fixes
+it.
+
+* TODO Names the prelinker cannot decode
+
+The prelinker reports "an error occurred during name decoding" 22
+times while it builds the library under =eccp -A=. c++filt decodes
+the same names. All 22 have one shape, e.g.
+=_ZN4__rw12__rw_extractIcSt11char_traitsIcEtEERSt13basic_istreamIT_T0_ES7_RT1_=,
+=__rw::__rw_extract<char, std::char_traits<char>, unsigned short>=.
+
+Fix: reduce it and report it to EDG.
+
+Check: the report is filed and cited here.
+
+* TODO =27.ostream=: the prelinker's recompile defines statics twice
+
+=tests/iostream/27.ostream.cpp= compiles under =eccp -A=. The
+prelinker then recompiles the object to assign template instances,
+and gcc rejects the generated C: it defines the function-local string
+statics of =test_formatted<charT>= twice
+(=_ZZ14test_formattedIcEvT_Es_0= and others, for =char= and
+=wchar_t=, all at =27.ostream.cpp:877=).
+
+Fix: reduce it and report it to EDG.
+
+Check: the report is filed and cited here, or the cause is found in
+the test.
+
+* TODO glibc's =signbit= in strict mode
+
+glibc's =<math.h>= gives a C++ compiler that is neither GCC 6+ nor
+Clang 3.3+ ~#define signbit(x) __builtin_signbitl (x)~. EDG has no
+such built-in in strict mode; =src/fpclass.h= fails. glibc exports
+=__signbit=. A report to glibc is a candidate, of the family of
+https://sourceware.org/bugzilla/show_bug.cgi?id=34692.
+
+Fix: reduce it and report it to glibc. How the library gets
+=signbit= under a strict compiler is undecided; =signbit= is C99 and
+not in C++03 either.
+
+Check: =src/fpclass.h= compiles under =eccp -A=.
+
 * TODO Retire =export= and implicit inclusion
 
 Decided 2026-10-07: the library does not use =export=. C++11 removed
@@ -488,18 +547,6 @@ and give the others the const-correct pair some other way.
 Check: the library builds under =eccp -A=; =21.cwchar= passes there
 and its GCC and Clang rows do not move.
 
-** TODO glibc's =signbit= in strict mode
-
-glibc's =<math.h>= gives a C++ compiler that is neither GCC 6+ nor
-Clang 3.3+ ~#define signbit(x) __builtin_signbitl (x)~. EDG has no
-such built-in in strict mode; =src/fpclass.h= fails. glibc exports
-=__signbit=. A report to glibc is a candidate, of the family of
-https://sourceware.org/bugzilla/show_bug.cgi?id=34692.
-
-Fix: undecided; =signbit= is C99 and not in C++03 either.
-
-Check: =src/fpclass.h= compiles under =eccp -A=.
-
 ** TODO Tests that GCC and Clang let through
 
 Ten test programs do not compile under =eccp -A= for causes in the
@@ -542,24 +589,6 @@ library, the test or the compiler.
 Fix: read each against the standard.
 
 Check: each compiles under =eccp -A=, or the cause is recorded.
-
-** TODO C that EDG generates and gcc rejects
-
-=eccp= compiles C++ to C and gcc compiles the C. Two test programs
-fail there:
-- =tests/algorithms/25.libc.cpp=: the generated C declares =_setjmp=
-  as =int (long *)=, glibc's =<setjmp.h>= as
-  =int (struct __jmp_buf_tag *)=.
-- =tests/iostream/27.ostream.cpp=: when the prelinker recompiles the
-  object to assign template instances, the generated C defines the
-  function-local string statics of =test_formatted<charT>= twice
-  (=_ZZ14test_formattedIcEvT_Es_0= and others).
-Both look like defects of the front end's C back end.
-
-Fix: reduce each and report it to EDG.
-
-Check: the report is filed and cited here, or the cause is found in
-the test.
 
 ** TODO Run-time differences from GCC
 
