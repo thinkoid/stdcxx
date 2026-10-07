@@ -1,6 +1,7 @@
 # The test-suite baseline
 
-As of 2026-09-30 (5629ca96).
+As of 2026-10-07 (c755a926) for GCC and 2026-09-30 (5629ca96) for
+Clang.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -10,15 +11,13 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 272 programs per configuration.
+- Every test builds. The harness runs 273 programs per configuration.
 - No assertion fails, in any configuration, under either compiler.
 - What fails, by cause:
-  - The regression test `27.ostream.inserters.stdcxx-51` aborts. All
-    configurations (chapter 3.1).
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
-    interface and moves the minor version (chapter 3.2).
+    interface and moves the minor version (chapter 3.1).
   - Seven locale MT rows of 15D time out. They measure the harness's
-    timeout, not the library (chapter 3.3).
+    timeout, not the library (chapter 3.2).
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
 
@@ -57,7 +56,7 @@ passed. Read the rows and the summary.
 
 ### 1.1 Rows that pass without a summary
 
-The 82 regression tests under `tests/regress` are plain programs that
+The 83 regression tests under `tests/regress` are plain programs that
 assert and exit. They print nothing, so a pass is `NOUT`.
 
 Five driver self-tests report on their own. They test the driver's
@@ -94,14 +93,14 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 272 | 10,103,645 | 0 | 0 | 1 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 272 | 10,103,535 | 0 | 0 | 1 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 272 | 10,116,511 | 0 | 0 | 9 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 273 | 10,103,644 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 273 | 10,103,534 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 273 | 10,116,510 | 0 | 0 | 8 |
 
 Chapter 4 lists where the three differ.
 
 The tables were pinned on 2026-09-30 from full rebuilds, after the
-address-space limit was scaled to the processor count (chapter 3.3)
+address-space limit was scaled to the processor count (chapter 3.2)
 and the `setbase` extension and `bin` were removed
 (`analysis-numeric-base.md`). After the removal of the locking
 extension the same day, 15D was measured again in full and the other
@@ -109,20 +108,15 @@ five in the rows that named the extension; only `27.basic.ios` moved,
 in the two thread-safe tables (`analysis-basic-ios-flags.md`). After
 the removal of the file stream additions, also that day, five
 configurations were measured again in full and 15D-clang in its
-`27.*` rows; only `27.filebuf` moved.
+`27.*` rows; only `27.filebuf` moved. The GCC tables were measured
+again in full on 2026-10-07, at c755a926. Three rows moved, each with
+the commit that changed its test: `19.cerrno` runs 4 assertions, not 5
+(d006f308); `21.char.traits.compare` is new (6bb238b6);
+`27.ostream.inserters.stdcxx-51` passes (415860cc).
 
 ## 3. What fails
 
-### 3.1 `27.ostream.inserters.stdcxx-51`
-
-The row aborts in every configuration, GCC and Clang alike. It has a
-`TODO` entry. The test expects `qnan` and `snan`, and `QNAN` and
-`SNAN` under `uppercase`, for quiet and signaling NaNs of all three
-floating types. The library prints `nan` and `NAN` for both. The
-test's `assert` at line 123 fails. It is the only signalled program
-outside 15D.
-
-### 3.2 `21.string.stdcxx-162` in 15D
+### 3.1 `21.string.stdcxx-162` in 15D
 
 The test requires a string body of at most 24 bytes. In 15D every
 string body carries its own mutex, 64 bytes: the layout of every
@@ -131,7 +125,7 @@ test and break that binary interface. The revival does not keep it;
 the `TODO` entry on the next minor version makes the change. The row
 is `ABRT` in 15D and `NOUT`, a pass, elsewhere.
 
-### 3.3 The MT locale rows of 15D
+### 3.2 The MT locale rows of 15D
 
 Seven older locale MT tests end in 15D with `HUP`:
 `22.locale.ctype.mt`, `money.put.mt`, `num.get.mt`, `num.put.mt`,
@@ -174,7 +168,7 @@ the harness, not a reference.
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
 | `21.string.stdcxx-162` | `NOUT` | `NOUT` | `ABRT` |
 | `22.locale.codecvt.mt` | 0 | 0 | 12800 |
-| seven `22.locale.*.mt` | pass | pass | `HUP`, chapter 3.3 |
+| seven `22.locale.*.mt` | pass | pass | `HUP`, chapter 3.2 |
 
 Reasons, in order:
 
@@ -193,9 +187,9 @@ Reasons, in order:
 - 15D skips the two libc-backed facets of `22.locale.codecvt` on a
   corrupt `mbstate_t`. Their state check sits under the locale lock.
 - The atomic operation tests count only in the thread-safe build.
-- `21.string.stdcxx-162`: chapter 3.2.
+- `21.string.stdcxx-162`: chapter 3.1.
 - `22.locale.codecvt.mt` counts only with more than one thread.
-- Seven older locale MT tests time out in 15D: chapter 3.3.
+- Seven older locale MT tests time out in 15D: chapter 3.2.
 
 The single-threaded builds run each MT test with one thread. Most
 count nothing there. The newer ones count in every build:
@@ -218,8 +212,10 @@ pinned the same way. `analysis-clang.md` records what it took.
 | 11s-clang | 10,103,550 | 0 | 0 | 1 |
 | 15D-clang | 10,116,511 | 0 | 0 | 9 |
 
-Row for row they are the GCC tables, with one exception.
+They were pinned on 2026-09-30 and predate the three rows that moved
+in the GCC tables on 2026-10-07 (chapter 2). Against the GCC tables of
+2026-09-30 they match row for row, with one exception.
 `18.numeric.special.float` runs 134 assertions in the 32-bit Clang
 build, where GCC's runs 119. Clang generates SSE code for i386, which
 carries a signaling NaN. The two 15D tables are identical; the seven
-timeouts measure the harness under either compiler (chapter 3.3).
+timeouts measure the harness under either compiler (chapter 3.2).

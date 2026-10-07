@@ -29,7 +29,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 18.support.dynamic                            0    0       47      0   100%
 18.support.rtti                               0    0       24      0   100%
 18.support.runtime.stdcxx-989              NOUT    0                       
-19.cerrno                                     0    0        5      0   100%
+19.cerrno                                     0    0        4      0   100%
 19.exceptions.mt                              0    0        0      0   100%
 19.std.exceptions                             0    0       81      0   100%
 2.smartptr.shared                             0    6      121      0   100%
@@ -44,6 +44,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 20.temp.buffer                                0    0    10792      0   100%
 21.c.strings.stdcxx-843                    NOUT    0                       
 21.cctype                                     0    0      281      0   100%
+21.char.traits.compare                     NOUT    0                       
 21.char.traits.find.stdcxx-541             NOUT    0                       
 21.cwchar                                     0    0       66      0   100%
 21.cwctype                                    0    0      260      0   100%
@@ -253,7 +254,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 27.istream.sentry                             0    0      832      0   100%
 27.istream.unformatted.get                    0    0     1650      0   100%
 27.objects                                    0    0       22      0   100%
-27.ostream.inserters.stdcxx-51             ABRT    0                       
+27.ostream.inserters.stdcxx-51             NOUT    0                       
 27.ostream                                    0    0     4876      0   100%
 27.ostream.unformatted.stdcxx-626          NOUT    0                       
 27.std.manip                                  0    0       48      0   100%
@@ -272,11 +273,11 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 atomic_add                                    0    0        0      0   100%
 atomic_xchg                                   0    0        0      0   100%
 PROGRAM SUMMARY:
-  Programs:                   272
+  Programs:                   273
   Non-zero exit status:         0
-  Signalled:                    1
+  Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10103535
+  Assertions:            10103534
   Failed assertions:            0

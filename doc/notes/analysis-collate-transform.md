@@ -396,7 +396,7 @@ Across the six pinned configurations the collate row is the only
 row of the suite that moves, apart from the rows that vary from run
 to run and varied again -- `23.bitset.cons` in the 64-bit builds and
 the MT locale tests in the thread-safe ones. 0d38b6cd steadied the
-first; `ref-test-baseline.md`, chapter 3.3, has the second. Where
+first; `ref-test-baseline.md`, chapter 3.2, has the second. Where
 those held still the assertion totals fall by exactly the 95
 assertions the collate row loses.
 
