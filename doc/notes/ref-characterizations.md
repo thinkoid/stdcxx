@@ -11,7 +11,7 @@ layouts, calling interfaces and runtime behavior are platform
 questions.
 
 The source census contains 205 named C++ probes, nine supporting C++
-translation units, one shell driver and 15 other support files. The
+translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
 **One probe does not necessarily mean one macro.**
@@ -62,7 +62,7 @@ conditions as well. No preprocessing or build was performed here.
 | group | status on the supported compilers |
 |---|---|
 | Old language deficiencies: `BOOL`, `NAMESPACE`, `EXPLICIT`, `TYPENAME`, casts, member templates, partial specialization | Every probe passes in the six configurations. Passing today is not a reason to remove a probe or its branch. |
-| Obsolete mechanisms: exported templates, implicit inclusion, dynamic exception specifications | The probes fail in the six configurations, and that is their job: a failing probe selects the path the compiler's dialect needs. |
+| Obsolete mechanisms: dynamic exception specifications | The probes fail in the six configurations, and that is their job: a failing probe selects the path the compiler's dialect needs. |
 | Runtime ABI: exception classes, allocation functions, RTTI members and namespace placement | Questions about the runtime, not the language. A historical ABI probe is not a description of public API support. |
 | Platform facts: sizes, typedefs, floating point, C structures, conversion interfaces, locale naming | Retain characterization or deliberately replace it with an equally sound source of the information. |
 | No direct reader of a status macro | Inspect emitted values and other probe dependencies before considering retirement. A status marker can be unused while the producer remains essential. |
@@ -198,7 +198,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [EXPLICIT_FUNC_INSTANTIATION](../../etc/config/src/EXPLICIT_FUNC_INSTANTIATION.cpp) / `NO_EXPLICIT_FUNC_INSTANTIATION` | explicit function instantiation | L/P; `src/collate.cpp` |
 | [EXPLICIT_INSTANTIATION](../../etc/config/src/EXPLICIT_INSTANTIATION.cpp) / `NO_EXPLICIT_INSTANTIATION` | explicit instantiation | L/P/T; `include/rw/_defs.h` |
 | [EXPLICIT_INSTANTIATION_BEFORE_DEFINITION](../../etc/config/src/EXPLICIT_INSTANTIATION_BEFORE_DEFINITION.cpp) / `NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION` | instantiation before definition | L; `include/rw/_defs.h` |
-| [EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION](../../etc/config/src/EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION.cpp) / `NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION` | explicit instantiation with implicit inclusion | L; `include/rw/_defs.h` |
 | [EXPLICIT_MEMBER_INSTANTIATION](../../etc/config/src/EXPLICIT_MEMBER_INSTANTIATION.cpp) / `NO_EXPLICIT_MEMBER_INSTANTIATION` | explicit instantiation of members | none |
 | [EXPLICIT_MEMBER_SPECIALIZATION](../../etc/config/src/EXPLICIT_MEMBER_SPECIALIZATION.cpp) / `NO_EXPLICIT_MEMBER_SPECIALIZATION` | explicit member specialization | L; `include/rw/_defs.h` |
 | [EXTERN_C_COMPATIBILITY](../../etc/config/src/EXTERN_C_COMPATIBILITY.cpp) / `NO_EXTERN_C_COMPATIBILITY` | compatibility of extern "C" and "C++" | L; `include/ansi/_cstdlib.h` |
@@ -352,7 +351,7 @@ libraries. The `.h`, `.c`, `.cc` and `.inc` files support those probes
 and the shell driver; they are not independently counted capabilities.
 The complete support-file inventory is:
 
-`collapse_static_locals.lib.cpp`, `collapse_template_locals.lib.cpp`, `collapse_template_statics.lib.cpp`, `extern_function_template_imp.cpp`, `extern_function_template_imp.h`, `extern_inline.lib.cpp`, `extern_template_before_definition_imp.cpp`, `extern_template_imp.cpp`, `extern_template_imp.h`, `float_defs.h`, `headers.inc`, `instantiation_before_definition.cc`, `instantiation_before_definition.h`, `instantiation_with_implicit_inclusion.c`, `instantiation_with_implicit_inclusion.cc`, `instantiation_with_implicit_inclusion.h`, `lib_exceptions.lib.cpp`, `locale_names.h`, `nodbg.h`, `object_mangling_imp.cpp`, `proclimits.h`, `terminate.h`, `thread.h`, `types.h`.
+`collapse_static_locals.lib.cpp`, `collapse_template_locals.lib.cpp`, `collapse_template_statics.lib.cpp`, `extern_function_template_imp.cpp`, `extern_function_template_imp.h`, `extern_inline.lib.cpp`, `extern_template_before_definition_imp.cpp`, `extern_template_imp.cpp`, `extern_template_imp.h`, `float_defs.h`, `headers.inc`, `instantiation_before_definition.cc`, `instantiation_before_definition.h`, `lib_exceptions.lib.cpp`, `locale_names.h`, `nodbg.h`, `object_mangling_imp.cpp`, `proclimits.h`, `terminate.h`, `thread.h`, `types.h`.
 
 Descriptions and exact-token references provide a survey, not a proof
 that every probe still asks the best question. The individually

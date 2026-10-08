@@ -95,39 +95,6 @@ on the C99 functions.
 Check: =src/fpclass.h= compiles under =eccp -A= with the C99 names
 requested and a glibc that fixes it.
 
-* TODO Retire =export= and implicit inclusion
-
-Decided 2026-10-07: the library does not use =export=. C++11 removed
-exported templates; EDG was the only front end to implement them.
-Implicit inclusion goes with it: no compiler the tree supports finds
-a template's =.cc= by name. =_config-gcc.h= declares GCC and Clang
-without it. Under =eccp= the =IMPLICIT_INCLUSION= characterization
-fails, and its export model reads the definitions through =.et= index
-files written when the defining translation unit is compiled, not by
-file name.
-
-The scaffolding:
-- =_RWSTD_NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION=: the
-  branches at =_defs.h:1291= and =:1319=.
-- The =EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION=
-  characterization and its helpers
-  =instantiation_with_implicit_inclusion.{c,cc,h}=.
-- The macro list in =README= and the rows of
-  =doc/notes/ref-characterizations.md=.
-
-Fix: delete all of it, one subsystem per commit. The explicit
-instantiation machinery stays: =_RWSTD_DEFINE_TEMPLATE=, its =_FIRST=
-and =_LAST= forms, =_RWSTD_INSTANTIATE=, the =ti_*.cpp= units, the
-extern templates. Of =_defs.h:1262='s conditional, only the arms that
-assume implicit inclusion go. =IMPLICIT_INSTANTIATION= is a different
-characterization and stays.
-
-Check: GCC and Clang preprocess every library, test and example
-translation unit to identical output before and after, since =_EXPORT=
-is empty and implicit inclusion off for both; =config.h= loses only
-the retired macros; the six tables do not move. Under =eccp= the
-library builds without =--no_export=.
-
 * TODO The wide half of UserCtype
 
 =tests/src/ctype.cpp= implements =UserCtype<wchar_t>= and

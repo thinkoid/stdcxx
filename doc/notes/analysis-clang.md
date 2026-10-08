@@ -155,9 +155,8 @@ next reader who has to trace them:
 - `_RWSTD_NO_EXTERN_FUNCTION_TEMPLATE`,
   `_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION`,
   `_RWSTD_NO_EXPLICIT_INSTANTIATION`, `_RWSTD_NO_IMPLICIT_INSTANTIATION`,
-  `_RWSTD_NO_INSTANTIATE`, `_RWSTD_NO_TEMPLATE_DEFINITIONS` and
-  `_RWSTD_NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION`: further
-  switches of the same family, none of them set on the matrix.
+  `_RWSTD_NO_INSTANTIATE` and `_RWSTD_NO_TEMPLATE_DEFINITIONS`:
+  further switches of the same family, none of them set on the matrix.
 
 ## 2. The library
 

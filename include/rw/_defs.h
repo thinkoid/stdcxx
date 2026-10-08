@@ -1287,25 +1287,9 @@ __rw_assert_fail (const char*, const char*, int, const char*)
               !_RWSTD_NO ## name ## _DEFINITION
 #      define _RWSTD_DEFINE_TEMPLATE_LAST(ignore)  0
 #    endif
-#  elif    !defined (_RWSTD_NO_EXPLICIT_INSTANTIATION) \
-        && !defined (_RWSTD_NO_IMPLICIT_INSTANTIATION) \
-        && !defined (_RWSTD_NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION)
+#  else   // if defined (_RWSTD_LIB_SRC)
      // this block is active when compiling (as opposed to using)
-     // the library headers and sources and implicit inclusion
-     // is being emulated
-
-#    define _RWSTD_DEFINE_TEMPLATE(name)   _RWSTD_INSTANTIATE ## name
-#    ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
-#      define _RWSTD_DEFINE_TEMPLATE_FIRST(ignore) 0
-#      define _RWSTD_DEFINE_TEMPLATE_LAST(name)    _RWSTD_INSTANTIATE ## name
-#    else
-#      define _RWSTD_DEFINE_TEMPLATE_FIRST(name)  _RWSTD_INSTANTIATE ## name
-#      define _RWSTD_DEFINE_TEMPLATE_LAST(ignore) 0
-#    endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
-#  else   // if no explicit instantiation (or with implicit inclusion)
-     // this block is active when compiling (as opposed to using)
-     // the library headers and sources and implicit inclusion is
-     // not being emulated
+     // the library headers and sources
 
 #    define _RWSTD_DEFINE_TEMPLATE(ignore)         1
 #    ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
@@ -1315,33 +1299,26 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #      define _RWSTD_DEFINE_TEMPLATE_FIRST(ignore)   1
 #      define _RWSTD_DEFINE_TEMPLATE_LAST(ignore)    0
 #    endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
-#  endif   // explicit instantiation (with implicit inclusion)
-#else
-#  ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION
-     // when implicit inclusion is enabled or being emulated,
-     // prevent out-of line non-member template functions or
-     // out-of-line member functions of class templates (i.e.,
-     // those defined in .c and .cc files) from being #included
-     // in translation units
+#  endif   // _RWSTD_LIB_SRC
+#else   // if defined (_RWSTD_NO_TEMPLATE_DEFINITIONS)
+     // this block is active when the definitions of the templates are
+     // not wanted; a library source still gets those it names with
+     // _RWSTD_INSTANTIATE_<name>
+
+#  ifndef _RWSTD_LIB_SRC
 #    define _RWSTD_DEFINE_TEMPLATE(ignore)         0
 #    define _RWSTD_DEFINE_TEMPLATE_FIRST(ignore)   0
 #    define _RWSTD_DEFINE_TEMPLATE_LAST(ignore)    0
-#  else   // if defined (NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION)
-#    ifndef _RWSTD_LIB_SRC
-#      define _RWSTD_DEFINE_TEMPLATE(ignore)         0
-#      define _RWSTD_DEFINE_TEMPLATE_FIRST(ignore)   0
-#      define _RWSTD_DEFINE_TEMPLATE_LAST(ignore)    0
-#    else   // if defined (_RWSTD_LIB_SRC)
-#      define _RWSTD_DEFINE_TEMPLATE(name)   _RWSTD_INSTANTIATE ## name
-#      ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
-#        define _RWSTD_DEFINE_TEMPLATE_FIRST(ignore) 0
-#        define _RWSTD_DEFINE_TEMPLATE_LAST(name)    _RWSTD_INSTANTIATE ## name
-#      else
-#        define _RWSTD_DEFINE_TEMPLATE_FIRST(name)  _RWSTD_INSTANTIATE ## name
-#        define _RWSTD_DEFINE_TEMPLATE_LAST(ignore) 0
-#      endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
-#    endif   // _RWSTD_LIB_SRC
-#  endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION
+#  else   // if defined (_RWSTD_LIB_SRC)
+#    define _RWSTD_DEFINE_TEMPLATE(name)   _RWSTD_INSTANTIATE ## name
+#    ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
+#      define _RWSTD_DEFINE_TEMPLATE_FIRST(ignore) 0
+#      define _RWSTD_DEFINE_TEMPLATE_LAST(name)    _RWSTD_INSTANTIATE ## name
+#    else
+#      define _RWSTD_DEFINE_TEMPLATE_FIRST(name)  _RWSTD_INSTANTIATE ## name
+#      define _RWSTD_DEFINE_TEMPLATE_LAST(ignore) 0
+#    endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
+#  endif   // _RWSTD_LIB_SRC
 #endif
 
 

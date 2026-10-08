@@ -979,12 +979,6 @@
      lexically  before the definitions of all their  members defined
      outside their bodies.
 
-  o  _RWSTD_NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION [auto]
-
-     #defined when explicit  template instantiation isn't supported in
-     conjunction  with the implicit  inclusion of  template definition
-     files (i.e., the .c or .cc files). 
-
   o  _RWSTD_NO_EXPLICIT_MEMBER_INSTANTIATION [auto]
 
      #defined when  the explicit instantiation of  member functions of
