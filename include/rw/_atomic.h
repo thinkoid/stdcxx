@@ -51,10 +51,6 @@
       && (__GNUC__ * 100 + __GNUC_MINOR__ >= 401)   \
       && !defined (_RWSTD_NO_INT_ATOMIC_OPS)
 #    include <rw/_atomic-sync.h>
-#  elif defined (__i386__) && defined (__GNUG__)
-#    include <rw/_atomic-x86.h>
-#  elif defined (__x86_64)
-#    include <rw/_atomic-x64.h>
 #  else
 #    define _RWSTD_NO_ATOMIC_OPS
 #  endif
