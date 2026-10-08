@@ -3,97 +3,89 @@
 #+STARTUP: overview
 #+OPTIONS: toc:nil
 
-The queue, in priority order, top first. Each entry states the fact,
-the fix and the check that settles it. Finished entries leave; git
-keeps them. The =analysis-= notes under =doc/notes= carry the longer
+The queue, in priority order, top first. Entries not yet investigated
+come first. Each entry states the fact, the fix and the check that
+settles it. Finished entries leave; git keeps them. The =analysis-= notes under =doc/notes= carry the longer
 investigations.
 
 #+TOC: headlines 2
 
-* TODO =_setjmp= in the C that EDG generates for =25.libc=
+* TODO Synchronization on atomic integer flags: a sweep
 
-=eccp= compiles C++ to C and gcc compiles the C. For
-=tests/algorithms/25.libc.cpp= the generated C declares =_setjmp= as
-=int (long *)=; glibc's =<setjmp.h>= declares it
-=int (struct __jmp_buf_tag *)=. gcc rejects the conflict at
-=25.libc.cpp:118=, and the test does not build under =eccp -A=.
+Some one-time initializations elect their initializer with an atomic
+increment. They publish completion with a plain write to a =volatile=
+flag the other threads spin on. =volatile= orders neither the flag
+against the data it guards nor the spin against the reads after it.
+Known sites:
+- =src/locale_body.cpp:807-830=, the global locale. The builder
+  stores =global= at 817 with no release, then =ginit += 1000= as a
+  plain read-modify-write. Readers wait on =ginit < 1000= with no
+  acquire and read =global= at 830; on aarch64 they can read 0.
+  =global= is also tested unlocked at 807, against the store under
+  the lock at 841: the one ThreadSanitizer report. The election
+  exists because =_C_manage (0, "C")= takes the same static guard,
+  and the mutex is not recursive.
+- =include/rw/_mutex.h:286=, the static mutex, with a non-atomic
+  fallback where atomics are absent.
+- =src/once.cpp:125= and =src/iostream.cpp:247=.
+The list is a start, not a census.
 
-A defect of the front end's C back end, in every mode: a translation
-unit that calls =setjmp= and has a =try= block. The =try= lowering
-declares its own =_setjmp= and does not look for the program's.
-glibc spells =setjmp (env)= as =_setjmp (env)=. Reported as
-https://github.com/edgcpp/compiler/discussions/234.
+Fix: census every site that synchronizes on an atomic or =volatile=
+integer. Decide each: a release store and an acquire load through the
+compiler built-ins, the site's mutex, or =__rw_once=.
 
-Fix: EDG's. The test and the library need no change.
+Check: the census in a note, each site with its decision. The
+ThreadSanitizer build reports none of them, and three rounds of every
+=22.locale.*.mt= test in it report nothing from the library.
 
-Check: =25.libc= builds under =eccp -A= with a front end that fixes
-it.
+* TODO =yi_US.CP1255= does not build on aarch64
 
-* TODO Names the prelinker cannot decode
+=make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=.
+=localedef= reports Error 308, "incomplete multibyte character in
+character map file: expecting 4 bytes, found 0". Nothing records the
+locales phase on x86-64, so whether it fails only on aarch64 is open.
+Hypothesis: =char= is unsigned on aarch64 and signed on x86, and the
+charmap reader depends on the sign of a byte.
 
-The prelinker reports "an error occurred during name decoding" 22
-times while it builds the library under =eccp -A=. c++filt decodes
-the same names. All 22 have one shape, e.g.
-=_ZN4__rw12__rw_extractIcSt11char_traitsIcEtEERSt13basic_istreamIT_T0_ES7_RT1_=,
-=__rw::__rw_extract<char, std::char_traits<char>, unsigned short>=.
-The test programs draw it for about 2,100 more.
+Fix: to be found.
 
-A defect of EDG's tools, not of these names: on Linux =edg_decode=
-decodes no IA-64 mangled name at all, and the prelinker warns for
-every such name that contains =__=. A two-line program with a
-function template in a namespace =__n= reproduces it. The prelinker
-uses decoded names only in its messages; template instances are
-assigned and the library builds. Reported as
-https://github.com/edgcpp/compiler/discussions/240.
+Check: =make locales= builds every locale in =etc/nls/gen_list= on
+aarch64, and the databases match the x86-64 ones byte for byte.
 
-Fix: EDG's. The library needs no change.
+* TODO Keep instantiated facets until the program ends
 
-Check: a build with a front end that fixes it shows no decoding
-warnings.
+A named facet dies with the last locale that holds it. The next locale
+of that name builds it again: the constructor, the mapping of its
+database, the initialization of its data. The locale MT tests that
+build locales in a loop pay for it. 15D on aarch64, lock-free atomics,
+5-run means of real time, before and after 2bbdf7c9 stopped the
+=use_facet= leak that had kept facets alive by accident:
+=22.locale.ctype.mt= 11.9 s to 13.0 s, =22.locale.numpunct.mt= 15.1 s
+to 16.7 s, =22.locale.globals.mt= 8.3 s to 9.3 s.
 
-* TODO =27.ostream=: string literals defined twice in the C that EDG generates
+Fix: explore a facet repository that keeps every facet it
+instantiates until the program ends: its cost in memory and mappings,
+what it changes in the reference counts and =~__rw_locale=, and what
+it does to the lifetime of the facet data.
 
-=tests/iostream/27.ostream.cpp= does not build under =eccp -A=. gcc
-rejects the generated C: it defines the string literals of
-=test_formatted<charT>= twice (=_ZZ14test_formattedIcEvT_Es_0= and
-others, for =char= and =wchar_t=). The failure shows in the
-prelinker's recompile only because that is where =test_formatted= is
-instantiated.
+Check: designed with the fix. The timings above are the baseline, and
+=22.locale.use_facet.mt= still finds no block outliving its round, or
+leaves with the design.
 
-A defect of the front end in strict mode, in every dialect: a string
-literal of an inline function or a template instance is defined once
-for each C-style cast of it to =const signed char*= or
-=const unsigned char*= passed as a function argument, and every
-definition has the same name. The =SCH= and =UCH= macros of the test
-make such casts. Reported as
-https://github.com/edgcpp/compiler/discussions/243.
+* TODO The suite against other libraries
 
-Fix: EDG's. The test needs no change.
+The suite tests the C++03 library through clauses 18 to 27. Most of
+its assertions check standard behaviour, not the library's additions.
+Run against libstdc++ and libc++, a disagreement is a defect in one of
+the three or a question the standard leaves open.
 
-Check: =27.ostream= builds under =eccp -A= with a front end that fixes
-it.
+Fix: build the driver and the tests of clauses 21 to 27 against
+another library. The tests that need the library's additions or its
+=_RWSTD_= macros are listed and left out, each with the reason.
 
-* TODO glibc's =signbit= assumes a GNU built-in in C++
-
-glibc's =<math.h>= gives a C++ compiler that is neither GCC 6+ nor
-Clang 3.3+ ~#define signbit(x) __builtin_signbitl (x)~. A compiler
-that does not emulate GCC has no such built-in: under =eccp= with the
-C99 names requested, =src/fpclass.h= fails. A regression in glibc
-2.27, from the fix for its bug 22296. Reported as
-https://sourceware.org/bugzilla/show_bug.cgi?id=34717.
-
-Without the C99 names, as in C++03 with no feature macro, glibc
-defines no =fpclassify= and =src/fpclass.h= takes its stub branch:
-=__rw_signbit=, =__rw_isnan= and =__rw_isinf= return false,
-=__rw_isfinite= true. How the library classifies floating values
-under a strict compiler is undecided; =signbit= is C99 and not in
-C++03 either.
-
-Fix: glibc's, for the header. The library side goes with the decision
-on the C99 functions.
-
-Check: =src/fpclass.h= compiles under =eccp -A= with the C99 names
-requested and a glibc that fixes it.
+Check: the census of the tests that build, a table per library, and
+each disagreement read against the standard and filed where it
+belongs.
 
 * TODO The wide half of UserCtype
 
@@ -196,8 +188,8 @@ routines, =__rw_atomic_add= and =__rw_atomic_xchg= at 8, 16, 32 and
 
 Fix: one backend over the =__atomic= built-ins with explicit orders,
 none weaker than today: =__ATOMIC_SEQ_CST= for the increments, the
-decrements and the exchange. Weakening an order is the next entry's
-business, site by site. The five characterizations test the
+decrements and the exchange. Weakening an order is the business of
+the sweep of atomic integer flags, site by site. The five characterizations test the
 =__atomic= operations the backend uses; their macros stay.
 =<rw/_atomic-x86.h>=, =<rw/_atomic-x64.h>= and their dispatch branches
 go. =src/atomic.s= and the two assembly sources stay built and
@@ -208,68 +200,6 @@ Check: the x86-64 and aarch64 suites unchanged against their tables.
 The disassembly shows =lock xadd= and =xchg= on x86-64 and 32-bit x86,
 and =ldaddal= and =swpal= behind the outline helpers on aarch64. The
 library's exported symbols unchanged.
-
-* TODO Synchronization on atomic integer flags: a sweep
-
-Some one-time initializations elect their initializer with an atomic
-increment. They publish completion with a plain write to a =volatile=
-flag the other threads spin on. =volatile= orders neither the flag
-against the data it guards nor the spin against the reads after it.
-Known sites:
-- =src/locale_body.cpp:807-830=, the global locale. The builder
-  stores =global= at 817 with no release, then =ginit += 1000= as a
-  plain read-modify-write. Readers wait on =ginit < 1000= with no
-  acquire and read =global= at 830; on aarch64 they can read 0.
-  =global= is also tested unlocked at 807, against the store under
-  the lock at 841: the one ThreadSanitizer report. The election
-  exists because =_C_manage (0, "C")= takes the same static guard,
-  and the mutex is not recursive.
-- =include/rw/_mutex.h:286=, the static mutex, with a non-atomic
-  fallback where atomics are absent.
-- =src/once.cpp:125= and =src/iostream.cpp:247=.
-The list is a start, not a census.
-
-Fix: census every site that synchronizes on an atomic or =volatile=
-integer. Decide each: a release store and an acquire load through the
-compiler built-ins, the site's mutex, or =__rw_once=.
-
-Check: the census in a note, each site with its decision. The
-ThreadSanitizer build reports none of them, and three rounds of every
-=22.locale.*.mt= test in it report nothing from the library.
-
-* TODO =yi_US.CP1255= does not build on aarch64
-
-=make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=.
-=localedef= reports Error 308, "incomplete multibyte character in
-character map file: expecting 4 bytes, found 0". Nothing records the
-locales phase on x86-64, so whether it fails only on aarch64 is open.
-Hypothesis: =char= is unsigned on aarch64 and signed on x86, and the
-charmap reader depends on the sign of a byte.
-
-Fix: to be found.
-
-Check: =make locales= builds every locale in =etc/nls/gen_list= on
-aarch64, and the databases match the x86-64 ones byte for byte.
-
-* TODO Keep instantiated facets until the program ends
-
-A named facet dies with the last locale that holds it. The next locale
-of that name builds it again: the constructor, the mapping of its
-database, the initialization of its data. The locale MT tests that
-build locales in a loop pay for it. 15D on aarch64, lock-free atomics,
-5-run means of real time, before and after 2bbdf7c9 stopped the
-=use_facet= leak that had kept facets alive by accident:
-=22.locale.ctype.mt= 11.9 s to 13.0 s, =22.locale.numpunct.mt= 15.1 s
-to 16.7 s, =22.locale.globals.mt= 8.3 s to 9.3 s.
-
-Fix: explore a facet repository that keeps every facet it
-instantiates until the program ends: its cost in memory and mappings,
-what it changes in the reference counts and =~__rw_locale=, and what
-it does to the lifetime of the facet data.
-
-Check: designed with the fix. The timings above are the baseline, and
-=22.locale.use_facet.mt= still finds no block outliving its round, or
-leaves with the design.
 
 * TODO Strict ANSI as the rule, the additions outside the standard gone
 
@@ -368,21 +298,6 @@ Fix: =%{?} + %zu%{;}=.
 Check: under =--trace=, the rows of that overload print the count and
 the character they pass. The suite table does not move.
 
-* TODO The suite against other libraries
-
-The suite tests the C++03 library through clauses 18 to 27. Most of
-its assertions check standard behaviour, not the library's additions.
-Run against libstdc++ and libc++, a disagreement is a defect in one of
-the three or a question the standard leaves open.
-
-Fix: build the driver and the tests of clauses 21 to 27 against
-another library. The tests that need the library's additions or its
-=_RWSTD_= macros are listed and left out, each with the reason.
-
-Check: the census of the tests that build, a table per library, and
-each disagreement read against the standard and filed where it
-belongs.
-
 * TODO The next minor version
 
 The version rule: the first number is source compatibility, the
@@ -457,16 +372,53 @@ fails. A file passed with =--preinclude_macros= works:
 EDG enters the keyword.
 
 Fix: restore =eccp.config= from =dd1128a5^= and bring it current:
-=-A -x=, =--no_export= while the entry below stands, the prelinker
-(~PRELINKFLAGS = --prelink_objects~, the step
-in =GNUmakefile.lib= and =GNUmakefile.rwt=, =*.ti= in the clean
-rules), =-lpthread=, the stopgap file. A macro of the override header
+=-A -x=, =--no_export= while the parked =src/punct.cpp= entry stands,
+the prelinker (~PRELINKFLAGS = --prelink_objects~, the step in
+=GNUmakefile.lib= and =GNUmakefile.rwt=, =*.ti= in the clean rules),
+=-lpthread=, the stopgap file. A macro of the override header
 comes back only where no characterization can express the gap, with
 its reason.
 
 Check: an =eccp= build directory configures, builds the library, the
 utilities and the tests, and runs the suite. Its table is pinned
 beside the six.
+
+** TODO Run-time differences from GCC
+
+Under =eccp -A=:
+- =26.valarray.transcend=: nine failed assertions on the =float=
+  functions (=std::acos (valarray<float>)= and kin); =config.h= has
+  no =float= or =long double= overloads of the =<cmath>= functions.
+- =18.limits.traps=: =numeric_limits<bool>::traps= is true, as for
+  every integer type, but the test's =bool= division by zero did not
+  trap. Outside the test, =bool= division by zero traps under =eccp=
+  too. The same row fails in an optimized GCC build (12D, 13
+  assertions) and once in 12D with Clang: the test counts on undefined
+  behavior surviving the optimizer, which is the first suspect.
+- =18.support.dynamic=: =bad_alloc::what ()= returns a bad string.
+  The first question is whose =bad_alloc= runs, the library's or that
+  of EDG's runtime.
+- =22.locale.num.put= runs 1,399 assertions against 1,485.
+
+Fix: read each against the standard and the characterization that
+decides it.
+
+Check: the rows pass, or the reason is recorded.
+
+** TODO The configuration under =eccp= against GCC's
+
+=config.h= under =eccp -A= differs from GCC's 11S beyond the other
+entries of this chapter: no atomic built-ins and no =_RWSTD_THREAD=; =STD_TYPE_INFO=
+fails (the characterization declares its own =type_info=; 12475dfe
+removed the =#pragma define_type_info= that served =eccp=); the
+special-member characterizations of the exception classes differ.
+=long long= and extern templates are absent, which is correct for
+C++03.
+
+Fix: read each difference against the standard and the
+characterization.
+
+Check: every difference is correct for C++03 or has an entry.
 
 ** TODO The C99 functions the library calls
 
@@ -488,23 +440,6 @@ feature level, as =tests/src/file.cpp= does.
 
 Check: the library builds under =eccp -A= with no feature macro on
 the command line, and the GCC and Clang tables do not move.
-
-** TODO =src/punct.cpp= under the export model
-
-The library uses neither =export= nor implicit inclusion since
-11b144b9..48d6dac1. =eccp -A= still turns its export model on, and
-under it EDG fails an internal assertion in =src/punct.cpp= at line
-113 (#2656, in =find_local_static_variable_init=). The other 97
-library sources compile. The 136 errors of the first build, 98 of them
-"already been defined" in the =.cc= files, came from =_EXPORT= and are
-gone. Reported as https://github.com/edgcpp/compiler/discussions/233,
-with a one-line candidate patch: a block scope that lowering adds for
-a return-value temporary has no parent.
-
-Fix: EDG's. Until then =eccp.config= passes =--no_export=.
-
-Check: the =eccp= build needs no =--no_export= with a front end that
-fixes it.
 
 ** TODO =FLOAT.cpp= under a strict compiler
 
@@ -591,43 +526,6 @@ linkage or report to EDG.
 Check: each compiles under =eccp -A=, and the GCC and Clang tables do
 not move.
 
-** TODO Run-time differences from GCC
-
-Under =eccp -A=:
-- =26.valarray.transcend=: nine failed assertions on the =float=
-  functions (=std::acos (valarray<float>)= and kin); =config.h= has
-  no =float= or =long double= overloads of the =<cmath>= functions.
-- =18.limits.traps=: =numeric_limits<bool>::traps= is true, as for
-  every integer type, but the test's =bool= division by zero did not
-  trap. Outside the test, =bool= division by zero traps under =eccp=
-  too. The same row fails in an optimized GCC build (12D, 13
-  assertions) and once in 12D with Clang: the test counts on undefined
-  behavior surviving the optimizer, which is the first suspect.
-- =18.support.dynamic=: =bad_alloc::what ()= returns a bad string.
-  The first question is whose =bad_alloc= runs, the library's or that
-  of EDG's runtime.
-- =22.locale.num.put= runs 1,399 assertions against 1,485.
-
-Fix: read each against the standard and the characterization that
-decides it.
-
-Check: the rows pass, or the reason is recorded.
-
-** TODO The configuration under =eccp= against GCC's
-
-=config.h= under =eccp -A= differs from GCC's 11S beyond the entries
-above: no atomic built-ins and no =_RWSTD_THREAD=; =STD_TYPE_INFO=
-fails (the characterization declares its own =type_info=; 12475dfe
-removed the =#pragma define_type_info= that served =eccp=); the
-special-member characterizations of the exception classes differ.
-=long long= and extern templates are absent, which is correct for
-C++03.
-
-Fix: read each difference against the standard and the
-characterization.
-
-Check: every difference is correct for C++03 or has an entry.
-
 ** TODO The ISO-8859-1 sources
 
 =eccp= reads source as UTF-8 only. Five sources carry ISO-8859-1
@@ -643,6 +541,114 @@ Fix: octal escapes.
 
 Check: the five are UTF-8 clean (=iconv -f utf-8=) and the tables do
 not move.
+
+* Parked
+
+Investigated and reported; each waits on its owner. Outside the
+priority order, as the EDG chapter and the documentation are. An
+entry leaves when the fix it waits for lands and its check passes.
+
+** TODO =_setjmp= in the C that EDG generates for =25.libc=
+
+=eccp= compiles C++ to C and gcc compiles the C. For
+=tests/algorithms/25.libc.cpp= the generated C declares =_setjmp= as
+=int (long *)=; glibc's =<setjmp.h>= declares it
+=int (struct __jmp_buf_tag *)=. gcc rejects the conflict at
+=25.libc.cpp:118=, and the test does not build under =eccp -A=.
+
+A defect of the front end's C back end, in every mode: a translation
+unit that calls =setjmp= and has a =try= block. The =try= lowering
+declares its own =_setjmp= and does not look for the program's.
+glibc spells =setjmp (env)= as =_setjmp (env)=. Reported as
+https://github.com/edgcpp/compiler/discussions/234.
+
+Fix: EDG's. The test and the library need no change.
+
+Check: =25.libc= builds under =eccp -A= with a front end that fixes
+it.
+
+** TODO Names the prelinker cannot decode
+
+The prelinker reports "an error occurred during name decoding" 22
+times while it builds the library under =eccp -A=. c++filt decodes
+the same names. All 22 have one shape, e.g.
+=_ZN4__rw12__rw_extractIcSt11char_traitsIcEtEERSt13basic_istreamIT_T0_ES7_RT1_=,
+=__rw::__rw_extract<char, std::char_traits<char>, unsigned short>=.
+The test programs draw it for about 2,100 more.
+
+A defect of EDG's tools, not of these names: on Linux =edg_decode=
+decodes no IA-64 mangled name at all, and the prelinker warns for
+every such name that contains =__=. A two-line program with a
+function template in a namespace =__n= reproduces it. The prelinker
+uses decoded names only in its messages; template instances are
+assigned and the library builds. Reported as
+https://github.com/edgcpp/compiler/discussions/240.
+
+Fix: EDG's. The library needs no change.
+
+Check: a build with a front end that fixes it shows no decoding
+warnings.
+
+** TODO =27.ostream=: string literals defined twice in the C that EDG generates
+
+=tests/iostream/27.ostream.cpp= does not build under =eccp -A=. gcc
+rejects the generated C: it defines the string literals of
+=test_formatted<charT>= twice (=_ZZ14test_formattedIcEvT_Es_0= and
+others, for =char= and =wchar_t=). The failure shows in the
+prelinker's recompile only because that is where =test_formatted= is
+instantiated.
+
+A defect of the front end in strict mode, in every dialect: a string
+literal of an inline function or a template instance is defined once
+for each C-style cast of it to =const signed char*= or
+=const unsigned char*= passed as a function argument, and every
+definition has the same name. The =SCH= and =UCH= macros of the test
+make such casts. Reported as
+https://github.com/edgcpp/compiler/discussions/243.
+
+Fix: EDG's. The test needs no change.
+
+Check: =27.ostream= builds under =eccp -A= with a front end that fixes
+it.
+
+** TODO glibc's =signbit= assumes a GNU built-in in C++
+
+glibc's =<math.h>= gives a C++ compiler that is neither GCC 6+ nor
+Clang 3.3+ ~#define signbit(x) __builtin_signbitl (x)~. A compiler
+that does not emulate GCC has no such built-in: under =eccp= with the
+C99 names requested, =src/fpclass.h= fails. A regression in glibc
+2.27, from the fix for its bug 22296. Reported as
+https://sourceware.org/bugzilla/show_bug.cgi?id=34717.
+
+Without the C99 names, as in C++03 with no feature macro, glibc
+defines no =fpclassify= and =src/fpclass.h= takes its stub branch:
+=__rw_signbit=, =__rw_isnan= and =__rw_isinf= return false,
+=__rw_isfinite= true. How the library classifies floating values
+under a strict compiler is undecided; =signbit= is C99 and not in
+C++03 either.
+
+Fix: glibc's, for the header. The library side goes with the decision
+on the C99 functions.
+
+Check: =src/fpclass.h= compiles under =eccp -A= with the C99 names
+requested and a glibc that fixes it.
+
+** TODO =src/punct.cpp= under the export model
+
+The library uses neither =export= nor implicit inclusion since
+11b144b9..48d6dac1. =eccp -A= still turns its export model on, and
+under it EDG fails an internal assertion in =src/punct.cpp= at line
+113 (#2656, in =find_local_static_variable_init=). The other 97
+library sources compile. The 136 errors of the first build, 98 of them
+"already been defined" in the =.cc= files, came from =_EXPORT= and are
+gone. Reported as https://github.com/edgcpp/compiler/discussions/233,
+with a one-line candidate patch: a block scope that lowering adds for
+a return-value temporary has no parent.
+
+Fix: EDG's. Until then =eccp.config= passes =--no_export=.
+
+Check: the =eccp= build needs no =--no_export= with a front end that
+fixes it.
 
 * Documentation
 
