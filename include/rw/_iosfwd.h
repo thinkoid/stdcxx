@@ -55,26 +55,21 @@ struct char_traits<wchar_t>;
 
 struct _RWSTD_EXPORT ios_base;
 
-_EXPORT
 template <class _CharT, class _Traits>
 class basic_ios;
 
-_EXPORT
 template <class _CharT, class _Traits>
 class basic_streambuf;
 
 // 27.2, p4
-_EXPORT
 template <class _CharT, class _Traits>
 class basic_istream;
 
 // 27.2, p5
-_EXPORT
 template <class _CharT, class _Traits>
 class basic_ostream;
 
 // 27.2, p6
-_EXPORT
 template <class _CharT, class _Traits>
 class basic_iostream;
 

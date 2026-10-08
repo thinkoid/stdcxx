@@ -52,7 +52,6 @@ _RWSTD_NAMESPACE (__rw) {
 #endif
 
     
-_EXPORT
 template <class _CharT, class _Traits>
 void __rw_bitset (unsigned long *__bits, _RWSTD_SIZE_T __maxbits,
                   const _CharT *__str, _RWSTD_SIZE_T __slen,
@@ -119,7 +118,6 @@ void __rw_bitset (unsigned long *__bits, _RWSTD_SIZE_T __maxbits,
 #undef _RWSTD_LOG2_ULONG_SIZE
 
 
-_EXPORT
 template <_RWSTD_SIZE_T _Size, class _CharT, class _Traits> 
 _STD::basic_istream<_CharT, _Traits>&  
 __rw_extract_bitset (_STD::basic_istream<_CharT, _Traits> &__strm,

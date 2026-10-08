@@ -64,7 +64,6 @@ struct _RWSTD_EXPORT time_base
 
 
 // 22.2.5.1
-_EXPORT
 template <class _CharT, class _InputIter = istreambuf_iterator<_CharT> >
 class time_get: public _RW::__rw_facet, public time_base
 {

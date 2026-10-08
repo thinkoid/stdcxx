@@ -174,7 +174,6 @@ operator!= (const __rw_list_iter<_TypeT, _DiffT, _Ptr1, _Ref1> &__x,
 }
 
 
-_EXPORT
 template <class _TypeT, class _Allocator = allocator<_TypeT> >
 class list : private _Allocator
 {

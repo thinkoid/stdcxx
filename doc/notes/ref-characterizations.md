@@ -201,8 +201,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION](../../etc/config/src/EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION.cpp) / `NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION` | explicit instantiation with implicit inclusion | L; `include/rw/_defs.h` |
 | [EXPLICIT_MEMBER_INSTANTIATION](../../etc/config/src/EXPLICIT_MEMBER_INSTANTIATION.cpp) / `NO_EXPLICIT_MEMBER_INSTANTIATION` | explicit instantiation of members | none |
 | [EXPLICIT_MEMBER_SPECIALIZATION](../../etc/config/src/EXPLICIT_MEMBER_SPECIALIZATION.cpp) / `NO_EXPLICIT_MEMBER_SPECIALIZATION` | explicit member specialization | L; `include/rw/_defs.h` |
-| [EXPORT](../../etc/config/src/EXPORT.cpp) / `NO_EXPORT` | exported templates | L/T; `include/rw/_config-gcc.h` |
-| [EXPORT_KEYWORD](../../etc/config/src/EXPORT_KEYWORD.cpp) / `NO_EXPORT_KEYWORD` | the export keyword | P; `etc/config/src/EXPORT.cpp` |
 | [EXTERN_C_COMPATIBILITY](../../etc/config/src/EXTERN_C_COMPATIBILITY.cpp) / `NO_EXTERN_C_COMPATIBILITY` | compatibility of extern "C" and "C++" | L; `include/ansi/_cstdlib.h` |
 | [EXTERN_C_EXCEPTIONS](../../etc/config/src/EXTERN_C_EXCEPTIONS.cpp) / `NO_EXTERN_C_EXCEPTIONS` | exceptions from extern "C" functions | none |
 | [EXTERN_C_OVERLOAD](../../etc/config/src/EXTERN_C_OVERLOAD.cpp) / `NO_EXTERN_C_OVERLOAD` | overloading on extern "C" | L; `include/ansi/_cstdlib.h` |

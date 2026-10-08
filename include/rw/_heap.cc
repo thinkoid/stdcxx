@@ -44,7 +44,6 @@
 _RWSTD_NAMESPACE (std) {
 
 
-_EXPORT
 template <class _RandomAccessIter, class _Dist, class _TypeT, class _Compare>
 void __push_heap (_RandomAccessIter __first, _Dist __holeIndex,
                   _Dist __topIndex, _TypeT __val, _Compare __comp)
@@ -61,7 +60,6 @@ void __push_heap (_RandomAccessIter __first, _Dist __holeIndex,
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _Dist, class _TypeT, class _Compare>
 void __adjust_heap (_RandomAccessIter __first, _Dist __holeIndex,
                     _Dist __dist, _TypeT __val, _Compare __comp)
@@ -87,7 +85,6 @@ void __adjust_heap (_RandomAccessIter __first, _Dist __holeIndex,
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _Compare, class _Dist>
 void __make_heap (_RandomAccessIter __first, _RandomAccessIter __last,
                   _Compare __comp, _Dist*)

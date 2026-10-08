@@ -87,14 +87,12 @@ struct _RWSTD_EXPORT ctype_base
 
 
 // 22.2.1.1
-_EXPORT
 template <class _CharT>
 class ctype;
 
 
 #ifndef _RWSTD_NO_EXT_CTYPE_PRIMARY
 
-_EXPORT
 template <class _CharT>
 class ctype: public _RW::__rw_facet, public ctype_base
 {

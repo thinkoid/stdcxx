@@ -46,14 +46,12 @@
 _RWSTD_NAMESPACE (std) { 
 
 
-_EXPORT
 template <class _CharT>
 class collate;
 
 
 #ifndef _RWSTD_NO_EXT_COLLATE_PRIMARY
 
-_EXPORT
 template <class _CharT>
 class collate: public _RW::__rw_facet
 {

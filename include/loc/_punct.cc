@@ -34,7 +34,6 @@
 _RWSTD_NAMESPACE (__rw) {
 
 
-_EXPORT
 template <class _CharT, class _InputIter>
 _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
                             const _CharT* const  *__names,

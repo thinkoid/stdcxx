@@ -261,13 +261,11 @@ inline bool equal (_InputIter1 __first1, _InputIter1 __last1,
 
 
 // 25.3.8 - Lexicographical Comparison
-_EXPORT
 template <class _InputIter1, class _InputIter2>
 bool lexicographical_compare (_InputIter1 __first1, _InputIter1 __last1,
                               _InputIter2 __first2, _InputIter2 __last2);
 
 
-_EXPORT
 template <class _InputIter1, class _InputIter2, class _Compare>
 bool lexicographical_compare(_InputIter1 __first1, _InputIter1 __last1,
                              _InputIter2 __first2, _InputIter2 __last2,

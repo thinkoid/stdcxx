@@ -51,7 +51,6 @@ _RWSTD_NAMESPACE (std) {
 // #ifndef _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
 
 // 22.2.3.1
-_EXPORT
 template <class _CharT>
 struct numpunct: _RW::__rw_facet
 {

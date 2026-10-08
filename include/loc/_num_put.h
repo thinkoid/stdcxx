@@ -49,7 +49,6 @@
 _RWSTD_NAMESPACE (std) {
 
 // 22.2.2.2
-_EXPORT
 template <class _CharT, class _OutputIter = ostreambuf_iterator<_CharT> >
 struct num_put: _RW::__rw_facet
 {

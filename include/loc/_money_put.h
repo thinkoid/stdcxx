@@ -49,7 +49,6 @@ struct _RWSTD_EXPORT ios_base;
 
 
 // 22.2.6.2
-_EXPORT
 template <class _CharT, class _OutputIter = ostreambuf_iterator<_CharT> >
 struct money_put: _RW::__rw_facet
 {

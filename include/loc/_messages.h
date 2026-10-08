@@ -70,7 +70,6 @@ struct _RWSTD_EXPORT messages_base
 
 
 // 22.2.7.1
-_EXPORT
 template <class _CharT>
 class messages: public _RW::__rw_facet,
                 public messages_base

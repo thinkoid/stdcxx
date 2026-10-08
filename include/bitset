@@ -41,7 +41,6 @@
 _RWSTD_NAMESPACE (__rw) {
 
 // helper, implements bitset converting ctor
-_EXPORT
 template <class _CharT, class _Traits>
 void
 __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
@@ -87,7 +86,6 @@ __rw_shr (unsigned long*, _RWSTD_SIZE_T, _RWSTD_SIZE_T) _THROWS (());
 _RWSTD_NAMESPACE (std) {
 
 
-_EXPORT
 template <_RWSTD_SIZE_T _Size>
 class bitset
 {
@@ -633,7 +631,6 @@ operator^ (const bitset<_Size>& __lhs, const bitset<_Size>& __rhs) _THROWS (())
 
 _RWSTD_NAMESPACE (__rw) {
 
-_EXPORT
 template <_RWSTD_SIZE_T _Size, class _CharT, class _Traits>
 _STD::basic_istream<_CharT, _Traits>&
 __rw_extract_bitset (_STD::basic_istream<_CharT, _Traits>&,

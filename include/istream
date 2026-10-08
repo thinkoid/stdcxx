@@ -50,7 +50,6 @@
 
 _RWSTD_NAMESPACE (__rw) {
 
-_EXPORT
 template <class _CharT, class _Traits, class _NativeType>
 _STD::basic_istream<_CharT, _Traits>&
 __rw_extract (_STD::basic_istream<_CharT, _Traits>&, _NativeType&);
@@ -101,11 +100,9 @@ _RWSTD_NAMESPACE (std) {
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
-_EXPORT
 template <class _CharT, class _Traits = char_traits<_CharT> >
 class basic_istream;
 
-_EXPORT
 template <class _CharT, class _Traits = char_traits<_CharT> >
 class basic_iostream;
 
@@ -121,7 +118,6 @@ typedef basic_iostream<wchar_t> wiostream;
 #endif   // _RWSTD_IOSFWD_INCLUDED
 
 
-_EXPORT
 template <class _CharT, class _Traits>
 class basic_istream: virtual public basic_ios<_CharT, _Traits>
 {

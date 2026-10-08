@@ -33,7 +33,6 @@ _RWSTD_NAMESPACE (std) {
 
 // complex number `a' raised to an integer power `n'
 //     a**n = r**n * (cos(n theta) + i sin (n theta))
-_EXPORT
 template <class _TypeT>
 complex<_TypeT>
 pow (const complex<_TypeT>& __a, int __n)
@@ -58,7 +57,6 @@ pow (const complex<_TypeT>& __a, int __n)
 
 // complex number `a' raised to a real power `s'
 //     a**s = exp(s * log(a))
-_EXPORT
 template <class _TypeT>
 complex<_TypeT>
 pow (const complex<_TypeT> &__a, const _TypeT &__s)
@@ -78,7 +76,6 @@ pow (const complex<_TypeT> &__a, const _TypeT &__s)
 
 // real number `s' raised to a complex power `a'
 //     s**a = exp(a * log (s))
-_EXPORT
 template <class _TypeT>
 complex<_TypeT>
 pow (const _TypeT& __s, const complex<_TypeT>& __a)
@@ -100,7 +97,6 @@ pow (const _TypeT& __s, const complex<_TypeT>& __a)
 //     a1**a2 = rho * (cos(phi) + i sin(phi))
 //     rho = r1 ** u2   *  exp (-v2 * theta1)
 //     phi = v2 * log(r1) + u2 * theta1
-_EXPORT
 template <class _TypeT>
 complex<_TypeT>
 pow (const complex<_TypeT>& __x, const complex<_TypeT>& __y)
@@ -120,7 +116,6 @@ pow (const complex<_TypeT>& __x, const complex<_TypeT>& __y)
 }      
 
 
-_EXPORT
 template <class _TypeT, class _CharT, class _Traits>
 basic_istream<_CharT, _Traits >&
 operator>> (basic_istream<_CharT, _Traits>& __strm, complex<_TypeT> &__val)
@@ -162,7 +157,6 @@ operator>> (basic_istream<_CharT, _Traits>& __strm, complex<_TypeT> &__val)
 }
 
 
-_EXPORT
 template <class _TypeT, class _CharT, class _Traits>
 basic_ostream<_CharT, _Traits>&
 operator<< (basic_ostream<_CharT, _Traits >& __strm,

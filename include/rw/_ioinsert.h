@@ -59,7 +59,6 @@ _RWSTD_NAMESPACE (std) {
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
-_EXPORT
 template <class _CharT, class _Traits = char_traits<_CharT> >
 class basic_ostream;
 
@@ -78,14 +77,12 @@ typedef basic_ostream<wchar_t> wostream;
 _RWSTD_NAMESPACE (__rw) { 
 
 // helper - implements insertion of arithmetic and pointer types
-_EXPORT
 template <class _CharT, class _Traits, class _NativeType>
 _STD::basic_ostream<_CharT, _Traits>&
 __rw_insert (_STD::basic_ostream<_CharT, _Traits>&, _NativeType);
 
 
 // helper - implements insertion of character strigs
-_EXPORT
 template<class _CharT, class _Traits, class _StringT>
 _STD::basic_ostream<_CharT, _Traits>&
 __rw_insert (_STD::basic_ostream<_CharT, _Traits>&, const _StringT*,

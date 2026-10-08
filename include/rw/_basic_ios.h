@@ -55,7 +55,6 @@ _RWSTD_NAMESPACE (std) {
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
-_EXPORT
 template <class _CharT, class _Traits = char_traits<_CharT> >
 class basic_ios;
 
@@ -69,7 +68,6 @@ typedef basic_ios<wchar_t> wios;
 #endif   // _RWSTD_IOSFWD_INCLUDED
 
 
-_EXPORT
 template <class _CharT, class _Traits>
 class basic_ios: public ios_base
 {

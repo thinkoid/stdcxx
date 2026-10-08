@@ -76,7 +76,7 @@ struct __rw_aligned_buffer
 // typedef prevents an MSVC 6.0 ICE
 typedef _RWSTD_SIZE_T _SizeT;
 
-_EXPORT template <class _TypeT, _SizeT _Size>
+template <class _TypeT, _SizeT _Size>
 class __rw_pod_array
 {
     _SizeT  _C_len;

@@ -54,7 +54,6 @@
 
 _RWSTD_NAMESPACE (std) {
 
-_EXPORT
 template <class _TypeT, class _Allocator = allocator<_TypeT> >
 class deque;
 
@@ -63,22 +62,18 @@ class deque;
 // declarations of non-member function templates implementing
 // the functionality of deque member function templates
 
-_EXPORT
 template <class _TypeT, class _Allocator, class _InputIter>
 void __rw_assign_range (deque<_TypeT, _Allocator>*,
                         _InputIter, _InputIter, input_iterator_tag);
 
-_EXPORT
 template <class _TypeT, class _Allocator, class _FwdIter>
 void __rw_assign_range (deque<_TypeT, _Allocator>*,
                         _FwdIter, _FwdIter, forward_iterator_tag);
 
-_EXPORT
 template <class _TypeT, class _Allocator, class _DequeIter, class _InputIter>
 void __rw_insert_range (deque<_TypeT, _Allocator>*, _DequeIter,
                         _InputIter, _InputIter, input_iterator_tag);
 
-_EXPORT
 template <class _TypeT, class _Allocator, class _DequeIter, class _BidirIter>
 void __rw_insert_range (deque<_TypeT, _Allocator>*, _DequeIter,
                         _BidirIter, _BidirIter, bidirectional_iterator_tag);
@@ -348,7 +343,6 @@ operator> (const _RWSTD_DEQUE_ITER(1) &__x, const _RWSTD_DEQUE_ITER(2) &__y)
 #undef _RWSTD_DEQUE_ITER
 
 
-_EXPORT
 template <class _TypeT, class _Allocator>
 class deque: private _Allocator
 {

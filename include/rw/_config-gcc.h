@@ -35,11 +35,6 @@
 #  define _RWSTD_NO_IMPLICIT_INCLUSION
 #endif
 
-#ifndef _RWSTD_NO_EXPORT
-     // not implemented
-#  define _RWSTD_NO_EXPORT
-#endif
-
 #ifndef __EXCEPTIONS
    // disable exceptions when the macro __EXCEPTIONS
    // is not #defined by the compiler, e.g., when

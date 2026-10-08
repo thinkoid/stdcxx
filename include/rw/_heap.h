@@ -62,7 +62,6 @@ _RWSTD_NAMESPACE (std) {
 // 25.3.6 - Heap operations
 
 // helper to work around the lack of iterator_traits
-_EXPORT
 template <class _RandomAccessIter, class _Dist, class _TypeT,
           class _Compare>
 void __push_heap (_RandomAccessIter, _Dist, _Dist, _TypeT, _Compare);
@@ -97,7 +96,6 @@ inline void push_heap (_RandomAccessIter __first, _RandomAccessIter __last)
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _Dist, class _TypeT,
           class _Compare>
 void __adjust_heap (_RandomAccessIter, _Dist, _Dist, _TypeT, _Compare);
@@ -137,7 +135,6 @@ inline void pop_heap (_RandomAccessIter __first, _RandomAccessIter __last)
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _Compare, class _Dist>
 void __make_heap (_RandomAccessIter, _RandomAccessIter, _Compare, _Dist*);
 

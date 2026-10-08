@@ -109,40 +109,40 @@ has_facet (const locale &__loc _RWSTD_DUMMY_ARG (const _Facet* = 0))
 
 
 // forward declare standard facets before referencing them below
-_EXPORT template <class _InternT, class _ExternT, class _StateT>
+template <class _InternT, class _ExternT, class _StateT>
 class codecvt;
 
-_EXPORT template <class _CharT>
+template <class _CharT>
 class collate;
 
-_EXPORT template <class _CharT>
+template <class _CharT>
 class ctype;
 
-_EXPORT template <class _CharT, class _Iter>
+template <class _CharT, class _Iter>
 struct money_get;
 
-_EXPORT template <class _CharT, class _Iter>
+template <class _CharT, class _Iter>
 struct money_put;
 
-_EXPORT template <class _CharT, bool _Intl>
+template <class _CharT, bool _Intl>
 struct moneypunct;
 
-_EXPORT template <class _CharT, class _Iter>
+template <class _CharT, class _Iter>
 struct num_get;
 
-_EXPORT template <class _CharT, class _Iter>
+template <class _CharT, class _Iter>
 struct num_put;
 
-_EXPORT template <class _CharT>
+template <class _CharT>
 struct numpunct;
 
-_EXPORT template <class _CharT, class _Iter>
+template <class _CharT, class _Iter>
 class time_get;
 
-_EXPORT template <class _CharT, class _Iter>
+template <class _CharT, class _Iter>
 struct time_put;
 
-_EXPORT template <class _CharT>
+template <class _CharT>
 class messages;
 
  

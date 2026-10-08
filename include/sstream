@@ -51,25 +51,21 @@ _RWSTD_NAMESPACE (std) {
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
-_EXPORT
 template <class _CharT,
           class _Traits = char_traits<_CharT>,
           class _Alloc = allocator<_CharT> >
 class basic_stringbuf;
 
-_EXPORT
 template <class _CharT,
           class _Traits = char_traits<_CharT>,
           class _Alloc = allocator<_CharT> >
 class basic_istringstream;
 
-_EXPORT
 template <class _CharT,
           class _Traits = char_traits<_CharT>,
           class _Alloc = allocator<_CharT> >
 class basic_ostringstream;
 
-_EXPORT
 template <class _CharT,
           class _Traits = char_traits<_CharT>,
           class _Alloc = allocator<_CharT> >
@@ -91,7 +87,6 @@ typedef basic_stringstream<wchar_t>  wstringstream;
 #endif   // _RWSTD_IOSFWD_INCLUDED
 
 
-_EXPORT
 template <class _CharT, class _Traits, class _Allocator>
 class basic_stringbuf: public basic_streambuf<_CharT, _Traits>
 {

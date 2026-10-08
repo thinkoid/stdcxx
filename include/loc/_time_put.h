@@ -51,7 +51,6 @@ struct _RWSTD_EXPORT ios_base;
 
 
 // 22.2.5.3
-_EXPORT
 template <class _CharT, class _OutputIter = ostreambuf_iterator<_CharT> >
 struct time_put: _RW::__rw_facet
 {

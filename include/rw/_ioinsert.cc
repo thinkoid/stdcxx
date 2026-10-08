@@ -33,7 +33,6 @@
 _RWSTD_NAMESPACE (__rw) { 
 
 
-_EXPORT
 template <class _CharT, class _Traits, class _NativeType>
 _STD::basic_ostream<_CharT, _Traits>&
 __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
@@ -112,7 +111,6 @@ __rw_sputn (_STD::basic_ostream<_CharT, _Traits> &__strm,
 }
 
 
-_EXPORT
 template<class _CharT, class _Traits, class _StringT>
 _STD::basic_ostream<_CharT, _Traits>&
 __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,

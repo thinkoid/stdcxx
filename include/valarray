@@ -57,7 +57,6 @@ template <class _TypeT> class indirect_array;
 
 
 // 26.3.2
-_EXPORT
 template <class _TypeT>
 class valarray
 {

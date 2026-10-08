@@ -31,10 +31,8 @@
 // disable implicit inclusion to work around a limitation in
 // IBM VAC++ 5.0.2.0 (PR #26959)
 
-// make protected members accessible if possible
-#if defined (_RWSTD_NO_EXPORT)
-#  define protected public
-#endif
+// make protected members accessible
+#define protected public
 
 #include <iterator>
 #include <locale>

@@ -107,16 +107,13 @@ files written when the defining translation unit is compiled, not by
 file name.
 
 The scaffolding:
-- =_EXPORT= (=include/rw/_defs.h:406=) and its 231 uses in 47 files,
-  nearly all under =include=; =_RWSTD_NO_EXPORT= in =_config-gcc.h=;
-  the =EXPORT= and =EXPORT_KEYWORD= characterizations.
 - =_RWSTD_NO_IMPLICIT_INCLUSION=: the guard on the =#include <x.cc>= at
   the end of ten headers (=algorithm=, =bitset=, =deque=, =limits=,
   =list=, =valarray=, =vector=, =rw/_algobase.h=, =rw/_heap.h=,
-  =rw/_tree.h=), the condition at =_defs.h:1270=, the define in
+  =rw/_tree.h=), the condition at =_defs.h:1263=, the define in
   =_config-gcc.h=.
 - =_RWSTD_NO_EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION=: the
-  branches at =_defs.h:1301= and =:1329=.
+  branches at =_defs.h:1294= and =:1322=.
 - The characterizations =IMPLICIT_INCLUSION= and
   =EXPLICIT_INSTANTIATION_WITH_IMPLICIT_INCLUSION= and their helpers
   =implicit_inclusion_imp.{c,cc,h}= and
@@ -127,7 +124,7 @@ The scaffolding:
 Fix: delete all of it, one subsystem per commit. The explicit
 instantiation machinery stays: =_RWSTD_DEFINE_TEMPLATE=, its =_FIRST=
 and =_LAST= forms, =_RWSTD_INSTANTIATE=, the =ti_*.cpp= units, the
-extern templates. Of =_defs.h:1270='s conditional, only the arms that
+extern templates. Of =_defs.h:1263='s conditional, only the arms that
 assume implicit inclusion go. =IMPLICIT_INSTANTIATION= is a different
 characterization and stays.
 

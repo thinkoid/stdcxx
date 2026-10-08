@@ -30,7 +30,6 @@
 _RWSTD_NAMESPACE (std) { 
 
 
-_EXPORT
 template<class _CharT, class _Traits, class _Allocator>
 basic_istream<_CharT, _Traits>&
 operator>> (basic_istream<_CharT, _Traits>&            __is, 
@@ -212,7 +211,6 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
 }
 
 
-_EXPORT
 template<class _CharT, class _Traits, class _Allocator>
 basic_istream<_CharT, _Traits>&
 getline (basic_istream<_CharT, _Traits>&            __is, 

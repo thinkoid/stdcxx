@@ -43,7 +43,6 @@ class allocator;
 
 #ifndef _RWSTD_RW_BASIC_IOS_H_INCLUDED
 
-_EXPORT
 template <class _CharT, class _Traits = char_traits<_CharT> >
 class basic_ios;
 
@@ -59,7 +58,6 @@ typedef basic_ios<wchar_t> wios;
 
 #ifndef _RWSTD_STREAMBUF_INCLUDED
 
-_EXPORT
 template <class _CharT, class _Traits = char_traits<_CharT> >
 class basic_streambuf;
 
@@ -76,7 +74,6 @@ typedef basic_streambuf<wchar_t> wstreambuf;
 #ifndef _RWSTD_ISTREAM_INCLUDED
 
 // 27.2, p4
-_EXPORT
 template <class _CharT, class _Traits = char_traits<_CharT> >
 class basic_istream;
 
@@ -100,7 +97,6 @@ typedef basic_iostream<wchar_t> wiostream;
 #ifndef _RWSTD_OSTREAM_INCLUDED
 
 // 27.2, p5
-_EXPORT
 template <class _CharT, class _Traits = char_traits<_CharT> >
 class basic_ostream;
 
@@ -116,7 +112,6 @@ typedef basic_ostream<wchar_t, char_traits<wchar_t> > wostream;
 
 #ifndef _RWSTD_SSTREAM_INCLUDED
 
-_EXPORT
 template <class _CharT,
           class _Traits = char_traits<_CharT>,
           class _Allocator = allocator<_CharT> > 
@@ -155,7 +150,6 @@ typedef basic_stringstream<wchar_t>  wstringstream;
 
 #ifndef _RWSTD_FSTREAM_INCLUDED
 
-_EXPORT
 template <class _CharT, class _Traits = char_traits<_CharT> >
 class basic_filebuf;
 

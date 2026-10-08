@@ -115,7 +115,6 @@ const wchar_t* __rw_get_punct (const _RW::__rw_facet*, int, wchar_t);
 // the 7th argument to eofbit if the end of input has been reached
 // while trying to match a name (note that the returned iterator
 // may be equal to the end iterator and eofbit may not be set)
-_EXPORT
 template <class _CharT, class _InputIter>
 _InputIter __rw_match_name (_InputIter, _InputIter,
                             const _CharT* const*, const _RWSTD_SIZE_T*,

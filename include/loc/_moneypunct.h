@@ -56,7 +56,6 @@ struct money_base
 
 
 // 22.2.6.3
-_EXPORT
 template <class _CharT, bool _Intl = false>
 struct moneypunct: _RW::__rw_facet, public money_base
 {

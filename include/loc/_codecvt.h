@@ -54,14 +54,12 @@ struct codecvt_base
 };
 
 
-_EXPORT
 template <class _InternT, class _ExternT, class _StateT>
 class codecvt;
 
 
 #ifndef _RWSTD_NO_EXT_CODECVT_PRIMARY
 
-_EXPORT
 template <class _InternT, class _ExternT, class _StateT>
 class codecvt: public _RW::__rw_facet,
                public codecvt_base

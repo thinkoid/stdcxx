@@ -948,15 +948,6 @@
      or   not   functioning    properly.    All   function   exception
      specifications in the source code are removed.
 
-  o  _RWSTD_NO_EXPORT [auto, over]
-
-     #defined when  the export keyword  is not supported  or  when the
-     export feature does not work as expected.
-
-  o  _RWSTD_NO_EXPORT_KEYWORD [auto, over]
-
-     #defined when the export keyword is not supported.
-
   o  _RWSTD_NO_FUNCTION_TRY_BLOCK [auto]
 
      #defined when the function try block syntax is not supported.

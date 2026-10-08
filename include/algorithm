@@ -115,11 +115,9 @@ find_if (_InputIter __first, _InputIter __last, _Predicate __pred)
 
 
 // helpers to work around the lack of iterator_traits
-_EXPORT
 template <class _FwdIter1, class _FwdIter2, class _Dist>
 _FwdIter1 __find_end (_FwdIter1, _FwdIter1, _FwdIter2, _FwdIter2, _Dist*);
 
-_EXPORT
 template <class _FwdIter1, class _FwdIter2, 
           class _BinaryPredicate, class _Dist>
 _FwdIter1 __find_end (_FwdIter1, _FwdIter1, _FwdIter2, _FwdIter2,
@@ -154,11 +152,9 @@ inline _FwdIter1 find_end (_FwdIter1 __first1, _FwdIter1 __last1,
 
 // 25.1.4 - Find First [lib.alg.find.first.of]
 
-_EXPORT
 template <class _FwdIter1, class _FwdIter2>
 _FwdIter1 find_first_of (_FwdIter1, _FwdIter1, _FwdIter2, _FwdIter2);
 
-_EXPORT
 template <class _FwdIter1, class _FwdIter2, class _BinaryPred>
 _FwdIter1 find_first_of (_FwdIter1,_FwdIter1, _FwdIter2, _FwdIter2,
                          _BinaryPred);
@@ -166,11 +162,9 @@ _FwdIter1 find_first_of (_FwdIter1,_FwdIter1, _FwdIter2, _FwdIter2,
 
 // 25.1.5 - Adjacent Find [lib.alg.adjacent.find]
 
-_EXPORT
 template <class _FwdIter>
 _FwdIter adjacent_find (_FwdIter, _FwdIter);
 
-_EXPORT
 template <class _FwdIter, class _BinaryPredicate>
 _FwdIter adjacent_find (_FwdIter, _FwdIter, _BinaryPredicate);
 
@@ -245,12 +239,10 @@ inline void count_if (_InputIter __first, _InputIter __last,
 
 
 // helpers to work around the lack of iterator_traits
-_EXPORT
 template <class _FwdIter1, class _FwdIter2, class _Dist1, class _Dist2>
 _FwdIter1 __search (_FwdIter1, _FwdIter1, _FwdIter2, _FwdIter2,
                     _Dist1*, _Dist2*);
 
-_EXPORT
 template <class _FwdIter1, class _FwdIter2,
           class _BinaryPredicate, class Distance1, class Distance2>
 _FwdIter1 __search (_FwdIter1, _FwdIter1, _FwdIter2, _FwdIter2,
@@ -281,11 +273,9 @@ inline _FwdIter1 search (_FwdIter1 __first1,_FwdIter1 __last1,
 
 
 // helper to work around the lack of iterator_traits
-_EXPORT
 template <class _FwdIter, class _Dist, class _Size, class _TypeT>
 _FwdIter __search_n (_FwdIter, _FwdIter, _Dist*, _Size, const _TypeT&);
  
-_EXPORT
 template <class _FwdIter, class _Dist, class _Size, class _TypeT,
           class _BinaryPredicate>
 _FwdIter __search_n (_FwdIter, _FwdIter, _Dist*, _Size,
@@ -403,7 +393,6 @@ replace_copy (_InputIter __first, _InputIter __last, _OutputIter __res,
     return __res;
 }
 
-_EXPORT
 template <class _Iter, class _OutputIter, class _Predicate, class _TypeT>
 _OutputIter replace_copy_if (_Iter, _Iter, _OutputIter, _Predicate,
                              const _TypeT&);
@@ -436,12 +425,10 @@ inline void generate_n (_OutputIter __first, _Size __n, _Generator __gen)
 
 
 // 25.2.7 - Remove [lib.alg.remove]
-_EXPORT
 template <class _InputIter, class _OutputIter, class _TypeT>
 _OutputIter remove_copy (_InputIter, _InputIter, _OutputIter,
                          const _TypeT&);
 
-_EXPORT
 template <class _InputIter, class _OutputIter, class _Predicate>
 _OutputIter remove_copy_if (_InputIter, _InputIter, _OutputIter, _Predicate);
 
@@ -467,7 +454,6 @@ inline _FwdIter remove_if (_FwdIter __first, _FwdIter __last, _Predicate __pred)
 }
 
 
-_EXPORT
 template <class _InputIter, class _FwdIter>
 _FwdIter __unique_copy (_InputIter, _InputIter, _FwdIter, forward_iterator_tag);
 
@@ -489,7 +475,6 @@ __unique_copy (_InputIter __first, _InputIter __last,
     return __unique_copy (__first, __last, __res, forward_iterator_tag ());
 }
 
-_EXPORT
 template <class _InputIter, class _OutputIter, class _TypeT>
 _OutputIter __unique_copy (_InputIter, _InputIter, _OutputIter, _TypeT*);
 
@@ -503,7 +488,6 @@ inline _OutputIter __unique_copy (_InputIter __first, _InputIter __last,
 }
 
 
-_EXPORT
 template <class _InputIter, class _FwdIter, class _BinaryPredicate>
 _FwdIter __unique_copy (_InputIter, _InputIter, _FwdIter, _BinaryPredicate,
                         forward_iterator_tag);
@@ -529,7 +513,6 @@ __unique_copy (_InputIter __first, _InputIter __last, _RandomAccessIter __res,
 }
 
 
-_EXPORT
 template <class _InputIter, class _OutputIter, class _BinaryPredicate,
           class _TypeT>
 _OutputIter __unique_copy (_InputIter, _InputIter, _OutputIter,
@@ -547,13 +530,11 @@ __unique_copy (_InputIter __first, _InputIter __last, _OutputIter __res,
 
 // 25.2.8 - Unique   [lib.alg.unique]
 
-_EXPORT
 template <class _FwdIter>
 _FwdIter
 unique (_FwdIter, _FwdIter);
 
 
-_EXPORT
 template <class _FwdIter, class _BinaryPredicate>
 _FwdIter
 unique (_FwdIter, _FwdIter, _BinaryPredicate);
@@ -625,7 +606,6 @@ reverse_copy (_BidirIter __first, _BidirIter __last, _OutputIter __res)
 }
 
 
-_EXPORT
 template <class _FwdIter, class _Dist>
 void __rotate (_FwdIter, _FwdIter, _FwdIter, _Dist*, forward_iterator_tag);
 
@@ -641,19 +621,16 @@ __rotate (_BidirIter __first, _BidirIter __middle, _BidirIter __last,
 }
 
 
-_EXPORT
 template <class _EuclideanRingElement>
 _EuclideanRingElement
 __gcd (_EuclideanRingElement, _EuclideanRingElement);
 
 
-_EXPORT
 template <class _RandomAccessIter, class _Dist, class _TypeT>
 void __rotate_cycle (_RandomAccessIter, _RandomAccessIter, _RandomAccessIter,
                      _Dist, _TypeT*);
 
 
-_EXPORT
 template <class _RandomAccessIter, class _Dist>
 void __rotate (_RandomAccessIter, _RandomAccessIter, _RandomAccessIter,
                _Dist*, random_access_iterator_tag);
@@ -678,7 +655,6 @@ rotate_copy (_FwdIter __first, _FwdIter __middle, _FwdIter __last,
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _RandomNumberGenerator>
 void random_shuffle (_RandomAccessIter, _RandomAccessIter,
                      _RandomNumberGenerator&);
@@ -694,12 +670,10 @@ random_shuffle (_RandomAccessIter __first, _RandomAccessIter __last)
 }
 
 
-_EXPORT
 template <class _BidirIter, class _Predicate>
 _BidirIter partition (_BidirIter, _BidirIter, _Predicate);
 
 
-_EXPORT
 template <class _BidirIter, class _Predicate, class _TypeT, class _Dist>
 _BidirIter
 __stable_partition (_BidirIter, _BidirIter, _Predicate, _TypeT*, _Dist*);
@@ -717,12 +691,10 @@ stable_partition (_BidirIter __first, _BidirIter __last, _Predicate __pred)
 // 25.3.1 - Sorting [lib.alg.sort]
 
 
-_EXPORT
 template <class _RandomAccessIter, class _TypeT, class _Compare>
 void __unguarded_linear_insert (_RandomAccessIter, _TypeT, _Compare);
 
 
-_EXPORT
 template <class _RandomAccessIter, class _Compare>
 void __insertion_sort (_RandomAccessIter, _RandomAccessIter, _Compare);
 
@@ -738,11 +710,9 @@ __unguarded_insertion_sort (_RandomAccessIter __first, _RandomAccessIter __last,
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _Dist, class _Compare>
 void __introsort_loop (_RandomAccessIter, _RandomAccessIter, _Dist, _Compare);
 
-_EXPORT
 template <class _RandomAccessIter, class _Compare>
 void __final_insertion_sort (_RandomAccessIter, _RandomAccessIter, _Compare);
 
@@ -767,7 +737,6 @@ inline void sort (_RandomAccessIter __first, _RandomAccessIter __last)
 }
 
 
-_EXPORT
 template <class _BidirIter, class _Dist, class _Compare>
 void __merge_without_buffer (_BidirIter, _BidirIter, _BidirIter,
                              _Dist, _Dist, _Compare);
@@ -789,7 +758,6 @@ __inplace_stable_sort (_RandomAccessIter __first, _RandomAccessIter __last,
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _TypeT, class _Dist, class _Compare>
 void
 __stable_sort (_RandomAccessIter, _RandomAccessIter, _TypeT*, _Dist*, _Compare);
@@ -815,7 +783,6 @@ inline void stable_sort (_RandomAccessIter __first, _RandomAccessIter __last)
 
 
 // helper to work around the lack of iterator_traits
-_EXPORT
 template <class _RandomAccessIter, class _TypeT, class _Compare>
 void __partial_sort (_RandomAccessIter, _RandomAccessIter,
                      _RandomAccessIter, _TypeT*, _Compare);
@@ -846,7 +813,6 @@ partial_sort (_RandomAccessIter __first, _RandomAccessIter __middle,
 
 
 // helper to work around the lack of iterator_traits
-_EXPORT
 template <class _InputIter, class _RandomAccessIter, class _Compare,
           class _Dist, class _TypeT>
 _RandomAccessIter
@@ -879,7 +845,6 @@ partial_sort_copy (_InputIter __first1, _InputIter __last1,
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _TypeT, class _Compare>
 void __nth_element (_RandomAccessIter, _RandomAccessIter,
                     _RandomAccessIter, _TypeT*, _Compare);
@@ -905,7 +870,6 @@ inline void nth_element (_RandomAccessIter __first, _RandomAccessIter __nth,
 
 // 25.3.3 - Binary search [lib.alg.binary.search]
 
-_EXPORT
 template <class _FwdIter, class _TypeT, class _Compare, class _Dist>
 _FwdIter __lower_bound (_FwdIter, _FwdIter, const _TypeT&, _Compare,
                         _Dist*, forward_iterator_tag);
@@ -921,7 +885,6 @@ __lower_bound (_FwdIter __first, _FwdIter __last,
                           (_Dist*)0, forward_iterator_tag ());
 }
 
-_EXPORT
 template <class _RandomAccessIter, class _TypeT, class _Compare, class _Dist>
 _RandomAccessIter __lower_bound (_RandomAccessIter, _RandomAccessIter,
                                  const _TypeT&, _Compare, _Dist*,
@@ -948,7 +911,6 @@ lower_bound (_FwdIter __first, _FwdIter __last, const _TypeT &__val)
 }
 
 
-_EXPORT
 template <class _FwdIter, class _TypeT, class _Compare, class _Dist>
 _FwdIter __upper_bound (_FwdIter, _FwdIter, const _TypeT&, _Compare,
                         _Dist*, forward_iterator_tag);
@@ -964,7 +926,6 @@ __upper_bound (_FwdIter __first, _FwdIter __last, const _TypeT &__val,
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _TypeT, class _Compare,
           class _Dist>
 _RandomAccessIter __upper_bound (_RandomAccessIter, _RandomAccessIter,
@@ -992,7 +953,6 @@ upper_bound (_FwdIter __first, _FwdIter __last, const _TypeT &__val)
 }
 
 
-_EXPORT
 template <class _FwdIter, class _TypeT, class _Compare, class _Dist>
 pair<_FwdIter, _FwdIter>
 __equal_range (_FwdIter, _FwdIter, const _TypeT&,
@@ -1009,7 +969,6 @@ __equal_range (_FwdIter __first, _FwdIter __last, const _TypeT &__val,
 }
 
 
-_EXPORT
 template <class _RandomAccessIter, class _TypeT, class _Compare, class _Dist>
 pair<_RandomAccessIter, _RandomAccessIter>
 __equal_range (_RandomAccessIter, _RandomAccessIter,
@@ -1055,7 +1014,6 @@ binary_search (_FwdIter __first, _FwdIter __last, const _TypeT &__val)
 
 // 25.3.4 - Merge [lib.alg.merge]
 
-_EXPORT
 template <class _InputIter1, class _InputIter2, class _OutputIter,
           class _Compare>
 _OutputIter merge (_InputIter1 __first1, _InputIter1 __last1,
@@ -1072,7 +1030,6 @@ inline _OutputIter merge (_InputIter1 __first1, _InputIter1 __last1,
 }
 
 
-_EXPORT
 template <class _BidirIter, class _Dist, class _TypeT, class _Compare>
 void __inplace_merge (_BidirIter, _BidirIter, _BidirIter,
                       _Dist*, _TypeT*, _Compare);
@@ -1102,7 +1059,6 @@ inplace_merge (_BidirIter __first, _BidirIter __middle, _BidirIter __last)
 // 25.3.5 - Set operations on sorted structures
 
 // 25.3.5.1
-_EXPORT
 template <class _InputIter1, class _InputIter2, class _Compare>
 bool includes (_InputIter1, _InputIter1, _InputIter2, _InputIter2, _Compare);
 
@@ -1116,7 +1072,6 @@ inline bool includes (_InputIter1 __first1, _InputIter1 __last1,
 
 
 // 25.3.5.2
-_EXPORT
 template <class _InputIter1, class _InputIter2, class _OutputIter,
           class _Compare>
 _OutputIter
@@ -1134,7 +1089,6 @@ set_union (_InputIter1 __first1, _InputIter1 __last1,
 
 
 // 25.3.5.3
-_EXPORT
 template <class _InputIter1, class _InputIter2, class _OutputIter,
           class _Compare>
 _OutputIter
@@ -1152,7 +1106,6 @@ set_intersection (_InputIter1 __first1, _InputIter1 __last1,
 
 
 // 25.3.5.4
-_EXPORT
 template <class _InputIter1, class _InputIter2, class _OutputIter, 
           class _Compare>
 _OutputIter
@@ -1170,7 +1123,6 @@ set_difference (_InputIter1 __first1, _InputIter1 __last1,
 
 
 // 25.3.5.5
-_EXPORT
 template <class _InputIter1, class _InputIter2, class _OutputIter,
           class _Compare>
 _OutputIter
@@ -1195,7 +1147,6 @@ set_symmetric_difference (_InputIter1 __first1, _InputIter1 __last1,
 // 25.3.7 - Minimum and maximum
 
 // 25.3.7, p7
-_EXPORT
 template <class _FwdIter, class _Compare>
 _FwdIter min_element (_FwdIter, _FwdIter, _Compare);
 
@@ -1207,7 +1158,6 @@ inline _FwdIter min_element (_FwdIter __first, _FwdIter __last)
 
 
 // 25.3.7, p9
-_EXPORT
 template <class _FwdIter, class _Compare>
 _FwdIter max_element (_FwdIter, _FwdIter, _Compare);
 
@@ -1222,7 +1172,6 @@ inline _FwdIter max_element (_FwdIter __first, _FwdIter __last)
 // 25.3.9 - Permutation generators [lib.alg.permutation.generators]
 
 // 25.3.9, p1
-_EXPORT
 template <class _BidirIter, class _Compare>
 bool next_permutation (_BidirIter, _BidirIter, _Compare);
 
@@ -1234,7 +1183,6 @@ inline bool next_permutation (_BidirIter __first, _BidirIter __last)
 
 
 // 25.3.9, p3
-_EXPORT
 template <class _BidirIter, class _Compare>
 bool prev_permutation (_BidirIter, _BidirIter, _Compare);
 

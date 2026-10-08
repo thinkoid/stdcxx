@@ -403,13 +403,6 @@
 #endif
 
 
-#ifndef _RWSTD_NO_EXPORT
-#  define _EXPORT   export
-#else
-#  define _EXPORT   /* empty */
-#endif
-
-
 #ifndef _RWSTD_NO_MUTABLE
 #  define _MUTABLE   mutable
 #else

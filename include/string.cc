@@ -451,7 +451,6 @@ replace (size_type __pos, size_type __len, size_type __count, value_type __val)
 
 #  ifdef _RWSTD_NO_STRING_OUTLINED_MEMBER_TEMPLATES
 
-_EXPORT
 template <class _CharT, class _Traits, class _Alloc,
           class _StringIter, class _InputIter>
 _STD::basic_string<_CharT, _Traits, _Alloc>& 
@@ -556,7 +555,6 @@ replace (iterator __first1, iterator __last1,
 
 #  ifdef _RWSTD_NO_STRING_OUTLINED_MEMBER_TEMPLATES
 
-_EXPORT
 template <class _CharT, class _Traits, class _Alloc,
           class _StringIter, class _InputIter>
 _STD::basic_string<_CharT, _Traits, _Alloc>& 

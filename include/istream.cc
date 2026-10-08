@@ -30,7 +30,6 @@
 _RWSTD_NAMESPACE (__rw) { 
 
 
-_EXPORT
 template <class _CharT, class _Traits, class _NativeType>
 _STD::basic_istream<_CharT, _Traits>&
 __rw_extract (_STD::basic_istream<_CharT, _Traits> &__strm,

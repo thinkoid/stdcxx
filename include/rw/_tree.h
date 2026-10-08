@@ -247,7 +247,6 @@ operator!= (const _RWSTD_TREE_ITER (1) &__lhs,
 #define _ITER_NODE(it)   (_ITER_BASE (it)._C_node)
 
 
-_EXPORT
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
 class __rb_tree : private _Alloc
 {
