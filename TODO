@@ -425,16 +425,19 @@ A first build on 2026-10-06, at 6bb238b6 with EDG 7.0 over gcc 16 and
 glibc, took hand changes to the tree. It configured, built the
 library, the test driver and the utilities, and built 257 of 272 test
 programs. The suite ran without signals or non-zero exits: 10,049,711
-assertions, 16 failed.
+assertions, 16 failed. A second build on 2026-10-08, at 48d6dac1 after
+the retirement of =export=, with the same hand changes and the same
+front end, gave the same table.
 
 ** TODO The =eccp= configuration
 
 The platform retirement removed =etc/config/eccp.config= (dd1128a5),
 =include/rw/_config-eccp.h= (6513a431) and the prelink step before
 =ar= (67c1f7b6; its message says only the retired compilers used it,
-but =eccp.config= did). The =__EDG__= guards in =_iosbase.h=,
-=_traits.h= and five characterizations survive, and so do the =eccp=
-rows of =etc/config/xfail.txt=.
+but =eccp.config= did). The =__EDG__= guards went with the platform
+retirement (d743fa8d, 12475dfe); comments that name =eccp= survive in
+=_iosbase.h=, =_traits.h= and five characterizations, and so do the
+=eccp= rows of =etc/config/xfail.txt=.
 
 The default dialect of =eccp= is C++03 (=__cplusplus= is =199711L=).
 No dialect option is needed. The C headers are a property of the
@@ -454,7 +457,8 @@ fails. A file passed with =--preinclude_macros= works:
 EDG enters the keyword.
 
 Fix: restore =eccp.config= from =dd1128a5^= and bring it current:
-=-A -x=, the prelinker (~PRELINKFLAGS = --prelink_objects~, the step
+=-A -x=, =--no_export= while the entry below stands, the prelinker
+(~PRELINKFLAGS = --prelink_objects~, the step
 in =GNUmakefile.lib= and =GNUmakefile.rwt=, =*.ti= in the clean
 rules), =-lpthread=, the stopgap file. A macro of the override header
 comes back only where no characterization can express the gap, with
@@ -485,24 +489,22 @@ feature level, as =tests/src/file.cpp= does.
 Check: the library builds under =eccp -A= with no feature macro on
 the command line, and the GCC and Clang tables do not move.
 
-** TODO =export= or the inclusion model
+** TODO =src/punct.cpp= under the export model
 
-=eccp= has =export= templates in strict C++03, and the =EXPORT=
-characterization passes. With =export= on, the first build failed with
-136 errors, 98 of them "already been defined" in the =.cc= files; the
-cause is not known. A three-file program with an exported template and
-its definition included explicitly compiles, links and runs, so the
-explicit =#include <x.cc>= is not enough to explain it. With
-=_RWSTD_NO_IMPLICIT_INCLUSION= undefined by hand, as the removed
-=_config-eccp.h= did, the library compiles but for =src/punct.cpp=,
-where EDG fails an internal assertion (#2656, in
-=find_local_static_variable_init=) at line 113. With =--no_export= the
-library builds.
+The library uses neither =export= nor implicit inclusion since
+11b144b9..48d6dac1. =eccp -A= still turns its export model on, and
+under it EDG fails an internal assertion in =src/punct.cpp= at line
+113 (#2656, in =find_local_static_variable_init=). The other 97
+library sources compile. The 136 errors of the first build, 98 of them
+"already been defined" in the =.cc= files, came from =_EXPORT= and are
+gone. Reported as https://github.com/edgcpp/compiler/discussions/233,
+with a one-line candidate patch: a block scope that lowering adds for
+a return-value temporary has no parent.
 
-Decided 2026-10-07: no =export=. The first entry of the queue retires
-it with implicit inclusion. This entry leaves with it.
+Fix: EDG's. Until then =eccp.config= passes =--no_export=.
 
-Check: the =eccp= build needs no =--no_export=.
+Check: the =eccp= build needs no =--no_export= with a front end that
+fixes it.
 
 ** TODO =FLOAT.cpp= under a strict compiler
 
@@ -562,17 +564,32 @@ not move.
 ** TODO Calls EDG matches to no function
 
 Four test programs fail with error #304, no instance of a function
-template or overloaded function matches the argument list:
-=tests/iostream/27.std.manip.cpp:518= (=test<charT, Traits>= called
-with =(int, Manip, fmtflags, char)=; the third parameter is =int=),
-=tests/iostream/27.filebuf.cpp:2019=,
-=tests/localization/22.locale.codecvt.cpp:680=,
-=tests/localization/22.locale.collate.cpp:1159=. Not read yet: the
-library, the test or the compiler.
+template or overloaded function matches the argument list. Each call
+is dependent and each callee it means has internal linkage.
+- =tests/iostream/27.std.manip.cpp:518= (=test<charT, Traits>=),
+  =tests/iostream/27.filebuf.cpp:2019= (=test_ctors<charT>=),
+  =tests/localization/22.locale.codecvt.cpp:680=
+  (=test_libstd_do_in<CodeCvtT>=): calls by template-id to =static=
+  function templates. Six lines reproduce it: a dependent call to a
+  =static= function template, by template-id or deduced, fails under
+  =eccp -A= and compiles under =eccp --c++11 -A=, =-x= and GCC's
+  =-std=c++98=. C++03 14.6.4.2 finds only functions with external
+  linkage for a dependent call by unqualified-id; C++11 dropped the
+  restriction. Whether the C++03 rule covers a template-id is to be
+  read in the C++03 text; if it does not, the rejection is an EDG
+  defect.
+- =tests/localization/22.locale.collate.cpp:1159=: an unqualified call
+  =check_NUL_collate (charTname, locname, charT ())=. EDG considers
+  only the six-argument template; the =static= non-template overloads
+  the call means (=:1072=, =:1108=) are not candidates. Small programs
+  of the same shape compile under =eccp -A=, so the cause is not yet
+  known; C-Vise is the next step.
 
-Fix: read each against the standard.
+Fix: read the C++03 text; then either give the callees external
+linkage or report to EDG.
 
-Check: each compiles under =eccp -A=, or the cause is recorded.
+Check: each compiles under =eccp -A=, and the GCC and Clang tables do
+not move.
 
 ** TODO Run-time differences from GCC
 
@@ -580,7 +597,12 @@ Under =eccp -A=:
 - =26.valarray.transcend=: nine failed assertions on the =float=
   functions (=std::acos (valarray<float>)= and kin); =config.h= has
   no =float= or =long double= overloads of the =<cmath>= functions.
-- =18.limits.traps=: =numeric_limits<bool>::traps= is true.
+- =18.limits.traps=: =numeric_limits<bool>::traps= is true, as for
+  every integer type, but the test's =bool= division by zero did not
+  trap. Outside the test, =bool= division by zero traps under =eccp=
+  too. The same row fails in an optimized GCC build (12D, 13
+  assertions) and once in 12D with Clang: the test counts on undefined
+  behavior surviving the optimizer, which is the first suspect.
 - =18.support.dynamic=: =bad_alloc::what ()= returns a bad string.
   The first question is whose =bad_alloc= runs, the library's or that
   of EDG's runtime.
