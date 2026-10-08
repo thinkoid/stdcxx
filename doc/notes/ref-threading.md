@@ -125,14 +125,10 @@ compare-and-exchange.
 
 ### 3.1 Backend selection and the meaning of `false`
 
-[_atomic.h](../../include/rw/_atomic.h) selects the GNU `__sync`
-backend where the configuration found the built-ins working on `int`,
-the x86 and x86-64 assembly helpers where it did not, and mutex
-fallback otherwise. The architecture test the characterization
-replaced named `__i486__`, which a default `-m32` compile does not
-predefine, so until then every threaded 32-bit x86 build ran the
-out-of-line assembly; it now runs the built-ins inline. Width adapters and missing-width fallbacks add another
-dispatch layer: each width follows its own characterization,
+[_atomic.h](../../include/rw/_atomic.h) selects the backend over
+the GNU `__atomic` built-ins where the configuration found them
+working on `int`, and the mutex fallback otherwise. Width adapters
+and missing-width fallbacks add another dispatch layer: each width follows its own characterization,
 `CHAR_ATOMIC_OPS.cpp` through `LLONG_ATOMIC_OPS.cpp`, and a width
 whose characterization fails is served by the mutex templates. On
 aarch64 GCC and Clang compile the built-ins to calls to the compiler
@@ -168,24 +164,30 @@ or subsystem.
 
 ### 3.2 Ordering is not uniform
 
-[_atomic-sync.h](../../include/rw/_atomic-sync.h) implements arithmetic
-with `__sync_add_and_fetch` and `__sync_sub_and_fetch`, but exchange
-with `__sync_lock_test_and_set`. GCC documents the arithmetic
-operations as full barriers and that exchange as an **acquire**
-barrier. Its interface therefore does not promise release publication
-of earlier writes merely because the macro is called `ATOMIC_SWAP`.
-See [GCC's legacy atomic builtins](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fsync-Builtins.html).
+[_atomic-builtins.h](../../include/rw/_atomic-builtins.h) implements
+the increment, the decrement and the exchange with
+`__atomic_add_fetch`, `__atomic_sub_fetch` and `__atomic_exchange_n`,
+all sequentially consistent. The ordered loads and stores of
+[_defs.h](../../include/rw/_defs.h) name their orders at the call:
+release, acquire or relaxed. See
+[GCC's memory-model built-ins](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fatomic-Builtins.html).
 
-The assembly backend has its own instruction and compiler-boundary
-contract; for example, [x86/atomic.s](../../src/x86/atomic.s) uses
-locked `xadd` and memory `xchg`. Mutex fallback supplies ordering
-through participating lock/unlock operations. These implementations
-must be evaluated separately rather than assigned one undocumented
-universal barrier guarantee. `TODO` queues one backend over the
-`__atomic` built-ins with explicit orders in place of all three; the
-library exports the assembly routines, and 32-bit binaries built
-before the characterizations call them. The assembly sources stay
-until the `TODO` entry on the next minor version removes them.
+On x86 and x86-64 the read-modify-writes are locked `xadd` and
+`xchg`. On aarch64 they are calls to the compiler runtime's
+`acq_rel` outline helpers: `ldaddal` and `swpal` on a CPU with the
+LSE atomics, an acquire-release exclusive pair otherwise. The `__sync`
+built-ins the backend replaced added a trailing full barrier on the
+exclusive-pair path. That barrier ordered later ordinary accesses
+after the store, which C++ sequential consistency does not promise;
+the library uses the increments for counts, ids and elections, none
+of which needs more than acquire and release. The mutex fallback
+supplies ordering through the lock and unlock of the mutex its
+callers share.
+
+The library still exports the x86 and x86-64 assembly routines, for
+32-bit binaries built before the characterizations, which call them.
+No header refers to them; the `TODO` entry on the next minor version
+removes them with their symbols.
 
 **Even a full barrier cannot make an unprotected compound operation
 indivisible.** It also does not convert every ordinary access elsewhere

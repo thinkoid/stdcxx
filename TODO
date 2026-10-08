@@ -172,35 +172,6 @@ Fix, in order:
 Check: the six tables of a parallel run identical to those of a
 serial one, three runs over; the wall time recorded beside the tables.
 
-* TODO One atomic backend, the =__atomic= built-ins
-
-The atomic operations have three backends besides the mutex
-templates: the GNU =__sync= built-ins (=<rw/_atomic-sync.h>=), x86
-assembly (=<rw/_atomic-x86.h>=, =src/x86/atomic.s=) and x86-64
-assembly (=<rw/_atomic-x64.h>=, =src/x86_64/atomic.s=). The =__sync=
-branch serves every configuration of the matrix, 32-bit x86 included.
-The assembly runs only when the =int= characterization fails. =__sync=
-is a full barrier for the arithmetic and an acquire barrier only for
-=__sync_lock_test_and_set=, which =_RWSTD_ATOMIC_SWAP= inherits; x86
-hides the difference behind =xchg=. The library exports the assembly
-routines, =__rw_atomic_add= and =__rw_atomic_xchg= at 8, 16, 32 and
-(x86-64) 64 bits. 32-bit binaries built before a976e3b9 call them.
-
-Fix: one backend over the =__atomic= built-ins with explicit orders,
-none weaker than today: =__ATOMIC_SEQ_CST= for the increments, the
-decrements and the exchange. Weakening an order is the business of
-the sweep of atomic integer flags, site by site. The five characterizations test the
-=__atomic= operations the backend uses; their macros stay.
-=<rw/_atomic-x86.h>=, =<rw/_atomic-x64.h>= and their dispatch branches
-go. =src/atomic.s= and the two assembly sources stay built and
-exported; the entry on the next minor version removes them with their
-symbols.
-
-Check: the x86-64 and aarch64 suites unchanged against their tables.
-The disassembly shows =lock xadd= and =xchg= on x86-64 and 32-bit x86,
-and =ldaddal= and =swpal= behind the outline helpers on aarch64. The
-library's exported symbols unchanged.
-
 * TODO Strict ANSI as the rule, the additions outside the standard gone
 
 =_RWSTD_STRICT_ANSI= (=include/rw/_config.h:234=, also selected by
@@ -314,7 +285,8 @@ wait for a release; the minor version moves when they land:
 - The =numpunct= cache members, unused since 2e196ebb
   (=include/loc/_numpunct.h:117=).
 - =src/x86/atomic.s=, =src/x86_64/atomic.s= and the symbols they
-  export, once the =__atomic= backend entry lands.
+  export; no header has referred to them since the backend moved to
+  the =__atomic= built-ins.
 
 Fix: all three go, and the minor version moves with them: delete the
 string clause rather than define the opt-in, remove the members,
