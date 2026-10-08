@@ -1,7 +1,7 @@
 /***************************************************************************
  *
- * _atomic-sync.h - definitions of inline functions for atomic
- *                  operations using __sync_xxx() functions set
+ * _atomic-builtins.h - definitions of inline functions for atomic
+ *                      operations using the __atomic_xxx() built-ins
  *
  * This is an internal header file used to implement the C++ Standard
  * Library. It should never be #included directly by a program.
@@ -30,6 +30,11 @@
  * 
  **************************************************************************/
 
+// every operation is sequentially consistent, as strong as the __sync
+// built-ins it replaces in C++ terms and stronger for the exchange,
+// which __sync made an acquire barrier only; a caller that needs less
+// gets it from a decision about its own site, not from this header
+
 _RWSTD_NAMESPACE (__rw) {
 
 #ifndef _RWSTD_NO_CHAR_ATOMIC_OPS
@@ -38,7 +43,7 @@ inline char
 __rw_atomic_preincrement (char &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (1 == sizeof (char));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -46,7 +51,7 @@ inline signed char
 __rw_atomic_preincrement (signed char &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (1 == sizeof (signed char));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -54,7 +59,7 @@ inline unsigned char
 __rw_atomic_preincrement (unsigned char &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (1 == sizeof (unsigned char));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 #endif   // _RWSTD_NO_CHAR_ATOMIC_OPS
@@ -66,7 +71,7 @@ inline short
 __rw_atomic_preincrement (short &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (2 == sizeof (short));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -74,7 +79,7 @@ inline unsigned short
 __rw_atomic_preincrement (unsigned short &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (2 == sizeof (unsigned short));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 #endif   // _RWSTD_NO_SHORT_ATOMIC_OPS
@@ -84,7 +89,7 @@ inline int
 __rw_atomic_preincrement (int &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (4 == sizeof (int));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -92,7 +97,7 @@ inline unsigned int
 __rw_atomic_preincrement (unsigned int &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (4 == sizeof (unsigned int));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -102,7 +107,7 @@ inline char
 __rw_atomic_predecrement (char &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (1 == sizeof (char));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -110,7 +115,7 @@ inline signed char
 __rw_atomic_predecrement (signed char &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (1 == sizeof (signed char));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -118,7 +123,7 @@ inline unsigned char
 __rw_atomic_predecrement (unsigned char &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (1 == sizeof (unsigned char));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 #endif   // _RWSTD_NO_CHAR_ATOMIC_OPS
@@ -130,7 +135,7 @@ inline short
 __rw_atomic_predecrement (short &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (2 == sizeof (short));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -138,7 +143,7 @@ inline unsigned short
 __rw_atomic_predecrement (unsigned short &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (2 == sizeof (unsigned short));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 #endif   // _RWSTD_NO_SHORT_ATOMIC_OPS
@@ -148,7 +153,7 @@ inline int
 __rw_atomic_predecrement (int &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (4 == sizeof (int));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -156,7 +161,7 @@ inline unsigned int
 __rw_atomic_predecrement (unsigned int &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (4 == sizeof (unsigned int));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -166,7 +171,7 @@ inline char
 __rw_atomic_exchange (char &__x, char __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (1 == sizeof (char));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 
@@ -174,7 +179,7 @@ inline signed char
 __rw_atomic_exchange (signed char &__x, signed char __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (1 == sizeof (signed char));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 
@@ -182,7 +187,7 @@ inline unsigned char
 __rw_atomic_exchange (unsigned char &__x, unsigned char __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (1 == sizeof (unsigned char));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 #endif   // _RWSTD_NO_CHAR_ATOMIC_OPS
@@ -194,7 +199,7 @@ inline short
 __rw_atomic_exchange (short &__x, short __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (2 == sizeof (short));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 
@@ -202,7 +207,7 @@ inline unsigned short
 __rw_atomic_exchange (unsigned short &__x, unsigned short __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (2 == sizeof (unsigned short));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 #endif   // _RWSTD_NO_SHORT_ATOMIC_OPS
@@ -212,7 +217,7 @@ inline int
 __rw_atomic_exchange (int &__x, int __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (4 == sizeof (int));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 
@@ -220,7 +225,7 @@ inline unsigned int
 __rw_atomic_exchange (unsigned int &__x, unsigned int __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (4 == sizeof (unsigned int));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 
@@ -230,7 +235,7 @@ inline long
 __rw_atomic_preincrement (long &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (long));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -238,7 +243,7 @@ inline unsigned long
 __rw_atomic_preincrement (unsigned long &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (unsigned long));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -246,7 +251,7 @@ inline long
 __rw_atomic_predecrement (long &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (long));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -254,7 +259,7 @@ inline unsigned long
 __rw_atomic_predecrement (unsigned long &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (unsigned long));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -262,7 +267,7 @@ inline long
 __rw_atomic_exchange (long &__x, long __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (long));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 
@@ -270,7 +275,7 @@ inline unsigned long
 __rw_atomic_exchange (unsigned long &__x, unsigned long __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (unsigned long));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 #else
@@ -286,7 +291,7 @@ inline _RWSTD_LONG_LONG
 __rw_atomic_preincrement (_RWSTD_LONG_LONG &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (_RWSTD_LONG_LONG));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -294,7 +299,7 @@ inline unsigned _RWSTD_LONG_LONG
 __rw_atomic_preincrement (unsigned _RWSTD_LONG_LONG &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (unsigned _RWSTD_LONG_LONG));
-    return __sync_add_and_fetch (&__x, 1);
+    return __atomic_add_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -302,7 +307,7 @@ inline _RWSTD_LONG_LONG
 __rw_atomic_predecrement (_RWSTD_LONG_LONG &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (_RWSTD_LONG_LONG));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -310,7 +315,7 @@ inline unsigned _RWSTD_LONG_LONG
 __rw_atomic_predecrement (unsigned _RWSTD_LONG_LONG &__x, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (unsigned _RWSTD_LONG_LONG));
-    return __sync_sub_and_fetch (&__x, 1);
+    return __atomic_sub_fetch (&__x, 1, __ATOMIC_SEQ_CST);
 }
 
 
@@ -318,7 +323,7 @@ inline _RWSTD_LONG_LONG
 __rw_atomic_exchange (_RWSTD_LONG_LONG &__x, _RWSTD_LONG_LONG __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (_RWSTD_LONG_LONG));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 
@@ -327,7 +332,7 @@ __rw_atomic_exchange (unsigned _RWSTD_LONG_LONG &__x,
                       unsigned _RWSTD_LONG_LONG __y, bool)
 {
     _RWSTD_COMPILE_ASSERT (8 == sizeof (unsigned _RWSTD_LONG_LONG));
-    return __sync_lock_test_and_set (&__x, __y);
+    return __atomic_exchange_n (&__x, __y, __ATOMIC_SEQ_CST);
 }
 
 #else

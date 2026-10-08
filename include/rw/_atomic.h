@@ -47,10 +47,9 @@
 
 #  if defined (_RWSTD_NO_ATOMIC_OPS)
      // do nothing
-#  elif   defined (__GNUG__)                        \
-      && (__GNUC__ * 100 + __GNUC_MINOR__ >= 401)   \
-      && !defined (_RWSTD_NO_INT_ATOMIC_OPS)
-#    include <rw/_atomic-sync.h>
+#  elif !defined (_RWSTD_NO_INT_ATOMIC_OPS)
+     // the characterization compiled and ran the built-ins
+#    include <rw/_atomic-builtins.h>
 #  else
 #    define _RWSTD_NO_ATOMIC_OPS
 #  endif
