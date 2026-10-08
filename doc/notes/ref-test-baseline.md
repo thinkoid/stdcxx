@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-10-07 (c755a926) for GCC and 2026-09-30 (5629ca96) for
+As of 2026-10-07 (c755a926) for GCC and 2026-10-08 (44420f7a) for
 Clang.
 
 The whole suite, run under its own harness on the current toolchain.
@@ -208,13 +208,11 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 10,103,645 | 0 | 0 | 1 |
-| 11s-clang | 10,103,550 | 0 | 0 | 1 |
-| 15D-clang | 10,116,511 | 0 | 0 | 9 |
+| 11S-clang | 10,103,644 | 0 | 0 | 0 |
+| 11s-clang | 10,103,549 | 0 | 0 | 0 |
+| 15D-clang | 10,116,510 | 0 | 0 | 8 |
 
-They were pinned on 2026-09-30 and predate the three rows that moved
-in the GCC tables on 2026-10-07 (chapter 2). Against the GCC tables of
-2026-09-30 they match row for row, with one exception.
+They match the GCC tables row for row, with one exception.
 `18.numeric.special.float` runs 134 assertions in the 32-bit Clang
 build, where GCC's runs 119. Clang generates SSE code for i386, which
 carries a signaling NaN. The two 15D tables are identical; the seven
