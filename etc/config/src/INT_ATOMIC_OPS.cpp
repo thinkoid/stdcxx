@@ -1,4 +1,4 @@
-// checking for the __sync built-ins on an int
+// checking for the __atomic built-ins on an int
 
 /***************************************************************************
  *
@@ -22,7 +22,7 @@
 
 #include <limits.h>   // for CHAR_BIT
 
-// the three built-ins <rw/_atomic-sync.h> uses at this width must
+// the three built-ins <rw/_atomic-builtins.h> uses at this width must
 // compile, link and run without help from a library such as libatomic,
 // which the configuration does not link; the values carry across every
 // byte of the object, so an operation on fewer bytes than the type
@@ -38,13 +38,14 @@ int main ()
 
     value = type (high - 1);
 
-    if (high != __sync_add_and_fetch (&value, 1))
+    if (high != __atomic_add_fetch (&value, 1, __ATOMIC_SEQ_CST))
         return 1;
 
-    if (type (high - 1) != __sync_sub_and_fetch (&value, 1))
+    if (type (high - 1) != __atomic_sub_fetch (&value, 1, __ATOMIC_SEQ_CST))
         return 2;
 
-    if (type (high - 1) != __sync_lock_test_and_set (&value, high))
+    if (   type (high - 1)
+        != __atomic_exchange_n (&value, high, __ATOMIC_SEQ_CST))
         return 3;
 
     return high != value ? 4 : 0;
