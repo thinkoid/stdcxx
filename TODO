@@ -73,19 +73,27 @@ Fix: EDG's. The test needs no change.
 Check: =27.ostream= builds under =eccp -A= with a front end that fixes
 it.
 
-* TODO glibc's =signbit= in strict mode
+* TODO glibc's =signbit= assumes a GNU built-in in C++
 
 glibc's =<math.h>= gives a C++ compiler that is neither GCC 6+ nor
-Clang 3.3+ ~#define signbit(x) __builtin_signbitl (x)~. EDG has no
-such built-in in strict mode; =src/fpclass.h= fails. glibc exports
-=__signbit=. A report to glibc is a candidate, of the family of
-https://sourceware.org/bugzilla/show_bug.cgi?id=34692.
+Clang 3.3+ ~#define signbit(x) __builtin_signbitl (x)~. A compiler
+that does not emulate GCC has no such built-in: under =eccp= with the
+C99 names requested, =src/fpclass.h= fails. A regression in glibc
+2.27, from the fix for its bug 22296. Reported as
+https://sourceware.org/bugzilla/show_bug.cgi?id=34717.
 
-Fix: reduce it and report it to glibc. How the library gets
-=signbit= under a strict compiler is undecided; =signbit= is C99 and
-not in C++03 either.
+Without the C99 names, as in C++03 with no feature macro, glibc
+defines no =fpclassify= and =src/fpclass.h= takes its stub branch:
+=__rw_signbit=, =__rw_isnan= and =__rw_isinf= return false,
+=__rw_isfinite= true. How the library classifies floating values
+under a strict compiler is undecided; =signbit= is C99 and not in
+C++03 either.
 
-Check: =src/fpclass.h= compiles under =eccp -A=.
+Fix: glibc's, for the header. The library side goes with the decision
+on the C99 functions.
+
+Check: =src/fpclass.h= compiles under =eccp -A= with the C99 names
+requested and a glibc that fixes it.
 
 * TODO Retire =export= and implicit inclusion
 
