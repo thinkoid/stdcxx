@@ -11,7 +11,7 @@ layouts, calling interfaces and runtime behavior are platform
 questions.
 
 The source census contains 205 named C++ probes, nine supporting C++
-translation units, one shell driver and 19 other support files. The
+translation units, one shell driver and 15 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
 **One probe does not necessarily mean one macro.**
@@ -232,7 +232,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [HONOR_STD](../../etc/config/src/HONOR_STD.cpp) / `NO_HONOR_STD` | if namespace std is honored | L/P/T; `include/ansi/cctype` |
 | [ICONV](../../etc/config/src/ICONV.cpp) / `NO_ICONV` + output | iconv() in &lt;iconv.h&gt; | V; `util/charmap.cpp` |
 | [ICONV_CONST_CHAR](../../etc/config/src/ICONV_CONST_CHAR.cpp) / `NO_ICONV_CONST_CHAR` | POSIX iconv() | P/T/V; `etc/config/src/ICONV.cpp` |
-| [IMPLICIT_INCLUSION](../../etc/config/src/IMPLICIT_INCLUSION.cpp) / `NO_IMPLICIT_INCLUSION` | implicit file inclusion | L/P; `include/algorithm` |
 | [IMPLICIT_INSTANTIATION](../../etc/config/src/IMPLICIT_INSTANTIATION.cpp) / `NO_IMPLICIT_INSTANTIATION` | implicit instantiation | L; `include/rw/_defs.h` |
 | [INFINITY](../../etc/config/src/INFINITY.cpp) / `NO_INFINITY` + output | infinity and NaN's | L/P; `src/limits_bits.cpp` |
 | [INSTANTIATE_DEFAULT_ARGS](../../etc/config/src/INSTANTIATE_DEFAULT_ARGS.cpp) / `NO_INSTANTIATE_DEFAULT_ARGS` | if default args are instantiated | none |
@@ -353,7 +352,7 @@ libraries. The `.h`, `.c`, `.cc` and `.inc` files support those probes
 and the shell driver; they are not independently counted capabilities.
 The complete support-file inventory is:
 
-`collapse_static_locals.lib.cpp`, `collapse_template_locals.lib.cpp`, `collapse_template_statics.lib.cpp`, `extern_function_template_imp.cpp`, `extern_function_template_imp.h`, `extern_inline.lib.cpp`, `extern_template_before_definition_imp.cpp`, `extern_template_imp.cpp`, `extern_template_imp.h`, `float_defs.h`, `headers.inc`, `implicit_inclusion_imp.c`, `implicit_inclusion_imp.cc`, `implicit_inclusion_imp.h`, `instantiation_before_definition.c`, `instantiation_before_definition.cc`, `instantiation_before_definition.h`, `instantiation_with_implicit_inclusion.c`, `instantiation_with_implicit_inclusion.cc`, `instantiation_with_implicit_inclusion.h`, `lib_exceptions.lib.cpp`, `locale_names.h`, `nodbg.h`, `object_mangling_imp.cpp`, `proclimits.h`, `terminate.h`, `thread.h`, `types.h`.
+`collapse_static_locals.lib.cpp`, `collapse_template_locals.lib.cpp`, `collapse_template_statics.lib.cpp`, `extern_function_template_imp.cpp`, `extern_function_template_imp.h`, `extern_inline.lib.cpp`, `extern_template_before_definition_imp.cpp`, `extern_template_imp.cpp`, `extern_template_imp.h`, `float_defs.h`, `headers.inc`, `instantiation_before_definition.cc`, `instantiation_before_definition.h`, `instantiation_with_implicit_inclusion.c`, `instantiation_with_implicit_inclusion.cc`, `instantiation_with_implicit_inclusion.h`, `lib_exceptions.lib.cpp`, `locale_names.h`, `nodbg.h`, `object_mangling_imp.cpp`, `proclimits.h`, `terminate.h`, `thread.h`, `types.h`.
 
 Descriptions and exact-token references provide a survey, not a proof
 that every probe still asks the best question. The individually

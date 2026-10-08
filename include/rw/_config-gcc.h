@@ -31,10 +31,6 @@
 
 // _REENTRANT is defined by the -pthread compiler option
 
-#ifndef _RWSTD_NO_IMPLICIT_INCLUSION
-#  define _RWSTD_NO_IMPLICIT_INCLUSION
-#endif
-
 #ifndef __EXCEPTIONS
    // disable exceptions when the macro __EXCEPTIONS
    // is not #defined by the compiler, e.g., when

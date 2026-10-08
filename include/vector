@@ -1336,9 +1336,7 @@ public:
 }   // namespace std
 
 
-#if defined (_RWSTD_NO_IMPLICIT_INCLUSION)
-#  include <vector.cc>
-#endif
+#include <vector.cc>
 
 
 #endif   // _RWSTD_VECTOR_INCLUDED

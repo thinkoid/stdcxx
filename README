@@ -1030,13 +1030,6 @@
      wchar_t  type in the  ISO 10646  encoding (essentially  UCS-4, or
      UNICODE).
 
-  o  _RWSTD_NO_IMPLICIT_INCLUSION
-
-     #defined  for the  compilers that  use the  Borland instantiation
-     model. It  is also  defined in some  tests and  example programs
-     that  have  a  code  layout  which is  incompatible  with  using
-     implicit inclusion on AIX 5.1 with VisualAge for C++ 5.0.2.0. 
-
   o  _RWSTD_NO_INSTANTIATE [abi, lib, over]
 
      When  #defined the  library will  not explicitly  instantiate any

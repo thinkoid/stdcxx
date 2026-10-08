@@ -552,8 +552,6 @@ struct numeric_limits<const volatile _TypeT>: numeric_limits<_TypeT> { };
 }   // namespace std
 
 
-#ifdef _RWSTD_NO_IMPLICIT_INCLUSION
-#  include <limits.cc>
-#endif
+#include <limits.cc>
 
 #endif   // _RWSTD_LIMITS_INCLUDED

@@ -183,9 +183,7 @@ inline void sort_heap (_RandomAccessIter __first, _RandomAccessIter __last)
 }   // namespace std
 
 
-#ifdef _RWSTD_NO_IMPLICIT_INCLUSION
-#  include <rw/_heap.cc>
-#endif
+#include <rw/_heap.cc>
 
 
 #endif   // _RWSTD_RW_HEAP_H_INCLUDED

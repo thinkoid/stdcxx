@@ -661,9 +661,7 @@ operator>> (basic_istream<_CharT, _Traits>& __strm, bitset<_Size>& __x)
 }   // namespace std
 
 
-#ifdef _RWSTD_NO_IMPLICIT_INCLUSION
-#  include <bitset.cc>
-#endif
+#include <bitset.cc>
 
 
 #endif   // _RWSTD_BITSET_INCLUDED

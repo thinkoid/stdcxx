@@ -28,9 +28,6 @@
 
 #include <rw/_defs.h>
 
-// disable implicit inclusion to work around a limitation in
-// IBM VAC++ 5.0.2.0 (PR #26959)
-
 // make protected members accessible
 #define protected public
 

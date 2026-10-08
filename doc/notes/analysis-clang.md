@@ -136,11 +136,6 @@ The macros that decide where a template's definitions are included
 relative to its instantiation directives, for the record and for the
 next reader who has to trace them:
 
-- `_RWSTD_NO_IMPLICIT_INCLUSION`: the compiler does not find a
-  template's `.cc` file by itself. Defined unconditionally in
-  `_config-gcc.h`; only IBM's VisualAge had implicit inclusion, and it
-  is retired. The block of `_defs.h` guarded on it is the only live
-  one.
 - `_RWSTD_NO_EXTERN_TEMPLATE_BEFORE_DEFINITION`: the probe above. It
   implies `_RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION`.
 - `_RWSTD_DEFINE_TEMPLATE_FIRST (name)` and

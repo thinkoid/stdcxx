@@ -2366,9 +2366,7 @@ valarray<_TypeT>::operator[] (const valarray<_RWSTD_SIZE_T> &__x)
 }   // namespace std
 
 
-#ifdef _RWSTD_NO_IMPLICIT_INCLUSION
-#  include <valarray.cc>
-#endif
+#include <valarray.cc>
 
 
 

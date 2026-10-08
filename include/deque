@@ -930,9 +930,7 @@ swap (deque<_TypeT, _Allocator> &__lhs, deque<_TypeT, _Allocator> &__rhs)
 }   // namespace end
 
 
-#ifdef _RWSTD_NO_IMPLICIT_INCLUSION
-#  include <deque.cc>
-#endif
+#include <deque.cc>
 
 
 #endif   // _RWSTD_DEQUE_INCLUDED

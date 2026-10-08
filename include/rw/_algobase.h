@@ -274,9 +274,7 @@ bool lexicographical_compare(_InputIter1 __first1, _InputIter1 __last1,
 }   // namespace std
 
 
-#ifdef _RWSTD_NO_IMPLICIT_INCLUSION
-#  include <rw/_algobase.cc>
-#endif   // _RWSTD_NO_IMPLICIT_INCLUSION
+#include <rw/_algobase.cc>
 
 
 #endif   // _RWSTD_RW_ALGOBASE_H_INCLUDED

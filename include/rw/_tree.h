@@ -837,8 +837,6 @@ equal_range (const _Key& __k)
 }   // namespace __rw
 
 
-#ifdef _RWSTD_NO_IMPLICIT_INCLUSION
-#  include <rw/_tree.cc>
-#endif
+#include <rw/_tree.cc>
 
 #endif   // _RWSTD_RW_TREE_H_INCLUDED

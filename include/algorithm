@@ -1199,9 +1199,7 @@ inline bool prev_permutation (_BidirIter __first, _BidirIter __last)
 #undef _INLINE
 
 
-#ifdef _RWSTD_NO_IMPLICIT_INCLUSION
-#  include <algorithm.cc>
-#endif
+#include <algorithm.cc>
 
 
 #endif   // _RWSTD_ALGORITHM_INCLUDED

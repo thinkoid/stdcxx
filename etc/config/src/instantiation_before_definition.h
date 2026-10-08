@@ -71,8 +71,6 @@ extern template struct InstantiatedBeforeDefined<int>;
 
 #endif   // INSTANTIATE_TEMPLATE, EXTERN_TEMPLATE
 
-#if defined (INCLUDE_CC_FILE)
-#  include "instantiation_before_definition.cc"
-#endif   // INCLUDE_CC_FILE
+#include "instantiation_before_definition.cc"
 
 #endif   // INSTANTIATION_BEFORE_DEFINITION_INCLUDED

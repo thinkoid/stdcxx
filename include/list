@@ -836,9 +836,7 @@ list<_TypeT, _Allocator>::swap (list &__x)
 }   // namespace std
 
 
-#ifdef _RWSTD_NO_IMPLICIT_INCLUSION
-#  include <list.cc>
-#endif
+#include <list.cc>
 
 
 #endif   //_RWSTD_LIST_INCLUDED
