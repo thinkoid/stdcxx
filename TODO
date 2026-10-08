@@ -51,19 +51,27 @@ Fix: EDG's. The library needs no change.
 Check: a build with a front end that fixes it shows no decoding
 warnings.
 
-* TODO =27.ostream=: the prelinker's recompile defines statics twice
+* TODO =27.ostream=: string literals defined twice in the C that EDG generates
 
-=tests/iostream/27.ostream.cpp= compiles under =eccp -A=. The
-prelinker then recompiles the object to assign template instances,
-and gcc rejects the generated C: it defines the function-local string
-statics of =test_formatted<charT>= twice
-(=_ZZ14test_formattedIcEvT_Es_0= and others, for =char= and
-=wchar_t=, all at =27.ostream.cpp:877=).
+=tests/iostream/27.ostream.cpp= does not build under =eccp -A=. gcc
+rejects the generated C: it defines the string literals of
+=test_formatted<charT>= twice (=_ZZ14test_formattedIcEvT_Es_0= and
+others, for =char= and =wchar_t=). The failure shows in the
+prelinker's recompile only because that is where =test_formatted= is
+instantiated.
 
-Fix: reduce it and report it to EDG.
+A defect of the front end in strict mode, in every dialect: a string
+literal of an inline function or a template instance is defined once
+for each C-style cast of it to =const signed char*= or
+=const unsigned char*= passed as a function argument, and every
+definition has the same name. The =SCH= and =UCH= macros of the test
+make such casts. Reported as
+https://github.com/edgcpp/compiler/discussions/243.
 
-Check: the report is filed and cited here, or the cause is found in
-the test.
+Fix: EDG's. The test needs no change.
+
+Check: =27.ostream= builds under =eccp -A= with a front end that fixes
+it.
 
 * TODO glibc's =signbit= in strict mode
 
