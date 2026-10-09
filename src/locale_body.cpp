@@ -846,7 +846,10 @@ _C_manage (__rw_locale *plocale, const char *locname)
         return tmp;
     }
 
-    if (plocale && plocale == classic) {
+    // read before the guard is taken, while another thread may store
+    // the pointer under it; only a thread that holds the classic body
+    // compares equal, and it got the body through the guard
+    if (plocale && plocale == _RWSTD_ATOMIC_LOAD_RELAXED (classic, false)) {
         // optimize the "destruction" of the classic C locale
         // the object is never destroyed and its reference count
         // never drops to 0
@@ -1015,8 +1018,13 @@ _C_manage (__rw_locale *plocale, const char *locname)
 
                     // construct a locale body in place
                     // with the initial reference count of 1
-                    classic = new (classic_body._C_store ()) 
-                        __rw_locale (locname);
+                    __rw_locale* const body =
+                        new (classic_body._C_store ()) __rw_locale (locname);
+
+                    // relaxed: the comparison above reads the pointer
+                    // without the guard, but nothing is published
+                    // through it
+                    _RWSTD_ATOMIC_STORE_RELAXED (classic, body, false);
 
                     _RWSTD_ASSERT (1 == classic->_C_ref);
                 }
