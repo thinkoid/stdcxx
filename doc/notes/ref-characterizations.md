@@ -75,20 +75,14 @@ commented-out `_RWSTD_NO_ATOMIC_OPS` **does not characterize the GNU
 `__atomic` built-ins** the read-modify-write backend uses; five probes
 do, one per width. `CHAR_ATOMIC_OPS.cpp`, `SHORT_ATOMIC_OPS.cpp`,
 `INT_ATOMIC_OPS.cpp`, `LONG_ATOMIC_OPS.cpp` and `LLONG_ATOMIC_OPS.cpp`
-run the three built-ins `include/rw/_atomic-builtins.h` uses, with its
-sequentially consistent order, on a value
+run the five built-ins `include/rw/_atomic-builtins.h` uses on a value
 that carries across every byte of the type, compiled, linked without
-libatomic and run. `include/rw/_atomic.h` selects the backend when
-the `int` probe passes, and the backend leaves out each width whose
-probe failed. Older investigation prose describing the former Windows
-probe no longer describes this source.
-
-`ATOMIC_BUILTINS.cpp` is the newest probe and the one that does
-characterize atomics: a release store and an acquire load of a
-`size_t` through the `__atomic` built-ins, compiled, linked without
-`libatomic` and run. Its answer gates the ordered load and store
-macros in `include/rw/_defs.h`, which publish facet data and facets
-and fill the scalar caches of `ctype` and `codecvt`.
+libatomic and run: the add, the subtract and the exchange,
+sequentially consistent, and the release store and the acquire load
+that back the ordered accesses. `include/rw/_atomic.h` selects the
+backend when the `int` probe passes, and the backend leaves out each
+width whose probe failed. Older investigation prose describing the
+former Windows probe no longer describes this source.
 
 `THREAD_SAFE_ERRNO` has no direct reader of its status macro. It is a
 stronger retirement-review candidate than a useful value generator
@@ -145,7 +139,6 @@ Token-pasted and script-generated names need family-level inspection.
 | probe / macro suffix | question | direct readers |
 |---|---|---|
 | [ABS_OVERLOADS](../../etc/config/src/ABS_OVERLOADS.cpp) / `NO_ABS_OVERLOADS` + output | overloads of abs() | none |
-| [ATOMIC_BUILTINS](../../etc/config/src/ATOMIC_BUILTINS.cpp) / `NO_ATOMIC_BUILTINS` | `__atomic` release store and acquire load on `size_t` | L; `include/rw/_defs.h` |
 | [ATOMIC_OPS](../../etc/config/src/ATOMIC_OPS.cpp) / `NO_ATOMIC_OPS` | Success stub; does not exercise atomics | L; `include/rw/_atomic.h` |
 | [BAD_ALLOC_ASSIGNMENT](../../etc/config/src/BAD_ALLOC_ASSIGNMENT.cpp) / `NO_BAD_ALLOC_ASSIGNMENT` | bad_alloc assignment operator | L; `src/memory.cpp` |
 | [BAD_ALLOC_COPY_CTOR](../../etc/config/src/BAD_ALLOC_COPY_CTOR.cpp) / `NO_BAD_ALLOC_COPY_CTOR` | bad_alloc copy ctor | L; `src/memory.cpp` |
