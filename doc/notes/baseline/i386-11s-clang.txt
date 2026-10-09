@@ -272,12 +272,13 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 8.cstdint                                     0    0      157      0   100%
 atomic_add                                    0    0        0      0   100%
 atomic_xchg                                   0    0        0      0   100%
+once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   273
+  Programs:                   274
   Non-zero exit status:         0
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10103549
+  Assertions:            10104149
   Failed assertions:            0

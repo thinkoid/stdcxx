@@ -11,7 +11,7 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 273 programs per configuration.
+- Every test builds. The harness runs 274 programs per configuration.
 - No assertion fails, in any configuration, under either compiler.
 - What fails, by cause:
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
@@ -93,9 +93,9 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 273 | 10,103,644 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 273 | 10,103,534 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 273 | 10,116,510 | 0 | 0 | 8 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 274 | 10,104,244 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 274 | 10,104,134 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 274 | 10,117,110 | 0 | 0 | 8 |
 
 Chapter 4 lists where the three differ.
 
@@ -112,7 +112,12 @@ configurations were measured again in full and 15D-clang in its
 again in full on 2026-10-07, at c755a926. Three rows moved, each with
 the commit that changed its test: `19.cerrno` runs 4 assertions, not 5
 (d006f308); `21.char.traits.compare` is new (6bb238b6);
-`27.ostream.inserters.stdcxx-51` passes (415860cc).
+`27.ostream.inserters.stdcxx-51` passes (415860cc). All six were
+measured again in full on 2026-10-09, when the `once` test of
+`__rw_once` came in with its 600 assertions. No other row moved, but
+`22.locale.money.get.mt` timed out once in 15D-clang on a loaded
+machine; alone it passes in 58 seconds, as it does at ee454d5a
+(chapter 3.2).
 
 ## 3. What fails
 
@@ -208,9 +213,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 10,103,644 | 0 | 0 | 0 |
-| 11s-clang | 10,103,549 | 0 | 0 | 0 |
-| 15D-clang | 10,116,510 | 0 | 0 | 8 |
+| 11S-clang | 10,104,244 | 0 | 0 | 0 |
+| 11s-clang | 10,104,149 | 0 | 0 | 0 |
+| 15D-clang | 10,117,110 | 0 | 0 | 8 |
 
 They match the GCC tables row for row, with one exception.
 `18.numeric.special.float` runs 134 assertions in the 32-bit Clang
