@@ -40,6 +40,7 @@
 #include <string.h>   // for memxxx() and strxxx() functions
 
 #include <loc/_locale.h>
+#include <rw/_once.h>
 
 #include "access.h"
 #include "locale_body.h"
@@ -803,26 +804,18 @@ _C_manage (__rw_locale *plocale, const char *locname)
         // manage the global locale
 
         static __rw_locale* global = 0;
+        static __rw_once_t  global_once;
 
-        if (!global) {
-
-            // volatile to prevent optimizers from turning
-            // the while statement below into an infinite loop
-            static volatile int ginit /* = 0 */;
-
-            // cast ginit to int& (STDCXX-792)
-            // casting should be removed after fixing STDCXX-794
-            if (!ginit && 1 == _RWSTD_ATOMIC_PREINCREMENT (
-                    _RWSTD_CONST_CAST (int&, ginit), false)) {
-                global  = _C_manage (0, "C");
-                ginit  += 1000;
+        // the global locale starts out as the classic one, built
+        // before the guard below is taken, because building it
+        // takes the same guard
+        struct _C_global {
+            static void _C_init () {
+                global = _C_manage (0, "C");
             }
-            else {
-                // ginit must be volatile to prevent optimizers
-                // from turning this into an infinite loop
-                while (ginit < 1000) { /* empty */ }
-            }
-        }
+        };
+
+        __rw_once (&global_once, _C_global::_C_init);
 
         // re-entrant
         _RWSTD_MT_STATIC_GUARD (_RW::__rw_locale);
