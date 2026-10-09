@@ -157,6 +157,11 @@ Still in the older shape: =globals.mt=, =num.get.mt=, =num.put.mt=,
 second family uses the round driver it moves into =librwtest=, and
 =codecvt_mt.h= leaves with the operation programs.
 
+State at 582ce429: =numpunct.mt= and =codecvt.first.mt= are in the
+model's shape; the five codecvt operation first-use programs, the
+retirement of =mixed.mt= and the twelve above are left, in that order.
+Only the 15D table is re-pinned; the other five wait for a run.
+
 * TODO Run the suites in parallel
 
 The six suites run one after another, about 26 minutes on 32
