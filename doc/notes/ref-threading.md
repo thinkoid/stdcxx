@@ -19,9 +19,10 @@ The clearest failure was the locale cache: two threads assigned the
 same cached string, although its representation's reference count was
 protected. It is repaired, together with the publication of facet data
 and of the facets themselves, the facet id race and a mixed
-synchronization of facet counts (chapters 4 and 5). Initialization
-counters remain. **Making every increment
-stronger would not have repaired these protocols.**
+synchronization of facet counts (chapters 4 and 5). One-time
+initialization goes through one protocol, `__rw_once` (chapter 5).
+**Making every increment stronger would not have repaired these
+protocols.**
 
 This note describes the source model and guides the remaining MT work.
 The [locale investigation](analysis-locale-mt-race.md) records the
@@ -291,27 +292,56 @@ alive; it does not make its mutable cache immutable.
 
 ## 5. Initialization: election is not completion
 
-Several mechanisms use a counter to choose a first caller, then ask
-that counter to stand for the readiness of unrelated state.
+Several mechanisms used a counter to choose a first caller, then
+asked that counter to stand for the readiness of unrelated state. An
+increment elects, but it announces nothing: the elected caller's
+writes reach the others only through a release they acquire, and the
+others must wait for it. Every one-time initialization in the
+library now goes through one protocol.
 
-| site | source protocol and audit boundary |
+[`__rw_once`](../../include/rw/_once.h) has the shape of Boost's
+atomic `call_once`. Its flag is a zero-initialized `int` with three
+states: ready, running and done. A caller that loads done with
+acquire returns at once. Any other caller takes the one mutex every
+flag shares. A ready flag elects it: it marks the flag running,
+unlocks, and calls the initializer. A running flag makes it wait on
+the one condition variable; a done flag sends it back. When the
+initializer returns, its caller stores done with release under the
+mutex and wakes every waiter. When the initializer throws, it stores
+ready instead, and one of the woken waiters calls the initializer in
+turn. The mutex is never held while an initializer runs, so an
+initializer may itself initialize through another flag; through its
+own flag it deadlocks ([once.cpp](../../src/once.cpp)).
+
+| site | what it initializes |
 |---|---|
-| Global locale, `__rw_locale::_C_manage` | Atomic increment elects the initializer; a pointer and a volatile completion counter are then updated ordinarily. Other callers inspect the pointer or spin on the counter before the later global-locale guard. That later guard does not cover these earlier accesses. |
-| Fallback `__rw_once`, [once.cpp](../../src/once.cpp) | Atomic increment elects a caller, ordinary volatile `init = 1000` announces completion, and waiters poll. The separate mutex fallback also has an ordinary unlocked first check. Neither pattern gains publication merely from its initial increment. |
-| Fallback static mutex construction, [_mutex.h](../../include/rw/_mutex.h) | Placement construction follows a counter election; an ordinary volatile update signals completion. With no usable integer atomic operation, even election uses ordinary increment. This branch is conditional on missing static mutex initialization. |
-| `ios_base::Init`, [iostream.cpp](../../src/iostream.cpp) | First increment initializes streams; later increments return immediately. Counting initializer objects does not itself wait for stream initialization. Establish startup reachability and ordering before claiming concurrent construction is covered. |
-| `__rw_facet_id::_C_init`, [facet.cpp](../../src/facet.cpp) | Repaired: threads racing the first use of a facet type each generated an id and the last store won. The id is now generated once, under a static lock with a recheck, stored with release and read with acquire; `22.locale.id.mt` counts the ids 500 types take. |
+| `locale::classic`, [locale_classic.cpp](../../src/locale_classic.cpp) | The classic locale object. |
+| `ctype<wchar_t>`, [wctype.cpp](../../src/wctype.cpp) | The classic wide mask table, where `_RWSTD_NO_EQUAL_CTYPE_MASK` is defined. |
+| Global locale, `__rw_locale::_C_manage` | The global locale, the classic body at first. The initializer runs before the `__rw_locale` guard, because building the body takes that guard. |
+| `ios_base::Init`, [iostream.cpp](../../src/iostream.cpp) | The eight standard iostream objects. Every `Init` is counted, for the destructor's flush, and waits for the first to construct them. |
+| `__rw_vfmtwhat`, [exception.cpp](../../src/exception.cpp) | The message catalog of the library's exceptions. |
+| `__rw_get_static_mutex`, [_mutex.h](../../include/rw/_mutex.h) | Each static mutex, where the configuration cannot initialize mutexes statically. |
 
-The normal POSIX `__rw_once` route delegates to `pthread_once`, as
-selected in [once.h](../../src/once.h). Do not attribute fallback
-behavior to a configuration that uses the native primitive. Equally,
-that native route does not repair independent hand-written
-initializers such as the global-locale counter.
+The static mutexes bound the protocol from below. Where `int` is not
+lock-free, the ordered accesses to an `int` lock the static mutex of
+`int`, which may be one of the mutexes `__rw_once` constructs. There
+`__rw_once` has no unlocked fast path, and every access to a flag
+holds the protocol's own mutex, which is a POSIX mutex initialized
+statically.
 
-For the fallback protocols, audit exception recovery and waiter
-progress as well as ordering. The static-mutex bootstrap cannot be
-fixed by recursively asking the same uninitialized mutex machinery
-to protect itself.
+`__rw_once` no longer calls `pthread_once`: POSIX leaves undefined
+an exception thrown through it, and glibc's recovery is an
+implementation detail. Its fallbacks for systems without
+`pthread_once` went with it.
+
+Two related sites need no protocol. `__rw_facet_id::_C_init`
+([facet.cpp](../../src/facet.cpp)) generates a facet type's id once,
+under a static lock with a recheck, stored with release and read with
+acquire; `22.locale.id.mt` counts the ids 500 types take.
+`_C_manage` compares a body with the classic body before it takes the
+guard, with a relaxed load. Only a thread that holds the classic body
+compares equal, and it got the body through the guard; nothing is
+published through the pointer.
 
 ## 6. Other uses and their limits
 
@@ -347,10 +377,11 @@ multiple participants and therefore supplies no such exclusion.
    mutex-based field needs the same mutex at every overlapping access.
    The string counts and their ordinary accesses (chapter 4.1) are
    still to audit.
-4. **Give initialization a completion protocol.** Prefer a supported
-   native once mechanism or another fully specified mechanism. Cover
-   readers, exceptions and bootstrap dependencies. Removing `volatile`
-   or strengthening the election instruction alone is insufficient.
+4. **Give initialization a completion protocol.** Done: every
+   one-time initialization goes through `__rw_once` (chapter 5),
+   which covers readers, exceptions and the bootstrap of the static
+   mutexes. Removing `volatile` or strengthening the election
+   instruction alone would have been insufficient.
 5. **Then choose memory orders and representations.** Retaining from
    an existing owner, publishing new state and performing the last
    release have different requirements. Derive them from the complete

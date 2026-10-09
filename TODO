@@ -10,23 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO Synchronization on atomic integer flags: a sweep
-
-Some one-time initializations elect their initializer with an atomic
-increment. They publish completion with a plain write to a =volatile=
-flag the other threads spin on. =volatile= orders neither the flag
-against the data it guards nor the spin against the reads after it.
-The census found six sites. The fallbacks of =__rw_once= went with
-=pthread_once= when =__rw_once= took the shape of Boost's atomic
-=call_once= (=include/rw/_once.h=). The global locale, the standard
-iostream objects, the message catalog and the static mutex initialize
-through it. The comparison with =classic= in =_C_manage= takes
-relaxed accesses.
-
-Check: the census in a note, each site with its decision. The
-ThreadSanitizer build reports none of them, and three rounds of every
-=22.locale.*.mt= test in it report nothing from the library.
-
 * TODO =yi_US.CP1255= does not build on aarch64
 
 =make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=.
