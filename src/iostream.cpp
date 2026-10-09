@@ -59,6 +59,7 @@
 #include <new>
 
 #include <rw/_error.h>
+#include <rw/_once.h>
 
 #include "iosdata.h"
 #include "podarray.h"   // for __rw_aligned_buffer
@@ -236,6 +237,9 @@ extern const void* __rw_std_streams [];
 // iostream initialization counter
 static int __rw_ios_initcnt /* = 0 */;
 
+// the standard iostream objects are constructed once
+static __rw_once_t __rw_ios_once;
+
 }   // namespace __rw
 
 
@@ -243,10 +247,18 @@ _RWSTD_NAMESPACE (std) {
 
 ios_base::Init::Init ()
 {
-    // only the first thread initializes
-    if (1 != _RWSTD_ATOMIC_PREINCREMENT (_RW::__rw_ios_initcnt, false))
-        return;
+    // every Init is counted, and the last one destroyed flushes the
+    // streams; only the first constructs them, and the others wait
+    // until it has (27.4.2.1.6, p3: the count never returns to zero)
+    _RWSTD_ATOMIC_PREINCREMENT (_RW::__rw_ios_initcnt, false);
 
+    _RW::__rw_once (&_RW::__rw_ios_once, _C_init);
+}
+
+
+/* static */ void
+ios_base::Init::_C_init ()
+{
     // since references need not be initialzied statically, cin, et al
     // may not be initialized at this time (i.e., &cin == 0 may hold,
     // and does with MSVC 6.0), obtain and use pointers to the objects

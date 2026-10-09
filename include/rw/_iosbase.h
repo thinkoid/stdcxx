@@ -182,6 +182,11 @@ struct _RWSTD_EXPORT ios_base: _RW::__rw_synchronized
         Init ();
 
         ~Init ();
+
+    private:
+
+        // constructs the standard iostream objects, once
+        static void _C_init ();
     };
 
     // 27.4.2.2, p1
