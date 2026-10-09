@@ -117,11 +117,14 @@ Loads and stores with an explicit ordering came later:
 `_RWSTD_ATOMIC_STORE_RELEASE` and `_RWSTD_ATOMIC_LOAD_ACQUIRE` publish
 data through a flag or a pointer, and `_RWSTD_ATOMIC_STORE_RELAXED`
 and `_RWSTD_ATOMIC_LOAD_RELAXED` state a race that orders nothing,
-such as a cache every thread fills with the same value. They expand
-to the GNU `__atomic` built-ins where `ATOMIC_BUILTINS.cpp` finds them
-and to ordinary accesses otherwise or in a nonreentrant build
-([_defs.h](../../include/rw/_defs.h)). There is still no
-compare-and-exchange.
+such as a cache every thread fills with the same value. They take
+the mutex argument of the rest of the family and call the backend's
+`__rw_atomic_load_acquire`, `__rw_atomic_load_relaxed`,
+`__rw_atomic_store_release` and `__rw_atomic_store_relaxed`; in a
+nonreentrant build they are ordinary accesses
+([_defs.h](../../include/rw/_defs.h)). The value a store writes is
+not deduced: it converts to the type of the object, which alone
+selects the overload. There is still no compare-and-exchange.
 
 ### 3.1 Backend selection and the meaning of `false`
 
@@ -140,6 +143,7 @@ exclusive load and store loop at run time.
 | Supported scalar with `false` | Hardware/compiler overload when available. |
 | Scalar with `false`, without a matching hardware overload | Generic operation under a static mutex associated with the scalar type. |
 | Scalar with an explicit `__rw_mutex_base&` | Ordinary scalar operation under that mutex. |
+| `volatile` scalar with `false` | No hardware overload takes a `volatile` object, so the call takes the mutex template for the `volatile` type. Callers cast `volatile` away first, as the increments of STDCXX-792 do. |
 | `_RWSTD_THREAD_*`, with TLS available | Ordinary operation on thread-local storage. |
 | `_RWSTD_THREAD_*`, without TLS | Corresponding atomic wrapper on shared storage. |
 | `_RWSTD_ATOMIC_IO_SWAP` | Ordinary exchange on an unlocked stream (`_C_nolock` set, a user's stream); otherwise the selected atomic wrapper with its supplied mutex. |
@@ -167,9 +171,9 @@ or subsystem.
 [_atomic-builtins.h](../../include/rw/_atomic-builtins.h) implements
 the increment, the decrement and the exchange with
 `__atomic_add_fetch`, `__atomic_sub_fetch` and `__atomic_exchange_n`,
-all sequentially consistent. The ordered loads and stores of
-[_defs.h](../../include/rw/_defs.h) name their orders at the call:
-release, acquire or relaxed. See
+all sequentially consistent, and the ordered loads and stores with the
+order their names give, for every characterized width, for `wchar_t`
+and for pointers of every type. See
 [GCC's memory-model built-ins](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fatomic-Builtins.html).
 
 On x86 and x86-64 the read-modify-writes are locked `xadd` and
