@@ -147,6 +147,38 @@ The other seven older tests pass. `22.locale.codecvt.mt` counts
 pass means every thread ran to the end without an error, a crash or a
 hang.
 
+These pins predate the codecvt split. The original program is now
+seven executables:
+
+| Program | Coverage |
+|---|---|
+| `22.locale.codecvt.first.mt` | First wide conversion through a fresh named facet; 200 rounds |
+| `22.locale.codecvt.in.mt` | Input conversion: result, output length and characters |
+| `22.locale.codecvt.out.mt` | Output conversion: result, output length and bytes |
+| `22.locale.codecvt.length.mt` | External sequence length against a serial reference |
+| `22.locale.codecvt.unshift.mt` | Shift-state handling from the initial state |
+| `22.locale.codecvt.properties.mt` | Encoding, maximum length and no-conversion queries |
+| `22.locale.codecvt.mixed.mt` | All seven operations together, both character types |
+
+The focused operation tests retain the narrow, wide and combined-type
+runs and both locale-sharing modes. Each iteration exercises its
+operation. The mixed test runs only the combined-type pool, with
+224 iterations by default: enough to visit all seven operations in
+all 32 supported locale slots. It advances the locale inside the
+operation cycle, so a shared divisor of the two counts cannot omit
+pairs. Smaller user-supplied iteration counts can stop mid-cycle.
+
+The private `tests/localization/codecvt_mt.h` supplies locale selection,
+options and thread-pool execution. Fixture preparation and checks
+remain in the test files. The first-use regression has its own driver:
+preparing reference conversions on a retained facet would consume
+the first-use window it tests. No arrival gates have been added yet.
+
+Only `first.mt` contributes counted assertions. The other programs use
+`RW_ASSERT`, which aborts on failure without contributing to the
+driver's assertion count. A passing row therefore counts zero.
+The tables have not yet been re-pinned for the split.
+
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
 that takes the machine's memory. In thread-safe builds the limit

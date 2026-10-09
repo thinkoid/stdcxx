@@ -118,6 +118,20 @@ test passes in seconds under the harness in 15D on any processor
 count, and the 15D rows become a reference. Each test still fails
 against the library before the fix it covers.
 
+The codecvt split is complete: =22.locale.codecvt.first.mt= keeps
+its first-use regression, while =in.mt=, =out.mt=, =length.mt=,
+=unshift.mt= and =properties.mt= isolate the operations. The short
+=mixed.mt= program retains cross-operation coverage. The private
+=tests/localization/codecvt_mt.h= holds locale selection, options
+and thread-pool execution; checks and fixture data stay in each
+program. Arrival gates and smaller fixed thread counts are still
+pending. The first-use regression still runs 200 fresh-locale rounds.
+
+Use this shape when splitting other tests. Compare each locale
+family's private driver with the others before adding another copy;
+move genuinely shared pieces into =librwtest= when their common
+requirements are established. Keep family-specific checks private.
+
 * TODO Run the suites in parallel
 
 The six suites run one after another, about 26 minutes on 32

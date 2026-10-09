@@ -38,7 +38,7 @@ Each hides the other, which is why the second one looked rare.
   round, 2000 rounds: with the slot filled by one thread first, 2685,
   2674 and 2698 of 24000 first conversions threw (about 11%); with
   the data stored before the size, none did. The data is now stored
-  first, and `22.locale.codecvt.mt` carries the case. Before the slot
+  first, and `22.locale.codecvt.first.mt` carries the case. Before the slot
   fix, left to race, the leak kept the facet alive after the first
   round, the data was never mapped again, and the second defect
   showed only in the first round of a process.
@@ -260,7 +260,7 @@ chapter 3 is about that.
 
 ### 2.4. The test
 
-`22.locale.codecvt.mt` ends with a case that builds
+`22.locale.codecvt.first.mt` builds
 `de_DE.ISO-8859-1` from the tree's sources into a locale root of its
 own, skips when the C library knows the name, and then, 200 times,
 constructs the locale, fills its slot from the main thread and has
