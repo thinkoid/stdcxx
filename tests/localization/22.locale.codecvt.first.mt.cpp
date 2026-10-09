@@ -39,11 +39,14 @@
 
 #define MAX_THREADS 32
 
-// default number of threads (adjusted to the processor count in main)
-int opt_nthreads = 1;
+// a small fixed pool, independent of the processor count
+int opt_nthreads = 4;
 
 // default timeout used by each threaded section of this test
-int opt_timeout = 60;
+int opt_timeout = 5;
+
+// the number of locales test_first_use constructs, one per round
+int opt_first_use_rounds = 64;
 
 /**************************************************************************/
 
@@ -99,9 +102,6 @@ first_use_func (void* arg)
 }   // extern "C"
 
 /**************************************************************************/
-
-// the number of locales test_first_use constructs, one per round
-int opt_first_use_rounds = 200;
 
 static int
 test_first_use ()
@@ -160,6 +160,9 @@ test_first_use ()
         for (int j = 0; j != opt_nthreads; ++j)
             args [j] = (void*)long (j);
 
+        // An arrival gate here hid the original fault by sending readers
+        // into conversion too early. Keep natural thread-start staggering
+        // without delays or inspection of the facet's internal state.
         result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
                                  first_use_func, args,
                                  std::size_t (opt_timeout));
@@ -167,6 +170,12 @@ test_first_use ()
         rw_error (result == 0, 0, __LINE__,
                   "rw_thread_pool(0, %d, 0, %{#f}, ...) failed",
                   opt_nthreads, first_use_func);
+
+        if (0 == result && rw_thread_pool_timeout_expired ()) {
+            rw_error (false, 0, __LINE__,
+                      "first-use round %d exceeded the soft timeout", i);
+            result = 1;
+        }
 
         for (int j = 0; 0 == result && j != opt_nthreads; ++j) {
 
@@ -227,22 +236,14 @@ run_test (int, char**)
 
 int main (int argc, char *argv[])
 {
-#ifdef _RWSTD_REENTRANT
-
-    // set nthreads to the greater of the number of processors
-    // and 2 (for uniprocessor systems) by default
-    opt_nthreads = rw_get_cpus ();
-    if (opt_nthreads < 2)
-        opt_nthreads = 2;
-
-#endif   // _RWSTD_REENTRANT
-
     return rw_test (argc, argv, __FILE__,
                     "lib.locale.codecvt",
                     "thread safety of the first conversion", run_test,
                     "|-soft-timeout#0 "  // must be non-negative
-                    "|-nthreads#0-* ",   // must be in [0, MAX_THREADS]
+                    "|-nthreads#0-* "    // must be in [0, MAX_THREADS]
+                    "|-nloops#1 ",       // fresh-locale rounds
                     &opt_timeout,
                     int (MAX_THREADS),
-                    &opt_nthreads);
+                    &opt_nthreads,
+                    &opt_first_use_rounds);
 }

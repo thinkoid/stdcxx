@@ -124,8 +124,14 @@ its first-use regression, while =in.mt=, =out.mt=, =length.mt=,
 =mixed.mt= program retains cross-operation coverage. The private
 =tests/localization/codecvt_mt.h= holds locale selection, options
 and thread-pool execution; checks and fixture data stay in each
-program. Arrival gates and smaller fixed thread counts are still
-pending. The first-use regression still runs 200 fresh-locale rounds.
+program. The first-use regression uses four workers and 64 fresh-locale
+rounds. It keeps natural thread-start staggering: simultaneous entry
+through a gate hid its known fault in the measured runs. The operation
+tests still need their contention schedules and smaller fixed counts.
+
+Keep scheduling independent of library internals and machine-specific
+delays. Use gates where they help public operations overlap; accept
+probabilistic detection rather than inspecting private publication flags.
 
 Use this shape when splitting other tests. Compare each locale
 family's private driver with the others before adding another copy;

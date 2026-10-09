@@ -262,13 +262,30 @@ chapter 3 is about that.
 
 `22.locale.codecvt.first.mt` builds
 `de_DE.ISO-8859-1` from the tree's sources into a locale root of its
-own, skips when the C library knows the name, and then, 200 times,
-constructs the locale, fills its slot from the main thread and has
-the pool's threads, created anew each round, convert `"abc"` on
-first use. Thread creation staggers the threads' arrival enough that
-some land in the window. On the aarch64 machine, 12 threads: 81, 47,
-75 and 55 failed assertions in four runs before the fix, 0 in four
-runs after. The case runs only in builds with threads.
+own and skips when the C library knows the name. Each round constructs
+a fresh locale, fills its facet slot from the main thread and has four
+workers convert `"abc"`. The workers are created anew for each of the
+64 rounds. `--nthreads` and `--nloops` can override the counts.
+
+The workers start naturally, without an arrival gate or an inserted
+delay. A gate can make every reader enter conversion before premature
+publication and wait on the facet's mutex, hiding the original fault.
+The test exercises public operations and never inspects private facet
+state. Detection remains probabilistic.
+
+In 12D on x86-64 Linux with GCC 16.2.1 and glibc 2.44, the current
+test passed 50 of 50 runs with the fixed library. Restoring only the
+original wide-codecvt mapping call in a scratch library produced the
+expected `bad locale name` assertion failures in 50 of 50 runs, with
+no injected delay. An earlier trial of the same worker and round counts
+detected the fault in 47 of 50 runs; the defaults do not guarantee
+detection. A simultaneous conversion gate missed it in all 20 trials
+with four workers and 32 rounds.
+
+The five-second soft timeout is checked after each pool joins. It stops
+further rounds after an overrun; a conversion or join that hangs still
+requires the harness's hard timeout. The case runs only in threaded
+builds.
 
 ## 3. What these fixes do not cover
 

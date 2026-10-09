@@ -152,7 +152,7 @@ seven executables:
 
 | Program | Coverage |
 |---|---|
-| `22.locale.codecvt.first.mt` | First wide conversion through a fresh named facet; 200 rounds |
+| `22.locale.codecvt.first.mt` | First wide conversion through a fresh named facet; four workers, 64 rounds |
 | `22.locale.codecvt.in.mt` | Input conversion: result, output length and characters |
 | `22.locale.codecvt.out.mt` | Output conversion: result, output length and bytes |
 | `22.locale.codecvt.length.mt` | External sequence length against a serial reference |
