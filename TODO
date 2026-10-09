@@ -118,30 +118,49 @@ test passes in seconds under the harness in 15D on any processor
 count, and the 15D rows become a reference. Each test still fails
 against the library before the fix it covers.
 
-The codecvt split is complete: =22.locale.codecvt.first.mt= keeps
-its first-use regression, while =in.mt=, =out.mt=, =length.mt=,
-=unshift.mt= and =properties.mt= isolate the operations. The short
-=mixed.mt= program retains cross-operation coverage. The private
-=tests/localization/codecvt_mt.h= holds locale selection, options
-and thread-pool execution; checks and fixture data stay in each
-program. The first-use regression uses four workers and 64 fresh-locale
-rounds. It keeps natural thread-start staggering: simultaneous entry
-through a gate hid its known fault in the measured runs. The operation
-tests still need their contention schedules and smaller fixed counts.
+=22.locale.numpunct.mt= is the model. Its locales are built from the
+tree's sources by =rw_localedef=, under names the C library does not
+know, so a facet whose data is missing cannot hide behind the C
+library's answer. Each round constructs a fresh locale and fills its
+facet slots from the main thread; four threads, 64 rounds. Even rounds
+run the threads in lockstep, a gate before each member call: one gate
+at the start loses them on the first call, which maps the facet's data
+under the facet's mutex and releases them one by one. Odd rounds let
+them start as they are created, for data published too early, which a
+gate hides (=22.locale.codecvt.first.mt=). Each thread records what it
+saw in a slot of its own; the main thread asserts after the join and
+stops at the first failing round. The test runs in 1.2 seconds in 15D.
+Against the numpunct cache that 2e196ebb removed it fails in round 0,
+20 runs of 20; the old program failed in one run of two, after 52
+seconds, and timed out in the other, which is also its pinned row.
 
-Keep scheduling independent of library internals and machine-specific
-delays. Use gates where they help public operations overlap; accept
-probabilistic detection rather than inspecting private publication flags.
+Schedules use public operations only: no delays, no reads of private
+state. Detection stays probabilistic and is measured against the fault
+each test covers.
 
-Use this shape when splitting other tests. Compare each locale
-family's private driver with the others before adding another copy;
-move genuinely shared pieces into =librwtest= when their common
-requirements are established. Keep family-specific checks private.
+The codecvt split moved the old program's steady-state loop into five
+operation programs and =mixed.mt=: 32 threads, 5000 iterations and
+three sections each, about 15 seconds where the one program took 4.
+They select locales with =rw_locales=, which on the tables' machine
+yields =C=, =POSIX=, =C.utf8= and =en_US.utf8=. None of them reads the
+library's database, and against the codecvt fault that 8c4282ee
+removed all six pass. Each of =do_in=, =do_out=, =do_unshift=,
+=do_length=, =do_encoding= and =do_max_length= reads the mapped data
+on its own and falls back on its own when it is missing, so each
+operation gets a first-use program in the model's shape, on
+=first.mt='s locale. =mixed.mt= then leaves.
+
+Still in the older shape: =globals.mt=, =num.get.mt=, =num.put.mt=,
+=time.get.mt=, =time.put.mt=, =money.get.mt=, =money.put.mt=,
+=moneypunct.mt=, =messages.mt=, =ctype.mt=, =cons.mt= and
+=statics.mt=. Split each by facet operation, not by member. Once a
+second family uses the round driver it moves into =librwtest=, and
+=codecvt_mt.h= leaves with the operation programs.
 
 * TODO Run the suites in parallel
 
 The six suites run one after another, about 26 minutes on 32
-processors. 14 of them are timeouts: seven older locale MT tests run
+processors. 12 of them are timeouts: six older locale MT tests run
 into the harness's 60 seconds in each thread-safe suite. The rest is a
 minute or two per suite, most of it in a few long tests. The suites
 are already isolated from each other: separate build directories,
