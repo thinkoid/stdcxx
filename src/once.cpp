@@ -10,7 +10,7 @@
  * contributor  license agreements.  See  the NOTICE  file distributed
  * with  this  work  for  additional information  regarding  copyright
  * ownership.   The ASF  licenses this  file to  you under  the Apache
- * License, Version  2.0 (the  License); you may  not use  this file
+ * License, Version  2.0 (the License); you may  not use  this file
  * except in  compliance with the License.   You may obtain  a copy of
  * the License at
  *
@@ -23,172 +23,137 @@
  * permissions and limitations under the License.
  *
  * Copyright 2007 Rogue Wave Software.
- * 
+ *
  **************************************************************************/
 
 #define _RWSTD_LIB_SRC
 #include <rw/_defs.h>
 #include <rw/_mutex.h>
-
-#include "once.h"
+#include <rw/_once.h>
 
 
 _RWSTD_NAMESPACE (__rw) {
 
 
-extern "C" {
+// the values of __rw_once_t::_C_state
+enum {
+    __rw_once_ready,     // func has not run, or exited by an exception
+    __rw_once_running,   // func is running
+    __rw_once_done       // func has returned
+};
 
 
-#ifdef _RWSTD_THREAD_ONCE
+#ifdef _RWSTD_REENTRANT
 
 
-// implementation that relies on the system one-time initialization
-// mechanism such as pthread_once()
-_RWSTD_EXPORT int
-__rw_once (__rw_once_t *once, void (*func)())
+// one mutex and one condition variable serve every flag; the mutex is
+// held while a flag changes state, never while func runs, so a func
+// may itself initialize through another flag
+static pthread_mutex_t
+__rw_once_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static pthread_cond_t
+__rw_once_cond = PTHREAD_COND_INITIALIZER;
+
+
+// releases the mutex on every exit, including the unwinding of a
+// thread cancelled while it waits
+struct __rw_once_lock
 {
-    _RWSTD_ASSERT (0 != once && 0 != func);
+    __rw_once_lock () {
+        pthread_mutex_lock (&__rw_once_mutex);
+    }
 
-    return _RWSTD_THREAD_ONCE (once, func);
+    ~__rw_once_lock () {
+        pthread_mutex_unlock (&__rw_once_mutex);
+    }
+};
+
+
+// returns true to the caller elected to run func, after marking the
+// flag running; false once func has returned in another thread
+static bool
+__rw_once_enter (int &state)
+{
+    const __rw_once_lock lock;
+
+    for ( ; ; ) {
+
+        // every store happens under the mutex, so a relaxed load
+        // under it sees the latest
+        switch (_RWSTD_ATOMIC_LOAD_RELAXED (state, false)) {
+
+        case __rw_once_ready:
+            _RWSTD_ATOMIC_STORE_RELAXED (state, __rw_once_running, false);
+            return true;
+
+        case __rw_once_done:
+            return false;
+        }
+
+        pthread_cond_wait (&__rw_once_cond, &__rw_once_mutex);
+    }
 }
 
 
-#elif defined (_RWSTD_NO_ATOMIC_OPS) && defined (_RWSTD_POSIX_THREADS)
-
-
-// implementation that uses a mutex instead of pthread_once() or atomic
-// operations
-_RWSTD_EXPORT int
-__rw_once (__rw_once_t *once, void (*func)())
+// leaves the flag done or ready again and wakes the waiters; the
+// store happens under the mutex, or a waiter that has just read
+// running could miss the broadcast
+static void
+__rw_once_leave (int &state, int next)
 {
-    _RWSTD_ASSERT (0 != once && 0 != func);
+    {
+        const __rw_once_lock lock;
 
-    // _C_init may take on one of two valid values:
-    // -1 for a properly initialized __rw_once_t object whose initializer
-    //    hasn't run yet
-    // +1 for ar __rw_once_t object whose initializer has already been
-    //    executed
-    // Any other value (including 0, for __rw_once_t objects that haven't
-    // been properly initialized) is invalid.
-
-    if (-1 == once->_C_init) {
-
-        const int result = pthread_mutex_lock (&once->_C_mutex);
-        if (result)
-            return result;
-
-        if (-1 == once->_C_init) {
-
-            // entered by the first thread and only the first time around,
-            // unless the initialization function throws
-
-            _TRY {
-                func ();
-            }
-            _CATCH (...) {
-                pthread_mutex_unlock (&once->_C_mutex);
-                _RETHROW;
-            }
-
-            once->_C_init += 2;
-        }
-
-        pthread_mutex_unlock (&once->_C_mutex);
+        // the release pairs with the acquire of the unlocked test in
+        // __rw_once: what func wrote is visible to every thread that
+        // sees the flag done
+        _RWSTD_ATOMIC_STORE_RELEASE (state, next, false);
     }
 
-    // verify that initialization took place exactly once and help detect
-    // uninitialized __rw_once_t objects to help catch problems on platforms
-    // such as HP-UX that require pthread_once_t objects to be explicitly
-    // initialized (i.e., not all bits tobe zeroed out) in order for
-    // pthread_once() to succeed
-    _RWSTD_ASSERT (1 == once->_C_init);
-
-    return 0;
+    pthread_cond_broadcast (&__rw_once_cond);
 }
 
 
-#elif defined (_RWSTD_REENTRANT)
-
-
-// implementation that uses atomic operations
-_RWSTD_EXPORT int
+_RWSTD_EXPORT void
 __rw_once (__rw_once_t *once, void (*func)())
 {
     _RWSTD_ASSERT (0 != once && 0 != func);
 
-    volatile int &init = once->_C_init;
+    int &state = once->_C_state;
 
-restart:
+    if (   __rw_once_done == _RWSTD_ATOMIC_LOAD_ACQUIRE (state, false)
+        || !__rw_once_enter (state))
+        return;
 
-    // cast init to int& (see STDCXX-792)
-    // casting should be removed after fixing STDCXX-794
-    if (init == 0 && 1 == _RWSTD_ATOMIC_PREINCREMENT (
-            _RWSTD_CONST_CAST (int&, init), false)) {
-
-        // entered by the first thread and only the first time around,
-        // unless the initialization function throws
-
-        _TRY {
-            func ();
-        }
-        _CATCH (...) {
-            _RWSTD_ATOMIC_PREDECREMENT (
-                _RWSTD_CONST_CAST (int&, init), false);
-            _RETHROW;
-        }
-
-        init = 1000;
-    }
-    else {
-        // entered by the second and subsequent threads or on the second
-        // and subsequent calls by the first thread after (or duing)
-        // a successful initialization 
-
-        for (int loop = 0; init < 1000; ++loop) {
-            if (0 == init) {
-                // first time initialization failed via an exception,
-                // try again
-                goto restart;
-            }
-
-            if (32 < loop) {
-                // avoid wasting too many CPU cycles
-                _RWSTD_THREAD_YIELD ();
-            }
-        }
-    }
-
-    return 0;
-}
-
-
-#else   // if !defined (_RWSTD_THREAD_ONCE)
-
-
-// thread-unsafe implementation
-_RWSTD_EXPORT int
-__rw_once (__rw_once_t *once, void (*func)())
-{
-    _RWSTD_ASSERT (0 != once && 0 != func);
-
-    // detect uninitialized __rw_once_t objects to help reveal problems
-    // in reentrant code on platforms such as HP-UX that require
-    // pthread_once_t objects to be explicitly initialized (i.e., not
-    // all bits tobe zeroed out) in order for pthread_once() to succeed
-    _RWSTD_ASSERT (-1 == once->_C_init || 1 == once->_C_init);
-
-    if (once->_C_init == -1) {
-
+    _TRY {
         func ();
-
-        once->_C_init = 1;
+    }
+    _CATCH (...) {
+        __rw_once_leave (state, __rw_once_ready);
+        _RETHROW;
     }
 
-    return 0;
+    __rw_once_leave (state, __rw_once_done);
 }
 
-#endif   // _RWSTD_THREAD_ONCE
 
-}   // extern "C"
+#else   // if !defined (_RWSTD_REENTRANT)
+
+
+_RWSTD_EXPORT void
+__rw_once (__rw_once_t *once, void (*func)())
+{
+    _RWSTD_ASSERT (0 != once && 0 != func);
+
+    // a func that exits by an exception leaves the flag ready
+    if (__rw_once_done != once->_C_state) {
+        func ();
+        once->_C_state = __rw_once_done;
+    }
+}
+
+
+#endif   // _RWSTD_REENTRANT
 
 }   // namespace __rw

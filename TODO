@@ -16,7 +16,7 @@ Some one-time initializations elect their initializer with an atomic
 increment. They publish completion with a plain write to a =volatile=
 flag the other threads spin on. =volatile= orders neither the flag
 against the data it guards nor the spin against the reads after it.
-The census found six sites:
+The census found six sites; five remain:
 - =src/locale_body.cpp:807-830=, the global locale. The builder
   stores =global= with no release; readers wait on =ginit= with no
   acquire and can read 0 on aarch64. The unlocked test of =global= at
@@ -29,18 +29,14 @@ The census found six sites:
   a data race whose answer cannot be wrong.
 - =include/rw/_mutex.h:286=, the static mutex, compiled only where the
   configuration rules out static initialization of mutexes.
-- =src/once.cpp:74= and =:125=, the fallbacks of =__rw_once=,
-  compiled only with =_RWSTD_NO_PTHREAD_ONCE= defined by hand.
+The sixth, the fallbacks of =__rw_once=, went with =pthread_once= when
+=__rw_once= took the shape of Boost's atomic =call_once=
+(=include/rw/_once.h=).
 
-Fix: one mechanism for one-time initialization, the library's own
-=__rw_once=, in the shape of Boost's atomic =call_once=: a flag valid
-when zero-initialized, one statically initialized mutex and condition
-variable for every flag, waiters that block, and an initializer that
-throws rolls the flag back and wakes them. Its fast path is an
-acquire load through the backend's ordered accesses. =pthread_once=,
-=_RWSTD_NO_PTHREAD_ONCE= and both fallbacks go. The global locale,
-=ios_base::Init=, the catalog and the static mutex initialize through
-it; the comparison with =classic= takes relaxed accesses.
+Fix: one mechanism for one-time initialization, =__rw_once=. The
+global locale, =ios_base::Init=, the catalog and the static mutex
+initialize through it; the comparison with =classic= takes relaxed
+accesses.
 
 Check: the census in a note, each site with its decision. The
 ThreadSanitizer build reports none of them, and three rounds of every

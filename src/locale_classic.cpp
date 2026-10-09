@@ -32,7 +32,7 @@
 #include <new>             // for placment new
 
 #include <loc/_locale.h>   // for locale
-#include "once.h"          // for __rw_once()
+#include <rw/_once.h>      // for __rw_once()
 #include "podarray.h"
 
 
@@ -45,8 +45,6 @@ static __rw_aligned_buffer<_STD::locale> __rw_classic;
 static __rw_once_t
 __rw_classic_once_init = _RWSTD_ONCE_INIT;
 
-
-extern "C" {
 
 // one-time initializer for the classic "C" locale object
 static void
@@ -66,8 +64,6 @@ __rw_init_classic ()
     // construct the classic "C" locale in the provided buffer
     new (__rw_classic._C_store ()) _STD::locale ("C");
 }
-
-}   // extern "C"
 
 }   // namespace __rw
 

@@ -50,7 +50,7 @@
 #include "use_facet.h"
 
 #ifdef _RWSTD_NO_EQUAL_CTYPE_MASK
-#  include "once.h"   // for __rw_once()
+#  include <rw/_once.h>   // for __rw_once()
 #endif   // _RWSTD_NO_EQUAL_CTYPE_MASK
 
 // utf8 encoding maximum size
@@ -305,8 +305,6 @@ __rw_classic_wide_tab [_STD::ctype<char>::table_size];
 static __rw_once_t
 __rw_classic_wide_tab_once_init = _RWSTD_ONCE_INIT;
 
-extern "C" {
-
 // one-time initializer for the classic wide_tab
 static void
 __rw_init_classic_wide_tab ()
@@ -331,8 +329,6 @@ __rw_init_classic_wide_tab ()
     __rw_get_mask (0, wc_array, wc_array + _STD::ctype<char>::table_size,
                    __rw_all, __rw_classic_wide_tab, false, false, "C");
 }
-
-}   // extern "C"
 
 #endif   // _RWSTD_NO_EQUAL_CTYPE_MASK
 
