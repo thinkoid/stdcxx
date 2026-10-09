@@ -223,7 +223,7 @@ cannot answer, but it is no longer needed to see the defect.
 | cause | fix | commit | evidence |
 |---|---|---|---|
 | A: `numpunct` caches | call the virtuals; the members stay, unused, until the next minor version | 2e196ebb | `22.locale.numpunct.mt` |
-| B: wide `codecvt` data | store the data before its size | 8c4282ee | `22.locale.codecvt.first.mt` |
+| B: wide `codecvt` data | store the data before its size | 8c4282ee | `22.locale.codecvt.in.mt` |
 | racing first `use_facet` | return the extra references | 2bbdf7c9 | `22.locale.use_facet.mt` |
 | facet data publication | release store of `_C_impsize`, acquire loads | 4e559c9b | memory model; no reordering in an aarch64 litmus |
 | `time_put` data built twice | re-check under `__rw_setlocale` | 81ef680c | `22.locale.time.put.libc.mt` |

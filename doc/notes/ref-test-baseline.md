@@ -11,8 +11,8 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 280 programs per configuration;
-  the tables not measured since the codecvt split pin 274.
+- Every test builds. The harness runs 278 programs per configuration;
+  the five tables not measured since the codecvt split pin 274.
 - No assertion fails, in any configuration, under either compiler.
 - What fails, by cause:
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
@@ -96,7 +96,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 274 | 10,104,244 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 274 | 10,104,134 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 280 | 10,107,382 | 0 | 0 | 7 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 278 | 10,110,966 | 0 | 0 | 7 |
 
 Chapter 4 lists where the three differ.
 
@@ -121,8 +121,11 @@ machine; alone it passes in 58 seconds, as it does at ee454d5a
 (chapter 3.2). 15D was measured again in full on 2026-10-09, after
 the codecvt MT program became seven and `22.locale.numpunct.mt` was
 rebuilt on fresh-locale rounds; only those rows and the summary moved.
-The other five tables still pin the single codecvt program and, in
-15D-clang, the timed-out numpunct row, until a run measures them.
+It was measured once more the same day, when the five codecvt programs
+took the first-use shape and the first-use and mixed programs left:
+only their rows and the summary moved. The other five tables still pin
+the single codecvt program and, in 15D-clang, the timed-out numpunct
+row, until a run measures them.
 
 ## 3. What fails
 
@@ -156,22 +159,23 @@ locales built from the tree's sources and counts 2560 assertions in
 about a second. The `TODO` entry "MT tests that provoke contention
 instead of waiting for it" describes the shape.
 
-The codecvt MT test is seven programs:
+The codecvt MT test is five programs in the same shape, one per
+operation of the facet, each on `de_DE.ISO-8859-1` built from the
+tree's sources, four threads, 64 rounds, no gates (the gate hides the
+fault they cover, `analysis-facet-first-use.md` 2.4). Each thread
+calls the wide and the narrow facet once per round.
 
-| Program | Coverage |
-|---|---|
-| `22.locale.codecvt.first.mt` | First wide conversion through a fresh named facet; four workers, 64 rounds |
-| `22.locale.codecvt.in.mt` | Input conversion: result, output length and characters |
-| `22.locale.codecvt.out.mt` | Output conversion: result, output length and bytes |
-| `22.locale.codecvt.length.mt` | External sequence length against a serial reference |
-| `22.locale.codecvt.unshift.mt` | Shift-state handling from the initial state |
-| `22.locale.codecvt.properties.mt` | Encoding, maximum length and no-conversion queries |
-| `22.locale.codecvt.mixed.mt` | All seven operations together, both character types |
+| Program | Operation | Assertions |
+|---|---|---|
+| `22.locale.codecvt.in.mt` | `in ()`: result, counts, characters | 1024 |
+| `22.locale.codecvt.out.mt` | `out ()`: result, counts, bytes | 1024 |
+| `22.locale.codecvt.unshift.mt` | `unshift ()`: result, count | 512 |
+| `22.locale.codecvt.length.mt` | `length ()` | 512 |
+| `22.locale.codecvt.properties.mt` | `encoding ()`, `max_length ()`, `always_noconv ()` | 1024 |
 
-`first.mt` counts 512 assertions. The other six check with
-`RW_ASSERT`, which aborts on failure and adds nothing to the count,
-so their rows count zero. They run the older shape on the C library's
-locales; the `TODO` entry says what replaces them.
+The round driver they and `22.locale.numpunct.mt` share is
+`rw_first_use_rounds` in `librwtest` (`tests/include/rw_rounds.h`);
+`--nthreads`, `--nrounds` and `--soft-timeout` override its counts.
 
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
@@ -198,7 +202,7 @@ the harness, not a reference.
 | `22.locale.codecvt` | 322 | 322 | 306 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
 | `21.string.stdcxx-162` | `NOUT` | `NOUT` | `ABRT` |
-| `22.locale.codecvt.first.mt` | 0 | 0 | 512 |
+| five `22.locale.codecvt.*.mt` | 0 | 0 | 1024, 1024, 512, 512, 1024 |
 | `22.locale.numpunct.mt` | 0 | 0 | 2560 |
 | six `22.locale.*.mt` | pass | pass | `HUP`, chapter 3.2 |
 
@@ -220,7 +224,7 @@ Reasons, in order:
   corrupt `mbstate_t`. Their state check sits under the locale lock.
 - The atomic operation tests count only in the thread-safe build.
 - `21.string.stdcxx-162`: chapter 3.1.
-- `22.locale.codecvt.first.mt` and `22.locale.numpunct.mt` count
+- The five codecvt MT programs and `22.locale.numpunct.mt` count
   only in the thread-safe build.
 - Six older locale MT tests time out in 15D: chapter 3.2.
 

@@ -127,7 +127,7 @@ run the threads in lockstep, a gate before each member call: one gate
 at the start loses them on the first call, which maps the facet's data
 under the facet's mutex and releases them one by one. Odd rounds let
 them start as they are created, for data published too early, which a
-gate hides (=22.locale.codecvt.first.mt=). Each thread records what it
+gate hides (=22.locale.codecvt.in.mt=). Each thread records what it
 saw in a slot of its own; the main thread asserts after the join and
 stops at the first failing round. The test runs in 1.2 seconds in 15D.
 Against the numpunct cache that 2e196ebb removed it fails in round 0,
@@ -138,29 +138,21 @@ Schedules use public operations only: no delays, no reads of private
 state. Detection stays probabilistic and is measured against the fault
 each test covers.
 
-The codecvt split moved the old program's steady-state loop into five
-operation programs and =mixed.mt=: 32 threads, 5000 iterations and
-three sections each, about 15 seconds where the one program took 4.
-They select locales with =rw_locales=, which on the tables' machine
-yields =C=, =POSIX=, =C.utf8= and =en_US.utf8=. None of them reads the
-library's database, and against the codecvt fault that 8c4282ee
-removed all six pass. Each of =do_in=, =do_out=, =do_unshift=,
-=do_length=, =do_encoding= and =do_max_length= reads the mapped data
-on its own and falls back on its own when it is missing, so each
-operation gets a first-use program in the model's shape, on
-=first.mt='s locale. =mixed.mt= then leaves.
+The codecvt family is done, on the driver: =in.mt=, =out.mt=,
+=unshift.mt=, =length.mt= and =properties.mt=, one program per
+operation of the facet, each on =de_DE.ISO-8859-1= from the tree's
+sources, ungated, and each failing 20 runs of 20 against the fault
+8c4282ee removed (=doc/notes/analysis-facet-first-use.md=, 2.4).
+=mixed.mt= is gone.
+The round driver is =rw_first_use_rounds= in =librwtest=
+(=tests/include/rw_rounds.h=): the locales, the expected blocks, the
+rounds, the exceptions a thread throws, and the gate.
 
 Still in the older shape: =globals.mt=, =num.get.mt=, =num.put.mt=,
 =time.get.mt=, =time.put.mt=, =money.get.mt=, =money.put.mt=,
 =moneypunct.mt=, =messages.mt=, =ctype.mt=, =cons.mt= and
-=statics.mt=. Split each by facet operation, not by member. Once a
-second family uses the round driver it moves into =librwtest=, and
-=codecvt_mt.h= leaves with the operation programs.
-
-State at 582ce429: =numpunct.mt= and =codecvt.first.mt= are in the
-model's shape; the five codecvt operation first-use programs, the
-retirement of =mixed.mt= and the twelve above are left, in that order.
-Only the 15D table is re-pinned; the other five wait for a run.
+=statics.mt=. Split each by facet operation, not by member. Only the
+15D table is re-pinned; the other five wait for a run.
 
 * TODO Run the suites in parallel
 

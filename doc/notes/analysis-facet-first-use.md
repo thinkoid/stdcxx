@@ -38,7 +38,7 @@ Each hides the other, which is why the second one looked rare.
   round, 2000 rounds: with the slot filled by one thread first, 2685,
   2674 and 2698 of 24000 first conversions threw (about 11%); with
   the data stored before the size, none did. The data is now stored
-  first, and `22.locale.codecvt.first.mt` carries the case. Before the slot
+  first, and `22.locale.codecvt.in.mt` carries the case. Before the slot
   fix, left to race, the leak kept the facet alive after the first
   round, the data was never mapped again, and the second defect
   showed only in the first round of a process.
@@ -260,31 +260,45 @@ chapter 3 is about that.
 
 ### 2.4. The test
 
-`22.locale.codecvt.first.mt` builds
+`22.locale.codecvt.in.mt` carries the case. It is one of five programs
+in the same shape, one per operation of the facet: `in`, `out`,
+`unshift`, `length`, and the queries `encoding`, `max_length` and
+`always_noconv` together. Each operation reads the mapped data on a
+path of its own in `src/wcodecvt.cpp` and falls back to the C library
+on its own when the data is missing, so each has the fault.
+
+The programs run on the round driver of `librwtest`,
+`rw_first_use_rounds` (`tests/include/rw_rounds.h`), which
+`22.locale.numpunct.mt` also uses. The driver builds
 `de_DE.ISO-8859-1` from the tree's sources into a locale root of its
 own and skips when the C library knows the name. Each round constructs
-a fresh locale, fills its facet slot from the main thread and has four
-workers convert `"abc"`. The workers are created anew for each of the
-64 rounds. `--nthreads` and `--nloops` can override the counts.
+a fresh locale, fills its facet slots from the main thread and has four
+threads call the wide and the narrow facet once each; the main thread
+then compares what every thread recorded with what a single thread saw
+in a locale that died before the rounds started. The threads are
+created anew for each of the 64 rounds. `--nthreads`, `--nrounds` and
+`--soft-timeout` override the counts.
 
-The workers start naturally, without an arrival gate or an inserted
-delay. A gate can make every reader enter conversion before premature
-publication and wait on the facet's mutex, hiding the original fault.
-The test exercises public operations and never inspects private facet
-state. Detection remains probabilistic.
+The threads start as they are created, without a gate or an inserted
+delay. A gate can make every reader enter the call before the
+premature publication and wait on the facet's mutex, hiding the fault.
+The driver's gated rounds are for `numpunct`, whose members each have
+lazy state of their own. The tests exercise public operations and
+never inspect private facet state. Detection remains probabilistic.
 
-In 12D on x86-64 Linux with GCC 16.2.1 and glibc 2.44, the current
-test passed 50 of 50 runs with the fixed library. Restoring only the
-original wide-codecvt mapping call in a scratch library produced the
-expected `bad locale name` assertion failures in 50 of 50 runs, with
-no injected delay. An earlier trial of the same worker and round counts
-detected the fault in 47 of 50 runs; the defaults do not guarantee
-detection. A simultaneous conversion gate missed it in all 20 trials
-with four workers and 32 rounds.
+In 15D on x86-64 Linux with GCC 16.2.1 and glibc 2.44, the five
+programs pass with the fixed library. Restoring only the original
+wide-codecvt mapping call in a scratch library made each of the five
+fail in 20 of 20 runs, the thread's exception `bad locale name`, with
+no injected delay. The earlier shape of the `in` program, four workers
+and 64 rounds converting `"abc"`, detected the fault in 50 of 50 runs
+in 12D, and in 47 of 50 in an earlier trial of the same counts; the
+defaults do not guarantee detection. A simultaneous conversion gate
+missed it in all 20 trials with four workers and 32 rounds.
 
 The five-second soft timeout is checked after each pool joins. It stops
-further rounds after an overrun; a conversion or join that hangs still
-requires the harness's hard timeout. The case runs only in threaded
+further rounds after an overrun; a call or join that hangs still
+requires the harness's hard timeout. The programs run only in threaded
 builds.
 
 ## 3. What these fixes do not cover

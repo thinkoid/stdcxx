@@ -2,7 +2,7 @@
  *
  * 22.locale.codecvt.out.mt.cpp
  *
- * test exercising the thread safety of codecvt output conversion
+ * test exercising the thread safety of the first output conversion
  *
  * $Id$
  *
@@ -26,179 +26,162 @@
  *
  **************************************************************************/
 
-#include "codecvt_mt.h"
+#include <locale>     // for locale, codecvt
 
-#include <rw_valcmp.h>    // for rw_strncmp ()
+#include <cstring>    // for memset()
+#include <cwchar>     // for mbstate_t
 
-template <class internT>
-struct MyCodecvtData_T
-{
-    enum { BufferSize = 16 };
-
-    typedef char externT;
-    typedef std::mbstate_t stateT;
-    typedef std::codecvt_base::result resultT;
-    typedef std::size_t sizeT;
-
-    externT out_buffer_ [BufferSize];
-    resultT out_result_;
-    sizeT out_length_;
-    stateT out_state_;
-};
-
-struct MyCodecvtData
-{
-    MyCodecvtData_T<char> char_data_;
-    MyCodecvtData_T<wchar_t> wchar_data_;
-
-} my_codecvt_data [MAX_THREADS];
-
-template <class charT>
-struct MyBuffer {
-    const charT* const str;
-    const int str_len;
-};
-
-const MyBuffer<char> nsrc [] = {
-    { "a\x80",       2 },
-    { "b",           1 },
-    { "c\0c",        3 },
-    { "ddd",         3 },
-    { "e\fce\0",     4 },
-    { "ff\0ffff",    5 },
-    { "gggg\0g",     6 },
-    { "hh\0hhhh",    7 },
-    { "i\ni\tiiii",  8 },
-    { "jjjjjjjjj",   9 },
-    { "kkkkkkkkkk", 10 }
-};
-
-const MyBuffer<wchar_t> wsrc [] = {
-    { L"\x0905\x0916", 2 },
-    { L"bb",           2 },
-    { L"\x106c",       2 },
-    { L"dddd",         4 },
-    { L"\xd800\xd801", 2 },
-    { L"ffffff",       6 },
-    { L"\xdfff\xffff", 2 },
-    { L"hhhhhhhh",     8 },
-    { L"i\0i\1i",      4 },
-    { L"jjjjjjjjjj",  10 },
-    { L"kkkkkkkkkkk", 11 }
-};
+#include <rw_rounds.h>
+#include <rw_driver.h>
 
 /**************************************************************************/
 
-template <class internT>
-void test_codecvt_out (const std::locale& loc,
-                       const MyBuffer<internT>& in,
-                       const MyCodecvtData_T<internT>& data)
+typedef std::codecvt<char, char, std::mbstate_t>    NCodeCvt;
+typedef std::codecvt<wchar_t, char, std::mbstate_t> WCodeCvt;
+
+// a locale that only the library's database has: a thread that finds
+// the facet's data missing falls back to the C library, which must not
+// know the name for the operation to fail
+// (doc/notes/analysis-facet-first-use.md, chapter 2)
+static const char* const locale_sources [][2] = {
+    { "de_DE", "ISO-8859-1" }
+};
+
+// the internal sequence, with a character above the ASCII range so
+// that the conversion reads the facet's table
+static const wchar_t wsrc [] = L"a\xe4" L"c";
+static const char    nsrc [] =  "a\xe4" "c";
+
+enum { SRC_LEN = sizeof nsrc - 1 };
+
+// what a thread saw in the current round, in a block of its own
+struct Data
 {
-    typedef char externT;
-    typedef std::mbstate_t stateT;
-    typedef std::size_t sizeT;
+    int  wres;              // the result of the wide out ()
+    int  wfrom;             // internal characters consumed
+    int  wto;               // external characters produced
+    char wdst [SRC_LEN];
 
-    typedef std::codecvt<internT, externT, stateT> code_cvt_type;
+    int  nres;              // the same for codecvt<char, char>
+    int  nfrom;
+    int  nto;
+    char ndst [SRC_LEN];
+};
 
-    const code_cvt_type& cvt =
-        std::use_facet<code_cvt_type>(loc);
+static Data expected [1];
+static Data results [RW_ROUND_MAX_THREADS];
 
-    externT out_buffer [MyCodecvtData_T<internT>::BufferSize];
-    out_buffer [0] = externT ();
 
-    const int out_len = RW_COUNT_OF (out_buffer);
-
-    const internT* from      = in.str;
-    const internT* from_end  = in.str + in.str_len;
+template <class internT>
+static void
+convert (const std::codecvt<internT, char, std::mbstate_t>& cvt,
+         const internT* from, char* dst, int& res, int& nfrom, int& nto)
+{
     const internT* from_next = 0;
-
-    externT* to       = out_buffer;
-    externT* to_limit = out_buffer + out_len;
-    externT* to_next  = 0;
+    char*          to_next   = 0;
 
     std::mbstate_t state = std::mbstate_t ();
 
-    const typename MyCodecvtData_T<internT>::resultT result =
-        cvt.out (state, from, from_end, from_next,
-                 to, to_limit, to_next);
+    res = cvt.out (state, from, from + SRC_LEN, from_next,
+                   dst, dst + SRC_LEN, to_next);
 
-    const sizeT len = to_next - to;
+    nfrom = int (from_next - from);
+    nto   = int (to_next - dst);
+}
 
-    RW_ASSERT (data.out_result_ == result);
-    RW_ASSERT (len == data.out_length_);
-    RW_ASSERT (!rw_strncmp (out_buffer, data.out_buffer_, len));
+
+// converts through the facets of a locale no thread has converted
+// through yet; the first use maps the wide facet's database
+static void
+convert (const std::locale& loc, void* block)
+{
+    Data& data = *_RWSTD_STATIC_CAST (Data*, block);
+
+    convert (std::use_facet<WCodeCvt>(loc), wsrc,
+             data.wdst, data.wres, data.wfrom, data.wto);
+
+    convert (std::use_facet<NCodeCvt>(loc), nsrc,
+             data.ndst, data.nres, data.nfrom, data.nto);
+}
+
+
+// fills the locale's slots from the main thread alone, so that the
+// threads race only the facets' data
+static void
+prepare (const std::locale& loc)
+{
+    (void)std::use_facet<WCodeCvt>(loc);
+    (void)std::use_facet<NCodeCvt>(loc);
+
+    std::memset (results, 0, sizeof results);
 }
 
 /**************************************************************************/
 
-static void
-exercise_codecvt (const std::locale& loc, std::size_t inx,
-                  std::size_t, bool narrow, bool wide)
+static bool
+check (const char* locname, int round, int thread,
+       const void* expected_block, const void* got_block)
 {
-    const int ni = RW_COUNT_OF (nsrc);
-    const int wi = RW_COUNT_OF (wsrc);
+    const Data& exp = *_RWSTD_STATIC_CAST (const Data*, expected_block);
+    const Data& got = *_RWSTD_STATIC_CAST (const Data*, got_block);
 
-    const MyCodecvtData& data = my_codecvt_data [inx];
+    bool success = true;
 
-    if (narrow) {
-        test_codecvt_out<char>(loc, nsrc [inx % ni], data.char_data_);
-    }
+    success = rw_assert (exp.wres == got.wres, 0, __LINE__,
+                         "codecvt<wchar_t, char>::out (%{#*ls}) == %d, "
+                         "got %d, in %#s, round %d, thread %d",
+                         SRC_LEN, wsrc, exp.wres, got.wres,
+                         locname, round, thread) && success;
 
-    if (wide) {
-        test_codecvt_out<wchar_t>(loc, wsrc [inx % wi], data.wchar_data_);
-    }
+    success = rw_assert (exp.wfrom == got.wfrom && exp.wto == got.wto,
+                         0, __LINE__,
+                         "codecvt<wchar_t, char>::out (%{#*ls}) consumed %d "
+                         "and produced %d, got %d and %d, in %#s, round %d, "
+                         "thread %d",
+                         SRC_LEN, wsrc, exp.wfrom, exp.wto, got.wfrom, got.wto,
+                         locname, round, thread) && success;
+
+    success = rw_assert (0 == std::memcmp (exp.wdst, got.wdst, exp.wto),
+                         0, __LINE__,
+                         "codecvt<wchar_t, char>::out (%{#*ls}) == %{#*s}, "
+                         "got %{#*s}, in %#s, round %d, thread %d",
+                         SRC_LEN, wsrc, exp.wto, exp.wdst, got.wto, got.wdst,
+                         locname, round, thread) && success;
+
+    success = rw_assert (   exp.nres == got.nres
+                         && exp.nfrom == got.nfrom && exp.nto == got.nto,
+                         0, __LINE__,
+                         "codecvt<char, char>::out (%{#*s}) == %d, consumed "
+                         "%d and produced %d, got %d, %d and %d, in %#s, "
+                         "round %d, thread %d",
+                         SRC_LEN, nsrc, exp.nres, exp.nfrom, exp.nto,
+                         got.nres, got.nfrom, got.nto,
+                         locname, round, thread) && success;
+
+    return success;
 }
 
 /**************************************************************************/
 
-template <class internT>
-void fill_codecvt_out (const std::locale& loc,
-                       const MyBuffer<internT>& in,
-                       MyCodecvtData_T<internT>& data)
+static int
+run_test (int, char**)
 {
-    typedef char externT;
-    typedef std::mbstate_t stateT;
-
-    typedef std::codecvt<internT, externT, stateT> code_cvt_type;
-
-    const code_cvt_type& cvt =
-        std::use_facet<code_cvt_type>(loc);
-
-    const int out_len = RW_COUNT_OF (data.out_buffer_);
-
-    const internT* from      = in.str;
-    const internT* from_end  = in.str + in.str_len;
-    const internT* from_next = 0;
-
-    externT* to       = data.out_buffer_;
-    externT* to_limit = data.out_buffer_ + out_len;
-    externT* to_next  = 0;
-
-    data.out_result_ = cvt.out (data.out_state_,
-                               from, from_end, from_next,
-                               to, to_limit, to_next);
-
-    data.out_length_ = to_next - to;
+    // the threads start as they are created: a gate before the call
+    // sends every thread into it before the data can be published too
+    // early, and hides the fault this test covers
+    // (doc/notes/analysis-facet-first-use.md, 2.4)
+    return rw_first_use_rounds (locale_sources, 1,
+                                expected, results, sizeof (Data),
+                                prepare, convert, check,
+                                "std::codecvt<charT, char>::out ()", false);
 }
 
-static void
-prepare_codecvt (const std::locale& loc, std::size_t inx)
-{
-    const int ni = RW_COUNT_OF (nsrc);
-    const int wi = RW_COUNT_OF (wsrc);
-
-    MyCodecvtData& data = my_codecvt_data [inx];
-
-    fill_codecvt_out<char>
-        (loc, nsrc [inx % ni], data.char_data_);
-
-    fill_codecvt_out<wchar_t>
-        (loc, wsrc [inx % wi], data.wchar_data_);
-}
+/**************************************************************************/
 
 int main (int argc, char *argv[])
 {
-    return codecvt_test (argc, argv, __FILE__,
-                         "thread safety of output conversion",
-                         prepare_codecvt, exercise_codecvt);
+    return rw_round_test (argc, argv, __FILE__,
+                          "lib.locale.codecvt",
+                          "thread safety of the first output conversion",
+                          run_test);
 }
