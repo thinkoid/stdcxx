@@ -22,7 +22,7 @@
 
 #include <limits.h>   // for CHAR_BIT
 
-// the three built-ins <rw/_atomic-builtins.h> uses at this width must
+// the five built-ins <rw/_atomic-builtins.h> uses at this width must
 // compile, link and run without help from a library such as libatomic,
 // which the configuration does not link; the values carry across every
 // byte of the object, so an operation on fewer bytes than the type
@@ -48,5 +48,13 @@ int main ()
         != __atomic_exchange_n (&value, high, __ATOMIC_SEQ_CST))
         return 3;
 
-    return high != value ? 4 : 0;
+    if (high != value)
+        return 4;
+
+    __atomic_store_n (&value, type (high - 1), __ATOMIC_RELEASE);
+
+    if (type (high - 1) != __atomic_load_n (&value, __ATOMIC_ACQUIRE))
+        return 5;
+
+    return 0;
 }
