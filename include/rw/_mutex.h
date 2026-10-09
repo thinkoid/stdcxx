@@ -70,6 +70,7 @@
 
 #  if defined(_RWSTD_NO_STATIC_MUTEX_INIT)
 #    include <new>
+#    include <rw/_once.h>
 #  endif  //_RWSTD_NO_STATIC_MUTEX_INIT
 
 
@@ -266,43 +267,18 @@ __rw_mutex_base& __rw_get_static_mutex (_TypeT*)
     // using a named union to work around a bug in HP aCC 3.14.10 (JAGad03246)
     static __mutex_buf_t __mutex_buf;
 
-    // initialize mutex reference to refer to the static buffer space
-    __rw_mutex_base &__mutex =
-        _RWSTD_REINTERPRET_CAST (__rw_mutex_base&, __mutex_buf);
+    // the mutex is constructed in the buffer once
+    static __rw_once_t __once;
 
-    // keep track of number of mutex initialization attempts
-    // although `init' may reach a value greater than 1, `mutex'
-    // will (should) never be multiply initialized
+    struct __mutex_init_t {
+        static void _C_construct () {
+            new (&__mutex_buf) __rw_mutex_base ();
+        }
+    };
 
-    // implicit initialization used to prevent a g++ 2.95.2 warning on Tru64
-    // sorry: semantics of inline function static data are wrong (you'll wind
-    // up with multiple copies)
-    static volatile int __cntr /* = 0 */;   // initialization counter
+    __rw_once (&__once, __mutex_init_t::_C_construct);
 
-#    if !defined (_RWSTD_NO_ATOMIC_OPS) && !defined (_RWSTD_NO_INT_ATOMIC_OPS)
-    // MT safe
-    // cast __cntr to int& (see STDCXX-792)
-    // casting should be removed after fixing STDCXX-794
-    if (0 == __cntr && 1 == _RWSTD_ATOMIC_PREINCREMENT (
-            _RWSTD_CONST_CAST (int&, __cntr), false))
-#    else   // _RWSTD_NO_ATOMIC_OPS || _RWSTD_NO_INT_ATOMIC_OPS
-    // not so safe (volatile should help)
-    if (0 == __cntr && 1 == ++__cntr)
-#    endif   // !_RWSTD_NO_ATOMIC_OPS && !_RWSTD_NO_INT_ATOMIC_OPS
-
-    {
-        // manually initialize `mutex' via a call to placement new
-        new (&__mutex) __rw_mutex_base ();
-
-        // indicate that `mutex' has been fully initialized
-        // (unlikely that we'll have more than 1000 threads)
-        __cntr += 1000;
-    }
-    else
-        // busywait until `mutex' has been completely initialized
-        while (__cntr < 1000);
-
-    return __mutex;
+    return _RWSTD_REINTERPRET_CAST (__rw_mutex_base&, __mutex_buf);
 }
 
 #  endif   //_RWSTD_NO_STATIC_MUTEX_INIT

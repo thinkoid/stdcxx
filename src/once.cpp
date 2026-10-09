@@ -70,6 +70,46 @@ struct __rw_once_lock
 };
 
 
+// _RWSTD_NO_ATOMIC_OPS, rather than _RWSTD_NO_INT_ATOMIC_OPS, which
+// <rw/_mutex.h> undefines: the atomic backend defines it where int
+// is not lock-free
+#ifndef _RWSTD_NO_ATOMIC_OPS
+
+// __rw_once tests the flag without the mutex first, with acquire;
+// every store, made under the mutex, is a release store, so that what
+// func wrote is visible to every thread that sees the flag done
+static inline bool
+__rw_once_is_done (int &state)
+{
+    return __rw_once_done == _RWSTD_ATOMIC_LOAD_ACQUIRE (state, false);
+}
+
+static inline void
+__rw_once_store (int &state, int value)
+{
+    _RWSTD_ATOMIC_STORE_RELEASE (state, value, false);
+}
+
+#else   // if defined (_RWSTD_NO_ATOMIC_OPS)
+
+// the atomic accesses to an int lock the static mutex of int, which
+// is itself constructed through __rw_once where mutexes cannot be
+// initialized statically; every access to the flag holds the mutex
+static inline bool
+__rw_once_is_done (int&)
+{
+    return false;
+}
+
+static inline void
+__rw_once_store (int &state, int value)
+{
+    state = value;
+}
+
+#endif   // _RWSTD_NO_ATOMIC_OPS
+
+
 // returns true to the caller elected to run func, after marking the
 // flag running; false once func has returned in another thread
 static bool
@@ -79,12 +119,12 @@ __rw_once_enter (int &state)
 
     for ( ; ; ) {
 
-        // every store happens under the mutex, so a relaxed load
-        // under it sees the latest
-        switch (_RWSTD_ATOMIC_LOAD_RELAXED (state, false)) {
+        // every store happens under the mutex, so a plain load under
+        // it sees the latest
+        switch (state) {
 
         case __rw_once_ready:
-            _RWSTD_ATOMIC_STORE_RELAXED (state, __rw_once_running, false);
+            __rw_once_store (state, __rw_once_running);
             return true;
 
         case __rw_once_done:
@@ -105,10 +145,7 @@ __rw_once_leave (int &state, int next)
     {
         const __rw_once_lock lock;
 
-        // the release pairs with the acquire of the unlocked test in
-        // __rw_once: what func wrote is visible to every thread that
-        // sees the flag done
-        _RWSTD_ATOMIC_STORE_RELEASE (state, next, false);
+        __rw_once_store (state, next);
     }
 
     pthread_cond_broadcast (&__rw_once_cond);
@@ -122,8 +159,7 @@ __rw_once (__rw_once_t *once, void (*func)())
 
     int &state = once->_C_state;
 
-    if (   __rw_once_done == _RWSTD_ATOMIC_LOAD_ACQUIRE (state, false)
-        || !__rw_once_enter (state))
+    if (__rw_once_is_done (state) || !__rw_once_enter (state))
         return;
 
     _TRY {
