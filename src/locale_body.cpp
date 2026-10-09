@@ -1130,7 +1130,7 @@ _C_is_managed (int cat) const _THROWS (())
             // another thread may fill the slot at any time, with a
             // release store (locale::_C_get_std_facet())
             const __rw_facet* const pfacet =
-                _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_std_facets [i]);
+                _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_std_facets [i], false);
 
             if (0 == pfacet) {
                 // skip facets that are not installed

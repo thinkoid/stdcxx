@@ -339,4 +339,134 @@ __rw_atomic_exchange (unsigned _RWSTD_LONG_LONG &__x,
 #  define _RWSTD_NO_LLONG_ATOMIC_OPS
 #endif   // _RWSTD_LONG_LONG && LLONG_SIZE > LONG_SIZE && !NO_LLONG_ATOMIC_OPS
 
+
+/********************** ordered loads and stores **********************/
+
+// an object of a type whose width the configuration characterized gets
+// the four ordered accesses below: an acquire load and a release store
+// to publish data through it, and relaxed forms for a cache that every
+// thread fills with the same value and that publishes nothing else
+
+#define _RWSTD_DEFINE_ORDERED_ATOMICS(type)                              \
+    inline type                                                          \
+    __rw_atomic_load_acquire (const type &__x, bool)                     \
+    {                                                                    \
+        return __atomic_load_n (&__x, __ATOMIC_ACQUIRE);                 \
+    }                                                                    \
+                                                                         \
+    inline type                                                          \
+    __rw_atomic_load_relaxed (const type &__x, bool)                     \
+    {                                                                    \
+        return __atomic_load_n (&__x, __ATOMIC_RELAXED);                 \
+    }                                                                    \
+                                                                         \
+    inline void                                                          \
+    __rw_atomic_store_release (type &__x, type __y, bool)                \
+    {                                                                    \
+        __atomic_store_n (&__x, __y, __ATOMIC_RELEASE);                  \
+    }                                                                    \
+                                                                         \
+    inline void                                                          \
+    __rw_atomic_store_relaxed (type &__x, type __y, bool)                \
+    {                                                                    \
+        __atomic_store_n (&__x, __y, __ATOMIC_RELAXED);                  \
+    }
+
+// a type the width of a smaller type is served by that type's
+// characterization; this header defines _RWSTD_NO_LONG_ATOMIC_OPS and
+// _RWSTD_NO_LLONG_ATOMIC_OPS for such widths as well as for failed ones
+#if    _RWSTD_LONG_SIZE == _RWSTD_INT_SIZE         \
+    || !defined (_RWSTD_NO_LONG_ATOMIC_OPS)
+#  define _RWSTD_ORDERED_LONG
+#endif
+
+#if    defined (_RWSTD_LONG_LONG)                           \
+    && (   _RWSTD_LLONG_SIZE == _RWSTD_LONG_SIZE            \
+        && defined (_RWSTD_ORDERED_LONG)                    \
+        || !defined (_RWSTD_NO_LLONG_ATOMIC_OPS))
+#  define _RWSTD_ORDERED_LLONG
+#endif
+
+#ifndef _RWSTD_NO_CHAR_ATOMIC_OPS
+_RWSTD_DEFINE_ORDERED_ATOMICS (char)
+_RWSTD_DEFINE_ORDERED_ATOMICS (signed char)
+_RWSTD_DEFINE_ORDERED_ATOMICS (unsigned char)
+#endif   // _RWSTD_NO_CHAR_ATOMIC_OPS
+
+#ifndef _RWSTD_NO_SHORT_ATOMIC_OPS
+_RWSTD_DEFINE_ORDERED_ATOMICS (short)
+_RWSTD_DEFINE_ORDERED_ATOMICS (unsigned short)
+#endif   // _RWSTD_NO_SHORT_ATOMIC_OPS
+
+_RWSTD_DEFINE_ORDERED_ATOMICS (int)
+_RWSTD_DEFINE_ORDERED_ATOMICS (unsigned int)
+
+#ifdef _RWSTD_ORDERED_LONG
+_RWSTD_DEFINE_ORDERED_ATOMICS (long)
+_RWSTD_DEFINE_ORDERED_ATOMICS (unsigned long)
+#endif   // _RWSTD_ORDERED_LONG
+
+#ifdef _RWSTD_ORDERED_LLONG
+_RWSTD_DEFINE_ORDERED_ATOMICS (_RWSTD_LONG_LONG)
+_RWSTD_DEFINE_ORDERED_ATOMICS (unsigned _RWSTD_LONG_LONG)
+#endif   // _RWSTD_ORDERED_LLONG
+
+#if    !defined (_RWSTD_NO_NATIVE_WCHAR_T)                       \
+    && (   _RWSTD_WCHAR_SIZE == _RWSTD_INT_SIZE                  \
+        ||    _RWSTD_WCHAR_SIZE == _RWSTD_SHRT_SIZE              \
+           && !defined (_RWSTD_NO_SHORT_ATOMIC_OPS)              \
+        ||    _RWSTD_WCHAR_SIZE == _RWSTD_CHAR_SIZE              \
+           && !defined (_RWSTD_NO_CHAR_ATOMIC_OPS))
+_RWSTD_DEFINE_ORDERED_ATOMICS (wchar_t)
+#endif   // _RWSTD_WCHAR_SIZE
+
+#undef _RWSTD_DEFINE_ORDERED_ATOMICS
+
+#if    _RWSTD_PTR_SIZE == _RWSTD_INT_SIZE                               \
+    || _RWSTD_PTR_SIZE == _RWSTD_LONG_SIZE && defined (_RWSTD_ORDERED_LONG) \
+    || _RWSTD_PTR_SIZE == _RWSTD_LLONG_SIZE && defined (_RWSTD_ORDERED_LLONG)
+
+// pointers of every type, preferred by partial ordering over the
+// templates of <rw/_atomic-mutex.h>
+
+template <class _TypeT>
+inline _TypeT*
+__rw_atomic_load_acquire (_TypeT* const &__x, bool)
+{
+    return __atomic_load_n (&__x, __ATOMIC_ACQUIRE);
+}
+
+
+template <class _TypeT>
+inline _TypeT*
+__rw_atomic_load_relaxed (_TypeT* const &__x, bool)
+{
+    return __atomic_load_n (&__x, __ATOMIC_RELAXED);
+}
+
+
+template <class _TypeT>
+inline void
+__rw_atomic_store_release (_TypeT* &__x,
+                           _TYPENAME __rw_atomic_value<_TypeT*>::_C_type __y,
+                           bool)
+{
+    __atomic_store_n (&__x, __y, __ATOMIC_RELEASE);
+}
+
+
+template <class _TypeT>
+inline void
+__rw_atomic_store_relaxed (_TypeT* &__x,
+                           _TYPENAME __rw_atomic_value<_TypeT*>::_C_type __y,
+                           bool)
+{
+    __atomic_store_n (&__x, __y, __ATOMIC_RELAXED);
+}
+
+#endif   // _RWSTD_PTR_SIZE
+
+#undef _RWSTD_ORDERED_LONG
+#undef _RWSTD_ORDERED_LLONG
+
 }   // namespace __rw

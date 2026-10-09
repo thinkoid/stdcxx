@@ -273,7 +273,7 @@ always_noconv () const _THROWS (())
     // optimize away repeated calls to the virtual function; threads
     // that race to fill the cache store the same value in it, so
     // relaxed accesses suffice (_RWSTD_ATOMIC_LOAD_RELAXED in _defs.h)
-    int __noconv = _RWSTD_ATOMIC_LOAD_RELAXED (_C_always_noconv);
+    int __noconv = _RWSTD_ATOMIC_LOAD_RELAXED (_C_always_noconv, false);
 
     if (__noconv < 0) {
 
@@ -284,7 +284,8 @@ always_noconv () const _THROWS (())
 
         __noconv = do_always_noconv ();
 
-        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_always_noconv, __noconv);
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_always_noconv, __noconv,
+                                     false);
     }
 
     return 1 == __noconv;

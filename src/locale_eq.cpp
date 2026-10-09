@@ -68,8 +68,10 @@ bool locale::operator== (const locale &rhs) const
         for (_RWSTD_SIZE_T i = 0;
              same_facets && i != _C_body->_C_n_std_facets; ++i) {
             same_facets =
-                   _RWSTD_ATOMIC_LOAD_RELAXED (_C_body->_C_std_facets [i])
-                == _RWSTD_ATOMIC_LOAD_RELAXED (rhs._C_body->_C_std_facets [i]);
+                   _RWSTD_ATOMIC_LOAD_RELAXED (
+                       _C_body->_C_std_facets [i], false)
+                == _RWSTD_ATOMIC_LOAD_RELAXED (
+                       rhs._C_body->_C_std_facets [i], false);
         }
 
         // in order to compare equal, both bodies must have the same

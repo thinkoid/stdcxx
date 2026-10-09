@@ -168,8 +168,8 @@ const void* __rw_facet::_C_get_data ()
     // builders of data from the C library run once `impsize' is set,
     // under a lock of their own, and publish `impdata' itself with a
     // release store (src/punct.cpp), so it is read with acquire
-    if (_RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize))
-        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata);
+    if (_RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize, false))
+        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata, false);
 
     // `pid' may be 0 if the facet has not been obtained
     // by a call to use_facet (but instead constructed
@@ -177,15 +177,15 @@ const void* __rw_facet::_C_get_data ()
     // in a locale object); in that case, locale database
     // mapping for the facet is not available
     if (!_C_pid)
-        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata);
+        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata, false);
 
     // lock the object
     _RWSTD_MT_GUARD (&_C_mutex);
 
     // check again for initialization; the object's lock does not
     // exclude the builders, hence the atomic loads
-    if (_RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize))
-        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata);
+    if (_RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize, false))
+        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata, false);
 
     __rw_chararray locname (_C_name && _C_name [0] ? _C_name : "C");
 
@@ -250,19 +250,19 @@ const void* __rw_facet::_C_get_data ()
 
             // set `impsize' to non-zero value to avoid subsequent
             // attempts at reinitialization
-            _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, size_t (-1));
+            _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, size_t (-1), false);
             return 0;
         }
 
         if (!is_wcodecvt_byname || (pstr && pdata)) {
             _C_impdata = pdata; 
-            _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, sz);
+            _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, sz, false);
             return _C_impdata;
         }
     }
     else if (!is_wcodecvt_byname) {
         _C_impdata = pdata;
-        _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, sz);
+        _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, sz, false);
         return _C_impdata;
     }
 
@@ -298,7 +298,7 @@ const void* __rw_facet::_C_get_data ()
         __rw_get_facet_data (cat, cvtsize, 0, codeset);
 
     _C_impdata = cvtdata;
-    _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, cvtsize);
+    _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, cvtsize, false);
 
     // unmap the LC_CTYPE database
     __rw_munmap (pdata, sz);
@@ -618,7 +618,7 @@ size_t __rw_facet_id::_C_init () const _THROWS (())
 {
     // return immediately if already initialized; the id is stored
     // once, with release, below
-    const size_t id = _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_id);
+    const size_t id = _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_id, false);
     if (id)
         return id;
 
@@ -636,12 +636,12 @@ size_t __rw_facet_id::_C_init () const _THROWS (())
 
 #ifndef _RWSTD_NO_MUTABLE
 
-    _RWSTD_ATOMIC_STORE_RELEASE (_C_id, new_id);
+    _RWSTD_ATOMIC_STORE_RELEASE (_C_id, new_id, false);
 
 #else   // if defined (_RWSTD_NO_MUTABLE)
 
     _RWSTD_ATOMIC_STORE_RELEASE (
-        _RWSTD_CONST_CAST (__rw_facet_id*, this)->_C_id, new_id);
+        _RWSTD_CONST_CAST (__rw_facet_id*, this)->_C_id, new_id, false);
 
 #endif   // _RWSTD_NO_MUTABLE
 

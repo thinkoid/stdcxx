@@ -93,7 +93,8 @@ race_func (void*)
 
     // spin until all threads have been created so that they update
     // the reference counts of the base's facets at the same time
-    while (_RWSTD_ATOMIC_LOAD_RELAXED (nstarted) < opt_nthreads);
+    while (_RWSTD_ATOMIC_LOAD_RELAXED (
+               _RWSTD_CONST_CAST (int&, nstarted), false) < opt_nthreads);
 
     // each locale built from the base takes a reference to each of
     // its facets, and its destruction returns them

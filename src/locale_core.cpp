@@ -203,7 +203,7 @@ locale::_C_get_std_facet (facet::_C_facet_type  type,
 
         if (filled)
             _RWSTD_ATOMIC_STORE_RELEASE (_C_body->_C_std_facets [inx],
-                                         pfacet);
+                                         pfacet, false);
     }
 
     if (!filled) {

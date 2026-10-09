@@ -340,7 +340,7 @@ ctype<char>::narrow (char_type __c, char __dfault) const
 
 #endif   // _RWSTD_CHAR_BIT > 8
 
-        _RWSTD_ATOMIC_LOAD_RELAXED (_C_narrow_tab [__inx]);
+        _RWSTD_ATOMIC_LOAD_RELAXED (_C_narrow_tab [__inx], false);
 
     if (__cached)
         return __cached;
@@ -351,7 +351,8 @@ ctype<char>::narrow (char_type __c, char __dfault) const
     __c = do_narrow (__c, __dfault);
 
     if (__c != __dfault)
-        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_narrow_tab [__inx], __c);
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_narrow_tab [__inx], __c,
+                                     false);
 
     return __c;
 }
@@ -372,7 +373,7 @@ ctype<char>::widen (char __ch) const
 
     if (__fits) {
         const char_type __cached =
-            _RWSTD_ATOMIC_LOAD_RELAXED (_C_wide_tab [__inx]);
+            _RWSTD_ATOMIC_LOAD_RELAXED (_C_wide_tab [__inx], false);
 
         if (__cached)
             return __cached;
@@ -382,7 +383,7 @@ ctype<char>::widen (char __ch) const
 
         const char_type __wc = do_widen (__ch);
 
-        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_wide_tab [__inx], __wc);
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_wide_tab [__inx], __wc, false);
 
         return __wc;
     }
@@ -562,7 +563,8 @@ ctype<wchar_t>::narrow (char_type __c, char __dfault) const
     // threads that race to fill a slot store the same value in it, so
     // relaxed accesses suffice (_RWSTD_ATOMIC_LOAD_RELAXED in _defs.h)
     const char __cached =
-        __fits ? _RWSTD_ATOMIC_LOAD_RELAXED (_C_narrow_tab [__inx]) : '\0';
+        __fits
+        ? _RWSTD_ATOMIC_LOAD_RELAXED (_C_narrow_tab [__inx], false) : '\0';
 
     if (__cached)
         return __cached;
@@ -573,7 +575,8 @@ ctype<wchar_t>::narrow (char_type __c, char __dfault) const
     const char __ch = do_narrow (__c, __dfault);
 
     if (__fits && __ch != __dfault)
-        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_narrow_tab [__inx], __ch);
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_narrow_tab [__inx], __ch,
+                                     false);
 
     return __ch;
 }
@@ -594,7 +597,7 @@ ctype<wchar_t>::widen (char __ch) const
 
     if (__fits) {
         const char_type __cached =
-            _RWSTD_ATOMIC_LOAD_RELAXED (_C_wide_tab [__inx]);
+            _RWSTD_ATOMIC_LOAD_RELAXED (_C_wide_tab [__inx], false);
 
         if (__cached)
             return __cached;
@@ -604,7 +607,7 @@ ctype<wchar_t>::widen (char __ch) const
 
         const char_type __wc = do_widen (__ch);
 
-        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_wide_tab [__inx], __wc);
+        _RWSTD_ATOMIC_STORE_RELAXED (__self->_C_wide_tab [__inx], __wc, false);
 
         return __wc;
     }

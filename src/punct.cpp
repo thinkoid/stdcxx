@@ -224,11 +224,11 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
     // read the two members with acquire loads (__rw_facet::_C_data)
     _RWSTD_ATOMIC_STORE_RELEASE (
         __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
-        pun);
+        pun, false);
 
     _RWSTD_ATOMIC_STORE_RELEASE (
         __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
-        (size_t)(-1));
+        (size_t)(-1), false);
 
     // call self recursively on already initialized `impdata'
     return __rw_get_numpunct (pfacet, flags);
@@ -556,11 +556,11 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
     // read the two members with acquire loads (__rw_facet::_C_data)
     _RWSTD_ATOMIC_STORE_RELEASE (
         __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
-        pun);
+        pun, false);
 
     _RWSTD_ATOMIC_STORE_RELEASE (
         __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
-        (size_t)(-1));
+        (size_t)(-1), false);
 
     // call self recursively on already initialized `impdata'
     return __rw_get_moneypunct (pfacet, flags);

@@ -45,6 +45,20 @@
 
 #ifdef _RWSTD_REENTRANT
 
+_RWSTD_NAMESPACE (__rw) {
+
+// names the type of the value an ordered store writes in a context
+// that deduces nothing: the object alone selects the overload, and the
+// value converts to the object's type, so a value of another type
+// cannot steer the call to the locked templates of <rw/_atomic-mutex.h>
+template <class _TypeT>
+struct __rw_atomic_value
+{
+    typedef _TypeT _C_type;
+};
+
+}   // namespace __rw
+
 #  if defined (_RWSTD_NO_ATOMIC_OPS)
      // do nothing
 #  elif !defined (_RWSTD_NO_INT_ATOMIC_OPS)

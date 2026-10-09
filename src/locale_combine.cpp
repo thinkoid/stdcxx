@@ -109,7 +109,8 @@ _C_construct (const __rw_locale &rhs, const __rw_facet *pfacet)
     // release store (locale::_C_get_std_facet()), hence the acquire
     // loads one slot at a time
     for (size_t i = 0; i != _C_n_std_facets; i++)
-        _C_std_facets [i] = _RWSTD_ATOMIC_LOAD_ACQUIRE (rhs._C_std_facets [i]);
+        _C_std_facets [i] =
+            _RWSTD_ATOMIC_LOAD_ACQUIRE (rhs._C_std_facets [i], false);
 
     _RWSTD_ASSERT (!pfacet || pfacet->_C_pid);
 
@@ -215,7 +216,8 @@ _C_construct (const __rw_locale &one, const __rw_locale &other, int cat)
     // a release store (locale::_C_get_std_facet()), hence the acquire
     // loads one slot at a time, here and below
     for (size_t i = 0; i != _C_n_std_facets; ++i)
-        _C_std_facets [i] = _RWSTD_ATOMIC_LOAD_ACQUIRE (one._C_std_facets [i]);
+        _C_std_facets [i] =
+            _RWSTD_ATOMIC_LOAD_ACQUIRE (one._C_std_facets [i], false);
 
     // copy user-defined facets (if any)
     memcpy (_C_usr_facets, one._C_usr_facets,
@@ -239,7 +241,7 @@ _C_construct (const __rw_locale &one, const __rw_locale &other, int cat)
         if (cat & c) {
             // assign/overwrite corresponding facets
             _C_std_facets [i] =
-                _RWSTD_ATOMIC_LOAD_ACQUIRE (other._C_std_facets [i]);
+                _RWSTD_ATOMIC_LOAD_ACQUIRE (other._C_std_facets [i], false);
         }
 
         if (_C_std_facets [i]) {
@@ -355,7 +357,7 @@ _C_combine (const __rw_facet *pfacet) const
                 // the body may be shared, and another thread may fill
                 // the slot at any time (locale::_C_get_std_facet())
                 const __rw_facet* const pf =
-                    _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_std_facets [i]);
+                    _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_std_facets [i], false);
 
                 const char* const ones_facet_locname =
                       pf ? pf->_C_name ? pf->_C_name : "C" : one_locname;
@@ -704,7 +706,7 @@ _C_get_facet (const id &fid) const
     // with a release store (locale::_C_get_std_facet()); the slots
     // of user-defined facets are only filled by the constructors
     const locale::facet* const pfacet = inx < _RW::__rw_locale::_C_n_std_facets
-        ? _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_body->_C_std_facets [inx])
+        ? _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_body->_C_std_facets [inx], false)
         : _C_body->_C_usr_facets [inx - _RW::__rw_locale::_C_n_std_facets];
 
     if (pfacet) {

@@ -545,6 +545,20 @@
               _RW::__rw_ordinary_exchange  (x, y)                    \
            :  _RW::__rw_atomic_exchange  (x, y, mutex))
 
+// a release store of a flag makes the data written before it visible
+// to a thread that reads the flag with an acquire load and takes no
+// lock; a relaxed access orders nothing and is for a cache that every
+// thread fills with the same value and that publishes nothing else,
+// where it compiles to the ordinary access but is not a data race
+#  define _RWSTD_ATOMIC_LOAD_ACQUIRE(x, mutex)                       \
+          _RW::__rw_atomic_load_acquire (x, mutex)
+#  define _RWSTD_ATOMIC_LOAD_RELAXED(x, mutex)                       \
+          _RW::__rw_atomic_load_relaxed (x, mutex)
+#  define _RWSTD_ATOMIC_STORE_RELEASE(x, y, mutex)                   \
+          _RW::__rw_atomic_store_release (x, y, mutex)
+#  define _RWSTD_ATOMIC_STORE_RELAXED(x, y, mutex)                   \
+          _RW::__rw_atomic_store_relaxed (x, y, mutex)
+
 #  define _RWSTD_STRING_ATOMIC_PREINCREMENT(x, mutex)              \
             _RWSTD_ATOMIC_PREINCREMENT (x, mutex)
 #  define _RWSTD_STRING_ATOMIC_PREDECREMENT(x, mutex)              \
@@ -584,6 +598,11 @@
 #  define _RWSTD_ATOMIC_IO_SWAP(x, y, ignore)  \
           _RW::__rw_ordinary_exchange ((x), (y))
 
+#  define _RWSTD_ATOMIC_LOAD_ACQUIRE(x, ignore)         (x)
+#  define _RWSTD_ATOMIC_LOAD_RELAXED(x, ignore)         (x)
+#  define _RWSTD_ATOMIC_STORE_RELEASE(x, y, ignore)     ((x) = (y))
+#  define _RWSTD_ATOMIC_STORE_RELAXED(x, y, ignore)     ((x) = (y))
+
 #  define _RWSTD_STRING_ATOMIC_PREINCREMENT(x, mutex) \
           _RWSTD_ATOMIC_PREINCREMENT(x, mutex)
 #  define _RWSTD_STRING_ATOMIC_PREDECREMENT(x, mutex) \
@@ -592,28 +611,6 @@
           _RWSTD_ATOMIC_SWAP(x, y, mutex)
 
 #endif   // _RWSTD_REENTRANT
-
-// a release store of a flag makes the data written before it visible
-// to a thread that reads the flag with an acquire load and takes no
-// lock; a relaxed access orders nothing and is for a cache that every
-// thread fills with the same value and that publishes nothing else,
-// where it compiles to the ordinary access but is not a data race;
-// without the built-ins all four are ordinary accesses
-#if defined (_RWSTD_REENTRANT) && !defined (_RWSTD_NO_ATOMIC_BUILTINS)
-#  define _RWSTD_ATOMIC_STORE_RELEASE(x, y)                          \
-          __atomic_store_n (&(x), (y), __ATOMIC_RELEASE)
-#  define _RWSTD_ATOMIC_LOAD_ACQUIRE(x)                              \
-          __atomic_load_n (&(x), __ATOMIC_ACQUIRE)
-#  define _RWSTD_ATOMIC_STORE_RELAXED(x, y)                          \
-          __atomic_store_n (&(x), (y), __ATOMIC_RELAXED)
-#  define _RWSTD_ATOMIC_LOAD_RELAXED(x)                              \
-          __atomic_load_n (&(x), __ATOMIC_RELAXED)
-#else   // !_RWSTD_REENTRANT || _RWSTD_NO_ATOMIC_BUILTINS
-#  define _RWSTD_ATOMIC_STORE_RELEASE(x, y)   ((x) = (y))
-#  define _RWSTD_ATOMIC_LOAD_ACQUIRE(x)       (x)
-#  define _RWSTD_ATOMIC_STORE_RELAXED(x, y)   ((x) = (y))
-#  define _RWSTD_ATOMIC_LOAD_RELAXED(x)       (x)
-#endif   // _RWSTD_REENTRANT && !_RWSTD_NO_ATOMIC_BUILTINS
 
 // thread-local storage declaration
 #ifndef _RWSTD_THREAD

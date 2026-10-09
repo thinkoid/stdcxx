@@ -189,8 +189,8 @@ public:
     // does `impdata' itself when the data is built from the C
     // library after `impsize' is set (src/punct.cpp)
     const void* _C_data () const {
-        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize)
-            ? _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata)
+        return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize, false)
+            ? _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata, false)
             : _RWSTD_CONST_CAST (__rw_facet*, this)->_C_get_data ();
     }
 

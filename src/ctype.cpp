@@ -804,14 +804,14 @@ do_widen (char ch) const
     // widen() fills the same slot, relaxed for the same reason
     // (include/loc/_ctype.h)
     const char_type cached =
-        _RWSTD_ATOMIC_LOAD_RELAXED (_C_wide_tab [_UChar (ch)]);
+        _RWSTD_ATOMIC_LOAD_RELAXED (_C_wide_tab [_UChar (ch)], false);
 
     if (cached)
         return cached;
 
     _RWSTD_ATOMIC_STORE_RELAXED (
         _RWSTD_CONST_CAST (ctype<char>*, this)->_C_wide_tab [_UChar (ch)],
-        char_type (ch));
+        char_type (ch), false);
 
     return char_type (ch);
 #else

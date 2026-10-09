@@ -415,7 +415,7 @@ do_widen (char c) const
     // HP aCC 3 and 5 bug (STDCXX-445)
     _RWSTD_ATOMIC_STORE_RELAXED (
         _RWSTD_CONST_CAST (ctype<wchar_t>*, this)->_C_wide_tab [_UChar (c)],
-        char_type (_UChar (c)));
+        char_type (_UChar (c)), false);
 
     return char_type (_UChar (c));
 }

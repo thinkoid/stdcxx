@@ -109,6 +109,98 @@ _TypeT __rw_atomic_exchange (_TypeT &__t, const _TypeU &__u, bool)
                                  __rw_get_static_mutex ((_TypeT*)0));
 }
 
+
+// ordered loads and stores: the lock and unlock of the mutex give the
+// order, so the acquire and the relaxed forms are the same operation,
+// as are the release and the relaxed stores; a load is ordered only
+// with the stores that take the same mutex
+
+template <class _TypeT>
+inline
+_TypeT __rw_atomic_load_acquire (const _TypeT &__t, __rw_mutex_base &__mutex)
+{
+    _RWSTD_MT_GUARD (__mutex);
+
+    return __t;
+}
+
+
+template <class _TypeT>
+inline
+_TypeT __rw_atomic_load_relaxed (const _TypeT &__t, __rw_mutex_base &__mutex)
+{
+    _RWSTD_MT_GUARD (__mutex);
+
+    return __t;
+}
+
+
+template <class _TypeT>
+inline
+void __rw_atomic_store_release (
+    _TypeT &__t, _TYPENAME __rw_atomic_value<_TypeT>::_C_type __u,
+    __rw_mutex_base &__mutex)
+{
+    _RWSTD_MT_GUARD (__mutex);
+
+    __t = __u;
+}
+
+
+template <class _TypeT>
+inline
+void __rw_atomic_store_relaxed (
+    _TypeT &__t, _TYPENAME __rw_atomic_value<_TypeT>::_C_type __u,
+    __rw_mutex_base &__mutex)
+{
+    _RWSTD_MT_GUARD (__mutex);
+
+    __t = __u;
+}
+
+
+// the load deduces the object's type from a reference to const, so it
+// takes the mutex the stores to the same object take
+
+template <class _TypeT>
+inline
+_TypeT __rw_atomic_load_acquire (const _TypeT &__t, bool)
+{
+    return __rw_atomic_load_acquire (__t,
+                                     __rw_get_static_mutex ((_TypeT*)0));
+}
+
+
+template <class _TypeT>
+inline
+_TypeT __rw_atomic_load_relaxed (const _TypeT &__t, bool)
+{
+    return __rw_atomic_load_relaxed (__t,
+                                     __rw_get_static_mutex ((_TypeT*)0));
+}
+
+
+template <class _TypeT>
+inline
+void __rw_atomic_store_release (
+    _TypeT &__t, _TYPENAME __rw_atomic_value<_TypeT>::_C_type __u,
+    bool)
+{
+    __rw_atomic_store_release (__t, __u,
+                               __rw_get_static_mutex ((_TypeT*)0));
+}
+
+
+template <class _TypeT>
+inline
+void __rw_atomic_store_relaxed (
+    _TypeT &__t, _TYPENAME __rw_atomic_value<_TypeT>::_C_type __u,
+    bool)
+{
+    __rw_atomic_store_relaxed (__t, __u,
+                               __rw_get_static_mutex ((_TypeT*)0));
+}
+
 }   // namespace __rw
 
 #endif   // _RWSTD_RW_ATOMIC_MUTEX_H_INCLUDED
