@@ -16,19 +16,17 @@ Some one-time initializations elect their initializer with an atomic
 increment. They publish completion with a plain write to a =volatile=
 flag the other threads spin on. =volatile= orders neither the flag
 against the data it guards nor the spin against the reads after it.
-The census found six sites; two remain:
-- =src/exception.cpp:519-555=, the message catalog: =__fname= is
-  tested unlocked, and =__cat= read unlocked can still be -1.
+The census found six sites; one remains:
 - =include/rw/_mutex.h:286=, the static mutex, compiled only where the
   configuration rules out static initialization of mutexes.
 The fallbacks of =__rw_once= went with =pthread_once= when =__rw_once=
 took the shape of Boost's atomic =call_once= (=include/rw/_once.h=).
-The global locale and the standard iostream objects initialize
-through it. The comparison with =classic= in =_C_manage= takes
-relaxed accesses.
+The global locale, the standard iostream objects and the message
+catalog initialize through it. The comparison with =classic= in
+=_C_manage= takes relaxed accesses.
 
 Fix: one mechanism for one-time initialization, =__rw_once=. The
-catalog and the static mutex initialize through it.
+static mutex initializes through it.
 
 Check: the census in a note, each site with its decision. The
 ThreadSanitizer build reports none of them, and three rounds of every

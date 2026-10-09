@@ -57,6 +57,7 @@
 #include <rw/_error.h>
 #include <rw/_iosfailure.h>
 #include <rw/_mutex.h>
+#include <rw/_once.h>
 
 #include "podarray.h"   // for __rw_aligned_buffer
 
@@ -508,20 +509,17 @@ char* __rw_vfmtwhat (char          *buf,      // buffer (allocate if 0)
 {
     typedef _STD::messages<char> _Msgs;
 
-    static const char     *__fname  =  0;   // catalog file
     static int             __catset =  1;   // catalog set
     static _Msgs::catalog  __cat    = -1;   // catalog id
 
     // facet must never be destroyed
     static __rw_aligned_buffer<_Msgs> msgs;
 
-    // try to open catalog if first time through only
-    if (!__fname) {
+    // the catalog is opened once
+    static __rw_once_t     __once;
 
-        _RWSTD_MT_STATIC_GUARD (void);
-
-        // double-check to prevent a race opening a catalog more than once
-        if (!__fname) {
+    struct _C_catalog {
+        static void _C_open () {
 
             // get catalog name (absolute or relative) from the environment
             char *__fn = getenv (_RWSTD_ERROR_ENVVAR);
@@ -544,13 +542,12 @@ char* __rw_vfmtwhat (char          *buf,      // buffer (allocate if 0)
 
             new (msgs._C_store ()) _Msgs;
 
-            // assign `fname' _after_ opening catalog to prevent a race
-            // between calling messages<>::open() and messages<>::get()
             // always use the classic locale, not the current snapshot
             __cat = msgs._C_data ()->open (__fn, _STD::locale::classic ());
-            __fname = __fn;
         }
-    }
+    };
+
+    __rw_once (&__once, _C_catalog::_C_open);
 
     if (-1 == __cat)
         return 0;   // indicate a falure to open catalog
