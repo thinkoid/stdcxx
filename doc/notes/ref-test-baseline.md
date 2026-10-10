@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-10-09: 64e1a829 for GCC, 91c923f5 for Clang.
+As of 2026-10-10: 176773dd for GCC and Clang.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -134,8 +134,9 @@ with the same result; in 15D-clang `22.locale.numpunct.mt` passes as
 in 15D. `22.locale.money.get.mt` timed out there, and the pin kept
 its pass. 15D was measured again in full the same night, when
 `22.locale.money.get.mt` moved to the round driver: only its row and
-the assertion total moved. The other five tables pin its older row
-until a run measures them.
+the assertion total moved. All six were measured in full at
+176773dd the next night. Only 15D-clang moved, in the same row and
+the total; the MT rows of the archive builds report no assertions.
 
 ## 3. What fails
 
@@ -266,7 +267,7 @@ pinned the same way. `analysis-clang.md` records what it took.
 |---|---|---|---|---|
 | 11S-clang | 10,104,244 | 0 | 0 | 0 |
 | 11s-clang | 10,104,149 | 0 | 0 | 0 |
-| 15D-clang | 10,110,966 | 0 | 0 | 7 |
+| 15D-clang | 10,119,158 | 0 | 0 | 7 |
 
 They match the GCC tables row for row, with one exception.
 `18.numeric.special.float` runs 134 assertions in the 32-bit Clang
