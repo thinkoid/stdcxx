@@ -220,6 +220,16 @@ fault 8c4282ee is reported in every run, from two threads and four
 rounds too; the fixed library is clean. The old program ran one thread
 per processor for 100,000 iterations and timed out in 15D.
 
+Under ThreadSanitizer at 629b9907, GCC 15D, all 22 locale MT programs
+run without a report, the older shape at 8 threads and 2000 loops.
+=use_facet.mt= and =time.put.libc.mt= abort before their rounds end:
+librwtest's =operator new= finds its trailing guard overwritten
+(=tests/src/new.cpp:173=, a 336-byte block, 32 threads, 200
+locales), in both, at the same offset. Hypothesis: the guard
+allocator and the sanitizer's interposed =operator new= disagree
+about the block. The nightly's =15D-tsan= configuration repeats the
+run and names the programs with a report or a non-zero exit.
+
 Still in the older shape: =globals.mt=, =num.get.mt=, =num.put.mt=,
 =time.get.mt=, =time.put.mt=, =moneypunct.mt=,
 =messages.mt=, =ctype.mt=, =cons.mt= and =statics.mt=. Split each
