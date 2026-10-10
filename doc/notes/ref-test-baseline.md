@@ -1,7 +1,6 @@
 # The test-suite baseline
 
-As of 2026-10-09 (64e1a829) for GCC and 2026-10-08 (44420f7a) for
-Clang.
+As of 2026-10-09: 64e1a829 for GCC, 91c923f5 for Clang.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -11,14 +10,15 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 278 programs per configuration;
-  the five tables not measured since the codecvt split pin 274.
+- Every test builds. The harness runs 278 programs per configuration.
 - No assertion fails, in any configuration, under either compiler.
 - What fails, by cause:
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
     interface and moves the minor version (chapter 3.1).
   - Six locale MT rows of 15D time out. They measure the harness's
-    timeout, not the library (chapter 3.2).
+    timeout, not the library (chapter 3.2). A seventh,
+    `22.locale.money.get.mt`, needs about 58 of the 60 seconds and
+    times out by chance.
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
 
@@ -115,10 +115,8 @@ the commit that changed its test: `19.cerrno` runs 4 assertions, not 5
 (d006f308); `21.char.traits.compare` is new (6bb238b6);
 `27.ostream.inserters.stdcxx-51` passes (415860cc). All six were
 measured again in full on 2026-10-09, when the `once` test of
-`__rw_once` came in with its 600 assertions. No other row moved, but
-`22.locale.money.get.mt` timed out once in 15D-clang on a loaded
-machine; alone it passes in 58 seconds, as it does at ee454d5a
-(chapter 3.2). 15D was measured again in full on 2026-10-09, after
+`__rw_once` came in with its 600 assertions. No other row moved.
+15D was measured again in full on 2026-10-09, after
 the codecvt MT program became seven and `22.locale.numpunct.mt` was
 rebuilt on fresh-locale rounds; only those rows and the summary moved.
 It was measured once more the same day, when the five codecvt programs
@@ -126,8 +124,10 @@ took the first-use shape and the first-use and mixed programs left:
 only their rows and the summary moved. 11S and 11s were measured in
 full that evening, at 64e1a829: the same rows and the summary moved,
 and nothing else; their MT rows report no assertions, as before. The
-three Clang tables still pin the single codecvt program and, in
-15D-clang, the timed-out numpunct row, until a run measures them.
+three Clang tables were measured in full the same night, at 91c923f5,
+with the same result; in 15D-clang `22.locale.numpunct.mt` passes as
+in 15D. `22.locale.money.get.mt` timed out there, and the pin keeps
+its pass (chapter 3.2).
 
 ## 3. What fails
 
@@ -155,6 +155,12 @@ The other older tests pass. `cons.mt`, `globals.mt`, `messages.mt`,
 `money.get.mt`, `moneypunct.mt` and `statics.mt` count none: their
 pass means every thread ran to the end without an error, a crash or a
 hang.
+
+`22.locale.money.get.mt` passes by a margin of two seconds. It runs
+100,000 iterations in each of 32 threads and needs about 58 of the
+harness's 60 seconds, under either compiler, so a run passes or times
+out by chance. With `--nloops=10000` it takes 6 seconds, and with
+`--nthreads=4` 3 seconds. The pins record its pass.
 
 `22.locale.numpunct.mt` runs 64 rounds of four threads on fresh
 locales built from the tree's sources and counts 2560 assertions in
@@ -249,7 +255,7 @@ pinned the same way. `analysis-clang.md` records what it took.
 |---|---|---|---|---|
 | 11S-clang | 10,104,244 | 0 | 0 | 0 |
 | 11s-clang | 10,104,149 | 0 | 0 | 0 |
-| 15D-clang | 10,117,110 | 0 | 0 | 8 |
+| 15D-clang | 10,110,966 | 0 | 0 | 7 |
 
 They match the GCC tables row for row, with one exception.
 `18.numeric.special.float` runs 134 assertions in the 32-bit Clang
