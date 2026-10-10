@@ -15,7 +15,7 @@ harness's own table without the timing columns.
 - What fails, by cause:
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
     interface and moves the minor version (chapter 3.1).
-  - Six locale MT rows of 15D time out. They measure the harness's
+  - Five locale MT rows of 15D time out. They measure the harness's
     timeout, not the library (chapter 3.2).
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
@@ -36,9 +36,9 @@ the build's `tests` directory. The locale tests exec
 `../bin/localedef`.
 
 The tables are measured with `LANG` and `LC_ALL` set to
-`en_US.UTF-8`, as a login shell sets them. Two rows read the
+`en_US.UTF-8`, as a login shell sets them. One row reads the
 environment. Without the variables `22.locale.moneypunct` counts 500
-assertions, not 540, and `22.locale.money.put.mt` can finish in time.
+assertions, not 540.
 A command run through `ssh` without a login shell has neither
 variable.
 
@@ -101,7 +101,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 278 | 10,104,244 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 278 | 10,104,134 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 278 | 10,119,158 | 0 | 0 | 7 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 278 | 10,125,302 | 0 | 0 | 6 |
 
 Chapter 4 lists where the three differ.
 
@@ -137,6 +137,10 @@ its pass. 15D was measured again in full the same night, when
 the assertion total moved. All six were measured in full at
 176773dd the next night. Only 15D-clang moved, in the same row and
 the total; the MT rows of the archive builds report no assertions.
+15D was measured again in full on 2026-10-10, when
+`22.locale.money.put.mt` moved to the round driver: its row, the
+signalled count and the total moved, nothing else. The other five
+tables pin its older row until a run measures them.
 
 ## 3. What fails
 
@@ -151,9 +155,9 @@ is `ABRT` in 15D and `NOUT`, a pass, elsewhere.
 
 ### 3.2 The MT locale rows of 15D
 
-Six older locale MT tests end in 15D with `HUP`:
-`22.locale.ctype.mt`, `money.put.mt`, `num.get.mt`, `num.put.mt`,
-`time.get.mt` and `time.put.mt`. A test runs one thread per
+Five older locale MT tests end in 15D with `HUP`:
+`22.locale.ctype.mt`, `num.get.mt`, `num.put.mt`, `time.get.mt` and
+`time.put.mt`. A test runs one thread per
 processor, 32 on the machine the tables come from. It runs each
 threaded section to its own 60-second soft timeout, and has up to
 three sections. The harness's 60 seconds cut it short. Run bare at 16
@@ -192,6 +196,12 @@ both character types and both formats, on a positive and a negative
 input. The two sources leave the international formats unspecified,
 so the international parses fail on the first character; the test
 compares that result too.
+
+`22.locale.money.put.mt` is its counterpart: both `put ()` overloads
+for `char`, the `long double` overload for `wchar_t`, both formats, a
+positive and a negative value, the same two locales, 6144 assertions.
+The wide string overload is left out until `ctype<wchar_t>::is ()`
+answers from the database in these locales (`TODO`).
 
 The round driver they and `22.locale.numpunct.mt` share is
 `rw_first_use_rounds` in `librwtest` (`tests/include/rw_rounds.h`);
@@ -253,8 +263,9 @@ count nothing there. The newer ones count in every build:
 `22.locale.use_facet.mt` and `22.locale.time.put.libc.mt` 200 each,
 `22.locale.id.mt` 999, `22.locale.facet.mt` 40,
 `21.string.cons.mt` 16, `21.string.push_back.mt` 2. These pass in
-15D too. `22.locale.money.put.mt` counts 6 in the single-threaded
-builds and is one of the six in 15D.
+15D too. `22.locale.money.put.mt` counted 6 in the single-threaded
+builds; on the round driver it reports none there, which their
+tables show once a run measures them.
 
 ## 5. The same suite under Clang
 

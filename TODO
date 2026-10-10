@@ -44,8 +44,10 @@ for =ctype_byname<wchar_t>=, against the history, before calling it
 a defect.
 
 Check: =is ()= answers from the database in such a locale, the scalar
-and the array overload, for every mask, and a wide =money_get= parses
-an input with a space in it.
+and the array overload, for every mask; a wide =money_get= parses
+an input with a space in it; and the string overload of a wide
+=money_put=, whose digit scan calls =is ()=, formats its input.
+=22.locale.money.put.mt= then takes that overload.
 
 * TODO Unspecified international formats in =moneypunct=
 
@@ -158,8 +160,9 @@ becomes a hang detector.
 Check: a census of what each older test covers against the gated
 ones, each kept, split or retired with the reason. Every locale MT
 test passes in seconds under the harness in 15D on any processor
-count, and the 15D rows become a reference. Each test still fails
-against the library before the fix it covers.
+count, and the 15D rows become a reference. Each program runs clean
+under the ThreadSanitizer build, which has been shown to report the
+fault class the program covers.
 
 =22.locale.numpunct.mt= is the model. Its locales are built from the
 tree's sources by =rw_localedef=, under names the C library does not
@@ -173,19 +176,26 @@ them start as they are created, for data published too early, which a
 gate hides (=22.locale.codecvt.in.mt=). Each thread records what it
 saw in a slot of its own; the main thread asserts after the join and
 stops at the first failing round. The test runs in 1.2 seconds in 15D.
-Against the numpunct cache that 2e196ebb removed it fails in round 0,
-20 runs of 20; the old program failed in one run of two, after 52
-seconds, and timed out in the other, which is also its pinned row.
+Against the numpunct cache that 2e196ebb removed it failed in round
+0; the old program failed in one run of two, after 52 seconds, and
+timed out in the other, which is also its pinned row.
 
 Schedules use public operations only: no delays, no reads of private
-state. Detection stays probabilistic and is measured against the fault
-each test covers.
+state. A schedule proves nothing by itself. Whether a thread arrives in
+a fault's window is set by the kernel's thread-creation stagger, the
+same for every pair of threads and every round, so a plain run catches
+the fault every time or never: the fault 8c4282ee, caught 20 runs of
+20 under one kernel, was caught 0 of 100 under the next day's, same
+binaries. The judge is the ThreadSanitizer build, which orders
+accesses by happens-before, not by overlap: under it two threads and
+four rounds report that fault, and the fixed library is clean
+(=doc/notes/analysis-facet-first-use.md=, 2.4).
 
 The codecvt family is done, on the driver: =in.mt=, =out.mt=,
 =unshift.mt=, =length.mt= and =properties.mt=, one program per
 operation of the facet, each on =de_DE.ISO-8859-1= from the tree's
-sources, ungated, and each failing 20 runs of 20 against the fault
-8c4282ee removed (=doc/notes/analysis-facet-first-use.md=, 2.4).
+sources, ungated, measured against the fault 8c4282ee removed
+(=doc/notes/analysis-facet-first-use.md=, 2.4).
 =mixed.mt= is gone.
 The round driver is =rw_first_use_rounds= in =librwtest=
 (=tests/include/rw_rounds.h=): the locales, the expected blocks, the
@@ -195,14 +205,23 @@ rounds, the exceptions a thread throws, and the gate.
 one operation with two overloads. It runs on =de_DE.ISO-8859-1= and
 =en_US.ISO-8859-1= from the tree's sources, ungated, the two
 overloads, both character types and both formats on a positive and a
-negative input. It fails 20 runs of 20 against the early publication
-of 8c4282ee injected into the general mapping path of
+negative input. It is measured against the early publication of
+8c4282ee injected into the general mapping path of
 =__rw_facet::_C_get_data=, which feeds =moneypunct= and =ctype=. The
 old program needed about 58 of the harness's 60 seconds and timed out
 by chance; the new one takes about a second.
 
+=money.put.mt= is done, on the driver: one program, the two overloads
+of =put= for =char= and the long double overload for =wchar_t=, both
+formats, a positive and a negative value, the same two locales,
+ungated; 6144 assertions in about a second. The wide string overload
+waits for the =ctype<wchar_t>::is= entry. Under ThreadSanitizer the
+fault 8c4282ee is reported in every run, from two threads and four
+rounds too; the fixed library is clean. The old program ran one thread
+per processor for 100,000 iterations and timed out in 15D.
+
 Still in the older shape: =globals.mt=, =num.get.mt=, =num.put.mt=,
-=time.get.mt=, =time.put.mt=, =money.put.mt=, =moneypunct.mt=,
+=time.get.mt=, =time.put.mt=, =moneypunct.mt=,
 =messages.mt=, =ctype.mt=, =cons.mt= and =statics.mt=. Split each
 by facet operation, not by member. Only the 15D table is re-pinned;
 the other five wait for a run.

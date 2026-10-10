@@ -117,7 +117,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 22.locale.money.get.mt                        0    0    8192      0   100%
 22.locale.money.get                           0    0    3952      0   100%
 22.locale.money.get.stdcxx-62              NOUT    0                      
-22.locale.money.put.mt                      HUP    0                      
+22.locale.money.put.mt                        0    0    6144      0   100%
 22.locale.money.put                           0    0    1328      0   100%
 22.locale.moneypunct.mt                       0    0       0      0   100%
 22.locale.moneypunct                          0    0     540      0   100%
@@ -280,9 +280,9 @@ once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
   Programs:                   278
   Non-zero exit status:         0
-  Signalled:                    7
+  Signalled:                    6
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10119158
+  Assertions:            10125302
   Failed assertions:            0

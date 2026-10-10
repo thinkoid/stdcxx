@@ -284,17 +284,34 @@ delay. A gate can make every reader enter the call before the
 premature publication and wait on the facet's mutex, hiding the fault.
 The driver's gated rounds are for `numpunct`, whose members each have
 lazy state of their own. The tests exercise public operations and
-never inspect private facet state. Detection remains probabilistic.
+never inspect private facet state.
 
 In 15D on x86-64 Linux with GCC 16.2.1 and glibc 2.44, the five
-programs pass with the fixed library. Restoring only the original
-wide-codecvt mapping call in a scratch library made each of the five
-fail in 20 of 20 runs, the thread's exception `bad locale name`, with
-no injected delay. The earlier shape of the `in` program, four workers
-and 64 rounds converting `"abc"`, detected the fault in 50 of 50 runs
-in 12D, and in 47 of 50 in an earlier trial of the same counts; the
-defaults do not guarantee detection. A simultaneous conversion gate
-missed it in all 20 trials with four workers and 32 rounds.
+programs pass with the fixed library. Whether a plain run catches the
+fault is not the test's to decide. The window is the `stat`, `open`,
+`mmap` and `close` of the database, between the size being written
+and the data being stored, a few microseconds; a thread lands in it
+only if it was created that far behind the first one, and the stagger
+is the kernel's, the same for every pair of threads and every round.
+A run therefore catches the fault every time or never. With the
+original wide-codecvt mapping call restored in a scratch library, each
+of the five failed in 20 of 20 runs under Linux 7.2.8, the thread's
+exception `bad locale name`, and in 0 of 10 under 7.2.9 the next day,
+same binaries. A simultaneous conversion gate hid it in all 20 trials,
+as the mechanism predicts: every thread arrives before the window
+opens and waits on the mutex.
+
+The judge is the ThreadSanitizer build. It orders accesses by
+happens-before, not by overlap: a reader whose acquire load of the
+size precedes the writer's release store is unordered with the plain
+store in `__rw_mmap`, whether or not it lands in the window, and a
+gated round makes every waiting thread such a reader. Built with
+`-fsanitize=thread` (`CXXOPTS` and `LDOPTS`, the configuration phase
+as usual), the money programs report the fault from two threads and
+four rounds, the write in `__rw_mmap` against the atomic read in
+`__rw_facet::_C_data`, and are clean with the fixed library. The
+check of each program is that it passes in 15D in seconds and runs
+clean under that build.
 
 The five-second soft timeout is checked after each pool joins. It stops
 further rounds after an overrun; a call or join that hangs still
