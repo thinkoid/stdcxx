@@ -16,9 +16,7 @@ harness's own table without the timing columns.
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
     interface and moves the minor version (chapter 3.1).
   - Six locale MT rows of 15D time out. They measure the harness's
-    timeout, not the library (chapter 3.2). A seventh,
-    `22.locale.money.get.mt`, needs about 58 of the 60 seconds and
-    times out by chance.
+    timeout, not the library (chapter 3.2).
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
 
@@ -36,6 +34,13 @@ The rule exports `TOPDIR`, `TMPDIR`, `TZ` and `LD_LIBRARY_PATH`. To
 run a test by hand, set `TOPDIR` to the source tree and work from
 the build's `tests` directory. The locale tests exec
 `../bin/localedef`.
+
+The tables are measured with `LANG` and `LC_ALL` set to
+`en_US.UTF-8`, as a login shell sets them. Two rows read the
+environment. Without the variables `22.locale.moneypunct` counts 500
+assertions, not 540, and `22.locale.money.put.mt` can finish in time.
+A command run through `ssh` without a login shell has neither
+variable.
 
 Set only the timeout, and set it in `makefile.in`. `RUNFLAGS` on the
 `make` command line replaces the whole variable. It drops the
@@ -96,7 +101,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 278 | 10,104,244 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 278 | 10,104,134 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 278 | 10,110,966 | 0 | 0 | 7 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 278 | 10,119,158 | 0 | 0 | 7 |
 
 Chapter 4 lists where the three differ.
 
@@ -126,8 +131,11 @@ full that evening, at 64e1a829: the same rows and the summary moved,
 and nothing else; their MT rows report no assertions, as before. The
 three Clang tables were measured in full the same night, at 91c923f5,
 with the same result; in 15D-clang `22.locale.numpunct.mt` passes as
-in 15D. `22.locale.money.get.mt` timed out there, and the pin keeps
-its pass (chapter 3.2).
+in 15D. `22.locale.money.get.mt` timed out there, and the pin kept
+its pass. 15D was measured again in full the same night, when
+`22.locale.money.get.mt` moved to the round driver: only its row and
+the assertion total moved. The other five tables pin its older row
+until a run measures them.
 
 ## 3. What fails
 
@@ -152,15 +160,8 @@ threads, all sixteen locale MT tests of ae1fbe04 pass, these six
 among them, in 2 to 143 seconds.
 
 The other older tests pass. `cons.mt`, `globals.mt`, `messages.mt`,
-`money.get.mt`, `moneypunct.mt` and `statics.mt` count none: their
-pass means every thread ran to the end without an error, a crash or a
-hang.
-
-`22.locale.money.get.mt` passes by a margin of two seconds. It runs
-100,000 iterations in each of 32 threads and needs about 58 of the
-harness's 60 seconds, under either compiler, so a run passes or times
-out by chance. With `--nloops=10000` it takes 6 seconds, and with
-`--nthreads=4` 3 seconds. The pins record its pass.
+`moneypunct.mt` and `statics.mt` count none: their pass means every
+thread ran to the end without an error, a crash or a hang.
 
 `22.locale.numpunct.mt` runs 64 rounds of four threads on fresh
 locales built from the tree's sources and counts 2560 assertions in
@@ -180,6 +181,16 @@ calls the wide and the narrow facet once per round.
 | `22.locale.codecvt.unshift.mt` | `unshift ()`: result, count | 512 |
 | `22.locale.codecvt.length.mt` | `length ()` | 512 |
 | `22.locale.codecvt.properties.mt` | `encoding ()`, `max_length ()`, `always_noconv ()` | 1024 |
+
+`22.locale.money.get.mt` is one program in the same shape, since
+`get ()` is one operation with two overloads. It runs on
+`de_DE.ISO-8859-1` and `en_US.ISO-8859-1` built from the tree's
+sources, four threads, 64 rounds, no gates, and counts 8192
+assertions in about a second. Each thread calls both overloads for
+both character types and both formats, on a positive and a negative
+input. The two sources leave the international formats unspecified,
+so the international parses fail on the first character; the test
+compares that result too.
 
 The round driver they and `22.locale.numpunct.mt` share is
 `rw_first_use_rounds` in `librwtest` (`tests/include/rw_rounds.h`);

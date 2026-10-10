@@ -24,6 +24,49 @@ Fix: to be found.
 Check: =make locales= builds every locale in =etc/nls/gen_list= on
 aarch64, and the databases match the x86-64 ones byte for byte.
 
+* TODO =ctype<wchar_t>::is= throws for a locale only the database has
+
+In a locale built by =localedef= under a name the C library does not
+know, =ctype<wchar_t>::is (ctype_base::digit, L'1')= throws =bad
+locale name= from =__rw_setlocale=, in one thread. =widen= and
+=narrow= of the same facet do not throw, nor do the four =moneypunct=
+facets. Seen in =de_DE.ISO-8859-1= and =hu_HU.ISO-8859-2= while
+rewriting =22.locale.money.get.mt=: a wide
+=money_get= whose pattern reaches a =space= element throws. The old
+=money.get.mt= used only locales the C library knows and never met
+it. =ctype_byname<wchar_t>::do_is= (=src/wctype.cpp=) hands the
+facet's =_C_use_libstd= option to =__rw_get_mask=. Hypothesis: that
+option is set for this facet, and the mask is taken from the C
+library even though the database has it.
+
+Fix: to be found. Read =__rw_get_mask= and where =_C_opts= is set
+for =ctype_byname<wchar_t>=, against the history, before calling it
+a defect.
+
+Check: =is ()= answers from the database in such a locale, the scalar
+and the array overload, for every mask, and a wide =money_get= parses
+an input with a space in it.
+
+* TODO Unspecified international formats in =moneypunct=
+
+=de_DE= and =en_US= under =etc/nls/src= define no =int_p_cs_precedes=
+and the other five =int_= fields. In those locales
+=moneypunct<charT, true>::pos_format ()= and =neg_format ()= return
+four fields of 127 (=CHAR_MAX=), none of them a =money_base::part=,
+and an international =money_get= fails on the first character of any
+input. =hu_HU=, which defines the fields, yields a proper pattern.
+C99 and POSIX use =CHAR_MAX= for a value that is not available.
+Hypothesis: the library should derive the pattern from the domestic
+fields when the international ones are missing, as the C library
+does.
+
+Fix: to be found. Read how =localedef= stores the fields and how
+=moneypunct_byname= builds the pattern, and what the C library does
+for these sources.
+
+Check: every pattern field is a =money_base::part= in every locale
+of =etc/nls/gen_list=.
+
 * TODO Keep instantiated facets until the program ends
 
 A named facet dies with the last locale that holds it. The next locale
@@ -148,11 +191,21 @@ The round driver is =rw_first_use_rounds= in =librwtest=
 (=tests/include/rw_rounds.h=): the locales, the expected blocks, the
 rounds, the exceptions a thread throws, and the gate.
 
+=money.get.mt= is done, on the driver: one program, since =get= is
+one operation with two overloads. It runs on =de_DE.ISO-8859-1= and
+=en_US.ISO-8859-1= from the tree's sources, ungated, the two
+overloads, both character types and both formats on a positive and a
+negative input. It fails 20 runs of 20 against the early publication
+of 8c4282ee injected into the general mapping path of
+=__rw_facet::_C_get_data=, which feeds =moneypunct= and =ctype=. The
+old program needed about 58 of the harness's 60 seconds and timed out
+by chance; the new one takes about a second.
+
 Still in the older shape: =globals.mt=, =num.get.mt=, =num.put.mt=,
-=time.get.mt=, =time.put.mt=, =money.get.mt=, =money.put.mt=,
-=moneypunct.mt=, =messages.mt=, =ctype.mt=, =cons.mt= and
-=statics.mt=. Split each by facet operation, not by member. Only the
-15D table is re-pinned; the other five wait for a run.
+=time.get.mt=, =time.put.mt=, =money.put.mt=, =moneypunct.mt=,
+=messages.mt=, =ctype.mt=, =cons.mt= and =statics.mt=. Split each
+by facet operation, not by member. Only the 15D table is re-pinned;
+the other five wait for a run.
 
 * TODO Run the suites in parallel
 

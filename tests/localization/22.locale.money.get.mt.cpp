@@ -26,454 +26,260 @@
  *
  **************************************************************************/
 
-#include <ios>        // for ios
-#include <iterator>   // for ostreambuf_iterator
-#include <locale>     // for locale, money_get
+#include <ios>        // for basic_ios, ios_base
+#include <iterator>   // for istreambuf_iterator
+#include <locale>     // for locale, money_get, moneypunct, ctype
+#include <string>     // for string, wstring
 
-#include <cstring>    // for strlen()
-
-#include <rw_locale.h>
-#include <rw_thread.h>
+#include <rw_rounds.h>
 #include <rw_driver.h>
-#include <rw_valcmp.h>    // for rw_strncmp ()
-
-
-// maximum number of threads allowed by the command line interface
-#define MAX_THREADS      32
-#define MAX_LOOPS    100000
-
-// the number of times each thread should iterate (unless specified
-// otherwise on the command line)
-int opt_nloops = 100000;
-
-// default number of threads (will be adjusted to the number
-// of processors/cores later)
-int opt_nthreads = 1;
-
-// number of locales to use
-int opt_nlocales = MAX_THREADS;
-
-// should all threads share the same set of locale objects instead
-// of creating their own?
-int opt_shared_locale;
-
-// default timeout used by each threaded section of this test
-int opt_timeout = 60;
 
 /**************************************************************************/
 
-// array of locale names to use for testing
-static const char*
-locales [MAX_THREADS];
+// the locales the rounds cycle through, built from the tree's sources;
+// a thread that finds the data of moneypunct or ctype missing falls
+// back to the C library, which must not know the name for the parse
+// to fail (doc/notes/analysis-facet-first-use.md, chapter 2)
+static const char* const locale_sources [][2] = {
+    { "de_DE", "ISO-8859-1" },
+    { "en_US", "ISO-8859-1" }
+};
 
-// number of locale names in the array
-static std::size_t
-nlocales;
+enum { NLOCALES = sizeof locale_sources / sizeof *locale_sources };
 
-/**************************************************************************/
+// the inputs, with no currency symbol, which is optional without
+// showbase, and the second with a sign, which the parse looks up in
+// moneypunct. Both locales' domestic patterns read them to the end
+// without reaching a space, which ctype<wchar_t>::is () would classify
+// through the C library. Their sources leave the international formats
+// unspecified, so the international parses fail on the first character,
+// after reading the data of moneypunct<charT, true>.
+static const char* const inputs [] = { "1234567", "-1234567" };
 
-//
-struct MyMoneyData
+enum { NINPUTS = sizeof inputs / sizeof *inputs };
+
+
+template <class charT>
+struct GetIos: std::basic_ios<charT>
 {
-    enum { BufferSize = 16 };
-
-    enum GetId {
-        get_ldbl,
-        get_string,
-        get_max
-    };
-
-    // name of the locale the data corresponds to
-    const char* locale_name_;
-
-    // optionally set to the named locale for threads to share
-    std::locale locale_;
-
-    // international or domestic format flag
-    bool intl_;
-
-    //
-    long double units_;
-
-    // narrow locale specific representations of units_
-    char ncs_ [BufferSize];
-    std::string ncs_digits_;
-
-#ifndef _RWSTD_NO_WCHAR_T
-
-    // wide locale specific representations of units_
-    wchar_t wcs_ [BufferSize];
-    std::wstring wcs_digits_;
-
-#endif // _RWSTD_NO_WCHAR_T
-
-} my_money_data [MAX_THREADS];
-
-
-template <class charT, class Traits>
-struct MyIos: std::basic_ios<charT, Traits>
-{
-    MyIos () {
-        this->init (0);
-    }
+    GetIos () { this->init (0); }
 };
 
 
-template <class charT, class Traits>
-struct MyStreambuf: std::basic_streambuf<charT, Traits>
+template <class charT>
+struct GetStreambuf: std::basic_streambuf<charT>
 {
-    typedef std::basic_streambuf<charT, Traits> Base;
-
-    MyStreambuf ()
-        : Base () {
+    void pubsetg (const charT* beg, std::streamsize n) {
+        charT* const p = _RWSTD_CONST_CAST (charT*, beg);
+        this->setg (p, p, p + n);
     }
 
-    void pubsetg (const charT *gbeg, std::streamsize n) {
-        this->setg (_RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gbeg) + n);
-    }
-
-    void pubsetp (charT *pbeg, std::streamsize n) {
-        this->setp (pbeg, pbeg + n);
-    }
+    int nread () const { return int (this->gptr () - this->eback ()); }
 };
 
 
-extern "C" {
-
-bool test_char;    // exercise money_get<char>
-bool test_wchar;   // exercise money_get<wchar_t>
-
-
-static void*
-thread_func (void*)
+// what one call of get () returned
+template <class charT>
+struct GetResult
 {
-    MyIos<char, std::char_traits<char> >       nio;
-    MyStreambuf<char, std::char_traits<char> > nsb;
-    std::basic_string<char, std::char_traits<char>  > str;
-    nio.rdbuf (&nsb);
+    int                       state;    // the iostate it set
+    int                       nread;    // input characters consumed
+    long double               units;    // the long double overload
+    std::basic_string<charT>  digits;   // the string overload
+};
 
-#ifndef _RWSTD_NO_WCHAR_T
-    MyIos<wchar_t, std::char_traits<wchar_t> >       wio;
-    MyStreambuf<wchar_t, std::char_traits<wchar_t> > wsb;
-    std::basic_string<wchar_t, std::char_traits<wchar_t>  > wstr;
-    wio.rdbuf (&wsb);
-#endif // _RWSTD_NO_WCHAR_T
+// what a thread saw in the current round, in a block of its own:
+// per character type, input and format (domestic, international)
+struct GetData
+{
+    GetResult<char>     narrow [NINPUTS][2];
+    GetResult<wchar_t>  wide [NINPUTS][2];
+};
+
+static GetData expected [NLOCALES];
+static GetData results [RW_ROUND_MAX_THREADS];
+
+
+template <class charT>
+static void
+get_money (const std::locale& loc, const char* input, bool intl,
+           GetResult<charT>& res)
+{
+    typedef std::istreambuf_iterator<charT> Iter;
+
+    const std::money_get<charT>& mg =
+        std::use_facet<std::money_get<charT> >(loc);
+
+    charT src [16];
+    std::size_t len = 0;
+
+    for (; input [len]; ++len)
+        src [len] = charT (input [len]);
+
+    GetIos<charT>       io;
+    GetStreambuf<charT> sb;
+
+    io.rdbuf (&sb);
+    io.imbue (loc);
 
     std::ios_base::iostate state = std::ios_base::goodbit;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-    long double ldbl = 0.;
-#endif  // _RWSTD_NO_LONG_DOUBLE
+    sb.pubsetg (src, std::streamsize (len));
+    mg.get (Iter (&sb), Iter (), intl, io, state, res.units);
 
-    for (int i = 0; i != opt_nloops; ++i) {
+    res.nread = sb.nread ();
 
-        if (rw_thread_pool_timeout_expired ())
-            break;
+    // the string overload records the state of both calls
+    sb.pubsetg (src, std::streamsize (len));
+    mg.get (Iter (&sb), Iter (), intl, io, state, res.digits);
 
-        // save the name of the locale
-        const MyMoneyData& data = my_money_data [i % nlocales];
+    res.state = int (state);
+}
 
-        // construct a named locale, get a reference to the money_get
-        // facet from it and use it to format a random money value
-        const std::locale loc =
-            opt_shared_locale ? data.locale_
-                              : std::locale (data.locale_name_);
 
-        if (test_char) {
-            // exercise the narrow char specialization of the facet
+// parses through the facets of a locale no thread has parsed through
+// yet; the first use maps the data of moneypunct and ctype
+static void
+get_money (const std::locale& loc, void* block)
+{
+    GetData& data = *_RWSTD_STATIC_CAST (GetData*, block);
 
-            const std::money_get<char> &ng =
-                std::use_facet<std::money_get<char> >(loc);
-
-            nio.imbue (loc);
-            nsb.pubsetg (data.ncs_, RW_COUNT_OF (data.ncs_));
-
-            if (i & 1) {
-                ng.get (std::istreambuf_iterator<char>(&nsb),
-                        std::istreambuf_iterator<char>(),
-                        data.intl_, nio, state, ldbl);
-                RW_ASSERT (! (state & std::ios_base::failbit));
-                RW_ASSERT (! rw_ldblcmp (ldbl, data.units_));
-            }
-            else {
-                ng.get (std::istreambuf_iterator<char>(&nsb),
-                        std::istreambuf_iterator<char>(),
-                        data.intl_, nio, state, str);
-                RW_ASSERT (! (state & std::ios_base::failbit));
-                RW_ASSERT (! rw_strncmp (str.c_str (),
-                                         data.ncs_digits_.c_str ()));
-            }
+    for (int i = 0; i != NINPUTS; ++i) {
+        for (int intl = 0; intl != 2; ++intl) {
+            get_money (loc, inputs [i], 0 != intl, data.narrow [i][intl]);
+            get_money (loc, inputs [i], 0 != intl, data.wide [i][intl]);
         }
+    }
+}
 
-        // both specializations may be tested at the same time
 
-        if (test_wchar) {
-            // exercise the wide char specialization of the facet
+// fills the locale's slots from the main thread alone, so that the
+// threads race only the facets' data
+static void
+prepare (const std::locale& loc)
+{
+    (void)std::use_facet<std::money_get<char> >(loc);
+    (void)std::use_facet<std::moneypunct<char, false> >(loc);
+    (void)std::use_facet<std::moneypunct<char, true> >(loc);
+    (void)std::use_facet<std::ctype<char> >(loc);
 
-#ifndef _RWSTD_NO_WCHAR_T
+    (void)std::use_facet<std::money_get<wchar_t> >(loc);
+    (void)std::use_facet<std::moneypunct<wchar_t, false> >(loc);
+    (void)std::use_facet<std::moneypunct<wchar_t, true> >(loc);
+    (void)std::use_facet<std::ctype<wchar_t> >(loc);
 
-            const std::money_get<wchar_t> &wg =
-                std::use_facet<std::money_get<wchar_t> >(loc);
+    for (int j = 0; j != rw_round_nthreads; ++j)
+        results [j] = GetData ();
+}
 
-            wio.imbue (loc);
-            wsb.pubsetg (data.wcs_, RW_COUNT_OF (data.wcs_));
+/**************************************************************************/
 
-            if (i & 1) {
-                wg.get (std::istreambuf_iterator<wchar_t>(&wsb),
-                        std::istreambuf_iterator<wchar_t>(),
-                        data.intl_, wio, state, ldbl);
-                RW_ASSERT (! (state & std::ios_base::failbit));
-                RW_ASSERT (! rw_ldblcmp (ldbl, data.units_));
-            }
-            else {
-                wg.get (std::istreambuf_iterator<wchar_t>(&wsb),
-                        std::istreambuf_iterator<wchar_t>(),
-                        data.intl_, wio, state, wstr);
-                RW_ASSERT (! (state & std::ios_base::failbit));
-                RW_ASSERT (! rw_strncmp(wstr.c_str (),
-                                        data.wcs_digits_.c_str ()));
-            }
+static bool
+check_digits (const char* tname, const std::string& got,
+              const std::string& exp, const char* input, bool intl,
+              const char* locname, int round, int thread)
+{
+    return rw_assert (got == exp, 0, __LINE__,
+                      "money_get<%s>::get (%#s, intl = %b, string&) "
+                      "== %{#S}, got %{#S}, in %#s, round %d, thread %d",
+                      tname, input, intl, &exp, &got,
+                      locname, round, thread);
+}
 
-#endif   // _RWSTD_NO_WCHAR_T
 
+static bool
+check_digits (const char* tname, const std::wstring& got,
+              const std::wstring& exp, const char* input, bool intl,
+              const char* locname, int round, int thread)
+{
+    return rw_assert (got == exp, 0, __LINE__,
+                      "money_get<%s>::get (%#s, intl = %b, wstring&) "
+                      "== %{#lS}, got %{#lS}, in %#s, round %d, thread %d",
+                      tname, input, intl, &exp, &got,
+                      locname, round, thread);
+}
+
+
+template <class charT>
+static bool
+check_result (const char* tname, const GetResult<charT>& got,
+              const GetResult<charT>& exp, const char* input, bool intl,
+              const char* locname, int round, int thread)
+{
+    bool success = true;
+
+    success = rw_assert (exp.state == got.state, 0, __LINE__,
+                         "money_get<%s>::get (%#s, intl = %b) state "
+                         "== %{Is}, got %{Is}, in %#s, round %d, thread %d",
+                         tname, input, intl, exp.state, got.state,
+                         locname, round, thread) && success;
+
+    success = rw_assert (exp.nread == got.nread, 0, __LINE__,
+                         "money_get<%s>::get (%#s, intl = %b) consumed %d, "
+                         "got %d, in %#s, round %d, thread %d",
+                         tname, input, intl, exp.nread, got.nread,
+                         locname, round, thread) && success;
+
+    success = rw_assert (exp.units == got.units, 0, __LINE__,
+                         "money_get<%s>::get (%#s, intl = %b, long double&) "
+                         "== %Lg, got %Lg, in %#s, round %d, thread %d",
+                         tname, input, intl, exp.units, got.units,
+                         locname, round, thread) && success;
+
+    success = check_digits (tname, got.digits, exp.digits, input, intl,
+                            locname, round, thread) && success;
+
+    return success;
+}
+
+
+static bool
+check (const char* locname, int round, int thread,
+       const void* expected_block, const void* got_block)
+{
+    const GetData& exp = *_RWSTD_STATIC_CAST (const GetData*, expected_block);
+    const GetData& got = *_RWSTD_STATIC_CAST (const GetData*, got_block);
+
+    bool success = true;
+
+    for (int i = 0; i != NINPUTS; ++i) {
+        for (int intl = 0; intl != 2; ++intl) {
+
+            success = check_result ("char", got.narrow [i][intl],
+                                    exp.narrow [i][intl], inputs [i],
+                                    0 != intl, locname, round, thread)
+                && success;
+
+            success = check_result ("wchar_t", got.wide [i][intl],
+                                    exp.wide [i][intl], inputs [i],
+                                    0 != intl, locname, round, thread)
+                && success;
         }
     }
 
-    return 0;
+    return success;
 }
-
-}   // extern "C"
 
 /**************************************************************************/
 
 static int
 run_test (int, char**)
 {
-    MyIos<char, std::char_traits<char> >       nio;
-    MyStreambuf<char, std::char_traits<char> > nsb;
-    nio.rdbuf (&nsb);
-
-#ifndef _RWSTD_NO_WCHAR_T
-    MyIos<wchar_t, std::char_traits<wchar_t> >       wio;
-    MyStreambuf<wchar_t, std::char_traits<wchar_t> > wsb;
-    wio.rdbuf (&wsb);
-#endif // _RWSTD_NO_WCHAR_T
-
-    // find all installed locales for which setlocale (LC_ALL) succeeds
-    const char* const locale_list =
-        rw_opt_locales ? rw_opt_locales : rw_locales (_RWSTD_LC_ALL);
-
-    const std::size_t maxinx = RW_COUNT_OF (locales);
-
-    for (const char* name = locale_list;
-         *name;
-         name += std::strlen (name) + 1) {
-
-        const std::size_t inx = nlocales;
-        locales [inx] = name;
-
-        // fill in the money and results for this locale
-        MyMoneyData& data = my_money_data [inx];
-        data.locale_name_ = name;
-
-        try {
-            const std::locale loc (data.locale_name_);
-
-            // exercise domestic formats every other iteration
-            // and international formats the rest
-            data.intl_ = 0 == (inx & 5);
-
-            // initialize with random but valid values
-            long double units = 1.f + inx;
-
-            // exercise postive and negative values
-            if (inx & 1)
-                units += (units * 3.14159);
-            else
-                units -= (units * 2.71828);
-
-            // local scope
-            {
-                const std::money_put<char> &np =
-                    std::use_facet<std::money_put<char> >(loc);
-
-                const std::money_get<char> &ng =
-                    std::use_facet<std::money_get<char> >(loc);
-
-                std::ios::iostate state = std::ios::goodbit;
-
-                nio.imbue (loc);
-
-                // write the value to buffer from long double
-                nsb.pubsetp (data.ncs_, RW_COUNT_OF (data.ncs_));
-                *np.put (std::ostreambuf_iterator<char>(&nsb),
-                         data.intl_, nio, ' ', units) = '\0';
-
-                rw_fatal (!nio.fail (), __FILE__, __LINE__,
-                          "money_put<char>::put(...) "
-                          "failed for locale(%#s)", data.locale_name_);
-
-                // read the value back so threads know what to expect
-                nsb.pubsetg (data.ncs_, RW_COUNT_OF (data.ncs_));
-                ng.get (std::istreambuf_iterator<char>(&nsb),
-                        std::istreambuf_iterator<char>(),
-                        data.intl_, nio, state, data.units_);
-
-                // read back as string, again for threads
-                nsb.pubsetg (data.ncs_, RW_COUNT_OF (data.ncs_));
-                ng.get (std::istreambuf_iterator<char>(&nsb),
-                        std::istreambuf_iterator<char>(),
-                        data.intl_, nio, state, data.ncs_digits_);
-
-                if (state & std::ios_base::failbit)
-                    continue;
-            }
-
-#ifndef _RWSTD_NO_WCHAR_T
-
-            // local scope
-            {
-                const std::money_put<wchar_t> &wp =
-                    std::use_facet<std::money_put<wchar_t> >(loc);
-
-                const std::money_get<wchar_t> &wg =
-                    std::use_facet<std::money_get<wchar_t> >(loc);
-
-                std::ios::iostate state = std::ios::goodbit;
-
-                wio.imbue (loc);
-
-                // write the value to buffer from long double
-                wsb.pubsetp (data.wcs_, RW_COUNT_OF (data.wcs_));
-                *wp.put (std::ostreambuf_iterator<wchar_t>(&wsb),
-                         data.intl_, wio, L' ', units) = L'\0';
-
-                rw_fatal (!nio.fail (), __FILE__, __LINE__,
-                           "money_put<wchar_t>::put(...) "
-                           "failed for locale(%#s)", data.locale_name_);
-
-                // read back as string, again for threads
-                wsb.pubsetg (data.wcs_, RW_COUNT_OF (data.wcs_));
-                wg.get (std::istreambuf_iterator<wchar_t>(&wsb),
-                        std::istreambuf_iterator<wchar_t>(),
-                        data.intl_, wio, state, data.wcs_digits_);
-
-                if (state & std::ios_base::failbit)
-                    continue;
-            }
-
-#endif // _RWSTD_NO_WCHAR_T
-
-            if (opt_shared_locale)
-                data.locale_ = loc;
-
-            nlocales += 1;
-
-        }
-        catch (...) {
-            rw_warn (!rw_opt_locales, 0, __LINE__,
-                     "failed to create locale(%#s)", name);
-        }
-
-        if (nlocales == maxinx || nlocales == std::size_t (opt_nlocales))
-            break;
-    }
-
-    // avoid divide by zero in thread if there are no locales to test
-    rw_fatal (nlocales != 0, 0, __LINE__,
-              "failed to create one or more usable locales!");
-
-    rw_info (0, 0, 0,
-             "testing std::money_get<charT> with %d thread%{?}s%{;}, "
-             "%d iteration%{?}s%{;} each, in %zu locales { %{ .*A@} }",
-             opt_nthreads, 1 != opt_nthreads,
-             opt_nloops, 1 != opt_nloops,
-             nlocales, int (nlocales), "%#s", locales);
-
-    rw_info (0, 0, 0, "exercising std::money_get<char>");
-
-    test_char  = true;
-    test_wchar = false;
-
-    // create and start a pool of threads and wait for them to finish
-    int result = 
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-#ifndef _RWSTD_NO_WCHAR_T
-
-    rw_info (0, 0, 0, "exercising std::money_get<wchar_t>");
-
-    test_char  = false;
-    test_wchar = true;
-
-    // start a pool of threads to exercise wstring thread safety
-    result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-    // exercise both the char and the wchar_t specializations
-    // at the same time
-
-    rw_info (0, 0, 0,
-             "exercising both std::money_get<char> "
-             "and std::money_get<wchar_t>");
-
-    test_char  = true;
-    test_wchar = true;
-
-    // start a pool of threads to exercise wstring thread safety
-    result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-#endif   // _RWSTD_NO_WCHAR_T
-
-    return result;
+    // the threads start as they are created: moneypunct keeps no lazy
+    // state of its own, and a gate before the parse would send every
+    // thread into it before the data can be published too early
+    // (doc/notes/analysis-facet-first-use.md, 2.4)
+    return rw_first_use_rounds (locale_sources, NLOCALES,
+                                expected, results, sizeof (GetData),
+                                prepare, get_money, check,
+                                "std::money_get<charT>::get ()", false);
 }
 
 /**************************************************************************/
 
 int main (int argc, char *argv[])
 {
-#ifdef _RWSTD_REENTRANT
-
-    // set nthreads to the greater of the number of processors
-    // and 2 (for uniprocessor systems) by default
-    opt_nthreads = rw_get_cpus ();
-    if (opt_nthreads < 2)
-        opt_nthreads = 2;
-
-#endif   // _RWSTD_REENTRANT
-
-    return rw_test (argc, argv, __FILE__,
-                    "lib.locale.money.get",
-                    "thread safety", run_test,
-                    "|-soft-timeout#0 "  // must be non-negative
-                    "|-nloops#0 "        // must be non-negative
-                    "|-nthreads#0-* "    // must be in [0, MAX_THREADS]
-                    "|-nlocales#0 "      // arg must be non-negative
-                    "|-locales= "        // must be provided
-                    "|-shared-locale# ",
-                    &opt_timeout,
-                    &opt_nloops,
-                    int (MAX_THREADS),
-                    &opt_nthreads,
-                    &opt_nlocales,
-                    &rw_opt_setlocales,
-                    &opt_shared_locale);
+    return rw_round_test (argc, argv, __FILE__,
+                          "lib.locale.money.get",
+                          "thread safety of the first parse", run_test);
 }
