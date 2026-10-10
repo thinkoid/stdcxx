@@ -1,7 +1,7 @@
 # The test-suite baseline
 
-As of 2026-10-07 (c755a926) for GCC, 2026-10-09 for GCC 15D, and
-2026-10-08 (44420f7a) for Clang.
+As of 2026-10-09 (64e1a829) for GCC and 2026-10-08 (44420f7a) for
+Clang.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -94,8 +94,8 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 274 | 10,104,244 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 274 | 10,104,134 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 278 | 10,104,244 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 278 | 10,104,134 | 0 | 0 | 0 |
 | 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 278 | 10,110,966 | 0 | 0 | 7 |
 
 Chapter 4 lists where the three differ.
@@ -123,9 +123,11 @@ the codecvt MT program became seven and `22.locale.numpunct.mt` was
 rebuilt on fresh-locale rounds; only those rows and the summary moved.
 It was measured once more the same day, when the five codecvt programs
 took the first-use shape and the first-use and mixed programs left:
-only their rows and the summary moved. The other five tables still pin
-the single codecvt program and, in 15D-clang, the timed-out numpunct
-row, until a run measures them.
+only their rows and the summary moved. 11S and 11s were measured in
+full that evening, at 64e1a829: the same rows and the summary moved,
+and nothing else; their MT rows report no assertions, as before. The
+three Clang tables still pin the single codecvt program and, in
+15D-clang, the timed-out numpunct row, until a run measures them.
 
 ## 3. What fails
 
