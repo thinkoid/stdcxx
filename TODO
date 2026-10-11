@@ -10,6 +10,21 @@ investigations.
 
 #+TOC: headlines 2
 
+* TODO =localedef= writes a byte it does not set
+
+Two runs of the same =localedef= command on =de_DE= and =ISO-8859-1=
+write databases that differ in one byte each: offset 24 of
+=LC_MESSAGES= (=0xff= or =0xfe=, in a field that reads =ff ff 00 00=)
+and offset 351 of =LC_COLLATE=. =LC_CTYPE= is the same. Hypothesis: a
+member or padding left uninitialized and written whole. The databases
+are not reproducible, and the check of the =yi_US.CP1255= entry, a
+byte-for-byte match against x86-64, cannot pass until this is fixed.
+
+Fix: to be found; the structures written at those offsets first.
+
+Check: two runs of =localedef= over every locale in
+=etc/nls/gen_list= write identical databases.
+
 * TODO =yi_US.CP1255= does not build on aarch64
 
 =make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=.
@@ -262,6 +277,24 @@ whose =sysconf= fails takes the path.
 Fix: =pclose=.
 
 Check: librwtest builds without the warning.
+
+* TODO All the C library's locales on the test hosts
+
+The test hosts generate one glibc locale besides =C= and =POSIX=:
+=en_US.UTF-8=. Tests that loop over the installed locales see four.
+Installing every locale in =/usr/share/i18n/SUPPORTED= widens them,
+but it also teaches the C library =de_DE.ISO-8859-1=, the name
+=rw_localedef= gives the database locale that the first-use section
+of =22.locale.codecvt.mt= races. The section then skips with a note
+and passes without testing anything.
+
+Fix: the tests that race a database locale build it under a name the
+C library cannot know (=rw_localedef='s fourth argument), then every
+locale is installed on all test hosts at once, and the pins are
+measured again.
+
+Check: with every locale installed, no MT program notes that the C
+library knows its database locale.
 
 * TODO The next minor version
 

@@ -29,6 +29,20 @@ option, so `config.h` is the plain 15D one. A 12D build made the same
 way is the last pass, once the sizes are chosen: optimization takes
 code paths the debug build does not.
 
+The utilities stay uninstrumented: `localedef` is a separate,
+single-threaded process, and under the sanitizer it takes 6.7 s to
+build `de_DE.ISO-8859-1` against 0.04 s plain. The tests find it
+through `BINDIR`, which points at the plain 15D build's `bin`.
+
+A fault is put back in an export of the tree (`git archive`), built as
+a build directory of its own: library, librwtest and the programs, so
+that its programs find its library through their own `RUNPATH`.
+`LD_LIBRARY_PATH` would also reach the plain `localedef`, which then
+fails, and the tests skip what they cannot build.
+
+The runs below are on an aarch64 host with 10 processors and four C
+library locales: `C`, `C.utf8`, `en_US.utf8`, `POSIX`.
+
 For each program:
 
 - A plain 15D run at its defaults, timed.
@@ -59,7 +73,7 @@ a dash means not yet established.
 
 | program | defaults | covers | plain 15D at defaults | command under the sanitizer | time | reports |
 |---|---|---|---|---|---|---|
-| `22.locale.codecvt.mt` | 5000 loops | 8c4282ee | | | | |
+| `22.locale.codecvt.mt` | 5000 loops | 8c4282ee | 1.7 s | `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | 1.1 s | none; 5 per run against the fault, 25 runs of 25 |
 | `22.locale.cons.mt` | 20000 loops | – | | | | |
 | `22.locale.ctype.mt` | 200000 loops | – | | | | |
 | `22.locale.facet.mt` | at most 8 threads, 20 rounds, 1000 loops | dcb5dc92 | | | | |
@@ -79,3 +93,41 @@ a dash means not yet established.
 | `22.locale.use_facet.mt` | 200 rounds | 2bbdf7c9 | | | | |
 
 `--nlocales` defaults to `MAX_THREADS` wherever a program has it.
+
+## 3. Per program
+
+### 3.1 `22.locale.codecvt.mt`
+
+Four sections. Three run the steady state: each thread constructs a
+named locale per iteration and calls one of the seven members of
+`codecvt`, the member and the locale chosen by the iteration number,
+in `char`, in `wchar_t`, then in both. The locales are the C library's,
+so what they cover depends on the host. The fourth races the first
+conversion through `de_DE.ISO-8859-1` built from the tree's sources,
+200 rounds, a constant with no option. Only the fourth can see
+8c4282ee.
+
+With four locales and seven members, 28 iterations run every member
+in every locale, the floor for the steady-state sections. The thread
+count does not change detection: two threads report the fault in
+every run. The 200 rounds set the floor of about a second.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.codecvt.mt` | plain 15D | 1.7 s | – |
+| `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | plain 15D | 0.96 s | – |
+| `./22.locale.codecvt.mt` | fixed | 4.0 s | 0 |
+| `./22.locale.codecvt.mt` | 8c4282ee | 4.1 s | 5, 5 runs of 5 |
+| `./22.locale.codecvt.mt --nthreads=4` | fixed | 2.5 s | 0 |
+| `./22.locale.codecvt.mt --nthreads=4` | 8c4282ee | 2.7 s | 5, 5 runs of 5 |
+| `./22.locale.codecvt.mt --nthreads=2` | fixed | 1.6 s | 0 |
+| `./22.locale.codecvt.mt --nthreads=2` | 8c4282ee | 1.7 s | 5, 5 runs of 5 |
+| `./22.locale.codecvt.mt --nthreads=4 --nloops=28` | fixed | 1.1 s | 0 |
+| `./22.locale.codecvt.mt --nthreads=4 --nloops=28` | 8c4282ee | 1.2 s | 5, 5 runs of 5 |
+| `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | fixed | 1.1 s | 0 |
+| `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | 8c4282ee | 1.1 s | 5, 5 runs of 5 |
+
+The five reports against the fault are on the facet data's path: the
+acquire load of `_C_impsize` against the plain store, and the reads of
+the codecvt tables (`n_to_w_tab`, `get_internal_at_offset`,
+`__rw_mbtowco`).
