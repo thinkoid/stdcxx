@@ -173,6 +173,18 @@ void operator delete (void *ptr) _THROWS (())
     operator_delete (ptr, false);
 }
 
+#    ifndef _RWSTD_NO_OPERATOR_DELETE_SIZED
+
+// the C++ runtime's sized form forwards to the unsized one, but a
+// sanitizer runtime linked ahead of it defines its own and frees a
+// block this one allocated: replace it, ignoring the size
+void operator delete (void *ptr, _RWSTD_SIZE_T) _THROWS (())
+{
+    operator_delete (ptr, false);
+}
+
+#    endif   // _RWSTD_NO_OPERATOR_DELETE_SIZED
+
 
 #    if    !defined (_RWSTD_NO_OPERATOR_NEW_ARRAY) \
           || defined (_RWSTD_NO_EXT_OPERATOR_NEW)
@@ -196,5 +208,15 @@ void operator delete[] (void *ptr) _THROWS (())
 
 
 #    endif   // !_NO_OPERATOR_DELETE_ARRAY || _NO_EXT_OPERATOR_NEW
+
+#    ifndef _RWSTD_NO_OPERATOR_DELETE_ARRAY_SIZED
+
+// as the sized operator delete above
+void operator delete[] (void *ptr, _RWSTD_SIZE_T) _THROWS (())
+{
+    operator_delete (ptr, true);
+}
+
+#    endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_SIZED
 #  endif   // !_RWSTD_TEST_SRC
 #endif   // RW_NEW_H_INCLUDED
