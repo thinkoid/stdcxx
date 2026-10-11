@@ -10,25 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO librwtest's timeout under ThreadSanitizer
-
-The soft timeout of =rw_thread_pool= is a flag: the =SIGALRM= handler
-writes it (=tests/src/thread.cpp:73=) and the threads read it (=:63=)
-with no ordering between them. It is a =volatile int=, which orders
-nothing between threads. Under ThreadSanitizer every MT program that
-runs into its soft timeout reports the race in librwtest, not in the
-library. The handler that =rw_alarm= installs
-(=_rw_handle_sigalrm=, =tests/src/alarm.cpp=) calls =sprintf= and
-=write= and does not restore =errno=, which the sanitizer also
-reports.
-
-Fix: an atomic store in the handler and an atomic load in
-=rw_thread_pool_timeout_expired=; the handler saves =errno= on entry
-and restores it on exit.
-
-Check: a program that runs =rw_thread_pool= into its soft timeout
-under ThreadSanitizer, 15D, reports nothing from librwtest.
-
 * TODO librwtest's replacement =operator new= under the sanitizers
 
 =22.locale.use_facet.mt= and =22.locale.time.put.libc.mt= abort under
@@ -294,6 +275,18 @@ Fix: =%{?} + %zu%{;}=.
 
 Check: under =--trace=, the rows of that overload print the count and
 the character they pass. The suite table does not move.
+
+* TODO =rw_get_cpus= closes a pipe with =fclose=
+
+=rw_get_cpus= (=tests/src/thread.cpp=) falls back on =popen= when
+=sysconf= cannot count the processors, and closes the stream with
+=fclose=. A stream from =popen= is closed with =pclose=, which also
+waits for the command. GCC warns (=-Wmismatched-dealloc=). Only a host
+whose =sysconf= fails takes the path.
+
+Fix: =pclose=.
+
+Check: librwtest builds without the warning.
 
 * TODO The next minor version
 

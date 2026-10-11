@@ -13,8 +13,8 @@ reporting the fault the program covers, and what the runs take.
 
 ## 0. tl;dr
 
-Nothing measured yet. The two librwtest entries at the top of `TODO`
-come first.
+Nothing measured yet. librwtest's replacement `operator new`, at the
+top of `TODO`, comes first.
 
 ## 1. Method
 
@@ -47,9 +47,9 @@ The sanitizer does not see a race whose accesses are all ordered but
 whose outcome is wrong: two critical sections whose combination is
 not atomic. The program's own assertions keep that case.
 
-Until the two librwtest entries are fixed, a program that runs into
-its soft timeout reports librwtest, and `22.locale.use_facet.mt` and
-`22.locale.time.put.libc.mt` abort in librwtest's `operator new`.
+Until librwtest's replacement `operator new` is fixed,
+`22.locale.use_facet.mt` and `22.locale.time.put.libc.mt` abort in it
+under the sanitizer.
 
 ## 2. The programs
 

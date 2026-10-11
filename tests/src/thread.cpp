@@ -32,6 +32,8 @@
 #include <rw_thread.h>
 #include <rw_alarm.h>   // for rw_alarm()
 
+#include <rw/_mutex.h>  // for _RWSTD_ATOMIC_{LOAD,STORE}_RELAXED()
+
 #include <stddef.h>     // for size_t
 #include <string.h>     // for memset()
 
@@ -52,6 +54,8 @@ static long maxthreads;
 
 /************************************************************************/
 
+// set by the SIGALRM handler and read by the threads: every access
+// is atomic, relaxed since the flag publishes nothing
 static volatile int
 _rw_timeout_expired = 0;
 
@@ -60,7 +64,9 @@ _rw_timeout_expired = 0;
 _TEST_EXPORT int
 rw_thread_pool_timeout_expired ()
 {
-    return _rw_timeout_expired != 0;
+    // cast the volatile flag to int& (see STDCXX-792)
+    return 0 != _RWSTD_ATOMIC_LOAD_RELAXED (
+        _RWSTD_CONST_CAST (int&, _rw_timeout_expired), false);
 }
 
 /************************************************************************/
@@ -70,7 +76,8 @@ extern "C" {
 static void
 _rw_timeout_handler (int)
 {
-    _rw_timeout_expired = 1;
+    _RWSTD_ATOMIC_STORE_RELAXED (
+        _RWSTD_CONST_CAST (int&, _rw_timeout_expired), 1, false);
 }
 
 }    // extern "C"
@@ -229,7 +236,8 @@ rw_thread_pool (rw_thread_t        *thr_id,
 {
     // apply timeout if one was specified
     if (0 != timeout) {
-        _rw_timeout_expired = 0;
+        _RWSTD_ATOMIC_STORE_RELAXED (
+            _RWSTD_CONST_CAST (int&, _rw_timeout_expired), 0, false);
         rw_alarm (unsigned (timeout), _rw_timeout_handler);
     }
 

@@ -33,6 +33,7 @@
 #include <time.h>     // for time_t
 
 #include <assert.h>   // for assert()
+#include <errno.h>    // for errno
 #include <stdio.h>    // for sprintf()
 
 #include <rw_alarm.h>    // for rw_alarm()
@@ -90,6 +91,9 @@ _rw_handle_sigalrm (int signo)
 {
     assert (SIGALRM == signo);
 
+    // the interrupted code may be about to read errno
+    const int saved_errno = errno;
+
     char buffer [1024];
 
     // fprintf() is not async-signal safe...
@@ -101,6 +105,8 @@ _rw_handle_sigalrm (int signo)
 
     if (_rw_alarm_handler)
         _rw_alarm_handler (signo);
+
+    errno = saved_errno;
 }
 
 }   // extern "C"
