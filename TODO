@@ -10,6 +10,50 @@ investigations.
 
 #+TOC: headlines 2
 
+* TODO librwtest's timeout under ThreadSanitizer
+
+The soft timeout of =rw_thread_pool= is a flag: the =SIGALRM= handler
+writes it (=tests/src/thread.cpp:73=) and the threads read it (=:63=)
+with no ordering between them. It is a =volatile int=, which orders
+nothing between threads. Under ThreadSanitizer every MT program that
+runs into its soft timeout reports the race in librwtest, not in the
+library. The handler that =rw_alarm= installs
+(=_rw_handle_sigalrm=, =tests/src/alarm.cpp=) calls =sprintf= and
+=write= and does not restore =errno=, which the sanitizer also
+reports.
+
+Fix: an atomic store in the handler and an atomic load in
+=rw_thread_pool_timeout_expired=; the handler saves =errno= on entry
+and restores it on exit.
+
+Check: a program that runs =rw_thread_pool= into its soft timeout
+under ThreadSanitizer, 15D, reports nothing from librwtest.
+
+* TODO librwtest's replacement =operator new= under the sanitizers
+
+=22.locale.use_facet.mt= and =22.locale.time.put.libc.mt= abort under
+ThreadSanitizer, and under AddressSanitizer, before their rounds end.
+librwtest's =operator new= finds the trailing guard of a 336-byte
+block overwritten (=tests/src/new.cpp:173=), the same offset in both.
+Both programs include =rw_new.h= for =rwt_check_leaks=; no other MT
+program does.
+
+Hypothesis: =rw_new.h= replaces the unsized =operator delete= only.
+A library compiled at a dialect with sized deallocation calls
+=operator delete (void*, size_t)=. Without a sanitizer that resolves
+to the C++ runtime's, which forwards to the replaced unsized one. The
+sanitizer runtimes define the sized form themselves (=_ZdlPvm= in
+=libtsan.so=), so the block goes to the sanitizer's allocator while
+librwtest's list still holds it. The sanitizer reuses the memory and
+overwrites the guard of a block librwtest still lists.
+
+Fix: to be found. If the hypothesis holds, =rw_new.h= replaces the
+sized forms as well, under a characterization of sized deallocation.
+
+Check: =nm= on the two programs and on the library shows which
+=operator delete= each deletion binds to; with the fix both programs
+run their rounds clean under ThreadSanitizer, 15D.
+
 * TODO =yi_US.CP1255= does not build on aarch64
 
 =make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=.
