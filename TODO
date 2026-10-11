@@ -149,18 +149,28 @@ The four gated tests, =22.locale.use_facet.mt=,
 on a barrier and start together at the first use of a fresh object,
 round after round. They overlap the older tests.
 
-Fix: rewrite the older tests in that shape, or retire those the gated
-tests cover, one race or one facet operation per program: 4 to 8
-threads whatever the processor count, a barrier, many short rounds on
-fresh state, a small thread stack. Steady-state races are left to the
-ThreadSanitizer build. With a small fixed thread count the timeout
-becomes a hang detector.
+A plain run catches a race only when the kernel's scheduling puts two
+threads in its window, and that is the same for every run on one
+kernel and changes with the next. ThreadSanitizer reports a race from
+what ran, not from its timing, and is the judge from here.
 
-Check: a census of what each older test covers against the gated
-ones, each kept, split or retired with the reason. Every locale MT
-test passes in seconds under the harness in 15D on any processor
-count, and the 15D rows become a reference. Each test still fails
-against the library before the fix it covers.
+Fix: first, with no change to the sources, run each program under the
+sanitizer at decreasing sizes through its own options, against the
+fixed library and with its fault put back. The smallest size that
+still reports the fault, and nothing on the fixed library, becomes
+the program's default. =doc/notes/analysis-locale-mt-sizing.md=
+records the method and each program's runs and times. Then a census
+of what each older test covers against the gated ones: each kept,
+split or retired with the reason, one race or one facet operation per
+program. Plain runs are sized for speed: a few threads whatever the
+processor count, short rounds on fresh state, the timeout a hang
+detector.
+
+Check: every program in the note's table has a chosen size, a time,
+and runs under the sanitizer that report its fault and stay clean on
+the fixed library, in 15D and in 12D. Every locale MT test passes in
+seconds under the harness in 15D on any processor count, and the 15D
+rows become a reference.
 
 * TODO Run the suites in parallel
 
