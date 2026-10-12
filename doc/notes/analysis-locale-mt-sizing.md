@@ -25,6 +25,10 @@ the sanitizer does not see them, and only the programs' own leak
 checks do. librwtest runs clean under the sanitizer: the soft timeout
 and the replacement `operator delete` are fixed.
 
+The sizes are now the programs' defaults, four threads whatever the
+number of processors; chapter 2's "defaults" column keeps the old
+ones. The options still take any size.
+
 ## 1. Method
 
 No source changes in this phase. Each program is run through its own
