@@ -681,6 +681,13 @@ BEGIN {
     getline
 
     builddirs [FILENAME] = $0
+
+    # the source tree of the first such log, which test names link
+    # into; buildntest builds in <source>/build
+    if ("" == srcdir) {
+        srcdir = $0
+        sub("/build$", "", srcdir)
+    }
 }
 
 
@@ -1079,9 +1086,9 @@ function get_dispname(section, compname)
         else
             dir = ""
     
-        if (dir != "") {
-            dispname = "<a href=\"" svnpath "/" dir "/" compname
-            dispname = dispname ".cpp?view=markup\">"
+        if (dir != "" && srcdir != "") {
+            dispname = "<a href=\"" srcdir "/" dir "/" compname
+            dispname = dispname ".cpp\">"
             dispname = dispname compname "</a>"
         }
         else {
