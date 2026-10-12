@@ -435,8 +435,13 @@ while getopts ":nv:e:l:o:t:B:C:E:L:M:P:T:" opt_name; do
             run_tests="$OPTARG"
             ;;
 
-        *) echo "$myname: unknown option : -$opt_name" >&2;
-           exit 1;;
+        :)  # OPTARG is the option missing its argument
+            echo "$myname: option -$OPTARG requires an argument" >&2;
+            exit 1;;
+
+        *)  # OPTARG is the unknown option
+            echo "$myname: unknown option : -$OPTARG" >&2;
+            exit 1;;
     esac;
 done
 
