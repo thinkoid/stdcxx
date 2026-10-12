@@ -89,7 +89,7 @@ a dash means not yet established.
 | `22.locale.num.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 26.1 s | `./22.locale.num.put.mt --nthreads=4 --nloops=256` | 0.2 s | none; 23 to 30 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.numpunct.mt` | 200000 loops | 2e196ebb, 9a482a4f, ae1fbe04 | 34.6 s | `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | 0.1 s | none; 16 to 93 per run against 2e196ebb, 25 runs of 25 |
 | `22.locale.statics.mt` | 20000 loops | 5b68c2a7 | 0.68 s | `./22.locale.statics.mt --nthreads=4 --nloops=256` | < 0.1 s | none; 1 per run against the fault, 30 runs of 30 |
-| `22.locale.time.get.mt` | 50000 loops | – | | | | |
+| `22.locale.time.get.mt` | 50000 loops | 9a482a4f, ae1fbe04 | 57.7 s | `./22.locale.time.get.mt --nthreads=4 --nloops=256` | 0.3 s | none; 38 to 48 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.time.put.libc.mt` | 200 rounds | 81ef680c | | | | |
 | `22.locale.time.put.mt` | 100000 loops | – | | | | |
 | `22.locale.use_facet.mt` | 200 rounds | 2bbdf7c9 | | | | |
@@ -644,3 +644,39 @@ sanitizer that is a tenth of a second.
 | `./22.locale.statics.mt --nthreads=4 --nloops=256` | fixed | < 0.1 s | 0, 7 runs of 7 |
 | `./22.locale.statics.mt --nthreads=4 --nloops=256` | 5b68c2a7 | 0.1 s | 1, 30 runs of 30 |
 | `./22.locale.statics.mt --nthreads=4 --nloops=256` | 4f38276b | < 0.1 s | 0, 5 runs of 5 |
+
+### 3.15 `22.locale.time.get.mt`
+
+Three sections, `char`, `wchar_t`, then both. The main thread formats
+a time in each locale first, its conversion fixed by the locale's
+place in the list, from `%X` and `%x` to the day and month names. Each
+thread constructs a named locale per iteration, takes its `time_get`
+facet and parses the string back with the matching member. The
+locales are the C library's, and the time data comes from
+`__rw_get_timepunct` in `src/time_put.cpp`. The plain program takes
+57.7 s at its defaults, three seconds under the harness's timeout.
+
+It covers 9a482a4f, through the put-back of 3.8: the sanitizer names
+the stores in `__rw_get_timepunct` against the readers of the time
+data. Each iteration's `use_facet` crosses the facet slot, and the
+program reports ae1fbe04 as well.
+
+One iteration of two threads, in `C` only, reported 9a482a4f in four
+runs of five; four iterations and more in every run. The size is four
+threads and 256 iterations, for room.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.time.get.mt` | plain 15D | 57.7 s | – |
+| `./22.locale.time.get.mt --nthreads=4 --nloops=256` | plain 15D | 0.12 s | – |
+| `./22.locale.time.get.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.time.get.mt --nthreads=2 --nloops=1` | 9a482a4f | < 0.1 s | 2 in 4 runs of 5, 0 in the other |
+| `./22.locale.time.get.mt --nthreads=2 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.time.get.mt --nthreads=2 --nloops=4` | 9a482a4f | 0.1 to 0.4 s | 8 to 24, 5 runs of 5 |
+| `./22.locale.time.get.mt --nthreads=4 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.time.get.mt --nthreads=4 --nloops=4` | 9a482a4f | 0.1 to 0.4 s | 7 to 28, 5 runs of 5 |
+| `./22.locale.time.get.mt --nthreads=4 --nloops=16` | fixed | < 0.1 s | 0 |
+| `./22.locale.time.get.mt --nthreads=4 --nloops=16` | 9a482a4f | 0.2 to 0.7 s | 10 to 31, 5 runs of 5 |
+| `./22.locale.time.get.mt --nthreads=4 --nloops=256` | fixed | 0.3 to 0.4 s | 0, 7 runs of 7 |
+| `./22.locale.time.get.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.9 to 4.3 s | 38 to 48, 25 runs of 25 |
+| `./22.locale.time.get.mt --nthreads=4 --nloops=256` | ae1fbe04 | 1.4 to 1.7 s | 35 to 43, 5 runs of 5 |
