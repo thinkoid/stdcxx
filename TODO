@@ -219,23 +219,24 @@ Fix:
   locale and breaks =bin/duration=; =free -o=, =hostname= and =gmake=
   are gone from Linux; the svn keywords and links are dead;
   =xcomp.awk= knows no aarch64.
-- A driver under =bin=: one =buildntest= per configuration, each in
-  its own build directory, logs named as =xcomp.awk= expects, one page
-  per night, each tests table compared with its pin, one verdict and
-  an exit status. =norm.sh= and =derive-pin.sh= come into the tree
-  beside it.
+- =bin/driver= runs one =buildntest= per configuration, each in its
+  own build directory, with logs named as =xcomp.awk= expects, and
+  writes one page per build into its build directory. Left: each
+  tests table compared with its pin, one verdict and an exit status.
+  =norm.sh= and =derive-pin.sh= come into the tree beside it.
 - The certification runs the tests only; the locale and example
   phases are not pinned. =buildntest= takes empty lists for them
   (=-e ''= and =-l ''=), which saves the locale phase's 22 minutes per
   configuration, and =xcomp.awk= must file the tests table of such a
   log as tests: a bare =make run= log comes out under locales.
-- 15D-tsan as a column of the page, the gate of the entry above.
+- 15D-tsan as a section of the 15D page, the gate of the entry
+  above. The driver runs the locale MT programs only, for now.
 - The page stays local. The logs carry the environment, the host
   name and =/proc/cpuinfo=, and nothing scrubs them.
 
 Check: one night of the six configurations and 15D-tsan through the
-driver gives one page, the six pins identical, and a verdict that
-fails when a pin is perturbed.
+driver gives a page per build, the six pins identical, and a verdict
+that fails when a pin is perturbed.
 
 * TODO Run the suites in parallel
 
