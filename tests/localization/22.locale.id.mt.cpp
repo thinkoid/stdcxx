@@ -37,8 +37,8 @@
 // maximum number of threads allowed by the command line interface
 #define MAX_THREADS      32
 
-// the number of threads racing each round (at most 8 by default,
-// fewer on machines with fewer processors)
+// the number of threads racing each round (4 in a thread-safe
+// build, set in main () whatever the number of processors)
 int opt_nthreads = 1;
 
 // default timeout used by each threaded section of this test
@@ -201,14 +201,10 @@ int main (int argc, char *argv[])
 {
 #ifdef _RWSTD_REENTRANT
 
-    // race the greater of 2 and the number of processors, at most 8:
-    // contention comes from threads released together, not from more
-    // of them
-    opt_nthreads = rw_get_cpus ();
-    if (opt_nthreads < 2)
-        opt_nthreads = 2;
-    else if (8 < opt_nthreads)
-        opt_nthreads = 8;
+    // four threads whatever the number of processors, the size
+    // chosen for this program under ThreadSanitizer
+    // (doc/notes/analysis-locale-mt-sizing.md)
+    opt_nthreads = 4;
 
 #endif   // _RWSTD_REENTRANT
 
