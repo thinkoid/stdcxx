@@ -88,7 +88,7 @@ a dash means not yet established.
 | `22.locale.num.get.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 23.1 s | `./22.locale.num.get.mt --nthreads=4 --nloops=256` | 0.2 s | none; 28 to 37 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.num.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 26.1 s | `./22.locale.num.put.mt --nthreads=4 --nloops=256` | 0.2 s | none; 23 to 30 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.numpunct.mt` | 200000 loops | 2e196ebb, 9a482a4f, ae1fbe04 | 34.6 s | `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | 0.1 s | none; 16 to 93 per run against 2e196ebb, 25 runs of 25 |
-| `22.locale.statics.mt` | 20000 loops | – | | | | |
+| `22.locale.statics.mt` | 20000 loops | 5b68c2a7 | 0.68 s | `./22.locale.statics.mt --nthreads=4 --nloops=256` | < 0.1 s | none; 1 per run against the fault, 30 runs of 30 |
 | `22.locale.time.get.mt` | 50000 loops | – | | | | |
 | `22.locale.time.put.libc.mt` | 200 rounds | 81ef680c | | | | |
 | `22.locale.time.put.mt` | 100000 loops | – | | | | |
@@ -604,3 +604,43 @@ iterations, for room.
 | `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | 2e196ebb | 0.2 to 3.1 s | 16 to 93, 25 runs of 25; the assertion aborted 15 of the last 20 |
 | `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.4 to 1.7 s | 32 to 41, 5 runs of 5 |
 | `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | ae1fbe04 | 0.9 to 1.5 s | 19 to 25, 5 runs of 5 |
+
+### 3.14 `22.locale.statics.mt`
+
+Two sections. In the first, gated, the threads wait for each other and
+copy `locale::classic ()` once. In the second each thread makes each
+of the locales global in turn, the locale chosen by the iteration
+number. The locales are the C library's.
+
+Chapter 7 predates the sweep of one-time initializations, whose
+commits are faults too. The program covers 5b68c2a7, the global
+locale initialized through `__rw_once`. The commit reverts as a
+patch. Against it the sanitizer names the global locale's pointer:
+the unlocked test in `__rw_locale::_C_manage` against the store under
+its guard, both from `locale::global`. One iteration of two threads
+reports it in every run.
+
+It does not cover 4f38276b, the relaxed accesses to the classic body
+in the same function, nor does any size reach it, the defaults
+included: the pointer is stored once, when the classic locale is first
+built, and the program's own array of locales, default-constructed at
+namespace scope, builds it during static initialization.
+
+The size is four threads and 256 iterations, for room; under the
+sanitizer that is a tenth of a second.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.statics.mt` | plain 15D | 0.68 s | – |
+| `./22.locale.statics.mt --nthreads=4 --nloops=256` | plain 15D | < 0.01 s | – |
+| `./22.locale.statics.mt` | fixed | 3.2 s | 0 |
+| `./22.locale.statics.mt` | 4f38276b | 3.2 s | 0, 2 runs of 2 |
+| `./22.locale.statics.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.statics.mt --nthreads=2 --nloops=1` | 5b68c2a7 | < 0.1 s | 1, 6 runs of 6 |
+| `./22.locale.statics.mt --nthreads=2 --nloops=1` | 4f38276b | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.statics.mt --nthreads=2 --nloops=4` | 5b68c2a7 | < 0.1 s | 1, 5 runs of 5 |
+| `./22.locale.statics.mt --nthreads=4 --nloops=4` | 5b68c2a7 | < 0.1 s | 1, 5 runs of 5 |
+| `./22.locale.statics.mt --nthreads=4 --nloops=16` | 5b68c2a7 | < 0.1 s | 1, 5 runs of 5 |
+| `./22.locale.statics.mt --nthreads=4 --nloops=256` | fixed | < 0.1 s | 0, 7 runs of 7 |
+| `./22.locale.statics.mt --nthreads=4 --nloops=256` | 5b68c2a7 | 0.1 s | 1, 30 runs of 30 |
+| `./22.locale.statics.mt --nthreads=4 --nloops=256` | 4f38276b | < 0.1 s | 0, 5 runs of 5 |
