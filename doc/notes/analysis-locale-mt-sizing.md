@@ -79,7 +79,7 @@ a dash means not yet established.
 | `22.locale.facet.mt` | at most 8 threads, 20 rounds, 1000 loops | dcb5dc92 | 0.06 s | `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | 0.02 s | none; 2 per run against the fault, 25 runs of 25 |
 | `22.locale.globals.mt` | 20000 loops | ae1fbe04 | 6.0 s | `./22.locale.globals.mt --nthreads=4 --nloops=256` | 0.3 s | none; 332 to 396 per run against the fault, 25 runs of 25 |
 | `22.locale.id.mt` | at most 8 threads, 500 rounds (fixed) | 46aa42c3 | 0.10 s | `./22.locale.id.mt --nthreads=4` | 0.2 s | none; 2 to 5 per run against the fault, 30 runs of 30 |
-| `22.locale.messages.mt` | 10000 loops, 11 catalogs | – | | | | |
+| `22.locale.messages.mt` | 10000 loops, 11 catalogs | ae1fbe04 | 6.2 s | `./22.locale.messages.mt --nthreads=4 --nloops=256` | 0.2 s | none; 9 to 31 per run against the fault, 25 runs of 25 |
 | `22.locale.money.get.mt` | 100000 loops | – | | | | |
 | `22.locale.money.put.mt` | 100000 loops | – | | | | |
 | `22.locale.moneypunct.mt` | 10000 loops | – | | | | |
@@ -335,3 +335,37 @@ every run; the size takes four, for room.
 | `./22.locale.id.mt --nthreads=2` | 46aa42c3 | < 0.1 s | 2, 5 runs of 5 |
 | `./22.locale.id.mt --nthreads=4` | fixed | 0.1 to 0.2 s | 0, 6 runs of 6 |
 | `./22.locale.id.mt --nthreads=4` | 46aa42c3 | 0.1 s | 2 to 5, 30 runs of 30; the gap check fails in each of the 25 counted |
+
+### 3.7 `22.locale.messages.mt`
+
+Three sections: `messages<char>`, `messages<wchar_t>`, then both. The
+main thread writes 11 catalogs first. Each thread constructs a named
+locale per iteration, takes its `messages` facet, closes the catalog
+it opened in the same slot iterations before, opens the next by name,
+and reads a message from it every other iteration. A thread keeps four
+narrow and five wide catalog slots. The catalog, the slot and the
+locale are the iteration number modulo 11, the slot count and the
+number of locales, so with four locales 220 iterations run every
+combination in every section. The locales are the C library's.
+
+No fault of chapter 7 is in the catalog code. Each iteration's
+`use_facet` on a fresh locale crosses the facet slot, and the program
+reports ae1fbe04: every report follows from a facet published without
+ordering, its readers in `_C_get_facet_type`, `_C_is_managed`,
+`messages::open`, and the `codecvt` facet the catalog converts with.
+One iteration of two threads reported it in one run of five; four
+threads and 256 iterations in every run.
+
+The size is four threads and 256 iterations, above the 220 that run
+every combination.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.messages.mt` | plain 15D | 6.2 s | – |
+| `./22.locale.messages.mt --nthreads=4 --nloops=256` | plain 15D | 0.08 s | – |
+| `./22.locale.messages.mt` | fixed | 18.5 s | 0 |
+| `./22.locale.messages.mt` | ae1fbe04 | 17.3 s | 7 |
+| `./22.locale.messages.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.messages.mt --nthreads=2 --nloops=1` | ae1fbe04 | < 0.1 s | 2 in 1 run of 5, 0 in the others |
+| `./22.locale.messages.mt --nthreads=4 --nloops=256` | fixed | 0.2 s | 0, 6 runs of 6 |
+| `./22.locale.messages.mt --nthreads=4 --nloops=256` | ae1fbe04 | 0.3 to 0.7 s | 9 to 31 in the first 5; reported in 25 runs of 25 |
