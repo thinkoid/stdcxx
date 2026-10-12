@@ -611,10 +611,17 @@ while getopts ":hnsve:l:o:T:t:V:" opt_name; do
             version=$OPTARG
             ;;
 
-        *) echo "$myname: unknown option : -$opt_name" >&2;
-           echo
-           print_help
-           exit 1;;
+        :)  # OPTARG is the option missing its argument
+            echo "$myname: option -$OPTARG requires an argument" >&2;
+            echo
+            print_help
+            exit 1;;
+
+        *)  # OPTARG is the unknown option
+            echo "$myname: unknown option : -$OPTARG" >&2;
+            echo
+            print_help
+            exit 1;;
      esac;
 done
 
