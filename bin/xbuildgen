@@ -944,7 +944,7 @@ td.OK, td.XPASS, td.BASE, td.NOUT, td.OUTPUT, td.MISS,
 td.WARN, td.XWARN, td.EXIT, td.XEXIT, td.FORMAT,
 td.RUNWARN, td.XRUNWARN, td.DIFF, td.XDIFF, td.ASSERT,
 td.XASSERT, td.SIGNAL, td.XSIGNAL, td.COMP, td.XCOMP,
-td.LINK, td.XLINK, td.EXEC, td.XDEP, td.XFORMAT {
+td.LINK, td.XLINK, td.EXEC, td.XFORMAT {
     --hue: var(--muted);
     color: var(--hue);
     background: color-mix(in srgb, var(--hue) 14%, var(--surface));
@@ -996,9 +996,6 @@ td.MISS {
     --hue: var(--muted);
     font-weight: 400;
 }
-
-/* not attempted for a failed dependency */
-td.XDEP                                  { --hue: var(--fail); }
 
 /* a log whose library failed to build */
 tr.LIB td {
@@ -1169,15 +1166,6 @@ cat <<EOF | output
           <td class="na">Success</td>
           <td colspan=2 class="na"><center>Not Applicable</center></td>
           <td class="na">Component was not tested.</td>
-        </tr>
-        <tr>
-          <td class="XDEP">XDEP</td>
-          <td class="na">Failure</td>
-          <td colspan=2 class="na"><center>Not Applicable</center></td>
-          <td class="na">
-              Component was not attempted due to a missing (or failed)
-              dependency.
-          </td>
         </tr>
         <tr>
           <td class="COMP">COMP</td>
