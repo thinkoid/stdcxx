@@ -87,7 +87,7 @@ a dash means not yet established.
 | `22.locale.moneypunct.mt` | 10000 loops | 9a482a4f, ae1fbe04 | 2.5 s | `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | 0.1 s | none; 97 to 113 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.num.get.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 23.1 s | `./22.locale.num.get.mt --nthreads=4 --nloops=256` | 0.2 s | none; 28 to 37 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.num.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 26.1 s | `./22.locale.num.put.mt --nthreads=4 --nloops=256` | 0.2 s | none; 23 to 30 per run against 9a482a4f, 25 runs of 25 |
-| `22.locale.numpunct.mt` | 200000 loops | 2e196ebb | | | | |
+| `22.locale.numpunct.mt` | 200000 loops | 2e196ebb, 9a482a4f, ae1fbe04 | 34.6 s | `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | 0.1 s | none; 16 to 93 per run against 2e196ebb, 25 runs of 25 |
 | `22.locale.statics.mt` | 20000 loops | – | | | | |
 | `22.locale.time.get.mt` | 50000 loops | – | | | | |
 | `22.locale.time.put.libc.mt` | 200 rounds | 81ef680c | | | | |
@@ -560,3 +560,47 @@ size is four threads and 256 iterations, for room.
 | `./22.locale.num.put.mt --nthreads=4 --nloops=256` | fixed | 0.2 s | 0, 6 runs of 6 |
 | `./22.locale.num.put.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.3 to 2.1 s | 23 to 30, 25 runs of 25 |
 | `./22.locale.num.put.mt --nthreads=4 --nloops=256` | ae1fbe04 | 2.8 to 4.0 s | 79 to 97, 5 runs of 5 |
+
+### 3.13 `22.locale.numpunct.mt`
+
+Three sections, `char`, `wchar_t`, then both. The main thread records
+the five members of `numpunct` in each locale first. Each thread
+constructs a named locale per iteration, the locale chosen by the
+iteration number, calls the five members and compares. Its checks are
+`RW_ASSERT`, which aborts. The locales are the C library's.
+
+It covers 2e196ebb. The commit reverts as a patch: `numpunct` caches
+the results of its virtuals again, in members filled without a lock.
+Against it the sanitizer names the cache and the strings it holds,
+and the program's own assertion catches a wrong `grouping` in most
+runs at the chosen size, aborting the run: this is the race the
+revival started from. Its data comes from the C library, so the
+program reports 9a482a4f as well, and ae1fbe04 through each
+iteration's `use_facet`.
+
+One iteration of two threads, in `C` only, reports no fault. Four
+iterations reported 2e196ebb in every run, two threads or four;
+9a482a4f missed in two runs of five with two threads and four
+iterations, and never at 16 or more. The size is four threads and 256
+iterations, for room.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.numpunct.mt` | plain 15D | 34.6 s | – |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | plain 15D | 0.03 s | – |
+| `./22.locale.numpunct.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.numpunct.mt --nthreads=2 --nloops=1` | 2e196ebb | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.numpunct.mt --nthreads=2 --nloops=1` | 9a482a4f | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.numpunct.mt --nthreads=2 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.numpunct.mt --nthreads=2 --nloops=4` | 2e196ebb | 0.1 to 0.2 s | 13 to 18, 5 runs of 5 |
+| `./22.locale.numpunct.mt --nthreads=2 --nloops=4` | 9a482a4f | < 0.1 to 0.2 s | 13 to 15 in 3 runs of 5, 0 in the others |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=4` | 2e196ebb | 0.2 to 0.3 s | 17 to 28, 5 runs of 5 |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=4` | 9a482a4f | 0.1 s | 2 to 13, 5 runs of 5 |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=16` | fixed | < 0.1 s | 0 |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=16` | 2e196ebb | 0.3 to 0.6 s | 24 to 47, 15 runs of 15; the assertion aborted 2 of the last 10 |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=16` | 9a482a4f | 0.3 to 0.4 s | 21 to 28, 5 runs of 5 |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | fixed | 0.1 s | 0, 7 runs of 7 |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | 2e196ebb | 0.2 to 3.1 s | 16 to 93, 25 runs of 25; the assertion aborted 15 of the last 20 |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.4 to 1.7 s | 32 to 41, 5 runs of 5 |
+| `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | ae1fbe04 | 0.9 to 1.5 s | 19 to 25, 5 runs of 5 |
