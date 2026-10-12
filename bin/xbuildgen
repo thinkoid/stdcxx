@@ -944,7 +944,7 @@ td.OK, td.XPASS, td.BASE, td.NOUT, td.OUTPUT, td.MISS,
 td.WARN, td.XWARN, td.EXIT, td.XEXIT, td.FORMAT,
 td.RUNWARN, td.XRUNWARN, td.DIFF, td.XDIFF, td.ASSERT,
 td.XASSERT, td.SIGNAL, td.XSIGNAL, td.COMP, td.XCOMP,
-td.LINK, td.XLINK, td.EXEC, td.xdep, td.XFORMAT {
+td.LINK, td.XLINK, td.EXEC, td.XDEP, td.XFORMAT {
     --hue: var(--muted);
     color: var(--hue);
     background: color-mix(in srgb, var(--hue) 14%, var(--surface));
@@ -992,10 +992,13 @@ td.XCOMP, td.XLINK, td.XWARN, td.XRUNWARN {
 td.XPASS                                 { --hue: var(--note); }
 
 /* not tested */
-td.MISS, td.xdep {
+td.MISS {
     --hue: var(--muted);
     font-weight: 400;
 }
+
+/* not attempted for a failed dependency */
+td.XDEP                                  { --hue: var(--fail); }
 
 /* a log whose library failed to build */
 tr.LIB td {
