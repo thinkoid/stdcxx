@@ -74,7 +74,7 @@ a dash means not yet established.
 | program | defaults | covers | plain 15D at defaults | command under the sanitizer | time | reports |
 |---|---|---|---|---|---|---|
 | `22.locale.codecvt.mt` | 5000 loops | 8c4282ee | 1.7 s | `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | 1.1 s | none; 5 per run against the fault, 25 runs of 25 |
-| `22.locale.cons.mt` | 20000 loops | – | | | | |
+| `22.locale.cons.mt` | 20000 loops | – | 6.5 s | `./22.locale.cons.mt --nthreads=2 --nloops=8` | 0.02 s | none; none against dcb5dc92 or ae1fbe04 |
 | `22.locale.ctype.mt` | 200000 loops | – | | | | |
 | `22.locale.facet.mt` | at most 8 threads, 20 rounds, 1000 loops | dcb5dc92 | | | | |
 | `22.locale.globals.mt` | 20000 loops | – | | | | |
@@ -131,3 +131,49 @@ The five reports against the fault are on the facet data's path: the
 acquire load of `_C_impsize` against the plain store, and the reads of
 the codecvt tables (`n_to_w_tab`, `get_internal_at_offset`,
 `__rw_mbtowco`).
+
+### 3.2 `22.locale.cons.mt`
+
+One section. Each thread constructs two locales from one name, copies
+one, constructs the next locale by name, and combines a locale with a
+name and with another locale for one of eight categories: `all`, the
+six, `none`. The locale is the iteration number modulo the number of
+locales, the category modulo eight. With four locales, 8 iterations
+run every category and every locale; the category fixes the locale, so
+not every pairing runs. The locales are the C library's. The library
+keeps a named locale's body after its first construction, so only the
+first iterations race its initialization. Its checks are `RW_ASSERT`,
+which aborts; a clean exit is the evidence.
+
+No fault of chapter 7 is on its path. It never calls `use_facet` and
+never adds a facet to a locale, so every facet slot of the bodies it
+builds stays empty, and `__rw_locale::_C_construct` copies and counts
+the facets of filled slots only. The two faults nearest to it were put
+back, and it reports neither, at the chosen size or at its defaults:
+dcb5dc92, the reference counts that `_C_construct` takes under each
+facet's mutex, and ae1fbe04, the slot filled with a plain store and
+read with plain loads. Both fault libraries report through the
+programs that cover them: `22.locale.facet.mt` gives two reports
+against dcb5dc92, in `_C_construct` with a facet added, and
+`22.locale.use_facet.mt` one against ae1fbe04, the slot's store in
+`locale::_C_get_std_facet`. The atomic sweep renamed the operations
+ae1fbe04 changed, so its commit no longer reverts as a patch; the
+store and the two loads were made plain by hand, and the facet id is
+again stored on every construction.
+
+The size is the coverage floor. The sanitizer reports nothing at any
+size, against either fault or the fixed library.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.cons.mt` | plain 15D | 6.5 s | – |
+| `./22.locale.cons.mt --nthreads=2 --nloops=8` | plain 15D | < 0.01 s | – |
+| `./22.locale.cons.mt` | fixed | 32.7 s | 0 |
+| `./22.locale.cons.mt` | dcb5dc92 | 32.1 s | 0, 2 runs of 2 |
+| `./22.locale.cons.mt` | ae1fbe04 | 31.1 s | 0, 2 runs of 2 |
+| `./22.locale.cons.mt --nthreads=4` | fixed | 14.7 s | 0 |
+| `./22.locale.cons.mt --nthreads=2` | fixed | 6.4 s | 0 |
+| `./22.locale.cons.mt --nthreads=4 --nloops=8` | fixed | 0.02 s | 0 |
+| `./22.locale.cons.mt --nthreads=2 --nloops=8` | fixed | 0.02 s | 0 |
+| `./22.locale.cons.mt --nthreads=2 --nloops=8` | dcb5dc92 | 0.02 s | 0, 5 runs of 5 |
+| `./22.locale.cons.mt --nthreads=2 --nloops=8` | ae1fbe04 | 0.02 s | 0, 5 runs of 5 |
