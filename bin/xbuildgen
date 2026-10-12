@@ -96,15 +96,6 @@ readonly rootdir=$mydir/..
 
 readonly today=`LC_ALL="C" date`
 
-# URL to the ViewVC directory
-readonly viewvc="http://svn.apache.org/viewvc"
-
-# URL to the revision number (use: "$revurl=$revno")
-readonly revurl="$viewvc?view=rev&rev"
-
-# URL to the trunk of the source repository
-readonly svnpath="$viewvc/stdcxx/trunk"
-
 # expected failures
 readonly xfailfile=$rootdir/etc/config/xfail.txt
 
@@ -126,24 +117,8 @@ tsanlog=""
 # default page title (unless overridden on the command line)
 title="Multi-platform Test Result View"
 
-# extract the script's revision number
-myrev='$Revision$'
-myrev=${myrev#'$Revision: '}   # strip leading text
-myrev=${myrev%' $'}            # strip trailing text
-
-# form the URL to this version of the script in the repository
-myurl='$HeadURL$'
-myurl=${myurl#'$HeadURL: '}   # strip leading text
-myurl=${myurl##*asf/}         # strip svn prefix
-myurl=${myurl%' $'}           # strip trailing text
-
-# prepend ViewVC prefix
-myurl="http://svn.apache.org/viewvc/$myurl"
-
 # the name of the script (used in diagnostic messages)
 readonly myname=${0##*/}
-
-myurl="$myurl?view=markup&rev=$myrev"
 
 ######################################################################
 
@@ -974,8 +949,6 @@ fi
 
 ######################################################################
 
-readonly scripturl="<a href=\"$myurl\"><code>$myname</code></a>"
-
 # output the initial portion of the HTML file
 cat <<EOF | output
 <html>
@@ -987,7 +960,7 @@ cat <<EOF | output
   <body>
 
     <h1>$title</h1>
-    Generated $today by $scripturl on $(uname -n) running $(uname -sr)
+    Generated $today by <code>$myname</code> on $(uname -n) running $(uname -sr)
     <hr>
 
     <h2>Index</h2>
