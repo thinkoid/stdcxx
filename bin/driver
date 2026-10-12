@@ -156,10 +156,14 @@ run_build()
     mkdir "$srcdir" || return
     git -C "$topdir" archive "$rev" | tar -x -C "$srcdir" || return
 
+    # the export holds no revision; the log names it first
+    echo "### revision:" > "$night/$cfg.log"
+    echo "$rev" >> "$night/$cfg.log"
+
     # buildntest is a bash script: it needs PIPESTATUS
     (cd "$srcdir" && MAKE="make -j$jobs" \
         bash bin/buildntest -k -e '' -l '' -C$config -B$cfg) \
-        > "$night/$cfg.log" 2>&1
+        >> "$night/$cfg.log" 2>&1
 }
 
 

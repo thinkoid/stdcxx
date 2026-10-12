@@ -680,6 +680,15 @@ BEGIN {
 }
 
 
+# extract the revision the build was made from
+/^### revision:$/ {
+
+    getline
+
+    buildrevs [FILENAME] = $0
+}
+
+
 # extract the absolute name of the build directory
 /^### build directory:$/ {
 
@@ -1977,13 +1986,16 @@ function print_logtable()
         buildage = substr(fullage, 1, pos - 1)
         print "          <td title=\"" fullage "\">" buildage "</td>"
 
-        pos = match(fname, "-[1-9][0-9]*-log")
-        buildrev = substr(fname, pos + 1, RLENGTH - 5)
-
         ################################################################
-        # format a ViewVC URL to the revision number/log
-        revurl = "http://svn.apache.org/viewvc?view=rev&rev=" buildrev
-        print "          <td><a href=\"" revurl "\">" buildrev "</a></td>"
+        # the revision the log names, or the number in its file name
+        if (fname in buildrevs)
+            buildrev = buildrevs [fname]
+        else {
+            pos = match(fname, "-[1-9][0-9]*-log")
+            buildrev = substr(fname, pos + 1, RLENGTH - 5)
+        }
+
+        print "          <td>" buildrev "</td>"
 
         ################################################################
         # library size
