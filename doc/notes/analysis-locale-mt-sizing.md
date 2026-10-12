@@ -76,7 +76,7 @@ a dash means not yet established.
 | `22.locale.codecvt.mt` | 5000 loops | 8c4282ee | 1.7 s | `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | 1.1 s | none; 5 per run against the fault, 25 runs of 25 |
 | `22.locale.cons.mt` | 20000 loops | – | 6.5 s | `./22.locale.cons.mt --nthreads=2 --nloops=8` | 0.02 s | none; none against dcb5dc92 or ae1fbe04 |
 | `22.locale.ctype.mt` | 200000 loops | bf6dc721 | 25.6 s | `./22.locale.ctype.mt --nthreads=4 --nloops=256` | 0.4 s | none; 4 to 6 per run against the fault, 50 runs of 50 |
-| `22.locale.facet.mt` | at most 8 threads, 20 rounds, 1000 loops | dcb5dc92 | | | | |
+| `22.locale.facet.mt` | at most 8 threads, 20 rounds, 1000 loops | dcb5dc92 | 0.06 s | `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | 0.02 s | none; 2 per run against the fault, 25 runs of 25 |
 | `22.locale.globals.mt` | 20000 loops | – | | | | |
 | `22.locale.id.mt` | at most 8 threads, 500 rounds (fixed) | 46aa42c3 | | | | |
 | `22.locale.messages.mt` | 10000 loops, 11 catalogs | – | | | | |
@@ -232,3 +232,44 @@ end at their 60-second soft timeout against the fault.
 | `./22.locale.ctype.mt --nthreads=4 --nloops=8` | bf6dc721 | 0.2 s | 4 or 5, 25 runs of 25 |
 | `./22.locale.ctype.mt --nthreads=4 --nloops=256` | fixed | 0.2 s | 0, 6 runs of 6 |
 | `./22.locale.ctype.mt --nthreads=4 --nloops=256` | bf6dc721 | 0.3 to 0.9 s | 4 to 6 in 50 runs of 50; the four members in each of the 25 checked by name |
+
+### 3.4 `22.locale.facet.mt`
+
+One section, gated. Each round the main thread builds a base locale
+holding a user-defined facet that counts its destructions; the threads
+wait for each other at a barrier, then each builds and destroys
+locales from the base with a facet added. After the round the facet
+must have been destroyed once, and not before the base went. Its
+checks are `rw_assert`: a lost update is a failed assertion.
+
+It covers dcb5dc92. Against the fault the sanitizer names the shared
+facet's reference count: the increment `_C_construct` takes under the
+facet's mutex, read and write, against the lock-free decrement in
+`~__rw_locale`. The program's own assertion fails as well, in each
+of 25 runs against the fault at the chosen size: the facet is never
+destroyed.
+
+One iteration in one round of two threads reports it in every run,
+one of the two reports; 16 iterations give both in about two runs of
+three. Four threads, four rounds and 256 iterations gave both in every
+run. The plain program is already fast at its defaults, so the size is
+for the sanitizer and leaves room above the floor.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.facet.mt` | plain 15D | 0.06 s | – |
+| `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | plain 15D | < 0.01 s | – |
+| `./22.locale.facet.mt` | fixed | 0.5 s | 0 |
+| `./22.locale.facet.mt` | dcb5dc92 | 0.5 to 1.1 s | 2, 5 runs of 5 |
+| `./22.locale.facet.mt --nthreads=2` | fixed | 0.2 s | 0 |
+| `./22.locale.facet.mt --nthreads=2` | dcb5dc92 | 0.2 to 1.0 s | 2, 5 runs of 5 |
+| `./22.locale.facet.mt --nthreads=2 --nrounds=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.facet.mt --nthreads=2 --nrounds=1` | dcb5dc92 | 0.7 to 1.3 s | 2, 5 runs of 5 |
+| `./22.locale.facet.mt --nthreads=2 --nrounds=1 --nloops=16` | fixed | < 0.1 s | 0 |
+| `./22.locale.facet.mt --nthreads=2 --nrounds=1 --nloops=16` | dcb5dc92 | < 0.1 s | 2 in 17 runs of 25, 1 in the others |
+| `./22.locale.facet.mt --nthreads=2 --nrounds=1 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.facet.mt --nthreads=2 --nrounds=1 --nloops=4` | dcb5dc92 | < 0.1 s | 2 in 12 runs of 25, 1 in the others |
+| `./22.locale.facet.mt --nthreads=2 --nrounds=1 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.facet.mt --nthreads=2 --nrounds=1 --nloops=1` | dcb5dc92 | < 0.1 s | 1, 5 runs of 5 |
+| `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | fixed | 0.02 s | 0, 6 runs of 6 |
+| `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | dcb5dc92 | 0.1 to 0.4 s | 2, 25 runs of 25; the assertion fails in each of 25 more |
