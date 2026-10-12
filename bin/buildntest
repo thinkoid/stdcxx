@@ -243,8 +243,9 @@ write_times()
     label=$1
 
     if [ -z $startsec ]; then
+        # in the C locale, the format bin/duration parses
         echo; echo "### date:"
-        date
+        LC_ALL=C date
     else
         elapsed="`date +$DATEFMT`-$startsec"
 
