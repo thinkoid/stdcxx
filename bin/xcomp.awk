@@ -1259,7 +1259,7 @@ function print_section(section)
     sectname = sectnames [section]
 
     if (0 == sectmaxcompcnts [section]) {
-        print
+        print ""
         print "    <a name=\"" sectname "s\"></a>"
         print "    <h2>No " sectname "s found in " logcount " logs</h2>"
 
