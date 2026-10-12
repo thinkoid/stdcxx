@@ -675,6 +675,15 @@ BEGIN {
 }
 
 
+# extract the absolute name of the build directory
+/^### build directory:$/ {
+
+    getline
+
+    builddirs [FILENAME] = $0
+}
+
+
 # a run of one directory names the section of the table it prints
 /^### .* -Cbuild\/bin runall/ {
     runsection = 1
@@ -1087,6 +1096,24 @@ function get_dispname(section, compname)
 }
 
 
+# returns the absolute name of the file that shows why the component
+# has its status in the build, or empty when there is none: the tests
+# stage's log for a build failure, the test's output otherwise
+function get_cellhref(section, fname, compname, class)
+{
+    if (2 != section || 0 == (fname in builddirs))
+        return ""
+
+    if ("OK" == class || "MISS" == class)
+        return ""
+
+    if (match(class, "^X?(COMP|LINK)$"))
+        return builddirs [fname] "/tests.log"
+
+    return builddirs [fname] "/tests/" compname ".out"
+}
+
+
 # prints a row of columns for the given section and component
 function print_component(section, compname)
 {
@@ -1112,6 +1139,7 @@ function print_component(section, compname)
     last_class = ""
     last_value = ""
     last_title = ""
+    last_href  = ""
 
     # iterate over all log files
     for (i = 1; i <= logcount; ++i) {
@@ -1159,6 +1187,8 @@ function print_component(section, compname)
             value = "N/A"
         }
 
+        href = get_cellhref(section, fname, compname, class)
+
         if (class in failclasses) {
             ++nfailures
             ++logcompfails [fname]
@@ -1172,10 +1202,12 @@ function print_component(section, compname)
             last_class = class
             last_title = title
             last_value = value
+            last_href  = href
         }
         else if (   last_class == class \
                  && last_value == value \
-                 && last_title == title) {
+                 && last_title == title \
+                 && last_href  == href) {
             ++repeat
         }
         else {
@@ -1195,12 +1227,17 @@ function print_component(section, compname)
                 last_title = coltext ":" last_title
 
             row = row " title=\"" last_title "\""
-            row = row ">" last_value "</td>\n"
+
+            if (last_href == "")
+                row = row ">" last_value "</td>\n"
+            else
+                row = row "><a href=\"" last_href "\">" last_value "</a></td>\n"
 
             repeat     = 1
             last_class = class
             last_title = title
             last_value = value
+            last_href  = href
         }
 
         ++statuscnts [fname, class]
@@ -1222,7 +1259,11 @@ function print_component(section, compname)
         last_title = coltext ": " last_title
 
     row = row " title=\"" last_title "\""
-    row = row ">" last_value "</td>"
+
+    if (last_href == "")
+        row = row ">" last_value "</td>"
+    else
+        row = row "><a href=\"" last_href "\">" last_value "</a></td>"
 
     repeat = 0
 
