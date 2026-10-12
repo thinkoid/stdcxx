@@ -80,7 +80,7 @@ a dash means not yet established.
 | `22.locale.globals.mt` | 20000 loops | ae1fbe04 | 6.0 s | `./22.locale.globals.mt --nthreads=4 --nloops=256` | 0.3 s | none; 332 to 396 per run against the fault, 25 runs of 25 |
 | `22.locale.id.mt` | at most 8 threads, 500 rounds (fixed) | 46aa42c3 | 0.10 s | `./22.locale.id.mt --nthreads=4` | 0.2 s | none; 2 to 5 per run against the fault, 30 runs of 30 |
 | `22.locale.messages.mt` | 10000 loops, 11 catalogs | ae1fbe04 | 6.2 s | `./22.locale.messages.mt --nthreads=4 --nloops=256` | 0.2 s | none; 9 to 31 per run against the fault, 25 runs of 25 |
-| `22.locale.money.get.mt` | 100000 loops | – | | | | |
+| `22.locale.money.get.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 17.7 s | `./22.locale.money.get.mt --nthreads=4 --nloops=256` | 0.1 s | none; 57 to 95 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.money.put.mt` | 100000 loops | – | | | | |
 | `22.locale.moneypunct.mt` | 10000 loops | – | | | | |
 | `22.locale.num.get.mt` | 100000 loops | – | | | | |
@@ -369,3 +369,47 @@ every combination.
 | `./22.locale.messages.mt --nthreads=2 --nloops=1` | ae1fbe04 | < 0.1 s | 2 in 1 run of 5, 0 in the others |
 | `./22.locale.messages.mt --nthreads=4 --nloops=256` | fixed | 0.2 s | 0, 6 runs of 6 |
 | `./22.locale.messages.mt --nthreads=4 --nloops=256` | ae1fbe04 | 0.3 to 0.7 s | 9 to 31 in the first 5; reported in 25 runs of 25 |
+
+### 3.8 `22.locale.money.get.mt`
+
+Three sections: `money_get<char>`, `money_get<wchar_t>`, then both.
+The main thread formats a value with `money_put` in each locale first.
+Each thread constructs a named locale per iteration, takes its
+`money_get` facet and parses the locale's string back, into a `long
+double` on odd iterations and into a string on even ones. The locale
+is the iteration number modulo the number of locales, so with four
+locales the parity fixes the overload: not every pairing runs. The
+locales are the C library's: the database has no data for them, and
+`moneypunct` builds its data from the C library under
+`__rw_setlocale`.
+
+It covers 9a482a4f, the publication of that data. The atomic sweep
+renamed the operations it changed; put back by hand, the builders'
+stores and the loads of the data are plain. Against it the sanitizer names the
+stores in `__rw_get_moneypunct` against the readers of the
+`moneypunct` data, its strings and signs. Each iteration's `use_facet`
+crosses the facet slot, and the program reports ae1fbe04 as well.
+
+One iteration of two threads, in `C` only, reports neither fault. Four
+iterations report 9a482a4f in every run, two threads or four, and 16
+give 20 or more reports a run. The size is four threads and 256
+iterations, for room.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.money.get.mt` | plain 15D | 17.7 s | – |
+| `./22.locale.money.get.mt --nthreads=4 --nloops=256` | plain 15D | 0.03 s | – |
+| `./22.locale.money.get.mt` | fixed | 108.2 s | 0 |
+| `./22.locale.money.get.mt` | 9a482a4f | 115.7 s | 114 |
+| `./22.locale.money.get.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.money.get.mt --nthreads=2 --nloops=1` | 9a482a4f | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.money.get.mt --nthreads=2 --nloops=1` | ae1fbe04 | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.money.get.mt --nthreads=2 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.money.get.mt --nthreads=2 --nloops=4` | 9a482a4f | 0.1 to 0.2 s | 2 to 12, 5 runs of 5 |
+| `./22.locale.money.get.mt --nthreads=4 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.money.get.mt --nthreads=4 --nloops=4` | 9a482a4f | 0.1 to 0.2 s | 2 to 11, 5 runs of 5 |
+| `./22.locale.money.get.mt --nthreads=4 --nloops=16` | fixed | < 0.1 s | 0 |
+| `./22.locale.money.get.mt --nthreads=4 --nloops=16` | 9a482a4f | 0.2 to 0.5 s | 14 to 29, 5 runs of 5 |
+| `./22.locale.money.get.mt --nthreads=4 --nloops=256` | fixed | 0.1 s | 0, 6 runs of 6 |
+| `./22.locale.money.get.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.3 to 2.4 s | 57 to 95, 25 runs of 25 |
+| `./22.locale.money.get.mt --nthreads=4 --nloops=256` | ae1fbe04 | 1.6 to 3.4 s | 70 to 96, 5 runs of 5 |
