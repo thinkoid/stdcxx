@@ -48,6 +48,11 @@ BEGIN {
     sectnames [2] = "test"
     sectnames [3] = "example"
 
+    # the directories under tests/ that hold the sources of tests
+    split("self regress intro support diagnostics utilities strings "  \
+          "localization containers iterators algorithms numerics "     \
+          "iostream tr1.c99 tr1.util", testdirs, " ")
+
     # names of build stages
     buildstages [1] = "config"
     buildstages [2] = "lib"
@@ -1053,46 +1058,21 @@ function get_dispname(section, compname)
         }
     }
     else if (2 == section) {
-        dir = "tests"
+        # link the name to the test's source in the tree, wherever
+        # under tests/ it lives
+        dispname = compname
 
-        if (match(compname, "\\.stdcxx-"))
-            dir = dir "/regress"
-        else if (match(compname, "^0\\."))
-            dir = dir "/self"
-        else if (match(compname, "^17\\."))
-            dir = dir "/intro"
-        else if (match(compname, "^18\\."))
-            dir = dir "/support"
-        else if (match(compname, "^19\\."))
-            dir = dir "/diagnostics"
-        else if (match(compname, "^20\\."))
-            dir = dir "/utilities"
-        else if (match(compname, "^21\\."))
-            dir = dir "/strings"
-        else if (match(compname, "^22\\."))
-            dir = dir "/localization"
-        else if (match(compname, "^23\\."))
-            dir = dir "/containers"
-        else if (match(compname, "^24\\."))
-            dir = dir "/iterators"
-        else if (match(compname, "^25\\."))
-            dir = dir "/algorithm"
-        else if (match(compname, "^26\\."))
-            dir = dir "/numerics"
-        else if (match(compname, "^27\\."))
-            dir = dir "/iostream"
-        else if (match(compname, "^d_"))
-            ; # dir = dir "/depr"
-        else
-            dir = ""
-    
-        if (dir != "" && srcdir != "") {
-            dispname = "<a href=\"" srcdir "/" dir "/" compname
-            dispname = dispname ".cpp\">"
-            dispname = dispname compname "</a>"
-        }
-        else {
-            dispname = compname
+        for (d = 1; srcdir != "" && d in testdirs; ++d) {
+            path = srcdir "/tests/" testdirs [d] "/" compname ".cpp"
+
+            if (0 < (getline line < path)) {
+                dispname = "<a href=\"" path "\">" compname "</a>"
+            }
+
+            close(path)
+
+            if (dispname != compname)
+                break
         }
     }
     else {
