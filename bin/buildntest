@@ -586,6 +586,10 @@ echo
 # Start our output file
 echo "result.file.type=stdcxx-extended" > ${OUTFILE}
 
+# write the absolute name of the build directory
+echo; echo "### build directory:"
+echo "$(pwd)/build"
+
 ##########
 # Create build directory, set state to 'C' on failure
 make_stage "builddir" "C"
