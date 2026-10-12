@@ -178,6 +178,7 @@ BEGIN {
     }
 
     section = 0
+    runsection = 0
 
     if (0 == match(FILENAME, re_logname)) {
         # treat files whose names don't match the log file name pattern
@@ -675,11 +676,31 @@ BEGIN {
 }
 
 
+# a run of one directory names the section of the table it prints
+/^### .* -Cbuild\/bin runall/ {
+    runsection = 1
+}
+
+/^### .* -Cbuild\/tests runall/ {
+    runsection = 2
+}
+
+/^### .* -Cbuild\/examples runall/ {
+    runsection = 3
+}
+
+
 # action at the beginning of component table
 /^NAME  *STATUS WARN/ {
     start = 1
 
-    ++section
+    # tables of a top-level runall come in the order of the sections
+    if (0 < runsection) {
+        section    = runsection
+        runsection = 0
+    }
+    else
+        ++section
 
     ++logsections [FILENAME]
 
