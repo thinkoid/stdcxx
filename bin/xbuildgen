@@ -59,6 +59,11 @@
 #          Specify the pathname of the output file. The utility will
 #          use stdout when no output file is specified.
 #
+#     -S <tsan-log>
+#          Append a section with the ThreadSanitizer runs in the log
+#          of a -tsan build of the same configuration, as bin/driver
+#          writes it.
+#
 #     -T <text>
 #          Specify the title for the page.
 #
@@ -114,6 +119,9 @@ components_in_rows=1
 
 # no verbosity by default
 verbose=0
+
+# the log of a ThreadSanitizer build (none by default)
+tsanlog=""
 
 # default page title (unless overridden on the command line)
 title="Multi-platform Test Result View"
@@ -175,6 +183,11 @@ print_help ()
     echo "     -o <output-file>"
     echo "          Specify the pathname of the output file. The utility will"
     echo "          use stdout when no output file is specified."
+    echo
+    echo "     -S <tsan-log>"
+    echo "          Append a section with the ThreadSanitizer runs in the log"
+    echo "          of a -tsan build of the same configuration, as bin/driver"
+    echo "          writes it."
     echo
     echo "     -T <text>"
     echo "          Specify the title for the page."
@@ -560,7 +573,7 @@ get_compiler ()
 ######################################################################
 
 # process command line options
-while getopts ":hnsve:l:o:T:t:V:" opt_name; do
+while getopts ":hnsve:l:o:S:T:t:V:" opt_name; do
     case $opt_name in
         # options with no arguments 
 
@@ -595,6 +608,10 @@ while getopts ":hnsve:l:o:T:t:V:" opt_name; do
 
         o)  # argument is the name of output file (stdout by default)
             outfile=$OPTARG
+            ;;
+
+        S)  # argument is the log of a ThreadSanitizer build
+            tsanlog=$OPTARG
             ;;
 
         T)  # argument is the title of the page
@@ -636,6 +653,84 @@ gzlogs=$*
 
 # set the TMPDIR variable to /tmp if not set
 [ -z $TMPDIR ] && TMPDIR=/tmp
+
+######################################################################
+
+# print_tsan(): writes the section of the ThreadSanitizer runs in the
+# given log: one row per program with its exit status, number of
+# reports, and real seconds, the name linked to the program's output
+# in the log's build directory; without runs, a line linking the log
+print_tsan ()
+{
+    log=$1
+
+    awk -v tsanlog="$log" '
+        /^### build directory:$/ {
+            getline
+            builddir = $0
+        }
+
+        /^### ThreadSanitizer runs:$/ {
+            # skip the header of the table
+            getline
+            start = 1
+            next
+        }
+
+        1 == start && 4 == NF {
+            ++nprogs
+
+            if (0 == $2 && 0 == $3) {
+                ++nclean
+                exitclass = "OK"
+                repclass  = "OK"
+            }
+            else {
+                exitclass = 0 == $2 ? "OK" : "EXIT"
+                repclass  = 0 == $3 ? "OK" : "ASSERT"
+            }
+
+            href = builddir "/tests/" $1 ".tsan"
+
+            rows = rows "        <tr>\n"
+            rows = rows "          <td class=\"header\">" nprogs "</td>\n"
+            rows = rows "          <td class=\"name\"><a href=\"" href "\">"
+            rows = rows $1 "</a></td>\n"
+            rows = rows "          <td class=\"" exitclass "\">" $2 "</td>\n"
+            rows = rows "          <td class=\"" repclass "\">" $3 "</td>\n"
+            rows = rows "          <td class=\"number\">" $4 "</td>\n"
+            rows = rows "        </tr>\n"
+        }
+
+        END {
+            print "    <h2><a name=\"tsan\"></a>ThreadSanitizer</h2>"
+
+            if (0 == nprogs) {
+                print "    No ThreadSanitizer runs in <a href=\"" tsanlog "\">"
+                print "    " tsanlog "</a>."
+                exit
+            }
+
+            print "    " nclean + 0 " of " nprogs " programs clean"
+            print "    in <code>" builddir "</code>."
+            print "    <table>"
+            print "      <thead>"
+            print "        <tr>"
+            print "          <th>###</th>"
+            print "          <th>program</th>"
+            print "          <th title=\"exit status\">exit</th>"
+            print "          <th title=\"number of ThreadSanitizer reports\">"
+            print "reports</th>"
+            print "          <th title=\"real time\">seconds</th>"
+            print "        </tr>"
+            print "      </thead>"
+            print "      <tbody>"
+            printf "%s", rows
+            print "      </tbody>"
+            print "    </table>"
+        }
+    ' "$log"
+}
 
 ######################################################################
 
@@ -901,6 +996,13 @@ cat <<EOF | output
       <li><a href="#logs">Logs and Columns</a></li>
       <li><a href="#timings">Timings</a></li>
       <li><a href="#tests">Tests</a></li>
+EOF
+
+if [ -n "$tsanlog" ]; then
+    output '      <li><a href="#tsan">ThreadSanitizer</a></li>'
+fi
+
+cat <<EOF | output
       <li><a href="#codes">Codes and Colors</a></li>
       <li><a href="#buildtypes">Build Types</a></li>
     </ul>
@@ -970,6 +1072,10 @@ else
 fi
 
 $xcomp bodyonly=1 logdir=$logdir version=$version $xfails $textlogs | output
+
+if [ -n "$tsanlog" ]; then
+    print_tsan "$tsanlog" | output
+fi
 
 ######################################################################
 # output the rest of the HTML file
