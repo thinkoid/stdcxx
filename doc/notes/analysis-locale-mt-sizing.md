@@ -81,7 +81,7 @@ a dash means not yet established.
 | `22.locale.id.mt` | at most 8 threads, 500 rounds (fixed) | 46aa42c3 | 0.10 s | `./22.locale.id.mt --nthreads=4` | 0.2 s | none; 2 to 5 per run against the fault, 30 runs of 30 |
 | `22.locale.messages.mt` | 10000 loops, 11 catalogs | ae1fbe04 | 6.2 s | `./22.locale.messages.mt --nthreads=4 --nloops=256` | 0.2 s | none; 9 to 31 per run against the fault, 25 runs of 25 |
 | `22.locale.money.get.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 17.7 s | `./22.locale.money.get.mt --nthreads=4 --nloops=256` | 0.1 s | none; 57 to 95 per run against 9a482a4f, 25 runs of 25 |
-| `22.locale.money.put.mt` | 100000 loops | – | | | | |
+| `22.locale.money.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 22.8 s | `./22.locale.money.put.mt --nthreads=4 --nloops=256` | 0.1 s | none; 14 to 21 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.moneypunct.mt` | 10000 loops | – | | | | |
 | `22.locale.num.get.mt` | 100000 loops | – | | | | |
 | `22.locale.num.put.mt` | 100000 loops | – | | | | |
@@ -413,3 +413,41 @@ iterations, for room.
 | `./22.locale.money.get.mt --nthreads=4 --nloops=256` | fixed | 0.1 s | 0, 6 runs of 6 |
 | `./22.locale.money.get.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.3 to 2.4 s | 57 to 95, 25 runs of 25 |
 | `./22.locale.money.get.mt --nthreads=4 --nloops=256` | ae1fbe04 | 1.6 to 3.4 s | 70 to 96, 5 runs of 5 |
+
+### 3.9 `22.locale.money.put.mt`
+
+The mirror of `22.locale.money.get.mt`, three sections, `char`,
+`wchar_t`, then both. The main thread formats a value in each locale
+first, with an overload and an international flag of the locale's own;
+each thread constructs a named locale per iteration, formats the same
+value with `money_put` and compares. The locales are the C library's;
+the program keeps three of the host's four, `C`, `en_US.utf8` and
+`POSIX`.
+
+It covers 9a482a4f, through the same put-back as 3.8: the sanitizer
+names the stores in `__rw_get_moneypunct` against the readers of the
+data. Each iteration's `use_facet` crosses the facet slot, and the
+program reports ae1fbe04 as well.
+
+One iteration of two threads reports neither fault. Four iterations
+report 9a482a4f in most runs, but one run of five with four threads
+reported nothing; 16 and more reported in every run. The size is four
+threads and 256 iterations, for room.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.money.put.mt` | plain 15D | 22.8 s | – |
+| `./22.locale.money.put.mt --nthreads=4 --nloops=256` | plain 15D | 0.03 s | – |
+| `./22.locale.money.put.mt` | fixed | 116.5 s | 0 |
+| `./22.locale.money.put.mt` | 9a482a4f | 127.4 s | 20 |
+| `./22.locale.money.put.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.money.put.mt --nthreads=2 --nloops=1` | 9a482a4f | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.money.put.mt --nthreads=2 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.money.put.mt --nthreads=2 --nloops=4` | 9a482a4f | 0.1 to 0.2 s | 5 to 7, 5 runs of 5 |
+| `./22.locale.money.put.mt --nthreads=4 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.money.put.mt --nthreads=4 --nloops=4` | 9a482a4f | < 0.1 s | 2 to 7 in 4 runs of 5, 0 in the other |
+| `./22.locale.money.put.mt --nthreads=4 --nloops=16` | fixed | < 0.1 s | 0 |
+| `./22.locale.money.put.mt --nthreads=4 --nloops=16` | 9a482a4f | 0.1 to 0.2 s | 5 to 12, 5 runs of 5 |
+| `./22.locale.money.put.mt --nthreads=4 --nloops=256` | fixed | 0.1 s | 0, 6 runs of 6 |
+| `./22.locale.money.put.mt --nthreads=4 --nloops=256` | 9a482a4f | 0.6 to 1.0 s | 14 to 21, 25 runs of 25 |
+| `./22.locale.money.put.mt --nthreads=4 --nloops=256` | ae1fbe04 | 1.0 to 1.3 s | 35 to 42, 5 runs of 5 |
