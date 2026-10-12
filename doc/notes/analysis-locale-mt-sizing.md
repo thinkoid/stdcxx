@@ -77,7 +77,7 @@ a dash means not yet established.
 | `22.locale.cons.mt` | 20000 loops | – | 6.5 s | `./22.locale.cons.mt --nthreads=2 --nloops=8` | 0.02 s | none; none against dcb5dc92 or ae1fbe04 |
 | `22.locale.ctype.mt` | 200000 loops | bf6dc721 | 25.6 s | `./22.locale.ctype.mt --nthreads=4 --nloops=256` | 0.4 s | none; 4 to 6 per run against the fault, 50 runs of 50 |
 | `22.locale.facet.mt` | at most 8 threads, 20 rounds, 1000 loops | dcb5dc92 | 0.06 s | `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | 0.02 s | none; 2 per run against the fault, 25 runs of 25 |
-| `22.locale.globals.mt` | 20000 loops | – | | | | |
+| `22.locale.globals.mt` | 20000 loops | ae1fbe04 | 6.0 s | `./22.locale.globals.mt --nthreads=4 --nloops=256` | 0.3 s | none; 332 to 396 per run against the fault, 25 runs of 25 |
 | `22.locale.id.mt` | at most 8 threads, 500 rounds (fixed) | 46aa42c3 | | | | |
 | `22.locale.messages.mt` | 10000 loops, 11 catalogs | – | | | | |
 | `22.locale.money.get.mt` | 100000 loops | – | | | | |
@@ -273,3 +273,36 @@ for the sanitizer and leaves room above the floor.
 | `./22.locale.facet.mt --nthreads=2 --nrounds=1 --nloops=1` | dcb5dc92 | < 0.1 s | 1, 5 runs of 5 |
 | `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | fixed | 0.02 s | 0, 6 runs of 6 |
 | `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | dcb5dc92 | 0.1 to 0.4 s | 2, 25 runs of 25; the assertion fails in each of 25 more |
+
+### 3.5 `22.locale.globals.mt`
+
+Two sections, `has_facet`, then `use_facet`. Each thread constructs a
+named locale per iteration, the locale chosen by the iteration number,
+and asks it for every standard facet of both character types. In a
+named locale each `_byname` facet must be the base facet; in the
+classic one, asking for a `_byname` facet must throw. The locales are
+the C library's, `C` among them.
+
+It covers ae1fbe04. Every report against the fault is on the facet
+slot: the load in `__rw_get_std_facet` against the store in
+`locale::_C_get_std_facet`. One iteration of two threads, in `C`
+only, gave 17 to 26 reports in every run.
+
+The size is that of `22.locale.ctype.mt`, four threads and 256
+iterations, with room above that floor. Against the fault the reports
+slow a run to about 10 s, against 0.3 s on the fixed library. At the
+defaults under the sanitizer both sections end at their 60-second soft
+timeout against the fault.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.globals.mt` | plain 15D | 6.0 s | – |
+| `./22.locale.globals.mt --nthreads=4 --nloops=256` | plain 15D | 0.05 s | – |
+| `./22.locale.globals.mt` | fixed | 36.5 s | 0 |
+| `./22.locale.globals.mt` | ae1fbe04 | 120.1 s | 438 |
+| `./22.locale.globals.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.globals.mt --nthreads=2 --nloops=1` | ae1fbe04 | 0.2 to 0.4 s | 17 to 26, 5 runs of 5 |
+| `./22.locale.globals.mt --nthreads=2 --nloops=5` | fixed | < 0.1 s | 0 |
+| `./22.locale.globals.mt --nthreads=2 --nloops=5` | ae1fbe04 | 0.6 to 1.1 s | 56 to 95, 5 runs of 5 |
+| `./22.locale.globals.mt --nthreads=4 --nloops=256` | fixed | 0.3 to 0.4 s | 0, 6 runs of 6 |
+| `./22.locale.globals.mt --nthreads=4 --nloops=256` | ae1fbe04 | 8.8 to 12.3 s | 332 to 396, 25 runs of 25 |
