@@ -13,8 +13,17 @@ reporting the fault the program covers, and what the runs take.
 
 ## 0. tl;dr
 
-Nothing measured yet. librwtest runs clean under the sanitizer:
-the soft timeout and the replacement `operator delete` are fixed.
+All 18 programs are sized: chapter 2 has each program's size and
+time, chapter 3 the runs. At its size every program but
+`22.locale.cons.mt` catches a known fault in every run against a
+library with the fault put back, and stays clean against the fixed
+library. Most sizes are four threads and 256 iterations, room above a
+floor of a few iterations. The 18 programs take about 253 s plain at
+their defaults on the host below; at their sizes, about 2.5 s plain
+and 4.7 s under the sanitizer. Two of the faults are leaks, not races:
+the sanitizer does not see them, and only the programs' own leak
+checks do. librwtest runs clean under the sanitizer: the soft timeout
+and the replacement `operator delete` are fixed.
 
 ## 1. Method
 
@@ -23,8 +32,8 @@ options: `--nthreads`, `--nloops`, `--nrounds`, `--nlocales`,
 `--ncatalogs`.
 
 The build is the one in `analysis-locale-mt-race.md`, chapter 1: a 15D
-build directory with `-fsanitize=thread` on the library, librwtest,
-the utilities and the tests. The configuration does not see the
+build directory with `-fsanitize=thread` on the library, librwtest
+and the tests. The configuration does not see the
 option, so `config.h` is the plain 15D one. A 12D build made the same
 way is the last pass, once the sizes are chosen: optimization takes
 code paths the debug build does not.
@@ -50,11 +59,17 @@ For each program:
   ends at a soft timeout, and decides nothing the sizes do not.
 - Runs under the sanitizer at decreasing sizes. At each size, one run
   against the fixed library and runs against a library with the
-  program's fault put back. A fault is put back by reverting its commit
-  in a scratch build; `analysis-locale-mt-race.md`, chapter 7, lists
-  them.
-- The chosen size is the smallest at which every run against the fault
+  program's fault put back. `analysis-locale-mt-race.md`, chapter 7,
+  lists the faults; the commits of the sweep of one-time
+  initializations are faults too. A commit is reverted where it still
+  applies as a patch; where later commits changed its lines, chiefly
+  the atomic sweep's renamed operations, it is put back by hand, and
+  each section says how.
+- The floor is the smallest size at which every run against the fault
   reports it and the run against the fixed library reports nothing.
+  The chosen size leaves room above it, mostly four threads and 256
+  iterations, and is confirmed by 25 runs against the fault and six
+  or more against the fixed library.
 - A program with no known fault is sized by what it runs: the smallest
   size at which each of its operations still runs from more than one
   thread on fresh state.
