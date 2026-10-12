@@ -181,6 +181,9 @@ build_tsan()
 
     mkdir "$night/$cfg" || return
 
+    echo; echo "### source directory:"
+    echo "$srcdir"
+
     echo; echo "### build directory:"
     echo "$builddir"
 

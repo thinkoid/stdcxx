@@ -633,13 +633,19 @@ gzlogs=$*
 
 # print_tsan(): writes the section of the ThreadSanitizer runs in the
 # given log: one row per program with its exit status, number of
-# reports, and real seconds, the name linked to the program's output
-# in the log's build directory; without runs, a line linking the log
+# reports, and real seconds; the name links to the program's source,
+# a failing status to the program's output in the log's build
+# directory; without runs, a line linking the log
 print_tsan ()
 {
     log=$1
 
     awk -v tsanlog="$log" '
+        /^### source directory:$/ {
+            getline
+            srcdir = $0
+        }
+
         /^### build directory:$/ {
             getline
             builddir = $0
@@ -655,24 +661,40 @@ print_tsan ()
         1 == start && 4 == NF {
             ++nprogs
 
-            if (0 == $2 && 0 == $3) {
+            if (0 == $2 && 0 == $3)
                 ++nclean
-                exitclass = "OK"
-                repclass  = "OK"
-            }
-            else {
-                exitclass = 0 == $2 ? "OK" : "EXIT"
-                repclass  = 0 == $3 ? "OK" : "ASSERT"
+
+            # the source of the program, wherever under tests/ it lives
+            name = $1
+            src  = ""
+
+            if (srcdir != "") {
+                cmd = "ls " srcdir "/tests/*/" $1 ".cpp 2>/dev/null"
+                cmd | getline src
+                close(cmd)
             }
 
-            href = builddir "/tests/" $1 ".tsan"
+            if (src != "")
+                name = "<a href=\"" src "\">" $1 "</a>"
+
+            # a failing status links the program output
+            out = "<a href=\"" builddir "/tests/" $1 ".tsan\">"
+
+            if (0 == $2)
+                exitcell = "<td class=\"OK\">0</td>"
+            else
+                exitcell = "<td class=\"EXIT\">" out $2 "</a></td>"
+
+            if (0 == $3)
+                repcell = "<td class=\"OK\">0</td>"
+            else
+                repcell = "<td class=\"ASSERT\">" out $3 "</a></td>"
 
             rows = rows "        <tr>\n"
             rows = rows "          <td class=\"header\">" nprogs "</td>\n"
-            rows = rows "          <td class=\"name\"><a href=\"" href "\">"
-            rows = rows $1 "</a></td>\n"
-            rows = rows "          <td class=\"" exitclass "\">" $2 "</td>\n"
-            rows = rows "          <td class=\"" repclass "\">" $3 "</td>\n"
+            rows = rows "          <td class=\"name\">" name "</td>\n"
+            rows = rows "          " exitcell "\n"
+            rows = rows "          " repcell "\n"
             rows = rows "          <td class=\"number\">" $4 "</td>\n"
             rows = rows "        </tr>\n"
         }
