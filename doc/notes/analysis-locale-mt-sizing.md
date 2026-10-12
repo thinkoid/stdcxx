@@ -91,7 +91,7 @@ a dash means not yet established.
 | program | defaults | covers | plain 15D at defaults | command under the sanitizer | time | reports |
 |---|---|---|---|---|---|---|
 | `22.locale.codecvt.mt` | 5000 loops | 8c4282ee | 1.7 s | `./22.locale.codecvt.mt --nthreads=4 --nloops=256` | 1.1 s | none; 5 per run against the fault, 25 runs of 25 |
-| `22.locale.cons.mt` | 20000 loops | – | 6.5 s | `./22.locale.cons.mt --nthreads=2 --nloops=8` | 0.02 s | none; none against dcb5dc92 or ae1fbe04 |
+| `22.locale.cons.mt` | 20000 loops | – | 6.5 s | `./22.locale.cons.mt --nthreads=4 --nloops=256` | 0.13 s | none; none against dcb5dc92 or ae1fbe04 |
 | `22.locale.ctype.mt` | 200000 loops | bf6dc721 | 25.6 s | `./22.locale.ctype.mt --nthreads=4 --nloops=256` | 0.4 s | none; 4 to 6 per run against the fault, 50 runs of 50 |
 | `22.locale.facet.mt` | at most 8 threads, 20 rounds, 1000 loops | dcb5dc92 | 0.06 s | `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | 0.02 s | none; 2 per run against the fault, 25 runs of 25 |
 | `22.locale.globals.mt` | 20000 loops | ae1fbe04 | 6.0 s | `./22.locale.globals.mt --nthreads=4 --nloops=256` | 0.3 s | none; 332 to 396 per run against the fault, 25 runs of 25 |
@@ -184,8 +184,11 @@ ae1fbe04 changed, so its commit no longer reverts as a patch; the
 store and the two loads were made plain by hand, and the facet id is
 again stored on every construction.
 
-The size is the coverage floor. The sanitizer reports nothing at any
-size, against either fault or the fixed library.
+The floor is two threads and 8 iterations. The size is four threads
+and 256 iterations like the others', since the sizes became the
+defaults: each of the eight pairings of category and locale it runs
+comes 32 times. The sanitizer reports nothing at any size, against
+either fault or the fixed library.
 
 | command | library | time | reports |
 |---|---|---|---|
@@ -200,6 +203,8 @@ size, against either fault or the fixed library.
 | `./22.locale.cons.mt --nthreads=2 --nloops=8` | fixed | 0.02 s | 0 |
 | `./22.locale.cons.mt --nthreads=2 --nloops=8` | dcb5dc92 | 0.02 s | 0, 5 runs of 5 |
 | `./22.locale.cons.mt --nthreads=2 --nloops=8` | ae1fbe04 | 0.02 s | 0, 5 runs of 5 |
+| `./22.locale.cons.mt --nthreads=4 --nloops=256` | plain 15D | 0.02 s | – |
+| `./22.locale.cons.mt --nthreads=4 --nloops=256` | fixed | 0.13 s | 0 |
 
 ### 3.3 `22.locale.ctype.mt`
 
