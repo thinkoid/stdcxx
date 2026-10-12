@@ -75,7 +75,7 @@ a dash means not yet established.
 |---|---|---|---|---|---|---|
 | `22.locale.codecvt.mt` | 5000 loops | 8c4282ee | 1.7 s | `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | 1.1 s | none; 5 per run against the fault, 25 runs of 25 |
 | `22.locale.cons.mt` | 20000 loops | – | 6.5 s | `./22.locale.cons.mt --nthreads=2 --nloops=8` | 0.02 s | none; none against dcb5dc92 or ae1fbe04 |
-| `22.locale.ctype.mt` | 200000 loops | – | | | | |
+| `22.locale.ctype.mt` | 200000 loops | bf6dc721 | 25.6 s | `./22.locale.ctype.mt --nthreads=4 --nloops=256` | 0.4 s | none; 4 to 6 per run against the fault, 50 runs of 50 |
 | `22.locale.facet.mt` | at most 8 threads, 20 rounds, 1000 loops | dcb5dc92 | | | | |
 | `22.locale.globals.mt` | 20000 loops | – | | | | |
 | `22.locale.id.mt` | at most 8 threads, 500 rounds (fixed) | 46aa42c3 | | | | |
@@ -177,3 +177,58 @@ size, against either fault or the fixed library.
 | `./22.locale.cons.mt --nthreads=2 --nloops=8` | fixed | 0.02 s | 0 |
 | `./22.locale.cons.mt --nthreads=2 --nloops=8` | dcb5dc92 | 0.02 s | 0, 5 runs of 5 |
 | `./22.locale.cons.mt --nthreads=2 --nloops=8` | ae1fbe04 | 0.02 s | 0, 5 runs of 5 |
+
+### 3.3 `22.locale.ctype.mt`
+
+Three sections: `ctype<char>`, `ctype<wchar_t>`, then both. Each thread
+constructs a named locale per iteration, takes its `ctype` facet and
+calls `widen` and `narrow`, the locale and the character chosen by the
+iteration number. The main thread computes the expected results
+through the same members first, in locales that are gone before the
+threads start, so the threads' facets are new: the sanitizer places
+every racing facet in a block allocated by a worker thread. The locales
+are the C library's.
+
+It covers bf6dc721, the `narrow` and `widen` caches of both
+specializations. The atomic sweep renamed the operations the commit
+changed, so it no longer reverts as a patch; the put-back makes its
+thirteen relaxed loads and stores plain, `codecvt<char,
+char>::always_noconv` among them, each cache still read once per call.
+Against it the sanitizer names the four members, a read or a store in
+one thread against a store in another.
+
+A facet lives while some thread's locale holds it, so whether two
+threads meet on one is still a matter of timing. With two threads the
+first section missed in 6 runs of 40 at 8 loops, and in 2 or 3 of 25
+at every loop count up to 256: two reports, the wide members only.
+Four threads met in every run, down to 4 loops, one per locale, the
+floor. The size keeps four threads and takes 256 loops for room above
+it. At the defaults under the sanitizer the second and third sections
+end at their 60-second soft timeout against the fault.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.ctype.mt` | plain 15D | 25.6 s | – |
+| `./22.locale.ctype.mt --nthreads=4 --nloops=256` | plain 15D | 0.11 s | – |
+| `./22.locale.ctype.mt` | fixed | 118.3 s | 0 |
+| `./22.locale.ctype.mt` | bf6dc721 | 176.6 s | 8 and 11, 2 runs of 2 |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=4096` | fixed | 1.1 s | 0 |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=4096` | bf6dc721 | 2.3 to 3.3 s | 4 to 6, 3 runs of 3 |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=256` | fixed | 0.2 s | 0 |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=256` | bf6dc721 | 0.2 to 1.0 s | 4 in 23 runs of 25, 2 in the others |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=64` | fixed | 0.1 s | 0 |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=64` | bf6dc721 | 0.2 s | 4 in 22 runs of 25, 2 in the others |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=16` | fixed | 0.1 s | 0 |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=16` | bf6dc721 | 0.2 s | 4 in 23 runs of 25, 2 in the others |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=8` | fixed | 0.1 s | 0 |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=8` | bf6dc721 | 0.2 s | 4 in 23 runs of 25, 2 in the others |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=4` | fixed | 0.1 s | 0 |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=4` | bf6dc721 | 0.2 s | 2 in 4 runs of 5, 4 in the other |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=1` | fixed | 0.1 s | 0 |
+| `./22.locale.ctype.mt --nthreads=2 --nloops=1` | bf6dc721 | 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.ctype.mt --nthreads=4 --nloops=4` | fixed | 0.1 s | 0 |
+| `./22.locale.ctype.mt --nthreads=4 --nloops=4` | bf6dc721 | 0.2 s | 4 to 6, 25 runs of 25 |
+| `./22.locale.ctype.mt --nthreads=4 --nloops=8` | fixed | 0.1 s | 0 |
+| `./22.locale.ctype.mt --nthreads=4 --nloops=8` | bf6dc721 | 0.2 s | 4 or 5, 25 runs of 25 |
+| `./22.locale.ctype.mt --nthreads=4 --nloops=256` | fixed | 0.2 s | 0, 6 runs of 6 |
+| `./22.locale.ctype.mt --nthreads=4 --nloops=256` | bf6dc721 | 0.3 to 0.9 s | 4 to 6 in 50 runs of 50; the four members in each of the 25 checked by name |
