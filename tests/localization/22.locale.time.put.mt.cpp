@@ -41,14 +41,13 @@
 #include <rw_valcmp.h>    // for rw_strncmp ()
 
 #define MAX_THREADS      32
-#define MAX_LOOPS    100000
 
-// default number of threads (will be adjusted to the number
-// of processors/cores later)
+// the number of threads (4 in a thread-safe build, set in main ()
+// whatever the number of processors)
 int opt_nthreads = 1;
 
 // the number of times each thread should iterate
-int opt_nloops = MAX_LOOPS;
+int opt_nloops = 256;
 
 // number of locales to use
 int opt_nlocales = MAX_THREADS;
@@ -379,11 +378,10 @@ int main (int argc, char *argv[])
 {
 #ifdef _RWSTD_REENTRANT
 
-    // set nthreads to the greater of the number of processors
-    // and 2 (for uniprocessor systems) by default
-    opt_nthreads = rw_get_cpus ();
-    if (opt_nthreads < 2)
-        opt_nthreads = 2;
+    // four threads whatever the number of processors, the size
+    // chosen for this program under ThreadSanitizer
+    // (doc/notes/analysis-locale-mt-sizing.md)
+    opt_nthreads = 4;
 
 #endif   // _RWSTD_REENTRANT
 
