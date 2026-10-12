@@ -900,9 +900,7 @@ cat <<EOF | output
     <ul>
       <li><a href="#logs">Logs and Columns</a></li>
       <li><a href="#timings">Timings</a></li>
-      <li><a href="#examples">Examples</a></li>
       <li><a href="#tests">Tests</a></li>
-      <li><a href="#locales">Locales</a></li>
       <li><a href="#codes">Codes and Colors</a></li>
       <li><a href="#buildtypes">Build Types</a></li>
     </ul>

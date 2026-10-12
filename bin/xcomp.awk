@@ -51,11 +51,10 @@ BEGIN {
     # names of build stages
     buildstages [1] = "config"
     buildstages [2] = "lib"
-    buildstages [3] = "examples"
-    buildstages [4] = "bin"
-    buildstages [5] = "tests"
-    buildstages [6] = "runall"
-    buildstages [7] = "total"
+    buildstages [3] = "bin"
+    buildstages [4] = "tests"
+    buildstages [5] = "runall"
+    buildstages [6] = "total"
 
     # displayed and cout as failures
     states ["ASSERT"] =  1
@@ -2031,15 +2030,13 @@ function print_timingstable()
         "      <th rowspan=3 title=\"column number and log\">"          \
         "log</th>\n"                                                    \
         "      <th rowspan=3>build<br>type</th>\n"                      \
-        "      <th colspan=21>build and run times (M:SS)</th>\n"        \
+        "      <th colspan=18>build and run times (M:SS)</th>\n"        \
         "    </tr>\n"                                                   \
         "    <tr>\n"                                                    \
         "      <th colspan=3 title=\"library configuration times\">"    \
         "config</th>\n"                                                 \
         "      <th colspan=3 title=\"library build times\">"            \
         "library</th>\n"                                                \
-        "      <th colspan=3 title=\"build times for all examples\">"   \
-        "examples</th>\n"                                               \
         "      <th colspan=3 title=\"build times for all utilities\">"  \
         "utilities</th>\n"                                              \
         "      <th colspan=3 title=\"build times for all tests\">"      \
@@ -2050,9 +2047,6 @@ function print_timingstable()
         "<b>total</b></th>\n"                                           \
         "    </tr>\n"                                                   \
         "    <tr>\n"                                                    \
-        "      <th>real</th>\n"                                         \
-        "      <th>user</th>\n"                                         \
-        "      <th>sys</th>\n"                                          \
         "      <th>real</th>\n"                                         \
         "      <th>user</th>\n"                                         \
         "      <th>sys</th>\n"                                          \
@@ -2154,8 +2148,8 @@ END {
 
     print_timingstable()
 
-    for (section = 1; section <= 3; ++section)
-        print_section(section)
+    # the tests only; the locales and the examples are not reported
+    print_section(2)
 
     if (0 == bodyonly) {
         print "  </body>"
