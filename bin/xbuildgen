@@ -560,7 +560,7 @@ get_compiler ()
 ######################################################################
 
 # process command line options
-while getopts ":hnsv:e:l:o:T:t:V:" opt_name; do
+while getopts ":hnsve:l:o:T:t:V:" opt_name; do
     case $opt_name in
         # options with no arguments 
 
