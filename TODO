@@ -137,6 +137,15 @@ program. Plain runs are sized for speed: a few threads whatever the
 processor count, short rounds on fresh state, the timeout a hang
 detector.
 
+State: all 18 programs are sized in 15D, the 12D pass to come; the
+sizes are not yet the defaults. The note's chapter 4 holds what the
+census needs: =22.locale.cons.mt= reaches no fixed fault (it never
+fills a facet slot); the classic section of =22.locale.statics.mt=
+races a classic locale its static array already built; the leak checks
+of =22.locale.time.put.libc.mt= and =22.locale.use_facet.mt= are the
+only detectors of their faults; =22.locale.money.put.mt= drops
+=C.utf8= without a word; six fixed commits were not put back.
+
 Check: every program in the note's table has a chosen size, a time,
 and runs under the sanitizer that report its fault and stay clean on
 the fixed library, in 15D and in 12D. Every locale MT test passes in

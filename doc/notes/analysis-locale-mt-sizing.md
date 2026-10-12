@@ -804,3 +804,89 @@ threads.
 | `./22.locale.use_facet.mt --nthreads=4` | fixed | 1.0 s | 0, 9 runs of 9 |
 | `./22.locale.use_facet.mt --nthreads=4` | 2bbdf7c9 | 0.9 s | 0; the leak check fails, 28 runs of 28 |
 | `./22.locale.use_facet.mt --nthreads=4` | ae1fbe04 | 1.0 s | 1, 28 runs of 28 |
+
+## 4. Findings
+
+### 4.1 Which program catches which fault
+
+| fault | what it put back | caught by | how |
+|---|---|---|---|
+| 8c4282ee | wide `codecvt` data published before its size | `22.locale.codecvt.mt` | sanitizer |
+| ae1fbe04 | facet slot filled and read with plain accesses | `22.locale.globals.mt`, `.messages.mt`, `.money.get.mt`, `.money.put.mt`, `.moneypunct.mt`, `.num.get.mt`, `.num.put.mt`, `.numpunct.mt`, `.time.get.mt`, `.time.put.mt`, `.use_facet.mt` | sanitizer |
+| dcb5dc92 | facet reference counts under the facet's mutex | `22.locale.facet.mt` | sanitizer and the program's assertion |
+| bf6dc721 | `ctype` caches with plain accesses | `22.locale.ctype.mt` | sanitizer |
+| 46aa42c3 | facet id generated without the lock | `22.locale.id.mt` | sanitizer and the program's gap check |
+| 9a482a4f | data built from the C library published with plain stores | `22.locale.money.get.mt`, `.money.put.mt`, `.moneypunct.mt`, `.num.get.mt`, `.num.put.mt`, `.numpunct.mt`, `.time.get.mt`, `.time.put.libc.mt`, `.time.put.mt` | sanitizer |
+| 2e196ebb | `numpunct` caches | `22.locale.numpunct.mt` | sanitizer and the program's assertion |
+| 81ef680c | `time_put` data built again by every waiting thread | `22.locale.time.put.libc.mt` | the program's leak check only |
+| 2bbdf7c9 | extra references of racing first `use_facet` calls | `22.locale.use_facet.mt` | the program's leak check only |
+| 5b68c2a7 | global locale initialized by a volatile counter | `22.locale.statics.mt` | sanitizer |
+| 4f38276b | classic body compared with plain accesses | none | not reachable, 4.3 |
+
+ae1fbe04 is caught by every program whose iterations call `use_facet`
+on a fresh locale, and 9a482a4f by every program whose facets take
+their data from the C library. Not put back in this phase, so whether
+any program reaches them is open: 4e559c9b (the release store of
+`_C_impsize`, the memory model's case with no litmus), c1f10248 and
+afda987c (further readers of the facet slot), and three commits of the
+sweep of one-time initializations, b1fd85f3 (the standard iostream
+objects), 7a0fee0e (the message catalog) and 74bbd8f9 (the static
+mutexes).
+
+### 4.2 `22.locale.cons.mt` reaches no fault
+
+The program constructs, copies, combines and compares locales, and
+never calls `use_facet` or adds a facet. Every facet slot of the
+bodies it builds stays empty, and `__rw_locale::_C_construct` copies
+and counts the facets of filled slots only, so neither the reference
+counts (dcb5dc92) nor the slot (ae1fbe04) is on its path; both were put
+back and it reported neither, at its size or at its defaults. What it
+does run is the bodies' construction by name, their cache, and
+combination by category, which no fixed fault touched. Its size is
+the coverage floor, unchecked against a fault.
+
+### 4.3 `22.locale.statics.mt` races a classic locale already built
+
+The first section was written to race the first construction of the
+classic locale. The program defines its array of locales at namespace
+scope, and their default construction during static initialization
+builds the classic body before `main`. The threads of the first
+section copy a classic locale that exists. That is why 4f38276b, whose
+store happens once at that construction, is out of reach at any size
+(a breakpoint on the store shows the static initialization of the
+array). The second section, `locale::global`, catches 5b68c2a7 in
+every run.
+
+### 4.4 Two faults are leaks
+
+81ef680c and 2bbdf7c9 leak: the extra builds and references happen in
+order, under a lock or by one thread each, and the sanitizer has no
+race to report. The only detectors are the programs' own checks, the
+blocks that outlive a round counted through the driver's replacement
+`operator new`. They fail in the first round of every run, under the
+sanitizer as well since the replacement `operator delete` was fixed.
+Any rework of these programs must keep the checks.
+
+### 4.5 What the sanitizer does not make deterministic
+
+The sanitizer reports a race between two accesses that ran; it cannot
+report one between threads that never met. Where the shared object is
+made by the workers themselves, meeting is still timing.
+`22.locale.ctype.mt` with two threads missed its `char` section in
+about one run in ten at any size; small sizes missed in other programs
+too, `22.locale.money.put.mt` at four iterations in one run of five,
+`22.locale.numpunct.mt` against 9a482a4f at four iterations of two
+threads in two of five. Four threads and room above the floor removed
+every miss in the confirmation runs. One iteration reaches only the
+first locale, `C`, and for most programs nothing.
+
+### 4.6 Other observations
+
+- `22.locale.time.get.mt` takes 57.7 s plain at its defaults, three
+  seconds under the harness's 60-second timeout.
+- `22.locale.money.put.mt` drops `C.utf8` at setup: an exception in its
+  setup's `try` block, reported by a warning that is inactive unless
+  `--locales` is given. Which call throws is not established.
+- `22.locale.codecvt.mt` races the first conversion in a fixed 200
+  rounds and `22.locale.id.mt` runs a fixed 500 rounds, constants with
+  no option; they set those programs' floors.
