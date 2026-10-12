@@ -132,8 +132,8 @@ myurl=${myurl%' $'}           # strip trailing text
 # prepend ViewVC prefix
 myurl="http://svn.apache.org/viewvc/$myurl"
 
-# extract program name from the url (used in diagnostic messages)
-readonly myname=${myurl##*/}
+# the name of the script (used in diagnostic messages)
+readonly myname=${0##*/}
 
 myurl="$myurl?view=markup&rev=$myrev"
 
