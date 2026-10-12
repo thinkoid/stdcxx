@@ -2065,7 +2065,6 @@ function format_time(timestr)
 function print_timingstable()
 {
     thead =                                                             \
-        "<table>\n"                                                     \
         "  <thead>\n"                                                   \
         "    <tr>\n"                                                    \
         "      <th rowspan=3 title=\"column number and log\">"          \
