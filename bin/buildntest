@@ -60,6 +60,10 @@
 #         Specifies the list of tests to build. When omitted, defaults
 #         to all.
 #
+#     -u <utilities-to-build>
+#         Specifies the list of utilities to build. When omitted,
+#         defaults to all.
+#
 #     -B <buildtype>
 #         Specifies the value of the BUILDTYPE variable to pass to
 #         make.
@@ -371,7 +375,7 @@ echo; echo "### script source: $myurl"
 
 
 # process command line options
-while getopts ":nv:e:l:o:t:B:C:E:L:M:P:T:" opt_name; do
+while getopts ":nv:e:l:o:t:u:B:C:E:L:M:P:T:" opt_name; do
 
     echo "$opt_name:$OPTARG"
 
