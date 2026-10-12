@@ -431,7 +431,7 @@ while getopts ":nv:e:l:o:t:B:C:E:L:M:P:T:" opt_name; do
             prefix=$OPTARG
             ;;
 
-        T)  # argument is a list of tests to build
+        T)  # argument is a list of tests to run
             run_tests="$OPTARG"
             ;;
 
