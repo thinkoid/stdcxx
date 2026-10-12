@@ -700,17 +700,20 @@ print_tsan ()
         }
 
         END {
+            # the heading, the summary, and the table share one column
+            print "    <div class=\"results\">"
             print "    <h2><a name=\"tsan\"></a>ThreadSanitizer</h2>"
 
             if (0 == nprogs) {
                 print "    No ThreadSanitizer runs in <a href=\"" tsanlog "\">"
                 print "    " tsanlog "</a>."
+                print "    </div>"
                 exit
             }
 
-            print "    " nclean + 0 " of " nprogs " programs clean"
-            print "    in <code>" builddir "</code>."
-            print "    <table class=\"results\">"
+            print "    <p>" nclean + 0 " of " nprogs " programs clean"
+            print "    in <code>" builddir "</code>.</p>"
+            print "    <table>"
             print "      <thead>"
             print "        <tr>"
             print "          <th>###</th>"
@@ -725,6 +728,7 @@ print_tsan ()
             printf "%s", rows
             print "      </tbody>"
             print "    </table>"
+            print "    </div>"
         }
     ' "$log"
 }
@@ -868,8 +872,8 @@ table {
     font-variant-numeric: tabular-nums;
 }
 
-/* the tests and ThreadSanitizer tables, a few columns each */
-table.results {
+/* the tests and ThreadSanitizer sections, a few columns each */
+div.results {
     width: 800px;
     max-width: 100%;
     margin: 0 auto;

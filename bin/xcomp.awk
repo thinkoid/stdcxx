@@ -1410,10 +1410,12 @@ function print_section(section)
 
     thead = thead row0 row1 row2 "      </thead>"
 
+    # the heading and the table share one column
+    print "    <div class=\"results\">"
     print "    <a name=\"" sectname "s\"></a>"
     print "    <h2>Results of " sectmaxcompcnts [section] " "        \
         sectname "s from " logcount " logs</h2>"
-    print "    <table class=\"results\">"
+    print "    <table>"
 
     print thead
 
@@ -1809,6 +1811,7 @@ function print_section(section)
     ##################################################################
     print "      </tfooter>"
     print "    </table>"
+    print "    </div>"
 }
 
 
