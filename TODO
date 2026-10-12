@@ -138,7 +138,7 @@ processor count, short rounds on fresh state, the timeout a hang
 detector.
 
 State: all 18 programs are sized in 15D, the 12D pass to come; the
-sizes are not yet the defaults. The note's chapter 4 holds what the
+sizes are becoming the defaults, one program at a time. The note's chapter 4 holds what the
 census needs: =22.locale.cons.mt= reaches no fixed fault (it never
 fills a facet slot); the classic section of =22.locale.statics.mt=
 races a classic locale its static array already built; the leak checks

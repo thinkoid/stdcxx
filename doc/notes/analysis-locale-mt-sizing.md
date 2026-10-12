@@ -90,7 +90,7 @@ a dash means not yet established.
 
 | program | defaults | covers | plain 15D at defaults | command under the sanitizer | time | reports |
 |---|---|---|---|---|---|---|
-| `22.locale.codecvt.mt` | 5000 loops | 8c4282ee | 1.7 s | `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | 1.1 s | none; 5 per run against the fault, 25 runs of 25 |
+| `22.locale.codecvt.mt` | 5000 loops | 8c4282ee | 1.7 s | `./22.locale.codecvt.mt --nthreads=4 --nloops=256` | 1.1 s | none; 5 per run against the fault, 25 runs of 25 |
 | `22.locale.cons.mt` | 20000 loops | – | 6.5 s | `./22.locale.cons.mt --nthreads=2 --nloops=8` | 0.02 s | none; none against dcb5dc92 or ae1fbe04 |
 | `22.locale.ctype.mt` | 200000 loops | bf6dc721 | 25.6 s | `./22.locale.ctype.mt --nthreads=4 --nloops=256` | 0.4 s | none; 4 to 6 per run against the fault, 50 runs of 50 |
 | `22.locale.facet.mt` | at most 8 threads, 20 rounds, 1000 loops | dcb5dc92 | 0.06 s | `./22.locale.facet.mt --nthreads=4 --nrounds=4 --nloops=256` | 0.02 s | none; 2 per run against the fault, 25 runs of 25 |
@@ -127,7 +127,10 @@ conversion through `de_DE.ISO-8859-1` built from the tree's sources,
 With four locales and seven members, 28 iterations run every member
 in every locale, the floor for the steady-state sections. The thread
 count does not change detection: two threads report the fault in
-every run. The 200 rounds set the floor of about a second.
+every run. The 200 rounds set the floor of about a second. The size
+was first two threads and 28 iterations, the floor; it is four
+threads and 256 iterations like the others' since the sizes became
+the defaults, and still reports the fault in every run.
 
 | command | library | time | reports |
 |---|---|---|---|
@@ -143,6 +146,9 @@ every run. The 200 rounds set the floor of about a second.
 | `./22.locale.codecvt.mt --nthreads=4 --nloops=28` | 8c4282ee | 1.2 s | 5, 5 runs of 5 |
 | `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | fixed | 1.1 s | 0 |
 | `./22.locale.codecvt.mt --nthreads=2 --nloops=28` | 8c4282ee | 1.1 s | 5, 5 runs of 5 |
+| `./22.locale.codecvt.mt --nthreads=4 --nloops=256` | plain 15D | 0.98 s | – |
+| `./22.locale.codecvt.mt --nthreads=4 --nloops=256` | fixed | 1.1 s | 0 |
+| `./22.locale.codecvt.mt --nthreads=4 --nloops=256` | 8c4282ee | 1.1 s | 5, 25 runs of 25 |
 
 The five reports against the fault are on the facet data's path: the
 acquire load of `_C_impsize` against the plain store, and the reads of
