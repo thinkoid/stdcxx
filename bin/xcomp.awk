@@ -1413,7 +1413,7 @@ function print_section(section)
     print "    <a name=\"" sectname "s\"></a>"
     print "    <h2>Results of " sectmaxcompcnts [section] " "        \
         sectname "s from " logcount " logs</h2>"
-    print "    <table>"
+    print "    <table class=\"results\">"
 
     print thead
 

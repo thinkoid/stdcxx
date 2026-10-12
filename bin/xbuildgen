@@ -710,7 +710,7 @@ print_tsan ()
 
             print "    " nclean + 0 " of " nprogs " programs clean"
             print "    in <code>" builddir "</code>."
-            print "    <table>"
+            print "    <table class=\"results\">"
             print "      <thead>"
             print "        <tr>"
             print "          <th>###</th>"
@@ -866,6 +866,13 @@ table {
     overflow: hidden;
     font-size: 13px;
     font-variant-numeric: tabular-nums;
+}
+
+/* the tests and ThreadSanitizer tables, a few columns each */
+table.results {
+    width: 800px;
+    max-width: 100%;
+    margin: 0 auto;
 }
 
 caption {
