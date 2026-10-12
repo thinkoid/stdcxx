@@ -384,20 +384,6 @@ EOF
 # write the name of the script and all arguments
 echo "### running $0 $* [$#]"
 
-# script's revision number
-myrev='$Revision$'
-myrev=${myrev#'$Revision: '}   # strip leading text
-myrev=${myrev%' $'}            # strip trailing text
-
-# URL to this version of the script in the repository
-myurl='$HeadURL$'
-myurl=${myurl#'$HeadURL: '}   # strip leading text
-myurl=${myurl%' $'}           # strip trailing text
-myurl="$myurl?view=markup&rev=$myrev"
-
-# write the URL to the version of the script that's running
-echo; echo "### script source: $myurl"
-
 
 # process command line options
 while getopts ":knve:l:o:t:u:B:C:E:L:M:P:T:" opt_name; do
