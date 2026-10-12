@@ -811,7 +811,7 @@ if [ "$create_stylesheet" = "1" ]; then
 body {
     margin: 0 auto;
     padding: 32px 24px 64px;
-    max-width: 1400px;
+    max-width: 1200px;
     background: var(--bg);
     color: var(--text);
     font: 14px/1.5 var(--sans);
@@ -857,6 +857,7 @@ code {
 /* tables */
 
 table {
+    width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     background: var(--surface);
