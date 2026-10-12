@@ -82,7 +82,7 @@ a dash means not yet established.
 | `22.locale.messages.mt` | 10000 loops, 11 catalogs | ae1fbe04 | 6.2 s | `./22.locale.messages.mt --nthreads=4 --nloops=256` | 0.2 s | none; 9 to 31 per run against the fault, 25 runs of 25 |
 | `22.locale.money.get.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 17.7 s | `./22.locale.money.get.mt --nthreads=4 --nloops=256` | 0.1 s | none; 57 to 95 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.money.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 22.8 s | `./22.locale.money.put.mt --nthreads=4 --nloops=256` | 0.1 s | none; 14 to 21 per run against 9a482a4f, 25 runs of 25 |
-| `22.locale.moneypunct.mt` | 10000 loops | – | | | | |
+| `22.locale.moneypunct.mt` | 10000 loops | 9a482a4f, ae1fbe04 | 2.5 s | `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | 0.1 s | none; 97 to 113 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.num.get.mt` | 100000 loops | – | | | | |
 | `22.locale.num.put.mt` | 100000 loops | – | | | | |
 | `22.locale.numpunct.mt` | 200000 loops | 2e196ebb | | | | |
@@ -451,3 +451,39 @@ threads and 256 iterations, for room.
 | `./22.locale.money.put.mt --nthreads=4 --nloops=256` | fixed | 0.1 s | 0, 6 runs of 6 |
 | `./22.locale.money.put.mt --nthreads=4 --nloops=256` | 9a482a4f | 0.6 to 1.0 s | 14 to 21, 25 runs of 25 |
 | `./22.locale.money.put.mt --nthreads=4 --nloops=256` | ae1fbe04 | 1.0 to 1.3 s | 35 to 42, 5 runs of 5 |
+
+### 3.10 `22.locale.moneypunct.mt`
+
+Three sections, `char`, `wchar_t`, then both. The main thread records
+every member of the four `moneypunct` facets in each locale first.
+Each thread constructs a named locale per iteration, the locale
+chosen by the iteration number, and calls every member of the
+domestic and the international facet of the section's character
+types, comparing each with the record. The locales are the C
+library's.
+
+It covers 9a482a4f, through the put-back of 3.8: every member reads
+the data the builder publishes. Each iteration's `use_facet` crosses
+the facet slot, and the program reports ae1fbe04 as well.
+
+One iteration of two threads, in `C` only, reports neither. Four
+iterations reported 9a482a4f in every run, two threads or four. The
+size is four threads and 256 iterations, for room.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.moneypunct.mt` | plain 15D | 2.5 s | – |
+| `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | plain 15D | 0.04 s | – |
+| `./22.locale.moneypunct.mt` | fixed | 11.0 s | 0 |
+| `./22.locale.moneypunct.mt` | 9a482a4f | 66.9 s | 140 |
+| `./22.locale.moneypunct.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.moneypunct.mt --nthreads=2 --nloops=1` | 9a482a4f | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.moneypunct.mt --nthreads=2 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.moneypunct.mt --nthreads=2 --nloops=4` | 9a482a4f | 0.1 to 0.6 s | 4 to 47, 5 runs of 5 |
+| `./22.locale.moneypunct.mt --nthreads=4 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.moneypunct.mt --nthreads=4 --nloops=4` | 9a482a4f | 0.5 to 0.6 s | 41 to 48, 5 runs of 5 |
+| `./22.locale.moneypunct.mt --nthreads=4 --nloops=16` | fixed | < 0.1 s | 0 |
+| `./22.locale.moneypunct.mt --nthreads=4 --nloops=16` | 9a482a4f | 0.8 to 1.1 s | 57 to 75, 5 runs of 5 |
+| `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | fixed | 0.1 s | 0, 6 runs of 6 |
+| `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | 9a482a4f | 2.5 to 5.8 s | 97 to 113, 25 runs of 25 |
+| `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | ae1fbe04 | 2.7 to 3.9 s | 45 to 55, 5 runs of 5 |
