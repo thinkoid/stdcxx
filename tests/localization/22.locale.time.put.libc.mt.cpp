@@ -44,8 +44,8 @@
 // maximum number of threads allowed by the command line interface
 #define MAX_THREADS      32
 
-// default number of threads (will be adjusted to the number
-// of processors/cores later)
+// the number of threads (4 in a thread-safe build, set in main ()
+// whatever the number of processors)
 int opt_nthreads = 1;
 
 // the number of locales the test constructs, one per round
@@ -225,11 +225,10 @@ int main (int argc, char *argv[])
 {
 #ifdef _RWSTD_REENTRANT
 
-    // set nthreads to the greater of the number of processors
-    // and 2 (for uniprocessor systems) by default
-    opt_nthreads = rw_get_cpus ();
-    if (opt_nthreads < 2)
-        opt_nthreads = 2;
+    // four threads whatever the number of processors, the size
+    // chosen for this program under ThreadSanitizer
+    // (doc/notes/analysis-locale-mt-sizing.md)
+    opt_nthreads = 4;
 
 #endif   // _RWSTD_REENTRANT
 
