@@ -278,6 +278,11 @@ make_stage()
     # remove the longest prefix matching the pattern "*/"
     stagename="${stagedir##*/}"
 
+    # a run of one directory is a runall stage, not its build stage
+    case "$stageargs" in
+        (runall*) stagename=runall;;
+    esac
+
     if [ "$failstate" = "" ]; then
         keep_going="-k"
     else
