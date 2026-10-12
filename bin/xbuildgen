@@ -767,203 +767,227 @@ if [ "$create_stylesheet" = "1" ]; then
     fi
 
     cat <<EOF >$dir/resultstyle.css
+:root {
+    color-scheme: light dark;
+
+    --bg:      #f7f8fa;
+    --surface: #ffffff;
+    --sunken:  #f1f3f6;
+    --border:  #e2e5ea;
+    --text:    #1f2328;
+    --muted:   #656d76;
+    --link:    #0b62c4;
+
+    --ok:      #1a7f37;
+    --fail:    #cf222e;
+    --warn:    #9a6700;
+    --build:   #8250df;
+    --note:    #0969da;
+
+    --mono: ui-monospace, "SF Mono", Menlo, "DejaVu Sans Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg:      #0d1117;
+        --surface: #161b22;
+        --sunken:  #1c2129;
+        --border:  #30363d;
+        --text:    #e6edf3;
+        --muted:   #8d96a0;
+        --link:    #58a6ff;
+
+        --ok:      #3fb950;
+        --fail:    #f85149;
+        --warn:    #d29922;
+        --build:   #a371f7;
+        --note:    #58a6ff;
+    }
+}
+
+/* page */
+
+body {
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    max-width: 1400px;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 var(--sans);
+}
+
+h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+h2 {
+    margin: 40px 0 12px;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+hr {
+    margin: 24px 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+}
+
+ul {
+    padding-left: 20px;
+}
+
+a {
+    color: var(--link);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+code {
+    font-family: var(--mono);
+    font-size: 0.92em;
+}
+
+/* tables */
 
 table {
-    background:lightslategray;
-    font-family:courier;
-    font-size: 80%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
 }
+
 caption {
-    background:lightslategray;
-    color:lightgray;
-    font-weight:bold;
-    font-family:lucida mono;
-    font-size: 120%;
+    padding: 8px;
+    font-weight: 600;
 }
+
 th {
-    background:lightgray;
-    text-align:center;
-    font-family:lucida mono;
+    padding: 6px 10px;
+    background: var(--sunken);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 12px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
 }
+
 td {
-    padding: 2px;
+    padding: 5px 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+}
+
+tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+tbody tr:hover td {
+    background-image: linear-gradient(
+        color-mix(in srgb, var(--text) 5%, transparent),
+        color-mix(in srgb, var(--text) 5%, transparent));
+}
+
+td.rowno,
+.header {
+    background: var(--sunken);
+    color: var(--muted);
+    font-weight: 600;
     text-align: center;
 }
-tr {
-    background:powderblue;
-}
-td.rowno {
-    text-align: right;
-    background:lightgray;
-}
+
 td.name {
     text-align: left;
-    background:lightblue;
+    font-family: var(--mono);
+    white-space: nowrap;
 }
-td.number {
-    text-align: center;
-    background:lightblue;
-}
-td.na {
-    background:white;
-    text-align:left;
-}
-.header {
-    background:#cccccc;
-    text-align:center;
-    font-weight:bold;
-    font-family:lucida mono;
-}
+
+td.number,
 td.total {
-    text-align:center;
-    font-weight:bold;
+    font-family: var(--mono);
 }
-td.OK {
-    background:forestgreen;
-    text-align:center;
-    font-weight:bold;
+
+td.total {
+    font-weight: 600;
 }
-td.XPASS {
-    color:yellow;
-    background:forestgreen;
-    text-align:center;
-    font-weight:bold;
+
+td.na {
+    background: var(--surface);
+    text-align: left;
 }
-td.BASE {
-    background:lightgreen;
-    text-align:center;
-    font-weight:bold;
+
+/* status cells: a tint of the status's hue and the hue as text */
+
+td.OK, td.XPASS, td.BASE, td.NOUT, td.OUTPUT, td.MISS,
+td.WARN, td.XWARN, td.EXIT, td.XEXIT, td.FORMAT,
+td.RUNWARN, td.XRUNWARN, td.DIFF, td.XDIFF, td.ASSERT,
+td.XASSERT, td.SIGNAL, td.XSIGNAL, td.COMP, td.XCOMP,
+td.LINK, td.XLINK, td.EXEC, td.xdep {
+    --hue: var(--muted);
+    color: var(--hue);
+    background: color-mix(in srgb, var(--hue) 14%, var(--surface));
+    font-family: var(--mono);
+    font-weight: 600;
+    text-align: center;
 }
-td.NOUT {
-    background:lightgreen;
-    text-align:center;
-    font-weight:bold;
+
+td a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    text-underline-offset: 2px;
 }
-td.OUTPUT {
-    background:lightgreen;
-    text-align:center;
-    font-weight:bold;
+
+td.name a {
+    color: var(--link);
+    text-decoration: none;
 }
-td.MISS {
-    color:white;
-    background:lightgray;
-    text-align:center;
-    font-weight:bold;
+
+td.name a:hover {
+    text-decoration: underline;
 }
-td.WARN {
-    color:red;
-    background:#ffff99;
-    text-align:center;
-    font-weight:bold;
-}
-td.XWARN {
-    color:tomato;
-    background:lightgreen;
-    text-align:center;
-    font-weight:bold;
-}
-td.EXIT {
-    color:red;
-    background:gold;
-    text-align:center;
-    font-weight:bold;
-}
-td.XEXIT {
-    color:tomato;
-    background:lightgreen;
-    text-align:center;
-    font-weight:bold;
-}
-td.FORMAT {
-    background:#ffffcc;
-    text-align:center;
-}
-td.RUNWARN {
-    color:black;
-    background:#ffff99;
-    text-align:center;
-    font-weight:bold;
-}
-td.XRUNWARN {
-    color:dimgray;
-    background:lightgreen;
-    text-align:center;
-    font-weight:bold;
-}
-td.DIFF {
-    color:red;
-    background:#ffff99;
-    font-weight:bold;
-    text-align:center;
-}
-td.XDIFF {
-    color:tomato;
-    background:lightgreen;
-    font-weight:bold;
-    text-align:center;
-}
-td.ASSERT {
-    color:red;
-    background:#ffff99;
-    font-weight:bold;
-    text-align:center;
-}
-td.XASSERT {
-    color:tomato;
-    background:lightgreen;
-    font-weight:bold;
-    text-align:center;
-}
+
+/* success */
+td.OK, td.BASE, td.NOUT, td.OUTPUT       { --hue: var(--ok); }
+
+/* failures */
+td.ASSERT, td.EXIT, td.DIFF              { --hue: var(--fail); }
+td.FORMAT, td.WARN, td.RUNWARN           { --hue: var(--warn); }
+td.COMP, td.LINK, td.EXEC                { --hue: var(--build); }
+
 td.SIGNAL {
-    color:yellow;
-    background:red;
-    font-weight:bold;
-    text-align:center;
+    color: #ffffff;
+    background: var(--fail);
 }
-td.XSIGNAL {
-    color:tomato;
-    background:lightgreen;
-    font-weight:bold;
-    text-align:center;
+
+/* expected failures and unexpected successes */
+td.XASSERT, td.XEXIT, td.XDIFF, td.XSIGNAL,
+td.XCOMP, td.XLINK, td.XWARN, td.XRUNWARN {
+    --hue: var(--muted);
+    font-style: italic;
 }
-td.COMP {
-    background:violet;
-    font-weight:bold;
-    text-align:center;
+
+td.XPASS                                 { --hue: var(--note); }
+
+/* not tested */
+td.MISS, td.xdep {
+    --hue: var(--muted);
+    font-weight: 400;
 }
-td.XCOMP {
-    color:violet;
-    background:lightgreen;
-    font-weight:bold;
-    text-align:center;
-}
-td.LINK {
-    color:yellow;
-    background:mediumpurple;
-    font-weight:bold;
-    text-align:center;
-}
-td.XLINK {
-    color:mediumpurple;
-    background:lightgreen;
-    font-weight:bold;
-    text-align:center;
-}
-td.EXEC {
-    color:white;
-    background:mediumslateblue;
-    font-weight:bold;
-    text-align:center;
-}
-td.xdep {
-    color:yellow;
-    background:gray;
-    font-weight:bold;
-    text-align:center;
-}
-tr.LIB {
-    background:pink;
-    color:black;
+
+/* a log whose library failed to build */
+tr.LIB td {
+    background: color-mix(in srgb, var(--fail) 10%, var(--surface));
 }
 EOF
 
