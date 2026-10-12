@@ -90,7 +90,7 @@ a dash means not yet established.
 | `22.locale.numpunct.mt` | 200000 loops | 2e196ebb, 9a482a4f, ae1fbe04 | 34.6 s | `./22.locale.numpunct.mt --nthreads=4 --nloops=256` | 0.1 s | none; 16 to 93 per run against 2e196ebb, 25 runs of 25 |
 | `22.locale.statics.mt` | 20000 loops | 5b68c2a7 | 0.68 s | `./22.locale.statics.mt --nthreads=4 --nloops=256` | < 0.1 s | none; 1 per run against the fault, 30 runs of 30 |
 | `22.locale.time.get.mt` | 50000 loops | 9a482a4f, ae1fbe04 | 57.7 s | `./22.locale.time.get.mt --nthreads=4 --nloops=256` | 0.3 s | none; 38 to 48 per run against 9a482a4f, 25 runs of 25 |
-| `22.locale.time.put.libc.mt` | 200 rounds | 81ef680c | | | | |
+| `22.locale.time.put.libc.mt` | 200 rounds | 81ef680c, 9a482a4f | 0.38 s | `./22.locale.time.put.libc.mt --nthreads=4` | 0.1 s | none; 81ef680c by the program's assertion, 9a482a4f by 7 or 8 reports, 25 runs of 25 each |
 | `22.locale.time.put.mt` | 100000 loops | – | | | | |
 | `22.locale.use_facet.mt` | 200 rounds | 2bbdf7c9 | | | | |
 
@@ -680,3 +680,41 @@ threads and 256 iterations, for room.
 | `./22.locale.time.get.mt --nthreads=4 --nloops=256` | fixed | 0.3 to 0.4 s | 0, 7 runs of 7 |
 | `./22.locale.time.get.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.9 to 4.3 s | 38 to 48, 25 runs of 25 |
 | `./22.locale.time.get.mt --nthreads=4 --nloops=256` | ae1fbe04 | 1.4 to 1.7 s | 35 to 43, 5 runs of 5 |
+
+### 3.16 `22.locale.time.put.libc.mt`
+
+One section, gated, 200 rounds. Each round the main thread constructs a
+fresh locale that only the C library knows, `C.utf8` here, and takes
+its `time_put` facet; the threads wait for each other and call `put`
+on it at once, the first call, which builds the facet's data. After
+the round the locale goes, and the driver's replacement `operator new`
+counts the blocks that outlive it. The leak check is `rw_assert`, and
+the first failure ends the run.
+
+It covers 81ef680c. The commit reverts as a patch: every thread that
+waited on `__rw_setlocale` builds the data again and overwrites the
+pointer, so all builds but the last leak. That is a leak, not a race:
+the builds are serialized by the lock, and the sanitizer reports
+nothing. The program's own leak check fails in the first round of
+every run, with two threads and one round already. The program also
+covers 9a482a4f, through the put-back of 3.8: the sanitizer names the
+stores in `__rw_get_timepunct` against the readers of the data, in
+every run at every size.
+
+The rounds are fresh locales and cheap under the sanitizer, so the
+size keeps the default 200 and takes four threads.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.time.put.libc.mt` | plain 15D | 0.38 s | – |
+| `./22.locale.time.put.libc.mt --nthreads=4` | plain 15D | 0.03 s | – |
+| `./22.locale.time.put.libc.mt --nthreads=2 --nrounds=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.time.put.libc.mt --nthreads=2 --nrounds=1` | 81ef680c | < 0.1 s | 0; the leak check fails, 5 runs of 5 |
+| `./22.locale.time.put.libc.mt --nthreads=2 --nrounds=1` | 9a482a4f | < 0.1 s | 2, 5 runs of 5 |
+| `./22.locale.time.put.libc.mt --nthreads=4 --nrounds=4` | 81ef680c | < 0.1 s | 0; the leak check fails, 5 runs of 5 |
+| `./22.locale.time.put.libc.mt --nthreads=4 --nrounds=4` | 9a482a4f | 0.1 s | 3 to 7, 5 runs of 5 |
+| `./22.locale.time.put.libc.mt --nthreads=4 --nrounds=64` | 81ef680c | < 0.1 s | 0; the leak check fails, 5 runs of 5 |
+| `./22.locale.time.put.libc.mt --nthreads=4 --nrounds=64` | 9a482a4f | 0.1 to 0.2 s | 4 to 8, 5 runs of 5 |
+| `./22.locale.time.put.libc.mt --nthreads=4` | fixed | 0.1 s | 0, 11 runs of 11 |
+| `./22.locale.time.put.libc.mt --nthreads=4` | 81ef680c | < 0.1 s | 0; the leak check fails, 30 runs of 30 |
+| `./22.locale.time.put.libc.mt --nthreads=4` | 9a482a4f | 0.3 s | reported in 30 runs of 30, 7 or 8 in the 5 counted |
