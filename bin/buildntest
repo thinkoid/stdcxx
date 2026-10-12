@@ -29,7 +29,8 @@
 #
 # USAGE:
 #
-#     buildntest [ -e <examples-to-build> ]
+#     buildntest [ -k ]
+#                [ -e <examples-to-build> ]
 #                [ -l <locales-to-build> ]
 #                [ -o <output-file> ]
 #                [ -t <tests-to-build> ]
@@ -43,6 +44,10 @@
 #                [ -T <tests-to-run> ]
 #
 # OPTIONS:
+#
+#     -k
+#         Keeps the build directory for inspection. When omitted, the
+#         build directory is cleaned up (realclean) after the run.
 #
 #     -e <examples-to-build>
 #         Specifies the list of example programs to build. When omitted,
@@ -222,6 +227,9 @@ run_locales="*"
 run_rwtest="*"
 run_tests="*"
 
+# clean up the build directory after the run unless -k is given
+keep_build=0
+
 # script's own temporary directory
 tmpdir=$TMPDIR/stdcxx-tmp.$$
 
@@ -375,12 +383,16 @@ echo; echo "### script source: $myurl"
 
 
 # process command line options
-while getopts ":nve:l:o:t:u:B:C:E:L:M:P:T:" opt_name; do
+while getopts ":knve:l:o:t:u:B:C:E:L:M:P:T:" opt_name; do
 
     echo "$opt_name:$OPTARG"
 
     case $opt_name in
         # options with no arguments 
+
+        k)  # keep the build directory
+            keep_build=1
+            ;;
 
         n)  # avoid cleaning up temporary files
             no_clean=1
@@ -736,12 +748,15 @@ du -sk build build/* $prefix
 # as clean deletes the config.log, and realclean deletes the config.h.
 # The top level realclean target affects the lib, rwtest, bin, test, 
 # plumbhall, and example directories (via the .DEFAULT rule).
-echo; echo "### $MAKE realclean"
-$MAKE realclean
+# With -k, keep all of it for inspection.
+if [ "$keep_build" -eq 0 ]; then
+    echo; echo "### $MAKE realclean"
+    $MAKE realclean
 
-# write out the size of the buildspace AFTER cleaning it up for reference
-echo; echo "### du -sk ./build/ ./build/*"
-du -sk ./build/ ./build/*
+    # write out the size of the buildspace AFTER cleaning it up for reference
+    echo; echo "### du -sk ./build/ ./build/*"
+    du -sk ./build/ ./build/*
+fi
 
 # write the amount of real, user, and system time
 write_times "total"
