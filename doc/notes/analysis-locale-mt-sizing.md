@@ -83,7 +83,7 @@ a dash means not yet established.
 | `22.locale.money.get.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 17.7 s | `./22.locale.money.get.mt --nthreads=4 --nloops=256` | 0.1 s | none; 57 to 95 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.money.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 22.8 s | `./22.locale.money.put.mt --nthreads=4 --nloops=256` | 0.1 s | none; 14 to 21 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.moneypunct.mt` | 10000 loops | 9a482a4f, ae1fbe04 | 2.5 s | `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | 0.1 s | none; 97 to 113 per run against 9a482a4f, 25 runs of 25 |
-| `22.locale.num.get.mt` | 100000 loops | – | | | | |
+| `22.locale.num.get.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 23.1 s | `./22.locale.num.get.mt --nthreads=4 --nloops=256` | 0.2 s | none; 28 to 37 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.num.put.mt` | 100000 loops | – | | | | |
 | `22.locale.numpunct.mt` | 200000 loops | 2e196ebb | | | | |
 | `22.locale.statics.mt` | 20000 loops | – | | | | |
@@ -487,3 +487,41 @@ size is four threads and 256 iterations, for room.
 | `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | fixed | 0.1 s | 0, 6 runs of 6 |
 | `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | 9a482a4f | 2.5 to 5.8 s | 97 to 113, 25 runs of 25 |
 | `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | ae1fbe04 | 2.7 to 3.9 s | 45 to 55, 5 runs of 5 |
+
+### 3.11 `22.locale.num.get.mt`
+
+Three sections, `char`, `wchar_t`, then both. The main thread formats
+a value in each locale first, its type fixed by the locale's place in
+the list, one of eight from `bool` to `void*`; with four locales four
+types run. Each thread constructs a named locale per iteration, takes
+its `num_get` facet and parses the value back. The locales are the C
+library's, and `numpunct` builds its data from the C library.
+
+It covers 9a482a4f, through the put-back of 3.8: the sanitizer names
+the stores in `__rw_get_numpunct` against the readers of the
+`numpunct` data. Each iteration's `use_facet` crosses the facet slot,
+and the program reports ae1fbe04 as well.
+
+One iteration of two threads, in `C` only, reports neither. Four
+iterations reported 9a482a4f in every run, two threads or four. The
+size is four threads and 256 iterations, for room. At the defaults
+under the sanitizer one section ends at its 60-second soft timeout,
+with the fixed library and against the fault.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.num.get.mt` | plain 15D | 23.1 s | – |
+| `./22.locale.num.get.mt --nthreads=4 --nloops=256` | plain 15D | 0.04 s | – |
+| `./22.locale.num.get.mt` | fixed | 138.3 s | 0 |
+| `./22.locale.num.get.mt` | 9a482a4f | 156.7 s | 44 |
+| `./22.locale.num.get.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.num.get.mt --nthreads=2 --nloops=1` | 9a482a4f | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.num.get.mt --nthreads=2 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.num.get.mt --nthreads=2 --nloops=4` | 9a482a4f | 0.2 to 0.4 s | 13 to 21, 5 runs of 5 |
+| `./22.locale.num.get.mt --nthreads=4 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.num.get.mt --nthreads=4 --nloops=4` | 9a482a4f | 0.2 to 0.3 s | 14 to 17, 5 runs of 5 |
+| `./22.locale.num.get.mt --nthreads=4 --nloops=16` | fixed | < 0.1 s | 0 |
+| `./22.locale.num.get.mt --nthreads=4 --nloops=16` | 9a482a4f | 0.3 to 0.5 s | 12 to 24, 5 runs of 5 |
+| `./22.locale.num.get.mt --nthreads=4 --nloops=256` | fixed | 0.2 s | 0, 6 runs of 6 |
+| `./22.locale.num.get.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.2 to 2.6 s | 28 to 37, 25 runs of 25 |
+| `./22.locale.num.get.mt --nthreads=4 --nloops=256` | ae1fbe04 | 1.6 to 2.5 s | 49 to 58, 5 runs of 5 |
