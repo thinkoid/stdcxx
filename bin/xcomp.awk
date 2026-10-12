@@ -1100,7 +1100,9 @@ function get_cellhref(section, fname, compname, class)
     if (2 != section || 0 == (fname in builddirs))
         return ""
 
-    if ("OK" == class || "MISS" == class)
+    # NOUT is a test that ran clean and wrote nothing: its output is
+    # empty
+    if ("OK" == class || "MISS" == class || "NOUT" == class)
         return ""
 
     if (match(class, "^X?(COMP|LINK)$"))
