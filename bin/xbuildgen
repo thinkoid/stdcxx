@@ -944,7 +944,7 @@ td.OK, td.XPASS, td.BASE, td.NOUT, td.OUTPUT, td.MISS,
 td.WARN, td.XWARN, td.EXIT, td.XEXIT, td.FORMAT,
 td.RUNWARN, td.XRUNWARN, td.DIFF, td.XDIFF, td.ASSERT,
 td.XASSERT, td.SIGNAL, td.XSIGNAL, td.COMP, td.XCOMP,
-td.LINK, td.XLINK, td.EXEC, td.xdep {
+td.LINK, td.XLINK, td.EXEC, td.xdep, td.XFORMAT {
     --hue: var(--muted);
     color: var(--hue);
     background: color-mix(in srgb, var(--hue) 14%, var(--surface));
@@ -983,7 +983,7 @@ td.SIGNAL {
 }
 
 /* expected failures and unexpected successes */
-td.XASSERT, td.XEXIT, td.XDIFF, td.XSIGNAL,
+td.XASSERT, td.XEXIT, td.XDIFF, td.XSIGNAL, td.XFORMAT,
 td.XCOMP, td.XLINK, td.XWARN, td.XRUNWARN {
     --hue: var(--muted);
     font-style: italic;
@@ -1162,15 +1162,6 @@ cat <<EOF | output
           </td>
         </tr>
         <tr>
-          <td colspan=2 class="na"><center>Not Applicable</center></td>
-          <td class="FORMAT">FORMAT</td>
-          <td class="na">Success</td>
-          <td class="na">
-             Component completed successfully but produced unexpected
-             output.
-          </td>
-        </tr>
-        <tr>
           <td class="MISS">N/A</td>
           <td class="na">Success</td>
           <td colspan=2 class="na"><center>Not Applicable</center></td>
@@ -1249,6 +1240,17 @@ cat <<EOF | output
           <td class="na">
             Component compiled and linked successfully, exited with
             a status of 0, but produced unexpected output.
+          </td>
+        </tr>
+        <tr>
+          <td class="FORMAT">FORMAT</td>
+          <td class="na">Failure</td>
+          <td class="XFORMAT">XFORMAT</td>
+          <td class="na">Success</td>
+          <td class="na">
+            Component compiled and linked successfully, exited with
+            a status of 0, but produced output in a format the harness
+            does not recognize.
           </td>
         </tr>
         <tr>
