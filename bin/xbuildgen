@@ -987,7 +987,7 @@ cat <<EOF | output
   <body>
 
     <h1>$title</h1>
-    Generated $today by $scripturl on `hostname` running `uname -sr`
+    Generated $today by $scripturl on $(uname -n) running $(uname -sr)
     <hr>
 
     <h2>Index</h2>
