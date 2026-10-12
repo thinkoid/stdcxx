@@ -182,6 +182,9 @@
 DATEFMT="((((%Y*366+1%j-100)*24+1%H-100)*60+1%M-100)*60+1%S-100)"
 OUTFILE=results.xml
 
+# the name of the script (used in diagnostic messages)
+myname=${0##*/}
+
 if [ -z "$MAKE" ]; then
     # let callers override the default gmake
     MAKE=gmake
