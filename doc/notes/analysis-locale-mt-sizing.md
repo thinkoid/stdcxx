@@ -905,3 +905,38 @@ first locale, `C`, and for most programs nothing.
 - `22.locale.codecvt.mt` races the first conversion in a fixed 200
   rounds and `22.locale.id.mt` runs a fixed 500 rounds, constants with
   no option; they set those programs' floors.
+
+## 5. The 12D pass
+
+The 18 programs at their new defaults, with no arguments, in a 12D
+build made the same way as the 15D one: optimized, thread-safe,
+shared, the library, librwtest and the programs under the sanitizer,
+`localedef` from the plain 12D build. Each fault is put back in the
+same export as in 15D, with the programs' current sources. Every fault
+a program covers in 15D is caught in 12D, every run, but one.
+
+| fault | program | runs reporting |
+|---|---|---|
+| none, the fixed library | all 18 | 0 of 6 each |
+| 8c4282ee | `22.locale.codecvt.mt` | 25 of 25; the program's assertions also fail in 5 |
+| ae1fbe04 | `.globals.mt`, `.money.get.mt`, `.money.put.mt`, `.moneypunct.mt`, `.num.get.mt`, `.num.put.mt`, `.numpunct.mt`, `.time.get.mt`, `.time.put.mt`, `.use_facet.mt` | 25 of 25 each |
+| ae1fbe04 | `22.locale.messages.mt` | 86 of 100 |
+| ae1fbe04, dcb5dc92 | `22.locale.cons.mt` | 0 of 25 each, as in 15D |
+| dcb5dc92 | `22.locale.facet.mt` | 25 of 25; the assertion fails in all 25 |
+| bf6dc721 | `22.locale.ctype.mt` | 25 of 25 |
+| 46aa42c3 | `22.locale.id.mt` | 25 of 25; the gap check fails in all 25 |
+| 9a482a4f | `.money.get.mt`, `.money.put.mt`, `.moneypunct.mt`, `.num.get.mt`, `.num.put.mt`, `.numpunct.mt`, `.time.get.mt`, `.time.put.libc.mt`, `.time.put.mt` | 25 of 25 each |
+| 2e196ebb | `22.locale.numpunct.mt` | 25 of 25; the assertion aborts 10 |
+| 81ef680c | `22.locale.time.put.libc.mt` | 0, a leak; the leak check fails in 25 of 25 |
+| 2bbdf7c9 | `22.locale.use_facet.mt` | 0, a leak; the leak check fails in 25 of 25 |
+| 5b68c2a7 | `22.locale.statics.mt` | 25 of 25 |
+| 4f38276b | `22.locale.statics.mt` | 0 of 25, out of reach as in 15D |
+
+The exception is `22.locale.messages.mt`, which meets the facet slot
+only through its `use_facet` calls: in 12D it reports ae1fbe04 in 86
+runs of 100, against 25 of 25 in 15D, and a larger size does not help,
+1024 iterations or eight threads reporting in 43 to 45 runs of 50.
+Ten other programs report the fault in every run, and the program's
+own subject, the catalogs, has no known fault; its coverage is a
+question for the census. Under the sanitizer the 18 programs take
+about 3 s in 12D, and about 1 s plain.
