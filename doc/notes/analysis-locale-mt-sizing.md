@@ -91,7 +91,7 @@ a dash means not yet established.
 | `22.locale.statics.mt` | 20000 loops | 5b68c2a7 | 0.68 s | `./22.locale.statics.mt --nthreads=4 --nloops=256` | < 0.1 s | none; 1 per run against the fault, 30 runs of 30 |
 | `22.locale.time.get.mt` | 50000 loops | 9a482a4f, ae1fbe04 | 57.7 s | `./22.locale.time.get.mt --nthreads=4 --nloops=256` | 0.3 s | none; 38 to 48 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.time.put.libc.mt` | 200 rounds | 81ef680c, 9a482a4f | 0.38 s | `./22.locale.time.put.libc.mt --nthreads=4` | 0.1 s | none; 81ef680c by the program's assertion, 9a482a4f by 7 or 8 reports, 25 runs of 25 each |
-| `22.locale.time.put.mt` | 100000 loops | – | | | | |
+| `22.locale.time.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 20.4 s | `./22.locale.time.put.mt --nthreads=4 --nloops=256` | 0.1 s | none; 13 to 19 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.use_facet.mt` | 200 rounds | 2bbdf7c9 | | | | |
 
 `--nlocales` defaults to `MAX_THREADS` wherever a program has it.
@@ -718,3 +718,36 @@ size keeps the default 200 and takes four threads.
 | `./22.locale.time.put.libc.mt --nthreads=4` | fixed | 0.1 s | 0, 11 runs of 11 |
 | `./22.locale.time.put.libc.mt --nthreads=4` | 81ef680c | < 0.1 s | 0; the leak check fails, 30 runs of 30 |
 | `./22.locale.time.put.libc.mt --nthreads=4` | 9a482a4f | 0.3 s | reported in 30 runs of 30, 7 or 8 in the 5 counted |
+
+### 3.17 `22.locale.time.put.mt`
+
+The mirror of `22.locale.time.get.mt`, three sections, `char`,
+`wchar_t`, then both, the conversion fixed by the locale's place in
+the list. Each thread constructs a named locale per iteration, formats
+the locale's time with `time_put` and compares it with the main
+thread's. The locales are the C library's.
+
+It covers 9a482a4f, through the put-back of 3.8: the sanitizer names
+the stores in `__rw_get_timepunct` against the readers of the time
+data. Each iteration's `use_facet` crosses the facet slot, and the
+program reports ae1fbe04 as well.
+
+One iteration of two threads, in `C` only, reports neither. Four
+iterations reported 9a482a4f in every run, two threads or four. The
+size is four threads and 256 iterations, for room.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.time.put.mt` | plain 15D | 20.4 s | – |
+| `./22.locale.time.put.mt --nthreads=4 --nloops=256` | plain 15D | 0.03 s | – |
+| `./22.locale.time.put.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.time.put.mt --nthreads=2 --nloops=1` | 9a482a4f | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.time.put.mt --nthreads=2 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.time.put.mt --nthreads=2 --nloops=4` | 9a482a4f | 0.1 to 0.2 s | 5 to 9, 5 runs of 5 |
+| `./22.locale.time.put.mt --nthreads=4 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.time.put.mt --nthreads=4 --nloops=4` | 9a482a4f | 0.1 s | 4 to 7, 5 runs of 5 |
+| `./22.locale.time.put.mt --nthreads=4 --nloops=16` | fixed | < 0.1 s | 0 |
+| `./22.locale.time.put.mt --nthreads=4 --nloops=16` | 9a482a4f | 0.1 to 0.3 s | 7 to 15, 5 runs of 5 |
+| `./22.locale.time.put.mt --nthreads=4 --nloops=256` | fixed | 0.1 to 0.2 s | 0, 7 runs of 7 |
+| `./22.locale.time.put.mt --nthreads=4 --nloops=256` | 9a482a4f | 0.7 to 2.0 s | 13 to 19, 25 runs of 25 |
+| `./22.locale.time.put.mt --nthreads=4 --nloops=256` | ae1fbe04 | 0.4 to 0.6 s | 10 to 16, 5 runs of 5 |
