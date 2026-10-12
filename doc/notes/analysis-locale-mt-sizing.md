@@ -92,7 +92,7 @@ a dash means not yet established.
 | `22.locale.time.get.mt` | 50000 loops | 9a482a4f, ae1fbe04 | 57.7 s | `./22.locale.time.get.mt --nthreads=4 --nloops=256` | 0.3 s | none; 38 to 48 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.time.put.libc.mt` | 200 rounds | 81ef680c, 9a482a4f | 0.38 s | `./22.locale.time.put.libc.mt --nthreads=4` | 0.1 s | none; 81ef680c by the program's assertion, 9a482a4f by 7 or 8 reports, 25 runs of 25 each |
 | `22.locale.time.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 20.4 s | `./22.locale.time.put.mt --nthreads=4 --nloops=256` | 0.1 s | none; 13 to 19 per run against 9a482a4f, 25 runs of 25 |
-| `22.locale.use_facet.mt` | 200 rounds | 2bbdf7c9 | | | | |
+| `22.locale.use_facet.mt` | 200 rounds | 2bbdf7c9, ae1fbe04 | 1.0 s | `./22.locale.use_facet.mt --nthreads=4` | 1.0 s | none; 2bbdf7c9 by the program's assertion, ae1fbe04 by 1 report, 25 runs of 25 each |
 
 `--nlocales` defaults to `MAX_THREADS` wherever a program has it.
 
@@ -751,3 +751,41 @@ size is four threads and 256 iterations, for room.
 | `./22.locale.time.put.mt --nthreads=4 --nloops=256` | fixed | 0.1 to 0.2 s | 0, 7 runs of 7 |
 | `./22.locale.time.put.mt --nthreads=4 --nloops=256` | 9a482a4f | 0.7 to 2.0 s | 13 to 19, 25 runs of 25 |
 | `./22.locale.time.put.mt --nthreads=4 --nloops=256` | ae1fbe04 | 0.4 to 0.6 s | 10 to 16, 5 runs of 5 |
+
+### 3.18 `22.locale.use_facet.mt`
+
+One section, gated, 200 rounds. The main thread builds
+`de_DE.ISO-8859-1` from the tree's sources first. Each round it
+constructs a fresh locale of that name; the threads wait for each
+other and call `use_facet` for its wide `codecvt` at once, the first
+call, which fills the facet's slot. After the round the locale goes,
+and the driver's replacement `operator new` counts the blocks that
+outlive it. The leak check is `rw_assert`, and the first failure ends
+the run. Building the locale takes most of the second the program
+runs, plain or under the sanitizer.
+
+It covers 2bbdf7c9: every thread that found the slot empty took a
+reference to the facet, and the body releases the slot once, so the
+facet outlived its locale. Since then ae1fbe04 changed the same lines,
+so the put-back is by hand and keeps its release store: the slot is
+filled without the lock and the extra references are kept. That is a
+leak, not a race, and the sanitizer reports nothing; the program's own
+leak check fails in the first round of every run, with two threads and
+one round already. The program also covers ae1fbe04, one report in
+every run at every size.
+
+The rounds are cheap, so the size keeps the default 200 and takes four
+threads.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.use_facet.mt` | plain 15D | 1.0 s | – |
+| `./22.locale.use_facet.mt --nthreads=4` | plain 15D | 0.9 s | – |
+| `./22.locale.use_facet.mt --nthreads=2 --nrounds=1` | fixed | | 0 |
+| `./22.locale.use_facet.mt --nthreads=2 --nrounds=1` | 2bbdf7c9 | | 0; the leak check fails, 5 runs of 5 |
+| `./22.locale.use_facet.mt --nthreads=2 --nrounds=1` | ae1fbe04 | | 1, 5 runs of 5 |
+| `./22.locale.use_facet.mt --nthreads=4 --nrounds=16` | 2bbdf7c9 | | 0; the leak check fails, 5 runs of 5 |
+| `./22.locale.use_facet.mt --nthreads=4 --nrounds=16` | ae1fbe04 | | 1, 5 runs of 5 |
+| `./22.locale.use_facet.mt --nthreads=4` | fixed | 1.0 s | 0, 9 runs of 9 |
+| `./22.locale.use_facet.mt --nthreads=4` | 2bbdf7c9 | 0.9 s | 0; the leak check fails, 28 runs of 28 |
+| `./22.locale.use_facet.mt --nthreads=4` | ae1fbe04 | 1.0 s | 1, 28 runs of 28 |
