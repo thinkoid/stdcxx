@@ -48,6 +48,7 @@
 #     -k
 #         Keeps the build directory for inspection. When omitted, the
 #         build directory is cleaned up (realclean) after the run.
+#         The log of each stage is kept in it as <stage>.log.
 #
 #     -e <examples-to-build>
 #         Specifies the list of example programs to build. When omitted,
@@ -317,6 +318,11 @@ make_stage()
     )
 
     status=$?
+
+    # with -k, keep a copy of the stage's log in the build directory
+    if [ "$keep_build" -ne 0 ] && [ -d build ]; then
+        cp $log build/$stagename.log
+    fi
 
     if [ -r "$runlog" ]; then
         # Parse runall results
