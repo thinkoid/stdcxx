@@ -45,7 +45,9 @@ library locales: `C`, `C.utf8`, `en_US.utf8`, `POSIX`.
 
 For each program:
 
-- A plain 15D run at its defaults, timed.
+- A plain 15D run at its defaults, timed. From 3.12 on, the defaults
+  are not run under the sanitizer: such a run takes minutes, often
+  ends at a soft timeout, and decides nothing the sizes do not.
 - Runs under the sanitizer at decreasing sizes. At each size, one run
   against the fixed library and runs against a library with the
   program's fault put back. A fault is put back by reverting its commit
@@ -84,7 +86,7 @@ a dash means not yet established.
 | `22.locale.money.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 22.8 s | `./22.locale.money.put.mt --nthreads=4 --nloops=256` | 0.1 s | none; 14 to 21 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.moneypunct.mt` | 10000 loops | 9a482a4f, ae1fbe04 | 2.5 s | `./22.locale.moneypunct.mt --nthreads=4 --nloops=256` | 0.1 s | none; 97 to 113 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.num.get.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 23.1 s | `./22.locale.num.get.mt --nthreads=4 --nloops=256` | 0.2 s | none; 28 to 37 per run against 9a482a4f, 25 runs of 25 |
-| `22.locale.num.put.mt` | 100000 loops | – | | | | |
+| `22.locale.num.put.mt` | 100000 loops | 9a482a4f, ae1fbe04 | 26.1 s | `./22.locale.num.put.mt --nthreads=4 --nloops=256` | 0.2 s | none; 23 to 30 per run against 9a482a4f, 25 runs of 25 |
 | `22.locale.numpunct.mt` | 200000 loops | 2e196ebb | | | | |
 | `22.locale.statics.mt` | 20000 loops | – | | | | |
 | `22.locale.time.get.mt` | 50000 loops | – | | | | |
@@ -525,3 +527,36 @@ with the fixed library and against the fault.
 | `./22.locale.num.get.mt --nthreads=4 --nloops=256` | fixed | 0.2 s | 0, 6 runs of 6 |
 | `./22.locale.num.get.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.2 to 2.6 s | 28 to 37, 25 runs of 25 |
 | `./22.locale.num.get.mt --nthreads=4 --nloops=256` | ae1fbe04 | 1.6 to 2.5 s | 49 to 58, 5 runs of 5 |
+
+### 3.12 `22.locale.num.put.mt`
+
+The mirror of `22.locale.num.get.mt`, three sections, `char`,
+`wchar_t`, then both, the value type fixed by the locale's place in
+the list. Each thread constructs a named locale per iteration, formats
+the locale's value with `num_put` and compares it with the main
+thread's. The locales are the C library's.
+
+It covers 9a482a4f, through the put-back of 3.8: the sanitizer names
+the stores in `__rw_get_numpunct` against the readers of the
+`numpunct` data. Each iteration's `use_facet` crosses the facet slot,
+and the program reports ae1fbe04 as well.
+
+One iteration of two threads, in `C` only, reports neither. Four
+iterations reported 9a482a4f in every run, two threads or four. The
+size is four threads and 256 iterations, for room.
+
+| command | library | time | reports |
+|---|---|---|---|
+| `./22.locale.num.put.mt` | plain 15D | 26.1 s | – |
+| `./22.locale.num.put.mt --nthreads=4 --nloops=256` | plain 15D | 0.05 s | – |
+| `./22.locale.num.put.mt --nthreads=2 --nloops=1` | fixed | < 0.1 s | 0 |
+| `./22.locale.num.put.mt --nthreads=2 --nloops=1` | 9a482a4f | < 0.1 s | 0, 5 runs of 5 |
+| `./22.locale.num.put.mt --nthreads=2 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.num.put.mt --nthreads=2 --nloops=4` | 9a482a4f | 0.1 to 0.2 s | 6 to 12, 5 runs of 5 |
+| `./22.locale.num.put.mt --nthreads=4 --nloops=4` | fixed | < 0.1 s | 0 |
+| `./22.locale.num.put.mt --nthreads=4 --nloops=4` | 9a482a4f | 0.1 to 0.2 s | 8 to 12, 5 runs of 5 |
+| `./22.locale.num.put.mt --nthreads=4 --nloops=16` | fixed | < 0.1 s | 0 |
+| `./22.locale.num.put.mt --nthreads=4 --nloops=16` | 9a482a4f | 0.3 to 0.4 s | 11 to 18, 5 runs of 5 |
+| `./22.locale.num.put.mt --nthreads=4 --nloops=256` | fixed | 0.2 s | 0, 6 runs of 6 |
+| `./22.locale.num.put.mt --nthreads=4 --nloops=256` | 9a482a4f | 1.3 to 2.1 s | 23 to 30, 25 runs of 25 |
+| `./22.locale.num.put.mt --nthreads=4 --nloops=256` | ae1fbe04 | 2.8 to 4.0 s | 79 to 97, 5 runs of 5 |
