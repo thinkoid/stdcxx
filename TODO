@@ -337,7 +337,7 @@ line 63100, and the keyword table in =util/scanner.cpp= lacks
 survey compared source values and ran no collation or formatting
 oracle, so the counts are differences, not proven defects. The GNU
 categories outside the six of C++ (paper, address, measurement) are
-not a gap. The facets can also read the C library's own locales
+not a gap. =doc/notes/analysis-locale-sources.md= holds the survey. The facets can also read the C library's own locales
 (=doc/notes/ref-locale.md=), so stale sources need not reach every
 =std::locale= a program constructs.
 
