@@ -158,29 +158,6 @@ the fixed library, in 15D and in 12D. Every locale MT test passes in
 seconds under the harness in 15D on any processor count, and the 15D
 rows become a reference.
 
-* TODO The string reference count is read without an atomic operation
-
-Under ThreadSanitizer, =21.string.cons.mt= reports 100 races and
-=21.string.push_back.mt= two, all of one shape: =_C_get_ref=
-(=include/rw/_strref.h:157=) reads =_C_refs= with a plain load while
-another thread decrements it through
-=_RWSTD_STRING_ATOMIC_PREDECREMENT= in =_C_dec_ref= (=:201=). The copy
-constructor (=include/string:946=) and the mutating members (=:262=,
-=:965=, =:1102=, =:1227=, =:1247=) read the count to decide whether
-the body is shared. The callers tolerate either value, the count
-before or after the decrement, so the program survives what the
-memory model calls a data race. Seen in a 15D build on aarch64, where
-the string uses the atomic operations; on Linux/x86-64
-=_RWSTD_NO_STRING_ATOMIC_OPS= (=_config.h:109=) decrements under the
-body's mutex and reads without it, which the sanitizer has not been
-asked about.
-
-Fix: =_C_get_ref= loads =_C_refs= through the atomic backend
-(=_atomic-builtins.h=), relaxed.
-
-Check: both programs run clean under the sanitizer in 15D; the
-tables do not move.
-
 * TODO =25.merge= reads before the array in a passing assertion
 
 =test_merge= (=tests/algorithms/25.merge.cpp:273=) asserts that the

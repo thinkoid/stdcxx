@@ -158,7 +158,11 @@ struct __string_ref
 
 #  ifndef _RWSTD_NO_STRING_REF_COUNT
 
-        return _C_refs + _RWSTD_STRING_REF_OFFSET;
+        // another thread may be adjusting the count; the value alone
+        // says whether the body is shared, so a relaxed load suffices
+        return _RWSTD_STRING_REF_OFFSET
+            + _RWSTD_STRING_ATOMIC_LOAD_RELAXED (_C_refs,
+                  _RWSTD_STRING_MUTEX (this));
 
 #else   // if defined (_RWSTD_NO_STRING_REF_COUNT)
 
@@ -229,7 +233,7 @@ struct __string_ref
       && !defined (_RWSTD_ONE_STRING_MUTEX)     \
       && !defined (_RWSTD_NO_STRING_MUTEX)
 
-    __rw_mutex_base _C_mutex;
+    _MUTABLE __rw_mutex_base _C_mutex;
 
 #  endif   // _REENTRANT && !_ONE_STRING_MUTEX && !_NO_STRING_MUTEX
 

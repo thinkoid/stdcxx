@@ -565,6 +565,8 @@
             _RWSTD_ATOMIC_PREDECREMENT (x, mutex)
 #  define _RWSTD_STRING_ATOMIC_SWAP(x, y, mutex)                   \
             _RWSTD_ATOMIC_SWAP (x, y, mutex)
+#  define _RWSTD_STRING_ATOMIC_LOAD_RELAXED(x, mutex)              \
+            _RWSTD_ATOMIC_LOAD_RELAXED (x, mutex)
 
    // thread-local storage
 #  ifndef _RWSTD_NO_TLS
@@ -609,6 +611,8 @@
           _RWSTD_ATOMIC_PREDECREMENT(x, mutex)
 #  define _RWSTD_STRING_ATOMIC_SWAP(x, y, mutex) \
           _RWSTD_ATOMIC_SWAP(x, y, mutex)
+#  define _RWSTD_STRING_ATOMIC_LOAD_RELAXED(x, mutex) \
+          _RWSTD_ATOMIC_LOAD_RELAXED(x, mutex)
 
 #endif   // _RWSTD_REENTRANT
 
