@@ -10,27 +10,12 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO =localedef= writes a byte it does not set
-
-Two runs of the same =localedef= command on =de_DE= and =ISO-8859-1=
-write databases that differ in one byte each: offset 24 of
-=LC_MESSAGES= (=0xff= or =0xfe=, in a field that reads =ff ff 00 00=)
-and offset 351 of =LC_COLLATE=. =LC_CTYPE= is the same. Hypothesis: a
-member or padding left uninitialized and written whole. The databases
-are not reproducible, and the check of the =yi_US.CP1255= entry, a
-byte-for-byte match against x86-64, cannot pass until this is fixed.
-
-Fix: to be found; the structures written at those offsets first.
-
-Check: two runs of =localedef= over every locale in
-=etc/nls/gen_list= write identical databases.
-
 * TODO =yi_US.CP1255= does not build on aarch64
 
 =make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=.
 =localedef= reports Error 308, "incomplete multibyte character in
-character map file: expecting 4 bytes, found 0". Nothing records the
-locales phase on x86-64, so whether it fails only on aarch64 is open.
+character map file: expecting 4 bytes, found 0". On x86-64 every
+locale in =etc/nls/gen_list= builds, so the failure is aarch64's.
 Hypothesis: =char= is unsigned on aarch64 and signed on x86, and the
 charmap reader depends on the sign of a byte.
 

@@ -548,9 +548,16 @@ Def::Def (const char* filename, const char* out_name, Charmap& char_map,
       no_position_ (no_position)
 
 {
-    // make sure ctype_out object is cleared
+    // clear every output image whole: each goes to its database in
+    // one write of its full size, padding bytes and the members no
+    // section assigns included
+    std::memset (&num_punct_out_, 0, sizeof (num_punct_out_));
     std::memset (&ctype_out_, 0, sizeof (ctype_out_));
     std::memset (&time_out_, 0, sizeof (time_out_));
+    std::memset (&collate_out_, 0, sizeof (collate_out_));
+    std::memset (&mon_out_, 0, sizeof (mon_out_));
+    std::memset (&num_out_, 0, sizeof (num_out_));
+    std::memset (&messages_out_, 0, sizeof (messages_out_));
 
     // invalidate format characters by setting each to CHAR_MAX
     // as specified by the C function localeconv()
@@ -577,16 +584,6 @@ Def::Def (const char* filename, const char* out_name, Charmap& char_map,
 
     collate_out_.largest_ce     = 1;
     collate_out_.longest_weight = 1;
-    collate_out_.num_wchars     = 0;
-    std::memset (collate_out_.weight_type, 0,
-                 sizeof (collate_out_.weight_type));
-
-    // initialize all extensions to 0
-    ctype_out_.ctype_ext_off     = 0;
-    num_out_.numeric_ext_off     = 0;
-    collate_out_.collate_ext_off = 0;
-    mon_out_.monetary_ext_off    = 0;
-    time_out_.time_ext_off       = 0;
 
     // actual processing
     scanner_.open (filename);
