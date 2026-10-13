@@ -215,12 +215,12 @@ static wchar_t utf8_decode (const char* from, const char* to)
                     "map file\n", *ch);
     }
     
-    if (ch_end < ch + num_bytes - 1) {
+    if (ch_end < ch + num_bytes) {
         // the input doesn't have enough characters
         issue_diag (E_MBCHAR, true, 0, 
                     "incomplete multibyte character in character "
-                    "map file: expecting %u bytes, found %u\n",
-                    num_bytes, ch_end - ch);
+                    "map file: expecting %lu bytes, found %lu\n",
+                    num_bytes, std::size_t (ch_end - ch));
     }
 
     // for each byte in the character extract the useful data by shifting
@@ -676,7 +676,8 @@ bool Charmap::convert_to_ucs (const std::string &sym_name,
 {
 
     if (in_utf8_) {
-        wc = utf8_decode (encoding.c_str (), &*(encoding.end () - 1));
+        wc = utf8_decode (encoding.c_str (),
+                          encoding.c_str () + encoding.size ());
         return true;
     }
 

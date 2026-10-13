@@ -10,21 +10,6 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO =utf8_decode= takes two different ends
-
-=utf8_decode= in =util/charmap.cpp= is documented over the range
-=[from, to)=, and its length check reads that way. Its two callers
-disagree: the UTF-8 charmap path passes the last byte of the
-sequence, the iconv path passes one past it. The check is one byte
-lenient for the second caller and exact for the first, and an empty
-range cannot be told from a one-byte one.
-
-Fix: one convention, one past the end, both callers; the check
-becomes =ch_end < ch + num_bytes=.
-
-Check: every locale in =etc/nls/gen_list= builds to the same database
-before and after.
-
 * TODO Keep instantiated facets until the program ends
 
 A named facet dies with the last locale that holds it. The next locale
