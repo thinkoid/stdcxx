@@ -680,6 +680,29 @@ on the C99 functions.
 Check: =src/fpclass.h= compiles under =eccp -A= with the C99 names
 requested and a glibc that fixes it.
 
+** TODO ThreadSanitizer cannot follow =longjmp= on glibc 2.44
+
+Under the sanitizer every =longjmp= and =siglongjmp= dies with "can't
+find longjmp buf" and exit 66. A ten-line program with =sigsetjmp=
+and =siglongjmp= and no signal fails the same way, under GCC 16's
+libtsan and Clang 23's runtime alike. The sanitizer records the stack
+pointer at =setjmp= and, at =longjmp=, demangles the one saved in the
+=jmp_buf= to find the record. glibc 2.44 (a5ec880f80, "Consolidate
+pointer guard to use a relro variable instead of the TCB") moved the
+x86-64 pointer guard from the thread control block slot at =%fs:0x30=
+to the variable =__pointer_chk_guard=; the slot now reads zero, and
+the runtimes still demangle with it. The same series gave aarch64 a
+rotate its runtime does not undo (78f1f0e39c). Reported upstream as
+LLVM issue 228263 (2026-10); GCC's libsanitizer takes the fix at its
+next merge from compiler-rt. The six programs of the spot-check note
+are the ones this stops.
+
+Fix: the sanitizer runtimes'. The tests need no change.
+
+Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
+=18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
+reads the new guard.
+
 ** TODO =src/punct.cpp= under the export model
 
 The library uses neither =export= nor implicit inclusion since
@@ -794,11 +817,14 @@ program without the limit and prints two warning lines, so every
 jump out of signal handlers or test =setjmp=; the sanitizer's
 =longjmp= interceptor finds no buffer for the jump, its check fails,
 and the program exits 66, the sanitizer's own =exitcode= default.
+The defect is the sanitizer runtime's against glibc 2.44, not the
+tests' (the parked entry on =longjmp= under the sanitizer).
 The address-space limit plays no part: the exit is the same without
 it. =0.inputiter= and =0.outputiter= die with an empty tail because
 they close =stderr= first, to silence the assertions they provoke,
 and every write of the report returns =EBADF=; the other four print
-the check. Measured with =strace= on aarch64. Two cannot pass:
+the check. Measured with =strace= on aarch64; x86-64 exits 66 too.
+Two cannot pass:
 =18.exception= and =20.temp.buffer= expect =bad_alloc= from a huge
 request, and the sanitizer's =operator new= reports out of memory
 instead, =allocator_may_return_null= or not. =22.locale.codecvt=
