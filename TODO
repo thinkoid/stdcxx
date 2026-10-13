@@ -146,7 +146,11 @@ locale its static array already built; the leak checks of
 =22.locale.time.put.libc.mt= and =22.locale.use_facet.mt= are the only
 detectors of their faults; =22.locale.money.put.mt= drops =C.utf8=
 without a word; six fixed commits were not put back; in 12D
-=22.locale.messages.mt= reports the slot fault in 86 runs of 100.
+=22.locale.messages.mt= reports the slot fault in 86 runs of 100. In
+the full GCC run at bf5fbd46 every locale MT test passes under the
+harness in 15D in about a second on 32 processors, and the GCC tables
+pin the rows (=ref-test-baseline.md=, chapter 3.2); the Clang tables
+are not yet measured at the new sizes.
 
 Check: every program in the note's table has a chosen size, a time,
 and runs under the sanitizer that report its fault and stay clean on
