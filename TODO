@@ -158,6 +158,63 @@ the fixed library, in 15D and in 12D. Every locale MT test passes in
 seconds under the harness in 15D on any processor count, and the 15D
 rows become a reference.
 
+* TODO The string reference count is read without an atomic operation
+
+Under ThreadSanitizer, =21.string.cons.mt= reports 100 races and
+=21.string.push_back.mt= two, all of one shape: =_C_get_ref=
+(=include/rw/_strref.h:157=) reads =_C_refs= with a plain load while
+another thread decrements it through
+=_RWSTD_STRING_ATOMIC_PREDECREMENT= in =_C_dec_ref= (=:201=). The copy
+constructor (=include/string:946=) and the mutating members (=:262=,
+=:965=, =:1102=, =:1227=, =:1247=) read the count to decide whether
+the body is shared. The callers tolerate either value, the count
+before or after the decrement, so the program survives what the
+memory model calls a data race. Seen in a 15D build on aarch64, where
+the string uses the atomic operations; on Linux/x86-64
+=_RWSTD_NO_STRING_ATOMIC_OPS= (=_config.h:109=) decrements under the
+body's mutex and reads without it, which the sanitizer has not been
+asked about.
+
+Fix: =_C_get_ref= loads =_C_refs= through the atomic backend
+(=_atomic-builtins.h=), relaxed.
+
+Check: both programs run clean under the sanitizer in 15D; the
+tables do not move.
+
+* TODO =25.merge= reads before the array in a passing assertion
+
+=test_merge= (=tests/algorithms/25.merge.cpp:273=) asserts that the
+merge is stable and passes =xdst [i - 1]= among the formatter's
+arguments. The arguments are evaluated whether the assertion holds or
+not, and the clamp above it (=:271=) leaves =i= at 0 for a one-element
+merge: the read is =xdst [-1]=. ThreadSanitizer reports it as a
+heap-use-after-free, the bytes before the array belonging to a chunk
+freed by an earlier call (=:292=).
+
+Fix: the element reads guarded by =i=, or the index clamped to 1.
+
+Check: =25.merge= runs clean under the sanitizer in 15D; its table
+row does not move.
+
+* TODO =tie= allocates under the stream's lock
+
+ThreadSanitizer reports a lock-order inversion in =27.objects=.
+=basic_ios::tie(ostream*)= holds its stream's mutex while
+=ios_base::_C_usr_data::_C_alloc= calls =operator new=; the test's
+replacement =operator new= inserts into a stream, and the insertion's
+=sentry= (=include/ostream:94=) takes that stream's mutex. The other
+order: an insertion's =sentry= holds its mutex while
+=basic_ios::fill= (=include/rw/_basic_ios.h:260=) takes the second.
+The test is single-threaded, so it does not deadlock; two threads can.
+Hypothesis: the two mutexes are those of =cout= and =cerr=, tied, and
+the trigger is a program whose =operator new= writes to a stream. The
+report's stacks are the record.
+
+Fix: to be found; the shape is the allocation outside the lock.
+
+Check: =27.objects= runs clean under the sanitizer in 15D; the suite
+does not move.
+
 * TODO The scripts under =bin= drive the certification
 
 =bin/buildntest= builds and runs one configuration and writes a log
@@ -780,3 +837,22 @@ ThreadSanitizer named. The front matter for the MT entries.
 
 The =basic_streambuf= buffering contract, the =ios_base= storage, how
 =filebuf= maps onto the C library. Shape: =ref-string-replace.md=.
+
+** TODO A ThreadSanitizer spot-check note
+
+How to run the suite under the sanitizer and read the table. The
+build is a complete 15D with =CXXOPTS=-fsanitize=thread= and
+=LDOPTS=-fsanitize=thread= on every stage after =config=, utilities
+included, and =make runall= in its own =tests=. The harness's
+address-space limit does not stop the sanitizer: it re-executes the
+program without the limit and prints two warning lines, so every
+=NOUT= row reads =FORMAT=. Six programs cannot run: =0.alloc=,
+=0.new=, =0.inputiter=, =0.outputiter=, =18.setjmp= and =18.csetjmp=
+jump out of signal handlers or test =setjmp=, and the sanitizer's
+=longjmp= check kills them with exit 66. Two cannot pass:
+=18.exception= and =20.temp.buffer= expect =bad_alloc= from a huge
+request, and the sanitizer's =operator new= reports out of memory
+instead, =allocator_may_return_null= or not. =22.locale.codecvt=
+times out at 60 seconds behind the instrumented =localedef=. The rest
+of the table matches the plain one but for the reports. First run,
+2026-10-13 on aarch64: 419 seconds, 274 programs, 12 non-zero exits.
