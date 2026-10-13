@@ -405,7 +405,7 @@ _rw_cmp8 (const void *buf1,
     const UI64T *pi1 = _RWSTD_STATIC_CAST (const UI64T*, buf1);
     const UI64T *pi2 = _RWSTD_STATIC_CAST (const UI64T*, buf2);
 
-    for (; nelems; ++pi1, ++pi2, ++inx) {
+    for (; inx < nelems; ++pi1, ++pi2, ++inx) {
 
         const UI64T ui1 = *pi1;
         const UI64T ui2 = *pi2;

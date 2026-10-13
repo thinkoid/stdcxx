@@ -226,7 +226,7 @@ test_all_cases (const T* /* dummy */, const U* /* dummy */,
 
     _RWSTD_UNUSED (one_time_per_specialization);
 
-    for (size_t i = 0; i != sizeof cases / sizeof cases; ++i) {
+    for (size_t i = 0; i != sizeof cases / sizeof *cases; ++i) {
         test_case ((T*)0, (U*)0,
                    tname, uname,
                    cases [i].line,
