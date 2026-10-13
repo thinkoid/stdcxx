@@ -158,21 +158,6 @@ the fixed library, in 15D and in 12D. Every locale MT test passes in
 seconds under the harness in 15D on any processor count, and the 15D
 rows become a reference.
 
-* TODO =25.merge= reads before the array in a passing assertion
-
-=test_merge= (=tests/algorithms/25.merge.cpp:273=) asserts that the
-merge is stable and passes =xdst [i - 1]= among the formatter's
-arguments. The arguments are evaluated whether the assertion holds or
-not, and the clamp above it (=:271=) leaves =i= at 0 for a one-element
-merge: the read is =xdst [-1]=. ThreadSanitizer reports it as a
-heap-use-after-free, the bytes before the array belonging to a chunk
-freed by an earlier call (=:292=).
-
-Fix: the element reads guarded by =i=, or the index clamped to 1.
-
-Check: =25.merge= runs clean under the sanitizer in 15D; its table
-row does not move.
-
 * TODO =tie= allocates under the stream's lock
 
 ThreadSanitizer reports a lock-order inversion in =27.objects=.

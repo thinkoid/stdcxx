@@ -270,14 +270,19 @@ void test_merge (int                line,
     // to avoid errors in --trace mode
     i = i < ndst ? i : ndst - 1;
 
+    // the arguments are evaluated whether the assertion holds or not;
+    // a one-element sequence leaves i at 0 and nothing precedes xdst [0]
+    const int prev_origin = i ? xdst [i - 1].origin_ : 0;
+    const int prev_val    = i ? xdst [i - 1].data_.val_ : 0;
+
     rw_assert (success, 0, line,
                "line %d: %s<%s%{?}, %s, %s%{;}%{?}, %s%{;}> "
                "(\"%s\", %{?}\"%s\"%{;}%{?}%zu%{;}, ...) ==> \"%{X=*.*}\" "
                "not stable at %zu: got ids %d != %d for values %#c == %#c",
-               __LINE__, algname, it1name, !inplace, it2name, outname, 
+               __LINE__, algname, it1name, !inplace, it2name, outname,
                predicate, predname, src1, !inplace, src2, inplace, midinx,
-               cwidth, int (ndst), i, xdst, i, xdst [i - 1].origin_, 
-               xdst [i].origin_, xdst [i - 1].data_.val_, xdst [i].data_.val_);
+               cwidth, int (ndst), i, xdst, i, prev_origin,
+               xdst [i].origin_, prev_val, xdst [i].data_.val_);
 
     // check the complexity
     success = n_ops_lt <= ndst - 1;
