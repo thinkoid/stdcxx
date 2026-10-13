@@ -871,7 +871,7 @@ rw_setvars (const StringFunc     &func,
 
     case StringIds::replace_iter_iter_size_val:
         rw_asnprintf (&buf, &bufsize, 
-                      "%{+} (begin()%{?} + %zu%{;}, begin()%{? + %zu%{;}, "
+                      "%{+} (begin()%{?} + %zu%{;}, begin()%{?} + %zu%{;}, "
                       "%zu, %{#c})",
                       0 != pcase->off, pcase->off, 0 != range1_end, range1_end,
                       pcase->size2, pcase->val);

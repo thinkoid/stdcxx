@@ -270,21 +270,6 @@ except the =21.cwchar= coverage, which adds assertions.
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
-* TODO A missing brace in a =replace= call formatter
-
-The case =replace_iter_iter_size_val= of the call formatter
-(=tests/src/21.strings.cpp=) spells its second conditional
-=%{? + %zu%{;}=, without the brace that closes =%{?}=. Each argument
-after it is printed one place early. Row 645 of =21.string.replace=
-passes a count of 1 and ='c'=; its diagnostics read
-=replace (begin(), begin(), 0, '\x01')=. The calls and the assertions
-are right; only the text is wrong. The defect dates from 2006.
-
-Fix: =%{?} + %zu%{;}=.
-
-Check: under =--trace=, the rows of that overload print the count and
-the character they pass. The suite table does not move.
-
 * TODO =rw_get_cpus= closes a pipe with =fclose=
 
 =rw_get_cpus= (=tests/src/thread.cpp=) falls back on =popen= when
