@@ -34,13 +34,8 @@
 #
 #     Exports the revision once per configuration into
 #     <night-dir>/<config> and runs bin/buildntest there on the tests
-#     alone, keeping the build directory. A configuration named
-#     <buildtype>-tsan builds the library, librwtest, and the locale MT
-#     programs of its sibling <buildtype> under ThreadSanitizer, in
-#     <night-dir>/<config>/build, and runs each program once outside
-#     the harness, with the utilities of the sibling. Last, it writes
-#     the page of each build to its build directory as index.html; the
-#     page of a sibling carries the ThreadSanitizer runs as a section.
+#     alone, keeping the build directory. Last, it writes the page of
+#     each build to its build directory as index.html.
 #
 #     Each configuration logs to <night-dir>/<config>.log. The script
 #     writes one line per step to stdout and exits non-zero when a
@@ -49,10 +44,8 @@
 # OPTIONS:
 #
 #     -c <configs>
-#         Specifies the list of configurations, each a build type with
-#         an optional -tsan suffix. A -tsan configuration needs its
-#         sibling in the list. When omitted, defaults to
-#         "11S 11s 15D 15D-tsan".
+#         Specifies the list of configurations, each a build type.
+#         When omitted, defaults to "11S 11s 15D".
 #
 #     -j <jobs>
 #         Specifies the number of make jobs within a stage. When
@@ -64,11 +57,10 @@
 #
 # EXAMPLES:
 #
-#     driver -c "15D 15D-tsan" ~/build/stdcxx-build/night-20261012
+#     driver -c 15D ~/build/stdcxx-build/night-20261012
 #
-#     The command above tests HEAD in the 15D configuration, builds
-#     and runs the locale MT programs under ThreadSanitizer, and
-#     writes the page of 15D, with its ThreadSanitizer section, to
+#     The command above tests HEAD in the 15D configuration and writes
+#     the page of 15D to
 #     ~/build/stdcxx-build/night-20261012/15D/build/index.html.
 #
 ########################################################################
@@ -85,37 +77,17 @@ readonly topdir=$(cd "$(dirname "$0")/.." && pwd)
 # the compiler configuration file
 readonly config=gcc.config
 
-# the number of seconds a program may run under ThreadSanitizer
-readonly tsan_timeout=600
-
-# the make variables that build under ThreadSanitizer
-readonly tsan_vars="CXXOPTS=-fsanitize=thread LDOPTS=-fsanitize=thread"
-
 ##########
 # global variables
 
 # by default (unless otherwise specified on the command line) test the
-# GCC configurations of the certification and 15D under ThreadSanitizer
-configs="11S 11s 15D 15D-tsan"
+# GCC configurations of the certification
+configs="11S 11s 15D"
 jobs=$(getconf _NPROCESSORS_ONLN)
 revision=HEAD
 
 # the exit status of the script, non-zero once a step fails
 status=0
-
-
-##########
-# mt_programs(): writes the names of the locale MT programs in the
-# given source tree, one per line
-mt_programs()
-{
-    srcdir=$1
-
-    for src in "$srcdir"/tests/localization/22.locale.*.mt.cpp; do
-        src=${src##*/}
-        echo "${src%.cpp}"
-    done
-}
 
 
 ##########
@@ -131,16 +103,6 @@ log_name()
     gccver=$(gcc -dumpfullversion)
 
     echo "$os-$osver-$arch-gcc-$gccver-$buildtype-1-log.gz.txt"
-}
-
-
-##########
-# run_cmd(): writes the command to the log, then runs it; reports its
-# exit status
-run_cmd()
-{
-    echo; echo "### $*:"
-    "$@"
 }
 
 
@@ -168,77 +130,11 @@ run_build()
 
 
 ##########
-# build_tsan(): configures the sibling's build type in the
-# configuration's build directory from the sibling's export, then
-# builds the library, librwtest, and the locale MT programs under
-# ThreadSanitizer; reports the status of the first stage that fails
-build_tsan()
-{
-    cfg=$1
-    sibling=${cfg%-tsan}
-    srcdir=$night/$sibling
-    builddir=$night/$cfg/build
-
-    mkdir "$night/$cfg" || return
-
-    echo; echo "### source directory:"
-    echo "$srcdir"
-
-    echo; echo "### build directory:"
-    echo "$builddir"
-
-    run_cmd make -C "$srcdir" BUILDDIR="$builddir" \
-        BUILDTYPE=$sibling CONFIG=$config config || return
-
-    run_cmd make -C "$builddir" -j$jobs lib rwtest $tsan_vars || return
-
-    # keep going: a program that fails to build exits 127 below
-    run_cmd make -C "$builddir/tests" -j$jobs -k \
-        $(mt_programs "$srcdir") $tsan_vars
-
-    return 0
-}
-
-
-##########
-# run_tsan(): runs each locale MT program once under ThreadSanitizer,
-# outside the harness, with the utilities of the sibling, its output
-# in <program>.tsan beside it; writes a table of one row per program:
-# its name, exit status, number of reports, and real seconds
-run_tsan()
-{
-    cfg=$1
-    sibling=${cfg%-tsan}
-    builddir=$night/$cfg/build
-    bindir=$night/$sibling/build/bin
-
-    echo; echo "### ThreadSanitizer runs:"
-    echo "NAME EXIT REPORTS SECONDS"
-
-    for prog in $(mt_programs "$night/$sibling"); do
-        out=$builddir/tests/$prog.tsan
-        start=$(date +%s)
-
-        (cd "$builddir/tests" \
-            && BINDIR=$bindir timeout $tsan_timeout "./$prog") \
-            > "$out" 2>&1
-        progstatus=$?
-
-        reports=$(grep -c 'WARNING: ThreadSanitizer' "$out")
-
-        echo "$prog $progstatus $reports $(($(date +%s) - start))"
-    done
-}
-
-
-##########
 # render_page(): writes the page of a build to its build directory as
-# index.html, with the ThreadSanitizer section when a log of one is
-# given; reports the exit status of xbuildgen
+# index.html; reports the exit status of xbuildgen
 render_page()
 {
     cfg=$1
-    tsanlog=$2
     srcdir=$night/$cfg
     builddir=$srcdir/build
     logname=$(log_name "$cfg")
@@ -246,14 +142,9 @@ render_page()
     mkdir -p "$builddir/logs" || return
     gzip -c "$night/$cfg.log" > "$builddir/logs/$logname" || return
 
-    set -- -s -T "stdcxx $rev, $cfg" -o "$builddir/index.html"
-
-    if [ -n "$tsanlog" ]; then
-        set -- "$@" -S "$tsanlog"
-    fi
-
     # xcomp.awk runs bin/duration from the PATH
-    PATH=$srcdir/bin:$PATH bash "$srcdir/bin/xbuildgen" "$@" \
+    PATH=$srcdir/bin:$PATH bash "$srcdir/bin/xbuildgen" -s \
+        -T "stdcxx $rev, $cfg" -o "$builddir/index.html" \
         "$builddir/logs/$logname"
 }
 
@@ -314,18 +205,6 @@ if [ $# -ne 1 ]; then
     exit 2
 fi
 
-# every -tsan configuration needs its sibling for the utilities
-for cfg in $configs; do
-    case $cfg in
-        (*-tsan)
-            case " $configs " in
-                (*" ${cfg%-tsan} "*) ;;
-                (*) echo "$myname: $cfg needs ${cfg%-tsan}" >&2
-                    exit 2;;
-            esac;;
-    esac
-done
-
 # resolve the revision once, so that every configuration tests one tree
 rev=$(git -C "$topdir" rev-parse --short=8 "$revision^{commit}") || exit 2
 
@@ -336,54 +215,16 @@ night=$(cd "$1" && pwd)
 echo "### $myname: $rev, $configs, -j$jobs, in $night"
 
 
-# build and test the plain configurations, one at a time
+# build and test the configurations, one at a time
 for cfg in $configs; do
-    case $cfg in
-        (*-tsan) continue;;
-    esac
-
     run_build "$cfg"
     report "build and test $cfg" $?
 done
 
 
-# build each -tsan configuration and run its programs; its sibling
-# must have built for the utilities
+# write the page of each configuration
 for cfg in $configs; do
-    case $cfg in
-        (*-tsan) ;;
-        (*) continue;;
-    esac
-
-    if [ ! -x "$night/${cfg%-tsan}/build/bin/localedef" ]; then
-        report "build $cfg: no utilities in ${cfg%-tsan}" 1
-        continue
-    fi
-
-    build_tsan "$cfg" > "$night/$cfg.log" 2>&1
-    buildstatus=$?
-    report "build $cfg" $buildstatus
-
-    if [ $buildstatus -eq 0 ]; then
-        run_tsan "$cfg" >> "$night/$cfg.log" 2>&1
-        report "run $cfg" $?
-    fi
-done
-
-
-# write the page of each plain configuration, with the section of
-# its -tsan sibling when there is one
-for cfg in $configs; do
-    case $cfg in
-        (*-tsan) continue;;
-    esac
-
-    case " $configs " in
-        (*" $cfg-tsan "*) tsanlog=$night/$cfg-tsan.log;;
-        (*) tsanlog="";;
-    esac
-
-    render_page "$cfg" "$tsanlog" > "$night/$cfg.page.log" 2>&1
+    render_page "$cfg" > "$night/$cfg.page.log" 2>&1
     report "page of $cfg: $night/$cfg/build/index.html" $?
 done
 

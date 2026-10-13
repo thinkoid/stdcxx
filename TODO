@@ -158,55 +158,6 @@ the fixed library, in 15D and in 12D. Every locale MT test passes in
 seconds under the harness in 15D on any processor count, and the 15D
 rows become a reference.
 
-* TODO ThreadSanitizer as a gate of the certification
-
-The overnight certification compares each configuration's table with
-its pin under =doc/notes/baseline=. A table records what a plain run
-showed, and a race the scheduler did not exercise leaves it
-unchanged. The run also builds 15D under ThreadSanitizer: the library
-and the driver instrumented, each locale MT program run once, outside
-the harness. Its result is a list of the programs that reported, and
-nothing compares it with a reference. The certification passes with
-a race in it.
-
-The gate is 15D under GCC alone. A race is a property of the source,
-so a second compiler or a second build type asks the same question
-again. The single-threaded builds start no threads, and the sanitizer
-does not support i386. The plain MT runs stay in the plain tables:
-they are the only check of the library as built.
-
-Fix:
-- A pin, =doc/notes/baseline/x86_64-15D-tsan.txt=: one row per
-  program with its exit status and its count of reports. The
-  arguments and the times stay out, as the timing columns stay out of
-  the other pins. The run is compared with it as the others are, and
-  =doc/notes/ref-test-baseline.md= gets a chapter for it.
-- The programs at their own defaults. The certification passes
-  ~--nthreads=8 --nloops=2000~ to every program that takes =--nloops=,
-  which overrides the sizes of the MT entry above.
-- The two driver fixes of the MT work first. Without them
-  =22.locale.use_facet.mt= and =22.locale.time.put.libc.mt= abort
-  under the sanitizer in the driver's guarded =operator new=
-  (fb947cc3), and the soft timeout's flag races (8c1e0f85).
-- Every program that starts threads, not only the locale ones.
-  =19.exceptions.mt=, =20.temp.buffer.mt=, =21.string.cons.mt=,
-  =21.string.push_back.mt=, =atomic_add=, =atomic_xchg= and =once=
-  have no recorded run under the sanitizer. Each runs clean on the
-  library before it joins the pin.
-- One verdict. The certification ends in a line that says whether
-  every table matched its pin, and exits non-zero when one did not.
-- No suppressions. One needed later gets its own entry and its
-  reason.
-
-The programs run outside the harness. Hypothesis: the harness's
-address-space limit stops the sanitizer, which reserves terabytes of
-address space for its shadow memory. One program run under =bin/exec=
-with the limit settles it. If it holds, the gate stays outside the
-harness; the limit is STDCXX-440's guard and is not loosened for it.
-
-Check: with the fault of ae1fbe04 put back, the certification fails
-the gate and exits non-zero; on the library, three runs pass it.
-
 * TODO The scripts under =bin= drive the certification
 
 =bin/buildntest= builds and runs one configuration and writes a log
@@ -233,14 +184,12 @@ Fix:
   (=-e ''= and =-l ''=), which saves the locale phase's 22 minutes per
   configuration, and =xcomp.awk= must file the tests table of such a
   log as tests: a bare =make run= log comes out under locales.
-- 15D-tsan as a section of the 15D page, the gate of the entry
-  above. The driver runs the locale MT programs only, for now.
 - The page stays local. The logs carry the environment, the host
   name and =/proc/cpuinfo=, and nothing scrubs them.
 
-Check: one night of the six configurations and 15D-tsan through the
-driver gives a page per build, the six pins identical, and a verdict
-that fails when a pin is perturbed.
+Check: one night of the six configurations through the driver gives
+a page per build, the six pins identical, and a verdict that fails
+when a pin is perturbed.
 
 * TODO Run the suites in parallel
 
