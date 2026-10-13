@@ -456,6 +456,20 @@ char* Charmap::convert_to_utf8 (const char *inbuf, size_t inbuf_s,
         return 0;
     }
 
+    // a stateful converter may hold the character back, waiting for
+    // one that could combine with it (glibc's CP1255 does with the
+    // Hebrew letters); flush the state so the character is written
+    // now and the next call does not get it instead of its own
+    if (std::size_t (-1) == iconv (ic_to_utf8_, 0, 0, &outbufp, &outbuf_s)) {
+        const char* const errtext = std::strerror (errno);
+
+        issue_diag (W_ICONV, false, &next, 
+                    "iconv failed to flush the state after \"%s\": %s\n",
+                    inbuf, errtext);
+
+        return 0;
+    }
+
     return outbufp;
 
 #else   // if defined (_RWSTD_NO_ICONV)
@@ -672,8 +686,9 @@ bool Charmap::convert_to_ucs (const std::string &sym_name,
     const char* const ch_end =
         convert_to_utf8  (encoding.c_str (), encoding.size (),
                           utf8_enc, sizeof utf8_enc);
-    if (ch_end)
-        // only if conversion to utf8 succeeded
+    if (ch_end && ch_end != utf8_enc)
+        // only if conversion to utf8 succeeded and wrote something:
+        // a converter that writes nothing leaves utf8_enc unset
         wc = utf8_decode (utf8_enc, ch_end);
     else
         // if not, try to convert the symbolic name directly

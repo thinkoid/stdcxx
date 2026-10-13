@@ -10,19 +10,20 @@ investigations.
 
 #+TOC: headlines 2
 
-* TODO =yi_US.CP1255= does not build on aarch64
+* TODO =utf8_decode= takes two different ends
 
-=make locales= in a 15D build on aarch64 Linux stops at =yi_US.CP1255=.
-=localedef= reports Error 308, "incomplete multibyte character in
-character map file: expecting 4 bytes, found 0". On x86-64 every
-locale in =etc/nls/gen_list= builds, so the failure is aarch64's.
-Hypothesis: =char= is unsigned on aarch64 and signed on x86, and the
-charmap reader depends on the sign of a byte.
+=utf8_decode= in =util/charmap.cpp= is documented over the range
+=[from, to)=, and its length check reads that way. Its two callers
+disagree: the UTF-8 charmap path passes the last byte of the
+sequence, the iconv path passes one past it. The check is one byte
+lenient for the second caller and exact for the first, and an empty
+range cannot be told from a one-byte one.
 
-Fix: to be found.
+Fix: one convention, one past the end, both callers; the check
+becomes =ch_end < ch + num_bytes=.
 
-Check: =make locales= builds every locale in =etc/nls/gen_list= on
-aarch64, and the databases match the x86-64 ones byte for byte.
+Check: every locale in =etc/nls/gen_list= builds to the same database
+before and after.
 
 * TODO Keep instantiated facets until the program ends
 
