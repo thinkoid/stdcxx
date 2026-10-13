@@ -158,25 +158,6 @@ the fixed library, in 15D and in 12D. Every locale MT test passes in
 seconds under the harness in 15D on any processor count, and the 15D
 rows become a reference.
 
-* TODO =tie= allocates under the stream's lock
-
-ThreadSanitizer reports a lock-order inversion in =27.objects=.
-=basic_ios::tie(ostream*)= holds its stream's mutex while
-=ios_base::_C_usr_data::_C_alloc= calls =operator new=; the test's
-replacement =operator new= inserts into a stream, and the insertion's
-=sentry= (=include/ostream:94=) takes that stream's mutex. The other
-order: an insertion's =sentry= holds its mutex while
-=basic_ios::fill= (=include/rw/_basic_ios.h:260=) takes the second.
-The test is single-threaded, so it does not deadlock; two threads can.
-Hypothesis: the two mutexes are those of =cout= and =cerr=, tied, and
-the trigger is a program whose =operator new= writes to a stream. The
-report's stacks are the record.
-
-Fix: to be found; the shape is the allocation outside the lock.
-
-Check: =27.objects= runs clean under the sanitizer in 15D; the suite
-does not move.
-
 * TODO The scripts under =bin= drive the certification
 
 =bin/buildntest= builds and runs one configuration and writes a log
@@ -815,6 +796,14 @@ jump out of signal handlers or test =setjmp=, and the sanitizer's
 =18.exception= and =20.temp.buffer= expect =bad_alloc= from a huge
 request, and the sanitizer's =operator new= reports out of memory
 instead, =allocator_may_return_null= or not. =22.locale.codecvt=
-times out at 60 seconds behind the instrumented =localedef=. The rest
-of the table matches the plain one but for the reports. First run,
+times out at 60 seconds behind the instrumented =localedef=. One
+report stays: =27.objects= shows a lock-order inversion, =cout='s
+stream buffer mutex against its =ios_base= mutex. An insertion takes
+the buffer's and then, on the first use of =fill=, the stream's;
+=tie= takes the stream's (=src/ios.cpp:271=) and allocates the
+user-data block under it, and the test's replacement =operator new=
+inserts into =cout=, taking the buffer's. It deadlocks only with a
+replacement =operator new= that writes to the stream while another
+thread ties it. Won't fix (2026-10-13): the report is expected. The
+rest of the table matches the plain one but for the reports. First run,
 2026-10-13 on aarch64: 419 seconds, 274 programs, 12 non-zero exits.
