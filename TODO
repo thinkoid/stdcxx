@@ -791,8 +791,14 @@ address-space limit does not stop the sanitizer: it re-executes the
 program without the limit and prints two warning lines, so every
 =NOUT= row reads =FORMAT=. Six programs cannot run: =0.alloc=,
 =0.new=, =0.inputiter=, =0.outputiter=, =18.setjmp= and =18.csetjmp=
-jump out of signal handlers or test =setjmp=, and the sanitizer's
-=longjmp= check kills them with exit 66. Two cannot pass:
+jump out of signal handlers or test =setjmp=; the sanitizer's
+=longjmp= interceptor finds no buffer for the jump, its check fails,
+and the program exits 66, the sanitizer's own =exitcode= default.
+The address-space limit plays no part: the exit is the same without
+it. =0.inputiter= and =0.outputiter= die with an empty tail because
+they close =stderr= first, to silence the assertions they provoke,
+and every write of the report returns =EBADF=; the other four print
+the check. Measured with =strace= on aarch64. Two cannot pass:
 =18.exception= and =20.temp.buffer= expect =bad_alloc= from a huge
 request, and the sanitizer's =operator new= reports out of memory
 instead, =allocator_may_return_null= or not. =22.locale.codecvt=
