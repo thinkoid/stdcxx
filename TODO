@@ -311,6 +311,52 @@ Fix: =pclose=.
 
 Check: librwtest builds without the warning.
 
+* TODO The locale sources under =etc/nls= are glibc 2.2's
+
+The definitions and charmaps under =etc/nls= are copies from GNU libc
+2.2, as the original =README= says, last changed in 312ef830 (2007).
+A survey on 2026-10-13 compared them with glibc's =localedata= at
+60a2ae4098 (2.44.9000, 2026-09-29). Coverage: 179 files against 372,
+163 language and territory definitions against 351. 139 names match,
+20 more once the =.euro= suffix maps to =@euro=; four names are
+legacy and ours only (=iw_IL=, =no_NO=, =sr_YU=, =sr_YU.cyrillic=);
+192 are glibc's only. Among the 139 shared definitions, after
+resolving =copy= directives: 46 currencies differ (=ro_RO= ROL to
+RON, =fr_FR= FRF to EUR, =tr_TR= TRL to TRY), 75 currency symbols,
+54 thousands separators, 8 decimal points, 45 groupings; =d_fmt=
+differs in 36, the month names in 45, the weekday names in 24;
+=ja_JP= has no Reiwa era; =ro_RO= collates circumflex before breve
+where glibc now does the opposite. The shared tables are older still:
+=i18n= says Unicode 3.0, the UTF-8 charmap's widths Unicode 3.2,
+against Unicode 14.0.0 in glibc's =i18n_ctype=; =U+1C90=, =U+1E900=
+and =U+1F600= are absent from the charmap. =localedef= cannot read
+the current sources: glibc's =en_US= with its UTF-8 charmap exits 4,
+Error 312, symbolic name =<S02D0>= not found at =iso14651_t1_common=
+line 63100, and the keyword table in =util/scanner.cpp= lacks
+=alt_mon=, =ab_alt_mon=, =class=, =map= and the conditionals. The
+survey compared source values and ran no collation or formatting
+oracle, so the counts are differences, not proven defects. The GNU
+categories outside the six of C++ (paper, address, measurement) are
+not a gap. The facets can also read the C library's own locales
+(=doc/notes/ref-locale.md=), so stale sources need not reach every
+=std::locale= a program constructs.
+
+Fix: in order. First the compiler: find what in the current sources
+it rejects, the Error 312 first, and extend the scanner and the =Def=
+writers until glibc's =en_US= builds. Then the shared tables together
+with their charmaps, =i18n=, the transliteration and collation
+templates: refreshed leaf definitions alone leave the shared tables
+stale. Then the definitions, the legacy names kept through an
+explicit mapping. Then the databases regenerated and the decoded
+facet values compared with the glibc source baseline, the currency,
+numeric and date repairs staged separately.
+
+Check: =localedef= builds every definition in the refreshed
+=etc/nls/src= with its charmap. The locale tests pass against their
+pins, re-pinned where the data moved. The decoded currency, numeric
+and date values of the 139 shared definitions match the glibc
+sources they come from.
+
 * TODO All the C library's locales on the test hosts
 
 The test hosts generate one glibc locale besides =C= and =POSIX=:
