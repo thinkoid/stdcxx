@@ -1,0 +1,94 @@
+# The layout of the tree, as clang-format can express it.
+#
+# For new code only. Format the lines you add (clang-format-region in
+# Emacs, or git clang-format on the hunks); never a whole file. The
+# options were chosen by measuring: the setting that changes the
+# fewest lines of the library's own sources wins. Agreement is about
+# 84 percent of lines; the rest is hand layout no option expresses:
+# right-aligned macro values, parameters grouped in pairs, a space in
+# `defined (X)`, `#include` left at the margin inside `#if` blocks.
+#
+# Needs clang-format 19 or later.
+
+Language: Cpp
+Standard: c++03
+BasedOnStyle: WebKit
+
+# indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+ConstructorInitializerIndentWidth: 4
+AccessModifierOffset: -4
+IndentCaseLabels: false
+NamespaceIndentation: None
+NamespaceMacros: [_RWSTD_NAMESPACE]
+IndentPPDirectives: AfterHash
+PPIndentWidth: 2
+
+# line length and blank lines
+ColumnLimit: 80
+MaxEmptyLinesToKeep: 2
+KeepEmptyLinesAtTheStartOfBlocks: true
+EmptyLineAfterAccessModifier: Always
+EmptyLineBeforeAccessModifier: Always
+
+# braces: classes and function definitions on their own line,
+# control statements cuddled, else and catch on their own line
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterControlStatement: Never
+  AfterExternBlock: false
+  BeforeElse: true
+  BeforeCatch: true
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+
+# declarations and definitions
+BreakAfterReturnType: TopLevelDefinitions
+BreakTemplateDeclarations: Yes
+BreakConstructorInitializers: BeforeColon
+AlignAfterOpenBracket: Align
+BinPackParameters: false
+BinPackArguments: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: true
+
+# spacing
+SpaceBeforeParens: Always
+SpaceBeforeSquareBrackets: true
+SpaceBeforeInheritanceColon: false
+SpaceAfterTemplateKeyword: true
+SpacesBeforeTrailingComments: 3
+DerivePointerAlignment: true
+PointerAlignment: Right
+ReferenceAlignment: Pointer
+Cpp11BracedListStyle: false
+
+# operators: a continuation line opens with the operator, except
+# after an assignment
+BreakBeforeBinaryOperators: NonAssignment
+AlignOperands: Align
+
+# alignment the tree keeps by hand; leave it alone
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Left
+AlignTrailingComments:
+  Kind: Leave
+ReflowComments: false
+FixNamespaceComments: false
+SortIncludes: Never
+
+AttributeMacros: [_RWSTD_INTERNAL, _RWSTD_EXPORT, _RWSTD_MEMBER_EXPORT,
+                  _RWSTD_SPECIALIZED_FUNCTION, _RWSTD_SPECIALIZED_CLASS]

@@ -132,6 +132,10 @@ them, not of a platform list.
   `_RWSTD_NO_*` macro it yields. The compiler is never bent back with
   `-std` or `-D` to make the tree compile.
 - The tree is C++98 and stays so. Null pointers are the literal `0`.
+- New code takes the layout of the code around it. `.clang-format`
+  at the root states that layout as far as the tool can; it is for
+  the lines you add (`git clang-format`, or the region in the
+  editor), never for a whole file. Existing lines are not reformatted.
 - Commit messages carry an `area: what it does` subject, the why in
   prose, then the changes as GNU ChangeLog bullets, `* file (symbol):
   change.`, in the grammar the history is written in. The `ChangeLog`
