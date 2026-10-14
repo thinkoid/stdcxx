@@ -212,12 +212,12 @@ strstreambuf::seekoff (off_type off, ios::seekdir way, ios::openmode which)
         if (seeklo + off < pbase ()) {
             // adjust beginning of output sequence, then increment pptr()
             setp (seeklo, epptr ());
-            pbump (off);
+            _C_pbump (off);
         }
         else {
             // reset pptr() first, then increment it by offset
             setp (pbase (), epptr ());
-            pbump (off - (pbase () - seeklo));
+            _C_pbump (off - (pbase () - seeklo));
         }
     }
     else
@@ -330,7 +330,7 @@ strstreambuf::setbuf (char_type* buf, streamsize bufsize)
     else
         setp (_C_buffer + seq_1_size, _C_buffer + _C_bufsize);
 
-    pbump (pptr_off);
+    _C_pbump (pptr_off);
 
     // restore input sequence
     char_type* const gbeg = _C_buffer + (eback () < gap_beg ? 0 : seq_1_size);

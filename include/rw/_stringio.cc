@@ -116,7 +116,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
 
                     // advance gptr() by the number of extracted
                     // characters, including the delimiter
-                    __rdbuf->gbump (__navail);
+                    __rdbuf->_C_gbump (__navail);
 
                     // we found a delimiter before the end of the get area,
                     // break out of outer loop
@@ -278,7 +278,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
 
                     // advance gptr() by the number of extracted
                     // characters, including the delimiter
-                    __rdbuf->gbump (__navail);
+                    __rdbuf->_C_gbump (__navail);
 
                     if (__pdel) {
                         break;

@@ -100,7 +100,7 @@ xsgetn (char_type* __buf, streamsize __n)
 
             // increment pointers and counts by the number of characters
             // copied
-            gbump (__navail);
+            _C_gbump (__navail);
             __n    -= __navail;
             __nget += __navail;
         }
@@ -145,7 +145,7 @@ xsputn (const char_type* __buf, streamsize __n)
 
         traits_type::copy (pptr (), __buf, __nwrite);
 
-        pbump (__nwrite);
+        _C_pbump (__nwrite);
 
         __nput += __nwrite;
 

@@ -175,26 +175,10 @@ protected:
         return _C_egptr;
     }
 
-#if    !defined (_RWSTD_NO_EXT_STREAMBUF_BUMP) \
-    && _RWSTD_INT_MAX < _RWSTD_PTRDIFF_MAX
-
-    // 27.5.2.3.1, p4, argument type is an extension
-    void gbump (_RWSTD_PTRDIFF_T __n) {
-        _RWSTD_ASSERT (_C_gptr != 0 || !__n);
-        _C_gptr += __n;
-        _RWSTD_ASSERT (_C_is_valid ());
-    }
-
-#else   // if NO_EXT_STREAMBUF_BUMP || INT_MAX >= PTRDIFF_MAX
-
     // 27.5.2.3.1, p4
     void gbump (int __n) {
-        _RWSTD_ASSERT (_C_gptr != 0 || !__n);
-        _C_gptr += __n;
-        _RWSTD_ASSERT (_C_is_valid ());
+        _C_gbump (__n);
     }
-
-#endif   // !NO_EXT_STREAMBUF_BUMP && INT_MAX < PTRDIFF_MAX
 
     // 27.5.2.3.1, p5
     void setg (char_type *__eback, char_type *__gptr, char_type *__egptr) {
@@ -218,26 +202,10 @@ protected:
         return _C_epptr;
     }
 
-#if    !defined (_RWSTD_NO_EXT_STREAMBUF_BUMP) \
-    && _RWSTD_INT_MAX < _RWSTD_PTRDIFF_MAX
-
-    // 27.5.2.3.2, p4, argument type is an extension
-    void pbump (_RWSTD_PTRDIFF_T __n) {
-        _RWSTD_ASSERT (_C_pptr != 0 || !__n);
-        _C_pptr += __n;
-        _RWSTD_ASSERT (_C_is_valid ());
-    }
-
-#else   // if NO_EXT_STREAMBUF_BUMP || INT_MAX >= PTRDIFF_MAX
-
     // 27.5.2.3.2, p4
     void pbump (int __n) {
-        _RWSTD_ASSERT (_C_pptr != 0 || !__n);
-        _C_pptr += __n;
-        _RWSTD_ASSERT (_C_is_valid ());
+        _C_pbump (__n);
     }
-
-#endif   // !NO_EXT_STREAMBUF_BUMP && INT_MAX < PTRDIFF_MAX
 
     // 27.5.2.3.2, p5
     void setp (char_type *__pbase, char_type *__epptr) {
@@ -382,6 +350,21 @@ protected:
             _C_state |= _C_unbuffered;
         else
             _C_state &= ~_C_unbuffered;
+    }
+
+    // advance gptr() and pptr() by a pointer difference; the
+    // library's own callers pass stream sizes and offsets, which
+    // the int argument of gbump() and pbump() need not hold
+    void _C_gbump (_RWSTD_PTRDIFF_T __n) {
+        _RWSTD_ASSERT (_C_gptr != 0 || !__n);
+        _C_gptr += __n;
+        _RWSTD_ASSERT (_C_is_valid ());
+    }
+
+    void _C_pbump (_RWSTD_PTRDIFF_T __n) {
+        _RWSTD_ASSERT (_C_pptr != 0 || !__n);
+        _C_pptr += __n;
+        _RWSTD_ASSERT (_C_is_valid ());
     }
 
     // debug only - asserts that get and put areas are consistent
