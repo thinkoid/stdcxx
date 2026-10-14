@@ -95,10 +95,11 @@ codes and catalog messages, the =stringbuf= and string stream
 =const char_type*= constructors and =str= overloads, the two-arg =str=
 now the private =_C_str=, the deep-copy =basic_string::copy=, the
 =num_get= members on =short= and =int=, the =NUM_PUT= test gate, the
-=time_get= format members, now the private =_C_get= pair. Next, per
-addition in the order above, the code path goes with its macro and its
-test branches; per kept behaviour, the macro and its dead branch go. The
-original README stays; =README.md= records the policy.
+=time_get= format members, now the private =_C_get= pair, the =void=
+=count= and =count_if=. Next, per addition in the order above, the code
+path goes with its macro and its test branches; per kept behaviour, the
+macro and its dead branch go. The original README stays; =README.md=
+records the policy.
 
 Check: =git grep _RWSTD_NO_EXT_= is empty under =include=, =src= and
 =tests=. The suite tables are re-pinned in all six configurations

@@ -203,36 +203,6 @@ count_if (_InputIter __first, _InputIter __last, _Predicate __pred)
 #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 
-// provided as a backward-compatibility extension (or as a workaround)
-#if    !defined (_RWSTD_NO_EXT_VOID_COUNT)    \
-    || defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-template <class _InputIter, class _TypeT, class _Size>
-inline void count (_InputIter __first, _InputIter __last,
-                   const _TypeT &__val, _Size& __n)
-{
-    _RWSTD_ASSERT_RANGE (__first, __last);
-
-    for ( ; !(__first == __last); ++__first) 
-        if (*__first == __val)
-            ++__n;
-}
-
-
-template <class _InputIter, class _Predicate, class _Size>
-inline void count_if (_InputIter __first, _InputIter __last,
-                      _Predicate __pred, _Size& __n)
-{
-    _RWSTD_ASSERT_RANGE (__first, __last);
-
-    for ( ; !(__first == __last); ++__first)
-        if (__pred (*__first))
-            ++__n;
-}
-
-#endif   // !_RWSTD_NO_EXT_VOID_COUNT || _RWSTD_NO_CLASS_PARTIAL_SPEC
-
-
 // 25.1.7 - Mismatch [lib.mismatch]
 // 25.1.8 - Equal [lib.alg.equal]
 // defined in <rw/_algobase.h>

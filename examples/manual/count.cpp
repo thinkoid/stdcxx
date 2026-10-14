@@ -27,7 +27,6 @@
  **************************************************************************/
 
 #include <algorithm>    // for count, count_if
-#include <cassert>      // for assert
 #include <functional>   // bind2nd, less
 #include <iostream>     // for cout
 #include <iterator>     // for ostream_iterator
@@ -68,28 +67,8 @@ int main ()
     Vector::size_type n_sixes = 0;
     Vector::size_type n_lt_8  = 0;
 
-#ifndef _RWSTD_NO_EXT_VOID_COUNT
-
-    // using the extended overloads of function template count()
-    // and count_if() provided by this implmentation, count the
-    // number of fives, sixes, and values less than 8 in the
-    // sequence
-
-    std::count (vec.begin (), vec.end (), 5, n_fives);
-    std::count (vec.begin (), vec.end (), 6, n_sixes);
-
-    std::count_if (vec.begin (), vec.end (),
-                   std::bind2nd (std::less<Vector::value_type>(), 8),
-                   n_lt_8);
-
-    assert (2 == n_fives);
-    assert (0 == n_sixes);
-    assert (7 == n_lt_8);
-
-#endif   // _RWSTD_NO_EXT_VOID_COUNT
-
-    // do the same using the standard function templates count()
-    // and count_if()
+    // count the number of fives, sixes, and values less than 8
+    // in the sequence
 
     n_fives = std::count (vec.begin (), vec.end (), 5);
     n_sixes = std::count (vec.begin (), vec.end (), 6);

@@ -190,14 +190,8 @@ void test_input_iterators (T, InputIterator)
     std::find (I (), I (), T ());
     std::find_if (I (), I (), UnaryPredicate<T>());
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
     std::count (I (), I (), T ());
     std::count_if (I (), I (), UnaryPredicate<T>());
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-    std::size_t n = 0;
-    std::count (I (), I (), T (), n);
-    std::count_if (I (), I (), UnaryPredicate<T>(), n);
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
     std::mismatch (I (), I (), I ());
     std::mismatch (I (), I (), I (), BinaryPredicate<T>());

@@ -65,28 +65,11 @@ _USING (::ptrdiff_t);
 
 #ifdef _RWSTD_NO_CLASS_PARTIAL_SPEC
 
-// supply conforming versions of count, count_if and distance for platforms
-// that do not correctly support partial specialization of class templates
+// supply a conforming version of distance for platforms that do not
+// correctly support partial specialization of class templates
 
 _RWSTD_NAMESPACE (std) {     
     
-template<class InputIter, class T>
-size_t count (InputIter a, InputIter b, const T& x)
-{
-    size_t n = 0;
-    count (a, b, x, n);
-    return n;
-}
-
-template<class InputIter, class T>
-size_t count_if (InputIter a, InputIter b, const T& x)
-{
-    size_t n = 0;
-    count_if (a, b, x, n);
-    return n;
-
-}
-
 template<class InputIter>
 size_t distance (InputIter a, InputIter b)
 {
