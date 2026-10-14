@@ -13,11 +13,10 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 0.process                                     0    0       17      0   100%
 0.strncmp                                FORMAT    0                       
 0.valcmp                                 FORMAT    0                       
-17.extensions                                 0    0       11      0   100%
 17.names                                      0    0        0      0   100%
 18.c.limits.stdcxx-988                     NOUT    0                       
 18.csetjmp                                    0    0        3      0   100%
-18.exception                                  0    1     1109      0   100%
+18.exception                                  0    1     1097      0   100%
 18.limits.cvqual                              0    0     1431      0   100%
 18.limits.stdcxx-436                       NOUT    0                       
 18.limits.stdcxx-937                       NOUT    0                       
@@ -46,8 +45,8 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.cctype                                     0    0      281      0   100%
 21.char.traits.compare                     NOUT    0                       
 21.char.traits.find.stdcxx-541             NOUT    0                       
-21.cwchar                                     0    0       66      0   100%
-21.cwctype                                    0    0      260      0   100%
+21.cwchar                                     0    0      118      0   100%
+21.cwctype                                    0    0      294      0   100%
 21.string.access                              0    0      980      0   100%
 21.string.append                              0    0    78471      0   100%
 21.string.append.stdcxx-1060               NOUT    0                       
@@ -104,7 +103,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.ctype.scan                          0    0      924      0   100%
 22.locale.ctype.tolower                       0    0     1028      0   100%
 22.locale.ctype.toupper                       0    0     1028      0   100%
-22.locale.facet.mt                            0    0       40      0   100%
+22.locale.facet.mt                            0    0        8      0   100%
 22.locale.globals.mt                          0    0        0      0   100%
 22.locale.id.mt                               0    0      999      0   100%
 22.locale.messages.mt                         0    0        0      0   100%
@@ -119,7 +118,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.moneypunct                          0    0      540      0   100%
 22.locale.name                                0    0        0      0   100%
 22.locale.num.get.mt                          0    0        0      0   100%
-22.locale.num.get                             0    0    63720      0   100%
+22.locale.num.get                             0    0    51894      0   100%
 22.locale.num.put.mt                          0    0        0      0   100%
 22.locale.num.put                             0    2     1481      0   100%
 22.locale.num.put.stdcxx-2                 NOUT    0                       
@@ -135,7 +134,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.time.put                            0    0     2156      0   100%
 22.locale.use_facet.mt                        0    0      200      0   100%
 23.associative.stdcxx-16                   NOUT    0                       
-23.bitset.cons                                0    0     2347      0   100%
+23.bitset.cons                                0    0     1677      0   100%
 23.bitset.cons.stdcxx-297                  NOUT    0                       
 23.bitset                                     0    0  2537538      0   100%
 23.containers.stdcxx-152                   NOUT    0                       
@@ -274,11 +273,11 @@ atomic_add                                    0    0        0      0   100%
 atomic_xchg                                   0    0        0      0   100%
 once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   274
+  Programs:                   273
   Non-zero exit status:         0
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10104149
+  Assertions:            10091684
   Failed assertions:            0

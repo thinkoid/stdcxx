@@ -16,8 +16,6 @@ harness's own table without the timing columns.
 - What fails, by cause:
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
     interface and moves the minor version (chapter 3.1).
-  - Seven locale MT rows of 15D-clang time out. The Clang tables
-    predate the sizing of the locale MT tests (chapters 3.2 and 5).
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
 
@@ -93,8 +91,8 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 274 | 10,104,212 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 274 | 10,104,102 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 273 | 10,091,779 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 273 | 10,091,669 | 0 | 0 | 0 |
 | 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 273 | 10,093,451 | 0 | 0 | 1 |
 
 Chapter 4 lists where the three differ.
@@ -122,7 +120,12 @@ machine; alone it passes in 58 seconds, as it does at ee454d5a
 their own (`analysis-locale-mt-sizing.md`). Only their rows moved:
 the seven timeouts of 15D pass, `22.locale.codecvt.mt` counts 1,600
 assertions in 15D, not 12,800, and `22.locale.facet.mt` counts 8, not
-40, in every configuration.
+40, in every configuration. All six were measured again on
+2026-10-14, at c40c5d16, after the strict ANSI removals: `17.extensions`
+is gone, `18.exception` counts 1,097, `21.cwchar` 118, `21.cwctype`
+294, `22.locale.num.get` 51,894 and `23.bitset.cons` 1,677, in every
+configuration; the Clang tables took the locale MT rows of 2026-10-13
+in the same run.
 
 ## 3. What fails
 
@@ -143,7 +146,7 @@ Until 2026-10-13 seven older locale MT tests ended in 15D with
 ran one thread per processor, 32 on the machine the tables come from,
 and ran each threaded section to its own 60-second soft timeout. The
 harness's 60 seconds cut them short, so the rows recorded the harness,
-not the library. The 15D-clang table still records them (chapter 5).
+not the library.
 
 Each locale MT test now runs 4 threads by default, whatever the
 processor count, at a size chosen under ThreadSanitizer
@@ -218,17 +221,17 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 10,104,244 | 0 | 0 | 0 |
-| 11s-clang | 10,104,149 | 0 | 0 | 0 |
-| 15D-clang | 10,117,110 | 0 | 0 | 8 |
+| 11S-clang | 10,091,779 | 0 | 0 | 0 |
+| 11s-clang | 10,091,684 | 0 | 0 | 0 |
+| 15D-clang | 10,093,451 | 0 | 0 | 1 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134
 assertions in the 32-bit Clang build, where GCC's runs 119. Clang
 generates SSE code for i386, which carries a signaling NaN.
 
-The Clang tables predate the sizing of the locale MT tests. They keep
-40 assertions for `22.locale.facet.mt`, and 15D-clang keeps the seven
-timeouts and 12,800 assertions for `22.locale.codecvt.mt` (chapter
-3.2). The driver under `bin` builds with GCC only, so the next Clang
-run is by hand, and it re-pins them.
+Measured again at c40c5d16 on 2026-10-14, they match the GCC tables
+row for row, `21.string.stdcxx-162` included, but for the
+`18.numeric.special.float` row of the 32-bit build. The driver under `bin` builds with GCC only; the Clang run
+goes through the same `buildntest` call with `CXX=clang` on the make
+line.
