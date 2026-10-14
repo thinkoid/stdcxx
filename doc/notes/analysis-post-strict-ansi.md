@@ -28,8 +28,8 @@ not repeat them beyond what the open questions need.
   comment that it misses the strong guarantee of 23.2.4.3, p1, and the
   conforming branch left with the gate; the five pins other than
   x86_64 15D still carry the old rows for the tests that moved.
-- **Six ends not in TODO** (chapter 4): `long long` stays while the
-  sort's own rule sent the other C++11 text away; the stream truth
+- **Six ends not in TODO** (chapter 4): `long long` stays, settled
+  on 2026-10-14 as the compiler's type set, not an addition; the stream truth
   conversion departs from 27.4.4.3's `operator void*`; the replaceable
   allocation functions in `src/memory.cpp` compile to nothing on every
   supported compiler; the `time_get` and `num_get` test coverage that
@@ -180,6 +180,19 @@ stream inserters and extractors would leave; under the practical
 reading every supported compiler has the type and the overloads are
 what a program written for the platform expects. The entry chose the
 practical reading without saying so.
+
+Settled 2026-10-14 by the maintainer. The two halves of the rule are
+about different things. The removals were interface the tree
+invented: a constructor, a member, an overload on a type the standard
+already covered. `long long` is a type the compiler has, and a
+library that will not format, parse or give the limits of such a type
+serves the platform's programs worse. The macro is defined in one
+place, `_RWSTD_LONG_LONG` under the `LONG_LONG` characterization's
+`_RWSTD_NO_LONG_LONG`, and everything that depends on it stays: the
+limits, the facet virtuals and their callers, the inserters and
+extractors, `abs` and `div`. The facet virtuals widen two vtables;
+that cost is accepted. The conformance note's chapter 2 carries the
+row.
 
 ### 4.2 The stream truth conversion is not 27.4.4.3's
 
