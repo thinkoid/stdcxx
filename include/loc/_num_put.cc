@@ -115,14 +115,6 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
     // number of fill chars to pad with
     streamsize __pad = __flags.width () - streamsize (__res);
 
-#ifdef _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
-
-    // unconditionally reset width before inserting anything
-    // in case the insertion causes an exception to be thrown
-    __flags.width (0);
-
-#endif   // _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
-
     // adjustfield bits (left, internal, or the default right)
     const int __adj = __f & _RWSTD_IOS_ADJUSTFIELD;
 
@@ -193,14 +185,10 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
     for (; __pad > 0; ++__it, --__pad)
         *__it = __fill;
 
-#ifndef _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
-
     // reset width only if the insertion has been successful
     // (i.e., no exception and the iterator has not failed)
     if (!_RW::__rw_iter_failed (__it))
         __flags.width (0);
-
-#endif   // _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
 
     return __it;
 }

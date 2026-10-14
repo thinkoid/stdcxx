@@ -101,7 +101,8 @@ of =vector<bool>::reference=, the allocator of const elements, the
 =bitset= constructors from character pointers, =string= and =wstring=
 with the integer overloads beside them, the =streambuf= bumps on
 =ptrdiff_t=, now the protected =_C_gbump= and =_C_pbump=. Stripped,
-behaviour kept: the four =*_IN_PLACE= gates of =deque= and =vector=.
+behaviour kept: the four =*_IN_PLACE= gates of =deque= and =vector=,
+=KEEP_WIDTH_ON_FAILURE=.
 Next, per kept behaviour, the macro and its dead branch go. The
 original README stays; =README.md= records the policy.
 

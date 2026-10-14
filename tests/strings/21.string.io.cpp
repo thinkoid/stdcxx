@@ -1140,10 +1140,8 @@ void test_io (charT*, Traits*, Allocator*,
                 const std::streamsize width =
                        func.which_ == StringIds::getline_istream_str
                     || func.which_ == StringIds::getline_istream_str_val
-#ifndef _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
                     || (   func.which_ == StringIds::inserter_ostream_cstr
                         && ret_state != Good)
-#endif  // _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
                     ? std::streamsize (tcase.off) : std::streamsize (tcase.val);
 
                 success = width == ret_width;

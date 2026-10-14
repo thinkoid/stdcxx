@@ -45,11 +45,7 @@ void test (const std::string& str, const std::streamsize width)
     catch (std::ios_base::failure&) {
     }
 
-#ifndef _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
     assert (width == os.width ());
-#else
-    assert (0 == os.width ());
-#endif
 }
 
 int main ()

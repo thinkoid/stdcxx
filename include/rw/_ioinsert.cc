@@ -156,22 +156,14 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
                     || _STD::ios_base::left == __padbits
                     && __pad != __strm._C_pad (__pad))
                     __err = _STD::ios_base::badbit;
-#ifndef _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
                 else
                     __strm.width (0);   // reset width only on success
-#else   // if defined (_RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE)
-                __strm.width (0);   // reset width unconditionally
-#endif   // _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
             }
             else if (__len == __rw_sputn (__strm, __s, __len, _Same ())) {
                 __strm.width (0);   // reset width only on success
             }
             else {
                 __err = _STD::ios_base::badbit;
-
-#ifdef _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
-                __strm.width (0);
-#endif   // _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
             }
         }
     }
