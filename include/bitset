@@ -292,9 +292,7 @@ public:
 # define _RWSTD_BITSET_TO_STRING(charT, Traits) \
     template to_string<charT, Traits, allocator <charT> >()
 
-#  ifndef _RWSTD_NO_EXT_BITSET_TO_STRING
-
-    // convenience extensions
+    // lwg issue 434
     template <class _CharT, class _Traits>
     basic_string<_CharT, _Traits, allocator<_CharT> >
     to_string (_CharT __b0 = '0', _CharT __b1 = '1') const {
@@ -313,8 +311,6 @@ public:
         return to_string<char, char_traits<char>, allocator<char> >
             (__b0, __b1);
     }
-
-#  endif   // !_NO_EXT_BITSET_TO_STRING
 
 #else   // if _MEMBER_TEMPLATES || _NO_TEMPLATE_ON_RETURN_TYPE || ...
 
