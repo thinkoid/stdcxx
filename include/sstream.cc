@@ -39,18 +39,6 @@ basic_stringbuf (const _C_string_type& __str, ios_base::openmode __mode)
 }
 
 
-// extension
-template<class _CharT, class _Traits, class _Allocator>
-basic_stringbuf<_CharT, _Traits, _Allocator>::
-basic_stringbuf (const char_type *__s, ios_base::openmode __mode)
-    : basic_streambuf<_CharT, _Traits>(__mode)
-{
-    _RWSTD_ASSERT (0 != __s);
-
-    str (__s, traits_type::length (__s));
-}
-
-
 template <class _CharT, class _Traits, class _Allocator>
 /* virtual */
 basic_stringbuf<_CharT, _Traits, _Allocator>::
@@ -63,21 +51,16 @@ basic_stringbuf<_CharT, _Traits, _Allocator>::
 }
 
 
-// extension
 template<class _CharT, class _Traits, class _Allocator>
 void
 basic_stringbuf<_CharT, _Traits, _Allocator>::
-str (const char_type *__s, _RWSTD_SIZE_T __slen)
+_C_str (const char_type *__s, _RWSTD_SIZE_T __slen)
 {
     _RWSTD_ASSERT (this->_C_is_valid ());
 
     typedef _RWSTD_ALLOC_TYPE (allocator_type, char_type) _ValueAlloc;
 
     typedef _RWSTD_STREAMSIZE _Streamsize;
-
-    // compute the lenth if not specified
-    if (_RWSTD_SIZE_MAX == __slen)
-        __slen = traits_type::length (__s);
 
     _ValueAlloc __alloc;
 
@@ -88,7 +71,7 @@ str (const char_type *__s, _RWSTD_SIZE_T __slen)
     _RWSTD_STREAMSIZE __off = -1;
 
     if (__s == this->_C_buffer) {
-        // special case: str(_C_buffer, _C_bufsize + N) called
+        // special case: _C_str(_C_buffer, _C_bufsize + N) called
         // to increase the capacity of buffer
 
         _C_catchup (this->eback ());
@@ -204,7 +187,7 @@ xsputn (const char_type* __s, streamsize __n)
 
         // grow the buffer if necessary to accommodate the whole
         // string plus the contents of the buffer up to pptr()
-        str (this->_C_buffer, __bufsize);
+        _C_str (this->_C_buffer, __bufsize);
 
         _RWSTD_ASSERT (__n <= this->epptr () - this->pptr ());
 
@@ -284,7 +267,7 @@ overflow (int_type __c)
 
     if (this->pptr () == this->epptr ()) {
         // reallocate buffer
-        str (this->_C_buffer, this->_C_bufsize + 1);
+        _C_str (this->_C_buffer, this->_C_bufsize + 1);
     }
     else if (this->epptr () < __bufend) {
         // bump up epptr() keeping pbase() and pptr() unchanged

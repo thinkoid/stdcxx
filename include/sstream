@@ -112,33 +112,12 @@ public:
     basic_stringbuf (const _C_string_type&,
                      ios_base::openmode = _RW::__rw_in_out);
 
-    // undetectable extension
-    _EXPLICIT
-    basic_stringbuf (const char_type*,
-                     ios_base::openmode = _RW::__rw_in_out);
-
     virtual ~basic_stringbuf ();
     
     _C_string_type str () const;
 
-#ifdef _RWSTD_NO_EXT_STRINGBUF_STR
-
-private:
-
-#endif   // _RWSTD_NO_EXT_STRINGBUF_STR
-
-    // extension
-    void str (const char_type*, _RWSTD_SIZE_T);
-
-public:
-
-    // undetectable extension for efficiency
-    void str (const char_type *__s) {
-        str (__s, traits_type::length (__s));
-    }
-
     void str (const _C_string_type &__str) {
-        str (__str.data (), __str.size ());
+        _C_str (__str.data (), __str.size ());
     }
 
 protected:
@@ -164,6 +143,10 @@ protected:
     setbuf (char_type*, streamsize);
 
 private:
+
+    // replaces the buffer with a copy of the sequence, or grows
+    // the buffer in place when the sequence is the buffer itself
+    void _C_str (const char_type*, _RWSTD_SIZE_T);
 
     _RWSTD_STREAMSIZE _C_grow (_RWSTD_STREAMSIZE) const;
 
@@ -269,13 +252,6 @@ public:
         : basic_istream<char_type, traits_type>(rdbuf ()),
           _C_sb (__str, __mode | ios_base::in) { }
 
-    // undetectable extension
-    _EXPLICIT
-    basic_istringstream (const char_type   * __s, 
-                         ios_base::openmode __mode = ios_base::in)
-        : basic_istream<char_type, traits_type>(rdbuf ()),
-          _C_sb (__s, __mode | ios_base::in) { }
-
     basic_stringbuf<char_type, traits_type, allocator_type> *rdbuf () const {
         // necessary to help SunPro 5.0/T9
         typedef basic_istringstream <char_type, traits_type, allocator_type>
@@ -285,20 +261,6 @@ public:
 
     _C_string_type str () const {
         return rdbuf ()->str ();
-    }
-
-#ifdef _RWSTD_NO_EXT_STRINGBUF_STR
-
-    // extension
-    void str (const char_type *__s, _RWSTD_SIZE_T __len) {
-        rdbuf ()->str (__s, __len);
-    }
-
-#endif   //  _RWSTD_NO_EXT_STRINGBUF_STR
-
-    // undetectable extension for efficiency
-    void str (const char_type *__s) {
-        rdbuf ()->str (__s);
     }
 
     void str (const _C_string_type &__str) {
@@ -339,13 +301,6 @@ public:
         : basic_ostream<char_type, traits_type>(rdbuf ()),
           _C_sb (__str, __mode | ios_base::out) { }
 
-    // undetectable extension
-    _EXPLICIT
-    basic_ostringstream (const char_type    *__s, 
-                         ios_base::openmode  __mode = ios_base::out)
-        : basic_ostream<char_type, traits_type>(rdbuf ()),
-          _C_sb (__s, __mode | ios_base::out) { }
-
     basic_stringbuf<char_type, traits_type, allocator_type>* rdbuf () const {
         // necessary to help SunPro 5.0/T9
         typedef basic_ostringstream <char_type, traits_type, allocator_type>
@@ -355,20 +310,6 @@ public:
 
     _C_string_type str () const {
         return rdbuf ()->str ();
-    }
-
-#ifdef _RWSTD_NO_EXT_STRINGBUF_STR
-
-    // extension
-    void str (const char_type *__s, _RWSTD_SIZE_T __len) {
-        rdbuf ()->str (__s, __len);
-    }
-
-#endif   //  _RWSTD_NO_EXT_STRINGBUF_STR
-
-    // undetectable extension for efficiency
-    void str (const char_type *__s) {
-        rdbuf ()->str (__s);
     }
 
     void str (const _C_string_type &__str) {
@@ -407,13 +348,6 @@ public:
         : basic_iostream<char_type, traits_type>(rdbuf ()),
           _C_sb (__str, __mode) { }
 
-    // undetectable extension
-    _EXPLICIT
-    basic_stringstream (const char_type    *__s, 
-                        ios_base::openmode __mode = _RW::__rw_in_out)
-        : basic_iostream<char_type, traits_type>(rdbuf ()),
-          _C_sb (__s, __mode) { }
-
     basic_stringbuf<char_type, traits_type, allocator_type> *rdbuf () const {
         // necessary to help SunPro 5.0/T9
         typedef basic_stringstream <char_type, traits_type, allocator_type>
@@ -423,20 +357,6 @@ public:
 
     _C_string_type str () const {
         return rdbuf ()->str ();
-    }
-
-#ifdef _RWSTD_NO_EXT_STRINGBUF_STR
-
-    // extension
-    void str (const char_type *__s, _RWSTD_SIZE_T __len) {
-        rdbuf ()->str (__s, __len);
-    }
-
-#endif   //  _RWSTD_NO_EXT_STRINGBUF_STR
-
-    // undetectable extension for efficiency
-    void str (const char_type *__s) {
-        rdbuf ()->str (__s);
     }
 
     void str (const _C_string_type &__str) {
