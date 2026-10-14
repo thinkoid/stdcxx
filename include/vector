@@ -744,34 +744,6 @@ public:
             return *this = bool(__x);
         }
 
-#ifndef _RWSTD_NO_EXT_VECTOR_BOOL_REF_OPS
-
-      bool operator== (const reference& __x) const {
-          return bool(*this) == bool(__x);
-      }
-
-      bool operator< (const reference& __x) const {
-          return bool(*this) < bool(__x);
-      }
-
-        bool operator!= (const reference& __x) const {
-            return !(*this == __x);
-        }
-
-        bool operator> (const reference& __x) const {
-            return  __x < *this;
-        }
-
-        bool operator>= (const reference& __x) const {
-            return !(*this < __x);
-        }
-
-        bool operator<= (const reference& __x) const {
-            return !(*this > __x);
-        }
-
-#endif // _RWSTD_NO_EXT_VECTOR_BOOL_REF_OPS
-
         void flip () {
             *_C_p ^= _C_mask;
         }
