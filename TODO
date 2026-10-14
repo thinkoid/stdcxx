@@ -2,15 +2,24 @@
 #+TITLE: The queue for the stdcxx revival
 #+STARTUP: overview
 #+OPTIONS: toc:nil
+#+TODO: TODO WAITING | DONE
 
-The queue, in priority order, top first. Entries not yet investigated
-come first. Each entry states the fact, the fix and the check that
-settles it. Finished entries leave; git keeps them. The =analysis-= notes under =doc/notes= carry the longer
-investigations.
+The queue, one chapter per part of the tree, in the order the work is
+wanted; within a chapter, priority order top first. Each entry states
+the fact, the fix and the check that settles it. A =WAITING= entry is
+investigated and reported and waits on its owner; it leaves when the
+fix it waits for lands and its check passes. Finished entries leave;
+git keeps them. The =analysis-= notes under =doc/notes= carry the
+longer investigations.
 
 #+TOC: headlines 2
 
-* TODO Keep instantiated facets until the program ends
+* Library
+
+The library itself, =include= and =src=: its behaviour, its interface
+and what it carries that it no longer uses.
+
+** TODO Keep instantiated facets until the program ends
 
 A named facet dies with the last locale that holds it. The next locale
 of that name builds it again: the constructor, the mapping of its
@@ -30,7 +39,122 @@ Check: designed with the fix. The timings above are the baseline, and
 =22.locale.use_facet.mt= still finds no block outliving its round, or
 leaves with the design.
 
-* TODO The suite against other libraries
+** TODO Strict ANSI as the rule, the additions outside the standard gone
+
+=_RWSTD_STRICT_ANSI= (=include/rw/_config.h:234=, also selected by
+=_RWSTD_NO_EXTENSIONS=) is opt-in. It undefines =_RWSTD_LONG_LONG= and
+defines 26 =_RWSTD_NO_EXT_*= macros. The original README calls the
+switch deprecated. The tree reads 33 =_RWSTD_NO_EXT_*= names in 34
+files under =include= and =src=; the strict block never sets seven of
+them. The tests carry the same gates, and =tests/intro/17.extensions=
+exercises the additions.
+
+Intent: strict conformance becomes the only configuration. What
+leaves is what the library adds beyond ISO/IEC 14882:2003: members,
+classes, overloads and manipulator values the standard does not
+specify. Among them the =ios_base::failure= subclasses,
+=stringbuf::str (const char*)=, the deep-copy =basic_string::copy=,
+the extra =num_get=, =num_put= and =time_get= members, the =void=
+forms of =count= and =distance=.
+
+The rest of what the gates cover keeps its behaviour and loses only
+its macro: choices the standard permits (the in-place =assign= and
+=insert= of =deque= and =vector=, the width kept on a failed
+insertion, the portable random sequence, the primary-template
+definitions), later defect resolutions the block disables under the
+extension name (LWG 559, cv-qualified =numeric_limits=; LWG 568, the
+safe stream conversion), and =long long=, which every supported
+compiler provides and C++11 made standard.
+
+Fix, one subsystem per commit, the suite tables as the oracle. The
+=setbase= bases and =bin= went first, ahead of the sort
+(=doc/notes/analysis-numeric-base.md=), then the stream-locking
+additions, their default kept
+(=doc/notes/analysis-basic-ios-flags.md=), then the file stream
+additions. Then the 33 gates sorted into the two lists, recorded in
+the commit that deletes =_RWSTD_STRICT_ANSI= and
+=_RWSTD_NO_EXTENSIONS= from =_config.h=. Then, per addition, the code
+path goes with its macro, its test branches and its =17.extensions=
+cases; per kept behaviour, the macro and its dead branch go. The
+original README stays; =README.md= records the policy.
+
+Check: =git grep _RWSTD_NO_EXT_= is empty under =include=, =src= and
+=tests=. =17.extensions= is reduced to nothing or retired. The suite
+tables are re-pinned in all six configurations with no row moving but
+the extension rows. The examples build.
+
+** TODO Leftovers beside the removed function probes
+
+The removal of the C library function probes (f43be017..a44256a6)
+kept to the code that read the probe macros. Its census found dead
+or stale code beside them. No tracked configuration compiles any of
+it differently.
+
+- =_RWSTD_NO_USING_LIBC_IN_STD= is defined nowhere. Fifteen headers
+  test it around their =namespace std= blocks.
+- =src/file.cpp= declares =fileno= under
+  =#ifndef _RWSTD_NO_PURE_C_HEADERS=, which the file defines above;
+  the block cannot be compiled.
+- =_cstdio.h= declares =gets= in =std= and =stdio.h= exports it, both
+  in pure-headers mode only. The default mode leaves it out, as
+  C++14 does.
+- =_RWSTD_FMT_TYPE=, =_RWSTD_FMT_ASSGN=, =_STRTOLL= and =_STRTOULL=
+  in =_defs.h= have had no user since the 2005 import.
+  =_RWSTD_WCSFTIME_ARG3_T= has no reader outside its
+  characterization. =config.h= carries =_RWSTD_NO_ABS_INT=; nothing
+  reads it.
+- =<cmath>='s =_FABSF= calls =fabsf= without the =::= of its 43
+  siblings. The 44 =_<F>F= and =_<F>L= macros could be inlined into
+  the overloads that call them.
+- =21.cwchar= exercises none of =wcscoll=, =wcsncat=, =vswprintf=,
+  =vwprintf=, =getwchar=, =putwchar=.
+- =libc_decl.sh= only looks for headers now; its name says more.
+  =headers.inc= holds one list, for one script.
+- Hypothesis: =__rw_get_timepunct= calls =wcsftime= with wide literal
+  formats whatever =_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT= says; on a C
+  library whose third parameter is =const char*= it would not
+  compile. Check: =git log -L= on those calls for a platform note.
+
+Fix: one commit per item, each inert on the six configurations
+except the =21.cwchar= coverage, which adds assertions.
+
+Check: the per-commit check of the removal (=config.h=, object code,
+the non-debug recompile, the suite table) in =11S=.
+
+** TODO The next minor version
+
+The version rule: the first number is source compatibility, the
+second binary compatibility. Three changes break the binary interface
+of 4.2.x. The revival does not keep that interface, so they do not
+wait for a release; the minor version moves when they land:
+- The string reference count. Thread-safe builds on Linux/x86-64 keep
+  a mutex in every string body (=_RWSTD_NO_STRING_ATOMIC_OPS=,
+  =include/rw/_config.h:101-114=). The clause cites 4.1.x; its effect
+  is the string layout of every 4.2.x release. =21.string.stdcxx-162=
+  aborts on it in 15D: the body is 64 bytes, the test allows 24. The
+  mutex is correct, only larger and slower.
+  =_RWSTD_USE_STRING_ATOMIC_OPS= selects the atomics today.
+- The =numpunct= cache members, unused since 2e196ebb
+  (=include/loc/_numpunct.h:117=).
+- =src/x86/atomic.s=, =src/x86_64/atomic.s= and the symbols they
+  export; no header has referred to them since the backend moved to
+  the =__atomic= built-ins.
+
+Fix: all three go, and the minor version moves with them: delete the
+string clause rather than define the opt-in, remove the members,
+remove the sources and their symbols. The number is a decision of its
+own: 4.3 names the unreleased upstream branch in this repository.
+
+Check: =21.string.stdcxx-162= passes in 15D. The exported symbols
+lose exactly the assembly routines. The suites are otherwise
+unchanged.
+
+* Tests
+
+The suite and its driver under =tests=: what it covers, what it
+misses, and how it runs.
+
+** TODO The suite against other libraries
 
 The suite tests the C++03 library through clauses 18 to 27. Most of
 its assertions check standard behaviour, not the library's additions.
@@ -45,7 +169,7 @@ Check: the census of the tests that build, a table per library, and
 each disagreement read against the standard and filed where it
 belongs.
 
-* TODO The wide half of UserCtype
+** TODO The wide half of UserCtype
 
 =tests/src/ctype.cpp= implements =UserCtype<wchar_t>= and
 =UserCtype<UserChar>= in part: ten members are "FIXME: implement
@@ -59,22 +183,7 @@ break.
 Check: =0.ctype= exercises the whole table for all three character
 types.
 
-* TODO README section 5 and the configuration
-
-The original README says to set =CPPOPTS= and =CXXOPTS= on the make
-command line to change compiler options. The configuration does not
-see them, by design. =config.h= is a function of the compiler, its
-version and the build type; what the configuration must see goes in
-the =CONFIG= file. A dialect option given only on the command line
-configures one language and builds the library in another.
-
-Fix: prose, no patch. The per-platform manual step the README
-describes is a defect to move away from. =README.md= says so; the
-original README stays as it is.
-
-Check: none; this is prose.
-
-* TODO MT tests that provoke contention instead of waiting for it
+** TODO MT tests that provoke contention instead of waiting for it
 
 The older =22.locale.*.mt= tests run one thread per processor, up to
 32, for 10,000 to 200,000 iterations each. Each threaded section runs
@@ -129,7 +238,54 @@ the fixed library, in 15D and in 12D. Every locale MT test passes in
 seconds under the harness in 15D on any processor count, and the 15D
 rows become a reference.
 
-* TODO The scripts under =bin= drive the certification
+** TODO All the C library's locales on the test hosts
+
+The test hosts generate one glibc locale besides =C= and =POSIX=:
+=en_US.UTF-8=. Tests that loop over the installed locales see four.
+Installing every locale in =/usr/share/i18n/SUPPORTED= widens them,
+but it also teaches the C library =de_DE.ISO-8859-1=, the name
+=rw_localedef= gives the database locale that the first-use section
+of =22.locale.codecvt.mt= races. The section then skips with a note
+and passes without testing anything.
+
+Fix: the tests that race a database locale build it under a name the
+C library cannot know (=rw_localedef='s fourth argument), then every
+locale is installed on all test hosts at once, and the pins are
+measured again.
+
+Check: with every locale installed, no MT program notes that the C
+library knows its database locale.
+
+** WAITING ThreadSanitizer cannot follow =longjmp= on glibc 2.44
+
+Under the sanitizer every =longjmp= and =siglongjmp= dies with "can't
+find longjmp buf" and exit 66. A ten-line program with =sigsetjmp=
+and =siglongjmp= and no signal fails the same way, under GCC 16's
+libtsan and Clang 23's runtime alike. The sanitizer records the stack
+pointer at =setjmp= and, at =longjmp=, demangles the one saved in the
+=jmp_buf= to find the record. glibc 2.44 (a5ec880f80, "Consolidate
+pointer guard to use a relro variable instead of the TCB") moved the
+x86-64 pointer guard from the thread control block slot at =%fs:0x30=
+to the variable =__pointer_chk_guard=; the slot now reads zero, and
+the runtimes still demangle with it. The same series gave aarch64 a
+rotate its runtime does not undo (78f1f0e39c). Reported upstream as
+LLVM issue 228263 (2026-10); GCC's libsanitizer takes the fix at its
+next merge from compiler-rt. The six programs of the spot-check note
+are the ones this stops.
+
+Fix: the sanitizer runtimes'. The tests need no change.
+
+Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
+=18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
+reads the new guard.
+
+* Certification
+
+The scripts under =bin= and the nightly run: building the
+configurations, running their suites and comparing the tables with
+their pins.
+
+** TODO The scripts under =bin= drive the certification
 
 =bin/buildntest= builds and runs one configuration and writes a log
 that describes itself. =bin/xbuildgen= hands a night's logs and
@@ -162,7 +318,7 @@ Check: one night of the six configurations through the driver gives
 a page per build, the six pins identical, and a verdict that fails
 when a pin is perturbed.
 
-* TODO Run the suites in parallel
+** TODO Run the suites in parallel
 
 The six suites run one after another, about 26 minutes on 32
 processors. 14 of them are timeouts: seven older locale MT tests run
@@ -174,7 +330,7 @@ each program's output beside it, and a =TMPDIR= of its own for every
 processors, and only the 15D MT rows depend on the load.
 
 Fix, in order:
-- The MT entry above. It removes the timeouts and the load
+- The MT entry under Tests. It removes the timeouts and the load
   sensitivity.
 - The configurations' suites at once: the four single-threaded ones
   now, the thread-safe ones with them once the MT entry lands. A
@@ -188,89 +344,12 @@ Fix, in order:
 Check: the six tables of a parallel run identical to those of a
 serial one, three runs over; the wall time recorded beside the tables.
 
-* TODO Strict ANSI as the rule, the additions outside the standard gone
+* Locales
 
-=_RWSTD_STRICT_ANSI= (=include/rw/_config.h:234=, also selected by
-=_RWSTD_NO_EXTENSIONS=) is opt-in. It undefines =_RWSTD_LONG_LONG= and
-defines 26 =_RWSTD_NO_EXT_*= macros. The original README calls the
-switch deprecated. The tree reads 33 =_RWSTD_NO_EXT_*= names in 34
-files under =include= and =src=; the strict block never sets seven of
-them. The tests carry the same gates, and =tests/intro/17.extensions=
-exercises the additions.
+The locale sources and charmaps under =etc/nls=, the =localedef= that
+compiles them and the databases the facets read.
 
-Intent: strict conformance becomes the only configuration. What
-leaves is what the library adds beyond ISO/IEC 14882:2003: members,
-classes, overloads and manipulator values the standard does not
-specify. Among them the =ios_base::failure= subclasses,
-=stringbuf::str (const char*)=, the deep-copy =basic_string::copy=,
-the extra =num_get=, =num_put= and =time_get= members, the =void=
-forms of =count= and =distance=.
-
-The rest of what the gates cover keeps its behaviour and loses only
-its macro: choices the standard permits (the in-place =assign= and
-=insert= of =deque= and =vector=, the width kept on a failed
-insertion, the portable random sequence, the primary-template
-definitions), later defect resolutions the block disables under the
-extension name (LWG 559, cv-qualified =numeric_limits=; LWG 568, the
-safe stream conversion), and =long long=, which every supported
-compiler provides and C++11 made standard.
-
-Fix, one subsystem per commit, the suite tables as the oracle. The
-=setbase= bases and =bin= went first, ahead of the sort
-(=doc/notes/analysis-numeric-base.md=), then the stream-locking
-additions, their default kept
-(=doc/notes/analysis-basic-ios-flags.md=), then the file stream
-additions. Then the 33 gates sorted into the two lists, recorded in
-the commit that deletes =_RWSTD_STRICT_ANSI= and
-=_RWSTD_NO_EXTENSIONS= from =_config.h=. Then, per addition, the code
-path goes with its macro, its test branches and its =17.extensions=
-cases; per kept behaviour, the macro and its dead branch go. The
-original README stays; =README.md= records the policy.
-
-Check: =git grep _RWSTD_NO_EXT_= is empty under =include=, =src= and
-=tests=. =17.extensions= is reduced to nothing or retired. The suite
-tables are re-pinned in all six configurations with no row moving but
-the extension rows. The examples build.
-
-* TODO Leftovers beside the removed function probes
-
-The removal of the C library function probes (f43be017..a44256a6)
-kept to the code that read the probe macros. Its census found dead
-or stale code beside them. No tracked configuration compiles any of
-it differently.
-
-- =_RWSTD_NO_USING_LIBC_IN_STD= is defined nowhere. Fifteen headers
-  test it around their =namespace std= blocks.
-- =src/file.cpp= declares =fileno= under
-  =#ifndef _RWSTD_NO_PURE_C_HEADERS=, which the file defines above;
-  the block cannot be compiled.
-- =_cstdio.h= declares =gets= in =std= and =stdio.h= exports it, both
-  in pure-headers mode only. The default mode leaves it out, as
-  C++14 does.
-- =_RWSTD_FMT_TYPE=, =_RWSTD_FMT_ASSGN=, =_STRTOLL= and =_STRTOULL=
-  in =_defs.h= have had no user since the 2005 import.
-  =_RWSTD_WCSFTIME_ARG3_T= has no reader outside its
-  characterization. =config.h= carries =_RWSTD_NO_ABS_INT=; nothing
-  reads it.
-- =<cmath>='s =_FABSF= calls =fabsf= without the =::= of its 43
-  siblings. The 44 =_<F>F= and =_<F>L= macros could be inlined into
-  the overloads that call them.
-- =21.cwchar= exercises none of =wcscoll=, =wcsncat=, =vswprintf=,
-  =vwprintf=, =getwchar=, =putwchar=.
-- =libc_decl.sh= only looks for headers now; its name says more.
-  =headers.inc= holds one list, for one script.
-- Hypothesis: =__rw_get_timepunct= calls =wcsftime= with wide literal
-  formats whatever =_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT= says; on a C
-  library whose third parameter is =const char*= it would not
-  compile. Check: =git log -L= on those calls for a platform note.
-
-Fix: one commit per item, each inert on the six configurations
-except the =21.cwchar= coverage, which adds assertions.
-
-Check: the per-commit check of the removal (=config.h=, object code,
-the non-debug recompile, the suite table) in =11S=.
-
-* TODO The locale sources under =etc/nls= are glibc 2.2's
+** TODO The locale sources under =etc/nls= are glibc 2.2's
 
 The definitions and charmaps under =etc/nls= are copies from GNU libc
 2.2, as the original =README= says, last changed in 312ef830 (2007).
@@ -316,62 +395,16 @@ pins, re-pinned where the data moved. The decoded currency, numeric
 and date values of the 139 shared definitions match the glibc
 sources they come from.
 
-* TODO All the C library's locales on the test hosts
-
-The test hosts generate one glibc locale besides =C= and =POSIX=:
-=en_US.UTF-8=. Tests that loop over the installed locales see four.
-Installing every locale in =/usr/share/i18n/SUPPORTED= widens them,
-but it also teaches the C library =de_DE.ISO-8859-1=, the name
-=rw_localedef= gives the database locale that the first-use section
-of =22.locale.codecvt.mt= races. The section then skips with a note
-and passes without testing anything.
-
-Fix: the tests that race a database locale build it under a name the
-C library cannot know (=rw_localedef='s fourth argument), then every
-locale is installed on all test hosts at once, and the pins are
-measured again.
-
-Check: with every locale installed, no MT program notes that the C
-library knows its database locale.
-
-* TODO The next minor version
-
-The version rule: the first number is source compatibility, the
-second binary compatibility. Three changes break the binary interface
-of 4.2.x. The revival does not keep that interface, so they do not
-wait for a release; the minor version moves when they land:
-- The string reference count. Thread-safe builds on Linux/x86-64 keep
-  a mutex in every string body (=_RWSTD_NO_STRING_ATOMIC_OPS=,
-  =include/rw/_config.h:101-114=). The clause cites 4.1.x; its effect
-  is the string layout of every 4.2.x release. =21.string.stdcxx-162=
-  aborts on it in 15D: the body is 64 bytes, the test allows 24. The
-  mutex is correct, only larger and slower.
-  =_RWSTD_USE_STRING_ATOMIC_OPS= selects the atomics today.
-- The =numpunct= cache members, unused since 2e196ebb
-  (=include/loc/_numpunct.h:117=).
-- =src/x86/atomic.s=, =src/x86_64/atomic.s= and the symbols they
-  export; no header has referred to them since the backend moved to
-  the =__atomic= built-ins.
-
-Fix: all three go, and the minor version moves with them: delete the
-string clause rather than define the opt-in, remove the members,
-remove the sources and their symbols. The number is a decision of its
-own: 4.3 names the unreleased upstream branch in this repository.
-
-Check: =21.string.stdcxx-162= passes in 15D. The exported symbols
-lose exactly the assembly routines. The suites are otherwise
-unchanged.
-
-* EDG strict mode
+* EDG porting
 
 The tree builds with EDG's =eccp= in strict mode (=-A=) as a
 conformance check: a question is settled there before a bug goes to
 another compiler. The front end is open source as of 2026-09:
-github.com/edgcpp/compiler. These entries are outside the priority
-order. The first is the build; the rest are what it found. Each error
-is read against the standard: a library defect is fixed here, a
-compiler defect goes to EDG, and the leniency of GCC or Clang it
-exposes is recorded.
+github.com/edgcpp/compiler. The first entry is the build; the rest
+are what it found. Each error is read against the standard: a library
+defect is fixed here, a compiler defect goes to EDG, and the leniency
+of GCC or Clang it exposes is recorded. The =WAITING= entries at the
+end are defects reported to EDG or glibc.
 
 A first build on 2026-10-06, at 6bb238b6 with EDG 7.0 over gcc 16 and
 glibc, took hand changes to the tree. It configured, built the
@@ -409,7 +442,7 @@ fails. A file passed with =--preinclude_macros= works:
 EDG enters the keyword.
 
 Fix: restore =eccp.config= from =dd1128a5^= and bring it current:
-=-A -x=, =--no_export= while the parked =src/punct.cpp= entry stands,
+=-A -x=, =--no_export= while the =WAITING= =src/punct.cpp= entry stands,
 the prelinker (~PRELINKFLAGS = --prelink_objects~, the step in
 =GNUmakefile.lib= and =GNUmakefile.rwt=, =*.ti= in the clean rules),
 =-lpthread=, the stopgap file. A macro of the override header
@@ -579,13 +612,24 @@ Fix: octal escapes.
 Check: the five are UTF-8 clean (=iconv -f utf-8=) and the tables do
 not move.
 
-* Parked
+** WAITING =src/punct.cpp= under the export model
 
-Investigated and reported; each waits on its owner. Outside the
-priority order, as the EDG chapter and the documentation are. An
-entry leaves when the fix it waits for lands and its check passes.
+The library uses neither =export= nor implicit inclusion since
+11b144b9..48d6dac1. =eccp -A= still turns its export model on, and
+under it EDG fails an internal assertion in =src/punct.cpp= at line
+113 (#2656, in =find_local_static_variable_init=). The other 97
+library sources compile. The 136 errors of the first build, 98 of them
+"already been defined" in the =.cc= files, came from =_EXPORT= and are
+gone. Reported as https://github.com/edgcpp/compiler/discussions/233,
+with a one-line candidate patch: a block scope that lowering adds for
+a return-value temporary has no parent.
 
-** TODO =_setjmp= in the C that EDG generates for =25.libc=
+Fix: EDG's. Until then =eccp.config= passes =--no_export=.
+
+Check: the =eccp= build needs no =--no_export= with a front end that
+fixes it.
+
+** WAITING =_setjmp= in the C that EDG generates for =25.libc=
 
 =eccp= compiles C++ to C and gcc compiles the C. For
 =tests/algorithms/25.libc.cpp= the generated C declares =_setjmp= as
@@ -604,7 +648,7 @@ Fix: EDG's. The test and the library need no change.
 Check: =25.libc= builds under =eccp -A= with a front end that fixes
 it.
 
-** TODO Names the prelinker cannot decode
+** WAITING Names the prelinker cannot decode
 
 The prelinker reports "an error occurred during name decoding" 22
 times while it builds the library under =eccp -A=. c++filt decodes
@@ -626,7 +670,7 @@ Fix: EDG's. The library needs no change.
 Check: a build with a front end that fixes it shows no decoding
 warnings.
 
-** TODO =27.ostream=: string literals defined twice in the C that EDG generates
+** WAITING =27.ostream=: string literals defined twice in the C that EDG generates
 
 =tests/iostream/27.ostream.cpp= does not build under =eccp -A=. gcc
 rejects the generated C: it defines the string literals of
@@ -648,7 +692,7 @@ Fix: EDG's. The test needs no change.
 Check: =27.ostream= builds under =eccp -A= with a front end that fixes
 it.
 
-** TODO glibc's =signbit= assumes a GNU built-in in C++
+** WAITING glibc's =signbit= assumes a GNU built-in in C++
 
 glibc's =<math.h>= gives a C++ compiler that is neither GCC 6+ nor
 Clang 3.3+ ~#define signbit(x) __builtin_signbitl (x)~. A compiler
@@ -670,46 +714,6 @@ on the C99 functions.
 Check: =src/fpclass.h= compiles under =eccp -A= with the C99 names
 requested and a glibc that fixes it.
 
-** TODO ThreadSanitizer cannot follow =longjmp= on glibc 2.44
-
-Under the sanitizer every =longjmp= and =siglongjmp= dies with "can't
-find longjmp buf" and exit 66. A ten-line program with =sigsetjmp=
-and =siglongjmp= and no signal fails the same way, under GCC 16's
-libtsan and Clang 23's runtime alike. The sanitizer records the stack
-pointer at =setjmp= and, at =longjmp=, demangles the one saved in the
-=jmp_buf= to find the record. glibc 2.44 (a5ec880f80, "Consolidate
-pointer guard to use a relro variable instead of the TCB") moved the
-x86-64 pointer guard from the thread control block slot at =%fs:0x30=
-to the variable =__pointer_chk_guard=; the slot now reads zero, and
-the runtimes still demangle with it. The same series gave aarch64 a
-rotate its runtime does not undo (78f1f0e39c). Reported upstream as
-LLVM issue 228263 (2026-10); GCC's libsanitizer takes the fix at its
-next merge from compiler-rt. The six programs of the spot-check note
-are the ones this stops.
-
-Fix: the sanitizer runtimes'. The tests need no change.
-
-Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
-=18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
-reads the new guard.
-
-** TODO =src/punct.cpp= under the export model
-
-The library uses neither =export= nor implicit inclusion since
-11b144b9..48d6dac1. =eccp -A= still turns its export model on, and
-under it EDG fails an internal assertion in =src/punct.cpp= at line
-113 (#2656, in =find_local_static_variable_init=). The other 97
-library sources compile. The 136 errors of the first build, 98 of them
-"already been defined" in the =.cc= files, came from =_EXPORT= and are
-gone. Reported as https://github.com/edgcpp/compiler/discussions/233,
-with a one-line candidate patch: a block scope that lowering adds for
-a return-value temporary has no parent.
-
-Fix: EDG's. Until then =eccp.config= passes =--no_export=.
-
-Check: the =eccp= build needs no =--no_export= with a front end that
-fixes it.
-
 * Documentation
 
 Documents that describe the library as it is, for a reader, not for
@@ -717,6 +721,21 @@ the record. They go under =doc/notes= with the =ref-= prefix. Each
 entry names the document, what it must answer and where the material
 is. They are prose: no check beyond a reading. Roughly in order of
 payback.
+
+** TODO README section 5 and the configuration
+
+The original README says to set =CPPOPTS= and =CXXOPTS= on the make
+command line to change compiler options. The configuration does not
+see them, by design. =config.h= is a function of the compiler, its
+version and the build type; what the configuration must see goes in
+the =CONFIG= file. A dialect option given only on the command line
+configures one language and builds the library in another.
+
+Fix: prose, no patch. The per-platform manual step the README
+describes is a defect to move away from. =README.md= says so; the
+original README stays as it is.
+
+Check: none; this is prose.
 
 ** TODO A tour of the locale subsystem
 
@@ -808,7 +827,7 @@ jump out of signal handlers or test =setjmp=; the sanitizer's
 =longjmp= interceptor finds no buffer for the jump, its check fails,
 and the program exits 66, the sanitizer's own =exitcode= default.
 The defect is the sanitizer runtime's against glibc 2.44, not the
-tests' (the parked entry on =longjmp= under the sanitizer).
+tests' (the =WAITING= entry on =longjmp= under the sanitizer).
 The address-space limit plays no part: the exit is the same without
 it. =0.inputiter= and =0.outputiter= die with an empty tail because
 they close =stderr= first, to silence the assertions they provoke,

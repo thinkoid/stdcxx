@@ -32,7 +32,8 @@ and the suite runs in full under its own harness. The results are
 pinned under `doc/notes/baseline` for each configuration
 measured, and `doc/notes/ref-test-baseline.md` reads them: what fails, why where
 that is known, and what is intended for each. `TODO` carries the
-same failures as queue entries, in priority order.
+same failures as queue entries, in the chapter of the part of the
+tree they belong to.
 
 The write-ups live under `doc/notes`, one directory, the kind in
 the file name's prefix. `ref-` documents describe the library as it
@@ -154,7 +155,7 @@ them, not of a platform list.
 | `examples/` | example and tutorial programs |
 | `util/` | the locale utilities and the test harness's `exec` |
 | `doc/` | the original HTML manuals; `notes/` for the revival's write-ups, the kind in the file name's prefix, and `notes/baseline/` for the pinned suite tables |
-| `TODO` | the queue, in priority order |
+| `TODO` | the queue, one chapter per part of the tree, priority order within a chapter |
 | `README` | the original manual, untouched |
 
 ## License
