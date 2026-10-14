@@ -51,10 +51,10 @@
 #  define _RWSTD_NO_DEPRECATED_C_HEADERS
 #endif   // _RWSTD_NO_PURE_C_HEADERS
 
-#if !defined (_RWSTD_STRICT_ANSI) && __GNUG__ <= 2 && __GNUC_MINOR__ < 97
+#if __GNUG__ <= 2 && __GNUC_MINOR__ < 97
      // prevent gcc 2.9x ICE
 #  define _RWSTD_NO_PLACEMENT_DELETE
-#endif   // !_RWSTD_STRICT_ANSI
+#endif   // gcc 2.9x
 
 #if __GNUG__ < 3
      // gcc 2.x doesn't understand the extern template syntax

@@ -13,7 +13,6 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 0.process                                     0    0       17      0   100%
 0.strncmp                                FORMAT    0                       
 0.valcmp                                 FORMAT    0                       
-17.extensions                                 0    0       11      0   100%
 17.names                                      0    0        0      0   100%
 18.c.limits.stdcxx-988                     NOUT    0                       
 18.csetjmp                                    0    0        3      0   100%
@@ -46,8 +45,8 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.cctype                                     0    0      281      0   100%
 21.char.traits.compare                     NOUT    0                       
 21.char.traits.find.stdcxx-541             NOUT    0                       
-21.cwchar                                     0    0       66      0   100%
-21.cwctype                                    0    0      260      0   100%
+21.cwchar                                     0    0      118      0   100%
+21.cwctype                                    0    0      294      0   100%
 21.string.access                              0    0      980      0   100%
 21.string.append                              0    0    78471      0   100%
 21.string.append.stdcxx-1060               NOUT    0                       
@@ -274,11 +273,11 @@ atomic_add                                    0    0       66      0   100%
 atomic_xchg                                   0    0       22      0   100%
 once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   274
+  Programs:                   273
   Non-zero exit status:         0
   Signalled:                    1
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10105884
+  Assertions:            10105959
   Failed assertions:            0

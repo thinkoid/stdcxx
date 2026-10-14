@@ -66,14 +66,14 @@ be distinguished from unresolved defects.
 | Extra template definitions | Primary templates such as `char_traits` and several facets have implementation-provided definitions beyond the required standard specializations; the original manual describes their extension controls. |
 | Later defect corrections | Some are treated as optional extensions, notably cv-qualified `numeric_limits` (chapter 3). |
 
-`_RWSTD_NO_EXTENSIONS` selects `_RWSTD_STRICT_ANSI`, which in turn
-defines individual suppression macros in `include/rw/_config.h`.
-**This is an extension policy, not an independently verified
-“conforming mode”.** The same block explicitly leaves several primary
-facet suppression macros commented out as unimplemented. It also
-disables a later defect resolution. Enabling the switch therefore
-cannot be summarized as “apply every correction and remove every
-extension”.
+The strict switch is gone. `_RWSTD_NO_EXTENSIONS` used to select
+`_RWSTD_STRICT_ANSI`, and a block in `include/rw/_config.h` defined
+the `_RWSTD_NO_EXT_*` macros under it; the block never covered every
+gate the tree reads, and it disabled later defect resolutions beside
+the additions. Nothing defines those macros now. The additions in the
+table are leaving one subsystem per commit, each with its macro, and
+the behaviours the standard permits keep their code and lose their
+macro; the `TODO` entry in the Library chapter carries the sort.
 
 Copy-on-write strings and the compatibility mutex in their bodies are
 implementation choices within the historical design, not automatically

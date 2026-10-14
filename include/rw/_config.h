@@ -76,11 +76,6 @@
  * OVERRIDES FOR CONFIGURATION MACROS                                     *
  **************************************************************************/
 
-#if defined (_RWSTD_NO_EXTENSIONS) && !defined (_RWSTD_STRICT_ANSI)
-#  define _RWSTD_STRICT_ANSI
-#endif   // _RWSTD_NO_EXTENSIONS && !_RWSTD_STRICT_ANSI
-
-
 // -D _REENTRANT or any one of the other thread safety macros
 // used in the conditional below turns on thread safety features
 #if   defined (_REENTRANT)            \
@@ -230,67 +225,6 @@
 #endif   // _RWSTD_NO_LONG_LONG
 
 
-// disable all extensions in strict ANSI mode
-#ifdef _RWSTD_STRICT_ANSI
-   // long long is not in ANSI C++ yet (although it is in ANSI C99)
-#  undef  _RWSTD_LONG_LONG
-#  define _RWSTD_NO_EXT_VECTOR_BOOL_REF_OPS
-#  define _RWSTD_NO_EXT_LOCALE
-#  define _RWSTD_NO_EXT_DEEP_STRING_COPY
-   // no support for exceptions derived from ios_base::failure
-#  define _RWSTD_NO_EXT_FAILURE
-   // disable safe conversion of iostream objects only to bool
-   // (and enable conversion to void*)
-#  define _RWSTD_NO_EXT_IOS_SAFE_CONVERSION
-   // disable the str(const char*) overload in stringbuf and stringstreams
-#  define _RWSTD_NO_EXT_STRINGBUF_STR
-   // no support for member overloads on all fundamental types
-#  define _RWSTD_NO_EXT_NUM_GET
-#  define _RWSTD_NO_EXT_NUM_PUT
-   // no support for extended member overloads
-#  define _RWSTD_NO_EXT_TIME_GET
-   // allocator<const T> not possible
-#  define _RWSTD_NO_EXT_CONST_ALLOCATOR
-   // missing operator new or delete not defined
-#  define _RWSTD_NO_EXT_OPERATOR_NEW
-   // void std::count<>() not defined (except when necessary)
-#  define _RWSTD_NO_EXT_VOID_COUNT
-   // void std::distance() not defined
-#  define _RWSTD_NO_EXT_VOID_DISTANCE
-
-   // calling width(0) only when insertion succeeds
-#  define _RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE
-
-   // deque::assign() clears container before assignment
-   // rather than assigning over existing elements
-#  define _RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE
-   // deque::insert() creates a copy of the container
-   // to insert into and on success swaps the copy
-#  define _RWSTD_NO_EXT_DEQUE_INSERT_IN_PLACE
-
-   // primary templates not defined
-#  define _RWSTD_NO_EXT_CHAR_TRAITS_PRIMARY
-#  define _RWSTD_NO_EXT_CODECVT_PRIMARY
-#  define _RWSTD_NO_EXT_COLLATE_PRIMARY
-#  define _RWSTD_NO_EXT_CTYPE_PRIMARY
-   // random number generator used by algorithms such as random_shuffle
-   // utilizes the entire range of size_t and will not generate the same
-   // sequence of values between ILP32 and LP64 (or LLP64)
-#  define _RWSTD_NO_EXT_PORTABLE_RANDOM_SEQUENCE
-
-   // disable the implementation of LWG issue 559 (numeric_limits
-   // limits specialized on cv-qualified scalar types)
-#  define _RWSTD_NO_EXT_CV_QUALIFIED_LIMITS
-
-// commented out macros not implemented yet
-// #  define _RWSTD_NO_EXT_MONEYPUNCT_PRIMARY
-// #  define _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
-// #  define _RWSTD_NO_EXT_TIME_GET_PRIMARY
-// #  define _RWSTD_NO_EXT_TIME_PUT_PRIMARY
-// #  define _RWSTD_NO_EXT_MESSAGES_PRIMARY
-
-#endif   // _RWSTD_STRICT_ANSI
-
    // macros that are enabled in library source files
 #ifdef _RWSTD_LIB_SRC
    // don't instantiate templates in library source code
@@ -304,9 +238,8 @@
    // operator new and delete variants the support library lacks
    // (see memory.cpp): the clause above was undone for every compiler
    // by a Visual C++ 6 workaround whose test, _MSC_VER <= 1300, held
-   // wherever the macro was not defined, and so was the definition
-   // in strict ANSI mode above; the workaround is gone, its effect
-   // is kept until the question is decided on its own
+   // wherever the macro was not defined; the workaround is gone, its
+   // effect is kept until the question is decided on its own
 #undef _RWSTD_NO_EXT_OPERATOR_NEW
 
 #ifdef _RWSTD_INSTANTIATE_TEMPLATES

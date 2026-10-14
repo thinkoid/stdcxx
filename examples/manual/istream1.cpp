@@ -28,30 +28,14 @@
  
 #include <fstream>    // for basic_ofstream
 #include <iostream>   // for basic_istream, cout
-#include <cstdio>     // for tmpnam () and remove ()
+#include <cstdio>     // for remove ()
 
 #include <examples.h>
 
 int main ()
 {
-#ifndef _RWSTD_STRICT_ANSI
-
-    // use an extension of this implementation: NULL file name argument
-    // creates a temporary file; closing the file stream object or its
-    // associated filebuf removes the temporary file
-    const char* const fname = 0;
-    
-#else   // if defined (_RWSTD_STRICT_ANSI)
-
-    char fnamebuf [L_tmpnam];
-
-    // create a temporary filename
-    const char* const fname = std::tmpnam (fnamebuf);
-
-    if (!fname)
-        return 1;
-
-#endif   // _RWSTD_STRICT_ANSI
+    // the name of a temporary file in the current directory
+    const char fname[] = "istream1.tmp";
   
     // typedefs for convenience
     typedef std::basic_istream<char, std::char_traits<char> >         Input;
@@ -138,13 +122,11 @@ int main ()
  
     std::cout << "\n\n\n";
 
-    if (fname) {
-        // close the stream before removing the file
-        out.close ();
+    // close the stream before removing the file
+    out.close ();
 
-        // remove the temporary file (must have a name)
-        std::remove (fname);
-    }
+    // remove the temporary file
+    std::remove (fname);
 
     return 0;
 }

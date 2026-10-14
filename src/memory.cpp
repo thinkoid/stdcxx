@@ -95,9 +95,8 @@ __rw_deallocate (void *p, size_t, int /* = 0 */) _THROWS (())
 
 // The following operators are replaceable; provide definitions if they're
 // missing in the compiler support library, and _RWSTD_NO_EXT_OPERATOR_NEW
-// is not defined (i.e., not in strict ansi mode). This means that they will
-// no longer be replaceable, but at least they will be callable without the
-// user providing the definitions
+// is not defined. This means that they will no longer be replaceable, but
+// at least they will be callable without the user providing the definitions
 //
 #ifndef _RWSTD_NO_EXT_OPERATOR_NEW
 

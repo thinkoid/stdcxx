@@ -29,31 +29,15 @@
 #include <fstream>    // for filebuf
 #include <iostream>   // for cout
 #include <iterator>   // for streambuf_iterator's
-#include <cstdio>     // for L_tmpnam, tmpnam and remove
+#include <cstdio>     // for remove
 
 #include <examples.h>
 
 
 int main ( )
 {
-#ifndef _RWSTD_STRICT_ANSI
-
-    // use an extension of this implementation: NULL file name argument
-    // creates a temporary file; closing the file stream object or its
-    // associated filebuf removes the temporary file
-    const char* const fname = 0;
-    
-#else   // if defined (_RWSTD_STRICT_ANSI)
-
-    char fnamebuf [L_tmpnam];
-
-    // create a temporary filename
-    const char* const fname = std::tmpnam (fnamebuf);
-
-    if (!fname)
-        return 1;
-
-#endif   // _RWSTD_STRICT_ANSI
+    // the name of a temporary file in the current directory
+    const char fname[] = "ostreambuf_iterator.tmp";
 
     // create a filebuf object
     std::filebuf buf;
@@ -89,13 +73,11 @@ int main ( )
 
     std::cout << '\n';
 
-    if (fname) {
-        // close the stream before removing the file
-        buf.close ();
+    // close the stream before removing the file
+    buf.close ();
 
-        // remove the temporary file (must have a name)
-        std::remove (fname);
-    }
+    // remove the temporary file
+    std::remove (fname);
 
     return 0;
 }

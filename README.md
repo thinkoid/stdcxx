@@ -53,6 +53,11 @@ suite clean. The revival does not raise the implementation language
 past C++98 and does not implement later standards. libstdc++, libc++
 and the Microsoft library already serve those.
 
+The interface is the standard's alone. The additions the library
+carried beyond it, once switched off by `_RWSTD_STRICT_ANSI`, are
+leaving one subsystem at a time; the switch itself is gone, and the
+`TODO` entry in the Library chapter lists what remains.
+
 The library has three uses as it is:
 
 - A probe of the toolchain. A suite of ten million assertions against

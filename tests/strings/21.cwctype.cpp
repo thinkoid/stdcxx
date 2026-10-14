@@ -810,11 +810,7 @@ static int rw_opt_no_behavior;   // for --no-behavior
 static int
 run_test (int, char**)
 {
-#ifdef _RWSTD_STRICT_ANSI
-#  define RW_DIAG rw_assert
-#else
-#  define RW_DIAG rw_warn
-#endif
+#define RW_DIAG rw_assert
 
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "checking for the absence of masking macros");

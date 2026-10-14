@@ -451,15 +451,9 @@ test_macros ()
     }
 
     for (unsigned i = 0; masking_macros [i]; ++i) {
-#ifdef _RWSTD_STRICT_ANSI
         rw_assert ('\0' == masking_macros [i][0], 0, __LINE__,
                    "masking macro %s unexpectedly defined",
                    masking_macros [i]);
-#else
-        rw_warn ('\0' == masking_macros [i][0], 0, __LINE__,
-                 "masking macro %s unexpectedly defined",
-                 masking_macros [i]);
-#endif
     }
 }
 

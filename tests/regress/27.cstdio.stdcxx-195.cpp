@@ -27,8 +27,6 @@
 #include <cstdio>
 
 
-#ifdef _RWSTD_STRICT_ANSI
-
 #  ifdef fpos_t
 #    error "fpos_t #defined"
 #  endif
@@ -196,8 +194,6 @@
 #  ifdef perror
 #    error "perror #defined"
 #  endif
-
-#endif   // _RWSTD_STRICT_ANSI
 
 int main ()
 {

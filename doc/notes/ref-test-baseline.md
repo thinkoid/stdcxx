@@ -11,7 +11,7 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 274 programs per configuration.
+- Every test builds. The harness runs 273 programs per configuration.
 - No assertion fails, in any configuration, under either compiler.
 - What fails, by cause:
   - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
@@ -95,7 +95,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 274 | 10,104,212 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 274 | 10,104,102 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 274 | 10,105,884 | 0 | 0 | 1 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 273 | 10,105,959 | 0 | 0 | 1 |
 
 Chapter 4 lists where the three differ.
 

@@ -70,17 +70,8 @@ void count_example () {
     
     char text[] = "Now is the time to begin";
     
-#ifdef _RWSTD_STRICT_ANSI
-
     ecount = std::count (text, text + sizeof text, 'e');
     vowelCount = std::count_if (text, text + sizeof text, isVowel);
-
-#else
-
-    std::count (text, text + sizeof text, 'e', ecount);
-    std::count_if (text, text + sizeof text, isVowel, vowelCount);
-
-#endif   // _RWSTD_STRICT_ANSI
     
     std::cout << "There are "           << ecount
               << " letter e's "         << '\n'

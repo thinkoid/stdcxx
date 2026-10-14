@@ -88,13 +88,6 @@ private:
 
 public:
 
-#ifndef _RWSTD_STRICT_ANSI
-
-    // expose proxy in relaxed mode
-    typedef _C_proxy proxy;
-
-#endif   // _RWSTD_STRICT_ANSI
-
     // 24.5.3.2, p1
     istreambuf_iterator (streambuf_type *__sb = 0) _THROWS (())
     : _C_sb (__sb) { }

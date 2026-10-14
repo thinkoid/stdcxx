@@ -1209,7 +1209,7 @@ struct NumGetDerived: std::num_get<charT, IterT>
 
 #ifdef _RWSTD_LONG_LONG
 
-        // extensions disabled in strict ANSI mode
+        // the long long overloads, kept beyond 14882:2003
         MEMFUN (IterT, do_get,
                 (IterT, IterT, IosBase&, IoState&, _RWSTD_LONG_LONG&) const);
         MEMFUN (IterT, do_get,
@@ -1258,7 +1258,7 @@ test_num_get (const char* cname, const char* iname)
 
 #ifdef _RWSTD_LONG_LONG
 
-    // extensions disabled in strict ANSI mode
+    // the long long overloads, kept beyond 14882:2003
     MEMFUN (IterT, get,
             (IterT, IterT, IosBase&, IoState&, _RWSTD_LONG_LONG&) const);
     MEMFUN (IterT, get,
@@ -1346,7 +1346,7 @@ test_num_put (const char* cname, const char* iname)
 
 #ifdef _RWSTD_LONG_LONG
 
-    // extensions disabled in strict ANSI mode
+    // the long long overloads, kept beyond 14882:2003
     MEMFUN (IterT, put,
             (IterT, IosBase&, charT, _RWSTD_LONG_LONG) const);
     MEMFUN (IterT, put,
