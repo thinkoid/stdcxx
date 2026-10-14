@@ -214,11 +214,6 @@ thread_func (void*)
                 ng.get_year (iter, end, nio, state, &local);
                 break;
             default:
-
-#ifndef _RWSTD_NO_EXT_TIME_GET
-                ng.get (iter, end, nio, state, &local, data.format_);
-#endif  // _RWSTD_NO_EXT_TIME_GET
-
                 break;
             }
 
@@ -264,11 +259,6 @@ thread_func (void*)
                 wg.get_year (iter, end, wio, state, &local);
                 break;
             default:
-
-#ifndef _RWSTD_NO_EXT_TIME_GET
-                wg.get (iter, end, wio, state, &local, data.format_);
-#endif  // _RWSTD_NO_EXT_TIME_GET
-
                 break;
             }
 
@@ -329,17 +319,10 @@ run_test (int, char**)
         data.time_.tm_yday = ++j % 366;
         data.time_.tm_year = ++j;
 
-#ifndef _RWSTD_NO_EXT_TIME_GET
-        // format specifiers that we can reliably parse
-        // get_weekday, get_monthname, get_date, get_time,
-        // get_year and the extension get.
-        const char formats [] = "aAbBCdhHjmMnRStTwxXyY";
-#else
         // formats that generate strings compatible with
         // get_weekday, get_monthname, get_date, get_time
         // and get_year.
         const char formats [] = "aAbBxXyY";
-#endif
 
         // get the "random" data type used to generate representation
         data.format_ = formats [nlocales % (sizeof formats - 1)];
@@ -397,11 +380,6 @@ run_test (int, char**)
                 ng.get_time (iter, end, nio, state, &data.time_);
                 break;
             default:
-
-#ifndef _RWSTD_NO_EXT_TIME_GET
-                ng.get (iter, end, nio, state, &data.time_, data.format_);
-#endif  // _RWSTD_NO_EXT_TIME_GET
-
                 break;
             }
 

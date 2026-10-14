@@ -95,7 +95,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 274 | 10,104,212 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 274 | 10,104,102 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 273 | 10,094,121 | 0 | 0 | 1 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 273 | 10,092,837 | 0 | 0 | 1 |
 
 Chapter 4 lists where the three differ.
 

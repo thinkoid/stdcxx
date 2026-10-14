@@ -63,8 +63,9 @@ template <class _CharT, class _InputIter>
 template <class _CharT, class _InputIter>
 _TYPENAME time_get<_CharT, _InputIter>::iter_type
 time_get<_CharT, _InputIter>::
-get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
-     tm *__tmb, const char_type *__pat, const char_type *__pat_end) const
+_C_get (iter_type __it, iter_type __end, ios_base &__fl,
+        _RWSTD_IOSTATE &__err, tm *__tmb,
+        const char_type *__pat, const char_type *__pat_end) const
 {
     _RWSTD_ASSERT (0 != __pat);
     _RWSTD_ASSERT (__pat <= __pat_end);
@@ -96,7 +97,7 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
                 // FIXME: handle the "%.[0-9]*" HP-UX extension
             }
             else {
-                __it = do_get (__it, __end, __fl, __errtmp, &__tmp, __ch,
+                __it = _C_get (__it, __end, __fl, __errtmp, &__tmp, __ch,
                                __fmt [1]);
                 __fmt [0] = __fmt [1] = '\0';   // reset
             }
@@ -131,9 +132,9 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
 
 
 template <class _CharT, class _InputIter>
-/* virtual */ _TYPENAME time_get<_CharT, _InputIter>::iter_type
+_TYPENAME time_get<_CharT, _InputIter>::iter_type
 time_get<_CharT, _InputIter>::
-do_get (iter_type __it, iter_type __end, ios_base &__fl,
+_C_get (iter_type __it, iter_type __end, ios_base &__fl,
         _RWSTD_IOSTATE &__err, tm *__tmb,
         char __fmt, char __modifier /* = '\0' */) const
 {
@@ -196,8 +197,8 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
         // single punctuator string stored in `names [0]'
         // e.g., "%m/%d/%y" for the format of "%D" (`fmt' == 'D')
-        return get (__it, __end, __fl, __err, __tmb,
-                    __names [0], __names [0] + __sizes [0]);
+        return _C_get (__it, __end, __fl, __err, __tmb,
+                       __names [0], __names [0] + __sizes [0]);
     }
 
     _RWSTD_IOSTATE __errtmp = _RW::__rw_goodbit;

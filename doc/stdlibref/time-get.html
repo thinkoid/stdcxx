@@ -42,9 +42,7 @@
 <LI><A HREF="#sec9">Destructor</A></LI>
 <LI><A HREF="#sec10">Facet ID</A></LI>
 <LI><A HREF="#sec11">Public Member Functions</A></LI>
-<LI><A HREF="#sec12">Extensions of this Implementation</A></LI>
 <LI><A HREF="#sec13">Protected Member Functions</A></LI>
-<LI><A HREF="#sec14">Extension of this Implementation</A></LI>
 <LI><A HREF="#sec15">Example</A></LI>
 <LI><A HREF="#sec16">See Also</A></LI>
 <LI><A HREF="#sec17">Standards Conformance</A></LI>
@@ -56,14 +54,12 @@
 <A HREF="#idx1227">char_type</A><BR>
 <A HREF="#idx1232">date_order()</A><BR>
 <A HREF="#idx1235">do_date_order()</A><BR>
-<A HREF="#idx1241">do_get()</A><BR>
 <A HREF="#idx1236">do_get_date()</A><BR>
 </TD>
 <TD VALIGN=top><A HREF="#idx1237">do_get_monthname()</A><BR>
 <A HREF="#idx1238">do_get_time()</A><BR>
 <A HREF="#idx1239">do_get_weekday()</A><BR>
 <A HREF="#idx1240">do_get_year()</A><BR>
-<A HREF="#idx1233">get()</A><BR>
 </TD>
 <TD VALIGN=top><A HREF="#idx1232">get_date()</A><BR>
 <A HREF="#idx1232">get_monthname()</A><BR>
@@ -157,16 +153,6 @@ namespace std {
     iter_type get_year(iter_type, iter_type, ios_base&amp;,
                        ios_base::iostate&amp;, tm*) const;
 
-     // extension of this implementation 
-     iter_type
-     get (iter_type, iter_type, ios_base&amp;, ios_base::iostate&amp;,
-          tm*, const char_type*, const char_type*) const; 
-
-     // extension of this implementation 
-     iter_type 
-     get (iter_type, iter_type, ios_base&amp;, ios_base::iostate&amp;,
-          tm*, char, char) const;
-
     static locale::id id;
 
     protected:
@@ -181,11 +167,6 @@ namespace std {
           ios_base&amp;, ios_base::iostate&amp;, tm*) const;
     virtual iter_type do_get_year(iter_type, iter_type,
           ios_base&amp;, ios_base::iostate&amp;, tm*) const;
- 
-    // extension of this implementation 
-    virtual iter_type 
-    do_get (iter_type, iter_type, ios_base&amp;, ios_base::iostate&amp;,
-            tm*, char, char) const;
   };
 }
 </PRE></UL>
@@ -249,23 +230,6 @@ iter_type
 <P>Each of these public functions calls the corresponding protected virtual <SAMP>do_xxx()</SAMP> function.</P>
 </UL>
 
-<A NAME="sec12"><H3>Extensions of this Implementation</H3></A>
-
-<A NAME="idx1233"></A><PRE>iter_type 
-<B>get</B> (iter_type s, iter_type end, ios_base &amp;io,<br>     ios_base::iostate &amp;err,tm *t, const char_type *pat, const<br>     char_type *pat_end) const; </PRE>
-<P>The function iterates over characters in the range  <SAMP>[pat,  pat_end)</SAMP> that is composed of zero or more directives. Each directive is composed as follows: either a non-empty sequence of white-space characters (as determined by <SAMP>isspace(io.getloc(), c)</SAMP>); or an ordinary character other than <SAMP>'%'</SAMP> or white-space; or a conversion specification. Each conversion specification   is composed of a leading <SAMP>'%'</SAMP> character followed by an optional conversion modifier, <SAMP>mod</SAMP>, and then by a conversion specifier, <SAMP>fmt</SAMP>, which determines the interpretation of the input character(s). The modifier and specifier characters are obtained by converting the (possibly wide) characters following the leading <SAMP>'%'</SAMP> character extracted from the input sequence as if by <SAMP>use_facet&lt;ctype&lt;char_type&gt; &gt;(io.getloc()).narrow(c, '\0')</SAMP>.        </P>
-<P>For each ordinary character other than white-space, the function extracts a character from the input sequence and compares the two.   If they are not equal, the function indicates an error by setting <SAMP>ios_base::failbit</SAMP> in <SAMP>err</SAMP> and the algorithm terminates. If the function reaches the end of the input sequence, it sets  <SAMP>ios_base::eofbit</SAMP> in  <SAMP>err</SAMP> and the algorithm terminates.</P>
-<P>For each white-space character, the function extracts any white-space characters from the input sequence until it encounters a character other than white-space. If the function reaches   the   end   of   the   input   sequence,   it   sets <SAMP>ios_base::eofbit</SAMP> in <SAMP>err</SAMP> and the algorithm terminates.</P>
-<P>For each conversion specification given by the characters <SAMP>fmt</SAMP> and <SAMP>mod</SAMP>, the function performs <SAMP>s = get (s, end, io, errtmp, t, fmt,  mod)</SAMP> with a <SAMP>errtmp</SAMP> argument of type <SAMP>ios_base::iostate</SAMP> initialized to  <SAMP>ios_base::good</SAMP>. If <SAMP>(errtmp  != ios_base::good)</SAMP> evaluates to true after the call, the function performs <SAMP>err |= errtmp</SAMP> and the algorithm terminates.</P>
-<P>Returns an iterator pointing just beyond the last extracted character.</P>
-
-<A NAME="idx1234"></A><PRE>
-iter_type 
-<B>get</B> (iter_type s, iter_type end, ios_base &amp;io, <br>     ios_base::iostate &amp;err, tm *t, char fmt, char mod = '\0')<br>     const; </PRE>
-<UL>
-<P>Returns <SAMP>do_get (s, end, io, err, t, fmt, mod)</SAMP>.</P>
-</UL>
-
 <A NAME="sec13"><H3>Protected Member Functions</H3></A>
 <P>The facet functions parse the string input sequence according to the same locale-specific format as the one used by the <A HREF="time-put.html">time_put</A> facet to format time and date values. If the input sequence does not match the expected format, the functions indicate an error by setting <SAMP>ios_base::failbit</SAMP> in <SAMP>err</SAMP>. If the functions reach the end of the input sequence while attempting to extract additional characters, they set <SAMP>ios_base::eofbit</SAMP> in <SAMP>err</SAMP>. The <SAMP>io</SAMP> argument is used to obtain a reference to the <SAMP>ctype&lt;char_type&gt;</SAMP> facet installed in the object's locale. </P>
 <P>The behavior of the functions is undefined if the <SAMP>t</SAMP> pointer does not point to a valid object of type <SAMP>tm</SAMP>. </P>
@@ -324,264 +288,6 @@ virtual iter_type
             ios_base::iostate&amp; err, tm* t) const; </PRE>
 <UL>
 <P>Fills in the <SAMP>t-&gt;tm_year</SAMP> member of the <SAMP>t</SAMP> argument with a year parsed from the character buffer specified by the range <SAMP>[s,end)</SAMP>. Values in the range <SAMP>[69,99]</SAMP> are assumed to refer to years 1969 through 1999, and values in the range <SAMP>[0, 68]</SAMP> are assumed to refer to years 2000 through 2068; all other values are assumed to include the century. This behavior follows the requirement on the <SAMP>strptime()</SAMP> function of IEEE Std 1003.1-2001. If an error occurs, then <SAMP>ios_base::failbit </SAMP>is set in the <SAMP>err</SAMP> argument. </P>
-<P>Returns an iterator pointing just beyond the last extracted character.</P>
-</UL>
-
-<A NAME="sec14"><H3>Extension of this Implementation</H3></A>
-
-<A NAME="idx1241"></A><PRE>iter_type 
-<B>do_get</B> (iter_type s, iter_type end, ios_base &amp;io,
-        ios_base::iostate &amp;err, tm *t, char fmt, char mod)<br>        const; </PRE>
-<UL>
-<P>Fills the appropriate members of the object pointed to by the <SAMP>t</SAMP> argument with values parsed from the character sequence in the range <SAMP>[s,end)</SAMP> according to the corresponding format specifier and, optionally, modifier (when <SAMP>(mod != '\0')</SAMP> evaluates to <SAMP>true</SAMP>). Alphabetic characters are compared without regard to case. If the input sequence does not match the format of the corresponding specifier and modifier, then the object pointed to by <SAMP>t</SAMP> is not modified and <SAMP>ios_base::failbit</SAMP> is set in the <SAMP>err</SAMP> argument. </P>
-<P>The following format specifiers and modifiers are recognized, as illustrated in <A HREF="time-get.html#Table&nbsp;34">Table&nbsp;34</A> and <A HREF="time-get.html#Table&nbsp;35">Table&nbsp;35</A>.</P>
-<H4><A NAME="Table&nbsp;34">Table&nbsp;34: Recognized conversion specifiers&nbsp;</A></H4>
-<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="3">
-<tr><td valign=top><B>Conversion Specifier</B>
-</td>
-<td valign=top><B>Description</B>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%a</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the day of the week. <SAMP>%a</SAMP> uses the locale's weekday names, specifiying either the abbreviated or full name.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%A</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Same as or equivalent to <SAMP>%a</SAMP>.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%b</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the month. <SAMP>%b</SAMP> uses the locale's month names, specifiying either the abbreviated or full name.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%B</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Same as or equivalent to <SAMP>%b</SAMP>.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%c</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents date and time formatted appropriate to the locale.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%d</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the day of the month as <SAMP>[01,31]</SAMP>. Leading zeros are optional. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%D</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the date, expressed as <SAMP>%m / %d / %y</SAMP>. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%e</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Same as or equivalent to <SAMP>%d</SAMP>.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%h</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Same as or equivalent to <SAMP>%b</SAMP>.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%H</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the hour in 24-hour clock form as <SAMP>[00,23]</SAMP>. Leading zeros are optional. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%I</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the hour in 12-hour clock form as <SAMP>[01,12]</SAMP>. Leading zeros are optional.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%j</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the day number of the year as <SAMP>[001,366]</SAMP>. Leading zeros are optional. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%m</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the month number as <SAMP>[01,12]</SAMP>. Leading zeros are optional. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%M</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Expresses the minute as <SAMP>[00,59]</SAMP>. Leading zeros are optional. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%n</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents blank (white) space. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%p</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents "a.m "or "p.m" formatted as appropriate to the locale. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%r</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the 12-hour clock time using the AM/PM notation. In the classic C locale, equivalent to <SAMP>%I : %M : %S %p</SAMP>.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%R</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the time as <SAMP>%H : %M</SAMP>. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%S</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the seconds as <SAMP>[00,60]</SAMP>. Leading zeros are optional. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%t</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents blank (white) space. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%T</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the time as <SAMP>%H : %M : %S</SAMP>. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%U</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the week number of the year as a decimal number (<SAMP>[00,53]</SAMP>) with Sunday representing as the first day of the week . Leading zeros are optional. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%w</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Expresses the weekday as a decimal number <SAMP>[0,6]</SAMP>. <SAMP>0 </SAMP>represents Sunday. Leading zeros are optional. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%W</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">The week number of the year (Monday as the first day of the week) as a decimal number <SAMP>[00,53]</SAMP>. Leading zeros are optional. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%x</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the date in the locale's date format. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%X</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the time in the locale's time format. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%y</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the year within the century. If a century is not specified, values in the range <SAMP>[59,99]</SAMP> will refer to years 1959 to 1999 inclusive, and values in the range <SAMP>[00,58]</SAMP> will refer to years 2000 to 2058 inclusive. Leading zeros are optional.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%Y</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the year and includes the century (e.g. 1988). </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%%</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents a literal <SAMP>%</SAMP> character. </P>
-</td>
-</tr>
-</TABLE>
-<P><A HREF="time-get.html#Table&nbsp;35">Table&nbsp;35</A> describes the recognized modified conversion specifiers.</P>
-<H4><A NAME="Table&nbsp;35">Table&nbsp;35: Recognized modified conversion specifiers&nbsp;</A></H4>
-<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="3">
-<tr><td valign=top><B>Name</B>
-</td>
-<td valign=top><B>Description</B>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%Ec </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the locale's alternative appropriate date and time conversion. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%EC </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the locale's alternative name of the base year (period) conversion. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%Ex </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the locale's alternative date conversion. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%EX </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the locale's alternative time conversion. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%Ey </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the offset from <SAMP>%EC</SAMP> (year only) in an alternate locale conversion. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%EY </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the full alternative year conversion. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%Od </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the day of the month by using alternate locale numeric symbols. Note, leading zeros are permitted but not required. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%Oe </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Same as or equivalent to <SAMP>%Od</SAMP>. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%OH </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the hour in 24-hour clock form using alternate numeric symbols for the locale. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%OI </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the hour in 12-hour clock form using alternate numeric symbols for the locale. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%Om </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the month using alternate numeric symbols for the locale. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%OM </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the minutes using alternate numeric symbols for the locale. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%OS </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the seconds using alternate numeric symbols for the locale. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%OU </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the week number of the year, with Sunday as the first day of the week, using alternate numeric symbols for the locale. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%Ow </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the number of the weekday (<SAMP>Sunday=0</SAMP>) using alternative numeric symbols for the locale. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%OW </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the week number of the year, with Monday as the first day of the week, using alternate numeric symbols for the locale. </P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>%Oy </SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Represents the year (offset from <SAMP>%C</SAMP>) using alternate numeric symbols for the locale. </P>
-</td>
-</tr>
-</TABLE>
 <P>Returns an iterator pointing just beyond the last extracted character.</P>
 </UL>
 
