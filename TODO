@@ -124,6 +124,26 @@ Check: =21.string.stdcxx-162= passes in 15D. The exported symbols
 lose exactly the assembly routines. The suites are otherwise
 unchanged.
 
+** TODO =time_get::do_date_order= returns =no_order= in every locale
+
+The base facet returns =dateorder ()= and no byname facet overrides
+it, since the 2005 import. 22.2.5.1.2, p1 asks for the order of the
+components of the =x= format when it is composed of day, month and
+year, and footnote 233 allows =no_order= "in valid locales", so the
+library conforms. The =time_get= example prints =date_order ()= in
+the =C= locale, whose =x= is =%m/%d/%y=, and its expected output has
+said =mdy= since the import, so the example has shown =DIFF= on
+every platform the tree ever ran on. The suite does not assert
+=date_order= anywhere.
+
+Fix: decide. Either =do_date_order= reads the facet's =x= format and
+answers =dmy=, =mdy=, =ymd= or =ydm= when the format is one of the
+four, the convenience the footnote describes, or the expected output
+takes =0= and the example documents what the library does.
+
+Check: the =time_get= example row is clean, and =22.locale.time.get=
+asserts =date_order= for the =C= locale and one named locale.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -217,11 +237,26 @@ rows become a reference.
 
 The test hosts generate one glibc locale besides =C= and =POSIX=:
 =en_US.UTF-8=. Tests that loop over the installed locales see four.
-Installing every locale in =/usr/share/i18n/SUPPORTED= widens them,
-but it also teaches the C library =de_DE.ISO-8859-1=, the name
-=rw_localedef= gives the database locale that the first-use section
-of =22.locale.codecvt.mt= races. The section then skips with a note
-and passes without testing anything.
+Three examples fail on it outright: =numpunct= finds none of its
+German names and ends =DIFF=, =codecvt1= wants =ja_JP.UTF-8=,
+=ja_JP.EUC-JP= and =ja_JP.Shift_JIS= and exits 1, =money_get= wants
+=en_US= and aborts on the uncaught =runtime_error=. =SUPPORTED= has
+no Shift_JIS locale, the charmap not being ASCII-compatible; glibc
+builds one by hand all the same, ~localedef -c -f SHIFT_JIS -i ja_JP
+ja_JP.SHIFT_JIS~, with a warning and exit status 1. The examples run against the C
+library's locales alone; the build's own databases are not built
+for them and =RWSTD_LOCALE_ROOT= is not set. Installing every locale
+in =/usr/share/i18n/SUPPORTED= widens them, but it also teaches the
+C library =de_DE.ISO-8859-1=, the name =rw_localedef= gives the
+database locale that the first-use section of =22.locale.codecvt.mt=
+races. The section then skips with a note and passes without testing
+anything. The =numpunct= example's list of German names still
+carries the spellings of the retired platforms, AIX to Windows, and
+the error it reports names the last of them. One host has every
+locale since 2026-10-14, =SUPPORTED= through =locale-gen= and the
+Shift_JIS one by hand: the three examples run clean there, and
+=22.locale.codecvt.mt= skips its first-use section there with the
+note. The other test hosts have =en_US.UTF-8= alone.
 
 Fix: the tests that race a database locale build it under a name the
 C library cannot know (=rw_localedef='s fourth argument), then every
@@ -229,7 +264,8 @@ locale is installed on all test hosts at once, and the pins are
 measured again.
 
 Check: with every locale installed, no MT program notes that the C
-library knows its database locale.
+library knows its database locale, and the =numpunct=, =codecvt1=
+and =money_get= examples run clean.
 
 ** WAITING ThreadSanitizer cannot follow =longjmp= on glibc 2.44
 
