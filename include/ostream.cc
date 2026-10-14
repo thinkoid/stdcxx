@@ -179,7 +179,7 @@ operator<< (basic_streambuf<char_type, traits_type> *__sb)
                         if (!__n)
                             break;
 
-                        __rdbuf->_C_pbump (__n);
+                        __rdbuf->pbump (__n);
 
                         __nget += __n;
                     }

@@ -114,7 +114,7 @@ _C_ipfx (bool __noskipws, ios_base::iostate __errbits)
                           __ctp.scan_not (__ctp.space, __gptr, __egptr)
                         - __gptr;
 
-                    __rdbuf->_C_gbump (__nskip);
+                    __rdbuf->gbump (__nskip);
 
                     if (__nskip < __egptr - __gptr)
                         break;
@@ -598,7 +598,7 @@ get (char_type *__s, streamsize __n, char_type __delim)
 
                     traits_type::copy (__s + _C_gcount, __gptr, __navail);
 
-                    __rdbuf->_C_gbump (__navail);
+                    __rdbuf->gbump (__navail);
 
                     _C_gcount += __navail;
                     __n       -= __navail;
@@ -711,7 +711,7 @@ getline (char_type *__line, streamsize __size, char_type __delim)
                     _C_gcount += __navail;
 
                     // advance gptr()
-                    __rdbuf->_C_gbump (__navail);
+                    __rdbuf->gbump (__navail);
 
                     if (__pdel) {
                         traits_type::assign (__line [_C_gcount - 1],

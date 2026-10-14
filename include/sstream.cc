@@ -145,13 +145,13 @@ _C_str (const char_type *__s, _RWSTD_SIZE_T __slen)
 
         if (0 <= __off) {
             // restore the pptr
-            this->_C_pbump (__off);
+            this->pbump (__off);
         }
         else if (   this->_C_state & ios_base::in
                  || this->_C_state & (ios_base::app | ios_base::ate)) {
             // in input or append/ate modes seek to end
             // (see also lwg issue 562 for clarification)
-            this->_C_pbump (__slen);
+            this->pbump (__slen);
         }
     }
 
@@ -200,7 +200,7 @@ xsputn (const char_type* __s, streamsize __n)
     // copy the whole string
     traits_type::copy (this->pptr (), __s, __n);
 
-    this->_C_pbump (__n);
+    this->pbump (__n);
 
     _C_catchup (this->eback ());
 
@@ -274,7 +274,7 @@ overflow (int_type __c)
 
         const _RWSTD_STREAMSIZE __off = this->pptr () - this->pbase ();
         this->setp (this->pbase (), __bufend);
-        this->_C_pbump (__off);
+        this->pbump (__off);
     }
 
     const int_type __retval = this->sputc (traits_type::to_char_type (__c));
@@ -361,7 +361,7 @@ setbuf (char_type* __buf, _RWSTD_STREAMSIZE __n)
 
     // reset the output and input sequences within the new buffer
     this->setp (this->_C_buffer, this->_C_buffer + this->_C_bufsize);
-    this->_C_pbump (__poff);   // ... and restore it
+    this->pbump (__poff);   // ... and restore it
 
     char_type* const __egptr = this->_C_buffer + __slen;
 
@@ -446,7 +446,7 @@ seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode __which)
             return pos_type (off_type (-1));
 
         // bump pptr up (or down) to the new position
-        this->_C_pbump (__newoff - __cur);
+        this->pbump (__newoff - __cur);
     }
 
     _RWSTD_ASSERT (this->_C_is_valid ());

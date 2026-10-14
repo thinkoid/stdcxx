@@ -448,7 +448,7 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
         // append the contents of the buffer to the controlled sequence
         traits_type::copy (this->pptr (), __buf, __nchars);
 
-        this->_C_pbump (__nchars);
+        this->pbump (__nchars);
 
         return __nchars;
     }

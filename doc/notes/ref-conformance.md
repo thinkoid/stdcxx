@@ -62,13 +62,13 @@ constructors and `str` overloads, the deep-copy `basic_string::copy`,
 the `num_get`, `num_put` and `time_get` members beyond the standard's,
 the `void` forms of `count`, `count_if` and `distance`, the comparison
 operators of `vector<bool>::reference`, the allocator of const
-elements, the `bitset` constructors from character pointers and from
-`string` and `wstring`, and the `ptrdiff_t` argument of `gbump` and
-`pbump`. Nothing reads an `_RWSTD_NO_EXT_*` macro now.
+elements, and the `bitset` constructors from character pointers and
+from `string` and `wstring`. Nothing reads an `_RWSTD_NO_EXT_*` macro
+now.
 
 What the gates also covered keeps its code with the macro gone:
-choices the standard permits, and defect resolutions the block
-disabled under an extension name.
+choices the standard permits, defect resolutions the block disabled
+under an extension name, and one addition kept on its merits.
 
 | choice in the tree | effect and source |
 |---|---|
@@ -78,6 +78,7 @@ disabled under an extension name.
 | Primary template definitions | `char_traits`, `ctype`, `collate`, `codecvt` and `numpunct` have primary template definitions beyond the required specializations (`include/rw/_traits.h`, `include/loc/`). |
 | Portable random sequence | The `random_shuffle` generator works in 32-bit words, so the sequence is the same on every target (`src/random.cpp`). |
 | Replaceable allocation functions | `src/memory.cpp` defines the `operator new` and `operator delete` variants a support library lacks, per the `_RWSTD_NO_OPERATOR_*` probes; none fires with GCC or Clang. |
+| Bump by `streamsize` | `gbump` and `pbump` take a `streamsize` where 27.5.2.3.1, p4 and 27.5.2.3.2, p4 write `int`. The library's own callers pass stream sizes and pointer differences, and an `int` cannot hold the advance of a buffer past `INT_MAX` characters on a 64-bit target. LWG issue 255 asked for this change in 2000 and was closed as not a defect in 2017, to spare the many derived classes in the wild; the library has no such constituency, so this addition stays, the only one of the strict switch's that did (`include/streambuf`). |
 | Later defect corrections | LWG 559's cv-qualified `numeric_limits` and LWG 434's `bitset::to_string` overloads are unconditional (chapter 3). |
 
 Copy-on-write strings and the compatibility mutex in their bodies are

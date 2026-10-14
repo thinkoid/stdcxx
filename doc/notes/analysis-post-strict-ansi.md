@@ -18,12 +18,11 @@ not repeat them beyond what the open questions need.
   and defect resolutions lost their dead branch. Every commit built
   and ran in the x86_64 GCC debug configuration with the suite table
   equal to the pin, or re-pinned where the change said it would move.
-- **Three calls to review** (chapter 2): the zero/one digit parameters
-  of the `bitset` string constructor stay as LWG 396's resolution; the
-  library's own callers of `gbump` and `pbump` keep a `ptrdiff_t`
-  path through protected `_C_gbump` and `_C_pbump` rather than
-  narrowing to `int`; the staying gates went one commit per gate
-  group.
+- **Three calls, reviewed on 2026-10-14** (chapter 2): the zero/one
+  digit parameters of the `bitset` string constructor stay as LWG
+  396's resolution, confirmed; the `gbump` and `pbump` call was
+  reversed, both take a `streamsize` now; the staying gates went one
+  commit per gate group, unchallenged.
 - **Two findings already in TODO** (chapter 3): the one-at-a-time
   input iterator insert of `deque` and `vector` admits in its own
   comment that it misses the strong guarantee of 23.2.4.3, p1, and the
@@ -64,14 +63,13 @@ format members left.
 | 15c7d99e | comparison operators of `vector<bool>::reference` |
 | aebf2e2a | the allocator of const elements |
 | 997b23cb | `bitset` constructors from character pointers, `string` and `wstring`, with the `int`, `unsigned` and `long` companions |
-| 48f1ae08 | `gbump` and `pbump` on `int`; the library's callers on protected `_C_gbump` and `_C_pbump` |
+| 48f1ae08 | `gbump` and `pbump` on `int`; the library's callers on protected `_C_gbump` and `_C_pbump`. Reversed on 2026-10-14, both on `streamsize`, see 2.2 |
 | cf434369 .. d627a991 | eight commits stripping the staying gates: in-place assign and insert, keep width on failure, cv-qualified limits, portable random, stream conversion, `bitset::to_string`, the five primary templates, operator new |
 | f402f64c | chapter 2 of the conformance note and the README policy paragraph |
 
-Three members kept a private form for the library's own use, the
-precedent set in c91e001f: `_C_str`, `_C_get`, `_C_gbump` and
-`_C_pbump`. The entry did not touch `src/mapfile.gcc`; the map lists
-the public `int` forms of `gbump` and `pbump` and all four are inline.
+Two members kept a private form for the library's own use, the
+precedent set in c91e001f: `_C_str` and `_C_get`. The entry did not
+touch `src/mapfile.gcc`.
 
 Suite table rows moved by the entry, all in
 `doc/notes/baseline/x86_64-15D.txt`: `17.extensions` gone;
@@ -82,7 +80,9 @@ Suite table rows moved by the entry, all in
 ## 2. Decisions taken by the sessions, for review
 
 These three were made by reading the entry's rule back at the case,
-not on the maintainer's word. Each is reversible with a small commit.
+not on the maintainer's word. The maintainer reviewed them on
+2026-10-14: the first confirmed, the second reversed, the third let
+stand.
 
 ### 2.1 The zero/one digit parameters of the `bitset` string constructor stay
 
@@ -98,7 +98,11 @@ as a yes or no. If the answer is that C++03's signature is the rule,
 the two parameters go and `23.bitset.cons` loses the cases that pass
 them.
 
-### 2.2 `gbump` and `pbump` keep a wide path privately
+Reviewed 2026-10-14: the parameters stay. The rule as the maintainer
+states it is C++03 as the baseline, with every resolution later
+adopted into the standard kept.
+
+### 2.2 `gbump` and `pbump`: the `int` form reversed, both take a `streamsize`
 
 27.5.2.3.1 declares both on `int`. The tree took `ptrdiff_t`, and its
 eighteen callers in seven files pass stream sizes and offsets:
@@ -107,12 +111,27 @@ eighteen callers in seven files pass stream sizes and offsets:
 past 2 GB would have silently wrapped the advance through an `int`
 parameter. 48f1ae08 made the public members `int` and routed the
 callers through protected `_C_gbump` and `_C_pbump` on `ptrdiff_t`,
-each asserting the buffer stays valid. libstdc++ has the same shape.
-The alternative, the standard signature alone and truncation above
-`INT_MAX`, is what the entry's rule literally asks for; the commit
-judged the private wide path to be the `_C_str` and `_C_get`
-precedent rather than an extension, since nothing outside the class
-can call it.
+the `_C_str` and `_C_get` precedent. That kept the library's own
+paths correct and left the truncation with every derived class.
+
+Reviewed 2026-10-14 and reversed. The `int` is a defect of the
+standard: LWG issue 255 asked for the change in 2000 and was closed
+as not a defect in 2017 because it would break the derived classes in
+the wild and an overload would be ambiguous; the signature is still
+`int` in C++23, 31.6.3.4.2 and 31.6.3.4.3. The library has no
+constituency of derived classes to protect, so the deviation is
+deliberate and recorded in chapter 2 of the conformance note. The
+type is `streamsize`, not `streamoff` or `ptrdiff_t`: 31.2.2 defines
+`streamsize` as the count of characters transferred or the size of a
+buffer, which is what a bump is, and `sgetn`, `sputn`, `xsgetn` and
+`xsputn` beside it already take it; `streamoff` is sized for file
+positions, which the standard lets exceed what a pointer can span.
+An overload on both types was rejected: it hides the defect, and a
+`size_t` argument converts to `int` and to `long` at the same rank.
+The private pair went and the callers use the public names again.
+`src/mapfile.gcc` keeps its `gbump` and `pbump` lines: it spells every
+`streamsize` parameter as `int`, so the two entries read the same
+under either signature (4.7).
 
 ### 2.3 One commit per gate group
 
@@ -227,6 +246,18 @@ build phases serially, the two `make run` targets, the pin derivation
 and a `diff -w` against the baseline. Neither is in the tree; both
 are twenty lines and worth rebuilding the next time a family of
 macros goes.
+
+### 4.7 The symbol map spells `streamsize` as `int`
+
+`src/mapfile.gcc` lists `sgetn`, `xsgetn`, `xsputn` and `pubsetbuf`
+of `basic_streambuf` with an `int` parameter (`EPci`), the mangling
+of a target where `ptrdiff_t` is `int`; on x86-64 the library
+instantiates them on `long` (`EPcl`), and the map ends in `local: *;`.
+Hypothesis: those entries match no symbol on x86-64 and the members
+reach the clients by instantiation in each translation unit, or the
+version script is not applied in the measured build. Check: `nm -D`
+on the 15D-gcc library for `5sgetnEPcl`, and the link line for the
+map. Seen from the `gbump` reversal; not looked into.
 
 ## 5. Where the record is
 

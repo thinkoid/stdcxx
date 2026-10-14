@@ -175,9 +175,14 @@ protected:
         return _C_egptr;
     }
 
-    // 27.5.2.3.1, p4
-    void gbump (int __n) {
-        _C_gbump (__n);
+    // 27.5.2.3.1, p4, except that the argument is a streamsize
+    // where the standard writes int: an int need not hold the
+    // advance of a get area past INT_MAX characters (lwg issue 255,
+    // closed as not a defect to spare existing derived classes)
+    void gbump (streamsize __n) {
+        _RWSTD_ASSERT (_C_gptr != 0 || !__n);
+        _C_gptr += __n;
+        _RWSTD_ASSERT (_C_is_valid ());
     }
 
     // 27.5.2.3.1, p5
@@ -202,9 +207,11 @@ protected:
         return _C_epptr;
     }
 
-    // 27.5.2.3.2, p4
-    void pbump (int __n) {
-        _C_pbump (__n);
+    // 27.5.2.3.2, p4, argument type as in gbump()
+    void pbump (streamsize __n) {
+        _RWSTD_ASSERT (_C_pptr != 0 || !__n);
+        _C_pptr += __n;
+        _RWSTD_ASSERT (_C_is_valid ());
     }
 
     // 27.5.2.3.2, p5
@@ -350,21 +357,6 @@ protected:
             _C_state |= _C_unbuffered;
         else
             _C_state &= ~_C_unbuffered;
-    }
-
-    // advance gptr() and pptr() by a pointer difference; the
-    // library's own callers pass stream sizes and offsets, which
-    // the int argument of gbump() and pbump() need not hold
-    void _C_gbump (_RWSTD_PTRDIFF_T __n) {
-        _RWSTD_ASSERT (_C_gptr != 0 || !__n);
-        _C_gptr += __n;
-        _RWSTD_ASSERT (_C_is_valid ());
-    }
-
-    void _C_pbump (_RWSTD_PTRDIFF_T __n) {
-        _RWSTD_ASSERT (_C_pptr != 0 || !__n);
-        _C_pptr += __n;
-        _RWSTD_ASSERT (_C_is_valid ());
     }
 
     // debug only - asserts that get and put areas are consistent
