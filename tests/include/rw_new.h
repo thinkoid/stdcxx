@@ -186,8 +186,7 @@ void operator delete (void *ptr, _RWSTD_SIZE_T) _THROWS (())
 #    endif   // _RWSTD_NO_OPERATOR_DELETE_SIZED
 
 
-#    if    !defined (_RWSTD_NO_OPERATOR_NEW_ARRAY) \
-          || defined (_RWSTD_NO_EXT_OPERATOR_NEW)
+#    ifndef _RWSTD_NO_OPERATOR_NEW_ARRAY
 
 // replaceable only if we don't provide a definition in <new>
 void* operator new[] (_RWSTD_SIZE_T n) _THROWS ((_RWSTD_BAD_ALLOC))
@@ -195,10 +194,9 @@ void* operator new[] (_RWSTD_SIZE_T n) _THROWS ((_RWSTD_BAD_ALLOC))
     return operator_new (n, true);
 }
 
-#    endif   // !_RWSTD_NO_OPERATOR_NEW_ARRAY || _RWSTD_NO_EXT_OPERATOR_NEW
+#    endif   // _RWSTD_NO_OPERATOR_NEW_ARRAY
 
-#    if   !defined (_RWSTD_NO_OPERATOR_DELETE_ARRAY) \
-          || defined (_RWSTD_NO_EXT_OPERATOR_NEW)
+#    ifndef _RWSTD_NO_OPERATOR_DELETE_ARRAY
 
 // replaceable only if we don't provide a definition in <new>
 void operator delete[] (void *ptr) _THROWS (())
@@ -207,7 +205,7 @@ void operator delete[] (void *ptr) _THROWS (())
 }
 
 
-#    endif   // !_NO_OPERATOR_DELETE_ARRAY || _NO_EXT_OPERATOR_NEW
+#    endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY
 
 #    ifndef _RWSTD_NO_OPERATOR_DELETE_ARRAY_SIZED
 

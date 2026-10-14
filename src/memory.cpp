@@ -94,13 +94,11 @@ __rw_deallocate (void *p, size_t, int /* = 0 */) _THROWS (())
 
 
 // The following operators are replaceable; provide definitions if they're
-// missing in the compiler support library, and _RWSTD_NO_EXT_OPERATOR_NEW
-// is not defined. This means that they will no longer be replaceable, but
-// at least they will be callable without the user providing the definitions
+// missing in the compiler support library. This means that they will no
+// longer be replaceable, but at least they will be callable without the
+// user providing the definitions
 //
-#ifndef _RWSTD_NO_EXT_OPERATOR_NEW
-
-#  ifdef _RWSTD_NO_OPERATOR_NEW_NOTHROW
+#ifdef _RWSTD_NO_OPERATOR_NEW_NOTHROW
 
 _RWSTD_EXPORT void*
 operator new (size_t __size, const _STD::nothrow_t&) _NEW_THROWS (())
@@ -108,11 +106,11 @@ operator new (size_t __size, const _STD::nothrow_t&) _NEW_THROWS (())
     return malloc (__size);
 }
 
-#  endif   // _RWSTD_NO_OPERATOR_NEW_NOTHROW
+#endif   // _RWSTD_NO_OPERATOR_NEW_NOTHROW
 
 
-#  if    defined (_RWSTD_NO_OPERATOR_DELETE_NOTHROW) \
-     && !defined (_RWSTD_NO_PLACEMENT_DELETE)
+#if    defined (_RWSTD_NO_OPERATOR_DELETE_NOTHROW) \
+    && !defined (_RWSTD_NO_PLACEMENT_DELETE)
 
 _RWSTD_EXPORT void
 operator delete (void* __ptr, const _STD::nothrow_t&) _NEW_THROWS (())
@@ -120,9 +118,9 @@ operator delete (void* __ptr, const _STD::nothrow_t&) _NEW_THROWS (())
     free (__ptr);
 }
 
-#  endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW && _RWSTD_NO_PLACEMENT_DELETE
+#endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW && _RWSTD_NO_PLACEMENT_DELETE
 
-#  ifdef _RWSTD_NO_OPERATOR_NEW_ARRAY
+#ifdef _RWSTD_NO_OPERATOR_NEW_ARRAY
 
 _RWSTD_EXPORT void*
 operator new[] (size_t __size) _NEW_THROWS ((_RWSTD_BAD_ALLOC))
@@ -130,9 +128,9 @@ operator new[] (size_t __size) _NEW_THROWS ((_RWSTD_BAD_ALLOC))
     return ::operator new (__size);
 }
 
-#  endif   // _RWSTD_NO_OPERATOR_NEW_ARRAY
+#endif   // _RWSTD_NO_OPERATOR_NEW_ARRAY
 
-#  ifdef _RWSTD_NO_OPERATOR_NEW_ARRAY_NOTHROW
+#ifdef _RWSTD_NO_OPERATOR_NEW_ARRAY_NOTHROW
 
 _RWSTD_EXPORT void*
 operator new[] (size_t __size, const _STD::nothrow_t&) _NEW_THROWS (())
@@ -146,10 +144,10 @@ operator new[] (size_t __size, const _STD::nothrow_t&) _NEW_THROWS (())
     }
 }
 
-#  endif   // _RWSTD_NO_OPERATOR_NEW_ARRAY_NOTHROW
+#endif   // _RWSTD_NO_OPERATOR_NEW_ARRAY_NOTHROW
 
 
-#  ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY
+#ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY
 
 _RWSTD_EXPORT void
 operator delete[] (void* __ptr) _NEW_THROWS (())
@@ -157,11 +155,11 @@ operator delete[] (void* __ptr) _NEW_THROWS (())
     ::operator delete (__ptr);
 }
 
-#  endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY
+#endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY
 
 
-#  if     defined (_RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW) \
-      && !defined (_RWSTD_NO_PLACEMENT_DELETE)
+#if     defined (_RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW) \
+    && !defined (_RWSTD_NO_PLACEMENT_DELETE)
 
 _RWSTD_EXPORT void
 operator delete[] (void* __ptr, const _STD::nothrow_t&) _NEW_THROWS (())
@@ -169,9 +167,7 @@ operator delete[] (void* __ptr, const _STD::nothrow_t&) _NEW_THROWS (())
     ::operator delete[] (__ptr);  // ::operator delete[] doesn't throw
 }
 
-#  endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW && _RWSTD_NO_PLACEMENT_DELETE
-
-#endif   // _RWSTD_NO_EXT_OPERATOR_NEW
+#endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW && _RWSTD_NO_PLACEMENT_DELETE
 
 //**************************************************************************
 

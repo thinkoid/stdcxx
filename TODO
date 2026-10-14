@@ -39,80 +39,6 @@ Check: designed with the fix. The timings above are the baseline, and
 =22.locale.use_facet.mt= still finds no block outliving its round, or
 leaves with the design.
 
-** TODO Strict ANSI as the rule, the additions outside the standard gone
-
-The strict switch is gone: =_RWSTD_STRICT_ANSI=, =_RWSTD_NO_EXTENSIONS=
-and the block in =include/rw/_config.h= that defined 26
-=_RWSTD_NO_EXT_*= macros under it, with =tests/intro/17.extensions=,
-which asserted the absence of the additions behind the switch. The C
-masking macros leave =<cstdio>= and =<cwchar>= unconditionally. What
-remains is the 33 =_RWSTD_NO_EXT_*= names the tree reads in 34 files
-under =include= and =src=, defined nowhere now, the same gates in the
-tests, and the code behind them.
-
-Intent: strict conformance becomes the only configuration. What
-leaves is what the library adds beyond ISO/IEC 14882:2003: members,
-classes, overloads and manipulator values the standard does not
-specify. Among them the =ios_base::failure= subclasses,
-=stringbuf::str (const char*)=, the deep-copy =basic_string::copy=,
-the extra =num_get=, =num_put= and =time_get= members, the =void=
-forms of =count= and =distance=.
-
-The rest of what the gates cover keeps its behaviour and loses only
-its macro: choices the standard permits (the in-place =assign= and
-=insert= of =deque= and =vector=, the width kept on a failed
-insertion, the portable random sequence, the primary-template
-definitions), later defect resolutions the block disables under the
-extension name (LWG 559, cv-qualified =numeric_limits=; LWG 568, the
-safe stream conversion), and =long long=, which every supported
-compiler provides and C++11 made standard.
-
-The sort. Leaving, each with its code, its tests and its examples:
-=FAILURE= (the three =ios_base::failure= subclasses),
-=STRINGBUF_STR= (=str (const char_type*, size_t)=, with the ungated
-=str (const char_type*)= and the =const char_type*= constructor beside
-it), =DEEP_STRING_COPY=, =NUM_GET= (=get= on =short= and =int=),
-=NUM_PUT= (a test gate only), =TIME_GET= (=get= with a format and its
-=do_get=, which the facet's own members use: they become private),
-=VOID_COUNT=, =VOID_DISTANCE=, =VECTOR_BOOL_REF_OPS=,
-=CONST_ALLOCATOR=, =BITSET_CTOR_STRING= and =BITSET_CTOR_CHAR_ARRAY=
-(C++11's constructors, not 2003's), =STREAMBUF_BUMP= (=gbump= and
-=pbump= on =ptrdiff_t=), and =LOCALE=, set once and read nowhere.
-Staying, the macro and its dead branch gone: the four =*_IN_PLACE=
-gates of =deque= and =vector=, =KEEP_WIDTH_ON_FAILURE=,
-=PORTABLE_RANDOM_SEQUENCE=, the nine =*_PRIMARY= gates (five of them
-commented out since 2005), =CV_QUALIFIED_LIMITS= (LWG 559),
-=IOS_SAFE_CONVERSION= (LWG 568), =BITSET_TO_STRING= (LWG 434), and
-=OPERATOR_NEW=, whose own open question is in =_config.h= beside its
-=#undef=.
-
-Fix, one subsystem per commit, the suite tables as the oracle. Done: the
-=setbase= bases and =bin= (=doc/notes/analysis-numeric-base.md=), the
-stream-locking additions, their default kept
-(=doc/notes/analysis-basic-ios-flags.md=), the file stream additions,
-the switch, the =ios_base::failure= subclasses with their three error
-codes and catalog messages, the =stringbuf= and string stream
-=const char_type*= constructors and =str= overloads, the two-arg =str=
-now the private =_C_str=, the deep-copy =basic_string::copy=, the
-=num_get= members on =short= and =int=, the =NUM_PUT= test gate, the
-=time_get= format members, now the private =_C_get= pair, the =void=
-=count= and =count_if=, the =void= =distance=, the comparison operators
-of =vector<bool>::reference=, the allocator of const elements, the
-=bitset= constructors from character pointers, =string= and =wstring=
-with the integer overloads beside them, the =streambuf= bumps on
-=ptrdiff_t=, now the protected =_C_gbump= and =_C_pbump=. Stripped,
-behaviour kept: the four =*_IN_PLACE= gates of =deque= and =vector=,
-=KEEP_WIDTH_ON_FAILURE=, =CV_QUALIFIED_LIMITS=, =PORTABLE_RANDOM_SEQUENCE=,
-=IOS_SAFE_CONVERSION=, =BITSET_TO_STRING=, the five =*_PRIMARY= gates
-still in the tree.
-Next, per kept behaviour, the macro and its dead branch go. The
-original README stays; =README.md= records the policy.
-
-Check: =git grep _RWSTD_NO_EXT_= is empty under =include=, =src= and
-=tests=. The suite tables are re-pinned in all six configurations
-with no row moving but the extension rows. The examples build and
-run.
-
 ** TODO The input iterator insert of =deque= and =vector= against 23.2.4.3, p1
 
 =__rw_insert_range= for an input iterator range, in =include/vector.cc=
@@ -333,6 +259,20 @@ reads the new guard.
 The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
+
+** TODO The five other pins after the strict ANSI removals
+
+The removals of October 14 moved four rows of the suite table:
+=17.extensions= is gone, =18.exception= runs 1097 assertions for
+1109, =21.cwchar= 118 for 66, =21.cwctype= 294 for 260 and
+=23.bitset.cons= 1677 for 2347. Only =x86_64-15D.txt= under
+=doc/notes/baseline= carries the new rows; the other five pins have
+the old ones.
+
+Fix: after the night's driver run, patch the five rows in each pin in
+its own layout, as the 15D pin was.
+
+Check: ~diff -w~ of each pin against its run log is empty.
 
 ** TODO The scripts under =bin= drive the certification
 

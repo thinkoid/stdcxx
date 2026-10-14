@@ -62,8 +62,7 @@ struct MemoryAllocator
             _failAlloc = false;
             _THROW (std::bad_alloc ());
         }
-#if !defined (_RWSTD_NO_EXT_OPERATOR_NEW) && \
-     defined (_RWSTD_NO_OPERATOR_NEW_NOTHROW)
+#ifdef _RWSTD_NO_OPERATOR_NEW_NOTHROW
 
         // test our implementation of
         // ::operator new(size_t, const std::nothrow)
@@ -85,8 +84,7 @@ struct MemoryAllocator
 
     void operatorDelete (void* ptr) _THROWS (()) {
         _deallocPtr = ptr;
-#if !defined (_RWSTD_NO_EXT_OPERATOR_NEW) && \
-     defined (_RWSTD_NO_OPERATOR_NEW_NOTHROW)
+#ifdef _RWSTD_NO_OPERATOR_NEW_NOTHROW
         // memory allocated by our nothrow operator new()
         if (recursive_delete_nothrow++ || recursive_new_nothrow)
             std::free (ptr);
@@ -249,8 +247,6 @@ int run_test (int, char* [])
         rw_assert (original_handler == 0, 0, __LINE__,
                    "std::set_new_handler() unexpectedly returned "
                    "installed handler");
-
-#define _RWSTD_NO_EXT_OPERATOR_NEW
 
         new_handler_t replacement_handler
             = std::set_new_handler (original_handler);
