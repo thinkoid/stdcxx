@@ -94,8 +94,6 @@ public:
 
     // 27.4.4.3, p1
 
-#ifndef _RWSTD_NO_EXT_IOS_SAFE_CONVERSION
-
 private:
 
     // SunPro 5.7 needs a data pointer and misoptimizes the conversion
@@ -108,14 +106,6 @@ public:
     operator _C_uniq_ptr () const {
         return fail () ? _C_uniq_ptr (0) : &_C_uniq_type::_C_foo;
     }
-
-#else   // if defined (_RWSTD_NO_EXT_IOS_SAFE_CONVERSION)
-
-    operator void*() const {
-        return fail () ? (void*)0 : (void*)1;
-    }
-
-#endif   // _RWSTD_NO_EXT_IOS_SAFE_CONVERSION
 
     // 27.4.4.3, p2
     bool operator! () const {
