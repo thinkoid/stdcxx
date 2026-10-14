@@ -270,18 +270,6 @@ except the =21.cwchar= coverage, which adds assertions.
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
-* TODO =rw_get_cpus= closes a pipe with =fclose=
-
-=rw_get_cpus= (=tests/src/thread.cpp=) falls back on =popen= when
-=sysconf= cannot count the processors, and closes the stream with
-=fclose=. A stream from =popen= is closed with =pclose=, which also
-waits for the command. GCC warns (=-Wmismatched-dealloc=). Only a host
-whose =sysconf= fails takes the path.
-
-Fix: =pclose=.
-
-Check: librwtest builds without the warning.
-
 * TODO The locale sources under =etc/nls= are glibc 2.2's
 
 The definitions and charmaps under =etc/nls= are copies from GNU libc

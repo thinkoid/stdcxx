@@ -216,7 +216,7 @@ rw_get_cpus ()
             if (1 == n)
                 ncpus = tmp;
 
-            fclose (fp);
+            pclose (fp);
         }
     }
 
