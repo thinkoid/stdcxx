@@ -407,8 +407,6 @@ _C_assign_n (size_type __n, const_reference __x)
 {
     _RWSTD_ASSERT (_C_is_valid ());
 
-#ifndef _RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE
-
     // assign over existing elements for better efficiency
     // and exception safety
 
@@ -432,19 +430,6 @@ _C_assign_n (size_type __n, const_reference __x)
     }
 
     insert (__end, __n, __x);
-
-#else   // if defined (_RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE)
-
-    // follow the inefficient requirement in 23.2.1.1, p8
-
-    // complexity: linear in n
-    // exception safety: basic
-
-    clear ();
-    insert (begin (), __n, __x);
-
-#endif   // _RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE
-
 }
 
 
@@ -544,8 +529,6 @@ __rw_assign_range (deque<_TypeT, _Allocator> *__self,
     _RWSTD_ASSERT_RANGE (__first, __last);
     _RWSTD_ASSERT (__self->_C_is_valid ());
 
-#ifndef _RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE
-
     // assign over existing elements for better efficiency
     // and exception safety
 
@@ -570,19 +553,6 @@ __rw_assign_range (deque<_TypeT, _Allocator> *__self,
     }
 
     __self->insert (__end, __first, __last);
-
-#else   // if defined (_RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE)
-
-    // follow the inefficient requirement in 23.2.1.1, p7
-
-    // complexity: linear in distance(first, last)
-    // exception safety: basic
-
-    __self->clear ();
-    __self->insert (__self->begin (), __first, __last);
-
-#endif   // _RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE
-
 }
 
 
@@ -613,30 +583,11 @@ __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
     _RWSTD_ASSERT_RANGE (__it, __self->end ());
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-#ifndef _RWSTD_NO_EXT_DEQUE_INSERT_IN_PLACE
-
     // insert one element at a time to prevent a loss of data
     // from the input sequence in the case of an exception
 
     for ( ; !(__first == __last); ++__it, ++__first)
         __it = __self->insert (__it, *__first); 
-
-#else   // if defined (_RWSTD_NO_EXT_DEQUE_INSERT_IN_PLACE)
-
-    // 23.2.1.3, p2: if an exception is thrown other than by the copy
-    // constructor or assignment operator of T there are no effects.
-
-    _Deque __tmp (__self->begin (), __it, __self->get_allocator ());
-
-    for (; !(__first == __last); ++__first)
-        __tmp.push_back (*__first);
-
-    __tmp.insert (__tmp.end (), __it, __self->end ());
-
-    __self->swap (__tmp);
-    
-#endif   // _RWSTD_NO_EXT_DEQUE_INSERT_IN_PLACE
-
 }
 
 

@@ -143,7 +143,6 @@ void exception_loop (int line, const char *fcall, bool capchg,
             }
             else if (-1 == n) {
 
-#ifndef _RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE
                 // disable exceptions if Iterator is not at least
                 // a ForwardIterator since the extension doesn't
                 // provide the strong exception safety guarantee
@@ -151,7 +150,6 @@ void exception_loop (int line, const char *fcall, bool capchg,
                 if (!is_forward (beg)) {
                     *pst->throw_at_calls_ [0] = std::size_t (-1);
                 }
-#endif   // _RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE
 
                 vec.insert (it, beg, end);
             }

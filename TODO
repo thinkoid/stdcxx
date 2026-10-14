@@ -100,15 +100,34 @@ now the private =_C_str=, the deep-copy =basic_string::copy=, the
 of =vector<bool>::reference=, the allocator of const elements, the
 =bitset= constructors from character pointers, =string= and =wstring=
 with the integer overloads beside them, the =streambuf= bumps on
-=ptrdiff_t=, now the protected =_C_gbump= and =_C_pbump=. Next, per
-addition in the order above, the code path goes with its macro and its
-test branches; per kept behaviour, the macro and its dead branch go. The
+=ptrdiff_t=, now the protected =_C_gbump= and =_C_pbump=. Stripped,
+behaviour kept: the four =*_IN_PLACE= gates of =deque= and =vector=.
+Next, per kept behaviour, the macro and its dead branch go. The
 original README stays; =README.md= records the policy.
 
 Check: =git grep _RWSTD_NO_EXT_= is empty under =include=, =src= and
 =tests=. The suite tables are re-pinned in all six configurations
 with no row moving but the extension rows. The examples build and
 run.
+
+** TODO The input iterator insert of =deque= and =vector= against 23.2.4.3, p1
+
+=__rw_insert_range= for an input iterator range, in =include/vector.cc=
+and =include/deque.cc=, inserts one element at a time; the comment in
+the =vector= one says it does not satisfy the strong exception safety
+requirement of 23.2.4.3, p1, and the =deque= one is of the same shape.
+The branch that met the requirement, a temporary filled first and
+inserted whole, was the other side of the =*_INSERT_IN_PLACE= gates
+and left with them; =tests/containers/23.vector.modifiers.cpp= turns
+exceptions off for an iterator below forward on that account. The
+strict ANSI entry sorted the gates as choices the standard permits.
+
+Fix: decide whether the one-at-a-time insert stays. If not, the
+temporary comes back from the gate's history as the only code and the
+test's exception step goes.
+
+Check: =23.vector.modifiers= and =23.deque.modifiers= with exceptions
+on for input iterators.
 
 ** TODO Leftovers beside the removed function probes
 

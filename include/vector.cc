@@ -46,18 +46,10 @@ vector<_TypeT, _Allocator>&
 vector<_TypeT, _Allocator>::
 operator= (const vector &__rhs)
 {
-#ifndef _RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE
-
     if (capacity () < __rhs.size ())
         vector (__rhs).swap (*this);
     else if (&__rhs != this)
         assign (__rhs.begin (), __rhs.end ());
-
-#else   // if defined (_RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE)
-
-    vector (__rhs).swap (*this);
-
-#endif   // _RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE
 
     return *this;
 }
@@ -142,19 +134,10 @@ template <class _TypeT, class _Allocator>
 void vector<_TypeT, _Allocator>::
 _C_assign_n (size_type __n, const_reference __x)
 {
-#ifndef _RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE
-
     // FIXME: implement in-place assignment with repetition
 
     clear ();
     insert (begin (), __n, __x);   
-
-#else   // if defined (_RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE)
-
-    clear ();
-    insert (begin (), __n, __x);   
-
-#endif   // _RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE
 }
 
 
@@ -341,8 +324,6 @@ __rw_assign_range (vector<_TypeT, _Allocator> *__self,
 
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-#ifndef _RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE
-
     // assign over existing elements for better efficiency
     // and exception safety
 
@@ -368,20 +349,6 @@ __rw_assign_range (vector<_TypeT, _Allocator> *__self,
     }
 
     __self->insert (__end, __first, __last);
-
-#else   // if defined (_RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE)
-
-    // follow the inefficient requirement in 23.2.4.1, p2
-
-    // complexity: linear in distance(first, last)
-    //    exactly distance(first, last) calls to value_type's copy ctor
-    // exception safety: basic
-
-    __self->clear ();
-    __self->insert (__self->begin (), __first, __last);
-
-#endif   // _RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE
-
 }
 
 
@@ -412,8 +379,6 @@ __rw_assign_range (vector<_TypeT, _Allocator> *__self,
 #endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
     _RWSTD_ASSERT_RANGE (__first, __last);
-
-#ifndef _RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE
 
     // assign over existing elements for better efficiency
     // and exception safety
@@ -462,19 +427,6 @@ __rw_assign_range (vector<_TypeT, _Allocator> *__self,
 
         __self->insert (__end, __first, __last);
     }
-
-#else   // if defined (_RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE)
-
-    // follow the inefficient requirement in 23.2.4.1, p2
-
-    // complexity: linear in distance(first, last)
-    // exception safety: basic
-
-    __self->clear ();
-    __self->insert (__self->begin (), __first, __last);
-
-#endif   // _RWSTD_NO_EXT_VECTOR_ASSIGN_IN_PLACE
-
 }
 
 
@@ -505,8 +457,6 @@ __rw_insert_range (vector<_TypeT, _Allocator> *__self, _VectorIter __it,
 
     _RWSTD_ASSERT_RANGE (__it, end ());
     _RWSTD_ASSERT_RANGE (__first, __last);
-
-#ifndef _RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE
 
     // note that this extension does not satisfy the strong exception
     // safety requirement in 23.2.4.3, p1
@@ -549,33 +499,6 @@ __rw_insert_range (vector<_TypeT, _Allocator> *__self, _VectorIter __it,
                 _STD::iter_swap (__p0, __p1);
         }
     }
-
-#else   // if defined (_RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE)
-
-    // 23.2.4.3, p1: If an exception is thrown other than by the copy
-    // constructor or assignment operator of T there are no effects.
-    // see also lwg issue 406
-
-    // complexity: linear in distance(first, last)
-    // exception safety:
-    // -- strong if capacity() < size() + distance(first, last) and
-    //    value_type's assignment operator and copy ctor do not throw
-    // -- basic otherwise
-
-    // insert input range into a temporary sequence rather than into *this
-    // to coid modifying *this in case an exception (e.g., bad_alloc) is
-    // thrown
-    vector<value_type, allocator_type> __tmp (__self->get_allocator ());
-
-    for ( ; !(__first == __last); ++__first)
-        __tmp.push_back (*__first);
-
-    // insert into *this using a more efficient algorithm optimized
-    // for BidirectionalIterator (and better)
-    __self->insert (__it, __tmp.begin (), __tmp.end ());
-
-#endif   // _RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE
-
 }
 
 
@@ -621,12 +544,8 @@ __rw_insert_range (vector<_TypeT, _Allocator> *__self,  _VectorIter __it,
     if (!__size2)
         return;
 
-#ifndef _RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE
     const bool __insert_in_place =
         __self->size () + __size2 <= __self->capacity ();
-#else   // if defined (_RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE)
-    const bool __insert_in_place = false;
-#endif   // _RWSTD_NO_EXT_VECTOR_INSERT_IN_PLACE
 
     if (__insert_in_place) {
 

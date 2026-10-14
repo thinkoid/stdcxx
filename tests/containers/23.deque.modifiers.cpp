@@ -952,13 +952,8 @@ void test_assign (int line, int exceptions,
     // destroys the existing elements before inserting the new ones,
     // or whether it assigns the new elements over the existing ones
 
-#ifndef _RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE
     const std::size_t expect_copy = seqlen < asnlen ? asnlen - seqlen : 0;
     const std::size_t expect_asgn = asnlen < seqlen ? asnlen : seqlen;
-#else   // if defined (_RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE)
-    const std::size_t expect_copy = asnlen;
-    const std::size_t expect_asgn = 0;
-#endif   // _RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE
 
     rw_assert (n_copy == expect_copy, __FILE__, line,
                "line %d: %s: expected %zu invocations "
@@ -1160,13 +1155,8 @@ void test_erase (int line,
     // destroys the existing elements before inserting the new ones,
     // or whether it assigns the new elements over the existing ones
 
-#ifndef _RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE
     const std::size_t expect_copy = seqlen < asnlen ? asnlen - seqlen : 0;
     const std::size_t expect_asgn = asnlen < seqlen ? asnlen : seqlen;
-#else   // if defined (_RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE)
-    const std::size_t expect_copy = asnlen;
-    const std::size_t expect_asgn = 0;
-#endif   // _RWSTD_NO_EXT_DEQUE_ASSIGN_IN_PLACE
 
     rw_assert (n_copy == int (expect_copy), 0, line,
                "line %d: %s: expected %zu invocations "
