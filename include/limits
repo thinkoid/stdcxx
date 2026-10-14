@@ -229,8 +229,7 @@ _RWSTD_EXPORT extern const long double __rw_ldbl_denorm_min;
 
 #undef _RWSTD_SPECIALIZE_LIMITS
 
-#if    !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) \
-    || defined (_RWSTD_NO_EXT_CV_QUALIFIED_LIMITS)
+#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
 #  define _RWSTD_SPECIALIZE_LIMITS(T, cpfx)  \
   _RWSTD_CLASS_BEGIN (numeric_limits<T>)     \
       _RWSTD_LIMITS_BODY (T, cpfx)           \
@@ -533,7 +532,6 @@ _RWSTD_SPECIALIZE_LIMITS (unsigned _RWSTD_LONG_LONG, _RWSTD_ULLONG)
 #ifndef _RWSTD_LIMITS_PARTIAL_SPEC_DEFINED
 #  define _RWSTD_LIMITS_PARTIAL_SPEC_DEFINED
 
-#  ifndef _RWSTD_NO_EXT_CV_QUALIFIED_LIMITS
 #    ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 template <class _TypeT>
@@ -546,7 +544,6 @@ template <class _TypeT>
 struct numeric_limits<const volatile _TypeT>: numeric_limits<_TypeT> { };
 
 #    endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
-#  endif   // _RWSTD_NO_EXT_CV_QUALIFIED_LIMITS
 #endif   // _RWSTD_LIMITS_PARTIAL_SPEC_DEFINED
 
 }   // namespace std

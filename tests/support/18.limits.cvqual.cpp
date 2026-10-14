@@ -36,24 +36,11 @@
 
 /**************************************************************************/
 
-template <class T>
-struct UserType
-{
-    const T val_;
-
-    UserType (T val = T ()): val_ (val) { /* empty */}
-
-    operator T () const { return val_; }
-};
-
-
 template <class T, class CVQualifiedT>
 void test_limits (const volatile T*, CVQualifiedT*,
                   const char *tname,
                   const char *quals)
 {
-#ifndef _RWSTD_NO_EXT_CV_QUALIFIED_LIMITS
-
     typedef std::numeric_limits<T>            limits;
     typedef std::numeric_limits<CVQualifiedT> cv_limits;
 
@@ -63,19 +50,6 @@ void test_limits (const volatile T*, CVQualifiedT*,
       rw_assert (limits::member == cv_limits::member, 0, __LINE__,          \
                  "numeric_limits<%s>::%s == numeric_limits<%s %1$s>::%2$s", \
                  tname, #member, quals)
-#else   // if defined (_RWSTD_NO_EXT_CV_QUALIFIED_LIMITS)
-
-    typedef std::numeric_limits<UserType<T> > limits;
-    typedef std::numeric_limits<CVQualifiedT> cv_limits;
-
-   // verify that the member has the same value as the same member
-   // of a specialization of numeric_limits on some user-defined T
-   // (i.e., the primary template)
-#  define TEST(member)                                                      \
-      rw_assert (limits::member == cv_limits::member, 0, __LINE__,          \
-                 "numeric_limits<%s>::%s == numeric_limits<%s %1$s>::%2$s", \
-                 tname, #member, quals)
-#endif   // _RWSTD_NO_EXT_CV_QUALIFIED_LIMITS
 
     TEST (is_specialized);
     TEST (min ());
@@ -195,9 +169,6 @@ int main (int argc, char *argv[])
     return rw_test (argc, argv, __FILE__,
                     "lib.numeric.limits",
 
-#ifdef _RWSTD_NO_EXT_CV_QUALIFIED_LIMITS
-                    "testing the absence of "
-#endif   // _RWSTD_NO_EXT_CV_QUALIFIED_LIMITS
                     "specializations on cv-qualifed types",
                     run_test,
                     0,
