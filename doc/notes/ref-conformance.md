@@ -72,7 +72,7 @@ under an extension name, and one addition kept on its merits.
 
 | choice in the tree | effect and source |
 |---|---|
-| Stream truth conversion | `basic_ios` converts to a private pointer-to-member type where 27.4.4.3 writes `operator void*`; a stream cannot be deleted or passed as an integer by accident, but `void* p = cin;` does not compile (`include/rw/_basic_ios.h`). Not C++11's explicit `operator bool` either. |
+| Stream truth conversion | `basic_ios` converts to a private pointer-to-member type where 14882:2003's 27.4.4.3 writes `operator void*`. That is LWG 468's resolution, adopted into the first C++0x draft: a conversion to an unspecified type that converts only to `bool`, pointer-to-member the suggested shape, so a stream cannot be deleted, compared to a pointer or passed as an integer by accident, and `void* p = cin;` does not compile. C++11 then replaced it with `explicit operator bool` (LWG 1094), the same contract with language support; the tree keeps the 468 form (`include/rw/_basic_ios.h`). |
 | Width after failed insertion | The string inserter and `num_put` keep the stream's width when the insertion fails and reset it on success (`include/rw/_ioinsert.cc`, `include/loc/_num_put.cc`). |
 | In-place assign and insert | `deque` and `vector` assign over their existing elements, and insert an input iterator range one element at a time; the vector insert's own comment says it does not meet the strong guarantee of 23.2.4.3, p1, a question the `TODO` carries (`include/deque.cc`, `include/vector.cc`). |
 | Primary template definitions | `char_traits`, `ctype`, `collate`, `codecvt` and `numpunct` have primary template definitions beyond the required specializations (`include/rw/_traits.h`, `include/loc/`). |

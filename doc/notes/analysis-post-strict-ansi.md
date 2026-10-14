@@ -30,9 +30,11 @@ not repeat them beyond what the open questions need.
   x86_64 15D still carry the old rows for the tests that moved.
 - **Six ends not in TODO** (chapter 4): `long long` stays, settled
   on 2026-10-14 as the compiler's type set, not an addition; the stream truth
-  conversion departs from 27.4.4.3's `operator void*`; the replaceable
+  conversion is LWG 468's resolution, not a departure, settled
+  2026-10-14; the replaceable
   allocation functions in `src/memory.cpp` compile to nothing on every
-  supported compiler; the `time_get` and `num_get` test coverage that
+  supported compiler, kept as probe-gated fallbacks, settled
+  2026-10-14; the `time_get` and `num_get` test coverage that
   the extensions carried is gone with them and nothing asserts the
   absence of extensions any more; two examples show DIFF and the
   library build has ten `-Wnonnull-compare` warnings, both predating
@@ -44,7 +46,7 @@ not repeat them beyond what the open questions need.
 
 The sort was made in a139fb29 and held through the work: an addition
 is anything the 2003 text does not name, and it leaves; a defect
-resolution adopted after 2003 (LWG 434, 559, 568) or a choice the
+resolution adopted after 2003 (LWG 434, 468, 559) or a choice the
 standard leaves to the implementation stays, with the macro that
 once disabled it gone. C++11's text is an addition against 2003, so
 the `bitset` constructors from character pointers and the `time_get`
@@ -91,7 +93,7 @@ __b1 = '1')` was ungated and sits beside the removed constructors.
 A survey ahead of the commit proposed taking the two parameters with
 the rest as C++11's text. The commit kept them: they are LWG 396's
 resolution against C++03, and the entry's own sort keeps defect
-resolutions, as it did for 434, 559 and 568. The distinction between
+resolutions, as it did for 434, 468 and 559. The distinction between
 "C++11's text" and "a resolution later folded into C++11" is the
 entry's, and it is defensible, but it was never put to the maintainer
 as a yes or no. If the answer is that C++03's signature is the rule,
@@ -194,17 +196,28 @@ extractors, `abs` and `div`. The facet virtuals widen two vtables;
 that cost is accepted. The conformance note's chapter 2 carries the
 row.
 
-### 4.2 The stream truth conversion is not 27.4.4.3's
+### 4.2 The stream truth conversion is LWG 468's resolution
 
 `basic_ios` converts to a private pointer-to-member type where
 27.4.4.3 writes `operator void*`. The gate went in e72719aa and the
 pointer-to-member form is now the only one. A stream can no longer be
 deleted or passed as an integer by accident, which is the point, but
-`void* p = cin;` does not compile, which a conforming program may
-write. The sort credited this to LWG 568; the resolution of that
-issue should be re-read against the tree before the row stands as a
-defect correction rather than a departure. C++11's `explicit operator
-bool` is a third shape the tree does not have.
+`void* p = cin;` does not compile, which a conforming 2003 program may
+write. The sort credited this to LWG 568; that issue is TR1's missing
+`log2` overloads and has nothing to do with streams.
+
+Settled 2026-10-14. The right issue is LWG 468, "unexpected
+consequences of `ios_base::operator void*()`", opened 2004-06-28 and
+adopted into the first C++0x draft: `operator void*` becomes a
+conversion to an unspecified type that converts only to `bool` and is
+not convertible to `int`, with pointer-to-member named as a suitable
+shape. The tree's form is that resolution to the letter, and it has
+been so since the 2005 import. C++11 then took LWG 1094 and spelled
+the same contract as `explicit operator bool`, which every supported
+compiler has. The maintainer's call is to keep the 468 form as is;
+moving to the C++11 spelling would be a decision of the bitset and
+streambuf kind, not a correction. The conformance note's row and the
+two citations in this note now name 468.
 
 ### 4.3 The replaceable allocation functions compile to nothing
 
@@ -222,6 +235,19 @@ which `_RWSTD_NO_CLASS_PARTIAL_SPEC` is the sharpest case: after
 compiler. Whether such probes stay as portability insurance or leave
 as unreachable code is a question for the tree as a whole, not this
 entry.
+
+Settled 2026-10-14: the block stays. It is the characterization
+rule's other half, a probe describing the support library and a
+fallback filling what is missing, and it costs nothing where the
+probes are silent. The file is not dead on the supported matrix
+either: the `bad_alloc` default constructor, copy constructor and
+assignment at the end of it are compiled under GCC and Clang, whose
+support library keeps them inline. The EDG port is the live reason:
+its trial failed `18.support.dynamic` on `bad_alloc::what ()` with
+the question of whose `bad_alloc` was in play, and nothing records
+what these probes say under eccp. Whether probe-gated fallbacks for
+support libraries the tree no longer meets stay at all is a decision
+for the whole tree once the compiler matrix is final.
 
 ### 4.4 Coverage that left with the extensions
 
