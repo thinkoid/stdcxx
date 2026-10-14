@@ -59,7 +59,7 @@ the `_RWSTD_NO_EXT_*` macros under it. The additions behind those
 macros left the tree in October 2026, one subsystem per commit: the
 `ios_base::failure` subclasses, the `stringbuf` character pointer
 constructors and `str` overloads, the deep-copy `basic_string::copy`,
-the `num_get`, `num_put` and `time_get` members beyond the standard's,
+the `num_get` and `num_put` members beyond the standard's,
 the `void` forms of `count`, `count_if` and `distance`, the comparison
 operators of `vector<bool>::reference`, the allocator of const
 elements, and the `bitset` constructors from character pointers and
@@ -68,7 +68,7 @@ now.
 
 What the gates also covered keeps its code with the macro gone:
 choices the standard permits, defect resolutions the block disabled
-under an extension name, and one addition kept on its merits.
+under an extension name, and two additions kept on their merits.
 
 | choice in the tree | effect and source |
 |---|---|
@@ -79,6 +79,7 @@ under an extension name, and one addition kept on its merits.
 | Portable random sequence | The `random_shuffle` generator works in 32-bit words, so the sequence is the same on every target (`src/random.cpp`). |
 | Replaceable allocation functions | `src/memory.cpp` defines the `operator new` and `operator delete` variants a support library lacks, per the `_RWSTD_NO_OPERATOR_*` probes; none fires with GCC or Clang. |
 | Bump by `streamsize` | `gbump` and `pbump` take a `streamsize` where 27.5.2.3.1, p4 and 27.5.2.3.2, p4 write `int`. The library's own callers pass stream sizes and pointer differences, and an `int` cannot hold the advance of a buffer past `INT_MAX` characters on a 64-bit target. LWG issue 255 asked for this change in 2000 and was closed as not a defect in 2017, to spare the many derived classes in the wild; the library has no such constituency, so this addition stays, the only one of the strict switch's that did (`include/streambuf`). |
+| `time_get` with a format | `time_get::get` with a conversion specifier and modifier, `get` over a `strptime`-style format range, and the virtual `do_get` behind them are C++11's 22.4.5.1.1, p6-10 and 22.4.5.1.2, p11-12, not 2003's. They stay as an exception to the 2003 baseline: the facet shipped them in 2001, N2070 and N2211 took them into the standard from this implementation, and the whole POSIX specifier engine is reachable only through them. They left in b7443c95 and came back the same day (`include/loc/_time_get.h`). |
 | Compiler types beyond 2003 | `long long` and `unsigned long long` are supported wherever the compiler has them: `numeric_limits`, the `num_get` and `num_put` virtuals and their public callers, the stream inserters and extractors, `abs` and `div`. 14882:2003 does not name the type; the library follows the compiler's type set, and the `LONG_LONG` characterization decides, not a policy switch. The extra virtuals widen two facet vtables; a program that overrides the 2003 virtuals is unaffected (`include/rw/_config.h`, `etc/config/src/LONG_LONG.cpp`). |
 | Later defect corrections | LWG 559's cv-qualified `numeric_limits` and LWG 434's `bitset::to_string` overloads are unconditional (chapter 3). |
 

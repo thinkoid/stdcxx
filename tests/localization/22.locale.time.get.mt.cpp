@@ -214,6 +214,9 @@ thread_func (void*)
                 ng.get_year (iter, end, nio, state, &local);
                 break;
             default:
+
+                ng.get (iter, end, nio, state, &local, data.format_);
+
                 break;
             }
 
@@ -259,6 +262,9 @@ thread_func (void*)
                 wg.get_year (iter, end, wio, state, &local);
                 break;
             default:
+
+                wg.get (iter, end, wio, state, &local, data.format_);
+
                 break;
             }
 
@@ -319,10 +325,10 @@ run_test (int, char**)
         data.time_.tm_yday = ++j % 366;
         data.time_.tm_year = ++j;
 
-        // formats that generate strings compatible with
-        // get_weekday, get_monthname, get_date, get_time
-        // and get_year.
-        const char formats [] = "aAbBxXyY";
+        // format specifiers that we can reliably parse
+        // get_weekday, get_monthname, get_date, get_time,
+        // get_year and the format get.
+        const char formats [] = "aAbBCdhHjmMnRStTwxXyY";
 
         // get the "random" data type used to generate representation
         data.format_ = formats [nlocales % (sizeof formats - 1)];
@@ -380,6 +386,9 @@ run_test (int, char**)
                 ng.get_time (iter, end, nio, state, &data.time_);
                 break;
             default:
+
+                ng.get (iter, end, nio, state, &data.time_, data.format_);
+
                 break;
             }
 

@@ -34,8 +34,9 @@ not repeat them beyond what the open questions need.
   2026-10-14; the replaceable
   allocation functions in `src/memory.cpp` compile to nothing on every
   supported compiler, kept as probe-gated fallbacks, settled
-  2026-10-14; the `time_get` and `num_get` test coverage that
-  the extensions carried is gone with them and nothing asserts the
+  2026-10-14; the `time_get` format members came back as an
+  exception on 2026-10-14 with their 1284 assertions, the `num_get`
+  coverage is gone with its members, and nothing asserts the
   absence of extensions any more; two examples show DIFF and the
   library build has ten `-Wnonnull-compare` warnings, both predating
   the entry; the `_RWSTD_NO_CLASS_PARTIAL_SPEC` probe now carries the
@@ -50,7 +51,8 @@ resolution adopted after 2003 (LWG 434, 468, 559) or a choice the
 standard leaves to the implementation stays, with the macro that
 once disabled it gone. C++11's text is an addition against 2003, so
 the `bitset` constructors from character pointers and the `time_get`
-format members left.
+format members left. The `time_get` members came back the same day
+as a ruled exception, see 4.4.
 
 | commit | what |
 |---|---|
@@ -60,7 +62,7 @@ format members left.
 | 8fda5edb | deep-copy `basic_string::copy` |
 | 444888d6 | `num_get` members on `short` and `int` |
 | 6266fe18 | the `num_put` test gate |
-| b7443c95 | `time_get` format members, private as the non-virtual `_C_get` pair |
+| b7443c95 | `time_get` format members, private as the non-virtual `_C_get` pair. Reversed on 2026-10-14, see 4.4 |
 | af1b3a88, ff4a97ba | `void` forms of `count`, `count_if` and `distance`, with the last no-partial-specialization fallbacks in the examples |
 | 15c7d99e | comparison operators of `vector<bool>::reference` |
 | aebf2e2a | the allocator of const elements |
@@ -263,6 +265,25 @@ specifier handling has less direct exercise than before. Separately,
 `17.extensions` retired with the switch, so no test asserts that an
 extension is absent; the check is the empty
 `git grep _RWSTD_NO_EXT_` and the compiler on each removal.
+
+Settled 2026-10-14: the `time_get` members came back. The three
+b7443c95 removed are, signature for signature, C++11's `get` with a
+format and modifier, `get` over a format range, and the virtual
+`do_get` (22.4.5.1.1, p6-10; 22.4.5.1.2, p11-12). They entered the
+standard through N2070 and its revision N2211, "Enhancing the
+time_get facet for POSIX compatibility", which name this library as
+the reference implementation and the Rogue Wave library as shipping
+the extension since 2001. No defect report preceded the paper; the
+one LWG issue in the area, 461, went the other way and fixed the
+formats `do_get_time` and `do_get_date` parse. By the letter of the
+rule the members are C++11 text and out; the maintainer ruled an
+exception on the motive, "it is ok to make exceptions from our own
+rules if the motives are compelling", and nothing is more compelling
+than the standard taking its text from this facet. The test, the MT
+test's format branch, the `time_manip` example and the reference
+pages came back with them, the gate lines did not, and the comments
+cite C++11. The `num_get` coverage stays gone: those members have no
+such lineage.
 
 ### 4.5 Pre-existing and untouched
 

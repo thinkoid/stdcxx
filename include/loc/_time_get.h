@@ -113,6 +113,22 @@ public:
 
     static _RW::__rw_facet_id id;
 
+
+    // 22.4.5.1.1, p7-10 of ISO/IEC 14882:2011: a strptime over the
+    // whole of POSIX, shipped here since 2001 and taken into the
+    // standard from this facet by N2211
+    iter_type
+    get (iter_type, iter_type, ios_base&, _RWSTD_IOSTATE&, tm*,
+         const char_type*, const char_type*) const;
+
+    // 22.4.5.1.1, p6 of ISO/IEC 14882:2011
+    iter_type
+    get (iter_type __it, iter_type __end, ios_base &__flags,
+         _RWSTD_IOSTATE &__err, tm *__time,
+         char __fmt, char __modifier = '\0') const {
+        return do_get (__it, __end, __flags, __err, __time, __fmt, __modifier);
+    }
+
 protected:
 
     virtual dateorder do_date_order()  const {
@@ -122,45 +138,36 @@ protected:
     virtual iter_type
     do_get_time (iter_type __it, iter_type __end, ios_base &__fl,
                  _RWSTD_IOSTATE &__err, tm *__tmb) const {
-        return _C_get (__it, __end, __fl, __err, __tmb, 'X');
+        return do_get (__it, __end, __fl, __err, __tmb, 'X');
     }
 
     virtual iter_type
     do_get_date (iter_type __it, iter_type __end, ios_base &__fl,
                  _RWSTD_IOSTATE &__err, tm *__tmb) const {
-        return _C_get (__it, __end, __fl, __err, __tmb, 'x');
+        return do_get (__it, __end, __fl, __err, __tmb, 'x');
     }
 
     virtual iter_type
     do_get_weekday (iter_type __it, iter_type __end, ios_base &__fl,
                     _RWSTD_IOSTATE &__err, tm *__tmb) const {
-        return _C_get (__it, __end, __fl, __err, __tmb, 'a');
+        return do_get (__it, __end, __fl, __err, __tmb, 'a');
     }
 
     virtual iter_type
     do_get_monthname (iter_type __it, iter_type __end, ios_base &__fl,
                       _RWSTD_IOSTATE &__err, tm *__tmb) const {
-        return _C_get (__it, __end, __fl, __err, __tmb, 'b');
+        return do_get (__it, __end, __fl, __err, __tmb, 'b');
     }
 
     virtual iter_type
     do_get_year (iter_type __it, iter_type __end, ios_base &__fl,
                  _RWSTD_IOSTATE &__err, tm *__tmb) const {
-        return _C_get (__it, __end, __fl, __err, __tmb, 'Y');
+        return do_get (__it, __end, __fl, __err, __tmb, 'Y');
     }
 
-private:
-
-    // parses the input against a strptime-style pattern, one
-    // directive at a time, through the overload below
-    iter_type
-    _C_get (iter_type, iter_type, ios_base&, _RWSTD_IOSTATE&, tm*,
-            const char_type*, const char_type*) const;
-
-    // parses the input against one conversion specifier and its
-    // optional modifier
-    iter_type
-    _C_get (iter_type, iter_type, ios_base&, _RWSTD_IOSTATE&, tm*,
+    // 22.4.5.1.2, p11-12 of ISO/IEC 14882:2011
+    virtual iter_type
+    do_get (iter_type, iter_type, ios_base&, _RWSTD_IOSTATE&, tm*,
             char, char = '\0') const;
 };
 
