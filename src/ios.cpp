@@ -208,22 +208,6 @@ _C_set (unsigned state, unsigned except, void *rdbuf)
 
         switch (state & except) {
 
-#ifndef _RWSTD_NO_EXT_FAILURE
-
-        // casts below are necessary to preserve the static type
-        // of the exception being thrown (upcast by _C_format ())
-
-        case _RWSTD_IOS_BADBIT:
-            _RW::__rw_throw (_RWSTD_ERROR_BADBIT_SET, strm);
-
-        case _RWSTD_IOS_FAILBIT:
-            _RW::__rw_throw (_RWSTD_ERROR_FAILBIT_SET, strm);
-            
-        case _RWSTD_IOS_EOFBIT:
-            _RW::__rw_throw (_RWSTD_ERROR_EOFBIT_SET, strm);
-
-#else   // if defined (_RWSTD_NO_EXT_FAILURE)
-
         case _RWSTD_IOS_BADBIT:
             bit = "badbit";
             break;
@@ -235,8 +219,6 @@ _C_set (unsigned state, unsigned except, void *rdbuf)
         case _RWSTD_IOS_EOFBIT:
             bit = "eofbit";
             break;
-
-#endif   // _RWSTD_NO_EXT_FAILURE
 
         case _RWSTD_IOS_BADBIT | _RWSTD_IOS_FAILBIT:
             bit = "badbit, failbit";

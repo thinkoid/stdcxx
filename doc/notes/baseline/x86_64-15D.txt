@@ -16,7 +16,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 17.names                                      0    0        0      0   100%
 18.c.limits.stdcxx-988                     NOUT    0                       
 18.csetjmp                                    0    0        3      0   100%
-18.exception                                  0    1     1109      0   100%
+18.exception                                  0    1     1097      0   100%
 18.limits.cvqual                              0    0     1431      0   100%
 18.limits.stdcxx-436                       NOUT    0                       
 18.limits.stdcxx-937                       NOUT    0                       
@@ -279,5 +279,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10105959
+  Assertions:            10105947
   Failed assertions:            0

@@ -90,10 +90,11 @@ Fix, one subsystem per commit, the suite tables as the oracle. Done:
 the =setbase= bases and =bin= (=doc/notes/analysis-numeric-base.md=),
 the stream-locking additions, their default kept
 (=doc/notes/analysis-basic-ios-flags.md=), the file stream additions,
-the switch. Next, per addition in the order above, the code path goes
-with its macro and its test branches; per kept behaviour, the macro
-and its dead branch go. The original README stays; =README.md=
-records the policy.
+the switch, the =ios_base::failure= subclasses with their three error
+codes and catalog messages. Next, per addition in the order above,
+the code path goes with its macro and its test branches; per kept
+behaviour, the macro and its dead branch go. The original README
+stays; =README.md= records the policy.
 
 Check: =git grep _RWSTD_NO_EXT_= is empty under =include=, =src= and
 =tests=. The suite tables are re-pinned in all six configurations

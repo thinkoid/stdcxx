@@ -56,15 +56,6 @@ struct _RWSTD_EXPORT ios_base: _RW::__rw_synchronized
     // 27.4.2.1.1
     typedef _RW::__rw_failure failure;
 
-#ifndef _RWSTD_NO_EXT_FAILURE
-
-    // extensions
-    typedef _RW::__rw_badbit_set  badbit_set;
-    typedef _RW::__rw_eofbit_set  eofbit_set;
-    typedef _RW::__rw_failbit_set failbit_set;
-
-#endif   // _RWSTD_NO_EXT_FAILURE
-
     // 27.4.2.1.2
     typedef _RWSTD_BITMASK_ENUM (_RW::__rw_fmtflags) fmtflags;
 

@@ -96,19 +96,16 @@ _RWSTD_EXPORT extern void (*__rw_throw_proc)(int, char*);
 #  define _RWSTD_ERROR_OVERFLOW_ERROR              (_RWSTD_ERROR_FIRST + 12)
 #  define _RWSTD_ERROR_UNDERFLOW_ERROR             (_RWSTD_ERROR_FIRST + 13)
 
-#  define _RWSTD_ERROR_FAILBIT_SET                 (_RWSTD_ERROR_FIRST + 14)
-#  define _RWSTD_ERROR_BADBIT_SET                  (_RWSTD_ERROR_FIRST + 15)
-#  define _RWSTD_ERROR_EOFBIT_SET                  (_RWSTD_ERROR_FIRST + 16)
-#  define _RWSTD_ERROR_IOSTATE_BIT_SET             (_RWSTD_ERROR_FIRST + 17)
+#  define _RWSTD_ERROR_IOSTATE_BIT_SET             (_RWSTD_ERROR_FIRST + 14)
 
-#  define _RWSTD_ERROR_FACET_NOT_FOUND             (_RWSTD_ERROR_FIRST + 18)
-#  define _RWSTD_ERROR_LOCALE_BAD_NAME             (_RWSTD_ERROR_FIRST + 19)
-#  define _RWSTD_ERROR_LOCALE_ERROR_NAME           (_RWSTD_ERROR_FIRST + 20)
-#  define _RWSTD_ERROR_CODECVT                     (_RWSTD_ERROR_FIRST + 21)
+#  define _RWSTD_ERROR_FACET_NOT_FOUND             (_RWSTD_ERROR_FIRST + 15)
+#  define _RWSTD_ERROR_LOCALE_BAD_NAME             (_RWSTD_ERROR_FIRST + 16)
+#  define _RWSTD_ERROR_LOCALE_ERROR_NAME           (_RWSTD_ERROR_FIRST + 17)
+#  define _RWSTD_ERROR_CODECVT                     (_RWSTD_ERROR_FIRST + 18)
 
-#  define _RWSTD_ERROR_BAD_POINTER                 (_RWSTD_ERROR_FIRST + 22)
-#  define _RWSTD_ERROR_TRANSFORM                   (_RWSTD_ERROR_FIRST + 23)
-#  define _RWSTD_ERROR_LOCALE_BAD_CAT              (_RWSTD_ERROR_FIRST + 24)
+#  define _RWSTD_ERROR_BAD_POINTER                 (_RWSTD_ERROR_FIRST + 19)
+#  define _RWSTD_ERROR_TRANSFORM                   (_RWSTD_ERROR_FIRST + 20)
+#  define _RWSTD_ERROR_LOCALE_BAD_CAT              (_RWSTD_ERROR_FIRST + 21)
 
 #  define _RWSTD_ERROR_STRINGS                                  \
           "%s: %s: unspecified error",                          \
@@ -125,11 +122,8 @@ _RWSTD_EXPORT extern void (*__rw_throw_proc)(int, char*);
           "%s: %s: range error: invalid range [%d, %d)",        \
           "%s: %s: overflow error",                             \
           "%s: %s: underflow error",                            \
-          /* the following take a single arg because */         \
-          /* they are generated in a .cpp file       */         \
-          "%s: stream object has set ios::failbit",             \
-          "%s: stream object has set ios::badbit",              \
-          "%s: stream object has set ios::eofbit",              \
+          /* the following takes a single arg because */        \
+          /* it is generated in a .cpp file           */        \
           "%s: stream object has set %s",                       \
           "%s: %s: facet %u not found in locale (\"%s\")",      \
           "%s: %s: bad locale name: \"%s\"",                    \

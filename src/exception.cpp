@@ -640,29 +640,6 @@ static void __rw_throw_exception (int id, char *what)
         throw (_STD::underflow_error&)
             _STD::underflow_error ()._C_assign (what, 0);
 
-#ifndef _RWSTD_NO_EXT_FAILURE
-
-    case _RWSTD_ERROR_FAILBIT_SET:
-        throw (__rw_failbit_set&)
-            __rw_failbit_set ()._C_assign (what, 0);
-
-    case _RWSTD_ERROR_BADBIT_SET:
-        throw (__rw_badbit_set&)
-            __rw_badbit_set ()._C_assign (what, 0);
-
-    case _RWSTD_ERROR_EOFBIT_SET:
-        throw (__rw_eofbit_set&)
-            __rw_eofbit_set ()._C_assign (what, 0);
-
-#else   // if defined (_RWSTD_NO_EXT_FAILURE)
-
-    case _RWSTD_ERROR_FAILBIT_SET:
-    case _RWSTD_ERROR_BADBIT_SET:
-    case _RWSTD_ERROR_EOFBIT_SET:
-        // fall through...
-
-#endif   // _RWSTD_NO_EXT_FAILURE
-
     case _RWSTD_ERROR_IOSTATE_BIT_SET:
         throw (__rw_failure&)
             __rw_failure ()._C_assign (what, 0);
@@ -874,24 +851,6 @@ _C_assign (const char *whatstr, size_t len /* = ~0 */)
 
 // virtual dtor
 /* virtual */ __rw_failure::~__rw_failure () _THROWS (())
-{
-    // no-op
-}
-
-
-/* virtual */ __rw_badbit_set::~__rw_badbit_set () _THROWS (())
-{
-    // no-op
-}
-
-
-/* virtual */ __rw_eofbit_set::~__rw_eofbit_set () _THROWS (())
-{
-    // no-op
-}
-
-
-/* virtual */ __rw_failbit_set::~__rw_failbit_set () _THROWS (())
 {
     // no-op
 }

@@ -57,28 +57,6 @@ int main ()
 
             std::cout << ch << ' ' << i << '\n';
         }
-
-#ifndef _RWSTD_NO_EXT_FAILURE
-
-        // Classes badbit_set, eofbit_set, and failbit_set are
-        // derived from failure and are optional extensions of
-        // this implementation.
-
-        catch (const std::ios::badbit_set &e) {
-            std::cout << "Caught std::ios::badbit_set: "
-                      << e.what () << '\n';
-        }
-        catch (const std::ios::eofbit_set &e) {
-            std::cout << "Caught std::ios::eofbit_set: "
-                      << e.what () << '\n';
-        }
-        catch (const std::ios::failbit_set &e) {
-            std::cout << "Caught std::ios::failbit_set: "
-                      << e.what () << '\n';
-        }
-
-#endif   // _RWSTD_NO_EXT_FAILURE
-
         catch (const std::ios::failure &e) {
             std::cout << "Caught std::ios::failure: "
                       << e.what () << '\n';

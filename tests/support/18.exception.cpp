@@ -503,9 +503,6 @@ test_rw_throw ()
         _RWSTD_ERROR_OVERFLOW_ERROR,
         _RWSTD_ERROR_UNDERFLOW_ERROR,
 
-        _RWSTD_ERROR_FAILBIT_SET,
-        _RWSTD_ERROR_BADBIT_SET,
-        _RWSTD_ERROR_EOFBIT_SET,
         _RWSTD_ERROR_IOSTATE_BIT_SET
     };
 
@@ -524,9 +521,6 @@ test_rw_throw ()
         "std::overflow_error",
         "std::underflow_error",
 
-        "std::ios_base::failbit_set",
-        "std::ios_base::badbit_set",
-        "std::ios_base::eofbit_set",
         "std::ios_base::failure"
     };
 
@@ -635,26 +629,6 @@ test_rw_throw ()
         }
 
 #endif   // _RWSTD_ERROR_BAD_TYPEID;
-
-#ifndef _RWSTD_NO_EXT_FAILURE
-
-        catch (std::ios_base::failbit_set &ex) {
-            rw_assert (!!ex.what (),  0, __LINE__,
-                       "ios_base::failbit_set::what() != 0");
-            caught = _RWSTD_ERROR_FAILBIT_SET;
-        }
-        catch (std::ios_base::badbit_set &ex) {
-            rw_assert (!!ex.what (),  0, __LINE__,
-                       "ios_base::badbit_set::what() != 0");
-            caught = _RWSTD_ERROR_BADBIT_SET;
-        }
-        catch (std::ios_base::eofbit_set &ex) {
-            rw_assert (!!ex.what (),  0, __LINE__,
-                       "ios_base::eofbit_set::what() != 0");
-            caught = _RWSTD_ERROR_EOFBIT_SET;
-        }
-
-#endif   // _RWSTD_NO_EXT_FAILURE
 
         catch (std::ios_base::failure &ex) {
             rw_assert (!!ex.what (),  0, __LINE__,
