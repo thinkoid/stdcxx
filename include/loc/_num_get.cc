@@ -80,49 +80,6 @@ template <class _CharT, class _InputIter>
 _RW::__rw_facet_id num_get<_CharT, _InputIter>::id;
 
 
-
-#ifndef _RWSTD_NO_EXT_NUM_GET
-
-template <class _CharT, class _InputIter>
-_TYPENAME num_get<_CharT, _InputIter>::iter_type
-num_get<_CharT, _InputIter>::
-get (iter_type __begin, iter_type __end, ios_base &__flags, 
-     _RWSTD_IOSTATE &__err, short &__val) const
-{
-    _RWSTD_ASSERT_RANGE (__begin, __end);
-
-    // preserve original value in case it's non-zero and
-    // do_get() fails for reason other than bad grouping
-    long __tmp = __val;
-
-    __begin = do_get (__begin, __end, __flags, __err, __tmp);
-    __val = __rw_check_overflow_short (__tmp, __flags.flags (), __err);
-
-    return __begin;
-}
-
-
-template <class _CharT, class _InputIter>
-_TYPENAME num_get<_CharT, _InputIter>::iter_type
-num_get<_CharT, _InputIter>::
-get (iter_type __begin, iter_type __end, ios_base &__flags, 
-     _RWSTD_IOSTATE &__err, int &__val) const
-{
-    _RWSTD_ASSERT_RANGE (__begin, __end);
-
-    // preserve original value in case it's non-zero and
-    // do_get() fails for reason other than bad grouping
-    long __tmp = long (__val);
-
-    __begin = do_get (__begin, __end, __flags, __err, __tmp);
-    __val = __rw_check_overflow_int (__tmp, __flags.flags (), __err);
-
-    return __begin;
-}
-
-#endif   // _RWSTD_NO_EXT_NUM_GET
-
-
 #ifndef _RWSTD_NO_NATIVE_BOOL
 
 template <class _CharT, class _InputIter /* = istreambuf_iterator<_CharT> */>

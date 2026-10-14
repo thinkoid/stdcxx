@@ -76,18 +76,6 @@ struct num_get: _RW::__rw_facet
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-#ifndef _RWSTD_NO_EXT_NUM_GET
-
-    // extension
-    iter_type
-    get (iter_type, iter_type, ios_base&, _RWSTD_IOSTATE&,  short&) const;
-
-    // extension
-    iter_type
-    get (iter_type, iter_type, ios_base&, _RWSTD_IOSTATE&, int&) const;
-
-#endif   // _RWSTD_NO_EXT_NUM_GET
-
     iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
                    _RWSTD_IOSTATE &__err, unsigned int &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);

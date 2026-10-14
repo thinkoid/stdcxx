@@ -118,7 +118,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.moneypunct                          0    0      540      0   100%
 22.locale.name                                0    0        0      0   100%
 22.locale.num.get.mt                          0    0        0      0   100%
-22.locale.num.get                             0    0    63720      0   100%
+22.locale.num.get                             0    0    51894      0   100%
 22.locale.num.put.mt                          0    0        0      0   100%
 22.locale.num.put                             0    2     1485      0   100%
 22.locale.num.put.stdcxx-2                 NOUT    0                       
@@ -279,5 +279,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10105947
+  Assertions:            10094121
   Failed assertions:            0

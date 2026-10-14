@@ -39,9 +39,9 @@
 #ifdef NO_GET_INTEGER
 #  define NO_GET_BOOL
 // no NO_GET_USHRT
-#  define NO_GET_SHRT
+// no NO_GET_SHRT
 // no NO_GET_UINT
-#  define NO_GET_INT
+// no NO_GET_INT
 #  define NO_GET_ULONG
 #  define NO_GET_LONG
 #  define NO_GET_ULLONG
@@ -799,81 +799,6 @@ test_bool (CharType ctype, const char *cname,
     _RWSTD_UNUSED (t);
 
 #endif   // NO_GET_BOOL
-
-}
-
-/**************************************************************************/
-
-static void
-test_shrt (CharType ctype, const char *cname,
-           IterType itype, const char *iname)
-{
-#ifndef _RWSTD_NO_EXT_NUM_GET
-#  ifndef NO_GET_SHRT
-
-    const char* const tname = "short";
-
-    rw_info (0, 0, 0, "extension: std::num_get<%s, %s>::get (..., %s&)",
-             cname, iname, tname);
-
-    // short parsing of 0, no base specified
-    TEST (T, short (0), "%hi",  1, 0, Eof, "%hi");
-    TEST (T, short (0), "%ho",  1, 0, Eof, "%hi");
-    TEST (T, short (0), "%hx",  1, 0, Eof, "%hi");
-    TEST (T, short (0), "%#hx", 1, 0, Eof, "%hi");
-
-    TEST (T, short (1),        "%hi",  1, 0, Eof, "%hi");
-    TEST (T, short (SHRT_MAX), "%hi", -1, 0, Eof, "%hi");
-    TEST (T, short (SHRT_MIN), "%hi", -1, 0, Eof, "%hi");
-
-    if (rw_opt_no_errno) {
-        rw_note (0, 0, 0, "errno test disabled");
-    }
-    else {
-        test_errno (ctype, cname, itype, iname, short ());
-    }
-
-#  else   // if defined (NO_GET_SHRT)
-
-    _RWSTD_UNUSED (t);
-
-#  endif   // NO_GET_SHRT
-#endif   // _RWSTD_NO_EXT_NUM_GET
-
-}
-
-/**************************************************************************/
-
-static void
-test_int (CharType ctype, const char *cname,
-          IterType itype, const char *iname)
-{
-#ifndef _RWSTD_NO_EXT_NUM_GET
-#  ifndef NO_GET_INT
-
-    const char* const tname = "int";
-
-    rw_info (0, 0, 0, "extension: std::num_get<%s, %s>::get (..., %s&)",
-             cname, iname, tname);
-
-    TEST (T, 0, "%i",  1, 0, Eof, "%i");
-    TEST (T, 0, "%o",  1, 0, Eof, "%i");
-    TEST (T, 0, "%x",  1, 0, Eof, "%i");
-    TEST (T, 0, "%#x", 1, 0, Eof, "%i");
-
-    if (rw_opt_no_errno) {
-        rw_note (0, 0, 0, "errno test disabled");
-    }
-    else {
-        test_errno (ctype, cname, itype, iname, int ());
-    }
-
-#  else   // if defined (NO_GET_INT)
-
-    _RWSTD_UNUSED (t);
-
-#  endif   // NO_GET_INT
-#endif   // _RWSTD_NO_EXT_NUM_GET
 
 }
 
@@ -2695,8 +2620,6 @@ run_tests (CharType ctype, const char *cname,
     TEST (bool,   "bool");
 #endif   // _RWSTD_NO_BOOL
 
-    TEST (shrt,   "short");
-    TEST (int,    "int");
     TEST (long,   "long");
     TEST (ulong,  "unsigned long");
 
