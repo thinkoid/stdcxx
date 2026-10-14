@@ -30,8 +30,6 @@
 _RWSTD_NAMESPACE (std) { 
 
 
-#ifndef _RWSTD_NO_EXT_COLLATE_PRIMARY
-
 template <class _CharT>
 _RW::__rw_facet_id collate<_CharT>::id;
 
@@ -44,7 +42,5 @@ template <class _CharT>
 {
     // no-op
 }
-
-#endif   // _RWSTD_NO_EXT_COLLATE_PRIMARY
 
 }   // namespace std

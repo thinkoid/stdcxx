@@ -30,8 +30,6 @@
 _RWSTD_NAMESPACE (std) { 
 
 
-#ifndef _RWSTD_NO_EXT_CODECVT_PRIMARY
-
 template <class _InternT, class _ExternT, class _StateT>
 _RW::__rw_facet_id codecvt<_InternT, _ExternT, _StateT>::id;
 
@@ -44,8 +42,6 @@ template <class _InternT, class _ExternT, class _StateT>
 {
     // no-op
 }
-
-#endif   // _RWSTD_NO_EXT_CODECVT_PRIMARY
 
 
 // outlined to avoid generating a vtable in each translation unit

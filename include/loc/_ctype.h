@@ -91,8 +91,6 @@ template <class _CharT>
 class ctype;
 
 
-#ifndef _RWSTD_NO_EXT_CTYPE_PRIMARY
-
 template <class _CharT>
 class ctype: public _RW::__rw_facet, public ctype_base
 {
@@ -217,8 +215,6 @@ protected:
     virtual const char_type*
     do_narrow (const char_type*, const char_type*, char, char*) const;
 };
-
-#endif   // _RWSTD_NO_EXT_CTYPE_PRIMARY
 
 
 _RWSTD_SPECIALIZED_CLASS

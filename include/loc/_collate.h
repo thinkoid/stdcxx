@@ -50,8 +50,6 @@ template <class _CharT>
 class collate;
 
 
-#ifndef _RWSTD_NO_EXT_COLLATE_PRIMARY
-
 template <class _CharT>
 class collate: public _RW::__rw_facet
 {
@@ -97,8 +95,6 @@ protected:
     virtual long
     do_hash (const char_type*, const char_type*) const;
 };
-
-#endif   // _RWSTD_NO_EXT_COLLATE_PRIMARY
 
 
 _RWSTD_SPECIALIZED_CLASS

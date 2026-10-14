@@ -208,8 +208,6 @@ template <class  _CharT>
 struct char_traits;
 
 
-#ifndef _RWSTD_NO_EXT_CHAR_TRAITS_PRIMARY
-
 template <class  _CharT> 
 struct char_traits
 {
@@ -299,8 +297,6 @@ struct char_traits
         return _RWSTD_STATIC_CAST (int_type, __c);
     }
 };
-
-#endif   // _RWSTD_NO_EXT_CHAR_TRAITS_PRIMARY
 
 
 // 21.1.3.1

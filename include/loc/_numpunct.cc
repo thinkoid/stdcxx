@@ -30,8 +30,6 @@
 _RWSTD_NAMESPACE (std) {
 
 
-// #ifndef _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
-
 template <class _CharT>
 _RW::__rw_facet_id numpunct<_CharT>::id;
 
@@ -44,8 +42,6 @@ template <class _CharT>
 {
     // no-op
 }
-
-// #endif   // _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
 
 
 // outlined to avoid generating a vtable in each translation unit

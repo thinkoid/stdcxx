@@ -58,8 +58,6 @@ template <class _InternT, class _ExternT, class _StateT>
 class codecvt;
 
 
-#ifndef _RWSTD_NO_EXT_CODECVT_PRIMARY
-
 template <class _InternT, class _ExternT, class _StateT>
 class codecvt: public _RW::__rw_facet,
                public codecvt_base
@@ -169,8 +167,6 @@ public:
     static _RW::__rw_facet_id id;
 
 };
-
-#endif   // _RWSTD_NO_EXT_CODECVT_PRIMARY
 
 
 // 22.2.1.5, p3 - performs no conversion

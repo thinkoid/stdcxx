@@ -30,8 +30,6 @@
 _RWSTD_NAMESPACE (std) { 
 
 
-#ifndef _RWSTD_NO_EXT_CTYPE_PRIMARY
-
 template <class _CharT>
 _RW::__rw_facet_id ctype<_CharT>::id;
 
@@ -141,8 +139,6 @@ do_narrow (const char_type *__lo, const char_type *__hi,
 
     return __hi;
 }
-
-#endif   // _RWSTD_NO_EXT_CTYPE_PRIMARY
 
 
 }   // namespace std

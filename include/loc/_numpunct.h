@@ -47,9 +47,6 @@
 _RWSTD_NAMESPACE (std) { 
 
 
-// FIXME: provide just required specializations when #defined
-// #ifndef _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
-
 // 22.2.3.1
 template <class _CharT>
 struct numpunct: _RW::__rw_facet
@@ -174,8 +171,6 @@ numpunct<_CharT>::falsename () const
 {
     return do_falsename ();
 }
-
-// #endif _RWSTD_NO_EXT_NUMPUNCT_PRIMARY
 
 
 // 22.2.3.2
