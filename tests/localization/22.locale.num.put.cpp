@@ -2145,7 +2145,7 @@ void numput_virtuals_test (charT, const char *cname)
     ASSERT (long,  1, long, "long", "long");
     ASSERT (ulong, 1, ulong, "unsigned long", "unsigned long");
 
-#if defined (_RWSTD_LONG_LONG) && !defined (_RWSTD_NO_EXT_NUM_PUT)
+#ifdef _RWSTD_LONG_LONG
 
     typedef          _RWSTD_LONG_LONG  llong;
     typedef unsigned _RWSTD_LONG_LONG ullong;
@@ -2153,7 +2153,7 @@ void numput_virtuals_test (charT, const char *cname)
     ASSERT (llong,  1, llong, "long long", "long long");
     ASSERT (ullong, 1, ullong, "unsigned long long", "unsigned long long");
 
-#endif   // _RWSTD_LONG_LONG   && !_RWSTD_NO_EXT_NUM_PUT
+#endif   // _RWSTD_LONG_LONG
 
     ASSERT (double, 1, double, "double", "double");
 
