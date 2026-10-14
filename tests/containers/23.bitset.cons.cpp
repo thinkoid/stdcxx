@@ -162,7 +162,7 @@ template <std::size_t N, class Traits, class Allocator>
 std::bitset<N>
 bitset_ctor (std::bitset<N>*,
              const std::basic_string<char, Traits, Allocator> *bstr,
-             const char                                       *str,
+             const char* /* intentionally unused */,
              std::size_t pos, std::size_t n, const char bin_digits [2])
 {
     if (bstr) {
@@ -181,30 +181,9 @@ bitset_ctor (std::bitset<N>*,
         return std::bitset<N>(*bstr, pos, n, bin_digits [0], bin_digits [1]);
     }
 
-#if    !defined (_RWSTD_NO_EXT_BITSET_CTOR_CHAR_ARRAY) \
-    && !defined (_RWSTD_NO_EXT_BITSET_CTOR_STRING)
-
-    if (std::size_t (-1) == pos)
-        return std::bitset<N>(str);
-
-    if (std::size_t (-1) == n)
-        return std::bitset<N>(str, pos);
-
-    if (0 == bin_digits)
-        return std::bitset<N>(str, pos, n);
-
-    if (Traits::eq (bin_digits [0], bin_digits [1]))
-        return std::bitset<N>(str, pos, n, bin_digits [0]);
-
-    return std::bitset<N>(str, pos, n, bin_digits [0], bin_digits [1]);
-
-#else
-
     RW_ASSERT (!"test logic error");
 
     return std::bitset<N>();
-
-#endif   // _RWSTD_NO_EXT_BITSET_CTOR_{CHAR_ARRAY,STRING)
 
 }
 
@@ -216,7 +195,7 @@ template <std::size_t N, class Traits, class Allocator>
 std::bitset<N>
 bitset_ctor (std::bitset<N>*,
              const std::basic_string<wchar_t, Traits, Allocator> *bstr,
-             const wchar_t                                       *wstr,
+             const wchar_t* /* intentionally unused */,
              std::size_t pos, std::size_t n, const wchar_t bin_digits [2])
 {
     if (bstr) {
@@ -235,30 +214,9 @@ bitset_ctor (std::bitset<N>*,
         return std::bitset<N>(*bstr, pos, n, bin_digits [0], bin_digits [1]);
     }
 
-#if    !defined (_RWSTD_NO_EXT_BITSET_CTOR_CHAR_ARRAY) \
-    && !defined (_RWSTD_NO_EXT_BITSET_CTOR_STRING)
-
-    if (std::size_t (-1) == pos)
-        return std::bitset<N>(wstr);
-
-    if (std::size_t (-1) == n)
-        return std::bitset<N>(wstr, pos);
-
-    if (0 == bin_digits)
-        return std::bitset<N>(wstr, pos, n);
-
-    if (Traits::eq (bin_digits [0], bin_digits [1]))
-        return std::bitset<N>(wstr, pos, n, bin_digits [0]);
-
-    return std::bitset<N>(wstr, pos, n, bin_digits [0], bin_digits [1]);
-
-#else
-
     RW_ASSERT (!"test logic error");
 
     return std::bitset<N>();
-
-#endif   // _RWSTD_NO_EXT_BITSET_CTOR_{CHAR_ARRAY,STRING)
 
 }
 
@@ -298,7 +256,7 @@ bitset_ctor (std::bitset<N>*,
 template <std::size_t N, class charT, class Traits, class Allocator>
 std::bitset<N>
 bitset_ctor (std::bitset<N>*,
-             std::basic_string<charT, Traits, Allocator> *p,
+             std::basic_string<charT, Traits, Allocator>*,
              const char *str, std::size_t pos, std::size_t n)
 {
     charT wstr [1024];
@@ -315,16 +273,9 @@ bitset_ctor (std::bitset<N>*,
     typedef std::bitset<N>                              Bitset;
     typedef std::basic_string<charT, Traits, Allocator> String;
 
-    if (p) {   // use one of the const basic_string& overloads
+    const String bstr (wstr);
 
-        const String bstr (wstr);
-
-        return bitset_ctor ((Bitset*)0, &bstr, 0, pos, n, (charT*)0);
-    }
-    else {   // invoke one of the const charT* overloads
-
-        return bitset_ctor ((Bitset*)0, (String*)0, wstr, pos, n, (charT*)0);
-    }
+    return bitset_ctor ((Bitset*)0, &bstr, 0, pos, n, (charT*)0);
 }
 
 
@@ -432,8 +383,7 @@ void test_string_ctor (std::basic_string<charT, Traits, Allocator> *p,
 
 #define CTOR_INFO(N)                                            \
     rw_info (0, 0, __LINE__, "std::bitset<%i>::bitset(const "   \
-             "%{?}std::basic_string<%s>&%{:}%3$s%{;})",         \
-             N, 0 != p, cname)
+             "std::basic_string<%s>&)", N, cname)
 
     CTOR_INFO (0);
 
@@ -592,8 +542,7 @@ void test_string_ctor (std::basic_string<charT, Traits, Allocator> *p,
 #undef CTOR_INFO
 #define CTOR_INFO(N)                                            \
     rw_info (0, 0, __LINE__, "std::bitset<%i>::bitset(const "   \
-             "%{?}std::basic_string<%s>&%{:}%3$s%{;}, size_t)", \
-             N, 0 != p, cname)
+             "std::basic_string<%s>&, size_t)", N, cname)
 
 #define TEST_2(N, str, pos, except)   DO_TEST(N, str, pos, -1, except)
 
@@ -664,8 +613,7 @@ void test_string_ctor (std::basic_string<charT, Traits, Allocator> *p,
 #undef CTOR_INFO
 #define CTOR_INFO(N)                                                    \
     rw_info (0, 0, __LINE__, "std::bitset<%i>::bitset(const "           \
-             "%{?}std::basic_string<%s>&%{:}%3$s%{;}, size_t, size_t)", \
-             N, 0 != p, cname)
+             "std::basic_string<%s>&, size_t, size_t)", N, cname)
 
     CTOR_INFO (0);
 
@@ -744,17 +692,6 @@ void test_ctors (const Traits*, const char *cname)
 
     // exercise const std::string& overloads
     test_string_ctor ((String*)1, cname);
-
-#if    !defined (_RWSTD_NO_EXT_BITSET_CTOR_CHAR_ARRAY) \
-    && !defined (_RWSTD_NO_EXT_BITSET_CTOR_STRING)
-
-    // exercise const char* and const wchar_t* extensions
-    // but avoid calling the bitset(const UserChar*) overload in order
-    if (sizeof (char_type) != sizeof (UserChar))
-        test_string_ctor ((String*)0, cname);
-
-#endif   // _RWSTD_NO_EXT_BITSET_CTOR_{CHAR_ARRAY,STRING}
-
 }
 
 /**************************************************************************/

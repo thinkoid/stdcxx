@@ -134,7 +134,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 22.locale.time.put                            0    0     2156      0   100%
 22.locale.use_facet.mt                        0    0      200      0   100%
 23.associative.stdcxx-16                   NOUT    0                       
-23.bitset.cons                                0    0     2347      0   100%
+23.bitset.cons                                0    0     1677      0   100%
 23.bitset.cons.stdcxx-297                  NOUT    0                       
 23.bitset                                     0    0  2537538      0   100%
 23.containers.stdcxx-152                   NOUT    0                       
@@ -279,5 +279,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            66
-  Assertions:            10092837
+  Assertions:            10092167
   Failed assertions:            0
