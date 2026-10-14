@@ -13,10 +13,10 @@ library.** The implementation has its C++98 foundation and C++03
 interface, and keeps both. The target is the C++03 library, complete,
 with the suite clean; later standards are not.
 
-This record describes the tree as of 2026-09-30: component coverage,
+This record describes the tree as of 2026-10-14: component coverage,
 concrete departures, selected defect resolutions checked against the
 code, and the broad gap to later libraries. Measurements are the
-pinned baseline tables of that date.
+pinned baseline tables in `doc/notes/baseline/`.
 
 ## 1. What the C++03 target covers
 
@@ -53,27 +53,32 @@ source revision.
 
 ## 2. Deliberate extensions and departures
 
-The default interface includes extensions. Some merely add facilities;
-others change a standard operation's signature or behavior. They must
-be distinguished from unresolved defects.
+The strict switch is gone. `_RWSTD_NO_EXTENSIONS` used to select
+`_RWSTD_STRICT_ANSI`, and a block in `include/rw/_config.h` defined
+the `_RWSTD_NO_EXT_*` macros under it. The additions behind those
+macros left the tree in October 2026, one subsystem per commit: the
+`ios_base::failure` subclasses, the `stringbuf` character pointer
+constructors and `str` overloads, the deep-copy `basic_string::copy`,
+the `num_get`, `num_put` and `time_get` members beyond the standard's,
+the `void` forms of `count`, `count_if` and `distance`, the comparison
+operators of `vector<bool>::reference`, the allocator of const
+elements, the `bitset` constructors from character pointers and from
+`string` and `wstring`, and the `ptrdiff_t` argument of `gbump` and
+`pbump`. Nothing reads an `_RWSTD_NO_EXT_*` macro now.
+
+What the gates also covered keeps its code with the macro gone:
+choices the standard permits, and defect resolutions the block
+disabled under an extension name.
 
 | choice in the tree | effect and source |
 |---|---|
-| Extra public facilities | Additional facet overloads and `basic_string::copy()` for a deep copy; documented in `README` §8.3.10 and controlled by `_RWSTD_NO_EXT_*` macros. |
-| Legacy algorithm overloads | Four-argument `count` and `count_if` accumulate into an output argument and return `void`, alongside the standard forms (`include/algorithm`). These are compatibility additions. |
-| Stream truth conversion | By default `basic_ios` converts to a private pointer-to-member type. `_RWSTD_NO_EXT_IOS_SAFE_CONVERSION` selects the C++03 `operator void*` form (`include/rw/_basic_ios.h`). The default is not C++11's explicit `operator bool`. |
-| Width after failed insertion | The string-insertion helper normally preserves width when writing fails; `_RWSTD_NO_EXT_KEEP_WIDTH_ON_FAILURE` selects unconditional reset on its normal write-failure paths (`include/rw/_ioinsert.cc`). |
-| Extra template definitions | Primary templates such as `char_traits` and several facets have implementation-provided definitions beyond the required standard specializations; the original manual describes their extension controls. |
-| Later defect corrections | Some are treated as optional extensions, notably cv-qualified `numeric_limits` (chapter 3). |
-
-The strict switch is gone. `_RWSTD_NO_EXTENSIONS` used to select
-`_RWSTD_STRICT_ANSI`, and a block in `include/rw/_config.h` defined
-the `_RWSTD_NO_EXT_*` macros under it; the block never covered every
-gate the tree reads, and it disabled later defect resolutions beside
-the additions. Nothing defines those macros now. The additions in the
-table are leaving one subsystem per commit, each with its macro, and
-the behaviours the standard permits keep their code and lose their
-macro; the `TODO` entry in the Library chapter carries the sort.
+| Stream truth conversion | `basic_ios` converts to a private pointer-to-member type where 27.4.4.3 writes `operator void*`; a stream cannot be deleted or passed as an integer by accident, but `void* p = cin;` does not compile (`include/rw/_basic_ios.h`). Not C++11's explicit `operator bool` either. |
+| Width after failed insertion | The string inserter and `num_put` keep the stream's width when the insertion fails and reset it on success (`include/rw/_ioinsert.cc`, `include/loc/_num_put.cc`). |
+| In-place assign and insert | `deque` and `vector` assign over their existing elements, and insert an input iterator range one element at a time; the vector insert's own comment says it does not meet the strong guarantee of 23.2.4.3, p1, a question the `TODO` carries (`include/deque.cc`, `include/vector.cc`). |
+| Primary template definitions | `char_traits`, `ctype`, `collate`, `codecvt` and `numpunct` have primary template definitions beyond the required specializations (`include/rw/_traits.h`, `include/loc/`). |
+| Portable random sequence | The `random_shuffle` generator works in 32-bit words, so the sequence is the same on every target (`src/random.cpp`). |
+| Replaceable allocation functions | `src/memory.cpp` defines the `operator new` and `operator delete` variants a support library lacks, per the `_RWSTD_NO_OPERATOR_*` probes; none fires with GCC or Clang. |
+| Later defect corrections | LWG 559's cv-qualified `numeric_limits` and LWG 434's `bitset::to_string` overloads are unconditional (chapter 3). |
 
 Copy-on-write strings and the compatibility mutex in their bodies are
 implementation choices within the historical design, not automatically
@@ -99,7 +104,7 @@ later amendment to the issue.
 | 350 | `allocator::address` obtains the address through casts to character references, bypassing an overloaded address-of operator. | `include/rw/_allocator.h` |
 | 453 | String-buffer seeking rejects a nonzero offset when the relevant buffer pointer is null. | `include/sstream.cc` |
 | 467 | `char_traits<char>::lt` compares after conversion to `unsigned char`, matching bytewise ordering. | `include/rw/_traits.h` |
-| 559 | cv-qualified `numeric_limits` specializations inherit the unqualified specialization; `_RWSTD_NO_EXT_CV_QUALIFIED_LIMITS` disables them. | `include/limits`, `include/rw/_config.h` |
+| 559 | cv-qualified `numeric_limits` specializations inherit the unqualified specialization. | `include/limits` |
 | 622 | `basic_filebuf` destruction catches exceptions from `close`. | `include/fstream` |
 
 Further cited issues include string construction and search (5, 7,
@@ -126,7 +131,7 @@ process failures can prevent later assertions from running.
 |---|---|
 | String range self-aliasing | Repaired; the relevant assignment, insertion and replacement tests and regressions pass in the recorded six configurations. This is evidence for the repaired path, not every string requirement. |
 | Locale facets | The `num_get`, `time_get` and `money_get` rows pass. `num_get` and `money_get` grow their digit buffers instead of failing or overrunning, and `money_get` throws `bad_alloc` where the buffer size would wrap. |
-| Numerics and extension controls | The limits, math, valarray and extension rows pass; the failures were test defects and a driver comparison. |
+| Numerics | The limits, math and valarray rows pass; the failures were test defects and a driver comparison. The extensions row is gone with the switch. |
 | Memory/lifetime symptoms | The intermittent string-iterator result was the test driver reading past short buffers, and the `21.cwchar` exit-time corruption a test's use of a write-only stream; both are repaired. |
 | Streams | `27.ostream.inserters.stdcxx-51` aborts: the library prints quiet and signaling NaNs alike, and the test expects distinct names; it has not yet been settled. The file streams have the standard's interface only: the additions from classic iostreams (descriptor and `FILE*` constructors, `fd ()`, `attach ()`, `detach ()`, extra open modes, a permissions argument) are gone. `basic_ios::flags ()` meets the postcondition of `init` in every configuration since the locking extension left the format flags. `setbase` and the clearing of `basefield` follow the standard since the `setbase` extension and `bin` were removed; `27.std.manip` pins them. |
 | Reentrant locale use | The sanitizer investigation found races and use-after-free in the locale; they are repaired, and each repair has a multithreaded test. Seven locale MT rows of the reentrant tables time out: on many processors they measure the harness's time limit, a test-design question queued in `TODO`. C++03 did not itself specify the later thread library and memory model. |

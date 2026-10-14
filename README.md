@@ -55,8 +55,8 @@ and the Microsoft library already serve those.
 
 The interface is the standard's alone. The additions the library
 carried beyond it, once switched off by `_RWSTD_STRICT_ANSI`, are
-leaving one subsystem at a time; the switch itself is gone, and the
-`TODO` entry in the Library chapter lists what remains.
+gone with the switch; `doc/notes/ref-conformance.md` names what left
+and the choices that stay.
 
 The library has three uses as it is:
 
