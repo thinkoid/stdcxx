@@ -226,7 +226,6 @@ void test_random_shuffle (const int                    line,
 
 void test_random_shuffle (const int line)
 {
-#ifndef _RWSTD_NO_EXT_PORTABLE_RANDOM_SEQUENCE
 
     rw_info (0, 0, 0,
              "verify that the randomly shuffled sequence "
@@ -315,11 +314,6 @@ void test_random_shuffle (const int line)
             break;
     }
 
-#else
-    rw_note (0, 0, 0,
-             "_RWSTD_NO_EXT_PORTABLE_RANDOM_SEQUENCE is defined, "
-             "no random_test available");
-#endif   // _RWSTD_NO_EXT_PORTABLE_RANDOM_SEQUENCE
 }
 
 /**************************************************************************/

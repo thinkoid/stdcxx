@@ -53,19 +53,9 @@
 _RWSTD_NAMESPACE (__rw) {
 
 
-#ifndef _RWSTD_NO_EXT_PORTABLE_RANDOM_SEQUENCE
-
 // generator produces the same sequence of random numbers
 // irrespective of the architecture and width of integers
 typedef _RWSTD_UINT32_T __rw_random_t;
-
-#else   // if defined (_RWSTD_NO_EXT_PORTABLE_RANDOM_SEQUENCE)
-
-// generator may produces a different sequence of random numbers
-// on different architectures (depending on the width of size_t)
-typedef size_t __rw_random_t;
-
-#endif   // _RWSTD_NO_EXT_PORTABLE_RANDOM_SEQUENCE
 
 
 static _RWSTD_THREAD __rw_random_t
