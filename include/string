@@ -638,15 +638,6 @@ public:
     // 21.3.5.7, p1
     size_type copy (pointer, size_type, size_type = 0) const;
 
-
-#ifndef _RWSTD_NO_EXT_DEEP_STRING_COPY
-
-    basic_string copy () const {
-        return basic_string (data (), size ());
-    }
-
-#endif   //_RWSTD_NO_EXT_DEEP_STRING_COPY
-
     void swap (basic_string &__s) {
         if (get_allocator () == __s.get_allocator ()) {
             pointer __temp = _C_data;
