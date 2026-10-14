@@ -351,21 +351,6 @@ distance (_ForwardIterator __first, _ForwardIterator __last)
 #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 
-#if    !defined (_RWSTD_NO_EXT_VOID_DISTANCE) \
-    || defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-template <class _ForwardIterator, class _Distance>
-inline void distance (const _ForwardIterator &__first,
-                      const _ForwardIterator &__last,
-                      _Distance              &__n)
-{
-    __distance (__first, __last, __n,
-                _RWSTD_ITERATOR_CATEGORY (_ForwardIterator, __first));
-}
-
-#endif   // !_RWSTD_NO_EXT_VOID_DISTANCE || _RWSTD_NO_CLASS_PARTIAL_SPEC
-
-
 }   // namespace std
 
 

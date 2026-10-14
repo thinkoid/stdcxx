@@ -63,28 +63,6 @@ _USING (::ptrdiff_t);
 #endif   // _RWSTD_NO_LIBC_IN_STD
 
 
-#ifdef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
-// supply a conforming version of distance for platforms that do not
-// correctly support partial specialization of class templates
-
-_RWSTD_NAMESPACE (std) {     
-    
-template<class InputIter>
-size_t distance (InputIter a, InputIter b)
-{
-    size_t n = 0;
-    distance (a, b, n);
-    return n;
-} 
-
-}   // namespace std
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
-
-
-
-
 #ifdef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
 
 _RWSTD_NAMESPACE (std) { 

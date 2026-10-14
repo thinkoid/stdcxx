@@ -26,7 +26,6 @@
  * 
  **************************************************************************/
 
-#include <cassert>
 #include <iterator>
 #include <iostream>
 #include <vector>
@@ -59,21 +58,7 @@ int main ()
               << *it << '\n';
 
     // Compute the distance of it from the first element.
-    Vector::difference_type dist = 0;
-
-#ifndef _RWSTD_NO_EXT_VOID_DISTANCE
-
-    // using the extended overload of function template distance()
-    // provided by this implmentation, compute the distance between
-    // the two iterators
-    std::distance (v.begin (), it, dist);
-
-    assert (3 == dist);
-
-#endif   // _RWSTD_NO_EXT_VOID_DISTANCE
-
-    // do the same using the standard function template distance()
-    dist = std::distance (v.begin (), it);
+    const Vector::difference_type dist = std::distance (v.begin (), it);
 
     std::cout << "The distance between the beginning and "
               << *it << " is " << dist << '\n';
