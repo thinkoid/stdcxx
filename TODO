@@ -19,26 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO Keep instantiated facets until the program ends
-
-A named facet dies with the last locale that holds it. The next locale
-of that name builds it again: the constructor, the mapping of its
-database, the initialization of its data. The locale MT tests that
-build locales in a loop pay for it. 15D on aarch64, lock-free atomics,
-5-run means of real time, before and after 2bbdf7c9 stopped the
-=use_facet= leak that had kept facets alive by accident:
-=22.locale.ctype.mt= 11.9 s to 13.0 s, =22.locale.numpunct.mt= 15.1 s
-to 16.7 s, =22.locale.globals.mt= 8.3 s to 9.3 s.
-
-Fix: explore a facet repository that keeps every facet it
-instantiates until the program ends: its cost in memory and mappings,
-what it changes in the reference counts and =~__rw_locale=, and what
-it does to the lifetime of the facet data.
-
-Check: designed with the fix. The timings above are the baseline, and
-=22.locale.use_facet.mt= still finds no block outliving its round, or
-leaves with the design.
-
 ** TODO The input iterator insert of =deque= and =vector= against 23.2.4.3, p1
 
 =__rw_insert_range= for an input iterator range, in =include/vector.cc=
