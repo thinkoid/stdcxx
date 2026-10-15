@@ -1092,16 +1092,16 @@ function get_dispname(section, compname)
 }
 
 
-# returns the absolute name of the file that shows why the component
-# failed in the build, or empty for a status that is not a failure:
-# the tests stage's log for a build failure, the test's output
-# otherwise
+# returns the absolute name of the file that explains the component's
+# status, or empty where nothing does (a clean or missing component,
+# or one that wrote no output): the tests stage's log for a build
+# failure, the test's output otherwise
 function get_cellhref(section, fname, compname, class)
 {
     if (2 != section || 0 == (fname in builddirs))
         return ""
 
-    if (0 == (class in failclasses))
+    if ("OK" == class || "MISS" == class || "NOUT" == class)
         return ""
 
     if (match(class, "^X?(COMP|LINK)$"))
