@@ -19,24 +19,40 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The input iterator insert of =deque= and =vector= against 23.2.4.3, p1
+** TODO The range inserts of =deque= against 23.2.1.3, p2
 
-=__rw_insert_range= for an input iterator range, in =include/vector.cc=
-and =include/deque.cc=, inserts one element at a time; the comment in
-the =vector= one says it does not satisfy the strong exception safety
-requirement of 23.2.4.3, p1, and the =deque= one is of the same shape.
-The branch that met the requirement, a temporary filled first and
-inserted whole, was the other side of the =*_INSERT_IN_PLACE= gates
-and left with them; =tests/containers/23.vector.modifiers.cpp= turns
-exceptions off for an iterator below forward on that account. The
-strict ANSI entry sorted the gates as choices the standard permits.
+23.2.1.3, p2 asks of =deque::insert= what 23.2.4.3, p1 asks of
+=vector::insert=: if an exception is thrown other than by the copy
+constructor or assignment operator of =T=, there are no effects.
+=__rw_insert_range= in =include/deque.cc= misses it in both range
+overloads. The input iterator one inserts one element at a time, so a
+=bad_alloc= on the k-th element leaves k-1 inserted, and a middle
+insert from an input range is quadratic. The bidirectional one pushes
+the new elements onto the container with =push_front= and
+=push_back= before it shuffles them into place, so a node allocation
+that fails mid-way leaves the container grown.
+=tests/containers/23.deque.modifiers.cpp= turns exceptions off for
+every insert into the middle and for every range insert of more than
+one element, at every iterator category, on that account; the range
+inserts have never been checked for the guarantee.
 
-Fix: decide whether the one-at-a-time insert stays. If not, the
-temporary comes back from the gate's history as the only code and the
-test's exception step goes.
+The =vector= half of this entry went with the restoration of the
+input iterator insert: a temporary filled from the range, then the
+forward overload, which meets the clause. The same move on =deque=
+would feed the bidirectional overload and inherit its hole. The
+branch that met the clause for the input iterator overload alone,
+a copy of the whole container swapped in on success, was the strict
+ANSI side of =_RWSTD_NO_EXT_DEQUE_INSERT_IN_PLACE= and is in history
+(cf434369's parent).
 
-Check: =23.vector.modifiers= and =23.deque.modifiers= with exceptions
-on for input iterators.
+Fix: decide. Either the bidirectional overload is made strong, the
+nodes the insert needs allocated before any element is touched, and
+the input iterator overload becomes a temporary handed to it; or the
+input iterator overload alone takes the whole-copy branch back and the
+bidirectional overload is filed by itself.
+
+Check: =23.deque.modifiers= with exceptions on for the range inserts,
+and the step at its line 336 reconsidered for them.
 
 ** TODO Leftovers beside the removed function probes
 

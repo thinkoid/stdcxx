@@ -450,55 +450,33 @@ __rw_insert_range (vector<_TypeT, _Allocator> *__self, _VectorIter __it,
     typedef _TYPENAME vector<_TypeT, _Allocator>::value_type value_type;
     typedef _TYPENAME vector<_TypeT, _Allocator>::allocator_type
         allocator_type;
-    typedef _TYPENAME vector<_TypeT, _Allocator>::size_type size_type;
-    typedef _TYPENAME vector<_TypeT, _Allocator>::pointer   pointer;
 
 #endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
     _RWSTD_ASSERT_RANGE (__it, end ());
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    // note that this extension does not satisfy the strong exception
-    // safety requirement in 23.2.4.3, p1
+    // 23.2.4.3, p1: If an exception is thrown other than by the copy
+    // constructor or assignment operator of T there are no effects.
+    // see also lwg issue 406
 
     // complexity: linear in distance(first, last)
-    // exception safety: basic
+    // exception safety:
+    // -- strong if capacity() < size() + distance(first, last) and
+    //    value_type's assignment operator and copy ctor do not throw
+    // -- basic otherwise
 
-    // append one element at a time to prevent the loss of data
-    // from the input sequence in the case of an exception
+    // insert input range into a temporary sequence rather than into *this
+    // to avoid modifying *this in case an exception (e.g., bad_alloc) is
+    // thrown
+    vector<value_type, allocator_type> __tmp (__self->get_allocator ());
 
-    const size_type __size = __self->size ();
-    const size_type __inx  = _DISTANCE (__self->begin (), __it, size_type);
+    for ( ; !(__first == __last); ++__first)
+        __tmp.push_back (*__first);
 
-    _RWSTD_ASSERT (__inx <= __size);
-
-    for (; !(__first == __last); ++__first)
-        __self->push_back (*__first);
-
-    if (__inx < __size) {
-        // swap the inserted elements with the elements before which
-        // they should be inserted, as if by calling
-        // std::rotate (__beg, __mid, _C_alloc._C_end)
-        const pointer __beg = __self->_C_alloc._C_begin + __inx;
-        const pointer __mid = __self->_C_alloc._C_begin + __size;
-
-        if (__beg < __mid) {
-            for (pointer __p0 = __beg, __p1 = __mid; __p0 < --__p1; ++__p0)
-                _STD::iter_swap (__p0, __p1);
-        }
-
-        if (__mid < __self->_C_alloc._C_end) {
-            for (pointer __p0 = __mid, __p1 = __self->_C_alloc._C_end;
-                 __p0 < --__p1; ++__p0)
-                _STD::iter_swap (__p0, __p1);
-        }
-
-        if (__beg < __self->_C_alloc._C_end) {
-            for (pointer __p0 = __beg, __p1 = __self->_C_alloc._C_end;
-                 __p0 < --__p1; ++__p0)
-                _STD::iter_swap (__p0, __p1);
-        }
-    }
+    // insert into *this using a more efficient algorithm optimized
+    // for BidirectionalIterator (and better)
+    __self->insert (__it, __tmp.begin (), __tmp.end ());
 }
 
 

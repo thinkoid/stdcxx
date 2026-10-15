@@ -159,7 +159,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 23.vector.capacity                            0    0   857048      0   100%
 23.vector.cons                                0    0        9      0   100%
 23.vector.cons.stdcxx-294                  NOUT    0                       
-23.vector.modifiers                           0    0    16030      0   100%
+23.vector.modifiers                           0    0    16942      0   100%
 23.vector.stdcxx-1037                      NOUT    0                       
 23.vector.stdcxx-494                       NOUT    0                       
 23.vector.stdcxx-611                       NOUT    0                       

@@ -142,15 +142,6 @@ void exception_loop (int line, const char *fcall, bool capchg,
                 vec.insert (it, *x);
             }
             else if (-1 == n) {
-
-                // disable exceptions if Iterator is not at least
-                // a ForwardIterator since the extension doesn't
-                // provide the strong exception safety guarantee
-                // required in 23.2.4.3, p1
-                if (!is_forward (beg)) {
-                    *pst->throw_at_calls_ [0] = std::size_t (-1);
-                }
-
                 vec.insert (it, beg, end);
             }
             else {
