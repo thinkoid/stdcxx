@@ -245,7 +245,15 @@ the error it reports names the last of them. One host has every
 locale since 2026-10-14, =SUPPORTED= through =locale-gen= and the
 Shift_JIS one by hand: the three examples run clean there, and
 =22.locale.codecvt.mt= skips its first-use section there with the
-note. The other test hosts have =en_US.UTF-8= alone.
+note. The other test hosts have =en_US.UTF-8= alone. On that host
+=22.locale.codecvt= reaches 53 assertions the pin never saw, the
+sections gated on the C library knowing a named locale, and fails
+35 of them: =do_length= against the C library's count for
+=ja_JP.UTF-8=, =ja_JP.EUC-JP= and =ja_JP.Shift_JIS= (line 611), and
+the wide =in= and =out= checks at lines 1520 to 1596. A binary
+built before the locales were installed fails the same 35, so the
+host, not the library's change of the day, is the variable; the
+cause is not yet read.
 
 Fix: the tests that race a database locale build it under a name the
 C library cannot know (=rw_localedef='s fourth argument), then every
