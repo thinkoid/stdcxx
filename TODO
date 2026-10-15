@@ -96,33 +96,22 @@ except the =21.cwchar= coverage, which adds assertions.
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
-** TODO The next minor version
+** TODO Dead members and sources of the 4.2.x layout
 
-The version rule: the first number is source compatibility, the
-second binary compatibility. Three changes break the binary interface
-of 4.2.x. The revival does not keep that interface, so they do not
-wait for a release; the minor version moves when they land:
-- The string reference count. Thread-safe builds on Linux/x86-64 keep
-  a mutex in every string body (=_RWSTD_NO_STRING_ATOMIC_OPS=,
-  =include/rw/_config.h:101-114=). The clause cites 4.1.x; its effect
-  is the string layout of every 4.2.x release. =21.string.stdcxx-162=
-  aborts on it in 15D: the body is 64 bytes, the test allows 24. The
-  mutex is correct, only larger and slower.
-  =_RWSTD_USE_STRING_ATOMIC_OPS= selects the atomics today.
+The revival keeps neither source nor binary compatibility with
+4.2.x; the next version is 5.0, named from the state of the library
+when it is cut.
+Two things stayed only for that compatibility:
 - The =numpunct= cache members, unused since 2e196ebb
   (=include/loc/_numpunct.h:117=).
 - =src/x86/atomic.s=, =src/x86_64/atomic.s= and the symbols they
   export; no header has referred to them since the backend moved to
   the =__atomic= built-ins.
 
-Fix: all three go, and the minor version moves with them: delete the
-string clause rather than define the opt-in, remove the members,
-remove the sources and their symbols. The number is a decision of its
-own: 4.3 names the unreleased upstream branch in this repository.
+Fix: remove the members, remove the sources and their symbols.
 
-Check: =21.string.stdcxx-162= passes in 15D. The exported symbols
-lose exactly the assembly routines. The suites are otherwise
-unchanged.
+Check: the exported symbols lose exactly the assembly routines. The
+suites are otherwise unchanged.
 
 ** TODO =time_get::do_date_order= returns =no_order= in every locale
 

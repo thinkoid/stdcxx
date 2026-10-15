@@ -57,12 +57,12 @@
 #  define _RWSTD_STRING_REF_INT long
 #endif
 
-#if !defined (_RWSTD_NO_ATOMIC_OPS) && !defined (_RWSTD_NO_STRING_ATOMIC_OPS)
+#ifndef _RWSTD_NO_ATOMIC_OPS
    // disable string mutex when atomic operations are available
 #  ifndef _RWSTD_NO_STRING_MUTEX
 #    define _RWSTD_NO_STRING_MUTEX
 #  endif   // _RWSTD_NO_STRING_MUTEX
-#endif   // _RWSTD_NO_ATOMIC_OPS && !_RWSTD_NO_STRING_ATOMIC_OPS
+#endif   // _RWSTD_NO_ATOMIC_OPS
 
 
 _RWSTD_NAMESPACE (std) { 

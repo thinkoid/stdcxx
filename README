@@ -1341,18 +1341,6 @@
      When #defined std::basic_string  objects are reference counted. A
      single per-process mutex object is used for thread safety.
 
-  o  _RWSTD_USE_STRING_ATOMIC_OPS [abi, lib, over]
-
-     When #defined on Linux/x86_64  (AMD64 or EM64T), in wide (64-bit)
-     mode,  std::basic_string   objects  use  atomic   operations  for
-     reference counting  instead of the default mutex.   Using a mutex
-     in basic_string is suboptimal and is only done in this release of
-     the  library  to  maintain  binary  compatibility  with  previous
-     versions.  This macro is  provided to allow users not constrained
-     by  binary  compatibility  to  make  use of  the  more  efficient
-     implementation of strings.  The macro has no effect in the narrow
-     (32-bit)  configuration   on  this  platform  or   on  any  other
-     platforms.
 
 
   8.3.6  Macros Controlling Iostreams

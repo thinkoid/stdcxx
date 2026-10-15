@@ -82,7 +82,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.string.replace.stdcxx-175               NOUT    0                       
 21.string.rfind                               0    0     6840      0   100%
 21.string.stdcxx-1009                      NOUT    0                       
-21.string.stdcxx-162                       ABRT    0                       
+21.string.stdcxx-162                       NOUT    0                       
 21.string.stdcxx-231                       NOUT    0                       
 21.string.stdcxx-466                       NOUT    0                       
 21.string.substr                              0    0     1660      0   100%
