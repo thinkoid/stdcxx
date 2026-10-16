@@ -275,7 +275,7 @@ once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
   Programs:                   273
   Non-zero exit status:         0
-  Signalled:                    1
+  Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
