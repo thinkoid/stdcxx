@@ -45,7 +45,7 @@ void test (const std::string& str, const std::streamsize width)
     catch (std::ios_base::failure&) {
     }
 
-    assert (width == os.width ());
+    assert (0 == os.width ());
 }
 
 int main ()

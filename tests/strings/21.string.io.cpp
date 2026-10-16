@@ -1140,8 +1140,6 @@ void test_io (charT*, Traits*, Allocator*,
                 const std::streamsize width =
                        func.which_ == StringIds::getline_istream_str
                     || func.which_ == StringIds::getline_istream_str_val
-                    || (   func.which_ == StringIds::inserter_ostream_cstr
-                        && ret_state != Good)
                     ? std::streamsize (tcase.off) : std::streamsize (tcase.val);
 
                 success = width == ret_width;

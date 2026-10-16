@@ -776,6 +776,16 @@ void test_formatted (charT, int line1, int line2,
 
         bool pass;
 
+        // verify that width(0) has been called (unless there are exceptions
+        // involved, in which case it's unspecified whether width(0) has or
+        // has not been called
+        pass = !((!exceptions || !tsb.fails_ && !tnp.fails_) && os.width ());
+
+        rw_assert (pass, __FILE__, line1,
+                   "%d. std::basic_ostream<%s>::operator<<(%s = %{#lc})"
+                   ".width () == 0, got %d",
+                   line2, cname, tname, val, os.width  ());
+
         // verify that ios_base::failure has been thrown (and caught)
         // if badbit is set in exceptions
         pass = !(exceptions & os.rdstate () && caught != E_failure);

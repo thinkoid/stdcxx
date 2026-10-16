@@ -156,15 +156,14 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
                     || _STD::ios_base::left == __padbits
                     && __pad != __strm._C_pad (__pad))
                     __err = _STD::ios_base::badbit;
-                else
-                    __strm.width (0);   // reset width only on success
             }
-            else if (__len == __rw_sputn (__strm, __s, __len, _Same ())) {
-                __strm.width (0);   // reset width only on success
-            }
-            else {
+            else if (__len != __rw_sputn (__strm, __s, __len, _Same ())) {
                 __err = _STD::ios_base::badbit;
             }
+
+            // 21.3.7.9, p4: the inserter calls width(0) after the
+            // characters are inserted, whether or not sputn failed
+            __strm.width (0);
         }
     }
     _CATCH (...) {

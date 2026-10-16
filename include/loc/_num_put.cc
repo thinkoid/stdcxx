@@ -115,6 +115,10 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
     // number of fill chars to pad with
     streamsize __pad = __flags.width () - streamsize (__res);
 
+    // 22.2.2.2.2, p21: str.width(0) is called at the end of stage 3,
+    // before anything is output, so a failed insertion resets it too
+    __flags.width (0);
+
     // adjustfield bits (left, internal, or the default right)
     const int __adj = __f & _RWSTD_IOS_ADJUSTFIELD;
 
@@ -184,11 +188,6 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
     // left justify if necessary
     for (; __pad > 0; ++__it, --__pad)
         *__it = __fill;
-
-    // reset width only if the insertion has been successful
-    // (i.e., no exception and the iterator has not failed)
-    if (!_RW::__rw_iter_failed (__it))
-        __flags.width (0);
 
     return __it;
 }
