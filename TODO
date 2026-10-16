@@ -40,33 +40,41 @@ meets p2 at the price of p1 at the ends; the one-at-a-time insert it
 replaced met p1 and not p2. No shape meets both without allocating
 ahead.
 
-The way that meets both, decided 2026-10-16: every slot of the
-node vector owns a buffer, so the vector's extent is the storage
-and =_C_beg= and =_C_end= mark the live part of it; what lies
-between the vector's ends and the live range is reserved, and the
-destructor frees every slot. An insert of n at an end then grows the
-node vector once if the reserve on that side is short, allocates the
-buffers for the new slots before any element is touched, freeing
-them if one allocation fails, and constructs into the reserve. After
-the growth nothing allocates, so the only exceptions left are =T='s,
-which the clause exempts, and a failed growth leaves nothing
-observable; a successful one leaves the reserve. Buffers are
-allocated by need: an insert of n takes the buffers the spare on its
-side is short, rotating spare buffers from the far end first, since
-a buffer is a buffer; the ratio stays on the node vector, which
-keeps =__rw_new_capacity='s golden ratio and minimum when it
-regrows. A ratio on the buffers would buy nothing: the deque's unit
-of growth is already a buffer, so each allocation serves
-=_C_bufsize ()= pushes, where =vector='s unit is one element.
-libstdc++ and libc++ both double the map and allocate blocks by
-need; libc++ also keeps every block it allocates, as decided here,
-and releases spare blocks on pops only beyond one per end. One
-mechanism for the three overloads; the input iterator overload then
-becomes a temporary handed to the bidirectional one and the whole
-copy goes. The spare goes to the end nearest the insertion point.
-=clear= keeps the map, as =vector='s keeps its capacity; only the
-destructor releases it, and the no-map state remains the
-default-constructed one.
+The way that meets both, decided 2026-10-16: two ranges. Every
+slot of the node vector owns a buffer, so the vector's extent is the
+storage, and =_C_beg= and =_C_end= mark the live part of it; what
+lies between the vector's ends and the live range is reserved, and
+the destructor frees every slot. The vector regrows by
+=__rw_new_capacity='s golden ratio, as it must for a push at an end
+to stay amortized constant (23.1.1, p12; 23.2.1, p1): a vector grown
+by need would copy every node pointer every =_C_bufsize ()= pushes,
+quadratic over n. Its minimum is a slot or two, not the 32 of
+=_RWSTD_MINIMUM_NEW_CAPACITY=, which is what would hold 4 KiB for
+one =int=. Idle memory is then at most about 0.618 of the size plus
+a slot or two, the trade the standard accepts for =vector='s
+capacity; libc++ holds less by allocating blocks by need inside a
+map with spare slots, a third range this design does not pay for.
+
+An insert of n at an end whose reserve is short grows the vector
+once, one allocation, installed before anything else happens, then
+allocates a buffer for every new slot one at a time, each written
+into its slot as it comes, and only then constructs into the
+reserve. Nothing is undone on a failure: a failed vector growth
+changes nothing, and a buffer allocation that fails after j leaves
+the vector j slots longer and the deque owning j more buffers,
+nothing observable, the next insert that much cheaper; libc++ does
+the same where its map has room ("we don't need to fix anything
+up"). After the growth nothing allocates, so the only exceptions
+left are =T='s, which the clause exempts. The memory kept after a
+=bad_alloc= is the same choice as the reserve kept after a =T=
+throw, applied consistently. Spare buffers at the far end can be
+rotated to the near one before the vector regrows, since a buffer
+is a buffer; libc++ does. One mechanism for the three overloads;
+the input iterator overload then becomes a temporary handed to the
+bidirectional one and the whole copy goes. The spare goes to the
+end nearest the insertion point. =clear= keeps the map, as
+=vector='s keeps its capacity; only the destructor releases it, and
+the no-map state remains the default-constructed one.
 
 What the shape changes: the null slot on each side of the live
 range, written by =_C_push= and the frees and asserted by
@@ -77,8 +85,8 @@ arithmetic does not read what the neighbouring slot holds:
 equality is positional, =0 == x - y=, and the difference reads
 =x._C_cur - *x._C_node=, zero for an iterator stepped onto any
 slot. The map's growth today is in slots, minimum 32, placed at a
-quarter or half of the new vector, and stays; in buffers that policy
-would hold 4 KiB for one =int=, which is why buffers go by need.
+quarter or half of the new vector; the ratio stays, the minimum
+goes, and the placement follows the end being grown.
 
 =tests/containers/23.deque.modifiers.cpp= runs its exception loop for
 the input iterator range insert at every position and length; for
