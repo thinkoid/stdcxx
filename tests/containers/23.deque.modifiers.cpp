@@ -599,6 +599,115 @@ void test_insert_int_range (const T &dummy, const char* tname)
 
 /**************************************************************************/
 
+// asserts that the seqlen elements whose addresses addr holds are at
+// those addresses with the values of seq, nfront elements from the
+// front of the deque; call names the modifier called last
+void check_references (int line, const char *call,
+                       const Deque &deq, const UserClass* const *addr,
+                       const char *seq, std::size_t seqlen,
+                       std::size_t nfront)
+{
+    std::size_t i = 0;
+
+    for ( ; i != seqlen; ++i) {
+        const UserClass &x = deq [nfront + i];
+
+        if (&x != addr [i] || x.data_.val_ != UChar (seq [i]))
+            break;
+    }
+
+    const UserClass* const got = i == seqlen ? 0 : &deq [nfront + i];
+
+    rw_assert (0 == got, 0, line,
+               "line %d: deque<UserClass>::%s: size() == %zu, element "
+               "%zu of the first %zu expected %c at %p, got %c at %p",
+               __LINE__, call, deq.size (), i, seqlen,
+               got ? seq [i] : ' ', (const void*)(got ? addr [i] : 0),
+               got ? got->data_.val_ : ' ', (const void*)got);
+}
+
+
+// 23.2.1.3, p1: an insert at either end of the deque leaves every
+// reference to its elements valid; verifies that the elements the
+// deque holds first stay at their addresses with their values through
+// inserts of every kind at both ends, while the live range crosses
+// buffer after buffer and the vector of nodes grows
+void test_insert_references ()
+{
+    rw_info (0, 0, 0,
+             "std::deque<UserClass>::insert(iterator, ...) at either end "
+             "leaves references to the elements valid");
+
+    static const char seq[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    static const std::size_t seqlen = sizeof seq - 1;
+
+    UserClass* const xseq = UserClass::from_char (seq, seqlen + 1);
+
+    Deque deq (xseq, xseq + seqlen);
+
+    // the address of every element before the first insert
+    const UserClass* addr [seqlen];
+
+    for (std::size_t i = 0; i != seqlen; ++i)
+        addr [i] = &deq [i];
+
+    // the number of elements inserted before the first of them
+    std::size_t nfront = 0;
+
+#define CHECK(call)                                                    \
+    check_references (__LINE__, call, deq, addr, seq, seqlen, nfront)
+
+    const InputIter<UserClass> in (0, 0, 0);
+
+    for (std::size_t n = 1; n < 40; n += 5) {
+
+        deq.push_front (xseq [0]);
+        ++nfront;
+        CHECK ("push_front(const_reference)");
+
+        deq.push_back (xseq [0]);
+        CHECK ("push_back(const_reference)");
+
+        deq.insert (deq.begin (), xseq [1]);
+        ++nfront;
+        CHECK ("insert(begin(), const_reference)");
+
+        deq.insert (deq.end (), xseq [1]);
+        CHECK ("insert(end(), const_reference)");
+
+        deq.insert (deq.begin (), n, xseq [2]);
+        nfront += n;
+        CHECK ("insert(begin(), size_type, const_reference)");
+
+        deq.insert (deq.end (), n, xseq [2]);
+        CHECK ("insert(end(), size_type, const_reference)");
+
+        deq.insert (deq.begin (),
+                    make_iter (xseq, xseq, xseq + seqlen, in),
+                    make_iter (xseq + seqlen, xseq, xseq + seqlen, in));
+        nfront += seqlen;
+        CHECK ("insert(begin(), InputIterator, InputIterator)");
+
+        deq.insert (deq.end (),
+                    make_iter (xseq, xseq, xseq + seqlen, in),
+                    make_iter (xseq + seqlen, xseq, xseq + seqlen, in));
+        CHECK ("insert(end(), InputIterator, InputIterator)");
+
+        deq.insert (deq.begin (), xseq, xseq + seqlen);
+        nfront += seqlen;
+        CHECK ("insert(begin(), const_pointer, const_pointer)");
+
+        deq.insert (deq.end (), xseq, xseq + seqlen);
+        CHECK ("insert(end(), const_pointer, const_pointer)");
+    }
+
+#undef CHECK
+
+    delete[] xseq;
+}
+
+/**************************************************************************/
+
 void test_insert ()
 {
     //////////////////////////////////////////////////////////////////
@@ -834,6 +943,10 @@ void test_insert ()
                  "std::deque<UserClass>::insert(iterator, T, T) "
                  "[with T = IntegralType] tests disabled."); 
 
+    //////////////////////////////////////////////////////////////////
+    // exercise the validity of references across inserts at the ends
+
+    test_insert_references ();
 }
 
 /**************************************************************************/

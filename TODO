@@ -19,112 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The inserts of =deque= against 23.2.1.3, p1 and p2
-
-23.2.1.3, p2: if an exception is thrown other than by the copy
-constructor or assignment operator of =T=, =insert= has no effects.
-23.2.1.3, p1: an insert at either end leaves references to the
-elements valid. The four overloads of =insert= meet both since the
-reserve below landed. Before it the bidirectional overload,
-=_C_insert_n= and the single-element insert into the middle pushed
-the new elements on with =push_front= and =push_back= before they
-shuffled them into place, so a node allocation that failed mid-way
-left the container grown; the input iterator overload copied the
-whole container and swapped it in, p2 at the price of p1. No shape
-meets both without allocating ahead. What remains is the assertion
-the suite lacks.
-
-The way that meets both, decided 2026-10-16: two ranges. Every
-slot of the node vector owns a buffer, so the vector's extent is the
-storage, and =_C_beg= and =_C_end= mark the live part of it; what
-lies between the vector's ends and the live range is reserved, and
-the destructor frees every slot. The vector regrows by
-=__rw_new_capacity='s golden ratio, as it must for a push at an end
-to stay amortized constant (23.1.1, p12; 23.2.1, p1): a vector grown
-by need would copy every node pointer every =_C_bufsize ()= pushes,
-quadratic over n. Its minimum is a slot or two, not the 32 of
-=_RWSTD_MINIMUM_NEW_CAPACITY=, which is what would hold 4 KiB for
-one =int=. Idle memory is then at most about 0.618 of the size plus
-a slot or two, the trade the standard accepts for =vector='s
-capacity; libc++ holds less by allocating blocks by need inside a
-map with spare slots, a third range this design does not pay for.
-
-An insert of n at an end whose reserve is short grows the vector
-once: allocate the new vector, allocate a buffer for each of its
-new slots, and only then copy the old pointers over, free the old
-vector and install the new one; after that it constructs into the
-reserve. A failure at any point of the growth frees what the growth
-allocated and leaves the old state untouched, so nothing is
-observable; keeping a partly filled vector instead would need the
-deque to remember the vector's allocated size beside its owned one,
-since =deallocate (p, n)= takes the n that =allocate= was given,
-and that is the third range back as a number (decided 2026-10-16:
-two ranges, the undo is a loop over j pointers and costs j wasted
-allocations only on a retry after =bad_alloc=). After the growth
-nothing allocates, so the only exceptions left are =T='s, which the
-clause exempts. A throw from =T= puts the storage back as well
-(decided with step two, 2026-10-16; the reserve was to stay): the
-vector a growth replaced is kept until the elements are in place,
-so the undo reinstates it, frees the new nodes and turns the spare
-back, and every iterator held before the call is valid after the
-throw; what the shuffle had assigned keeps the value it was given.
-Spare buffers at the far end are rotated to the near one before the
-vector regrows, since a buffer is a buffer, libc++ does: half of
-them, or as many as the room needs, in place, which is what keeps a
-queue in bounded storage when a pop frees nothing. One mechanism
-for the three overloads; the input iterator overload is a temporary
-handed to the bidirectional one and the whole copy is gone. The
-spare goes to the end nearest the insertion point. =clear= keeps
-the map, as =vector='s keeps its capacity; only the destructor
-releases it, and the no-map state remains the default-constructed
-one.
-
-What the shape changes: the null slot on each side of the live
-range, written by =_C_push= and the frees and asserted by
-=_C_is_valid=, goes, the frees no longer release a buffer when the
-live range leaves it, and the growth test in =_C_push= (end's node
-is the last slot) becomes the reserve trigger. The iterator
-arithmetic does not read what the neighbouring slot holds:
-equality is positional, =0 == x - y=, and the difference reads
-=x._C_cur - *x._C_node=, zero for an iterator stepped onto any
-slot, but the slot after the last node must exist, so one null
-guard stays. The map's growth was in slots, minimum 32, placed at a
-quarter or half of the new vector; the ratio stays, the minimum
-went, and the placement follows the end being grown.
-
-=tests/containers/23.deque.modifiers.cpp= runs its exception loop for
-the input iterator range insert at every position and length; for
-the other inserts it still turns exceptions off into the middle and
-for more than one element, which is where they fail.
-
-Fix: in the tree, in three commits, each gated on the suite. First,
-landed, the storage model with behaviour unchanged: every node owns
-a buffer, =_C_grow= is the one growth, the pops stop releasing,
-=clear= keeps the storage, the destructor frees every node,
-=_C_is_valid= asserts the new invariant. One null guard after the
-last node stays, allocated with the vector: an iterator stepping
-off the last element of a full last buffer reads it, which the
-sanitizer caught and the suite could not. Second, landed, the
-reserve and the three inserts, gated on the exception loop with its
-exemptions removed; the loop injects every exception into every
-insert case now. Third the missing assertion below. Nothing outside
-=include/deque= and =include/deque.cc= reads the internals; =queue=
-and =stack= only name the type. A driver against the tree's headers
-under the address sanitizer gives the fast loop and the leak check
-the suite lacks, the three =23.deque= tests the verdict.
-
-A pop never frees the buffer it empties (decided 2026-10-16). Today
-it frees it, which thrashes across a block boundary; libc++ frees
-beyond one spare block per end. Here the map holds the peak until
-the deque is destroyed or swapped: storage is released by the
-=deque<T> ().swap (d)= idiom, which already works, since =swap=
-exchanges the map. =shrink_to_fit= is C++11 and not in the
-interface.
-
-Check: an assertion in =23.deque.modifiers= that a reference into
-the deque survives an insert at either end, which the suite does
-not have.
-
 ** TODO The constructors of =vector= when =assign= throws
 
 The three constructing constructors of =vector= in =include/vector=
@@ -250,7 +144,7 @@ Under =_RWSTDDEBUG= the raw deque iterator in =include/deque=
 declares a destructor that nulls its two pointers and no copy
 constructor or assignment, so GCC's =-Wdeprecated-copy= flags every
 implicitly declared copy and assignment of it, once per site and
-instantiation: 187 in =23.deque.modifiers= in =15D= since the
+instantiation: 190 in =23.deque.modifiers= in =15D= since the
 inserts reserve their room, 115 before. The debug wrapper in
 =rw/_iterbase.h= declares its own assignment for the same reason
 and is flagged at the sites that copy it.
