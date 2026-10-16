@@ -552,7 +552,11 @@ __rw_assign_range (deque<_TypeT, _Allocator> *__self,
         *__ix = *__first;
     }
 
-    __self->insert (__end, __first, __last);
+    // append the rest of the range one element at a time; the input
+    // iterator overload of insert copies the whole container for the
+    // strong guarantee this function does not make
+    for ( ; !(__first == __last); ++__first)
+        __self->push_back (*__first);
 }
 
 
@@ -583,11 +587,20 @@ __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
     _RWSTD_ASSERT_RANGE (__it, __self->end ());
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    // insert one element at a time to prevent a loss of data
-    // from the input sequence in the case of an exception
+    // 23.2.1.3, p2: if an exception is thrown other than by the copy
+    // constructor or assignment operator of T there are no effects.
 
-    for ( ; !(__first == __last); ++__it, ++__first)
-        __it = __self->insert (__it, *__first); 
+    if (__first == __last)
+        return;
+
+    _Deque __tmp (__self->begin (), __it, __self->get_allocator ());
+
+    for (; !(__first == __last); ++__first)
+        __tmp.push_back (*__first);
+
+    __tmp.insert (__tmp.end (), __it, __self->end ());
+
+    __self->swap (__tmp);
 }
 
 

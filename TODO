@@ -19,40 +19,49 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The range inserts of =deque= against 23.2.1.3, p2
+** TODO The inserts of =deque= against 23.2.1.3, p1 and p2
 
-23.2.1.3, p2 asks of =deque::insert= what 23.2.4.3, p1 asks of
-=vector::insert=: if an exception is thrown other than by the copy
-constructor or assignment operator of =T=, there are no effects.
-=__rw_insert_range= in =include/deque.cc= misses it in both range
-overloads. The input iterator one inserts one element at a time, so a
-=bad_alloc= on the k-th element leaves k-1 inserted, and a middle
-insert from an input range is quadratic. The bidirectional one pushes
-the new elements onto the container with =push_front= and
-=push_back= before it shuffles them into place, so a node allocation
-that fails mid-way leaves the container grown.
-=tests/containers/23.deque.modifiers.cpp= turns exceptions off for
-every insert into the middle and for every range insert of more than
-one element, at every iterator category, on that account; the range
-inserts have never been checked for the guarantee.
+23.2.1.3, p2: if an exception is thrown other than by the copy
+constructor or assignment operator of =T=, =insert= has no effects.
+The input iterator overload of =__rw_insert_range= in
+=include/deque.cc= meets it since the whole-copy branch came back:
+a copy of the container with the range inserted, swapped in on
+success. The bidirectional overload, =_C_insert_n= and the
+single-element insert into the middle do not: they push the new
+elements onto the container with =push_front= and =push_back= before
+they shuffle them into place, and a node allocation that fails
+mid-way leaves the container grown. The deque allocates its buffers
+one at a time between element constructions, which is where the
+=bad_alloc= lands.
 
-The =vector= half of this entry went with the restoration of the
-input iterator insert: a temporary filled from the range, then the
-forward overload, which meets the clause. The same move on =deque=
-would feed the bidirectional overload and inherit its hole. The
-branch that met the clause for the input iterator overload alone,
-a copy of the whole container swapped in on success, was the strict
-ANSI side of =_RWSTD_NO_EXT_DEQUE_INSERT_IN_PLACE= and is in history
-(cf434369's parent).
+23.2.1.3, p1: an insert at either end leaves references to the
+elements valid. The whole-copy branch moves every element, so it
+meets p2 at the price of p1 at the ends; the one-at-a-time insert it
+replaced met p1 and not p2. No shape meets both without allocating
+ahead.
 
-Fix: decide. Either the bidirectional overload is made strong, the
-nodes the insert needs allocated before any element is touched, and
-the input iterator overload becomes a temporary handed to it; or the
-input iterator overload alone takes the whole-copy branch back and the
-bidirectional overload is filed by itself.
+The way that meets both: a reserve at one end, given n, that grows
+the node vector once if needed and allocates the ceil(n / bufsize)
+buffers into it before any element is touched, freeing them if one
+allocation fails. After it nothing allocates, so the only exceptions
+left are =T='s, which the clause exempts; a failed reserve leaves
+spare capacity and nothing observable. One mechanism for the three
+overloads; the input iterator overload then becomes a temporary
+handed to the bidirectional one and the whole copy goes. Better
+alternatives may exist and need more investigation before the
+deque's core is touched.
 
-Check: =23.deque.modifiers= with exceptions on for the range inserts,
-and the step at its line 336 reconsidered for them.
+=tests/containers/23.deque.modifiers.cpp= runs its exception loop for
+the input iterator range insert at every position and length; for
+the other inserts it still turns exceptions off into the middle and
+for more than one element, which is where they fail.
+
+Fix: investigate the alternatives, then the reserve or what beats it,
+in the three inserts.
+
+Check: =23.deque.modifiers= with the two exemptions removed, and an
+assertion that a reference into the deque survives an insert at
+either end, which the suite does not have.
 
 ** TODO The constructors of =vector= when =assign= throws
 
