@@ -54,6 +54,23 @@ bidirectional overload is filed by itself.
 Check: =23.deque.modifiers= with exceptions on for the range inserts,
 and the step at its line 336 reconsidered for them.
 
+** TODO The constructors of =vector= when =assign= throws
+
+The three constructing constructors of =vector= in =include/vector=
+are an =assign= call with no handler, the shape the =deque= ones had
+until their fix: an object whose constructor throws is never
+destroyed, so whatever =assign= had built is lost. For =deque= the
+loss was measured. For =vector= the hypothesis is that nothing is
+lost: =assign= on an empty vector is an insert, and the vector insert
+builds into a temporary and swaps, so a throw leaves the object
+empty and owning nothing.
+
+Fix: none if the hypothesis holds; the =deque= handler otherwise.
+
+Check: =23.vector.modifiers='s leak counter around the three
+constructors under injected =bad_alloc= and a throwing copy
+constructor, the way the =deque= test's loop now runs.
+
 ** TODO Leftovers beside the removed function probes
 
 The removal of the C library function probes (f43be017..a44256a6)

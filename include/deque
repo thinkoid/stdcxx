@@ -439,7 +439,15 @@ public:
            const allocator_type &__alloc = allocator_type ())
         : allocator_type (__alloc) {
         _C_init ();
-        assign (__n, __x);
+        _TRY {
+            assign (__n, __x);
+        }
+        _CATCH (...) {
+            // the destructor of an object whose constructor throws
+            // does not run: destroy and deallocate what assign built
+            clear ();
+            _RETHROW;
+        }
     }
 
     template <class _InputIter>
@@ -447,13 +455,25 @@ public:
            const allocator_type &__alloc = allocator_type ())
         : allocator_type (__alloc) {
         _C_init ();
-        assign (__first, __last);
+        _TRY {
+            assign (__first, __last);
+        }
+        _CATCH (...) {
+            clear ();
+            _RETHROW;
+        }
     }
 
     deque (const deque &__rhs)
         : allocator_type (__rhs.get_allocator ()) {
         _C_init ();
-        assign (__rhs.begin (), __rhs.end ());
+        _TRY {
+            assign (__rhs.begin (), __rhs.end ());
+        }
+        _CATCH (...) {
+            clear ();
+            _RETHROW;
+        }
     }
 
     ~deque () {
