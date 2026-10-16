@@ -50,15 +50,23 @@ buffers for the new slots before any element is touched, freeing
 them if one allocation fails, and constructs into the reserve. After
 the growth nothing allocates, so the only exceptions left are =T='s,
 which the clause exempts, and a failed growth leaves nothing
-observable; a successful one leaves the reserve. Growth keeps
-=__rw_new_capacity='s golden ratio on the element count the deque
-must hold, rounded up to a whole number of buffers: 1 element asks
-for 2 buffers, 64 for 4, 1000 for 51. One mechanism for the three
-overloads; the input iterator overload then becomes a temporary
-handed to the bidirectional one and the whole copy goes. The spare
-goes to the end nearest the insertion point. =clear= keeps the map,
-as =vector='s keeps its capacity; only the destructor releases it,
-and the no-map state remains the default-constructed one.
+observable; a successful one leaves the reserve. Buffers are
+allocated by need: an insert of n takes the buffers the spare on its
+side is short, rotating spare buffers from the far end first, since
+a buffer is a buffer; the ratio stays on the node vector, which
+keeps =__rw_new_capacity='s golden ratio and minimum when it
+regrows. A ratio on the buffers would buy nothing: the deque's unit
+of growth is already a buffer, so each allocation serves
+=_C_bufsize ()= pushes, where =vector='s unit is one element.
+libstdc++ and libc++ both double the map and allocate blocks by
+need; libc++ also keeps every block it allocates, as decided here,
+and releases spare blocks on pops only beyond one per end. One
+mechanism for the three overloads; the input iterator overload then
+becomes a temporary handed to the bidirectional one and the whole
+copy goes. The spare goes to the end nearest the insertion point.
+=clear= keeps the map, as =vector='s keeps its capacity; only the
+destructor releases it, and the no-map state remains the
+default-constructed one.
 
 What the shape changes: the null slot on each side of the live
 range, written by =_C_push= and the frees and asserted by
@@ -69,8 +77,8 @@ arithmetic does not read what the neighbouring slot holds:
 equality is positional, =0 == x - y=, and the difference reads
 =x._C_cur - *x._C_node=, zero for an iterator stepped onto any
 slot. The map's growth today is in slots, minimum 32, placed at a
-quarter or half of the new vector; in buffers that policy would hold
-4 KiB for one =int=, which is why the rule above is in elements.
+quarter or half of the new vector, and stays; in buffers that policy
+would hold 4 KiB for one =int=, which is why buffers go by need.
 
 =tests/containers/23.deque.modifiers.cpp= runs its exception loop for
 the input iterator range insert at every position and length; for
