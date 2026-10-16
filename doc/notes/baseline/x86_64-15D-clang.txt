@@ -82,7 +82,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.string.replace.stdcxx-175               NOUT    0                       
 21.string.rfind                               0    0     6840      0   100%
 21.string.stdcxx-1009                      NOUT    0                       
-21.string.stdcxx-162                       ABRT    0                       
+21.string.stdcxx-162                       NOUT    0                       
 21.string.stdcxx-231                       NOUT    0                       
 21.string.stdcxx-466                       NOUT    0                       
 21.string.substr                              0    0     1660      0   100%
@@ -139,7 +139,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 23.bitset                                     0    0  2537538      0   100%
 23.containers.stdcxx-152                   NOUT    0                       
 23.deque.iterators                            0    0  4915404      0   100%
-23.deque.modifiers                            0    0    89930      0   100%
+23.deque.modifiers                            0    0   163602      0   100%
 23.deque.special                              0    0    61465      0   100%
 23.deque.special.stdcxx-127                NOUT    0                       
 23.list.assign                                0    0    20542      0   100%
@@ -159,7 +159,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 23.vector.capacity                            0    0   857048      0   100%
 23.vector.cons                                0    0        9      0   100%
 23.vector.cons.stdcxx-294                  NOUT    0                       
-23.vector.modifiers                           0    0    16030      0   100%
+23.vector.modifiers                           0    0    16942      0   100%
 23.vector.stdcxx-1037                      NOUT    0                       
 23.vector.stdcxx-494                       NOUT    0                       
 23.vector.stdcxx-611                       NOUT    0                       
@@ -275,7 +275,7 @@ once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
   Programs:                   273
   Non-zero exit status:         0
-  Signalled:                    1
+  Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
