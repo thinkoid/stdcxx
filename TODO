@@ -85,8 +85,25 @@ the input iterator range insert at every position and length; for
 the other inserts it still turns exceptions off into the middle and
 for more than one element, which is where they fail.
 
-Fix: the storage model and growth rule above, in the three inserts,
-the pushes, the frees and the destructor.
+Fix: in the tree, in three commits, each gated on the suite. First
+the storage model with behaviour unchanged: every slot owns a
+buffer, the sentinel nulls go, the frees stop releasing, =clear=
+keeps the map, the destructor walks the whole vector, =_C_is_valid=
+asserts the new invariant; every row of the suite equal to the pin,
+counts included. Second the reserve and the three inserts, gated on
+the exception loop with its exemptions removed. Third the missing
+assertion below. Nothing outside =include/deque= and
+=include/deque.cc= reads the internals; =queue= and =stack= only
+name the type. A driver against the tree's headers gives the fast
+loop, the three =23.deque= tests the verdict.
+
+A pop never frees the buffer it empties (decided 2026-10-16). Today
+it frees it, which thrashes across a block boundary; libc++ frees
+beyond one spare block per end. Here the map holds the peak until
+the deque is destroyed or swapped: storage is released by the
+=deque<T> ().swap (d)= idiom, which already works, since =swap=
+exchanges the map. =shrink_to_fit= is C++11 and not in the
+interface.
 
 Check: =23.deque.modifiers= with the two exemptions removed, and an
 assertion that a reference into the deque survives an insert at
