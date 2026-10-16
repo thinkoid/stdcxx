@@ -56,18 +56,20 @@ capacity; libc++ holds less by allocating blocks by need inside a
 map with spare slots, a third range this design does not pay for.
 
 An insert of n at an end whose reserve is short grows the vector
-once, one allocation, installed before anything else happens, then
-allocates a buffer for every new slot one at a time, each written
-into its slot as it comes, and only then constructs into the
-reserve. Nothing is undone on a failure: a failed vector growth
-changes nothing, and a buffer allocation that fails after j leaves
-the vector j slots longer and the deque owning j more buffers,
-nothing observable, the next insert that much cheaper; libc++ does
-the same where its map has room ("we don't need to fix anything
-up"). After the growth nothing allocates, so the only exceptions
-left are =T='s, which the clause exempts. The memory kept after a
-=bad_alloc= is the same choice as the reserve kept after a =T=
-throw, applied consistently. Spare buffers at the far end can be
+once: allocate the new vector, allocate a buffer for each of its
+new slots, and only then copy the old pointers over, free the old
+vector and install the new one; after that it constructs into the
+reserve. A failure at any point of the growth frees what the growth
+allocated and leaves the old state untouched, so nothing is
+observable; keeping a partly filled vector instead would need the
+deque to remember the vector's allocated size beside its owned one,
+since =deallocate (p, n)= takes the n that =allocate= was given,
+and that is the third range back as a number (decided 2026-10-16:
+two ranges, the undo is a loop over j pointers and costs j wasted
+allocations only on a retry after =bad_alloc=). After the growth
+nothing allocates, so the only exceptions left are =T='s, which the
+clause exempts; the reserve a successful growth made stays after a
+=T= throw, applied consistently. Spare buffers at the far end can be
 rotated to the near one before the vector regrows, since a buffer
 is a buffer; libc++ does. One mechanism for the three overloads;
 the input iterator overload then becomes a temporary handed to the
