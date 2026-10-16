@@ -40,24 +40,45 @@ meets p2 at the price of p1 at the ends; the one-at-a-time insert it
 replaced met p1 and not p2. No shape meets both without allocating
 ahead.
 
-The way that meets both: a reserve at one end, given n, that grows
-the node vector once if needed and allocates the ceil(n / bufsize)
-buffers into it before any element is touched, freeing them if one
-allocation fails. After it nothing allocates, so the only exceptions
-left are =T='s, which the clause exempts; a failed reserve leaves
-spare capacity and nothing observable. One mechanism for the three
+The way that meets both, decided 2026-10-16: every slot of the
+node vector owns a buffer, so the vector's extent is the storage
+and =_C_beg= and =_C_end= mark the live part of it; what lies
+between the vector's ends and the live range is reserved, and the
+destructor frees every slot. An insert of n at an end then grows the
+node vector once if the reserve on that side is short, allocates the
+buffers for the new slots before any element is touched, freeing
+them if one allocation fails, and constructs into the reserve. After
+the growth nothing allocates, so the only exceptions left are =T='s,
+which the clause exempts, and a failed growth leaves nothing
+observable; a successful one leaves the reserve. Growth keeps
+=__rw_new_capacity='s golden ratio on the element count the deque
+must hold, rounded up to a whole number of buffers: 1 element asks
+for 2 buffers, 64 for 4, 1000 for 51. One mechanism for the three
 overloads; the input iterator overload then becomes a temporary
-handed to the bidirectional one and the whole copy goes. Better
-alternatives may exist and need more investigation before the
-deque's core is touched.
+handed to the bidirectional one and the whole copy goes. The spare
+goes to the end nearest the insertion point. =clear= keeps the map,
+as =vector='s keeps its capacity; only the destructor releases it,
+and the no-map state remains the default-constructed one.
+
+What the shape changes: the null slot on each side of the live
+range, written by =_C_push= and the frees and asserted by
+=_C_is_valid=, goes, the frees no longer release a buffer when the
+live range leaves it, and the growth test in =_C_push= (end's node
+is the last slot) becomes the reserve trigger. The iterator
+arithmetic does not read what the neighbouring slot holds:
+equality is positional, =0 == x - y=, and the difference reads
+=x._C_cur - *x._C_node=, zero for an iterator stepped onto any
+slot. The map's growth today is in slots, minimum 32, placed at a
+quarter or half of the new vector; in buffers that policy would hold
+4 KiB for one =int=, which is why the rule above is in elements.
 
 =tests/containers/23.deque.modifiers.cpp= runs its exception loop for
 the input iterator range insert at every position and length; for
 the other inserts it still turns exceptions off into the middle and
 for more than one element, which is where they fail.
 
-Fix: investigate the alternatives, then the reserve or what beats it,
-in the three inserts.
+Fix: the storage model and growth rule above, in the three inserts,
+the pushes, the frees and the destructor.
 
 Check: =23.deque.modifiers= with the two exemptions removed, and an
 assertion that a reference into the deque survives an insert at
