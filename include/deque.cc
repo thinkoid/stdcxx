@@ -227,177 +227,123 @@ _C_push (bool __at_back, const_reference __x)
 
     _C_value_alloc_type __alloc (*this);
 
-    // allocate a new buffer to store elements in
-    const pointer __buf = __alloc.allocate (__bufsize, pointer ());
+    if (_C_node_pointer () == _C_nodes) {
 
-    const bool __empty = empty ();
+        // first element: allocate the vector and its buffers, point
+        // both iterators at the middle of the middle buffer and
+        // construct the element on the side the caller grows
+        _C_grow (__at_back, _C_vecsize (1));
+        _C_reset ();
 
-    if (   __empty
-        || (__at_back && _C_end._C_node == _C_nodes + _C_node_size - 1)
-        || (!__at_back && _C_beg._C_node == _C_nodes)) {
+        const pointer __where = __at_back ? _C_end._C_cur
+                                          : _C_beg._C_cur - 1;
 
-        _C_node_alloc_type __node_alloc (*this);
+        __alloc.construct (__where, __x);
 
-        _RWSTD_ASSERT (_C_beg._C_node <= _C_end._C_node);
+        return;
+    }
 
-        // compute the current number of used nodes
-        // and the new number of nodes
+    if (__at_back ? _C_end._C_node == _C_nodes + _C_node_size - 1
+                  : _C_beg._C_node == _C_nodes)
+        _C_grow (__at_back, _C_vecsize (size () + 1));
 
-        const _C_node_pointer __end = _C_end._C_node + !__empty;
+    // the node next to the end being grown owns a buffer with no
+    // elements in it: construct at its near edge and point the
+    // iterator at the element so that the caller's increment or
+    // decrement lands on it
+    if (__at_back) {
+        const _C_node_pointer __node = _C_end._C_node + 1;
 
-        const size_type __nodes = size_type (__end - _C_beg._C_node);
+        __alloc.construct (*__node, __x);
 
-        // obtain the next greater number of nodes for the new vector
-        const size_type __nvecsize = _C_vecsize (__nodes);
-
-        _RWSTD_ASSERT (__nvecsize > __nodes);
-
-        // compute the beginning of the old (current) vector
-        const _C_node_pointer __ovec = _C_nodes - !__empty;
-        _C_node_pointer __nvec;
-
-        _TRY {
-            // allocate enough for two extra unused nodes
-            __nvec = __node_alloc.allocate (__nvecsize + 2, __ovec);
-
-            _RWSTD_ASSERT (!(_C_node_pointer () == __nvec));
-
-            const pointer __where = __buf
-                + (  __empty ? __bufsize / 2 - !__at_back
-                   : __at_back ? 0 : __bufsize - 1);
-
-            _TRY {
-                __alloc.construct (__where, __x);
-            }
-            _CATCH (...) {
-                __node_alloc.deallocate (__nvec, __nvecsize + 2);
-                _RETHROW;
-            }
-
-            // reserve the first and last nodes (must always be 0)
-            ++__nvec;
-        }
-        _CATCH (...) {
-            // deallocate buffer and rethrow
-            __alloc.deallocate (__buf, __bufsize);
-            _RETHROW;
-        }
-
-        // compute the new indices into the newly allocated vector
-        // of the first and last occuppied node, respectively
-        const size_type __beg_inx = __nvecsize / (__empty ? 2 : 4);
-        const size_type __end_inx = __beg_inx + __nodes;
-
-        // copy existing nodes into the new buffer
-        _STD::copy (_C_beg._C_node, __end, __nvec + (__beg_inx + !__at_back));
-
-        // deallocate the current buffer only when non-0 to satisfy
-        // the requirement that deallocate() argument be non-zero
-        if (!(__ovec == _C_node_pointer ()))
-            __node_alloc.deallocate (__ovec, _C_node_size + 2);
-
-        // set the pointer and size
-        _C_nodes     = __nvec;
-        _C_node_size = __nvecsize;
-
-        // insert the fixed-size array into the vector of nodes...
-        if (__at_back) {
-
-            // ...at the end
-            _C_nodes [__end_inx] = __buf;
-
-            _C_beg._C_node = _C_nodes + __beg_inx;
-            _C_end = _C_deque_iter (__buf, _C_nodes + __end_inx);
-
-        }
-        else {
-            // ...at the beginning
-            _C_nodes [__beg_inx] = __buf;
-
-            _C_beg = _C_deque_iter (__buf + __bufsize, _C_nodes + __beg_inx);
-            _C_end._C_node = _C_nodes + __end_inx;
-        }
-
-        if (__empty) {
-            // set the beginning and end pointers both
-            // to point at the same (future) element
-            _C_beg._C_cur =
-            _C_end._C_cur = __buf + __bufsize / 2;
-        }
+        _C_end = _C_deque_iter (*__node, __node);
     }
     else {
-        _RWSTD_ASSERT (_C_is_valid (0 /* valid and non-empty */));
+        const _C_node_pointer __node = _C_beg._C_node - 1;
 
-        _TRY {
+        __alloc.construct (*__node + (__bufsize - 1), __x);
 
-            if (__at_back) {
-                __alloc.construct (__buf, __x);
-
-                // append the newly allocated buffer to the end of the vector
-                // of pointers and increment `end' to point at the first
-                // element in it; zero out the following node
-                *++_C_end._C_node  = __buf;
-                _C_end._C_cur      = __buf;
-            }
-            else {
-                __alloc.construct (__buf + (__bufsize - 1), __x);
-
-                // prepend the newly allocated buffer to the beginning of
-                // the vector of pointers and decrement `begin' to point
-                // at the last element in it; zero out the preceding node
-                *--_C_beg._C_node   = __buf;
-                _C_beg._C_cur       = __buf + __bufsize;
-            }
-        }
-        _CATCH (...) {
-            __alloc.deallocate (__buf, __bufsize);
-
-            _RETHROW;
-        }
-    }
-
-    _C_end._C_node [+1] = pointer ();
-    _C_beg._C_node [-1] = pointer ();
-}
-
-
-template <class _TypeT, class _Allocator>
-void deque<_TypeT, _Allocator>::
-_C_free_at_begin ()
-{
-    const size_type __bufsize = _C_bufsize ();
-
-    _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                        deallocate (*_C_beg._C_node, __bufsize));
-    if (empty ()) {
-        _C_node_alloc_type (*this).
-            deallocate (_C_nodes - 1, _C_node_size + 2);
-        _C_init ();
-    }
-    else {
-        *_C_beg._C_node++ = pointer ();
-        _C_beg = _C_deque_iter (*_C_beg._C_node, _C_beg._C_node);
+        _C_beg = _C_deque_iter (*__node + __bufsize, __node);
     }
 }
 
 
+// grows the vector of nodes to `__nnodes' nodes, with a buffer for
+// each node added after the existing ones (at the back) or before
+// them (at the front), and the null guard after the last node that
+// an iterator stepping off the last element reads; a failed
+// allocation frees what this call allocated and leaves the container
+// as it was
 template <class _TypeT, class _Allocator>
 void deque<_TypeT, _Allocator>::
-_C_free_at_end ()
+_C_grow (bool __at_back, size_type __nnodes)
 {
+    _RWSTD_ASSERT (_C_node_size < __nnodes);
+
+    const size_type __bufsize = _C_bufsize ();
+    const size_type __nnew    = __nnodes - _C_node_size;
+
+    _C_value_alloc_type __alloc (*this);
+    _C_node_alloc_type  __node_alloc (*this);
+
+    const _C_node_pointer __nvec =
+        __node_alloc.allocate (__nnodes + 1, _C_nodes);
+
+    const _C_node_pointer __added = __nvec + (__at_back ? _C_node_size : 0);
+    const _C_node_pointer __kept  = __nvec + (__at_back ? 0 : __nnew);
+
+    size_type __i = 0;
+
+    _TRY {
+        for ( ; __i != __nnew; ++__i)
+            __added [__i] = __alloc.allocate (__bufsize, pointer ());
+    }
+    _CATCH (...) {
+        while (__i)
+            __alloc.deallocate (__added [--__i], __bufsize);
+
+        __node_alloc.deallocate (__nvec, __nnodes + 1);
+        _RETHROW;
+    }
+
+    // nothing below throws: move the existing nodes over, point
+    // the iterators at them and free the old vector
+    if (_C_node_pointer () != _C_nodes) {
+        _STD::copy (_C_nodes, _C_nodes + _C_node_size, __kept);
+
+        _C_beg._C_node = __kept + (_C_beg._C_node - _C_nodes);
+        _C_end._C_node = __kept + (_C_end._C_node - _C_nodes);
+
+        __node_alloc.deallocate (_C_nodes, _C_node_size + 1);
+    }
+
+    __nvec [__nnodes] = pointer ();
+
+    _C_nodes     = __nvec;
+    _C_node_size = __nnodes;
+}
+
+
+// frees every buffer and the vector of nodes of an empty container
+template <class _TypeT, class _Allocator>
+void deque<_TypeT, _Allocator>::
+_C_dealloc ()
+{
+    _RWSTD_ASSERT (empty ());
+
+    if (_C_node_pointer () == _C_nodes)
+        return;
+
     const size_type __bufsize = _C_bufsize ();
 
-    _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                        deallocate (*_C_end._C_node, __bufsize));
-    if (empty ()) {
-        _C_node_alloc_type (*this).
-            deallocate (_C_nodes - 1, _C_node_size + 2);
-        _C_init ();
-    }
-    else {
-        *_C_end._C_node-- = pointer ();
-        _C_end = _C_deque_iter (*_C_end._C_node + __bufsize, _C_end._C_node);
-    }
+    _C_value_alloc_type __alloc (*this);
+
+    for (size_type __i = 0; __i != _C_node_size; ++__i)
+        __alloc.deallocate (_C_nodes [__i], __bufsize);
+
+    _C_node_alloc_type (*this).deallocate (_C_nodes, _C_node_size + 1);
+
+    _C_init ();
 }
 
 
@@ -758,60 +704,47 @@ _C_is_valid (int __emptyfl) const
     if (__emptyfl < 0 /* don't care */)
         return _C_is_valid (0 + empty ());
 
-    // the nodes just prior the first valid node and
-    // just past the last valid node must always be 0
-    if (_C_node_pointer () != _C_nodes) {
-        _RWSTD_ASSERT (pointer () == _C_beg._C_node [-1]);
-        _RWSTD_ASSERT (pointer () == _C_end._C_node [+1]);
-    }
+    if (_C_node_pointer () == _C_nodes) {
 
-    if (__emptyfl) {
-        // container must be empty
-        _RWSTD_ASSERT (empty ());
+        // no storage: the container is empty, both `current' pointers
+        // are 0 and both node pointers dereference `end.cur'
+        _RWSTD_ASSERT (0 == _C_node_size);
+        _RWSTD_ASSERT (__emptyfl && empty ());
 
-        // both `current' pointers must be 0
         _RWSTD_ASSERT (pointer () == _C_beg._C_cur);
         _RWSTD_ASSERT (pointer () == _C_end._C_cur);
 
-        // node pointers must be dereferenceable...
-        _RWSTD_ASSERT (_C_node_pointer () != _C_beg._C_node);
-        _RWSTD_ASSERT (_C_node_pointer () != _C_end._C_node);
-
-        // ...and both must dereference the same pointer
-        _RWSTD_ASSERT (*_C_beg._C_node == *_C_end._C_node);
+        _RWSTD_ASSERT (&_C_end._C_cur == _C_beg._C_node);
+        _RWSTD_ASSERT (&_C_end._C_cur == _C_end._C_node);
 
         return true;
     }
 
     const size_type __bufsize = _C_bufsize ();
 
-    // container must be non-empty
-    _RWSTD_ASSERT (!empty ());
+    if (__emptyfl)
+        _RWSTD_ASSERT (empty ());
+    else
+        _RWSTD_ASSERT (!empty ());
 
-    // current pointers must be non-0
-    _RWSTD_ASSERT (pointer () != _C_beg._C_cur);
-    _RWSTD_ASSERT (pointer () != _C_end._C_cur);
-
-    // `begin' must be less than `end'
-    _RWSTD_ASSERT (_C_beg._C_node <= _C_end._C_node);
-
-    // `begin' must point into the vector of nodes
+    // `begin' and `end' must point into the vector of nodes, in order
     _RWSTD_ASSERT (_C_nodes <= _C_beg._C_node);
-    _RWSTD_ASSERT (_C_beg._C_node <= _C_nodes + _C_node_size);
+    _RWSTD_ASSERT (_C_beg._C_node <= _C_end._C_node);
+    _RWSTD_ASSERT (_C_end._C_node < _C_nodes + _C_node_size);
 
-    // `begin' must point to a non-empty array of elements
+    // every node owns a buffer; the first, the last and the two
+    // the iterators point to stand for all (the check is constant
+    // time and runs on every push, pop and subscript); the guard
+    // after the last node is null
+    _RWSTD_ASSERT (pointer () != _C_nodes [0]);
+    _RWSTD_ASSERT (pointer () != _C_nodes [_C_node_size - 1]);
     _RWSTD_ASSERT (pointer () != *_C_beg._C_node);
+    _RWSTD_ASSERT (pointer () != *_C_end._C_node);
+    _RWSTD_ASSERT (pointer () == _C_nodes [_C_node_size]);
 
     // `begin' must point into an array of `bufsize' elements
     _RWSTD_ASSERT (_C_beg._C_cur >= *_C_beg._C_node);
     _RWSTD_ASSERT (_C_beg._C_cur <= *_C_beg._C_node + __bufsize);
-
-    // `end' must point into the vector of nodes
-    _RWSTD_ASSERT (_C_nodes <= _C_end._C_node);
-    _RWSTD_ASSERT (_C_end._C_node <= _C_nodes + _C_node_size);
-
-    // `end' must point to a non-empty array of elements
-    _RWSTD_ASSERT (pointer () != *_C_end._C_node);
 
     // `end' must point into an array of `bufsize' elements
     _RWSTD_ASSERT (_C_end._C_cur >= *_C_end._C_node);

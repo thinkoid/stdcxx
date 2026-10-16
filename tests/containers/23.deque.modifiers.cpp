@@ -68,15 +68,14 @@ inline Deque::size_type
 __rw_new_capacity<Deque>(Deque::size_type n, const Deque*)
 {
     if (n) {
-        // non-zero size argument indicates a request for an increase
-        // in the capacity of a deque object's dynamically sizable
-        // vector of nodes
+        // non-zero size argument is the number of elements the deque
+        // must hold when its vector of nodes grows; the result is the
+        // capacity in elements the vector grows to, in whole buffers
         return n * 2;
     }
 
-    // zero size argument is a request for the initial size of a deque
-    // object's dynamically sizable vector of nodes or for the size of
-    // the objects's fixed-size buffer for elements
+    // zero size argument is a request for the size of the object's
+    // fixed-size buffer for elements
     return new_capacity;
 }
 

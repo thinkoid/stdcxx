@@ -86,26 +86,30 @@ is the last slot) becomes the reserve trigger. The iterator
 arithmetic does not read what the neighbouring slot holds:
 equality is positional, =0 == x - y=, and the difference reads
 =x._C_cur - *x._C_node=, zero for an iterator stepped onto any
-slot. The map's growth today is in slots, minimum 32, placed at a
+slot, but the slot after the last node must exist, so one null
+guard stays. The map's growth was in slots, minimum 32, placed at a
 quarter or half of the new vector; the ratio stays, the minimum
-goes, and the placement follows the end being grown.
+went, and the placement follows the end being grown.
 
 =tests/containers/23.deque.modifiers.cpp= runs its exception loop for
 the input iterator range insert at every position and length; for
 the other inserts it still turns exceptions off into the middle and
 for more than one element, which is where they fail.
 
-Fix: in the tree, in three commits, each gated on the suite. First
-the storage model with behaviour unchanged: every slot owns a
-buffer, the sentinel nulls go, the frees stop releasing, =clear=
-keeps the map, the destructor walks the whole vector, =_C_is_valid=
-asserts the new invariant; every row of the suite equal to the pin,
-counts included. Second the reserve and the three inserts, gated on
-the exception loop with its exemptions removed. Third the missing
-assertion below. Nothing outside =include/deque= and
-=include/deque.cc= reads the internals; =queue= and =stack= only
-name the type. A driver against the tree's headers gives the fast
-loop, the three =23.deque= tests the verdict.
+Fix: in the tree, in three commits, each gated on the suite. First,
+landed, the storage model with behaviour unchanged: every node owns
+a buffer, =_C_grow= is the one growth, the pops stop releasing,
+=clear= keeps the storage, the destructor frees every node,
+=_C_is_valid= asserts the new invariant. One null guard after the
+last node stays, allocated with the vector: an iterator stepping
+off the last element of a full last buffer reads it, which the
+sanitizer caught and the suite could not. Second the reserve and
+the three inserts, gated on the exception loop with its exemptions
+removed. Third the missing assertion below. Nothing outside
+=include/deque= and =include/deque.cc= reads the internals; =queue=
+and =stack= only name the type. A driver against the tree's headers
+under the address sanitizer gives the fast loop and the leak check
+the suite lacks, the three =23.deque= tests the verdict.
 
 A pop never frees the buffer it empties (decided 2026-10-16). Today
 it frees it, which thrashes across a block boundary; libc++ frees

@@ -401,8 +401,18 @@ public:
 
 #endif   // _RWSTD_NO_DEBUG_ITER
 
-    size_type _C_vecsize (size_type __nodes) const {
-        return _RWSTD_NEW_CAPACITY (deque, this, __nodes);
+    // the number of nodes for the vector to grow to when the container
+    // must hold `__n' elements: the capacity in elements, computed from
+    // the greater of the current capacity and `__n' the way vector grows,
+    // rounded up to whole buffers; at least one node more than there are
+    size_type _C_vecsize (size_type __n) const {
+        const size_type __bufsize = _C_bufsize ();
+        const size_type __cap     = _C_node_size * __bufsize;
+
+        const size_type __newcap =
+            _RWSTD_NEW_CAPACITY (deque, this, __cap < __n ? __n : __cap);
+
+        return (__newcap + __bufsize - 1) / __bufsize;
     }
 
     static size_type _C_bufsize () {
@@ -444,8 +454,9 @@ public:
         }
         _CATCH (...) {
             // the destructor of an object whose constructor throws
-            // does not run: destroy and deallocate what assign built
+            // does not run: destroy what assign built and free the storage
             clear ();
+            _C_dealloc ();
             _RETHROW;
         }
     }
@@ -460,6 +471,7 @@ public:
         }
         _CATCH (...) {
             clear ();
+            _C_dealloc ();
             _RETHROW;
         }
     }
@@ -472,12 +484,14 @@ public:
         }
         _CATCH (...) {
             clear ();
+            _C_dealloc ();
             _RETHROW;
         }
     }
 
     ~deque () {
         clear ();
+        _C_dealloc ();
     }
 
     deque& operator= (const deque&);
@@ -634,19 +648,18 @@ public:
 private:
 
     //////////////////////////////////////////////////////////////////
-    // layout of a non-empty deque:
-    //        
-    //        +------------------- nodes [-1] (not used, 0
-    //        | +----------------- nodes [0] (first usable)
-    //        | |   +------------- beg.node
-    //        | |   |     +------- end.node
-    //        | |   |     |   +--- nodes [node_size - 1] (last usable)
-    //        | |   |     |   | +- allocated but not used (0)
-    //        | |   |     |   | |
-    //        v v   v     v   v v
-    //       +-+-+-+-+   +-+-+-+-+
-    //       |0|X|X| |...| |X|X|0| dynamically sizable
-    //       +-+-+-+-+   +-+-+-+-+
+    // layout of a deque with storage:
+    //
+    //        +----------------- nodes [0] (first)
+    //        |   +------------- beg.node
+    //        |   |     +------- end.node
+    //        |   |     |   +--- nodes [node_size - 1] (last)
+    //        |   |     |   | +- nodes [node_size] (guard, always 0)
+    //        |   |     |   | |
+    //        v   v     v   v v
+    //       +-+-+-+   +-+-+-+-+
+    //       |X|X|X|...|X|X|X|0| dynamically sizable vector of nodes
+    //       +-+-+-+   +-+-+-+-+
     //          ^   | ||| |
     //          |   v vvv v
     // nodes ---+  +-+   +-+ fixed-size arrays, all of the same size
@@ -660,26 +673,37 @@ private:
     //             +-+   +-+<-- end.cur (end())
     //             | |...|X|<-- (bufsize - 1)
     //             +-+   +-+
+    //
+    // every node of the vector owns a buffer; the nodes before `beg.node'
+    // and after `end.node' hold no elements and are the room the pushes
+    // at either end take before the vector must grow. the null guard
+    // after the last node is what an iterator stepping off the last
+    // element of a full last buffer reads (it then compares equal to
+    // `end' by position); the vector is allocated with it. a container with
+    // no storage has `nodes' null, both `current' pointers null and both
+    // node pointers dereferencing `end.cur'; a container emptied by pops
+    // keeps its storage, both iterators at the same slot in the middle
+    // of the middle buffer
 
-    // `beg.node' points to the first fixed-size array in `nodes'
+    // `beg.node' points to the node of the first element
     // `beg.cur' points at the first element in the array pointed
-    // to by `beg.node' (it is null iff the container is empty)
+    // to by `beg.node' (it is null iff the container has no storage)
     _C_deque_iter _C_beg;
 
-    // `end.node' points to the last fixed-size array in `nodes'
+    // `end.node' points to the node of the last element
     // `end.cur' points just past the last element in the array
-    // pointed to by `end.node' (null iff the container is empty)
+    // pointed to by `end.node' (null iff the container has no storage)
     _C_deque_iter _C_end;
 
     // `nodes' points to a dynamically sizable vector of `node_size'
     // nodes where each node is a pointer to a fixed-size array of
-    // elements of value_type (null iff the container is empty)
+    // elements of value_type (null iff the container has no storage)
     _C_node_pointer _C_nodes;
 
-    // the capacity of the dynamically sizable vector of nodes
-    // `node_size' is 0 for an empty deque; each (re)allocation
-    // grows `node_size' to __rw_new_capacity(N, this) where N
-    // is 0 is empty() and `end.node - beg.node + 1' otherwise
+    // the number of nodes in the vector, each owning a buffer, not
+    // counting the guard after the last; 0 iff `nodes' is null; grows
+    // to _C_vecsize (N) with N the number of elements the container
+    // must hold
     size_type _C_node_size;
 
     void _C_init () {
@@ -692,11 +716,23 @@ private:
         _C_node_size = 0;
     }
 
+    // points both iterators at the middle of the middle buffer of an
+    // emptied container, so that the pushes to come at either end find
+    // room before a node is taken
+    void _C_reset () {
+        _RWSTD_ASSERT (_C_node_pointer () != _C_nodes);
+
+        const _C_node_pointer __mid = _C_nodes + _C_node_size / 2;
+
+        _C_beg =
+        _C_end = _C_deque_iter (*__mid + _C_bufsize () / 2, __mid);
+    }
+
     void _C_push (bool, const_reference);
 
-    void _C_free_at_begin ();
+    void _C_grow (bool, size_type);
 
-    void _C_free_at_end ();
+    void _C_dealloc ();
 
 private:
 
@@ -832,8 +868,13 @@ deque<_TypeT, _Allocator>::pop_front ()
 
     ++_C_beg._C_cur;
 
-    if (empty () || _C_beg._C_cur == *_C_beg._C_node + _C_bufsize ()) 
-        _C_free_at_begin ();
+    if (empty ())
+        _C_reset ();
+    else if (_C_beg._C_cur == *_C_beg._C_node + _C_bufsize ()) {
+        // the buffer is empty and stays; the next one holds the front
+        ++_C_beg._C_node;
+        _C_beg._C_cur = *_C_beg._C_node;
+    }
 
     _RWSTD_ASSERT (_C_is_valid ());
 }
@@ -851,8 +892,13 @@ deque<_TypeT, _Allocator>::pop_back ()
 
     --_C_end._C_cur;
 
-    if (empty () || _C_end._C_cur == *_C_end._C_node) 
-        _C_free_at_end ();
+    if (empty ())
+        _C_reset ();
+    else if (_C_end._C_cur == *_C_end._C_node) {
+        // the buffer is empty and stays; the previous one holds the back
+        --_C_end._C_node;
+        _C_end._C_cur = *_C_end._C_node + _C_bufsize ();
+    }
 
     _RWSTD_ASSERT (_C_is_valid ());
 }
