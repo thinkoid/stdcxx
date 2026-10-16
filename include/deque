@@ -644,6 +644,15 @@ public:
     }
 #endif
 
+#ifdef _RWSTD_NO_MEMBER_TEMPLATES
+
+    // the non-member range insert reaches the reserve
+    template <class _TypeU, class _AllocU, class _DequeIter, class _BidirIter>
+    friend void __rw_insert_range (deque<_TypeU, _AllocU>*, _DequeIter,
+                                   _BidirIter, _BidirIter,
+                                   bidirectional_iterator_tag);
+
+#endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
 private:
 
@@ -683,7 +692,12 @@ private:
     // no storage has `nodes' null, both `current' pointers null and both
     // node pointers dereferencing `end.cur'; a container emptied by pops
     // keeps its storage, both iterators at the same slot in the middle
-    // of the middle buffer
+    // of the middle buffer. an insert reserves the room it needs at the
+    // end nearer the insertion point before it touches an element: the
+    // spare nodes at the far end are shared out first, then the vector
+    // grows with the new nodes at that end; the vector replaced stays
+    // until the elements are in place, so that a throw from T puts the
+    // storage back as it was
 
     // `beg.node' points to the node of the first element
     // `beg.cur' points at the first element in the array pointed
@@ -728,9 +742,35 @@ private:
         _C_end = _C_deque_iter (*__mid + _C_bufsize () / 2, __mid);
     }
 
+    // the storage as it was before a reserve: what _C_restore puts
+    // back after a throw and _C_discard frees after a success
+    struct _C_storage {
+        _C_deque_iter   _C_beg;
+        _C_deque_iter   _C_end;
+        _C_node_pointer _C_nodes;
+        size_type       _C_node_size;
+        size_type       _C_shift;      // spare nodes shared out
+        bool            _C_at_back;
+    };
+
+    _C_storage _C_reserve (bool, size_type);
+
+    void _C_rotate (bool, size_type);
+
+    void _C_restore (const _C_storage&);
+
+    // frees the vector a reserve replaced, once the elements it was
+    // made for are in place
+    void _C_discard (const _C_storage &__prior) {
+        if (   _C_node_pointer () != __prior._C_nodes
+            && __prior._C_nodes != _C_nodes)
+            _C_node_alloc_type (*this).deallocate (__prior._C_nodes,
+                                                   __prior._C_node_size + 1);
+    }
+
     void _C_push (bool, const_reference);
 
-    void _C_grow (bool, size_type);
+    _C_node_pointer _C_grow (bool, size_type);
 
     void _C_dealloc ();
 
@@ -738,9 +778,6 @@ private:
 
     // implements assign with repetition
     void _C_assign_n (size_type, const_reference);
-
-    // implements a single-element insert
-    void _C_insert_1 (const iterator&, const_reference);
 
     // implements insert with repetition
     void _C_insert_n (const iterator&, size_type, const_reference);

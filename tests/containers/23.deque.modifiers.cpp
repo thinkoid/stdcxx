@@ -297,35 +297,15 @@ void exception_loop (int              line /* line number in caller*/,
 bool is_bidirectional (std::input_iterator_tag) { return false; }
 bool is_bidirectional (std::bidirectional_iterator_tag) { return true; }
 
-// returns the number of invocations of the assignment operators
-// for a call to deque::insert(iterator, InputIterator, InputIterator)
-// (the value depends on the iterator category)
-template <class Iterator>
-std::size_t insert_assignments (Iterator it,
-                                int nelems,
+// returns the number of invocations of the assignment operator
+// for a call to any of the inserts: the elements on the shorter
+// side of the insertion point move over, each assigned once,
+// whatever the number of elements inserted
+std::size_t insert_assignments (std::size_t nelems,
                                 std::size_t off,
-                                std::size_t seqlen,
-                                std::size_t inslen)
+                                std::size_t seqlen)
 {
-    if (is_bidirectional (_RWSTD_ITERATOR_CATEGORY (Iterator, it)))
-        return 0 == nelems ? 0 : off < seqlen - off ? off : seqlen - off;
-
-    if (0 < nelems)
-        --nelems;
-
-    if (0 == nelems || 0 == inslen)
-        return 0;
-
-    // compute the number of assignments done
-    // to insert the first element in the sequence
-    const std::size_t first = off < seqlen - off ? off : seqlen - off;
-
-    // recursively compute the numner of assignments
-    // for the rest of the elements in the sequence
-    const std::size_t rest =
-        insert_assignments (it, nelems, off + 1, seqlen + 1, inslen - 1);
-
-    return first + rest;
+    return 0 == nelems ? 0 : off < seqlen - off ? off : seqlen - off;
 }
 
 
@@ -346,21 +326,18 @@ void test_insert (int line, int exceptions,
     _RWSTD_ASSERT (off <= deq.size ());
     const Deque::iterator iter = deq.begin () + off;
 
-    // the input iterator overload of the range insert builds a copy
-    // of the container and swaps it in on success, so it has no effects
-    // when an exception is thrown, at any position and for any number
-    // of elements (23.2.1.3, p2); it copies every element of *this once
-    // and assigns none
-    const bool strong =
+    // every insert reserves the room it needs before it touches an
+    // element and puts the storage back if a throw follows, so none
+    // has effects on the size or the ends when an exception is thrown,
+    // at any position and for any number of elements (23.2.1.3, p2);
+    // the loop below exercises that with every exception enabled
+
+    // the input iterator overload copies the range into a temporary
+    // deque first and inserts the temporary, so it copies every
+    // element of the range twice; the others copy each once
+    const bool twice =
            -1 == nelems
         && !is_bidirectional (_RWSTD_ITERATOR_CATEGORY (Iterator, dummy));
-
-    // of the inserts into *this only insert() at either end of the
-    // container is exception safe; insertions into the middle of the
-    // container are not (i.e., the container may grow or may even
-    // become inconsistent)
-    if (!strong && off && off < deq.size ())
-        exceptions = 0;
 
     // format a string describing the function call being exercised
     // (used in diagnostic output below)
@@ -388,9 +365,6 @@ void test_insert (int line, int exceptions,
     }
     else if (-1 == nelems) {   // insert(iterator, Iterator, Iterator)
 
-        if (!strong && inslen > 1)
-            exceptions = 0;
-
         const Iterator first =
             make_iter (xins, xins, xins + inslen, dummy);
 
@@ -403,9 +377,6 @@ void test_insert (int line, int exceptions,
 
     }
     else {   // insert(iterator, size_type, const_reference)
-
-        if (nelems > 1)
-            exceptions = 0;
 
         exception_loop (line, Insert_n, funcall, exceptions,
                         deq, iter, nelems, xins, dummy, dummy,
@@ -445,7 +416,7 @@ void test_insert (int line, int exceptions,
     // verify the complexity of the operation in terms of the number
     // of calls to the copy ctor and assignment operator on value_type
     const std::size_t expect_copy =
-          strong     ? inslen ? seqlen + inslen : 0
+          twice      ? 2 * inslen
         : nelems < 0 ? inslen : nelems;
 
     rw_assert (n_copy == expect_copy, __FILE__, line,
@@ -455,7 +426,7 @@ void test_insert (int line, int exceptions,
 
     // compute the number of calls to the assignment operator
     const std::size_t expect_asgn =
-        strong ? 0 : insert_assignments (dummy, nelems, off, seqlen, inslen);
+        insert_assignments (nelems < 0 ? inslen : nelems, off, seqlen);
 
     rw_assert (n_asgn == expect_asgn, __FILE__, line,
                "line %d: %s: expected %zu invocations "
