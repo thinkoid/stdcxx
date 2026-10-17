@@ -123,6 +123,36 @@ and =DEPENDENT_TEMPLATE.cpp= once nothing reads its macro.
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
+** TODO The member templates gate, once =eccp= has voted
+
+No configuration the tree has been built in defines
+=_RWSTD_NO_MEMBER_TEMPLATES=: GCC and Clang pass the =MEMBER_TEMPLATES=
+probe, and no compiler since about 2000 fails it. The gate is read in
+sixteen headers. Where it fires, every range constructor, =assign= and
+=insert= of =string=, =vector=, =list= and =deque= has a non-member
+twin, reached through =_RWSTD_ASSIGN_RANGE= and =_RWSTD_INSERT_RANGE=
+in =rw/_defs.h=, with friend declarations to let the twins at the
+internals. Nobody can compile that branch, so it rots unseen: the
+=deque= rewrite had to write its friend declarations blind, and the
+groom after it removed a forward-tag declaration there that had lost
+its definition. Version 5.0 owes 4.2.x no compatibility.
+
+Fix: first =make config= under =eccp= (the entry "The =eccp=
+configuration" in the EDG chapter), so the second compiler's answer to
+=MEMBER_TEMPLATES=, =EXTERN_MEMBER_TEMPLATE= and
+=MEMBER_TEMPLATE_OVERLOAD= is on record before anything goes. If it
+agrees with GCC, retire the gate one header group at a time, each
+commit taking the =#ifdef= branches, the twins, the friend declarations
+and the dispatch macros together; the probes and the macro go with the
+last group; =ref-characterizations.md= records the retirement. The
+build modes (=_RWSTD_NO_EXCEPTIONS= and the rest) and the host
+characterizations are not this entry.
+
+Check: =git grep _RWSTD_NO_MEMBER_TEMPLATES= empty under =include=,
+=src= and =tests=; the suite equal to the pin in the GCC debug
+configuration after every commit; =make config= under =eccp= unchanged
+in every other macro.
+
 ** TODO Dead members and sources of the 4.2.x layout
 
 The revival keeps neither source nor binary compatibility with
