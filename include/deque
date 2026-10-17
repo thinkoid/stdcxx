@@ -613,8 +613,8 @@ private:
     // The non-null map slots form one contiguous owned span. The live
     // range lies within it; all other owned buffers are retained spares.
     // Ownership bounds are found by scanning, not stored in the deque.
-    // The extra terminal map slot is null. See POST-MORTEM for the
-    // representation and rollback invariants.
+    // The extra terminal map slot is null. See doc/notes/analysis-deque-redesign.md
+    // for the representation and rollback invariants.
     _C_deque_iter   _C_beg;
     _C_deque_iter   _C_end;
     _C_node_pointer _C_nodes;
