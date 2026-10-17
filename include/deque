@@ -64,21 +64,17 @@ class deque;
 // declarations of non-member function templates implementing
 // the functionality of deque member function templates
 
-template <class _TypeT, class _Allocator, class _InputIter>
+template <class _TypeT, class _Allocator, class _Iterator>
 void __rw_assign_range (deque<_TypeT, _Allocator>*,
-                        _InputIter, _InputIter, input_iterator_tag);
+                        _Iterator, _Iterator, input_iterator_tag);
 
-template <class _TypeT, class _Allocator, class _FwdIter>
-void __rw_assign_range (deque<_TypeT, _Allocator>*,
-                        _FwdIter, _FwdIter, forward_iterator_tag);
-
-template <class _TypeT, class _Allocator, class _DequeIter, class _InputIter>
+template <class _TypeT, class _Allocator, class _DequeIter, class _Iterator>
 void __rw_insert_range (deque<_TypeT, _Allocator>*, _DequeIter,
-                        _InputIter, _InputIter, input_iterator_tag);
+                        _Iterator, _Iterator, input_iterator_tag);
 
-template <class _TypeT, class _Allocator, class _DequeIter, class _BidirIter>
+template <class _TypeT, class _Allocator, class _DequeIter, class _Iterator>
 void __rw_insert_range (deque<_TypeT, _Allocator>*, _DequeIter,
-                        _BidirIter, _BidirIter, bidirectional_iterator_tag);
+                        _Iterator, _Iterator, bidirectional_iterator_tag);
 
 #endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
@@ -141,6 +137,7 @@ public:
         if (!_C_cur || _C_cur == *_C_node)
             _C_cur = *--_C_node + _C_bufsize ();
         --_C_cur;
+
         return *this;
     }
 
@@ -157,10 +154,13 @@ public:
     __rw_deque_iter& operator+= (difference_type __n) {
         if (0 == __n)
             return *this;
+
         const difference_type __size = difference_type (_C_bufsize ());
+
         difference_type       __jump = __n / __size;
         const difference_type __rest = __n % __size;
-        difference_type       __off  = _C_offset ();
+
+        difference_type __off = _C_offset ();
 
         // Split the displacement before adding it to the offset, so a
         // representable displacement cannot overflow that addition.
@@ -177,10 +177,12 @@ public:
 
         _C_node += __jump;
         _C_cur = *_C_node;
+
         if (_C_cur)
             _C_cur += __off;
         else
             _RWSTD_ASSERT (0 == __off);
+
         return *this;
     }
 
@@ -406,8 +408,8 @@ public:
         }
     }
 
-    template <class _InputIter>
-    deque (_InputIter __first, _InputIter __last,
+    template <class _Iterator>
+    deque (_Iterator __first, _Iterator __last,
            const allocator_type &__alloc = allocator_type ())
         : allocator_type (__alloc) {
         _C_init ();
@@ -441,10 +443,10 @@ public:
 
     deque& operator= (const deque&);
 
-    template <class _InputIter>
-    void assign (_InputIter __first, _InputIter __last) {
+    template <class _Iterator>
+    void assign (_Iterator __first, _Iterator __last) {
         // dispatch either to a range assign or to an assign with repetition
-        _C_assign (__first, __last, _RWSTD_DISPATCH (_InputIter));
+        _C_assign (__first, __last, _RWSTD_DISPATCH (_Iterator));
     }
 
     void assign (size_type __n, const_reference __x) {
@@ -499,13 +501,18 @@ public:
         const size_type __bufsize = _C_bufsize ();
         const size_type __values =
             _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this, max_size ());
+
         if (__values < __bufsize)
             return 0;
+
         const size_type __nodes = _C_max_nodes ();
+
         if (0 == __nodes)
             return 0;
-        // Leave room for the unused prefix of the first live buffer.
+
+        // the live range may start at the last slot of its first buffer
         const size_type __limit = (__nodes - 1) * __bufsize + 1;
+
         return __values < __limit ? __values : __limit;
     }
 
@@ -571,9 +578,9 @@ public:
         _C_insert_n (__it, __n, __x);
     }
 
-    template <class _InputIter>
-    void insert (iterator __it, _InputIter __first, _InputIter __last) {
-        _C_insert (__it, __first, __last, _RWSTD_DISPATCH (_InputIter));
+    template <class _Iterator>
+    void insert (iterator __it, _Iterator __first, _Iterator __last) {
+        _C_insert (__it, __first, __last, _RWSTD_DISPATCH (_Iterator));
     }
 
     void pop_front ();
@@ -601,9 +608,9 @@ public:
 #ifdef _RWSTD_NO_MEMBER_TEMPLATES
 
     // the non-member range insert reaches the reserve
-    template <class _TypeU, class _AllocU, class _DequeIter, class _BidirIter>
+    template <class _TypeU, class _AllocU, class _DequeIter, class _Iterator>
     friend void __rw_insert_range (deque<_TypeU, _AllocU>*, _DequeIter,
-                                   _BidirIter, _BidirIter,
+                                   _Iterator, _Iterator,
                                    bidirectional_iterator_tag);
 
 #endif   // _RWSTD_NO_MEMBER_TEMPLATES
@@ -629,8 +636,10 @@ private:
     size_type _C_max_nodes () const {
         const size_type __limit =
             size_type ((numeric_limits<difference_type>::max) ()) / _C_bufsize ();
+
         const size_type __slots = _C_node_alloc_type (*this).max_size ();
         const size_type __nodes = __slots ? __slots - 1 : 0;
+
         return __nodes < __limit ? __nodes : __limit;
     }
 
@@ -644,19 +653,31 @@ private:
     // construction cursor belong to this operation, not the container.
     struct _C_reservation {
         deque&          _C_deque;
+
+        // the storage as it was, restored on failure
         _C_deque_iter   _C_beg;
         _C_deque_iter   _C_end;
         _C_node_pointer _C_nodes;
         size_type       _C_node_size;
+
+        // the owned span the scan found: first slot, count, and the
+        // slot it was moved to if recentred
         size_type       _C_first;
         size_type       _C_count;
         size_type       _C_pos;
+
+        // what the preparation changed and must undo: spare pointers
+        // transferred, buffers allocated, and the first slot they fill
         size_type       _C_moved;
         size_type       _C_added;
         size_type       _C_alloc;
+
+        // the request: how many elements, at which end, committed yet
         size_type       _C_n;
         bool            _C_back;
         bool            _C_done;
+
+        // the reserved room and how far construction got into it
         _C_deque_iter   _C_base;
         _C_deque_iter   _C_cur;
 
@@ -691,14 +712,14 @@ private:
 
 #ifndef _RWSTD_NO_MEMBER_TEMPLATES
 
-    // implements range insert for BidirectionalIterators
-    template <class _BidirIter>
-    void _C_insert_range (iterator, _BidirIter, _BidirIter,
+    // the direct range insert, for sources whose operations cannot throw
+    template <class _Iterator>
+    void _C_insert_range (iterator, _Iterator, _Iterator,
                           bidirectional_iterator_tag);
 
-    // implements range insert for InputIterators
-    template <class _InputIter>
-    void _C_insert_range (iterator, _InputIter, _InputIter,
+    // the staged range insert, for any other source
+    template <class _Iterator>
+    void _C_insert_range (iterator, _Iterator, _Iterator,
                           input_iterator_tag);
 
 #else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
@@ -708,8 +729,8 @@ public:
 #endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
     // implements range assign
-    template <class _InputIter>
-    void _C_assign (_InputIter __first, _InputIter __last, void*) {
+    template <class _Iterator>
+    void _C_assign (_Iterator __first, _Iterator __last, void*) {
         _RWSTD_ASSERT_RANGE (__first, __last);
 
         _RWSTD_ASSIGN_RANGE (__first, __last, input_iterator_tag ());
@@ -722,14 +743,14 @@ public:
         _C_assign_n (__n, __x);
     }
 
-    // implements range insert for InputIterators
-    template <class _InputIter>
-    void _C_assign_range (_InputIter, _InputIter, input_iterator_tag);
+    // implements range assign, one element at a time, for any iterator
+    template <class _Iterator>
+    void _C_assign_range (_Iterator, _Iterator, input_iterator_tag);
 
     // implements range insert
-    template <class _InputIter>
+    template <class _Iterator>
     void _C_insert (const iterator &__it,
-                   _InputIter __first, _InputIter __last, void*) {
+                   _Iterator __first, _Iterator __last, void*) {
         _RWSTD_ASSERT_RANGE (begin (), __it);
         _RWSTD_ASSERT_RANGE (__first, __last);
 
@@ -778,6 +799,8 @@ deque<_TypeT, _Allocator>::push_front (const_reference __x)
     _RWSTD_ASSERT (_C_is_valid ());
 
     _C_check_length (1);
+
+    // room before the first element of its buffer, or a reservation
     if (0 == _C_beg._C_offset ())
         _C_push (false, __x);
     else {
@@ -785,6 +808,7 @@ deque<_TypeT, _Allocator>::push_front (const_reference __x)
                             construct (_C_beg._C_address () - 1, __x));
         --_C_beg;
     }
+
     _RWSTD_ASSERT (_C_is_valid (0));
 }
 
@@ -796,6 +820,8 @@ deque<_TypeT, _Allocator>::push_back (const_reference __x)
     _RWSTD_ASSERT (_C_is_valid ());
 
     _C_check_length (1);
+
+    // a null element pointer means the end slot owns no buffer yet
     if (0 == _C_end._C_cur)
         _C_push (true, __x);
     else {
@@ -803,6 +829,7 @@ deque<_TypeT, _Allocator>::push_back (const_reference __x)
                             construct (_C_end._C_address (), __x));
         ++_C_end;
     }
+
     _RWSTD_ASSERT (_C_is_valid (0));
 }
 
@@ -852,9 +879,6 @@ inline bool
 operator== (const deque<_TypeT, _Allocator> &__lhs,
             const deque<_TypeT, _Allocator> &__rhs)
 {
-//     _RWSTD_ASSERT (__lhs._C_is_valid ());
-//     _RWSTD_ASSERT (__rhs._C_is_valid ());
-
     return    __lhs.size () == __rhs.size ()
            && _STD::equal (__lhs.begin (), __lhs.end (), __rhs.begin ());
 }
@@ -865,9 +889,6 @@ inline bool
 operator< (const deque<_TypeT, _Allocator> &__lhs,
            const deque<_TypeT, _Allocator> &__rhs)
 {
-//     _RWSTD_ASSERT (__lhs._C_is_valid ());
-//     _RWSTD_ASSERT (__rhs._C_is_valid ());
-
     return _STD::lexicographical_compare (__lhs.begin (), __lhs.end (),
                                           __rhs.begin (), __rhs.end ());
 }

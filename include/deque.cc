@@ -121,9 +121,13 @@ erase (iterator __first, iterator __last)
 
     const size_type __off = __first - begin ();
     size_type       __n   = __last - __first;
+
     if (0 == __n)
         return begin () + __off;
 
+    // the shorter side moves over the erased range and is popped off
+    // its end; the pops may recentre an emptied deque, so the result
+    // is rebuilt from the offset afterwards
     if (__off < size_type (end () - __last)) {
         _STD::copy_backward (begin (), __first, __last);
         while (__n--)
@@ -134,6 +138,7 @@ erase (iterator __first, iterator __last)
         while (__n--)
             pop_back ();
     }
+
     return begin () + __off;
 }
 
@@ -180,6 +185,7 @@ _C_reservation (deque &__deque, bool __back, size_type __n)
       _C_alloc (0), _C_n (__n), _C_back (__back), _C_done (false)
 {
     _C_deque._C_check_length (__n);
+
     _TRY {
         _C_prepare ();
     }
@@ -187,6 +193,8 @@ _C_reservation (deque &__deque, bool __back, size_type __n)
         _C_restore ();
         _RETHROW;
     }
+
+    // the room is in place: construction starts at its near end
     _C_base = __back ? _C_deque._C_end
                     : _C_deque._C_beg - difference_type (__n);
     _C_cur = _C_base;
@@ -213,8 +221,11 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_commit ()
     else
         _C_deque._C_beg -= difference_type (_C_n);
 
+    // a map the preparation replaced lived on until now, so that the
+    // iterators saved for a failure stayed valid
     if (_C_nodes && _C_nodes != _C_deque._C_nodes)
         _C_node_alloc_type (_C_deque).deallocate (_C_nodes, _C_node_size + 1);
+
     _C_done = true;
 }
 
@@ -242,37 +253,51 @@ template <class _TypeT, class _Allocator>
 void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
 {
     deque &__d = _C_deque;
+
+    // the room left in the partial buffer at this end
     const size_type __b = __d._C_bufsize ();
     const difference_type __begoff = _C_beg._C_offset ();
     const difference_type __endoff = _C_end._C_offset ();
     const size_type __partial = _C_back
         ? (__endoff ? __b - size_type (__endoff) : 0)
         : size_type (__begoff);
+
     if (_C_n <= __partial)
         return;
 
+    // whole buffers wanted beyond it, and where the live range sits:
+    // its first slot, its end slot, and the first slot past its last
+    // live element
     size_type __needed = (_C_n - __partial) / __b
                       + (0 != (_C_n - __partial) % __b);
     const size_type __beg = _C_nodes ? _C_beg._C_node - _C_nodes : 0;
     const size_type __end = _C_nodes ? _C_end._C_node - _C_nodes : 0;
     const size_type __past = __end + (0 != __endoff);
 
-    // Scan outwards from the live range, across spare buffers only.
-    // A dense queue need not walk the unused part of its pointer map.
+    // the owned span, found by scanning outwards from the live range
+    // across spare buffers only; a dense queue has few to walk
     _C_first = __beg;
     while (_C_first && _C_nodes [_C_first - 1])
         --_C_first;
+
     size_type __last = __past;
     while (__last != _C_node_size && _C_nodes [__last])
         ++__last;
+
     _C_count = __last - _C_first;
     _C_pos = _C_first;
 
+    // the spares on this side come first
     const size_type __near = _C_back ? __last - __past : __beg - _C_first;
+
     if (__needed <= __near)
         return;
+
     __needed -= __near;
 
+    // then the far side's spares, moved over one pointer each; what is
+    // still short is new buffers, within the allocator's and the
+    // difference type's limits
     const size_type __far = _C_back ? __beg - _C_first : __last - __past;
     const size_type __reuse = __far < __needed ? __far : __needed;
     const size_type __nnew = __needed - __reuse;
@@ -282,10 +307,13 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
                      (_RWSTD_ERROR_LENGTH_ERROR,
                       _RWSTD_FUNC ("deque::insert"), _C_n, __d.max_size ()));
 
+    // the moved and the new buffers need null slots on this side; short
+    // of them, recentre the span when the null slack pays for moving it,
+    // otherwise a larger map, the old one kept until commit
     const size_type __slack = _C_node_size - _C_count;
     const size_type __near_null = _C_back ? _C_node_size - __last : _C_first;
+
     if (__near_null < __needed) {
-        // Recentring needs enough null slack to pay for moving the span.
         if (__needed <= __slack && _C_count <= __slack) {
             _C_pos = (__slack - __needed) / 2 + (_C_back ? 0 : __needed);
             __d._C_move_nodes (_C_first, _C_pos, _C_count);
@@ -325,6 +353,9 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
         }
     }
 
+    // on the same map the far spares move over now, one pointer each,
+    // from the span's far end to the slots next to its near end; a new
+    // map received them already rotated
     if (__d._C_nodes == _C_nodes) {
         for (size_type __i = 0; __i != __reuse; ++__i) {
             const size_type __from = _C_back ? _C_pos + __i
@@ -334,15 +365,20 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
             __d._C_nodes [__to] = __d._C_nodes [__from];
             __d._C_nodes [__from] = pointer ();
         }
+
         _C_moved = __reuse;
         _C_alloc = _C_back ? _C_pos + _C_count + __reuse
                           : _C_pos - __reuse - __nnew;
     }
 
+    // the buffers still missing, one per slot, each owned as soon as
+    // its pointer is written
     _C_value_alloc_type __alloc (__d);
     for ( ; _C_added != __nnew; ++_C_added)
         __d._C_nodes [_C_alloc + _C_added] = __alloc.allocate (__b, pointer ());
 
+    // both iterators canonical again: a boundary slot that gained a
+    // buffer now carries its element pointer
     __d._C_beg = _C_deque_iter (__d._C_beg._C_node, __begoff);
     __d._C_end = _C_deque_iter (__d._C_end._C_node, __endoff);
 }
@@ -352,12 +388,16 @@ template <class _TypeT, class _Allocator>
 void deque<_TypeT, _Allocator>::_C_reservation::_C_restore ()
 {
     deque &__d = _C_deque;
+
+    // the new buffers go first
     _C_value_alloc_type __alloc (__d);
     for (size_type __i = 0; __i != _C_added; ++__i) {
         __alloc.deallocate (__d._C_nodes [_C_alloc + __i], __d._C_bufsize ());
         __d._C_nodes [_C_alloc + __i] = pointer ();
     }
 
+    // a replaced map goes whole; the same map has its transfers undone
+    // first and its recentring after, the reverse of the preparation
     if (__d._C_nodes != _C_nodes)
         _C_node_alloc_type (__d).deallocate (__d._C_nodes, __d._C_node_size + 1);
     else {
@@ -371,6 +411,9 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_restore ()
         }
         __d._C_move_nodes (_C_pos, _C_first, _C_count);
     }
+
+    // the four fields as saved; the iterators point into buffers that
+    // never moved
     __d._C_nodes = _C_nodes;
     __d._C_node_size = _C_node_size;
     __d._C_beg = _C_beg;
@@ -382,14 +425,17 @@ template <class _TypeT, class _Allocator>
 void deque<_TypeT, _Allocator>::_C_dealloc ()
 {
     _RWSTD_ASSERT (empty ());
+
     if (!_C_nodes)
         return;
 
+    // every owned buffer, live or spare, then the map
     _C_value_alloc_type __alloc (*this);
     for (size_type __i = 0; __i != _C_node_size; ++__i) {
         if (_C_nodes [__i])
             __alloc.deallocate (_C_nodes [__i], _C_bufsize ());
     }
+
     _C_node_alloc_type (*this).deallocate (_C_nodes, _C_node_size + 1);
     _C_init ();
 }
@@ -412,15 +458,12 @@ _C_assign_n (size_type __n, const_reference __x)
 
     const iterator __end = end ();
 
-    // avoid using the name __i or __it below so as not to trigger
-    // a (bogus) gcc 2.95.2 -Wshadow warning: declaration of `__i'
-    // shadows previous local
-    for (iterator __ix = begin (); !(__ix == __end); ++__ix, --__n) {
+    for (iterator __it = begin (); !(__it == __end); ++__it, --__n) {
         if (size_type () == __n) {
-            erase (__ix, __end);
+            erase (__it, __end);
             return;
         }
-        *__ix = __x;
+        *__it = __x;
     }
 
     insert (__end, __n, __x);
@@ -433,11 +476,14 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
 {
     _RWSTD_ASSERT_RANGE (begin (), __it);
     _RWSTD_ASSERT_RANGE (__it, end ());
+
     if (0 == __n)
         return;
+
     _C_check_length (__n);
 
     const size_type __off = __it - begin ();
+
     if (__off && __off != size ()) {
         // A shift may overwrite the element supplying the fill value.
         const value_type __saved (__x);
@@ -452,6 +498,8 @@ template <class _TypeT, class _Allocator>
 void deque<_TypeT, _Allocator>::
 _C_insert_fill (size_type __off, size_type __n, const_reference __x)
 {
+    // the shorter side shifts; the reservation may move map slots, so
+    // the position is taken after it
     const size_type __rem = size () - __off;
     const bool __back = __rem <= __off;
     _C_reservation __room (*this, __back, __n);
@@ -459,7 +507,9 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
 
     if (__back) {
         if (__rem < __n) {
-            // Fill the new suffix, then copy the displaced tail after it.
+            // the fill outruns the tail: the part of it past the old end
+            // and then the tail are constructed, the tail's old place
+            // takes the rest of the fill
             for (size_type __i = __n - __rem; __i; --__i)
                 __room._C_construct (__x);
             for (_C_deque_iter __from = __pos; __from != _C_end; ++__from)
@@ -467,6 +517,8 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
             _STD::fill (__pos, _C_end, __x);
         }
         else {
+            // the tail's last n are constructed past the old end, the
+            // rest of the tail shifts up, the hole takes the fill
             const _C_deque_iter __tail = _C_end - difference_type (__n);
             for (_C_deque_iter __from = __tail; __from != _C_end; ++__from)
                 __room._C_construct (*__from);
@@ -476,7 +528,9 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
     }
     else {
         if (__off < __n) {
-            // Copy the displaced prefix, then fill up to the old beginning.
+            // the fill outruns the prefix: the prefix and then the part
+            // of the fill before the old beginning are constructed, the
+            // prefix's old place takes the rest of the fill
             for (_C_deque_iter __from = _C_beg; __from != __pos; ++__from)
                 __room._C_construct (*__from);
             while (__room._C_cur != _C_beg)
@@ -484,6 +538,9 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
             _STD::fill (_C_beg, __pos, __x);
         }
         else {
+            // the prefix's first n are constructed before the old
+            // beginning, the rest of the prefix shifts down, the hole
+            // takes the fill
             for (_C_deque_iter __from = _C_beg;
                  __room._C_cur != _C_beg; ++__from)
                 __room._C_construct (*__from);
@@ -491,7 +548,9 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
             _STD::fill (__pos - difference_type (__n), __pos, __x);
         }
     }
+
     __room._C_commit ();
+
     _RWSTD_ASSERT (_C_is_valid (0));
 }
 
@@ -499,18 +558,18 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
 #ifndef _RWSTD_NO_MEMBER_TEMPLATES
 
 template <class _TypeT, class _Allocator>
-template <class _InputIter>
+template <class _Iterator>
 void deque<_TypeT, _Allocator>::
-_C_assign_range (_InputIter __first, _InputIter __last, input_iterator_tag)
+_C_assign_range (_Iterator __first, _Iterator __last, input_iterator_tag)
 {
     deque* const __self = this;
 
 #else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
 
-template <class _TypeT, class _Allocator, class _InputIter>
+template <class _TypeT, class _Allocator, class _Iterator>
 void
 __rw_assign_range (deque<_TypeT, _Allocator> *__self,
-                   _InputIter __first, _InputIter __last, input_iterator_tag)
+                   _Iterator __first, _Iterator __last, input_iterator_tag)
 {
     typedef _TYPENAME deque<_TypeT, _Allocator>::iterator iterator;
     
@@ -530,16 +589,13 @@ __rw_assign_range (deque<_TypeT, _Allocator> *__self,
 
     const iterator __end = __self->end ();
 
-    // avoid using the name __i or __it below so as not to trigger
-    // a (bogus) gcc 2.95.2 -Wshadow warning: declaration of `__i'
-    // shadows previous local
-    for (iterator __ix = __self->begin (); !(__ix == __end);
-         ++__ix, ++__first) {
+    for (iterator __it = __self->begin (); !(__it == __end);
+         ++__it, ++__first) {
         if (__first == __last) {
-            __self->erase (__ix, __end);
+            __self->erase (__it, __end);
             return;
         }
-        *__ix = *__first;
+        *__it = *__first;
     }
 
     // append the rest of the range one element at a time
@@ -551,10 +607,10 @@ __rw_assign_range (deque<_TypeT, _Allocator> *__self,
 #ifndef _RWSTD_NO_MEMBER_TEMPLATES
 
 template<class _TypeT, class _Allocator>
-template <class _InputIter>
+template <class _Iterator>
 void deque<_TypeT, _Allocator>::
 _C_insert_range (iterator __it,
-                 _InputIter __first, _InputIter __last,
+                 _Iterator __first, _Iterator __last,
                  input_iterator_tag)
 {
     typedef deque _Deque;
@@ -563,10 +619,10 @@ _C_insert_range (iterator __it,
 
 #else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
 
-template <class _TypeT, class _Allocator, class _DequeIter, class _InputIter>
+template <class _TypeT, class _Allocator, class _DequeIter, class _Iterator>
 void
 __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
-                   _InputIter __first, _InputIter __last, input_iterator_tag)
+                   _Iterator __first, _Iterator __last, input_iterator_tag)
 {
     typedef deque<_TypeT, _Allocator> _Deque;
 
@@ -598,10 +654,10 @@ __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
 #ifndef _RWSTD_NO_MEMBER_TEMPLATES
 
 template <class _TypeT, class _Allocator>
-template <class _BidirIter>
+template <class _Iterator>
 void deque<_TypeT, _Allocator>::
 _C_insert_range (iterator __it,
-                 _BidirIter __first, _BidirIter __last,
+                 _Iterator __first, _Iterator __last,
                  bidirectional_iterator_tag)
 {
     typedef deque _Deque;
@@ -610,10 +666,10 @@ _C_insert_range (iterator __it,
 
 #else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
 
-template <class _TypeT, class _Allocator, class _DequeIter, class _BidirIter>
+template <class _TypeT, class _Allocator, class _DequeIter, class _Iterator>
 void
 __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
-                   _BidirIter __first, _BidirIter __last,
+                   _Iterator __first, _Iterator __last,
                    bidirectional_iterator_tag)
 
 {
@@ -650,15 +706,20 @@ __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
 
     if (__back) {
         if (__rem < __n) {
-            _BidirIter __mid = __first;
+            // the range outruns the tail: its part past the old end and
+            // then the tail are constructed, the tail's old place takes
+            // the rest of the range
+            _Iterator __mid = __first;
             _STD::advance (__mid, difference_type (__rem));
-            for (_BidirIter __from = __mid; __from != __last; ++__from)
+            for (_Iterator __from = __mid; __from != __last; ++__from)
                 __room._C_construct (*__from);
             for (_Iter __from = __pos; __from != __end; ++__from)
                 __room._C_construct (*__from);
             _STD::copy (__first, __mid, __pos);
         }
         else {
+            // the tail's last n are constructed past the old end, the
+            // rest of the tail shifts up, the hole takes the range
             const _Iter __tail = __end - difference_type (__n);
             for (_Iter __from = __tail; __from != __end; ++__from)
                 __room._C_construct (*__from);
@@ -668,22 +729,30 @@ __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
     }
     else {
         if (__inx < __n) {
-            _BidirIter __mid = __first;
+            // the range outruns the prefix: the prefix and then the
+            // range's part before the old beginning are constructed,
+            // the prefix's old place takes the rest of the range
+            _Iterator __mid = __first;
             _STD::advance (__mid, difference_type (__n - __inx));
             for (_Iter __from = __beg; __from != __pos; ++__from)
                 __room._C_construct (*__from);
-            for (_BidirIter __from = __first; __from != __mid; ++__from)
+            for (_Iterator __from = __first; __from != __mid; ++__from)
                 __room._C_construct (*__from);
             _STD::copy (__mid, __last, __beg);
         }
         else {
+            // the prefix's first n are constructed before the old
+            // beginning, the rest of the prefix shifts down, the hole
+            // takes the range
             for (_Iter __from = __beg; __room._C_cur != __beg; ++__from)
                 __room._C_construct (*__from);
             _STD::copy (__beg + difference_type (__n), __pos, __beg);
             _STD::copy (__first, __last, __pos - difference_type (__n));
         }
     }
+
     __room._C_commit ();
+
     _RWSTD_ASSERT (__self->_C_is_valid (0));
 }
 
@@ -704,14 +773,20 @@ _C_is_valid (int __emptyfl) const
         return true;
     }
 
+    // the live range lies within the map, the sentinel slot included
+    // for the end
     _RWSTD_ASSERT (_C_nodes <= _C_beg._C_node);
     _RWSTD_ASSERT (_C_beg._C_node <= _C_end._C_node);
     _RWSTD_ASSERT (_C_end._C_node <= _C_nodes + _C_node_size);
+
+    // offsets canonical, and the sentinel null and reached at offset 0
     _RWSTD_ASSERT (size_type (_C_beg._C_offset ()) < _C_bufsize ());
     _RWSTD_ASSERT (size_type (_C_end._C_offset ()) < _C_bufsize ());
     _RWSTD_ASSERT (   _C_end._C_node != _C_nodes + _C_node_size
                   || 0 == _C_end._C_offset ());
     _RWSTD_ASSERT (0 == _C_nodes [_C_node_size]);
+
+    // the slots of the first and the last live element own buffers
     if (!empty ()) {
         _RWSTD_ASSERT (_C_beg < _C_end);
         _RWSTD_ASSERT (0 != *_C_beg._C_node);
