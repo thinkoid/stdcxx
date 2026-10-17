@@ -184,8 +184,6 @@ _C_reservation (deque &__deque, bool __back, size_type __n)
       _C_first (0), _C_count (0), _C_pos (0), _C_moved (0), _C_added (0),
       _C_alloc (0), _C_n (__n), _C_back (__back), _C_done (false)
 {
-    _C_deque._C_check_length (__n);
-
     _TRY {
         _C_prepare ();
     }
@@ -480,7 +478,11 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
     if (0 == __n)
         return;
 
-    _C_check_length (__n);
+    _RWSTD_REQUIRES (__n <= max_size () - size (),
+                     (_RWSTD_ERROR_LENGTH_ERROR,
+                      _RWSTD_FUNC ("deque::insert(iterator, size_type, "
+                                   "const_reference)"),
+                      __n, max_size ()));
 
     const size_type __off = __it - begin ();
 
@@ -688,6 +690,12 @@ __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
 
     if (0 == __n)
         return;
+
+    _RWSTD_REQUIRES (__n <= __self->max_size () - __self->size (),
+                     (_RWSTD_ERROR_LENGTH_ERROR,
+                      _RWSTD_FUNC ("deque::insert(iterator, Iterator, "
+                                   "Iterator)"),
+                      __n, __self->max_size ()));
 
     const size_type __inx = _DISTANCE (__self->begin (), __it, size_type);
     const size_type __rem = __self->size () - __inx;

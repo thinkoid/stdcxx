@@ -262,7 +262,7 @@ inline bool
 operator< (const _RWSTD_DEQUE_ITER(1) &__x, const _RWSTD_DEQUE_ITER(2) &__y)
 {
     return __x._C_node == __y._C_node
-        ? __x._C_cur != __y._C_cur && __x._C_cur < __y._C_cur
+        ? __x._C_cur < __y._C_cur
         : __x._C_node < __y._C_node;
 }
 
@@ -643,12 +643,6 @@ private:
         return __nodes < __limit ? __nodes : __limit;
     }
 
-    void _C_check_length (size_type __n) const {
-        _RWSTD_REQUIRES (__n <= max_size () - size (),
-                         (_RWSTD_ERROR_LENGTH_ERROR,
-                          _RWSTD_FUNC ("deque::insert"), __n, max_size ()));
-    }
-
     // A reservation owns rollback until commit. Its scan results and
     // construction cursor belong to this operation, not the container.
     struct _C_reservation {
@@ -798,7 +792,10 @@ deque<_TypeT, _Allocator>::push_front (const_reference __x)
 {
     _RWSTD_ASSERT (_C_is_valid ());
 
-    _C_check_length (1);
+    _RWSTD_REQUIRES (size () < max_size (),
+                     (_RWSTD_ERROR_LENGTH_ERROR,
+                      _RWSTD_FUNC ("deque::push_front(const_reference)"),
+                      size () + 1, max_size ()));
 
     // room before the first element of its buffer, or a reservation
     if (0 == _C_beg._C_offset ())
@@ -819,7 +816,10 @@ deque<_TypeT, _Allocator>::push_back (const_reference __x)
 {
     _RWSTD_ASSERT (_C_is_valid ());
 
-    _C_check_length (1);
+    _RWSTD_REQUIRES (size () < max_size (),
+                     (_RWSTD_ERROR_LENGTH_ERROR,
+                      _RWSTD_FUNC ("deque::push_back(const_reference)"),
+                      size () + 1, max_size ()));
 
     // a null element pointer means the end slot owns no buffer yet
     if (0 == _C_end._C_cur)

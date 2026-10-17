@@ -399,9 +399,6 @@ public:
     typedef _TYPENAME traits_type::pointer            pointer;
     typedef _TYPENAME traits_type::iterator_category  iterator_category;
 
-    typedef __rw_debug_iter <container_type, _MutableIterator,
-                             _MutableIterator>        _C_mutable_iterator;
-
     __rw_debug_iter (): _C_cont (0) { }
 
     __rw_debug_iter (const container_type &__cont, const iterator_type &__it)
