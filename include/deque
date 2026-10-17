@@ -132,8 +132,6 @@ public:
 #endif   // _RWSTDDEBUG
 
 
-    // dummy first argument used to easily switch between
-    // iterators with and without support for debugging
     __rw_deque_iter (pointer __cur, _C_node_pointer __node)
         : _C_cur (__cur), _C_node (__node) { }
 
@@ -181,7 +179,7 @@ public:
         return *(*this + __n);
     }
 
-    // `cur' points at the curent element or is null (for the end iterator)
+    // `cur' points at the current element or is null (for the end iterator)
     // `node' points to the array containing the element or &cur (for end)
     pointer         _C_cur;
     _C_node_pointer _C_node;
@@ -773,8 +771,6 @@ private:
     _C_node_pointer _C_grow (bool, size_type);
 
     void _C_dealloc ();
-
-private:
 
     // implements assign with repetition
     void _C_assign_n (size_type, const_reference);
