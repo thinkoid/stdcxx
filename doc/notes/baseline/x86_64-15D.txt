@@ -138,10 +138,11 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 23.bitset.cons.stdcxx-297                  NOUT    0                       
 23.bitset                                     0    0  2537538      0   100%
 23.containers.stdcxx-152                   NOUT    0                       
-23.deque.iterators                            0    0  4915404      0   100%
-23.deque.modifiers                            0    0   201238      0   100%
+23.deque.iterators                            0    0  4921862      0   100%
+23.deque.modifiers                            0    0   590558      0   100%
 23.deque.special                              0    0    61465      0   100%
 23.deque.special.stdcxx-127                NOUT    0                       
+23.deque.storage                              0    0  1310326      0   100%
 23.list.assign                                0    0    20542      0   100%
 23.list.capacity                              0    0     2416      0   100%
 23.list.cons                                  0    0    13164      0   100%
@@ -273,11 +274,11 @@ atomic_add                                    0    0       66      0   100%
 atomic_xchg                                   0    0       22      0   100%
 once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   273
+  Programs:                   274
   Non-zero exit status:         0
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            10093451
+  Assertions:            11912687
   Failed assertions:            0

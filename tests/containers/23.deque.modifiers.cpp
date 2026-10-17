@@ -68,9 +68,8 @@ inline Deque::size_type
 __rw_new_capacity<Deque>(Deque::size_type n, const Deque*)
 {
     if (n) {
-        // non-zero size argument is the number of elements the deque
-        // must hold when its vector of nodes grows; the result is the
-        // capacity in elements the vector grows to, in whole buffers
+        // A non-zero argument requests growth of the pointer map.
+        // Its capacity is measured in nodes, independently of buffers.
         return n * 2;
     }
 
@@ -102,200 +101,140 @@ enum MemberFunction {
 };
 
 
-// causes operator new, deque element's copy ctor, or assignment operator
-// to throw an exception and iterates as long as the member function exits
-// by throwing an exception; verifies that the exception had no effects
-// on the container
+// Invoke one operation with fresh range iterators on every attempt.
 template <class Iterator>
-void exception_loop (int              line /* line number in caller*/,
-                     MemberFunction   mfun /* deque member function */,
-                     const char      *fcall /* function call string */,
-                     int              exceptions /* enabled exceptions */,
-                     Deque           &deq /* container to call function on */,
-                     const Deque::iterator &it /* iterator into container */,
-                     int              n /* number of elements or offset */,
-                     const UserClass *x /* pointer to an element or 0 */,
-                     const Iterator  &first /* beginning of range */,
-                     const Iterator  &last /* end of range to insert */,
-                     std::size_t     *n_copy /* number of copy ctors */,
-                     std::size_t     *n_asgn /* number of assignments */)
+void exercise (MemberFunction mfun, Deque &deq, Deque::size_type off,
+               int n, const UserClass *x,
+               const Iterator &first, const Iterator &last)
 {
-    std::size_t throw_after = 0;
+    const Iterator range_first = copy_iter (first, (UserClass*)0);
+    const Iterator range_last  = copy_iter (last, (UserClass*)0);
+    const Deque::size_type nelems (n);
+    const Deque::iterator pos = deq.begin () + off;
 
-    // get the initial size of the container and its begin() iterator
-    // to detect illegal changes after an exception (i.e., violations
-    // if the strong exception guarantee)
-    const std::size_t           size  = deq.size ();
-    const Deque::const_iterator begin = deq.begin ();
-    const Deque::const_iterator end   = deq.end ();
+    switch (mfun) {
+    case Assign_n:    deq.assign (nelems, *x); break;
+    case AssignRange: deq.assign (range_first, range_last); break;
+    case Insert_1:    deq.insert (pos, *x); break;
+    case Insert_n:    deq.insert (pos, nelems, *x); break;
+    case InsertRange: deq.insert (pos, range_first, range_last); break;
+    case Erase_1: {
+        const Deque::iterator result = deq.erase (pos);
+        rw_assert (result == deq.begin () + off, 0, __LINE__,
+                   "erase(iterator) returned the wrong position");
+        break;
+    }
+    case EraseRange: {
+        const Deque::iterator result = deq.erase (pos, pos + n);
+        rw_assert (result == deq.begin () + off, 0, __LINE__,
+                   "erase(first, last) returned the wrong position");
+        break;
+    }
+    }
+}
 
-#ifdef DEFINE_REPLACEMENT_NEW_AND_DELETE
-
-    rwt_free_store* const pst = rwt_get_free_store (0);
-
-#endif   // DEFINE_REPLACEMENT_NEW_AND_DELETE
-
-    // repeatedly call the specified member function until it returns
-    // without throwing an exception
-    for ( ; ; ) {
-
-        // detect objects constructed but not destroyed after an exception
-        std::size_t x_count = UserClass::count_;
-
-        _RWSTD_ASSERT (n_copy);
-        _RWSTD_ASSERT (n_asgn);
-
-        *n_copy = UserClass::n_total_copy_ctor_;
-        *n_asgn = UserClass::n_total_op_assign_;
-
-#ifdef DEFINE_REPLACEMENT_NEW_AND_DELETE
-
-        // disable out of memory exceptions before copying iterators
-        // (InputIter ctors may dynamically allocate memory)
-        *pst->throw_at_calls_ [0] = _RWSTD_SIZE_MAX;
-
-#endif   // DEFINE_REPLACEMENT_NEW_AND_DELETE
-
-        // create "deep" copies of the iterators to thwart InputIter's
-        // multi-pass detection: a retry after an exception must start
-        // from iterators the failed call has not advanced
-        const Iterator range_first = copy_iter (first, (UserClass*)0);
-        const Iterator range_last  = copy_iter (last, (UserClass*)0);
+// Sweep one failure source at a time. A fresh container for every attempt
+// permits element assignment to leave changed values after an exception.
+template <class Iterator>
+void exception_loop (int line, MemberFunction mfun, const char *fcall,
+                     int exceptions, Deque &deq,
+                     const Deque::iterator &it, int n, const UserClass *x,
+                     const Iterator &first, const Iterator &last,
+                     std::size_t *n_copy, std::size_t *n_asgn)
+{
+    const Deque::size_type off = it - deq.begin ();
 
 #ifndef _RWSTD_NO_EXCEPTIONS
 
-        // iterate for `n=throw_after' starting at the next call to operator
-        // new, forcing each call to throw an exception, until the insertion
-        // finally succeeds (i.e, no exception is thrown)
+    rwt_free_store* const pst = rwt_get_free_store (0);
 
-#  ifdef DEFINE_REPLACEMENT_NEW_AND_DELETE
+    for (int source = NewThrows; source <= AssignmentThrows; source <<= 1) {
+        if (!(exceptions & source))
+            continue;
 
-        if (exceptions & NewThrows) {
-            *pst->throw_at_calls_ [0] = pst->new_calls_ [0] + throw_after + 1;
+        for (std::size_t ordinal = 1; ; ++ordinal) {
+            Deque trial (deq);
+            const Deque::const_iterator begin = trial.begin ();
+            const Deque::const_iterator end   = trial.end ();
+            const std::size_t live = UserClass::count_;
+
+            // InputIter copies may allocate. Make them before arming new.
+            const Iterator range_first = copy_iter (first, (UserClass*)0);
+            const Iterator range_last  = copy_iter (last, (UserClass*)0);
+
+            const std::size_t copies = UserClass::n_total_copy_ctor_;
+            const std::size_t assigns = UserClass::n_total_op_assign_;
+            const std::size_t allocations = pst->new_calls_ [0];
+
+            if (NewThrows == source)
+                *pst->throw_at_calls_ [0] = allocations + ordinal;
+            else if (CopyCtorThrows == source)
+                UserClass::copy_ctor_throw_count_ = copies + ordinal;
+            else
+                UserClass::op_assign_throw_count_ = assigns + ordinal;
+
+            bool caught = false;
+            _TRY {
+                exercise (mfun, trial, off, n, x, range_first, range_last);
+            }
+            _CATCH (...) {
+                caught = true;
+            }
+
+            *pst->throw_at_calls_ [0] = _RWSTD_SIZE_MAX;
+            UserClass::copy_ctor_throw_count_ = 0;
+            UserClass::op_assign_throw_count_ = 0;
+
+            const std::size_t calls = NewThrows == source
+                ? pst->new_calls_ [0] - allocations : CopyCtorThrows == source
+                ? UserClass::n_total_copy_ctor_ - copies
+                : UserClass::n_total_op_assign_ - assigns;
+
+            rw_assert (caught ? calls == ordinal : calls < ordinal,
+                       0, line, "%s: failure source %d, ordinal %zu, "
+                       "caught %d after %zu calls", fcall, source, ordinal,
+                       caught, calls);
+
+            if (!caught)
+                break;
+
+            rw_assert (trial.size () == deq.size (), 0, line,
+                       "%s: size changed after source %d threw", fcall, source);
+            rw_assert (trial.begin () == begin && trial.end () == end, 0, line,
+                       "%s: endpoints changed after source %d threw",
+                       fcall, source);
+            rw_assert (UserClass::count_ == live, 0, line,
+                       "%s: leaked objects after source %d threw", fcall, source);
+
+            if (NewThrows == source) {
+                for (Deque::size_type i = 0; i != deq.size (); ++i)
+                    rw_assert (trial [i].data_.val_ == deq [i].data_.val_,
+                               0, line, "%s: allocation failure changed "
+                               "element %zu", fcall, i);
+            }
         }
+    }
 
-#  endif   // DEFINE_REPLACEMENT_NEW_AND_DELETE
+#else
 
-        if (exceptions & CopyCtorThrows) {
-            UserClass::copy_ctor_throw_count_ =
-                UserClass::n_total_copy_ctor_ + throw_after;
-        }
-
-        if (exceptions & AssignmentThrows) {
-            UserClass::op_assign_throw_count_ =
-                UserClass::n_total_op_assign_ + throw_after;
-        }
+    _RWSTD_UNUSED (exceptions);
+    _RWSTD_UNUSED (line);
+    _RWSTD_UNUSED (fcall);
 
 #endif   // _RWSTD_NO_EXCEPTIONS
 
-        _TRY {
-
-            // convert an int to size_type to avoid conversion
-            // warnings when passing it to member functions
-            // that expect an unsigned argument
-            const Deque::size_type nelems (n);
-
-            switch (mfun) {
-            case Assign_n:
-                _RWSTD_ASSERT (x);
-                deq.assign (nelems, *x);
-                break;
-            case AssignRange:
-                deq.assign (range_first, range_last);
-                break;
-
-            case Erase_1:
-                deq.erase (it);
-                break;
-            case EraseRange: {
-                const Deque::iterator erase_end (it + n);
-                deq.erase (it, erase_end);
-                break;
-            }
-
-            case Insert_1:
-                _RWSTD_ASSERT (x);
-                deq.insert (it, *x);
-                break;
-            case Insert_n:
-                _RWSTD_ASSERT (x);
-                deq.insert (it, nelems, *x);
-                break;
-            case InsertRange:
-                deq.insert (it, range_first, range_last);
-                break;
-            }
-        }
-        _CATCH (...) {
-
-            // verify that an exception thrown from the member function
-            // didn't cause a change in the state of the container
-
-            rw_assert (deq.size () == size, 0, line,
-                       "line %d: %s: size unexpectedly changed "
-                       "from %zu to %zu after an exception",
-                       __LINE__, fcall, size, deq.size ());
-            
-            rw_assert (deq.begin () == begin, 0, line,
-                       "line %d: %s: begin() unexpectedly "
-                       "changed after an exception by %td",
-                       __LINE__, fcall, deq.begin () - begin);
-
-            rw_assert (deq.end () == end, 0, line,
-                       "line %d: %s: end() unexpectedly "
-                       "changed after an exception by %td",
-                       __LINE__, fcall, deq.end () - end);
-            
-
-            // count the number of objects to detect leaks
-            x_count = UserClass::count_ - x_count;
-            rw_assert (x_count == deq.size () - size, 0, line,
-                       "line %d: %s: leaked %zu objects after an exception",
-                       __LINE__, fcall, x_count - (deq.size () - size));
-            
-            if (exceptions) {
-
-                // increment to allow this call to operator new to succeed
-                // and force the next one to fail, and try to insert again
-                ++throw_after;
-            }
-            else
-                break;
-
-            continue;
-        }
-
-        // count the number of objects to detect leaks
-        x_count = UserClass::count_ - x_count;
-        rw_assert (x_count == deq.size () - size, 0, line,
-                   "line %d: %s: leaked %zu objects "
-                   "after a successful insertion",
-                   __LINE__, fcall, x_count - (deq.size () - size));
-
-        break;
-    }
-
-#ifdef DEFINE_REPLACEMENT_NEW_AND_DELETE
-
-    // disable exceptions from replacement operator new
-    *pst->throw_at_calls_ [0] = _RWSTD_SIZE_MAX;
-
-#endif   // DEFINE_REPLACEMENT_NEW_AND_DELETE
-
-    UserClass::copy_ctor_throw_count_ = 0;
-    UserClass::op_assign_throw_count_ = 0;
-
-    // compute the number of calls to UserClass copy ctor and assignment
-    // operator and set `n_copy' and `n_assgn' to the value of the result
+    const std::size_t live = UserClass::count_;
+    const std::size_t size = deq.size ();
+    *n_copy = UserClass::n_total_copy_ctor_;
+    *n_asgn = UserClass::n_total_op_assign_;
+    exercise (mfun, deq, off, n, x, first, last);
     *n_copy = UserClass::n_total_copy_ctor_ - *n_copy;
     *n_asgn = UserClass::n_total_op_assign_ - *n_asgn;
+
+    rw_assert (UserClass::count_ + size == live + deq.size (), 0, line,
+               "%s: object count changed unexpectedly", fcall);
 }
 
-
-// used to determine whether insert() can or cannot use
-// an algorithm optimized for BidirectionalIterators
-bool is_bidirectional (std::input_iterator_tag) { return false; }
-bool is_bidirectional (std::bidirectional_iterator_tag) { return true; }
 
 // returns the number of invocations of the assignment operator
 // for a call to any of the inserts: the elements on the shorter
@@ -332,12 +271,8 @@ void test_insert (int line, int exceptions,
     // at any position and for any number of elements (23.2.1.3, p2);
     // the loop below exercises that with every exception enabled
 
-    // the input iterator overload copies the range into a temporary
-    // deque first and inserts the temporary, so it copies every
-    // element of the range twice; the others copy each once
-    const bool twice =
-           -1 == nelems
-        && !is_bidirectional (_RWSTD_ITERATOR_CATEGORY (Iterator, dummy));
+    // Arbitrary source iterators are consumed before destination mutation.
+    const bool twice = -1 == nelems;
 
     // format a string describing the function call being exercised
     // (used in diagnostic output below)
@@ -416,8 +351,8 @@ void test_insert (int line, int exceptions,
     // verify the complexity of the operation in terms of the number
     // of calls to the copy ctor and assignment operator on value_type
     const std::size_t expect_copy =
-          twice      ? 2 * inslen
-        : nelems < 0 ? inslen : nelems;
+        (twice ? 2 * inslen : nelems < 0 ? inslen : nelems)
+        + (!twice && (nelems < 0 || nelems) && off && off != seqlen);
 
     rw_assert (n_copy == expect_copy, __FILE__, line,
                "line %d: %s: expected %zu invocations "

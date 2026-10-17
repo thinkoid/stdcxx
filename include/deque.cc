@@ -106,56 +106,35 @@ erase (iterator __it)
     _RWSTD_ASSERT (!(__it == end ()));
     _RWSTD_ASSERT (_C_is_valid (0 /* valid and non-empty */));
 
-    const iterator __next = ++iterator (__it);
-
-    if (__it - begin () < end () - __it) {
-
-        _STD::copy_backward (begin (), __it, __next);
-
-        pop_front ();
-
-        return empty () ? end () : __next;
-    }
-
-    _STD::copy (__next, end (), __it);
-
-    pop_back ();
-
-    return __it;
+    return erase (__it, __it + 1);
 }
-    
+
 
 template <class _TypeT, class _Allocator>
-_TYPENAME deque<_TypeT, _Allocator>::iterator 
+_TYPENAME deque<_TypeT, _Allocator>::iterator
 deque<_TypeT, _Allocator>::
 erase (iterator __first, iterator __last)
 {
-    // (`first', `last'] must be a valid range into `*this'
-
     _RWSTD_ASSERT_RANGE (__first, __last);
     _RWSTD_ASSERT_RANGE (begin (), __first);
-    _RWSTD_ASSERT (_C_is_valid ());
+    _RWSTD_ASSERT_RANGE (__last, end ());
 
-    size_type __n = _DISTANCE (__first, __last, size_type);
+    const size_type __off = __first - begin ();
+    size_type       __n   = __last - __first;
+    if (0 == __n)
+        return begin () + __off;
 
-    _RWSTD_ASSERT (__n <= size ());
-
-    if (__first - begin () < end () - __last) {
-
+    if (__off < size_type (end () - __last)) {
         _STD::copy_backward (begin (), __first, __last);
-
-        while (__n-- != 0)
+        while (__n--)
             pop_front ();
-
-        return __last;
     }
-
-    _STD::copy (__last, end (), __first);
-
-    while (__n-- != 0)
-        pop_back ();
-
-    return __first;
+    else {
+        _STD::copy (__last, end (), __first);
+        while (__n--)
+            pop_back ();
+    }
+    return begin () + __off;
 }
 
 
@@ -173,29 +152,6 @@ swap (deque<_TypeT, _Allocator> &__rhs)
         _STD::swap (_C_nodes,     __rhs._C_nodes);
         _STD::swap (_C_node_size, __rhs._C_node_size);
 
-        if (pointer() == _C_beg._C_cur) {
-            _RWSTD_ASSERT (pointer() == _C_end._C_cur);
-            _RWSTD_ASSERT (   _C_beg._C_node == &__rhs._C_end._C_cur
-                           && _C_end._C_node == &__rhs._C_end._C_cur);
-
-            _C_beg._C_node =
-            _C_end._C_node = &_C_end._C_cur;
-        }
-        else {
-            _RWSTD_ASSERT (pointer() != _C_end._C_cur);
-        }
-
-        if (pointer() == __rhs._C_beg._C_cur) {
-            _RWSTD_ASSERT (pointer() == __rhs._C_end._C_cur);
-            _RWSTD_ASSERT (   __rhs._C_beg._C_node == &_C_end._C_cur
-                           && __rhs._C_end._C_node == &_C_end._C_cur);
-
-            __rhs._C_beg._C_node =
-            __rhs._C_end._C_node = &__rhs._C_end._C_cur;
-        }
-        else {
-            _RWSTD_ASSERT (pointer() != __rhs._C_end._C_cur);
-        }
     }
     else {
         deque __tmp (*this);
@@ -205,298 +161,236 @@ swap (deque<_TypeT, _Allocator> &__rhs)
 }
 
 
-// pushes `x' at the back or the front of a container whose buffer
-// there is full, or that has no storage
 template <class _TypeT, class _Allocator>
 void deque<_TypeT, _Allocator>::
-_C_push (bool __at_back, const_reference __x)
+_C_push (bool __back, const_reference __x)
 {
-    _RWSTD_ASSERT (_C_is_valid ());
+    _C_reservation __room (*this, __back, 1);
+    __room._C_construct (__x);
+    __room._C_commit ();
+}
 
-    const _C_storage __prior = _C_reserve (__at_back, 1);
 
-    const size_type __bufsize = _C_bufsize ();
-
-    // step onto the neighbouring buffer when the one at the end is
-    // full, and point the iterator so that the caller's increment or
-    // decrement lands on the element
-    _C_deque_iter __it = __at_back ? _C_end : _C_beg;
-
-    if (__at_back) {
-        if (__it._C_cur == *__it._C_node + __bufsize) {
-            ++__it._C_node;
-            __it._C_cur = *__it._C_node;
-        }
-    }
-    else if (__it._C_cur == *__it._C_node) {
-        --__it._C_node;
-        __it._C_cur = *__it._C_node + __bufsize;
-    }
-
-    _C_value_alloc_type __alloc (*this);
-
+template <class _TypeT, class _Allocator>
+deque<_TypeT, _Allocator>::_C_reservation::
+_C_reservation (deque &__deque, bool __back, size_type __n)
+    : _C_deque (__deque), _C_beg (__deque._C_beg), _C_end (__deque._C_end),
+      _C_nodes (__deque._C_nodes), _C_node_size (__deque._C_node_size),
+      _C_first (0), _C_count (0), _C_pos (0), _C_moved (0), _C_added (0),
+      _C_alloc (0), _C_n (__n), _C_back (__back), _C_done (false)
+{
+    _C_deque._C_check_length (__n);
     _TRY {
-        __alloc.construct (__at_back ? __it._C_cur : __it._C_cur - 1, __x);
+        _C_prepare ();
     }
     _CATCH (...) {
-        _C_restore (__prior);
+        _C_restore ();
         _RETHROW;
     }
+    _C_base = __back ? _C_deque._C_end
+                    : _C_deque._C_beg - difference_type (__n);
+    _C_cur = _C_base;
+}
 
-    if (__at_back)
-        _C_end = __it;
+
+template <class _TypeT, class _Allocator>
+deque<_TypeT, _Allocator>::_C_reservation::~_C_reservation ()
+{
+    if (!_C_done) {
+        for ( ; _C_base != _C_cur; ++_C_base)
+            _RWSTD_VALUE_ALLOC (_C_value_alloc_type, _C_deque,
+                                destroy (_C_base._C_address ()));
+        _C_restore ();
+    }
+}
+
+
+template <class _TypeT, class _Allocator>
+void deque<_TypeT, _Allocator>::_C_reservation::_C_commit ()
+{
+    if (_C_back)
+        _C_deque._C_end += difference_type (_C_n);
     else
-        _C_beg = __it;
+        _C_deque._C_beg -= difference_type (_C_n);
 
-    _C_discard (__prior);
+    if (_C_nodes && _C_nodes != _C_deque._C_nodes)
+        _C_node_alloc_type (_C_deque).deallocate (_C_nodes, _C_node_size + 1);
+    _C_done = true;
 }
 
 
-// makes room for `n' more elements at the back or at the front
-// without touching an element: shares the spare nodes at the far end
-// out to the near one, half of them or as many as the room needs,
-// and grows the vector with the new nodes at the near end when they
-// do not suffice; a container with no storage first allocates the
-// vector for `n' elements. a failed allocation leaves the container
-// as it was. returns the storage as it was, for _C_restore after a
-// throw from T and for _C_discard once the elements are in place
-template <class _TypeT, class _Allocator>
-_TYPENAME deque<_TypeT, _Allocator>::_C_storage
-deque<_TypeT, _Allocator>::
-_C_reserve (bool __at_back, size_type __n)
-{
-    _RWSTD_ASSERT (_C_is_valid ());
-    _RWSTD_ASSERT (0 < __n);
-
-    const size_type __bufsize = _C_bufsize ();
-
-    _C_storage __prior;
-
-    __prior._C_beg       = _C_beg;
-    __prior._C_end       = _C_end;
-    __prior._C_nodes     = _C_nodes;
-    __prior._C_node_size = _C_node_size;
-    __prior._C_shift     = 0;
-    __prior._C_at_back   = __at_back;
-
-    if (_C_node_pointer () == _C_nodes)
-        _C_grow (__at_back, _C_vecsize (__n));
-
-    if (empty ()) {
-        // both iterators to the middle buffer, the near side of it
-        // holding what the room needs, up to the whole buffer, the
-        // rest split between the sides; the spare nodes of the far
-        // side then cover any shortfall, so a fresh vector does not
-        // grow again below
-        const _C_node_pointer __mid = _C_nodes + _C_node_size / 2;
-
-        const size_type __need = __n < __bufsize ? __n : __bufsize;
-        const size_type __off  = (__bufsize - __need + 1) / 2;
-
-        const size_type __at = __at_back ? __off : __bufsize - __off;
-
-        _C_beg =
-        _C_end = _C_deque_iter (*__mid + __at, __mid);
-    }
-
-    // the room at the near end, in elements, and the whole spare
-    // nodes at the far one
-    size_type __room;
-    size_type __spare;
-
-    if (__at_back) {
-        __room  =   size_type (*_C_end._C_node + __bufsize - _C_end._C_cur)
-                  + size_type (_C_nodes + _C_node_size - 1 - _C_end._C_node)
-                  * __bufsize;
-        __spare = size_type (_C_beg._C_node - _C_nodes);
-    }
-    else {
-        __room  =   size_type (_C_beg._C_cur - *_C_beg._C_node)
-                  + size_type (_C_beg._C_node - _C_nodes) * __bufsize;
-        __spare = size_type (_C_nodes + _C_node_size - 1 - _C_end._C_node);
-    }
-
-    if (__n <= __room)
-        return __prior;
-
-    const size_type __needed = (__n - __room + __bufsize - 1) / __bufsize;
-
-    // share the spare out: at least half of it, more when the room
-    // needs more, all of it when the need exceeds it
-    size_type __shift = (__spare + 1) / 2;
-
-    if (__shift < __needed)
-        __shift = __needed < __spare ? __needed : __spare;
-
-    if (__shift) {
-        _C_rotate (__at_back, __shift);
-        __prior._C_shift = __shift;
-    }
-
-    if (__shift < __needed) {
-        // the vector allocated above has the spare for all of `n'
-        _RWSTD_ASSERT (_C_node_pointer () != __prior._C_nodes);
-
-        const size_type __least  = _C_node_size + (__needed - __shift);
-        const size_type __nnodes = _C_vecsize (size () + __n);
-
-        _TRY {
-            _C_grow (__at_back, __nnodes < __least ? __least : __nnodes);
-        }
-        _CATCH (...) {
-            // no effects: the spare shared out goes back too
-            _C_restore (__prior);
-            _RETHROW;
-        }
-    }
-
-    return __prior;
-}
-
-
-// moves `k' spare nodes from the far end of the vector to the near
-// one and the other nodes over by `k' toward the far end, in place:
-// no buffer changes hands and the spare nodes come out in some
-// order, which is no matter, a buffer is a buffer
+// Move a contiguous owned span within the map and clear the vacated slots.
 template <class _TypeT, class _Allocator>
 void deque<_TypeT, _Allocator>::
-_C_rotate (bool __at_back, size_type __k)
+_C_move_nodes (size_type __from, size_type __to, size_type __n)
 {
-    _RWSTD_ASSERT (__k <= _C_node_size);
-
-    if (__at_back) {
-        for (size_type __i = 0; __i != _C_node_size - __k; ++__i)
-            _STD::swap (_C_nodes [__i], _C_nodes [__i + __k]);
-
-        _C_beg._C_node -= __k;
-        _C_end._C_node -= __k;
+    if (__to < __from) {
+        _STD::copy (_C_nodes + __from, _C_nodes + __from + __n, _C_nodes + __to);
+        const size_type __clear = __from < __to + __n ? __to + __n : __from;
+        _STD::fill (_C_nodes + __clear, _C_nodes + __from + __n, pointer ());
     }
-    else {
-        for (size_type __i = _C_node_size; __k < __i; ) {
-            --__i;
-            _STD::swap (_C_nodes [__i], _C_nodes [__i - __k]);
-        }
-
-        _C_beg._C_node += __k;
-        _C_end._C_node += __k;
+    else if (__from < __to) {
+        _STD::copy_backward (_C_nodes + __from, _C_nodes + __from + __n,
+                             _C_nodes + __to + __n);
+        const size_type __clear = __to < __from + __n ? __to : __from + __n;
+        _STD::fill (_C_nodes + __from, _C_nodes + __clear, pointer ());
     }
 }
 
 
-// puts the storage back as it was before a reserve, after a throw
-// from T: frees the buffers of the nodes a growth added with the
-// vector it made, reinstates the vector replaced, whose nodes are as
-// they were, and turns the spare shared out back
 template <class _TypeT, class _Allocator>
-void deque<_TypeT, _Allocator>::
-_C_restore (const _C_storage &__prior)
+void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
 {
-    const size_type __bufsize = _C_bufsize ();
-
-    if (_C_nodes != __prior._C_nodes) {
-        _C_value_alloc_type __alloc (*this);
-
-        const size_type __nnew = _C_node_size - __prior._C_node_size;
-
-        const _C_node_pointer __added =
-            _C_nodes + (__prior._C_at_back ? __prior._C_node_size : 0);
-
-        for (size_type __i = 0; __i != __nnew; ++__i)
-            __alloc.deallocate (__added [__i], __bufsize);
-
-        _C_node_alloc_type (*this).deallocate (_C_nodes, _C_node_size + 1);
-
-        _C_nodes     = __prior._C_nodes;
-        _C_node_size = __prior._C_node_size;
-    }
-
-    if (__prior._C_shift && _C_node_pointer () != _C_nodes)
-        _C_rotate (!__prior._C_at_back, __prior._C_shift);
-
-    _C_beg = __prior._C_beg;
-    _C_end = __prior._C_end;
-}
-
-
-// grows the vector of nodes to `__nnodes' nodes, with a buffer for
-// each node added after the existing ones (at the back) or before
-// them (at the front), and the null guard after the last node that
-// an iterator stepping off the last element reads; a failed
-// allocation frees what this call allocated and leaves the container
-// as it was. returns the vector replaced, null if there was none,
-// for the caller to free or to put back
-template <class _TypeT, class _Allocator>
-_TYPENAME deque<_TypeT, _Allocator>::_C_node_pointer
-deque<_TypeT, _Allocator>::
-_C_grow (bool __at_back, size_type __nnodes)
-{
-    _RWSTD_ASSERT (_C_node_size < __nnodes);
-
-    const size_type __bufsize = _C_bufsize ();
-    const size_type __nnew    = __nnodes - _C_node_size;
-
-    _C_value_alloc_type __alloc (*this);
-    _C_node_alloc_type  __node_alloc (*this);
-
-    const _C_node_pointer __nvec =
-        __node_alloc.allocate (__nnodes + 1, _C_nodes);
-
-    const _C_node_pointer __added = __nvec + (__at_back ? _C_node_size : 0);
-    const _C_node_pointer __kept  = __nvec + (__at_back ? 0 : __nnew);
-
-    size_type __i = 0;
-
-    _TRY {
-        for ( ; __i != __nnew; ++__i)
-            __added [__i] = __alloc.allocate (__bufsize, pointer ());
-    }
-    _CATCH (...) {
-        while (__i)
-            __alloc.deallocate (__added [--__i], __bufsize);
-
-        __node_alloc.deallocate (__nvec, __nnodes + 1);
-        _RETHROW;
-    }
-
-    // nothing below throws: move the existing nodes over and point
-    // the iterators at them; the vector they came from stays intact
-    const _C_node_pointer __old = _C_nodes;
-
-    if (_C_node_pointer () != __old) {
-        _STD::copy (__old, __old + _C_node_size, __kept);
-
-        _C_beg._C_node = __kept + (_C_beg._C_node - __old);
-        _C_end._C_node = __kept + (_C_end._C_node - __old);
-    }
-
-    __nvec [__nnodes] = pointer ();
-
-    _C_nodes     = __nvec;
-    _C_node_size = __nnodes;
-
-    return __old;
-}
-
-
-// frees every buffer and the vector of nodes of an empty container
-template <class _TypeT, class _Allocator>
-void deque<_TypeT, _Allocator>::
-_C_dealloc ()
-{
-    _RWSTD_ASSERT (empty ());
-
-    if (_C_node_pointer () == _C_nodes)
+    deque &__d = _C_deque;
+    const size_type __b = __d._C_bufsize ();
+    const difference_type __begoff = _C_beg._C_offset ();
+    const difference_type __endoff = _C_end._C_offset ();
+    const size_type __partial = _C_back
+        ? (__endoff ? __b - size_type (__endoff) : 0)
+        : size_type (__begoff);
+    if (_C_n <= __partial)
         return;
 
-    const size_type __bufsize = _C_bufsize ();
+    size_type __needed = (_C_n - __partial) / __b
+                      + (0 != (_C_n - __partial) % __b);
+    const size_type __beg = _C_nodes ? _C_beg._C_node - _C_nodes : 0;
+    const size_type __end = _C_nodes ? _C_end._C_node - _C_nodes : 0;
+    const size_type __past = __end + (0 != __endoff);
+
+    // Scan outwards from the live range, across spare buffers only.
+    // A dense queue need not walk the unused part of its pointer map.
+    _C_first = __beg;
+    while (_C_first && _C_nodes [_C_first - 1])
+        --_C_first;
+    size_type __last = __past;
+    while (__last != _C_node_size && _C_nodes [__last])
+        ++__last;
+    _C_count = __last - _C_first;
+    _C_pos = _C_first;
+
+    const size_type __near = _C_back ? __last - __past : __beg - _C_first;
+    if (__needed <= __near)
+        return;
+    __needed -= __near;
+
+    const size_type __far = _C_back ? __beg - _C_first : __last - __past;
+    const size_type __reuse = __far < __needed ? __far : __needed;
+    const size_type __nnew = __needed - __reuse;
+    const size_type __limit = __d._C_max_nodes ();
+
+    _RWSTD_REQUIRES (__nnew <= __limit - _C_count,
+                     (_RWSTD_ERROR_LENGTH_ERROR,
+                      _RWSTD_FUNC ("deque::insert"), _C_n, __d.max_size ()));
+
+    const size_type __slack = _C_node_size - _C_count;
+    const size_type __near_null = _C_back ? _C_node_size - __last : _C_first;
+    if (__near_null < __needed) {
+        // Recentring needs enough null slack to pay for moving the span.
+        if (__needed <= __slack && _C_count <= __slack) {
+            _C_pos = (__slack - __needed) / 2 + (_C_back ? 0 : __needed);
+            __d._C_move_nodes (_C_first, _C_pos, _C_count);
+            __d._C_beg._C_node = __d._C_nodes + _C_pos + (__beg - _C_first);
+            __d._C_end._C_node = __d._C_nodes + _C_pos + (__end - _C_first);
+        }
+        else {
+            const size_type __required = _C_count + __nnew;
+            const size_type __from = _C_node_size < __required
+                ? __required : _C_node_size;
+            size_type __capacity = _RWSTD_NEW_CAPACITY (deque, &__d, __from);
+            if (__capacity < __required || __capacity <= _C_node_size
+                || __limit < __capacity)
+                __capacity = __limit;
+
+            _C_node_pointer __map =
+                _C_node_alloc_type (__d).allocate (__capacity + 1, _C_nodes);
+            _STD::fill (__map, __map + __capacity + 1, pointer ());
+
+            const size_type __first = (__capacity - __required) / 2
+                                   + (_C_back ? 0 : __nnew);
+            const size_type __cut = _C_back ? __reuse : _C_count - __reuse;
+            if (_C_count) {
+                _STD::copy (_C_nodes + _C_first + __cut, _C_nodes + __last,
+                            __map + __first);
+                _STD::copy (_C_nodes + _C_first, _C_nodes + _C_first + __cut,
+                            __map + __first + _C_count - __cut);
+            }
+
+            const difference_type __shift = _C_back
+                ? -difference_type (__reuse) : difference_type (__reuse);
+            __d._C_nodes = __map;
+            __d._C_node_size = __capacity;
+            __d._C_beg._C_node = __map + __first + (__beg - _C_first) + __shift;
+            __d._C_end._C_node = __map + __first + (__end - _C_first) + __shift;
+            _C_alloc = _C_back ? __first + _C_count : __first - __nnew;
+        }
+    }
+
+    if (__d._C_nodes == _C_nodes) {
+        for (size_type __i = 0; __i != __reuse; ++__i) {
+            const size_type __from = _C_back ? _C_pos + __i
+                : _C_pos + _C_count - 1 - __i;
+            const size_type __to = _C_back ? _C_pos + _C_count + __i
+                : _C_pos - 1 - __i;
+            __d._C_nodes [__to] = __d._C_nodes [__from];
+            __d._C_nodes [__from] = pointer ();
+        }
+        _C_moved = __reuse;
+        _C_alloc = _C_back ? _C_pos + _C_count + __reuse
+                          : _C_pos - __reuse - __nnew;
+    }
+
+    _C_value_alloc_type __alloc (__d);
+    for ( ; _C_added != __nnew; ++_C_added)
+        __d._C_nodes [_C_alloc + _C_added] = __alloc.allocate (__b, pointer ());
+
+    __d._C_beg = _C_deque_iter (__d._C_beg._C_node, __begoff);
+    __d._C_end = _C_deque_iter (__d._C_end._C_node, __endoff);
+}
+
+
+template <class _TypeT, class _Allocator>
+void deque<_TypeT, _Allocator>::_C_reservation::_C_restore ()
+{
+    deque &__d = _C_deque;
+    _C_value_alloc_type __alloc (__d);
+    for (size_type __i = 0; __i != _C_added; ++__i) {
+        __alloc.deallocate (__d._C_nodes [_C_alloc + __i], __d._C_bufsize ());
+        __d._C_nodes [_C_alloc + __i] = pointer ();
+    }
+
+    if (__d._C_nodes != _C_nodes)
+        _C_node_alloc_type (__d).deallocate (__d._C_nodes, __d._C_node_size + 1);
+    else {
+        for (size_type __i = 0; __i != _C_moved; ++__i) {
+            const size_type __to = _C_back ? _C_pos + __i
+                : _C_pos + _C_count - 1 - __i;
+            const size_type __from = _C_back ? _C_pos + _C_count + __i
+                : _C_pos - 1 - __i;
+            __d._C_nodes [__to] = __d._C_nodes [__from];
+            __d._C_nodes [__from] = pointer ();
+        }
+        __d._C_move_nodes (_C_pos, _C_first, _C_count);
+    }
+    __d._C_nodes = _C_nodes;
+    __d._C_node_size = _C_node_size;
+    __d._C_beg = _C_beg;
+    __d._C_end = _C_end;
+}
+
+
+template <class _TypeT, class _Allocator>
+void deque<_TypeT, _Allocator>::_C_dealloc ()
+{
+    _RWSTD_ASSERT (empty ());
+    if (!_C_nodes)
+        return;
 
     _C_value_alloc_type __alloc (*this);
-
-    for (size_type __i = 0; __i != _C_node_size; ++__i)
-        __alloc.deallocate (_C_nodes [__i], __bufsize);
-
+    for (size_type __i = 0; __i != _C_node_size; ++__i) {
+        if (_C_nodes [__i])
+            __alloc.deallocate (_C_nodes [__i], _C_bufsize ());
+    }
     _C_node_alloc_type (*this).deallocate (_C_nodes, _C_node_size + 1);
-
     _C_init ();
 }
 
@@ -538,137 +432,67 @@ void deque<_TypeT, _Allocator>::
 _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
 {
     _RWSTD_ASSERT_RANGE (begin (), __it);
-    _RWSTD_ASSERT (_C_is_valid ());
-
+    _RWSTD_ASSERT_RANGE (__it, end ());
     if (0 == __n)
         return;
+    _C_check_length (__n);
 
-    const size_type __inx = _DISTANCE (begin (), __it, size_type);
-    const size_type __rem = size () - __inx;
+    const size_type __off = __it - begin ();
+    if (__off && __off != size ()) {
+        // A shift may overwrite the element supplying the fill value.
+        const value_type __saved (__x);
+        _C_insert_fill (__off, __n, __saved);
+    }
+    else
+        _C_insert_fill (__off, __n, __x);
+}
 
-    _RWSTD_ASSERT (__inx <= size ());
 
-    // the shorter side of the insertion point moves over by `n'. the
-    // elements that land beyond that end, the new ones and the moved
-    // ones, are constructed into the reserve before any element is
-    // assigned, so that a throw from T leaves the size and both ends
-    // where they were: what was constructed is destroyed, what was
-    // assigned keeps the value it was given. complexity: n copies
-    // and min (inx, rem) assignments
-    const bool __at_back = !(__inx < __rem);
+template <class _TypeT, class _Allocator>
+void deque<_TypeT, _Allocator>::
+_C_insert_fill (size_type __off, size_type __n, const_reference __x)
+{
+    const size_type __rem = size () - __off;
+    const bool __back = __rem <= __off;
+    _C_reservation __room (*this, __back, __n);
+    const _C_deque_iter __pos = _C_beg + difference_type (__off);
 
-    const _C_storage __prior = _C_reserve (__at_back, __n);
-
-    const size_type __bufsize = _C_bufsize ();
-
-    _C_value_alloc_type __alloc (*this);
-
-    if (__at_back) {
-        const _C_deque_iter __pos =
-            __rem ? _C_end - difference_type (__rem) : _C_end;
-
-        // the first raw element past the back, and the one past the
-        // last constructed; `end' is a past-the-end iterator and may
-        // sit at the edge of a full buffer, where the increment does
-        // not start
-        _C_deque_iter __base = _C_end;
-
-        if (__base._C_cur == *__base._C_node + __bufsize) {
-            ++__base._C_node;
-            __base._C_cur = *__base._C_node;
+    if (__back) {
+        if (__rem < __n) {
+            // Fill the new suffix, then copy the displaced tail after it.
+            for (size_type __i = __n - __rem; __i; --__i)
+                __room._C_construct (__x);
+            for (_C_deque_iter __from = __pos; __from != _C_end; ++__from)
+                __room._C_construct (*__from);
+            _STD::fill (__pos, _C_end, __x);
         }
-
-        _C_deque_iter __cur = __base;
-
-        _TRY {
-            if (__rem < __n) {
-                // the n - rem copies of `x' past the back, the rem
-                // elements of [pos, end) after them, and `x' over
-                // [pos, end)
-                for (size_type __i = __n - __rem; __i; --__i, ++__cur)
-                    __alloc.construct (__cur._C_cur, __x);
-
-                for (_C_deque_iter __from = __pos; !(__from == _C_end);
-                     ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                _STD::fill (__pos, _C_end, __x);
-            }
-            else {
-                // the last n elements past the back, the rest of
-                // [pos, end) up by n, and `x' over [pos, pos + n)
-                const _C_deque_iter __tail = _C_end - difference_type (__n);
-
-                for (_C_deque_iter __from = __tail; !(__from == _C_end);
-                     ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                _STD::copy_backward (__pos, __tail, _C_end);
-                _STD::fill (__pos, __pos + difference_type (__n), __x);
-            }
-        }
-        _CATCH (...) {
-            for ( ; !(__base == __cur); ++__base)
-                __alloc.destroy (__base._C_cur);
-
-            _C_restore (__prior);
-            _RETHROW;
-        }
-
-        _C_end = _C_end + difference_type (__n);
-
-        // keep `end' in its form, past the last element of its buffer
-        if (_C_end._C_cur == *_C_end._C_node) {
-            --_C_end._C_node;
-            _C_end._C_cur = *_C_end._C_node + __bufsize;
+        else {
+            const _C_deque_iter __tail = _C_end - difference_type (__n);
+            for (_C_deque_iter __from = __tail; __from != _C_end; ++__from)
+                __room._C_construct (*__from);
+            _STD::copy_backward (__pos, __tail, _C_end);
+            _STD::fill (__pos, __pos + difference_type (__n), __x);
         }
     }
     else {
-        const _C_deque_iter __pos     = _C_beg + difference_type (__inx);
-        const _C_deque_iter __new_beg = _C_beg - difference_type (__n);
-
-        _C_deque_iter __cur = __new_beg;
-
-        _TRY {
-            if (__inx < __n) {
-                // the inx elements of [beg, pos) at the new front, the
-                // n - inx copies of `x' after them up to the old front,
-                // and `x' over [beg, pos)
-                for (_C_deque_iter __from = _C_beg; !(__from == __pos);
-                     ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                for ( ; !(__cur == _C_beg); ++__cur)
-                    __alloc.construct (__cur._C_cur, __x);
-
-                _STD::fill (_C_beg, __pos, __x);
-            }
-            else {
-                // the first n elements at the new front, the rest of
-                // [beg, pos) down by n, and `x' over [pos - n, pos)
-                for (_C_deque_iter __from = _C_beg; !(__cur == _C_beg);
-                     ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                _STD::copy (_C_beg + difference_type (__n), __pos, _C_beg);
-                _STD::fill (__pos - difference_type (__n), __pos, __x);
-            }
+        if (__off < __n) {
+            // Copy the displaced prefix, then fill up to the old beginning.
+            for (_C_deque_iter __from = _C_beg; __from != __pos; ++__from)
+                __room._C_construct (*__from);
+            while (__room._C_cur != _C_beg)
+                __room._C_construct (__x);
+            _STD::fill (_C_beg, __pos, __x);
         }
-        _CATCH (...) {
-            for (_C_deque_iter __made = __new_beg; !(__made == __cur);
-                 ++__made)
-                __alloc.destroy (__made._C_cur);
-
-            _C_restore (__prior);
-            _RETHROW;
+        else {
+            for (_C_deque_iter __from = _C_beg;
+                 __room._C_cur != _C_beg; ++__from)
+                __room._C_construct (*__from);
+            _STD::copy (_C_beg + difference_type (__n), __pos, _C_beg);
+            _STD::fill (__pos - difference_type (__n), __pos, __x);
         }
-
-        _C_beg = __new_beg;
     }
-
-    _C_discard (__prior);
-
-    _RWSTD_ASSERT (_C_is_valid (0 /* valid and non-empty */));
+    __room._C_commit ();
+    _RWSTD_ASSERT (_C_is_valid (0));
 }
 
 
@@ -679,8 +503,6 @@ template <class _InputIter>
 void deque<_TypeT, _Allocator>::
 _C_assign_range (_InputIter __first, _InputIter __last, input_iterator_tag)
 {
-    typedef deque _Deque;
-
     deque* const __self = this;
 
 #else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
@@ -690,8 +512,7 @@ void
 __rw_assign_range (deque<_TypeT, _Allocator> *__self,
                    _InputIter __first, _InputIter __last, input_iterator_tag)
 {
-    typedef deque<_TypeT, _Allocator> _Deque;
-    typedef _TYPENAME _Deque::iterator iterator;
+    typedef _TYPENAME deque<_TypeT, _Allocator>::iterator iterator;
     
 #endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
@@ -757,14 +578,18 @@ __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
     if (__first == __last)
         return;
 
-    // the range can be read once and its length is not known ahead:
-    // copy it into a temporary, then insert the temporary in one go,
-    // with the room reserved before an element is touched (23.2.1.3,
-    // p2); a throw while copying leaves *this untouched
+    // Iterator category does not promise non-throwing source operations.
+    // Consume an arbitrary source before overwriting destination elements.
     _Deque __tmp (__self->get_allocator ());
 
-    for (; !(__first == __last); ++__first)
+    const _TYPENAME _Deque::size_type __limit =
+        __self->max_size () - __self->size ();
+    for ( ; !(__first == __last); ++__first) {
+        _RWSTD_REQUIRES (__tmp.size () < __limit,
+                         (_RWSTD_ERROR_LENGTH_ERROR,
+                          _RWSTD_FUNC ("deque::insert"), __tmp.size (), __limit));
         __tmp.push_back (*__first);
+    }
 
     __self->insert (__it, __tmp.begin (), __tmp.end ());
 }
@@ -813,137 +638,53 @@ __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
 
     _RWSTD_ASSERT (__inx <= __self->size ());
 
-    // the shape of _C_insert_n with the range for the repeated value:
-    // the shorter side moves over, what lands beyond that end is
-    // constructed into the reserve before any element is assigned,
-    // a throw from T leaves the size and both ends where they were.
-    // complexity: n copies and min (inx, rem) assignments
-    const bool __at_back = !(__inx < __rem);
+    // This overload receives pointers or this deque's raw iterators.
+    // Their operations cannot throw after a shift of existing values.
+    const bool __back = __rem <= __inx;
+    _TYPENAME _Deque::_C_reservation __room (*__self, __back, __n);
 
-    const _TYPENAME _Deque::_C_storage __prior =
-        __self->_C_reserve (__at_back, __n);
+    typedef _TYPENAME _Deque::_C_deque_iter _Iter;
+    const _Iter __beg = __self->_C_beg;
+    const _Iter __end = __self->_C_end;
+    const _Iter __pos = __beg + difference_type (__inx);
 
-    const size_type __bufsize = _Deque::_C_bufsize ();
-
-    _TYPENAME _Deque::_C_value_alloc_type __alloc (*__self);
-
-    _TYPENAME _Deque::_C_deque_iter &__beg = __self->_C_beg;
-    _TYPENAME _Deque::_C_deque_iter &__end = __self->_C_end;
-
-    if (__at_back) {
-        const _TYPENAME _Deque::_C_deque_iter __pos =
-            __rem ? __end - difference_type (__rem) : __end;
-
-        _TYPENAME _Deque::_C_deque_iter __base = __end;
-
-        if (__base._C_cur == *__base._C_node + __bufsize) {
-            ++__base._C_node;
-            __base._C_cur = *__base._C_node;
+    if (__back) {
+        if (__rem < __n) {
+            _BidirIter __mid = __first;
+            _STD::advance (__mid, difference_type (__rem));
+            for (_BidirIter __from = __mid; __from != __last; ++__from)
+                __room._C_construct (*__from);
+            for (_Iter __from = __pos; __from != __end; ++__from)
+                __room._C_construct (*__from);
+            _STD::copy (__first, __mid, __pos);
         }
-
-        _TYPENAME _Deque::_C_deque_iter __cur = __base;
-
-        _TRY {
-            if (__rem < __n) {
-                // the last n - rem of the range past the back, the
-                // rem elements of [pos, end) after them, and the
-                // first rem of the range over [pos, end)
-                _BidirIter __mid = __first;
-
-                _STD::advance (__mid, difference_type (__rem));
-
-                for (_BidirIter __from = __mid; !(__from == __last);
-                     ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                for (_TYPENAME _Deque::_C_deque_iter __from = __pos;
-                     !(__from == __end); ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                _STD::copy (__first, __mid, __pos);
-            }
-            else {
-                // the last n elements past the back, the rest of
-                // [pos, end) up by n, and the range over [pos, pos + n)
-                const _TYPENAME _Deque::_C_deque_iter __tail =
-                    __end - difference_type (__n);
-
-                for (_TYPENAME _Deque::_C_deque_iter __from = __tail;
-                     !(__from == __end); ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                _STD::copy_backward (__pos, __tail, __end);
-                _STD::copy (__first, __last, __pos);
-            }
-        }
-        _CATCH (...) {
-            for ( ; !(__base == __cur); ++__base)
-                __alloc.destroy (__base._C_cur);
-
-            __self->_C_restore (__prior);
-            _RETHROW;
-        }
-
-        __end = __end + difference_type (__n);
-
-        if (__end._C_cur == *__end._C_node) {
-            --__end._C_node;
-            __end._C_cur = *__end._C_node + __bufsize;
+        else {
+            const _Iter __tail = __end - difference_type (__n);
+            for (_Iter __from = __tail; __from != __end; ++__from)
+                __room._C_construct (*__from);
+            _STD::copy_backward (__pos, __tail, __end);
+            _STD::copy (__first, __last, __pos);
         }
     }
     else {
-        const _TYPENAME _Deque::_C_deque_iter __pos =
-            __beg + difference_type (__inx);
-        const _TYPENAME _Deque::_C_deque_iter __new_beg =
-            __beg - difference_type (__n);
-
-        _TYPENAME _Deque::_C_deque_iter __cur = __new_beg;
-
-        _TRY {
-            if (__inx < __n) {
-                // the inx elements of [beg, pos) at the new front, the
-                // first n - inx of the range after them up to the old
-                // front, and the rest of the range over [beg, pos)
-                _BidirIter __mid = __first;
-
-                _STD::advance (__mid, difference_type (__n - __inx));
-
-                for (_TYPENAME _Deque::_C_deque_iter __from = __beg;
-                     !(__from == __pos); ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                for (_BidirIter __from = __first; !(__from == __mid);
-                     ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                _STD::copy (__mid, __last, __beg);
-            }
-            else {
-                // the first n elements at the new front, the rest of
-                // [beg, pos) down by n, and the range over [pos - n, pos)
-                for (_TYPENAME _Deque::_C_deque_iter __from = __beg;
-                     !(__cur == __beg); ++__from, ++__cur)
-                    __alloc.construct (__cur._C_cur, *__from);
-
-                _STD::copy (__beg + difference_type (__n), __pos, __beg);
-                _STD::copy (__first, __last, __pos - difference_type (__n));
-            }
+        if (__inx < __n) {
+            _BidirIter __mid = __first;
+            _STD::advance (__mid, difference_type (__n - __inx));
+            for (_Iter __from = __beg; __from != __pos; ++__from)
+                __room._C_construct (*__from);
+            for (_BidirIter __from = __first; __from != __mid; ++__from)
+                __room._C_construct (*__from);
+            _STD::copy (__mid, __last, __beg);
         }
-        _CATCH (...) {
-            for (_TYPENAME _Deque::_C_deque_iter __made = __new_beg;
-                 !(__made == __cur); ++__made)
-                __alloc.destroy (__made._C_cur);
-
-            __self->_C_restore (__prior);
-            _RETHROW;
+        else {
+            for (_Iter __from = __beg; __room._C_cur != __beg; ++__from)
+                __room._C_construct (*__from);
+            _STD::copy (__beg + difference_type (__n), __pos, __beg);
+            _STD::copy (__first, __last, __pos - difference_type (__n));
         }
-
-        __beg = __new_beg;
     }
-
-    __self->_C_discard (__prior);
-
-    _RWSTD_ASSERT (__self->_C_is_valid (0 /* valid and non-empty */));
+    __room._C_commit ();
+    _RWSTD_ASSERT (__self->_C_is_valid (0));
 }
 
 
@@ -953,54 +694,29 @@ _C_is_valid (int __emptyfl) const
 {
 #ifdef _RWSTDDEBUG
 
-    if (__emptyfl < 0 /* don't care */)
-        return _C_is_valid (0 + empty ());
+    if (0 <= __emptyfl)
+        _RWSTD_ASSERT (bool (__emptyfl) == empty ());
 
-    if (_C_node_pointer () == _C_nodes) {
-
-        // no storage: the container is empty, both `current' pointers
-        // are 0 and both node pointers dereference `end.cur'
+    if (!_C_nodes) {
         _RWSTD_ASSERT (0 == _C_node_size);
-        _RWSTD_ASSERT (__emptyfl && empty ());
-
-        _RWSTD_ASSERT (pointer () == _C_beg._C_cur);
-        _RWSTD_ASSERT (pointer () == _C_end._C_cur);
-
-        _RWSTD_ASSERT (&_C_end._C_cur == _C_beg._C_node);
-        _RWSTD_ASSERT (&_C_end._C_cur == _C_end._C_node);
-
+        _RWSTD_ASSERT (empty ());
+        _RWSTD_ASSERT (0 == _C_beg._C_node && 0 == _C_beg._C_offset ());
         return true;
     }
 
-    const size_type __bufsize = _C_bufsize ();
-
-    if (__emptyfl)
-        _RWSTD_ASSERT (empty ());
-    else
-        _RWSTD_ASSERT (!empty ());
-
-    // `begin' and `end' must point into the vector of nodes, in order
     _RWSTD_ASSERT (_C_nodes <= _C_beg._C_node);
     _RWSTD_ASSERT (_C_beg._C_node <= _C_end._C_node);
-    _RWSTD_ASSERT (_C_end._C_node < _C_nodes + _C_node_size);
-
-    // every node owns a buffer; the first, the last and the two
-    // the iterators point to stand for all (the check is constant
-    // time and runs on every push, pop and subscript); the guard
-    // after the last node is null
-    _RWSTD_ASSERT (pointer () != _C_nodes [0]);
-    _RWSTD_ASSERT (pointer () != _C_nodes [_C_node_size - 1]);
-    _RWSTD_ASSERT (pointer () != *_C_beg._C_node);
-    _RWSTD_ASSERT (pointer () != *_C_end._C_node);
-    _RWSTD_ASSERT (pointer () == _C_nodes [_C_node_size]);
-
-    // `begin' must point into an array of `bufsize' elements
-    _RWSTD_ASSERT (_C_beg._C_cur >= *_C_beg._C_node);
-    _RWSTD_ASSERT (_C_beg._C_cur <= *_C_beg._C_node + __bufsize);
-
-    // `end' must point into an array of `bufsize' elements
-    _RWSTD_ASSERT (_C_end._C_cur >= *_C_end._C_node);
-    _RWSTD_ASSERT (_C_end._C_cur <= *_C_end._C_node + __bufsize);
+    _RWSTD_ASSERT (_C_end._C_node <= _C_nodes + _C_node_size);
+    _RWSTD_ASSERT (size_type (_C_beg._C_offset ()) < _C_bufsize ());
+    _RWSTD_ASSERT (size_type (_C_end._C_offset ()) < _C_bufsize ());
+    _RWSTD_ASSERT (   _C_end._C_node != _C_nodes + _C_node_size
+                  || 0 == _C_end._C_offset ());
+    _RWSTD_ASSERT (0 == _C_nodes [_C_node_size]);
+    if (!empty ()) {
+        _RWSTD_ASSERT (_C_beg < _C_end);
+        _RWSTD_ASSERT (0 != *_C_beg._C_node);
+        _RWSTD_ASSERT (0 != *(_C_end - 1)._C_node);
+    }
 
 #else   // if !defined (_RWSTDDEBUG)
 

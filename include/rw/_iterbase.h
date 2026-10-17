@@ -407,9 +407,13 @@ public:
     __rw_debug_iter (const container_type &__cont, const iterator_type &__it)
         : _C_iter (__it), _C_cont (&__cont) { }
 
-    // no copy ctor other than the one below is defined
-    // will use a compiler generated one if _Iterator != _MutableIterator
-    __rw_debug_iter (const _C_mutable_iterator &__rhs)
+    __rw_debug_iter (const __rw_debug_iter &__rhs)
+        : _C_iter (__rhs._C_iter), _C_cont (__rhs._C_cont) { }
+
+    // Only a mutable wrapped iterator participates in this conversion.
+    template <class _MutableIter>
+    __rw_debug_iter (const __rw_debug_iter<container_type, _MutableIterator,
+                                          _MutableIter> &__rhs)
         : _C_iter (__rhs._C_iter), _C_cont (__rhs._C_cont) { }
 
     __rw_debug_iter& operator= (const __rw_debug_iter &__rhs) {

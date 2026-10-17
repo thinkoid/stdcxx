@@ -98,6 +98,20 @@ void test_iterators (std::size_t N, int dir, T*)
     const Iterator begin = d.begin ();
     const Iterator end   = d.end ();
 
+    rw_assert (end + 0 == end && 0 + end == end, 0, __LINE__,
+               "zero arithmetic changed end()");
+    rw_assert (begin + Difference (N) == end, 0, __LINE__,
+               "begin() + size() differs from end()");
+    if (N) {
+        rw_assert (1 + _ITER_BASE (begin) == _ITER_BASE (begin) + 1,
+                   0, __LINE__, "integer + raw iterator differs");
+        ConstIterator converted (begin);
+        ConstIterator copied (converted);
+        converted = copied;
+        rw_assert (converted == begin, 0, __LINE__,
+                   "iterator copy or conversion changed position");
+    }
+
     Iterator i0 = begin;
     Iterator i1 = end;
 
@@ -297,8 +311,19 @@ void test_iterators (std::size_t N, T*)
 
 /**************************************************************************/
 
+char accepts_mutable (IntDeque::iterator);
+long accepts_mutable (...);
+char accepts_raw_mutable (IntDeque::_C_deque_iter);
+long accepts_raw_mutable (...);
+
 int run_test (int, char**)
 {
+    rw_assert (sizeof (accepts_mutable (IntDeque::const_iterator ()))
+               == sizeof (long), 0, __LINE__,
+               "const_iterator implicitly converts to iterator");
+    rw_assert (sizeof (accepts_raw_mutable (IntDeque::_C_deque_citer ()))
+               == sizeof (long), 0, __LINE__,
+               "raw const_iterator implicitly converts to iterator");
 #ifdef _RWSTD_NO_DEBUG_ITER
 
     // verify the size of deque<int>::iterator (space optimization

@@ -138,67 +138,6 @@ takes =0= and the example documents what the library does.
 Check: the =time_get= example row is clean, and =22.locale.time.get=
 asserts =date_order= for the =C= locale and one named locale.
 
-** TODO The deprecated copy of =__rw_deque_iter= under =_RWSTDDEBUG=
-
-Under =_RWSTDDEBUG= the raw deque iterator in =include/deque=
-declares a destructor that nulls its two pointers and no copy
-constructor or assignment, so GCC's =-Wdeprecated-copy= flags every
-implicitly declared copy and assignment of it, once per site and
-instantiation: 190 in =23.deque.modifiers= in =15D= since the
-inserts reserve their room, 115 before. The debug wrapper in
-=rw/_iterbase.h= declares its own assignment for the same reason
-and is flagged at the sites that copy it.
-
-Fix: declare the copy constructor and the assignment beside the
-destructor, in both classes, with the same member-wise bodies;
-history first, the destructor may have a reader.
-
-Check: =23.deque.modifiers= compiles without the warning in =15D=;
-the suite unchanged.
-
-** TODO The deque representation, modifiers and spare rotation
-
-Review at 7655ec93, after the storage and insert rework:
-
-- Inserting =d[0]= at offset 2 in =[0,1,2,3,4,5,6,7,8,9]= inserts
-  1. The shorter-side shift overwrites the referenced value before
-  the fill reads it. The count overload shares the path.
-- Erasing all 100 pushed elements returns the old beginning, which
-  differs from the new end after the last pop recentres the deque.
-- With the default buffer size, =end()+0= after 16 back pushes
-  asserts. Stored end and ordinary iterator increment use different
-  representations of a buffer boundary.
-- Without the debug wrapper, =1+iterator= fails to compile on a
-  64-bit target: the offset template parameter is deduced as both
-  =int= and =long=. These four cases also fail at d7a980b3.
-- A throwing source increment after a successful construction leaves
-  the new range loop's constructed endpoint behind. Cleanup misses
-  that object's destructor. This lifetime defect is new in d425d47d.
-  A source exception during the assignment phase also leaves changed
-  values despite storage rollback. The source exception guarantee
-  needs its own treatment.
-- A fixed-size queue with one buffer's worth of spare rotates one
-  buffer every bufferful of cycles, swapping nearly the whole map
-  each time. At 32 elements per buffer, 32768 cycles cause 3072
-  pointer swaps with four buffers and 1630208 with 1593. Neither run
-  grows. This is pointer work, separate from the standard's count of
-  operations on contained elements.
-
-Fix: redesign the iterator and modifiers together, retaining buffer
-ownership and allocation before mutation. Give boundary positions one
-representation; preserve aliased scalar values; account for each
-construction before the next throwing source operation; reconstruct
-erase's result after mutation. Require enough slack to amortize a
-map rotation, or grow. Settle source exception handling before the
-assignment phase. Check size arithmetic and allocator limits too;
-those remain unprobed.
-
-Check: regressions for each case, raw and wrapped iterator arithmetic,
-separate allocation and element failure sweeps, source exceptions,
-reference stability and lifetime counts. Count map movement in dense
-queues as well as allocations. The existing three deque tests pass
-at their pinned counts despite the findings.
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -352,32 +291,6 @@ Fix: the sanitizer runtimes'. The tests need no change.
 Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
 =18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
 reads the new guard.
-
-** TODO The deque exception loop and boundary coverage
-
-=23.deque.modifiers='s =exception_loop= starts =throw_after= at zero.
-Allocation failure uses the next call, but copy and assignment use
-the current counter, which the operation increments before testing.
-An insert with spare capacity succeeds on its first attempt without
-injecting an exception. An eight-element deque, inserting once at
-offset 2 with all failures enabled, makes just one copy attempt and
-two assignment attempts. An allocation failure can start the retries,
-but arming all sources together also lets earlier copy failures hide
-assignment failures at the same ordinal.
-
-The loop discards both erase return values. The iterator test stops
-its arithmetic loop before the endpoint and uses the exact difference
-type for offsets. Neither test covers aliased scalar insertion or
-throwing source iterator operations.
-
-Fix: sweep failure sources separately from their first future call;
-assert each intended failure occurred. Check returned iterators,
-aliases, end and empty arithmetic, plain integer offsets on both
-sides, source failures, and raw as well as wrapped iterators.
-
-Check: each regression fails for its named reason on the reviewed
-headers and passes after its repair. Preserve the existing buffer-size
-sweep and the reference-stability checks.
 
 * Certification
 
