@@ -616,6 +616,137 @@ void test_ctors (Vector*, T*, Alloc alloc)
 
 /**************************************************************************/
 
+// an object whose constructor throws is never destroyed: nothing
+// a constructor of vector built may outlive the exception that
+// leaves it. Each of the three constructing constructors is swept,
+// one failure source at a time, over every ordinal of operator new
+// and of the copy constructor of UserClass until the construction
+// succeeds; after every attempt the objects and the blocks in
+// existence must be what they were before it.
+
+enum CtorKind { CountCtor, RangeCtor, CopyCtor };
+
+enum FailureSource { NewThrows = 1, CopyCtorThrows = 2 };
+
+template <class Iterator>
+std::size_t
+construct (CtorKind kind, std::size_t n, const UserClass &val,
+           const std::vector<UserClass, std::allocator<UserClass> > &src,
+           const Iterator &first, const Iterator &last)
+{
+    typedef std::vector<UserClass, std::allocator<UserClass> > Vector;
+
+    switch (kind) {
+    case CountCtor: { const Vector v (n, val);      return v.size (); }
+    case RangeCtor: { const Vector v (first, last); return v.size (); }
+    case CopyCtor:  { const Vector v (src);         return v.size (); }
+    }
+
+    return 0;
+}
+
+template <class Iterator>
+void test_ctor_exceptions (CtorKind kind, const char *fcall,
+                           const Iterator &dummy)
+{
+    typedef std::vector<UserClass, std::allocator<UserClass> > Vector;
+
+    rw_info (0, 0, 0, "std::vector<UserClass>::%s under injected failures",
+             fcall);
+
+#ifndef _RWSTD_NO_EXCEPTIONS
+
+    rwt_free_store* const pst = rwt_get_free_store (0);
+
+    for (std::size_t n = 0; n != rw_opt_nloops; ++n) {
+
+        const UserClass val;
+
+        UserClass* const xsrc = new UserClass [n];
+        const Vector src (xsrc, xsrc + n);
+
+        for (int source = NewThrows; source <= CopyCtorThrows; source <<= 1) {
+
+            for (std::size_t ordinal = 1; ; ++ordinal) {
+
+                // InputIter copies may allocate: make them before arming new
+                const Iterator first = make_iter (xsrc, xsrc, xsrc + n, dummy);
+                const Iterator last  = make_iter (xsrc + n, xsrc, xsrc + n,
+                                                  dummy);
+
+                const std::size_t live        = UserClass::count_;
+                const std::size_t copies      = UserClass::n_total_copy_ctor_;
+                const std::size_t allocations = pst->new_calls_ [0];
+
+                // establish a checkpoint for memory leaks
+                rwt_check_leaks (0, 0);
+
+                if (NewThrows == source)
+                    *pst->throw_at_calls_ [0] = allocations + ordinal;
+                else
+                    UserClass::copy_ctor_throw_count_ = copies + ordinal;
+
+                bool        caught = false;
+                std::size_t size   = 0;
+
+                _TRY {
+                    size = construct (kind, n, val, src, first, last);
+                }
+                _CATCH (...) {
+                    caught = true;
+                }
+
+                *pst->throw_at_calls_ [0]         = std::size_t (-1);
+                UserClass::copy_ctor_throw_count_ = std::size_t (-1);
+
+                const std::size_t calls = NewThrows == source
+                    ? pst->new_calls_ [0] - allocations
+                    : UserClass::n_total_copy_ctor_ - copies;
+
+                rw_assert (caught ? calls == ordinal : calls < ordinal,
+                           0, __LINE__, "vector<UserClass>::%s: %zu elements, "
+                           "failure source %d, ordinal %zu, caught %d "
+                           "after %zu calls",
+                           fcall, n, source, ordinal, caught, calls);
+
+                std::size_t nbytes = 0;
+                const std::size_t nblocks = rwt_check_leaks (&nbytes, 0);
+
+                rw_assert (UserClass::count_ == live, 0, __LINE__,
+                           "vector<UserClass>::%s: %zu elements, failure "
+                           "source %d, ordinal %zu: leaked %zu objects",
+                           fcall, n, source, ordinal,
+                           UserClass::count_ - live);
+
+                rw_assert (0 == nblocks && 0 == nbytes, 0, __LINE__,
+                           "vector<UserClass>::%s: %zu elements, failure "
+                           "source %d, ordinal %zu: leaked %zu bytes "
+                           "in %zu blocks",
+                           fcall, n, source, ordinal, nbytes, nblocks);
+
+                if (!caught) {
+                    rw_assert (size == n, 0, __LINE__,
+                               "vector<UserClass>::%s: %zu elements, "
+                               "size () == %zu", fcall, n, size);
+                    break;
+                }
+            }
+        }
+
+        delete[] xsrc;
+    }
+
+#else   // if defined (_RWSTD_NO_EXCEPTIONS)
+
+    _RWSTD_UNUSED (kind);
+    _RWSTD_UNUSED (dummy);
+
+#endif   // _RWSTD_NO_EXCEPTIONS
+
+}
+
+/**************************************************************************/
+
 static int
 run_test (int /* argc */, char** /* argv */)
 {
@@ -720,6 +851,26 @@ run_test (int /* argc */, char** /* argv */)
     }
     else {
         test_ctors ();
+
+        test_ctor_exceptions (CountCtor,
+                              "vector(size_type, const_reference)",
+                              (UserClass*)0);
+        test_ctor_exceptions (RangeCtor,
+                              "vector(InputIterator, InputIterator)",
+                              InputIter<UserClass>(0, 0, 0));
+        test_ctor_exceptions (RangeCtor,
+                              "vector(ForwardIterator, ForwardIterator)",
+                              ConstFwdIter<UserClass>());
+        test_ctor_exceptions (RangeCtor,
+                              "vector(BidirectionalIterator, "
+                              "BidirectionalIterator)",
+                              ConstBidirIter<UserClass>());
+        test_ctor_exceptions (RangeCtor,
+                              "vector(RandomAccessIterator, "
+                              "RandomAccessIterator)",
+                              ConstRandomAccessIter<UserClass>());
+        test_ctor_exceptions (CopyCtor, "vector(const vector&)",
+                              (UserClass*)0);
     }
 
     return 0;

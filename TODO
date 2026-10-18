@@ -41,23 +41,6 @@ Check: a section of =23.deque.storage= with a grown-then-drained deque
 that counts map reads per bufferful and finds a constant; the
 allocator section's ownership checks unchanged; the suite unchanged.
 
-** TODO The constructors of =vector= when =assign= throws
-
-The three constructing constructors of =vector= in =include/vector=
-are an =assign= call with no handler, the shape the =deque= ones had
-until their fix: an object whose constructor throws is never
-destroyed, so whatever =assign= had built is lost. For =deque= the
-loss was measured. For =vector= the hypothesis is that nothing is
-lost: =assign= on an empty vector is an insert, and the vector insert
-builds into a temporary and swaps, so a throw leaves the object
-empty and owning nothing.
-
-Fix: none if the hypothesis holds; the =deque= handler otherwise.
-
-Check: =23.vector.modifiers='s leak counter around the three
-constructors under injected =bad_alloc= and a throwing copy
-constructor, the way the =deque= test's loop now runs.
-
 ** TODO The twins' seam in the range members of =vector= and =deque=
 
 The seven out-of-class range members, =_C_assign_range= and
