@@ -319,8 +319,6 @@ int main ()
 
 #endif   // _RWSTD_NO_LONG_LONG
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     printf ("#define _RWSTD_WCHAR_SIZE  %2u /* sizeof (wchar_t) */\n",
             SIZEOF (wchar_t));
 
@@ -329,8 +327,6 @@ int main ()
         suffix = "";
     
     MKLIMITS (wchar_t, "WCHAR", suffix, "wchar_t");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 #if defined (MB_LEN_MAX)
 

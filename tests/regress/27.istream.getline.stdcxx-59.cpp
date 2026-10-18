@@ -46,8 +46,6 @@ int main ()
     assert ('y' == s [1]);
     assert ('z' == s [2]);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     std::wistringstream wstrm;
 
     wstrm.setstate (wstrm.failbit);
@@ -58,8 +56,6 @@ int main ()
     assert (L'\0' == ws [0]);
     assert (L'y' == ws [1]);
     assert (L'z' == ws [2]);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

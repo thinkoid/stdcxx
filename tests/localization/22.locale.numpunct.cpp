@@ -142,8 +142,6 @@ char widen (char, const char *s)
     return *s;
 }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 wchar_t widen (wchar_t, const char *s)
 {
     wchar_t wc = 0;
@@ -152,8 +150,6 @@ wchar_t widen (wchar_t, const char *s)
 
     return n > 0 ? wc : n ? -1 : 0;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 template <class charT>

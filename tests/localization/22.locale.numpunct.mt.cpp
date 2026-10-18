@@ -83,14 +83,10 @@ struct NumPunctData
     std::string truename_;
     std::string falsename_;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     wchar_t wdecimal_point_;
     wchar_t wthousands_sep_;
     std::wstring wtruename_;
     std::wstring wfalsename_;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 } punct_data [MAX_THREADS];
 
@@ -145,8 +141,6 @@ thread_func (void*)
         if (test_wchar) {
             // exercise the wide char specialization of the facet
 
-#ifndef _RWSTD_NO_WCHAR_T
-
             const std::numpunct<wchar_t> &wp =
                 std::use_facet<std::numpunct<wchar_t> >(loc);
 
@@ -164,8 +158,6 @@ thread_func (void*)
                                         data.wtruename_.c_str ()));
             RW_ASSERT (0 == rw_strncmp (fn.c_str (),
                                         data.wfalsename_.c_str ()));
-
-#endif   // _RWSTD_NO_WCHAR_T
 
         }
     }
@@ -211,8 +203,6 @@ run_test (int, char**)
             data.truename_  = np.truename ();
             data.falsename_ = np.falsename ();
 
-#ifndef _RWSTD_NO_WCHAR_T
-
             const std::numpunct<wchar_t> &wp =
                 std::use_facet<std::numpunct<wchar_t> >(loc);
 
@@ -221,8 +211,6 @@ run_test (int, char**)
 
             data.wtruename_  = wp.truename ();
             data.wfalsename_ = wp.falsename ();
-
-#endif
 
             if (opt_shared_locale)
                 data.locale_ = loc;
@@ -263,8 +251,6 @@ run_test (int, char**)
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     rw_info (0, 0, 0, "exercising std::numpunct<wchar_t>");
 
     test_char  = false;
@@ -297,8 +283,6 @@ run_test (int, char**)
     rw_error (result == 0, 0, __LINE__,
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return result;
 }

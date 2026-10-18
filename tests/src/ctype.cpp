@@ -884,8 +884,6 @@ do_narrow (const char_type *lo, const char_type *hi, char dflt, char *dst) const
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 UserCtype<wchar_t>::
 UserCtype (size_t refs /* = 0 */)
     : Base (refs), UserCtypeBase ("wchar_t")
@@ -1284,8 +1282,6 @@ do_narrow (const char_type *lo, const char_type *hi, char dflt, char *dst) const
 
     return lo;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /**************************************************************************/
 

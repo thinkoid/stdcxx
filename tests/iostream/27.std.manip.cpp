@@ -85,8 +85,6 @@ type_name< CharTraits<char> > ()
     return "CharTraits<char>";
 }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <>
 /*static*/ const char*
 type_name< wchar_t > ()
@@ -107,8 +105,6 @@ type_name< CharTraits<wchar_t> > ()
 {
     return "CharTraits<wchar_t>";
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /***********************************************************************/
 
@@ -715,12 +711,8 @@ run_test (int /*argc*/, char* /*argv*/ [])
     do_test<char, std::char_traits<char> > ();
     do_test<char, CharTraits<char> > ();
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     do_test<wchar_t, std::char_traits<wchar_t> > ();
     do_test<wchar_t, CharTraits<wchar_t> > ();
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

@@ -148,8 +148,6 @@ thread_func (void*)
         if (test_wchar) {
             // exercise the wide char specialization of the facet
 
-#ifndef _RWSTD_NO_WCHAR_T
-
             const std::ctype<wchar_t> &wct =
                 std::use_facet<std::ctype<wchar_t> >(loc);
 
@@ -164,8 +162,6 @@ thread_func (void*)
             const char nc = wct.narrow (data->wide_ [winx], L'\0');
 
             RW_ASSERT (nc == data->wnarrowed_ [winx]);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
         }
     }
@@ -263,8 +259,6 @@ run_test (int, char**)
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     rw_info (0, 0, 0, "exercising std::ctype<wchar_t>");
 
     test_char  = false;
@@ -297,8 +291,6 @@ run_test (int, char**)
     rw_error (result == 0, 0, __LINE__,
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return result;
 }

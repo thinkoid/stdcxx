@@ -883,8 +883,6 @@ run_test (int, char**)
         t.runTest ();
     }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     {
         Test<wchar_t> t ("wchar_t", false);
         t.runTest ();
@@ -894,8 +892,6 @@ run_test (int, char**)
         Test<wchar_t> t ("wchar_t", true);
         t.runTest ();
     }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

@@ -417,19 +417,15 @@ void test_virtual (VFun         *pfid,
     if (VFun:: DefaultTraits == pfid->tid_) {
         if (VFun::Char == pfid->cid_)
             TEST (char, std::char_traits<char>);
-#ifndef _RWSTD_NO_WCHAR_T
         else
             TEST (wchar_t, std::char_traits<wchar_t>);
-#endif   // _RWSTD_NO_WCHAR_T
     }
     else {
         if (VFun::Char == pfid->cid_)
             TEST (char, CharTraits<char>);
 
-#ifndef _RWSTD_NO_WCHAR_T
         else
             TEST (wchar_t, CharTraits<wchar_t>);
-#endif   // _RWSTD_NO_WCHAR_T
     }
 
     pfid->strarg_   = 0;

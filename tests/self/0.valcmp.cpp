@@ -267,11 +267,8 @@ run_test (const T* /* dummy */, const char *tname)
 
 #endif   // _RWSTD_LONG_LONG
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     TEST_ALL_CASES (wchar_t);
 
-#endif   // _RWSTD_NO_WCHAR_T
 }
 
 
@@ -297,11 +294,7 @@ int main ()
 
 #endif   // _RWSTD_LONG_LONG
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     RUN_TEST (wchar_t);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return exit_status;
 }

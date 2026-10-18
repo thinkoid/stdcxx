@@ -101,8 +101,6 @@ typedef std::fstream       C_fstream;
 typedef std::streampos     C_streampos;
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 typedef std::wios           W_wios;
 typedef std::wstreambuf     W_wstreambuf;
 typedef std::wistream       W_wistream;
@@ -118,8 +116,6 @@ typedef std::wofstream      W_wofstream;
 typedef std::wfstream       W_wfstream;
 
 typedef std::wstreampos     W_wstreampos;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /**************************************************************************/
 
@@ -181,8 +177,6 @@ run_test (int, char*[])
     TEST_TYPEDEF (std::ofstream,      C_ofstream);
     TEST_TYPEDEF (std::fstream,       C_fstream);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     TEST_TYPEDEF (std::wios,           W_wios);
     TEST_TYPEDEF (std::wstreambuf,     W_wstreambuf);
     TEST_TYPEDEF (std::wistream,       W_wistream);
@@ -197,8 +191,6 @@ run_test (int, char*[])
     TEST_TYPEDEF (std::wofstream,      W_wofstream);
     TEST_TYPEDEF (std::wfstream,       W_wfstream);
     TEST_TYPEDEF (std::wstreampos,     std::streampos);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

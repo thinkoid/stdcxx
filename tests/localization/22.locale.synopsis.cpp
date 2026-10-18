@@ -206,12 +206,8 @@ namespace std {
 template <> class ctype<char>;
 template <> class ctype_byname<char>;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <> class ctype<wchar_t>;
 template <> class ctype_byname<wchar_t>;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }   // namespace std
 
@@ -371,12 +367,8 @@ void is_explicit (const std::locale::facet&);
 void is_explicit (const std::collate<char>&);
 void is_explicit (const std::ctype<char>&);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 void is_explicit (const std::collate<wchar_t>&);
 void is_explicit (const std::ctype<wchar_t>&);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 struct has_implicit_ctor
 {
@@ -687,11 +679,7 @@ test_locale ()
     // 22.1.1.4, p3
     MEMFUN (bool, operator(), (const std::string&, const std::string&) const);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     MEMFUN (bool, operator(), (const std::wstring&, const std::wstring&)const);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     // exercise a specialization other than on the default char types
     typedef StringTypes<int>::string_type IntString;
@@ -1875,8 +1863,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
     // std::locale::messages category
     FUN1 (test_messages, char);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     // same as above but for wchar_t
     test_have_use_facet<wchar_t> ();
     test_convenience_funs<wchar_t> ();
@@ -1905,8 +1891,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
     FUN2 (test_time_put, wchar_t, wchar_t*);
 
     FUN1 (test_messages, wchar_t);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     // test facet specializations on character types other than char and wchar_t
     // and iterator types other than istreambuf_iterator and ostreambuf_iterator

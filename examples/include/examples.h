@@ -59,25 +59,6 @@ using ::ptrdiff_t;
 #endif   // _RWSTD_NO_EXCEPTIONS
 
 
-#ifdef _RWSTD_NO_WCHAR_T
-
-// remove `L' from wide string literals
-#define L
-
-// fake wide stream objects
-#define wcin          cin
-#define wcout         cout
-#define wcerr         cerr
-#define wclog         clog
-
-// fake wide string and stringstream
-#define wstring       string
-#define wstringstream stringstream
-
-#define wchar_t       char
-
-#endif   // _RWSTD_NO_WCHAR_T
-
 
 // undefine macros #defined by some evil C libraries (e.g., MSVC)
 #undef max

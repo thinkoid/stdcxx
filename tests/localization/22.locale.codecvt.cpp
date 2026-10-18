@@ -61,7 +61,6 @@
 /****************************************************************************/
 
 // mbs/wcs helper functions
-#if !defined _RWSTD_NO_WCHAR_T
 
 template <class T>
 /*static*/ std::size_t
@@ -100,8 +99,6 @@ rwtest_wcstombs<char>(std::mbstate_t& /*unused*/, const char* /*unused*/,
     return 0;
 }
 
-#endif // !defined _RWSTD_NO_WCHAR_T
-
 
 static std::size_t
 rwtest_mbslen (std::mbstate_t& state,
@@ -134,10 +131,8 @@ typedef std::codecvt_base::result                         CodecvtResult;
 typedef std::codecvt<char,char,std::mbstate_t>            Codecvt;
 typedef std::codecvt_byname<char,char,std::mbstate_t>     CodecvtBn;
 
-#ifndef _RWSTD_NO_WCHAR_T
 typedef std::codecvt<wchar_t,char,std::mbstate_t>         CodecvtW;
 typedef std::codecvt_byname<wchar_t,char,std::mbstate_t>  CodecvtBnW;
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 // Type names used in assertion messages
@@ -156,8 +151,6 @@ TypeName<Codecvt>::name = "std::codecvt<char, char, std::mbstate_t>";
 template <> const char*
 TypeName<CodecvtBn>::name = "std::codecvt_byname<char, char, std::mbstate_t>";
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <> const char*
 TypeName<wchar_t>::name = "wchar_t";
 
@@ -167,8 +160,6 @@ TypeName<CodecvtW>::name = "std::codecvt<wchar_t, char, std::mbstate_t>";
 template <> const char*
 TypeName<CodecvtBnW>::name =
     "std::codecvt_byname<wchar_t, char, std::mbstate_t>";
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /****************************************************************************/
 
@@ -255,8 +246,6 @@ template <>
 CodecvtDerived<CodecvtBn>::CodecvtDerived (const char* name)
     : CodecvtBn (name) { }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <>
 CodecvtDerived<CodecvtW>::CodecvtDerived (const char* /*unused*/)
     : CodecvtW () { }
@@ -264,8 +253,6 @@ CodecvtDerived<CodecvtW>::CodecvtDerived (const char* /*unused*/)
 template <>
 CodecvtDerived<CodecvtBnW>::CodecvtDerived (const char* name)
     : CodecvtBnW (name) { }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 //  Tests the call of virtual member functions in codecvt facets
@@ -338,8 +325,6 @@ const CodecvtBn& create_CodecvtBn (const std::locale& loc)
     return std::use_facet< CodecvtBn >(loc);
 }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 const CodecvtW& create_CodecvtW (const std::locale&)
 {
     static CodecvtW cc;
@@ -350,8 +335,6 @@ const CodecvtBnW& create_CodecvtBnW (const std::locale& loc)
 {
     return std::use_facet< CodecvtBnW >(loc);
 }
-
-#endif // !defined _RWSTD_NO_WCHAR_T
 
 
 // facet operations results
@@ -2354,12 +2337,8 @@ run_test (int /*unused*/, char* /*unused*/ [])
     test_virtuals<Codecvt> (0);
     test_virtuals<CodecvtW> ("C");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     test_virtuals<CodecvtBn> ("C");
     test_virtuals<CodecvtBnW> ("C");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 #define TEST_UCS_MODIFIER(T, mod, enc, locname, f, i, is)                    \
     do {                                                                     \
@@ -2476,8 +2455,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
         if (!locname)
             continue;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         // unshift () as the first call on the wide facet of a locale
         // from the database must take the database's data, not fall
         // through to the C library, which does not know the name
@@ -2505,8 +2482,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
                        "(locale (%#s)).unshift () as the first call "
                        "threw an exception", locname);
         }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
         // find the native locale name correspomding to the canonical
         // locale name hardcoded in the table above
@@ -2546,8 +2521,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
                          std::codecvt_base::noconv, 1,
                          true, locales [i].nbytes, 1);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         // exercise the behavior of codecvt<wchar_t, char, mbstate_t>
         TEST_CONVERSION (CodecvtW, locales [i].locale_name, true, s, true,
                          std::codecvt_base::ok, locales [i].nbytes,
@@ -2585,8 +2558,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
         TEST_UCS_MODIFIER (CodecvtBnW, "UCS", which_ucs,
                            locales [i].locale_name, s, std::codecvt_base::ok,
                            locales [i].nchars);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     }
 

@@ -770,14 +770,10 @@ run_test (int, char**)
     TEST (char, char_array);
     TEST (char, streambuf);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     TEST (wchar_t, void);
     TEST (wchar_t, char);
     TEST (wchar_t, char_array);
     TEST (wchar_t, streambuf);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

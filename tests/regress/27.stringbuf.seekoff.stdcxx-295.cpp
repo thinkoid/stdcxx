@@ -50,8 +50,6 @@ int main()
     assert (0 == inout.tellg ());
     assert (0 == inout.tellp ());
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     std::wistringstream win;
     std::wostringstream wout;
     std::wstringstream winout;
@@ -60,7 +58,5 @@ int main()
     assert (0 == wout.tellp ());
     assert (0 == winout.tellg ());
     assert (0 == winout.tellp ());
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }

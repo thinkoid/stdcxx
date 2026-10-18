@@ -228,8 +228,6 @@ bool cond3 (std::ctype_base::mask, char, const char*)
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 const char* narrow (char *dst, const wchar_t *src)
 {
     static char buf [4096];
@@ -375,8 +373,6 @@ bool cond3 (std::ctype_base::mask mask, wchar_t ch, const char *locname)
 
     return result;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /**************************************************************************/
 
@@ -633,11 +629,7 @@ run_test (int, char**)
 
     run_test (char (), "char");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     run_test (wchar_t (), "wchar_t");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

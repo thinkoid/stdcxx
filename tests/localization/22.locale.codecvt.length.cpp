@@ -46,12 +46,8 @@
 typedef std::codecvt<char, char, std::mbstate_t>           Codecvt;
 typedef std::codecvt_byname<char, char, std::mbstate_t>    CodecvtByname;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 typedef std::codecvt<wchar_t, char, std::mbstate_t>        WCodecvt;
 typedef std::codecvt_byname<wchar_t, char, std::mbstate_t> WCodecvtByname;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /****************************************************************************/
 
@@ -213,8 +209,6 @@ test_wcodecvt ()
              "(state_type&, const extern_type*, const extern_type*, "
              "size_t)");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     const std::locale classic = std::locale::classic ();
 
     const WCodecvt &cvt = std::use_facet<WCodecvt>(classic);
@@ -241,17 +235,9 @@ test_wcodecvt ()
     TEST ("abc", 3, 3, 3);
     TEST ("abc", 3, 4, 3);
 
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    rw_warn (0, 0, __LINE__, "_RWSTD_NO_WCHAR_T #defined, cannot test");
-
-#endif   // _RWSTD_NO_WCHAR_T
-
 }
 
 /****************************************************************************/
-
-#ifndef _RWSTD_NO_WCHAR_T
 
 // exercises an algorithmic multibyte encoding
 static void
@@ -713,8 +699,6 @@ test_wcodecvt_byname_libc_based ()
     TEST (mb_string, 21, 5, 21);   //  |----------------------------->
 }
 
-#endif   // _RWSTD_NO_WCHAR_T
-
 
 static void
 test_wcodecvt_byname ()
@@ -724,17 +708,9 @@ test_wcodecvt_byname ()
              "(state_type&, const extern_type*, const extern_type*, "
              "size_t)");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     test_wcodecvt_byname_algorithmic ();
     test_wcodecvt_byname_table_based ();
     test_wcodecvt_byname_libc_based ();
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    rw_warn (0, 0, __LINE__, "_RWSTD_NO_WCHAR_T #defined, cannot test");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }
 

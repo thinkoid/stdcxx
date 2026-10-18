@@ -2067,15 +2067,11 @@ template int _rw_fmtarray (const FmtSpec&, Buffer&, const UInt*, size_t, int);
 template int _rw_fmtarray (const FmtSpec&, Buffer&, const ULong*, size_t, int);
 
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
-
 // avoid instantiating when wchar_t is not a fundamental type
 // (since it's most likely not distinct from one of the types
 // the templates are instantiated on above)
 template int _rw_quotechar (char*, wchar_t, int);
 template int _rw_fmtarray(const FmtSpec&, Buffer&, const wchar_t*, size_t, int);
-
-#endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
 /********************************************************************/
 
@@ -2315,8 +2311,6 @@ _rw_fmtstr (const FmtSpec &spec, Buffer &buf, const char *str, size_t len)
 
 /********************************************************************/
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 static int
 _rw_fmtwstr (const FmtSpec &spec, Buffer &buf,
              const wchar_t *wstr, size_t len)
@@ -2397,8 +2391,6 @@ _rw_fmtwstr (const FmtSpec &spec, Buffer &buf,
 
     return int (len);
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /********************************************************************/
 

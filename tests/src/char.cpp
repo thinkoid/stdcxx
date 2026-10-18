@@ -168,8 +168,6 @@ UserTraits<char>::
 eof_ = std::char_traits<char>::eof ();
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 void UserTraits<wchar_t>::
 assign (char_type &dst, const char_type &src)
 {
@@ -296,8 +294,6 @@ n_calls_ [UserTraits<wchar_t>::MemFun::n_funs];
 UserTraits<wchar_t>::int_type
 UserTraits<wchar_t>::
 eof_ = std::char_traits<wchar_t>::eof ();
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 size_t
@@ -583,12 +579,7 @@ _rw_expand (void *dst, size_t elemsize,
             size_t *dst_len /* = 0 */)
 {
     // create a typedef for "genericity"
-#ifndef _RWSTD_NO_WCHAR_T
     typedef wchar_t WChar;
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-    // dummy, will never be used
-    typedef int WChar;
-#endif   // _RWSTD_NO_WCHAR_T
 
     RW_ASSERT (   sizeof (char) == elemsize
                || sizeof (WChar) == elemsize
@@ -844,8 +835,6 @@ rw_match (const char *s1, const char *s2, size_t len /* = SIZE_MAX */)
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 _TEST_EXPORT
 wchar_t*
 rw_widen (wchar_t *dst, const char *src, size_t len /* = SIZE_MAX */)
@@ -990,8 +979,6 @@ rw_match (const char *s1, const wchar_t *s2, size_t len /* = SIZE_MAX */)
 
     return len < count ? len : count;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 _TEST_EXPORT

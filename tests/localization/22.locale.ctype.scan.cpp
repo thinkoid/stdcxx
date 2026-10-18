@@ -243,8 +243,6 @@ char widen (char, char ch, const char*)
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 int libc_isalpha (wchar_t ch)
 {
     return (std::iswalpha)(ch);
@@ -402,8 +400,6 @@ wchar_t widen (wchar_t, char ch, const char *locname)
 
     return result;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 template <class charT>

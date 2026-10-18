@@ -116,8 +116,6 @@ const char* widen (char* dst, const char* src)
     return dst;
 }
 
-#if !defined (_RWSTD_NO_WCHAR_T)
-
 int c_strcoll (const wchar_t* s1, const wchar_t* s2)
 {
     const int ret = std::wcscoll(s1, s2);
@@ -193,8 +191,6 @@ const char* narrow (char* dst, const wchar_t* src)
 
     return dst;
 }
-
-#endif   //_RWSTD_NO_WCHAR_T
 
 /**************************************************************************/
 
@@ -1102,8 +1098,6 @@ check_NUL_collate (const char* charTname, const char* locname, char)
     T ("a\0\0b", "a\0\0b");
 }
 
-#if !defined (_RWSTD_NO_WCHAR_T)
-
 static void
 check_NUL_collate (const char* charTname, const char* locname, wchar_t)
 {
@@ -1138,8 +1132,6 @@ check_NUL_collate (const char* charTname, const char* locname, wchar_t)
 
 #undef T
 }
-
-#endif // _RWSTD_NO_WCHAR_T
 
 template <class charT>
 void
@@ -1181,9 +1173,7 @@ run_test (int /*argc*/, char* /*argv*/ [])
 {
     do_test<char> ("char");
 
-#if !defined (_RWSTD_NO_WCHAR_T)
     do_test<wchar_t> ("wchar_t");
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

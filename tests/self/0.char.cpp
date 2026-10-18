@@ -414,8 +414,6 @@ test_rw_widen ()
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "rw_widen(wchar_t*, const char*, size_t)");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     static const wchar_t wsrc [] = L"abcdefgh";
     static const wchar_t wnull [nsrc + 1] = L"";
     wchar_t              wdst [nsrc + 1];
@@ -446,12 +444,6 @@ test_rw_widen ()
                "rw_widen(wchar_t*, %{#s}, %zu) == %{#*s}, got L%{#*ls}",
                0, sizeof wdst, int (sizeof wdst / sizeof *wdst), wnull,
                int (sizeof wdst / sizeof *wdst), wdst);
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    rw_note (0, 0, 0, "_RWSTD_NO_WCHAR_T #defined, wchar_t test disabled");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "rw_widen(UserChar*, const char*, size_t)");
@@ -555,9 +547,7 @@ test_rw_expand ()
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "rw_expand(wchar_t*, const char*, size_t, size_t*)");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
-#  undef TEST
+#undef TEST
 #define TEST(str, expstr)                                                  \
     do {                                                                   \
         const size_t str_size = sizeof str - 1;                            \
@@ -604,12 +594,6 @@ test_rw_expand ()
     TEST ("a@3b@2c",   L"aaabbc");
     TEST ("a@3b@2c@1", L"aaabbc");
     TEST ("a@3b@3c@2", L"aaabbbcc");
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    rw_note (0, 0, 0, "_RWSTD_NO_WCHAR_T #defined, wchar_t test disabled");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "rw_expand(UserChar*, const char*, size_t, size_t*)");
@@ -660,8 +644,6 @@ test_rw_narrow ()
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "rw_narrow(wchar_t*, const wchar_t*, size_t)");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     static const wchar_t wsrc [] = L"abcdefgh";
 
     for (size_t i = 0; i != nsrc + 1; ++i) {
@@ -690,12 +672,6 @@ test_rw_narrow ()
                "rw_narrow(char*, %{#s}, %zu) == %{#*s}, got %{#*s}",
                0, sizeof cdst, int (sizeof null), null,
                int (sizeof cdst), cdst);
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    rw_note (0, 0, 0, "_RWSTD_NO_WCHAR_T #defined, wchar_t test disabled");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "rw_narrow(char*, const UserChar*, size_t)");
@@ -916,8 +892,6 @@ test_rw_match ()
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "rw_match(char*, const wchar_t*, size_t)");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 #undef TEST
 #define TEST(s1, s2, len, expect)                                            \
   result = rw_match ((const char*)s1, (const wchar_t*)s2, size_t (len));     \
@@ -1011,12 +985,6 @@ test_rw_match ()
     // invalid directives
     TEST ("a@b",   L"a@b",   -1, 4);
     TEST ("a@b@c", L"a@b@c", -1, 6);
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    rw_note (0, 0, 0, "_RWSTD_NO_WCHAR_T #defined, wchar_t test disabled");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     //////////////////////////////////////////////////////////////////
     rw_info (0, 0, 0, "rw_match(char*, const UserChar*, size_t)");

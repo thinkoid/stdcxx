@@ -114,8 +114,6 @@ typedef std::time_get_byname<char>                      TimeGetByname;
 typedef std::time_put_byname<char>                      TimePutByname;
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 typedef std::collate<wchar_t>                       WCollate;
 typedef std::ctype<wchar_t>                         WCtype;
 typedef std::codecvt<wchar_t, char, std::mbstate_t> WCodecvt;
@@ -139,8 +137,6 @@ typedef std::moneypunct_byname<wchar_t, true>              WMoneypunct1Byname;
 typedef std::numpunct_byname<wchar_t>                      WNumpunctByname;
 typedef std::time_get_byname<wchar_t>                      WTimeGetByname;
 typedef std::time_put_byname<wchar_t>                      WTimePutByname;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 extern "C" {
@@ -197,8 +193,6 @@ test_has_facet (void*)
         HAS_BYNAME (TimeGetByname, time_get);
         HAS_BYNAME (TimePutByname, time_put);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         HAS (WCodecvt, codecvt);
         HAS (WCollate, collate);
         HAS (WCtype, ctype);
@@ -221,8 +215,6 @@ test_has_facet (void*)
         HAS_BYNAME (WMoneypunct1Byname, moneypunct_intl);
         HAS_BYNAME (WTimeGetByname, time_get);
         HAS_BYNAME (WTimePutByname, time_put);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     }
 
@@ -324,8 +316,6 @@ use_facet_loop (const std::locale &classic, int i)
         }
     }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     {
         const std::locale::facet* const bases[] = {
             // get pointers to the char specializations of facets
@@ -387,8 +377,6 @@ use_facet_loop (const std::locale &classic, int i)
             TEST_USE_FACET (WTimePutByname, time_put);
         }
     }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }
 

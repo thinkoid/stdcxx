@@ -482,8 +482,6 @@ run_test (int, char**)
         TEST (ok, char, UserTraits<char>);
     }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     if (rw_note (0 <= opt_wchar && 0 <= opt_char_traits, 0, __LINE__,
                  "wistream::sentry tests disabled")) {
         TEST (ctor, wchar_t, char_traits<wchar_t>);
@@ -496,8 +494,6 @@ run_test (int, char**)
         TEST (ctor, wchar_t, UserTraits<wchar_t>);
         TEST (ok, wchar_t, UserTraits<wchar_t>);
     }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 

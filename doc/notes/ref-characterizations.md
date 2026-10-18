@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 154 named C++ probes, five supporting C++
+The source census contains 152 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 154 named probes are discoverable by
+three different things.** All 152 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -118,6 +118,7 @@ its row is gone from the catalogue below.
 | `CLASS_PARTIAL_SPEC`, `PART_SPEC_OVERLOAD` | `NO_*`, one each | 2026-10-17, one commit | Partial specialization and partial ordering of function templates; every compiler of the matrix passes. The branches they selected were the largest of the family: iterator traits done by overloads, a `vector<bool>` that was a plain class, swap as a friend. The iterator-traits macros they left are spelled out in the commit after. |
 | `POD_ZERO_INIT`, `NESTED_CLASS_ACCESS`, `NONCLASS_ARROW_RETURN`, `EXTERN_C_COMPATIBILITY`, `DUMMY_DEFAULT_ARG`, `CV_VOID_SPECIALIZATIONS`, `EMPTY_MEM_INITIALIZER` | `NO_*`, one each | 2026-10-17, one commit | The other language rules of C++98: value-initialization of a POD, a nested class's access (CWG 45), `operator->` returning a pointer, `extern "C"` function types, a dummy default argument, specializations on cv-qualified `void`, an empty mem-initializer. Every compiler of the matrix passes; `DUMMY_DEFAULT_ARG` had lost its last reader earlier in the day. `_RWSTD_OPERATOR_ARROW` is spelled out. |
 | `LONG_DOUBLE` | `NO_LONG_DOUBLE` | 2026-10-18 | Whether `long double` is a type of its own that overload resolution can pick; every compiler of the matrix passes. The gate hid the long double half of the numeric and money facets, `numeric_limits<long double>`, `complex<long double>`, the `<cmath>` overloads and the bit patterns in `limits_bits.cpp`; with it defined the library replaced a required virtual of `money_get` with a double one, so that build was never conforming. The five host-fact probes that read it (`FLOAT`, `INFINITY`, `LIMITS`, `MATH_OVERLOADS`, `VA_LIST`) print their long double answers unconditionally. |
+| `WCHAR_T`, `NATIVE_WCHAR_T` | `NO_WCHAR_T`, `NO_NATIVE_WCHAR_T` | 2026-10-18, three commits | `wchar_t` has been a keyword since C++98 and every compiler of the matrix has it; `NATIVE_WCHAR_T` was Visual C++'s `/Zc:wchar_t-`, and `rw/_config.h` derived it from `WCHAR_T`. The gate hid the wide half of the library: the `w` typedefs of `<iosfwd>`, the wide facets and their instantiation units, `wcodecvt.cpp`, `wctype.cpp`, 31 conditions in `time_put.cpp` alone, and the wide cases of 74 tests. `LIMITS` prints `_RWSTD_WCHAR_SIZE` and the `wchar_t` limits unconditionally. |
 
 ## 3. Outputs beyond the status macro
 
@@ -235,7 +236,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [MBSTATE_T](../../etc/config/src/MBSTATE_T.cpp) / `NO_MBSTATE_T` + output | mbstate_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/wchar.h` |
 | [MMAP](../../etc/config/src/MMAP.cpp) / `NO_MMAP` | mmap() and munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [MUNMAP](../../etc/config/src/MUNMAP.cpp) / `NO_MUNMAP` + output | munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
-| [NATIVE_WCHAR_T](../../etc/config/src/NATIVE_WCHAR_T.cpp) / `NO_NATIVE_WCHAR_T` | if wchar_t is a native type | L/P/T; `include/limits` |
 | [NEWLINE](../../etc/config/src/NEWLINE.cpp) / `NO_NEWLINE` + output | newline (CR or CR-LF) | none |
 | [NEW_HEADER](../../etc/config/src/NEW_HEADER.cpp) / `NO_NEW_HEADER` | C++-style C library headers | L/P/T; `include/rw/_config-gcc.h` |
 | [NEW_OFLOW_SAFE](../../etc/config/src/NEW_OFLOW_SAFE.cpp) / `NO_NEW_OFLOW_SAFE` | if operator new() checks the argument for overflow | L/P; `src/memory.cpp` |
@@ -299,7 +299,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [UNISTD_DECL](../../etc/config/src/UNISTD_DECL.cpp) / `NO_UNISTD_DECL` + output | the contents of &lt;unistd.h&gt; | none |
 | [VA_LIST](../../etc/config/src/VA_LIST.cpp) / `NO_VA_LIST` + output | the type of va_list | none |
 | [VSNPRINTF_RETURN](../../etc/config/src/VSNPRINTF_RETURN.cpp) / `NO_VSNPRINTF_RETURN` + output | vsnprintf() return value | none |
-| [WCHAR_T](../../etc/config/src/WCHAR_T.cpp) / `NO_WCHAR_T` | wchar_t support | L/P/T/V/E; `include/ansi/stdlib.h` |
 | [WCSFTIME_WCHAR_T_FMAT](../../etc/config/src/WCSFTIME_WCHAR_T_FMAT.cpp) / `NO_WCSFTIME_WCHAR_T_FMAT` + output | wcsftime() in &lt;wchar.h&gt; | L/T; `include/rw/_defs.h` |
 | [WCTRANS_T](../../etc/config/src/WCTRANS_T.cpp) / `NO_WCTRANS_T` + output | wctrans_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/cwctype` |
 | [WCTYPE_T](../../etc/config/src/WCTYPE_T.cpp) / `NO_WCTYPE_T` + output | wctype_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/cwctype` |

@@ -29,7 +29,6 @@
 
 int main ()
 {
-#ifndef _RWSTD_NO_WCHAR_T
 
     typedef std::char_traits<wchar_t> Traits;
 
@@ -54,8 +53,6 @@ int main ()
 
     assert (0 > Traits::compare (first, second, 2));
     assert (0 < Traits::compare (second, first, 2));
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

@@ -2219,14 +2219,10 @@ run_test (int, char*[])
     else
         rw_note (0, __FILE__, __LINE__, "char test disabled");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     if (rw_enabled ("wchar_t"))
         run_tests (wchar_t (), "wchar_t");
     else
         rw_note (0, __FILE__, __LINE__, "wchar_t test disabled");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

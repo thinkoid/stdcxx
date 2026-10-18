@@ -438,8 +438,6 @@ run_test (int, char**)
                  "ws (basic_istream<char, UserTraits<char>>) disabled"))
         TEST (char, UserTraits<char>);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     if (rw_note (0 <= opt_wchar && 0 <= opt_char_traits, 0, __LINE__,
                  "ws (basic_istream<wchar_t, char_traits<wchar_t>>) disabled"))
         TEST (wchar_t, std::char_traits<wchar_t>);
@@ -447,8 +445,6 @@ run_test (int, char**)
     if (rw_note (0 <= opt_wchar && 0 <= opt_user_traits, 0, __LINE__,
                  "ws (basic_istream<wchar_t, UserTraits<wchar_t>>) disabled"))
         TEST (wchar_t, UserTraits<wchar_t>);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

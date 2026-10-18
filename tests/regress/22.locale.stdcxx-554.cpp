@@ -75,10 +75,8 @@ int main (int, char* [])
     test_moneypunct (char ());
     test_messages (char ());
 
-#ifndef _RWSTD_NO_WCHAR_T
     test_moneypunct (wchar_t ());
     test_messages (wchar_t ());
-#endif
 
     return 0;
 }

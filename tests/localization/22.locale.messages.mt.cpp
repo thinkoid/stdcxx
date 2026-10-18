@@ -163,8 +163,6 @@ thread_func (void*)
     for (unsigned c = 0; c < n_ncatalogs; ++c)
         ncatalogs [c].cat = -1;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     const std::wstring wdflt (L"\1\2\3\4");
 
     struct {
@@ -176,8 +174,6 @@ thread_func (void*)
 
     for (unsigned c = 0; c < n_wcatalogs; ++c)
         wcatalogs [c].cat = -1;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     ///////////////////////////////////////////////////////////////////////
 
@@ -225,8 +221,6 @@ thread_func (void*)
             }
         }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         if (test_wchar) {
             // exercise the wide char specialization of the facet
 
@@ -257,8 +251,6 @@ thread_func (void*)
             }
         }
 
-#endif   // _RWSTD_NO_WCHAR_T
-
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -275,8 +267,6 @@ thread_func (void*)
         }
     }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     for (unsigned c = 0; c < n_wcatalogs; ++c) {
         if (! (wcatalogs [c].cat < 0)) {
 
@@ -286,8 +276,6 @@ thread_func (void*)
             (wm.close)(wcatalogs [c].cat);
         }
     }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }
@@ -358,16 +346,12 @@ run_test (int, char**)
                 _RWSTD_UNUSED (nm);
             }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
             {
                 const std::messages<wchar_t>& wm =
                     std::use_facet<std::messages<wchar_t> >(loc);
 
                 _RWSTD_UNUSED (wm);
             }
-
-#endif // _RWSTD_NO_WCHAR_T
 
             if (opt_shared_locale)
                 data.locale_ = loc;
@@ -407,8 +391,6 @@ run_test (int, char**)
 
     ///////////////////////////////////////////////////////////////////////
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     test_char   = false;
     test_wchar  = true;
 
@@ -437,8 +419,6 @@ run_test (int, char**)
     rw_error (result == 0, 0, __LINE__,
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
-
-#endif // _RWSTD_NO_WCHAR_T
 
     ///////////////////////////////////////////////////////////////////////
 

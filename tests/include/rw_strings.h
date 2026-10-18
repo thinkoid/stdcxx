@@ -823,8 +823,7 @@ struct RangeBase {
     StringIds::opt_memfun_disabled [which & ~StringIds::fid_mask]
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-#  define TEST_DISPATCH(Alloc, fname, func, tcase)              \
+#define TEST_DISPATCH(Alloc, fname, func, tcase)              \
     if (StringIds::DefaultTraits == func.traits_id_) {          \
         if (StringIds::Char == func.char_id_)                   \
             fname (char (), (std::char_traits<char>*)0,         \
@@ -848,33 +847,6 @@ struct RangeBase {
                   (Alloc<UserChar>*)0, func, tcase);            \
     }                                                           \
     (void)0
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-#  define TEST_DISPATCH(Alloc, fname, func, tcase)              \
-    if (StringIds::DefaultTraits == func.traits_id_) {          \
-        if (StringIds::Char == func.char_id_)                   \
-            fname (char (), (std::char_traits<char>*)0,         \
-                   (Alloc<char>*)0, func, tcase);               \
-        else if (StringIds::WChar == func.char_id_)             \
-            RW_ASSERT (!"logic error: wchar_t disabled");       \
-        else                                                    \
-            rw_note (0, 0, 0,                                   \
-                     "%{$CLASS} tests not implemented");        \
-        }                                                       \
-    }                                                           \
-    else {                                                      \
-        if (StringIds::Char == func.char_id_)                   \
-            fname (char (), (UserTraits<char>*)0,               \
-                   (Alloc<char>*)0, func, tcase);               \
-        else if (StringIds::WChar == func.char_id_)             \
-             RW_ASSERT (!"logic error: wchar_t disabled");      \
-        else if (StringIds::UChar == func.char_id_)             \
-            fname (UserChar (), (UserTraits<UserChar>*)0,       \
-                   (Alloc<UserChar>*)0, func, tcase);           \
-    }                                                           \
-    (void)0
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 #define DEFINE_STRING_TEST_DISPATCH(fname)                      \
@@ -900,8 +872,7 @@ struct RangeBase {
     (VoidFunc*)(TFUNC (charT, Traits, Allocator))       \
         &fname<charT, Traits<charT>, Allocator<charT> >
 
-#ifndef _RWSTD_NO_WCHAR_T
-#  define DEFINE_STRING_TEST_FUNCTIONS(fname)                           \
+#define DEFINE_STRING_TEST_FUNCTIONS(fname)                           \
     static VoidFunc* const fname ## _func_array [] = {                  \
       TFUNC_ADDR (fname, char, std::char_traits, std::allocator),       \
       TFUNC_ADDR (fname, char, std::char_traits, UserAlloc),            \
@@ -918,27 +889,6 @@ struct RangeBase {
       TFUNC_ADDR (fname, UserChar, UserTraits, std::allocator),         \
       TFUNC_ADDR (fname, UserChar, UserTraits, UserAlloc)               \
     }
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-#  define DEFINE_STRING_TEST_FUNCTIONS(fname)                           \
-    static VoidFunc* const fname ## _func_array [] = {                  \
-      TFUNC_ADDR (fname, char, std::char_traits, std::allocator),       \
-      TFUNC_ADDR (fname, char, std::char_traits, UserAlloc),            \
-      TFUNC_ADDR (fname, char, UserTraits,       std::allocator),       \
-      TFUNC_ADDR (fname, char, UserTraits,       UserAlloc),            \
-                                                                        \
-      (VoidFunc*)0, /* wchar_t disabled */                              \
-      (VoidFunc*)0, /* wchar_t disabled */                              \
-      (VoidFunc*)0, /* wchar_t disabled */                              \
-      (VoidFunc*)0, /* wchar_t disabled */                              \
-                                                                        \
-      (VoidFunc*)0, /* std::char_traits<UserChar> not allowed */        \
-      (VoidFunc*)0, /* std::char_traits<UserChar> not allowed */        \
-      TFUNC_ADDR (fname, UserChar, UserTraits, std::allocator),         \
-      TFUNC_ADDR (fname, UserChar, UserTraits, UserAlloc)               \
-    }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 #endif   // RW_21_STRINGS_H_INCLUDED

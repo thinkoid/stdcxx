@@ -103,8 +103,6 @@ run_test (int, char*[])
     TEST ( 2, "a\0c", "a\0b", 3, CMP_RETOFF);
     TEST ( 2, "a\0b", "a\0c", 3, CMP_RETOFF);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     //////////////////////////////////////////////////////////////////
     printf ("rw_strncmp(const wchar_t*, const wchar_t*, size_t, int)\n");
 
@@ -176,8 +174,6 @@ run_test (int, char*[])
     TEST (-1, "a\0b", L"a\0b", 3, CMP_NULTERM | CMP_RETOFF);
     TEST (-1, "a\0c", L"a\0b", 3, CMP_NULTERM | CMP_RETOFF);
     TEST (-1, "a\0b", L"a\0c", 3, CMP_NULTERM | CMP_RETOFF);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return exit_status;
 }

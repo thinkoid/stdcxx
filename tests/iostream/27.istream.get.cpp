@@ -148,11 +148,7 @@ static int run_test (int, char**)
 {
     run_test (char (), "char");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     run_test (wchar_t (), "wchar_t");
-    
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

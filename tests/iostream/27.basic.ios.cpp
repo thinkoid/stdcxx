@@ -58,11 +58,7 @@ struct S { /* empty */ };
 typedef std::char_traits<S>                      Traits;
 typedef std::char_traits<char>                   char_Traits;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 typedef std::char_traits<wchar_t>                wchar_t_Traits;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 typedef std::allocator<S>                        Alloc;
 
@@ -132,8 +128,6 @@ typedef std::fstream       X_fstream;
 
 typedef std::streampos     X_streampos;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 typedef std::wios           X_wios;
 typedef std::wstreambuf     X_wstreambuf;
 typedef std::wistream       X_wistream;
@@ -149,8 +143,6 @@ typedef std::wofstream      X_wofstream;
 typedef std::wfstream       X_wfstream;
 
 typedef std::wstreampos     X_wstreampos;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /**************************************************************************/
 
@@ -183,16 +175,12 @@ test_synopsis ()
     _RWSTD_UNUSED (bios_2);
     _RWSTD_UNUSED (bios_1);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     // exercise a default argument
     std::basic_ios<wchar_t, std::char_traits<wchar_t> > *wbios_2 = 0;
     std::basic_ios<wchar_t /*, char_traits<wchar_t> */> *wbios_1 = wbios_2;
 
     _RWSTD_UNUSED (wbios_2);
     _RWSTD_UNUSED (wbios_1);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 #define TEST_MANIP(name) {                              \
         std::ios_base& (*pf)(std::ios_base&) = &name;   \

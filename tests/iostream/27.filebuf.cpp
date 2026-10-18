@@ -2036,11 +2036,7 @@ run_test (int /*argc*/, char* /*argv*/ [])
 {
     do_test<char> ("char");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     do_test<wchar_t> ("wchar_t");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

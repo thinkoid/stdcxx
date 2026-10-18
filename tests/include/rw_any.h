@@ -73,16 +73,12 @@ public:
     rw_any_t (volatile char*);
     rw_any_t (const volatile char*);
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
     rw_any_t (wchar_t);
-#endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
-#ifndef _RWSTD_NO_WCHAR_T
     rw_any_t (wchar_t*);
     rw_any_t (const wchar_t*);
     rw_any_t (volatile wchar_t*);
     rw_any_t (const volatile wchar_t*);
-#endif   // _RWSTD_NO_WCHAR_T
 
     rw_any_t (const rw_any_t&);
 
@@ -117,9 +113,7 @@ private:
         unsigned _RWSTD_LONG_LONG ullong_;
 #endif   // _RWSTD_LONG_LONG
         float          flt_;
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
         wchar_t        wchar_;
-#endif   // _RWSTD_NO_NATIVE_WCHAR_T
         signed long    slong_;
         unsigned long  ulong_;
         signed int     sint_;

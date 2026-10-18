@@ -2647,8 +2647,6 @@ run_tests (IterType itype)
     else
         rw_note (0, __FILE__, __LINE__, "char test disabled");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     if (rw_enabled ("wchar_t")) {
         static const char* const inames[] = {
             "wchar_t*", "istreambuf_iterator<wchar_t>", "InputIter<wchar_t>"
@@ -2657,13 +2655,6 @@ run_tests (IterType itype)
     }
     else
         rw_note (0, __FILE__, __LINE__, "wchar_t test disabled");
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    rw_note (0, __FILE__, __LINE__,
-             "wchar_t test disabled: _RWSTD_NO_WCHAR_T #defined");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 #if 0   // disabled
 

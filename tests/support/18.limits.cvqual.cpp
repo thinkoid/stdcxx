@@ -153,9 +153,7 @@ run_test (int, char*[])
 
     TEST (long double);
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
     TEST (wchar_t);
-#endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
     return 0;
 }

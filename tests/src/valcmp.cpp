@@ -670,8 +670,6 @@ rw_strncmp (const char* str1,
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 _TEST_EXPORT int
 rw_strncmp (const char*    str1,
             const wchar_t* str2,
@@ -701,8 +699,6 @@ rw_strncmp (const wchar_t* str1,
     return rw_valcmp (str1, str2, nelems,
                       sizeof (wchar_t), sizeof (wchar_t), flags);
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 // floating point comparison helpers based on

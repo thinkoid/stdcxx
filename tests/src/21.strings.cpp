@@ -1386,16 +1386,6 @@ _rw_run_test (int, char*[])
 
 #endif   // _RWSTD_NO_EXCEPTIONS
 
-#ifdef _RWSTD_NO_WCHAR_T
-
-    rw_note (0, 0, 0, "wchar_t tests disabled (macro "
-             "_RWSTD_NO_WCHAR_T #defined)");
-
-    // disable wchar_t tests and avoid further notes
-    _rw_opt_char_types [StringIds::WChar] = -2;
-
-#endif   // _RWSTD_NO_WCHAR_T
-
     // see if any option controlling a string function has been
     // explicitly enabled and if so disable all those that haven't
     // been (i.e., so that --enable-foo-size will have the effect

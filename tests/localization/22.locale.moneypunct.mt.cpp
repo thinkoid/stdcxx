@@ -84,8 +84,6 @@ struct MoneypunctData
     char int_pos_format_ [32];
     char int_neg_format_ [32];
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     wchar_t wdecimal_point_;
     wchar_t wthousands_sep_;
     wchar_t wcurr_symbol_ [32];
@@ -93,8 +91,6 @@ struct MoneypunctData
     wchar_t wnegative_sign_ [32];
 
     wchar_t wint_curr_symbol_ [32];
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 } punct_data [MAX_THREADS];
 
@@ -173,8 +169,6 @@ thread_loop_body (std::size_t i)
 
     // both specializations may be tested at the same time
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     if (test_wchar) {
         // exercise the wide char, local specialization of the facet
 
@@ -232,8 +226,6 @@ thread_loop_body (std::size_t i)
         RW_ASSERT (!std::memcmp (&pfm, data->int_pos_format_, 4));
         RW_ASSERT (!std::memcmp (&nfm, data->int_neg_format_, 4));
     }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }
 
@@ -336,8 +328,6 @@ run_test (int, char**)
             continue;
         }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         try {
             typedef std::moneypunct<wchar_t, false> Punct;
 
@@ -383,8 +373,6 @@ run_test (int, char**)
             continue;
         }
 
-#endif   // _RWSTD_NO_WCHAR_T
-
         ++nlocales;
 
         if (nlocales == maxinx)
@@ -426,8 +414,6 @@ run_test (int, char**)
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     rw_info (0, 0, 0, "exercising std::moneypunct<wchar_t>");
 
     test_char  = false;
@@ -461,8 +447,6 @@ run_test (int, char**)
     rw_error (result == 0, 0, __LINE__,
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return result;
 }

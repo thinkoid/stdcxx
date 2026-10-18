@@ -853,12 +853,8 @@ bool is_char (const unsigned char*) { return true; }
 template <class charT>
 bool is_wchar_t (charT) { return false; }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 bool is_wchar_t (wchar_t) { return true; }
 bool is_wchar_t (const wchar_t*) { return true; }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 template <class charT, class T>
@@ -967,14 +963,10 @@ void test_formatted (charT)
 
     if (is_wchar_t (charT ())) {
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
-
         //////////////////////////////////////////////////////////////////
         // exercise operator<< (basic_ostream, wchar_t)
         TEST (T (L'b'), 0, 0, "b");
         TEST (T (L'B'), 0, 0, "B");
-
-#endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
     }
     else {
@@ -1460,11 +1452,7 @@ run_test (int, char**)
 {
     run_test (char ());
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     run_test (wchar_t ());
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

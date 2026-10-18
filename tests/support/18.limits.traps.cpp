@@ -179,9 +179,7 @@ run_test (int, char*[])
     TEST (unsigned _RWSTD_LONG_LONG, false);
 #endif   // _RWSTD_NO_LONG_LONG
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
     TEST (wchar_t, false);
-#endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
     TEST (float, true);
     TEST (double, true);

@@ -100,9 +100,7 @@ do_test ()
         "[STDOUT_FILENO]"
         "[cout,1][stdout,1][cout,2][stdout,2]"
 
-#ifndef _RWSTD_NO_WCHAR_T
         "[wcout,1][stdout,3][wcout,2][stdout,4]"
-#endif   // _RWSTD_NO_WCHAR_T
     };
 
     static const char stderr_expect[] = {
@@ -110,10 +108,8 @@ do_test ()
         "[cerr,1][stderr,1][cerr,2][stderr,2]"
         "[clog,1][stderr,3][clog,2][stderr,4]"
 
-#ifndef _RWSTD_NO_WCHAR_T
         "[wcerr,1][stderr,5][wcerr,2][stderr,6]"
         "[wclog,1][stderr,7][wclog,2][stderr,8]"
-#endif   // _RWSTD_NO_WCHAR_T
     };
 
     static const char stdio_expect[] = {
@@ -123,12 +119,10 @@ do_test ()
         "[clog,1][stderr,3][clog,2][stderr,4]"
         "[stdout,2]"   // but [stdout,2] flushed here
 
-#ifndef _RWSTD_NO_WCHAR_T
         "[wcout,1][stdout,3][wcout,2]"   // no [stdout,2] here
         "[wcerr,1][stderr,5][wcerr,2][stderr,6]"
         "[wclog,1][stderr,7][wclog,2][stderr,8]"
         "[stdout,4]"   // but [stdout,2] flushed here
-#endif   // _RWSTD_NO_WCHAR_T
     };
 
     rw_info (0, __FILE__, __LINE__,
@@ -335,8 +329,6 @@ exec_stdio_setup (const char* stdio_fname)
     std::clog << "[clog,2]";
     std::fprintf (stderr, "[stderr,4]");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     std::wcout << "[wcout,1]";
     std::printf ("[stdout,3]");
     std::wcout << "[wcout,2]";
@@ -350,8 +342,6 @@ exec_stdio_setup (const char* stdio_fname)
     std::fprintf (stderr, "[stderr,7]");
     std::wclog << "[wclog,2]";
     std::fprintf (stderr, "[stderr,8]");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

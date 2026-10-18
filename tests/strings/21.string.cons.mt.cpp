@@ -62,8 +62,6 @@ shared [nstrings] = {
 };
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 const wchar_t* const
 wdata [] = {
     /*  0 */ L"",
@@ -81,8 +79,6 @@ wshared [nstrings] = {
     wdata [0], wdata [1], wdata [2], wdata [3],
     wdata [4], wdata [5], wdata [6], wdata [7]
 };
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /**************************************************************************/
 
@@ -166,11 +162,7 @@ thread_func (void *arg)
 
     if (test_wstring) {
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         test_string_cons<wchar_t>(wdata, wshared, threadno);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     }
     else {
@@ -213,8 +205,6 @@ run_test (int, char**)
                    data [i], &shared [i]);
     }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     rw_info (0, 0, 0,
              "testing std::wstring with %d thread%{?}s%{;}, "
              "%d iteration%{?}s%{;} each",
@@ -240,8 +230,6 @@ run_test (int, char**)
                    "shared string modifed from %#ls to %{#lS}",
                    wdata [i], &wshared [i]);
     }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return result;
 }

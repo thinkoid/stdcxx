@@ -289,12 +289,8 @@ test_synopsis (std::bitset<0>*)
     MEMFUN (std::basic_string<PARAMLIST_3 (char) >,
             to_string, (char, char) const);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     MEMFUN (std::basic_string<PARAMLIST_3 (wchar_t) >,
             to_string<PARAMLIST_3 (wchar_t) >, (wchar_t, wchar_t) const);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     MEMFUN (std::basic_string<PARAMLIST_3 (int) >,
             to_string<PARAMLIST_3 (int) >, (int, int) const);
@@ -332,14 +328,10 @@ test_synopsis (std::bitset<0>*)
     FUN (std::basic_ostream< PARAMLIST (char) >&, std::operator<<,
          (std::basic_ostream< PARAMLIST (char) >&, const Bitset&));
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     FUN (std::basic_istream< PARAMLIST (wchar_t) >&, std::operator>>,
          (std::basic_istream< PARAMLIST (wchar_t) >&, Bitset&));
     FUN (std::basic_ostream< PARAMLIST (wchar_t) >&, std::operator<<,
          (std::basic_ostream< PARAMLIST (wchar_t) >&, const Bitset&));
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     // MSVC is too dumb to handle bitset inserters and extractors
     // parametrized on multiple template paramenters
@@ -731,9 +723,7 @@ struct char_traits<UserChar>: UserTraits<UserChar> { };
 
 const char* type_name (char) { return "char"; }
 
-#ifndef _RWSTD_NO_WCHAR_T
 const char* type_name (wchar_t) { return "wchar_t"; }
-#endif   // _RWSTD_NO_WCHAR_T
 
 const char* type_name (const UserChar&)
 {
@@ -969,9 +959,7 @@ bitset_to_string_0 (const std::bitset<N> &bs, int nfargs,
 inline char to_char (char ch) { return ch; }
 inline char to_char (UserChar ch) { return ch.c; }
 
-#ifndef _RWSTD_NO_WCHAR_T
 inline char to_char (wchar_t ch) { return char (ch); }
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 // convert a basic_string object to a tempstr object for diagnostics
@@ -1244,15 +1232,11 @@ void test_to_string (const std::bitset<N>*)
                     (std::allocator<char>*)0,
                     false);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     test_to_string ((std::bitset<N>*)0,
                     (wchar_t*)0,
                     (std::char_traits<wchar_t>*)0,
                     (std::allocator<wchar_t>*)0,
                     true);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     test_to_string ((std::bitset<N>*)0,
                     (UserChar*)0,

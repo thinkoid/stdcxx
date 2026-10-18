@@ -55,8 +55,6 @@ int main ()
 
     std::remove (tmpfname);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     std::wfilebuf wfb;
 
     assert (0 != wfb.open (tmpfname, std::ios::out));
@@ -75,8 +73,6 @@ int main ()
     wfb.close ();
 
     std::remove (tmpfname);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

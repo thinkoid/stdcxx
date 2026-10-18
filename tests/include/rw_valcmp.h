@@ -90,8 +90,6 @@ _TEST_EXPORT int
 rw_strncmp (const char*, const char*,
             _RWSTD_SIZE_T = _RWSTD_SIZE_MAX, int = CMP_NULTERM);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 _TEST_EXPORT int
 rw_strncmp (const char*, const wchar_t*,
             _RWSTD_SIZE_T = _RWSTD_SIZE_MAX, int = CMP_NULTERM);
@@ -103,8 +101,6 @@ rw_strncmp (const wchar_t*, const char*,
 _TEST_EXPORT int
 rw_strncmp (const wchar_t*, const wchar_t*,
             _RWSTD_SIZE_T = _RWSTD_SIZE_MAX, int = CMP_NULTERM);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 /**

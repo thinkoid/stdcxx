@@ -154,8 +154,6 @@ protected:
 };
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <>
 class _TEST_EXPORT UserCtype<wchar_t>
     : public std::ctype<wchar_t>, public UserCtypeBase
@@ -209,8 +207,6 @@ protected:
     do_narrow (const char_type*, const char_type*, char, char*) const;
 };
 
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 namespace std {

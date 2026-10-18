@@ -99,13 +99,9 @@ struct MyMoneyData
     char ncs_ [BufferSize];
     std::string ncs_digits_;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     // wide locale specific representations of units_
     wchar_t wcs_ [BufferSize];
     std::wstring wcs_digits_;
-
-#endif // _RWSTD_NO_WCHAR_T
 
 } my_money_data [MAX_THREADS];
 
@@ -154,12 +150,10 @@ thread_func (void*)
     std::basic_string<char, std::char_traits<char>  > str;
     nio.rdbuf (&nsb);
 
-#ifndef _RWSTD_NO_WCHAR_T
     MyIos<wchar_t, std::char_traits<wchar_t> >       wio;
     MyStreambuf<wchar_t, std::char_traits<wchar_t> > wsb;
     std::basic_string<wchar_t, std::char_traits<wchar_t>  > wstr;
     wio.rdbuf (&wsb);
-#endif // _RWSTD_NO_WCHAR_T
 
     std::ios_base::iostate state = std::ios_base::goodbit;
 
@@ -210,8 +204,6 @@ thread_func (void*)
         if (test_wchar) {
             // exercise the wide char specialization of the facet
 
-#ifndef _RWSTD_NO_WCHAR_T
-
             const std::money_get<wchar_t> &wg =
                 std::use_facet<std::money_get<wchar_t> >(loc);
 
@@ -234,8 +226,6 @@ thread_func (void*)
                                         data.wcs_digits_.c_str ()));
             }
 
-#endif   // _RWSTD_NO_WCHAR_T
-
         }
     }
 
@@ -253,11 +243,9 @@ run_test (int, char**)
     MyStreambuf<char, std::char_traits<char> > nsb;
     nio.rdbuf (&nsb);
 
-#ifndef _RWSTD_NO_WCHAR_T
     MyIos<wchar_t, std::char_traits<wchar_t> >       wio;
     MyStreambuf<wchar_t, std::char_traits<wchar_t> > wsb;
     wio.rdbuf (&wsb);
-#endif // _RWSTD_NO_WCHAR_T
 
     // find all installed locales for which setlocale (LC_ALL) succeeds
     const char* const locale_list =
@@ -329,8 +317,6 @@ run_test (int, char**)
                     continue;
             }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
             // local scope
             {
                 const std::money_put<wchar_t> &wp =
@@ -361,8 +347,6 @@ run_test (int, char**)
                 if (state & std::ios_base::failbit)
                     continue;
             }
-
-#endif // _RWSTD_NO_WCHAR_T
 
             if (opt_shared_locale)
                 data.locale_ = loc;
@@ -404,8 +388,6 @@ run_test (int, char**)
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     rw_info (0, 0, 0, "exercising std::money_get<wchar_t>");
 
     test_char  = false;
@@ -438,8 +420,6 @@ run_test (int, char**)
     rw_error (result == 0, 0, __LINE__,
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return result;
 }

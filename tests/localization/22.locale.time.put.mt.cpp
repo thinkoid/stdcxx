@@ -92,12 +92,8 @@ struct MyTimeData
     // locale_name_ and the format_
     char ncs_ [BufferSize];
     
-#ifndef _RWSTD_NO_WCHAR_T
-
     // wide representations of time_
     wchar_t wcs_ [BufferSize];
-
-#endif // _RWSTD_NO_WCHAR_T
 
 } my_time_data [MAX_THREADS];
 
@@ -140,12 +136,10 @@ thread_func (void*)
     MyStreambuf<char, std::char_traits<char> > nsb;
     nio.rdbuf (&nsb);
 
-#ifndef _RWSTD_NO_WCHAR_T
     wchar_t                 wcs [MyTimeData::BufferSize];
     MyIos<wchar_t, std::char_traits<wchar_t> >       wio;
     MyStreambuf<wchar_t, std::char_traits<wchar_t> > wsb;
     wio.rdbuf (&wsb);
-#endif // _RWSTD_NO_WCHAR_T
 
     for (int i = 0; i != opt_nloops; ++i) {
 
@@ -185,8 +179,6 @@ thread_func (void*)
         if (test_wchar) {
             // exercise the wide char specialization of the facet
 
-#ifndef _RWSTD_NO_WCHAR_T
-
             const std::time_put<wchar_t> &wp =
                 std::use_facet<std::time_put<wchar_t> >(loc);
 
@@ -198,8 +190,6 @@ thread_func (void*)
 
             RW_ASSERT (!wio.fail ());
             RW_ASSERT (!rw_strncmp(wcs, data.wcs_));
-
-#endif // _RWSTD_NO_WCHAR_T
 
         }
     }
@@ -218,11 +208,9 @@ run_test (int, char**)
     MyStreambuf<char, std::char_traits<char> > nsb;
     nio.rdbuf (&nsb);
 
-#ifndef _RWSTD_NO_WCHAR_T
     MyIos<wchar_t, std::char_traits<wchar_t> >       wio;
     MyStreambuf<wchar_t, std::char_traits<wchar_t> > wsb;
     wio.rdbuf (&wsb);
-#endif // _RWSTD_NO_WCHAR_T
 
     // find all installed locales for which setlocale (LC_ALL) succeeds
     const char* const locale_list =
@@ -275,8 +263,6 @@ run_test (int, char**)
                       "failed for locale(%#s)",
                       data.format_, data.locale_name_);
             
-#ifndef _RWSTD_NO_WCHAR_T
-
             const std::time_put<wchar_t> &wp =
                 std::use_facet<std::time_put<wchar_t> >(loc);
 
@@ -290,8 +276,6 @@ run_test (int, char**)
                       "time_put<wchar_t>::put(..., %c) "
                       "failed for locale(%#s)",
                       data.format_, data.locale_name_);
-
-#endif // _RWSTD_NO_WCHAR_T
 
             if (opt_shared_locale)
                 data.locale_ = loc;
@@ -333,8 +317,6 @@ run_test (int, char**)
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     rw_info (0, 0, 0, "exercising std::time_put<wchar_t>");
 
     test_char  = false;
@@ -366,8 +348,6 @@ run_test (int, char**)
     rw_error (result == 0, 0, __LINE__,
               "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
               opt_nthreads, thread_func);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return result;
 }

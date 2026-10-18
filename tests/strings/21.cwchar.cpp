@@ -747,9 +747,7 @@ GET_TYPE_NAME (_RWSTD_LONG_LONG);
 GET_TYPE_NAME (unsigned _RWSTD_LONG_LONG);
 #endif
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
 GET_TYPE_NAME (wchar_t);
-#endif
 
 GET_TYPE_NAME (wchar_t*);
 GET_TYPE_NAME (const wchar_t*);

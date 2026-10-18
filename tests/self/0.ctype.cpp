@@ -460,9 +460,7 @@ run_test (int, char**)
 {
     test ((char*)0, "char");
 
-#ifndef _RWSTD_NO_WCHAR_T
     test ((wchar_t*)0, "wchar_t");
-#endif   // _RWSTD_NO_WCHAR_T
 
     test ((UserChar*)0, "UserChar");
 

@@ -222,8 +222,6 @@ rw_any_t::rw_any_t (const volatile char* value)
     val_.pvoid_ = value;
 }
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
-
 rw_any_t::rw_any_t (wchar_t value)
     : str_ (0), tid_ (t_wchar)
 {
@@ -231,10 +229,6 @@ rw_any_t::rw_any_t (wchar_t value)
     val_.wchar_ = value;
 }
 
-#endif   // _RWSTD_NO_NATIVE_WCHAR_T
-
-
-#ifndef _RWSTD_NO_WCHAR_T
 
 rw_any_t::rw_any_t (wchar_t* value)
     : str_ (0), tid_ (t_wstr)
@@ -263,8 +257,6 @@ rw_any_t::rw_any_t (const volatile wchar_t* value)
     memset (&val_, 0, sizeof val_);
     val_.pvoid_ = value;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 rw_any_t::rw_any_t (const rw_any_t &rhs)
@@ -432,15 +424,11 @@ rw_any_t::tostr (const char *fmt /* = 0 */)
         str_ = rw_sprintfa (fmt, val_.pvoid_);
         break;
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
-
     case t_wchar:
         if (0 == fmt)
             fmt = "%lc";
         str_ = rw_sprintfa (fmt, val_.wchar_);
         break;
-
-#endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
     case t_str:
     case t_c_str:
@@ -451,8 +439,6 @@ rw_any_t::tostr (const char *fmt /* = 0 */)
         str_ = rw_sprintfa (fmt, val_.pvoid_);
         break;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     case t_wstr:
     case t_c_wstr:
     case t_v_wstr:
@@ -461,8 +447,6 @@ rw_any_t::tostr (const char *fmt /* = 0 */)
             fmt = "%ls";
         str_ = rw_sprintfa (fmt, val_.pvoid_);
         break;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     }
 

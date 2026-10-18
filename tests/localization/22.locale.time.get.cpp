@@ -1649,13 +1649,9 @@ run_test (int, char**)
 
     test_user (char (), "char", locname);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     test_posix (wchar_t (), "wchar_t");
 
     test_user (wchar_t (), "wchar_t", locname);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     // reset the gloab locale to free up resources (such as file
     // descriptors used by time_get_byname to map locale databases)

@@ -188,8 +188,6 @@ bitset_ctor (std::bitset<N>*,
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 // invokes coverting bitset ctor from basic_string<wchar_t, ...>
 template <std::size_t N, class Traits, class Allocator>
 std::bitset<N>
@@ -219,8 +217,6 @@ bitset_ctor (std::bitset<N>*,
     return std::bitset<N>();
 
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 // invokes coverting bitset ctor from basic_string<UserChar, ...>
@@ -282,11 +278,7 @@ bitset_ctor (std::bitset<N>*,
 template <class charT>
 const char* type_prefix (charT) { return ""; }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 const char* type_prefix (wchar_t) { return "L"; }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 enum { InvalidArgument = 1, OutOfRange };
 
@@ -745,8 +737,6 @@ run_test (int, char**)
         rw_note (0, 0, __LINE__, "tests of char specialization disabled");
     }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     if (0 <= opt_wchar) {
         typedef std::char_traits<wchar_t> WideTraits;
 
@@ -755,8 +745,6 @@ run_test (int, char**)
     else {
         rw_note (0, 0, __LINE__, "tests of wchar_t specialization disabled");
     }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     if (0 <= opt_userchar) {
         test_ctors ((UserTraits<UserChar>*)0, "UserChar");

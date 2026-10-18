@@ -76,15 +76,11 @@ inline char make_char (char c, char*)
     return c;
 }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 inline wchar_t make_char (char c, wchar_t*)
 {
     typedef unsigned char UChar;
     return wchar_t (UChar (c));
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 // the value of a character of any of the three types, as an int,
@@ -97,14 +93,10 @@ inline int char_value (char c)
     return int (UChar (c));
 }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 inline int char_value (wchar_t c)
 {
     return int (c);
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 inline int char_value (const UserChar &c)
 {
@@ -287,8 +279,6 @@ private:
 };
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 // required specialization on wchar_t
 template <>
 struct _TEST_EXPORT UserTraits<wchar_t>: std::char_traits<wchar_t>
@@ -356,8 +346,6 @@ private:
     ~UserTraits ();
     void operator= (UserTraits&);
 };
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 template <>

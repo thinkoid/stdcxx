@@ -200,8 +200,6 @@ struct Limits<unsigned char>
     }
 };
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
-
 template <>
 struct Limits<wchar_t>
 {
@@ -246,8 +244,6 @@ struct Limits<wchar_t>
         return std::sprintf (buf, "%u", wchar_t (~0)) - 1;
     }
 };
-
-#endif //_RWSTD_NO_NATIVE_WCHAR_T
 
 
 template <>
@@ -604,11 +600,7 @@ run_test (int, char**)
 
 #endif   // _RWSTD_LONG_LONG
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
-
     TEST (wchar_t, "%{#lc}");
-
-#endif   //_RWSTD_NO_NATIVE_WCHAR_T
  
     TEST (void*, "%#p");
 

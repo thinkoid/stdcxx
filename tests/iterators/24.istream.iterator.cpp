@@ -403,8 +403,6 @@ run_test (int, char*[])
                 do_test<char, UsrTraits>(id, "char", "UserTraits<char>");
         }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         if (0 <= opt_wchar_t) {
 
             typedef std::char_traits<wchar_t> WTraits;
@@ -417,8 +415,6 @@ run_test (int, char*[])
                                              "UserTraits<wchar_t>");
 
         }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     }
 

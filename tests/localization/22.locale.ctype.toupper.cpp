@@ -143,8 +143,6 @@ char widen (char, char ch, const char*)
     return ch;
 }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 wchar_t libc_tolower (wchar_t ch)
 {
     return (std::towlower)(ch);
@@ -194,8 +192,6 @@ wchar_t widen (wchar_t, char ch, const char *locname)
 
     return result;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /**************************************************************************/
 

@@ -484,8 +484,6 @@ test_codecvt_byname ()
 
 /****************************************************************************/
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 typedef std::codecvt<wchar_t, char, std::mbstate_t>        WCodecvt;
 typedef std::codecvt_byname<wchar_t, char, std::mbstate_t> WCodecvtByname;
 
@@ -1066,8 +1064,6 @@ test_wcodecvt_byname ()
     test_wcodecvt_byname_libc_based ();
 }
 
-#endif   // _RWSTD_NO_WCHAR_T
-
 /****************************************************************************/
 
 static int
@@ -1081,17 +1077,9 @@ run_test (int, char**)
     test_codecvt ();
     test_codecvt_byname ();
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     // exercise wchar_t specializations
     test_wcodecvt ();
     test_wcodecvt_byname ();
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    rw_warn (0, 0, __LINE__, "_RWSTD_NO_WCHAR_T #defined, cannot test");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

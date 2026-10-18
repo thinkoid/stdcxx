@@ -66,14 +66,10 @@ using std::cout;
 using std::cerr;
 using std::clog;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 using std::wcin;
 using std::wcout;
 using std::wcerr;
 using std::wclog;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 /**************************************************************************/
 
@@ -110,13 +106,9 @@ LifetimeChecker::~LifetimeChecker ()
         std::cerr << "[cerr]";
         std::clog << "[clog]";
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         std::wcout << "[wcout]";
         std::wcerr << "[wcerr]";
         std::wclog << "[wclog]";
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     }
 }
@@ -169,8 +161,6 @@ void do_test (charT)
     rw_assert (0 == new_calls - new_0, 0, __LINE__,
                "unexpected dynamic memory allocation");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     rw_assert (   0 != &std::wcin  && 0 != &std::wcout
                && 0 != &std::wcerr && 0 != &std::wclog,
                0, __LINE__, "std::wcin, wcout, wcerr, or wclog address 0");
@@ -207,19 +197,13 @@ void do_test (charT)
     rw_assert (0 == new_calls - new_0, 0, __LINE__,
                "unexpected dynamic memory allocation");
 
-#endif   // _RWSTD_NO_WCHAR_T
-
     std::cout << 0.0;
     std::cerr << 0.0;
     std::clog << 0.0;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     std::wcout << 0.0;
     std::wcerr << 0.0;
     std::wclog << 0.0;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     std::cout << std::endl;
 
@@ -236,8 +220,6 @@ void do_test (charT)
     std::clog.tie (&std::clog);
     std::clog << std::clog.tie () << ' ';
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     std::wcout.tie (&std::wcout);
     std::wcout << std::wcout.tie () << ' ';
 
@@ -246,8 +228,6 @@ void do_test (charT)
 
     std::wclog.tie (&std::wclog);
     std::wclog << std::wclog.tie () << ' ';
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
     rw_info (0, 0, __LINE__, "exercising the ability to tie stream objects "
@@ -269,8 +249,6 @@ void do_test (charT)
     std::cerr.tie (0);
     std::clog.tie (0);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     std::wcout.tie (&std::wcerr);
     std::wcout << std::wcout.tie () << ' ';
 
@@ -286,8 +264,6 @@ void do_test (charT)
     std::wcout.tie (0);
     std::wcerr.tie (0);
     std::wclog.tie (0);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     std::cout << std::endl;
 }

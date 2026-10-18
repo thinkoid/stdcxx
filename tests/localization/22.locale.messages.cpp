@@ -785,11 +785,7 @@ run_test (int, char*[])
 
     test_messages (char (), "char", locname);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     test_messages (wchar_t (), "wchar_t", locname);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     std::remove (CAT_NAME);
 

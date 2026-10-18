@@ -302,8 +302,6 @@ bool cond3 (std::ctype_base::mask, char, const char*)
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 int libc_isalpha (wchar_t ch)
 {
     return (std::iswalpha)(ch);
@@ -526,8 +524,6 @@ bool cond3 (std::ctype_base::mask mask, wchar_t ch, const char *locname)
 
     return result;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 template <class charT>
@@ -1614,15 +1610,11 @@ run_test (int, char**)
 {
     test_libc (char (), "char");
 
-#ifndef _RWSTD_NO_WCHAR_T
     test_libc (wchar_t (), "wchar_t");
-#endif   // _RWSTD_NO_WCHAR_T
 
     test_libstd (char (), "char");
 
-#ifndef _RWSTD_NO_WCHAR_T
     test_libstd (wchar_t (), "wchar_t");
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 }

@@ -312,7 +312,6 @@ std::string Def::convert_string (const std::string &str1)
 
 }
 
-#ifndef _RWSTD_NO_WCHAR_T
 // converts a collating element definition to an array of wide characters
 // (the wide characters the collating element is composed of).
 
@@ -406,8 +405,6 @@ Def::convert_wstring (const token_t& t)
     return ret;
    
 }
-
-#endif  // _RWSTD_NO_WCHAR_T
 
 
 // automatically fill any categories that depend on other categories

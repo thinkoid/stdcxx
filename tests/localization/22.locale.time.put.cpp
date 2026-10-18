@@ -1835,13 +1835,9 @@ run_test (int, char*[])
    // exercise std::time_put in a user-specified locale
     test_user (char (), "char");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     test_POSIX (wchar_t (), "wchar_t");
 
     test_user (wchar_t (), "wchar_t");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     return 0;
 

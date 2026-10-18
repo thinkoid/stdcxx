@@ -417,8 +417,6 @@ test_string ()
     const void* addr = bad_address (0);
     TEST ("%s", addr, 0, 0, format_bad_address (addr, false));
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "\"%ls\": wide character string");
 
@@ -431,8 +429,6 @@ test_string ()
     TEST ("%ls", addr, 0, 0, format_bad_address (addr, true));
 
     fprintf (stderr, "Warning: %s\n", "\"%ls\" not exercised");
-
-#endif   //  _RWSTD_NO_WCHAR_T
 
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "extension: \"%{#s}\": quoted character string");
@@ -466,8 +462,6 @@ test_string ()
     TEST ("%{#*s}", 3, "\0\0\0y", 0, "\"\\0\\0\\0\"");
     TEST ("%{#*s}", 4, "\0\0\0z", 0, "\"\\0\\0\\0z\"");
     TEST ("%{#*s}", 5, "\0\0\0z", 0, "\"\\0\\0\\0z\\0\"");
-
-#ifndef _RWSTD_NO_WCHAR_T
 
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "extension: \"%{#ls}\": quoted wide character string");
@@ -507,8 +501,6 @@ test_string ()
 
     addr = bad_address (sizeof (wchar_t));
     TEST ("%{#ls}", addr,  0, 0, format_bad_address (addr, true));
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }
 
@@ -559,11 +551,7 @@ test_chararray ()
     TEST ("%{*.7Ac}", 1,    "abc\0def", 0, "\"abc\\0def\"");
     TEST ("%{*.*Ac}", 1, 7, "abcd\0ef",    "\"abcd\\0ef\"");
 
-#ifndef _RWSTD_NO_WCHAR_T
     const unsigned wchar_size = sizeof (wchar_t);
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-    const unsigned wchar_size = 0;
-#endif   // _RWSTD_NO_WCHAR_T
 
     if (2 == wchar_size) {
         TEST ("%{2Ac}", 0,      0, 0, "(null)");
@@ -732,12 +720,10 @@ test_basic_string ()
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "extension: \"%{lS}\": std::wstring");
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     std::wstring wstr;
 
-#  undef WS
-#  define WS(ws)   \
+#undef WS
+#define WS(ws)   \
       &(wstr = std::wstring (L ## ws, sizeof L ## ws / sizeof (wchar_t) - 1))
 
     TEST ("%{lS}",  0,                 0, 0, "(null)");
@@ -753,13 +739,6 @@ test_basic_string ()
     TEST ("%{#lS}", WS ("ab\0"),       0, 0, "\"ab\\0\"");
     TEST ("%{#lS}", WS ("a\0\0"),      0, 0, "\"a\\0\\0\"");
     TEST ("%{#lS}", WS ("\0\0\0"),     0, 0, "\"\\0\\0\\0\"");
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    fprintf (stderr, "Warning: %s\n", "\"%{lS}\" not exercised: "
-             "_RWSTD_NO_WCHAR_T #defined");
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     //////////////////////////////////////////////////////////////////
     printf ("%s\n", "extension: \"%{#*S}\": std::basic_string<charT> with "
