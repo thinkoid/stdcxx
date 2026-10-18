@@ -617,10 +617,6 @@
 #endif   // _RWSTD_NO_EXCEPTIONS
 
 
-// support for building the new locale (v.3)
-#define _RWSTD_USE_FACET(type, arg)   std::use_facet< type >(arg)
-
-
 // to prevent warnings about unused arguments
 #define _RWSTD_UNUSED(arg)   ((void)&arg)
 

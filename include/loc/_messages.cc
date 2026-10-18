@@ -80,7 +80,7 @@ messages<_CharT>::do_get (messages_base::catalog __cat,
         typedef typename _CodeCvt::state_type state_type;
 
         const _CodeCvt& __codecvt =
-            _RWSTD_USE_FACET (_CodeCvt, __rw::__rw_get_locale (__cat));
+            std::use_facet< _CodeCvt >(__rw::__rw_get_locale (__cat));
 
         if (sizeof (_CharT) == sizeof (char) && __codecvt.always_noconv ()) {
             // lwg issue 19: always_noconv() is only allowed to return
@@ -133,7 +133,7 @@ messages<_CharT>::do_get (messages_base::catalog __cat,
                 typedef ctype<_CharT> _Ctype;
 
                 const _Ctype& __ctp =
-                    _RWSTD_USE_FACET (_Ctype, __rw::__rw_get_locale (__cat));
+                    std::use_facet< _Ctype >(__rw::__rw_get_locale (__cat));
 
                 for (_SizeT __i = 0; __i != __src_len; ++__i)
                     __dst_first [__i] = __ctp.widen (__text [__i]);

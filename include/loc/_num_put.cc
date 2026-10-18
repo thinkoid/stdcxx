@@ -76,7 +76,7 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
         const void *__pval) const
 {
     const numpunct<char_type> &__np =
-        _RWSTD_USE_FACET (numpunct<char_type>, __flags.getloc ());
+        std::use_facet< numpunct<char_type> >(__flags.getloc ());
 
     char __buf [_RWSTD_DBL_MAX_10_EXP];
 
@@ -132,7 +132,7 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
     }
 
     const ctype<char_type> &__ctp =
-        _RWSTD_USE_FACET (ctype<char_type>, __flags.getloc ());
+        std::use_facet< ctype<char_type> >(__flags.getloc ());
 
     const char *__p = __pbuf;
 

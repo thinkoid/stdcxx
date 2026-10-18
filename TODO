@@ -118,22 +118,6 @@ Check: the gate retirements' oracles: preprocessed tokens, library
 and test objects, fresh =config.h= under gcc and eccp, the suite at
 the pin.
 
-** TODO =_RWSTD_USE_FACET= has one definition
-
-=_RWSTD_USE_FACET (type, arg)= in =include/rw/_defs.h= spelled
-=std::use_facet< type >(arg)=, or the unqualified call when
-=_RWSTD_NO_HONOR_STD= was defined. That gate went on 2026-10-18 and
-the macro has one definition at 60 sites: the convenience header,
-the facet sources under =include/loc=, =src/use_facet.h= and
-=22.locale.moneypunct=. It was kept on 2026-10-17 only because the
-gate was still open.
-
-Fix: spell the call at the sites, the one-definition macros' pattern
-of 2026-10-17; a type argument that carries a comma needs a hand.
-
-Check: preprocessed tokens identical but for the spelling; the suite
-at the pin.
-
 ** TODO The twins' seam in the range members of =vector= and =deque=
 
 The seven out-of-class range members, =_C_assign_range= and
