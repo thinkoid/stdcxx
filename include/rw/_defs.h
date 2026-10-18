@@ -1374,26 +1374,6 @@ _RWSTD_NAMESPACE (std) {
 #endif   // _RWSTD_NO_EXTERN_TEMPLATE
 
 
-// configuration for container class templates and their member
-// function templates
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-   // member function template definitions outside the body
-   // of the parent container class template are enabled
-#  define _RWSTD_ASSIGN_RANGE(first, last, tag)     \
-          _C_assign_range (first, last, tag)
-#  define _RWSTD_INSERT_RANGE(it, first, last, tag) \
-          _C_insert_range (it, first, last, tag)
-#else
-   // when member function template definitions outside the body
-   // of the parent container class template are disabled, they
-   // are emulated using namespace-scope function templates
-#  define _RWSTD_ASSIGN_RANGE(first, last, tag)       \
-          __rw_assign_range (this, first, last, tag)
-#  define _RWSTD_INSERT_RANGE(it, first, last, tag)   \
-          __rw_insert_range (this, it, first, last, tag)
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
-
-
 #if defined (va_copy) || !defined _RWSTD_NO_VA_COPY
    // either va_copy() is already #defined (because <stdarg.h>
    // is already #included), or it was detected at configuration

@@ -59,25 +59,6 @@ _RWSTD_NAMESPACE (std) {
 template <class _TypeT, class _Allocator = allocator<_TypeT> >
 class deque;
 
-#ifdef _RWSTD_NO_MEMBER_TEMPLATES
-
-// declarations of non-member function templates implementing
-// the functionality of deque member function templates
-
-template <class _TypeT, class _Allocator, class _Iterator>
-void __rw_assign_range (deque<_TypeT, _Allocator>*,
-                        _Iterator, _Iterator, input_iterator_tag);
-
-template <class _TypeT, class _Allocator, class _DequeIter, class _Iterator>
-void __rw_insert_range (deque<_TypeT, _Allocator>*, _DequeIter,
-                        _Iterator, _Iterator, input_iterator_tag);
-
-template <class _TypeT, class _Allocator, class _DequeIter, class _Iterator>
-void __rw_insert_range (deque<_TypeT, _Allocator>*, _DequeIter,
-                        _Iterator, _Iterator, bidirectional_iterator_tag);
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
-
 
 template <class _TypeT, class _DiffT, class _Pointer,
           class _Reference, class _Allocator>
@@ -605,16 +586,6 @@ public:
     }
 #endif
 
-#ifdef _RWSTD_NO_MEMBER_TEMPLATES
-
-    // the non-member range insert reaches the reserve
-    template <class _TypeU, class _AllocU, class _DequeIter, class _Iterator>
-    friend void __rw_insert_range (deque<_TypeU, _AllocU>*, _DequeIter,
-                                   _Iterator, _Iterator,
-                                   bidirectional_iterator_tag);
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
-
 private:
 
     // The non-null map slots form one contiguous owned span. The live
@@ -704,8 +675,6 @@ private:
     // implements insert with repetition
     void _C_insert_n (const iterator&, size_type, const_reference);
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
     // the direct range insert, for sources whose operations cannot throw
     template <class _Iterator>
     void _C_insert_range (iterator, _Iterator, _Iterator,
@@ -716,18 +685,12 @@ private:
     void _C_insert_range (iterator, _Iterator, _Iterator,
                           input_iterator_tag);
 
-#else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
-
-public:
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
-
     // implements range assign
     template <class _Iterator>
     void _C_assign (_Iterator __first, _Iterator __last, void*) {
         _RWSTD_ASSERT_RANGE (__first, __last);
 
-        _RWSTD_ASSIGN_RANGE (__first, __last, input_iterator_tag ());
+        _C_assign_range (__first, __last, input_iterator_tag ());
     }
 
     // implements assign with repetition if value_type == size_type
@@ -748,29 +711,31 @@ public:
         _RWSTD_ASSERT_RANGE (begin (), __it);
         _RWSTD_ASSERT_RANGE (__first, __last);
 
-        _RWSTD_INSERT_RANGE (__it, __first, __last, input_iterator_tag ());
+        _C_insert_range (__it, __first, __last, input_iterator_tag ());
     }
 
     void _C_insert (const iterator &__it, pointer __first,
                     pointer __last, void*) {
-        _RWSTD_INSERT_RANGE (__it, __first, __last, bidirectional_iterator_tag ());
+        _C_insert_range (__it, __first, __last,
+                         bidirectional_iterator_tag ());
     }
 
     void _C_insert (const iterator &__it, const_pointer __first,
                     const_pointer __last, void*) {
-        _RWSTD_INSERT_RANGE (__it, __first, __last, bidirectional_iterator_tag ());
+        _C_insert_range (__it, __first, __last,
+                         bidirectional_iterator_tag ());
     }
 
     void _C_insert (const iterator &__it, iterator __first,
                     iterator __last, void*) {
-        _RWSTD_INSERT_RANGE (__it, _ITER_BASE (__first), _ITER_BASE (__last),
-                             bidirectional_iterator_tag ());
+        _C_insert_range (__it, _ITER_BASE (__first), _ITER_BASE (__last),
+                         bidirectional_iterator_tag ());
     }
 
     void _C_insert (const iterator &__it, const_iterator __first,
                     const_iterator __last, void*) {
-        _RWSTD_INSERT_RANGE (__it, _ITER_BASE (__first), _ITER_BASE (__last),
-                             bidirectional_iterator_tag ());
+        _C_insert_range (__it, _ITER_BASE (__first), _ITER_BASE (__last),
+                         bidirectional_iterator_tag ());
     }
 
     // implements insert with repetition if value_type == size_type

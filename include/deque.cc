@@ -557,25 +557,12 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
 }
 
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
 template <class _TypeT, class _Allocator>
 template <class _Iterator>
 void deque<_TypeT, _Allocator>::
 _C_assign_range (_Iterator __first, _Iterator __last, input_iterator_tag)
 {
     deque* const __self = this;
-
-#else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
-
-template <class _TypeT, class _Allocator, class _Iterator>
-void
-__rw_assign_range (deque<_TypeT, _Allocator> *__self,
-                   _Iterator __first, _Iterator __last, input_iterator_tag)
-{
-    typedef _TYPENAME deque<_TypeT, _Allocator>::iterator iterator;
-    
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
     _RWSTD_ASSERT_RANGE (__first, __last);
     _RWSTD_ASSERT (__self->_C_is_valid ());
@@ -606,8 +593,6 @@ __rw_assign_range (deque<_TypeT, _Allocator> *__self,
 }
 
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
 template<class _TypeT, class _Allocator>
 template <class _Iterator>
 void deque<_TypeT, _Allocator>::
@@ -618,17 +603,6 @@ _C_insert_range (iterator __it,
     typedef deque _Deque;
 
     _Deque* const __self = this;
-
-#else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
-
-template <class _TypeT, class _Allocator, class _DequeIter, class _Iterator>
-void
-__rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
-                   _Iterator __first, _Iterator __last, input_iterator_tag)
-{
-    typedef deque<_TypeT, _Allocator> _Deque;
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
     _RWSTD_ASSERT_RANGE (__it, __self->end ());
     _RWSTD_ASSERT_RANGE (__first, __last);
@@ -653,8 +627,6 @@ __rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
 }
 
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
 template <class _TypeT, class _Allocator>
 template <class _Iterator>
 void deque<_TypeT, _Allocator>::
@@ -665,22 +637,6 @@ _C_insert_range (iterator __it,
     typedef deque _Deque;
 
     _Deque* const __self = this;
-
-#else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
-
-template <class _TypeT, class _Allocator, class _DequeIter, class _Iterator>
-void
-__rw_insert_range (deque<_TypeT, _Allocator> *__self, _DequeIter __it,
-                   _Iterator __first, _Iterator __last,
-                   bidirectional_iterator_tag)
-
-{
-    typedef deque<_TypeT, _Allocator>         _Deque;
-    typedef _TYPENAME _Deque::difference_type difference_type;
-    typedef _TYPENAME _Deque::size_type       size_type;
-    typedef _TYPENAME _Deque::iterator        iterator;
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
     _RWSTD_ASSERT_RANGE (__self->begin (), __it);
     _RWSTD_ASSERT_RANGE (__first, __last);
