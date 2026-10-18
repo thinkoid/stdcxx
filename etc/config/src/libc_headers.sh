@@ -32,22 +32,12 @@
 #
 #   $ rm -f header.h logfile.log
 #   $ touch header.h logfile.log
-#   $ libc_decl header.h logfile.log [headers]
+#   $ libc_headers header.h logfile.log [headers]
 #
 ##############################################################################
 
 output=/dev/tty
 logfile=/dev/tty
-
-OSNAME=`uname -s`
-
-if [ $OSNAME = "SunOS" -a -x /usr/xpg4/bin/basename ]; then
-    # use the POSIX basename rather than the one in /usr/bin
-    # to avoid interpreting the suffix in a special way
-    basename=/usr/xpg4/bin/basename
-else
-    basename=basename
-fi
 
 [ ! -d "$TMPDIR" ] && TMPDIR=/tmp
 
@@ -63,8 +53,11 @@ fi
 
 [ -r vars.sh ] && . ./vars.sh
 
-# include headers.inc file with the names of the headers to look for
-. $TOPDIR/etc/config/src/headers.inc
+# the headers to look for: the C library's by their C++ names without
+# the c prefix, the two C++ ones, and two POSIX ones by file name
+hdrs="assert ctype errno float iso646 limits locale math setjmp signal       \
+      stdarg stddef stdio stdlib string time wchar wctype new typeinfo"
+hdrs="$hdrs ieeefp.h pthread.h"
 
 if [ ! -z "$3" ]; then
     hdrs="$3"
@@ -74,22 +67,6 @@ fi
 
 CPPFLAGS="`echo $CPPFLAGS | sed 's:-I *[^ ]*::g'`"
 
-if [ "$CXX" = "aCC" ] ; then
-
-    cxx_major="`echo $CXX_VER | sed 's/.*\.\([0-9][0-9]*\)\..*/\1/'`"
-    echo $CXXFLAGS | grep '[-]Aa' >/dev/null 2>&1
-    has_Aa=$?
-
-    if [ "$cxx_major" -le "05" -a $has_Aa -eq 0 ] ; then
-        # prepend -I/usr/include to CXXOPTS for HP aCC when the -Aa
-        # command line option is specified (aCC 3 and 5 but not aCC
-        # 6 on IPF)
-        CXXFLAGS="$CXXFLAGS -I/usr/include"
-    fi
-
-    unset cxx_major
-fi
-
 capitalize='sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'
 
 ##############################################################################
@@ -97,7 +74,7 @@ capitalize='sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'
 
 for h in $hdrs ; do
 
-    hdr_base=`${basename} $h \.h`
+    hdr_base=`basename $h \.h`
     hdr=$h
 
     if [ "$hdr_base" = "$h" ] ; then

@@ -62,17 +62,14 @@ constructor, the way the =deque= test's loop now runs.
 
 The removal of the C library function probes (f43be017..a44256a6)
 kept to the code that read the probe macros. Its census found dead
-or stale code beside them; most went on 2026-10-18. Two items remain.
+or stale code beside them; most went on 2026-10-18. One item remains.
 
 - =21.cwchar= exercises none of =wcscoll=, =wcsncat=, =vswprintf=,
   =vwprintf=, =getwchar=, =putwchar=.
-- =libc_decl.sh= only looks for headers now; its name says more.
-  =headers.inc= holds one list, for one script.
 
-Fix: one commit per item; the =21.cwchar= coverage adds assertions
-and moves the pin.
+Fix: the =21.cwchar= coverage adds assertions and moves the pin.
 
-Check: the suite table; =make config= unchanged for the script.
+Check: the suite table.
 
 ** TODO The twins' seam in the range members of =vector= and =deque=
 
@@ -463,7 +460,7 @@ reserved, so strict mode may provide it; reported as
 https://github.com/edgcpp/compiler/discussions/185. =eccp_builtins.h=
 maps it onto =__INTADDR__=, EDG's own =offsetof= primitive; the
 characterization "a working offsetof() in <stddef.h>" passes with it.
-A =-D= cannot carry the definition: =libc_decl.sh= expands =$CPPFLAGS=
+A =-D= cannot carry the definition: =libc_headers.sh= expands =$CPPFLAGS=
 unquoted, the shell splits it at its spaces, and every header probe
 fails. The file leaves when EDG enters the keyword.
 
