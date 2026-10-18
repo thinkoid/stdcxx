@@ -1739,35 +1739,31 @@ find_locale (const char* locname, const char* codeset)
         { { 0 }, { 0 } }
     };
 
-    const char* name = std::setlocale (LC_ALL, locname);
-
+    // the index, `inx', of `locname' in the table, when it has one;
+    // the codeset check below needs it whichever name setlocale() took
     std::size_t inx = std::size_t (-1);
 
-    if (!name) {
+    for (std::size_t i = 0; i != sizeof aliases / sizeof *aliases; ++i) {
+        if (!aliases [i].locnames [0])
+            break;
 
-        // find the index, `inx', of `locname' in the table
-        for (std::size_t i = 0; i != sizeof aliases / sizeof *aliases; ++i) {
-            if (!aliases [i].locnames [0])
-                break;
-
-            if (!std::strcmp (locname, aliases [i].locnames [0])) {
-                inx = i;
-                break;
-            }
+        if (!std::strcmp (locname, aliases [i].locnames [0])) {
+            inx = i;
+            break;
         }
+    }
 
-        if (std::size_t (-1) != inx) {
+    // the name returned is the caller's or a table entry, never the
+    // buffer setlocale() returns, which the calls below overwrite
+    const char* name = std::setlocale (LC_ALL, locname) ? locname : 0;
 
-            // go through the locale name's aliases until one
-            // that's a valid argument to setlocale() is found
-            for (std::size_t j = 1; aliases [inx].locnames [j]; ++j) {
-                if (!aliases [inx].locnames [j])
-                    break;
-
-                if (std::setlocale (LC_ALL, aliases [inx].locnames [j])) {
-                    name = aliases [inx].locnames [j];
-                    break;
-                }
+    if (!name && std::size_t (-1) != inx) {
+        // go through the locale name's aliases until one
+        // that's a valid argument to setlocale() is found
+        for (std::size_t j = 1; aliases [inx].locnames [j]; ++j) {
+            if (std::setlocale (LC_ALL, aliases [inx].locnames [j])) {
+                name = aliases [inx].locnames [j];
+                break;
             }
         }
     }
@@ -1781,16 +1777,21 @@ find_locale (const char* locname, const char* codeset)
 
             // if `codeset' is specified, verify that it matches
             // the codeset used to encode the libc locale found
-            // and set above
+            // and set above, under any of its spellings
 
-            for (std::size_t j = 0; aliases [inx].codesets [j]; ++j) {
+            bool match = false;
 
-                if (!std::strcmp (aliases [inx].codesets [j], cset)) {
-                    std::setlocale (LC_ALL, "C");
-                    return name;
+            if (std::size_t (-1) != inx) {
+                for (std::size_t j = 0; aliases [inx].codesets [j]; ++j) {
+                    if (!std::strcmp (aliases [inx].codesets [j], cset)) {
+                        match = true;
+                        break;
+                    }
                 }
             }
-            name = 0;
+
+            if (!match)
+                name = 0;
         }
 
         std::setlocale (LC_ALL, "C");
