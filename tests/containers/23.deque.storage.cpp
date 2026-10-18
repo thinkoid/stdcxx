@@ -532,6 +532,52 @@ static void test_allocator ()
         rw_assert (0 == pool.used, 0, __LINE__, "queue leaked storage");
     }
 
+    // A deque that grew and drained refills from its spares at either
+    // end: bufferfuls of pushes at the null boundary allocate nothing
+    // until the spares are used up, and push_front takes the spare of
+    // the slot before directly, as push_back takes the one after.
+    for (int front = 0; front != 2; ++front) {
+        Pool pool;
+        const Allocator<Value> alloc (&pool);
+        {
+            OwnedDeque d (alloc);
+            const int bufsize = 3;   // the growth hook above: three-element buffers
+            const int buffers = 24;
+            for (int i = 0; i != buffers * bufsize; ++i)
+                d.push_back (Value (i));
+            const int blocks = pool.used;
+            if (front)
+                while (d.size () != 1)
+                    d.pop_front ();
+            else
+                while (d.size () != 1)
+                    d.pop_back ();
+            const int calls = pool.calls;
+            for (int i = 0; i != (buffers - 2) * bufsize; ++i) {
+                if (front)
+                    d.push_front (Value (i));
+                else
+                    d.push_back (Value (i));
+            }
+            rw_assert (calls == pool.calls, 0, __LINE__,
+                       "refill from spares allocated, %s", front ? "push_front" : "push_back");
+            rw_assert (blocks == pool.used, 0, __LINE__,
+                       "refill from spares changed the storage, %s",
+                       front ? "push_front" : "push_back");
+            rw_assert (d.size () == std::size_t ((buffers - 2) * bufsize + 1),
+                       0, __LINE__, "refill lost elements");
+            bool correct = true;
+            for (int i = 0; i != (buffers - 2) * bufsize; ++i) {
+                const int at = front ? (buffers - 2) * bufsize - 1 - i : i + 1;
+                if (d [at].data != i)
+                    correct = false;
+            }
+            rw_assert (correct, 0, __LINE__, "refill changed contents");
+            pool.check ();
+        }
+        rw_assert (0 == pool.used, 0, __LINE__, "refilled deque leaked storage");
+    }
+
     // Different allocators must continue owning their respective allocations.
     Pool left;
     Pool right;

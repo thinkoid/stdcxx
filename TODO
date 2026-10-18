@@ -19,28 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The owned span of =deque= is found by scanning
-
-The map's non-null slots form one contiguous owned span and the deque
-stores no bounds for it. =_C_reservation::_C_prepare= in
-=include/deque.cc= scans from the live range to both ends of the span
-before it decides anything, and takes a far spare from the far end,
-which only the scan locates. The work is proportional to the retained
-spare buffers, which pops never free, so a deque that grew to P buffers
-and drained pays a P-slot scan on every bufferful of pushes at a null
-boundary until it is destroyed or swapped away. =push_front= at offset
-0 takes that path even when the previous slot holds a spare, where
-=push_back= constructs directly when =_C_end._C_cur= is set.
-
-Fix: two members, the first owned slot and the owned count, kept by
-=_C_prepare=, =_C_restore=, =_C_dealloc= and =swap=; the scans move
-into =_C_is_valid= as the check of the cache under =_RWSTDDEBUG=; then
-the =push_front= fast path, the mirror of =push_back='s.
-
-Check: a section of =23.deque.storage= with a grown-then-drained deque
-that counts map reads per bufferful and finds a constant; the
-allocator section's ownership checks unchanged; the suite unchanged.
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it

@@ -152,10 +152,12 @@ swap (deque<_TypeT, _Allocator> &__rhs)
 
     if (get_allocator () == __rhs.get_allocator ()) {
 
-        std::swap (_C_beg,        __rhs._C_beg);
-        std::swap (_C_end,        __rhs._C_end);
-        std::swap (_C_nodes,      __rhs._C_nodes);
+        std::swap (_C_beg,       __rhs._C_beg);
+        std::swap (_C_end,       __rhs._C_end);
+        std::swap (_C_nodes,     __rhs._C_nodes);
         std::swap (_C_node_size, __rhs._C_node_size);
+        std::swap (_C_span,      __rhs._C_span);
+        std::swap (_C_span_size, __rhs._C_span_size);
 
     }
     else {
@@ -181,7 +183,8 @@ deque<_TypeT, _Allocator>::_C_reservation::
 _C_reservation (deque &__deque, bool __back, size_type __n)
     : _C_deque (__deque), _C_beg (__deque._C_beg), _C_end (__deque._C_end),
       _C_nodes (__deque._C_nodes), _C_node_size (__deque._C_node_size),
-      _C_first (0), _C_count (0), _C_pos (0), _C_moved (0), _C_added (0),
+      _C_first (__deque._C_span), _C_count (__deque._C_span_size),
+      _C_pos (__deque._C_span), _C_moved (0), _C_added (0),
       _C_alloc (0), _C_n (__n), _C_back (__back), _C_done (false)
 {
     _TRY {
@@ -271,18 +274,10 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
     const size_type __end = _C_nodes ? _C_end._C_node - _C_nodes : 0;
     const size_type __past = __end + (0 != __endoff);
 
-    // the owned span, found by scanning outwards from the live range
-    // across spare buffers only; a dense queue has few to walk
-    _C_first = __beg;
-    while (_C_first && _C_nodes [_C_first - 1])
-        --_C_first;
+    // the owned span as the deque keeps it; the live range lies inside
+    const size_type __last = _C_first + _C_count;
 
-    size_type __last = __past;
-    while (__last != _C_node_size && _C_nodes [__last])
-        ++__last;
-
-    _C_count = __last - _C_first;
-    _C_pos = _C_first;
+    _RWSTD_ASSERT (_C_first <= __beg && __past <= __last);
 
     // the spares on this side come first
     const size_type __near = _C_back ? __last - __past : __beg - _C_first;
@@ -314,6 +309,7 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
         if (__needed <= __slack && _C_count <= __slack) {
             _C_pos = (__slack - __needed) / 2 + (_C_back ? 0 : __needed);
             __d._C_move_nodes (_C_first, _C_pos, _C_count);
+            __d._C_span = _C_pos;
             __d._C_beg._C_node = __d._C_nodes + _C_pos + (__beg - _C_first);
             __d._C_end._C_node = __d._C_nodes + _C_pos + (__end - _C_first);
         }
@@ -344,6 +340,7 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
                 ? -difference_type (__reuse) : difference_type (__reuse);
             __d._C_nodes = __map;
             __d._C_node_size = __capacity;
+            __d._C_span = __first;
             __d._C_beg._C_node = __map + __first + (__beg - _C_first) + __shift;
             __d._C_end._C_node = __map + __first + (__end - _C_first) + __shift;
             _C_alloc = _C_back ? __first + _C_count : __first - __nnew;
@@ -366,13 +363,18 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
         _C_moved = __reuse;
         _C_alloc = _C_back ? _C_pos + _C_count + __reuse
                           : _C_pos - __reuse - __nnew;
+        __d._C_span = _C_back ? _C_pos + __reuse : _C_pos - __reuse;
     }
 
-    // the buffers still missing, one per slot, each owned as soon as
-    // its pointer is written
+    // the buffers still missing, one per slot, each owned, and counted
+    // into the span, as soon as its pointer is written
     _C_value_alloc_type __alloc (__d);
-    for ( ; _C_added != __nnew; ++_C_added)
+    for ( ; _C_added != __nnew; ++_C_added) {
         __d._C_nodes [_C_alloc + _C_added] = __alloc.allocate (__b, pointer ());
+        ++__d._C_span_size;
+        if (!_C_back)
+            --__d._C_span;
+    }
 
     // both iterators canonical again: a boundary slot that gained a
     // buffer now carries its element pointer
@@ -409,10 +411,12 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_restore ()
         __d._C_move_nodes (_C_pos, _C_first, _C_count);
     }
 
-    // the four fields as saved; the iterators point into buffers that
+    // the six fields as saved; the iterators point into buffers that
     // never moved
     __d._C_nodes = _C_nodes;
     __d._C_node_size = _C_node_size;
+    __d._C_span = _C_first;
+    __d._C_span_size = _C_count;
     __d._C_beg = _C_beg;
     __d._C_end = _C_end;
 }
@@ -721,10 +725,18 @@ _C_is_valid (int __emptyfl) const
 
     if (!_C_nodes) {
         _RWSTD_ASSERT (0 == _C_node_size);
+        _RWSTD_ASSERT (0 == _C_span && 0 == _C_span_size);
         _RWSTD_ASSERT (empty ());
         _RWSTD_ASSERT (0 == _C_beg._C_node && 0 == _C_beg._C_offset ());
         return true;
     }
+
+    // the cached span is the one the map encodes: every slot in it
+    // owns a buffer and no slot outside it does
+    _RWSTD_ASSERT (_C_span + _C_span_size <= _C_node_size);
+    for (size_type __i = 0; __i != _C_node_size; ++__i)
+        _RWSTD_ASSERT (   (0 != _C_nodes [__i])
+                       == (_C_span <= __i && __i < _C_span + _C_span_size));
 
     // the live range lies within the map, the sentinel slot included
     // for the end
@@ -739,7 +751,8 @@ _C_is_valid (int __emptyfl) const
                   || 0 == _C_end._C_offset ());
     _RWSTD_ASSERT (0 == _C_nodes [_C_node_size]);
 
-    // the slots of the first and the last live element own buffers
+    // the slots of the first and the last live element own buffers,
+    // which puts the live range inside the span
     if (!empty ()) {
         _RWSTD_ASSERT (_C_beg < _C_end);
         _RWSTD_ASSERT (0 != *_C_beg._C_node);

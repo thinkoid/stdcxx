@@ -568,20 +568,24 @@ public:
 
 private:
 
-    // The non-null map slots form one contiguous owned span. The live
-    // range lies within it; all other owned buffers are retained spares.
-    // Ownership bounds are found by scanning, not stored in the deque.
-    // The extra terminal map slot is null. See doc/notes/analysis-deque-redesign.md
-    // for the representation and rollback invariants.
+    // The non-null map slots form one contiguous owned span, its first
+    // slot and its length kept here. The live range lies within it; all
+    // other owned buffers are retained spares. The extra terminal map
+    // slot is null. See doc/notes/analysis-deque-redesign.md for the
+    // representation and rollback invariants.
     _C_deque_iter   _C_beg;
     _C_deque_iter   _C_end;
     _C_node_pointer _C_nodes;
     size_type       _C_node_size;
+    size_type       _C_span;
+    size_type       _C_span_size;
 
     void _C_init () {
         _C_beg = _C_end = _C_deque_iter ();
         _C_nodes = 0;
         _C_node_size = 0;
+        _C_span = 0;
+        _C_span_size = 0;
     }
 
     size_type _C_max_nodes () const {
@@ -594,7 +598,7 @@ private:
         return __nodes < __limit ? __nodes : __limit;
     }
 
-    // A reservation owns rollback until commit. Its scan results and
+    // A reservation owns rollback until commit. Its saved span and
     // construction cursor belong to this operation, not the container.
     struct _C_reservation {
         deque&          _C_deque;
@@ -605,8 +609,8 @@ private:
         _C_node_pointer _C_nodes;
         size_type       _C_node_size;
 
-        // the owned span the scan found: first slot, count, and the
-        // slot it was moved to if recentred
+        // the owned span as saved: first slot, count, and the slot it
+        // was moved to if recentred
         size_type       _C_first;
         size_type       _C_count;
         size_type       _C_pos;
@@ -741,13 +745,19 @@ deque<_TypeT, _Allocator>::push_front (const_reference __x)
                       _RWSTD_FUNC ("deque::push_front(const_reference)"),
                       size () + 1, max_size ()));
 
-    // room before the first element of its buffer, or a reservation
-    if (0 == _C_beg._C_offset ())
-        _C_push (false, __x);
-    else {
+    // room before the first element of its buffer, or in the spare
+    // buffer of the slot before, or a reservation
+    if (0 != _C_beg._C_offset ()) {
         allocator_type::construct (_C_beg._C_address () - 1, __x);
         --_C_beg;
     }
+    else if (_C_nodes && _C_span < size_type (_C_beg._C_node - _C_nodes)) {
+        allocator_type::construct (*(_C_beg._C_node - 1) + (_C_bufsize () - 1),
+                                   __x);
+        --_C_beg;
+    }
+    else
+        _C_push (false, __x);
 
     _RWSTD_ASSERT (_C_is_valid (0));
 }

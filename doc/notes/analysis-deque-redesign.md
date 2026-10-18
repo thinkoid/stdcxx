@@ -40,11 +40,11 @@ queued in ddc0a0b3 and closed by the rewrite.
   `bad_alloc` at every allocation ordinal and a throw at every
   source-iterator operation, ASan and UBSan, and differential runs
   against another library.
-- **Open:** ownership is discovered by scanning the map, a cost
-  proportional to the retained spare buffers; the queue carries the
-  cached-bounds fix. Every non-pointer source range is staged in a
-  temporary, a second copy per element, to meet 23.2.1.3, p2 for
-  throwing source iterators; that trade stands until decided otherwise.
+- **Open:** every non-pointer source range is staged in a temporary,
+  a second copy per element, to meet 23.2.1.3, p2 for throwing source
+  iterators; that trade stands until decided otherwise. The ownership
+  scan of the first rewrite is gone: the deque keeps the span's bounds
+  (6.1).
 
 ## 1. The findings at 7655ec93
 
@@ -128,9 +128,10 @@ The ordinary map slots have this shape:
 The non-null slots form one contiguous owned span; the live range lies
 within it; the other owned buffers are retained spares; boundary buffers
 may be only partly live. One extra terminal slot is always null. The
-deque stores four things: the two live iterators, the map pointer and
-the ordinary slot count. It stores no ownership bounds; the null and
-non-null pattern encodes them and a reservation scans for them (see 6.1).
+deque stores six things: the two live iterators, the map pointer, the
+ordinary slot count, and the span's first slot and length. The null and
+non-null pattern encodes the same bounds; the debug check compares the
+two (see 6.1).
 
 The raw iterator keeps a node pointer and an element pointer. At a
 boundary the node is the following one and the element pointer is that
@@ -249,20 +250,29 @@ the allocators compare equal.
 
 ## 6. Costs and open items
 
-### 6.1 Ownership by scanning
+### 6.1 Ownership bounds
 
-A reservation at a null boundary scans to both ends of the owned span
-before it decides, and takes a far spare from the span's far end, which
-only the scan locates. The work is proportional to the retained spare
-buffers. Since pops never free, a deque that grew to a peak and drained
-pays a peak-sized scan on every bufferful of pushes at a null boundary
-until it is destroyed or swapped away. The dense queue has no spares and
-does not see it; the drained queue sees nothing else. libc++ is the same
-model with the bounds cached. The fix is two members, the first owned
-slot and the owned count, after which transfers are constant and the
-scans survive as the debug check of the cache; `push_front` then gets
-the fast path `push_back` already has when a spare sits in the next
-slot. The queue carries this entry.
+The rewrite as landed found the owned span by scanning the map from
+the live range outwards on every reservation at a null boundary, and
+took a far spare from the span's far end, which only the scan located.
+The work was proportional to the retained spare buffers: since pops
+never free, a deque that grew to a peak and drained paid a peak-sized
+scan on every bufferful of pushes at a null boundary until destroyed or
+swapped away. The dense queue, with no spares, never saw it; the
+drained queue saw nothing else. Measured with `deque<int>` grown to P
+buffers and drained, a bufferful of pushes at the null boundary cost
+0.4 ms at P = 1000 and 22 ms at P = 64000.
+
+libc++ is the same model with the bounds cached, and so is this deque
+now: two members hold the first owned slot and the owned count, the
+reservation reads them and keeps them current through recentring, map
+replacement, transfers and each buffer it allocates, and its rollback
+restores the saved pair. The same bufferful costs 2 to 3 us at every P.
+The scan survives in `_C_is_valid` as the debug check of the cache,
+slot by slot. `push_front` at a buffer boundary constructs into the
+spare of the slot before when the span says one is there, the fast
+path `push_back` already had through the end iterator's element
+pointer.
 
 ### 6.2 Staged sources
 

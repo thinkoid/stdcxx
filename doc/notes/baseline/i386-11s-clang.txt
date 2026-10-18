@@ -142,7 +142,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 23.deque.modifiers                            0    0   590558      0   100%
 23.deque.special                              0    0    61465      0   100%
 23.deque.special.stdcxx-127                NOUT    0                       
-23.deque.storage                              0    0  1310326      0   100%
+23.deque.storage                              0    0  1311766      0   100%
 23.list.assign                                0    0    20542      0   100%
 23.list.capacity                              0    0     2416      0   100%
 23.list.cons                                  0    0    13164      0   100%
@@ -280,5 +280,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            11926422
+  Assertions:            11927862
   Failed assertions:            0
