@@ -833,11 +833,11 @@ rest of the table matches the plain one but for the reports. First run,
 
 ** TODO =ref-characterizations.md= lags the tree by seven probes
 
-The catalogue in chapter 4 has 198 rows against 205 named probes in
+The catalogue in chapter 4 has 142 rows against 149 named probes in
 =etc/config/src=. The five =*_ATOMIC_OPS= probes and the two
 =OPERATOR_DELETE_*_SIZED= probes have no row; they arrived after the
 document's 2026-09-27 refresh. The counts in the tl;dr and chapter 2
-were brought to 205 with the member templates retirement; the rows
+followed every retirement since, down to 149 on 2026-10-18; the rows
 were not written.
 
 Fix: the seven rows, in the catalogue's shape, and the support-file
