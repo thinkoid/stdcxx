@@ -37,7 +37,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
 {
     _RWSTD_ASSERT (0 != __is.rdbuf ());
 
-    const _TYPENAME basic_istream<_CharT, _Traits>::sentry
+    const typename basic_istream<_CharT, _Traits>::sentry
         __ipfx (__is /* , noskipws = false */);
 
     ios_base::iostate __err = ios_base::goodbit;
@@ -81,7 +81,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
                     const _CharT* __pdel = __gptr;
                     for (/**/; __pdel != __egptr; ++__pdel) {
 
-                        const _TYPENAME _Traits::int_type
+                        const typename _Traits::int_type
                             __c = _Traits::to_int_type(*__pdel);
 
                         if (_Traits::eq_int_type (__c, _Traits::eof ())) {
@@ -133,7 +133,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
 
                     // n data in buffer, trigger underflow()
                     // note that streambuf may be unbuffered
-                    const _TYPENAME _Traits::int_type
+                    const typename _Traits::int_type
                         __c = __rdbuf->sgetc ();
 
                     if (_Traits::eq_int_type (__c, _Traits::eof ())) {
@@ -142,7 +142,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
                     }
 
                     // convert to char_type so that isspace works correctly
-                    const _TYPENAME _Traits::char_type
+                    const typename _Traits::char_type
                         __ch = _Traits::to_char_type (__c);
 
                     if (__ctp.is (__ctp.space, __ch))
@@ -165,7 +165,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
 
             for ( ; __n != 0; ) {
 
-                const _TYPENAME _Traits::int_type
+                const typename _Traits::int_type
                     __c (__rdbuf->sgetc ());
 
                 if (_Traits::eq_int_type (__c, _Traits::eof ())) {
@@ -174,7 +174,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
                 }
 
                 // convert to char_type so that isspace works correctly
-                const _TYPENAME _Traits::char_type
+                const typename _Traits::char_type
                     __ch = _Traits::to_char_type (__c);
 
                 if (__ctp.is (__ctp.space, __ch))
@@ -219,7 +219,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
 {
     _RWSTD_ASSERT (0 != __is.rdbuf ());
 
-    const _TYPENAME basic_istream<_CharT, _Traits>::sentry
+    const typename basic_istream<_CharT, _Traits>::sentry
         __ipfx (__is, true /* noskipws */);
 
 #ifndef _RWSTD_NO_FRIEND_TEMPLATE
@@ -245,7 +245,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
 
             for ( ; ; ) {
 
-                typedef _TYPENAME _Traits::int_type int_type;
+                typedef typename _Traits::int_type int_type;
 
                 const _CharT* const __gptr  = __rdbuf->gptr ();
                 const _CharT* const __egptr = __rdbuf->egptr ();
@@ -348,12 +348,12 @@ getline (basic_istream<_CharT, _Traits>&            __is,
             // FIXME: code commented out to work around an HP aCC 3.14.10
             // bug #JAGac86264
 
-            // typedef _TYPENAME
+            // typedef typename
             //     basic_string<_CharT, _Traits, _Allocator>::size_type
 
             for ( ; ; ) {
 
-                const _TYPENAME _Traits::int_type
+                const typename _Traits::int_type
                     __c (__is.rdbuf ()->sgetc ());
 
                 if (_Traits::eq_int_type (__c, _Traits::eof ())) {

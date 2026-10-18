@@ -65,12 +65,12 @@ public:
 
     typedef _TypeT                                     value_type;
     typedef _Allocator                                 allocator_type;
-    typedef _TYPENAME allocator_type::size_type        size_type;
-    typedef _TYPENAME allocator_type::difference_type  difference_type;
-    typedef _TYPENAME allocator_type::reference        reference;
-    typedef _TYPENAME allocator_type::const_reference  const_reference;
-    typedef _TYPENAME allocator_type::pointer          pointer;
-    typedef _TYPENAME allocator_type::const_pointer    const_pointer;
+    typedef typename allocator_type::size_type         size_type;
+    typedef typename allocator_type::difference_type   difference_type;
+    typedef typename allocator_type::reference         reference;
+    typedef typename allocator_type::const_reference   const_reference;
+    typedef typename allocator_type::pointer           pointer;
+    typedef typename allocator_type::const_pointer     const_pointer;
 
 public:
 
@@ -380,7 +380,7 @@ private:
 
 
 template <class _TypeT, class _Allocator>
-inline _TYPENAME vector<_TypeT, _Allocator>::reference
+inline typename vector<_TypeT, _Allocator>::reference
 vector<_TypeT, _Allocator>::
 operator[] (size_type __n)
 {
@@ -398,7 +398,7 @@ operator[] (size_type __n)
   
 
 template <class _TypeT, class _Allocator>
-inline _TYPENAME vector<_TypeT, _Allocator>::const_reference
+inline typename vector<_TypeT, _Allocator>::const_reference
 vector<_TypeT, _Allocator>::
 operator[] (size_type __n) const
 {
@@ -416,7 +416,7 @@ operator[] (size_type __n) const
   
 
 template <class _TypeT, class _Allocator>
-inline _TYPENAME vector<_TypeT, _Allocator>::reference
+inline typename vector<_TypeT, _Allocator>::reference
 vector<_TypeT, _Allocator>::
 at (size_type __n)
 {
@@ -429,7 +429,7 @@ at (size_type __n)
     
 
 template <class _TypeT, class _Allocator>
-inline _TYPENAME vector<_TypeT, _Allocator>::const_reference
+inline typename vector<_TypeT, _Allocator>::const_reference
 vector<_TypeT, _Allocator>::
 at (size_type __n)  const
 {
@@ -481,7 +481,7 @@ push_back (const_reference __x)
 
 
 template <class _TypeT, class _Allocator>
-inline _TYPENAME vector<_TypeT, _Allocator>::iterator
+inline typename vector<_TypeT, _Allocator>::iterator
 vector<_TypeT, _Allocator>::
 insert (iterator __it, const_reference __x)
 {
@@ -499,7 +499,7 @@ insert (iterator __it, const_reference __x)
 
 
 template <class _TypeT, class _Allocator>
-inline _TYPENAME vector<_TypeT, _Allocator>::iterator
+inline typename vector<_TypeT, _Allocator>::iterator
 vector<_TypeT, _Allocator>::
 erase (iterator __it)
 {
@@ -519,7 +519,7 @@ erase (iterator __it)
 
 
 template <class _TypeT, class _Allocator>
-inline _TYPENAME vector<_TypeT, _Allocator>::iterator
+inline typename vector<_TypeT, _Allocator>::iterator
 vector<_TypeT, _Allocator>::
 erase (iterator __first, iterator __last)
 {
@@ -651,12 +651,6 @@ class _RWSTD_EXPORT
 
 vector<bool, _Allocator >: private _Allocator
 {
-#ifdef _RWSTD_NO_CLASS_PARTIAL_SPEC
-    // clear _TYPENAME
-#undef _TYPENAME
-#define _TYPENAME
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
-
     typedef _RWSTD_REBIND(_Allocator, unsigned int)       _C_value_alloc_type;
     typedef vector                                        _C_self;
 public:
@@ -664,16 +658,10 @@ public:
     typedef _Allocator                                      allocator_type;
     typedef bool                                            value_type;
 
-    typedef _TYPENAME allocator_type::size_type             size_type;
-    typedef _TYPENAME allocator_type::difference_type       difference_type;
-    typedef _TYPENAME _C_value_alloc_type::pointer          pointer;
-    typedef _TYPENAME _C_value_alloc_type::const_pointer    const_pointer;
-
-#ifdef _RWSTD_NO_CLASS_PARTIAL_SPEC
-    // restore _TYPENAME
-#undef _TYPENAME
-#define _TYPENAME   typename
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
+    typedef typename allocator_type::size_type              size_type;
+    typedef typename allocator_type::difference_type        difference_type;
+    typedef typename _C_value_alloc_type::pointer           pointer;
+    typedef typename _C_value_alloc_type::const_pointer     const_pointer;
 
     class iterator;
     class const_iterator;

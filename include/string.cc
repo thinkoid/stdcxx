@@ -36,7 +36,7 @@ _RWSTD_NAMESPACE (std) {
    // (see PR #26562)
 
 template <class _CharT, class _Traits, class _Allocator>
-const _TYPENAME basic_string<_CharT, _Traits, _Allocator>::size_type
+const typename basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 npos /* = SIZE_MAX */;
 
@@ -54,7 +54,7 @@ _C_null_ref;
 
 
 template <class _CharT, class _Traits, class _Allocator>
-_TYPENAME basic_string<_CharT, _Traits, _Allocator>::_C_string_ref_type*
+typename basic_string<_CharT, _Traits, _Allocator>::_C_string_ref_type*
 basic_string<_CharT, _Traits, _Allocator>::
 _C_get_rep (size_type __cap, size_type __len)
 {
@@ -457,9 +457,9 @@ __rw_replace (_STD::basic_string<_CharT, _Traits, _Alloc> &__s,
               _InputIter __first2, _InputIter __last2) {
 
     typedef _Traits                               traits_type;
-    typedef _TYPENAME traits_type::char_type      value_type;
+    typedef typename traits_type::char_type       value_type;
     typedef _Alloc                                allocator_type;
-    typedef _TYPENAME allocator_type::size_type   size_type;
+    typedef typename allocator_type::size_type    size_type;
 
     typedef _STD::basic_string<_CharT, _Traits, _Alloc> _C_string_type;
 
@@ -509,7 +509,7 @@ replace (iterator __first1, iterator __last1,
     }
 
     _C_string_type __s3;
-    _TYPENAME _C_string_type::iterator __first3 = __s3.begin ();
+    typename _C_string_type::iterator __first3 = __s3.begin ();
     
     for ( ; !(__first2 == __last2); ++__first2, ++__first3) {
 
@@ -561,13 +561,13 @@ __rw_replace_aux (_STD::basic_string<_CharT, _Traits, _Alloc> &__s,
                   _InputIter __first2, _InputIter __last2)
 {
     typedef _Traits                                   traits_type;
-    typedef _TYPENAME traits_type::char_type          value_type;
+    typedef typename traits_type::char_type           value_type;
     typedef _Alloc                                    allocator_type;
-    typedef _TYPENAME allocator_type::size_type       size_type;
-    typedef _TYPENAME allocator_type::difference_type difference_type;
-    typedef _TYPENAME allocator_type::pointer         pointer;
-    typedef _TYPENAME allocator_type::const_pointer   const_pointer;
-    typedef _TYPENAME allocator_type::const_reference const_reference;
+    typedef typename allocator_type::size_type        size_type;
+    typedef typename allocator_type::difference_type difference_type;
+    typedef typename allocator_type::pointer          pointer;
+    typedef typename allocator_type::const_pointer    const_pointer;
+    typedef typename allocator_type::const_reference const_reference;
 
     typedef _RW::__string_ref<value_type, traits_type, allocator_type>
     _C_string_ref_type;
@@ -658,7 +658,7 @@ __replace_aux (iterator __first1, iterator __last1,
 
 
 template <class _CharT, class _Traits, class _Allocator>
-_TYPENAME basic_string<_CharT, _Traits, _Allocator>::size_type
+typename basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 copy (pointer __s, size_type __n, size_type __pos) const
 {
@@ -677,7 +677,7 @@ copy (pointer __s, size_type __n, size_type __pos) const
 
 
 template <class _CharT, class _Traits, class _Allocator>
-_TYPENAME basic_string<_CharT, _Traits, _Allocator>::size_type
+typename basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 find (const_pointer __seq, size_type __off, size_type __len) const
 {
@@ -736,7 +736,7 @@ find (const_pointer __seq, size_type __off, size_type __len) const
 
 
 template <class _CharT, class _Traits, class _Allocator>
-_TYPENAME basic_string<_CharT, _Traits, _Allocator>::size_type
+typename basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 rfind (const_pointer __s, size_type __pos, size_type __n) const
 {
@@ -758,7 +758,7 @@ rfind (const_pointer __s, size_type __pos, size_type __n) const
 
 
 template <class _CharT, class _Traits, class _Allocator>
-_TYPENAME basic_string<_CharT, _Traits, _Allocator>::size_type
+typename basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 find_first_of (const_pointer __s, size_type __pos, size_type __n) const
 {
@@ -775,7 +775,7 @@ find_first_of (const_pointer __s, size_type __pos, size_type __n) const
 
 
 template <class _CharT, class _Traits, class _Allocator>
-_TYPENAME basic_string<_CharT, _Traits, _Allocator>::size_type
+typename basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 find_last_of (const_pointer __s, size_type __pos, size_type __n) const
 {
@@ -796,7 +796,7 @@ find_last_of (const_pointer __s, size_type __pos, size_type __n) const
 
 
 template <class _CharT, class _Traits, class _Allocator>
-_TYPENAME basic_string<_CharT, _Traits, _Allocator>::size_type
+typename basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 find_first_not_of (const_pointer __s, size_type __pos, size_type __n) const
 {
@@ -819,7 +819,7 @@ find_first_not_of (const_pointer __s, size_type __pos, size_type __n) const
 
 
 template <class _CharT, class _Traits, class _Allocator>
-_TYPENAME basic_string<_CharT, _Traits, _Allocator>::size_type
+typename basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 find_last_not_of (const_pointer __s, size_type __pos, size_type __n) const
 {

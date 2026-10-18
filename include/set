@@ -98,16 +98,16 @@ public:
         // const iterators. This is intentional, the purpose is to
         // prevent the modification of a set element after it has
         // been inserted.
-    typedef _TYPENAME __rep_type::reference               reference;
-    typedef _TYPENAME __rep_type::const_reference         const_reference;
-    typedef _TYPENAME __rep_type::const_iterator          iterator;
-    typedef _TYPENAME __rep_type::const_iterator          const_iterator;
-    typedef _TYPENAME __rep_type::size_type               size_type;
-    typedef _TYPENAME __rep_type::difference_type         difference_type;
-    typedef _TYPENAME __rep_type::pointer                 pointer;
-    typedef _TYPENAME __rep_type::const_pointer           const_pointer;
-    typedef _TYPENAME __rep_type::const_reverse_iterator  reverse_iterator;
-    typedef _TYPENAME __rep_type::const_reverse_iterator
+    typedef typename __rep_type::reference                reference;
+    typedef typename __rep_type::const_reference          const_reference;
+    typedef typename __rep_type::const_iterator           iterator;
+    typedef typename __rep_type::const_iterator           const_iterator;
+    typedef typename __rep_type::size_type                size_type;
+    typedef typename __rep_type::difference_type          difference_type;
+    typedef typename __rep_type::pointer                  pointer;
+    typedef typename __rep_type::const_pointer            const_pointer;
+    typedef typename __rep_type::const_reverse_iterator   reverse_iterator;
+    typedef typename __rep_type::const_reverse_iterator
         const_reverse_iterator;
 
     //
@@ -157,7 +157,7 @@ public:
     // modifiers
     //
     pair<iterator, bool> insert (const value_type& __x) {
-        const pair<_TYPENAME __rep_type::iterator, bool> __p =
+        const pair<typename __rep_type::iterator, bool> __p =
             _C_rep.insert (__x, false); 
         return pair<iterator, bool>(__p.first, __p.second);
     }
@@ -275,16 +275,16 @@ public:
     //
     // types
     //
-    typedef _TYPENAME __rep_type::reference               reference;
-    typedef _TYPENAME __rep_type::const_reference         const_reference;
-    typedef _TYPENAME __rep_type::iterator                iterator;
-    typedef _TYPENAME __rep_type::const_iterator          const_iterator;
-    typedef _TYPENAME __rep_type::size_type               size_type;
-    typedef _TYPENAME __rep_type::difference_type         difference_type;
-    typedef _TYPENAME __rep_type::pointer                 pointer;
-    typedef _TYPENAME __rep_type::const_pointer           const_pointer;
-    typedef _TYPENAME __rep_type::reverse_iterator        reverse_iterator;
-    typedef _TYPENAME __rep_type::const_reverse_iterator
+    typedef typename __rep_type::reference                reference;
+    typedef typename __rep_type::const_reference          const_reference;
+    typedef typename __rep_type::iterator                 iterator;
+    typedef typename __rep_type::const_iterator           const_iterator;
+    typedef typename __rep_type::size_type                size_type;
+    typedef typename __rep_type::difference_type          difference_type;
+    typedef typename __rep_type::pointer                  pointer;
+    typedef typename __rep_type::const_pointer            const_pointer;
+    typedef typename __rep_type::reverse_iterator         reverse_iterator;
+    typedef typename __rep_type::const_reverse_iterator
             const_reverse_iterator;
 
     //

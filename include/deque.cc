@@ -67,7 +67,7 @@ operator= (const deque &__rhs)
 
 
 template <class _TypeT, class _Allocator>
-_TYPENAME deque<_TypeT, _Allocator>::iterator 
+typename deque<_TypeT, _Allocator>::iterator 
 deque<_TypeT, _Allocator>::
 insert (iterator __it, const_reference __x)
 {
@@ -96,7 +96,7 @@ insert (iterator __it, const_reference __x)
 
 
 template <class _TypeT, class _Allocator>
-_TYPENAME deque<_TypeT, _Allocator>::iterator 
+typename deque<_TypeT, _Allocator>::iterator 
 deque<_TypeT, _Allocator>::
 erase (iterator __it)
 {
@@ -111,7 +111,7 @@ erase (iterator __it)
 
 
 template <class _TypeT, class _Allocator>
-_TYPENAME deque<_TypeT, _Allocator>::iterator
+typename deque<_TypeT, _Allocator>::iterator
 deque<_TypeT, _Allocator>::
 erase (iterator __first, iterator __last)
 {
@@ -614,7 +614,7 @@ _C_insert_range (iterator __it,
     // Consume an arbitrary source before overwriting destination elements.
     _Deque __tmp (__self->get_allocator ());
 
-    const _TYPENAME _Deque::size_type __limit =
+    const typename _Deque::size_type __limit =
         __self->max_size () - __self->size ();
     for ( ; !(__first == __last); ++__first) {
         _RWSTD_REQUIRES (__tmp.size () < __limit,
@@ -661,9 +661,9 @@ _C_insert_range (iterator __it,
     // This overload receives pointers or this deque's raw iterators.
     // Their operations cannot throw after a shift of existing values.
     const bool __back = __rem <= __inx;
-    _TYPENAME _Deque::_C_reservation __room (*__self, __back, __n);
+    typename _Deque::_C_reservation __room (*__self, __back, __n);
 
-    typedef _TYPENAME _Deque::_C_deque_iter _Iter;
+    typedef typename _Deque::_C_deque_iter _Iter;
     const _Iter __beg = __self->_C_beg;
     const _Iter __end = __self->_C_end;
     const _Iter __pos = __beg + difference_type (__inx);

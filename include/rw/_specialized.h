@@ -61,7 +61,7 @@ _RWSTD_NAMESPACE (__rw) {
 
 
 #ifndef _RWSTD_NO_NONDEDUCED_CONTEXT
-#  define _RWSTD_CONTAINER_SIZE_TYPE _TYPENAME _Container::size_type
+#  define _RWSTD_CONTAINER_SIZE_TYPE typename _Container::size_type
 #else
 #  define _RWSTD_CONTAINER_SIZE_TYPE _RWSTD_SIZE_T
 #endif   // _RWSTD_NO_NONDEDUCED_CONTEXT
@@ -163,7 +163,7 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
                     _ForwardIterator __res)
 {
     const _ForwardIterator __start = __res;
-    typedef _TYPENAME iterator_traits<_ForwardIterator>::value_type _TypeT;
+    typedef typename iterator_traits<_ForwardIterator>::value_type _TypeT;
 
     _TRY {
         for (; __first != __last; ++__first, ++__res) {

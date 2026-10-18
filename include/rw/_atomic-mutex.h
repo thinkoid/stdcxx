@@ -138,7 +138,7 @@ _TypeT __rw_atomic_load_relaxed (const _TypeT &__t, __rw_mutex_base &__mutex)
 template <class _TypeT>
 inline
 void __rw_atomic_store_release (
-    _TypeT &__t, _TYPENAME __rw_atomic_value<_TypeT>::_C_type __u,
+    _TypeT &__t, typename __rw_atomic_value<_TypeT>::_C_type __u,
     __rw_mutex_base &__mutex)
 {
     _RWSTD_MT_GUARD (__mutex);
@@ -150,7 +150,7 @@ void __rw_atomic_store_release (
 template <class _TypeT>
 inline
 void __rw_atomic_store_relaxed (
-    _TypeT &__t, _TYPENAME __rw_atomic_value<_TypeT>::_C_type __u,
+    _TypeT &__t, typename __rw_atomic_value<_TypeT>::_C_type __u,
     __rw_mutex_base &__mutex)
 {
     _RWSTD_MT_GUARD (__mutex);
@@ -183,7 +183,7 @@ _TypeT __rw_atomic_load_relaxed (const _TypeT &__t, bool)
 template <class _TypeT>
 inline
 void __rw_atomic_store_release (
-    _TypeT &__t, _TYPENAME __rw_atomic_value<_TypeT>::_C_type __u,
+    _TypeT &__t, typename __rw_atomic_value<_TypeT>::_C_type __u,
     bool)
 {
     __rw_atomic_store_release (__t, __u,
@@ -194,7 +194,7 @@ void __rw_atomic_store_release (
 template <class _TypeT>
 inline
 void __rw_atomic_store_relaxed (
-    _TypeT &__t, _TYPENAME __rw_atomic_value<_TypeT>::_C_type __u,
+    _TypeT &__t, typename __rw_atomic_value<_TypeT>::_C_type __u,
     bool)
 {
     __rw_atomic_store_relaxed (__t, __u,

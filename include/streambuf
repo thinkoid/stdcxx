@@ -64,9 +64,9 @@ class basic_streambuf: public _RW::__rw_synchronized
 public:
     typedef _CharT                          char_type;
     typedef _Traits                         traits_type;
-    typedef _TYPENAME traits_type::int_type int_type;
-    typedef _TYPENAME traits_type::pos_type pos_type;
-    typedef _TYPENAME traits_type::off_type off_type;
+    typedef typename traits_type::int_type int_type;
+    typedef typename traits_type::pos_type pos_type;
+    typedef typename traits_type::off_type off_type;
 
     virtual ~basic_streambuf () { }
 
@@ -399,7 +399,7 @@ private:
 
 
 template<class _CharT, class _Traits>
-inline _TYPENAME basic_streambuf<_CharT, _Traits>::int_type
+inline typename basic_streambuf<_CharT, _Traits>::int_type
 basic_streambuf<_CharT, _Traits>::
 sbumpc ()
 {
@@ -416,7 +416,7 @@ sbumpc ()
 
 
 template<class _CharT, class _Traits>
-inline _TYPENAME basic_streambuf<_CharT, _Traits>::int_type
+inline typename basic_streambuf<_CharT, _Traits>::int_type
 basic_streambuf<_CharT, _Traits>::
 sputbackc (char_type __c)
 {
@@ -430,7 +430,7 @@ sputbackc (char_type __c)
 
 
 template<class _CharT, class _Traits>
-inline _TYPENAME basic_streambuf<_CharT, _Traits>::int_type
+inline typename basic_streambuf<_CharT, _Traits>::int_type
 basic_streambuf<_CharT, _Traits>::
 sputc (char_type __ch)
 {
@@ -452,7 +452,7 @@ sputc (char_type __ch)
 
 
 template<class _CharT, class _Traits>
-inline _TYPENAME basic_streambuf<_CharT, _Traits>::int_type
+inline typename basic_streambuf<_CharT, _Traits>::int_type
 basic_streambuf<_CharT, _Traits>::
 sungetc ()
 {

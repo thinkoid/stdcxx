@@ -78,7 +78,7 @@ _RW::__rw_facet_id money_get<_CharT, _InputIter>::id;
 
 
 template <class _CharT, class _InputIter>
-_TYPENAME money_get<_CharT, _InputIter>::iter_type
+typename money_get<_CharT, _InputIter>::iter_type
 money_get<_CharT, _InputIter>::
 _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
         _RWSTD_IOSTATE &__err, void *__pval, string_type *__pstr) const
@@ -122,7 +122,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
 
     _RW::__rw_money_get_buffer __guard (__buf, __pbuf);   // frees __pbuf
 
-    typedef _TYPENAME string_type::traits_type _Traits;
+    typedef typename string_type::traits_type _Traits;
 
     char __grpbuf [sizeof __buf];       // holds sizes of discovered groups
     char       *__pgrpbuf = __grpbuf;   // pointer to allocated group buffer

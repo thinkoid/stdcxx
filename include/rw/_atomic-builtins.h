@@ -448,7 +448,7 @@ __rw_atomic_load_relaxed (_TypeT* const &__x, bool)
 template <class _TypeT>
 inline void
 __rw_atomic_store_release (_TypeT* &__x,
-                           _TYPENAME __rw_atomic_value<_TypeT*>::_C_type __y,
+                           typename __rw_atomic_value<_TypeT*>::_C_type __y,
                            bool)
 {
     __atomic_store_n (&__x, __y, __ATOMIC_RELEASE);
@@ -458,7 +458,7 @@ __rw_atomic_store_release (_TypeT* &__x,
 template <class _TypeT>
 inline void
 __rw_atomic_store_relaxed (_TypeT* &__x,
-                           _TYPENAME __rw_atomic_value<_TypeT*>::_C_type __y,
+                           typename __rw_atomic_value<_TypeT*>::_C_type __y,
                            bool)
 {
     __atomic_store_n (&__x, __y, __ATOMIC_RELAXED);

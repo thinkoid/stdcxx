@@ -383,8 +383,6 @@
 #define _RWSTD_MEMBER_EXPORT   /* empty */
 
 
-#define _TYPENAME   typename
-
 
 #define _EXPLICIT   explicit
 
@@ -716,10 +714,10 @@
 #ifdef _RWSTD_ALLOCATOR
 #  ifndef _RWSTD_NO_DEPENDENT_TEMPLATE
 #    define _RWSTD_REBIND(from, to) \
-            _TYPENAME from::template rebind < to >::other
+            typename from::template rebind < to >::other
 #  else
 #    define _RWSTD_REBIND(from, to) \
-            _TYPENAME from:: rebind < to >::other
+            typename from:: rebind < to >::other
 #  endif   // _RWSTD_NO_DEPENDENT_TEMPLATE
 
 #  define _RWSTD_ALLOC_TYPE(Allocator, ignore)        \
@@ -851,22 +849,22 @@
 // _Iterator typedefs
 // (note that you must use a semi-colon at the end of this macro)
 #define _RWSTD_ITERATOR_TYPES(_Iterator)                               \
-     typedef _TYPENAME _Iterator::difference_type difference_type;     \
-     typedef _TYPENAME _Iterator::value_type value_type;               \
-     typedef _TYPENAME _Iterator::pointer pointer;                     \
-     typedef _TYPENAME _Iterator::reference reference;                 \
-     typedef _TYPENAME _Iterator::iterator_category iterator_category
+     typedef typename _Iterator::difference_type difference_type;      \
+     typedef typename _Iterator::value_type value_type;                \
+     typedef typename _Iterator::pointer pointer;                      \
+     typedef typename _Iterator::reference reference;                  \
+     typedef typename _Iterator::iterator_category iterator_category
 
 // helpers making working w/o iterator_traits transparent
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 #  define _RWSTD_VALUE_TYPE(iterT) \
-       (_TYPENAME _STD::iterator_traits< iterT >::value_type*)0
+       (typename _STD::iterator_traits< iterT >::value_type*)0
 #  define _RWSTD_DIFFERENCE_TYPE(iterT)   \
-       (_TYPENAME _STD::iterator_traits< iterT >::difference_type*)0
+       (typename _STD::iterator_traits< iterT >::difference_type*)0
 
 #  define _RWSTD_ITERATOR_CATEGORY(iterT, ignore) \
-         _TYPENAME _STD::iterator_traits< iterT >::iterator_category ()
+         typename _STD::iterator_traits< iterT >::iterator_category ()
 
 #  define _RWSTD_REVERSE_ITERATOR(iterT, ign1, ign2, ign3) \
        _STD::reverse_iterator<iterT>

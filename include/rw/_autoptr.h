@@ -162,7 +162,7 @@ public:
     }
 
     // 20.4.5.2, p1
-    _TYPENAME _RW::__rw_nonvoid_ref<element_type>::_C_ref
+    typename _RW::__rw_nonvoid_ref<element_type>::_C_ref
     operator* () const _THROWS (()) {
         _RWSTD_ASSERT (0 != get ());
         return *get (); 

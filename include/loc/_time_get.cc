@@ -61,7 +61,7 @@ template <class _CharT, class _InputIter>
 
 
 template <class _CharT, class _InputIter>
-_TYPENAME time_get<_CharT, _InputIter>::iter_type
+typename time_get<_CharT, _InputIter>::iter_type
 time_get<_CharT, _InputIter>::
 get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
      tm *__tmb, const char_type *__pat, const char_type *__pat_end) const
@@ -131,7 +131,7 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
 
 
 template <class _CharT, class _InputIter>
-/* virtual */ _TYPENAME time_get<_CharT, _InputIter>::iter_type
+/* virtual */ typename time_get<_CharT, _InputIter>::iter_type
 time_get<_CharT, _InputIter>::
 do_get (iter_type __it, iter_type __end, ios_base &__fl,
         _RWSTD_IOSTATE &__err, tm *__tmb,

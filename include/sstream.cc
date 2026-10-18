@@ -223,7 +223,7 @@ showmanyc ()
 
 
 template <class _CharT, class _Traits, class _Allocator>
-/* virtual */ _TYPENAME basic_stringbuf<_CharT, _Traits, _Allocator>::int_type
+/* virtual */ typename basic_stringbuf<_CharT, _Traits, _Allocator>::int_type
 basic_stringbuf<_CharT, _Traits, _Allocator>::
 underflow ()
 {
@@ -249,7 +249,7 @@ underflow ()
 
 
 template<class _CharT, class _Traits, class _Allocator>
-_TYPENAME basic_stringbuf<_CharT, _Traits, _Allocator>::int_type
+typename basic_stringbuf<_CharT, _Traits, _Allocator>::int_type
 basic_stringbuf<_CharT, _Traits, _Allocator>::
 overflow (int_type __c)
 {
@@ -287,7 +287,7 @@ overflow (int_type __c)
 
 
 template<class _CharT, class _Traits, class _Allocator>
-/* virtual */ _TYPENAME basic_stringbuf<_CharT, _Traits, _Allocator>::int_type
+/* virtual */ typename basic_stringbuf<_CharT, _Traits, _Allocator>::int_type
 basic_stringbuf<_CharT, _Traits, _Allocator>::
 pbackfail (int_type __c)
 {
@@ -377,7 +377,7 @@ setbuf (char_type* __buf, _RWSTD_STREAMSIZE __n)
 
 
 template<class _CharT, class _Traits, class _Allocator>
-/* virtual */ _TYPENAME basic_stringbuf<_CharT, _Traits, _Allocator>::pos_type
+/* virtual */ typename basic_stringbuf<_CharT, _Traits, _Allocator>::pos_type
 basic_stringbuf<_CharT, _Traits, _Allocator>::
 seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode __which)
 {
@@ -456,7 +456,7 @@ seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode __which)
 
 
 template<class _CharT, class _Traits, class _Allocator>
-/* virtual */ _TYPENAME basic_stringbuf<_CharT, _Traits, _Allocator>::pos_type
+/* virtual */ typename basic_stringbuf<_CharT, _Traits, _Allocator>::pos_type
 basic_stringbuf<_CharT, _Traits, _Allocator>::
 seekpos (pos_type __pos, ios_base::openmode __which)
 {

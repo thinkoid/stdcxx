@@ -152,7 +152,7 @@ showmanyc ()
         // restore position within file only if seek succeeded
         _RW::__rw_fseek (_C_file, this->_C_state, _C_cur_pos, ios_base::beg);
 
-        typedef _TYPENAME traits_type::state_type _StateT;
+        typedef typename traits_type::state_type _StateT;
         typedef codecvt<char_type, char, _StateT> _Codecvt;
 
         const _Codecvt &__cvt = _USE_FACET (_Codecvt, this->getloc ());
@@ -169,7 +169,7 @@ showmanyc ()
 
 
 template<class _CharT, class _Traits>
-_TYPENAME basic_filebuf<_CharT, _Traits>::int_type
+typename basic_filebuf<_CharT, _Traits>::int_type
 basic_filebuf<_CharT, _Traits>::
 underflow ()
 {
@@ -184,7 +184,7 @@ underflow ()
 
     char_type* const __to_end = this->_C_buffer + this->_C_bufsize;
 
-    typedef _TYPENAME traits_type::int_type _IntType;
+    typedef typename traits_type::int_type _IntType;
 
     _IntType __ret = _IntType ();
 
@@ -215,7 +215,7 @@ underflow ()
 
         _C_beg_pos = _C_cur_pos;
 
-        typedef _TYPENAME traits_type::state_type _StateT;
+        typedef typename traits_type::state_type _StateT;
         typedef codecvt<char_type, char, _StateT> _Codecvt;
 
         const _Codecvt &__cvt = _USE_FACET (_Codecvt, this->getloc ());
@@ -354,7 +354,7 @@ underflow ()
 
 
 template<class _CharT, class _Traits>
-_TYPENAME basic_filebuf<_CharT, _Traits>::int_type
+typename basic_filebuf<_CharT, _Traits>::int_type
 basic_filebuf<_CharT, _Traits>::
 overflow (int_type __c /* = eof () */)
 {
@@ -472,7 +472,7 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
 
     const char_type* const __end = __buf + __nchars;
 
-    typedef _TYPENAME traits_type::state_type _StateT;
+    typedef typename traits_type::state_type _StateT;
 
     _RWSTD_STREAMSIZE __nwrote = 0;          // num chars to write
     _StateT __state = _C_cur_pos.state ();   // state of stream
@@ -576,7 +576,7 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
 
 
 template<class _CharT, class _Traits>
-_TYPENAME basic_filebuf<_CharT, _Traits>::int_type
+typename basic_filebuf<_CharT, _Traits>::int_type
 basic_filebuf<_CharT, _Traits>::
 pbackfail (int_type __c)
 {
@@ -702,7 +702,7 @@ setbuf (char_type *__buf, streamsize __ssize)
 
 // 27.8.1.4, p 11
 template<class _CharT, class _Traits>
-_TYPENAME basic_filebuf<_CharT, _Traits>::pos_type
+typename basic_filebuf<_CharT, _Traits>::pos_type
 basic_filebuf<_CharT, _Traits>::
 seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode)
 {
@@ -711,7 +711,7 @@ seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode)
     if (!is_open ())
         return pos_type (off_type (-1));
 
-    typedef _TYPENAME traits_type::state_type _StateT;
+    typedef typename traits_type::state_type _StateT;
     typedef codecvt<char_type, char, _StateT> _Codecvt;
 
     const int __width = _USE_FACET (_Codecvt, this->getloc ()).encoding ();
@@ -752,7 +752,7 @@ seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode)
 
 
 template<class _CharT, class _Traits>
-_TYPENAME basic_filebuf<_CharT, _Traits>::pos_type
+typename basic_filebuf<_CharT, _Traits>::pos_type
 basic_filebuf<_CharT, _Traits>::
 seekpos (pos_type __pos, ios_base::openmode)
 {
@@ -814,7 +814,7 @@ sync ()
         if (_C_pbacksize == this->_C_bufsize)
             _C_pbacksize = this->_C_bufsize - 1;
 
-        typedef _TYPENAME traits_type::state_type _StateT;
+        typedef typename traits_type::state_type _StateT;
         typedef codecvt<char_type, char, _StateT> _Codecvt;
 
         const _Codecvt &__cvt = _USE_FACET (_Codecvt, this->getloc ());
@@ -951,7 +951,7 @@ bool
 basic_filebuf<_CharT, _Traits>::
 _C_unshift ()
 {
-    typedef _TYPENAME traits_type::state_type _StateT;
+    typedef typename traits_type::state_type _StateT;
     typedef codecvt<char_type, char, _StateT> _Codecvt;
 
     const _Codecvt &__cvt = _USE_FACET (_Codecvt, this->getloc ());
