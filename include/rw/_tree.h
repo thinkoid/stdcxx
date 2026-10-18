@@ -416,24 +416,8 @@ private:
 public:
     
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     typedef std::reverse_iterator<iterator>        reverse_iterator;
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-  typedef std::reverse_iterator<const_iterator, 
-        std::bidirectional_iterator_tag, value_type, 
-        const_reference, const_pointer, difference_type>
-    const_reverse_iterator;
-
-    typedef std::reverse_iterator<iterator, 
-        std::bidirectional_iterator_tag, value_type, 
-        reference, pointer, difference_type>
-    reverse_iterator;
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 private:
 

@@ -86,8 +86,6 @@ _RWSTD_SPECIALIZE_IS_INT (wchar_t);
        (typename __rw::__rw_select_int< iter >::_SelectT (1L))
 
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
 template <class _TypeT, class _TypeU>
 struct __rw_is_same
 {
@@ -101,39 +99,6 @@ struct __rw_is_same<_TypeT, _TypeT>
     typedef __rw_true_t _C_type;
     enum { _C_val = 1 };
 };
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-template <bool flag>
-struct __rw_bool_t
-{
-    typedef __rw_false_t _C_type;
-};
-
-template <>
-struct __rw_bool_t<true>
-{
-    typedef __rw_true_t _C_type;
-};
-
-template <class _TypeT, class _TypeU>
-struct __rw_is_same
-{
-    struct _C_yes {};
-    struct _C_no { _C_yes no_ [2]; };
-    template <class _TypeV>
-    struct _C_Type {};
-
-    static _C_yes test (_C_Type<_TypeT>, _C_Type<_TypeT>);
-    static _C_no test (...);
-
-    enum { _C_val = sizeof (test (_C_Type<_TypeT> (),
-                                  _C_Type<_TypeU> ())) == sizeof (_C_yes) };
-
-    typedef typename __rw_bool_t<_C_val>::_C_type _C_type;
-};
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 
 }   // namespace __rw

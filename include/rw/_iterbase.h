@@ -73,8 +73,6 @@ struct bidirectional_iterator_tag : public forward_iterator_tag { };
 struct random_access_iterator_tag : public bidirectional_iterator_tag { };
 
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
 template <class _TypeT>
 struct iterator_traits<_TypeT*>
 {
@@ -95,8 +93,6 @@ struct iterator_traits<const _TypeT*>
     typedef const value_type&          reference;
     typedef random_access_iterator_tag iterator_category;
 };
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 
 // 24.3.2 - Basic iterator
@@ -184,8 +180,6 @@ inline bool __is_random_access_iterator (random_access_iterator_tag)
 }
 
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
 template <class _Iterator>
 inline typename iterator_traits<_Iterator>::value_type*
 __value_type (const _Iterator*)
@@ -193,27 +187,6 @@ __value_type (const _Iterator*)
     return 0;
 }
 
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-template <class _Category, class _TypeT, class _Distance, 
-          class _Pointer, class _Reference>
-inline _TypeT*
-__value_type (const iterator<_Category, _TypeT, _Distance,
-                             _Pointer, _Reference>*)
-{
-    return 0;
-}
-
-template <class _TypeT>
-inline _TypeT* __value_type (const _TypeT* const*)
-{
-    return 0;
-}
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
-
-
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 template <class _Iterator>
 inline typename iterator_traits<_Iterator>::difference_type*
@@ -221,24 +194,6 @@ __distance_type (_Iterator)
 { 
     return 0;
 }
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-template <class _Category, class _TypeT, class _Distance, 
-          class _Pointer, class _Reference>
-inline _Distance* 
-__distance_type (iterator<_Category, _TypeT, _Distance, _Pointer, _Reference>)
-{
-    return 0;
-}
-
-template <class _TypeT>
-inline _RWSTD_PTRDIFF_T* __distance_type (const _TypeT*)
-{ 
-    return 0;
-}
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 
 // 24.3.4 - Iterator operations
@@ -333,8 +288,6 @@ inline void __distance (const _RandomAccessIterator &__first,
 }
 
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
 // 24.3.4, p4
 template <class _ForwardIterator>
 inline typename iterator_traits<_ForwardIterator>::difference_type
@@ -347,8 +300,6 @@ distance (_ForwardIterator __first, _ForwardIterator __last)
 
     return __n;
 }
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 
 }   // namespace std

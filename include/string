@@ -125,23 +125,8 @@ public:
 #endif   // _RWSTD_NO_DEBUG_ITER
 
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
-
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     typedef std::reverse_iterator<iterator>        reverse_iterator;
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-    typedef std::reverse_iterator<const_iterator, 
-      random_access_iterator_tag, value_type, 
-      const_reference, const_pointer, difference_type>
-      const_reverse_iterator;
-    typedef std::reverse_iterator<iterator, 
-      random_access_iterator_tag, value_type, 
-      reference, pointer, difference_type>
-      reverse_iterator;
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
     static const size_type npos = size_type (_RWSTD_SIZE_MAX);
 
@@ -751,12 +736,6 @@ public:
     // lwg Issue 5
     int compare (size_type, size_type, const_pointer, size_type) const;
 
-#if defined (_RWSTD_NO_PART_SPEC_OVERLOAD)
-    friend void swap (basic_string& __lhs, basic_string& __rhs) {
-        __lhs.swap (__rhs);
-    }
-#endif
-
 #ifndef _RWSTD_NO_STRING_OUTLINED_MEMBER_TEMPLATES
 
 private:
@@ -1344,7 +1323,6 @@ operator>= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 }
 
 // 21.3.7.8, p1
-#ifndef _RWSTD_NO_PART_SPEC_OVERLOAD
 
 template <class _CharT, class _Traits, class _Allocator>
 inline void swap (basic_string<_CharT, _Traits, _Allocator>& __a, 
@@ -1352,8 +1330,6 @@ inline void swap (basic_string<_CharT, _Traits, _Allocator>& __a,
 {
     __a.swap (__b);
 }
-
-#endif   // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 
 // 21.3.7.3, p2

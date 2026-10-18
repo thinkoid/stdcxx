@@ -188,8 +188,6 @@ inline void iter_swap (_FwdIter1 __a, _FwdIter2 __b)
     // std::iterator_traits<_FwdIter[12]>::value_type must satisfy
     // both Assignable and CopyConstructible
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
     // accommodate _FwdIter::operator*() that returns an rvalue that
     // doesn't bind to a non-const reference e.g., vector<bool>::reference
 
@@ -198,13 +196,6 @@ inline void iter_swap (_FwdIter1 __a, _FwdIter2 __b)
 
     __rw::__rw_swap (__ref1, __ref2);
 
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-    // the return type of std::iterator_traits<_FwdIter>::operator*()
-    // must be (convertible to) a true reference (i.e., value_type&)
-    __rw::__rw_swap (*__a, *__b);
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 }
 
 

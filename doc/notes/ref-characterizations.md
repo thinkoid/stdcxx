@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 164 named C++ probes, five supporting C++
+The source census contains 162 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 164 named probes are discoverable by
+three different things.** All 162 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -115,6 +115,7 @@ its row is gone from the catalogue below.
 | `EXPLICIT_CTOR_INSTANTIATION`, `IMPLICIT_INSTANTIATION`, `STATIC_TEMPLATE_MEMBER_INIT`, `DEFAULT_TEMPLATE_ARGS`, `DEPENDENT_TEMPLATE`, `SPECIALIZATION_ON_RETURN_TYPE`, `EXPLICIT_MEMBER_SPECIALIZATION`, `EXPLICIT_FUNC_INSTANTIATION`, `EXPLICIT_INSTANTIATION`, `SPECIALIZED_FRIEND`, `OVERLOAD_OF_TEMPLATE_FUNCTION` | `NO_*`, one each | 2026-10-17, one commit | The small template gates: every compiler of the matrix passes them. `_RWSTD_SPECIALIZED_FRIEND`, `_RWSTD_DEFAULT_ARG` and `_RWSTD_DUMMY_ARG` went with them, spelled out or unused; the Borland branch beside the first was the last `__TURBOC__` in the tree. |
 | `FRIEND_TEMPLATE`, `FUNC_PARTIAL_SPEC`, `NONDEDUCED_CONTEXT`, `TEMPLATE_ON_RETURN_TYPE` | `NO_*`, one each | 2026-10-17, one commit | Four more template gates every compiler of the matrix passes. The facet and temporary-buffer macros that spelled the return-type workaround (`_STD_USE_FACET` and kin) and the three local size-type macros went with them, spelled out. |
 | `STATIC_CONST_MEMBER_INIT`, `COLLAPSE_TEMPLATE_STATICS` | `NO_*`, one each | 2026-10-17, one commit | In-class initializers of static const members and one static per template instance across translation units; every compiler of the matrix passes. The static mutex initialization fallback, `_RWSTD_NO_STATIC_MUTEX_INIT`, had no definer left and went too; `_RWSTD_STATIC_CONST`, `_RWSTD_DEFINE_STATIC_CONST` and `_RWSTD_BITMASK_ENUM` are spelled out. |
+| `CLASS_PARTIAL_SPEC`, `PART_SPEC_OVERLOAD` | `NO_*`, one each | 2026-10-17, one commit | Partial specialization and partial ordering of function templates; every compiler of the matrix passes. The branches they selected were the largest of the family: iterator traits done by overloads, a `vector<bool>` that was a plain class, swap as a friend. The iterator-traits macros they left are spelled out in the commit after. |
 
 ## 3. Outputs beyond the status macro
 
@@ -177,7 +178,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [BAD_TYPEID_DTOR](../../etc/config/src/BAD_TYPEID_DTOR.cpp) / `NO_BAD_TYPEID_DTOR` | bad_typeid dtor | L; `src/typeinfo.cpp` |
 | [BAD_TYPEID_WHAT](../../etc/config/src/BAD_TYPEID_WHAT.cpp) / `NO_BAD_TYPEID_WHAT` | bad_typeid::what() | L; `src/typeinfo.cpp` |
 | [BITS_TYPES___MBSTATE_T_H](../../etc/config/src/BITS_TYPES___MBSTATE_T_H.cpp) / `NO_BITS_TYPES___MBSTATE_T_H` | __mbstate_t in &lt;bits/types/__mbstate_t.h&gt; | L; `include/rw/_mbstate.h` |
-| [CLASS_PARTIAL_SPEC](../../etc/config/src/CLASS_PARTIAL_SPEC.cpp) / `NO_CLASS_PARTIAL_SPEC` | partial template specialization | L/P/T/E; `include/algorithm` |
 | [CTYPE_BITS](../../etc/config/src/CTYPE_BITS.cpp) / `NO_CTYPE_BITS` + output | ctype constants | none |
 | [CV_VOID_SPECIALIZATIONS](../../etc/config/src/CV_VOID_SPECIALIZATIONS.cpp) / `NO_CV_VOID_SPECIALIZATIONS` | cv qualifiers on type void | L; `include/rw/_autoptr.h` |
 | [DAYLIGHT](../../etc/config/src/DAYLIGHT.cpp) / `NO_DAYLIGHT` | daylight variable in &lt;time.h&gt; | L; `src/time_put.cpp` |
@@ -262,7 +262,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [OPERATOR_NEW_ARRAY_PLACEMENT](../../etc/config/src/OPERATOR_NEW_ARRAY_PLACEMENT.cpp) / `NO_OPERATOR_NEW_ARRAY_PLACEMENT` | operator new[] (size_t, void*) | L; `include/new` |
 | [OPERATOR_NEW_NOTHROW](../../etc/config/src/OPERATOR_NEW_NOTHROW.cpp) / `NO_OPERATOR_NEW_NOTHROW` | operator new (size_t, nothrow_t) | L/T; `include/new` |
 | [OPERATOR_NEW_PLACEMENT](../../etc/config/src/OPERATOR_NEW_PLACEMENT.cpp) / `NO_OPERATOR_NEW_PLACEMENT` | operator new (size_t, void*) | L; `include/rw/_new.h` |
-| [PART_SPEC_OVERLOAD](../../etc/config/src/PART_SPEC_OVERLOAD.cpp) / `NO_PART_SPEC_OVERLOAD` | partial ordering of function templates | L/P/T; `include/deque` |
 | [PLACEMENT_DELETE](../../etc/config/src/PLACEMENT_DELETE.cpp) / `NO_PLACEMENT_DELETE` | placement delete | L/T; `include/new` |
 | [POD_ZERO_INIT](../../etc/config/src/POD_ZERO_INIT.cpp) / `NO_POD_ZERO_INIT` | POD zero initialization | L; `include/rw/_traits.h` |
 | [POSIX_MADVISE](../../etc/config/src/POSIX_MADVISE.cpp) / `NO_POSIX_MADVISE` | posix_madvise() in &lt;sys/mman.h&gt; | none |

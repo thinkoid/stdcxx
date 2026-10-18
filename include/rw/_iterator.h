@@ -58,22 +58,11 @@ namespace std {
 //
 //  Macros for reverse iterators to accomodate non-standard compilers
 //
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
-#  define _RWSTD_ITER_TEMPLATE template <class _Iterator>
-#  define _RWSTD_ITER_ID(i)    i <_Iterator>
-#  define _RWSTD_ITER_DIFF_TYPE(i, ignore)                             \
+#define _RWSTD_ITER_TEMPLATE template <class _Iterator>
+#define _RWSTD_ITER_ID(i)    i <_Iterator>
+#define _RWSTD_ITER_DIFF_TYPE(i, ignore)                             \
           typename iterator_traits<_Iterator>::difference_type
-#else
-#  define _RWSTD_ITER_TEMPLATE                                         \
-          template <class _Iterator, class _Category, class _TypeT,    \
-                    class _Reference, class _Pointer, class _Distance>
-#  define _RWSTD_ITER_ID(i)                                            \
-          i <_Iterator, _Category, _TypeT, _Reference, _Pointer, _Distance>
-#  define _RWSTD_ITER_DIFF_TYPE(ignore, distance) distance          
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
-
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
 template <class _Iterator>
 class reverse_iterator
@@ -90,24 +79,6 @@ public:
     typedef typename traits_type::pointer          pointer;
     typedef typename traits_type::reference        reference;
 
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-template <class _Iterator, class _Category, class _TypeT,
-          class _Reference = _TypeT&, 
-          class _Pointer = _TypeT*,
-          class _Distance = _RWSTD_PTRDIFF_T>
-class reverse_iterator
-    : public iterator<_Category, _TypeT, _Distance, _Pointer, _Reference>
-
-{
-public:
-    typedef _Distance  difference_type;
-    typedef _TypeT     value_type;
-    typedef _Reference reference;
-    typedef _Pointer   pointer;
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
-
     typedef _Iterator iterator_type;
 
     reverse_iterator () { }
@@ -116,23 +87,10 @@ public:
     explicit reverse_iterator (iterator_type __rhs) : current (__rhs) { }
  
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
-
     // 24.4.1.3.1, p2
     template <class _TypeU>
     reverse_iterator (const reverse_iterator<_TypeU>& __rhs)
         : current (__rhs.base ()) { }
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-    // 24.4.1.3.1, p2
-    template <class _Iterator2, class _Category2, class _TypeU,
-              class _Reference2, class _Pointer2, class _Distance2>
-    reverse_iterator (const reverse_iterator<_Iterator2, _Category2, _TypeU,
-                      _Reference2, _Pointer2, _Distance2>& __rhs)
-        : current (__rhs.base ()) { }
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
 
     // 24.4.1.3.2, p1
@@ -277,131 +235,9 @@ operator+ (_RWSTD_ITER_DIFF_TYPE (_Iterator, _Distance) __n,
 
 #undef _RWSTD_ITER_DIFF_TYPE
 
-#ifdef _RWSTD_NO_CLASS_PARTIAL_SPEC
 
-}   // namespace std
-
-namespace __rw { 
-
-// Reverse bidirectional iterator.       
-// This is needed to get around non-standard compilers that insist
-// on instantiating all members of a class whether they're used 
-// or not.
-
-template <class _Iterator, class _Category, class _TypeT, 
-          class _Reference = _TypeT&, 
-          class _Pointer = _TypeT*, 
-          class _Distance = _RWSTD_PTRDIFF_T>
-class __reverse_bi_iterator
-    : public std::iterator<_Category, _TypeT, _Distance, _Pointer, _Reference>
-{
-public:
-    typedef _Distance  difference_type;
-    typedef _TypeT     value_type;
-    typedef _Reference reference;
-    typedef _Pointer   pointer;
-    typedef _Iterator  iterator_type;
-
-    __reverse_bi_iterator () { }
-
-    explicit __reverse_bi_iterator (const iterator_type &__rhs) 
-        : current (__rhs) { }
-
-
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
-
-      template <class _TypeU>
-      __reverse_bi_iterator (const __reverse_bi_iterator<_TypeU>& __rhs)
-          : current (__rhs.base ()) { }
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC )
-
-      template <class _Iterator2, class _Category2, class _TypeU,
-                class _Reference2, class _Pointer2, class _Distance2>
-      __reverse_bi_iterator (const __reverse_bi_iterator<_Iterator2,
-                                                         _Category2,
-                                                         _TypeU,
-                                                         _Reference2,
-                                                         _Pointer2,
-                                                         _Distance2>& __rhs)
-          : current (__rhs.base ()) { }
-#endif
-
-
-    iterator_type base () const {
-        return current;
-    }
-
-    reference operator* () const {
-        iterator_type __tmp = base ();
-        return *--__tmp;
-    }
-
-    _RWSTD_OPERATOR_ARROW (pointer operator->() const);
-
-    __reverse_bi_iterator& operator++ () {
-        return --current, *this;
-    }
-
-    __reverse_bi_iterator  operator++ (int) {
-        __reverse_bi_iterator __tmp (*this);
-        ++*this;
-        return __tmp;
-    }
-
-    __reverse_bi_iterator& operator-- () {
-        return ++current, *this;
-    }
-
-    __reverse_bi_iterator operator-- (int) {
-        __reverse_bi_iterator __tmp (*this);
-        --*this;
-        return __tmp;
-    }
-
-protected:
-
-    iterator_type current;
-};
-
-
-_RWSTD_ITER_TEMPLATE
-inline bool operator== (const _RWSTD_ITER_ID (__reverse_bi_iterator)& __x, 
-                        const _RWSTD_ITER_ID (__reverse_bi_iterator)& __y)
-{
-    return __x.base () == __y.base ();
-}
-
-
-_RWSTD_ITER_TEMPLATE
-inline bool operator!= (const _RWSTD_ITER_ID (__reverse_bi_iterator)& __x,
-                        const _RWSTD_ITER_ID (__reverse_bi_iterator)& __y)
-{
-    return !(__x == __y);
-}
-
-#undef _RWSTD_ITER_TEMPLATE
-#undef _RWSTD_ITER_ID
-
-}   // namespace __rw
-
-namespace std { 
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
-
-
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-#  define _RWSTD_INSERT_ITERATOR_BASE(ignore)       \
+#define _RWSTD_INSERT_ITERATOR_BASE(ignore)       \
           iterator<output_iterator_tag, void, void, void, void>
-#else
-   // necessary to allow __iterator_category, __value_type, etc. to work
-#  define _RWSTD_INSERT_ITERATOR_BASE(cont)         \
-          iterator<output_iterator_tag,             \
-                   typename cont::value_type,       \
-                   typename cont::difference_type, \
-                   typename cont::pointer,          \
-                   typename cont::reference>
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 
 template <class _Container>

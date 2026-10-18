@@ -267,12 +267,6 @@ public:
         return _C_rep.equal_range (__x);
     }
 
-#if defined (_RWSTD_NO_PART_SPEC_OVERLOAD)
-    friend void swap (map& __lhs, map& __rhs) {
-        __lhs.swap (__rhs);
-    }
-#endif
-
 };
 
 
@@ -469,12 +463,6 @@ public:
         return _C_rep.equal_range (__x);
     }
 
-#if defined (_RWSTD_NO_PART_SPEC_OVERLOAD)
-    friend void swap (multimap& __lhs, multimap& __rhs) {
-        __lhs.swap (__rhs);
-    }
-#endif
-
 };
 
 
@@ -534,8 +522,6 @@ inline bool operator<= (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
 }
 
 
-#ifndef _RWSTD_NO_PART_SPEC_OVERLOAD
-
 // 23.3.1.4
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
 inline void swap (map<_Key, _TypeT, _Compare, _Allocator> &__y, 
@@ -543,8 +529,6 @@ inline void swap (map<_Key, _TypeT, _Compare, _Allocator> &__y,
 {
     __x.swap (__y);
 }
-
-#endif   // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 
 // 23.1, p5 - table 65
@@ -609,8 +593,6 @@ operator<= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
 }
 
 
-#ifndef _RWSTD_NO_PART_SPEC_OVERLOAD
-
 // 23.3.2.3
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
 void swap (multimap<_Key, _TypeT, _Compare, _Allocator> &__x, 
@@ -618,8 +600,6 @@ void swap (multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
 {
     __x.swap (__y);
 }
-
-#endif   // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 
 }   // namespace std

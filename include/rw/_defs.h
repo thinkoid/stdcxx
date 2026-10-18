@@ -731,36 +731,17 @@
      typedef typename _Iterator::iterator_category iterator_category
 
 // helpers making working w/o iterator_traits transparent
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
 
-#  define _RWSTD_VALUE_TYPE(iterT) \
+#define _RWSTD_VALUE_TYPE(iterT) \
        (typename std::iterator_traits< iterT >::value_type*)0
-#  define _RWSTD_DIFFERENCE_TYPE(iterT)   \
+#define _RWSTD_DIFFERENCE_TYPE(iterT)   \
        (typename std::iterator_traits< iterT >::difference_type*)0
 
-#  define _RWSTD_ITERATOR_CATEGORY(iterT, ignore) \
+#define _RWSTD_ITERATOR_CATEGORY(iterT, ignore) \
          typename std::iterator_traits< iterT >::iterator_category ()
 
-#  define _RWSTD_REVERSE_ITERATOR(iterT, ign1, ign2, ign3) \
+#define _RWSTD_REVERSE_ITERATOR(iterT, ign1, ign2, ign3) \
        std::reverse_iterator<iterT>
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-#  define _RWSTD_VALUE_TYPE(iterT) __value_type ((iterT*)0)
-   // assume default ctor is defined and accessible
-#  define _RWSTD_DIFFERENCE_TYPE(iterT)   \
-       std::__distance_type (iterT ())
-   // macro cannot use the default ctor to construct a temporary
-   // with the type of the first argument since the default ctor
-   // may not exist or be accessible (e.g., istream_iterator<>)
-#  define _RWSTD_ITERATOR_CATEGORY(ignore, iter) \
-       std::__iterator_category (iter)
-
-#  define _RWSTD_REVERSE_ITERATOR(iterT, Ref, Ptr, Tag)         \
-       std::reverse_iterator<iterT, std::Tag, value_type,       \
-                              Ref, Ptr, difference_type>
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 // Use -D_RWSTDDEBUG to compile a version of the libraries to debug
 // user code. This will perform pre- and post-condition checks but
@@ -898,19 +879,12 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 
 // for convenience
-#if !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-#  define _DISTANCE(first, last, ignore) std::distance (first, last)
-#else
-// working around a SunPro 5.{3,4} bug (see PR #25958)
-#  define _DISTANCE(first, last, type) __rw::__rw_distance (first, last, type())
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
+#define _DISTANCE(first, last, ignore) std::distance (first, last)
 
 
-// enable only in debug mode and only id partial class specialization
-// is supported; prevent multiple definition of _RWSTD_NO_DEBUG_ITER
-#if   defined (_RWSTDDEBUG)                    \
-    && !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) \
-    && !defined (_RWSTD_NO_DEBUG_ITER)
+// enable only in debug mode; prevent multiple definition of
+// _RWSTD_NO_DEBUG_ITER
+#if defined (_RWSTDDEBUG) && !defined (_RWSTD_NO_DEBUG_ITER)
 #  define _RWSTD_ASSERT_RANGE(first, last) \
       _RWSTD_ASSERT (__rw::__rw_valid_range (first, last))
 #  define _RWSTD_ASSERT_IN_RANGE(it, first, last) \
@@ -925,7 +899,7 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #  define _RWSTD_ASSERT_RANGE(ign1, ign2)          ((void)0)
 #  define _RWSTD_ASSERT_IN_RANGE(ign1, ign2, ign3) ((void)0)
 #  define _RWSTD_ASSERT_DEREF(ignore)              ((void)0)
-#endif   // _RWSTDDEBUG && _RWSTD_NO_CLASS_PARTIAL_SPEC
+#endif   // _RWSTDDEBUG && !_RWSTD_NO_DEBUG_ITER
 
 
 // convenience macro to get the "real" iterator embedded in __rw_debug_iter<>

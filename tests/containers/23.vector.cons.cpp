@@ -142,24 +142,10 @@ void test_types (Vector*, T*, Allocator)
     TEST_TYPE (typename Allocator::pointer,         pointer);
     TEST_TYPE (typename Allocator::const_pointer,   const_pointer);
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
     typedef std::reverse_iterator<typename Vector::iterator>
         ReverseIterator;
     typedef std::reverse_iterator<typename Vector::const_iterator>
       ConstReverseIterator;
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-    typedef std::reverse_iterator<typename Vector::iterator,
-        std::random_access_iterator_tag, T /*non-const T&, non-const T* */>
-      ReverseIterator;
-
-    typedef std::reverse_iterator<typename Vector::const_iterator,
-        std::random_access_iterator_tag, T, const T&, const T*>
-      ConstReverseIterator;
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
     TEST_TYPE (ReverseIterator, reverse_iterator);
     TEST_TYPE (ConstReverseIterator, const_reverse_iterator);

@@ -169,8 +169,6 @@ template <class _FwdIter, class _BinaryPredicate>
 _FwdIter adjacent_find (_FwdIter, _FwdIter, _BinaryPredicate);
 
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
 // 25.1.6 - Count [lib.alg.count]
 
 template <class _InputIter, class _TypeT>
@@ -199,8 +197,6 @@ count_if (_InputIter __first, _InputIter __last, _Predicate __pred)
             ++__n;
     return __n;
 }
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 
 // 25.1.7 - Mismatch [lib.mismatch]

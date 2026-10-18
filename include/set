@@ -241,12 +241,6 @@ public:
         return _C_rep.equal_range (__x);
     }
 
-#if defined (_RWSTD_NO_PART_SPEC_OVERLOAD)
-    friend void swap (set& __lhs, set& __rhs) {
-        __lhs.swap (__rhs);
-    }
-#endif
-
 };
 
 
@@ -418,12 +412,6 @@ public:
         return _C_rep.equal_range (__x);
     }
 
-#if defined (_RWSTD_NO_PART_SPEC_OVERLOAD)
-    friend void swap (multiset& __lhs, multiset& __rhs) {
-        __lhs.swap (__rhs);
-    }
-#endif
-
 };
 
 
@@ -477,16 +465,12 @@ inline bool operator<= (const set<_Key,_Compare,_Allocator>& __x,
 }
 
 
-#ifndef _RWSTD_NO_PART_SPEC_OVERLOAD
-
 template <class _Key, class _Compare, class _Allocator>
 void swap (set<_Key,_Compare,_Allocator>& __a, 
            set<_Key,_Compare,_Allocator>& __b)
 {
     __a.swap (__b);
 }
-
-#endif   // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 
 template <class _Key, class _Compare, class _Allocator>
@@ -538,16 +522,12 @@ inline bool operator<= (const multiset<_Key,_Compare,_Allocator>& __x,
     return !(__y <  __x);
 }
 
-#ifndef _RWSTD_NO_PART_SPEC_OVERLOAD
-
 template <class _Key, class _Compare,  class _Allocator>
 void swap (multiset<_Key,_Compare,_Allocator>& __a, 
            multiset<_Key,_Compare,_Allocator>& __b)
 {
     __a.swap (__b); 
 }
-
-#endif   // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 
 }   // namespace std

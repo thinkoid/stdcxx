@@ -560,14 +560,9 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
 
 #ifndef _RWSTD_NO_VECTOR_BOOL
 
-#if !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) 
   template <class _Allocator>
   template<class _InputIter>
   void vector<bool, _Allocator >::insert 
-#else
-  template<class _InputIter>
-  void vector<bool, allocator<bool> >::insert 
-#endif // _RWSTD_NO_CLASS_PARTIAL_SPEC
   (iterator __it, _InputIter __first, _InputIter __last)
 
   {
@@ -593,8 +588,6 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
       _C_begin = iterator(__q, 0);
     }
   }
-
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 // Duplicates of the following functions exist in src/stl/vecbool.cpp.
 // Which set is used depends on the availability of partial specialization.
@@ -682,8 +675,6 @@ _C_insert (iterator __it, bool __x)
     else if (__new_size < size())
       erase(begin() + __new_size, end());
   }
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 #endif   // _RWSTD_NO_VECTOR_BOOL
 

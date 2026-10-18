@@ -143,10 +143,8 @@
 
 
 #ifndef _RWSTD_NO_STL_SPECIALIZATION
-// #ifdef _RWSTD_NO_CLASS_PARTIAL_SPEC
 // disable partial specialization for void* of STL sequences
 #  define _RWSTD_NO_STL_SPECIALIZATION
-// #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 #endif   // _RWSTD_NO_STL_SPECIALIZATION
 
 // 

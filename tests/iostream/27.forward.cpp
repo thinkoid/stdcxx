@@ -127,34 +127,11 @@ typedef std::wstreampos     W_wstreampos;
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_PART_SPEC_OVERLOAD
-
 template <class T, class U>
 bool is_same_type (const T*, const U*) { return false; }
 
 template <class T>
 bool is_same_type (const T*, const T*) { return true; }
-
-#else   // ifdef _RWSTD_NO_PART_SPEC_OVERLOAD
-
-template <class T, class U>
-struct is_same
-{
-    struct yes {};
-    struct no { yes no_ [2]; };
-    template <class T>
-    struct Type {};
-
-    static yes test (Type<T>, Type<T>);
-    static no test (...);
-
-    enum { value = sizeof (test (Type<T> (), Type<U> ())) == sizeof (yes) };
-};
-
-template <class T, class U>
-bool is_same_type (const T*, const U*) { return is_same<T, U>::value; }
-
-#endif  // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 /**************************************************************************/
 

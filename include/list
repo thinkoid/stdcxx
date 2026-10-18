@@ -235,24 +235,8 @@ public:
 #endif   // _RWSTD_NO_DEBUG_ITER
 
 
-#if !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) 
-
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     typedef std::reverse_iterator<iterator>        reverse_iterator;
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-  typedef std::reverse_iterator<const_iterator, 
-        bidirectional_iterator_tag, value_type, 
-        const_reference, const_pointer, difference_type>
-    const_reverse_iterator;
-
-    typedef std::reverse_iterator<iterator, 
-        bidirectional_iterator_tag, value_type, 
-        reference, pointer, difference_type>
-    reverse_iterator;
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 protected:
 
@@ -583,12 +567,6 @@ public:
         erase (begin (), end ());
     }
 
-#if defined (_RWSTD_NO_PART_SPEC_OVERLOAD)
-    friend void swap (list& __lhs, list& __rhs) {
-        __lhs.swap (__rhs);
-    }
-#endif
-
 protected:
     
     void _C_transfer (iterator, iterator, iterator, list&);
@@ -716,16 +694,12 @@ operator>= (const list<_TypeT, _Allocator>& __x,
 }
 
 
-#ifndef _RWSTD_NO_PART_SPEC_OVERLOAD
-
 template <class _TypeT, class _Allocator>
 inline void swap (list<_TypeT, _Allocator>& __x, 
                   list<_TypeT, _Allocator>& __y)
 {
     __x.swap (__y);
 }
-
-#endif   // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 
 template <class _TypeT, class _Allocator>

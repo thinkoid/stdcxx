@@ -98,8 +98,8 @@ every one of them out, keyword by keyword, the casts last.
 | gate | question | lib | tests | files | read by |
 | --- | --- | --- | --- | --- | --- |
 | `MEMBER_TEMPLATES` | member templates | 107 | 31 | 17 | `EXTERN_MEMBER_TEMPLATE`, `extern_template_imp`; retired 2026-10-17 |
-| `CLASS_PARTIAL_SPEC` | partial specialization | 79 | 6 | 16 | `VA_LIST` |
-| `PART_SPEC_OVERLOAD` | partial ordering of function templates | 29 | 3 | 7 | `VA_LIST` |
+| `CLASS_PARTIAL_SPEC` | partial specialization | 79 | 6 | 16 | `VA_LIST`; retired 2026-10-17 |
+| `PART_SPEC_OVERLOAD` | partial ordering of function templates | 29 | 3 | 7 | `VA_LIST`; retired 2026-10-17 |
 | `TEMPLATE_ON_RETURN_TYPE` | function template overloads on the return type | 16 | 4 | 4 | retired 2026-10-17 |
 | `STATIC_CONST_MEMBER_INIT` | in-class initializer of a static const member | 12 | 7 | 5 | retired 2026-10-17 |
 | `NONDEDUCED_CONTEXT` | nondeduced contexts | 10 | 0 | 4 | retired 2026-10-17 |
@@ -255,7 +255,8 @@ Small first, so the pattern settles before the big three.
    commit; `FRIEND_TEMPLATE`, `FUNC_PARTIAL_SPEC`, `NONDEDUCED_CONTEXT`
    and `TEMPLATE_ON_RETURN_TYPE` in the next; `STATIC_CONST_MEMBER_INIT`
    and `COLLAPSE_TEMPLATE_STATICS`, with the static mutex fallback they
-   alone enabled, in the one after.
+   alone enabled, in the one after; `CLASS_PARTIAL_SPEC` and
+   `PART_SPEC_OVERLOAD` last, as planned. Item 3 is done.
 4. The other language rules of 2.4.
 5. `LONG_DOUBLE`.
 6. `WCHAR_T` with `NATIVE_WCHAR_T`, the largest.

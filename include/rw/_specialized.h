@@ -77,8 +77,6 @@ __rw_new_capacity (typename _Container::size_type __size, const _Container*)
 }                     
 
 
-#ifndef _RWSTD_NO_PART_SPEC_OVERLOAD
-
 template <class _TypeT, class _TypeU>
 inline void
 __rw_construct (_TypeT* __p, _TypeU& __val)
@@ -94,26 +92,6 @@ __rw_construct (volatile _TypeT* __p, _TypeU& __val)
     // remove volatile before invoking operator new
     __rw_construct (const_cast< _TypeT* >(__p), __val);
 }
-
-#else   // #ifdef _RWSTD_NO_PART_SPEC_OVERLOAD
-
-template <class _TypeT, class _TypeU>
-inline void
-__rw_construct_impl (_TypeT* __p, _TypeU& __val)
-{
-    ::new (static_cast< void* >(__p)) _TypeT (__val);
-}
-
-
-template <class _TypeT, class _TypeU>
-inline void
-__rw_construct (volatile _TypeT* __p, _TypeU& __val)
-{
-    // remove volatile before invoking operator new
-    __rw_construct_impl (const_cast< _TypeT* >(__p), __val);
-}
-
-#endif  // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 template <class _TypeT>
 inline void

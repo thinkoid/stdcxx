@@ -581,12 +581,8 @@ void random_shuffle (_RandomAccessIter __first, _RandomAccessIter __last,
 
     if (!(__first == __last)) {
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
         typedef typename
             iterator_traits<_RandomAccessIter>::difference_type _DiffT;
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-        typedef _RWSTD_PTRDIFF_T _DiffT;
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
         _DiffT __limit = 2;
 

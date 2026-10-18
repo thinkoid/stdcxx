@@ -353,16 +353,9 @@ private:
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
 struct DummyBase { };
 
-#  define ITER_BASE(ign1, ign2, ign3, ign4, ign5) DummyBase
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-   // when partial specialization isn't supported 
-#  define ITER_BASE(Cat, T, Dist, Ptr, Ref) \
-          std::iterator<Cat, T, Dist, Ptr, Ref >
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
+#define ITER_BASE(ign1, ign2, ign3, ign4, ign5) DummyBase
 
 
 // satisfies the requirements in 24.1.1 [lib.input.iterators]

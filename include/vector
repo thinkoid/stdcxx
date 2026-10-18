@@ -104,24 +104,8 @@ public:
 
 #endif   // _RWSTD_NO_DEBUG_ITER
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
-
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     typedef std::reverse_iterator<iterator>        reverse_iterator;
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-    typedef std::reverse_iterator<const_iterator, 
-        random_access_iterator_tag, value_type, 
-        const_reference, const_pointer, difference_type>
-    const_reverse_iterator;
-
-    typedef std::reverse_iterator<iterator, 
-        random_access_iterator_tag, value_type,
-        reference, pointer, difference_type>
-    reverse_iterator;
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
 public:
 
@@ -277,14 +261,6 @@ public:
     void swap (vector&);
     
     void clear ();
-
-#ifdef _RWSTD_NO_PART_SPEC_OVERLOAD
-
-    friend void swap (vector& __lhs, vector& __rhs) {
-        __lhs.swap (__rhs);
-    }
-
-#endif   // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 private:
 
@@ -615,16 +591,12 @@ operator<= (const vector<_TypeT, _Allocator> &__x,
     return !(__y <  __x);
 }
 
-#ifndef _RWSTD_NO_PART_SPEC_OVERLOAD
-
 template <class _TypeT, class _Allocator>
 inline void
 swap (vector<_TypeT, _Allocator> &__x, vector<_TypeT, _Allocator> &__y)
 {
     __x.swap (__y);
 }
-
-#endif   // _RWSTD_NO_PART_SPEC_OVERLOAD
 
 /***************************************************************************/
 
@@ -634,20 +606,8 @@ swap (vector<_TypeT, _Allocator> &__x, vector<_TypeT, _Allocator> &__y)
 #define _RWSTD_WORD_BIT (int (_RWSTD_CHAR_BIT * sizeof (unsigned int)))
 
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
-
 template <class _Allocator>
 class
-
-#else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-
-     // use a macro to mutate _Allocator into allocator<bool>
-# define _Allocator allocator<bool>
-
-template <>
-class _RWSTD_EXPORT
-
-#endif  // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 vector<bool, _Allocator >: private _Allocator
 {
@@ -935,24 +895,8 @@ public:
         }
     };
 
-#ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
-
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     typedef std::reverse_iterator<iterator>        reverse_iterator;
-
-#else
-
-    typedef std::reverse_iterator<const_iterator, 
-        random_access_iterator_tag, value_type, 
-        const_reference, const_pointer, difference_type>
-    const_reverse_iterator;
-
-    typedef std::reverse_iterator<iterator, 
-        random_access_iterator_tag, value_type,
-        reference, pointer, difference_type>
-    reverse_iterator;
-
-#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
   private:
     //
@@ -1239,12 +1183,6 @@ public:
     {
       erase(begin(),end());
     }
-
-#if defined (_RWSTD_NO_PART_SPEC_OVERLOAD)
-    friend void swap (vector& __lhs, vector& __rhs) {
-        __lhs.swap (__rhs);
-    }
-#endif
 
 };
 
