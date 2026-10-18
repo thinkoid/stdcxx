@@ -118,6 +118,18 @@ that read each gate (5), and the order (6). Largest: =WCHAR_T= (524
 lines, 48 library files), =LONG_DOUBLE= (154, 12), =NAMESPACE= (145,
 32), =CLASS_PARTIAL_SPEC= (90, 16). Three sit between the families and
 wait on a decision: =HONOR_STD=, =RUNTIME_IN_STD=, =PLACEMENT_DELETE=.
+Two of them are one decision, whether the tree still claims g++ 2.9x:
+=rw/_config-gcc.h= sets =_RWSTD_NO_PLACEMENT_DELETE= by hand under
+=__GNUG__ <= 2= beside two more such blocks, the extern template
+syntax and =_RWSTD_NO_IOSTREAM_OBJECT_REFS=, which is read only when
+=HONOR_STD= is off, and =src/exception.cpp= disjoins =HONOR_STD= with
+=2 == __GNUG__= four times. =RUNTIME_IN_STD= is the other kind: every
+library condition on it is a disjunction with a =STD_*= probe, which
+stay (2026-10-17), and its probe overrides their stray answers (under
+GCC =bad_exception= is found in neither namespace and the probe
+undefines =_RWSTD_NO_STD_BAD_EXCEPTION=); retiring it leaves those
+probes without library readers. It waits on the runtime family's
+review, not on this entry.
 
 Fix: the member templates retirement's pattern, one gate or bundle per
 commit, in the note's order: the keyword gates, the template gates,
