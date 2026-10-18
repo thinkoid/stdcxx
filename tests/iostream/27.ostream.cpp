@@ -228,11 +228,7 @@ num_put_overload select_overload (unsigned _RWSTD_LONG_LONG) { return ULong; }
 num_put_overload select_overload (float)          { return Dbl; }
 num_put_overload select_overload (double)         { return Dbl; }
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 num_put_overload select_overload (long double)    { return LDbl; }
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 num_put_overload select_overload (const void*)    { return PVoid; }
 
@@ -1270,8 +1266,6 @@ void test_formatted (charT)
     // which is used for the fixed flag
     TEST (T (12.3456789), Fixed, 0, "12.345679");
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     //////////////////////////////////////////////////////////////////
     // exercise basic_ostream::operator<< (long double)
     TEST (T ( 0.0L), 0, 0, "0");
@@ -1288,8 +1282,6 @@ void test_formatted (charT)
     // digits after the decimal point for the "%f" or "%F" conversion,
     // which is used for the fixed flag
     TEST (T (12.3456789L), Fixed, 0, "12.345679");
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     //////////////////////////////////////////////////////////////////
     // exercise basic_ostream::operator<< (const void*)

@@ -140,11 +140,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
     test_val<float> ("float");
     test_val<double> ("double");
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     test_val<long double> ("long double");
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     return 0;
 }

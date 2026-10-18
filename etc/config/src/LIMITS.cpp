@@ -251,10 +251,8 @@ int main ()
     printf ("#define _RWSTD_DBL_SIZE    %2u /* sizeof (double) */\n",
             SIZEOF (double));
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
     printf ("#define _RWSTD_LDBL_SIZE   %2u /* sizeof (long double) */\n",
             SIZEOF (long double));
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     // compute the sizes of data and function pointers
     printf ("#define _RWSTD_PTR_SIZE    %2u /* sizeof (void*) */\n",

@@ -129,15 +129,11 @@ rw_fltcmp (float x, float y);
 _TEST_EXPORT int
 rw_dblcmp (double x, double y);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 /**
  * @see rw_fltcmp.
  */
 _TEST_EXPORT int
 rw_ldblcmp (long double x, long double y);
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 /**************************************************************************/
 
@@ -171,8 +167,6 @@ inline int rw_equal (double x, double y)
     return 0 == rw_dblcmp (x, y);
 }
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 /**
  * @see rw_equal.
  */
@@ -180,7 +174,5 @@ inline int rw_equal (long double x, long double y)
 {
     return 0 == rw_ldblcmp (x, y);
 }
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 #endif   // RW_VALCMP_H_INCLUDED

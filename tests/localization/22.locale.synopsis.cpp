@@ -1658,17 +1658,8 @@ struct MoneyGetDerived: std::money_get<charT, IterT>
     static void test_protected_members () {
         // protected virtuals
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
         MEMFUN (IterT, do_get, (IterT, IterT, bool, IosBase&,
                                 IoState&, long double&) const);
-
-#else   // if defined _RWSTD_NO_LONG_DOUBLE
-
-        MEMFUN (IterT, do_get, (IterT, IterT, bool, IosBase&,
-                                IoState&, double&) const);
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
         MEMFUN (IterT, do_get, (IterT, IterT, bool, IosBase&,
                                 IoState&, StringT&) const);
@@ -1726,16 +1717,8 @@ struct MoneyPutDerived: std::money_put<charT, IterT>
     static void test_protected_members () {
             // protected virtuals
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
         MEMFUN (IterT, do_put, (IterT, bool, IosBase&, charT,
                                 long double) const);
-
-#else   // if defined _RWSTD_NO_LONG_DOUBLE
-
-        MEMFUN (IterT, do_put, (IterT, bool, IosBase&, charT, double) const);
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
         MEMFUN (IterT, do_put, (IterT, bool, IosBase&, charT,
                                 const StringT&) const);

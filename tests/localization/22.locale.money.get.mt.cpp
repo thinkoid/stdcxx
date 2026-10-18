@@ -163,9 +163,7 @@ thread_func (void*)
 
     std::ios_base::iostate state = std::ios_base::goodbit;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
     long double ldbl = 0.;
-#endif  // _RWSTD_NO_LONG_DOUBLE
 
     for (int i = 0; i != opt_nloops; ++i) {
 

@@ -186,9 +186,7 @@ run_test (int, char*[])
     TEST (float, true);
     TEST (double, true);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
     TEST (long double, true);
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     return 0;
 }

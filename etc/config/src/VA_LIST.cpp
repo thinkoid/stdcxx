@@ -56,11 +56,7 @@ GET_TYPE_NAME (unsigned long long);
 GET_TYPE_NAME (float);
 GET_TYPE_NAME (double);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 GET_TYPE_NAME (long double);
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 GET_TYPE_NAME (void*);
 

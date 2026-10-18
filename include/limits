@@ -111,14 +111,10 @@ _RWSTD_EXPORT extern const double      __rw_dbl_sNaN;
 _RWSTD_EXPORT extern const float       __rw_flt_denorm_min;
 _RWSTD_EXPORT extern const double      __rw_dbl_denorm_min;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 _RWSTD_EXPORT extern const long double __rw_ldbl_infinity;
 _RWSTD_EXPORT extern const long double __rw_ldbl_qNaN;
 _RWSTD_EXPORT extern const long double __rw_ldbl_sNaN;
 _RWSTD_EXPORT extern const long double __rw_ldbl_denorm_min;
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 
 }   // extern "C"/"C++"
@@ -425,8 +421,6 @@ _RWSTD_CLASS_BEGIN (numeric_limits<double>)
 _RWSTD_CLASS_END   // numeric_limits<double>
 
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 _RWSTD_CLASS_BEGIN (numeric_limits<long double>)
 
     _RWSTD_STATIC (long double, bool, is_specialized, true);
@@ -473,8 +467,6 @@ _RWSTD_CLASS_BEGIN (numeric_limits<long double>)
                    _RWSTD_ROUND_STYLE);
 
 _RWSTD_CLASS_END    // numeric_limits<long double>
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 
 // define numeric_limits<> integral specializations

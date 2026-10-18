@@ -131,11 +131,7 @@ int main ()
     pass = test<float>("float");
     pass = test<double>("double") && pass;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     pass = test<long double>("long double") && pass;
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     assert (pass);
 

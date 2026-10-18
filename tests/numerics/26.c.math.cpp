@@ -146,9 +146,7 @@ test_behavior ()
         float       f;
         double      d;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
         long double l;
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
         char buf [sizeof (long double) * 2];
     } u;
@@ -169,16 +167,12 @@ test_behavior ()
                && check_bits (u.buf + sizeof (u.d), sizeof (u) - sizeof (u.d)),
                __FILE__, __LINE__, "double std::modf (double)");
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     clear_bytes (u.buf, sizeof u);
     const long double l = std::modf (3.1415926L, &u.l);
 
     rw_assert (   3000 == int (u.l * 1000) && 1415926 == int (l * 10000000)
                && check_bits (u.buf + sizeof (u.l), sizeof (u) - sizeof (u.l)),
                __FILE__, __LINE__, "long double std::modf (long double)");
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     // check overloads of std::pow()
     for (int i = -10; i != 10; ++i) {
@@ -212,8 +206,6 @@ test_behavior ()
                        "std::pow (%d.0, %d.0) = %g",
                        i, j, xd, i, j, yd);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
             const long double il = static_cast< long double >(i);
             const long double jl = static_cast< long double >(j);
 
@@ -231,8 +223,6 @@ test_behavior ()
                        "std::pow (%d.0L, %d.0L) = %Lg",
                        i, j, xl, i, j, yl);
 
-#endif   // _RWSTD_NO_LONG_DOUBLE
-
         }
     }
 }
@@ -249,21 +239,13 @@ test_declarations ()
     float f = 0.1;
     double d = 0.1;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     long double ld = 0.1;
 
-#  define CHECK_OVERLOADS(name)                                         \
+#define CHECK_OVERLOADS(name)                                         \
           rw_info (0, 0, __LINE__, "std::%s() overloads ", #name);      \
           (void)name (f);                                               \
           (void)name (d);                                               \
           (void)name (ld)
-#else   // if defined (_RWSTD_NO_LONG_DOUBLE)
-#  define CHECK_OVERLOADS(name)                                         \
-          rw_info (0, 0, __LINE__, "std::%s() overloads", #name);       \
-          (void)name (f);                                               \
-          (void)name (d)
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     CHECK_OVERLOADS (abs);
     CHECK_OVERLOADS (acos);
@@ -302,8 +284,6 @@ test_declarations ()
     CHECK_OVERLOADS (tan);
     CHECK_OVERLOADS (tanh);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     (void)atan2 (ld, ld);
     (void)fmod (ld, ld);
     (void)frexp (ld, &i);
@@ -311,8 +291,6 @@ test_declarations ()
     (void)modf (ld, &ld);
     (void)pow (ld, ld);
     (void)pow (ld, i);
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     rw_info (0, 0, __LINE__, "std::%s() overloads", "div");
     (void)div (i, i);

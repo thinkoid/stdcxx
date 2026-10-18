@@ -380,15 +380,7 @@ run_test (int, char**)
 
 #endif   // _RWSTD_LONG_LONG
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     test_get_temporary_buffer ((long double*)0, "long double");
-
-#else   // if defined (_RWSTD_NO_LONG_DOUBLE)
-
-    test_get_temporary_buffer ((double*)0, "double");
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     // exercise ordinary pointers
     test_get_temporary_buffer ((void**)0, "void*");

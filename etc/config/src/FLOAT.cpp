@@ -139,16 +139,12 @@ int main ()
     PRINTINT (FLT_MIN_EXP);
     PRINTINT (FLT_RADIX);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     PRINTINT (LDBL_DIG);
     PRINTINT (LDBL_MANT_DIG);
     PRINTINT (LDBL_MAX_10_EXP);
     PRINTINT (LDBL_MAX_EXP);
     PRINTINT (LDBL_MIN_10_EXP);
     PRINTINT (LDBL_MIN_EXP);
-
-#endif   //  _RWSTD_NO_LONG_DOUBLE
 
 
 #if defined (DBL_MAX)
@@ -159,11 +155,9 @@ int main ()
     PRINTFLT (FLT_MAX, "", FLT_DIG, "F");
 #endif   // FLT_MAX
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-#  if defined (LDBL_MAX)
+#if defined (LDBL_MAX)
     PRINTFLT (LDBL_MAX, LDBL_FMT, DBL_DIG, "F");
-#  endif   // LDBL_MAX
-#endif   // _RWSTD_NO_LONG_DOUBLE
+#endif   // LDBL_MAX
 
 #if defined (DBL_EPSILON)
     PRINTFLT (DBL_EPSILON, "l", DBL_DIG, "");
@@ -181,15 +175,13 @@ int main ()
     PRINTFLT (FLT_MIN, "", FLT_DIG, "F");
 #endif   // FLT_MIN
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-#  if defined (LDBL_EPSILON)
+#if defined (LDBL_EPSILON)
     PRINTFLT (LDBL_EPSILON, LDBL_FMT, LDBL_DIG, "L");
-#  endif   // LDBL_EPSILON
+#endif   // LDBL_EPSILON
 
-#  if defined (LDBL_MIN)
+#if defined (LDBL_MIN)
     PRINTFLT (LDBL_MIN, LDBL_FMT, LDBL_DIG, "L");
-#  endif   // LDBL_MIN
-#endif   // _RWSTD_NO_LONG_DOUBLE
+#endif   // LDBL_MIN
 
 
 #if !defined (ERANGE)
@@ -220,8 +212,6 @@ int main ()
         printf ("// #define _RWSTD_NO_STRTOD_UFLOW    // %d%s\n",
                 errno, ERANGE == errno ? " (ERANGE)" : "");
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     errno = 0;
 
     // HP-UX strtold() returns struct long_double
@@ -237,8 +227,6 @@ int main ()
     else
         printf ("// #define _RWSTD_NO_STRTOLD_UFLOW   // %d%s\n",
                 errno, ERANGE == errno ? " (ERANGE)" : "");
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     return 0;
 }

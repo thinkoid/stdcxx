@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 155 named C++ probes, five supporting C++
+The source census contains 154 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 155 named probes are discoverable by
+three different things.** All 154 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -117,6 +117,7 @@ its row is gone from the catalogue below.
 | `STATIC_CONST_MEMBER_INIT`, `COLLAPSE_TEMPLATE_STATICS` | `NO_*`, one each | 2026-10-17, one commit | In-class initializers of static const members and one static per template instance across translation units; every compiler of the matrix passes. The static mutex initialization fallback, `_RWSTD_NO_STATIC_MUTEX_INIT`, had no definer left and went too; `_RWSTD_STATIC_CONST`, `_RWSTD_DEFINE_STATIC_CONST` and `_RWSTD_BITMASK_ENUM` are spelled out. |
 | `CLASS_PARTIAL_SPEC`, `PART_SPEC_OVERLOAD` | `NO_*`, one each | 2026-10-17, one commit | Partial specialization and partial ordering of function templates; every compiler of the matrix passes. The branches they selected were the largest of the family: iterator traits done by overloads, a `vector<bool>` that was a plain class, swap as a friend. The iterator-traits macros they left are spelled out in the commit after. |
 | `POD_ZERO_INIT`, `NESTED_CLASS_ACCESS`, `NONCLASS_ARROW_RETURN`, `EXTERN_C_COMPATIBILITY`, `DUMMY_DEFAULT_ARG`, `CV_VOID_SPECIALIZATIONS`, `EMPTY_MEM_INITIALIZER` | `NO_*`, one each | 2026-10-17, one commit | The other language rules of C++98: value-initialization of a POD, a nested class's access (CWG 45), `operator->` returning a pointer, `extern "C"` function types, a dummy default argument, specializations on cv-qualified `void`, an empty mem-initializer. Every compiler of the matrix passes; `DUMMY_DEFAULT_ARG` had lost its last reader earlier in the day. `_RWSTD_OPERATOR_ARROW` is spelled out. |
+| `LONG_DOUBLE` | `NO_LONG_DOUBLE` | 2026-10-18 | Whether `long double` is a type of its own that overload resolution can pick; every compiler of the matrix passes. The gate hid the long double half of the numeric and money facets, `numeric_limits<long double>`, `complex<long double>`, the `<cmath>` overloads and the bit patterns in `limits_bits.cpp`; with it defined the library replaced a required virtual of `money_get` with a double one, so that build was never conforming. The five host-fact probes that read it (`FLOAT`, `INFINITY`, `LIMITS`, `MATH_OVERLOADS`, `VA_LIST`) print their long double answers unconditionally. |
 
 ## 3. Outputs beyond the status macro
 
@@ -227,7 +228,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [LIMITS](../../etc/config/src/LIMITS.cpp) / `NO_LIMITS` + output | numerical limits | none |
 | [LLONG_PRINTF_PREFIX](../../etc/config/src/LLONG_PRINTF_PREFIX.cpp) / `NO_LLONG_PRINTF_PREFIX` + output | long long printf format prefix | none |
 | [LOCALE_NAME_FMAT](../../etc/config/src/LOCALE_NAME_FMAT.cpp) / `NO_LOCALE_NAME_FMAT` + output | combined locale name format | L; `src/locale_body.cpp` |
-| [LONG_DOUBLE](../../etc/config/src/LONG_DOUBLE.cpp) / `NO_LONG_DOUBLE` | if long double is a native type | L/P/T; `include/ansi/cmath` |
 | [LONG_LONG](../../etc/config/src/LONG_LONG.cpp) / `NO_LONG_LONG` | long long | L/P/T; `include/rw/_config.h` |
 | [MADVISE](../../etc/config/src/MADVISE.cpp) / `NO_MADVISE` | madvise() in &lt;sys/mman.h&gt; | L; `src/memattr.cpp` |
 | [MATH_EXCEPTION](../../etc/config/src/MATH_EXCEPTION.cpp) / `NO_MATH_EXCEPTION` | struct exception in &lt;math.h&gt; | L; `include/ansi/cmath` |

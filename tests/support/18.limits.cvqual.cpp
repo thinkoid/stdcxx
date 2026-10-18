@@ -151,9 +151,7 @@ run_test (int, char*[])
     TEST (float);
     TEST (double);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
     TEST (long double);
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 #ifndef _RWSTD_NO_NATIVE_WCHAR_T
     TEST (wchar_t);

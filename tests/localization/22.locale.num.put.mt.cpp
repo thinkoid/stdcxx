@@ -85,11 +85,7 @@ struct MyNumData {
 
         put_dbl,
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
         put_ldbl,
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
         put_ptr,
         put_max
@@ -185,14 +181,10 @@ put_data (const MyNumData                               &data,
 
         break;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     case MyNumData::put_ldbl:
         *np.put (iter, io, fill,
                  (long double)data.value_) = term;
         break;
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     case MyNumData::put_ptr:
         *np.put (iter, io, fill,

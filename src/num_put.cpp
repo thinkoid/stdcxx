@@ -711,8 +711,6 @@ __rw_put_num (char **pbuf, size_t bufsize,
         }
         break;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     case __rw_facet::_C_ldouble | __rw_facet::_C_ptr: {
             const long double ldval = *(const long double*)pval;
             if (!__rw_isfinite (ldval)) {
@@ -747,8 +745,6 @@ __rw_put_num (char **pbuf, size_t bufsize,
             }
         }
         break;
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     case __rw_facet::_C_pvoid:
         if (pval) {

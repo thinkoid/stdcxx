@@ -61,9 +61,7 @@ public:
     rw_any_t (float);
     rw_any_t (double);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
     rw_any_t (long double);
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     rw_any_t (void*);
     rw_any_t (volatile void*);
@@ -111,9 +109,7 @@ private:
 
     union uval_t {
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
         long double ldbl_;
-#endif   // _RWSTD_NO_LONG_DOUBLE
         const volatile void *pvoid_;
         double      dbl_;
 #ifdef _RWSTD_LONG_LONG

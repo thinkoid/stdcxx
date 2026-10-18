@@ -2515,8 +2515,6 @@ test_ldbl (CharType ctype, const char *cname,
 {
 #ifndef NO_GET_LDBL
 
-#  ifndef _RWSTD_NO_LONG_DOUBLE
-
     const char* const tname = "long double";
 
     rw_info (0, 0, 0, "std::num_get<%s, %s>::get (..., %s&)",
@@ -2537,7 +2535,7 @@ test_ldbl (CharType ctype, const char *cname,
 
     const char *start;
 
-#    if _RWSTD_LDBL_MAX_10_EXP >= 38
+#  if _RWSTD_LDBL_MAX_10_EXP >= 38
 
     // parse "10...<repeats 37 times>" (i.e., 1 followed by 38 zeros)
     start = &(long_str [sizeof long_str - 40] = '1');
@@ -2547,10 +2545,10 @@ test_ldbl (CharType ctype, const char *cname,
     TEST (T, 1.0e+38L, long_str, INTSIZE (long_str) - 1, 0, Eof);
     long_str [sizeof long_str - 40] = '0';
 
-#    endif   // _RWSTD_LDBL_MAX_10_EXP > 129
+#  endif   // _RWSTD_LDBL_MAX_10_EXP > 129
 
 
-#    if _RWSTD_LDBL_MAX_10_EXP >= 128
+#  if _RWSTD_LDBL_MAX_10_EXP >= 128
 
     // parse "10...<repeats 127 times>" (i.e., 1 followed by 128 zeros)
     start = &(long_str [sizeof long_str - 130] = '1');
@@ -2560,9 +2558,9 @@ test_ldbl (CharType ctype, const char *cname,
     TEST (T, 1.0e+128L, long_str, INTSIZE (long_str) - 1, 0, Eof);
     long_str [sizeof long_str - 130] = '0';
 
-#    endif   // _RWSTD_LDBL_MAX_10_EXP > 129
+#  endif   // _RWSTD_LDBL_MAX_10_EXP > 129
 
-#    if _RWSTD_LDBL_MAX_10_EXP >= 308
+#  if _RWSTD_LDBL_MAX_10_EXP >= 308
 
     // parse "10...<repeats 307 times>" (i.e., 1 followed by 308 zeros)
     start = &(long_str [sizeof long_str - 310] = '1');
@@ -2572,21 +2570,19 @@ test_ldbl (CharType ctype, const char *cname,
     TEST (T, 1.0e+308L, long_str, INTSIZE (long_str) - 1, 0, Eof);
     long_str [sizeof long_str - 310] = '0';
 
-#    endif   // _RWSTD_LDBL_MAX_10_EXP > 308
+#  endif   // _RWSTD_LDBL_MAX_10_EXP > 308
 
-#    undef CAT
-#    undef CONCAT
+#  undef CAT
+#  undef CONCAT
 
-#    define CAT(a, b)      CONCAT (a, b)
-#    define CONCAT(a, b)   a ## b
+#  define CAT(a, b)      CONCAT (a, b)
+#  define CONCAT(a, b)   a ## b
 
     // parse "10..." (i.e., 1 followed by LDBL_MAX_10_EXP zeros)
     long_str [0] = '1';
     long_val     = CAT (CAT (1.0e+, _RWSTD_LDBL_MAX_10_EXP), L);
 
     TEST (T, long_val, long_str, INTSIZE (long_str) - 1, 0, Eof);
-
-#  endif   // _RWSTD_NO_LONG_DOUBLE
 
     if (rw_opt_no_uflow) {
         rw_note (0, 0, 0, "underflow test disabled");

@@ -483,8 +483,6 @@ static dbl_bits dbl_denorm_min ()
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 union ldbl_bits
 {
     char bits [sizeof (long double)];
@@ -756,8 +754,6 @@ static ldbl_bits ldbl_denorm_min ()
     return val;
 }
 
-#endif   // _RWSTD_NO_LONG_DOUBLE
-
 /**************************************************************************/
 
 int main ()
@@ -772,14 +768,10 @@ int main ()
     const dbl_bits d_snan = dbl_snan ();
     const dbl_bits d_den  = dbl_denorm_min ();
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     const ldbl_bits l_inf  = ldbl_infinity ();
     const ldbl_bits l_qnan = ldbl_qnan ();
     const ldbl_bits l_snan = ldbl_snan ();
     const ldbl_bits l_den  = ldbl_denorm_min ();
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 
 #ifdef _RWSTD_NO_DBL_TRAPS
@@ -790,11 +782,7 @@ int main ()
     const int flt_has_denorm = 0.0f != f_den.val;
     const int dbl_has_denorm = 0.0  != d_den.val;
 
-#  ifndef _RWSTD_NO_LONG_DOUBLE
-
     const int ldbl_has_denorm = 0.0L != l_den.val;
-
-#  endif   // _RWSTD_NO_LONG_DOUBLE
 
 #else   // if !defined (_RWSTD_NO_DBL_TRAPS)
 
@@ -822,16 +810,12 @@ int main ()
 
     printf ("#define _RWSTD_DBL_HAS_DENORM  %d\n", dbl_has_denorm);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     print ("#define _RWSTD_LDBL_INF_BITS ", &l_inf, sizeof l_inf);
     print ("#define _RWSTD_LDBL_QNAN_BITS ", &l_qnan, sizeof l_qnan);
     print ("#define _RWSTD_LDBL_SNAN_BITS ", &l_snan, sizeof l_snan);
     print ("#define _RWSTD_LDBL_DENORM_MIN_BITS ", &l_den, sizeof l_den);
 
     printf ("#define _RWSTD_LDBL_HAS_DENORM  %d\n", ldbl_has_denorm);
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     return 0;
 }

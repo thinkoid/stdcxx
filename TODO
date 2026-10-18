@@ -98,9 +98,9 @@ the non-debug recompile, the suite table) in =11S=.
 
 ** TODO The feature gates after the member templates
 
-Three gates ask whether the compiler accepts a C++98 construct, and no
+Two gates ask whether the compiler accepts a C++98 construct, and no
 compiler the tree is built with (GCC, Clang, eccp in strict C++03)
-defines one of them (=EXPLICIT_INSTANTIATION_BEFORE_DEFINITION= left
+defines either (=EXPLICIT_INSTANTIATION_BEFORE_DEFINITION= left
 the list: =rw/_defs.h= defines it by hand under eccp). Retired so far:
 the member templates gate (bfbf7ac3 and the seven commits after it),
 the member template overload gate, the ten keyword and syntax gates of
@@ -108,7 +108,9 @@ the note's 2.1 in one commit, the namespace gate with its nine probes,
 the eleven small template gates of 2.2 in one commit, four medium ones
 in the next, the two static-member ones after, and the partial
 specialization pair last; the seven other language rules of 2.4 in one
-commit. What remains is the types chapter, 2.3. The branch behind each
+commit; =LONG_DOUBLE= on 2026-10-18, the five host-fact probes that
+read it printing their long double answers unconditionally. What
+remains is =WCHAR_T= with =NATIVE_WCHAR_T=. The branch behind each
 cannot be compiled and rots. =doc/notes/analysis- feature-gates.md= is
 the census: the candidates by family with their footprint (chapter 2),
 sixteen probes nobody reads (3), what stays and why (4), the probes
@@ -118,9 +120,9 @@ lines, 48 library files), =LONG_DOUBLE= (154, 12), =NAMESPACE= (145,
 wait on a decision: =HONOR_STD=, =RUNTIME_IN_STD=, =PLACEMENT_DELETE=.
 
 Fix: the member templates retirement's pattern, one gate or bundle per
-commit, in the note's order, the first two items done: the keyword
-gates, the template gates, the other language rules, =LONG_DOUBLE=,
-=WCHAR_T=; the reader-less probes went on 2026-10-17. Each commit
+commit, in the note's order: the keyword gates, the template gates,
+the other language rules and =LONG_DOUBLE= done, =WCHAR_T= next; the
+reader-less probes went on 2026-10-17. Each commit
 takes the =#ifdef= branches, the twins, the dispatch macros, the probe
 and the probes that read it; =ref-characterizations.md= records each
 retirement.

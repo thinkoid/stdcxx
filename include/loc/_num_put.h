@@ -80,14 +80,10 @@ struct num_put: __rw::__rw_facet
         return do_put (__it, __flags, __fill, __val);
     }
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     iter_type put (iter_type __it, ios_base &__flags, char_type __fill,
                    long double __val) const {
         return do_put (__it, __flags, __fill, __val);
     }
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     iter_type put (iter_type __it, ios_base &__flags, char_type __fill,
                    const void* __val) const {
@@ -143,15 +139,11 @@ protected:
         return _C_put (__it, __flags, __fill, _C_double | _C_ptr, &__val);
     }
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     virtual iter_type
     do_put (iter_type __it, ios_base &__flags, char_type __fill,
             long double __val) const {
         return _C_put (__it, __flags, __fill, _C_ldouble | _C_ptr, &__val);
     }
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     virtual iter_type
     do_put (iter_type __it, ios_base &__flags, char_type __fill,

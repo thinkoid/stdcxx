@@ -53,13 +53,9 @@ class complex<float>;
 template <>
 class complex<double>;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 // 26.2.3
 template <>
 class complex<long double>;
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 
 // 26.2.6 complex non-member operations (used from within member functions)
@@ -105,12 +101,8 @@ public:
     // defined after the definition of the incomplete complex<double>
     explicit complex (const complex<double>&);
     
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     // defined after the definition of the incomplete complex<long double>
     explicit complex (const complex<long double>&);
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     value_type imag () const {
         return _C_im;
@@ -184,12 +176,8 @@ public:
     complex (const complex<float> &__rhs)
         : _C_re (__rhs.real ()), _C_im (__rhs.imag ()) { }
     
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     // defined after the definition of the incomplete complex<long double>
     explicit complex (const complex<long double>&);
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     value_type imag () const {
         return _C_im;
@@ -248,8 +236,6 @@ private:
     value_type _C_re, _C_im;
 };
 
-
-#ifndef _RWSTD_NO_LONG_DOUBLE
 
 template <>
 class complex<long double>
@@ -322,16 +308,12 @@ private:
     value_type _C_re, _C_im;
 };
 
-#endif   // _RWSTD_NO_LONG_DOUBLE
-
 
 inline complex<float>::complex (const complex<double> &__rhs)
     : _C_re (static_cast< value_type >(__rhs.real ())),
       _C_im (static_cast< value_type >(__rhs.imag ()))
 { }
     
-
-#ifndef _RWSTD_NO_LONG_DOUBLE
 
 inline complex<float>::complex (const complex<long double> &__rhs)
     : _C_re (static_cast< value_type >(__rhs.real ())),
@@ -342,8 +324,6 @@ inline complex<double>::complex (const complex<long double> &__rhs)
     : _C_re (static_cast< value_type >(__rhs.real ())),
       _C_im (static_cast< value_type >(__rhs.imag ()))
 { }
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 
 

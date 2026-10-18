@@ -76,23 +76,11 @@ struct money_get: __rw::__rw_facet
 
 protected:
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     virtual iter_type
     do_get (iter_type __it, iter_type __end, bool __intl, ios_base &__fl,
             _RWSTD_IOSTATE &__err, long double &__val) const {
         return _C_get (__it, __end, __intl, __fl, __err, &__val, 0);
     }
-
-#else   // if defined (_RWSTD_NO_LONG_DOUBLE)
-
-    virtual iter_type
-    do_get (iter_type __it, iter_type __end, bool __intl, ios_base &__fl,
-            _RWSTD_IOSTATE &__err, double &__val) const {
-        return _C_get (__it, __end, __intl, __fl, __err, &__val, 0);
-    }
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     virtual iter_type
     do_get (iter_type __it, iter_type __end, bool __intl, ios_base &__fl,

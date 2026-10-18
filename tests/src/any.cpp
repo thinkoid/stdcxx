@@ -157,16 +157,12 @@ rw_any_t::rw_any_t (double value)
 }
 
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 rw_any_t::rw_any_t (long double value)
     : str_ (0), tid_ (t_ldbl)
 {
     memset (&val_, 0, sizeof val_);
     val_.ldbl_ = value;
 }
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 
 rw_any_t::rw_any_t (void* value)
@@ -421,15 +417,11 @@ rw_any_t::tostr (const char *fmt /* = 0 */)
         str_ = rw_sprintfa (fmt, val_.dbl_);
         break;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     case t_ldbl:
         if (0 == fmt)
             fmt = "%Lg";
         str_ = rw_sprintfa (fmt, val_.ldbl_);
         break;
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     case t_pvoid:
     case t_c_pvoid:

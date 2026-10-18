@@ -129,7 +129,7 @@ in 19 library lines. That derived gate goes with them.
 | gate | question | lib | tests | files | read by |
 | --- | --- | --- | --- | --- | --- |
 | `WCHAR_T` | `wchar_t` support | 157 | 365 | 48 | `LIMITS`, `NATIVE_WCHAR_T` |
-| `LONG_DOUBLE` | `long double` a native type | 52 | 80 | 12 | `FLOAT`, `INFINITY`, `LIMITS`, `MATH_OVERLOADS`, `VA_LIST` |
+| `LONG_DOUBLE` | `long double` a native type | 52 | 80 | 12 | `FLOAT`, `INFINITY`, `LIMITS`, `MATH_OVERLOADS`, `VA_LIST`; retired 2026-10-18 |
 | `NATIVE_WCHAR_T` | `wchar_t` a distinct type, not a typedef | 9 | 21 | 5 | |
 
 `NATIVE_WCHAR_T` was Visual C++'s `/Zc:wchar_t-`; that compiler is
@@ -258,7 +258,8 @@ Small first, so the pattern settles before the big three.
    alone enabled, in the one after; `CLASS_PARTIAL_SPEC` and
    `PART_SPEC_OVERLOAD` last, as planned. Item 3 is done.
 4. The other language rules of 2.4; done 2026-10-17, one commit.
-5. `LONG_DOUBLE`.
+5. `LONG_DOUBLE`: done 2026-10-18, one commit. The five host-fact
+   probes that read it keep their long double branches, unconditional.
 6. `WCHAR_T` with `NATIVE_WCHAR_T`, the largest.
 7. The probes of chapter 3, any time, one commit; done 2026-10-17.
 8. The three of 2.5, after a decision.

@@ -73,11 +73,7 @@ extern "C++" {
 extern const float       __rw_flt_infinity;
 extern const double      __rw_dbl_infinity;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 extern const long double __rw_ldbl_infinity;
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 }   // extern "C"/"C++"
 
@@ -497,8 +493,6 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 
             typedef long double LDbl;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
             LDbl ld;
 
             // assumes `buf' is formatted for the current locale
@@ -531,8 +525,6 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
             *static_cast< LDbl* >(pval) =
                 __rw_validate (ld, LDbl (_RWSTD_LDBL_MIN),
                                __rw_ldbl_infinity, *buf, err);
-
-#endif   // _RWSTD_LONG_DOUBLE
 
             break;
         }

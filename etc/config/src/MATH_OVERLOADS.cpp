@@ -108,45 +108,33 @@ int main ()
 {
     float f = 0;
     double d = 0;
-
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     long double ld = 0;
-
-#  define IF_LDBL   if (1)
-#else
-
-    double ld = 0;
-
-#  define IF_LDBL   if (0)
-#endif   // _RWSTD_NO_LONG_DOUBLE
-
     int i = 0;
 
-    abs (d); abs (f); IF_LDBL abs (ld);
-    acos (d); acos (f); IF_LDBL acos (ld);
-    asin (d); asin (f); IF_LDBL asin (ld);
-    atan (d); atan (f); IF_LDBL atan (ld);
-    atan2 (d, d); atan2 (f, f); IF_LDBL atan2 (ld, ld);
-    ceil (d); ceil (f); IF_LDBL ceil (ld);
-    cos (d); cos (f); IF_LDBL cos (ld);
-    cosh (d); cosh (f); IF_LDBL cosh (ld);
-    exp (d); exp (f); IF_LDBL exp (ld);
-    fabs (d); fabs (f); IF_LDBL fabs (ld);
-    floor (d); floor (f); IF_LDBL floor (ld);
-    fmod (d, d); fmod (f, f); IF_LDBL fmod (ld, ld);
-    frexp (d, &i); frexp (f, &i); IF_LDBL frexp (ld, &i);
-    ldexp (d, i); ldexp (f, i); IF_LDBL ldexp (ld, i);
-    log (d); log (f); IF_LDBL log (ld);
-    log10 (d); log10 (f); IF_LDBL log10 (ld);
-    modf (d, &d); modf (f, &f); IF_LDBL modf (ld, &ld);
-    pow (d, d); pow (f, f); IF_LDBL pow (ld, ld);
-    pow (d, i); pow (f, i); IF_LDBL pow (ld, i);
-    sin (d); sin (f); IF_LDBL sin (ld);
-    sinh (d); sinh (f); IF_LDBL sinh (ld);
-    sqrt (d); sqrt (f); IF_LDBL sqrt (ld);
-    tan (d); tan (f); IF_LDBL tan (ld);
-    tanh (d); tanh (f); IF_LDBL tanh (ld);
+    abs (d); abs (f); abs (ld);
+    acos (d); acos (f); acos (ld);
+    asin (d); asin (f); asin (ld);
+    atan (d); atan (f); atan (ld);
+    atan2 (d, d); atan2 (f, f); atan2 (ld, ld);
+    ceil (d); ceil (f); ceil (ld);
+    cos (d); cos (f); cos (ld);
+    cosh (d); cosh (f); cosh (ld);
+    exp (d); exp (f); exp (ld);
+    fabs (d); fabs (f); fabs (ld);
+    floor (d); floor (f); floor (ld);
+    fmod (d, d); fmod (f, f); fmod (ld, ld);
+    frexp (d, &i); frexp (f, &i); frexp (ld, &i);
+    ldexp (d, i); ldexp (f, i); ldexp (ld, i);
+    log (d); log (f); log (ld);
+    log10 (d); log10 (f); log10 (ld);
+    modf (d, &d); modf (f, &f); modf (ld, &ld);
+    pow (d, d); pow (f, f); pow (ld, ld);
+    pow (d, i); pow (f, i); pow (ld, i);
+    sin (d); sin (f); sin (ld);
+    sinh (d); sinh (f); sinh (ld);
+    sqrt (d); sqrt (f); sqrt (ld);
+    tan (d); tan (f); tan (ld);
+    tanh (d); tanh (f); tanh (ld);
 
     return 0;
 }

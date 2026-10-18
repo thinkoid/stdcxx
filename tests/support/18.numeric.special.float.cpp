@@ -66,11 +66,7 @@ extern const bool big_endian = !*(const char*)&endian_test;
 volatile float  flt_zero  = 0;
 volatile double dbl_zero  = 0;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 volatile long double ldbl_zero = 0;
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 /***********************************************************************/
 
@@ -1091,14 +1087,10 @@ run_test (int, char**)
     test_limits (float (), "float", "%g");
     test_limits (double (), "double", "%g");
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
    // working around a SunPro 5.3 ICE (PR #25968)
 
     const char fmt[] = "%" _RWSTD_LDBL_PRINTF_PREFIX "g";
     test_limits ((long double)0.0, "long double", fmt);
-
-#endif   //_RWSTD_NO_LONG_DOUBLE
 
     return 0;
 }

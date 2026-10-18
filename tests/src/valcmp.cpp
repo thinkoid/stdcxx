@@ -810,12 +810,10 @@ rw_dblcmp (double x, double y)
 }
 
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 #if    !defined (_RWSTD_NO_LONG_LONG) \
     && (64 == _RWSTD_LDBL_MANT_DIG || 113 == _RWSTD_LDBL_MANT_DIG)
    // an IEC 559 format wider than double, and the integer to take it apart
-#  define _RW_LDBL_ORDINAL
+#define _RW_LDBL_ORDINAL
 #endif
 
 
@@ -966,5 +964,3 @@ rw_ldblcmp (long double x, long double y)
 
 #endif   // _RW_LDBL_ORDINAL
 }
-
-#endif   // _RWSTD_NO_LONG_DOUBLE

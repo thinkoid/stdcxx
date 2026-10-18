@@ -120,11 +120,7 @@ struct FmtSpec
     // extension: fill character
     int fill;
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
     typedef long double ldbl_t;
-#else
-    typedef double      ldbl_t;   // bogus (for convenience)
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 #ifdef _RWSTD_LONG_LONG
     typedef _RWSTD_LONG_LONG llong_t;

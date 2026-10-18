@@ -178,12 +178,8 @@ struct __rw_is_fundamental<float> { enum { _C_val = 1 }; };
 template <>
 struct __rw_is_fundamental<double> { enum { _C_val = 1 }; };
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 template <>
 struct __rw_is_fundamental<long double> { enum { _C_val = 1 }; };
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 template <>
 struct __rw_is_fundamental<bool> { enum { _C_val = 1 }; };

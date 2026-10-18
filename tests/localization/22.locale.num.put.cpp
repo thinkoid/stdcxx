@@ -252,16 +252,12 @@ struct NumPut: std::num_put<charT, charT*>
         return Base::do_put (it, f, fill, v);
     }
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     virtual iter_type
     do_put (iter_type it, std::ios_base &f, char_type fill,
             long double v) const {
         ++ncalls_ [test_ldouble];
         return Base::do_put (it, f, fill, v);
     }
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     virtual iter_type
     do_put (iter_type it, std::ios_base &f, char_type fill,
@@ -506,11 +502,7 @@ void direct_use_test (charT, const char *cname)
     DIRECT_USE_TEST (long);
     DIRECT_USE_TEST (double);
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     DIRECT_USE_TEST (long double);
-
-#endif
 
     DIRECT_USE_TEST (void*);
 }
@@ -1619,7 +1611,6 @@ void dbl_test (charT, const char *cname)
 template <class charT>
 void ldbl_test (charT, const char *cname)
 {
-#ifndef _RWSTD_NO_LONG_DOUBLE
 
     const char* const tname = "long double";
 
@@ -1785,7 +1776,6 @@ void ldbl_test (charT, const char *cname)
 
     inf_nan_test (charT (), (long double)0, cname, tname);
 
-#endif   // _RWSTD_NO_LONG_DOUBLE
 }
 
 
@@ -2144,13 +2134,9 @@ void numput_virtuals_test (charT, const char *cname)
 
     ASSERT (double, 1, double, "double", "double");
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     typedef long double ldouble;
 
     ASSERT (ldouble, 1, ldouble, "long double", "long double");
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     typedef const void* pvoid;
     ASSERT (pvoid, 1, pvoid, "const void*", "const void*");
@@ -2199,11 +2185,7 @@ void run_tests (charT, const char *cname)
 
     TEST (dbl, "dbouble");
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
     TEST (ldbl, "long double");
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     TEST (pvoid, "void*");
 

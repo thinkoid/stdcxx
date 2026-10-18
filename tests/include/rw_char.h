@@ -38,13 +38,7 @@
 
 struct UserChar   // user-defined character type (must be POD)
 {
-#if !defined (_RWSTD_NO_LONG_DOUBLE)
     long double f;    // exercise correct alignment
-#else
-    // cannot use long double with SunPro due to a compiler
-    // bug that prevents assignments of UserChar() (PR #28328)
-    double f;
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
     unsigned char c;   // underlying character representation
 

@@ -38,12 +38,7 @@
 #include <rw_valcmp.h>   // for rw_ldblcmp()
 
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-#  define LongDouble long double
-#else
-#  define LongDouble   double
-#  define rw_ldblcmp   rw_dblcmp
-#endif   // _RWSTD_NO_LONG_DOUBLE
+#define LongDouble long double
 
 /**************************************************************************/
 
@@ -1020,11 +1015,7 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     TEST (T, -600000.0, "$-6;0;;0.00000 ", 14, 0, failbit, 3, 0, "$", "\1");
     TEST (T, -700004.0, "$-7;;0;0.00456 ", 14, 0, failbit, 3, 0, "$", "\1");
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-#  define LDBL(x)   x ## L
-#else
-#  define LDBL(x)   x
-#endif
+#define LDBL(x)   x ## L
     TEST (T, LDBL (1234567890.0),
           "$1;2;3;4;5;6;7;8;9;0", 20, 0, eofbit, 0, 0, "$", "\1");
 

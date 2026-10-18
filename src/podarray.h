@@ -53,11 +53,7 @@ template <class _TypeT>
 struct __rw_aligned_buffer
 {
     union {
-#ifndef _RWSTD_NO_LONG_DOUBLE
         long double _C_pad;                     // guarantee suitable alignment
-#else
-        double      _C_pad;
-#endif   // _RWSTD_NO_LONG_DOUBLE
         void       *_C_void_pad;
         void      (*_C_pfn_pad)();
         char        _C_data [sizeof (_TypeT)];  // data to back _TypeT up with 

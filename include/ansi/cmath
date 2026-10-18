@@ -373,8 +373,6 @@ inline double pow (double __x, int __y)
 #endif   // _RWSTD_NO_POW_DBL_INT
 
 
-#ifndef _RWSTD_NO_LONG_DOUBLE
-
 // long double overloads
 
 
@@ -383,8 +381,8 @@ inline long double abs (long double __x)
 {
     return _FABSL (__x);
 }
-#  undef _RWSTD_NO_ABS_LDBL
-#  else
+#undef _RWSTD_NO_ABS_LDBL
+#else
 using ::abs;
 #endif   // _RWSTD_NO_ABS_LDBL
 
@@ -458,7 +456,7 @@ inline long double fabs (long double __x)
 {
     return _FABSL (__x);
 }
-#  undef _RWSTD_NO_FABS_LDBL
+#undef _RWSTD_NO_FABS_LDBL
 #endif   // _RWSTD_NO_FABS_LDBL
 
 
@@ -581,8 +579,6 @@ inline long double tanh (long double __x)
 }
 #endif   // _RWSTD_NO_TANH_LDBL
 
-
-#endif   // _RWSTD_NO_LONG_DOUBLE
 
 
 // using statements must come after the overloads.

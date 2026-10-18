@@ -145,12 +145,8 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
 _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
                           __rw_insert (std::ostream&, double));
 
-#  ifndef _RWSTD_NO_LONG_DOUBLE
-
 _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
                           __rw_insert (std::ostream&, long double));
-
-#  endif   // _RWSTD_NO_LONG_DOUBLE
 
 #endif    // _RWSTD_INSTANTIATE (_INSERT_DBL, _CHAR)
 
@@ -200,12 +196,8 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
 _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
                           __rw_insert (std::wostream&, double));
 
-#    ifndef _RWSTD_NO_LONG_DOUBLE
-
 _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
                           __rw_insert (std::wostream&, long double));
-
-#  endif   // _RWSTD_NO_LONG_DOUBLE
 
 #endif   // _RWSTD_INSTANTIATE (_INSERT_DBL, _WCHAR_T)
 

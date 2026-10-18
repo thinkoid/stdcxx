@@ -106,15 +106,11 @@ struct num_get: __rw::__rw_facet
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-#ifndef _RWSTD_LONG_DOUBLE
-
     iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
                    _RWSTD_IOSTATE &__err, long double &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
-
-#endif   // _RWSTD_LONG_DOUBLE
 
     iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
                    _RWSTD_IOSTATE &__err, void* &__val) const {
@@ -187,15 +183,11 @@ protected:
         return _C_get (__begin, __end, __flags, __err, _C_double, &__val);
     }
 
-#ifndef _RWSTD_LONG_DOUBLE
-
     virtual iter_type
     do_get (iter_type __begin, iter_type __end, ios_base &__flags,
             _RWSTD_IOSTATE &__err, long double &__val) const {
         return _C_get (__begin, __end, __flags, __err, _C_ldouble, &__val);
     }
-
-#endif   // _RWSTD_LONG_DOUBLE
 
     virtual iter_type
     do_get (iter_type __begin, iter_type __end, ios_base &__flags,
