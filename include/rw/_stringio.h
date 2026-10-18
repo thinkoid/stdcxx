@@ -30,9 +30,9 @@
  * 
  **************************************************************************/
 
-#if __GNUG__ >= 3
+#ifdef __GNUG__
 #  pragma GCC system_header
-#endif   // gcc >= 3
+#endif   // __GNUG__
 
 #ifndef _RWSTD_RW_STRINGIO_H_INCLUDED
 #define _RWSTD_RW_STRINGIO_H_INCLUDED

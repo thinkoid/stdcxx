@@ -1073,7 +1073,7 @@ namespace std {
    // is already #included), or it was detected at configuration
 #  define _RWSTD_VA_COPY(va_dst, va_src) \
           va_copy (va_dst, va_src)
-#elif 2 < __GNUG__
+#elif defined (__GNUG__)
    // no va_copy() macro detected, use gcc builtin
 #  define _RWSTD_VA_COPY(va_dst, va_src) \
           __builtin_va_copy (va_dst, va_src)

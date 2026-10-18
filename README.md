@@ -125,6 +125,9 @@ the same table under both; the Clang configuration is
 `doc/notes/analysis-clang.md` records what it took. The characterizations
 stayed: what they detect is a property of the toolchain in front of
 them, not of a platform list.
+No version test on GCC remains in the tree: the blocks that served gcc
+2, 3 and 4 went in October 2026, and the oldest compiler the library
+builds with is the oldest the certification runs.
 
 ## Rules of the tree
 

@@ -161,17 +161,9 @@ test_have_use_facet ()
     rw_info (0, __FILE__, __LINE__,
              "std::use_facet<Facet>(std::locale&) synopsis");
 
-// working around an HP aCC bug (see PR #23312)
-
-#if !(defined (__GNUG__) || __GNUG__ > 2 || __GNUC_MINOR__ > 96)
-
-    // working around a gcc 2.9{5,6} ICE
-    // working around an MSVC 6.0 bug (PR #26307)
     FUN (const std::ctype<charT>&,
          std::use_facet<std::ctype<charT> >, (const std::locale&));
     FUN (bool, std::has_facet<std::ctype<charT> >, (const std::locale&));
-
-#endif   // gcc > 2.96 && MSVC > 6.0
 
 }
 

@@ -96,28 +96,6 @@ except the =21.cwchar= coverage, which adds assertions.
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
-** TODO The g++ 3.0 to 3.2 workarounds
-
-The tree stopped claiming g++ 2.9x on 2026-10-18, when =HONOR_STD=
-and =PLACEMENT_DELETE= were retired with every =__GNUG__ <= 2= block.
-Its successor is still served: =src/collate.cpp=, =exception.cpp=,
-=iostream.cpp= and =strstream.cpp= force =_RWSTD_NO_EXTERN_TEMPLATE=
-under =3 == __GNUG__ && 3 > __GNUC_MINOR__= (a gcc bug, PR 29570),
-=rw/_config-gcc.h= grants =_RWSTD_ATTRIBUTE_NOTHROW= only from 3.3,
-=src/locale_body.cpp= works around a gcc 3.1 optimizer bug on SPARC
-when it clears the facet table, and =tests/utilities/20.auto.ptr.cpp=
-skips a member-address check below 3.x. None is a gate; each is a
-version test with no probe behind it.
-
-Fix: name the floor GCC the tree claims, the oldest the certification
-runs, and remove the blocks below it. The SPARC one keeps its
-=__i386__= operand either way; whether it stays as a host fact is a
-decision.
-
-Check: the gate retirements' oracles: preprocessed tokens, library
-and test objects, fresh =config.h= under gcc and eccp, the suite at
-the pin.
-
 ** TODO The twins' seam in the range members of =vector= and =deque=
 
 The seven out-of-class range members, =_C_assign_range= and
@@ -158,23 +136,6 @@ asserts =date_order= for the =C= locale and one named locale.
 
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
-
-** TODO =22.locale.synopsis= skips two checks under every GCC
-
-The signature checks of =use_facet<ctype<charT> >= and
-=has_facet<ctype<charT> >= sit under
-=#if !(defined (__GNUG__) || __GNUG__ > 2 || __GNUC_MINOR__ > 96)=,
-written in 2005 to skip a g++ 2.95 and 2.96 internal error and an
-MSVC 6.0 bug. The negation covers the whole disjunction, so the
-condition is true only when =__GNUG__= is not defined at all: the two
-checks run under eccp and never under GCC or Clang. Left in place on
-2026-10-18 when the other g++ 2.9x blocks went, since enabling them
-changes what the suite compiles under GCC.
-
-Fix: drop the condition and the two workaround comments.
-
-Check: the test compiles and passes under GCC, Clang and eccp; the
-suite table gains nothing but the two assertions.
 
 ** TODO The suite against other libraries
 

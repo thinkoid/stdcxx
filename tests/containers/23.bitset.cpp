@@ -235,13 +235,8 @@ test_synopsis (std::bitset<0>*)
     MEMFUN (Reference&, flip, ());
 
     // 23.3.5.1 - verify bitset ctors
-#if !defined (__GNUG__) || __GNUG__ >= 3
-    // working around a SunPro 5.2 bug (see PR #25959)
-
     // verify that bitset ctor is declared explicit
     is_explicit (std::string ());
-
-#endif   // gcc >= 3
 
     // verify default arguments
     (void)Bitset (std::string ());

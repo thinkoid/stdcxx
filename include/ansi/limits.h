@@ -102,11 +102,9 @@
 
 #else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
 
-#  if __GNUC__ > 2
-#    pragma GCC system_header
-#  endif
-
 #  ifdef __GNUC__
+#    pragma GCC system_header
+
      // use the gcc extension to #include the compiler's <limits.h>
 #    include_next <limits.h>
 

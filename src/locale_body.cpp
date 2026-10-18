@@ -579,23 +579,7 @@ __rw_locale (const char *name)
            _C_byname_facet_bits = _C_all;
    }
 
-#if defined (__i386__) || !defined (__GNUG__)
-
    memset (_C_std_facets, 0, sizeof _C_std_facets);
-
-#else   // !i86  || !gcc 3.x
-
-   // Working around a gcc 3.1 optimizer bug on SPARC (and possibly
-   // other RISC architectures) where, when generating PIC, _C_std_facets
-   // ends up being 4-byte aligned and gcc replaces memset() with a series
-   // of std %o1, [_C_std_facets + i] instructions with %o1 being 0 and i
-   // being 0, 8, 16, etc. and std operating on 64-bit double words. The
-   // first such misaligned std operation causes a SIGBUS
-
-   for (size_t i = 0; i != _C_n_std_facets; ++i)
-       _C_std_facets [i] = 0;
-
-#endif   // i86/gcc 3.x
 
 }
 

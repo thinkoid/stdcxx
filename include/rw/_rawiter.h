@@ -135,12 +135,12 @@ get_temporary_buffer (_Distance __nelems, _TypeT*)
 {
     pair<_TypeT*, _Distance> __res (0, 0);
 
-#if __GNUG__ >= 4
+#ifdef __GNUG__
 
-    // tell gcc 4 about type-punning in the cast below
+    // tell gcc about type-punning in the cast below
     typedef void* __attribute__ ((__may_alias__)) _VoidPtrT;
 
-#else   // !gcc || gcc < 4
+#else   // !gcc
 
     typedef void* _VoidPtrT;
 
@@ -168,12 +168,12 @@ template <class _TypeT>
 inline void
 return_temporary_buffer (_TypeT *__p)
 {
-#if __GNUG__ >= 4
+#ifdef __GNUG__
 
-    // tell gcc 4 about type-punning in the cast below
+    // tell gcc about type-punning in the cast below
     typedef void* __attribute__ ((__may_alias__)) _VoidPtrT;
 
-#else   // !gcc || gcc < 4
+#else   // !gcc
 
     typedef void* _VoidPtrT;
 

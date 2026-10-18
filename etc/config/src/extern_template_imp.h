@@ -27,11 +27,11 @@
 // it only searches .cpp files for them)
 // #include <config.h>
 
-#if __GNUG__ >= 3
-   // disable gcc 3.x (and beyond) error: ISO C++ forbids the use
+#ifdef __GNUG__
+   // disable the gcc error: ISO C++ forbids the use
    // of `extern' on explicit instantiations
 #  pragma GCC system_header
-#endif   // gcc >= 3
+#endif   // __GNUG__
 
 
 template <class T>

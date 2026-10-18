@@ -28,16 +28,6 @@
 
 #define _RWSTD_LIB_SRC
 
-#if    3 == __GNUG__ && 3 > __GNUC_MINOR__ \
-    || 3 == __GNUC_MINOR__ && 1 >__GNUC_PATCHLEVEL__
-
-  // working around a gcc bug (PR #29570)
-#  include <rw/_config.h>
-#  ifndef _RWSTD_NO_EXTERN_TEMPLATE
-#    define _RWSTD_NO_EXTERN_TEMPLATE
-#  endif
-#endif   // gcc >= 3.0 && gcc < 3.3.1
-
 #include <rw/_defs.h>
 
 #include <stddef.h>   // for size_t

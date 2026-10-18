@@ -81,22 +81,16 @@ _RWSTD_EXPORT _RWSTD_SIZE_T __rw_wcslen (const wchar_t*);
 #  define _RWSTD_WCSLEN    __rw::__rw_wcslen
 #else   // !defined (_RWSTDDEBUG)
 
-#  if 4 <= __GNUG__
-     // use gcc 4.x intrinsic functions
+#  ifdef __GNUG__
+     // use the gcc intrinsic functions
 #    define _RWSTD_MEMCPY    __builtin_memcpy
 #    define _RWSTD_MEMCMP    __builtin_memcmp
 #    define _RWSTD_MEMMOVE   __builtin_memmove
 #    define _RWSTD_MEMSET    __builtin_memset
 #    define _RWSTD_STRLEN    __builtin_strlen
 
-#    if 4 < __GNUG__ || 3 <= __GNUC_MINOR__
-       // __builtin_memchr() is only available in gcc 4.3 and beyond
-#      define _RWSTD_MEMCHR    __builtin_memchr
-#    else   // gcc < 4.3
-#      include _RWSTD_CSTRING   // for memchr()
-#      define _RWSTD_MEMCHR    _RWSTD_C::memchr
-#    endif   // gcc 4.3
-#  else   // gcc < 4.0
+#    define _RWSTD_MEMCHR    __builtin_memchr
+#  else   // !gcc
 #    include _RWSTD_CSTRING   // for memcmp(), ...
 
 #    define _RWSTD_MEMCPY    _RWSTD_C::memcpy
@@ -105,7 +99,7 @@ _RWSTD_EXPORT _RWSTD_SIZE_T __rw_wcslen (const wchar_t*);
 #    define _RWSTD_MEMSET    _RWSTD_C::memset
 #    define _RWSTD_STRLEN    _RWSTD_C::strlen
 #    define _RWSTD_MEMCHR    _RWSTD_C::memchr
-#  endif   // gcc 4.0
+#  endif   // gcc
 
 #  include _RWSTD_CWCHAR    // wmemcmp(), ...
 

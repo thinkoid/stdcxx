@@ -158,24 +158,14 @@ void test_auto_ptr (T*, const char *tname)
     FUN (T*, T, release, () _PTR_THROWS (()));
     FUN (void, T, reset, (T*) _PTR_THROWS (()));
 
-#if !defined(__GNUG__) || __GNUG__ > 3 || __GNUG__ == 3 && __GNUC_MINOR__ > 2
-
-     // g++ 2.95.2 and HP aCC can't take the address of a template member
-
-    // SunPro incorrectly warns here (see PR #27276)
     FUN (std::auto_ptr<Base>&, Base,
          operator=, (std::auto_ptr<Derived>&) _PTR_THROWS (()));
-
-       // SunPro 5.4 can't decide between a ctor template
-       // and a conversion operator (see PR #24476)
 
     FUN (std::auto_ptr_ref<Base>, Derived,
          operator std::auto_ptr_ref<Base>, () _PTR_THROWS (()));
 
     FUN (std::auto_ptr<Base>, Derived,
          operator std::auto_ptr<Base>, () _PTR_THROWS (()));
-
-#endif   // gcc > 3.2
 
     rw_info (0, 0, 0, "[lib.auto.ptr.cons]");
 

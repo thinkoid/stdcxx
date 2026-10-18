@@ -30,9 +30,9 @@
 #ifndef _RWSTD_SSTREAM_INCLUDED
 #define _RWSTD_SSTREAM_INCLUDED
 
-#if __GNUG__ >= 3
+#ifdef __GNUG__
 #  pragma GCC system_header
-#endif   // gcc >= 3
+#endif   // __GNUG__
 
 #include <streambuf>
 

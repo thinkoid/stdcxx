@@ -30,9 +30,9 @@
 #ifndef _RWSTD_FSTREAM_INCLUDED
 #define _RWSTD_FSTREAM_INCLUDED
 
-#if __GNUG__ >= 3
+#ifdef __GNUG__
 #  pragma GCC system_header
-#endif   // gcc >= 3
+#endif   // __GNUG__
 
 #include <streambuf>
 
@@ -107,14 +107,11 @@ public:
     }
 
 #ifndef _RWSTD_NO_STATIC_IOSTREAM_INIT
-#  if !defined (__GNUG__) || 2 < __GNUG__ || 96 < __GNUC_MINOR__
 
 private:
 
-    // g++ 2.95 error: `std::ios_base::Init' does not declare a template type
     friend struct ios_base::Init;
 
-#  endif   // gcc > 2.95
 #endif   // _RWSTD_NO_STATIC_IOSTREAM_INIT
 
     // ios_base::Init builds the standard objects' buffers on their

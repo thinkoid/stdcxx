@@ -31,9 +31,9 @@
 #define _RWSTD_RW_BASIC_IOS_H_INCLUDED
 
 
-#if __GNUG__ >= 3
+#ifdef __GNUG__
 #  pragma GCC system_header
-#endif   // gcc >= 3
+#endif   // __GNUG__
 
 
 #ifndef _RWSTD_NO_REDUNDANT_DEFINITIONS
