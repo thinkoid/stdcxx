@@ -64,10 +64,12 @@ template <class _CharT, class _InputIter>
 // of the facet's x format. The order is read off the format: %d and
 // %e are the day, %b, %B, %h and %m the month, %C, %y and %Y the
 // year, %D and %F the sequences they stand for; the E and O
-// modifiers, %%, whitespace and the weekday conversions are skipped
-// since they do not take part in the order. A format that lacks one
-// of the three, repeats one, or carries any other conversion gives
-// no_order, which footnote 233 allows in a valid locale.
+// modifiers, the flags and widths of the C library's formats, %%,
+// whitespace and the weekday conversions are skipped since they do
+// not take part in the order, and a %y right after a %C completes
+// that year rather than repeating it. A format that lacks one of the
+// three, repeats one, or carries any other conversion gives no_order,
+// which footnote 233 allows in a valid locale.
 template <class _CharT, class _InputIter>
 /* virtual */ typename time_get<_CharT, _InputIter>::dateorder
 time_get<_CharT, _InputIter>::
@@ -96,6 +98,7 @@ do_date_order () const
 
     char          __order [3];
     _RWSTD_SIZE_T __n = 0;
+    bool          __century = false;
 
     const char_type*       __p   = __names [0];
     const char_type* const __end = __p + __sizes [0];
@@ -105,25 +108,34 @@ do_date_order () const
         if (char_type ('%') != *__p)
             continue;
 
-        if (++__p == __end)
-            break;
+        // past the flags and the width, then the modifier
+        do {
+            if (++__p == __end)
+                return no_order;
+        } while (   char_type ('-') == *__p || char_type ('_') == *__p
+                 || char_type ('0') == *__p || char_type ('^') == *__p
+                 || char_type ('#') == *__p
+                 || (char_type ('1') <= *__p && *__p <= char_type ('9')));
 
         if (char_type ('E') == *__p || char_type ('O') == *__p)
             if (++__p == __end)
-                break;
+                return no_order;
 
         const char *__comp = "";
 
         switch (*__p) {
         case 'd': case 'e':                     __comp = "d";   break;
         case 'b': case 'B': case 'h': case 'm': __comp = "m";   break;
-        case 'C': case 'y': case 'Y':           __comp = "y";   break;
+        case 'C': case 'Y':                     __comp = "y";   break;
+        case 'y':             __comp = __century ? "" : "y";    break;
         case 'D':                               __comp = "mdy"; break;
         case 'F':                               __comp = "ymd"; break;
         case 'a': case 'A': case 'n': case 't': case '%':       break;
         default:
             return no_order;
         }
+
+        __century = char_type ('C') == *__p;
 
         for ( ; *__comp; ++__comp) {
 

@@ -36,6 +36,8 @@
 #include <cstring>   // for memcmp(), strlen()
 #include <ctime>     // for struct tm
 
+#include <langinfo.h>    // for nl_langinfo(), D_FMT
+
 #include <rw_driver.h>   // for rw_test()
 #include <rw_file.h>     // for rw_nextfd()
 #include <rw_locale.h>   // for rw_locale_query()
@@ -869,6 +871,89 @@ void test_posix (charT, const char *cname)
 
 /**************************************************************************/
 
+// the order of the day, month and year in the C library's date format
+// of the named locale, by the rule time_get::do_date_order applies to
+// the facet's own format: the expectation comes from the C library's
+// copy of the same data; -1 when the C library does not know the name
+static int
+expected_date_order (const char *locname)
+{
+    char saved [256];
+    const char* const cur = std::setlocale (LC_TIME, 0);
+    std::strncpy (saved, cur ? cur : "C", sizeof saved - 1);
+    saved [sizeof saved - 1] = '\0';
+
+    if (0 == std::setlocale (LC_TIME, locname))
+        return -1;
+
+    const char *fmt = nl_langinfo (D_FMT);
+
+    char order [3] = { '\0', '\0', '\0' };
+    int  n = 0;
+    bool century = false;
+    int  result = std::time_base::no_order;
+
+    for ( ; fmt && *fmt; ++fmt) {
+
+        if ('%' != *fmt)
+            continue;
+
+        // past the flags and the width, then the modifier
+        do {
+            ++fmt;
+        } while (   '-' == *fmt || '_' == *fmt || '0' == *fmt
+                 || '^' == *fmt || '#' == *fmt || ('1' <= *fmt && *fmt <= '9'));
+
+        if ('E' == *fmt || 'O' == *fmt)
+            ++fmt;
+
+        const char *comp = "";
+
+        switch (*fmt) {
+        case 'd': case 'e':                     comp = "d";   break;
+        case 'b': case 'B': case 'h': case 'm': comp = "m";   break;
+        case 'C': case 'Y':                     comp = "y";   break;
+        case 'y':             comp = century ? "" : "y";      break;
+        case 'D':                               comp = "mdy"; break;
+        case 'F':                               comp = "ymd"; break;
+        case 'a': case 'A': case 'n': case 't': case '%':     break;
+        default:
+            n = -1;
+        }
+
+        if (n < 0)
+            break;
+
+        century = 'C' == *fmt;
+
+        for ( ; *comp; ++comp) {
+            if (3 == n || std::memchr (order, *comp, n)) {
+                n = -1;
+                break;
+            }
+            order [n++] = *comp;
+        }
+
+        if (n < 0 || '\0' == *fmt)
+            break;
+    }
+
+    if (3 == n) {
+        if ('d' == order [0])
+            result = 'm' == order [1] ? std::time_base::dmy : std::time_base::no_order;
+        else if ('m' == order [0])
+            result = 'd' == order [1] ? std::time_base::mdy : std::time_base::no_order;
+        else
+            result = 'm' == order [1] ? std::time_base::ymd : std::time_base::ydm;
+    }
+
+    std::setlocale (LC_TIME, saved);
+
+    return result;
+}
+
+/**************************************************************************/
+
 
 template <class charT>
 void test_english (charT, const char *cname, const char *locname)
@@ -884,13 +969,18 @@ void test_english (charT, const char *cname, const char *locname)
         return;
     }
 
-    // 22.2.5.1.2, p1: the order of the components of the x format
-    rw_assert (std::time_base::mdy == std::use_facet<std::time_get<charT> >(
-                   std::locale ()).date_order (), 0, __LINE__,
-               "std::time_get<%s>::date_order() in locale (\"%s\") "
-               "== %d, got %d", cname, std::locale ().name ().c_str (),
-               std::time_base::mdy, std::use_facet<std::time_get<charT> >(
-                   std::locale ()).date_order ());
+    // 22.2.5.1.2, p1: the order of the components of the x format,
+    // expected from the C library's format of the same locale
+    {
+        const int expect = expected_date_order (locname);
+        const int order  = std::use_facet<std::time_get<charT> >(
+                               std::locale ()).date_order ();
+
+        rw_assert (expect < 0 || expect == order, 0, __LINE__,
+                   "std::time_get<%s>::date_order() in locale (\"%s\") "
+                   "== %d from the C library's D_FMT, got %d",
+                   cname, locname, expect, order);
+    }
 
     // exercise abbreviated weekday names
     FUNCTION ("get_weekday");
@@ -1009,13 +1099,18 @@ void test_german (charT, const char *cname, const char *locname)
         return;
     }
 
-    // 22.2.5.1.2, p1: the order of the components of the x format
-    rw_assert (std::time_base::dmy == std::use_facet<std::time_get<charT> >(
-                   std::locale ()).date_order (), 0, __LINE__,
-               "std::time_get<%s>::date_order() in locale (\"%s\") "
-               "== %d, got %d", cname, std::locale ().name ().c_str (),
-               std::time_base::dmy, std::use_facet<std::time_get<charT> >(
-                   std::locale ()).date_order ());
+    // 22.2.5.1.2, p1: the order of the components of the x format,
+    // expected from the C library's format of the same locale
+    {
+        const int expect = expected_date_order (locname);
+        const int order  = std::use_facet<std::time_get<charT> >(
+                               std::locale ()).date_order ();
+
+        rw_assert (expect < 0 || expect == order, 0, __LINE__,
+                   "std::time_get<%s>::date_order() in locale (\"%s\") "
+                   "== %d from the C library's D_FMT, got %d",
+                   cname, locname, expect, order);
+    }
 
     // exercise abbreviated weekday names
     // these may be { So, Mo, Di, Mi, Do, Sa } (e.g., Compaq Tru64 UNIX)
@@ -1071,13 +1166,18 @@ void test_danish (charT, const char *cname, const char *locname)
         return;
     }
 
-    // 22.2.5.1.2, p1: the order of the components of the x format
-    rw_assert (std::time_base::dmy == std::use_facet<std::time_get<charT> >(
-                   std::locale ()).date_order (), 0, __LINE__,
-               "std::time_get<%s>::date_order() in locale (\"%s\") "
-               "== %d, got %d", cname, std::locale ().name ().c_str (),
-               std::time_base::dmy, std::use_facet<std::time_get<charT> >(
-                   std::locale ()).date_order ());
+    // 22.2.5.1.2, p1: the order of the components of the x format,
+    // expected from the C library's format of the same locale
+    {
+        const int expect = expected_date_order (locname);
+        const int order  = std::use_facet<std::time_get<charT> >(
+                               std::locale ()).date_order ();
+
+        rw_assert (expect < 0 || expect == order, 0, __LINE__,
+                   "std::time_get<%s>::date_order() in locale (\"%s\") "
+                   "== %d from the C library's D_FMT, got %d",
+                   cname, locname, expect, order);
+    }
 
     // exercise abbreviated weekday names
     // the length of <s><o/><n> and <l><o/><r> depends on the codeset

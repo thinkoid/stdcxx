@@ -146,7 +146,16 @@ sections gated on the C library knowing a named locale, and fails
 the wide =in= and =out= checks at lines 1520 to 1596. A binary
 built before the locales were installed fails the same 35, so the
 host, not the library's change of the day, is the variable; the
-cause is not yet read.
+cause is not yet read. A second host got every locale on
+2026-10-18 evening (no Shift_JIS yet) and fails 34 of 48 new
+=22.locale.codecvt= assertions: 32 are the wide =out= of the
+"codeset ISO-8859-15 of locale an_ES" section returning =error=,
+the other two the =in= of the extended ASCII range in =ja_JP.UTF-8=
+and =ja_JP.EUC-JP=, whose message prints the native locale's name
+as garbage, a =setlocale= return pointer reused after a later call.
+=22.locale.time.get= found =en_AG= and =de_AT= as its English and
+German locales there, not =en_US= and =de_DE=: the first match of
+the test's pattern is whatever =locale -a= lists first.
 
 Fix: the tests that race a database locale build it under a name the
 C library cannot know (=rw_localedef='s fourth argument), then every
