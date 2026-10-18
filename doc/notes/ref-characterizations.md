@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 150 named C++ probes, five supporting C++
+The source census contains 149 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 150 named probes are discoverable by
+three different things.** All 149 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -120,6 +120,7 @@ its row is gone from the catalogue below.
 | `LONG_DOUBLE` | `NO_LONG_DOUBLE` | 2026-10-18 | Whether `long double` is a type of its own that overload resolution can pick; every compiler of the matrix passes. The gate hid the long double half of the numeric and money facets, `numeric_limits<long double>`, `complex<long double>`, the `<cmath>` overloads and the bit patterns in `limits_bits.cpp`; with it defined the library replaced a required virtual of `money_get` with a double one, so that build was never conforming. The five host-fact probes that read it (`FLOAT`, `INFINITY`, `LIMITS`, `MATH_OVERLOADS`, `VA_LIST`) print their long double answers unconditionally. |
 | `WCHAR_T`, `NATIVE_WCHAR_T` | `NO_WCHAR_T`, `NO_NATIVE_WCHAR_T` | 2026-10-18, three commits | `wchar_t` has been a keyword since C++98 and every compiler of the matrix has it; `NATIVE_WCHAR_T` was Visual C++'s `/Zc:wchar_t-`, and `rw/_config.h` derived it from `WCHAR_T`. The gate hid the wide half of the library: the `w` typedefs of `<iosfwd>`, the wide facets and their instantiation units, `wcodecvt.cpp`, `wctype.cpp`, 31 conditions in `time_put.cpp` alone, and the wide cases of 74 tests. `LIMITS` prints `_RWSTD_WCHAR_SIZE` and the `wchar_t` limits unconditionally. |
 | `HONOR_STD`, `PLACEMENT_DELETE` | `NO_HONOR_STD`, `NO_PLACEMENT_DELETE` | 2026-10-18 | g++ 2.9x's `-fhonor-std` and its placement-delete internal error. The tree no longer claims that compiler: every `__GNUG__ <= 2` block went with the two gates, in `rw/_config-gcc.h`, `rw/_config.h`, `<new>`, `<valarray>`, the `<cxxx>` headers, the sources, five probes, two tests and the locale utility. The 25 probes that put their names in `std` under `HONOR_STD` do so unconditionally. `RUNTIME_IN_STD` stays, by decision (`analysis-feature-gates.md` 2.5). |
+| `WCSFTIME_WCHAR_T_FMAT` | `NO_WCSFTIME_WCHAR_T_FMAT`, `_RWSTD_WCSFTIME_ARG3_T` | 2026-10-18 | Whether `wcsftime` takes a `const char*` format, as HP-UX 11's did. Six calls in `time_put.cpp` have passed wide literals since 2006 whatever the answer, so a C library that failed the probe had not built the library for twenty years; the one branch that honored it, and the two `_RWSTD_FMT_*` macros nothing read, went with the probe. |
 
 ## 3. Outputs beyond the status macro
 
@@ -135,7 +136,7 @@ families whose individual members depend on the producer.
 | `STRUCT_TM`, `LCONV`, `MBSTATE_T` | C structure layout declarations or storage sizes. |
 | `CTYPE_BITS`, `LOCALE_NAME_FMAT` | C character-class masks, locale category values, separators and composite-name conventions. |
 | `ABS_OVERLOADS`, `DIV_OVERLOADS`, `MATH_OVERLOADS` | Per-type overload availability, in addition to the probe's own status marker. |
-| `ICONV`, `MUNMAP`, `WCSFTIME_WCHAR_T_FMAT` | Argument types for C interfaces. |
+| `ICONV`, `MUNMAP` | Argument types for C interfaces. |
 | `LDBL_PRINTF_PREFIX`, `LLONG_PRINTF_PREFIX` | Formatting prefixes for the relevant arithmetic types. |
 | `TLS`, `NEWLINE`, `UNAME` | Thread-local spelling, newline representation and operating-system identifiers. |
 | `VSNPRINTF_RETURN` | Distinct checks of termination and return behavior. |
@@ -298,7 +299,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [UNISTD_DECL](../../etc/config/src/UNISTD_DECL.cpp) / `NO_UNISTD_DECL` + output | the contents of &lt;unistd.h&gt; | none |
 | [VA_LIST](../../etc/config/src/VA_LIST.cpp) / `NO_VA_LIST` + output | the type of va_list | none |
 | [VSNPRINTF_RETURN](../../etc/config/src/VSNPRINTF_RETURN.cpp) / `NO_VSNPRINTF_RETURN` + output | vsnprintf() return value | none |
-| [WCSFTIME_WCHAR_T_FMAT](../../etc/config/src/WCSFTIME_WCHAR_T_FMAT.cpp) / `NO_WCSFTIME_WCHAR_T_FMAT` + output | wcsftime() in &lt;wchar.h&gt; | L/T; `include/rw/_defs.h` |
 | [WCTRANS_T](../../etc/config/src/WCTRANS_T.cpp) / `NO_WCTRANS_T` + output | wctrans_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/cwctype` |
 | [WCTYPE_T](../../etc/config/src/WCTYPE_T.cpp) / `NO_WCTYPE_T` + output | wctype_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/cwctype` |
 | [WINT_T](../../etc/config/src/WINT_T.cpp) / `NO_WINT_T` + output | wint_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L/P; `include/ansi/_cwchar.h` |

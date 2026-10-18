@@ -640,18 +640,6 @@
 #endif   // _RWSTD_NO_STATICS_IN_TEMPLATE
 
 
-// Selection of vendor dependent "format" string argument to wcsftime()
-// 7.24.5.1 of C99 - wcsftime()'s 3rd arg is const wchar* [restrict]
-//                   HP-UX 11 (and perhaps others) still uses const char*
-#ifndef _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT
-#  define _RWSTD_FMT_TYPE(arg)  const wchar_t* arg
-#  define _RWSTD_FMT_ASSGN(str) L##str
-#else
-#  define _RWSTD_FMT_TYPE(arg)  const char* arg
-#  define _RWSTD_FMT_ASSGN(str) str
-#endif   // _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT
-
-
 // _Iterator typedefs
 // (note that you must use a semi-colon at the end of this macro)
 #define _RWSTD_ITERATOR_TYPES(_Iterator)                               \
@@ -874,10 +862,6 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #ifndef _RWSTD_TMPBUF_SIZE
 #  define _RWSTD_TMPBUF_SIZE 4096
 #endif
-
-#define _STRTOLL           strtoll
-#define _STRTOULL          strtoull
-
 
 #ifdef _RWSTD_LIB_SRC
 #  define _RWSTD_TI_EXPORT    /* empty */

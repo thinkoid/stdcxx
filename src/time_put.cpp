@@ -2644,17 +2644,7 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
         }
         else {
 
-#ifndef _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT
-
             wchar_t fmtstr [4] = { L'%', fmt, L'\0', L'\0' };
-
-#else   // if defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT)
-
-            // work around incorrect wcsftime() declarations some
-            // platforms
-            char fmtstr [4] = { '%', fmt, '\0', '\0' };
-
-#endif   // _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT
 
             if (mod) {
                 fmtstr [1] = mod;

@@ -148,20 +148,7 @@ std::size_t rw_strftime (wchar_t *wbuf, std::size_t bufsize,
 { 
     static const std::tm tmp = std::tm ();
 
-#if !defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT)
-
     std::size_t n = std::wcsftime (wbuf, bufsize, wpat, tmb ? tmb : &tmp);
-
-#else   // if defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT)
-
-    char pat [1024];
-    char buf [1024];
-
-    narrow (pat, wpat);
-    std::size_t n = rw_strftime (buf, bufsize, pat, tmb ? tmb : &tmp);
-    widen (wbuf, buf);
-
-#endif   // !defined (_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT)
 
     RW_ASSERT (n < bufsize);
 
