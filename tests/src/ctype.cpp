@@ -644,6 +644,65 @@ _rw_tolower (const UserCtypeBase &ctp, size_t uch)
     return uch;
 }
 
+// an invalid character under the facet's tables: the facet's
+// exception when it is set to throw on them, nothing otherwise
+static void
+_rw_invalid (const UserCtypeBase &ctp, UserCtypeBase::MemFunc mf, size_t uch)
+{
+    if (!ctp.throw_on_invalid_)
+        return;
+
+    ++const_cast< UserCtypeBase* >(&ctp)->n_throws_ [mf];
+
+    _rw_throw (__FILE__, __LINE__,
+               "UserCtype<%s>::%s: invalid character: %{#lc}",
+               ctp.cname_, _rw_func_names [mf], int (uch));
+}
+
+// the wide counterpart of a narrow character under the narrow_/wide_
+// pair: the entry's wide value; for an entry with none, the facet's
+// exception or the character itself; the character itself when the
+// pair has no entry for it
+static int
+_rw_widen_table (const UserCtypeBase &ctp, UserCtypeBase::MemFunc mf,
+                 size_t uch)
+{
+    for (size_t i = 0; 0 <= ctp.narrow_ [i]; ++i) {
+        if (size_t (ctp.narrow_ [i]) != uch)
+            continue;
+
+        if (0 <= ctp.wide_ [i])
+            return ctp.wide_ [i];
+
+        _rw_invalid (ctp, mf, uch);
+        break;
+    }
+
+    return int (uch);
+}
+
+// the narrow counterpart of a wide character under the pair: the
+// entry's narrow value; -1, the caller's default, for an entry with
+// none (after the facet's exception when set) and for a character
+// outside the pair
+static int
+_rw_narrow_table (const UserCtypeBase &ctp, UserCtypeBase::MemFunc mf,
+                  size_t uch)
+{
+    for (size_t i = 0; 0 <= ctp.wide_ [i]; ++i) {
+        if (size_t (ctp.wide_ [i]) != uch)
+            continue;
+
+        if (0 <= ctp.narrow_ [i])
+            return ctp.narrow_ [i];
+
+        _rw_invalid (ctp, mf, uch);
+        break;
+    }
+
+    return -1;
+}
+
 /**************************************************************************/
 
 static UserCtype<char>::mask*
@@ -764,21 +823,10 @@ do_widen (char ch) const
 
     const UChar uch = UChar (ch);
 
-    _rw_check_char (*this, mf_toupper, uch);
+    _rw_check_char (*this, mf_widen, uch);
 
-    if (narrow_ && wide_) {
-        for (size_t i = 0; 0 <= narrow_ [i]; ++i) {
-            if (uch == UChar (narrow_ [i])) {
-                if (0 <= wide_ [i])
-                    return UChar (wide_ [i]);
-
-                if (throw_on_invalid_)
-                    throw;
-
-                break;
-            }
-        }
-    }
+    if (narrow_ && wide_)
+        return char_type (_rw_widen_table (*this, mf_widen, uch));
 
     return ch;
 }
@@ -793,21 +841,11 @@ do_widen (const char *lo, const char *hi, char_type *dst) const
     if (narrow_ && wide_) {
         for ( ; lo < hi; ++lo, ++dst) {
 
-            const UChar uch = *lo;
+            const UChar uch = UChar (*lo);
 
-            _rw_check_char (*this, mf_toupper, uch);
+            _rw_check_char (*this, mf_widen_range, uch);
 
-            for (size_t i = 0; 0 <= narrow_ [i]; ++i) {
-                if (uch == UChar (narrow_ [i])) {
-                    if (0 <= wide_ [i])
-                        *dst = UChar (wide_ [i]);
-
-                    if (throw_on_invalid_)
-                        throw;
-
-                    break;
-                }
-            }
+            *dst = char_type (_rw_widen_table (*this, mf_widen_range, uch));
         }
     }
     else if (throw_char_ < 0 || int (_RWSTD_UCHAR_MAX) < throw_char_) {
@@ -817,11 +855,8 @@ do_widen (const char *lo, const char *hi, char_type *dst) const
     }
     else {
         for (; lo < hi; ++lo, ++dst) {
-
             const UChar uch = UChar (*lo);
-
-            _rw_check_char (*this, mf_toupper, uch);
-
+            _rw_check_char (*this, mf_widen_range, uch);
             *dst = char_type (uch);
         }
     }
@@ -837,22 +872,11 @@ do_narrow (char_type ch, char dfault) const
 
     const UChar uch = UChar (ch);
 
-    _rw_check_char (*this, mf_toupper, uch);
+    _rw_check_char (*this, mf_narrow, uch);
 
     if (narrow_ && wide_) {
-        for (size_t i = 0; 0 <= wide_ [i]; ++i) {
-            if (uch == UChar (wide_ [i])) {
-                if (0 <= wide_ [i])
-                    return UChar (wide_ [i]);
-
-                if (throw_on_invalid_)
-                    throw;
-
-                break;
-            }
-        }
-
-        return dfault;
+        const int nc = _rw_narrow_table (*this, mf_narrow, uch);
+        return 0 <= nc ? char (nc) : dfault;
     }
 
     return ch;
@@ -868,16 +892,12 @@ do_narrow (const char_type *lo, const char_type *hi, char dflt, char *dst) const
     if (narrow_ && wide_) {
         for ( ; lo < hi; ++lo, ++dst) {
 
-            const UChar uch = UChar (*lo);
+            const size_t uch = UChar (*lo);
 
-            _rw_check_char (*this, mf_toupper, uch);
+            _rw_check_char (*this, mf_narrow_range, uch);
 
-            for (size_t i = 0; 0 <= wide_ [i]; ++i) {
-                if (uch == UChar (wide_ [i])) {
-                    *dst = 0 <= narrow_ [i] ? UChar (wide_ [i]) : UChar (dflt);
-                    break;
-                }
-            }
+            const int nc = _rw_narrow_table (*this, mf_narrow_range, uch);
+            *dst = 0 <= nc ? char (nc) : dflt;
         }
     }
     else if (throw_char_ < 0 || int (_RWSTD_UCHAR_MAX) < throw_char_) {
@@ -887,11 +907,8 @@ do_narrow (const char_type *lo, const char_type *hi, char dflt, char *dst) const
     }
     else {
         for (; lo < hi; ++lo, ++dst) {
-
             const UChar uch = UChar (*lo);
-
-            _rw_check_char (*this, mf_toupper, uch);
-
+            _rw_check_char (*this, mf_narrow_range, uch);
             *dst = char_type (uch);
         }
     }
@@ -977,8 +994,10 @@ do_is (const char_type *lo, const char_type *hi, mask *vec) const
                 }
             }
 
-            if (!found && throw_on_invalid_)
-                throw;
+            if (!found) {
+                *vec = mask ();
+                _rw_invalid (*this, mf_is_range, size_t (*lo));
+            }
         }
     }
 
@@ -1125,21 +1144,10 @@ do_widen (char ch) const
 
     const UChar uch = UChar (ch);
 
-    _rw_check_char (*this, mf_toupper, uch);
+    _rw_check_char (*this, mf_widen, uch);
 
-    if (narrow_ && wide_) {
-        for (size_t i = 0; 0 <= narrow_ [i]; ++i) {
-            if (int (uch) == narrow_ [i]) {
-                if (0 <= wide_ [i])
-                    return char_type (wide_ [i]);
-
-                if (throw_on_invalid_)
-                    throw;
-
-                break;
-            }
-        }
-    }
+    if (narrow_ && wide_)
+        return char_type (_rw_widen_table (*this, mf_widen, uch));
 
     return ch;
 }
@@ -1154,30 +1162,17 @@ do_widen (const char *lo, const char *hi, char_type *dst) const
     if (narrow_ && wide_) {
         for ( ; lo < hi; ++lo, ++dst) {
 
-            const size_t uch = size_t (*lo);
+            const UChar uch = UChar (*lo);
 
-            _rw_check_char (*this, mf_toupper, uch);
+            _rw_check_char (*this, mf_widen_range, uch);
 
-            for (size_t i = 0; 0 <= narrow_ [i]; ++i) {
-                if (int (uch) == narrow_ [i]) {
-                    if (0 <= wide_ [i])
-                        *dst = char_type (wide_ [i]);
-
-                    if (throw_on_invalid_)
-                        throw;
-
-                    break;
-                }
-            }
+            *dst = char_type (_rw_widen_table (*this, mf_widen_range, uch));
         }
     }
     else {
         for (; lo < hi; ++lo, ++dst) {
-
             const UChar uch = UChar (*lo);
-
-            _rw_check_char (*this, mf_toupper, uch);
-
+            _rw_check_char (*this, mf_widen_range, uch);
             *dst = char_type (uch);
         }
     }
@@ -1193,22 +1188,11 @@ do_narrow (char_type ch, char dfault) const
 
     const size_t uch = size_t (ch);
 
-    _rw_check_char (*this, mf_toupper, uch);
+    _rw_check_char (*this, mf_narrow, uch);
 
     if (narrow_ && wide_) {
-        for (size_t i = 0; 0 <= wide_ [i]; ++i) {
-            if (int (uch) == wide_ [i]) {
-                if (0 <= wide_ [i])
-                    return char (wide_ [i]);
-
-                if (throw_on_invalid_)
-                    throw;
-
-                break;
-            }
-        }
-
-        return dfault;
+        const int nc = _rw_narrow_table (*this, mf_narrow, uch);
+        return 0 <= nc ? char (nc) : dfault;
     }
 
     return char (uch);
@@ -1226,23 +1210,16 @@ do_narrow (const char_type *lo, const char_type *hi, char dflt, char *dst) const
 
             const size_t uch = size_t (*lo);
 
-            _rw_check_char (*this, mf_toupper, uch);
+            _rw_check_char (*this, mf_narrow_range, uch);
 
-            for (size_t i = 0; 0 <= wide_ [i]; ++i) {
-                if (int (uch) == wide_ [i]) {
-                    *dst = 0 <= narrow_ [i] ? char (wide_ [i]) : dflt;
-                    break;
-                }
-            }
+            const int nc = _rw_narrow_table (*this, mf_narrow_range, uch);
+            *dst = 0 <= nc ? char (nc) : dflt;
         }
     }
     else {
         for (; lo < hi; ++lo, ++dst) {
-
             const size_t uch = size_t (*lo);
-
-            _rw_check_char (*this, mf_toupper, uch);
-
+            _rw_check_char (*this, mf_narrow_range, uch);
             *dst = char (uch);
         }
     }
@@ -1336,8 +1313,10 @@ do_is (const char_type *lo, const char_type *hi, mask *vec) const
                 }
             }
 
-            if (!found && throw_on_invalid_)
-                throw;
+            if (!found) {
+                *vec = mask ();
+                _rw_invalid (*this, mf_is_range, size_t (lo->c));
+            }
         }
     }
 
@@ -1490,21 +1469,10 @@ do_widen (char ch) const
 
     const UChar uch = UChar (ch);
 
-    _rw_check_char (*this, mf_toupper, uch);
+    _rw_check_char (*this, mf_widen, uch);
 
-    if (narrow_ && wide_) {
-        for (size_t i = 0; 0 <= narrow_ [i]; ++i) {
-            if (int (uch) == narrow_ [i]) {
-                if (0 <= wide_ [i])
-                    return make_char (char (wide_ [i]), (UserChar*)0);
-
-                if (throw_on_invalid_)
-                    throw;
-
-                break;
-            }
-        }
-    }
+    if (narrow_ && wide_)
+        return make_char (_rw_widen_table (*this, mf_widen, uch), (UserChar*)0);
 
     return make_char (ch, (UserChar*)0);
 }
@@ -1519,30 +1487,17 @@ do_widen (const char *lo, const char *hi, char_type *dst) const
     if (narrow_ && wide_) {
         for ( ; lo < hi; ++lo, ++dst) {
 
-            const size_t uch = size_t (*lo);
+            const UChar uch = UChar (*lo);
 
-            _rw_check_char (*this, mf_toupper, uch);
+            _rw_check_char (*this, mf_widen_range, uch);
 
-            for (size_t i = 0; 0 <= narrow_ [i]; ++i) {
-                if (int (uch) == narrow_ [i]) {
-                    if (0 <= wide_ [i])
-                        *dst = make_char (char (wide_ [i]), (UserChar*)0);
-
-                    if (throw_on_invalid_)
-                        throw;
-
-                    break;
-                }
-            }
+            *dst = make_char (_rw_widen_table (*this, mf_widen_range, uch), (UserChar*)0);
         }
     }
     else {
         for (; lo < hi; ++lo, ++dst) {
-
             const UChar uch = UChar (*lo);
-
-            _rw_check_char (*this, mf_toupper, uch);
-
+            _rw_check_char (*this, mf_widen_range, uch);
             *dst = make_char (*lo, (UserChar*)0);
         }
     }
@@ -1558,22 +1513,11 @@ do_narrow (char_type ch, char dfault) const
 
     const size_t uch = size_t (ch.c);
 
-    _rw_check_char (*this, mf_toupper, uch);
+    _rw_check_char (*this, mf_narrow, uch);
 
     if (narrow_ && wide_) {
-        for (size_t i = 0; 0 <= wide_ [i]; ++i) {
-            if (int (uch) == wide_ [i]) {
-                if (0 <= wide_ [i])
-                    return char (wide_ [i]);
-
-                if (throw_on_invalid_)
-                    throw;
-
-                break;
-            }
-        }
-
-        return dfault;
+        const int nc = _rw_narrow_table (*this, mf_narrow, uch);
+        return 0 <= nc ? char (nc) : dfault;
     }
 
     return char (uch);
@@ -1591,23 +1535,16 @@ do_narrow (const char_type *lo, const char_type *hi, char dflt, char *dst) const
 
             const size_t uch = size_t (lo->c);
 
-            _rw_check_char (*this, mf_toupper, uch);
+            _rw_check_char (*this, mf_narrow_range, uch);
 
-            for (size_t i = 0; 0 <= wide_ [i]; ++i) {
-                if (int (uch) == wide_ [i]) {
-                    *dst = 0 <= narrow_ [i] ? char (wide_ [i]) : dflt;
-                    break;
-                }
-            }
+            const int nc = _rw_narrow_table (*this, mf_narrow_range, uch);
+            *dst = 0 <= nc ? char (nc) : dflt;
         }
     }
     else {
         for (; lo < hi; ++lo, ++dst) {
-
             const size_t uch = size_t (lo->c);
-
-            _rw_check_char (*this, mf_toupper, uch);
-
+            _rw_check_char (*this, mf_narrow_range, uch);
             *dst = char (uch);
         }
     }
