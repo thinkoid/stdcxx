@@ -182,9 +182,7 @@ void test_auto_ptr (T*, const char *tname)
     FUN (T*, T, release, () _PTR_THROWS (()));
     FUN (void, T, reset, (T*) _PTR_THROWS (()));
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
-#  if !defined(__GNUG__) || __GNUG__ > 3 || __GNUG__ == 3 && __GNUC_MINOR__ > 2
+#if !defined(__GNUG__) || __GNUG__ > 3 || __GNUG__ == 3 && __GNUC_MINOR__ > 2
 
      // g++ 2.95.2 and HP aCC can't take the address of a template member
 
@@ -201,9 +199,7 @@ void test_auto_ptr (T*, const char *tname)
     FUN (std::auto_ptr<Base>, Derived,
          operator std::auto_ptr<Base>, () _PTR_THROWS (()));
 
-#  endif   // gcc > 3.2
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
+#endif   // gcc > 3.2
 
     rw_info (0, 0, 0, "[lib.auto.ptr.cons]");
 
@@ -271,8 +267,6 @@ test_auto_ptr_void ()
     ap1 = ap1;
     ap1.operator= (ap1);
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
     // working around an HP aCC 3 and 5 bug (STDCXX-655)
 
     ap1.operator=<void>(ap1);
@@ -281,8 +275,6 @@ test_auto_ptr_void ()
     ap1 = ap4;
     ap1.operator= (ap4);
     ap1.operator=<int>(ap4);
-
-#endif // _RWSTD_NO_MEMBER_TEMPLATES
 
     // operator*() cannot be instantiated
 
@@ -295,8 +287,6 @@ test_auto_ptr_void ()
     ap1.reset ();
     ap1.reset (pv);
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
     // working around an HP aCC 3 and 5 bug (STDCXX-656)
 
     const std::auto_ptr_ref<void> ar = ap1.operator std::auto_ptr_ref<void>();
@@ -305,13 +295,9 @@ test_auto_ptr_void ()
     _RWSTD_UNUSED (ar);
     _RWSTD_UNUSED (ap5);
 
-#endif // _RWSTD_NO_MEMBER_TEMPLATES
-
 }
 
 /**************************************************************************/
-
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
 
 // exercise 20.4.5.4
 static std::auto_ptr<Derived>
@@ -387,8 +373,6 @@ test_auto_ptr_conversions ()
     }
 }
 
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
-
 /**************************************************************************/
 
 static int rw_opt_no_conversions;     // for --no-conversions
@@ -409,8 +393,6 @@ run_test (int, char**)
     test_auto_ptr ((double*)0, "double");
     test_auto_ptr ((void**)0, "void*");
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
     int count = Base::cnt_;
 
     // exercise 20.4.5.4
@@ -422,8 +404,6 @@ run_test (int, char**)
     // verify that no objects leaked
     rw_assert (count == Base::cnt_, 0, __LINE__,
                "autoptr leaked %d objects", Base::cnt_ - count);
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
     if (!rw_enabled ("void"))
         rw_note (0, 0, 0, "auto_ptr<void> test disabled");

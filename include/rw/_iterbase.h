@@ -497,12 +497,6 @@ public:
         return _C_iter;
     }
 
-#if !defined (_RWSTD_NO_MEMBER_TEMPLATES)
-
-    // IBM xlC 5.0 fails to find these member template operators,
-    // yet it complains about ambiguity if they are defined along
-    // with the non-members below...
-
     // operators are templatized to assure const/non-const symmetry
 
     template <class _Iter>
@@ -555,8 +549,6 @@ public:
         return !(_C_iter < __rhs._C_iter);
     }
 
-#endif   // !defined (_RWSTD_NO_MEMBER_TEMPLATES)
-
     iterator_type         _C_iter;   // wrapped iterator
     const container_type *_C_cont;   // associated container
 };
@@ -583,80 +575,6 @@ operator+ (_RWSTD_CONT_DIFF_TYPE                               __n,
 }
 
 #undef _RWSTD_CONT_DIFF_TYPE 
-
-
-#if defined (_RWSTD_NO_MEMBER_TEMPLATES)
-
-// IBM xlC 5.0 fails to find the member template operators
-// defined above in the presence of namespaces...
-
-// with no support for member templates namespace-scope (non-member)
-// operators must be used - these will cause ambiguities with those
-// in std::rel_ops if the latter are found during lookup
-
-
-// _Iter1 may differ from _Iter2 if the function operands are const
-// and non-const iterators, respectively (allows symmetry)
-
-template <class _Cont, class _Iter1, class _Iter2, class _MutIter>
-inline _TYPENAME _Cont::difference_type
-operator- (const _RW::__rw_debug_iter<_Cont, _Iter1, _MutIter> &__x,
-           const _RW::__rw_debug_iter<_Cont, _Iter2, _MutIter> &__y)
-{
-    _RWSTD_ASSERT (__x._C_cont && __x._C_cont == __y._C_cont);
-    return __x._C_iter - __y._C_iter;
-}
-    
-template <class _Cont, class _Iter1, class _Iter2, class _MutIter>
-inline bool
-operator== (const _RW::__rw_debug_iter<_Cont, _Iter1, _MutIter> &__x,
-            const _RW::__rw_debug_iter<_Cont, _Iter2, _MutIter> &__y)
-{
-    return __x._C_iter == __y._C_iter;
-}
-
-template <class _Cont, class _Iter1, class _Iter2, class _MutIter>
-inline bool
-operator< (const _RW::__rw_debug_iter<_Cont, _Iter1, _MutIter> &__x,
-           const _RW::__rw_debug_iter<_Cont, _Iter2, _MutIter> &__y)
-{
-    _RWSTD_ASSERT (__x._C_cont && __x._C_cont == __y._C_cont);
-    return __x._C_iter < __y._C_iter;
-}
-
-template <class _Cont, class _Iter1, class _Iter2, class _MutIter>
-inline bool
-operator!= (const _RW::__rw_debug_iter<_Cont, _Iter1, _MutIter> &__x,
-            const _RW::__rw_debug_iter<_Cont, _Iter2, _MutIter> &__y)
-{
-    return !(__x == __y);
-}
-
-template <class _Cont, class _Iter1, class _Iter2, class _MutIter>
-inline bool
-operator<= (const _RW::__rw_debug_iter<_Cont, _Iter1, _MutIter> &__x,
-            const _RW::__rw_debug_iter<_Cont, _Iter2, _MutIter> &__y)
-{
-    return !(__y < __x);
-}
-
-template <class _Cont, class _Iter1, class _Iter2, class _MutIter>
-inline bool
-operator>= (const _RW::__rw_debug_iter<_Cont, _Iter1, _MutIter> &__x,
-            const _RW::__rw_debug_iter<_Cont, _Iter2, _MutIter> &__y)
-{
-    return !(__x < __y);
-}
-
-template <class _Cont, class _Iter1, class _Iter2, class _MutIter>
-inline bool
-operator> (const _RW::__rw_debug_iter<_Cont, _Iter1, _MutIter> &__x,
-           const _RW::__rw_debug_iter<_Cont, _Iter2, _MutIter> &__y)
-{
-    return __y < __x;
-}
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
 }   // namespace std
 
