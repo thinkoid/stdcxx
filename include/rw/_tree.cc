@@ -770,7 +770,7 @@ erase (const key_type &__x)
 {
     const std::pair<iterator, iterator> __p = equal_range(__x);
 
-    const size_type __n = _DISTANCE (__p.first, __p.second, size_type);
+    const size_type __n = std::distance (__p.first, __p.second);
 
     erase (__p.first, __p.second);
 

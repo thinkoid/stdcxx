@@ -244,7 +244,7 @@ inline void __advance (_RandomAccessIterator& __it, _Distance __n,
 template <class _InputIterator, class _Distance>
 inline void advance (_InputIterator& __it, _Distance __n)
 {
-    __advance (__it, __n, _RWSTD_ITERATOR_CATEGORY (_InputIterator, __it));
+    __advance (__it, __n, _RWSTD_ITERATOR_CATEGORY (_InputIterator));
 }
 
 
@@ -296,7 +296,7 @@ distance (_ForwardIterator __first, _ForwardIterator __last)
     typename iterator_traits<_ForwardIterator>::difference_type __n = 0;
 
     __distance (__first, __last, __n,
-                _RWSTD_ITERATOR_CATEGORY (_ForwardIterator, __first));
+                _RWSTD_ITERATOR_CATEGORY (_ForwardIterator));
 
     return __n;
 }
@@ -317,7 +317,7 @@ __rw_distance (const _ForwardIterator &__first,
                _Distance               __n)
 {
     std::__distance (__first, __last, __n,
-                      _RWSTD_ITERATOR_CATEGORY (_ForwardIterator, __first));
+                      _RWSTD_ITERATOR_CATEGORY (_ForwardIterator));
     return __n;
 }
 

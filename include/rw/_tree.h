@@ -798,7 +798,7 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 count (const _Key& __k) const
 {
     std::pair<const_iterator, const_iterator> __p = equal_range (__k);
-    size_type __n = _DISTANCE (__p.first, __p.second, size_type);
+    size_type __n = std::distance (__p.first, __p.second);
     return __n;
 }
 

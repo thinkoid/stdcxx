@@ -85,7 +85,7 @@ insert (iterator __it, const_reference __x)
         return __it;
     }
 
-    const size_type __inx = _DISTANCE (begin (), __it, size_type);
+    const size_type __inx = std::distance (begin (), __it);
 
     _RWSTD_ASSERT (__inx < size ());
 
@@ -642,7 +642,7 @@ _C_insert_range (iterator __it,
     _RWSTD_ASSERT_RANGE (__first, __last);
     _RWSTD_ASSERT (__self->_C_is_valid ());
 
-    const size_type __n = _DISTANCE (__first, __last, size_type);
+    const size_type __n = std::distance (__first, __last);
 
     if (0 == __n)
         return;
@@ -653,7 +653,7 @@ _C_insert_range (iterator __it,
                                    "Iterator)"),
                       __n, __self->max_size ()));
 
-    const size_type __inx = _DISTANCE (__self->begin (), __it, size_type);
+    const size_type __inx = std::distance (__self->begin (), __it);
     const size_type __rem = __self->size () - __inx;
 
     _RWSTD_ASSERT (__inx <= __self->size ());

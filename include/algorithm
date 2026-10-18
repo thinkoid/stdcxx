@@ -511,7 +511,7 @@ inline _OutputIter
 unique_copy (_InputIter __first, _InputIter __last, _OutputIter __res)
 {
     return  __unique_copy (__first, __last, __res,
-                           _RWSTD_ITERATOR_CATEGORY (_OutputIter, __res));
+                           _RWSTD_ITERATOR_CATEGORY (_OutputIter));
 }
 
 
@@ -521,7 +521,7 @@ unique_copy (_InputIter __first, _InputIter __last, _OutputIter __res,
              _BinaryPredicate __pred)
 {
     return __unique_copy (__first, __last, __res, __pred,
-                          _RWSTD_ITERATOR_CATEGORY (_OutputIter, __res));
+                          _RWSTD_ITERATOR_CATEGORY (_OutputIter));
 }
 
 
@@ -556,7 +556,7 @@ reverse (_BidirIter __first, _BidirIter __last)
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    __reverse (__first, __last, _RWSTD_ITERATOR_CATEGORY (_BidirIter, __first));
+    __reverse (__first, __last, _RWSTD_ITERATOR_CATEGORY (_BidirIter));
 }
 
 
@@ -608,7 +608,7 @@ inline void rotate (_FwdIter __first, _FwdIter __middle, _FwdIter __last)
     if (!(__first == __middle || __middle == __last))
         __rotate (__first, __middle, __last,
                   _RWSTD_DIFFERENCE_TYPE (_FwdIter),
-                  _RWSTD_ITERATOR_CATEGORY (_FwdIter, __first));
+                  _RWSTD_ITERATOR_CATEGORY (_FwdIter));
 }
 
 
@@ -764,7 +764,7 @@ inline void partial_sort (_RandomAccessIter __first,
 
     if (!(__first == __middle))
         __partial_sort (__first, __middle, __last,
-                        _RWSTD_VALUE_TYPE(_RandomAccessIter),
+                        _RWSTD_VALUE_TYPE (_RandomAccessIter),
                         __comp);
 }
 
@@ -864,7 +864,7 @@ lower_bound (_FwdIter __first,_FwdIter __last,
 {
     return __lower_bound (__first, __last, __val, __comp,
                           _RWSTD_DIFFERENCE_TYPE (_FwdIter),
-                          _RWSTD_ITERATOR_CATEGORY (_FwdIter, __first));
+                          _RWSTD_ITERATOR_CATEGORY (_FwdIter));
 }
 
 
@@ -906,7 +906,7 @@ upper_bound (_FwdIter __first,_FwdIter __last,
 {
     return __upper_bound (__first, __last, __val, __comp,
                           _RWSTD_DIFFERENCE_TYPE (_FwdIter),
-                          _RWSTD_ITERATOR_CATEGORY (_FwdIter, __first));
+                          _RWSTD_ITERATOR_CATEGORY (_FwdIter));
 }
 
 
@@ -949,7 +949,7 @@ equal_range (_FwdIter __first, _FwdIter __last,
 {
     return __equal_range (__first, __last, __val, __comp,
                           _RWSTD_DIFFERENCE_TYPE (_FwdIter),
-                          _RWSTD_ITERATOR_CATEGORY (_FwdIter, __first));
+                          _RWSTD_ITERATOR_CATEGORY (_FwdIter));
 }
 
 template <class _FwdIter, class _TypeT>

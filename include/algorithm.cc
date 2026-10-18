@@ -51,12 +51,12 @@ _FwdIter1 __find_end (_FwdIter1 __first1, _FwdIter1 __last1,
     _RWSTD_ASSERT_RANGE (__first1, __last1);
     _RWSTD_ASSERT_RANGE (__first2, __last2);
 
-    const _Dist __dist1 = _DISTANCE (__first2, __last2, _Dist);
+    const _Dist __dist1 = std::distance (__first2, __last2);
 
     if (!__dist1)
         return __last1;
 
-    _Dist __dist2 = _DISTANCE (__first1, __last1, _Dist);
+    _Dist __dist2 = std::distance (__first1, __last1);
 
     _FwdIter1 __res = __last1;
 
@@ -64,7 +64,7 @@ _FwdIter1 __find_end (_FwdIter1 __first1, _FwdIter1 __last1,
         if (equal (__first2, __last2, __first1))
             __res  = __first1;
 
-        __dist2 = _DISTANCE (++__first1, __last1, _Dist);
+        __dist2 = std::distance (++__first1, __last1);
     }
     return __res;
 }
@@ -80,12 +80,12 @@ _FwdIter1 __find_end (_FwdIter1 __first1, _FwdIter1 __last1,
     _RWSTD_ASSERT_RANGE (__first1, __last1);
     _RWSTD_ASSERT_RANGE (__first2, __last2);
 
-    const _Dist __dist1 = _DISTANCE (__first2, __last2, _Dist);
+    const _Dist __dist1 = std::distance (__first2, __last2);
 
     if (!__dist1)
         return __last1;
 
-    _Dist __dist2 = _DISTANCE (__first1, __last1, _Dist);
+    _Dist __dist2 = std::distance (__first1, __last1);
 
     _FwdIter1 __res = __last1;
 
@@ -93,7 +93,7 @@ _FwdIter1 __find_end (_FwdIter1 __first1, _FwdIter1 __last1,
         if (std::equal (__first2, __last2, __first1, __pred))
             __res = __first1;
 
-        __dist2 = _DISTANCE (++__first1, __last1, _Dist);
+        __dist2 = std::distance (++__first1, __last1);
     }
     return __res;
 }
@@ -179,8 +179,8 @@ _FwdIter1 __search (_FwdIter1 __first1, _FwdIter1 __last1,
     _RWSTD_ASSERT_RANGE (__first1, __last1);
     _RWSTD_ASSERT_RANGE (__first2, __last2);
 
-    _Dist1 __dist1 = _DISTANCE (__first1, __last1, _Dist1);
-    _Dist2 __dist2 = _DISTANCE (__first2, __last2, _Dist2);
+    _Dist1 __dist1 = std::distance (__first1, __last1);
+    _Dist2 __dist2 = std::distance (__first2, __last2);
 
     if (__dist1 < __dist2)
         return __last1;
@@ -217,8 +217,8 @@ _FwdIter1 __search (_FwdIter1 __first1, _FwdIter1 __last1,
     _RWSTD_ASSERT_RANGE (__first1, __last1);
     _RWSTD_ASSERT_RANGE (__first2, __last2);
 
-    _Dist1 __dist1 = _DISTANCE (__first1, __last1, _Dist1);
-    _Dist2 __dist2 = _DISTANCE (__first2, __last2, _Dist2);
+    _Dist1 __dist1 = std::distance (__first1, __last1);
+    _Dist2 __dist2 = std::distance (__first2, __last2);
 
     if (__dist1 < __dist2) return __last1;
 
@@ -254,7 +254,7 @@ _FwdIter __search_n (_FwdIter __first, _FwdIter __last,
     if (__count <= 0)
         return __last;
 
-    const _Dist __dist = _DISTANCE (__first, __last, _Dist);
+    const _Dist __dist = std::distance (__first, __last);
 
     if (__dist < _Dist (__count))
         return __last;
@@ -291,7 +291,7 @@ _FwdIter __search_n (_FwdIter __first, _FwdIter __last,
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    const _Dist __dist = _DISTANCE (__first, __last, _Dist);
+    const _Dist __dist = std::distance (__first, __last);
 
     const _RWSTD_PTRDIFF_T __int_count = __count;
 
@@ -391,7 +391,7 @@ unique (_FwdIter __first, _FwdIter __last)
     // invoke unique_copy to copy over the original sequence
     // starting at one past the first element
     return __unique_copy (__next, __last, __first,
-                          _RWSTD_ITERATOR_CATEGORY (_FwdIter, __first));
+                          _RWSTD_ITERATOR_CATEGORY (_FwdIter));
 }
 
 
@@ -414,7 +414,7 @@ unique (_FwdIter __first, _FwdIter __last, _BinaryPredicate __pred)
     }
 
     return __unique_copy (__next, __last, __first, __pred,
-                          _RWSTD_ITERATOR_CATEGORY (_FwdIter, __first));
+                          _RWSTD_ITERATOR_CATEGORY (_FwdIter));
 }
 
 
@@ -648,7 +648,7 @@ _BidirIter __inplace_stable_partition (_BidirIter __first, _BidirIter __last,
         __second_cut = __inplace_stable_partition (__middle, __last, __pred,
                                                  __dist - __dist / 2);
     std::rotate (__first_cut, __middle, __second_cut);
-    __dist = _DISTANCE (__middle, __second_cut, _Dist);
+    __dist = std::distance (__middle, __second_cut);
     std::advance (__first_cut, __dist);
     return __first_cut;
 }
@@ -718,7 +718,7 @@ _BidirIter __stable_partition_adaptive (_BidirIter __first, _BidirIter __last,
                                      __fill_pointer, (_TypeT*)0);
 
     std::rotate (__first_cut, __middle, __second_cut);
-    __dist = _DISTANCE (__middle, __second_cut, _Dist);
+    __dist = std::distance (__middle, __second_cut);
     std::advance (__first_cut, __dist);
     return __first_cut;
 }
@@ -730,7 +730,7 @@ _BidirIter __stable_partition (_BidirIter __first, _BidirIter __last,
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    const _Dist __dist = _DISTANCE (__first, __last, _Dist);
+    const _Dist __dist = std::distance (__first, __last);
 
     if (!__dist)
         return __last;
@@ -1137,7 +1137,7 @@ _FwdIter __lower_bound (_FwdIter __first, _FwdIter __last,
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
     
-    for (_Dist __dist = _DISTANCE (__first, __last, _Dist); __dist; ) {
+    for (_Dist __dist = std::distance (__first, __last); __dist; ) {
 
         const _Dist __half = __dist / 2;
         _FwdIter __middle = __first;
@@ -1191,7 +1191,7 @@ _FwdIter __upper_bound (_FwdIter __first, _FwdIter __last,
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    for (_Dist __dist = _DISTANCE (__first, __last, _Dist); __dist; ) {
+    for (_Dist __dist = std::distance (__first, __last); __dist; ) {
 
         const _Dist __half = __dist / 2;
         _FwdIter __middle = __first;
@@ -1244,7 +1244,7 @@ __equal_range (_FwdIter __first, _FwdIter __last, const _TypeT& __val,
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    for (_Dist __dist = _DISTANCE (__first, __last, _Dist); __dist; ) {
+    for (_Dist __dist = std::distance (__first, __last); __dist; ) {
 
         const _Dist __half = __dist / 2;
         _FwdIter __middle = __first;
@@ -1365,14 +1365,14 @@ void __merge_without_buffer (_BidirIter __first,
         std::advance (__first_cut, __dist11);
         __second_cut = std::lower_bound (__middle, __last,
                                           *__first_cut, __comp);
-        __dist22 = _DISTANCE (__middle, __second_cut, _Dist);
+        __dist22 = std::distance (__middle, __second_cut);
     }
     else {
         __dist22 = __dist2 / 2;
         std::advance (__second_cut, __dist22);
         __first_cut = std::upper_bound (__first, __middle,
                                             *__second_cut, __comp);
-        __dist11 = _DISTANCE (__first, __first_cut, _Dist);
+        __dist11 = std::distance (__first, __first_cut);
     }
     std::rotate (__first_cut, __middle, __second_cut);
 
@@ -1514,7 +1514,7 @@ void __merge_adaptive (_BidirIter __first, _BidirIter __middle,
             std::advance (__first_cut, __dist11);
             __second_cut = std::lower_bound (__middle, __last, *__first_cut,
                                               __comp);
-            __dist22 = _DISTANCE (__middle, __second_cut, _Dist);
+            __dist22 = std::distance (__middle, __second_cut);
         }
         else
         {
@@ -1522,7 +1522,7 @@ void __merge_adaptive (_BidirIter __first, _BidirIter __middle,
             std::advance (__second_cut, __dist22);
             __first_cut = std::upper_bound (__first, __middle, *__second_cut,
                                                 __comp);
-            __dist11 = _DISTANCE (__first, __first_cut, _Dist);
+            __dist11 = std::distance (__first, __first_cut);
         }
         _BidirIter __middle2 =
             __rotate_adaptive (__first_cut, __middle, __second_cut,
@@ -1542,8 +1542,8 @@ template <class _BidirIter, class _Dist, class _TypeT, class _Compare>
 void __inplace_merge (_BidirIter __first, _BidirIter __middle,
                       _BidirIter __last, _Dist*, _TypeT*, _Compare __comp)
 {
-    _Dist __dist1 = _DISTANCE (__first, __middle, _Dist);
-    _Dist __dist2 = _DISTANCE (__middle, __last, _Dist);
+    _Dist __dist1 = std::distance (__first, __middle);
+    _Dist __dist2 = std::distance (__middle, __last);
  
     // call an extension of get_temporary_buffer<>() in case partial class
     // specialization (and iterator_traits<>) isn't supported by compiler

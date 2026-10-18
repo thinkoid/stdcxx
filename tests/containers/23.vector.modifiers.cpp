@@ -85,7 +85,7 @@ bool is_forward (const Iterator &it)
 {
     _RWSTD_UNUSED (it);
 
-    return is_forward_category (_RWSTD_ITERATOR_CATEGORY (Iterator, it));
+    return is_forward_category (_RWSTD_ITERATOR_CATEGORY (Iterator));
 
 }
 

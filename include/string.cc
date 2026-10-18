@@ -489,8 +489,7 @@ replace (iterator __first1, iterator __last1,
     // buffer, which __replace_aux overwrites as it reads (STDCXX-170);
     // the string's own pointer and iterator types skip the copy through
     // the non-template overloads in <string>
-    if (std::__is_bidirectional_iterator (_RWSTD_ITERATOR_CATEGORY(_InputIter,
-                                                                    __last2))) {
+    if (std::__is_bidirectional_iterator (_RWSTD_ITERATOR_CATEGORY (_InputIter))) {
         _C_string_type __s3;
         __s3.__replace_aux (__s3.begin (), __s3.begin (), __first2, __last2);
 
@@ -579,7 +578,7 @@ __replace_aux (iterator __first1, iterator __last1,
     _RWSTD_ASSERT_RANGE (__first1, __last1);
     _RWSTD_ASSERT_RANGE (__first2, __last2);
 
-    const size_type  __n2 = _DISTANCE (__first2, __last2, size_type);
+    const size_type  __n2 = std::distance (__first2, __last2);
     const size_type  __n  = __s._C_off (__first1, __last1);
     const size_type __pos = __s._C_off (__first1);
     const size_type __ssize = __s.size ();

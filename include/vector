@@ -290,7 +290,7 @@ private:
 
         // dispatch to an assign suitable for the category of InputIter
         _C_assign_range (__first, __last,
-                         _RWSTD_ITERATOR_CATEGORY (_InputIter, __first));
+                         _RWSTD_ITERATOR_CATEGORY (_InputIter));
     }
 
     // implements assign with repetition if value_type == size_type
@@ -316,7 +316,7 @@ private:
 
         // dispatch to an insert suitable for the category of InputIter
         _C_insert_range (__it, __first, __last,
-                         _RWSTD_ITERATOR_CATEGORY (_InputIter, __first));
+                         _RWSTD_ITERATOR_CATEGORY (_InputIter));
     }
 
     // implements insert with repetition if value_type == size_type
@@ -978,7 +978,7 @@ public:
     vector  (_InputIter __first, _InputIter __last)
         : allocator_type (), _C_bufend ()
     {
-      size_type __n = _DISTANCE (__first, __last, size_type);
+      size_type __n = std::distance (__first, __last);
       _C_init(__n); 
       _C_copy(__first, __last, _C_begin);
     }

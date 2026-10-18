@@ -84,16 +84,10 @@ struct array
 
 #endif   // _RWSTD_NO_DEBUG_ITER
 
-    typedef _RWSTD_REVERSE_ITERATOR (iterator,
-                                     reference,
-                                     pointer,
-                                     random_access_iterator_tag)
+    typedef std::reverse_iterator<iterator>
         reverse_iterator;
 
-    typedef _RWSTD_REVERSE_ITERATOR (const_iterator,
-                                     const_reference,
-                                     const_pointer,
-                                     random_access_iterator_tag)
+    typedef std::reverse_iterator<const_iterator>
         const_reverse_iterator;
 
     // No explicit construct/copy/destroy for aggregate type

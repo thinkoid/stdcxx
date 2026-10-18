@@ -190,7 +190,7 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
     // unless the new size of the container would exceed its capacity
 
     // compute the numbers of elements to be copied and inserted
-    const size_type __size1 = _DISTANCE (begin (), __it, size_type);
+    const size_type __size1 = std::distance (begin (), __it);
     const size_type __size2 = size () + __n;
 
     if (capacity () < __size2) {
@@ -358,7 +358,7 @@ _C_assign_range (_FwdIter __first, _FwdIter __last, forward_iterator_tag)
     // -- strong if capacity() < size() + distance(first, last)
     // -- basic otherwise
 
-    const size_type __size1 = _DISTANCE (__first, __last, size_type);
+    const size_type __size1 = std::distance (__first, __last);
     const size_type __size2 = __self->size () + __size1;
 
     if (__self->capacity () < __size2) {
@@ -448,8 +448,8 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
     // unless the new size of the container would exceed its capacity
 
     // compute the sizes of the ranges of elements to be copied    
-    const size_type __size1 = _DISTANCE (__self->begin (), __it, size_type);
-    const size_type __size2 = _DISTANCE (__first, __last, size_type);
+    const size_type __size1 = std::distance (__self->begin (), __it);
+    const size_type __size2 = std::distance (__first, __last);
 
     if (!__size2)
         return;
@@ -567,7 +567,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
 
   {
     if (__first == __last) return;
-    size_type __n = _DISTANCE (__first, __last, size_type);
+    size_type __n = std::distance (__first, __last);
     if (capacity() - size() >= __n)
     {
       copy_backward(__it, end(), _C_end + __n);

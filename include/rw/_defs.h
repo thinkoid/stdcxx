@@ -730,18 +730,15 @@
      typedef typename _Iterator::reference reference;                  \
      typedef typename _Iterator::iterator_category iterator_category
 
-// helpers making working w/o iterator_traits transparent
-
+// shorthands for the iterator traits of an iterator type: a null
+// pointer to the value or difference type, for dispatch on the type,
+// and a category tag object
 #define _RWSTD_VALUE_TYPE(iterT) \
        (typename std::iterator_traits< iterT >::value_type*)0
 #define _RWSTD_DIFFERENCE_TYPE(iterT)   \
        (typename std::iterator_traits< iterT >::difference_type*)0
-
-#define _RWSTD_ITERATOR_CATEGORY(iterT, ignore) \
-         typename std::iterator_traits< iterT >::iterator_category ()
-
-#define _RWSTD_REVERSE_ITERATOR(iterT, ign1, ign2, ign3) \
-       std::reverse_iterator<iterT>
+#define _RWSTD_ITERATOR_CATEGORY(iterT) \
+       typename std::iterator_traits< iterT >::iterator_category ()
 
 // Use -D_RWSTDDEBUG to compile a version of the libraries to debug
 // user code. This will perform pre- and post-condition checks but
@@ -876,10 +873,6 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 }   // extern "C++"
 
 }   // namespace __rw
-
-
-// for convenience
-#define _DISTANCE(first, last, ignore) std::distance (first, last)
 
 
 // enable only in debug mode; prevent multiple definition of
