@@ -579,6 +579,73 @@ _rw_check_char (const UserCtypeBase   &ctp,
 
 /**************************************************************************/
 
+// the mask of a character under either kind of table: the default
+// table indexed by the character, or the chars/masks pair searched
+static int
+_rw_mask (const UserCtypeBase &ctp, size_t uch)
+{
+    if (ctp.masks_ == _rw_char_masks)
+        return uch < 256 ? ctp.masks_ [uch] : 0;
+
+    for (size_t i = 0; 0 <= ctp.chars_ [i]; ++i)
+        if (size_t (ctp.chars_ [i]) == uch)
+            return ctp.masks_ [i];
+
+    return 0;
+}
+
+// the counterpart of a character in a pair of parallel tables,
+// the character itself when the pair has no entry for it
+static size_t
+_rw_map_case (const int *from, const int *to, size_t uch)
+{
+    for (size_t i = 0; 0 <= from [i]; ++i)
+        if (size_t (from [i]) == uch)
+            return size_t (to [i]);
+
+    return uch;
+}
+
+// the uppercase counterpart of a character: the facet's lower_/upper_
+// pair when it has one, otherwise the shift of the letters its masks
+// classify as lower
+static size_t
+_rw_toupper (const UserCtypeBase &ctp, size_t uch)
+{
+    if (ctp.upper_ && ctp.lower_)
+        return _rw_map_case (ctp.lower_, ctp.upper_, uch);
+
+    if (_rw_mask (ctp, uch) & LOWER) {
+#if 'A' == 0x41   // ASCII
+        return uch - 32;
+#else   // EBCDIC
+        return uch + 64;
+#endif
+    }
+
+    return uch;
+}
+
+// the lowercase counterpart, the mirror of _rw_toupper
+static size_t
+_rw_tolower (const UserCtypeBase &ctp, size_t uch)
+{
+    if (ctp.upper_ && ctp.lower_)
+        return _rw_map_case (ctp.upper_, ctp.lower_, uch);
+
+    if (_rw_mask (ctp, uch) & UPPER) {
+#if 'A' == 0x41   // ASCII
+        return uch + 32;
+#else   // EBCDIC
+        return uch - 64;
+#endif
+    }
+
+    return uch;
+}
+
+/**************************************************************************/
+
 static UserCtype<char>::mask*
 _rw_make_mask_vec (const int *chars, const int *masks)
 {
@@ -629,25 +696,11 @@ do_toupper (char_type ch) const
 {
     _rw_funcall (*this, mf_toupper);
 
-    const UChar uch = UChar (ch);
+    const size_t uch = size_t (UChar (ch));
 
     _rw_check_char (*this, mf_toupper, uch);
 
-    if (0 == upper_) {
-        if (masks_ [uch] & LOWER) {
-#if 'A' == 0x41   // ASCII
-            return char_type (uch - 32);
-#else   // EBCDIC
-            return char_type (uch + 64);
-#endif
-        }
-    }
-    else {
-        // FIXME: implement this
-        RW_ASSERT (!"do_toupper() not implemented");
-    }
-
-    return ch;
+    return char_type (_rw_toupper (*this, uch));
 }
 
 
@@ -657,25 +710,13 @@ do_toupper (char_type *lo, const char_type *hi) const
 {
     _rw_funcall (*this, mf_toupper_range);
 
-    if (0 == upper_) {
-        for ( ; lo < hi; ++lo) {
+    for ( ; lo < hi; ++lo) {
 
-            const UChar uch = UChar (*lo);
+        const size_t uch = size_t (UChar (*lo));
 
-            _rw_check_char (*this, mf_toupper, uch);
+        _rw_check_char (*this, mf_toupper, uch);
 
-            if (masks_ [uch] & LOWER) {
-#if 'A' == 0x41   // ASCII
-                *lo = char_type (uch - 32);
-#else   // EBCDIC
-                *lo = char_type (uch + 64);
-#endif
-            }
-        }
-    }
-    else {
-        // FIXME: implement this 
-        RW_ASSERT (!"do_toupper() not implemented");
+        *lo = char_type (_rw_toupper (*this, uch));
     }
 
     return lo;
@@ -688,23 +729,11 @@ do_tolower (char_type ch) const
 {
     _rw_funcall (*this, mf_tolower);
 
-    _rw_check_char (*this, mf_toupper, UChar (ch));
+    const size_t uch = size_t (UChar (ch));
 
-    if (0 == chars_) {
-        if (masks_ [UChar (ch)] & UPPER) {
-#if 'A' == 0x41   // ASCII
-            return char_type (UChar (ch + 32));
-#else   // EBCDIC
-            return char_type (UChar (ch - 64));
-#endif
-        }
-    }
-    else {
-        // FIXME: implement this
-        RW_ASSERT (!"do_toupper() not implemented");
-    }
+    _rw_check_char (*this, mf_tolower, uch);
 
-    return ch;
+    return char_type (_rw_tolower (*this, uch));
 }
 
 
@@ -714,25 +743,13 @@ do_tolower (char_type *lo, const char_type *hi) const
 {
     _rw_funcall (*this, mf_tolower_range);
 
-    if (0 == chars_) {
-        for ( ; lo < hi; ++lo) {
+    for ( ; lo < hi; ++lo) {
 
-            const UChar uch = UChar (*lo);
+        const size_t uch = size_t (UChar (*lo));
 
-            _rw_check_char (*this, mf_toupper, uch);
+        _rw_check_char (*this, mf_tolower, uch);
 
-            if (masks_ [uch] & UPPER) {
-#if 'A' == 0x41   // ASCII
-                *lo = char_type (uch - 32);
-#else   // EBCDIC
-                *lo = char_type (uch + 64);
-#endif
-            }
-        }
-    }
-    else {
-        // FIXME: implement this 
-        RW_ASSERT (!"do_toupper() not implemented");
+        *lo = char_type (_rw_tolower (*this, uch));
     }
 
     return lo;
@@ -1044,22 +1061,7 @@ do_toupper (char_type ch) const
 
     _rw_check_char (*this, mf_toupper, uch);
 
-    if (0 == upper_) {
-
-        if (uch < 256 && masks_ [uch] & LOWER) {
-#if 'A' == 0x41   // ASCII
-            return char_type (uch - 32);
-#else   // EBCDIC
-            return char_type (uch + 64);
-#endif
-        }
-    }
-    else {
-        // FIXME: implement this
-        RW_ASSERT (!"do_toupper() not implemented");
-    }
-
-    return ch;
+    return char_type (_rw_toupper (*this, uch));
 }
 
 
@@ -1069,24 +1071,13 @@ do_toupper (char_type *lo, const char_type *hi) const
 {
     _rw_funcall (*this, mf_toupper_range);
 
-    if (0 == upper_) {
-        for ( ; lo < hi; ++lo) {
-            const size_t uch = size_t (*lo);
+    for ( ; lo < hi; ++lo) {
 
-            _rw_check_char (*this, mf_toupper, uch);
+        const size_t uch = size_t (*lo);
 
-            if (uch < 256 && masks_ [uch] & LOWER) {
-#if 'A' == 0x41   // ASCII
-                *lo = char_type (uch - 32);
-#else   // EBCDIC
-                *lo = char_type (uch + 64);
-#endif
-            }
-        }
-    }
-    else {
-        // FIXME: implement this 
-        RW_ASSERT (!"do_toupper() not implemented");
+        _rw_check_char (*this, mf_toupper, uch);
+
+        *lo = char_type (_rw_toupper (*this, uch));
     }
 
     return lo;
@@ -1101,23 +1092,9 @@ do_tolower (char_type ch) const
 
     const size_t uch = size_t (ch);
 
-    _rw_check_char (*this, mf_toupper, uch);
+    _rw_check_char (*this, mf_tolower, uch);
 
-    if (masks_ == _rw_char_masks) {
-        if (uch < 256 && masks_ [uch] & UPPER) {
-#if 'A' == 0x41   // ASCII
-            return char_type (uch + 32);
-#else   // EBCDIC
-            return char_type (uch - 64);
-#endif
-        }
-    }
-    else {
-        // FIXME: implement this
-        RW_ASSERT (!"do_toupper() not implemented");
-    }
-
-    return ch;
+    return char_type (_rw_tolower (*this, uch));
 }
 
 
@@ -1127,23 +1104,13 @@ do_tolower (char_type *lo, const char_type *hi) const
 {
     _rw_funcall (*this, mf_tolower_range);
 
-    if (masks_ == _rw_char_masks) {
-        for ( ; lo < hi; ++lo) {
+    for ( ; lo < hi; ++lo) {
 
-            const size_t uch = size_t (*lo);
+        const size_t uch = size_t (*lo);
 
-            if (uch < 256 && masks_ [uch] & UPPER) {
-#if 'A' == 0x41   // ASCII
-                *lo = char_type (uch - 32);
-#else   // EBCDIC
-                *lo = char_type (uch + 64);
-#endif
-            }
-        }
-    }
-    else {
-        // FIXME: implement this 
-        RW_ASSERT (!"do_toupper() not implemented");
+        _rw_check_char (*this, mf_tolower, uch);
+
+        *lo = char_type (_rw_tolower (*this, uch));
     }
 
     return lo;
@@ -1455,20 +1422,7 @@ do_toupper (char_type ch) const
 
     _rw_check_char (*this, mf_toupper, uch);
 
-    if (0 == upper_) {
-
-        if (uch < 256 && masks_ [uch] & LOWER) {
-#if 'A' == 0x41   // ASCII
-            ch.c = UChar (uch - 32);
-#else   // EBCDIC
-            ch.c = UChar (uch + 64);
-#endif
-        }
-    }
-    else {
-        // FIXME: implement this
-        RW_ASSERT (!"do_toupper() not implemented");
-    }
+    ch.c = UChar (_rw_toupper (*this, uch));
 
     return ch;
 }
@@ -1480,24 +1434,13 @@ do_toupper (char_type *lo, const char_type *hi) const
 {
     _rw_funcall (*this, mf_toupper_range);
 
-    if (0 == upper_) {
-        for ( ; lo < hi; ++lo) {
-            const size_t uch = size_t (lo->c);
+    for ( ; lo < hi; ++lo) {
 
-            _rw_check_char (*this, mf_toupper, uch);
+        const size_t uch = size_t (lo->c);
 
-            if (uch < 256 && masks_ [uch] & LOWER) {
-#if 'A' == 0x41   // ASCII
-                lo->c = UChar (uch - 32);
-#else   // EBCDIC
-                lo->c = UChar (uch + 64);
-#endif
-            }
-        }
-    }
-    else {
-        // FIXME: implement this 
-        RW_ASSERT (!"do_toupper() not implemented");
+        _rw_check_char (*this, mf_toupper, uch);
+
+        lo->c = UChar (_rw_toupper (*this, uch));
     }
 
     return lo;
@@ -1512,21 +1455,9 @@ do_tolower (char_type ch) const
 
     const size_t uch = size_t (ch.c);
 
-    _rw_check_char (*this, mf_toupper, uch);
+    _rw_check_char (*this, mf_tolower, uch);
 
-    if (masks_ == _rw_char_masks) {
-        if (uch < 256 && masks_ [uch] & UPPER) {
-#if 'A' == 0x41   // ASCII
-            ch.c = UChar (uch + 32);
-#else   // EBCDIC
-            ch.c = UChar (uch - 64);
-#endif
-        }
-    }
-    else {
-        // FIXME: implement this
-        RW_ASSERT (!"do_toupper() not implemented");
-    }
+    ch.c = UChar (_rw_tolower (*this, uch));
 
     return ch;
 }
@@ -1538,23 +1469,13 @@ do_tolower (char_type *lo, const char_type *hi) const
 {
     _rw_funcall (*this, mf_tolower_range);
 
-    if (masks_ == _rw_char_masks) {
-        for ( ; lo < hi; ++lo) {
+    for ( ; lo < hi; ++lo) {
 
-            const size_t uch = size_t (lo->c);
+        const size_t uch = size_t (lo->c);
 
-            if (uch < 256 && masks_ [uch] & UPPER) {
-#if 'A' == 0x41   // ASCII
-                lo->c = UChar (uch - 32);
-#else   // EBCDIC
-                lo->c = UChar (uch + 64);
-#endif
-            }
-        }
-    }
-    else {
-        // FIXME: implement this 
-        RW_ASSERT (!"do_toupper() not implemented");
+        _rw_check_char (*this, mf_tolower, uch);
+
+        lo->c = UChar (_rw_tolower (*this, uch));
     }
 
     return lo;

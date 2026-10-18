@@ -3,7 +3,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 0.braceexp                                 NOUT    0                       
 0.char                                        0    8      487      0   100%
 0.cmdopts                                FORMAT    0                       
-0.ctype                                       0   30     3313      0   100%
+0.ctype                                       0   30     3325      0   100%
 0.fnmatch                                  NOUT    0                       
 0.inputiter                                   0    0       20      0   100%
 0.locale                                      0    0        3      0   100%
@@ -280,5 +280,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            11928177
+  Assertions:            11928189
   Failed assertions:            0

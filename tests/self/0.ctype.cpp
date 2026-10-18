@@ -122,6 +122,22 @@ test_id (charT*, const char *cname)
 
 /***********************************************************************/
 
+// the largest character value each type represents; UserChar
+// carries its character in an unsigned char
+static int char_max (char*)     { return _RWSTD_UCHAR_MAX; }
+static int char_max (UserChar*) { return _RWSTD_UCHAR_MAX; }
+
+static int char_max (wchar_t*)
+{
+#if _RWSTD_WCHAR_MAX < _RWSTD_INT_MAX
+    return int (_RWSTD_WCHAR_MAX);
+#else
+    return _RWSTD_INT_MAX;
+#endif
+}
+
+/***********************************************************************/
+
 template <class charT>
 void
 test_is (charT*, const char *cname,
@@ -278,13 +294,9 @@ test_is (charT*, const char *cname)
 
     for (std::size_t i = 0; 0 <= chars [i]; ++i) {
 
-        // FIXME: enable tests of characters greater than CHAR_MAX
-        if (   _RWSTD_UCHAR_MAX < std::size_t (chars [i])
-            /* && sizeof (char) == sizeof (charT) */) {
-            // when charT == char break out when the character
-            // value is greater than CHAR_MAX
+        // the rest of the table is beyond the character type
+        if (char_max ((charT*)0) < chars [i])
             break;
-        }
 
         const charT ch = make_char (chars [i], (charT*)0);
 

@@ -82,6 +82,24 @@ inline wchar_t make_char (char c, wchar_t*)
     return wchar_t (UChar (c));
 }
 
+// the same from a character value, for the values a char cannot hold
+inline UserChar make_char (int c, UserChar*)
+{
+    typedef unsigned char UChar;
+    const UserChar ch = { 0.0, UChar (c) };
+    return ch;
+}
+
+inline char make_char (int c, char*)
+{
+    return char (c);
+}
+
+inline wchar_t make_char (int c, wchar_t*)
+{
+    return wchar_t (c);
+}
+
 
 // the value of a character of any of the three types, as an int,
 // for the driver's %{#c} directive: the directive reads an int from

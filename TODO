@@ -61,19 +61,26 @@ Check: the census of the tests that build, a table per library, and
 each disagreement read against the standard and filed where it
 belongs.
 
-** TODO The wide half of UserCtype
+** TODO The narrow and widen tables of UserCtype, and the six members =0.ctype= does not exercise
 
-=tests/src/ctype.cpp= implements =UserCtype<wchar_t>= and
-=UserCtype<UserChar>= in part: ten members are "FIXME: implement
-this" stubs. =make_char= (=tests/include/rw_char.h=) takes only a
-=char=. =tests/self/0.ctype.cpp= stops its table at =UCHAR_MAX=, so
-the wide entries have never run.
+=tests/src/ctype.cpp=: =do_narrow= of =UserCtype<wchar_t>= and of
+=ctype<UserChar>= returns =wide_ [i]= where =narrow_ [i]= is meant,
+in both the single and the range form; =do_widen=, =do_narrow= and
+the range =do_is= say =throw;= for an invalid character with no
+exception active, which is =terminate=, not the facet's exception;
+=do_narrow= and =do_widen= are the only members left on the
+=masks_ == _rw_char_masks= test where the others ask for the table
+they need. =tests/self/0.ctype.cpp= exercises =is= alone: =scan_is=,
+=scan_not=, =toupper=, =tolower=, =widen= and =narrow= are each a
+"not exercised" warning, thirty in the pinned row, so the =upper_=,
+=lower_=, =narrow_= and =wide_= tables have no check.
 
-Fix: finish the helper, give =make_char= an =int= overload, remove the
-break.
+Fix: the four table lookups made right; the invalid-character path
+throws the helper's exception; a section of =0.ctype= per member
+over the default table and over a custom one.
 
-Check: =0.ctype= exercises the whole table for all three character
-types.
+Check: =0.ctype= with no warnings, every member exercised for the
+three character types.
 
 ** TODO MT tests that provoke contention instead of waiting for it
 
