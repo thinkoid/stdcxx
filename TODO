@@ -123,7 +123,7 @@ and =DEPENDENT_TEMPLATE.cpp= once nothing reads its macro.
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
-** TODO The member templates gate, once =eccp= has voted
+** TODO The member templates gate
 
 No configuration the tree has been built in defines
 =_RWSTD_NO_MEMBER_TEMPLATES=: GCC and Clang pass the =MEMBER_TEMPLATES=
@@ -137,15 +137,17 @@ internals. Nobody can compile that branch, so it rots unseen: the
 groom after it removed a forward-tag declaration there that had lost
 its definition. Version 5.0 owes 4.2.x no compatibility.
 
-Fix: first =make config= under =eccp= (the entry "The =eccp=
-configuration" in the EDG chapter), so the second compiler's answer to
-=MEMBER_TEMPLATES=, =EXTERN_MEMBER_TEMPLATE= and
-=MEMBER_TEMPLATE_OVERLOAD= is on record before anything goes. If it
-agrees with GCC, retire the gate one header group at a time, each
-commit taking the =#ifdef= branches, the twins, the friend declarations
-and the dispatch macros together; the probes and the macro go with the
-last group; =ref-characterizations.md= records the retirement. The
-build modes (=_RWSTD_NO_EXCEPTIONS= and the rest) and the host
+The second compiler has voted. Under =eccp -A= (the entry "The
+=eccp= configuration" in the EDG chapter) =MEMBER_TEMPLATES=,
+=MEMBER_TEMPLATE_OVERLOAD= and =FUNCTION_TEMPLATE_OVERLOAD= pass as
+under GCC; =EXTERN_MEMBER_TEMPLATE= fails, as C++03 has no extern
+templates, and that macro is not this gate.
+
+Fix: retire the gate one header group at a time, each commit taking
+the =#ifdef= branches, the twins, the friend declarations and the
+dispatch macros together; the probes and the macro go with the last
+group; =ref-characterizations.md= records the retirement. The build
+modes (=_RWSTD_NO_EXCEPTIONS= and the rest) and the host
 characterizations are not this entry.
 
 Check: =git grep _RWSTD_NO_MEMBER_TEMPLATES= empty under =include=,
@@ -502,13 +504,16 @@ front end, gave the same table.
 
 ** TODO The =eccp= configuration
 
-The platform retirement removed =etc/config/eccp.config= (dd1128a5),
-=include/rw/_config-eccp.h= (6513a431) and the prelink step before
-=ar= (67c1f7b6; its message says only the retired compilers used it,
-but =eccp.config= did). The =__EDG__= guards went with the platform
-retirement (d743fa8d, 12475dfe); comments that name =eccp= survive in
-=_iosbase.h=, =_traits.h= and five characterizations, and so do the
-=eccp= rows of =etc/config/xfail.txt=.
+=etc/config/eccp.config= is back, restored from before the platform
+retirement (dd1128a5) and brought current: =-A -x=, =--no_export=
+while the =WAITING= =src/punct.cpp= entry stands, the prelinker
+(~PRELINKFLAGS = --prelink_objects~, the step before =ar= in
+=GNUmakefile.lib= and =GNUmakefile.rwt=, =*.ti= in the clean rules),
+=-lpthread=, and =etc/config/eccp_builtins.h= on =--preinclude_macros=.
+The =__EDG__= guards went with the platform retirement (d743fa8d,
+12475dfe); comments that name =eccp= survive in =_iosbase.h=,
+=_traits.h= and five characterizations, and so do the =eccp= rows of
+=etc/config/xfail.txt=.
 
 The default dialect of =eccp= is C++03 (=__cplusplus= is =199711L=).
 No dialect option is needed. The C headers are a property of the
@@ -519,21 +524,27 @@ target facts gcc's =float.h= and =limits.h= read.
 gcc's =stddef.h= spells =offsetof= as =__builtin_offsetof=, a keyword
 EDG enters only when it emulates GNU, Microsoft or Clang. The name is
 reserved, so strict mode may provide it; reported as
-https://github.com/edgcpp/compiler/discussions/185. A =-D= cannot
-carry the stopgap: =libc_decl.sh= expands =$CPPFLAGS= unquoted, the
-shell splits the definition at its spaces, and every header probe
-fails. A file passed with =--preinclude_macros= works:
-~#define __builtin_offsetof(T, M) ((__SIZE_TYPE__) __INTADDR__ (&((T *) 0)->M))~.
-=__INTADDR__= is EDG's own =offsetof= primitive. The file leaves when
-EDG enters the keyword.
+https://github.com/edgcpp/compiler/discussions/185. =eccp_builtins.h=
+maps it onto =__INTADDR__=, EDG's own =offsetof= primitive; the
+characterization "a working offsetof() in <stddef.h>" passes with it.
+A =-D= cannot carry the definition: =libc_decl.sh= expands =$CPPFLAGS=
+unquoted, the shell splits it at its spaces, and every header probe
+fails. The file leaves when EDG enters the keyword.
 
-Fix: restore =eccp.config= from =dd1128a5^= and bring it current:
-=-A -x=, =--no_export= while the =WAITING= =src/punct.cpp= entry stands,
-the prelinker (~PRELINKFLAGS = --prelink_objects~, the step in
-=GNUmakefile.lib= and =GNUmakefile.rwt=, =*.ti= in the clean rules),
-=-lpthread=, the stopgap file. A macro of the override header
-comes back only where no characterization can express the gap, with
-its reason.
+With no feature macro on the command line, =make config= under
+=eccp -A= (11S) writes a =config.h= in which 72 characterizations
+fail, against 75 under gcc; 31 macros are defined under =eccp= only
+and 102 under gcc only (the entry "The configuration under =eccp=
+against GCC's"). =make lib= then compiles 55 of 98 sources. Every
+failure is another entry of this chapter: =_RWSTD_FLT_*= undefined
+in 16 sources (=FLOAT.cpp=), =_RWSTD_LC_*= undefined (the ISO-8859-1
+sources), =::qsort= missing at =include/ansi/_cstdlib.h:142= in 16
+sources (the pure C header model, under "The C99 functions"),
+=vsnprintf= and =S_IFDIR= undefined (the same).
+
+Fix: the entries below, in order. The gcc configuration is unchanged:
+its =makefile.in= gains an empty =PRELINKFLAGS= and =make -n lib=
+shows no prelink step.
 
 Check: an =eccp= build directory configures, builds the library, the
 utilities and the tests, and runs the suite. Its table is pinned
@@ -564,12 +575,24 @@ Check: the rows pass, or the reason is recorded.
 ** TODO The configuration under =eccp= against GCC's
 
 =config.h= under =eccp -A= differs from GCC's 11S beyond the other
-entries of this chapter: no atomic built-ins and no =_RWSTD_THREAD=; =STD_TYPE_INFO=
-fails (the characterization declares its own =type_info=; 12475dfe
-removed the =#pragma define_type_info= that served =eccp=); the
+entries of this chapter: no atomic built-ins, no =_RWSTD_THREAD= and
+no TLS; =STD_TYPE_INFO= fails (the characterization declares its own
+=type_info=; 12475dfe removed the =#pragma define_type_info= that
+served =eccp=); =TYPE_INFO_DTOR= and =LIBC_EXCEPTION_SPEC= (#536,
+an exception specification incompatible with glibc's) fail; the
 special-member characterizations of the exception classes differ.
-=long long= and extern templates are absent, which is correct for
-C++03.
+=STD_NOTHROW= fails to link: =libC.a= defines no =std::nothrow=
+object. =long long= and extern templates are absent, which is
+correct for C++03.
+
+Without a feature macro glibc shows strict C++03 the ISO names only,
+and the POSIX and XSI characterizations fail on an undefined
+identifier: =DAYLIGHT=, =TIMEZONE=, =TM_GMTOFF=, =MADVISE=
+(=caddr_t=), =THREAD_SAFE_EXCEPTIONS= (=pthread_setconcurrency=),
+=VSNPRINTF_RETURN= (=vsnprintf=), =VA_COPY=, =LCONV_INT_FMAT=. The
+first build of 2026-10-06 did not see them because its command line
+pinned =_XOPEN_SOURCE=. Whether the library wants these names under
+a strict compiler is the decision of "The C99 functions" entry.
 
 Fix: read each difference against the standard and the
 characterization.
@@ -587,7 +610,17 @@ Its premise, that every tracked configuration takes the C library
 function, held for GCC and Clang only.
 
 The first build exposed them with
-~-D_XOPEN_SOURCE=500 -D_DEFAULT_SOURCE~ in =eccp.config=. That is a pin and cannot stay.
+~-D_XOPEN_SOURCE=500 -D_DEFAULT_SOURCE~ in =eccp.config=. That is a
+pin and cannot stay.
+
+The C header model is part of the same question. =_config-gcc.h=
+selects the wrapper model for gcc (=_RWSTD_NO_PURE_C_HEADERS=,
+glibc's headers included by path); nothing selects it for =eccp=,
+which gets the pure model, RW's own C90 declarations in
+=include/ansi/_c*.h=. Under it 16 library sources stop at
+=include/ansi/_cstdlib.h:142=, "the global scope has no qsort"
+(#282), and =NEW_HEADER= fails for want of a =<cassert>=. The first
+build appended the two wrapper-model macros to =config.h= by hand.
 
 Fix: undecided. The candidates: declare the functions where they are
 used, as =FLOAT.cpp= did; restore the fallbacks behind a
@@ -676,11 +709,18 @@ is dependent and each callee it means has internal linkage.
   of the same shape compile under =eccp -A=, so the cause is not yet
   known; C-Vise is the next step.
 
+The characterization =STATICS_IN_TEMPLATE= fails the same way, #304
+on =static_function=, so =config.h= under =eccp -A= carries
+=_RWSTD_NO_STATICS_IN_TEMPLATE=. =src/num_get.cpp:458=, =:490= and
+=:532= draw #304 on =__rw::__rw_validate= in the first library build;
+the =_RWSTD_FLT_*= macros are missing there, so that may be a
+cascade. To be read again when =FLOAT= passes.
+
 Fix: read the C++03 text; then either give the callees external
 linkage or report to EDG.
 
-Check: each compiles under =eccp -A=, and the GCC and Clang tables do
-not move.
+Check: each compiles under =eccp -A=, the characterization passes,
+and the GCC and Clang tables do not move.
 
 ** TODO The ISO-8859-1 sources
 

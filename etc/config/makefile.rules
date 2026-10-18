@@ -38,7 +38,7 @@
 ########################################################################
 
 clean: cleantarget
-	rm -rf a.out core *.o *.i *.ii *.sh *.sta *.out  \
+	rm -rf a.out core *.o *.i *.ii *.ti *.sh *.sta *.out  \
         *$(LIBSUFFIX) $(CATFILE) 2>/dev/null
 
 cleantarget:

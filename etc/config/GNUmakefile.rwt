@@ -56,6 +56,12 @@ INCLUDES    += -I$(TESTDIR)/include
 # VPATH to look for sources in (appended dir for test.cpp)
 VPATH       += $(TESTDIR)/src
 
+# the prelink command, for compilers that assign template
+# instantiations to the objects before they are archived
+ifneq ($(PRELINKFLAGS),)
+  CXXPRELINK = $(CXX) $(CPPFLAGS) $(PRELINKFLAGS) $(OBJS) $(LDFLAGS) $(LDLIBS)
+endif   # ($(PRELINKFLAGS),)
+
 ifneq ($(RPATH),)
   LDFLAGS += $(RPATH)$(LIBDIR)
 endif
@@ -76,11 +82,19 @@ realclean: clean dependclean
 # decide to build a shared library for rw test lib.
 ifeq ($(findstring shared,$(BUILDMODE)),shared)
 $(RWTESTLIB): $(OBJS)
+ifneq ($(CXXPRELINK),)
+	@echo "$(CXXPRELINK)" >> $(LOGFILE)
+	$(CXXPRELINK) $(TEEOPTS)
+endif   # ($(CXXPRELINK),)
 	@echo "$(AR) $(ARFLAGS) $(RWTESTLIB) $(OBJS)" >> $(LOGFILE)
 	$(AR) $(ARFLAGS) $(RWTESTLIB) $(OBJS)
 
 else
 $(RWTESTLIB): $(OBJS)
+ifneq ($(CXXPRELINK),)
+	@echo "$(CXXPRELINK)" >> $(LOGFILE)
+	$(CXXPRELINK) $(TEEOPTS)
+endif   # ($(CXXPRELINK),)
 	@echo "$(AR) $(ARFLAGS) $(RWTESTLIB) $(OBJS)" >> $(LOGFILE)
 	$(AR) $(ARFLAGS) $(RWTESTLIB) $(OBJS)
 

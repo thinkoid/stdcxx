@@ -60,6 +60,12 @@ include ../makefile.common
 CXXFLAGS    += $(PICFLAGS)
 LDFLAGS     += $(LDSOFLAGS) $(MAPFLAGS) $(MAPFILE)
 
+# the prelink command, for compilers that assign template
+# instantiations to the objects before they are archived
+ifneq ($(PRELINKFLAGS),)
+  CXXPRELINK = $(CXX) $(CPPFLAGS) $(LDFLAGS) $(PRELINKFLAGS) $(OBJS)
+endif   # ($(PRELINKFLAGS),)
+
 ########################################################################
 #  TARGETS
 ########################################################################
@@ -86,6 +92,10 @@ $(LIBLINK): $(LIB)
 else
 
 $(LIB): $(OBJS)
+ifneq ($(CXXPRELINK),)
+	@echo "$(CXXPRELINK)" >> $(LOGFILE)
+	$(CXXPRELINK) $(TEEOPTS)
+endif   # ($(CXXPRELINK),)
 	@echo "$(AR) $(ARFLAGS) $(LIBNAME) $(OBJS)" >> $(LOGFILE)
 	$(AR) $(ARFLAGS) $(LIBNAME) $(OBJS) $(TEEOPTS)
 

@@ -140,6 +140,11 @@
 #   PICFLAGS  - flags to generate Position Independent Code
 #               for shared libraries
 #
+#   PRELINKFLAGS - flags that make the compiler prelink the objects of
+#               a library, for a template instantiation model that
+#               assigns the instantiations before the objects are
+#               archived (EDG eccp)
+#
 #   PREFIX    - the root of the installation directory where the bin/
 #               include/ and lib/ subdirectories will be rooted
 #
@@ -564,6 +569,7 @@ $(MAKEFILE_IN): $(configpath)
           && echo "OMIT_TST_SRCS = $(OMIT_TST_SRCS)"     >> $(MAKEFILE_IN)  \
           && echo "BUILDTAG   = $(BUILDTAG)"             >> $(MAKEFILE_IN)  \
           && echo "PLATFORM   = $(PLATFORM)"             >> $(MAKEFILE_IN)  \
+          && echo "PRELINKFLAGS = $(PRELINKFLAGS)"       >> $(MAKEFILE_IN)  \
           && echo "WITH_PURIFY = $(WITH_PURIFY)"         >> $(MAKEFILE_IN)  \
           && echo "PURIFYFLAGS = $(PURIFYFLAGS)"         >> $(MAKEFILE_IN));
 
