@@ -303,6 +303,10 @@ Fix:
   log as tests: a bare =make run= log comes out under locales.
 - The page stays local. The logs carry the environment, the host
   name and =/proc/cpuinfo=, and nothing scrubs them.
+- =15D-tsan= is not a build type the GNUmakefile knows; the driver
+  takes it in =-c= and fails at =builddir= (2026-10-18). The sanitizer
+  configuration either becomes a build type or leaves the driver's
+  vocabulary.
 
 Check: one night of the six configurations through the driver gives
 a page per build, the six pins identical, and a verdict that fails
