@@ -560,21 +560,13 @@ public:
 namespace std { 
 
 
-#ifndef _RWSTD_NO_NONDEDUCED_CONTEXT
-# define _RWSTD_CONT_DIFF_TYPE typename _Cont::difference_type 
-#else
-# define _RWSTD_CONT_DIFF_TYPE _RWSTD_PTRDIFF_T 
-#endif
-
 template <class _Cont, class _Iter, class _MutIter>
 inline __rw::__rw_debug_iter<_Cont, _Iter, _MutIter> 
-operator+ (_RWSTD_CONT_DIFF_TYPE                               __n,
+operator+ (typename _Cont::difference_type                     __n,
            const __rw::__rw_debug_iter<_Cont, _Iter, _MutIter> &__x)
 {
     return __x + __n;
 }
-
-#undef _RWSTD_CONT_DIFF_TYPE 
 
 }   // namespace std
 

@@ -193,10 +193,10 @@ runTest()
     typedef std::moneypunct_byname<charT, true>  MoneyPunctIntlByname;
 
     if (1) {
-        if (_STD_HAS_FACET (MoneyPunctByname, loc_))
+        if (std::has_facet< MoneyPunctByname >(loc_))
             _RWSTD_USE_FACET (MoneyPunctByname, loc_);
 
-        if (_STD_HAS_FACET (MoneyPunctIntlByname, loc_))
+        if (std::has_facet< MoneyPunctIntlByname >(loc_))
             _RWSTD_USE_FACET (MoneyPunctIntlByname, loc_);
     }
 

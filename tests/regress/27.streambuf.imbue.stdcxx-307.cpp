@@ -45,16 +45,16 @@ int main ()
 
     const std::locale loc (buf.getloc (), new MyFacet);
 
-    assert (_STD_HAS_FACET (MyFacet, loc));
-    assert (!_STD_HAS_FACET (MyFacet, buf.getloc ()));
+    assert (std::has_facet< MyFacet >(loc));
+    assert (!std::has_facet< MyFacet >(buf.getloc ()));
 
     buf.imbue (loc);
 
-    assert (!_STD_HAS_FACET (MyFacet, buf.getloc ()));
+    assert (!std::has_facet< MyFacet >(buf.getloc ()));
 
     buf.pubimbue (loc);
 
-    assert (_STD_HAS_FACET (MyFacet, buf.getloc ()));
+    assert (std::has_facet< MyFacet >(buf.getloc ()));
 
     return 0;
 }

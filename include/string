@@ -1458,24 +1458,17 @@ operator>= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 
 namespace __rw { 
 
-#ifndef _RWSTD_NO_FUNC_PARTIAL_SPEC
-
-#  ifndef _RWSTD_NO_NONDEDUCED_CONTEXT
-#    define _RWSTD_STRING_SIZE_TYPE \
-            typename std::basic_string<_CharT, _Traits, _Allocator>::size_type
-#  else
-#    define _RWSTD_STRING_SIZE_TYPE _RWSTD_SIZE_T
-#  endif   // _RWSTD_NO_NONDEDUCED_CONTEXT
-
 // more specialized version for basic_string<>; may be further specialized
 // in user code for example on a user-defined allocator
 
 template <class _CharT, class _Traits, class _Allocator>
-inline _RWSTD_STRING_SIZE_TYPE
-__rw_new_capacity (_RWSTD_STRING_SIZE_TYPE __size,
-                   const std::basic_string<_CharT, _Traits, _Allocator>*)
+inline typename std::basic_string<_CharT, _Traits, _Allocator>::size_type
+__rw_new_capacity (
+    typename std::basic_string<_CharT, _Traits, _Allocator>::size_type __size,
+    const std::basic_string<_CharT, _Traits, _Allocator>*)
 {
-    typedef _RWSTD_STRING_SIZE_TYPE _RWSizeT;
+    typedef typename std::basic_string<_CharT, _Traits, _Allocator>::size_type
+        _RWSizeT;
 
     const _RWSizeT __ratio = _RWSizeT (  (_RWSTD_STRING_CAPACITY_RATIO << 10)
                                        / _RWSTD_RATIO_DIVIDER);
@@ -1485,55 +1478,6 @@ __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE __size,
 
     return (__size += _RWSTD_MINIMUM_STRING_CAPACITY) > __cap ? __size : __cap;
 }                     
-
-#else   // if defined (_RWSTD_NO_FUNC_PARTIAL_SPEC)
-
-#  ifndef _RWSTD_NO_NONDEDUCED_CONTEXT
-#    define _RWSTD_STRING_SIZE_TYPE(type)   type::size_type
-#  else
-#    define _RWSTD_STRING_SIZE_TYPE(ignore) _RWSTD_SIZE_T
-#  endif   // _RWSTD_NO_NONDEDUCED_CONTEXT
-
-
-// the following specializations of the __rw_new_capacity<> function template
-// are provided for char and wchar_t; the general case is given in <memory>
-
-template <>
-inline _RWSTD_STRING_SIZE_TYPE (std::string)
-__rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (std::string) __size,
-                   const std::string*)
-{
-    typedef _RWSTD_STRING_SIZE_TYPE (std::string) _RWSizeT;
-
-    const _RWSizeT __ratio = _RWSizeT (  (_RWSTD_STRING_CAPACITY_RATIO << 10)
-                                       / _RWSTD_RATIO_DIVIDER);
-
-    const _RWSizeT __cap =   (__size >> 10) * __ratio
-                           + (((__size & 0x3ff) * __ratio) >> 10);
-
-    return (__size += _RWSTD_MINIMUM_STRING_CAPACITY) > __cap ? __size : __cap;
-}                     
-
-template <>
-inline _RWSTD_STRING_SIZE_TYPE (std::wstring)
-__rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (std::wstring) __size,
-                   const std::wstring*)
-{
-    typedef _RWSTD_STRING_SIZE_TYPE (std::wstring) _RWSizeT;
-
-    const _RWSizeT __ratio = _RWSizeT (  (_RWSTD_STRING_CAPACITY_RATIO << 10)
-                                       / _RWSTD_RATIO_DIVIDER);
-
-    const _RWSizeT __cap =   (__size >> 10) * __ratio
-                           + (((__size & 0x3ff) * __ratio) >> 10);
-
-    return (__size += _RWSTD_MINIMUM_STRING_CAPACITY) > __cap  ? __size : __cap;
-}                     
-
-#endif   // _RWSTD_NO_FUNC_PARTIAL_SPEC
-
-// clean up
-#undef _RWSTD_STRING_SIZE_TYPE
 
 }   // namespace __rw
 

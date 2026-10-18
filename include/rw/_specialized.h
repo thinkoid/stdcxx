@@ -60,19 +60,12 @@
 namespace __rw { 
 
 
-#ifndef _RWSTD_NO_NONDEDUCED_CONTEXT
-#  define _RWSTD_CONTAINER_SIZE_TYPE typename _Container::size_type
-#else
-#  define _RWSTD_CONTAINER_SIZE_TYPE _RWSTD_SIZE_T
-#endif   // _RWSTD_NO_NONDEDUCED_CONTEXT
-
-
 // returns a suggested new capacity for a container needing more space
 template <class _Container>
-inline _RWSTD_CONTAINER_SIZE_TYPE
-__rw_new_capacity (_RWSTD_CONTAINER_SIZE_TYPE __size, const _Container*)
+inline typename _Container::size_type
+__rw_new_capacity (typename _Container::size_type __size, const _Container*)
 {
-    typedef _RWSTD_CONTAINER_SIZE_TYPE _RWSizeT;
+    typedef typename _Container::size_type _RWSizeT;
 
     const _RWSizeT __ratio = _RWSizeT (  (_RWSTD_NEW_CAPACITY_RATIO << 10)
                                        / _RWSTD_RATIO_DIVIDER);
@@ -82,8 +75,6 @@ __rw_new_capacity (_RWSTD_CONTAINER_SIZE_TYPE __size, const _Container*)
 
     return (__size += _RWSTD_MINIMUM_NEW_CAPACITY) > __cap ? __size : __cap;
 }                     
-
-#undef _RWSTD_CONTAINER_SIZE_TYPE
 
 
 #ifndef _RWSTD_NO_PART_SPEC_OVERLOAD

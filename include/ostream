@@ -350,24 +350,12 @@ operator<< (basic_ostream<_CharT, _Traits> &__strm, char __c)
 }
 
 
-#ifndef _RWSTD_NO_FUNC_PARTIAL_SPEC
-
 template <class _Traits>
 inline basic_ostream<char, _Traits>&
 operator<< (basic_ostream<char, _Traits> &__strm, char __c)
 {
     return __rw::__rw_insert (__strm, &__c, 1, __strm.width ());
 }
-
-#else   // if defined (_RWSTD_NO_FUNC_PARTIAL_SPEC)
-
-inline basic_ostream<char, char_traits<char> >&
-operator<< (basic_ostream<char, char_traits<char> > &__strm, char __c)
-{
-    return __rw::__rw_insert (__strm, &__c, 1, __strm.width ());
-}
-
-#endif   // _RWSTD_NO_FUNC_PARTIAL_SPEC
 
 
 template<class _CharT, class _Traits>
@@ -389,8 +377,6 @@ operator<< (basic_ostream<_CharT, _Traits> &__strm, const char *__s)
 }
 
 
-#ifndef _RWSTD_NO_FUNC_PARTIAL_SPEC
-
 template <class _Traits>
 inline basic_ostream<char, _Traits>&
 operator<< (basic_ostream<char, _Traits> &__strm, const char *__s)
@@ -399,18 +385,6 @@ operator<< (basic_ostream<char, _Traits> &__strm, const char *__s)
                       __strm.width ());
     return __strm;
 }
-
-#else   // if defined (_RWSTD_NO_FUNC_PARTIAL_SPEC)
-
-inline basic_ostream<char, char_traits<char> >&
-operator<< (basic_ostream<char, char_traits<char> >& __strm, const char *__s)
-{
-    __rw::__rw_insert (__strm, __s, streamsize (char_traits<char>::length (__s)),
-                      __strm.width ());
-    return __strm;
-}
-
-#endif   // _RWSTD_NO_FUNC_PARTIAL_SPEC
 
 
 template <class _Traits>

@@ -133,7 +133,7 @@ void test_sort (int                line,
     if (stable) {
         std::pair<UserClass*, std::ptrdiff_t> dummy;
         if (alloc) {
-            dummy = std::_GET_TEMP_BUFFER (T, nsrc + 1);
+            dummy = std::get_temporary_buffer< T >(nsrc + 1);
             rw_assert (0 != dummy.first, 0, 0,
                        "line %d: %s<%s%{?}, %s%{;}> (): "
                        "memory allocation failed for %zu elements",

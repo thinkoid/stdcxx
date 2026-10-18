@@ -195,12 +195,12 @@ public:
 
     // 27.4.4.2, p10
     char narrow (char_type __c, char __dflt) const {
-        return _USE_FACET (ctype<char_type>, getloc ()).narrow (__c, __dflt);
+        return use_facet< ctype<char_type> >(getloc ()).narrow (__c, __dflt);
     }
 
     // 27.4.4.2, p11
     char_type widen (char __c) const {
-        return _USE_FACET (ctype<char_type>, getloc ()).widen (__c);
+        return use_facet< ctype<char_type> >(getloc ()).widen (__c);
     }
 
 protected:

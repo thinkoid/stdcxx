@@ -227,7 +227,7 @@ check_libc_locale (const char* charTname, char const* locname,
     std::locale loc (locname);
 
     const std::collate<charT> &co =
-        _STD_USE_FACET (std::collate<charT>, loc);
+        std::use_facet< std::collate<charT> >(loc);
 
     co._C_opts |= co._C_use_libc;
     co._C_opts &= ~co._C_use_libstd;
@@ -588,7 +588,7 @@ check_libstd_test_locale (const char* charTname)
         }
 
         const std::collate<charT> &co =
-            _STD_USE_FACET (std::collate<charT>, loc);
+            std::use_facet< std::collate<charT> >(loc);
         co._C_opts |=  co._C_use_libstd;
         co._C_opts &= ~co._C_use_libc;
 
@@ -837,14 +837,14 @@ check_libstd (const char* charTname)
             }
 
             const std::collate<charT> &co =
-                _STD_USE_FACET (std::collate<charT>, loc);
+                std::use_facet< std::collate<charT> >(loc);
 
             co._C_opts |= co._C_use_libstd;
             co._C_opts &= ~co._C_use_libc;
 
             typedef std::codecvt<charT, char, std::mbstate_t> CodeCvt;
 
-            const CodeCvt &cvt = _STD_USE_FACET (CodeCvt, loc);
+            const CodeCvt &cvt = std::use_facet< CodeCvt >(loc);
 
             cvt._C_opts |= cvt._C_use_libstd;
             cvt._C_opts &= ~cvt._C_use_libc;
@@ -981,7 +981,7 @@ check_hash_eff (const char* charTname)
     // facets, simply set up a std::locale that uses the "C" locale
     std::locale loc ("C");
     const std::collate<charT> &co =
-        _STD_USE_FACET (std::collate<charT>, loc);
+        std::use_facet< std::collate<charT> >(loc);
 
 
     int nfail = 0;

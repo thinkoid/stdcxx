@@ -85,10 +85,10 @@ const char* locale_root;
        _TRY {                                                              \
            const std::locale loc (locname);                                \
            const std::ctype<char> &ctc =                                   \
-               _STD_USE_FACET (std::ctype<char>, loc);                     \
+               std::use_facet< std::ctype<char> >(loc);                     \
            _RWSTD_UNUSED (ctc);                                            \
            const std::ctype<charT> &ctp =                                  \
-               _STD_USE_FACET (std::ctype<charT>, loc);                    \
+               std::use_facet< std::ctype<charT> >(loc);                    \
            for (int loop_cntrl = 0; loop_cntrl < int (num); loop_cntrl++)
 
 #define END_LOCALE_LOOP(locname)                                        \
@@ -429,7 +429,7 @@ void test_libstd (charT, const char *cname)
     const std::locale loc (locname);
 
     const std::ctype<charT> &ct =
-        _STD_USE_FACET (std::ctype<charT>, loc);
+        std::use_facet< std::ctype<charT> >(loc);
 
     ct._C_opts |=  ct._C_use_libstd;
     ct._C_opts &= ~ct._C_use_libc;
@@ -444,8 +444,8 @@ void run_test (charT, const char *cname)
 {
     if (0) {
         // do a compile time only test on use_facet and has_facet
-        _STD_HAS_FACET (std::ctype_byname<charT>, std::locale ());
-        _STD_USE_FACET (std::ctype_byname<charT>, std::locale ());
+        std::has_facet< std::ctype_byname<charT> >(std::locale ());
+        std::use_facet< std::ctype_byname<charT> >(std::locale ());
     }
 
     test_libc (charT (), cname);

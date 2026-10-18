@@ -669,57 +669,12 @@
 #endif   // _RWSTD_ALLOCATOR
 
 
-// for compilers that can't deal with template functions parametrized
-// on the function's return type (as opposed to function arguments)
-//
-// NOTE: the spaces around type below are necessary to prevent errors
-//       if `type' is a template-id and the preprocessor doesn't put
-//       the spaces there automatically (GNU does, Sun does not)
-#ifndef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-
-#  define _STD_HAS_FACET(type, arg)    std::has_facet < type >(arg)
-#  define _HAS_FACET(type, arg)        has_facet < type >(arg)
-
-#  define _STD_USE_FACET(type, arg)    std::use_facet < type >(arg)
-#  define _USE_FACET(type, arg)        use_facet < type >(arg)
-
-#  define _GET_TEMP_BUFFER(type, size) get_temporary_buffer < type >(size)
-#else   // if defined (_RWSTD_NO_TEMPLATE_ON_RETURN_TYPE)
-
-#  define _STD_HAS_FACET(type, arg)    std::has_facet (arg, (type*)(0))
-#  define _HAS_FACET(type, arg)        has_facet (arg, (type*)(0))
-
-#  define _STD_USE_FACET(type, arg)    std::use_facet (arg, (type*)(0))
-#  define _USE_FACET(type, arg)        use_facet (arg, (type*)(0))
-
-#  define _GET_TEMP_BUFFER(type, size) get_temporary_buffer (size, (type*)0)
-#endif   // _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-
-// working around g++ 2.95.2 -fno-honor-std inability to use std::use_facet
-#if    defined (__GNUG__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 97 \
-    && defined (_RWSTD_NO_HONOR_STD)
-   // use_facet is introduced into namespace __rw via a using declaration
-#  undef _STD_HAS_FACET
-#  define _STD_HAS_FACET(type, arg)    _HAS_FACET (type, arg)
-
-#  undef _STD_USE_FACET
-#  define _STD_USE_FACET(type, arg)    _USE_FACET (type, arg)
-#endif   // // __GNUG__ >= 2.97 || !_RWSTD_NO_HONOR_STD
-
 // support for building the new locale (v.3)
-#ifndef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-#  ifndef _RWSTD_NO_HONOR_STD
-#    define _RWSTD_USE_FACET(type, arg)   std::use_facet< type >(arg)
-#  else
-#    define _RWSTD_USE_FACET(type, arg)   use_facet< type >(arg)
-#  endif
-#else   // if defined (_RWSTD_NO_TEMPLATE_ON_RETURN_TYPE)
-#  ifndef _RWSTD_NO_HONOR_STD
-#    define _RWSTD_USE_FACET(type, arg)   std::use_facet(arg, (type*)(0))
-#  else
-#    define _RWSTD_USE_FACET(type, arg)   use_facet(arg, (type*)(0))
-#  endif
-#endif // _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
+#ifndef _RWSTD_NO_HONOR_STD
+#  define _RWSTD_USE_FACET(type, arg)   std::use_facet< type >(arg)
+#else
+#  define _RWSTD_USE_FACET(type, arg)   use_facet< type >(arg)
+#endif
 
 
 #ifndef _RWSTD_NO_NONCLASS_ARROW_RETURN

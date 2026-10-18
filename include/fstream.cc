@@ -155,7 +155,7 @@ showmanyc ()
         typedef typename traits_type::state_type _StateT;
         typedef codecvt<char_type, char, _StateT> _Codecvt;
 
-        const _Codecvt &__cvt = _USE_FACET (_Codecvt, this->getloc ());
+        const _Codecvt &__cvt = use_facet< _Codecvt >(this->getloc ());
 
         if (__cvt.always_noconv ())
             __retval += __end_pos - _C_cur_pos;
@@ -218,7 +218,7 @@ underflow ()
         typedef typename traits_type::state_type _StateT;
         typedef codecvt<char_type, char, _StateT> _Codecvt;
 
-        const _Codecvt &__cvt = _USE_FACET (_Codecvt, this->getloc ());
+        const _Codecvt &__cvt = use_facet< _Codecvt >(this->getloc ());
 
         if (__cvt.always_noconv ()) {
             // no conversion required
@@ -251,7 +251,7 @@ underflow ()
             codecvt_base::result __res = codecvt_base::ok;
 
             const ctype<char_type> &__ctp =
-                _USE_FACET (ctype<char_type>, this->getloc ());
+                use_facet< ctype<char_type> >(this->getloc ());
 
             while (__to_next != __to_end && codecvt_base::error != __res) {
 
@@ -481,7 +481,7 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
 
     typedef codecvt<char_type, char, _StateT> _Codecvt;
 
-    const _Codecvt &__cvt = _USE_FACET (_Codecvt, this->getloc ());
+    const _Codecvt &__cvt = use_facet< _Codecvt >(this->getloc ());
 
     if (__cvt.always_noconv ()) {
 
@@ -714,7 +714,7 @@ seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode)
     typedef typename traits_type::state_type _StateT;
     typedef codecvt<char_type, char, _StateT> _Codecvt;
 
-    const int __width = _USE_FACET (_Codecvt, this->getloc ()).encoding ();
+    const int __width = use_facet< _Codecvt >(this->getloc ()).encoding ();
 
     // offset must be zero with state-dependent encoding
     if (0 != __off && __width <= 0)
@@ -817,7 +817,7 @@ sync ()
         typedef typename traits_type::state_type _StateT;
         typedef codecvt<char_type, char, _StateT> _Codecvt;
 
-        const _Codecvt &__cvt = _USE_FACET (_Codecvt, this->getloc ());
+        const _Codecvt &__cvt = use_facet< _Codecvt >(this->getloc ());
         int __width = __cvt.encoding ();
 
         if (__width > 0) {
@@ -954,7 +954,7 @@ _C_unshift ()
     typedef typename traits_type::state_type _StateT;
     typedef codecvt<char_type, char, _StateT> _Codecvt;
 
-    const _Codecvt &__cvt = _USE_FACET (_Codecvt, this->getloc ());
+    const _Codecvt &__cvt = use_facet< _Codecvt >(this->getloc ());
 
     // unshifting isn't necessary if encoding isn't state dependent
     // or if the state is equivalent to initial state (determined

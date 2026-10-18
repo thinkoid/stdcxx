@@ -292,7 +292,7 @@ _C_crlf_intern_count (const char_type* __start,
     // compute the number of newline characters in the internal representation
     if (!(this->_C_state & ios_base::binary)) {
         const char_type __nl =
-            _USE_FACET (ctype<char_type>, this->getloc ()).widen ('\n');
+            use_facet< ctype<char_type> >(this->getloc ()).widen ('\n');
 
         while ((__start = _Traits::find (__start, __finish - __start, __nl))) {
             ++__start;

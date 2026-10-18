@@ -60,9 +60,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
             basic_streambuf<_CharT, _Traits>* const __rdbuf = __is.rdbuf ();
 
             const ctype<_CharT> &__ctp =
-                _USE_FACET (ctype<_CharT>, __is.getloc ());
-
-#ifndef _RWSTD_NO_FRIEND_TEMPLATE
+                use_facet< ctype<_CharT> >(__is.getloc ());
 
             while (__n != 0) {
 
@@ -161,39 +159,6 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
                 }
             }
 
-#else   // if defined (_RWSTD_NO_FRIEND_TEMPLATE)
-
-            for ( ; __n != 0; ) {
-
-                const typename _Traits::int_type
-                    __c (__rdbuf->sgetc ());
-
-                if (_Traits::eq_int_type (__c, _Traits::eof ())) {
-                    __err = ios_base::eofbit;
-                    break;
-                }
-
-                // convert to char_type so that isspace works correctly
-                const typename _Traits::char_type
-                    __ch = _Traits::to_char_type (__c);
-
-                if (__ctp.is (__ctp.space, __ch))
-                    break;
-
-                __str.push_back (__ch);
-                --__n;
-
-                __rdbuf->sbumpc ();
-
-                // increment gcount only _after_ sbumpc() but _before_
-                // the subsequent call to sgetc() to correctly reflect
-                // the number of extracted characters in the presence
-                // of exceptions thrown from streambuf virtuals
-                ++__gcount;
-            }
-
-#endif   // if defined (_RWSTD_NO_FRIEND_TEMPLATE)
-
             __is.width (0);
         }
     }
@@ -221,8 +186,6 @@ getline (basic_istream<_CharT, _Traits>&            __is,
 
     const typename basic_istream<_CharT, _Traits>::sentry
         __ipfx (__is, true /* noskipws */);
-
-#ifndef _RWSTD_NO_FRIEND_TEMPLATE
 
     ios_base::iostate __err = ios_base::goodbit;
 
@@ -332,60 +295,6 @@ getline (basic_istream<_CharT, _Traits>&            __is,
 
     if (!__gcount)
         __err |= ios_base::failbit;
-
-#else   // if defined (_RWSTD_NO_FRIEND_TEMPLATE)
-
-    ios_base::iostate __err = ios_base::failbit;
-
-    if (__ipfx) { 
-
-        _TRY {
-
-            __str.clear ();
-
-            const _RWSTD_SIZE_T __max_size = __str.max_size ();
-
-            // FIXME: code commented out to work around an HP aCC 3.14.10
-            // bug #JAGac86264
-
-            // typedef typename
-            //     basic_string<_CharT, _Traits, _Allocator>::size_type
-
-            for ( ; ; ) {
-
-                const typename _Traits::int_type
-                    __c (__is.rdbuf ()->sgetc ());
-
-                if (_Traits::eq_int_type (__c, _Traits::eof ())) {
-                    // 21.3.7.9, p7
-                    if (__str.size ())
-                        __err = ios_base::eofbit;
-                    else
-                        __err = ios_base::eofbit | ios_base::failbit;
-
-                    break;
-                }
-
-                if (_Traits::eq (_Traits::to_char_type (__c), __delim)) {
-                    __is.rdbuf ()->sbumpc ();
-                    __err = ios_base::goodbit;
-                    break;
-                }
-
-                if (__max_size <= __str.size ())
-                    break;
-
-                __str.push_back (_Traits::to_char_type (__c));
-
-                __is.rdbuf ()->sbumpc ();
-            }
-        }
-        _CATCH (...) {
-            __is.setstate (ios_base::badbit | __rw::__rw_rethrow);
-        }
-    }
-
-#endif   // _RWSTD_NO_FRIEND_TEMPLATE
 
     if (__err)
         __is.setstate (__err);

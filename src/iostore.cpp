@@ -175,7 +175,7 @@ void ios_base::_C_fire_event (event ev, bool reentrant)
         // stream member functions recursively)
         if (reentrant) {
             // never throws
-            cba = _GET_TEMP_BUFFER (_C_usr_data::_C_event_cb, cbsize).first;
+            cba = get_temporary_buffer< _C_usr_data::_C_event_cb >(cbsize).first;
 
             if (!cba) {
                 // clear may throw...

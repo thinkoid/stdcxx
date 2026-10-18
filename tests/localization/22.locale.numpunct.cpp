@@ -79,8 +79,8 @@ void run_test (charT, const char *tname)
     // to specialize use_facet() and has_facet()
     typedef std::numpunct_byname<charT> NumpunctByname;
 
-    if (_STD_HAS_FACET (NumpunctByname, *loc))
-        _STD_USE_FACET (NumpunctByname, *loc);
+    if (std::has_facet< NumpunctByname >(*loc))
+        std::use_facet< NumpunctByname >(*loc);
 
     // verify values as per 7.4 of C89, and 7.11, p2 of C99
     check_decimal_point (charT ('.'), tname, loc);
@@ -246,7 +246,7 @@ void check_decimal_point (charT              expect,
     typedef std::char_traits<charT> Traits;
 
     const charT c = loc ?
-          _STD_USE_FACET (Punct, *loc).decimal_point ()
+          std::use_facet< Punct >(*loc).decimal_point ()
         : Punct ().decimal_point ();
 
 
@@ -266,7 +266,7 @@ void check_thousands_sep (charT              expect,
     typedef std::char_traits<charT> Traits;
 
     const charT c = loc ?
-          _STD_USE_FACET (Punct, *loc).thousands_sep ()
+          std::use_facet< Punct >(*loc).thousands_sep ()
         : Punct ().thousands_sep ();
 
     rw_assert (Traits::eq (c, expect), 0, __LINE__,
@@ -285,7 +285,7 @@ void check_grouping (charT,
     typedef std::numpunct<charT> Punct;
 
     const std::string s = loc ?
-          _STD_USE_FACET (Punct, *loc).grouping ()
+          std::use_facet< Punct >(*loc).grouping ()
         : Punct ().grouping ();
 
     if (   s != expect
@@ -324,7 +324,7 @@ void check_falsename (const std::basic_string<charT> &expect,
     typedef std::numpunct<charT> Punct;
 
     const std::basic_string<charT> s = loc ?
-          _STD_USE_FACET (Punct, *loc).falsename ()
+          std::use_facet< Punct >(*loc).falsename ()
         : Punct ().falsename ();
 
     const int char_size = int (sizeof (charT));
@@ -344,7 +344,7 @@ void check_truename (const std::basic_string<charT> &expect,
     typedef std::numpunct<charT> Punct;
 
     const std::basic_string<charT> s = loc ?
-          _STD_USE_FACET (Punct, *loc).truename ()
+          std::use_facet< Punct >(*loc).truename ()
         : Punct ().truename ();
 
     const int char_size = int (sizeof (charT));

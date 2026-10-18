@@ -51,55 +51,6 @@ using ::ptrdiff_t;
 #endif   // _RWSTD_NO_LIBC_IN_STD
 
 
-#ifdef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-
-namespace std { 
-
-#define has_facet fake_has_facet
-#define use_facet fake_use_facet
-
-// fake std::use_facet
-template <class Facet>
-struct has_facet
-{
-    has_facet (const std::locale &loc)
-
-#ifndef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-
-        : result (std::has_facet<Facet>(loc)) { }
-
-#else
-
-        : result (std::has_facet (loc, (Facet*)0)) { }
-
-#endif   // _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-
-    operator bool () const {
-        return result;
-    }
-
-    bool result;
-};
-
-
-// fake std::use_facet
-template <class Facet>
-struct use_facet
-{
-    use_facet (const std::locale &loc)
-        : facet (std::_USE_FACET (Facet, loc)) { }
-
-    operator const Facet& () const {
-        return facet;
-    }
-
-    const Facet &facet;
-};
-
-}   // namespace std
-
-#endif   // _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-
 
 #ifdef _RWSTD_NO_EXCEPTIONS
 #  define try            if (1)

@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 170 named C++ probes, five supporting C++
+The source census contains 166 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 170 named probes are discoverable by
+three different things.** All 166 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -113,6 +113,7 @@ its row is gone from the catalogue below.
 | `NAMESPACE` | `NO_NAMESPACE` | 2026-10-17 | The `namespace` keyword; every compiler of the matrix has it. Nine probes read the gate to put their names in `std`; they do so unconditionally now. `_RWSTD_NAMESPACE`, `_STD`, `_RW` and `_USING` in `rw/_defs.h` were then spelled out as `namespace`, `std`, `__rw` and `using`. |
 | `EXPLICIT_ARG`, `EXTERN_INLINE`, `FUNCTION_TRY_BLOCK`, `TEMPLATE_DEFAULT_ARG_CONVERSION`, `INSTANTIATE_DEFAULT_ARGS`, `STATIC_CONST_MEMBER_EXPR_CONST`, `EXPLICIT_MEMBER_INSTANTIATION`, `COLLAPSE_STATIC_LOCALS`, `COLLAPSE_TEMPLATE_LOCALS`, `EXTERN_C_EXCEPTIONS`, `LIB_EXCEPTIONS`, `THREAD_SAFE_ERRNO` | `NO_*`, one each | 2026-10-17, one commit | Nothing read the status macro and the probe printed nothing else; four took a support translation unit with them. |
 | `EXPLICIT_CTOR_INSTANTIATION`, `IMPLICIT_INSTANTIATION`, `STATIC_TEMPLATE_MEMBER_INIT`, `DEFAULT_TEMPLATE_ARGS`, `DEPENDENT_TEMPLATE`, `SPECIALIZATION_ON_RETURN_TYPE`, `EXPLICIT_MEMBER_SPECIALIZATION`, `EXPLICIT_FUNC_INSTANTIATION`, `EXPLICIT_INSTANTIATION`, `SPECIALIZED_FRIEND`, `OVERLOAD_OF_TEMPLATE_FUNCTION` | `NO_*`, one each | 2026-10-17, one commit | The small template gates: every compiler of the matrix passes them. `_RWSTD_SPECIALIZED_FRIEND`, `_RWSTD_DEFAULT_ARG` and `_RWSTD_DUMMY_ARG` went with them, spelled out or unused; the Borland branch beside the first was the last `__TURBOC__` in the tree. |
+| `FRIEND_TEMPLATE`, `FUNC_PARTIAL_SPEC`, `NONDEDUCED_CONTEXT`, `TEMPLATE_ON_RETURN_TYPE` | `NO_*`, one each | 2026-10-17, one commit | Four more template gates every compiler of the matrix passes. The facet and temporary-buffer macros that spelled the return-type workaround (`_STD_USE_FACET` and kin) and the three local size-type macros went with them, spelled out. |
 
 ## 3. Outputs beyond the status macro
 
@@ -202,9 +203,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [EXTERN_TEMPLATE_BEFORE_DEFINITION](../../etc/config/src/EXTERN_TEMPLATE_BEFORE_DEFINITION.cpp) / `NO_EXTERN_TEMPLATE_BEFORE_DEFINITION` | extern template before definition | L; `include/rw/_defs.h` |
 | [FLOAT](../../etc/config/src/FLOAT.cpp) / `NO_FLOAT` + output | floating point properties | none |
 | [FPOS_T](../../etc/config/src/FPOS_T.cpp) / `NO_FPOS_T` | fpos_t in &lt;stdio.h&gt; | L; `include/ansi/cstdio` |
-| [FRIEND_TEMPLATE](../../etc/config/src/FRIEND_TEMPLATE.cpp) / `NO_FRIEND_TEMPLATE` | friend templates of templates | L; `include/rw/_stringio.cc` |
 | [FUNC](../../etc/config/src/FUNC.cpp) / `NO_FUNC` | the __func__ special macro | L/T; `include/ansi/_cassert.h` |
-| [FUNC_PARTIAL_SPEC](../../etc/config/src/FUNC_PARTIAL_SPEC.cpp) / `NO_FUNC_PARTIAL_SPEC` | function template overload | L; `include/ostream` |
 | [GLOBAL_BAD_ALLOC](../../etc/config/src/GLOBAL_BAD_ALLOC.cpp) / `NO_GLOBAL_BAD_ALLOC` | class ::bad_alloc | P; `etc/config/src/RUNTIME_IN_STD.cpp` |
 | [GLOBAL_BAD_CAST](../../etc/config/src/GLOBAL_BAD_CAST.cpp) / `NO_GLOBAL_BAD_CAST` | class ::bad_cast | P; `etc/config/src/RUNTIME_IN_STD.cpp` |
 | [GLOBAL_BAD_EXCEPTION](../../etc/config/src/GLOBAL_BAD_EXCEPTION.cpp) / `NO_GLOBAL_BAD_EXCEPTION` | class ::bad_exception | P; `etc/config/src/RUNTIME_IN_STD.cpp` |
@@ -248,7 +247,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [NL_LANGINFO](../../etc/config/src/NL_LANGINFO.cpp) / `NO_NL_LANGINFO` | nl_langinfo() in &lt;langinfo.h&gt; | L/T/V; `src/time_put.cpp` |
 | [NL_TYPES_H](../../etc/config/src/NL_TYPES_H.cpp) / `NO_NL_TYPES_H` | catopen() in &lt;nl_types.h&gt; | L; `src/catalog.cpp` |
 | [NONCLASS_ARROW_RETURN](../../etc/config/src/NONCLASS_ARROW_RETURN.cpp) / `NO_NONCLASS_ARROW_RETURN` | operator-&gt;() | L/T/E; `include/rw/_autoptr.h` |
-| [NONDEDUCED_CONTEXT](../../etc/config/src/NONDEDUCED_CONTEXT.cpp) / `NO_NONDEDUCED_CONTEXT` | nondeduced context | L; `include/bitset` |
 | [NO_DBL_TRAPS](../../etc/config/src/NO_DBL_TRAPS.cpp) / `NO_DBL_TRAPS` | if floating point math traps | L/P/T; `include/limits` |
 | [NO_INT_TRAPS](../../etc/config/src/NO_INT_TRAPS.cpp) / `NO_INT_TRAPS` | if integer math traps | L; `include/limits` |
 | [NO_OBJECT_MANGLING](../../etc/config/src/NO_OBJECT_MANGLING.cpp) / `NO_OBJECT_MANGLING` | object name mangling | L; `include/limits` |
@@ -296,7 +294,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [STD_UNEXPECTED](../../etc/config/src/STD_UNEXPECTED.cpp) / `NO_STD_UNEXPECTED` | std::unexpected() | L/P; `src/exception.cpp` |
 | [STRUCT_TM](../../etc/config/src/STRUCT_TM.cpp) / `NO_STRUCT_TM` + output | struct tm in &lt;time.h&gt; | L; `include/ansi/cwchar` |
 | [STRUCT_TM_IN_WCHAR_H](../../etc/config/src/STRUCT_TM_IN_WCHAR_H.cpp) / `NO_STRUCT_TM_IN_WCHAR_H` | struct tm declaration in &lt;wchar.h&gt; | L; `include/ansi/cwchar` |
-| [TEMPLATE_ON_RETURN_TYPE](../../etc/config/src/TEMPLATE_ON_RETURN_TYPE.cpp) / `NO_TEMPLATE_ON_RETURN_TYPE` | template overloads on return type | L/E; `include/bitset` |
 | [THREAD_SAFE_EXCEPTIONS](../../etc/config/src/THREAD_SAFE_EXCEPTIONS.cpp) / `NO_THREAD_SAFE_EXCEPTIONS` | if exceptions are thread safe | T; `tests/localization/22.locale.globals.mt.cpp` |
 | [TIMEZONE](../../etc/config/src/TIMEZONE.cpp) / `NO_TIMEZONE` | int timezone in &lt;time.h&gt; | L; `src/time_put.cpp` |
 | [TLS](../../etc/config/src/TLS.cpp) / `NO_TLS` + output | thread-local storage | L; `include/rw/_defs.h` |

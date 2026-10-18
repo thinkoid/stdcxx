@@ -100,13 +100,13 @@ every one of them out, keyword by keyword, the casts last.
 | `MEMBER_TEMPLATES` | member templates | 107 | 31 | 17 | `EXTERN_MEMBER_TEMPLATE`, `extern_template_imp`; retired 2026-10-17 |
 | `CLASS_PARTIAL_SPEC` | partial specialization | 79 | 6 | 16 | `VA_LIST` |
 | `PART_SPEC_OVERLOAD` | partial ordering of function templates | 29 | 3 | 7 | `VA_LIST` |
-| `TEMPLATE_ON_RETURN_TYPE` | function template overloads on the return type | 16 | 4 | 4 | |
+| `TEMPLATE_ON_RETURN_TYPE` | function template overloads on the return type | 16 | 4 | 4 | retired 2026-10-17 |
 | `STATIC_CONST_MEMBER_INIT` | in-class initializer of a static const member | 12 | 7 | 5 | |
-| `NONDEDUCED_CONTEXT` | nondeduced contexts | 10 | 0 | 4 | |
+| `NONDEDUCED_CONTEXT` | nondeduced contexts | 10 | 0 | 4 | retired 2026-10-17 |
 | `COLLAPSE_TEMPLATE_STATICS` | one static member per template instance across translation units | 10 | 0 | 5 | |
-| `EXPLICIT_INSTANTIATION_BEFORE_DEFINITION` | explicit instantiation before the definition | 9 | 0 | 1 | |
-| `FUNC_PARTIAL_SPEC` | overloading a function template | 9 | 0 | 2 | |
-| `FRIEND_TEMPLATE` | friend templates of templates | 8 | 0 | 2 | reads `EXPLICIT_FUNC_INSTANTIATION` |
+| `EXPLICIT_INSTANTIATION_BEFORE_DEFINITION` | explicit instantiation before the definition | 9 | 0 | 1 | not a candidate after all: `rw/_defs.h` defines it by hand when `EXTERN_TEMPLATE_BEFORE_DEFINITION` fails, so the branch is live under eccp (chapter 4) |
+| `FUNC_PARTIAL_SPEC` | overloading a function template | 9 | 0 | 2 | retired 2026-10-17 |
+| `FRIEND_TEMPLATE` | friend templates of templates | 8 | 0 | 2 | reads `EXPLICIT_FUNC_INSTANTIATION`; retired 2026-10-17 |
 | `OVERLOAD_OF_TEMPLATE_FUNCTION` | partial ordering, the hard case | 4 | 0 | 1 | retired 2026-10-17 |
 | `SPECIALIZED_FRIEND` | `template <>` in a friend declaration | 3 | 0 | 1 | retired 2026-10-17 |
 | `EXPLICIT_INSTANTIATION` | explicit instantiation | 2 | 78 | 1 | `IMPLICIT_INSTANTIATION`, `INSTANTIATE_DEFAULT_ARGS`; retired 2026-10-17 |
@@ -201,7 +201,10 @@ probes that print values (`LIMITS`, `FLOAT`, `LCONV`, `VA_LIST`,
   `_RWSTD_NO_STD_NOTHROW` and `_RWSTD_NO_STD_TYPE_INFO` under eccp).
 - **Gates eccp defines**: `LONG_LONG`, `EXTERN_TEMPLATE` and its
   three relatives, the five `*_ATOMIC_OPS`, `TLS`,
-  `STATICS_IN_TEMPLATE`. Live by construction.
+  `STATICS_IN_TEMPLATE`. Live by construction. So is
+  `EXPLICIT_INSTANTIATION_BEFORE_DEFINITION`, which the census listed
+  in 2.2: no probe answer defines it, but `rw/_defs.h` defines it by
+  hand whenever `EXTERN_TEMPLATE_BEFORE_DEFINITION` is, and eccp's is.
 - **Host facts**: everything that prints a value, the C header and
   function probes, `WINT_T`, `WCTYPE_T`, `WCTRANS_T`, `MBSTATE_T`,
   `FPOS_T`, `STRUCT_TM`, `OFFSETOF`, `INFINITY`, `QUIET_NAN`, the
@@ -249,7 +252,8 @@ Small first, so the pattern settles before the big three.
 3. The template gates of 2.2, smallest first; `CLASS_PARTIAL_SPEC`
    with `PART_SPEC_OVERLOAD` and `FUNC_PARTIAL_SPEC` last of them.
    The eleven with four library hits or fewer went 2026-10-17 in one
-   commit.
+   commit; `FRIEND_TEMPLATE`, `FUNC_PARTIAL_SPEC`, `NONDEDUCED_CONTEXT`
+   and `TEMPLATE_ON_RETURN_TYPE` in the next.
 4. The other language rules of 2.4.
 5. `LONG_DOUBLE`.
 6. `WCHAR_T` with `NATIVE_WCHAR_T`, the largest.

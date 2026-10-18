@@ -184,13 +184,9 @@ struct _RWSTD_CLASS_EXPORT locale
     template <class _Facet>
     locale (const locale&, _Facet*);
 
-#ifndef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-
     // 22.1.1.3, p1
     template <class _Facet>
     locale combine (const locale&) const;
-
-#endif   // _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
 
     // 22.1.1.4, p3
     template <class _CharT, class _Traits, class _Allocator>
@@ -468,8 +464,6 @@ inline locale::locale (const locale &__rhs, _Facet *__facet)
 }
 
 
-#ifndef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-
 template <class _Facet>
 inline locale locale::combine (const locale &__rhs) const
 {
@@ -482,8 +476,6 @@ inline locale locale::combine (const locale &__rhs) const
 
     return locale (*this, &use_facet<_Facet>(__rhs));
 }
-
-#endif   // _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
 
 
 template <class _CharT, class _Traits, class _Allocator>

@@ -335,7 +335,7 @@ const Codecvt& create_Codecvt (const std::locale&)
 
 const CodecvtBn& create_CodecvtBn (const std::locale& loc)
 {
-    return _STD_USE_FACET (CodecvtBn, loc);
+    return std::use_facet< CodecvtBn >(loc);
 }
 
 #ifndef _RWSTD_NO_WCHAR_T
@@ -348,7 +348,7 @@ const CodecvtW& create_CodecvtW (const std::locale&)
 
 const CodecvtBnW& create_CodecvtBnW (const std::locale& loc)
 {
-    return _STD_USE_FACET (CodecvtBnW, loc);
+    return std::use_facet< CodecvtBnW >(loc);
 }
 
 #endif // !defined _RWSTD_NO_WCHAR_T
@@ -1131,7 +1131,7 @@ test_mbstate_t (const CodeCvtT*, const char* name)
 {
     const std::locale loc (name);
 
-    const CodeCvtT &cvt = _STD_USE_FACET (CodeCvtT, loc);
+    const CodeCvtT &cvt = std::use_facet< CodeCvtT >(loc);
 
     typedef typename CodeCvtT::intern_type intern_type;
     typedef typename CodeCvtT::extern_type extern_type;

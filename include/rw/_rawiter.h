@@ -154,8 +154,6 @@ get_temporary_buffer (_Distance __nelems, _TypeT*)
 }
 
 
-#ifndef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
-
 // 20.4.3, p1
 template <class _TypeT>
 inline pair<_TypeT*, _RWSTD_PTRDIFF_T>
@@ -163,8 +161,6 @@ get_temporary_buffer (_RWSTD_PTRDIFF_T __n)
 {
     return get_temporary_buffer (__n, (_TypeT*)0);
 }
-
-#endif   // _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
 
 
 // 20.4.3, p3

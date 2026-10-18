@@ -46,7 +46,7 @@ __rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
         typedef std::ostreambuf_iterator<_CharT, _Traits> _Iter;
         typedef std::num_put<_CharT, _Iter>                _NumPut;
 
-        if (__opfx && _STD_USE_FACET (_NumPut, __strm.getloc ())
+        if (__opfx && std::use_facet< _NumPut >(__strm.getloc ())
             .put (_Iter (__strm), __strm, __strm.fill (), __val).failed ()) {
 
             // this may throw but the exception will just be caught
@@ -95,7 +95,7 @@ __rw_sputn (std::basic_ostream<_CharT, _Traits> &__strm,
     _RWSTD_ASSERT (!__len || __len > 0 && 0 != __s);
 
     const std::ctype<_CharT>& __ctp =
-        _STD_USE_FACET (std::ctype<_CharT>, __strm.getloc ());
+        std::use_facet< std::ctype<_CharT> >(__strm.getloc ());
 
     for (_RWSTD_STREAMSIZE __i = 0; __i < __len; ++__i) {
 
