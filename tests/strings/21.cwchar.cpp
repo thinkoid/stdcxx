@@ -821,7 +821,9 @@ void test_functions ()
     TEST (wchar_t*, wcscpy, (wstr, L""), -1);
     TEST (wchar_t*, wcsncpy, (wstr, L"", size), -1);
     TEST (wchar_t*, wcscat, (wstr, L""), -1);
+    TEST (wchar_t*, wcsncat, (wstr, L"", size), -1);
     TEST (int, wcscmp, (wstr, L""), -1);
+    TEST (int, wcscoll, (wstr, L""), -1);
     TEST (int, wcsncmp, (wstr, L"", size), -1);
     TEST (test_size_t, wcsxfrm, (wstr, L"", size), -1);
 
@@ -931,6 +933,8 @@ void test_file_functions (int dummy, ...)
 
     const test_wint_t wi = 0;
 
+    const test_size_t size = sizeof warray / sizeof *warray;
+
     // cast rw_stdout to FILE* via void* since the latter may be
     // an incomplete type and casts between two non-void pointers
     // require that the types be complete (in case they are related
@@ -960,6 +964,7 @@ void test_file_functions (int dummy, ...)
     TEST (int, fwscanf, (ifp, L"", uniqptr), -1);
 
     TEST (int, vfwprintf, (fp, L"", va), -1);
+    TEST (int, vswprintf, (wstr, size, L"", va), -1);
 
     TEST (test_wint_t, fgetwc, (ifp), -1);
     TEST (wchar_t*, fgetws, (wstr, i, ifp), -1);
@@ -968,6 +973,10 @@ void test_file_functions (int dummy, ...)
     TEST (test_wint_t, getwc, (ifp), -1);
     TEST (test_wint_t, putwc, (L'\0', fp), -1);
     TEST (test_wint_t, ungetwc, (wi, ifp), -1);
+
+    // getwchar() reads stdin: point it at the null device first
+    if (std::freopen (DEV_NULL, "r", stdin))
+        TEST (test_wint_t, getwchar, (), -1);
 
     std::fclose ((std::FILE*)ifp);
     std::fclose ((std::FILE*)fp);

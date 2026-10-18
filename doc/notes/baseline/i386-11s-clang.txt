@@ -45,7 +45,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 21.cctype                                     0    0      281      0   100%
 21.char.traits.compare                     NOUT    0                       
 21.char.traits.find.stdcxx-541             NOUT    0                       
-21.cwchar                                     0    0      118      0   100%
+21.cwchar                                     0    0      122      0   100%
 21.cwctype                                    0    0      294      0   100%
 21.string.access                              0    0      980      0   100%
 21.string.append                              0    0    78471      0   100%

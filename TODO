@@ -58,19 +58,6 @@ Check: =23.vector.modifiers='s leak counter around the three
 constructors under injected =bad_alloc= and a throwing copy
 constructor, the way the =deque= test's loop now runs.
 
-** TODO Leftovers beside the removed function probes
-
-The removal of the C library function probes (f43be017..a44256a6)
-kept to the code that read the probe macros. Its census found dead
-or stale code beside them; most went on 2026-10-18. One item remains.
-
-- =21.cwchar= exercises none of =wcscoll=, =wcsncat=, =vswprintf=,
-  =vwprintf=, =getwchar=, =putwchar=.
-
-Fix: the =21.cwchar= coverage adds assertions and moves the pin.
-
-Check: the suite table.
-
 ** TODO The twins' seam in the range members of =vector= and =deque=
 
 The seven out-of-class range members, =_C_assign_range= and
