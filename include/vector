@@ -57,29 +57,6 @@ _RWSTD_NAMESPACE (std) {
 template <class _TypeT, class _Allocator = allocator<_TypeT> >
 class vector;
 
-#ifdef _RWSTD_NO_MEMBER_TEMPLATES
-
-// declarations of non-member function templates implementing
-// the functionality of vector member function templates
-
-template <class _TypeT, class _Allocator, class _InputIter>
-void __rw_assign_range (vector<_TypeT, _Allocator>*,
-                        _InputIter, _InputIter, input_iterator_tag);
-
-template <class _TypeT, class _Allocator, class _FwdIter>
-void __rw_assign_range (vector<_TypeT, _Allocator>*,
-                        _FwdIter, _FwdIter, forward_iterator_tag);
-
-template <class _TypeT, class _Allocator, class _VectorIter, class _InputIter>
-void __rw_insert_range (vector<_TypeT, _Allocator>*, _VectorIter,
-                        _InputIter, _InputIter, input_iterator_tag);
-
-template <class _TypeT, class _Allocator, class _VectorIter, class _FwdIter>
-void __rw_insert_range (vector<_TypeT, _Allocator>*, _VectorIter,
-                        _FwdIter, _FwdIter, forward_iterator_tag);
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
-
 
 template <class _TypeT, class _Allocator>
 class vector
@@ -320,8 +297,6 @@ private:
     // implements insert with repetition
     void _C_insert_n (const iterator&, size_type, const_reference);
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
     // implements range insert for ForwardIterators
     template <class _FwdIter>
     void _C_insert_range (iterator, _FwdIter, _FwdIter,
@@ -332,20 +307,14 @@ private:
     void _C_insert_range (iterator, _InputIter, _InputIter,
                           input_iterator_tag);
 
-#else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
-
-public:
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
-
     // implements range assign
     template <class _InputIter>
     void _C_assign (_InputIter __first, _InputIter __last, void*) {
         _RWSTD_ASSERT_RANGE (__first, __last);
 
         // dispatch to an assign suitable for the category of InputIter
-        _RWSTD_ASSIGN_RANGE (__first, __last,
-                             _RWSTD_ITERATOR_CATEGORY (_InputIter, __first));
+        _C_assign_range (__first, __last,
+                         _RWSTD_ITERATOR_CATEGORY (_InputIter, __first));
     }
 
     // implements assign with repetition if value_type == size_type
@@ -370,8 +339,8 @@ public:
         _RWSTD_ASSERT_RANGE (__first, __last);
 
         // dispatch to an insert suitable for the category of InputIter
-        _RWSTD_INSERT_RANGE (__it, __first, __last,
-                             _RWSTD_ITERATOR_CATEGORY (_InputIter, __first));
+        _C_insert_range (__it, __first, __last,
+                         _RWSTD_ITERATOR_CATEGORY (_InputIter, __first));
     }
 
     // implements insert with repetition if value_type == size_type
@@ -1248,14 +1217,9 @@ public:
     }
     void insert (iterator __it, size_type __n, const bool& __x);
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
     template<class _InputIter>
     void insert (iterator __it, _InputIter __first,
                  _InputIter __last);
-#else
-    void insert (iterator __it, const_iterator __first, 
-                 const_iterator __last);
-#endif
 
     iterator erase (iterator __it)
     {
