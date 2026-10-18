@@ -41,22 +41,6 @@ Check: a section of =23.deque.storage= with a grown-then-drained deque
 that counts map reads per bufferful and finds a constant; the
 allocator section's ownership checks unchanged; the suite unchanged.
 
-** TODO The twins' seam in the range members of =vector= and =deque=
-
-The seven out-of-class range members, =_C_assign_range= and
-=_C_insert_range= in =include/vector.cc= and =include/deque.cc=,
-open with =vector* const __self = this;= and reach every member
-through =__self->=. The alias let one body serve the member and its
-namespace-scope twin, which took the container as a parameter. The
-twins left with the member templates gate; the alias is what remains
-of the seam.
-
-Fix: drop the alias and the =__self->= qualification in each body.
-
-Check: the disassembly of a program that exercises the seven members
-unchanged in the debug and the optimized configuration; the suite
-equal to the pin.
-
 ** TODO =time_get::do_date_order= returns =no_order= in every locale
 
 The base facet returns =dateorder ()= and no byname facet overrides

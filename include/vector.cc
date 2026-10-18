@@ -307,8 +307,6 @@ template<class _InputIter>
 void vector<_TypeT, _Allocator>::
 _C_assign_range (_InputIter __first, _InputIter __last, input_iterator_tag)
 {
-    vector* const __self = this;
-
     _RWSTD_ASSERT_RANGE (__first, __last);
 
     // assign over existing elements for better efficiency
@@ -325,17 +323,17 @@ _C_assign_range (_InputIter __first, _InputIter __last, input_iterator_tag)
     //    assignment operator and iterator operations do not throw
     // -- basic otherwise
 
-    const iterator __end = __self->end ();
+    const iterator __end = end ();
 
-    for (iterator __it = __self->begin (); __it != __end; ++__it, ++__first) {
+    for (iterator __it = begin (); __it != __end; ++__it, ++__first) {
         if (__first == __last) {
-            __self->erase (__it, __end);
+            erase (__it, __end);
             return;
         }
         *__it = *__first;
     }
 
-    __self->insert (__end, __first, __last);
+    insert (__end, __first, __last);
 }
 
 
@@ -344,8 +342,6 @@ template <class _FwdIter>
 void vector<_TypeT, _Allocator>::
 _C_assign_range (_FwdIter __first, _FwdIter __last, forward_iterator_tag)
 {
-    vector* const __self = this;
-
     _RWSTD_ASSERT_RANGE (__first, __last);
 
     // assign over existing elements for better efficiency
@@ -359,13 +355,13 @@ _C_assign_range (_FwdIter __first, _FwdIter __last, forward_iterator_tag)
     // -- basic otherwise
 
     const size_type __size1 = std::distance (__first, __last);
-    const size_type __size2 = __self->size () + __size1;
+    const size_type __size2 = size () + __size1;
 
-    if (__self->capacity () < __size2) {
+    if (capacity () < __size2) {
 
         // exception safety: strong
 
-        vector<value_type, allocator_type> __tmp (__self->get_allocator ());
+        vector<value_type, allocator_type> __tmp (get_allocator ());
         __tmp.reserve (__size2);
 
         // copy elements in the range [first, last) into the temporary
@@ -378,22 +374,22 @@ _C_assign_range (_FwdIter __first, _FwdIter __last, forward_iterator_tag)
             __tmp._C_push_back (*__first);
 
         // swap *this with the temporary, having its dtor clean up
-        __self->swap (__tmp);
+        swap (__tmp);
     }
     else {
         // exception safety: nothrow or basic
 
-        const iterator __end = __self->end ();
+        const iterator __end = end ();
 
-        for (iterator __i = __self->begin (); __i != __end; ++__i, ++__first) {
+        for (iterator __i = begin (); __i != __end; ++__i, ++__first) {
             if (__first == __last) {
-                __self->erase (__i, __end);
+                erase (__i, __end);
                 return;
             }
             *__i = *__first;
         }
 
-        __self->insert (__end, __first, __last);
+        insert (__end, __first, __last);
     }
 }
 
@@ -404,8 +400,6 @@ void vector<_TypeT, _Allocator>::
 _C_insert_range (iterator __it, _InputIter __first, _InputIter __last,
                  input_iterator_tag)
 {
-    vector* const __self = this;
-
     _RWSTD_ASSERT_RANGE (__it, end ());
     _RWSTD_ASSERT_RANGE (__first, __last);
 
@@ -422,14 +416,14 @@ _C_insert_range (iterator __it, _InputIter __first, _InputIter __last,
     // insert input range into a temporary sequence rather than into *this
     // to avoid modifying *this in case an exception (e.g., bad_alloc) is
     // thrown
-    vector<value_type, allocator_type> __tmp (__self->get_allocator ());
+    vector<value_type, allocator_type> __tmp (get_allocator ());
 
     for ( ; !(__first == __last); ++__first)
         __tmp.push_back (*__first);
 
     // insert into *this using a more efficient algorithm optimized
     // for BidirectionalIterator (and better)
-    __self->insert (__it, __tmp.begin (), __tmp.end ());
+    insert (__it, __tmp.begin (), __tmp.end ());
 }
 
 
@@ -439,8 +433,6 @@ void vector<_TypeT, _Allocator>::
 _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
                  forward_iterator_tag)
 {
-    vector* const __self = this;
-
     _RWSTD_ASSERT_RANGE (__it, end ());
     _RWSTD_ASSERT_RANGE (__first, __last);
 
@@ -448,14 +440,14 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
     // unless the new size of the container would exceed its capacity
 
     // compute the sizes of the ranges of elements to be copied    
-    const size_type __size1 = std::distance (__self->begin (), __it);
+    const size_type __size1 = std::distance (begin (), __it);
     const size_type __size2 = std::distance (__first, __last);
 
     if (!__size2)
         return;
 
     const bool __insert_in_place =
-        __self->size () + __size2 <= __self->capacity ();
+        size () + __size2 <= capacity ();
 
     if (__insert_in_place) {
 
@@ -463,12 +455,12 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
         // in the sequence controlled by *this that need to be moved
         // (copy contructed past the end of the end of the sequence
         // or assigned over existing elements)
-        const pointer __movbeg = __self->_C_alloc._C_begin + __size1;
+        const pointer __movbeg = _C_alloc._C_begin + __size1;
         const pointer __movend = __movbeg + __size2;
 
-        _RWSTD_ASSERT (__self->_C_make_iter (__movbeg) == __it);
+        _RWSTD_ASSERT (_C_make_iter (__movbeg) == __it);
 
-        const pointer __end = __self->_C_alloc._C_end;
+        const pointer __end = _C_alloc._C_end;
 
         if (__movend <= __end) {
             // compute the beginning of the range of elements whose copies
@@ -479,7 +471,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
             // construct copies of elements that will be moved beyond
             // the current end of the sequence controlled by *this
             for (pointer __p = __ucpbeg; !(__p == __end); ++__p)
-                __self->_C_push_back (*__p);
+                _C_push_back (*__p);
 
             // over the range of elements moved above
             for (pointer __q = __end; __movend < __q; ) {
@@ -491,7 +483,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
             // compute the length of the initial subsequence of the range
             // of elements being inserted that overlaps the end of the
             // sequence being inserted into
-            const size_type __size2a = __self->size () - __size1;
+            const size_type __size2a = size () - __size1;
             _FwdIter __mid = __first;
             std::advance (__mid, __size2a);
 
@@ -500,7 +492,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
             // std::uninitialized_copy (__mid, __last, _C_alloc._C_end);
 
             for (_FwdIter __m = __mid ; !(__m == __last); ++__m)
-                __self->_C_push_back (*__m);
+                _C_push_back (*__m);
 
             // construct copies of the range of elements [pos, end)
             // past the end of the range of elements inserted above,
@@ -508,7 +500,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
             // std::uninitialized_copy (__movbeg, __end, _C_alloc._C_end);
 
             for (pointer __p = __movbeg; !(__p == __end); ++__p)
-                __self->_C_push_back (*__p);
+                _C_push_back (*__p);
 
             __last = __mid;
         }
@@ -520,9 +512,9 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
         // constructor or assignment operator of T there are no effects.
 
         // create a temporary vector and reserve sufficient space
-        vector<value_type, allocator_type> __tmp (__self->get_allocator ());
+        vector<value_type, allocator_type> __tmp (get_allocator ());
 
-        __tmp.reserve (__self->size () + __size2);
+        __tmp.reserve (size () + __size2);
 
         // avoid using the name __i or __it below so as not to trigger
         // a (bogus) gcc 2.95.2 -Wshadow warning: declaration of `__i'
@@ -535,7 +527,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
         // iteration so that an exception thrown by the copy ctor
         // will cause the destruction of all already constructed
         // elements (by invoking the temporary's dtor)
-        for (__ix = __self->begin (); __ix != __it; ++__ix) {
+        for (__ix = begin (); __ix != __it; ++__ix) {
             __tmp._C_push_back (*__ix);
         }
 
@@ -547,12 +539,12 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
         }
 
         // copy the remaining elements from *this
-        for ( ; __ix != __self->end (); ++__ix) {
+        for ( ; __ix != end (); ++__ix) {
             __tmp._C_push_back (*__ix);
         }
 
         // swap *this with the temporary, having its dtor clean up
-        __self->swap (__tmp);
+        swap (__tmp);
     }
 }
 

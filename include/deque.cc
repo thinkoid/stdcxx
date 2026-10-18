@@ -561,10 +561,8 @@ template <class _Iterator>
 void deque<_TypeT, _Allocator>::
 _C_assign_range (_Iterator __first, _Iterator __last, input_iterator_tag)
 {
-    deque* const __self = this;
-
     _RWSTD_ASSERT_RANGE (__first, __last);
-    _RWSTD_ASSERT (__self->_C_is_valid ());
+    _RWSTD_ASSERT (_C_is_valid ());
 
     // assign over existing elements for better efficiency
     // and exception safety
@@ -575,12 +573,12 @@ _C_assign_range (_Iterator __first, _Iterator __last, input_iterator_tag)
     //    assignment operator and iterator operations do not throw
     // -- basic otherwise
 
-    const iterator __end = __self->end ();
+    const iterator __end = end ();
 
-    for (iterator __it = __self->begin (); !(__it == __end);
+    for (iterator __it = begin (); !(__it == __end);
          ++__it, ++__first) {
         if (__first == __last) {
-            __self->erase (__it, __end);
+            erase (__it, __end);
             return;
         }
         *__it = *__first;
@@ -588,7 +586,7 @@ _C_assign_range (_Iterator __first, _Iterator __last, input_iterator_tag)
 
     // append the rest of the range one element at a time
     for ( ; !(__first == __last); ++__first)
-        __self->push_back (*__first);
+        push_back (*__first);
 }
 
 
@@ -599,11 +597,7 @@ _C_insert_range (iterator __it,
                  _Iterator __first, _Iterator __last,
                  input_iterator_tag)
 {
-    typedef deque _Deque;
-
-    _Deque* const __self = this;
-
-    _RWSTD_ASSERT_RANGE (__it, __self->end ());
+    _RWSTD_ASSERT_RANGE (__it, end ());
     _RWSTD_ASSERT_RANGE (__first, __last);
 
     if (__first == __last)
@@ -611,10 +605,10 @@ _C_insert_range (iterator __it,
 
     // Iterator category does not promise non-throwing source operations.
     // Consume an arbitrary source before overwriting destination elements.
-    _Deque __tmp (__self->get_allocator ());
+    deque __tmp (get_allocator ());
 
-    const typename _Deque::size_type __limit =
-        __self->max_size () - __self->size ();
+    const size_type __limit =
+        max_size () - size ();
     for ( ; !(__first == __last); ++__first) {
         _RWSTD_REQUIRES (__tmp.size () < __limit,
                          (_RWSTD_ERROR_LENGTH_ERROR,
@@ -622,7 +616,7 @@ _C_insert_range (iterator __it,
         __tmp.push_back (*__first);
     }
 
-    __self->insert (__it, __tmp.begin (), __tmp.end ());
+    insert (__it, __tmp.begin (), __tmp.end ());
 }
 
 
@@ -633,38 +627,34 @@ _C_insert_range (iterator __it,
                  _Iterator __first, _Iterator __last,
                  bidirectional_iterator_tag)
 {
-    typedef deque _Deque;
-
-    _Deque* const __self = this;
-
-    _RWSTD_ASSERT_RANGE (__self->begin (), __it);
+    _RWSTD_ASSERT_RANGE (begin (), __it);
     _RWSTD_ASSERT_RANGE (__first, __last);
-    _RWSTD_ASSERT (__self->_C_is_valid ());
+    _RWSTD_ASSERT (_C_is_valid ());
 
     const size_type __n = std::distance (__first, __last);
 
     if (0 == __n)
         return;
 
-    _RWSTD_REQUIRES (__n <= __self->max_size () - __self->size (),
+    _RWSTD_REQUIRES (__n <= max_size () - size (),
                      (_RWSTD_ERROR_LENGTH_ERROR,
                       _RWSTD_FUNC ("deque::insert(iterator, Iterator, "
                                    "Iterator)"),
-                      __n, __self->max_size ()));
+                      __n, max_size ()));
 
-    const size_type __inx = std::distance (__self->begin (), __it);
-    const size_type __rem = __self->size () - __inx;
+    const size_type __inx = std::distance (begin (), __it);
+    const size_type __rem = size () - __inx;
 
-    _RWSTD_ASSERT (__inx <= __self->size ());
+    _RWSTD_ASSERT (__inx <= size ());
 
     // This overload receives pointers or this deque's raw iterators.
     // Their operations cannot throw after a shift of existing values.
     const bool __back = __rem <= __inx;
-    typename _Deque::_C_reservation __room (*__self, __back, __n);
+    _C_reservation __room (*this, __back, __n);
 
-    typedef typename _Deque::_C_deque_iter _Iter;
-    const _Iter __beg = __self->_C_beg;
-    const _Iter __end = __self->_C_end;
+    typedef _C_deque_iter _Iter;
+    const _Iter __beg = _C_beg;
+    const _Iter __end = _C_end;
     const _Iter __pos = __beg + difference_type (__inx);
 
     if (__back) {
@@ -716,7 +706,7 @@ _C_insert_range (iterator __it,
 
     __room._C_commit ();
 
-    _RWSTD_ASSERT (__self->_C_is_valid (0));
+    _RWSTD_ASSERT (_C_is_valid (0));
 }
 
 
