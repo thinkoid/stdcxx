@@ -353,7 +353,7 @@ typedef _Facet (time_put, char, _OutIter (char))       __rw_tput_c;
 // inline definitions of heavily used use_facet specializations
 // for iostream efficiency
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline const __rw_facet*
 __rw_get_facet (const _STD::locale &__loc, const _STD::ctype<char>*)
 {
@@ -362,7 +362,7 @@ __rw_get_facet (const _STD::locale &__loc, const _STD::ctype<char>*)
 }
 
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline const __rw_facet*
 __rw_get_facet (const _STD::locale &__loc, const _STD::numpunct<char>*)
 {
@@ -371,7 +371,7 @@ __rw_get_facet (const _STD::locale &__loc, const _STD::numpunct<char>*)
 }
 
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline const __rw_facet*
 __rw_get_facet (const _STD::locale &__loc, const __rw_nget_c*)
 {
@@ -380,7 +380,7 @@ __rw_get_facet (const _STD::locale &__loc, const __rw_nget_c*)
 }
 
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline const __rw_facet*
 __rw_get_facet (const _STD::locale &__loc, const __rw_nput_c*)
 {

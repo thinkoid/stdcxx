@@ -48,7 +48,7 @@ _RWSTD_NAMESPACE (std) {
 // define an explicit specialization of the deque::swap() member
 // to verify tha the non-member swap function calls the member
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 void DequeType::swap (DequeType&)
 {
     ++deque_swap_called;
@@ -89,7 +89,7 @@ Deque::size_type new_capacity;
 
 namespace __rw {
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline Deque::size_type
 __rw_new_capacity<Deque>(Deque::size_type n, const Deque*)
 {

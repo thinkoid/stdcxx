@@ -46,17 +46,17 @@ template <class _TypeT>
 class complex;
 
 // 26.2.3
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class complex<float>;
 
 // 26.2.3
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class complex<double>;
 
 #ifndef _RWSTD_NO_LONG_DOUBLE
 
 // 26.2.3
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class complex<long double>;
 
 #endif   // _RWSTD_NO_LONG_DOUBLE
@@ -92,7 +92,7 @@ operator/ (const complex<_TypeT> &__lhs, const complex<_TypeT> &__rhs)
 
 // 26.2.3 - complex specializations
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class complex<float>
 {
 public:
@@ -170,7 +170,7 @@ private:
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class complex<double>
 {
 public:
@@ -251,7 +251,7 @@ private:
 
 #ifndef _RWSTD_NO_LONG_DOUBLE
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class complex<long double>
 {
 public:

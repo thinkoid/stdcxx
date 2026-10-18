@@ -70,7 +70,7 @@ template <class _TypeT> class
 allocator;
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class allocator<void>
 {
 public:
@@ -256,7 +256,7 @@ public:
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class allocator_interface<allocator<void>, void> 
 {
 public:

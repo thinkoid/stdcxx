@@ -300,7 +300,7 @@ struct char_traits
 
 
 // 21.1.3.1
-_RWSTD_SPECIALIZED_CLASS  
+template <>               
 struct char_traits<char> 
 {
     typedef char             char_type;
@@ -387,7 +387,7 @@ struct char_traits<char>
 #ifndef _RWSTD_NO_WCHAR_T
 
 // 21.1.3.2
-_RWSTD_SPECIALIZED_CLASS  
+template <>               
 struct char_traits<wchar_t> 
 {
     typedef wchar_t          char_type;

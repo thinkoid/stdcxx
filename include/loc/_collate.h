@@ -97,7 +97,7 @@ protected:
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT collate<char>: public _RW::__rw_facet
 {
 public:
@@ -145,7 +145,7 @@ protected:
 
 #ifndef   _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT collate<wchar_t>: public _RW::__rw_facet
 {
 public:
@@ -207,7 +207,7 @@ public:
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT collate_byname<char>: public collate<char>
 {
     char _C_namebuf [32];
@@ -233,7 +233,7 @@ protected:
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT collate_byname<wchar_t>: public collate<wchar_t>
 {
     char _C_namebuf [32];

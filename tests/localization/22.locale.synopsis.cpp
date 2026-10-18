@@ -203,13 +203,13 @@ test_convenience_funs ()
 _RWSTD_NAMESPACE (std) {
 
 // verify that specializations are present in the lib
-_RWSTD_SPECIALIZED_CLASS class ctype<char>;
-_RWSTD_SPECIALIZED_CLASS class ctype_byname<char>;
+template <> class ctype<char>;
+template <> class ctype_byname<char>;
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS class ctype<wchar_t>;
-_RWSTD_SPECIALIZED_CLASS class ctype_byname<wchar_t>;
+template <> class ctype<wchar_t>;
+template <> class ctype_byname<wchar_t>;
 
 #endif   // _RWSTD_NO_WCHAR_T
 
@@ -451,7 +451,7 @@ _RWSTD_NAMESPACE (std) {
 #define UDC int
 
 // class template specialization for UDC type
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class collate<UDC>: public locale::facet
 {
 public:
@@ -824,7 +824,7 @@ struct CtypeCharDerived: std::ctype<char>
 
 
 // exercise the char specialization
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 /*static*/ void
 test_ctype_specialization<char> ()
 {
@@ -1060,7 +1060,7 @@ namespace std {
 // provide an explicit specialization of numpunct on UDC necessary
 // in order to exercise num_get<UDC> and num_put<UDC>
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct numpunct<UDC>: locale::facet
 {
     typedef UDC                                 char_type;
@@ -1543,7 +1543,7 @@ namespace std {
 // specializations of moneypunct on UDC necessary in order to exercise
 // money_get<UDC> and money_put<UDC>
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct moneypunct<UDC, false>: locale::facet, money_base
 {
     typedef UDC                                 char_type;
@@ -1573,7 +1573,7 @@ struct moneypunct<UDC, false>: locale::facet, money_base
 locale::id moneypunct<UDC, false>::id;
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct moneypunct<UDC, true>: locale::facet, money_base
 {
     typedef UDC                                 char_type;

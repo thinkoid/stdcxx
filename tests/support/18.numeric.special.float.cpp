@@ -234,7 +234,7 @@ struct limits_values;
 
 /***********************************************************************/
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct limits_values<float>
 {
     static bool is_specialized () { return true; }
@@ -463,7 +463,7 @@ struct limits_values<float>
 /***********************************************************************/
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct limits_values<double>
 {
     static bool is_specialized () { return true; }
@@ -687,7 +687,7 @@ struct limits_values<double>
 /***********************************************************************/
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct limits_values<long double>
 {
     static bool is_specialized () { return true; }

@@ -723,7 +723,7 @@ void test_elem_access (const std::bitset<N>*)
 
 _RWSTD_NAMESPACE (std) {
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct char_traits<UserChar>: UserTraits<UserChar> { };
 
 }   // namespace std

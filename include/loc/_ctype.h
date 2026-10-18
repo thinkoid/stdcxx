@@ -217,7 +217,7 @@ protected:
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT ctype<char>: public _RW::__rw_facet, public ctype_base
 {
     typedef unsigned char _UChar;
@@ -403,7 +403,7 @@ public:
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT ctype_byname<char>: public ctype<char>
 {
     char _C_namebuf [32];
@@ -416,7 +416,7 @@ public:
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT ctype<wchar_t>: public _RW::__rw_facet, public ctype_base
 {
     typedef unsigned char _UChar;
@@ -613,7 +613,7 @@ ctype<wchar_t>::widen (char __ch) const
 
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT ctype_byname<wchar_t>: public ctype<wchar_t>
 {
 public:

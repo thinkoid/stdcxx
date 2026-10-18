@@ -109,7 +109,7 @@
    // (e.g., VisualAge C++ on AIX)
 #  define _RWSTD_SPECIALIZE_FACET_ID(Facet, TArgs)        \
       _RWSTD_NAMESPACE (std) {                            \
-          _RWSTD_SPECIALIZED_CLASS                        \
+          template <>                                     \
           _RW::__rw_facet_id Facet TArgs::                \
           id (_RW::__rw_facet_id::_C_Init);               \
       }                                                   \

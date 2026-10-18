@@ -156,28 +156,28 @@ inline bool __is_random_access_iterator (_Tag)
 }
 
 
-_RWSTD_SPECIALIZED_FUNCTION 
+template <> 
 inline bool __is_input_iterator (input_iterator_tag)
 {
     return true;
 }
 
 
-_RWSTD_SPECIALIZED_FUNCTION 
+template <> 
 inline bool __is_bidirectional_iterator (bidirectional_iterator_tag)
 {
     return true;
 }
 
 
-_RWSTD_SPECIALIZED_FUNCTION 
+template <> 
 inline bool __is_bidirectional_iterator (random_access_iterator_tag)
 {
     return true;
 }
 
 
-_RWSTD_SPECIALIZED_FUNCTION 
+template <> 
 inline bool __is_random_access_iterator (random_access_iterator_tag)
 {
     return true;

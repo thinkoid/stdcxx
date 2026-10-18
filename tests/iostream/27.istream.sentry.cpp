@@ -185,7 +185,7 @@ struct Ctype: std::ctype<charT>
 
 
 // specialized for ctype<char>
-_RWSTD_SPECIALIZED_CLASS
+template <>
 Ctype<char>::Ctype (unsigned ref, char white)
     : Base (table_, false, ref), ws_ (white)
 {

@@ -48,7 +48,7 @@ struct __rw_nonvoid_ref
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_nonvoid_ref<void>
 {
     // makes the declaration of auto_ptr<void>::operator*() well-formed
@@ -59,19 +59,19 @@ struct __rw_nonvoid_ref<void>
 
 #ifndef _RWSTD_NO_CV_VOID_SPECIALIZATIONS
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_nonvoid_ref<const void>
 {
     typedef void _C_ref;
 };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_nonvoid_ref<volatile void>
 {
     typedef void _C_ref;
 };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_nonvoid_ref<const volatile void>
 {
     typedef void _C_ref;

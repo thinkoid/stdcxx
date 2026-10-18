@@ -77,7 +77,7 @@ static const size_t __rw_wbasemask = 127;
 //     increasing bit positions.
 // -7- If M < N, remaining bit positions are initialized to zero.
 
-_RWSTD_SPECIALIZED_FUNCTION _RWSTD_EXPORT void
+template <> _RWSTD_EXPORT void
 __rw_bitset (unsigned long *bits, size_t maxbits,
              const char *str, size_t slen,
              const _STD::char_traits<char>*, char b0, char b1,
@@ -133,7 +133,7 @@ __rw_bitset (unsigned long *bits, size_t maxbits,
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_FUNCTION _RWSTD_EXPORT void
+template <> _RWSTD_EXPORT void
 __rw_bitset (unsigned long *bits, size_t maxbits,
              const wchar_t *str, size_t slen,
              const _STD::char_traits<wchar_t>*, wchar_t b0, wchar_t b1,

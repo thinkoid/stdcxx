@@ -62,7 +62,7 @@ typedef std::basic_string<Char, CharTraits, CharAllocator> String;
 _RWSTD_NAMESPACE (std) {
 
 // specialize in order to easily induce exceptional conditions
-_RWSTD_SPECIALIZED_CLASS
+template <>
 String::size_type String::max_size () const
 {
     return _RWSTD_NEW_CAPACITY (String, this, 0);

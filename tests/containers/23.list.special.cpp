@@ -132,7 +132,7 @@ _RWSTD_NAMESPACE (std) {
     // define an explicit specialization of the list::swap() member
     // to verify tha the non-member swap function calls the member
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 void ListType::swap (ListType&)
 {
     ++list_swap_called;

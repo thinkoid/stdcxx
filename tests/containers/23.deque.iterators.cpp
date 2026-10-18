@@ -47,7 +47,7 @@ typedef std::deque<int> IntDeque;
 
 namespace __rw {
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline IntDeque::size_type
 __rw_new_capacity<IntDeque>(IntDeque::size_type n, const IntDeque*)
 {

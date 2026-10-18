@@ -168,18 +168,18 @@ private:
 
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 _RW::__rw_facet_id moneypunct<char, false>::id;
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 _RW::__rw_facet_id moneypunct<char, true>::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 _RW::__rw_facet_id moneypunct<wchar_t, false>::id;
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 _RW::__rw_facet_id moneypunct<wchar_t, true>::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T

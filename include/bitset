@@ -49,7 +49,7 @@ __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
              _RWSTD_SIZE_T, _RWSTD_SIZE_T,
              const char*, const char*);
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 _RWSTD_EXPORT void
 __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
              const char*, _RWSTD_SIZE_T,
@@ -59,7 +59,7 @@ __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 _RWSTD_EXPORT void
 __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
              const wchar_t*, _RWSTD_SIZE_T,

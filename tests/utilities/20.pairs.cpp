@@ -42,7 +42,7 @@ int less_used;
 
 _RWSTD_NAMESPACE (std) {
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 bool less<Y>::operator() (const Y &a, const Y &b) const
 {
     ++less_used;

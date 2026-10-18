@@ -42,12 +42,12 @@ _RWSTD_NAMESPACE (std) {
 template<class _CharT>
 struct char_traits;
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct char_traits<char>;
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct char_traits<wchar_t>;
 
 #endif   // _RWSTD_NO_WCHAR_T

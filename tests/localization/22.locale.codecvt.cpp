@@ -74,7 +74,7 @@ rwtest_mbstowcs (std::mbstate_t& state, T* pi,
 }
 
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 /*static*/ std::size_t
 rwtest_mbstowcs<char> (std::mbstate_t& /*unused*/, char* /*unused*/,
                        const char* /*unused*/, std::size_t /*unused*/)
@@ -92,7 +92,7 @@ rwtest_wcstombs (std::mbstate_t& state, const charT* pi,
 
 }
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline std::size_t
 rwtest_wcstombs<char>(std::mbstate_t& /*unused*/, const char* /*unused*/,
                       char* /*unused*/, std::size_t /*unused*/)
@@ -147,24 +147,24 @@ struct TypeName
     static const char* name;
 };
 
-_RWSTD_SPECIALIZED_CLASS const char*
+template <> const char*
 TypeName<char>::name = "char";
 
-_RWSTD_SPECIALIZED_CLASS const char*
+template <> const char*
 TypeName<Codecvt>::name = "std::codecvt<char, char, std::mbstate_t>";
 
-_RWSTD_SPECIALIZED_CLASS const char*
+template <> const char*
 TypeName<CodecvtBn>::name = "std::codecvt_byname<char, char, std::mbstate_t>";
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS const char*
+template <> const char*
 TypeName<wchar_t>::name = "wchar_t";
 
-_RWSTD_SPECIALIZED_CLASS const char*
+template <> const char*
 TypeName<CodecvtW>::name = "std::codecvt<wchar_t, char, std::mbstate_t>";
 
-_RWSTD_SPECIALIZED_CLASS const char*
+template <> const char*
 TypeName<CodecvtBnW>::name =
     "std::codecvt_byname<wchar_t, char, std::mbstate_t>";
 
@@ -247,21 +247,21 @@ struct CodecvtDerived: Base
 
 
 // specialization for the class constructor in CodecvtDerived
-_RWSTD_SPECIALIZED_CLASS
+template <>
 CodecvtDerived<Codecvt>::CodecvtDerived (const char* /*unused*/)
     : Codecvt () { }
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 CodecvtDerived<CodecvtBn>::CodecvtDerived (const char* name)
     : CodecvtBn (name) { }
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 CodecvtDerived<CodecvtW>::CodecvtDerived (const char* /*unused*/)
     : CodecvtW () { }
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 CodecvtDerived<CodecvtBnW>::CodecvtDerived (const char* name)
     : CodecvtBnW (name) { }
 

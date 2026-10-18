@@ -1499,7 +1499,7 @@ __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE __size,
 // the following specializations of the __rw_new_capacity<> function template
 // are provided for char and wchar_t; the general case is given in <memory>
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline _RWSTD_STRING_SIZE_TYPE (_STD::string)
 __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (_STD::string) __size,
                    const _STD::string*)
@@ -1515,7 +1515,7 @@ __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (_STD::string) __size,
     return (__size += _RWSTD_MINIMUM_STRING_CAPACITY) > __cap ? __size : __cap;
 }                     
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline _RWSTD_STRING_SIZE_TYPE (_STD::wstring)
 __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (_STD::wstring) __size,
                    const _STD::wstring*)

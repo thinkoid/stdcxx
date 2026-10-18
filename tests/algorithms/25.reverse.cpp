@@ -82,7 +82,7 @@ unsigned iter_swap_calls;
 
 _RWSTD_NAMESPACE (std) {
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 void iter_swap (BidirIter<UserClass> i, BidirIter<UserClass> j)
 {
     ++iter_swap_calls;
@@ -93,7 +93,7 @@ void iter_swap (BidirIter<UserClass> i, BidirIter<UserClass> j)
     (*j).data_.val_ = tmp;
 }
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 void iter_swap (RandomAccessIter<UserClass> i, RandomAccessIter<UserClass> j)
 {
     ++iter_swap_calls;

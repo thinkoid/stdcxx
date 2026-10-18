@@ -135,67 +135,67 @@ struct __rw_is_fundamental
     enum { _C_val = __rw_is_pointer<_TypeT>::_C_val };
 };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<unsigned char> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<signed char> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<char> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<unsigned short> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<signed short> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<unsigned int> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<signed int> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<unsigned long> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<signed long> { enum { _C_val = 1 }; };
 
 #ifdef _RWSTD_LONG_LONG
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<unsigned _RWSTD_LONG_LONG> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<signed _RWSTD_LONG_LONG> { enum { _C_val = 1 }; };
 
 #endif   // _RWSTD_LONG_LONG
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<float> { enum { _C_val = 1 }; };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<double> { enum { _C_val = 1 }; };
 
 #ifndef _RWSTD_NO_LONG_DOUBLE
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<long double> { enum { _C_val = 1 }; };
 
 #endif   // _RWSTD_NO_LONG_DOUBLE
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<bool> { enum { _C_val = 1 }; };
 
 #ifndef _RWSTD_NO_NATIVE_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<wchar_t> { enum { _C_val = 1 }; };
 
 #endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_fundamental<void> { enum { _C_val = 1 }; };
 
 
@@ -231,7 +231,7 @@ struct __rw_is_enum
 
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_is_enum<void>
 {
     enum { _C_val = 0 };

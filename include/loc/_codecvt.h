@@ -171,7 +171,7 @@ public:
 
 // 22.2.1.5, p3 - performs no conversion
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT codecvt<char, char, _RWSTD_MBSTATE_T>
     : public _RW::__rw_facet,
       public codecvt_base
@@ -293,7 +293,7 @@ always_noconv () const _THROWS (())
 // 22.2.1.5, p3 - converts between wide and narrow characters
 // of the native character set (i.e., widens and narrows)
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT codecvt<wchar_t, char, _RWSTD_MBSTATE_T>
     : public _RW::__rw_facet,
       public codecvt_base
@@ -408,7 +408,7 @@ public:
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT codecvt_byname<char, char, _RWSTD_MBSTATE_T>
     : public codecvt<char, char, _RWSTD_MBSTATE_T>
 {
@@ -425,7 +425,7 @@ public:
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT codecvt_byname<wchar_t, char, _RWSTD_MBSTATE_T>
     : public codecvt<wchar_t, char, _RWSTD_MBSTATE_T>
 {

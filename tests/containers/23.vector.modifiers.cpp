@@ -61,7 +61,7 @@ Vector::size_type new_capacity;
 
 namespace __rw {
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline Vector::size_type
 __rw_new_capacity<Vector>(Vector::size_type n, const Vector*)
 {

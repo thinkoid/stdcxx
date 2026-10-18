@@ -644,7 +644,7 @@ class
      // use a macro to mutate _Allocator into allocator<bool>
 # define _Allocator allocator<bool>
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _RWSTD_EXPORT
 
 #endif  // _RWSTD_NO_CLASS_PARTIAL_SPEC

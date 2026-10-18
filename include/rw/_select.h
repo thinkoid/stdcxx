@@ -52,7 +52,7 @@ struct __rw_select_int
 
 
 #define _RWSTD_SPECIALIZE_IS_INT(T)    \
-    _RWSTD_SPECIALIZED_CLASS           \
+    template <>                        \
     struct __rw_select_int<T> {        \
         typedef int _SelectT;          \
         enum { _C_selector = 1 };      \
@@ -110,7 +110,7 @@ struct __rw_bool_t
     typedef __rw_false_t _C_type;
 };
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_bool_t<true>
 {
     typedef __rw_true_t _C_type;

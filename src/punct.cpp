@@ -569,7 +569,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
 /***************************************************************************/
 
 
-/* _RWSTD_SPECIALIZED_FUNCTION */ _RWSTD_EXPORT
+/* template <> */ _RWSTD_EXPORT
 const char*
 __rw_get_punct(const __rw_facet *pfacet, int flags, char)
 {
@@ -584,7 +584,7 @@ __rw_get_punct(const __rw_facet *pfacet, int flags, char)
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-/* _RWSTD_SPECIALIZED_FUNCTION */ _RWSTD_EXPORT
+/* template <> */ _RWSTD_EXPORT
 const wchar_t*
 __rw_get_punct(const __rw_facet *pfacet, int flags, wchar_t)
 {

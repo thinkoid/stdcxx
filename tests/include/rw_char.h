@@ -225,7 +225,7 @@ struct TraitsMemFunc
 
 
 // required specialization on char
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct _TEST_EXPORT UserTraits<char>: std::char_traits<char>
 {
     typedef std::char_traits<char> Base;
@@ -296,7 +296,7 @@ private:
 #ifndef _RWSTD_NO_WCHAR_T
 
 // required specialization on wchar_t
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct _TEST_EXPORT UserTraits<wchar_t>: std::char_traits<wchar_t>
 {
     typedef std::char_traits<wchar_t> Base;
@@ -366,7 +366,7 @@ private:
 #endif   // _RWSTD_NO_WCHAR_T
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct _TEST_EXPORT UserTraits<UserChar>   // user-defined character traits
 {
     typedef TraitsMemFunc MemFun;

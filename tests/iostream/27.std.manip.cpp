@@ -64,21 +64,21 @@ struct CharTraits: std::char_traits<charT> { /* empty */ };
 template < typename T >
 /*static*/ const char* type_name ();
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 /*static*/ const char*
 type_name< char > ()
 {
     return "char";
 }
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 /*static*/ const char*
 type_name< std::char_traits<char> > ()
 {
     return "std::char_traits<char>";
 }
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 /*static*/ const char*
 type_name< CharTraits<char> > ()
 {
@@ -87,21 +87,21 @@ type_name< CharTraits<char> > ()
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 /*static*/ const char*
 type_name< wchar_t > ()
 {
     return "wchar_t";
 }
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 /*static*/ const char*
 type_name< std::char_traits<wchar_t> > ()
 {
     return "std::char_traits<wchar_t>";
 }
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 /*static*/ const char*
 type_name< CharTraits<wchar_t> > ()
 {

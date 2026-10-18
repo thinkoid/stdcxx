@@ -122,12 +122,12 @@ private:
 
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 _RW::__rw_facet_id numpunct<char>::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 _RW::__rw_facet_id numpunct<wchar_t>::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T

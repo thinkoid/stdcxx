@@ -24,19 +24,18 @@
 
 #include "config.h"
 
-#define _RWSTD_SPECIALIZED_CLASS template<>
 
 template <class T>
 struct S {};
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct S<void> {};
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct S<const void> {};
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct S<volatile void> {};
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct S<const volatile void> {};

@@ -407,14 +407,6 @@
 
 #define _RWSTD_DYNAMIC_CAST(T, x)      dynamic_cast< T >(x)
 
-//
-// Macros for the new template specialization syntax
-//
-
-#define _RWSTD_SPECIALIZED_FUNCTION template<>
-
-#define _RWSTD_SPECIALIZED_CLASS template<>
-
 #define _RWSTD_NAMESPACE(name)    namespace name
 #define _USING(name)              using name
 
@@ -997,7 +989,7 @@ extern "C++" {
 template <bool __b>
 struct __rw_compile_assert;
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct __rw_compile_assert<true> { enum { _C_ok }; };
 
 #define _RWSTD_COMPILE_ASSERT(const_expr) \

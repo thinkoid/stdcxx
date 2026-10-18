@@ -50,7 +50,7 @@ struct Generator
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Generator<UserClass>
 {
     // dummy arguments provided to prevent Generator

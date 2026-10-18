@@ -146,7 +146,7 @@ _RWSTD_EXPORT extern const long double __rw_ldbl_denorm_min;
 // that #includes <limits>
 
 #  define _RWSTD_CLASS_BEGIN(name)                            \
-   _RWSTD_SPECIALIZED_CLASS struct _RWSTD_EXPORT name {
+   template <> struct _RWSTD_EXPORT name {
 #  define _RWSTD_CLASS_END              };
 #  define _RWSTD_TYPEDEF(def)           typedef def;
 #  define _RWSTD_STATIC(ignore, type, name, value)            \

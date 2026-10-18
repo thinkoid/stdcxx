@@ -112,7 +112,7 @@ template <class _CharT>
 class UserCtype;
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _TEST_EXPORT UserCtype<char>
     : public std::ctype<char>, public UserCtypeBase
 {
@@ -156,7 +156,7 @@ protected:
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _TEST_EXPORT UserCtype<wchar_t>
     : public std::ctype<wchar_t>, public UserCtypeBase
 {
@@ -215,7 +215,7 @@ protected:
 
 _RWSTD_NAMESPACE (std) {
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _TEST_EXPORT ctype<UserChar>
     : public std::locale::facet, public UserCtypeBase
 {
@@ -335,7 +335,7 @@ protected:
 }   // namespace std
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 class _TEST_EXPORT UserCtype<UserChar>
     : public std::ctype<UserChar>
 {

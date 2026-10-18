@@ -70,14 +70,14 @@ inline bool is_modulo (T _max)
     return ++max_plus_one < _max;
 }
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline bool is_modulo (bool)
 {
     return false;
 }
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<int>
 {
     enum { is_specialized = true };
@@ -101,7 +101,7 @@ struct Limits<int>
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<bool>
 {  
     enum { is_specialized = true };
@@ -124,7 +124,7 @@ struct Limits<bool>
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<char>                              
 {  
     enum { is_specialized = true };
@@ -151,7 +151,7 @@ struct Limits<char>
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<signed char>
 {
 
@@ -176,7 +176,7 @@ struct Limits<signed char>
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<unsigned char>
 {
     enum { is_specialized = true };
@@ -202,7 +202,7 @@ struct Limits<unsigned char>
 
 #ifndef _RWSTD_NO_NATIVE_WCHAR_T
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<wchar_t>
 {
     enum { is_specialized = true };
@@ -250,7 +250,7 @@ struct Limits<wchar_t>
 #endif //_RWSTD_NO_NATIVE_WCHAR_T
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<short>
 {
     enum { is_specialized = true };
@@ -275,7 +275,7 @@ struct Limits<short>
 
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<long>
 {
     enum { is_specialized = true };
@@ -299,7 +299,7 @@ struct Limits<long>
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits <unsigned short>
 {
     enum { is_specialized = true };
@@ -323,7 +323,7 @@ struct Limits <unsigned short>
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<unsigned int>
 {
     enum { is_specialized = true };
@@ -347,7 +347,7 @@ struct Limits<unsigned int>
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<unsigned long>
 {
     enum { is_specialized = true };
@@ -374,7 +374,7 @@ struct Limits<unsigned long>
 
 #ifdef _RWSTD_LONG_LONG
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<_RWSTD_LONG_LONG>
 {
     typedef _RWSTD_LONG_LONG LLong;
@@ -410,7 +410,7 @@ struct Limits<_RWSTD_LONG_LONG>
 };
 
 
-_RWSTD_SPECIALIZED_CLASS
+template <>
 struct Limits<unsigned _RWSTD_LONG_LONG>
 {
     typedef unsigned _RWSTD_LONG_LONG ULLong;

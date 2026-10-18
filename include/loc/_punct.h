@@ -93,12 +93,12 @@ __rw_get_punct (const _RW::__rw_facet*, int, _CharT)
 
 // use overloading instead of specialization below to prevent
 // linker unsats when using Intel C++ on Windows (PR #29178)
-/* _RWSTD_SPECIALIZED_FUNCTION */ _RWSTD_EXPORT
+/* template <> */ _RWSTD_EXPORT
 const char* __rw_get_punct (const _RW::__rw_facet*, int, char);
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-/* _RWSTD_SPECIALIZED_FUNCTION */ _RWSTD_EXPORT
+/* template <> */ _RWSTD_EXPORT
 const wchar_t* __rw_get_punct (const _RW::__rw_facet*, int, wchar_t);
 
 #endif   // _RWSTD_NO_WCHAR_T

@@ -343,7 +343,7 @@ typedef std::deque<Value, Allocator<Value> > OwnedDeque;
 
 namespace __rw {
 
-_RWSTD_SPECIALIZED_FUNCTION
+template <>
 inline OwnedDeque::size_type
 __rw_new_capacity<OwnedDeque> (OwnedDeque::size_type n, const OwnedDeque*)
 {
