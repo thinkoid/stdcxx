@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 205 named C++ probes, nine supporting C++
+The source census contains 204 named C++ probes, nine supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 205 named probes are discoverable by
+three different things.** All 204 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -108,6 +108,7 @@ its row is gone from the catalogue below.
 | probe | macro | retired | why |
 |---|---|---|---|
 | `MEMBER_TEMPLATES` | `NO_MEMBER_TEMPLATES` | 2026-10-17, bfbf7ac3 and the seven commits after it | GCC, Clang and eccp in strict C++03 pass it, and no compiler since about 2000 fails it. The branch it selected, the namespace-scope twins of the containers' range members among the rest, could not be compiled and rotted unseen. |
+| `MEMBER_TEMPLATE_OVERLOAD` | `NO_MEMBER_TEMPLATE_OVERLOAD` | 2026-10-17 | The same three compilers pass it. Its one reader, the condition on `bitset::to_string`, keeps the return-type gate alone. |
 
 ## 3. Outputs beyond the status macro
 
@@ -252,7 +253,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [MATH_EXCEPTION](../../etc/config/src/MATH_EXCEPTION.cpp) / `NO_MATH_EXCEPTION` | struct exception in &lt;math.h&gt; | L; `include/ansi/cmath` |
 | [MATH_OVERLOADS](../../etc/config/src/MATH_OVERLOADS.cpp) / `NO_MATH_OVERLOADS` + output | function overloads in &lt;math.h&gt; | none |
 | [MBSTATE_T](../../etc/config/src/MBSTATE_T.cpp) / `NO_MBSTATE_T` + output | mbstate_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/wchar.h` |
-| [MEMBER_TEMPLATE_OVERLOAD](../../etc/config/src/MEMBER_TEMPLATE_OVERLOAD.cpp) / `NO_MEMBER_TEMPLATE_OVERLOAD` | member template overloads on return type | L; `include/bitset` |
 | [MMAP](../../etc/config/src/MMAP.cpp) / `NO_MMAP` | mmap() and munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [MUNMAP](../../etc/config/src/MUNMAP.cpp) / `NO_MUNMAP` + output | munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [NAMESPACE](../../etc/config/src/NAMESPACE.cpp) / `NO_NAMESPACE` | namespaces | L/P/T/E; `include/ansi/cctype` |

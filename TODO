@@ -125,10 +125,11 @@ the non-debug recompile, the suite table) in =11S=.
 
 ** TODO The feature gates after the member templates
 
-Forty-four gates ask whether the compiler accepts a C++98 construct,
+Forty-three gates ask whether the compiler accepts a C++98 construct,
 and no compiler the tree is built with (GCC, Clang, eccp in strict
 C++03) defines one of them. The member templates gate was the
-forty-fifth; bfbf7ac3 and the seven commits after it retired it. The branch behind each cannot be compiled
+forty-fifth, retired by bfbf7ac3 and the seven commits after it; the
+member template overload gate followed in the next commit. The branch behind each cannot be compiled
 and rots. =doc/notes/analysis-feature-gates.md= is the census: the
 candidates by family with their footprint (chapter 2), sixteen
 probes nobody reads (3), what stays and why (4), the probes that
@@ -139,7 +140,7 @@ families and wait on a decision: =HONOR_STD=, =RUNTIME_IN_STD=,
 =PLACEMENT_DELETE=.
 
 Fix: the member templates retirement's pattern, one gate or bundle
-per commit, in the note's order: the keyword gates, the template gates,
+per commit, in the note's order, the first item done: the keyword gates, the template gates,
 the other language rules, =LONG_DOUBLE=, =WCHAR_T=, then the
 reader-less probes. Each commit takes the =#ifdef= branches, the
 twins, the dispatch macros, the probe and the probes that read it;

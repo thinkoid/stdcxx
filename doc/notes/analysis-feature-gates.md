@@ -104,7 +104,7 @@ by" names the probes that read the gate (chapter 5).
 | `EXPLICIT_INSTANTIATION` | explicit instantiation | 2 | 78 | 1 | `IMPLICIT_INSTANTIATION`, `INSTANTIATE_DEFAULT_ARGS` |
 | `EXPLICIT_FUNC_INSTANTIATION` | explicit instantiation of a function template | 2 | 0 | 1 | `FRIEND_TEMPLATE` |
 | `EXPLICIT_MEMBER_SPECIALIZATION` | explicit specialization of a member | 2 | 0 | 1 | |
-| `MEMBER_TEMPLATE_OVERLOAD` | member template overloads on the return type | 2 | 0 | 1 | |
+| `MEMBER_TEMPLATE_OVERLOAD` | member template overloads on the return type | 2 | 0 | 1 | retired 2026-10-17 |
 | `SPECIALIZATION_ON_RETURN_TYPE` | specialization on the return type | 2 | 0 | 1 | |
 | `DEPENDENT_TEMPLATE` | `::template` | 2 | 0 | 1 | |
 | `DEFAULT_TEMPLATE_ARGS` | default template arguments | 1 | 6 | 1 | |
@@ -231,7 +231,8 @@ Small first, so the pattern settles before the big three.
 
 1. `MEMBER_TEMPLATES`: retired, bfbf7ac3 and the seven commits after
    it, one header group per commit, the probe and its two readers
-   last. `MEMBER_TEMPLATE_OVERLOAD`: queued, with the rest.
+   last. `MEMBER_TEMPLATE_OVERLOAD`: retired in the commit after
+   them.
 2. The keyword gates of 2.1 as one bundle; `NAMESPACE` on its own
    for its nine probes.
 3. The template gates of 2.2, smallest first; `CLASS_PARTIAL_SPEC`
