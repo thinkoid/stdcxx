@@ -446,6 +446,24 @@ Fix, in order:
 Check: the six tables of a parallel run identical to those of a
 serial one, three runs over; the wall time recorded beside the tables.
 
+** TODO No configuration builds with exceptions off
+
+=_RWSTD_NO_EXCEPTIONS= is a build mode, set by =-fno-exceptions= in
+=include/rw/_config-gcc.h=, and =_TRY=, =_CATCH=, =_THROW= and
+=_RETHROW= in =rw/_defs.h= carry the library through it, the way
+libstdc++'s =__try= and =__catch= do. The six certified
+configurations all build with exceptions on, so the other side of
+those macros, 78 library sites and 41 in the tests, is live by
+construction and never compiled.
+
+Fix: decide whether the mode is supported. If it is, one
+configuration of the nightly builds the library and the suite with
+=-fno-exceptions=; if it is not, the four macros follow the twelve
+spelled out on 2026-10-17 and the gate retires as a build mode.
+
+Check: the no-exceptions library and suite build, with the table
+pinned; or =git grep _TRY= empty.
+
 * Locales
 
 The locale sources and charmaps under =etc/nls=, the =localedef= that
