@@ -92,8 +92,8 @@ protected:
 
     // 22.2.3.1.2, p3
     virtual string do_grouping () const {
-        return _RWSTD_REINTERPRET_CAST (const char*,
-                   __rw::__rw_get_punct (this, __rw::__rw_gr, char_type ()));
+        return reinterpret_cast< const char* >(
+            __rw::__rw_get_punct (this, __rw::__rw_gr, char_type ()));
     }
 
     // 22.2.3.1.2, p4

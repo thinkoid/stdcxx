@@ -833,7 +833,7 @@ _C_assign (const char *whatstr, size_t len /* = ~0 */)
                 }
                 else {
                     // special case: do not allocate, just use passed in pointer
-                    tmp = _RWSTD_CONST_CAST (char*, whatstr);
+                    tmp = const_cast< char* >(whatstr);
                 }
             }
         }

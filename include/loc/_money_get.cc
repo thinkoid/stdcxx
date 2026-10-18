@@ -87,9 +87,9 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
     typedef moneypunct<_CharT, true> _Punct1;
 
     const _Punct0 &__pun = __intl ? 
-          _RWSTD_REINTERPRET_CAST (const _Punct0&,
-                                   _RWSTD_USE_FACET (_Punct1,
-                                                     __flags.getloc ()))
+          reinterpret_cast< const _Punct0& >(
+              _RWSTD_USE_FACET (_Punct1,
+                                __flags.getloc ()))
         : _RWSTD_USE_FACET (_Punct0, __flags.getloc ());
 
     // retrieve positive and negative sign, currency symbol,

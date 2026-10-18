@@ -128,7 +128,7 @@ UserClass::UserClass (const UserClass &rhs)
 
     // increment the number of times `rhs' has been copied
     // (do so even if the function throws an exception below)
-    ++_RWSTD_CONST_CAST (UserClass*, &rhs)->n_copy_ctor_;
+    ++const_cast< UserClass* >(&rhs)->n_copy_ctor_;
 
     // increment the total number of invocations of the copy ctor
     // (do so even if the function throws an exception below)
@@ -176,7 +176,7 @@ UserClass::~UserClass ()
     --count_;
 
     // invalidate id
-    _RWSTD_CONST_CAST (int&, this->id_) = 0;
+    const_cast< int& >(this->id_) = 0;
 }
 
 
@@ -336,10 +336,10 @@ UserClass::operator== (const UserClass &rhs) const
     // increment the number of times each distinct object
     // has been used as the argument to operator==
     // (do so even if the function throws an exception below)
-    ++_RWSTD_CONST_CAST (UserClass*, this)->n_op_eq_;
+    ++const_cast< UserClass* >(this)->n_op_eq_;
 
     if (this != &rhs)
-        ++_RWSTD_CONST_CAST (UserClass*, &rhs)->n_op_eq_;
+        ++const_cast< UserClass* >(&rhs)->n_op_eq_;
 
     // increment the total number of invocations of the operator
     // (do so even if the function throws an exception below)
@@ -373,10 +373,10 @@ UserClass::operator< (const UserClass &rhs) const
     // increment the number of times each distinct object
     // has been used as the argument to operator<
     // (do so even if the function throws an exception below)
-    ++_RWSTD_CONST_CAST (UserClass*, this)->n_op_lt_;
+    ++const_cast< UserClass* >(this)->n_op_lt_;
 
     if (this != &rhs)
-        ++_RWSTD_CONST_CAST (UserClass*, &rhs)->n_op_lt_;
+        ++const_cast< UserClass* >(&rhs)->n_op_lt_;
 
     // increment the total number of invocations of the operator
     // (do so even if the function throws an exception below)
@@ -685,9 +685,9 @@ static inline void
 _rw_advance (const void*& parray, int idx, bool is_class)
 {
     if (is_class)
-        parray = _RWSTD_STATIC_CAST (const UserClass*, parray) + idx;
+        parray = static_cast< const UserClass* >(parray) + idx;
     else
-        parray = _RWSTD_STATIC_CAST (const UserPOD*, parray) + idx;
+        parray = static_cast< const UserPOD* >(parray) + idx;
 }
 
 static int
@@ -838,13 +838,13 @@ _rw_fmtxarrayv (char **pbuf, size_t *pbufsize, const char *fmt, va_list va)
 
         if (is_class) {
             const UserClass* const pclass =
-                _RWSTD_STATIC_CAST (const UserClass*, px);
+                static_cast< const UserClass* >(px);
             val = pclass->data_.val_;
             id = pclass->id_;
         }
         else {
             const UserPOD* const ppod =
-                _RWSTD_STATIC_CAST (const UserPOD*, px);
+                static_cast< const UserPOD* >(px);
             val = ppod->data_.val_;
             id = 0;
         }

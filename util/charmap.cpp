@@ -170,10 +170,10 @@ static wchar_t utf8_decode (const char* from, const char* to)
     assert (from <= to);
 
     const unsigned char* const ch =
-        _RWSTD_REINTERPRET_CAST (const unsigned char*, from);
+        reinterpret_cast< const unsigned char* >(from);
 
     const unsigned char* const ch_end =
-        _RWSTD_REINTERPRET_CAST (const unsigned char*, to);
+        reinterpret_cast< const unsigned char* >(to);
 
     size_t num_bytes = 0;
 
@@ -442,7 +442,7 @@ char* Charmap::convert_to_utf8 (const char *inbuf, size_t inbuf_s,
 #  ifndef _RWSTD_NO_ICONV_CONST_CHAR
     const char* inbufp = inbuf;
 #  else
-    char* inbufp = _RWSTD_CONST_CAST(char*, inbuf);
+    char* inbufp = const_cast< char* >(inbuf);
 #  endif   // _RWSTD_NO_ICONV_CONST_CHAR
     
     if (std::size_t (-1) == 

@@ -101,12 +101,12 @@ race_func (void *arg)
     const long inx = long (arg);
 
     // cast nstarted to int& (see STDCXX-792)
-    _RWSTD_ATOMIC_PREINCREMENT (_RWSTD_CONST_CAST (int&, nstarted), false);
+    _RWSTD_ATOMIC_PREINCREMENT (const_cast< int& >(nstarted), false);
 
     // spin until all threads have been created so that they find
     // the facet data missing at the same time
     while (_RWSTD_ATOMIC_LOAD_RELAXED (
-               _RWSTD_CONST_CAST (int&, nstarted), false) < opt_nthreads);
+               const_cast< int& >(nstarted), false) < opt_nthreads);
 
     MyStreambuf& sb = thread_data [inx].sb;
     sb.pubsetp (thread_data [inx].buf, sizeof thread_data [inx].buf);

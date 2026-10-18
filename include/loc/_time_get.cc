@@ -142,7 +142,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
     _RWSTD_SIZE_T    __sizes [sizeof __names / sizeof *__names];
 
     const void** __pv =
-        _RWSTD_REINTERPRET_CAST (const void**, __names);
+        reinterpret_cast< const void** >(__names);
 
     tm __tmp = __tmb ? *__tmb : tm ();
 

@@ -131,7 +131,7 @@ private:
     }
 
     virtual void* _C_get_deleter () const {
-        return _RWSTD_CONST_CAST (_Deleter*, &_C_del);
+        return const_cast< _Deleter* >(&_C_del);
     }
 
     _Deleter _C_del;
@@ -338,7 +338,7 @@ public:
 
     template <class _Deleter>
     _Deleter* _C_get_deleter () const {
-        return _RWSTD_STATIC_CAST (_Deleter*,
+        return static_cast< _Deleter* >(
             _C_pbody ? _C_pbody->_C_get_deleter () : 0);
     }
 
@@ -394,7 +394,7 @@ template <class _TypeT, class _TypeU>
 inline shared_ptr<_TypeT>
 static_pointer_cast (const shared_ptr<_TypeU> &__src)
 {
-    _TypeT* const __ptr = _RWSTD_STATIC_CAST (_TypeT*, __src.get ());
+    _TypeT* const __ptr = static_cast< _TypeT* >(__src.get ());
     if (__ptr)
         return shared_ptr<_TypeT>(__src, __ptr);
 
@@ -406,7 +406,7 @@ template <class _TypeT, class _TypeU>
 inline shared_ptr<_TypeT>
 dynamic_pointer_cast (const shared_ptr<_TypeU> &__src)
 {
-    _TypeT* const __ptr = _RWSTD_DYNAMIC_CAST (_TypeT*, __src.get ());
+    _TypeT* const __ptr = dynamic_cast< _TypeT* >(__src.get ());
     if (__ptr)
         return shared_ptr<_TypeT>(__src, __ptr);
 
@@ -418,7 +418,7 @@ template <class _TypeT, class _TypeU>
 inline shared_ptr<_TypeT>
 const_pointer_cast (const shared_ptr<_TypeU> &__src)
 {
-    _TypeT* const __ptr = _RWSTD_CONST_CAST (_TypeT*, __src.get ());
+    _TypeT* const __ptr = const_cast< _TypeT* >(__src.get ());
     if (__ptr)
         return shared_ptr<_TypeT>(__src, __ptr);
 

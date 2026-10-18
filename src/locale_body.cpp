@@ -672,7 +672,7 @@ __rw_locale::
     _RWSTD_ASSERT (0 == _C_ref);
 
     if (_C_name != _C_namebuf)
-        delete[] _RWSTD_CONST_CAST (char*, _C_name);
+        delete[] const_cast< char* >(_C_name);
 
     // decrement the reference count of each installed facet
     // and delete each facet whose refcount drops to zero
@@ -742,9 +742,9 @@ cmplocales (const void *pv1, const void *pv2) _THROWS (())
     _RWSTD_ASSERT (0 != pv2);
 
     const __rw_locale* const pl1 =
-        *_RWSTD_STATIC_CAST (const __rw_locale* const*, pv1);
+        *static_cast< const __rw_locale* const* >(pv1);
     const __rw_locale* const pl2 =
-        *_RWSTD_STATIC_CAST (const __rw_locale* const*, pv2);
+        *static_cast< const __rw_locale* const* >(pv2);
 
     _RWSTD_ASSERT (0 != pl1->_C_get_name ());
     _RWSTD_ASSERT (0 != pl1->_C_get_name ());
@@ -760,10 +760,10 @@ cmplocale (const void *pv1, const void *pv2) _THROWS (())
     _RWSTD_ASSERT (0 != pv1);
     _RWSTD_ASSERT (0 != pv2);
 
-    const char* const nm1 = _RWSTD_STATIC_CAST (const char*, pv1);
+    const char* const nm1 = static_cast< const char* >(pv1);
 
     const __rw_locale* const plocale =
-        *_RWSTD_STATIC_CAST (const __rw_locale* const*, pv2);
+        *static_cast< const __rw_locale* const* >(pv2);
 
     _RWSTD_ASSERT (0 != nm1);
     _RWSTD_ASSERT (0 != plocale->_C_get_name ());
@@ -906,8 +906,8 @@ _C_manage (__rw_locale *plocale, const char *locname)
         if (pl) {
 
             const size_t inx =
-                  _RWSTD_STATIC_CAST (const __rw_locale* const*, pl)
-                - _RWSTD_CONST_CAST (const __rw_locale* const*, locales);
+                  static_cast< const __rw_locale* const* >(pl)
+                - const_cast< const __rw_locale* const* >(locales);
 
             plocale = locales [inx];
 
@@ -983,9 +983,9 @@ _C_manage (__rw_locale *plocale, const char *locname)
         if (pcl) {
             // facet already exists in the repository, bump up its ref count
 
-            void* const pl = _RWSTD_CONST_CAST (void*, pcl);
+            void* const pl = const_cast< void* >(pcl);
 
-            plocale  = *_RWSTD_STATIC_CAST (__rw_locale**, pl);
+            plocale  = *static_cast< __rw_locale** >(pl);
 
             _RWSTD_ASSERT (0 != plocale);
 

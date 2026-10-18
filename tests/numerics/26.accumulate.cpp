@@ -109,7 +109,7 @@ struct Y: public UserClass
         ++n_op_plus_assign_;
 
         if (this != &rhs)
-            ++_RWSTD_CONST_CAST (Y*, &rhs)->n_op_plus_assign_;
+            ++const_cast< Y* >(&rhs)->n_op_plus_assign_;
 
         // increment the total number of invocations of the operator
         // (do so even if the function throws an exception below)

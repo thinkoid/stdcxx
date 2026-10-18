@@ -467,14 +467,14 @@ template <class _Traits>
 inline basic_istream<char, _Traits>&
 operator>> (basic_istream<char, _Traits> &__strm, unsigned char &__c)
 {
-    return __strm >> _RWSTD_REINTERPRET_CAST (char&, __c);
+    return __strm >> reinterpret_cast< char& >(__c);
 }
 
 template <class _Traits>
 inline basic_istream<char, _Traits>&
 operator>> (basic_istream<char, _Traits> &__strm,  signed char &__c)
 {
-    return __strm >> _RWSTD_REINTERPRET_CAST (char&, __c);
+    return __strm >> reinterpret_cast< char& >(__c);
 }
 
 
@@ -483,7 +483,7 @@ template <class _Traits>
 inline basic_istream<char, _Traits>&
 operator>> (basic_istream<char, _Traits> &__strm, unsigned char *__s)
 {
-    return __strm >> _RWSTD_REINTERPRET_CAST (char*, __s);
+    return __strm >> reinterpret_cast< char* >(__s);
 }
 
 
@@ -491,7 +491,7 @@ template <class _Traits>
 inline basic_istream<char, _Traits>&
 operator>> (basic_istream<char, _Traits> &__strm, signed char *__s)
 {
-    return __strm >> _RWSTD_REINTERPRET_CAST (char*, __s);
+    return __strm >> reinterpret_cast< char* >(__s);
 }
 
 

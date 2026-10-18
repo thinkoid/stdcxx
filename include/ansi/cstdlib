@@ -164,7 +164,7 @@ inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
              int (*__cmp)(const void*, const void*))
     {
         return ::bsearch (__key, __base, __n, __size,
-                          _RWSTD_REINTERPRET_CAST (__rw_compar_t, __cmp));
+                          reinterpret_cast< __rw_compar_t >(__cmp));
     }
 
     // 25.4, p4
@@ -173,7 +173,7 @@ inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
            int (*__cmp)(const void*, const void*))
     {
         return ::qsort (__base, __n, __size,
-                        _RWSTD_REINTERPRET_CAST (__rw_compar_t, __cmp));
+                        reinterpret_cast< __rw_compar_t >(__cmp));
     }
 
     }   // extern "C++"

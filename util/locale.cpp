@@ -331,8 +331,8 @@ init_sections ()
                                (__rw::__rw_punct_t*)0);
 
     if (0 != mon_punct_st) {
-        mon_st = _RWSTD_STATIC_CAST (const __rw::__rw_mon_t*,
-                                     mon_punct_st->get_ext());
+        mon_st = static_cast< const __rw::__rw_mon_t* >(
+            mon_punct_st->get_ext());
         validate (mon_st, sizeof *mon_st);
     }
 
@@ -353,8 +353,8 @@ init_sections ()
     num_punct_st = init_section (loc_path_root, sect_lc_numeric, 0,
                                (__rw::__rw_punct_t*)0);
     if (0 != num_punct_st) {
-        num_st = _RWSTD_STATIC_CAST (const __rw::__rw_num_t*,
-                                     num_punct_st->get_ext());
+        num_st = static_cast< const __rw::__rw_num_t* >(
+            num_punct_st->get_ext());
         validate (num_st, sizeof *mon_st);
     }
 
@@ -1327,10 +1327,10 @@ print_decimal_point (const char *keyword, int print_cat)
         std::cout << '"' << create_str (".", 0, 0) << "\"\n";
     else {
         const char* const dp =
-            _RWSTD_STATIC_CAST (const char*, num_punct_st->decimal_point (0));
+            static_cast< const char* >(num_punct_st->decimal_point (0));
 
         const wchar_t* const wdp =
-            _RWSTD_STATIC_CAST(const wchar_t*, num_punct_st->decimal_point (1));
+            static_cast< const wchar_t* >(num_punct_st->decimal_point (1));
 
         const Charmap* const cmap = get_charmap (LC_NUMERIC);
 
@@ -1353,10 +1353,10 @@ print_thousands_sep (const char *keyword, int print_cat)
         std::cout << "\"\"\n";
     else {
         const char* const ts =
-            _RWSTD_STATIC_CAST (const char*, num_punct_st->thousands_sep (0));
+            static_cast< const char* >(num_punct_st->thousands_sep (0));
 
         const wchar_t* const wts =
-            _RWSTD_STATIC_CAST(const wchar_t*, num_punct_st->thousands_sep (1));
+            static_cast< const wchar_t* >(num_punct_st->thousands_sep (1));
 
         const Charmap* const cmap = get_charmap (LC_NUMERIC);
 
@@ -1436,10 +1436,10 @@ print_int_curr_symbol (const char *keyword, int print_cat)
         std::cout << "\"\"\n";
     else {
         const char* const cs =
-            _RWSTD_STATIC_CAST (const char*, mon_st->curr_symbol (1, 0));
+            static_cast< const char* >(mon_st->curr_symbol (1, 0));
 
         const wchar_t* const wcs =
-            _RWSTD_STATIC_CAST (const wchar_t*, mon_st->curr_symbol (1, 1));
+            static_cast< const wchar_t* >(mon_st->curr_symbol (1, 1));
 
         const Charmap* const cmap = get_charmap (LC_MONETARY);
 
@@ -1462,10 +1462,10 @@ print_currency_symbol (const char *keyword, int print_cat)
         std::cout << "\"\"\n";
     else {
         const char* const cs =
-            _RWSTD_STATIC_CAST (const char*, mon_st->curr_symbol (0, 0));
+            static_cast< const char* >(mon_st->curr_symbol (0, 0));
 
         const wchar_t* const wcs =
-            _RWSTD_STATIC_CAST (const wchar_t*, mon_st->curr_symbol (0, 1));
+            static_cast< const wchar_t* >(mon_st->curr_symbol (0, 1));
 
         const Charmap* const cmap = get_charmap (LC_MONETARY);
 
@@ -1488,10 +1488,10 @@ print_mon_decimal_point (const char *keyword, int print_cat)
         std::cout << "\"\"\n";
     else {
         const char* const dp =
-            _RWSTD_STATIC_CAST (const char*, mon_punct_st->decimal_point (0));
+            static_cast< const char* >(mon_punct_st->decimal_point (0));
 
         const wchar_t* const wdp =
-            _RWSTD_STATIC_CAST(const wchar_t*, mon_punct_st->decimal_point (1));
+            static_cast< const wchar_t* >(mon_punct_st->decimal_point (1));
 
         const Charmap* const cmap = get_charmap (LC_MONETARY);
 
@@ -1514,10 +1514,10 @@ print_mon_thousands_sep (const char *keyword, int print_cat)
         std::cout << "\"\"\n";
     else {
         const char* const ts =
-            _RWSTD_STATIC_CAST (const char*, mon_punct_st->thousands_sep (0));
+            static_cast< const char* >(mon_punct_st->thousands_sep (0));
 
         const wchar_t* const wts =
-            _RWSTD_STATIC_CAST(const wchar_t*, mon_punct_st->thousands_sep (1));
+            static_cast< const wchar_t* >(mon_punct_st->thousands_sep (1));
 
         const Charmap* const cmap = get_charmap (LC_MONETARY);
 
@@ -1564,10 +1564,10 @@ print_positive_sign (const char *keyword, int print_cat)
         std::cout << "\"\"\n";
     else {
         const char* const ps =
-            _RWSTD_STATIC_CAST (const char*, mon_st->positive_sign (0));
+            static_cast< const char* >(mon_st->positive_sign (0));
 
         const wchar_t* const wps =
-            _RWSTD_STATIC_CAST (const wchar_t*, mon_st->positive_sign (1));
+            static_cast< const wchar_t* >(mon_st->positive_sign (1));
 
         const Charmap* const cmap = get_charmap (LC_MONETARY);
 
@@ -1590,10 +1590,10 @@ print_negative_sign (const char *keyword, int print_cat)
         std::cout << "\"\"\n";
     else {
         const char* const ns =
-            _RWSTD_STATIC_CAST (const char*, mon_st->negative_sign (0));
+            static_cast< const char* >(mon_st->negative_sign (0));
 
         const wchar_t* const wns =
-            _RWSTD_STATIC_CAST (const wchar_t*, mon_st->negative_sign (1));
+            static_cast< const wchar_t* >(mon_st->negative_sign (1));
         
         const Charmap* const cmap = get_charmap (LC_MONETARY);
 
@@ -1811,8 +1811,8 @@ print_time_keyword (const char *keyword, int print_cat,
 
     const Charmap* const cmap = get_charmap (LC_TIME);
 
-    const char*    const str  = _RWSTD_STATIC_CAST (const char*, vstr);
-    const wchar_t* const wstr = _RWSTD_STATIC_CAST (const wchar_t*, vwstr);
+    const char*    const str  = static_cast< const char* >(vstr);
+    const wchar_t* const wstr = static_cast< const wchar_t* >(vwstr);
 
     std::cout << '"' << create_str (str, wstr, cmap) << "\"";
 }
@@ -2015,16 +2015,16 @@ print_era (const char *keyword, int print_cat)
             }
 
             const char* const era =
-                _RWSTD_STATIC_CAST (const char*, time_st->era_name (i, 0));
+                static_cast< const char* >(time_st->era_name (i, 0));
 
             const wchar_t* const wera =
-                _RWSTD_STATIC_CAST (const wchar_t*, time_st->era_name (i, 1));
+                static_cast< const wchar_t* >(time_st->era_name (i, 1));
 
             const char* const fmt =
-                _RWSTD_STATIC_CAST (const char*, time_st->era_fmt (i, 0));
+                static_cast< const char* >(time_st->era_fmt (i, 0));
 
             const wchar_t* const wfmt =
-                _RWSTD_STATIC_CAST (const wchar_t*, time_st->era_fmt (i, 1));
+                static_cast< const wchar_t* >(time_st->era_fmt (i, 1));
 
             std::cout << create_str (era, wera, cmap) << ":"
                       << create_str (fmt, wfmt, cmap);
@@ -2224,10 +2224,10 @@ print_noexpr (const char *keyword, int print_cat)
         std::cout << '"' << create_str ("^[nN]", 0, 0) << "\"\n";
     else {
         const char* const no
-            = _RWSTD_STATIC_CAST (const char*, messages_st->noexpr (0));
+            = static_cast< const char* >(messages_st->noexpr (0));
 
         const wchar_t* const wno
-            = _RWSTD_STATIC_CAST (const wchar_t*, messages_st->noexpr (1));
+            = static_cast< const wchar_t* >(messages_st->noexpr (1));
 
         const Charmap* const cmap = get_charmap (LC_MESSAGES);
 
@@ -2250,10 +2250,10 @@ print_yesexpr (const char *keyword, int print_cat)
         std::cout << '"' << create_str ("^[yY]", 0, 0) << "\"\n";
     else {
         const char* const yes
-            = _RWSTD_STATIC_CAST (const char*, messages_st->yesexpr (0));
+            = static_cast< const char* >(messages_st->yesexpr (0));
 
         const wchar_t* const wyes
-            = _RWSTD_STATIC_CAST (const wchar_t*, messages_st->yesexpr (1));
+            = static_cast< const wchar_t* >(messages_st->yesexpr (1));
 
         const Charmap* const cmap = get_charmap (LC_MESSAGES);
 

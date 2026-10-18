@@ -122,12 +122,12 @@ static void*
 race_func (void*)
 {
     // cast nstarted to int& (see STDCXX-792)
-    _RWSTD_ATOMIC_PREINCREMENT (_RWSTD_CONST_CAST (int&, nstarted), false);
+    _RWSTD_ATOMIC_PREINCREMENT (const_cast< int& >(nstarted), false);
 
     // spin until all threads have been created so that they find
     // the id uninitialized at the same time
     while (_RWSTD_ATOMIC_LOAD_RELAXED (
-               _RWSTD_CONST_CAST (int&, nstarted), false) < opt_nthreads);
+               const_cast< int& >(nstarted), false) < opt_nthreads);
 
     if (!install_funcs [race_round] ())
         _RWSTD_ATOMIC_PREINCREMENT (nmissed, false);

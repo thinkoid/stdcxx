@@ -1753,7 +1753,7 @@ int _rw_quotechar (char *buf, charT wc, int noesc)
     // wchar_t is signed, convert its value to unsigned long
     // without widening (i.e., treat it as an unsigned type)
     const _RWSTD_UWCHAR_INT_T wi =
-        _RWSTD_STATIC_CAST (_RWSTD_UWCHAR_INT_T, wc);
+        static_cast< _RWSTD_UWCHAR_INT_T >(wc);
 
     if ((1 == sizeof wc || wi < 0x100U) && noesc) {
         buf [0] = char (wc);
@@ -3078,7 +3078,7 @@ _rw_fmtexpr (FmtSpec &spec, Buffer &buf, VarArgs *pva)
     // free the string allocated in _rw_fmtspec()
     free (spec.strarg);
     spec.strarg     = 0;
-    spec.param.ptr_ = _RWSTD_CONST_CAST (char*, val);
+    spec.param.ptr_ = const_cast< char* >(val);
 
     return len;
 }
@@ -3282,10 +3282,10 @@ rw_snprintf (char *buf, size_t bufsize, const char *fmt, ...)
 // be exported/imported
 
 /* _TEST_EXPORT */ rw_file* const
-rw_stdout = _RWSTD_REINTERPRET_CAST (rw_file*, stdout);
+rw_stdout = reinterpret_cast< rw_file* >(stdout);
 
 /* _TEST_EXPORT */ rw_file* const
-rw_stderr = _RWSTD_REINTERPRET_CAST (rw_file*, stderr);
+rw_stderr = reinterpret_cast< rw_file* >(stderr);
 
 /********************************************************************/
 
@@ -3309,7 +3309,7 @@ _rw_vfprintf (rw_file *file, const char *fmt, va_list va)
 
             // FIXME: implement this in terms of POSIX write()
             //        for async-signal safety
-            FILE* const stdio_file = _RWSTD_REINTERPRET_CAST (FILE*, file);
+            FILE* const stdio_file = reinterpret_cast< FILE* >(file);
 
             nwrote = int (fwrite (buf, 1, size_t (nchars), stdio_file));
 

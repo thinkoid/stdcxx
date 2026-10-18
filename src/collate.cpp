@@ -483,7 +483,7 @@ __rw_strnxfrm (const char *src, size_t nchars)
             else {
                 // terminating NUL found in the source buffer
                 nchars -= (last - src) + 1;
-                psrc    = _RWSTD_CONST_CAST (char*, src);
+                psrc    = const_cast< char* >(src);
                 src    += (last - src) + 1;
             }
 
@@ -600,7 +600,7 @@ __rw_wcsnxfrm (const wchar_t *src, size_t nchars)
 
                 // terminating NUL found in the source buffer
                 nchars -= (last - src) + 1;
-                psrc    = _RWSTD_CONST_CAST (wchar_t*, src);
+                psrc    = const_cast< wchar_t* >(src);
                 src    += (last - src) + 1;
             }
 
@@ -817,8 +817,8 @@ do_transform (const char* low, const char* high) const
     const int ccvt_cat = __rw::__rw_get_cat ((_C_wcodecvt_byname + 1) / 2);
 
     __rw::__rw_collate_t* const impl = 
-        _RWSTD_CONST_CAST (__rw::__rw_collate_t*,
-            _RWSTD_STATIC_CAST (const __rw::__rw_collate_t*, _C_data ()));
+        const_cast< __rw::__rw_collate_t* >(
+            static_cast< const __rw::__rw_collate_t* >(_C_data ()));
 
     if (!impl || (this->_C_opts & this->_C_use_libc)) {
 
@@ -860,10 +860,10 @@ do_transform (const char* low, const char* high) const
 
                     size_t size;
                     if (0 == cvt) {
-                        cvt = _RWSTD_STATIC_CAST (const __rw::__rw_codecvt_t*, 
-                                                  __rw::__rw_get_facet_data (
-                                                      ccvt_cat, size, _C_name, 
-                                                      impl->codeset_name ()));
+                        cvt = static_cast< const __rw::__rw_codecvt_t* >(
+                            __rw::__rw_get_facet_data (
+                                ccvt_cat, size, _C_name, 
+                                impl->codeset_name ()));
 
                         if (0 == cvt)
                             return string_type ();   // error
@@ -1076,8 +1076,7 @@ do_transform (const wchar_t* low, const wchar_t* high) const
     const int ccvt_cat = __rw::__rw_get_cat ((_C_wcodecvt_byname + 1) / 2);
 
     __rw::__rw_collate_t *impl = 
-        _RWSTD_CONST_CAST (__rw::__rw_collate_t*, _RWSTD_STATIC_CAST (
-            const __rw::__rw_collate_t*, _C_data ()));
+        const_cast< __rw::__rw_collate_t* >(static_cast< const __rw::__rw_collate_t* >(_C_data ()));
 
     if (!impl || (this->_C_opts & this->_C_use_libc)) {
 
@@ -1116,10 +1115,10 @@ do_transform (const wchar_t* low, const wchar_t* high) const
 
 
                         if (0 == cvt) {
-                            cvt = _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*,
-                                                     __rw::__rw_get_facet_data (
-                                                        ccvt_cat, size, _C_name,
-                                                        impl->codeset_name ()));
+                            cvt = static_cast< const __rw::__rw_codecvt_t* >(
+                                __rw::__rw_get_facet_data (
+                                   ccvt_cat, size, _C_name,
+                                   impl->codeset_name ()));
 
                             if (0 == cvt)
                                 return string_type ();   // error

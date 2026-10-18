@@ -100,7 +100,7 @@ do_get (iter_type __begin, iter_type __end, ios_base &__flags,
         // testing for failbit in `err' since the bit could be set even
         // for valid `val' (e.g., when the positions of thousands_seps
         // in otherwise valid input do not match grouping)
-        if (_RWSTD_STATIC_CAST (unsigned long, __lval) < 2)
+        if (static_cast< unsigned long >(__lval) < 2)
             __val = 0L != __lval;
         else
             __err |= __rw::__rw_failbit;

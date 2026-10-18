@@ -209,7 +209,7 @@ _rw_opt_enable_line (int argc, char *argv[])
             "<range> ::= [ - ] <number> | <number> - [ <number> ]\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -231,7 +231,7 @@ _rw_opt_no_line (int argc, char *argv[])
             "<range> ::= [ - ] <number> | <number> - [ <number> ]\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -254,7 +254,7 @@ _rw_opt_expect_line (int argc, char *argv[])
             "<range> ::= [ - ] <number> | <number> - [ <number> ]\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }

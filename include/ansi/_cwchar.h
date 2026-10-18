@@ -138,35 +138,35 @@ size_t wcsrtombs (char*, const wchar_t**, size_t, mbstate_t*);
 // 21.4, p14 of ISO/IEC 14882:1998
 inline const wchar_t* wcschr (const wchar_t *__s, wchar_t __c)
 {
-    return wcschr (_RWSTD_CONST_CAST (wchar_t*, __s), __c);
+    return wcschr (const_cast< wchar_t* >(__s), __c);
 }
 
 
 // 21.4, p16 of ISO/IEC 14882:1998
 inline const wchar_t* wcspbrk (const wchar_t *__s1, const wchar_t *__s2)
 {
-    return wcspbrk (_RWSTD_CONST_CAST (wchar_t*, __s1), __s2);
+    return wcspbrk (const_cast< wchar_t* >(__s1), __s2);
 }
 
 
 // 21.4, p18 of ISO/IEC 14882:1998
 inline const wchar_t* wcsrchr (const wchar_t *__s, wchar_t __c)
 {
-    return wcsrchr (_RWSTD_CONST_CAST (wchar_t*, __s), __c);
+    return wcsrchr (const_cast< wchar_t* >(__s), __c);
 }
 
 
 // 21.4, p20 of ISO/IEC 14882:1998
 inline const wchar_t* wcsstr (const wchar_t *__s1, const wchar_t *__s2)
 {
-    return wcsstr (_RWSTD_CONST_CAST (wchar_t*, __s1), __s2);
+    return wcsstr (const_cast< wchar_t* >(__s1), __s2);
 }
 
 
 // 21.4, p22 of ISO/IEC 14882:1998
 inline const wchar_t* wmemchr (const wchar_t *__p, wchar_t __c, size_t __n)
 {
-    return wmemchr (_RWSTD_CONST_CAST (wchar_t*, __p), __c, __n);
+    return wmemchr (const_cast< wchar_t* >(__p), __c, __n);
 }
 
 

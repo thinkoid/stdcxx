@@ -145,8 +145,8 @@ struct __rw_lt
     bool operator() (const _TypeT &__lhs, const _TypeU &__rhs) const {
         // cast away constness in case operator<
         // takes a non-const argument
-        return   _RWSTD_CONST_CAST (_TypeT&, __lhs)
-               < _RWSTD_CONST_CAST (_TypeU&, __rhs);
+        return   const_cast< _TypeT& >(__lhs)
+               < const_cast< _TypeU& >(__rhs);
     }
 };
 

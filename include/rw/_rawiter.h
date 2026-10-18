@@ -147,7 +147,7 @@ get_temporary_buffer (_Distance __nelems, _TypeT*)
 #endif   // gcc
 
     __res.second =
-        __rw::__rw_tmpbuf (_RWSTD_REINTERPRET_CAST (_VoidPtrT*, &__res.first),
+        __rw::__rw_tmpbuf (reinterpret_cast< _VoidPtrT* >(&__res.first),
                           __nelems < 0 ? 0 : __nelems, sizeof (_TypeT));
 
     return __res;
@@ -183,7 +183,7 @@ return_temporary_buffer (_TypeT *__p)
 
 #endif   // gcc
 
-    __rw::__rw_tmpbuf (_RWSTD_REINTERPRET_CAST (_VoidPtrT*, &__p),
+    __rw::__rw_tmpbuf (reinterpret_cast< _VoidPtrT* >(&__p),
                       0, sizeof (_TypeT));
 }
 

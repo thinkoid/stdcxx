@@ -537,7 +537,7 @@ static void
 _rw_funcall (const UserCtypeBase    &ctp,
              UserCtypeBase::MemFunc  mf)
 {
-    UserCtypeBase* const pctp = _RWSTD_CONST_CAST (UserCtypeBase*, &ctp);
+    UserCtypeBase* const pctp = const_cast< UserCtypeBase* >(&ctp);
 
     // increment the number of calls regardless of success
     ++pctp->n_all_calls_;
@@ -566,7 +566,7 @@ _rw_check_char (const UserCtypeBase   &ctp,
 {
     if (0 <= ctp.throw_char_ && size_t (ctp.throw_char_) == uch) {
 
-        UserCtypeBase* const pctp = _RWSTD_CONST_CAST (UserCtypeBase*, &ctp);
+        UserCtypeBase* const pctp = const_cast< UserCtypeBase* >(&ctp);
         ++pctp->n_throws_ [mf];
 
         _rw_throw (__FILE__, __LINE__,

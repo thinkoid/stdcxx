@@ -233,7 +233,7 @@ public:
 
     // follows proposed resolution of lwg issue 214
     pair<iterator, iterator> equal_range (const key_type& __x) {
-        return _RWSTD_CONST_CAST (const set*, this)->equal_range (__x);
+        return const_cast< const set* >(this)->equal_range (__x);
     }
 
     pair<const_iterator, const_iterator>

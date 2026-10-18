@@ -756,7 +756,7 @@ rw_expand (char *dst, const char *src, size_t src_len /* = SIZE_MAX */,
 {
     void* const result = _rw_expand (dst, sizeof *dst, src, src_len, dst_len);
 
-    return _RWSTD_STATIC_CAST (char*, result);
+    return static_cast< char* >(result);
 }
 
 
@@ -886,7 +886,7 @@ rw_expand (wchar_t *dst, const char *src, size_t src_len /* = SIZE_MAX */,
 {
     void* const result = _rw_expand (dst, sizeof *dst, src, src_len, dst_len);
 
-    return _RWSTD_STATIC_CAST (wchar_t*, result);
+    return static_cast< wchar_t* >(result);
 }
 
 
@@ -962,7 +962,7 @@ rw_match (const char *s1, const wchar_t *s2, size_t len /* = SIZE_MAX */)
             ch1 = _rw_get_char (p1, &p1, &n1);
         }
 
-        ch2 = _RWSTD_STATIC_CAST (unsigned long, *p2++);
+        ch2 = static_cast< unsigned long >(*p2++);
         n2  = 1;
 
         if (ch1 != ch2)
@@ -1035,7 +1035,7 @@ rw_expand (UserChar *dst, const char *src, size_t src_len /* = SIZE_MAX */,
 {
     void* const result = _rw_expand (dst, sizeof *dst, src, src_len, dst_len);
 
-    return _RWSTD_STATIC_CAST (UserChar*, result);
+    return static_cast< UserChar* >(result);
 }
 
 

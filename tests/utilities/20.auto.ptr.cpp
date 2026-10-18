@@ -315,7 +315,7 @@ test_auto_ptr_conversions ()
 
     rw_assert (0 == ap1.get (), 0, __LINE__,
                "auto_ptr<Base>::auto_ptr(auto_ptr<Derived>&)");
-    rw_assert (_RWSTD_STATIC_CAST (Base*, pd) == ap2.get (), 0, __LINE__,
+    rw_assert (static_cast< Base* >(pd) == ap2.get (), 0, __LINE__,
                "auto_ptr<Base>::auto_ptr(auto_ptr<Derived>&)");
 
     ap2.reset (pd);

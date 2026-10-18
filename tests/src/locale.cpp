@@ -370,7 +370,7 @@ rw_locales (int loc_cat, const char* grep_exp, bool prepend_c_loc)
 
     // allocate first time through
     if (!slocname) {
-        slocname = _RWSTD_STATIC_CAST (char*, _QUIET_MALLOC (total_size));
+        slocname = static_cast< char* >(_QUIET_MALLOC (total_size));
 
         if (!slocname)
             return deflocname;
@@ -456,7 +456,7 @@ rw_locales (int loc_cat, const char* grep_exp, bool prepend_c_loc)
                 total_size += grow_size;
 
                 char* tmp =
-                    _RWSTD_STATIC_CAST (char*, _QUIET_MALLOC (total_size));
+                    static_cast< char* >(_QUIET_MALLOC (total_size));
                 if (!tmp)
                     break;
 
@@ -832,7 +832,7 @@ rw_opt_setlocales (int argc, char* argv[])
             "names given by <arg>.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -1090,8 +1090,8 @@ _rw_all_locales ()
                 capacity += grow_size;
 
                 _rw_locale_entry* new_entries =
-                    _RWSTD_STATIC_CAST(_rw_locale_entry*,
-                                    _QUIET_MALLOC (entry_size * capacity));
+                    static_cast< _rw_locale_entry* >(
+                        _QUIET_MALLOC (entry_size * capacity));
                 if (!new_entries) {
                     break;
                 }
@@ -1384,7 +1384,7 @@ rw_locale_query (int loc_cat, const char* query, size_t wanted)
 
                 // one additional character for the second null
                 char* new_string =
-                    _RWSTD_STATIC_CAST(char*, _QUIET_MALLOC (capacity + 1));
+                    static_cast< char* >(_QUIET_MALLOC (capacity + 1));
                 if (!new_string) {
 
                     // setup to get out of outer loop

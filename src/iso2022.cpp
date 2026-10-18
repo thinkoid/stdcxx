@@ -467,7 +467,7 @@ __rw_get_iso2022_state (_RWSTD_MBSTATE_T& state, int enc)
 
     // retrieve the array index
     ISO_2022_STATE_INDEX_T* pc =
-        _RWSTD_REINTERPRET_CAST (ISO_2022_STATE_INDEX_T*, &state);
+        reinterpret_cast< ISO_2022_STATE_INDEX_T* >(&state);
 
     int n = *pc;
 
@@ -483,7 +483,7 @@ __rw_get_iso2022_state (_RWSTD_MBSTATE_T& state, int enc)
             return pstate;
 
         // store the state index
-        *pc = _RWSTD_STATIC_CAST (ISO_2022_STATE_INDEX_T, n + 1);
+        *pc = static_cast< ISO_2022_STATE_INDEX_T >(n + 1);
     }
     else
         n--;
@@ -735,7 +735,7 @@ __rw_iso2022jp_designate (__rw_iso2022_state_t& state,
         // insert the designation
         if (reg != state.g_map [2]) {
             // FIXME - check correctness
-            if (_RWSTD_STATIC_CAST (size_t, to_end - to) < len)
+            if (static_cast< size_t >(to_end - to) < len)
                 return CODECVT_PARTIAL;
 
             if (len) {
@@ -751,7 +751,7 @@ __rw_iso2022jp_designate (__rw_iso2022_state_t& state,
 
         // insert the single shift function
         // FIXME - check correctness
-        if (_RWSTD_STATIC_CAST (size_t, to_end - to) < len)
+        if (static_cast< size_t >(to_end - to) < len)
             return CODECVT_PARTIAL;
 
         if (sslen) {
@@ -766,7 +766,7 @@ __rw_iso2022jp_designate (__rw_iso2022_state_t& state,
     } else {
 
         // FIXME - check correctness
-        if (_RWSTD_STATIC_CAST (size_t, to_end - to) < len)
+        if (static_cast< size_t >(to_end - to) < len)
             return CODECVT_PARTIAL;
 
         if (len) {
@@ -1147,7 +1147,7 @@ __rw_eucjp_to_iso2022 (__rw_iso2022_state_t& state,
     std::codecvt_base::result ret;
 
     // convert and store the encoding
-    unsigned char c = *_RWSTD_REINTERPRET_CAST(const unsigned char*, from);
+    unsigned char c = *reinterpret_cast< const unsigned char* >(from);
     switch (c) {
     case 0x8e:
         // JIS X 0201 Katakana
@@ -1479,7 +1479,7 @@ __rw_ucs4_to_eucjp (const wchar_t*& from,
 
     // "impl" as raw pointer to unsigned ints
     const char* impl_raw =
-        _RWSTD_REINTERPRET_CAST(const char*,impl);
+        reinterpret_cast< const char* >(impl);
 
     // utf8 temporary buffer
     char tmp [_UTF8_MB_CUR_MAX];
@@ -1556,10 +1556,10 @@ __rw_ucs4_to_interm (  const wchar_t*& from,
 
         // cast the database map pointer to the correct type
         const __rw::__rw_codecvt_t* impl =
-            _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, pdb);
+            static_cast< const __rw::__rw_codecvt_t* >(pdb);
 
         // the "raw access" pointer used in finding the external repr.
-        const char* impl_raw = _RWSTD_REINTERPRET_CAST(const char*,impl);
+        const char* impl_raw = reinterpret_cast< const char* >(impl);
 
         // tbls will point to the first lookup table
         const unsigned int* tbls = impl->utf8_to_ext_tab ();
@@ -1664,7 +1664,7 @@ __rw_iso2022_to_ucs4 (_RWSTD_MBSTATE_T&     state,
         return CODECVT_ERROR;
     }
     const __rw::__rw_codecvt_t* pimpl =
-        _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, pdb);
+        static_cast< const __rw::__rw_codecvt_t* >(pdb);
 
     // retrieve the lookup table start
     const unsigned int* tbls = pimpl->n_to_w_tab ();
@@ -1775,7 +1775,7 @@ __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T& state,
     }
 
     const __rw::__rw_codecvt_t* pimpl =
-        _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, pdb);
+        static_cast< const __rw::__rw_codecvt_t* >(pdb);
     _RWSTD_ASSERT(pimpl);
 
     // Loop until the source buffer is consumed, an error occurs, or

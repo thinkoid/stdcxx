@@ -276,7 +276,7 @@ always_noconv () const _THROWS (())
         // typedef works around an HP aCC x.38 bug (PR #25832)
         typedef codecvt<char, char, _RWSTD_MBSTATE_T> _CodeCvt;
 
-        _CodeCvt *__self = _RWSTD_CONST_CAST (_CodeCvt*, this);
+        _CodeCvt *__self = const_cast< _CodeCvt* >(this);
 
         __noconv = do_always_noconv ();
 

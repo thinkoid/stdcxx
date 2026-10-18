@@ -393,7 +393,7 @@ int run_test (int, char* [])
                 // allocation
                 alloc._bytesRequested = ~i;   // reset
 
-                ptr = _RWSTD_STATIC_CAST (char*, __rw::__rw_allocate (i));
+                ptr = static_cast< char* >(__rw::__rw_allocate (i));
                 rw_assert (alloc._bytesRequested == i, 0, __LINE__,
                            "__rw_allocate (%u) requested %u bytes",
                            i, alloc._bytesRequested);

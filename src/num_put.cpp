@@ -45,7 +45,7 @@
 // on platforms such as HP-UX 11.00 that incorrectly declare it
 // without the const qualifier
 #define _SNPRINTF(buf, size, fmt, arg)   \
-    snprintf (buf, size, _RWSTD_CONST_CAST (char*, fmt), arg)
+    snprintf (buf, size, const_cast< char* >(fmt), arg)
 
 
 namespace __rw { 
@@ -163,7 +163,7 @@ __rw_dtoa (char *buf, _LLong i, unsigned flags)
     else
         n = 0;   // no sign here
 
-    return n + __rw_dtoa (buf, _RWSTD_STATIC_CAST (_ULLong, i), flags);
+    return n + __rw_dtoa (buf, static_cast< _ULLong >(i), flags);
 }
 
 
@@ -239,7 +239,7 @@ __rw_itoa (char *buf, _LLong i, unsigned flags)
     if (_RWSTD_IOS_OCT != basefield && _RWSTD_IOS_HEX != basefield)
         return __rw_dtoa (buf, i, flags);
 
-    return __rw_itoa (buf, _RWSTD_STATIC_CAST (_ULLong, i), flags);
+    return __rw_itoa (buf, static_cast< _ULLong >(i), flags);
 }
 
 
@@ -300,7 +300,7 @@ __rw_dtoa (char *buf, long i, unsigned flags)
     else
         n = 0;   // no sign here
 
-    return n + __rw_dtoa (buf, _RWSTD_STATIC_CAST (unsigned long, i), flags);
+    return n + __rw_dtoa (buf, static_cast< unsigned long >(i), flags);
 }
 
 
@@ -375,7 +375,7 @@ __rw_itoa (char *buf, long i, unsigned flags)
     if (_RWSTD_IOS_OCT != basefield && _RWSTD_IOS_HEX != basefield)
         return __rw_dtoa (buf, i, flags);
 
-    return __rw_itoa (buf, _RWSTD_STATIC_CAST (unsigned long, i), flags);
+    return __rw_itoa (buf, static_cast< unsigned long >(i), flags);
 }
 
 
@@ -438,7 +438,7 @@ __rw_put_groups (char **pbuf, size_t len, size_t bufsize,
         else
             ++pg;
 
-        if (grplen + grp >= _RWSTD_STATIC_CAST (size_t, end - pd))
+        if (grplen + grp >= static_cast< size_t >(end - pd))
             break;
 
         grplen += grp;
@@ -460,7 +460,7 @@ __rw_put_groups (char **pbuf, size_t len, size_t bufsize,
     for (pd = *pbuf + (len - 1); pd != *pbuf && ngrps; --pd) {
         if (pd >= end) {
             // copy the fractional part (if any) of the number
-            *pd = pd [-_RWSTD_STATIC_CAST (_RWSTD_PTRDIFF_T, ngrps)];
+            *pd = pd [-static_cast< _RWSTD_PTRDIFF_T >(ngrps)];
         }
         else {
             if (size_t (end - pd) == grplen + 1) {
@@ -477,7 +477,7 @@ __rw_put_groups (char **pbuf, size_t len, size_t bufsize,
             }
             else {
                 // copy the integral part
-                *pd = pd [-_RWSTD_STATIC_CAST (_RWSTD_PTRDIFF_T, ngrps)];
+                *pd = pd [-static_cast< _RWSTD_PTRDIFF_T >(ngrps)];
             }
         }
     }
@@ -612,7 +612,7 @@ __rw_put_num (char **pbuf, size_t bufsize,
     case __rw_facet::_C_short:
     case __rw_facet::_C_int:
     case __rw_facet::_C_long:
-        len = __rw_itoa (buf, _RWSTD_REINTERPRET_CAST (long, pval), flags);
+        len = __rw_itoa (buf, reinterpret_cast< long >(pval), flags);
         break;
 
     case __rw_facet::_C_ushort:
@@ -623,7 +623,7 @@ __rw_put_num (char **pbuf, size_t bufsize,
         // sign is only used in signed conversions; 7.19 6.1, p6
         // of C99: The result of a signed conversion always begins
         // with a plus or minus sign.)
-        len = __rw_itoa (buf, _RWSTD_REINTERPRET_CAST (unsigned long, pval),
+        len = __rw_itoa (buf, reinterpret_cast< unsigned long >(pval),
                          flags & ~_RWSTD_IOS_SHOWPOS);
         break;
 

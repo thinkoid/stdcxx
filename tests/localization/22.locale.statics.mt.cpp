@@ -74,14 +74,14 @@ test_classic (void*)
 
     // cast nthreads to int& (see STDCXX-792)
     // casting should be removed after fixing STDCXX-794
-    _RWSTD_ATOMIC_PREINCREMENT (_RWSTD_CONST_CAST (int&, nthreads), false);
+    _RWSTD_ATOMIC_PREINCREMENT (const_cast< int& >(nthreads), false);
 
     // spin until all threads have been created in order to icrease
     // the odds that at least two of them will hit the tested function
     // (and the lazy one-time initialization done by it) at the same
     // time
     while (_RWSTD_ATOMIC_LOAD_RELAXED (
-               _RWSTD_CONST_CAST (int&, nthreads), false) < opt_nthreads);
+               const_cast< int& >(nthreads), false) < opt_nthreads);
 
     const std::locale classic (std::locale::classic ());
 

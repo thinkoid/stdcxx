@@ -69,12 +69,12 @@ static void*
 race_func (void*)
 {
     // cast nstarted to int& (see STDCXX-792)
-    _RWSTD_ATOMIC_PREINCREMENT (_RWSTD_CONST_CAST (int&, nstarted), false);
+    _RWSTD_ATOMIC_PREINCREMENT (const_cast< int& >(nstarted), false);
 
     // spin until all threads have been created so that they find
     // the slot empty at the same time
     while (_RWSTD_ATOMIC_LOAD_RELAXED (
-               _RWSTD_CONST_CAST (int&, nstarted), false) < opt_nthreads);
+               const_cast< int& >(nstarted), false) < opt_nthreads);
 
     (void)std::use_facet<CodeCvt>(*race_locale);
 

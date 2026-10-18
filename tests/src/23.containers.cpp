@@ -771,31 +771,31 @@ _rw_setvars (const ContainerFunc     &func,
 
     case ContainerIds::List:
         _rw_list_sigcat (&buf, &bufsize,
-            _RWSTD_STATIC_CAST (ListIds::OverloadId, func.which_),
+            static_cast< ListIds::OverloadId >(func.which_),
             self, str, str_len, arg, arg_len, *pcase);
         break;
 
     case ContainerIds::Vector:
         _rw_vector_sigcat (&buf, &bufsize,
-            _RWSTD_STATIC_CAST (VectorIds::OverloadId, func.which_),
+            static_cast< VectorIds::OverloadId >(func.which_),
             self, str, str_len, arg, arg_len, *pcase);
         break;
 
     case ContainerIds::Deque:
         _rw_deque_sigcat (&buf, &bufsize,
-            _RWSTD_STATIC_CAST (DequeIds::OverloadId, func.which_),
+            static_cast< DequeIds::OverloadId >(func.which_),
             self, str, str_len, arg, arg_len, *pcase);
         break;
 
     case ContainerIds::Queue:
         _rw_queue_sigcat (&buf, &bufsize,
-            _RWSTD_STATIC_CAST (QueueIds::OverloadId, func.which_),
+            static_cast< QueueIds::OverloadId >(func.which_),
             self, str, str_len, arg, arg_len, *pcase);
         break;
 
     case ContainerIds::Stack:
         _rw_stack_sigcat (&buf, &bufsize,
-            _RWSTD_STATIC_CAST (StackIds::OverloadId, func.which_),
+            static_cast< StackIds::OverloadId >(func.which_),
             self, str, str_len, arg, arg_len, *pcase);
         break;
 
@@ -860,7 +860,7 @@ _rw_dispatch (T*, Allocator*,
 
     const size_t inx = func.elem_id_ * 2 + func.alloc_id_;
 
-    TestFunc* const tfunc = _RWSTD_REINTERPRET_CAST (TestFunc*, farray [inx]);
+    TestFunc* const tfunc = reinterpret_cast< TestFunc* >(farray [inx]);
 
     if (0 == tfunc) {
         rw_error (0, __FILE__, __LINE__,

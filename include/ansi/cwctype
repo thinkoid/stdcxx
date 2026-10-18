@@ -63,7 +63,7 @@ namespace std {
 // #define WEOF when not #defined (see also <cwchar>)
 #if !defined WEOF
 #  ifndef _RWSTD_NO_WINT_T
-#    define WEOF _RWSTD_STATIC_CAST (_RWSTD_WINT_T, -1)
+#    define WEOF static_cast< _RWSTD_WINT_T >(-1)
 #  else
 #    define WEOF (-1)
 #  endif

@@ -83,7 +83,7 @@ std::string Def::convert_to_ext (wchar_t val)
 // convert the wchar_t value into a utf8 string 
 std::string Def::utf8_encode (wchar_t wc)
 {
-    unsigned int wc_int = _RWSTD_STATIC_CAST (unsigned int, wc);
+    unsigned int wc_int = static_cast< unsigned int >(wc);
 
     std::string ret;
     std::size_t size = 0;

@@ -72,8 +72,8 @@
 
 
 #define DIST(addr1, addr2)                         \
-  (  _RWSTD_REINTERPRET_CAST (const char*, addr1)  \
-   - _RWSTD_REINTERPRET_CAST (const char*, addr2))
+  (  reinterpret_cast< const char* >(addr1)  \
+   - reinterpret_cast< const char* >(addr2))
 
 namespace __rw {
 
@@ -93,8 +93,8 @@ __rw_memattr (const void *addr, size_t nbytes, int attr)
     // compute the address of the beginning of the page
     // to which the address `addr' belongs
     caddr_t const page =
-        _RWSTD_REINTERPRET_CAST (caddr_t,
-            _RWSTD_REINTERPRET_CAST (size_t, addr) & ~(pgsz - 1));
+        reinterpret_cast< caddr_t >(
+            reinterpret_cast< size_t >(addr) & ~(pgsz - 1));
 
     // compute the maximum number of pages occuppied by the memory
     // region pointed to by `addr' (nbytes may be -1 as a request
@@ -104,7 +104,7 @@ __rw_memattr (const void *addr, size_t nbytes, int attr)
 
     for (size_t i = 0; i < npages; ++i) {
 
-        const caddr_t next = _RWSTD_REINTERPRET_CAST (char*, page) + i * pgsz;
+        const caddr_t next = reinterpret_cast< char* >(page) + i * pgsz;
 
 #if !defined (_RWSTD_NO_MADVISE)
 
@@ -163,7 +163,7 @@ __rw_memattr (const void *addr, size_t nbytes, int attr)
         }
     }
 
-    return _RWSTD_STATIC_CAST (_RWSTD_SSIZE_T, nbytes);
+    return static_cast< _RWSTD_SSIZE_T >(nbytes);
 
 }
 

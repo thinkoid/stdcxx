@@ -780,7 +780,7 @@ charT& assign (charT &lhs, char rhs)
 
 UserChar& assign (UserChar &lhs, char rhs)
 {
-    lhs.c = _RWSTD_STATIC_CAST (unsigned char, rhs);
+    lhs.c = static_cast< unsigned char >(rhs);
 
     return lhs;
 }

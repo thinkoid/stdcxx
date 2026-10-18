@@ -355,8 +355,8 @@ struct ConsRangePtrOverload: ContRangeBase<List> {
         const ListVal* const beg = tdata.arg_ + tdata.off2_;
         const ListVal* const end = beg + tdata.ext2_;
 
-        const Iterator first = _RWSTD_CONST_CAST (Iterator, beg);
-        const Iterator last  = _RWSTD_CONST_CAST (Iterator, end);
+        const Iterator first = const_cast< Iterator >(beg);
+        const Iterator last  = const_cast< Iterator >(end);
 
         if (Cons (range_alloc) == tdata.func_.which_) {
             ListAlloc alloc;
@@ -487,7 +487,7 @@ void test_cons (T*, Allocator*, const ContRangeBase<
 
         try {
             ListIds::OverloadId which =
-                _RWSTD_STATIC_CAST (ListIds::OverloadId, func.which_);
+                static_cast< ListIds::OverloadId >(func.which_);
 
             // reset function call counters
             if (is_class)
@@ -750,7 +750,7 @@ void test_op_set (T*, Allocator*,
                 UserClass::reset_totals ();
 
             ListIds::OverloadId which =
-                _RWSTD_STATIC_CAST (ListIds::OverloadId, func.which_);
+                static_cast< ListIds::OverloadId >(func.which_);
 
             switch (which) {
 

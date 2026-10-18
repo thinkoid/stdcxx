@@ -343,7 +343,7 @@ public:
     basic_filebuf<char_type, traits_type>* rdbuf() const {
         // necessary to help SunPro 5.0/T9
         typedef basic_ifstream <char_type, traits_type> __self_type;
-        return &_RWSTD_CONST_CAST (__self_type*, this)->_C_filebuf;
+        return &const_cast< __self_type* >(this)->_C_filebuf;
     }
 
     bool is_open () const {
@@ -397,7 +397,7 @@ public:
     basic_filebuf<char_type, traits_type>* rdbuf () const {
         // necessary to help SunPro 5.0/T9
         typedef basic_ofstream <char_type, traits_type> _SelfT;
-        return &_RWSTD_CONST_CAST (_SelfT*, this)->_C_filebuf;
+        return &const_cast< _SelfT* >(this)->_C_filebuf;
     }
 
     bool is_open () const {
@@ -452,7 +452,7 @@ public:
     basic_filebuf<char_type, traits_type>* rdbuf() const {
         // necessary to help SunPro 5.0/T9
         typedef basic_fstream <char_type, traits_type> _SelfT;
-        return &_RWSTD_CONST_CAST (_SelfT*, this)->_C_filebuf;
+        return &const_cast< _SelfT* >(this)->_C_filebuf;
     }
 
     bool is_open () const {

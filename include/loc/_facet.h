@@ -191,7 +191,7 @@ public:
     const void* _C_data () const {
         return _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impsize, false)
             ? _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_impdata, false)
-            : _RWSTD_CONST_CAST (__rw_facet*, this)->_C_get_data ();
+            : const_cast< __rw_facet* >(this)->_C_get_data ();
     }
 
     const char* _C_get_name () const {

@@ -89,8 +89,9 @@ could not list: no probe yields it, nothing defines it, and two
 places read it. The bundle left `_TYPENAME`, `_EXPLICIT`, the
 `_RWSTD_*_CAST` and the `_RWSTD_SPECIALIZED_*` macros in `rw/_defs.h`
 with their one definition, as the `NAMESPACE` retirement left
-`_RWSTD_NAMESPACE`, `_STD`, `_RW` and `_USING`; whether to spell them
-out is a sweep of its own, queued.
+`_RWSTD_NAMESPACE`, `_STD`, `_RW` and `_USING`. Liviu, 2026-10-17:
+"those have no reason to exist"; five commits after the gates spelled
+every one of them out, keyword by keyword, the casts last.
 
 ### 2.2 Templates
 

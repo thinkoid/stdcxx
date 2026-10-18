@@ -68,7 +68,7 @@ void test (const TestCase& tcase)
 {
     if (void* buf = rw_alloc (tcase.size_, tcase.prot_)) {
 
-        char* str = _RWSTD_STATIC_CAST (char*, buf);
+        char* str = static_cast< char* >(buf);
 
         bool protbelow = 0 != (tcase.prot_ & RW_PROT_BELOW);
 

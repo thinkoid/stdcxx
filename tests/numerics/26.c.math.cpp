@@ -214,8 +214,8 @@ test_behavior ()
 
 #ifndef _RWSTD_NO_LONG_DOUBLE
 
-            const long double il = _RWSTD_STATIC_CAST (long double, i);
-            const long double jl = _RWSTD_STATIC_CAST (long double, j);
+            const long double il = static_cast< long double >(i);
+            const long double jl = static_cast< long double >(j);
 
             const long double xl = std::pow (il, j);
             const long double yl = std::pow (il, jl);

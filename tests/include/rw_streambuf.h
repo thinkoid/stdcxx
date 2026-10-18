@@ -463,7 +463,7 @@ bool
 MyStreambuf<charT, Traits>::
 test (MemFun which) const
 {
-    MyStreambuf* const self = _RWSTD_CONST_CAST (MyStreambuf*, this);
+    MyStreambuf* const self = const_cast< MyStreambuf* >(this);
 
     const int inx = memfun_inx (which);
     if (inx < 0)

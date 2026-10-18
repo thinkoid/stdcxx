@@ -118,7 +118,7 @@ void test_uninitialized_copy (const InputIterator &dummy,
     const unsigned N = sizeof a / sizeof *a;
 
     // allocate an uninitialized buffer
-    Y *buf = _RWSTD_STATIC_CAST (Y*, ::operator new (N * sizeof (Y)));
+    Y *buf = static_cast< Y* >(::operator new (N * sizeof (Y)));
 
     for (unsigned i = 0; i != N; ++i) {
 
@@ -184,7 +184,7 @@ void test_uninitialized_fill (const ForwardIterator*, bool test_count)
     const unsigned N = 32;
 
     // allocate an uninitialized buffer
-    Y *buf = _RWSTD_STATIC_CAST (Y*, ::operator new (N * sizeof (Y)));
+    Y *buf = static_cast< Y* >(::operator new (N * sizeof (Y)));
 
     for (unsigned i = 0; i != N; ++i) {
 

@@ -92,7 +92,7 @@ template <class _TypeT, class _TypeU>
 inline void
 __rw_construct (_TypeT* __p, _TypeU& __val)
 {
-    ::new (_RWSTD_STATIC_CAST (void*, __p)) _TypeT (__val);
+    ::new (static_cast< void* >(__p)) _TypeT (__val);
 }
 
 
@@ -101,7 +101,7 @@ inline void
 __rw_construct (volatile _TypeT* __p, _TypeU& __val)
 {
     // remove volatile before invoking operator new
-    __rw_construct (_RWSTD_CONST_CAST (_TypeT*, __p), __val);
+    __rw_construct (const_cast< _TypeT* >(__p), __val);
 }
 
 #else   // #ifdef _RWSTD_NO_PART_SPEC_OVERLOAD
@@ -110,7 +110,7 @@ template <class _TypeT, class _TypeU>
 inline void
 __rw_construct_impl (_TypeT* __p, _TypeU& __val)
 {
-    ::new (_RWSTD_STATIC_CAST (void*, __p)) _TypeT (__val);
+    ::new (static_cast< void* >(__p)) _TypeT (__val);
 }
 
 
@@ -119,7 +119,7 @@ inline void
 __rw_construct (volatile _TypeT* __p, _TypeU& __val)
 {
     // remove volatile before invoking operator new
-    __rw_construct_impl (_RWSTD_CONST_CAST (_TypeT*, __p), __val);
+    __rw_construct_impl (const_cast< _TypeT* >(__p), __val);
 }
 
 #endif  // _RWSTD_NO_PART_SPEC_OVERLOAD
@@ -169,8 +169,8 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
         for (; __first != __last; ++__first, ++__res) {
             // avoid const-qualifying ptr to prevent an HP aCC 3 bug
             volatile void* /* const */ __ptr =
-                _RWSTD_STATIC_CAST (volatile void*, &*__res);
-            ::new (_RWSTD_CONST_CAST (void*, __ptr)) _TypeT (*__first);
+                static_cast< volatile void* >(&*__res);
+            ::new (const_cast< void* >(__ptr)) _TypeT (*__first);
         }
     }
     _CATCH (...) {

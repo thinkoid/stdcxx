@@ -81,8 +81,8 @@ _C_get_rep (size_type __cap, size_type __len)
 
     // allocate, initialize the __string_ref, and initialize each character
     _C_string_ref_type* const __ret =
-        _RWSTD_STATIC_CAST (_C_string_ref_type*,
-            _RWSTD_STATIC_CAST (void*,
+        static_cast< _C_string_ref_type* >(
+            static_cast< void* >(
                 _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
                     allocate (  __cap + sizeof (_C_string_ref_type)
                               / sizeof (value_type) + 2))));

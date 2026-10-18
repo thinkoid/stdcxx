@@ -716,11 +716,11 @@ public:
     ~StringTestCaseData () {
         // clean up dynamically allocated memory (if any)
         if (str_ != str_buf_)
-            delete[] _RWSTD_CONST_CAST (charT*, str_);
+            delete[] const_cast< charT* >(str_);
         if (arg_ != arg_buf_)
-            delete[] _RWSTD_CONST_CAST (charT*, arg_);
+            delete[] const_cast< charT* >(arg_);
         if (res_ != res_buf_)
-            delete[] _RWSTD_CONST_CAST (charT*, res_);
+            delete[] const_cast< charT* >(res_);
     }
 };
 
@@ -774,7 +774,7 @@ struct RangeBase {
 
     static StringPtr
     begin (String &str, StringPtr*) {
-        return _RWSTD_CONST_CAST (StringPtr, str.data ());
+        return const_cast< StringPtr >(str.data ());
     }
 
     static StringConstPtr

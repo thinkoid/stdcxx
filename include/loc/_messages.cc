@@ -85,7 +85,7 @@ messages<_CharT>::do_get (messages_base::catalog __cat,
         if (sizeof (_CharT) == sizeof (char) && __codecvt.always_noconv ()) {
             // lwg issue 19: always_noconv() is only allowed to return
             // true if extern_type and intern_type are one and the same
-            return _RWSTD_REINTERPRET_CAST (const _CharT*, __text);
+            return reinterpret_cast< const _CharT* >(__text);
         }
 
         typedef char_traits<char> _CharTraits;
@@ -125,7 +125,7 @@ messages<_CharT>::do_get (messages_base::catalog __cat,
             if (sizeof (_CharT) == sizeof (char)) {
                 // lwg issue 19: in() is only allowed to return noconv
                 // if extern_type and intern_type are one and the same
-                return _RWSTD_REINTERPRET_CAST (const _CharT*, __text);
+                return reinterpret_cast< const _CharT* >(__text);
             }
             else {
                 // should not happen - bad codecvt implementation

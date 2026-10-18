@@ -38,9 +38,9 @@ __rw_memcpy (void *dst, const void *src, size_t nbytes)
 {
     _RWSTD_ASSERT (0 == nbytes || (dst && src));
 
-    const char* csrc = _RWSTD_STATIC_CAST (const char*, src);
+    const char* csrc = static_cast< const char* >(src);
 
-    for (char *tmp = _RWSTD_STATIC_CAST (char*, dst); nbytes; --nbytes)
+    for (char *tmp = static_cast< char* >(dst); nbytes; --nbytes)
         *tmp++ = *csrc++;
 
     return dst;
@@ -52,8 +52,8 @@ __rw_memmove (void *dst, const void *src, size_t nbytes)
 {
     _RWSTD_ASSERT (0 == nbytes || (dst && src));
 
-    char* cdst = _RWSTD_STATIC_CAST (char*, dst);
-    const char* csrc = _RWSTD_STATIC_CAST (const char*, src);
+    char* cdst = static_cast< char* >(dst);
+    const char* csrc = static_cast< const char* >(src);
 
     if (cdst < csrc) {
         while (nbytes--)
@@ -75,7 +75,7 @@ __rw_memchr (const void *src, int c, size_t nbytes)
 
     typedef unsigned char UChar;
 
-    const UChar* csrc = _RWSTD_STATIC_CAST (const UChar*, src);
+    const UChar* csrc = static_cast< const UChar* >(src);
 
     while (nbytes > 0 && int (*csrc) != c) {
         ++csrc;
@@ -91,7 +91,7 @@ __rw_memset (void *dst, int c, size_t nbytes)
 {
     _RWSTD_ASSERT (0 == nbytes || dst);
 
-    for (char *tmp = _RWSTD_STATIC_CAST (char*, dst); nbytes; ++tmp, --nbytes)
+    for (char *tmp = static_cast< char* >(dst); nbytes; ++tmp, --nbytes)
         *tmp = c;
 
     return dst;
@@ -105,8 +105,8 @@ __rw_memcmp (const void *s1, const void *s2, size_t nbytes)
 
     typedef unsigned char UChar;
 
-    const UChar* cs1 = _RWSTD_STATIC_CAST (const UChar*, s1);
-    const UChar* cs2 = _RWSTD_STATIC_CAST (const UChar*, s2);
+    const UChar* cs1 = static_cast< const UChar* >(s1);
+    const UChar* cs2 = static_cast< const UChar* >(s2);
 
     int result = 0;
 
@@ -125,7 +125,7 @@ __rw_strlen (const char *str)
     while (*str)
         ++str;
 
-    return _RWSTD_STATIC_CAST (size_t, str - begin);
+    return static_cast< size_t >(str - begin);
 }
 
 
@@ -212,7 +212,7 @@ __rw_wcslen (const wchar_t *wstr)
     while (*wstr)
         ++wstr;
 
-    return _RWSTD_STATIC_CAST (size_t, wstr - begin);
+    return static_cast< size_t >(wstr - begin);
 }
 
 #endif   // _RWSTD_NO_WCHAR_T

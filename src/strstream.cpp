@@ -291,7 +291,7 @@ strstreambuf::setbuf (char_type* buf, streamsize bufsize)
         _TRY {
             // allocate a new buffer
             buf = _C_palloc ?
-                  _RWSTD_STATIC_CAST (char_type*, _C_palloc (bufsize))
+                  static_cast< char_type* >(_C_palloc (bufsize))
                 : new char [bufsize];
         }
         _CATCH (...) {
@@ -354,10 +354,10 @@ _C_init (streamsize  alsize,
     _C_pfree  = pdealloc;
 
     char* const gnext =
-        _RWSTD_STATIC_CAST (char*, _RWSTD_CONST_CAST (void*, gnext_v));
+        static_cast< char* >(const_cast< void* >(gnext_v));
 
     char* const pbeg =
-        _RWSTD_STATIC_CAST (char*, _RWSTD_CONST_CAST (void*, pbeg_v));
+        static_cast< char* >(const_cast< void* >(pbeg_v));
 
     // D.7.1.1, p4
     if (n < 0)

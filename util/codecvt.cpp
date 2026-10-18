@@ -468,7 +468,7 @@ write_codecvt (std::string dir_name)
     __rw::__rw_codecvt_t codecvt_out;
     std::memset (&codecvt_out, 0, sizeof codecvt_out);
 
-#define UINT(x) _RWSTD_STATIC_CAST(unsigned, x)
+#define UINT(x) static_cast< unsigned >(x)
 
     // calculate byte offsets within the structure
     codecvt_out.n_to_w_tab_off = 0;

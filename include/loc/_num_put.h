@@ -96,7 +96,7 @@ struct num_put: __rw::__rw_facet
 
 // prevent gcc warning: cast to pointer from integer of different size
 #define _TO_VOID(x) \
-  _RWSTD_REINTERPRET_CAST (const void*, _RWSTD_STATIC_CAST (_RWSTD_SIZE_T, x))
+  reinterpret_cast< const void* >(static_cast< _RWSTD_SIZE_T >(x))
 
 #ifdef _RWSTD_LONG_LONG
 

@@ -131,7 +131,7 @@ size_t wcstombs (char*, const wchar_t*, size_t);
              int (*__cmp)(const void*, const void*))
     {
         return bsearch (__key, __base, __n, __size,
-                        _RWSTD_REINTERPRET_CAST (__rw_compar_t, __cmp));
+                        reinterpret_cast< __rw_compar_t >(__cmp));
     }
 
     // 25.4, p4 of ISO/IEC 14882:1998
@@ -140,7 +140,7 @@ size_t wcstombs (char*, const wchar_t*, size_t);
            int (*__cmp)(const void*, const void*))
     {
         return _RWSTD_C::qsort (__base, __n, __size,
-                               _RWSTD_REINTERPRET_CAST (__rw_compar_t, __cmp));
+                               reinterpret_cast< __rw_compar_t >(__cmp));
     }
 
     inline long

@@ -91,8 +91,8 @@ inline bool
 __rw_atomic_exchange (bool &__x, bool __y, bool)
 {
     return 0 != __rw_atomic_exchange (
-                    _RWSTD_REINTERPRET_CAST (_RWSTD_BOOL_TYPE&, __x),
-                    _RWSTD_STATIC_CAST (_RWSTD_BOOL_TYPE, __y),
+                    reinterpret_cast< _RWSTD_BOOL_TYPE& >(__x),
+                    static_cast< _RWSTD_BOOL_TYPE >(__y),
                     false);
 }
 
@@ -115,36 +115,36 @@ namespace __rw {
 inline long
 __rw_atomic_preincrement (long &__x, bool)
 {
-    return __rw_atomic_preincrement (_RWSTD_REINTERPRET_CAST (int&, __x),
+    return __rw_atomic_preincrement (reinterpret_cast< int& >(__x),
                                      false);
 }
 
 inline unsigned long
 __rw_atomic_preincrement (unsigned long &__x, bool)
 {
-    return __rw_atomic_preincrement (_RWSTD_REINTERPRET_CAST (int&, __x),
+    return __rw_atomic_preincrement (reinterpret_cast< int& >(__x),
                                      false);
 }
 
 inline long
 __rw_atomic_predecrement (long &__x, bool)
 {
-    return __rw_atomic_predecrement (_RWSTD_REINTERPRET_CAST (int&, __x),
+    return __rw_atomic_predecrement (reinterpret_cast< int& >(__x),
                                      false);
 }
 
 inline unsigned long
 __rw_atomic_predecrement (unsigned long &__x, bool)
 {
-    return __rw_atomic_predecrement (_RWSTD_REINTERPRET_CAST (int&, __x),
+    return __rw_atomic_predecrement (reinterpret_cast< int& >(__x),
                                      false);
 }
 
 inline long
 __rw_atomic_exchange (long &__x, long __y, bool)
 {
-    return __rw_atomic_exchange (_RWSTD_REINTERPRET_CAST (int&, __x),
-                                 _RWSTD_STATIC_CAST (int, __y),
+    return __rw_atomic_exchange (reinterpret_cast< int& >(__x),
+                                 static_cast< int >(__y),
                                  false);
 }
 
@@ -152,8 +152,8 @@ inline unsigned long
 __rw_atomic_exchange (unsigned long &__x,
                       unsigned long __y, bool)
 {
-    return __rw_atomic_exchange (_RWSTD_REINTERPRET_CAST (int&, __x),
-                                 _RWSTD_STATIC_CAST (int, __y),
+    return __rw_atomic_exchange (reinterpret_cast< int& >(__x),
+                                 static_cast< int >(__y),
                                  false);
 }
 
@@ -176,36 +176,36 @@ namespace __rw {
 inline _RWSTD_LONG_LONG
 __rw_atomic_preincrement (_RWSTD_LONG_LONG &__x, bool)
 {
-    return __rw_atomic_preincrement (_RWSTD_REINTERPRET_CAST (long&, __x),
+    return __rw_atomic_preincrement (reinterpret_cast< long& >(__x),
                                      false);
 }
 
 inline unsigned _RWSTD_LONG_LONG
 __rw_atomic_preincrement (unsigned _RWSTD_LONG_LONG &__x, bool)
 {
-    return __rw_atomic_preincrement (_RWSTD_REINTERPRET_CAST (long&, __x),
+    return __rw_atomic_preincrement (reinterpret_cast< long& >(__x),
                                      false);
 }
 
 inline _RWSTD_LONG_LONG
 __rw_atomic_predecrement (_RWSTD_LONG_LONG &__x, bool)
 {
-    return __rw_atomic_predecrement (_RWSTD_REINTERPRET_CAST (long&, __x),
+    return __rw_atomic_predecrement (reinterpret_cast< long& >(__x),
                                      false);
 }
 
 inline unsigned _RWSTD_LONG_LONG
 __rw_atomic_predecrement (unsigned _RWSTD_LONG_LONG &__x, bool)
 {
-    return __rw_atomic_predecrement (_RWSTD_REINTERPRET_CAST (long&, __x),
+    return __rw_atomic_predecrement (reinterpret_cast< long& >(__x),
                                      false);
 }
 
 inline _RWSTD_LONG_LONG
 __rw_atomic_exchange (_RWSTD_LONG_LONG &__x, _RWSTD_LONG_LONG __y, bool)
 {
-    return __rw_atomic_exchange (_RWSTD_REINTERPRET_CAST (long&, __x),
-                                 _RWSTD_STATIC_CAST (long, __y),
+    return __rw_atomic_exchange (reinterpret_cast< long& >(__x),
+                                 static_cast< long >(__y),
                                  false);
 }
 
@@ -213,8 +213,8 @@ inline unsigned _RWSTD_LONG_LONG
 __rw_atomic_exchange (unsigned _RWSTD_LONG_LONG &__x,
                       unsigned _RWSTD_LONG_LONG __y, bool)
 {
-    return __rw_atomic_exchange (_RWSTD_REINTERPRET_CAST (long&, __x),
-                                 _RWSTD_STATIC_CAST (long, __y),
+    return __rw_atomic_exchange (reinterpret_cast< long& >(__x),
+                                 static_cast< long >(__y),
                                  false);
 }
 

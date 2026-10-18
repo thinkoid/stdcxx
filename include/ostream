@@ -149,13 +149,13 @@ public:
     basic_ostream& operator<< (short);
 
     basic_ostream& operator<< (unsigned short __val) {
-        return *this << _RWSTD_STATIC_CAST (unsigned long, __val);
+        return *this << static_cast< unsigned long >(__val);
     }
 
     basic_ostream& operator<< (int);
 
     basic_ostream& operator<< (unsigned int __val) {
-        return *this << _RWSTD_STATIC_CAST (unsigned long, __val);
+        return *this << static_cast< unsigned long >(__val);
     }
 
     basic_ostream& operator<< (long __val) {
@@ -167,7 +167,7 @@ public:
     }
 
     basic_ostream& operator<< (float __val) {
-        return *this << _RWSTD_STATIC_CAST (double, __val);
+        return *this << static_cast< double >(__val);
     }
 
     basic_ostream& operator<< (double __val) {
@@ -248,7 +248,7 @@ basic_ostream<_CharT, _Traits>::operator<< (short __val)
     // i.e., -1 must format as hex "ffff" when (sizeof (short) == 2),
     // and not, for example, "ffffffff" in ILP32 (see lwg issue 117)
     const long __lval = !__bf || this->dec == __bf ?
-        long (__val) : long (_RWSTD_STATIC_CAST (unsigned short, __val));
+        long (__val) : long (static_cast< unsigned short >(__val));
 
     return __rw::__rw_insert (*this, __lval);
 }
@@ -264,7 +264,7 @@ basic_ostream<_CharT, _Traits>::operator<< (int __val)
     // i.e., -1 must format as hex "ffffffff" when (sizeof (int) == 4),
     // and not, for example "ffffffffffffffff" in LP64 (lwg issue 117)
     const long __lval = !__bf || this->dec == __bf ?
-        long (__val) : long (_RWSTD_STATIC_CAST (unsigned int, __val));
+        long (__val) : long (static_cast< unsigned int >(__val));
 
     return __rw::__rw_insert (*this, __lval);
 }
@@ -297,7 +297,7 @@ basic_ostream<_CharT, _Traits>::_C_opfx ()
     }
 
     if (_C_is_sync ())
-        __rw::__rw_fflush (_RWSTD_STATIC_CAST (ios_base*, this), 0);
+        __rw::__rw_fflush (static_cast< ios_base* >(this), 0);
 
     return *this;
 }
@@ -424,7 +424,7 @@ template <class _Traits>
 inline basic_ostream<char, _Traits>&
 operator<< (basic_ostream<char, _Traits> &__strm, unsigned char __c)
 {
-    return __strm << _RWSTD_STATIC_CAST (char, __c);
+    return __strm << static_cast< char >(__c);
 }
 
 
@@ -432,7 +432,7 @@ template <class _Traits>
 inline basic_ostream<char, _Traits>&
 operator<< (basic_ostream<char, _Traits> &__strm, signed char __c)
 {
-    return __strm << _RWSTD_STATIC_CAST (char, __c);
+    return __strm << static_cast< char >(__c);
 }
 
 
@@ -440,7 +440,7 @@ template <class _Traits>
 inline basic_ostream<char, _Traits>&
 operator<< (basic_ostream<char, _Traits> &__strm, const unsigned char *__s)
 {
-    return __strm << _RWSTD_REINTERPRET_CAST (const char*, __s);
+    return __strm << reinterpret_cast< const char* >(__s);
 }
 
 
@@ -448,7 +448,7 @@ template <class _Traits>
 inline basic_ostream<char, _Traits>&
 operator<< (basic_ostream<char, _Traits>& __strm, const signed char *__s)
 {
-    return __strm << _RWSTD_REINTERPRET_CAST (const char*, __s);
+    return __strm << reinterpret_cast< const char* >(__s);
 }
 
 

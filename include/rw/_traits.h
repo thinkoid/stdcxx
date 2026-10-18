@@ -265,8 +265,8 @@ struct char_traits
 
     static char_type*
     copy (char_type *__dst, const char_type *__src, _RWSTD_SIZE_T __n) {
-        _RWSTD_MEMCPY (_RWSTD_STATIC_CAST (void*, __dst),
-                       _RWSTD_STATIC_CAST (const void*, __src),
+        _RWSTD_MEMCPY (static_cast< void* >(__dst),
+                       static_cast< const void* >(__src),
                        __n * sizeof (char_type));
         return __dst;
     }
@@ -289,12 +289,12 @@ struct char_traits
 
     static char_type to_char_type (const int_type& __c) {
         // cast to prevent warnings for unusual types
-        return _RWSTD_STATIC_CAST (char_type, __c);
+        return static_cast< char_type >(__c);
     }
       
     static int_type to_int_type (const char_type& __c) {
         // cast to prevent warnings for unusual types
-        return _RWSTD_STATIC_CAST (int_type, __c);
+        return static_cast< int_type >(__c);
     }
 };
 
@@ -324,8 +324,8 @@ struct char_traits<char>
     static bool lt (const char_type& __c1, const char_type& __c2) {
         // lwg issue 467: cast arguments to unsigned char
         // to get the same result as memcmp(&c1, &c2) < 0
-        return   _RWSTD_STATIC_CAST (unsigned char, __c1)
-               < _RWSTD_STATIC_CAST (unsigned char, __c2);
+        return   static_cast< unsigned char >(__c1)
+               < static_cast< unsigned char >(__c2);
     }
 
     static int
@@ -338,9 +338,8 @@ struct char_traits<char>
         // cast to const void* used to get around a gcc 2.95 bug
         // that prevents a static_cast from void* --> const T*
         // (only occurs if memchr() isn't overloaded on const)
-        return _RWSTD_STATIC_CAST (
-            const char_type*, (const void*)_RWSTD_MEMCHR (
-                __s, _RWSTD_STATIC_CAST (unsigned char, __c), __n));
+        return static_cast< const char_type* >((const void*)_RWSTD_MEMCHR (
+__s, static_cast< unsigned char >(__c), __n));
     }
 
     static _RWSTD_SIZE_T length (const char_type *__s) {
@@ -374,12 +373,12 @@ struct char_traits<char>
     }
                         
     static char_type to_char_type (const int_type& __c) {
-        return _RWSTD_STATIC_CAST (char_type, __c);
+        return static_cast< char_type >(__c);
     }
       
     static int_type to_int_type (const char_type& __c) {
         // make sure (signed char)'\xff' converts to 255 and not -1
-        return _RWSTD_STATIC_CAST (unsigned char, __c);
+        return static_cast< unsigned char >(__c);
     }
 };
 
@@ -419,15 +418,15 @@ struct char_traits<wchar_t>
 
     static _RWSTD_SIZE_T length (const char_type *__s) {
         // [harmless] cast necessary on CygWin
-        return _RWSTD_WCSLEN (_RWSTD_CONST_CAST (char_type*, __s));
+        return _RWSTD_WCSLEN (const_cast< char_type* >(__s));
     }
       
     static const char_type*
     find (const char_type* __s, _RWSTD_SIZE_T __n, const char_type& __c) {
         // const cast in case of a const-incorrect wmemchr()
-        return _RWSTD_STATIC_CAST (const char_type*,
-                   _RWSTD_WMEMCHR (_RWSTD_CONST_CAST (char_type*, __s),
-                                   __c, __n));
+        return static_cast< const char_type* >(
+            _RWSTD_WMEMCHR (const_cast< char_type* >(__s),
+                            __c, __n));
     }
 
     static char_type*

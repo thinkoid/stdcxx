@@ -89,12 +89,12 @@ static void*
 race_func (void*)
 {
     // cast nstarted to int& (see STDCXX-792)
-    _RWSTD_ATOMIC_PREINCREMENT (_RWSTD_CONST_CAST (int&, nstarted), false);
+    _RWSTD_ATOMIC_PREINCREMENT (const_cast< int& >(nstarted), false);
 
     // spin until all threads have been created so that they update
     // the reference counts of the base's facets at the same time
     while (_RWSTD_ATOMIC_LOAD_RELAXED (
-               _RWSTD_CONST_CAST (int&, nstarted), false) < opt_nthreads);
+               const_cast< int& >(nstarted), false) < opt_nthreads);
 
     // each locale built from the base takes a reference to each of
     // its facets, and its destruction returns them

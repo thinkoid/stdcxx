@@ -219,7 +219,7 @@ __rw_bit_count (const unsigned long *bits,
 
     typedef unsigned char UChar;
 
-    const UChar*       pbyte = _RWSTD_REINTERPRET_CAST (const UChar*, bits);
+    const UChar*       pbyte = reinterpret_cast< const UChar* >(bits);
     const UChar* const pend  = pbyte + size * sizeof (unsigned long);
 
     for ( ; pbyte != pend; ++pbyte)

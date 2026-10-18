@@ -59,9 +59,9 @@ struct Streambuf: std::basic_streambuf<charT, Traits>
           fail_after_ (-1),    // never fail
           throw_after_ (-1),   // never throw
           end_ (gend) {
-        this->setg (_RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gbeg));
+        this->setg (const_cast< charT* >(gbeg),
+                    const_cast< charT* >(gbeg),
+                    const_cast< charT* >(gbeg));
     }
 
     const charT* pubeback () const {

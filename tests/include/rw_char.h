@@ -150,7 +150,7 @@ public:
         // verify rhs is valid 
         // const_cast used to avoid MSVC 7.0 error C2446:
         // '==' : no conversion from 'const int *' to 'void *const '
-        RW_ASSERT (_RWSTD_CONST_CAST (const void*, rhs.ptr_) == &rhs.i_);
+        RW_ASSERT (const_cast< const void* >(rhs.ptr_) == &rhs.i_);
         RW_ASSERT (-1 <= rhs.i_  && rhs.i_ < 257);   // i may be invalid
     }
 
@@ -159,7 +159,7 @@ public:
     void operator= (const UserInt &rhs) {
         RW_ASSERT (ptr_     == &i_);                // verify *this is valid
         // verify rhs is valid
-        RW_ASSERT (_RWSTD_CONST_CAST (const void*, rhs.ptr_) == &rhs.i_);
+        RW_ASSERT (const_cast< const void* >(rhs.ptr_) == &rhs.i_);
         RW_ASSERT (-1 <= i_     && i_     < 257);   // i may be invalid
         RW_ASSERT (-1 <  rhs.i_ && rhs.i_ < 257);   // rhs.i must ve valid
 
@@ -196,9 +196,9 @@ public:
 
     bool equal (const UserInt &rhs) const {
         // verify *this is valid
-        RW_ASSERT (_RWSTD_CONST_CAST (const void*, ptr_) == &i_);
+        RW_ASSERT (const_cast< const void* >(ptr_) == &i_);
         // verify rhs is valid
-        RW_ASSERT (_RWSTD_CONST_CAST (const void*, rhs.ptr_) == &rhs.i_);
+        RW_ASSERT (const_cast< const void* >(rhs.ptr_) == &rhs.i_);
         RW_ASSERT (-1 < i_     && i_     < 257);   // i must ve valid
         RW_ASSERT (-1 < rhs.i_ && rhs.i_ < 257);   // rhs.i must be valid
 

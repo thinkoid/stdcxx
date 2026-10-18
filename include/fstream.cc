@@ -393,7 +393,7 @@ overflow (int_type __c /* = eof () */)
         else {
             // call xsputn() with a special value to have it flush
             // the controlled sequence to the file
-            __buf    = _RWSTD_REINTERPRET_CAST (char_type*, this);
+            __buf    = reinterpret_cast< char_type* >(this);
             __nchars = this->pptr () - this->pbase ();
         }
 
@@ -437,7 +437,7 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
     const _RWSTD_STREAMSIZE __navail = this->epptr () - this->pptr ();
 
     const char_type* const __special =
-        _RWSTD_REINTERPRET_CAST (char_type*, this);
+        reinterpret_cast< char_type* >(this);
 
     if (__buf == __special) {
         __buf = this->pbase ();
@@ -626,7 +626,7 @@ setbuf (char_type *__buf, streamsize __ssize)
         return 0;
 
     const _RWSTD_SIZE_T __bufsize =
-        _RWSTD_STATIC_CAST (_RWSTD_SIZE_T, __ssize);
+        static_cast< _RWSTD_SIZE_T >(__ssize);
 
     // sync the buffer to the external file so it can be deallocated
     if ((this->gptr () || this->pptr ()) && is_open () && sync () != 0)

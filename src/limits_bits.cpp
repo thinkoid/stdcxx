@@ -184,7 +184,7 @@ _RWSTD_EXPORT extern const float __rw_flt_infinity =
 
 #  else   // !defined (INFINITY)
 
-_RWSTD_STATIC_CAST (float, atof ("INF"));
+static_cast< float >(atof ("INF"));
 
 #  endif   // defined (INFINITY)
 
@@ -208,7 +208,7 @@ _RWSTD_EXPORT extern const float __rw_flt_qNaN =
 
 #  else   // !defined (NAN)
 
-_RWSTD_STATIC_CAST (float, atof ("NAN"));
+static_cast< float >(atof ("NAN"));
 
 #  endif   // defined (NAN)
 

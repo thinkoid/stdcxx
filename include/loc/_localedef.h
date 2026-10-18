@@ -59,21 +59,21 @@ struct __rw_lower_elm
 // returns a pointer to a character at the given byte offset
 // from the end of the structure
 #define _RWSTD_CHAR_ARRAY(off)   \
-    (_RWSTD_REINTERPRET_CAST (const char*, this + 1) + (off))
+    (reinterpret_cast< const char* >(this + 1) + (off))
 
 // returns a pointer to a wide character at the given byte offset
 // from the end of the structure
 #define _RWSTD_WCHAR_T_ARRAY(off)   \
-    _RWSTD_REINTERPRET_CAST (const wchar_t*, _RWSTD_CHAR_ARRAY (off))
+    reinterpret_cast< const wchar_t* >(_RWSTD_CHAR_ARRAY (off))
 
 #define _RWSTD_UINT_ARRAY(off)    \
-    _RWSTD_REINTERPRET_CAST (const _RWSTD_UINT32_T*, _RWSTD_CHAR_ARRAY (off))
+    reinterpret_cast< const _RWSTD_UINT32_T* >(_RWSTD_CHAR_ARRAY (off))
 
 // returns a pointer to the i-th element of an array
 // at the given byte offset from the end of the structure
 #define _RWSTD_ARRAY_ELM(T, off, i)                        \
-    _RWSTD_REINTERPRET_CAST (const T*,                     \
-        (  _RWSTD_REINTERPRET_CAST (const char*, this + 1) \
+    reinterpret_cast< const T* >(                          \
+        (  reinterpret_cast< const char* >(this + 1)       \
          + (off) + (i) * sizeof (T)))
 
 
@@ -748,7 +748,7 @@ __rw_utf8toucs4 (_RWSTD_INT32_T *ret, const char *from, const char *from_end)
     typedef _RWSTD_INT32_T _Int32;
 
     const _RWSTD_UINT8_T* const byte =
-        _RWSTD_REINTERPRET_CAST (const _RWSTD_UINT8_T*, from);
+        reinterpret_cast< const _RWSTD_UINT8_T* >(from);
 
     if (byte [0] < 0x80U) {
         *ret = _Int32 (byte [0]);

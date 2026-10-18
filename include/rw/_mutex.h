@@ -278,7 +278,7 @@ __rw_mutex_base& __rw_get_static_mutex (_TypeT*)
 
     __rw_once (&__once, __mutex_init_t::_C_construct);
 
-    return _RWSTD_REINTERPRET_CAST (__rw_mutex_base&, __mutex_buf);
+    return reinterpret_cast< __rw_mutex_base& >(__mutex_buf);
 }
 
 #  endif   //_RWSTD_NO_STATIC_MUTEX_INIT

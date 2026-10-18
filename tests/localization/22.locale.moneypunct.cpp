@@ -77,9 +77,9 @@ std::lconv* lconvdup (const std::lconv *plconv)
 
     const std::size_t bufsize = sizeof (std::lconv) + total_sz;
 
-    char *pbuf = _RWSTD_STATIC_CAST (char*, operator new (bufsize));
+    char *pbuf = static_cast< char* >(operator new (bufsize));
 
-    std::lconv *plconv2 = _RWSTD_REINTERPRET_CAST (std::lconv*, pbuf);
+    std::lconv *plconv2 = reinterpret_cast< std::lconv* >(pbuf);
 
     plconv2->decimal_point = (pbuf += sizeof (std::lconv));
     std::memcpy (pbuf, plconv->decimal_point, decimal_point_sz);
@@ -256,7 +256,7 @@ runTest()
             char buf [256], *pbuf = buf;
             const std::size_t size = std::strlen (mixed) + 1;
             if (sizeof buf < size)
-                pbuf = _RWSTD_STATIC_CAST (char*, std::malloc (size));
+                pbuf = static_cast< char* >(std::malloc (size));
 
             if (!rw_assert (0 != pbuf, 0, __LINE__,
                             "malloc (%zu) failed", size))
@@ -374,7 +374,7 @@ check_moneypunct (const char *locname)
     // doc/notes/analysis-moneypunct-locale-name.md.
     const std::size_t size = std::strlen (loc) + 1;
     if (sizeof buf < size)
-        pbuf = _RWSTD_STATIC_CAST (char*, std::malloc (size));
+        pbuf = static_cast< char* >(std::malloc (size));
 
     if (!rw_assert (0 != pbuf, 0, __LINE__,
                     "malloc (%zu) failed", size))
@@ -472,7 +472,7 @@ check_moneypunct (const char *locname)
         check_format (*plconv);
 
         // cast away constness to work around compiler bugs (e.g., MSVC 6)
-        operator delete (_RWSTD_CONST_CAST (std::lconv*, plconv));
+        operator delete (const_cast< std::lconv* >(plconv));
     }
     _CATCH (...) {
         success = false;

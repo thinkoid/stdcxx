@@ -69,7 +69,7 @@ _rw_setopt_trace_mask (int argc, char *argv[])
             "the severity would be if it were active.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -195,7 +195,7 @@ _rw_setopt_trace (int argc, char *argv[])
             "option for details.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }

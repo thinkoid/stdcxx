@@ -126,7 +126,7 @@ template <class T>
 void
 delete_array (const T *array, std::size_t)
 {
-    T* const a = _RWSTD_CONST_CAST (T*, array);
+    T* const a = const_cast< T* >(array);
     delete[] a;
 }
 
@@ -144,7 +144,7 @@ T value (const T &val) { return val; }
 void
 delete_array (const UserClass *array, std::size_t nelems)
 {
-    UserClass* const a = _RWSTD_CONST_CAST (UserClass*, array);
+    UserClass* const a = const_cast< UserClass* >(array);
     
     for (std::size_t i = 0; i != nelems; ++i)
         (a + i)->~UserClass ();
@@ -212,7 +212,7 @@ make_array (const UserClass*, const char *s, std::size_t *psize)
                 static const std::size_t size = sizeof (UserClass);
 
                 void* const raw = operator new ((bufsize + 1) * 2 * size);
-                UserClass* const tmp = _RWSTD_STATIC_CAST (UserClass*, raw);
+                UserClass* const tmp = static_cast< UserClass* >(raw);
 
                 for (std::size_t i = 0; i != nelems; ++i)
                     new (tmp +i) UserClass (buf [i]);

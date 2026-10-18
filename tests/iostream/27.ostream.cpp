@@ -163,7 +163,7 @@ template <class charT>
 bool
 test_streambuf<charT>::test (streambuf_failure which) const
 {
-    ++_RWSTD_CONST_CAST (test_streambuf*, this)->ncalls_ [which];
+    ++const_cast< test_streambuf* >(this)->ncalls_ [which];
 
     if (ncalls_ [which] == fail_when_ && throws_ == which)
         throw which;
@@ -319,7 +319,7 @@ template <class charT>
 typename test_num_put<charT>::iter_type
 test_num_put<charT>::test (iter_type it, num_put_overload which) const
 {
-    ++_RWSTD_CONST_CAST (test_num_put*, this)->ncalls_ [which];
+    ++const_cast< test_num_put* >(this)->ncalls_ [which];
 
     if (throws_ == which)
         throw which;

@@ -172,7 +172,7 @@ public:
 
     // D.7.2.2, p1
     strstreambuf* rdbuf() const {
-        return _RWSTD_CONST_CAST (strstreambuf*, &_C_sb);
+        return const_cast< strstreambuf* >(&_C_sb);
     }
 
     // D.7.2.1, p1, and p2
@@ -202,7 +202,7 @@ class _RWSTD_EXPORT ostrstream
 public:
   
     strstreambuf* rdbuf() const {
-        return _RWSTD_CONST_CAST (strstreambuf*, &_C_sb);
+        return const_cast< strstreambuf* >(&_C_sb);
     }
 
     ostrstream (): _Base (rdbuf ()) { }
@@ -242,7 +242,7 @@ class _RWSTD_EXPORT strstream
 public:
   
     strstreambuf* rdbuf() const {
-        return _RWSTD_CONST_CAST (strstreambuf*, &_C_sb);
+        return const_cast< strstreambuf* >(&_C_sb);
     }
 
     strstream (): _Base (rdbuf ()), _C_sb () { }

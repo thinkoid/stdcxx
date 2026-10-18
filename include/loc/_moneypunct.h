@@ -124,7 +124,7 @@ protected:
     // 22.2.6.3.1, p3
     virtual string do_grouping () const {
         return
-            _RWSTD_REINTERPRET_CAST (const char*, _C_get (this, __rw::__rw_gr));
+            reinterpret_cast< const char* >(_C_get (this, __rw::__rw_gr));
     }
 
     // 22.2.6.3.1, p4
@@ -144,20 +144,20 @@ protected:
 
     // 22.2.6.3.1, p6
     virtual int do_frac_digits () const {
-        return _RWSTD_STATIC_CAST(int, _RWSTD_REINTERPRET_CAST (_RWSTD_SIZE_T, 
-                                           _C_get (this, __rw::__rw_fd)));
+        return static_cast< int >(reinterpret_cast< _RWSTD_SIZE_T >(
+            _C_get (this, __rw::__rw_fd)));
     }
 
     // 22.2.6.3.1, p7
     virtual pattern do_pos_format () const {
-        return *_RWSTD_REINTERPRET_CAST (const pattern*,
-                                         _C_get (this, __rw::__rw_pf));
+        return *reinterpret_cast< const pattern* >(
+            _C_get (this, __rw::__rw_pf));
     }
 
     // 22.2.6.3.1, p5
     virtual pattern do_neg_format () const {
-        return *_RWSTD_REINTERPRET_CAST (const pattern*,
-                                         _C_get (this, __rw::__rw_nf));
+        return *reinterpret_cast< const pattern* >(
+            _C_get (this, __rw::__rw_nf));
     }
 
 private:
@@ -195,8 +195,8 @@ moneypunct<_CharT, _Intl>::_C_get (const __rw::__rw_facet *__pf, int __fl)
 
     __fl |= __rw::__rw_mon;
 
-    return _RWSTD_STATIC_CAST (const char_type*,
-                               __rw::__rw_get_punct(__pf, __fl, char_type()));
+    return static_cast< const char_type* >(
+        __rw::__rw_get_punct(__pf, __fl, char_type()));
 }
 
 

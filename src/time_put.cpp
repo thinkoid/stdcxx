@@ -388,7 +388,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     if (pdata) {
 
         const __rw_time_t* const pun =
-            _RWSTD_STATIC_CAST (const __rw_time_t*, pdata);
+            static_cast< const __rw_time_t* >(pdata);
 
         switch (member) {
         case __rw_abday: return pun->abday (inx, wide);
@@ -430,9 +430,9 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
  
     // allocate memory using operator new to avoid mismatch with
     // facet destructor
-    char *pbuf = _RWSTD_STATIC_CAST (char*, ::operator new (newsize));
+    char *pbuf = static_cast< char* >(::operator new (newsize));
 
-    __rw_time_t *pun = _RWSTD_REINTERPRET_CAST (__rw_time_t*, pbuf);
+    __rw_time_t *pun = reinterpret_cast< __rw_time_t* >(pbuf);
 
     // zero out all members
     memset (pun, 0, sizeof *pun);
@@ -443,7 +443,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 #ifndef _RWSTD_NO_WCHAR_T
 
     // reserve offset 0 for the empty string (both narrow and wide)
-    *_RWSTD_REINTERPRET_CAST (wchar_t*, pbuf) = L'\0';
+    *reinterpret_cast< wchar_t* >(pbuf) = L'\0';
 
     size_t off = sizeof (wchar_t);
 
@@ -559,7 +559,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     };
 
     // points to the first __rw_time_t data member
-    _RWSTD_UINT32_T *pmem = _RWSTD_REINTERPRET_CAST (_RWSTD_UINT32_T*, pun);
+    _RWSTD_UINT32_T *pmem = reinterpret_cast< _RWSTD_UINT32_T* >(pun);
 
     const bool c_locale = 'C' == locname [0] && '\0' == locname [1];
 
@@ -587,13 +587,13 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
             // reallocate, again using operator new to avoid mismatch
             // with facet destructor
             char* const tmp = 
-                _RWSTD_STATIC_CAST(char*, ::operator new (tmpsize));
+                static_cast< char* >(::operator new (tmpsize));
             memcpy (tmp, pun, sizeof *pun + off);
 
             ::operator delete (pun);
 
-            pun      = _RWSTD_REINTERPRET_CAST (__rw_time_t*, tmp);
-            pmem     = _RWSTD_REINTERPRET_CAST (_RWSTD_UINT32_T*, pun);
+            pun      = reinterpret_cast< __rw_time_t* >(tmp);
+            pmem     = reinterpret_cast< _RWSTD_UINT32_T* >(pun);
             pbuf     = tmp + sizeof *pun;
             bufsize  = bufsize * 2 + estsize;
         }
@@ -601,7 +601,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         // copy string to the allocated buffer and set its offset
         memcpy (pbuf + off, str, size);
         pmem [nl_items [i].moff [0]] =
-            _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+            static_cast< _RWSTD_UINT32_T >(off);
         off += size;
 
 #ifndef _RWSTD_NO_WCHAR_T
@@ -613,7 +613,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 
         // widen the narrow (multibyte) string into the allocated buffer
         // (at an appropriately aligned offset) and set its offset
-        wchar_t* const pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+        wchar_t* const pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
         size = mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
 
         if (_RWSTD_SIZE_MAX == size) {
@@ -627,7 +627,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         }
 
         pmem [nl_items [i].moff [1]] =
-            _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+            static_cast< _RWSTD_UINT32_T >(off);
         off += size * sizeof (wchar_t);
 
 #endif   // _RWSTD_NO_WCHAR_T
@@ -682,13 +682,13 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         len = strftime (pbuf + off, bufsize - off, "%a", &t);
 
         pun->abday_off [0][t.tm_wday]  =
-            _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+            static_cast< _RWSTD_UINT32_T >(off);
         off                           += len + 1;
 
         len = strftime (pbuf + off, bufsize - off, "%A", &t);
 
         pun->day_off [0][t.tm_wday]  =
-            _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+            static_cast< _RWSTD_UINT32_T >(off);
         off                         += len + 1;
 
 #  ifndef _RWSTD_NO_WCHAR_T
@@ -698,17 +698,17 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         if (align)
             off += sizeof (wchar_t) - align;
 
-        wchar_t *pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+        wchar_t *pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
         len = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%a", &t);
 
         pun->abday_off [1][t.tm_wday]  =
-            _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+            static_cast< _RWSTD_UINT32_T >(off);
         off                           += (len + 1) * sizeof (wchar_t);
 
-        pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+        pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
         len   = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%A", &t);
 
-        pun->day_off [1][t.tm_wday] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+        pun->day_off [1][t.tm_wday] = static_cast< _RWSTD_UINT32_T >(off);
         off                         += (len + 1) * sizeof (wchar_t);
 
 #  endif   // _RWSTD_NO_WCHAR_T
@@ -721,12 +721,12 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         len = strftime (pbuf + off, bufsize - off, "%b", &t);
 
         pun->abmon_off [0][t.tm_mon]  = 
-            _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+            static_cast< _RWSTD_UINT32_T >(off);
         off                          += len + 1;
 
         len = strftime (pbuf + off, bufsize - off, "%B", &t);
 
-        pun->mon_off [0][t.tm_mon]  = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+        pun->mon_off [0][t.tm_mon]  = static_cast< _RWSTD_UINT32_T >(off);
         off                        += len + 1;
 
 #  ifndef _RWSTD_NO_WCHAR_T
@@ -736,17 +736,17 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         if (align)
             off += sizeof (wchar_t) - align;
 
-        wchar_t *pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+        wchar_t *pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
         len = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%b", &t);
 
         pun->abmon_off [1][t.tm_mon]  =
-            _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+            static_cast< _RWSTD_UINT32_T >(off);
         off                          += (len + 1) * sizeof (wchar_t);
 
-        pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+        pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
         len   = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%B", &t);
 
-        pun->mon_off [1][t.tm_mon]  = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+        pun->mon_off [1][t.tm_mon]  = static_cast< _RWSTD_UINT32_T >(off);
         off                        += (len + 1) * sizeof (wchar_t);
 
 #  endif   // _RWSTD_NO_WCHAR_T
@@ -756,22 +756,22 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     // copy AM/PM designations
     t.tm_hour = 1;
     len = strftime (pbuf + off, bufsize - off, "%p", &t);
-    pun->am_pm_off [0][0] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->am_pm_off [0][0] = static_cast< _RWSTD_UINT32_T >(off);
     off += len + 1;
     
     t.tm_hour = 13;
     len = strftime (pbuf + off, bufsize - off, "%p", &t);
-    pun->am_pm_off [0][1] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->am_pm_off [0][1] = static_cast< _RWSTD_UINT32_T >(off);
     off += len + 1;
 
     // determine the locale's "%x" format (date representation)
     len                 = __rw_get_date_fmat (pbuf + off);
-    pun->d_fmt_off [0]  = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->d_fmt_off [0]  = static_cast< _RWSTD_UINT32_T >(off);
     off                += len + 1;
     
     // determine the locale's "%X" format (time representation)
     len                 = __rw_get_time_fmat (pbuf + off);
-    pun->t_fmt_off [0]  = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->t_fmt_off [0]  = static_cast< _RWSTD_UINT32_T >(off);
     off                += len + 1;
 
     // FIXME: determine "%r" at runtime (just like "%x" and "%X")
@@ -782,7 +782,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 
     len = sizeof t_fmt_ampm_fmat;
     memcpy (pbuf + off, t_fmt_ampm_fmat, len);
-    pun->t_fmt_ampm_off [0]  = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->t_fmt_ampm_off [0]  = static_cast< _RWSTD_UINT32_T >(off);
     off                     += len;
 
     // FIXME: determine "%c" at runtime (just like "%x" and "%X"),
@@ -792,14 +792,14 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     static const char d_t_fmat[] = "%a %b %e %H:%M:%S %Y";
     len                  = sizeof d_t_fmat;
     memcpy (pbuf + off, d_t_fmat, len);
-    pun->d_t_fmt_off [0]  = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->d_t_fmt_off [0]  = static_cast< _RWSTD_UINT32_T >(off);
     off                  += len;
 
     // FIXME: determine "%Ec", "%EX", "%Ex"
     pbuf [off]               = '\0';
-    pun->era_d_t_fmt_off [0] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
-    pun->era_d_fmt_off [0]   = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
-    pun->era_t_fmt_off [0]   = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->era_d_t_fmt_off [0] = static_cast< _RWSTD_UINT32_T >(off);
+    pun->era_d_fmt_off [0]   = static_cast< _RWSTD_UINT32_T >(off);
+    pun->era_t_fmt_off [0]   = static_cast< _RWSTD_UINT32_T >(off);
     off                     += 1;
 
 #  ifndef _RWSTD_NO_WCHAR_T
@@ -813,20 +813,20 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     size_t      size;
 
     t.tm_hour = 1;
-    pwbuf     = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+    pwbuf     = reinterpret_cast< wchar_t* >(pbuf + off);
     len       = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%p", &t);
-    pun->am_pm_off [1][0] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->am_pm_off [1][0] = static_cast< _RWSTD_UINT32_T >(off);
     off += (len + 1) * sizeof (wchar_t);
     
     t.tm_hour = 13;
-    pwbuf     = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+    pwbuf     = reinterpret_cast< wchar_t* >(pbuf + off);
     len       = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%p", &t);
-    pun->am_pm_off [1][1] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->am_pm_off [1][1] = static_cast< _RWSTD_UINT32_T >(off);
     off += (len + 1) * sizeof (wchar_t);
 
     // convert "%x" to its wide equivalent
-    str   = _RWSTD_STATIC_CAST (const char*, pun->d_fmt (0));
-    pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+    str   = static_cast< const char* >(pun->d_fmt (0));
+    pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
     size  = mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
 
     if (_RWSTD_SIZE_MAX == size) {
@@ -839,12 +839,12 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         size += 1;
     }
 
-    pun->d_fmt_off [1] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->d_fmt_off [1] = static_cast< _RWSTD_UINT32_T >(off);
     off               += size * sizeof (wchar_t);
     
     // convert "%X" to its wide equivalent
-    str   = _RWSTD_STATIC_CAST (const char*, pun->t_fmt (0));
-    pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+    str   = static_cast< const char* >(pun->t_fmt (0));
+    pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
     size  = mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
 
     if (_RWSTD_SIZE_MAX == size) {
@@ -857,12 +857,12 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         size += 1;
     }
 
-    pun->t_fmt_off [1] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->t_fmt_off [1] = static_cast< _RWSTD_UINT32_T >(off);
     off               += size * sizeof (wchar_t);
 
     // convert "%c" to its wide equivalent
-    str   = _RWSTD_STATIC_CAST (const char*, pun->d_t_fmt (0));
-    pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+    str   = static_cast< const char* >(pun->d_t_fmt (0));
+    pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
     size  = mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
 
     if (_RWSTD_SIZE_MAX == size) {
@@ -875,12 +875,12 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         size += 1;
     }
 
-    pun->d_t_fmt_off [1] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->d_t_fmt_off [1] = static_cast< _RWSTD_UINT32_T >(off);
     off                 += size * sizeof (wchar_t);
 
     // convert "%r" to its wide equivalent
-    str   = _RWSTD_STATIC_CAST (const char*, pun->t_fmt_ampm (0));
-    pwbuf = _RWSTD_REINTERPRET_CAST (wchar_t*, pbuf + off);
+    str   = static_cast< const char* >(pun->t_fmt_ampm (0));
+    pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
     size  = mbstowcs (pwbuf, str, (bufsize - off) / sizeof (*pwbuf));
 
     if (_RWSTD_SIZE_MAX == size) {
@@ -893,7 +893,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         size += 1;
     }
 
-    pun->t_fmt_ampm_off [1] = _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, off);
+    pun->t_fmt_ampm_off [1] = static_cast< _RWSTD_UINT32_T >(off);
     off                    += size * sizeof (wchar_t);
 
 #  endif   // _RWSTD_NO_WCHAR_T
@@ -903,11 +903,11 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     // publish the data to threads that hold neither lock and read the
     // two members with acquire loads (__rw_facet::_C_data)
     _RWSTD_ATOMIC_STORE_RELEASE (
-        __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        __rw_access::_C_get_impdata (*const_cast< __rw_facet* >(pfacet)),
         pun, false);
 
     _RWSTD_ATOMIC_STORE_RELEASE (
-        __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        __rw_access::_C_get_impsize (*const_cast< __rw_facet* >(pfacet)),
         _RWSTD_SIZE_MAX, false);
 
     // call self recursively on already initialized `impdata'
@@ -956,8 +956,8 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
     case __rw_era_names: {
 
         const __rw_time_t* const ptime =
-            _RWSTD_STATIC_CAST (const __rw_time_t*,
-                                __rw_get_timepunct (pfacet, 0, 0));
+            static_cast< const __rw_time_t* >(
+                __rw_get_timepunct (pfacet, 0, 0));
 
         count = size_t (ptime->era_count ());
         break;
@@ -978,8 +978,8 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
     case __rw_alt_digits: {
 
         const __rw_time_t* const ptime =
-            _RWSTD_STATIC_CAST (const __rw_time_t*,
-                                __rw_get_timepunct (pfacet, 0, 0));
+            static_cast< const __rw_time_t* >(
+                __rw_get_timepunct (pfacet, 0, 0));
 
         count = size_t (ptime->alt_digits_count ());
         break;
@@ -1079,7 +1079,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
     hib = 0;
 
     const void** pv =
-        _RWSTD_REINTERPRET_CAST (const void**, names);
+        reinterpret_cast< const void** >(names);
 
     size_t cnt = 0;
 
@@ -1906,7 +1906,7 @@ use_tzset:
 
     // tzet() sets timezone to the difference, in seconds, between
     // Coordinated Universal Time (UTC) and local standard time
-    tpd.val = _RWSTD_STATIC_CAST (int, timezone / 60);
+    tpd.val = static_cast< int >(timezone / 60);
 
 #else   // if defined (_RWSTD_NO_TIMEZONE)
 
@@ -1979,11 +1979,11 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
     } null_fmt = { { 0 } };
 
     const __rw_time_t *ptime =
-        _RWSTD_STATIC_CAST (const __rw_time_t*, facet->_C_data ());
+        static_cast< const __rw_time_t* >(facet->_C_data ());
 
     if (!ptime)
-        ptime = _RWSTD_STATIC_CAST (const __rw_time_t*,
-                                    __rw_get_timepunct (facet, 0, 0));
+        ptime = static_cast< const __rw_time_t* >(
+            __rw_get_timepunct (facet, 0, 0));
 
     _RWSTD_ASSERT (0 != ptime);
 
@@ -2023,9 +2023,9 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 
         if (   !tpd.fmt
 #ifndef _RWSTD_NO_WCHAR_T
-            ||  (wide && !*_RWSTD_STATIC_CAST (const wchar_t*, tpd.fmt))
+            ||  (wide && !*static_cast< const wchar_t* >(tpd.fmt))
 #endif   // _RWSTD_NO_WCHAR_T
-            || (!wide && !*_RWSTD_STATIC_CAST (const char*, tpd.fmt)))
+            || (!wide && !*static_cast< const char* >(tpd.fmt)))
             tpd.fmt = ptime->d_t_fmt (wide);
 
         _RWSTD_ASSERT (0 != tpd.fmt);
@@ -2358,9 +2358,9 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 
         if (   !tpd.fmt
 #ifndef _RWSTD_NO_WCHAR_T
-            ||  (wide && !*_RWSTD_STATIC_CAST (const wchar_t*, tpd.fmt))
+            ||  (wide && !*static_cast< const wchar_t* >(tpd.fmt))
 #endif   // _RWSTD_NO_WCHAR_T
-            || (!wide && !*_RWSTD_STATIC_CAST (const char*, tpd.fmt)))
+            || (!wide && !*static_cast< const char* >(tpd.fmt)))
             tpd.fmt = ptime->d_fmt (wide);
 
         break;
@@ -2374,9 +2374,9 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 
         if (   !tpd.fmt
 #ifndef _RWSTD_NO_WCHAR_T
-            ||  (wide && !*_RWSTD_STATIC_CAST (const wchar_t*, tpd.fmt))
+            ||  (wide && !*static_cast< const wchar_t* >(tpd.fmt))
 #endif   // _RWSTD_NO_WCHAR_T
-            || (!wide && !*_RWSTD_STATIC_CAST (const char*, tpd.fmt)))
+            || (!wide && !*static_cast< const char* >(tpd.fmt)))
             tpd.fmt = ptime->t_fmt (wide);
 
         break;
@@ -2532,20 +2532,20 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
         // retrieve the alternative numeric symbols (if any)
 
         const __rw_time_t *ptime =
-            _RWSTD_STATIC_CAST (const __rw_time_t*, facet->_C_data ());
+            static_cast< const __rw_time_t* >(facet->_C_data ());
 
         _RWSTD_ASSERT (0 != ptime);
 
         const _RWSTD_UINT32_T ndigits = ptime->alt_digits_count ();
 
         const _RWSTD_UINT32_T altval =
-            _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, tpd.altval);
+            static_cast< _RWSTD_UINT32_T >(tpd.altval);
 
         if (altval < ndigits) {
 
             // format using alternative numeric symbols
             const char* digit =
-               _RWSTD_STATIC_CAST (const char*, ptime->alt_digits (altval, 0));
+               static_cast< const char* >(ptime->alt_digits (altval, 0));
 
             _RWSTD_ASSERT (digit);
 
@@ -2579,7 +2579,7 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
         if (tpd.fmt) {
 
             const char* const fmtstr =
-                _RWSTD_STATIC_CAST (const char*, tpd.fmt);
+                static_cast< const char* >(tpd.fmt);
 
             return __rw_fmt_time (facet, buf, bufsize, flags,
                                   fill, tmb, fmtstr);
@@ -2588,7 +2588,7 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
         if (tpd.str) {
             // copy data if available
 
-            const char *src = _RWSTD_STATIC_CAST (const char*, tpd.str);
+            const char *src = static_cast< const char* >(tpd.str);
 
             for (char *dst = buf; *src && res < bufsize; ++src, ++dst, ++res)
                 *dst = *src;
@@ -2632,7 +2632,7 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
     if (_RWSTD_INT_MIN != tpd.altval) {
 
         const __rw_time_t *ptime =
-            _RWSTD_STATIC_CAST (const __rw_time_t*, facet->_C_data ());
+            static_cast< const __rw_time_t* >(facet->_C_data ());
 
         _RWSTD_ASSERT (0 != ptime);
 
@@ -2641,11 +2641,11 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
         if (tpd.altval >= 0 && tpd.altval < int (n)) {
 
             const size_t altval =
-                _RWSTD_STATIC_CAST (size_t, tpd.altval);
+                static_cast< size_t >(tpd.altval);
 
             // format using alternative numeric symbols
             const wchar_t* digit =
-            _RWSTD_STATIC_CAST (const wchar_t*, ptime->alt_digits (altval, 1));
+            static_cast< const wchar_t* >(ptime->alt_digits (altval, 1));
 
             _RWSTD_ASSERT (digit);
 
@@ -2683,7 +2683,7 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
         if (tpd.fmt) {
 
             const wchar_t* const wfmt =
-                _RWSTD_STATIC_CAST (const wchar_t*, tpd.fmt);
+                static_cast< const wchar_t* >(tpd.fmt);
 
             return __rw_fmt_time (facet, wbuf, bufsize, flags, fill, tmb, wfmt);
         }
@@ -2691,7 +2691,7 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
         if (tpd.str) {
             // copy data if available
 
-            const wchar_t *src = _RWSTD_STATIC_CAST (const wchar_t*, tpd.str);
+            const wchar_t *src = static_cast< const wchar_t* >(tpd.str);
 
             for (wchar_t *dst = wbuf; *src && res < bufsize; ++src, ++dst, ++res)
                 *dst = *src;

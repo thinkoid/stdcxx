@@ -66,7 +66,7 @@ rw_thread_pool_timeout_expired ()
 {
     // cast the volatile flag to int& (see STDCXX-792)
     return 0 != _RWSTD_ATOMIC_LOAD_RELAXED (
-        _RWSTD_CONST_CAST (int&, _rw_timeout_expired), false);
+        const_cast< int& >(_rw_timeout_expired), false);
 }
 
 /************************************************************************/
@@ -77,7 +77,7 @@ static void
 _rw_timeout_handler (int)
 {
     _RWSTD_ATOMIC_STORE_RELAXED (
-        _RWSTD_CONST_CAST (int&, _rw_timeout_expired), 1, false);
+        const_cast< int& >(_rw_timeout_expired), 1, false);
 }
 
 }    // extern "C"
@@ -237,7 +237,7 @@ rw_thread_pool (rw_thread_t        *thr_id,
     // apply timeout if one was specified
     if (0 != timeout) {
         _RWSTD_ATOMIC_STORE_RELAXED (
-            _RWSTD_CONST_CAST (int&, _rw_timeout_expired), 0, false);
+            const_cast< int& >(_rw_timeout_expired), 0, false);
         rw_alarm (unsigned (timeout), _rw_timeout_handler);
     }
 

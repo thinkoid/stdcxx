@@ -47,14 +47,14 @@ __rw_realloc (void *array, size_t size, size_t &n, int inx)
     if (inx < 0)
         return 0;   // bad index
 
-    if (_RWSTD_STATIC_CAST (size_t, inx) < n)
+    if (static_cast< size_t >(inx) < n)
         return array;   // no need to reallocate
 
     void *tmp;
 
     _TRY {
         // make sure index is dereferencable (cast prevents HP aCC warnings)
-        tmp = operator new (_RWSTD_STATIC_CAST (size_t, ++inx) * size);
+        tmp = operator new (static_cast< size_t >(++inx) * size);
     }
     _CATCH (...) {
         return 0;
@@ -67,10 +67,10 @@ __rw_realloc (void *array, size_t size, size_t &n, int inx)
         memcpy (tmp, array, n * size);
 
     // zero out newly allocated storage
-    memset (_RWSTD_STATIC_CAST (char*, tmp) + n * size, 0, (inx - n) * size);
+    memset (static_cast< char* >(tmp) + n * size, 0, (inx - n) * size);
 
     // modify passed-in size
-    n = _RWSTD_STATIC_CAST (size_t, inx);
+    n = static_cast< size_t >(inx);
 
     operator delete (array);
 
@@ -255,7 +255,7 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
     _TRY {
         // lock `rhs', *this not locked yet
         _RWSTD_MT_GUARD (rhs._C_nolock
-                         ? 0 : &_RWSTD_CONST_CAST (ios_base&, rhs)._C_mutex);
+                         ? 0 : &const_cast< ios_base& >(rhs)._C_mutex);
 
         if (rhs._C_usr) {
 
@@ -274,14 +274,14 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
             a_size [1] = rusr->_C_psize;
             a_size [2] = rusr->_C_cbsize;
                 
-            ia = _RWSTD_STATIC_CAST (long*,
-                     a_size [0] ? operator new (a_size [0] * sizeof *ia) : 0);
+            ia = static_cast< long* >(
+                a_size [0] ? operator new (a_size [0] * sizeof *ia) : 0);
 
-            pa = _RWSTD_STATIC_CAST (void**,
-                     a_size [1] ? operator new (a_size [1] * sizeof *pa) : 0);
+            pa = static_cast< void** >(
+                a_size [1] ? operator new (a_size [1] * sizeof *pa) : 0);
 
-            cba = _RWSTD_STATIC_CAST (EventCB*,
-                     a_size [2] ? operator new (a_size [2] * sizeof *cba) : 0);
+            cba = static_cast< EventCB* >(
+                a_size [2] ? operator new (a_size [2] * sizeof *cba) : 0);
 
             // copy rhs into allocated storage and assign (27.4.4.2, p15)
             memcpy (ia,  rusr->_C_iarray,  a_size [0] * sizeof *ia);
@@ -432,15 +432,15 @@ long& ios_base::iword (int inx)
         _C_usr = _C_usr_data::_C_alloc (&ios_base::_C_fire_event);
 
     long* const ia = _C_usr
-        ? _RWSTD_STATIC_CAST (long*, __rw::__rw_realloc (_C_usr->_C_iarray,
-                                                        sizeof (long),
-                                                        _C_usr->_C_isize,
-                                                        inx))
+        ? static_cast< long* >(__rw::__rw_realloc (_C_usr->_C_iarray,
+                                                  sizeof (long),
+                                                  _C_usr->_C_isize,
+                                                  inx))
         : 0;
 
     if (ia) {
         _RWSTD_ASSERT (  _C_usr->_C_isize
-                       > _RWSTD_STATIC_CAST (size_t, inx));
+                       > static_cast< size_t >(inx));
 
         return (_C_usr->_C_iarray = ia)[inx];
     }
@@ -462,15 +462,15 @@ void*& ios_base::pword (int inx)
         _C_usr = _C_usr_data::_C_alloc (&ios_base::_C_fire_event);
 
     void** const pa = _C_usr
-        ? _RWSTD_STATIC_CAST (void**, __rw::__rw_realloc (_C_usr->_C_parray,
-                                                         sizeof (void*),
-                                                         _C_usr->_C_psize,
-                                                         inx))
+        ? static_cast< void** >(__rw::__rw_realloc (_C_usr->_C_parray,
+                                                   sizeof (void*),
+                                                   _C_usr->_C_psize,
+                                                   inx))
         : 0;
 
     if (pa) {
         _RWSTD_ASSERT (  _C_usr->_C_psize
-                       > _RWSTD_STATIC_CAST (size_t, inx));
+                       > static_cast< size_t >(inx));
 
         return (_C_usr->_C_parray = pa)[inx];
     }
@@ -501,11 +501,11 @@ register_callback (event_callback fun, int inx)
 
     if (_C_usr) {
         sz  = _C_usr->_C_cbsize;
-        cba = _RWSTD_STATIC_CAST (EventCB*,
-                                  __rw::__rw_realloc (_C_usr->_C_cbarray,
-                                                     sizeof (EventCB),
-                                                     _C_usr->_C_cbsize,
-                                                     int (sz)));
+        cba = static_cast< EventCB* >(
+            __rw::__rw_realloc (_C_usr->_C_cbarray,
+                               sizeof (EventCB),
+                               _C_usr->_C_cbsize,
+                               int (sz)));
     }
 
     if (cba) {

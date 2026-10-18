@@ -49,8 +49,8 @@ test_case (const T* /* dummy */, const U* /* dummy */,
     typedef unsigned char UChar;
 
     for (size_t i = 0; i != nelems; ++i) {
-        buf1 [i] = T (_RWSTD_STATIC_CAST (UChar, str1 [i])); 
-        buf2 [i] = U (_RWSTD_STATIC_CAST (UChar, str2 [i]));
+        buf1 [i] = T (static_cast< UChar >(str1 [i])); 
+        buf2 [i] = U (static_cast< UChar >(str2 [i]));
    }
 
     const int result = rw_valcmp (buf1, buf2, nelems, flags);

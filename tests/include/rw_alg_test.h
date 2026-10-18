@@ -169,8 +169,8 @@ struct func {
     typedef argument_type& reference;
 
     reference operator() (const argument_type&) const {
-        return _RWSTD_REINTERPRET_CAST (reference,
-                   _RWSTD_CONST_CAST (func*, this)->dummy);
+        return reinterpret_cast< reference >(
+            const_cast< func* >(this)->dummy);
     }
 
 private:
@@ -186,8 +186,8 @@ struct binary_func {
 
     reference operator() (const argument_type&, 
                           const argument_type&) const {
-        return _RWSTD_REINTERPRET_CAST (reference,
-                   _RWSTD_CONST_CAST (binary_func*, this)->dummy);
+        return reinterpret_cast< reference >(
+            const_cast< binary_func* >(this)->dummy);
     }
 
 private:
@@ -315,7 +315,7 @@ template <class T, class U>
 struct cvt : T 
 {
     operator U& () {
-        return _RWSTD_REINTERPRET_CAST (U&, *this);
+        return reinterpret_cast< U& >(*this);
     }
 };
 
@@ -324,7 +324,7 @@ template <class T, class U>
 struct const_cvt : T
 {
     operator const U& () const {
-        return _RWSTD_REINTERPRET_CAST (const U&, *this);
+        return reinterpret_cast< const U& >(*this);
     }
 };
 

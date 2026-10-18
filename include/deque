@@ -518,7 +518,7 @@ public:
     }
 
     const_reference at (size_type __inx) const { 
-        return _RWSTD_CONST_CAST (deque*, this)->at (__inx);
+        return const_cast< deque* >(this)->at (__inx);
     }
 
     reference at (size_type __inx) {

@@ -455,7 +455,7 @@ struct limits_values<float>
 
     static std::float_round_style round_style () {
 
-        return _RWSTD_STATIC_CAST (std::float_round_style, FLT_ROUNDS);
+        return static_cast< std::float_round_style >(FLT_ROUNDS);
     }
 
 };
@@ -678,7 +678,7 @@ struct limits_values<double>
 
     static std::float_round_style round_style () {
 
-        return _RWSTD_STATIC_CAST (std::float_round_style, FLT_ROUNDS);
+        return static_cast< std::float_round_style >(FLT_ROUNDS);
 
     }
 
@@ -891,7 +891,7 @@ struct limits_values<long double>
     static bool tinyness_before () { return false; }
 
     static std::float_round_style round_style () {
-        return _RWSTD_STATIC_CAST (std::float_round_style, FLT_ROUNDS);
+        return static_cast< std::float_round_style >(FLT_ROUNDS);
     }
 };
 

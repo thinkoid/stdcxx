@@ -335,9 +335,9 @@ ContainerTestCaseData<T>::
 
     // cast away the constness of the pointers to work around
     // an HP aCC 6.16 and prior bug described in STDCXX-802
-    delete[] _RWSTD_CONST_CAST (T*, str_);
-    delete[] _RWSTD_CONST_CAST (T*, arg_);
-    delete[] _RWSTD_CONST_CAST (T*, res_);
+    delete[] const_cast< T* >(str_);
+    delete[] const_cast< T* >(arg_);
+    delete[] const_cast< T* >(res_);
 }
 
 /**************************************************************************/

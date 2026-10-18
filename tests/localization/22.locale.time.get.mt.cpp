@@ -120,9 +120,9 @@ struct MyStreambuf: std::basic_streambuf<charT, Traits>
     }
 
     void pubsetg (const charT *gbeg, std::streamsize n) {
-        this->setg (_RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gbeg) + n);
+        this->setg (const_cast< charT* >(gbeg),
+                    const_cast< charT* >(gbeg),
+                    const_cast< charT* >(gbeg) + n);
     }
 
     void pubsetp (charT *pbeg, std::streamsize n) {

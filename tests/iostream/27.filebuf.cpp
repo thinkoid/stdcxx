@@ -248,7 +248,7 @@ test_open (const char* tname)
             Filebuf ().open (tmpfname, mode);
         }
 
-        buf = _RWSTD_STATIC_CAST (char*, rw_fread (tmpfname, &size));
+        buf = static_cast< char* >(rw_fread (tmpfname, &size));
 
         ASSERT_OPEN (0 != buf, mode, "failed to create a new file");
 
@@ -262,7 +262,7 @@ test_open (const char* tname)
             Filebuf ().open (tmpfname, mode);
         }
 
-        buf = _RWSTD_STATIC_CAST (char*, rw_fread (tmpfname, &size));
+        buf = static_cast< char* >(rw_fread (tmpfname, &size));
 
         ASSERT_OPEN (0 != buf, mode, "failed to open an existing file");
 
@@ -284,7 +284,7 @@ test_open (const char* tname)
             Filebuf ().open (tmpfname, mode);
         }
 
-        buf = _RWSTD_STATIC_CAST (char*, rw_fread (tmpfname, &size));
+        buf = static_cast< char* >(rw_fread (tmpfname, &size));
 
         ASSERT_OPEN (0 != buf, mode, "failed to create a new file");
 
@@ -297,7 +297,7 @@ test_open (const char* tname)
             Filebuf ().open (tmpfname, mode);
         }
 
-        buf = _RWSTD_STATIC_CAST (char*, rw_fread (tmpfname, &size));
+        buf = static_cast< char* >(rw_fread (tmpfname, &size));
 
         ASSERT_OPEN (0 != buf, mode, "failed to open an existing file");
 
@@ -321,7 +321,7 @@ test_open (const char* tname)
         }
 
         // read the contents of the file and verify that they are empty
-        buf = _RWSTD_STATIC_CAST (char*, rw_fread (tmpfname, &size));
+        buf = static_cast< char* >(rw_fread (tmpfname, &size));
 
         // file must exist
         ASSERT_OPEN (0 != buf, mode, "failed to open an existing file");
@@ -540,7 +540,7 @@ test_open (const char* tname)
             fb.close ();
 
             size = 0;
-            buf  = _RWSTD_STATIC_CAST (char*, rw_fread (tmpfname, &size, "rb"));
+            buf  = static_cast< char* >(rw_fread (tmpfname, &size, "rb"));
 
             rw_assert (std::size_t (N) == size, __FILE__, __LINE__,
                        "basic_filebuf<%s>::sputn() wrote %d bytes, "

@@ -68,7 +68,7 @@ struct __rw_aligned_buffer
     }
 
     _TypeT* _C_data () {
-        return _RWSTD_REINTERPRET_CAST (_TypeT*, _C_buf._C_data);
+        return reinterpret_cast< _TypeT* >(_C_buf._C_data);
     }
 };
 

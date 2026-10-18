@@ -299,7 +299,7 @@ _rw_opt_brief (int argc, char *argv[])
             "Enables brief mode.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -331,7 +331,7 @@ _rw_opt_quiet (int argc, char *argv[])
             "issued."
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -362,7 +362,7 @@ _rw_opt_verbose (int argc, char *argv[])
             "Enables verbose mode.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -383,7 +383,7 @@ _rw_setopt_csv (int argc, char *argv[])
             "Enables CSV (comma separated values) mode.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -411,7 +411,7 @@ _rw_opt_compat (int argc, char *argv[])
             "Enables RWTest-format compatibility mode.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -447,7 +447,7 @@ _rw_opt_no_stdout (int argc, char *argv[])
             "file. Otherwise, the driver exits with an error.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -471,7 +471,7 @@ _rw_setopt_output_file (int argc, char *argv[])
             "\nDriver diagnostics are always directed to stderr.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -552,7 +552,7 @@ _rw_setopt_ulimit (int argc, char **argv)
             "both limits to attempt to be set.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -672,7 +672,7 @@ _rw_setopt_compat_error (int argc, char **argv, char opt)
             "Compatibility-mode option\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }

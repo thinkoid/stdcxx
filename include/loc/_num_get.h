@@ -287,7 +287,7 @@ __rw_check_overflow_short (long __lval, _RWSTD_FMTFLAGS __flags,
 
 #endif   // _RWSTD_SHRT_MAX < _RWSTD_LONG_MAX
 
-    return _RWSTD_STATIC_CAST (short, __lval);
+    return static_cast< short >(__lval);
 }
 
 inline int
@@ -329,7 +329,7 @@ __rw_check_overflow_int (long __lval, _RWSTD_FMTFLAGS __flags,
 
 #endif   // _RWSTD_INT_MAX < _RWSTD_LONG_MAX
 
-    return _RWSTD_STATIC_CAST (int, __lval);
+    return static_cast< int >(__lval);
 }
 
 }   // namespace __rw

@@ -81,7 +81,7 @@ extern "C" int mkstemp (char*);
 // file for the Portable Character Set (in POSIX-compliant format) 
 _TEST_EXPORT void pcs_write (void *fpv, const char *str)
 {
-    FILE* const fp = _RWSTD_STATIC_CAST (FILE*, fpv);
+    FILE* const fp = static_cast< FILE* >(fpv);
 
     // ASCII (ISO-646) character map definition
     static const char* charmap[] = {
@@ -150,7 +150,7 @@ _TEST_EXPORT void pcs_write (void *fpv, const char *str)
     if (str) {
         // write out `str' using the charmap above
         for (; *str; ++str) {
-            const unsigned char uc = _RWSTD_STATIC_CAST (unsigned char, *str);
+            const unsigned char uc = static_cast< unsigned char >(*str);
 
             if (uc < sizeof charmap / sizeof *charmap)
                 fprintf (fp, "%s", charmap [uc]);
@@ -273,7 +273,7 @@ void* rw_fread (const char *fname,
 
         char* const oldbuf = usrbuf;
 
-        usrbuf  = _RWSTD_CONST_CAST (char*, mode);
+        usrbuf  = const_cast< char* >(mode);
         usrsize = usrbuf ? *size : 0;
 
         return oldbuf;
@@ -358,7 +358,7 @@ size_t rw_fwrite (const char *fname,
         return size_t (-1);
 
     if (size_t (-1) == size)
-        size = strlen (_RWSTD_STATIC_CAST (const char*, buf));
+        size = strlen (static_cast< const char* >(buf));
 
     // fwrite() returns the number of elements successfully written
     // set it up so that the number of elements == the number of bytes

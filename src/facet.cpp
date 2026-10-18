@@ -126,7 +126,7 @@ __rw_facet::~__rw_facet () // nothrow
 
     if (_C_name != _C_buf)
         //  MSVC requires that we cast away const before calling delete.
-        delete[] _RWSTD_CONST_CAST (char*, _C_name);
+        delete[] const_cast< char* >(_C_name);
 
     // mark destroyed
     _C_name = destroyed;
@@ -136,7 +136,7 @@ __rw_facet::~__rw_facet () // nothrow
     // not necessarily memory mapped, data w/o setting `impsize'
     // to something meaningful
     if (size_t (-1) == _C_impsize)
-        ::operator delete (_RWSTD_CONST_CAST (void*, _C_impdata));
+        ::operator delete (const_cast< void* >(_C_impdata));
     else if (_C_impdata && _C_impsize) 
         __rw_release_facet_data (_C_impdata, _C_impsize);
 }
@@ -269,7 +269,7 @@ const void* __rw_facet::_C_get_data ()
     // for codecvt_byname facet map the database indicated by 
     // codeset_name offset in LC_CTYPE database
     const __rw::__rw_ctype_t* pctype = 
-        _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*, pdata);
+        static_cast< const __rw::__rw_ctype_t* >(pdata);
  
     _RWSTD_ASSERT (0 != pctype);
 
@@ -316,9 +316,9 @@ static int cmpfacets (const void *pv1, const void *pv2) _THROWS (())
     _RWSTD_ASSERT (0 != pv2);
 
     const __rw_facet* const pf1 =
-        *_RWSTD_STATIC_CAST (const __rw_facet* const*, pv1);
+        *static_cast< const __rw_facet* const* >(pv1);
     const __rw_facet* const pf2 =
-        *_RWSTD_STATIC_CAST (const __rw_facet* const*, pv2);
+        *static_cast< const __rw_facet* const* >(pv2);
 
     if (__rw_access::_C_get_type(*pf1) == __rw_access::_C_get_type(*pf2)) {
         return ::strcmp (__rw_access::_C_get_name(*pf1) ? 
@@ -344,10 +344,10 @@ static int cmpfacet (const void *pv1, const void *pv2) _THROWS (())
     _RWSTD_ASSERT (0 != pv2);
 
     const __rw_facet_info* const pinfo =
-        _RWSTD_STATIC_CAST (const __rw_facet_info*, pv1);
+        static_cast< const __rw_facet_info* >(pv1);
 
     const __rw_facet* const pfacet =
-        *_RWSTD_STATIC_CAST (const __rw_facet* const*, pv2);
+        *static_cast< const __rw_facet* const* >(pv2);
 
     if (pinfo->_C_type == __rw_access::_C_get_type(*pfacet)) {
         return ::strcmp (pinfo->_C_name  ? pinfo->_C_name   : "C",
@@ -395,8 +395,8 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
         if (pf) {
 
             const size_t inx =
-                  _RWSTD_STATIC_CAST (const __rw_facet* const*, pf)
-                - _RWSTD_CONST_CAST (const __rw_facet* const*, std_facets);
+                  static_cast< const __rw_facet* const* >(pf)
+                - const_cast< const __rw_facet* const* >(std_facets);
 
             pfacet = std_facets [inx];
 
@@ -463,8 +463,8 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
         if (pcf) {
             // facet already exists in the repository, bump up its ref count
 
-            void *pf = _RWSTD_CONST_CAST (void*, pcf);
-            pfacet = *_RWSTD_STATIC_CAST (__rw_facet**, pf);
+            void *pf = const_cast< void* >(pcf);
+            pfacet = *static_cast< __rw_facet** >(pf);
 
             _RWSTD_ASSERT (0 != pfacet);
 
@@ -500,7 +500,7 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
             // type; only the first store changes it, and it precedes
             // the facet's publication, so later ones are skipped rather
             // than race with readers of other facets of the same type
-            const size_t id = _RWSTD_STATIC_CAST (size_t, (type + 1) / 2);
+            const size_t id = static_cast< size_t >((type + 1) / 2);
 
             if (*__rw_access::_C_get_pid (*pfacet) != id)
                 *__rw_access::_C_get_pid (*pfacet) = id;

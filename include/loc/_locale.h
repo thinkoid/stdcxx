@@ -91,7 +91,7 @@ use_facet (const locale &__loc _RWSTD_DUMMY_ARG (const _Facet* = 0))
                      (_RWSTD_ERROR_BAD_CAST,
                       _RWSTD_FUNC ("use_facet (const locale&)")));
 
-    return *_RWSTD_STATIC_CAST (const _Facet*, __pfacet);
+    return *static_cast< const _Facet* >(__pfacet);
 }
 
 
@@ -283,7 +283,7 @@ __rw_get_facet (const std::locale &__loc, const _Facet *__dummy)
     const __rw_facet* const __pfacet =
         __rw_get_facet_by_id (__loc, _Facet::id, __dummy);
 
-    return _RWSTD_DYNAMIC_CAST (const _Facet*, __pfacet);
+    return dynamic_cast< const _Facet* >(__pfacet);
 }
 
 
@@ -298,7 +298,7 @@ __rw_get_std_facet (const std::locale   &__loc,
     };
 
     const _Facets* const __pfacets =
-        _RWSTD_REINTERPRET_CAST (const _Facets*, __loc._C_body);
+        reinterpret_cast< const _Facets* >(__loc._C_body);
 
     _RWSTD_ASSERT (0 != __pfacets);
 
@@ -453,7 +453,7 @@ inline locale::locale (const locale &__rhs, _Facet *__facet)
     if (__facet && !__facet->_C_pid) {
         // unusual cast (to size_t** rather than size_t*&)
         // done to work around an HP aCC 3.3x bug
-        *_RWSTD_CONST_CAST (_RWSTD_SIZE_T**, &__facet->_C_pid) =
+        *const_cast< _RWSTD_SIZE_T** >(&__facet->_C_pid) =
             &_Facet::id._C_id;
     }
 

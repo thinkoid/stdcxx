@@ -375,7 +375,7 @@ void test_insert (int line, int exceptions,
 
     // cast away constness to work around an HP aCC 6.16 bug
     // see http://issues.apache.org/jira/browse/STDCXX-802
-    delete[] _RWSTD_CONST_CAST (UserClass*, xseq);
+    delete[] const_cast< UserClass* >(xseq);
 }
 
 /**************************************************************************/
@@ -1016,7 +1016,7 @@ void test_assign (int line, int exceptions,
 
     // cast away constness to work around an HP aCC 6.16 bug
     // see http://issues.apache.org/jira/browse/STDCXX-802
-    delete[] _RWSTD_CONST_CAST (UserClass*, xseq);
+    delete[] const_cast< UserClass* >(xseq);
 }
 
 
@@ -1217,7 +1217,7 @@ void test_erase (int line,
 
     // cast away constness to work around an HP aCC 6.16 bug
     // see http://issues.apache.org/jira/browse/STDCXX-802
-    delete[] _RWSTD_CONST_CAST (UserClass*, xseq);
+    delete[] const_cast< UserClass* >(xseq);
 }
 
 void test_erase ()

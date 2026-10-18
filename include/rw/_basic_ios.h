@@ -159,24 +159,24 @@ public:
 
     // 27.4.4.2, p1
     ostream_type* tie () const {
-        return _C_usr ? _RWSTD_STATIC_CAST (ostream_type*, _C_tie ()) : 0;
+        return _C_usr ? static_cast< ostream_type* >(_C_tie ()) : 0;
     }
 
     // 27.4.4.2, p2
     ostream_type* tie (ostream_type *__strm) {
-        return _RWSTD_STATIC_CAST (ostream_type*, _C_tie (__strm));
+        return static_cast< ostream_type* >(_C_tie (__strm));
     }
 
     // 27.4.4.2, p4 - NOTE: the pointer returned from rdbuf() in derived
     // classes may be different from the one passed to rdbuf (streambuf_type*)
     streambuf_type* rdbuf () const {
-        return _RWSTD_STATIC_CAST (streambuf_type*, _C_rdbuf);
+        return static_cast< streambuf_type* >(_C_rdbuf);
     }
 
     // 27.4.4.2, p5
     streambuf_type* rdbuf (streambuf_type *__rdbuf) {
-        return _RWSTD_STATIC_CAST (streambuf_type*,
-                                   _C_set (goodbit, _C_except, __rdbuf));
+        return static_cast< streambuf_type* >(
+            _C_set (goodbit, _C_except, __rdbuf));
     }
 
     // 27.4.4.2, p15
@@ -234,7 +234,7 @@ basic_ios<_CharT, _Traits>::fill () const
     // constructed even if the global locale doesn't contain a ctype facet
     // specialized on the stream type's char_type
     if (traits_type::eq_int_type (traits_type::eof (), _C_fill))
-        _RWSTD_CONST_CAST (basic_ios*, this)->fill (widen (' '));
+        const_cast< basic_ios* >(this)->fill (widen (' '));
 
     return traits_type::to_char_type (_C_fill);
 }

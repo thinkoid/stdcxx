@@ -417,7 +417,7 @@ void test_insert (int             line,     // line number of call site
                __LINE__, fcall, expect_asgn, n_asgn);
     
     delete [] xins;
-    delete [] _RWSTD_CONST_CAST (UserClass*, xseq);
+    delete [] const_cast< UserClass* >(xseq);
 }
 
 /**************************************************************************/

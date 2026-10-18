@@ -123,7 +123,7 @@ static int
 _rw_iszero (const void *buf, size_t size)
 {
     for (size_t i = 0; i != size; ++i)
-        if (_RWSTD_STATIC_CAST (const UChar*, buf)[i])
+        if (static_cast< const UChar* >(buf)[i])
             return 0;
 
     return 1;
@@ -138,8 +138,8 @@ _rw_cmpx (const void *buf1,
           size_t      size,
           int         flags = 0)
 {
-    const UChar *p1 = _RWSTD_STATIC_CAST (const UChar*, buf1);
-    const UChar *p2 = _RWSTD_STATIC_CAST (const UChar*, buf2);
+    const UChar *p1 = static_cast< const UChar* >(buf1);
+    const UChar *p2 = static_cast< const UChar* >(buf2);
 
     int ret = 0;
 
@@ -197,8 +197,8 @@ _rw_cmp1 (const void *buf1,
 
     if (CMP_NULTERM == flags) {
         const int ret =
-            strncmp (_RWSTD_STATIC_CAST (const char*, buf1),
-                     _RWSTD_STATIC_CAST (const char*, buf2),
+            strncmp (static_cast< const char* >(buf1),
+                     static_cast< const char* >(buf2),
                      nelems);
         return ret < 0 ? -1 : ret ? +1 : 0;
     }
@@ -206,8 +206,8 @@ _rw_cmp1 (const void *buf1,
     size_t inx = 0;
     int    ret = 0;
 
-    const UI8T *pi1 = _RWSTD_STATIC_CAST (const UI8T*, buf1);
-    const UI8T *pi2 = _RWSTD_STATIC_CAST (const UI8T*, buf2);
+    const UI8T *pi1 = static_cast< const UI8T* >(buf1);
+    const UI8T *pi2 = static_cast< const UI8T* >(buf2);
 
     for (; inx < nelems; ++pi1, ++pi2, ++inx) {
 
@@ -268,8 +268,8 @@ _rw_cmp2 (const void *buf1,
     size_t inx = 0;
     int    ret = 0;
 
-    const UI16T *pi1 = _RWSTD_STATIC_CAST (const UI16T*, buf1);
-    const UI16T *pi2 = _RWSTD_STATIC_CAST (const UI16T*, buf2);
+    const UI16T *pi1 = static_cast< const UI16T* >(buf1);
+    const UI16T *pi2 = static_cast< const UI16T* >(buf2);
 
     for (; inx < nelems; ++pi1, ++pi2, ++inx) {
 
@@ -335,8 +335,8 @@ _rw_cmp4 (const void *buf1,
     size_t inx = 0;
     int    ret = 0;
 
-    const UI32T *pi1 = _RWSTD_STATIC_CAST (const UI32T*, buf1);
-    const UI32T *pi2 = _RWSTD_STATIC_CAST (const UI32T*, buf2);
+    const UI32T *pi1 = static_cast< const UI32T* >(buf1);
+    const UI32T *pi2 = static_cast< const UI32T* >(buf2);
 
     for (; inx < nelems; ++pi1, ++pi2, ++inx) {
 
@@ -402,8 +402,8 @@ _rw_cmp8 (const void *buf1,
     size_t inx = 0;
     int    ret = 0;
 
-    const UI64T *pi1 = _RWSTD_STATIC_CAST (const UI64T*, buf1);
-    const UI64T *pi2 = _RWSTD_STATIC_CAST (const UI64T*, buf2);
+    const UI64T *pi1 = static_cast< const UI64T* >(buf1);
+    const UI64T *pi2 = static_cast< const UI64T* >(buf2);
 
     for (; inx < nelems; ++pi1, ++pi2, ++inx) {
 
@@ -487,7 +487,7 @@ _rw_cmpxx (const void* buf1,
 
         case 1: {
             const _RWSTD_UINT8_T* ptr =
-                _RWSTD_STATIC_CAST (const _RWSTD_UINT8_T*, buf1);
+                static_cast< const _RWSTD_UINT8_T* >(buf1);
             ui1 = *ptr++;
             buf1 = ptr;
             break;
@@ -499,7 +499,7 @@ _rw_cmpxx (const void* buf1,
 
         case 2: {
             const _RWSTD_UINT16_T* ptr =
-                _RWSTD_STATIC_CAST (const _RWSTD_UINT16_T*, buf1);
+                static_cast< const _RWSTD_UINT16_T* >(buf1);
             ui1 = *ptr++;
             buf1 = ptr;
             break;
@@ -511,7 +511,7 @@ _rw_cmpxx (const void* buf1,
 
         case 4: {
             const _RWSTD_UINT32_T* ptr =
-                _RWSTD_STATIC_CAST (const _RWSTD_UINT32_T*, buf1);
+                static_cast< const _RWSTD_UINT32_T* >(buf1);
             ui1 = *ptr++;
             buf1 = ptr;
             break;
@@ -523,7 +523,7 @@ _rw_cmpxx (const void* buf1,
 
         case 8: {
             const _RWSTD_UINT64_T* ptr =
-                _RWSTD_STATIC_CAST (const _RWSTD_UINT64_T*, buf1);
+                static_cast< const _RWSTD_UINT64_T* >(buf1);
             ui1 = *ptr++;
             buf1 = ptr;
             break;
@@ -545,7 +545,7 @@ _rw_cmpxx (const void* buf1,
 
         case 1: {
             const _RWSTD_UINT8_T* ptr =
-                _RWSTD_STATIC_CAST (const _RWSTD_UINT8_T*, buf2);
+                static_cast< const _RWSTD_UINT8_T* >(buf2);
             ui2 = *ptr++;
             buf2 = ptr;
             break;
@@ -557,7 +557,7 @@ _rw_cmpxx (const void* buf1,
 
         case 2: {
             const _RWSTD_UINT16_T* ptr =
-                _RWSTD_STATIC_CAST (const _RWSTD_UINT16_T*, buf2);
+                static_cast< const _RWSTD_UINT16_T* >(buf2);
             ui2 = *ptr++;
             buf2 = ptr;
             break;
@@ -569,7 +569,7 @@ _rw_cmpxx (const void* buf1,
 
         case 4: {
             const _RWSTD_UINT32_T* ptr =
-                _RWSTD_STATIC_CAST (const _RWSTD_UINT32_T*, buf2);
+                static_cast< const _RWSTD_UINT32_T* >(buf2);
             ui2 = *ptr++;
             buf2 = ptr;
             break;
@@ -581,7 +581,7 @@ _rw_cmpxx (const void* buf1,
 
         case 8: {
             const _RWSTD_UINT64_T* ptr =
-                _RWSTD_STATIC_CAST (const _RWSTD_UINT64_T*, buf2);
+                static_cast< const _RWSTD_UINT64_T* >(buf2);
             ui2 = *ptr++;
             buf2 = ptr;
             break;

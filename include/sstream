@@ -256,7 +256,7 @@ public:
         // necessary to help SunPro 5.0/T9
         typedef basic_istringstream <char_type, traits_type, allocator_type>
             _SelfT;
-        return &_RWSTD_CONST_CAST (_SelfT*, this)->_C_sb;
+        return &const_cast< _SelfT* >(this)->_C_sb;
     }
 
     _C_string_type str () const {
@@ -305,7 +305,7 @@ public:
         // necessary to help SunPro 5.0/T9
         typedef basic_ostringstream <char_type, traits_type, allocator_type>
             _SelfT;
-        return &_RWSTD_CONST_CAST (_SelfT*, this)->_C_sb;
+        return &const_cast< _SelfT* >(this)->_C_sb;
     }
 
     _C_string_type str () const {
@@ -352,7 +352,7 @@ public:
         // necessary to help SunPro 5.0/T9
         typedef basic_stringstream <char_type, traits_type, allocator_type>
             _SelfT;
-        return &_RWSTD_CONST_CAST (_SelfT*, this)->_C_sb;
+        return &const_cast< _SelfT* >(this)->_C_sb;
     }
 
     _C_string_type str () const {

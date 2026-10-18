@@ -326,21 +326,21 @@ private:
 
 
 inline complex<float>::complex (const complex<double> &__rhs)
-    : _C_re (_RWSTD_STATIC_CAST (value_type, __rhs.real ())),
-      _C_im (_RWSTD_STATIC_CAST (value_type, __rhs.imag ()))
+    : _C_re (static_cast< value_type >(__rhs.real ())),
+      _C_im (static_cast< value_type >(__rhs.imag ()))
 { }
     
 
 #ifndef _RWSTD_NO_LONG_DOUBLE
 
 inline complex<float>::complex (const complex<long double> &__rhs)
-    : _C_re (_RWSTD_STATIC_CAST (value_type, __rhs.real ())),
-      _C_im (_RWSTD_STATIC_CAST (value_type, __rhs.imag ()))
+    : _C_re (static_cast< value_type >(__rhs.real ())),
+      _C_im (static_cast< value_type >(__rhs.imag ()))
 { }
 
 inline complex<double>::complex (const complex<long double> &__rhs)
-    : _C_re (_RWSTD_STATIC_CAST (value_type, __rhs.real ())),
-      _C_im (_RWSTD_STATIC_CAST (value_type, __rhs.imag ()))
+    : _C_re (static_cast< value_type >(__rhs.real ())),
+      _C_im (static_cast< value_type >(__rhs.imag ()))
 { }
 
 #endif   // _RWSTD_NO_LONG_DOUBLE
@@ -368,8 +368,8 @@ public:
 
     template <class _TypeU>
     complex (const complex<_TypeU>& __rhs)
-        : _C_re (_RWSTD_STATIC_CAST (value_type, __rhs.real ())),
-          _C_im (_RWSTD_STATIC_CAST (value_type, __rhs.imag ())) { }
+        : _C_re (static_cast< value_type >(__rhs.real ())),
+          _C_im (static_cast< value_type >(__rhs.imag ())) { }
 
     template <class _TypeU>
     complex& operator= (const complex<_TypeU>& __rhs) {

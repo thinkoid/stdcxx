@@ -93,7 +93,7 @@ _rw_print_help (int argc, char *argv[])
             "The leading underscores in the name of an option are optional.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }
@@ -246,7 +246,7 @@ _rw_set_ignenv (int argc, char *argv[])
             "it with the two arguments on the command line.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }

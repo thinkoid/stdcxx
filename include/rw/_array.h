@@ -115,8 +115,8 @@ template <class _TypeT>
 inline __rw_array<_TypeT>::__rw_array (size_type __n)
 {
     if (__n)
-        _C_data = _RWSTD_STATIC_CAST (pointer,
-                                      ::operator new (__n * sizeof *_C_data));
+        _C_data = static_cast< pointer >(
+            ::operator new (__n * sizeof *_C_data));
     else
         _C_data = 0;
 
@@ -128,8 +128,8 @@ template <class _TypeT>
 inline __rw_array<_TypeT>::__rw_array (const_reference __val, size_type __n)
 {
     if (__n) {
-        _C_data = _RWSTD_STATIC_CAST (pointer,
-                                      ::operator new (__n * sizeof *_C_data));
+        _C_data = static_cast< pointer >(
+            ::operator new (__n * sizeof *_C_data));
         std::uninitialized_fill_n (_C_data, __n, __val);
     }
     else
@@ -143,8 +143,8 @@ template <class _TypeT>
 inline __rw_array<_TypeT>::__rw_array (const_pointer __data, size_type __n)
 { 
     if (__n) {
-        _C_data = _RWSTD_STATIC_CAST (pointer,
-                                      ::operator new (__n * sizeof *_C_data));
+        _C_data = static_cast< pointer >(
+            ::operator new (__n * sizeof *_C_data));
         std::uninitialized_copy (__data, __data + __n, _C_data);
     }
     else
@@ -159,8 +159,8 @@ inline __rw_array<_TypeT>::__rw_array (const __rw_array<_TypeT> &__rhs)
     : _C_size (__rhs.size ())
 { 
     if (__rhs.size ()) {
-        _C_data = _RWSTD_STATIC_CAST (pointer,
-                                    ::operator new (_C_size * sizeof *_C_data));
+        _C_data = static_cast< pointer >(
+            ::operator new (_C_size * sizeof *_C_data));
         std::uninitialized_copy (__rhs.begin (), __rhs.end (), begin ());
     }
     else
@@ -217,8 +217,8 @@ resize (size_type __size, const_reference __val /* = value_type () */)
     }
 
     if ((_C_size = __size)) {
-        _C_data = _RWSTD_STATIC_CAST (pointer,
-                              ::operator new (_C_size * sizeof *_C_data));
+        _C_data = static_cast< pointer >(
+            ::operator new (_C_size * sizeof *_C_data));
         std::uninitialized_fill_n (_C_data, _C_size, __val);
     }
 }

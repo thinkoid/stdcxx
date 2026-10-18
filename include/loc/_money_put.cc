@@ -327,7 +327,7 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
     const _RWSTD_SIZE_T __n =
         __rw::__rw_put_num (&__pbuf, sizeof __buf, _RWSTD_IOS_FIXED,
                            _C_ldouble | _C_ptr,
-                           _RWSTD_STATIC_CAST (_RWSTD_STREAMSIZE, -__fd),
+                           static_cast< _RWSTD_STREAMSIZE >(-__fd),
                            &__val, __grouping.c_str ());
 
     // widen narrow buffer (necessary even if char_type == char)

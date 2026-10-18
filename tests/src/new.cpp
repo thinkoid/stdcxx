@@ -260,7 +260,7 @@ operator_new (size_t nbytes, bool array)
         static const char* envvar = getenv ("RWSTD_NEW_FLAGS");
 
         if (envvar) {
-            char *end = _RWSTD_CONST_CAST (char*, envvar);
+            char *end = const_cast< char* >(envvar);
 
             if ('-' == *end) {
                 // begin tracing with the sequence number 0

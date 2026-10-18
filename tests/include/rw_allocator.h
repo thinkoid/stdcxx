@@ -198,7 +198,7 @@ public:
 
     pointer allocate (size_type nelems, const void *hint = 0) {
         void* const ptr = pal_->allocate (nelems, sizeof (value_type), hint);
-        return _RWSTD_STATIC_CAST (pointer, ptr);
+        return static_cast< pointer >(ptr);
     }
 
     void deallocate (pointer ptr, size_type nelems) {

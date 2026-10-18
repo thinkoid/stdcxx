@@ -62,8 +62,8 @@ __rw_copy (void *dst, const void *src, size_t n)
 static inline void
 __rw_widen (void *dst, const void *src, size_t n)
 {
-    mbstowcs (_RWSTD_STATIC_CAST (wchar_t*, dst),
-              _RWSTD_STATIC_CAST (const char*, src), n);
+    mbstowcs (static_cast< wchar_t* >(dst),
+              static_cast< const char* >(src), n);
 }
 
 
@@ -77,7 +77,7 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
     if (pdata) {
 
         const __rw_punct_t* const pun =
-            _RWSTD_STATIC_CAST (const __rw_punct_t*, pdata);
+            static_cast< const __rw_punct_t* >(pdata);
 
         const __rw_num_t *num;
     
@@ -88,12 +88,12 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
         case __rw_gr: return pun->grouping ();
 
         case __rw_tn:
-            num = _RWSTD_STATIC_CAST (const __rw_num_t*, pun->get_ext ());
+            num = static_cast< const __rw_num_t* >(pun->get_ext ());
             _RWSTD_ASSERT (num);
             return num->truename (winx);
 
         case __rw_fn:
-            num = _RWSTD_STATIC_CAST (const __rw_num_t*, pun->get_ext ());
+            num = static_cast< const __rw_num_t* >(pun->get_ext ());
             _RWSTD_ASSERT (num);
             return num->falsename (winx);
 
@@ -173,7 +173,7 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
 
     // allocate variable size structure(s)
     __rw_punct_t* const pun = 
-        _RWSTD_STATIC_CAST (__rw_punct_t*, ::operator new (size));
+        static_cast< __rw_punct_t* >(::operator new (size));
 
     // compute offsets into the varaiable size structure
     pun->decimal_point_off [winx] = 0;
@@ -184,7 +184,7 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
         winx ? __rw_widen : __rw_copy;
 
     // copy strings from lconv data members to the varaiable size structure
-    char* s = _RWSTD_REINTERPRET_CAST (char*, pun + 1);
+    char* s = reinterpret_cast< char* >(pun + 1);
 
     widen (s + pun->decimal_point_off [winx], dp, dpsz);
     widen (s + pun->thousands_sep_off [winx], ts, tssz);
@@ -197,9 +197,9 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
     if (misalign)
         pun->punct_ext_off += int (sizeof (size_t) - misalign);
 
-    s = _RWSTD_REINTERPRET_CAST (char*, pun + 1) + pun->punct_ext_off;
+    s = reinterpret_cast< char* >(pun + 1) + pun->punct_ext_off;
 
-    __rw_num_t* const num = _RWSTD_REINTERPRET_CAST (__rw_num_t*, s);
+    __rw_num_t* const num = reinterpret_cast< __rw_num_t* >(s);
 
     s += sizeof *num;
 
@@ -213,8 +213,7 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
     widen (s + num->falsename_off [winx], "false", fnsz);
 
     // place narrow grouping string last to avoid alignment issues
-    pun->grouping_off =
-        _RWSTD_STATIC_CAST (_RWSTD_UINT32_T,
+    pun->grouping_off = static_cast< _RWSTD_UINT32_T >(
         pun->punct_ext_off + sizeof *num + num->falsename_off [winx] + fnsz);
 
     memcpy (s + num->falsename_off [winx] + fnsz, grp, grsz);
@@ -223,11 +222,11 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
     // stores publish the data to threads that hold neither lock and
     // read the two members with acquire loads (__rw_facet::_C_data)
     _RWSTD_ATOMIC_STORE_RELEASE (
-        __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        __rw_access::_C_get_impdata (*const_cast< __rw_facet* >(pfacet)),
         pun, false);
 
     _RWSTD_ATOMIC_STORE_RELEASE (
-        __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        __rw_access::_C_get_impsize (*const_cast< __rw_facet* >(pfacet)),
         (size_t)(-1), false);
 
     // call self recursively on already initialized `impdata'
@@ -248,7 +247,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
     if (pdata) {
 
         const __rw_punct_t* const pun =
-            _RWSTD_STATIC_CAST (const __rw_punct_t*, pdata);
+            static_cast< const __rw_punct_t* >(pdata);
 
         const __rw_mon_t *mon;
     
@@ -260,7 +259,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
         }
 
         // get extended data
-        mon = _RWSTD_STATIC_CAST (const __rw_mon_t*, pun->get_ext ());
+        mon = static_cast< const __rw_mon_t* >(pun->get_ext ());
         _RWSTD_ASSERT (mon);
 
         typedef unsigned char UChar;
@@ -275,8 +274,8 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
         case __rw_nf: return mon->neg_format [intl];
 
         case __rw_fd:
-            return _RWSTD_REINTERPRET_CAST (void*, (size_t)
-                                            UChar (mon->frac_digits [intl]));
+            return reinterpret_cast< void* >((size_t)
+                                      UChar (mon->frac_digits [intl]));
 
         default: _RWSTD_ASSERT (!"bad discriminant");
         }
@@ -365,7 +364,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
 
     // allocate variable size structure(s)
     __rw_punct_t* const pun = 
-        _RWSTD_STATIC_CAST (__rw_punct_t*, ::operator new (size));
+        static_cast< __rw_punct_t* >(::operator new (size));
 
     // compute offsets into the varaiable size structure
     pun->decimal_point_off [winx] = 0;
@@ -376,7 +375,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
         winx ? __rw_widen : __rw_copy;
 
     // copy strings from lconv data members to the varaiable size structure
-    char* s = _RWSTD_REINTERPRET_CAST (char*, pun + 1);
+    char* s = reinterpret_cast< char* >(pun + 1);
 
     widen (s + pun->decimal_point_off [winx], pconv->mon_decimal_point, dpsz);
     widen (s + pun->thousands_sep_off [winx], pconv->mon_thousands_sep, tssz);
@@ -389,9 +388,9 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
     if (misalign)
         pun->punct_ext_off += int (sizeof (size_t) - misalign);
 
-    s = _RWSTD_REINTERPRET_CAST (char*, pun + 1) + pun->punct_ext_off;
+    s = reinterpret_cast< char* >(pun + 1) + pun->punct_ext_off;
 
-    __rw_mon_t* const mon = _RWSTD_REINTERPRET_CAST (__rw_mon_t*, s);
+    __rw_mon_t* const mon = reinterpret_cast< __rw_mon_t* >(s);
 
     s += sizeof *mon;
 
@@ -410,9 +409,9 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
     widen (s + mon->curr_symbol_off [intl][winx], cs, cssz);
 
     pun->grouping_off =
-        _RWSTD_STATIC_CAST (_RWSTD_UINT32_T,
-          pun->punct_ext_off + sizeof *mon
-        + mon->curr_symbol_off [intl][winx] + cssz);
+        static_cast< _RWSTD_UINT32_T >(
+            pun->punct_ext_off + sizeof *mon
+          + mon->curr_symbol_off [intl][winx] + cssz);
 
     // place narrow grouping string last to avoid alignment issues
     memcpy (s + mon->curr_symbol_off [intl][winx] + cssz,
@@ -555,11 +554,11 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
     // stores publish the data to threads that hold neither lock and
     // read the two members with acquire loads (__rw_facet::_C_data)
     _RWSTD_ATOMIC_STORE_RELEASE (
-        __rw_access::_C_get_impdata (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        __rw_access::_C_get_impdata (*const_cast< __rw_facet* >(pfacet)),
         pun, false);
 
     _RWSTD_ATOMIC_STORE_RELEASE (
-        __rw_access::_C_get_impsize (*_RWSTD_CONST_CAST (__rw_facet*, pfacet)),
+        __rw_access::_C_get_impsize (*const_cast< __rw_facet* >(pfacet)),
         (size_t)(-1), false);
 
     // call self recursively on already initialized `impdata'

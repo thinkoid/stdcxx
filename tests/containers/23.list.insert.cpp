@@ -462,8 +462,8 @@ struct InsertRangePtrOverload: ContRangeBase<List> {
         const ListVal* const beg = tdata.arg_ + tdata.off2_;
         const ListVal* const end = beg + tdata.ext2_;
 
-        const Iterator first2 = _RWSTD_CONST_CAST (Iterator, beg);
-        const Iterator last2  = _RWSTD_CONST_CAST (Iterator, end);
+        const Iterator first2 = const_cast< Iterator >(beg);
+        const Iterator last2  = const_cast< Iterator >(end);
 
         lst.insert (first1, first2, last2);
         return lst;

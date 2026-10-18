@@ -205,7 +205,7 @@ _rw_setopt_diags (int argc, char *argv[])
             "color set for the terminal.\n"
         };
 
-        argv [0] = _RWSTD_CONST_CAST (char*, helpstr);
+        argv [0] = const_cast< char* >(helpstr);
 
         return 0;
     }

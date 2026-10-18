@@ -114,8 +114,8 @@ __rw_get_mask (__rw_ctype_t    *impl,
 
                 // convert both sides to a sufficiently large type
                 // with the same signedness
-                if (  _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, next_elm.ch)
-                    < _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, *beg))
+                if (  static_cast< _RWSTD_UINT32_T >(next_elm.ch)
+                    < static_cast< _RWSTD_UINT32_T >(*beg))
                     low = cur + 1;
                 else
                     high = cur - 1;
@@ -217,8 +217,8 @@ __rw_toupper (__rw_ctype_t* impl,
 
             // convert both sides to a sufficiently large type
             // with the same signedness
-            if (  _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, next_elm.lower)
-                < _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, c))
+            if (  static_cast< _RWSTD_UINT32_T >(next_elm.lower)
+                < static_cast< _RWSTD_UINT32_T >(c))
                 low = cur + 1;
             else
                 high = cur - 1;
@@ -259,8 +259,8 @@ __rw_tolower (__rw_ctype_t* impl,
 
             // convert both sides to a sufficiently large type
             // with the same signedness
-            if (  _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, next_elm.upper)
-                < _RWSTD_STATIC_CAST (_RWSTD_UINT32_T, c))
+            if (  static_cast< _RWSTD_UINT32_T >(next_elm.upper)
+                < static_cast< _RWSTD_UINT32_T >(c))
                 low = cur + 1;
             else
                 high = cur - 1;
@@ -353,8 +353,8 @@ ctype<wchar_t>::ctype (size_t ref) _THROWS (())
 
     _C_mask_tab  = __rw::__rw_classic_wide_tab;
 #endif
-    _C_upper_tab = _RWSTD_CONST_CAST (_UChar*, __rw::__rw_upper_tab);
-    _C_lower_tab = _RWSTD_CONST_CAST (_UChar*, __rw::__rw_lower_tab);
+    _C_upper_tab = const_cast< _UChar* >(__rw::__rw_upper_tab);
+    _C_lower_tab = const_cast< _UChar* >(__rw::__rw_lower_tab);
     _C_delete_it = false;
 
     memset (_C_narrow_tab, 0, sizeof _C_narrow_tab);
@@ -365,7 +365,7 @@ ctype<wchar_t>::ctype (size_t ref) _THROWS (())
 ctype<wchar_t>::~ctype ()
 {
     if (_C_delete_it) {
-        delete[] _RWSTD_CONST_CAST (mask*, _C_mask_tab);
+        delete[] const_cast< mask* >(_C_mask_tab);
 
         if (_C_upper_tab != __rw::__rw_upper_tab) {
             // lower_tab is allocated in the same block of memory
@@ -379,7 +379,7 @@ ctype<wchar_t>::~ctype ()
 bool ctype<wchar_t>::
 do_is (mask m, char_type c) const
 {
-    return    _RWSTD_STATIC_CAST (size_t, c) <= _C_tab_size
+    return    static_cast< size_t >(c) <= _C_tab_size
            && (_C_mask_tab [_UChar (c)] & m);
 }
 
@@ -391,7 +391,7 @@ do_is (const char_type *lo, const char_type *hi, mask *mvec) const
     _RWSTD_ASSERT (lo <= hi);
 
     for ( ; lo != hi; ++lo, ++mvec) {
-        *mvec = _RWSTD_STATIC_CAST (size_t, *lo) < _C_tab_size ?
+        *mvec = static_cast< size_t >(*lo) < _C_tab_size ?
             _C_mask_tab [_UChar (*lo)] : mask (0);
     }
 
@@ -410,7 +410,7 @@ do_widen (char c) const
     // explicitly specifying template argument list to work around
     // HP aCC 3 and 5 bug (STDCXX-445)
     _RWSTD_ATOMIC_STORE_RELAXED (
-        _RWSTD_CONST_CAST (ctype<wchar_t>*, this)->_C_wide_tab [_UChar (c)],
+        const_cast< ctype<wchar_t>* >(this)->_C_wide_tab [_UChar (c)],
         char_type (_UChar (c)), false);
 
     return char_type (_UChar (c));
@@ -435,7 +435,7 @@ ctype<wchar_t>::char_type
 ctype<wchar_t>::
 do_toupper (char_type c) const
 {
-    return _RWSTD_STATIC_CAST (size_t, c) < _C_tab_size ?
+    return static_cast< size_t >(c) < _C_tab_size ?
         _C_upper_tab [_UChar (c)] : c;
 }
 
@@ -444,7 +444,7 @@ ctype<wchar_t>::char_type
 ctype<wchar_t>::
 do_tolower (char_type c) const
 {
-    return _RWSTD_STATIC_CAST (size_t, c) < _C_tab_size ?
+    return static_cast< size_t >(c) < _C_tab_size ?
         _C_lower_tab [_UChar (c)] : c;
 }
 
@@ -456,7 +456,7 @@ do_toupper (char_type *lo, const char_type *hi) const
     _RWSTD_ASSERT (lo <= hi);
 
     for ( ; lo < hi; ++lo)
-        *lo = _RWSTD_STATIC_CAST (size_t, *lo) < _C_tab_size ?
+        *lo = static_cast< size_t >(*lo) < _C_tab_size ?
             _C_upper_tab [_UChar (*lo)] : 0;
 
     return lo;
@@ -470,7 +470,7 @@ do_tolower (char_type *lo, const char_type *hi) const
     _RWSTD_ASSERT (lo <= hi);
 
     for ( ; lo < hi; ++lo)
-        *lo = _RWSTD_STATIC_CAST (size_t, *lo) < _C_tab_size ?
+        *lo = static_cast< size_t >(*lo) < _C_tab_size ?
             _C_lower_tab [_UChar (*lo)] : 0;
 
     return lo;
@@ -484,7 +484,7 @@ do_scan_is (mask m, const char_type *lo, const char_type *hi) const
     _RWSTD_ASSERT (lo <= hi);
 
     for ( ; lo != hi; ++lo) {
-        if (   _RWSTD_STATIC_CAST (size_t, *lo) <= _C_tab_size
+        if (   static_cast< size_t >(*lo) <= _C_tab_size
             && (_C_mask_tab [_UChar (*lo)] & m))
             break;
     }
@@ -499,7 +499,7 @@ do_scan_not (mask m, const char_type *lo, const char_type *hi) const
 {
     _RWSTD_ASSERT (lo <= hi);
     for ( ; lo != hi; ++lo) {
-        if (   _RWSTD_STATIC_CAST (size_t, *lo) >= _C_tab_size
+        if (   static_cast< size_t >(*lo) >= _C_tab_size
             || !(_C_mask_tab [_UChar (*lo)] & m))
             break;
     }
@@ -512,8 +512,8 @@ char
 ctype<wchar_t>::
 do_narrow (char_type c, char dfault) const
 {
-    return _RWSTD_STATIC_CAST (size_t, c) <= _RWSTD_SCHAR_MAX ?
-        _RWSTD_STATIC_CAST (char, c) : dfault;
+    return static_cast< size_t >(c) <= _RWSTD_SCHAR_MAX ?
+        static_cast< char >(c) : dfault;
 }
 
 
@@ -541,8 +541,8 @@ ctype_byname (const char *name, size_t refs)
 
     // delayed initialization not used for efficiency
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-            _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
                 __rw::__rw_get_facet_data (LC_CTYPE, _C_impsize, _C_name)));
 
     _C_impdata = impl;
@@ -572,7 +572,7 @@ ctype_byname (const char *name, size_t refs)
             _C_lower_tab = _C_upper_tab + _C_tab_size;
         }
         _CATCH (...) {
-            delete[] _RWSTD_CONST_CAST (mask*, _C_mask_tab);
+            delete[] const_cast< mask* >(_C_mask_tab);
             _RETHROW;
         }
 
@@ -610,7 +610,7 @@ ctype_byname (const char *name, size_t refs)
             if ((::iswgraph)(i))
                 m |= __rw::__rw_graph;
 
-            _RWSTD_CONST_CAST (mask*, _C_mask_tab) [i]  = mask (m);
+            const_cast< mask* >(_C_mask_tab) [i]  = mask (m);
 
             const size_t upr = size_t ((::towupper)(i));
 
@@ -649,9 +649,9 @@ ctype_byname<wchar_t>::
 do_is (mask m, wchar_t c) const
 {
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
-                                               _C_data ()));
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
+                _C_data ()));
 
     const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
@@ -669,9 +669,9 @@ do_is (const char_type *lo, const char_type *hi, mask *mvec) const
 {
     _RWSTD_ASSERT (lo <= hi);
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
-                                               _C_data ()));
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
+                _C_data ()));
 
     const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
@@ -685,9 +685,9 @@ ctype_byname<wchar_t>::
 do_toupper (char_type c) const
 {
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
-                                               _C_data ()));
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
+                _C_data ()));
 
     const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
@@ -700,9 +700,9 @@ ctype_byname<wchar_t>::
 do_tolower (char_type c) const
 {
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
-                                               _C_data ()));
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
+                _C_data ()));
 
     const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
@@ -716,9 +716,9 @@ do_toupper (char_type *lo, const char_type *hi) const
 {
     _RWSTD_ASSERT (lo <= hi);
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
-                                               _C_data ()));
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
+                _C_data ()));
 
     const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
@@ -735,9 +735,9 @@ do_tolower (char_type *lo, const char_type *hi) const
 {
     _RWSTD_ASSERT (lo <= hi);
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
-                                               _C_data ()));
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
+                _C_data ()));
 
     const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
@@ -755,9 +755,9 @@ do_scan_is (mask m, const char_type* lo, const char_type* hi) const
     _RWSTD_ASSERT (lo <= hi);
 
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
-                                               _C_data ()));
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
+                _C_data ()));
     const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
     return __rw::__rw_get_mask (impl, lo, hi, m, 0, true, libstd, _C_name);
@@ -771,9 +771,9 @@ do_scan_not (mask m, const char_type *lo, const char_type *hi) const
     _RWSTD_ASSERT (lo <= hi);
 
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
-                                               _C_data ()));
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
+                _C_data ()));
     const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
     return __rw::__rw_get_mask (impl, lo, hi, m, 0, false, libstd, _C_name);
@@ -799,7 +799,7 @@ do_narrow (char_type c, char dfault) const
 #endif   // _RWSTD_WCHAR_MIN
 
     const __rw::__rw_codecvt_t* cvt = 
-        _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, _C_cvtimpl);
+        static_cast< const __rw::__rw_codecvt_t* >(_C_cvtimpl);
 
     char ch = 0;
     if (0 == cvt || (this->_C_opts & this->_C_use_libc)) {
@@ -825,8 +825,7 @@ do_narrow (char_type c, char dfault) const
         // was native and use wide-to-narrow tables for conversion
         char_type wc = 0;
 
-        unsigned int* tbl  = _RWSTD_CONST_CAST(unsigned int*, 
-                                               cvt->w_to_n_tab ());
+        unsigned int* tbl  = const_cast< unsigned int* >(cvt->w_to_n_tab ());
         unsigned int* ptbl = tbl;
 
         char  tmp [_UTF8_MB_CUR_MAX + 1];
@@ -864,7 +863,7 @@ do_narrow (char_type c, char dfault) const
         // the narrow sequence; for our purposes here, that sequence has
         // to have length of one
         const char* impl_raw = 
-            _RWSTD_REINTERPRET_CAST(const char*, cvt);
+            reinterpret_cast< const char* >(cvt);
         size_t offset = wc + sizeof (__rw::__rw_codecvt_t);
 
         if (impl_raw [offset + 1])
@@ -907,7 +906,7 @@ do_widen (char c) const
     // otherwise we have to call setlocale() and btowc() to get the
     // corresponding wchar_t
     const __rw::__rw_codecvt_t* cvt = 
-        _RWSTD_STATIC_CAST (const __rw::__rw_codecvt_t*, _C_cvtimpl);
+        static_cast< const __rw::__rw_codecvt_t* >(_C_cvtimpl);
 
     char_type ch;
 

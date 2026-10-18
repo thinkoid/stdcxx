@@ -744,7 +744,7 @@ convert_escape (const char  *esc,
         // cast away constness below to work around an MSVC 7.0 bug:
         // causing error C2446: '==' : no conversion from 'char ** '
         // to 'const char ** ' Conversion loses qualifiers
-        if (!multi && _RWSTD_CONST_CAST (char**, pend) == &end && **pend)
+        if (!multi && const_cast< char** >(pend) == &end && **pend)
             issue_diag (E_SYNTAX, true, 0,
                         "%s constant expected: %s\n", basename, esc);
 

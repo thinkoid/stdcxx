@@ -142,7 +142,7 @@ public:
         }
 
         operator bool () const _THROWS (()) {
-            return _RWSTD_CONST_CAST (const bitset<_Size>&, _C_ref)[_C_pos];
+            return const_cast< const bitset<_Size>& >(_C_ref)[_C_pos];
         }
 
         reference& flip () _THROWS (()) {

@@ -283,8 +283,8 @@ struct AssignRangePtrOverload: ContRangeBase<List> {
         const ListVal* const beg = tdata.arg_ + tdata.off2_;
         const ListVal* const end = beg + tdata.ext2_;
 
-        const Iterator first = _RWSTD_CONST_CAST (Iterator, beg);
-        const Iterator last  = _RWSTD_CONST_CAST (Iterator, end);
+        const Iterator first = const_cast< Iterator >(beg);
+        const Iterator last  = const_cast< Iterator >(end);
 
         lst.assign (first, last);
         return lst;

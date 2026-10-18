@@ -158,8 +158,7 @@ format (const char* file, int line,
 
     if (sizeof buf_ <= size_t (nchars)) {
         // tmpbuf_ size is too small
-        ex_str_ = _RWSTD_STATIC_CAST (ExceptionString*,
-                                      malloc (sizeof (*ex_str_)));
+        ex_str_ = static_cast< ExceptionString* >(malloc (sizeof (*ex_str_)));
 
         if (ex_str_) {
             ex_str_->init (tmpbuf);

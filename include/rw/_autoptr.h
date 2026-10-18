@@ -104,7 +104,7 @@ class auto_ptr_ref
     // if U* is implicitly convertible to T* (via inheritance)
     template <class _TypeU>
     auto_ptr_ref (auto_ptr<_TypeU>& __rhs, const _TypeU* = 0) _THROWS (())
-        : _C_ptr (_RWSTD_REINTERPRET_CAST (auto_ptr<_TypeT>&, __rhs)) { }
+        : _C_ptr (reinterpret_cast< auto_ptr<_TypeT>& >(__rhs)) { }
 
     // reference to the owning auto_ptr object
     auto_ptr<_TypeT>& _C_ptr;

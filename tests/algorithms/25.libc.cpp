@@ -62,8 +62,8 @@ extern "C" {
 
 #endif   // _RWSTD_NO_EXCEPTIONS
 
-        return   (*_RWSTD_STATIC_CAST (const UserClass*, x)).data_.val_
-               - (*_RWSTD_STATIC_CAST (const UserClass*, y)).data_.val_;
+        return   (*static_cast< const UserClass* >(x)).data_.val_
+               - (*static_cast< const UserClass* >(y)).data_.val_;
     }
 }
 
@@ -79,8 +79,8 @@ extern "C++" {
 
 #endif   // _RWSTD_NO_EXCEPTIONS
 
-        return   (*_RWSTD_STATIC_CAST (const UserClass*, x)).data_.val_
-               - (*_RWSTD_STATIC_CAST (const UserClass*, y)).data_.val_;
+        return   (*static_cast< const UserClass* >(x)).data_.val_
+               - (*static_cast< const UserClass* >(y)).data_.val_;
     }
 }
 
@@ -192,7 +192,7 @@ test_bsearch (int          line,
                "line %d: extern \"C%{?}++%{;}\" bsearch (\"%s\", %#c, ...) "
                "== %p, got %p, difference is %td elements",
                __LINE__, cxx, src, key_val, result, exp_res,
-               _RWSTD_STATIC_CAST (const UserClass*, result) - exp_res);
+               static_cast< const UserClass* >(result) - exp_res);
 
     delete[] xsrc;
 }

@@ -784,8 +784,8 @@ public:
     _C_string_ref_type* _C_pref () const {
         // use two static_casts in favor of reinterpret_cast
         // to prevent "increased alignment" warnings
-        return _RWSTD_STATIC_CAST (_C_string_ref_type*,
-                   _RWSTD_STATIC_CAST (void*, _C_data)) - 1; 
+        return static_cast< _C_string_ref_type* >(
+            static_cast< void* >(_C_data)) - 1; 
     }
 
     void _C_unlink (pointer);   
@@ -805,7 +805,7 @@ public:
     static __rw::__null_ref<_CharT, _Traits, _Allocator>* _C_nullref () {
         typedef __rw::__null_ref<_CharT, _Traits, _Allocator> _NullRef;
 
-        return _RWSTD_REINTERPRET_CAST (_NullRef*, __rw::__nullref);
+        return reinterpret_cast< _NullRef* >(__rw::__nullref);
     }
 
 #endif   // _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
@@ -853,8 +853,7 @@ _C_unlink (pointer __ptr)
 
         _C_ref_alloc_type (*this).destroy (_C_pref ());
         _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                            deallocate (_RWSTD_REINTERPRET_CAST (pointer,
-                                                                 _C_pref ()),
+                            deallocate (reinterpret_cast< pointer >(_C_pref ()),
                                         __size));
     }
 

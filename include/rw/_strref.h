@@ -220,11 +220,11 @@ struct __string_ref
     }
 
     char_type* data () {
-        return _RWSTD_REINTERPRET_CAST (char_type*, this + 1);
+        return reinterpret_cast< char_type* >(this + 1);
     }
 
     const char_type* data () const {
-        return _RWSTD_REINTERPRET_CAST (const char_type*, this + 1);
+        return reinterpret_cast< const char_type* >(this + 1);
     }
 
 #ifndef _RWSTD_NO_STRING_REF_COUNT

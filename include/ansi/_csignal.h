@@ -75,17 +75,17 @@ typedef void __rw_sighandler_t (int);
 
 #ifndef SIG_DFL
 #  define SIG_DFL \
-       _RWSTD_REINTERPRET_CAST (std::__rw_sighandler_t*, _RWSTD_SIG_DFL)
+       reinterpret_cast< std::__rw_sighandler_t* >(_RWSTD_SIG_DFL)
 #endif   // SIG_DFL
 
 #ifndef SIG_ERR
 #  define SIG_ERR \
-       _RWSTD_REINTERPRET_CAST (std::__rw_sighandler_t*, _RWSTD_SIG_ERR)
+       reinterpret_cast< std::__rw_sighandler_t* >(_RWSTD_SIG_ERR)
 #endif   // SIG_ERR
 
 #ifndef SIG_IGN
 #  define SIG_IGN \
-       _RWSTD_REINTERPRET_CAST (std::__rw_sighandler_t*, _RWSTD_SIG_IGN)
+       reinterpret_cast< std::__rw_sighandler_t* >(_RWSTD_SIG_IGN)
 #endif   // SIG_IGN
 
 

@@ -667,8 +667,8 @@ ctype (const mask *tab, bool del, size_t refs) _THROWS (())
         _C_delete_it = false;
     }
 
-    _C_upper_tab = _RWSTD_CONST_CAST (_UChar*, __rw::__rw_upper_tab);
-    _C_lower_tab = _RWSTD_CONST_CAST (_UChar*, __rw::__rw_lower_tab);
+    _C_upper_tab = const_cast< _UChar* >(__rw::__rw_upper_tab);
+    _C_lower_tab = const_cast< _UChar* >(__rw::__rw_lower_tab);
 
     memset (_C_narrow_tab, 0, sizeof _C_narrow_tab);
     memset (_C_wide_tab, 0, sizeof _C_wide_tab);
@@ -678,7 +678,7 @@ ctype (const mask *tab, bool del, size_t refs) _THROWS (())
 ctype<char>::~ctype () // nothrow
 {
     if (_C_delete_it) {
-        delete[] _RWSTD_CONST_CAST (mask*, _C_mask_tab);
+        delete[] const_cast< mask* >(_C_mask_tab);
 
         if (_C_upper_tab != __rw::__rw_upper_tab) {
             // lower_tab is allocated in the same block of memory
@@ -810,7 +810,7 @@ do_widen (char ch) const
         return cached;
 
     _RWSTD_ATOMIC_STORE_RELAXED (
-        _RWSTD_CONST_CAST (ctype<char>*, this)->_C_wide_tab [_UChar (ch)],
+        const_cast< ctype<char>* >(this)->_C_wide_tab [_UChar (ch)],
         char_type (ch), false);
 
     return char_type (ch);
@@ -869,8 +869,8 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
 
     // delayed initialization not used for efficiency
     __rw::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
-            _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
+        const_cast< __rw::__rw_ctype_t* >(
+            static_cast< const __rw::__rw_ctype_t* >(
                 __rw::__rw_get_facet_data (LC_CTYPE, _C_impsize, _C_name)));
 
     _C_impdata = impl;
@@ -893,7 +893,7 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
             _C_delete_it = true;
         }
         _CATCH (...) {
-            delete[] _RWSTD_CONST_CAST (mask*, _C_mask_tab);
+            delete[] const_cast< mask* >(_C_mask_tab);
             _RETHROW;
         }
 
@@ -924,7 +924,7 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
             if ((::isgraph)(i))
                 m |= __rw::__rw_graph;
 
-            _RWSTD_CONST_CAST (mask*, _C_mask_tab)[i] = mask (m);
+            const_cast< mask* >(_C_mask_tab)[i] = mask (m);
         }
 
         typedef unsigned char UChar;
@@ -947,12 +947,12 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
         _C_lower_tab = impl->tolower_tab;
 
         const mask *mask_tab =
-            _RWSTD_REINTERPRET_CAST (const mask*, impl->mask_tab);
+            reinterpret_cast< const mask* >(impl->mask_tab);
 
         // verify that mask is the same size
         _RWSTD_ASSERT (sizeof *mask_tab == sizeof *impl->mask_tab);
 
-        _C_mask_tab = _RWSTD_CONST_CAST (mask*, mask_tab);
+        _C_mask_tab = const_cast< mask* >(mask_tab);
     }
 }
 

@@ -66,7 +66,7 @@ __rw_tmpbuf (void **pptr, _RWSTD_PTRDIFF_T nelems, size_t size)
     size_t nbytes = nelems * size;
 
     if (   nelems < 0
-        || nbytes / size != _RWSTD_STATIC_CAST (size_t, nelems)
+        || nbytes / size != static_cast< size_t >(nelems)
         || (nelems && nbytes / nelems != size)) {
         *pptr = 0;
         return 0;

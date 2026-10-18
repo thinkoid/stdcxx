@@ -91,7 +91,7 @@ struct __rw_setfill
 struct __rw_setprecision
 {
     void operator() (std::ios_base &__strm, int __prec) const {
-        __strm.precision (_RWSTD_STATIC_CAST (_RWSTD_STREAMSIZE, __prec));
+        __strm.precision (static_cast< _RWSTD_STREAMSIZE >(__prec));
     }
 };
 
@@ -100,7 +100,7 @@ struct __rw_setprecision
 struct __rw_setw
 {
     void operator() (std::ios_base &__strm, int __width) const {
-        __strm.width (_RWSTD_STATIC_CAST (_RWSTD_STREAMSIZE, __width));
+        __strm.width (static_cast< _RWSTD_STREAMSIZE >(__width));
     }
 };
 

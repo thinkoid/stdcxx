@@ -399,14 +399,6 @@
 #define _RWSTD_REDECLARED_DEFAULT(arg)   = arg
 
 
-// Macro for casting, using either the "old" method
-// or the new C++ cast system
-#define _RWSTD_STATIC_CAST(T, x)      static_cast< T >(x)
-#define _RWSTD_REINTERPRET_CAST(T, x) reinterpret_cast< T >(x)
-#define _RWSTD_CONST_CAST(T, x)       const_cast< T >(x)
-
-#define _RWSTD_DYNAMIC_CAST(T, x)      dynamic_cast< T >(x)
-
 //
 // for compilers that don't like specialized friends
 // such as operator== in template classes
@@ -703,7 +695,7 @@
 #  define _RWSTD_VALUE_ALLOC(ignore, object, call)    \
           (object).allocator_type::call
 #  define _RWSTD_VALUE_ALLOC_CAST(rvalue)             \
-          _RWSTD_STATIC_CAST (allocator_type&, rvalue)
+          static_cast< allocator_type& >(rvalue)
 #else   // if !defined (_RWSTD_ALLOCATOR)
 #  define _RWSTD_REBIND(from, to) \
           std::allocator_interface < from, to >

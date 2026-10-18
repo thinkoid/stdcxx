@@ -351,7 +351,7 @@ private:
     _C_link_t _C_get_link () {
         _C_link_t __tmp = _C_free_list;
         _C_link_t __tmp2 = (void*)_C_free_list ? 
-            (_C_free_list = _RWSTD_STATIC_CAST (_C_link_t,(_C_free_list->_C_child [1])), __tmp) 
+            (_C_free_list = static_cast< _C_link_t >((_C_free_list->_C_child [1])), __tmp) 
             : (_C_next_avail == _C_last ? (_C_add_new_buffer (), _C_next_avail++) 
                : _C_next_avail++);
         __tmp2->_C_parent    = 0;
@@ -604,7 +604,7 @@ public:
     iterator find (const key_type&);
 
     const_iterator find (const key_type& __key) const {
-        return _RWSTD_CONST_CAST (__rb_tree*, this)->find (__key);
+        return const_cast< __rb_tree* >(this)->find (__key);
     }
 
     size_type count (const key_type&) const;
@@ -612,13 +612,13 @@ public:
     iterator lower_bound (const key_type&);
 
     const_iterator lower_bound (const key_type& __key) const {
-        return _RWSTD_CONST_CAST (__rb_tree*, this)->lower_bound (__key);
+        return const_cast< __rb_tree* >(this)->lower_bound (__key);
     }
 
     iterator upper_bound (const key_type&);
 
     const_iterator upper_bound (const key_type& __key) const {
-        return _RWSTD_CONST_CAST (__rb_tree*, this)->upper_bound (__key);
+        return const_cast< __rb_tree* >(this)->upper_bound (__key);
     }
 
     std::pair<iterator, iterator> equal_range (const key_type&);
@@ -626,7 +626,7 @@ public:
     std::pair<const_iterator, const_iterator>
     equal_range (const key_type& __key) const {
         std::pair<iterator, iterator> __tmp =
-            _RWSTD_CONST_CAST (__rb_tree*, this)->equal_range (__key);
+            const_cast< __rb_tree* >(this)->equal_range (__key);
         return std::pair<const_iterator, const_iterator>
             (__tmp.first, __tmp.second);
     }

@@ -55,7 +55,7 @@ parse_era (const token_t& tok)
     // may get the wide version of the era name and format
     const std::wstring wera = convert_wstring (tok);
 
-    char* const erap = _RWSTD_CONST_CAST (char*, era.c_str ());
+    char* const erap = const_cast< char* >(era.c_str ());
 
     const wchar_t* const werap = wera.c_str ();
 
@@ -372,7 +372,7 @@ void Def::write_time(std::string dir_name)
 
     int i;
 
-#define UINT(x) _RWSTD_STATIC_CAST(unsigned, x)
+#define UINT(x) static_cast< unsigned >(x)
 
     time_out_.num_alt_digits = UINT (alt_digits_.size());
     time_out_.era_off = 0;

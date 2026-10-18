@@ -105,7 +105,7 @@
   namespace std {                                                    \
     /* reference (not object) to a basic_[i|o]stream<> object */              \
     _RWSTD_EXPORT stream &name                                                \
-        = _RWSTD_REINTERPRET_CAST (stream&, __rw::__rw_indestructible_##name); \
+        = reinterpret_cast< stream& >(__rw::__rw_indestructible_##name);      \
   }   /* namespace std */                                                     \
   typedef void __rw_unused_typedef
 
@@ -142,7 +142,7 @@
   }   /* namespace __rw */                                                  \
   typedef void __rw_unused_typedef
 
-#define _OBJECT(type, name)   _RWSTD_REINTERPRET_CAST (type&, name)
+#define _OBJECT(type, name)   reinterpret_cast< type& >(name)
 
 #  endif   // _RWSTD_NO_IOSTREAM_OBJECT_REFS
 
@@ -269,10 +269,10 @@ ios_base::Init::_C_init ()
 
     // stream objects expected to be arranged in this order
     // must be initialized dynamically (as opposed to statically)
-    __rw::__rw_std_streams[0] = _RWSTD_STATIC_CAST (ios_base*, pcin);
-    __rw::__rw_std_streams[1] = _RWSTD_STATIC_CAST (ios_base*, pcout);
-    __rw::__rw_std_streams[2] = _RWSTD_STATIC_CAST (ios_base*, pcerr);
-    __rw::__rw_std_streams[3] = _RWSTD_STATIC_CAST (ios_base*, pclog);
+    __rw::__rw_std_streams[0] = static_cast< ios_base* >(pcin);
+    __rw::__rw_std_streams[1] = static_cast< ios_base* >(pcout);
+    __rw::__rw_std_streams[2] = static_cast< ios_base* >(pcerr);
+    __rw::__rw_std_streams[3] = static_cast< ios_base* >(pclog);
 
     // 27.3.1, p2
     pcin->_C_usr = &_C_usr_data::_C_std_usr_data [0];
@@ -303,10 +303,10 @@ ios_base::Init::_C_init ()
 
     // stream objects expected to be arranged in this order
     // must be initialized dynamically (as opposed to statically)
-    __rw::__rw_std_streams[4] = _RWSTD_STATIC_CAST (ios_base*, pwcin);
-    __rw::__rw_std_streams[5] = _RWSTD_STATIC_CAST (ios_base*, pwcout);
-    __rw::__rw_std_streams[6] = _RWSTD_STATIC_CAST (ios_base*, pwcerr);
-    __rw::__rw_std_streams[7] = _RWSTD_STATIC_CAST (ios_base*, pwclog);
+    __rw::__rw_std_streams[4] = static_cast< ios_base* >(pwcin);
+    __rw::__rw_std_streams[5] = static_cast< ios_base* >(pwcout);
+    __rw::__rw_std_streams[6] = static_cast< ios_base* >(pwcerr);
+    __rw::__rw_std_streams[7] = static_cast< ios_base* >(pwclog);
 
     // 27.3.2, p2
     pwcin->_C_usr = &_C_usr_data::_C_std_usr_data [1];

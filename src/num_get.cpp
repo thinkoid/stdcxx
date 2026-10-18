@@ -135,8 +135,8 @@ __rw_check_grouping (const char *grps,   _RWSTD_SIZE_T ngrps,
     // iterate over elements of `groups' starting with the least significant
     // one (at the greatest index), comparing each against the relevant
     // element of `groupings' (at the lowest index)
-    for (PCUChar g = _RWSTD_REINTERPRET_CAST (PCUChar, grps + ngrps - 1),
-                 e = _RWSTD_REINTERPRET_CAST (PCUChar, grping); ; --g) {
+    for (PCUChar g = reinterpret_cast< PCUChar >(grps + ngrps - 1),
+                 e = reinterpret_cast< PCUChar >(grping); ; --g) {
 
         typedef const void* PVoid;
 
@@ -280,7 +280,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
         switch (type) {
         case __rw_facet::_C_bool:
             if (0 == val.l || 1 == val.l) {
-                *_RWSTD_STATIC_CAST (bool*, pval) = 1 == val.l;
+                *static_cast< bool* >(pval) = 1 == val.l;
             }
             else
                 err = ERANGE;
@@ -298,8 +298,8 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
                     val.ul = _RWSTD_USHRT_MAX - val.ul + 1;
             }
 
-            *_RWSTD_STATIC_CAST (unsigned short*, pval) =
-                _RWSTD_STATIC_CAST (unsigned short, val.ul);
+            *static_cast< unsigned short* >(pval) =
+                static_cast< unsigned short >(val.ul);
             break;
                 
         case __rw_facet::_C_short:
@@ -313,8 +313,8 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
                 err   = ERANGE;
             }
 
-            *_RWSTD_STATIC_CAST (short*, pval) =
-                _RWSTD_STATIC_CAST (short, val.l);
+            *static_cast< short* >(pval) =
+                static_cast< short >(val.l);
             break;
 
         case __rw_facet::_C_uint:
@@ -339,7 +339,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
                     val.ul = _RWSTD_UINT_MAX - val.ul + 1;
             }
 
-            *_RWSTD_STATIC_CAST (unsigned*, pval) = unsigned (val.ul);
+            *static_cast< unsigned* >(pval) = unsigned (val.ul);
             break;
 
         case __rw_facet::_C_int:
@@ -368,35 +368,35 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 
 #endif   // _RWSTD_UINT_MAX < _RWSTD_ULONG_MAX
 
-            *_RWSTD_STATIC_CAST (int*, pval) = int (val.l);
+            *static_cast< int* >(pval) = int (val.l);
             break;
 
         case __rw_facet::_C_ulong:
-            *_RWSTD_STATIC_CAST (unsigned long*, pval) = val.ul;
+            *static_cast< unsigned long* >(pval) = val.ul;
             break;
             
         case __rw_facet::_C_long:
-            *_RWSTD_STATIC_CAST (long*, pval) = val.l;
+            *static_cast< long* >(pval) = val.l;
             break;
 
 #ifdef _RWSTD_LONG_LONG
 
         case __rw_facet::_C_ullong:
-            *_RWSTD_STATIC_CAST (unsigned _RWSTD_LONG_LONG*, pval) = val.ull;
+            *static_cast< unsigned _RWSTD_LONG_LONG* >(pval) = val.ull;
             break;
 
         case __rw_facet::_C_llong:
-            *_RWSTD_STATIC_CAST (_RWSTD_LONG_LONG*, pval) = val.ll;
+            *static_cast< _RWSTD_LONG_LONG* >(pval) = val.ll;
             break;
 
 #endif   // _RWSTD_LONG_LONG
 
         case __rw_facet::_C_pvoid:
-            *_RWSTD_STATIC_CAST (void**, pval) =
+            *static_cast< void** >(pval) =
 #if defined (_RWSTD_LONG_LONG) && _RWSTD_PTR_SIZE > _RWSTD_LONG_SIZE
-                _RWSTD_REINTERPRET_CAST (void*, val.ull);
+                reinterpret_cast< void* >(val.ull);
 #else
-                _RWSTD_REINTERPRET_CAST (void*, val.ul);
+                reinterpret_cast< void* >(val.ul);
 #endif
 
             // disable grouping
@@ -432,7 +432,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 
             // assumes `buf' is formatted for the current locale
             // specifically, affects the value of decimal_point
-            float f = strtof (_RWSTD_CONST_CAST (char*, buf), &end);
+            float f = strtof (const_cast< char* >(buf), &end);
 
             err = errno;
 
@@ -443,7 +443,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
                 // set teporarily the global locale to "C" and reparse
                 __rw_setlocale loc ("C", _RWSTD_LC_NUMERIC);
 
-                f   = strtof (_RWSTD_CONST_CAST (char*, buf), &end);
+                f   = strtof (const_cast< char* >(buf), &end);
                 err = errno;
             }
 
@@ -454,7 +454,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
             if (*end)
                 return _RWSTD_IOS_FAILBIT;
 
-            *_RWSTD_STATIC_CAST (float*, pval) =
+            *static_cast< float* >(pval) =
                 __rw_validate (f, float (_RWSTD_FLT_MIN),
                                __rw_flt_infinity, *buf, err);
 
@@ -486,7 +486,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
             if (*end)
                 return _RWSTD_IOS_FAILBIT;
 
-            *_RWSTD_STATIC_CAST (double*, pval) =
+            *static_cast< double* >(pval) =
                __rw_validate (d, double (_RWSTD_DBL_MIN),
                               __rw_dbl_infinity, *buf, err);
             break;
@@ -528,7 +528,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
             if (*end)
                 return _RWSTD_IOS_FAILBIT;
 
-            *_RWSTD_STATIC_CAST (LDbl*, pval) =
+            *static_cast< LDbl* >(pval) =
                 __rw_validate (ld, LDbl (_RWSTD_LDBL_MIN),
                                __rw_ldbl_infinity, *buf, err);
 

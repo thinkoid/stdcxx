@@ -593,8 +593,8 @@ test_libstd_do_length (const char* locale_name, const CodeCvtT& cc,
     // the state
     std::mbstate_t state = std::mbstate_t ();
 
-    extern_t* pe       = _RWSTD_CONST_CAST(extern_t*, buffe);
-    extern_t* pe_limit = _RWSTD_CONST_CAST(extern_t*, buffe + sze);
+    extern_t* pe       = const_cast< extern_t* >(buffe);
+    extern_t* pe_limit = const_cast< extern_t* >(buffe + sze);
 
     sze = cc.length ( state, pe, pe_limit, sze );
 
@@ -656,7 +656,7 @@ test_libstd_codecvt (const char* locale_name, const CodeCvtT& cc,
     std::size_t eelength = 0;
 
     // read source file
-    ebuffer = _RWSTD_STATIC_CAST (extern_t*, rw_fread (fname, &elength, "rb"));
+    ebuffer = static_cast< extern_t* >(rw_fread (fname, &elength, "rb"));
 
     if (!ebuffer || !elength) {
         rw_assert (false, __FILE__, __LINE__,
@@ -864,11 +864,11 @@ rwtest_iconv_convert (iconv_t      fd,
     std::size_t tmp = out_sz++ + 1;
 
 #if defined _RWSTD_NO_ICONV_CONST_CHAR
-    char* par1 = _RWSTD_CONST_CAST (char*, in);
+    char* par1 = const_cast< char* >(in);
 #else
     const char* par1 = in;
 #endif //  defined _RWSTD_NO_ICONV_CONST_CHAR
-    char* par2 = _RWSTD_REINTERPRET_CAST (char*, out);
+    char* par2 = reinterpret_cast< char* >(out);
 
     std::size_t res = iconv (fd, &par1, &in_sz, &par2, &out_sz);
     if (res == std::size_t (-1))
@@ -1020,7 +1020,7 @@ test_ucs_modifier (const char*       locale_name,
     std::size_t ilen_native = 0;
 
     // read source file
-    ebuf = _RWSTD_STATIC_CAST (char*, rw_fread (fname, &elen, "rb"));
+    ebuf = static_cast< char* >(rw_fread (fname, &elen, "rb"));
     if (!ebuf || !elen)
         return;
 
@@ -1468,7 +1468,7 @@ test_inout (int which, int line, const char* name,
 
         if (pextstr != sext) {
             // const_cast works around an MSVC 6.0 bug (PR #30092)
-            delete[] _RWSTD_CONST_CAST (char*, pextstr);
+            delete[] const_cast< char* >(pextstr);
         }
 
         std::codecvt_base::result res;
@@ -2566,7 +2566,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
 
         // save the index of the first locale database successfully built
         if (-1 == first_good_locale)
-            first_good_locale = _RWSTD_STATIC_CAST (int, i);
+            first_good_locale = static_cast< int >(i);
 
         // exercise the behavior of codecvt_byname<wchar_t, char, mbstate_t>
         // in constructed with one of the additional @UCS name modifiers

@@ -1127,7 +1127,7 @@ _rw_dispatch (charT*, Traits*, Allocator*,
 
     const size_t inx = func.char_id_ * 4 + func.traits_id_ * 2 + func.alloc_id_;
 
-    TestFunc* const tfunc = _RWSTD_REINTERPRET_CAST (TestFunc*, farray [inx]);
+    TestFunc* const tfunc = reinterpret_cast< TestFunc* >(farray [inx]);
 
     if (0 == tfunc) {
         rw_error (0, __FILE__, __LINE__,

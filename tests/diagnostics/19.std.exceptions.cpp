@@ -160,7 +160,7 @@ static int test_exception_defs ()
     // verify that each exceptions converting ctor is explicit
     // use a pointer since std::string need not be a complete class
     const char s[40] = "";
-    const std::string *ps = _RWSTD_REINTERPRET_CAST (const std::string*, s);
+    const std::string *ps = reinterpret_cast< const std::string* >(s);
     is_explicit (*ps);
 
     // verify that each exceptions converting ctor from const char*

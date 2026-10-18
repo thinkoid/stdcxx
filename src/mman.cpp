@@ -112,11 +112,11 @@ void __rw_munmap (const void* pcv, size_t size)   // nothrow
     _RWSTD_ASSERT (pcv && size);
 
         // cast first to void*
-    void* pv = _RWSTD_CONST_CAST (void*, pcv);
+    void* pv = const_cast< void* >(pcv);
 
     // POSIX munmap() takes a void*, but not all platforms conform
 #ifndef _RWSTD_NO_MUNMAP
-    munmap (_RWSTD_STATIC_CAST (_RWSTD_MUNMAP_ARG1_T, pv), size);
+    munmap (static_cast< _RWSTD_MUNMAP_ARG1_T >(pv), size);
 #else   // no munmap()
     operator delete (pv);
 #endif  // !defined (_RWSTD_NO_MUNMAP)

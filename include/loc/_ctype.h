@@ -323,7 +323,7 @@ protected:
 inline ctype<char>::char_type
 ctype<char>::narrow (char_type __c, char __dfault) const
 {
-    const _RWSTD_SIZE_T __inx = _RWSTD_STATIC_CAST (unsigned char, __c);
+    const _RWSTD_SIZE_T __inx = static_cast< unsigned char >(__c);
 
     // optimize away all but the first call to the virtual do_widen();
     // threads that race to fill a slot store the same value in it, so
@@ -342,7 +342,7 @@ ctype<char>::narrow (char_type __c, char __dfault) const
         return __cached;
 
     // template argument provided to work around an HP aCC bug (PR #27087)
-    ctype<char>* const __self = _RWSTD_CONST_CAST (ctype<char>*, this);
+    ctype<char>* const __self = const_cast< ctype<char>* >(this);
 
     __c = do_narrow (__c, __dfault);
 
@@ -357,7 +357,7 @@ ctype<char>::narrow (char_type __c, char __dfault) const
 inline ctype<char>::char_type
 ctype<char>::widen (char __ch) const
 {
-    const _RWSTD_SIZE_T __inx = _RWSTD_STATIC_CAST (unsigned char, __ch);
+    const _RWSTD_SIZE_T __inx = static_cast< unsigned char >(__ch);
 
     // optimize away all but the first call to the virtual do_widen()
 
@@ -375,7 +375,7 @@ ctype<char>::widen (char __ch) const
             return __cached;
 
         // template argument provided to work around an HP aCC bug (PR #27087)
-        ctype<char>* const __self = _RWSTD_CONST_CAST (ctype<char>*, this);
+        ctype<char>* const __self = const_cast< ctype<char>* >(this);
 
         const char_type __wc = do_widen (__ch);
 
@@ -551,7 +551,7 @@ ctype<wchar_t>::narrow (char_type __c, char __dfault) const
     // underlying integer type, avoiding sign extension and
     // similar issues
     const _RWSTD_UWCHAR_INT_T __inx =
-        _RWSTD_STATIC_CAST (_RWSTD_UWCHAR_INT_T, __c);
+        static_cast< _RWSTD_UWCHAR_INT_T >(__c);
 
     const bool __fits = __inx < sizeof _C_narrow_tab / sizeof *_C_narrow_tab;
 
@@ -566,7 +566,7 @@ ctype<wchar_t>::narrow (char_type __c, char __dfault) const
         return __cached;
 
     // template argument provided to work around an HP aCC bug (PR #27087)
-    ctype<wchar_t>* const __self = _RWSTD_CONST_CAST (ctype<wchar_t>*, this);
+    ctype<wchar_t>* const __self = const_cast< ctype<wchar_t>* >(this);
 
     const char __ch = do_narrow (__c, __dfault);
 
@@ -581,7 +581,7 @@ ctype<wchar_t>::narrow (char_type __c, char __dfault) const
 inline ctype<wchar_t>::char_type
 ctype<wchar_t>::widen (char __ch) const
 {
-    const _RWSTD_SIZE_T __inx = _RWSTD_STATIC_CAST (unsigned char, __ch);
+    const _RWSTD_SIZE_T __inx = static_cast< unsigned char >(__ch);
 
     // optimize away all but the first call to the virtual do_widen()
 
@@ -599,7 +599,7 @@ ctype<wchar_t>::widen (char __ch) const
             return __cached;
 
         // template argument provided to work around an HP aCC bug (PR #27087)
-        ctype<wchar_t>* const __self = _RWSTD_CONST_CAST (ctype<wchar_t>*, this);
+        ctype<wchar_t>* const __self = const_cast< ctype<wchar_t>* >(this);
 
         const char_type __wc = do_widen (__ch);
 

@@ -209,7 +209,7 @@ __rw_fopen (const char *fname, int openmode, long prot)
         if (0 == file)
             return 0;
 
-        return _RWSTD_STATIC_CAST (void*, file);
+        return static_cast< void* >(file);
     }
 
     // convert the iostream open mode to the POSIX file access mode
@@ -224,7 +224,7 @@ __rw_fopen (const char *fname, int openmode, long prot)
     if (fd < 0)
         return 0;
 
-    return _RWSTD_REINTERPRET_CAST (void*, fd + 1);
+    return reinterpret_cast< void* >(fd + 1);
 }
 
 
@@ -234,7 +234,7 @@ __rw_fdopen (int fd)
     if (fd < 0)
         return 0;
 
-    return _RWSTD_REINTERPRET_CAST (void*, fd + 1);
+    return reinterpret_cast< void* >(fd + 1);
 }
 
 
@@ -242,12 +242,12 @@ _RWSTD_EXPORT int
 __rw_fclose (void *file, int flags)
 {
     if (flags & _RWSTD_IOS_STDIO) {
-        FILE* const fp = _RWSTD_STATIC_CAST (FILE*, file);
+        FILE* const fp = static_cast< FILE* >(file);
 
         return fclose (fp);
     }
 
-    const int fd = int (_RWSTD_STATIC_CAST (char*, file) - 1 - (char*)0);
+    const int fd = int (static_cast< char* >(file) - 1 - (char*)0);
 
     return close (fd);
 }
@@ -257,9 +257,9 @@ _RWSTD_EXPORT int
 __rw_fileno (void *file, int flags)
 {
     if (flags & _RWSTD_IOS_STDIO)
-        return _RWSTD_FILENO (_RWSTD_STATIC_CAST (FILE*, file));
+        return _RWSTD_FILENO (static_cast< FILE* >(file));
 
-    const int fd = int (_RWSTD_STATIC_CAST (char*, file) - 1 - (char*)0);
+    const int fd = int (static_cast< char* >(file) - 1 - (char*)0);
 
     return fd;
 }
@@ -292,12 +292,12 @@ _RWSTD_EXPORT int
 __rw_fmode (void *file, int flags)
 {
     if (flags & _RWSTD_IOS_STDIO) {
-        FILE* const fp = _RWSTD_STATIC_CAST (FILE*, file);
+        FILE* const fp = static_cast< FILE* >(file);
 
         return __rw_fdmode (_RWSTD_FILENO (fp));
     }
 
-    const int fd = int (_RWSTD_STATIC_CAST (char*, file) - 1 - (char*)0);
+    const int fd = int (static_cast< char* >(file) - 1 - (char*)0);
 
     return __rw_fdmode (fd);
 }
@@ -307,7 +307,7 @@ _RWSTD_EXPORT long
 __rw_fseek (void *file, int flags, ptrdiff_t offset, int origin)
 {
     if (flags & _RWSTD_IOS_STDIO) {
-        FILE* const fp = _RWSTD_STATIC_CAST (FILE*, file);
+        FILE* const fp = static_cast< FILE* >(file);
 
         const int pos = fseek (fp, long (offset), origin);
         if (pos < 0)
@@ -316,7 +316,7 @@ __rw_fseek (void *file, int flags, ptrdiff_t offset, int origin)
         return ftell (fp);
     }
 
-    const int fd = int (_RWSTD_STATIC_CAST (char*, file) - 1 - (char*)0);
+    const int fd = int (static_cast< char* >(file) - 1 - (char*)0);
 
     return lseek (fd, offset, origin);
 }
@@ -326,12 +326,12 @@ _RWSTD_EXPORT size_t
 __rw_fread (void *file, int flags, void *buf, size_t size)
 {
     if (flags & _RWSTD_IOS_STDIO) {
-        FILE* const fp = _RWSTD_STATIC_CAST (FILE*, file);
+        FILE* const fp = static_cast< FILE* >(file);
 
         return fread (buf, 1, size, fp);
     }
 
-    const int fd = int (_RWSTD_STATIC_CAST (char*, file) - 1 - (char*)0);
+    const int fd = int (static_cast< char* >(file) - 1 - (char*)0);
 
     return read (fd, buf, size);
 }
@@ -341,12 +341,12 @@ _RWSTD_EXPORT ptrdiff_t
 __rw_fwrite (void *file, int flags, const void *buf, size_t size)
 {
     if (flags & _RWSTD_IOS_STDIO) {
-        FILE* const fp = _RWSTD_STATIC_CAST (FILE*, file);
+        FILE* const fp = static_cast< FILE* >(file);
 
-        return _RWSTD_STATIC_CAST (ptrdiff_t, fwrite (buf, 1, size, fp));
+        return static_cast< ptrdiff_t >(fwrite (buf, 1, size, fp));
     }
 
-    const int fd = int (_RWSTD_STATIC_CAST (char*, file) - 1 - (char*)0);
+    const int fd = int (static_cast< char* >(file) - 1 - (char*)0);
 
     return write (fd, buf, size);
 }
@@ -372,7 +372,7 @@ __rw_fflush (void *file, int flags)
         if (flags & _RWSTD_IOS_STDIO) {
 
             // `file' is a C file objec, flush it
-            FILE* const fp = _RWSTD_STATIC_CAST (FILE*, file);
+            FILE* const fp = static_cast< FILE* >(file);
 
             return fflush (fp);
         }

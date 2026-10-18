@@ -75,7 +75,7 @@ struct Pointer
     Pointer (difference_type off, int) : offset_ (off) {}
 
     reference operator* () const {
-        return *_RWSTD_REINTERPRET_CAST (pointer, offset_);
+        return *reinterpret_cast< pointer >(offset_);
     }
 
     bool operator== (const Pointer &rhs) const {
@@ -103,20 +103,20 @@ struct Pointer
     }
 
     Pointer& operator++ () {
-        pointer ptr = _RWSTD_REINTERPRET_CAST (pointer, offset_);
-        offset_ = _RWSTD_REINTERPRET_CAST (difference_type, ++ptr);
+        pointer ptr = reinterpret_cast< pointer >(offset_);
+        offset_ = reinterpret_cast< difference_type >(++ptr);
         return *this;
     }
 
     Pointer& operator-- () {
-        pointer ptr = _RWSTD_REINTERPRET_CAST (pointer, offset_);
-        offset_ = _RWSTD_REINTERPRET_CAST (difference_type, --ptr);
+        pointer ptr = reinterpret_cast< pointer >(offset_);
+        offset_ = reinterpret_cast< difference_type >(--ptr);
         return *this;
     }
 
     Pointer& operator+= (difference_type i) {
-        pointer ptr = _RWSTD_REINTERPRET_CAST (pointer, offset_);
-        offset_ = _RWSTD_REINTERPRET_CAST (difference_type, ptr += i);
+        pointer ptr = reinterpret_cast< pointer >(offset_);
+        offset_ = reinterpret_cast< difference_type >(ptr += i);
         return *this;
     }
 
@@ -133,8 +133,8 @@ struct Pointer
     }
 
     difference_type operator- (const Pointer &rhs) const {
-        pointer p1 = _RWSTD_REINTERPRET_CAST (pointer, offset_);
-        pointer p2 = _RWSTD_REINTERPRET_CAST (pointer, rhs.offset_);
+        pointer p1 = reinterpret_cast< pointer >(offset_);
+        pointer p2 = reinterpret_cast< pointer >(rhs.offset_);
         return p1 - p2;
     }
 
@@ -165,11 +165,11 @@ public:
     typedef std::random_access_iterator_tag iterator_category;
 
     pointer address (reference r) const {
-        return pointer (_RWSTD_REINTERPRET_CAST (difference_type, &r), 1);
+        return pointer (reinterpret_cast< difference_type >(&r), 1);
     }
 
     const_pointer address (const_reference r) const {
-        return const_pointer (_RWSTD_REINTERPRET_CAST (difference_type, &r),
+        return const_pointer (reinterpret_cast< difference_type >(&r),
                               1);
     }
 
@@ -180,19 +180,19 @@ public:
 
     pointer allocate (size_type n, const void* = 0) {
         void* const ptr = operator new (n * sizeof (T));
-        return pointer (_RWSTD_REINTERPRET_CAST (difference_type, ptr), 1);
+        return pointer (reinterpret_cast< difference_type >(ptr), 1);
     }
 
     void deallocate (pointer ptr, size_type) {
-        operator delete (_RWSTD_REINTERPRET_CAST (void*, ptr.offset_));
+        operator delete (reinterpret_cast< void* >(ptr.offset_));
     }
 
     void construct (pointer ptr, const_reference val) {
-        new (_RWSTD_REINTERPRET_CAST (void*, ptr.offset_)) value_type (val);
+        new (reinterpret_cast< void* >(ptr.offset_)) value_type (val);
     }
 
     void destroy (pointer ptr) { 
-        _RWSTD_REINTERPRET_CAST (T*, ptr.offset_)->~value_type ();
+        reinterpret_cast< T* >(ptr.offset_)->~value_type ();
     }
 
     size_type max_size () const throw () {

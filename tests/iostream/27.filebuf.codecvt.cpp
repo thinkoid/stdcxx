@@ -721,7 +721,7 @@ test_noconv (const char *fname)
     };
 
     // use static cast through void* to avoid using reinterpret_cast
-    pubbuf *rdbuf = _RWSTD_STATIC_CAST (pubbuf*, (void*)f.rdbuf ());
+    pubbuf *rdbuf = static_cast< pubbuf* >((void*)f.rdbuf ());
 
     std::streamsize filesize = rdbuf->showmanyc ();
 

@@ -217,9 +217,9 @@ struct Streambuf: std::basic_streambuf<charT, Traits>
 
     Streambuf (const charT *gbeg, const charT *gend)
         : Base () {
-        this->setg (_RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gend));
+        this->setg (const_cast< charT* >(gbeg),
+                    const_cast< charT* >(gbeg),
+                    const_cast< charT* >(gend));
     }
 
     std::ptrdiff_t gptr_off () const {
@@ -1169,7 +1169,7 @@ test_long (CharType ctype, const char *cname,
     const char vflow_1[]      = "999999999999999999990";
 #endif
 
-#define INTSIZE(x) _RWSTD_STATIC_CAST(int, sizeof (x))
+#define INTSIZE(x) static_cast< int >(sizeof (x))
 
     TEST (T, LONG_MIN, lmin,         INTSIZE (lmin) - 1,         0, Eof);
     TEST (T, LONG_MIN, lmin_minus_1, INTSIZE (lmin_minus_1) - 1, 0, Eof | Fail);

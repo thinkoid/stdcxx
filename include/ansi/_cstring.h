@@ -80,31 +80,31 @@ size_t strlen (const char*);
 // 21.4, p12 of ISO/IEC 14882:1998
 inline const void* memchr (const void *__p, int __c, size_t __n)
 {
-    return memchr (_RWSTD_CONST_CAST (void*, __p), __c, __n);
+    return memchr (const_cast< void* >(__p), __c, __n);
 }
 
 // 21.4, p4 of ISO/IEC 14882:1998
 inline const char* strchr (const char *__s, int __c)
 {
-    return strchr (_RWSTD_CONST_CAST (char*, __s), __c);
+    return strchr (const_cast< char* >(__s), __c);
 }
 
 // 21.4, p6 of ISO/IEC 14882:1998
 inline const char* strpbrk (const char *__s1, const char *__s2)
 {
-    return strpbrk (_RWSTD_CONST_CAST (char*, __s1), __s2);
+    return strpbrk (const_cast< char* >(__s1), __s2);
 }
 
 // 21.4, p8 of ISO/IEC 14882:1998
 inline const char* strrchr (const char *__s, int __c)
 {
-    return strrchr (_RWSTD_CONST_CAST (char*, __s), __c);
+    return strrchr (const_cast< char* >(__s), __c);
 }
 
 // 21.4, p10 of ISO/IEC 14882:1998
 inline const char* strstr (const char *__s1, const char *__s2)
 {
-    return strstr (_RWSTD_CONST_CAST (char*, __s1), __s2);
+    return strstr (const_cast< char* >(__s1), __s2);
 }
 
 

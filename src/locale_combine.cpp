@@ -138,7 +138,7 @@ _C_construct (const __rw_locale &rhs, const __rw_facet *pfacet)
     _C_byname_facet_bits = rhs._C_byname_facet_bits;
 
     if (pfacet) {
-        __rw_facet* const pf = _RWSTD_CONST_CAST (__rw_facet*, pfacet);
+        __rw_facet* const pf = const_cast< __rw_facet* >(pfacet);
         // overwrite an existing pointer or add a new one
         if (inx < _C_n_std_facets) {
             _C_std_facets [inx] = pf;

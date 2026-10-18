@@ -175,7 +175,7 @@ funcall (MemFun mf, const SharedAlloc *other /* = 0 */)
             if (0 == --n_refs_)
                 id_ = -1;
 
-            SharedAlloc* const po = _RWSTD_CONST_CAST (SharedAlloc*, other);
+            SharedAlloc* const po = const_cast< SharedAlloc* >(other);
 
             if (other->id_ <= 0)
                 po->id_ = ++_rw_id_gen;

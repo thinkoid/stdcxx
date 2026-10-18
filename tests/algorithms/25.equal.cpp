@@ -80,8 +80,8 @@ void test_equal (std::size_t           N,
 
     // use ::operator new() to prevent default initialization
     const std::size_t size = N * sizeof (UserClass);
-    UserClass *buf1 = _RWSTD_STATIC_CAST (UserClass*, ::operator new (size));
-    UserClass *buf2 = _RWSTD_STATIC_CAST (UserClass*, ::operator new (size));
+    UserClass *buf1 = static_cast< UserClass* >(::operator new (size));
+    UserClass *buf2 = static_cast< UserClass* >(::operator new (size));
 
     const std::size_t mid_inx = N / 2;
 

@@ -153,25 +153,6 @@ Check: =git grep= of the gate empty under =include=, =src= and
 after every commit; =make config= under =eccp= unchanged in every
 other macro.
 
-** TODO The keyword macros after their gates
-
-=_TYPENAME=, =_EXPLICIT=, =_RWSTD_STATIC_CAST=, =_RWSTD_CONST_CAST=,
-=_RWSTD_REINTERPRET_CAST=, =_RWSTD_DYNAMIC_CAST=,
-=_RWSTD_SPECIALIZED_CLASS=, =_RWSTD_SPECIALIZED_FUNCTION=,
-=_RWSTD_NAMESPACE=, =_STD=, =_RW= and =_USING= in
-=include/rw/_defs.h= each had two definitions, one per side of a
-keyword gate. The gates are retired and each macro has one
-definition, the keyword or the name itself. About 1200 lines of the
-library and 500 of the tests spell the keyword macros, and 2200 and
-150 the namespace ones, where the keyword or the name would do.
-
-Fix: one commit per macro, a mechanical replacement; the cast macros
-need a scanner that finds the top-level comma of each call. Whether
-to do it at all is a style call, not yet made.
-
-Check: the preprocessed output of every header unchanged as a token
-stream; the suite equal to the pin.
-
 ** TODO The twins' seam in the range members of =vector= and =deque=
 
 The seven out-of-class range members, =_C_assign_range= and

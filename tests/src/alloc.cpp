@@ -156,9 +156,9 @@ public:
         // caddr_ should be aligned to memory page boundary
         const size_t off = size_t (addr) & pagemask;
 
-        addr = _RWSTD_STATIC_CAST (char*, addr) - off;
+        addr = static_cast< char* >(addr) - off;
 
-        caddr_ = _RWSTD_STATIC_CAST (CaddrT, addr);
+        caddr_ = static_cast< CaddrT >(addr);
         size_  = size + off;
 
         const int res = mprotect (caddr_, size, PROT_READ | PROT_WRITE);
@@ -186,7 +186,7 @@ _rw_table_free ()
     if (!_rw_table)
         return;
 
-    const CaddrT caddr = _RWSTD_REINTERPRET_CAST (CaddrT, _rw_table);
+    const CaddrT caddr = reinterpret_cast< CaddrT >(_rw_table);
 
     const int res = munmap (caddr, _rw_table_size);
     rw_error (0 == res, __FILE__, __LINE__,
@@ -232,7 +232,7 @@ _rw_table_grow ()
         // free old table
         _rw_table_free ();
 
-        _rw_table          = _RWSTD_REINTERPRET_CAST (Pair*, caddr);
+        _rw_table          = reinterpret_cast< Pair* >(caddr);
         _rw_table_size     = new_size;
         _rw_table_max_size = new_size / sizeof (Pair);
     }
@@ -302,7 +302,7 @@ _rw_allocate_blocks ()
 
         memset (caddr, 0, pagesize);
 
-        Blocks* const blocks = _RWSTD_REINTERPRET_CAST (Blocks*, caddr);
+        Blocks* const blocks = reinterpret_cast< Blocks* >(caddr);
 
         blocks->nblocks_ = blocks_per_page;
 
@@ -341,7 +341,7 @@ _rw_free_blocks ()
     static const size_t pagesize = GETPAGESIZE ();
 
     while (_rw_head) {
-        const CaddrT caddr = _RWSTD_REINTERPRET_CAST (CaddrT, _rw_head);
+        const CaddrT caddr = reinterpret_cast< CaddrT >(_rw_head);
 
         _rw_head = _rw_head->next_;
 
@@ -473,7 +473,7 @@ rw_alloc (size_t nbytes, int flags /* = -1 */)
 
             if (MAP_FAILED != newinfo.addr_) {
 
-                char* data = _RWSTD_STATIC_CAST (char*, newinfo.addr_);
+                char* data = static_cast< char* >(newinfo.addr_);
                 char* guard = data;
                 
                 if (RW_PROT_BELOW & flags)
@@ -519,7 +519,7 @@ rw_free (void* addr)
         if (-1 == info.flags_)
             free (addr);
         else {
-            const CaddrT caddr = _RWSTD_REINTERPRET_CAST (CaddrT, info.addr_);
+            const CaddrT caddr = reinterpret_cast< CaddrT >(info.addr_);
 
             const int res = munmap (caddr, info.size_);
             rw_error (0 == res, __FILE__, __LINE__,

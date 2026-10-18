@@ -131,23 +131,22 @@ public:
 
     pointer address (reference __x) const {
         // lwg issue 350
-        return _RWSTD_REINTERPRET_CAST (pointer,
-                   &_RWSTD_REINTERPRET_CAST (char&, __x));
+        return reinterpret_cast< pointer >(&reinterpret_cast< char& >(__x));
     }
 
     const_pointer address (const_reference __x) const {
         // lwg issue 350
-        return _RWSTD_REINTERPRET_CAST (const_pointer,
-                   &_RWSTD_REINTERPRET_CAST (const char&, __x));
+        return reinterpret_cast< const_pointer >(
+            &reinterpret_cast< const char& >(__x));
     }
 
     pointer allocate (size_type __n, allocator<void>::const_pointer = 0) {
 
 #ifdef _RWSTD_ALLOCATOR
-        return _RWSTD_STATIC_CAST (pointer,
-                   __rw::__rw_allocate (__n * sizeof (value_type)));
+        return static_cast< pointer >(
+            __rw::__rw_allocate (__n * sizeof (value_type)));
 #else
-        return _RWSTD_STATIC_CAST (pointer, __rw::__rw_allocate (__n));
+        return static_cast< pointer >(__rw::__rw_allocate (__n));
 #endif   // _RWSTD_ALLOCATOR
     }
 
@@ -223,14 +222,13 @@ public:
 
     pointer address (reference __x) const {
         // lwg issue 350
-        return _RWSTD_REINTERPRET_CAST (pointer,
-                   &_RWSTD_REINTERPRET_CAST (char&, __x));
+        return reinterpret_cast< pointer >(&reinterpret_cast< char& >(__x));
     }
   
     const_pointer address (const_reference __x) const {
         // lwg issue 350
-        return _RWSTD_REINTERPRET_CAST (const_pointer,
-                   &_RWSTD_REINTERPRET_CAST (const char&, __x));
+        return reinterpret_cast< const_pointer >(
+            &reinterpret_cast< const char& >(__x));
     }
 
     size_type max_size () const { 

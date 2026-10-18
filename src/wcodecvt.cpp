@@ -424,7 +424,7 @@ __rw_utf8validate (const char* from, size_t nbytes)
     _RWSTD_ASSERT (1 < nbytes && 7 > nbytes);
 
     const unsigned char* const byte =
-        _RWSTD_REINTERPRET_CAST (const unsigned char*, from);
+        reinterpret_cast< const unsigned char* >(from);
 
     // check for overlong sequences with the bit pattern shown below
 
@@ -612,7 +612,7 @@ __rw_libstd_do_out (const wchar_t             *from,
             // convert wchar_t to the unsigned form of its underlying
             // integer type that's safe in arithmetic comaprisons and
             // doesn't generate signed/unsigned compiler warnings
-            const WIntT wi = _RWSTD_STATIC_CAST (WIntT, *from_next);
+            const WIntT wi = static_cast< WIntT >(*from_next);
 
             if (   (WIntT (0xd800U) <= wi && wi <= WIntT (0xdfffU))
                 || (WIntT (0xfffeU) <= wi && wi <= WIntT (0xffffU))) {
@@ -661,7 +661,7 @@ __rw_libstd_do_out (const wchar_t             *from,
             }
 
             // get the UTF-8 sequence corresponding to the wide character
-            utf = _RWSTD_REINTERPRET_CAST (const char*, impl + 1) + off;
+            utf = reinterpret_cast< const char* >(impl + 1) + off;
 
             // check that there's enough space in the destination sequence
             utf8_len = *utf ? strlen (utf) : 1;
@@ -821,7 +821,7 @@ __rw_libstd_do_length (const char*                from,
         const char* from_next = from;
 
         const unsigned char* const limit =
-            _RWSTD_REINTERPRET_CAST (const unsigned char*, from_end);
+            reinterpret_cast< const unsigned char* >(from_end);
 
         const unsigned int* const tbls =
             use_ucs ? impl->utf8_to_ext_tab () : impl->n_to_w_tab ();
@@ -832,7 +832,7 @@ __rw_libstd_do_length (const char*                from,
         for ( ; imax && from_next < from_end; --imax) {
 
             const unsigned char* next =
-                _RWSTD_REINTERPRET_CAST (const unsigned char*, from_next);
+                reinterpret_cast< const unsigned char* >(from_next);
 
             for (const unsigned* tbl = tbls; tbl [*next] & 0x80000000; ) {
 
@@ -850,7 +850,7 @@ __rw_libstd_do_length (const char*                from,
                     return from_next - from;
             }
 
-            from_next = _RWSTD_REINTERPRET_CAST (const char*, next + 1);
+            from_next = reinterpret_cast< const char* >(next + 1);
         }
 
         // return the number of extern characters
@@ -943,7 +943,7 @@ do_out (state_type         &state,
     // copy internal sequence to external
     for (; from_next != from_end && to_next != to_end; ++from_next, ++to_next)
         // prevent conversion problems due to char signedness
-        *to_next = _RWSTD_STATIC_CAST (unsigned char, *from_next);
+        *to_next = static_cast< unsigned char >(*from_next);
 
     // Table 53, and lwg issue 382: do_out() returns partial
     // if not all source characters could be converted (e.g.,
@@ -984,7 +984,7 @@ do_in (state_type         &state,
     for (; from_next != from_end && to_next != to_end;
          ++from_next, ++to_next) {
         // prevent conversion problems due to char signedness
-        *to_next = _RWSTD_STATIC_CAST (unsigned char, *from_next);
+        *to_next = static_cast< unsigned char >(*from_next);
     }
 
     return from_next == from_end ? ok : partial;
@@ -1195,7 +1195,7 @@ do_in (state_type&         state,
 
         // obtain the mapping of the database file
         const __rw::__rw_codecvt_t* const impl =
-            _RWSTD_STATIC_CAST (const __rw::__rw_codecvt_t*, this->_C_data ());
+            static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
     
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
@@ -1281,7 +1281,7 @@ do_out (state_type         &state,
 
         // obtain the mapping of the database file
         const __rw::__rw_codecvt_t* impl = 
-            _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, this->_C_data ());
+            static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
     
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
@@ -1356,7 +1356,7 @@ do_unshift (state_type&   state,
 
         // obtain the mapping of the database file
         const __rw::__rw_codecvt_t* const impl =
-            _RWSTD_STATIC_CAST (const __rw::__rw_codecvt_t*, this->_C_data ());
+            static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
 
         if (USE_LIBC (impl, _C_flags)) {
 
@@ -1421,7 +1421,7 @@ do_length (state_type&        state,
 
         // obtain the mapping of the database file
         const __rw::__rw_codecvt_t* impl = 
-            _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, this->_C_data ());
+            static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
 
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
@@ -1489,7 +1489,7 @@ do_encoding () const _THROWS (())
     case __rw::stateless: {
         // obtain the database file mapping
         const __rw::__rw_codecvt_t* impl = 
-            _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, this->_C_data ());
+            static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
 
         if (USE_LIBC (impl, _C_flags)) {
             // 7.20.7.2 of C99: if first arg is 0, mbtowc() returns non-zero 
@@ -1553,7 +1553,7 @@ do_max_length () const _THROWS (())
     case __rw::stateless: {
         // obtain the database file mapping
         const __rw::__rw_codecvt_t* impl = 
-            _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, this->_C_data ());
+            static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
             
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale

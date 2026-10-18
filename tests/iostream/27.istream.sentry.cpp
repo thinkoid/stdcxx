@@ -207,9 +207,9 @@ struct Streambuf: std::basic_streambuf<charT, Traits>
 
     Streambuf (const charT *gbeg, const charT *gend)
         : Base (), nsyncs_ (0) {
-        this->setg (_RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gbeg),
-                    _RWSTD_CONST_CAST (charT*, gend));
+        this->setg (const_cast< charT* >(gbeg),
+                    const_cast< charT* >(gbeg),
+                    const_cast< charT* >(gend));
     }
 
     const charT* pubeback () const {
