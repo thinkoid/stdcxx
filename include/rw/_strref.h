@@ -233,7 +233,7 @@ struct __string_ref
       && !defined (_RWSTD_ONE_STRING_MUTEX)     \
       && !defined (_RWSTD_NO_STRING_MUTEX)
 
-    _MUTABLE __rw_mutex_base _C_mutex;
+    mutable __rw_mutex_base _C_mutex;
 
 #  endif   // _REENTRANT && !_ONE_STRING_MUTEX && !_NO_STRING_MUTEX
 

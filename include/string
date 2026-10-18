@@ -146,7 +146,7 @@ public:
     _RWSTD_STATIC_CONST (size_type, npos = size_type (_RWSTD_SIZE_MAX));
 
     // 21.3.1, p2
-    _EXPLICIT basic_string (const allocator_type &__alloc = allocator_type ())
+    explicit basic_string (const allocator_type &__alloc = allocator_type ())
         : allocator_type (__alloc), _C_data (_C_nullref ()->data ()) { }
 
     // lwg issue #42

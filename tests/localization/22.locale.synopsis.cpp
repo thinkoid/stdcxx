@@ -460,7 +460,7 @@ public:
 
     typedef locale::facet                       Base;
 
-    _EXPLICIT collate (size_t refs = 0)
+    explicit collate (size_t refs = 0)
         : Base (refs) { /* empty */ }
 
     static locale::id                           id;
@@ -1069,7 +1069,7 @@ struct numpunct<UDC>: locale::facet
     // working around an MSVC 6.0 bug
     typedef locale::facet           Base;
 
-    _EXPLICIT numpunct (size_t refs = 0)
+    explicit numpunct (size_t refs = 0)
         : Base (refs) { /* empty */ }
 
     static locale::id id;
@@ -1552,7 +1552,7 @@ struct moneypunct<UDC, false>: locale::facet, money_base
     // working around an MSVC 6.0 bug
     typedef locale::facet           Base;
 
-    _EXPLICIT moneypunct (size_t refs = 0)
+    explicit moneypunct (size_t refs = 0)
         : Base (refs), money_base () { /* empty */ }
 
     static locale::id id;
@@ -1582,7 +1582,7 @@ struct moneypunct<UDC, true>: locale::facet, money_base
     // working around an MSVC 6.0 bug
     typedef locale::facet           Base;
 
-    _EXPLICIT moneypunct (size_t refs = 0)
+    explicit moneypunct (size_t refs = 0)
         : Base (refs), money_base () { /* empty */ }
 
     static locale::id id;

@@ -125,11 +125,11 @@ public:
 
 public:
 
-    _EXPLICIT
+    explicit
     vector (const allocator_type &__alloc = allocator_type ())
         : _C_alloc (__alloc) { }
 
-    _EXPLICIT
+    explicit
     vector (size_type __n, const_reference __x = value_type (),
             const allocator_type &__alloc = allocator_type ())
         : _C_alloc (__alloc) {
@@ -1015,7 +1015,7 @@ public:
         _C_bufend () { }
 
     // working around a SunPro 5.3 bug (see PR #25962)
-    _EXPLICIT
+    explicit
     vector (size_type __n, bool __val = bool (), 
        const _Allocator&  __alloc = allocator_type ())
         : allocator_type (__alloc), _C_bufend () {

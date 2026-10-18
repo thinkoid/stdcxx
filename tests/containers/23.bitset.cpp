@@ -65,13 +65,13 @@ struct test_set
         bits_ [N] = '\0';   // null-terminate
     }
 
-    _EXPLICIT test_set (unsigned long val) {
+    explicit test_set (unsigned long val) {
         for (std::size_t i = 0; i != N; ++i)
             set (i, !!(val & (1UL << i)));
         bits_ [N] = '\0';   // NUL-terminate
     }
 
-    _EXPLICIT test_set (const std::bitset<N> &rhs) {
+    explicit test_set (const std::bitset<N> &rhs) {
         for (std::size_t i = 0; i != N; ++i)
             set (i, rhs.test (i));
         bits_ [N] = '\0';   // NUL-terminate

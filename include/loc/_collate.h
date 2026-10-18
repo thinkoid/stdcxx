@@ -59,7 +59,7 @@ public:
                          allocator<char_type> >
     string_type;
 
-    _EXPLICIT collate (_RWSTD_SIZE_T __refs = 0)
+    explicit collate (_RWSTD_SIZE_T __refs = 0)
         : _RW::__rw_facet (__refs) { }
 
     virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
@@ -106,7 +106,7 @@ public:
                          allocator<char_type> >
     string_type;
 
-    _EXPLICIT collate (_RWSTD_SIZE_T __refs = 0)
+    explicit collate (_RWSTD_SIZE_T __refs = 0)
         : _RW::__rw_facet (__refs) { }
 
     virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
@@ -154,7 +154,7 @@ public:
                          allocator<char_type> >
     string_type;
 
-    _EXPLICIT collate (_RWSTD_SIZE_T __refs = 0) _THROWS (())
+    explicit collate (_RWSTD_SIZE_T __refs = 0) _THROWS (())
         : _RW::__rw_facet (__refs) { }
 
     virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
@@ -200,7 +200,7 @@ class collate_byname: public collate<_CharT>
 
 public:
 
-    _EXPLICIT collate_byname (const char *__name, _RWSTD_SIZE_T __ref = 0)
+    explicit collate_byname (const char *__name, _RWSTD_SIZE_T __ref = 0)
         : collate<_CharT>(__ref) {
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
@@ -213,7 +213,7 @@ class _RWSTD_EXPORT collate_byname<char>: public collate<char>
     char _C_namebuf [32];
 public:
 
-    _EXPLICIT collate_byname (const char* __name, _RWSTD_SIZE_T __ref = 0)
+    explicit collate_byname (const char* __name, _RWSTD_SIZE_T __ref = 0)
         :  collate<char_type>(__ref){ 
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
@@ -239,7 +239,7 @@ class _RWSTD_EXPORT collate_byname<wchar_t>: public collate<wchar_t>
     char _C_namebuf [32];
 public:
 
-    _EXPLICIT collate_byname (const char* __name, _RWSTD_SIZE_T __ref = 0)
+    explicit collate_byname (const char* __name, _RWSTD_SIZE_T __ref = 0)
         :  collate<char_type>(__ref){ 
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }

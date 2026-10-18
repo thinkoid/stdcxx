@@ -57,7 +57,7 @@ struct time_put: _RW::__rw_facet
     typedef _CharT      char_type;
     typedef _OutputIter iter_type;
 
-    _EXPLICIT time_put (_RWSTD_SIZE_T __refs = 0)
+    explicit time_put (_RWSTD_SIZE_T __refs = 0)
         : _RW::__rw_facet (__refs) { }
 
     virtual ~time_put () _RWSTD_ATTRIBUTE_NOTHROW;
@@ -103,7 +103,7 @@ class time_put_byname: public time_put<_CharT, _OutputIter>
 
 public:
 
-    _EXPLICIT time_put_byname (const char *__name, _RWSTD_SIZE_T __ref = 0)
+    explicit time_put_byname (const char *__name, _RWSTD_SIZE_T __ref = 0)
         : time_put<_CharT, _OutputIter>(__ref) {
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }

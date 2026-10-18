@@ -128,7 +128,7 @@ private:
 
 #ifndef _RWSTD_NO_NATIVE_IO
 
-    _EXPLICIT
+    explicit
     basic_filebuf (int __fd, char_type* __buf, _RWSTD_STREAMSIZE __bufsz)
         : _Streambuf (ios_base::openmode (_RW::__rw_fdmode (__fd))),
           _C_file (0), _C_cur_pos (), _C_beg_pos (), _C_pbacksize (0) {
@@ -140,7 +140,7 @@ private:
     // FILE is declared where the macro stdin is, i.e., where the
     // header <cstdio> or <stdio.h> has been #included
 
-    _EXPLICIT
+    explicit
     basic_filebuf (FILE *__fptr, char_type* __buf, _RWSTD_STREAMSIZE __bufsz)
         : _Streambuf (),
           _C_file (0), _C_cur_pos (), _C_beg_pos (), _C_pbacksize (0) {
@@ -330,7 +330,7 @@ public:
     basic_ifstream ()
         : basic_istream<char_type, traits_type> (rdbuf ()) { }
 
-    _EXPLICIT
+    explicit
     basic_ifstream (const char        *__name,
                     ios_base::openmode __mode = ios_base::in)
         : basic_istream<char_type, traits_type> (rdbuf ()) {
@@ -385,7 +385,7 @@ public:
     basic_ofstream ()
         : basic_ostream<char_type, traits_type> (rdbuf ()) { }
 
-    _EXPLICIT basic_ofstream (const char         *__name,
+    explicit basic_ofstream (const char          *__name,
                               ios_base::openmode  __mode = ios_base::out)
         : basic_ostream<char_type, traits_type> (rdbuf ()) {
         open (__name, __mode);
@@ -439,7 +439,7 @@ public:
     basic_fstream ()
         : basic_iostream<char_type, traits_type>(rdbuf ()) { }
 
-    _EXPLICIT
+    explicit
     basic_fstream (const char         *__name,
                    ios_base::openmode  __mode = _RW::__rw_in_out)
         : basic_iostream<char_type, traits_type>(rdbuf ()) {

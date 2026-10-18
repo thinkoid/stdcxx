@@ -383,13 +383,6 @@
 #define _RWSTD_MEMBER_EXPORT   /* empty */
 
 
-
-#define _EXPLICIT   explicit
-
-
-#define _MUTABLE   mutable
-
-
 //
 // Macro for forming or omitting default template arguments in constructors
 //

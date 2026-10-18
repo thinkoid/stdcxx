@@ -113,7 +113,7 @@ public:
     //
     // construct/copy/destroy
     //
-    _EXPLICIT set (const key_compare    &__cmp   = key_compare (),
+    explicit set (const key_compare     &__cmp   = key_compare (),
                    const allocator_type &__alloc = allocator_type ())
         : _C_rep (__cmp, __alloc) { }
 
@@ -290,7 +290,7 @@ public:
     //
     // construct/copy/destroy
     //
-    _EXPLICIT
+    explicit
     multiset (const key_compare &__cmp = key_compare (),
               const allocator_type &__alloc = allocator_type ())
         : _C_rep (__cmp, __alloc) { }

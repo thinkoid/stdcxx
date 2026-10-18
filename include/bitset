@@ -164,7 +164,7 @@ public:
 
     // 23.3.5.1, p3
     template <class _CharT, class _Traits, class _Allocator>
-    _EXPLICIT
+    explicit
     bitset (const basic_string<_CharT, _Traits, _Allocator> &__str,
             typename basic_string<_CharT, _Traits,
                                    _Allocator>::size_type __pos = 0,
@@ -184,7 +184,7 @@ public:
 
     // 23.3.5.1, p3
     template <class _CharT, class _Traits, class _Allocator>
-    _EXPLICIT
+    explicit
     bitset (const basic_string<_CharT, _Traits, _Allocator> &__str,
             _RWSTD_SIZE_T __pos = 0, _RWSTD_SIZE_T __n = _RWSTD_SIZE_MAX,
             _CharT __b0 = '0', _CharT __b1 = '1') {
