@@ -297,20 +297,6 @@ private:
     // the number of nodes held by each brace buffer [see below]
     enum { size = 64 };
 
-#ifdef _RWSTD_NO_NESTED_CLASS_ACCESS
-
-    // allow _rw_brace_node_buffer access to _rw_brace_graph's private
-    // type(s) if the resolution of cwg issue 45 is not yet implemented
-    struct _rw_brace_node_buffer;
-    friend struct _rw_brace_node_buffer;
-
-    // allow _rw_recursion_context access to _rw_brace_graph's private
-    // type(s) if the resolution of cwg issue 45 is not yet implemented
-    struct _rw_recursion_context;
-    friend struct _rw_recursion_context;
-
-#endif    // _RWSTD_NO_NESTED_CLASS_ACCESS
-
     // this is essentially a rope with a fixed length payload of
     // brace nodes
     struct _rw_brace_node_buffer

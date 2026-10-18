@@ -149,8 +149,7 @@ inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
 
 #endif   // _RWSTD_NO_DIV_LONG
 
-#ifndef _RWSTD_NO_EXTERN_C_COMPATIBILITY
-#  ifndef _RWSTD_NO_EXTERN_C_OVERLOAD
+#ifndef _RWSTD_NO_EXTERN_C_OVERLOAD
 
     extern "C" {
         typedef int (*__rw_compar_t)(const void*, const void*);
@@ -178,8 +177,7 @@ inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
 
     }   // extern "C++"
 
-#  endif   // _RWSTD_NO_EXTERN_C_OVERLOAD
-#endif   // _RWSTD_NO_EXTERN_C_COMPATIBILITY
+#endif   // _RWSTD_NO_EXTERN_C_OVERLOAD
     
     // using statements must come after the overloads.
     // working around MSVC6 PR# 27677

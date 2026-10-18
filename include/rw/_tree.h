@@ -214,7 +214,7 @@ public:
         return _C_node->_C_value;
     }
 
-    _RWSTD_OPERATOR_ARROW (pointer operator-> () const);
+    pointer operator-> () const { return &**this; };
 };
 
 
@@ -314,15 +314,6 @@ public:
 #endif   // _RWSTD_NO_DEBUG_ITER
 
 private:
-
-#ifdef _RWSTD_NO_NESTED_CLASS_ACCESS
-
-    // allow _C_node_buf access to __rb_tree's private type(s)
-    // if the resolution of cwg issue 45 is not yet implemented
-    struct _C_node_buf;
-    friend struct _C_node_buf;
-    
-#endif   // _RWSTD_NO_NESTED_CLASS_ACCESS
 
     struct _C_node_buf {
         typedef _RWSTD_REBIND (allocator_type, _C_node_buf) _C_buf_alloc_t;

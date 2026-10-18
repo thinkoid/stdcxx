@@ -421,7 +421,7 @@ struct InputIter: ITER_BASE (std::input_iterator_tag, T, int, T*, T&)
         return *cur_;
     }
 
-    _RWSTD_OPERATOR_ARROW (const value_type* operator-> () const);
+    const value_type* operator-> () const { return &**this; };
 
     InputIter& operator++ () {
         RW_ASSERT (*this == *this);      // assert *this is valid
@@ -610,7 +610,7 @@ struct OutputIter: ITER_BASE (std::output_iterator_tag, T, int, T*, T&)
         return Proxy (ptr_);
     }
 
-    _RWSTD_OPERATOR_ARROW (pointer operator-> () const);
+    pointer operator-> () const { return &**this; };
 
     OutputIter& operator++ () {
         RW_ASSERT (cur_ == ptr_->cur_);
@@ -712,7 +712,7 @@ struct FwdIter: ITER_BASE (std::forward_iterator_tag, T, int, T*, T&)
         return *cur_;
     }
 
-    _RWSTD_OPERATOR_ARROW (pointer operator-> () const);
+    pointer operator-> () const { return &**this; };
 
     FwdIter& operator++ () {
         RW_ASSERT (cur_ != 0 && cur_ != end_);
@@ -747,7 +747,7 @@ struct ConstFwdIter: FwdIter<const T>
         return Base::operator* ();
     }
 
-    _RWSTD_OPERATOR_ARROW (const value_type* operator-> () const);
+    const value_type* operator-> () const { return &**this; };
 };
 
 /**************************************************************************/
@@ -796,7 +796,7 @@ struct BidirIter: ITER_BASE (std::bidirectional_iterator_tag, T, int, T*, T&)
         return *cur_;
     }
 
-    _RWSTD_OPERATOR_ARROW (pointer operator-> () const);
+    pointer operator-> () const { return &**this; };
 
     BidirIter& operator++ () {
         RW_ASSERT (cur_ != 0 && cur_ != end_);
@@ -842,7 +842,7 @@ struct ConstBidirIter: BidirIter<const T>
         return Base::operator* ();
     }
 
-    _RWSTD_OPERATOR_ARROW (const value_type* operator-> () const);
+    const value_type* operator-> () const { return &**this; };
 };
 
 /**************************************************************************/
@@ -884,7 +884,7 @@ struct RandomAccessIter
         return *cur_;
     }
 
-    _RWSTD_OPERATOR_ARROW (pointer operator-> () const);
+    pointer operator-> () const { return &**this; };
 
     RandomAccessIter& operator++ () {
         RW_ASSERT (cur_ != 0 && cur_ != end_);
@@ -988,7 +988,7 @@ struct ConstRandomAccessIter: RandomAccessIter<const T>
         return Base::operator* ();
     }
 
-    _RWSTD_OPERATOR_ARROW (const value_type* operator-> () const);
+    const value_type* operator-> () const { return &**this; };
 
     const value_type& operator[] (difference_type inx) const {
         return Base::operator[] (inx);

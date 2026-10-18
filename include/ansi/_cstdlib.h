@@ -116,8 +116,7 @@ size_t wcstombs (char*, const wchar_t*, size_t);
 
 }   // extern "C"
 
-#ifndef _RWSTD_NO_EXTERN_C_COMPATIBILITY
-#  ifndef _RWSTD_NO_EXTERN_C_OVERLOAD
+#ifndef _RWSTD_NO_EXTERN_C_OVERLOAD
 
     extern "C" {
         typedef int (*__rw_compar_t)(const void*, const void*);
@@ -157,8 +156,7 @@ size_t wcstombs (char*, const wchar_t*, size_t);
 
     }   // extern "C++"
 
-#  endif   // _RWSTD_NO_EXTERN_C_OVERLOAD
-#endif   // _RWSTD_NO_EXTERN_C_COMPATIBILITY
+#endif   // _RWSTD_NO_EXTERN_C_OVERLOAD
 
 
 }   // namespace std

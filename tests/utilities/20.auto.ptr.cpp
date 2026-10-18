@@ -172,11 +172,7 @@ void test_auto_ptr (T*, const char *tname)
 
     FUN (T&, T, operator*, () const _PTR_THROWS (()));
     
-#ifndef _RWSTD_NO_NONCLASS_ARROW_RETURN
-
     FUN (T*, T, operator->, () const _PTR_THROWS (()));
-
-#endif   // _RWSTD_NO_NONCLASS_ARROW_RETURN
 
     FUN (T*, T, get, () const _PTR_THROWS (()));
     FUN (T*, T, release, () _PTR_THROWS (()));

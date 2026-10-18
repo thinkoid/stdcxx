@@ -139,13 +139,13 @@ retired. `_config.h` derives it from `WCHAR_T`.
 
 | gate | question | lib | tests | files | read by |
 | --- | --- | --- | --- | --- | --- |
-| `POD_ZERO_INIT` | `T ()` zero-initializes a POD | 8 | 0 | 2 | |
-| `NESTED_CLASS_ACCESS` | a nested class's access to its enclosing class | 6 | 2 | 3 | |
-| `NONCLASS_ARROW_RETURN` | `operator->` returning a non-class type | 4 | 3 | 2 | |
-| `EXTERN_C_COMPATIBILITY` | `extern "C"` and `extern "C++"` function types | 4 | 0 | 2 | |
-| `DUMMY_DEFAULT_ARG` | a dummy default argument | 3 | 0 | 1 | |
-| `CV_VOID_SPECIALIZATIONS` | specializations on cv-qualified `void` | 2 | 0 | 1 | |
-| `EMPTY_MEM_INITIALIZER` | an empty mem-initializer list | 2 | 5 | 1 | |
+| `POD_ZERO_INIT` | `T ()` zero-initializes a POD | 8 | 0 | 2 | retired 2026-10-17 |
+| `NESTED_CLASS_ACCESS` | a nested class's access to its enclosing class | 6 | 2 | 3 | retired 2026-10-17 |
+| `NONCLASS_ARROW_RETURN` | `operator->` returning a non-class type | 4 | 3 | 2 | retired 2026-10-17 |
+| `EXTERN_C_COMPATIBILITY` | `extern "C"` and `extern "C++"` function types | 4 | 0 | 2 | retired 2026-10-17 |
+| `DUMMY_DEFAULT_ARG` | a dummy default argument | 3 | 0 | 1 | retired 2026-10-17 |
+| `CV_VOID_SPECIALIZATIONS` | specializations on cv-qualified `void` | 2 | 0 | 1 | retired 2026-10-17 |
+| `EMPTY_MEM_INITIALIZER` | an empty mem-initializer list | 2 | 5 | 1 | retired 2026-10-17 |
 
 ### 2.5 For a decision
 
@@ -257,7 +257,7 @@ Small first, so the pattern settles before the big three.
    and `COLLAPSE_TEMPLATE_STATICS`, with the static mutex fallback they
    alone enabled, in the one after; `CLASS_PARTIAL_SPEC` and
    `PART_SPEC_OVERLOAD` last, as planned. Item 3 is done.
-4. The other language rules of 2.4.
+4. The other language rules of 2.4; done 2026-10-17, one commit.
 5. `LONG_DOUBLE`.
 6. `WCHAR_T` with `NATIVE_WCHAR_T`, the largest.
 7. The probes of chapter 3, any time, one commit; done 2026-10-17.

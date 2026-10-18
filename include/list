@@ -129,7 +129,7 @@ public:
         return (*_C_node)._C_data;
     }
 
-    _RWSTD_OPERATOR_ARROW (pointer operator-> () const);
+    pointer operator-> () const { return &**this; };
     
     difference_type operator- (const __rw_list_iter&) const {
         return 0;

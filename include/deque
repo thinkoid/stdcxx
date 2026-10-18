@@ -187,7 +187,7 @@ public:
 
     reference operator* () const { return *_C_address (); }
 
-    _RWSTD_OPERATOR_ARROW (pointer operator-> () const);
+    pointer operator-> () const { return &**this; };
 
     reference operator[] (difference_type __n) const {
         return *(*this + __n);

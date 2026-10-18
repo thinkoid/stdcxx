@@ -89,7 +89,7 @@ public:
     }
 
     // 24.5.1.2, p2
-    _RWSTD_OPERATOR_ARROW (const value_type* operator->() const);
+    const value_type* operator->() const { return &**this; };
 
     // 24.5.1.2, p3
     istream_iterator& operator++ ();

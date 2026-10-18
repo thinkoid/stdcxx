@@ -63,12 +63,7 @@ struct pair
 
     // 20.2.2, p2
     pair ()
-#ifndef _RWSTD_NO_EMPTY_MEM_INITIALIZER
         : first (/* lwg issue 265 */), second () { }
-#else
-        // assumes types satisfy the CopyConstructible requirements
-        : first (first_type ()), second (second_type ()) { }
-#endif   // _RWSTD_NO_EMPTY_MEM_INITIALIZER
 
     // 20.2.2, p3
     pair (const first_type &__x, const second_type &__y)

@@ -68,11 +68,7 @@ int main ()
     std::cout << "b destroyed" << '\n';
 
         // Output the value contained by the underlying pointer.
-#ifndef _RWSTD_NO_NONCLASS_ARROW_RETURN
         std::cout << a->get () << '\n';
-#else
-        std::cout << (*a).get () << '\n';
-#endif
 
     // The pointer will be delete'd when a is destroyed on leaving scope.
     return 0;

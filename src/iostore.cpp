@@ -100,8 +100,6 @@ ios_base::_C_usr_data::_C_alloc (_C_fire_fun pfire)
 
         _RWSTD_ASSERT (0 != pdata);
 
-#ifndef _RWSTD_NO_POD_ZERO_INIT
-
         // assert that the POD ctor above zeroed out all members
         _RWSTD_ASSERT (!pdata->_C_tie);
         _RWSTD_ASSERT (!pdata->_C_iarray);
@@ -110,12 +108,6 @@ ios_base::_C_usr_data::_C_alloc (_C_fire_fun pfire)
         _RWSTD_ASSERT (!pdata->_C_isize);
         _RWSTD_ASSERT (!pdata->_C_psize);
         _RWSTD_ASSERT (!pdata->_C_cbsize);
-
-#else   // if defined (_RWSTD_NO_POD_ZERO_INIT)
-
-        memset (pdata, 0, sizeof *pdata);
-
-#endif   // _RWSTD_NO_POD_ZERO_INIT
 
         pdata->_C_fire = pfire;
 
@@ -342,20 +334,6 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
         else if (ia || pa || cba || ptie) {
             // allocation may throw
             _C_usr = new _C_usr_data ();
-
-#ifdef _RWSTD_NO_POD_ZERO_INIT
-
-#  ifdef _RWSTD_NO_NEW_THROWS
-
-            if (!_C_usr)
-                __rw::__rw_throw (_RWSTD_ERROR_FIRST + 3 /* BAD_ALLOC */);
-
-#  endif   // _RWSTD_NO_NEW_THROWS
-
-            _RWSTD_ASSERT (0 != _C_usr);
-            memset (_C_usr, 0, sizeof *_C_usr);
-
-#endif   // _RWSTD_NO_POD_ZERO_INIT
 
         }
     }

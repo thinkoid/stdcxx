@@ -125,8 +125,8 @@ the non-debug recompile, the suite table) in =11S=.
 
 ** TODO The feature gates after the member templates
 
-Twelve gates ask whether the compiler accepts a C++98 construct, and
-no compiler the tree is built with (GCC, Clang, eccp in strict C++03)
+Three gates ask whether the compiler accepts a C++98 construct, and no
+compiler the tree is built with (GCC, Clang, eccp in strict C++03)
 defines one of them (=EXPLICIT_INSTANTIATION_BEFORE_DEFINITION= left
 the list: =rw/_defs.h= defines it by hand under eccp). Retired so far:
 the member templates gate (bfbf7ac3 and the seven commits after it),
@@ -134,15 +134,15 @@ the member template overload gate, the ten keyword and syntax gates of
 the note's 2.1 in one commit, the namespace gate with its nine probes,
 the eleven small template gates of 2.2 in one commit, four medium ones
 in the next, the two static-member ones after, and the partial
-specialization pair last; the template gates of 2.2 are done. The
-branch behind each cannot be compiled and rots. =doc/notes/analysis-
-feature-gates.md= is the census: the candidates by family with their
-footprint (chapter 2), sixteen probes nobody reads (3), what stays and
-why (4), the probes that read each gate (5), and the order (6).
-Largest: =WCHAR_T= (524 lines, 48 library files), =LONG_DOUBLE= (154,
-12), =NAMESPACE= (145, 32), =CLASS_PARTIAL_SPEC= (90, 16). Three sit
-between the families and wait on a decision: =HONOR_STD=,
-=RUNTIME_IN_STD=, =PLACEMENT_DELETE=.
+specialization pair last; the seven other language rules of 2.4 in one
+commit. What remains is the types chapter, 2.3. The branch behind each
+cannot be compiled and rots. =doc/notes/analysis- feature-gates.md= is
+the census: the candidates by family with their footprint (chapter 2),
+sixteen probes nobody reads (3), what stays and why (4), the probes
+that read each gate (5), and the order (6). Largest: =WCHAR_T= (524
+lines, 48 library files), =LONG_DOUBLE= (154, 12), =NAMESPACE= (145,
+32), =CLASS_PARTIAL_SPEC= (90, 16). Three sit between the families and
+wait on a decision: =HONOR_STD=, =RUNTIME_IN_STD=, =PLACEMENT_DELETE=.
 
 Fix: the member templates retirement's pattern, one gate or bundle per
 commit, in the note's order, the first two items done: the keyword

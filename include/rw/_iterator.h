@@ -105,7 +105,7 @@ public:
     }
 
     // 24.4.1.3.4, p1
-    _RWSTD_OPERATOR_ARROW (pointer operator->() const);
+    pointer operator->() const { return &**this; };
 
     // 24.4.1.3.5, p1
     reverse_iterator& operator++ () {

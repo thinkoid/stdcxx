@@ -61,11 +61,7 @@ namespace std {
 // instead of qualifying it with its name to work around compiler
 // bugs (e.g., SunPro 5.4 -- see PR #28117)
 
-#ifndef _RWSTD_NO_EMPTY_MEM_INITIALIZER
-
 template pair<DefaultConstructible, DefaultConstructible>::pair ();
-
-#endif  // _RWSTD_NO_EMPTY_MEM_INITIALIZER
 
 template pair<CopyConstructible, CopyConstructible>::
          pair (const CopyConstructible&, const CopyConstructible&);
@@ -113,21 +109,10 @@ void test_pair (T, const char *tname, U, const char *uname)
                    "pair<Y, Y>::pair() called %d default ctors, "
                    "expected 2", UserClass::n_total_def_ctor_, 2);
 
-#ifndef _RWSTD_NO_EMPTY_MEM_INITIALIZER
-
         // exercise lwg issue 265
         rw_assert (UserClass::n_total_copy_ctor_ == 0, 0, __LINE__,
                    "pair<Y, Y>::pair() called %d copy ctors, "
                    "expected 0", UserClass::n_total_copy_ctor_);
-
-#else   // if defined (_RWSTD_NO_EMPTY_MEM_INITIALIZER)
-
-        // 20.2.2, p2: commented out -- calls to copy ctor may be elided
-        // RW_ASSERT (t, UserClass::n_total_copy_ctor_ == 2,
-        //            ("std::pair<Y, Y>::pair() called %d copy ctors, "
-        //            "expected 2", UserClass::n_total_copy_ctor_));
-
-#endif   // _RWSTD_NO_EMPTY_MEM_INITIALIZER
 
         rw_info (0, 0, __LINE__,
                  "std::pair<%s, %s>::pair(const %s&, const %s&)",

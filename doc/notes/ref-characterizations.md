@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 162 named C++ probes, five supporting C++
+The source census contains 155 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 162 named probes are discoverable by
+three different things.** All 155 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -116,6 +116,7 @@ its row is gone from the catalogue below.
 | `FRIEND_TEMPLATE`, `FUNC_PARTIAL_SPEC`, `NONDEDUCED_CONTEXT`, `TEMPLATE_ON_RETURN_TYPE` | `NO_*`, one each | 2026-10-17, one commit | Four more template gates every compiler of the matrix passes. The facet and temporary-buffer macros that spelled the return-type workaround (`_STD_USE_FACET` and kin) and the three local size-type macros went with them, spelled out. |
 | `STATIC_CONST_MEMBER_INIT`, `COLLAPSE_TEMPLATE_STATICS` | `NO_*`, one each | 2026-10-17, one commit | In-class initializers of static const members and one static per template instance across translation units; every compiler of the matrix passes. The static mutex initialization fallback, `_RWSTD_NO_STATIC_MUTEX_INIT`, had no definer left and went too; `_RWSTD_STATIC_CONST`, `_RWSTD_DEFINE_STATIC_CONST` and `_RWSTD_BITMASK_ENUM` are spelled out. |
 | `CLASS_PARTIAL_SPEC`, `PART_SPEC_OVERLOAD` | `NO_*`, one each | 2026-10-17, one commit | Partial specialization and partial ordering of function templates; every compiler of the matrix passes. The branches they selected were the largest of the family: iterator traits done by overloads, a `vector<bool>` that was a plain class, swap as a friend. The iterator-traits macros they left are spelled out in the commit after. |
+| `POD_ZERO_INIT`, `NESTED_CLASS_ACCESS`, `NONCLASS_ARROW_RETURN`, `EXTERN_C_COMPATIBILITY`, `DUMMY_DEFAULT_ARG`, `CV_VOID_SPECIALIZATIONS`, `EMPTY_MEM_INITIALIZER` | `NO_*`, one each | 2026-10-17, one commit | The other language rules of C++98: value-initialization of a POD, a nested class's access (CWG 45), `operator->` returning a pointer, `extern "C"` function types, a dummy default argument, specializations on cv-qualified `void`, an empty mem-initializer. Every compiler of the matrix passes; `DUMMY_DEFAULT_ARG` had lost its last reader earlier in the day. `_RWSTD_OPERATOR_ARROW` is spelled out. |
 
 ## 3. Outputs beyond the status macro
 
@@ -179,12 +180,9 @@ Token-pasted and script-generated names need family-level inspection.
 | [BAD_TYPEID_WHAT](../../etc/config/src/BAD_TYPEID_WHAT.cpp) / `NO_BAD_TYPEID_WHAT` | bad_typeid::what() | L; `src/typeinfo.cpp` |
 | [BITS_TYPES___MBSTATE_T_H](../../etc/config/src/BITS_TYPES___MBSTATE_T_H.cpp) / `NO_BITS_TYPES___MBSTATE_T_H` | __mbstate_t in &lt;bits/types/__mbstate_t.h&gt; | L; `include/rw/_mbstate.h` |
 | [CTYPE_BITS](../../etc/config/src/CTYPE_BITS.cpp) / `NO_CTYPE_BITS` + output | ctype constants | none |
-| [CV_VOID_SPECIALIZATIONS](../../etc/config/src/CV_VOID_SPECIALIZATIONS.cpp) / `NO_CV_VOID_SPECIALIZATIONS` | cv qualifiers on type void | L; `include/rw/_autoptr.h` |
 | [DAYLIGHT](../../etc/config/src/DAYLIGHT.cpp) / `NO_DAYLIGHT` | daylight variable in &lt;time.h&gt; | L; `src/time_put.cpp` |
 | [DEPRECATED_LIBC_IN_STD](../../etc/config/src/DEPRECATED_LIBC_IN_STD.cpp) / `NO_DEPRECATED_LIBC_IN_STD` | deprecated C headers and namespace std | none |
 | [DIV_OVERLOADS](../../etc/config/src/DIV_OVERLOADS.cpp) / `NO_DIV_OVERLOADS` + output | overloads of div() | none |
-| [DUMMY_DEFAULT_ARG](../../etc/config/src/DUMMY_DEFAULT_ARG.cpp) / `NO_DUMMY_DEFAULT_ARG` | dummy default arguments | L; `include/rw/_defs.h` |
-| [EMPTY_MEM_INITIALIZER](../../etc/config/src/EMPTY_MEM_INITIALIZER.cpp) / `NO_EMPTY_MEM_INITIALIZER` | empty mem-initializer arglist | L/T; `include/rw/_pair.h` |
 | [EQUAL_CTYPE_MASK](../../etc/config/src/EQUAL_CTYPE_MASK.cpp) / `NO_EQUAL_CTYPE_MASK` | that ctype mask's for char and wchar_t are equal | L; `src/wctype.cpp` |
 | [EXCEPTIONS](../../etc/config/src/EXCEPTIONS.cpp) / `NO_EXCEPTIONS` | exceptions | L/P/T/E; `include/rw/_config-gcc.h` |
 | [EXCEPTION_ASSIGNMENT](../../etc/config/src/EXCEPTION_ASSIGNMENT.cpp) / `NO_EXCEPTION_ASSIGNMENT` | exception assignment operator | L; `src/exception.cpp` |
@@ -195,7 +193,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [EXCEPTION_SPECIFICATION_ON_NEW](../../etc/config/src/EXCEPTION_SPECIFICATION_ON_NEW.cpp) / `NO_EXCEPTION_SPECIFICATION_ON_NEW` | exception specification on new | L/P; `include/rw/_defs.h` |
 | [EXCEPTION_WHAT](../../etc/config/src/EXCEPTION_WHAT.cpp) / `NO_EXCEPTION_WHAT` | exception::what() | L; `src/exception.cpp` |
 | [EXPLICIT_INSTANTIATION_BEFORE_DEFINITION](../../etc/config/src/EXPLICIT_INSTANTIATION_BEFORE_DEFINITION.cpp) / `NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION` | instantiation before definition | L; `include/rw/_defs.h` |
-| [EXTERN_C_COMPATIBILITY](../../etc/config/src/EXTERN_C_COMPATIBILITY.cpp) / `NO_EXTERN_C_COMPATIBILITY` | compatibility of extern "C" and "C++" | L; `include/ansi/_cstdlib.h` |
 | [EXTERN_C_OVERLOAD](../../etc/config/src/EXTERN_C_OVERLOAD.cpp) / `NO_EXTERN_C_OVERLOAD` | overloading on extern "C" | L; `include/ansi/_cstdlib.h` |
 | [EXTERN_FUNCTION_TEMPLATE](../../etc/config/src/EXTERN_FUNCTION_TEMPLATE.cpp) / `NO_EXTERN_FUNCTION_TEMPLATE` | extern function template extension | L/P; `include/rw/_defs.h` |
 | [EXTERN_MEMBER_TEMPLATE](../../etc/config/src/EXTERN_MEMBER_TEMPLATE.cpp) / `NO_EXTERN_MEMBER_TEMPLATE` | extern template extension | L; `include/string` |
@@ -239,14 +236,12 @@ Token-pasted and script-generated names need family-level inspection.
 | [MMAP](../../etc/config/src/MMAP.cpp) / `NO_MMAP` | mmap() and munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [MUNMAP](../../etc/config/src/MUNMAP.cpp) / `NO_MUNMAP` + output | munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [NATIVE_WCHAR_T](../../etc/config/src/NATIVE_WCHAR_T.cpp) / `NO_NATIVE_WCHAR_T` | if wchar_t is a native type | L/P/T; `include/limits` |
-| [NESTED_CLASS_ACCESS](../../etc/config/src/NESTED_CLASS_ACCESS.cpp) / `NO_NESTED_CLASS_ACCESS` | member class access | L/T; `include/istream` |
 | [NEWLINE](../../etc/config/src/NEWLINE.cpp) / `NO_NEWLINE` + output | newline (CR or CR-LF) | none |
 | [NEW_HEADER](../../etc/config/src/NEW_HEADER.cpp) / `NO_NEW_HEADER` | C++-style C library headers | L/P/T; `include/rw/_config-gcc.h` |
 | [NEW_OFLOW_SAFE](../../etc/config/src/NEW_OFLOW_SAFE.cpp) / `NO_NEW_OFLOW_SAFE` | if operator new() checks the argument for overflow | L/P; `src/memory.cpp` |
 | [NEW_THROWS](../../etc/config/src/NEW_THROWS.cpp) / `NO_NEW_THROWS` | if operator new() throws | L/P/T; `src/iostore.cpp` |
 | [NL_LANGINFO](../../etc/config/src/NL_LANGINFO.cpp) / `NO_NL_LANGINFO` | nl_langinfo() in &lt;langinfo.h&gt; | L/T/V; `src/time_put.cpp` |
 | [NL_TYPES_H](../../etc/config/src/NL_TYPES_H.cpp) / `NO_NL_TYPES_H` | catopen() in &lt;nl_types.h&gt; | L; `src/catalog.cpp` |
-| [NONCLASS_ARROW_RETURN](../../etc/config/src/NONCLASS_ARROW_RETURN.cpp) / `NO_NONCLASS_ARROW_RETURN` | operator-&gt;() | L/T/E; `include/rw/_autoptr.h` |
 | [NO_DBL_TRAPS](../../etc/config/src/NO_DBL_TRAPS.cpp) / `NO_DBL_TRAPS` | if floating point math traps | L/P/T; `include/limits` |
 | [NO_INT_TRAPS](../../etc/config/src/NO_INT_TRAPS.cpp) / `NO_INT_TRAPS` | if integer math traps | L; `include/limits` |
 | [NO_OBJECT_MANGLING](../../etc/config/src/NO_OBJECT_MANGLING.cpp) / `NO_OBJECT_MANGLING` | object name mangling | L; `include/limits` |
@@ -263,7 +258,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [OPERATOR_NEW_NOTHROW](../../etc/config/src/OPERATOR_NEW_NOTHROW.cpp) / `NO_OPERATOR_NEW_NOTHROW` | operator new (size_t, nothrow_t) | L/T; `include/new` |
 | [OPERATOR_NEW_PLACEMENT](../../etc/config/src/OPERATOR_NEW_PLACEMENT.cpp) / `NO_OPERATOR_NEW_PLACEMENT` | operator new (size_t, void*) | L; `include/rw/_new.h` |
 | [PLACEMENT_DELETE](../../etc/config/src/PLACEMENT_DELETE.cpp) / `NO_PLACEMENT_DELETE` | placement delete | L/T; `include/new` |
-| [POD_ZERO_INIT](../../etc/config/src/POD_ZERO_INIT.cpp) / `NO_POD_ZERO_INIT` | POD zero initialization | L; `include/rw/_traits.h` |
 | [POSIX_MADVISE](../../etc/config/src/POSIX_MADVISE.cpp) / `NO_POSIX_MADVISE` | posix_madvise() in &lt;sys/mman.h&gt; | none |
 | [PRETTY_FUNCTION](../../etc/config/src/PRETTY_FUNCTION.cpp) / `NO_PRETTY_FUNCTION` | __PRETTY_FUNCTION__ | L/T; `include/rw/_defs.h` |
 | [PTR_EXCEPTION_SPEC](../../etc/config/src/PTR_EXCEPTION_SPEC.cpp) / `NO_PTR_EXCEPTION_SPEC` | pointer exception specification | T; `tests/diagnostics/19.std.exceptions.cpp` |

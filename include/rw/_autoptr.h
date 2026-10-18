@@ -57,8 +57,6 @@ struct __rw_nonvoid_ref<void>
     typedef void _C_ref;
 };
 
-#ifndef _RWSTD_NO_CV_VOID_SPECIALIZATIONS
-
 template <>
 struct __rw_nonvoid_ref<const void>
 {
@@ -76,8 +74,6 @@ struct __rw_nonvoid_ref<const volatile void>
 {
     typedef void _C_ref;
 };
-
-#endif  // _RWSTD_NO_CV_VOID_SPECIALIZATIONS
 
 }   // namespace __rw
 
@@ -168,17 +164,10 @@ public:
         return *get (); 
     }
 
-#ifndef _RWSTD_NO_NONCLASS_ARROW_RETURN
-
     // 20.4.5.2, p3
     element_type* operator->() const _THROWS (()) {
-        // avoid using the _RWSTD_OPERATOR_ARROW() helper macro
-        // (defined in terms of operator*()) in order to permit
-        // auto_ptr<void>::operator->() to be instantiated
         return _C_ptr;
     }
-
-#endif   // _RWSTD_NO_NONCLASS_ARROW_RETURN
 
     // 20.4.5.2, p4
     element_type* get () const _THROWS (()) {

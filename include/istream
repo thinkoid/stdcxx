@@ -135,15 +135,6 @@ public:
     basic_istream&
     _C_ipfx (bool, ios_base::iostate = ios_base::eofbit | ios_base::failbit);
 
-#ifdef _RWSTD_NO_NESTED_CLASS_ACCESS
-
-    // allow access to ios_base::_C_bufmutex() if the resolution
-    // of cwg issue 45 is not yet implemented
-    struct sentry;
-    friend struct sentry;
-
-#endif   // _RWSTD_NO_NESTED_CLASS_ACCESS
-
     // 27.6.1.1.2
     struct sentry: __rw::__rw_guard {
 

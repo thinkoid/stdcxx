@@ -380,7 +380,7 @@ public:
         return _C_iter [__n];
     }
 
-    _RWSTD_OPERATOR_ARROW (pointer operator-> () const);
+    pointer operator-> () const { return &**this; };
 
     __rw_debug_iter& operator++ () {
         _RWSTD_ASSERT (!_C_is_end ());

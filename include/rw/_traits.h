@@ -141,27 +141,11 @@ public:
 
     typedef _StateT state_type;
       
-#ifndef _RWSTD_NO_POD_ZERO_INIT
-
     fpos (_RWSTD_STREAMOFF __off = 0,
           const state_type &__state = state_type ())
         : _C_pos (__off),
           _C_state (__state)
         { }
-
-#else   // if defined (_RWSTD_NO_POD_ZERO_INIT)
-
-    fpos (_RWSTD_STREAMOFF __off = 0)
-        : _C_pos (__off) {
-        _RWSTD_MEMSET (&_C_state, 0, sizeof _C_state);
-    }
-
-    fpos (_RWSTD_STREAMOFF __off, const state_type &__state)
-        : _C_pos (__off),
-          _C_state (__state)
-        { }
-
-#endif   // _RWSTD_NO_POD_ZERO_INIT
 
     operator _RWSTD_STREAMOFF () const {
         return _C_pos;

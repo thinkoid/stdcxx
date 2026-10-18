@@ -677,15 +677,6 @@
 #endif
 
 
-#ifndef _RWSTD_NO_NONCLASS_ARROW_RETURN
-   // expected signature: "_TypeT* operator->()"
-   // and/or:             "const _TypeT* operator->() const"
-#  define _RWSTD_OPERATOR_ARROW(signature) signature { return &**this; }
-#else
-#  define _RWSTD_OPERATOR_ARROW(ignore)
-#endif   // _RWSTD_NO_NONCLASS_ARROW_RETURN
-
-
 // to prevent warnings about unused arguments
 #define _RWSTD_UNUSED(arg)   ((void)&arg)
 
