@@ -383,42 +383,8 @@
 #define _RWSTD_MEMBER_EXPORT   /* empty */
 
 
-//
-// Macro for forming or omitting default template arguments in constructors
-//
-
-#ifndef _RWSTD_NO_DEFAULT_TEMPLATE_ARGS
-#  define _RWSTD_DEFAULT_ARG(n) = n
-#else
-#  define _RWSTD_DEFAULT_ARG(n)
-#endif
-
-
-
 // Work around a bug in MSVC (see PR# 28547); used in basic_string
 #define _RWSTD_REDECLARED_DEFAULT(arg)   = arg
-
-
-//
-// for compilers that don't like specialized friends
-// such as operator== in template classes
-//
-#ifdef _RWSTD_NO_SPECIALIZED_FRIEND
-#  ifdef __TURBOC__
-#    define _RWSTD_SPECIALIZED_FRIEND(name)   (std::name)
-#  else   // if !defined (__TURBOC__)
-#    define _RWSTD_SPECIALIZED_FRIEND(name)   name
-#  endif   // __TURBOC__
-#else   // if defined (_RWSTD_NO_SPECIALIZED_FRIEND)
-#  ifdef __TURBOC__
-#    define _RWSTD_SPECIALIZED_FRIEND(name)   (std::name)
-#  else   // if !defined (__TURBOC__)
-     // the space between `name' and `<>' is necessary
-     // to prevent ..._FRIEND (operator<) from expanding into operator<<>
-     // (only the GNU preprocessor inserts a space)
-#    define _RWSTD_SPECIALIZED_FRIEND(name)   name <>
-#  endif  // __TURBOC__
-#endif   // _RWSTD_NO_SPECIALIZED_FRIEND
 
 
 //
@@ -682,13 +648,8 @@
 //       if `to' is a template-id and the preprocessor doesn't put
 //       the spaces there automatically (GNU does, Sun does not)
 #ifdef _RWSTD_ALLOCATOR
-#  ifndef _RWSTD_NO_DEPENDENT_TEMPLATE
-#    define _RWSTD_REBIND(from, to) \
+#  define _RWSTD_REBIND(from, to) \
             typename from::template rebind < to >::other
-#  else
-#    define _RWSTD_REBIND(from, to) \
-            typename from:: rebind < to >::other
-#  endif   // _RWSTD_NO_DEPENDENT_TEMPLATE
 
 #  define _RWSTD_ALLOC_TYPE(Allocator, ignore)        \
           Allocator
@@ -1084,7 +1045,6 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 
 #if     defined (_RWSTD_INSTANTIATE_TEMPLATES)       \
-    && !defined (_RWSTD_NO_EXPLICIT_INSTANTIATION)   \
     && !defined (_RWSTD_NO_INSTANTIATE)
 
 #  define _RWSTD_INSTANTIATE(name, type)   \
@@ -1178,8 +1138,6 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 // allows for efficient compilation of the library sources: only
 // specializations explicitly instantiated in the library are available
 #if    !defined (_RWSTD_NO_TEMPLATE_DEFINITIONS)     \
-    ||  defined (_RWSTD_NO_EXPLICIT_INSTANTIATION)   \
-    ||  defined (_RWSTD_NO_IMPLICIT_INSTANTIATION)   \
     ||  defined (_RWSTD_NO_INSTANTIATE)
 
 #  ifndef _RWSTD_LIB_SRC
@@ -1240,20 +1198,6 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #endif
 
 
-#ifndef _RWSTD_NO_SPECIALIZATION_ON_RETURN_TYPE
-#  define _RWSTD_DUMMY_ARG(ignore)
-#else
-#  ifndef _RWSTD_NO_DUMMY_DEFAULT_ARG
-     // use a dummy argument with a default value to simulate
-     // the effect of a function template whose template argument
-     // only appears in its return type (and not in the function
-     // argument list)
-#    define _RWSTD_DUMMY_ARG(T)   , T
-#  else   // if defined (_RWSTD_NO_DUMMY_DEFAULT_ARG)
-#    define _RWSTD_DUMMY_ARG(ignore)
-#  endif   // _RWSTD_NO_DUMMY_DEFAULT_ARG
-#endif   // _RWSTD_NO_SPECIALIZATION_ON_RETURN_TYPE
-
 // helpers to make referring to the iterators easier
 #define _RWSTD_ISTREAMBUF_ITER(T)   \
     std::istreambuf_iterator<T, std::char_traits<T > >
@@ -1272,16 +1216,7 @@ namespace std {
 // and wchar_t specializations to guarantee at most one definition
 // of each in a program (in case the compiler doesn't provide such
 // a guarantee; e.g., MSVC or VisualAge on AIX don't)
-#ifdef _RWSTD_NO_EXTERN_TEMPLATE
-#  ifdef _RWSTD_NO_EXPLICIT_MEMBER_SPECIALIZATION
-#    ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
-#      define _RWSTD_NO_SPECIALIZED_FACET_ID
-#    endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
-#  else
-     // FIXME: handle the case when explicit member specialization
-     // is not available (e.g., MSVC 6)
-#  endif   // _RWSTD_NO_EXPLICIT_MEMBER_SPECIALIZATION
-#else   // if !defined (_RWSTD_NO_EXTERN_TEMPLATE)
+#ifndef _RWSTD_NO_EXTERN_TEMPLATE
    // no need to explicitly specialize the members when extern
    // template is available since they are explicitly instantiated
    // in the library

@@ -79,7 +79,7 @@ namespace std {
 // 22.1.2, p1
 template <class _Facet>
 inline const _Facet&
-use_facet (const locale &__loc _RWSTD_DUMMY_ARG (const _Facet* = 0))
+use_facet (const locale &__loc)
 {
     // Facet could be a const SomeFacet; strip the const qualifier
     // and, for non-standard facets, use dynamic_cast to make sure
@@ -98,7 +98,7 @@ use_facet (const locale &__loc _RWSTD_DUMMY_ARG (const _Facet* = 0))
 // 22.1.2, p5
 template <class _Facet>
 inline bool
-has_facet (const locale &__loc _RWSTD_DUMMY_ARG (const _Facet* = 0))
+has_facet (const locale &__loc)
 {
     // Facet could be a const SomeFacet; strip the const qualifier 
     const __rw::__rw_facet* const __pfacet =

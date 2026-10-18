@@ -62,7 +62,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template 
 plus_asgn<assign<base<cpy_ctor> > >
@@ -79,8 +78,6 @@ inner_product (InputIter<assign<base<cpy_ctor> > >,
                assign<base<cpy_ctor> >,
                binary_func<assign<base<cpy_ctor> > >,
                binary_func<assign<base<cpy_ctor> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

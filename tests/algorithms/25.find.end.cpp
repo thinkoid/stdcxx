@@ -38,8 +38,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template
 FwdIter<eq_comp<base<> > > 
 find_end (FwdIter<eq_comp<base<> > >, FwdIter<eq_comp<base<> > >, 
@@ -50,8 +48,6 @@ FwdIter<eq_comp<base<> > >
 find_end (FwdIter<eq_comp<base<> > >, FwdIter<eq_comp<base<> > >, 
           FwdIter<eq_comp<base<> > >, FwdIter<eq_comp<base<> > >, 
           binary_predicate<eq_comp<base<> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

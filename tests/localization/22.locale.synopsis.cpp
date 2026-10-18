@@ -297,8 +297,6 @@ test_facets ()
         pmbase = mpun_intl;
         _RWSTD_UNUSED (pmbase);
 
-#ifndef _RWSTD_NO_DEFAULT_TEMPLATE_ARGS
-
         const std::moneypunct<char_type> *pmpun_noarg = mpun;
         _RWSTD_UNUSED (pmpun_noarg);
 
@@ -307,8 +305,6 @@ test_facets ()
         const std::money_put<char_type> *pmput = mput;
         _RWSTD_UNUSED (pmget);
         _RWSTD_UNUSED (pmput);
-
-#endif   // _RWSTD_NO_DEFAULT_TEMPLATE_ARGS
 
     }
 
@@ -322,15 +318,11 @@ test_facets ()
         pfac = nget;
         pfac = nput;
 
-#ifndef _RWSTD_NO_DEFAULT_TEMPLATE_ARGS
-
         // verify default template arguments
         const std::num_get<char_type> *pnget = nget;
         const std::num_put<char_type> *pnput = nput;
         _RWSTD_UNUSED (pnget);
         _RWSTD_UNUSED (pnput);
-
-#endif   // _RWSTD_NO_DEFAULT_TEMPLATE_ARGS
 
     }
 
@@ -344,15 +336,11 @@ test_facets ()
         pfac = tget;
         pfac = tput;
 
-#ifndef _RWSTD_NO_DEFAULT_TEMPLATE_ARGS
-
         // verify default template arguments
         const std::time_get<char_type> *ptget = tget;
         const std::time_put<char_type> *ptput = tput;
         _RWSTD_UNUSED (ptget);
         _RWSTD_UNUSED (ptput);
-
-#endif   // _RWSTD_NO_DEFAULT_TEMPLATE_ARGS
 
     }
 

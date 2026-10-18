@@ -52,8 +52,6 @@ using namespace std;
 using namespace std::rel_ops;
 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 // explicitly instantiate containers
 template class
 std::deque<int, std::allocator<int> >;
@@ -72,8 +70,6 @@ std::basic_string<int, std::char_traits<int>, std::allocator<int> >;
 
 template class
 std::vector<int, std::allocator<int> >;
-
-#endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 /**************************************************************************/
 

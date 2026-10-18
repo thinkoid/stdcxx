@@ -37,8 +37,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template
 OutputIter<assign<base<> > >
 copy (InputIter<const_cvt<base<>, assign<base<> > > >, 
@@ -50,8 +48,6 @@ BidirIter<assign<base<> > >
 copy_backward (BidirIter<const_cvt<base<>, assign<base<> > > >, 
                BidirIter<const_cvt<base<>, assign<base<> > > >,
                BidirIter<assign <base<> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

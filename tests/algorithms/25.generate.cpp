@@ -73,7 +73,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template 
 void generate (FwdIter<assign<base<> > >, FwdIter<assign<base<> > >,
@@ -82,8 +81,6 @@ void generate (FwdIter<assign<base<> > >, FwdIter<assign<base<> > >,
 template
 void generate_n (OutputIter<assign<base<> > >, std::size_t,
                  Generator<assign<base<> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

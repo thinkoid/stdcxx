@@ -38,7 +38,6 @@
 namespace std { 
 
 // disable explicit instantiation for compilers that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 bool
@@ -61,8 +60,6 @@ bool
 next_permutation (BidirIter<lt_comp<assign<base<cpy_ctor> > > >, 
                   BidirIter<lt_comp<assign<base<cpy_ctor> > > >,
                   binary_predicate<lt_comp<assign<base<cpy_ctor> > > >);
-
-#endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

@@ -54,8 +54,6 @@ const plus<T>& operator+ (const plus<T>& lhs, const plus<T>& rhs)
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template 
 OutputIter<plus<assign<base<cpy_ctor> > > >
 partial_sum (InputIter<plus<assign<base<cpy_ctor> > > >,
@@ -68,8 +66,6 @@ partial_sum (InputIter<assign<base<cpy_ctor> > >,
              InputIter<assign<base<cpy_ctor> > >,
              OutputIter<assign<base<cpy_ctor> > >,
              binary_func<assign<base<cpy_ctor> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

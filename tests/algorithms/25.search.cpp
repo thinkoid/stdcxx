@@ -39,7 +39,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 // instantiate each algorithm on all kinds of iterators
 // it is required to work with (the algorithm may delegate
@@ -128,8 +127,6 @@ search_n (RandomAccessIter<eq_comp<base<> > >,
           RandomAccessIter<eq_comp<base<> > >, 
           Size<int>, const eq_comp<base<> >&, 
           binary_predicate<eq_comp<base<> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

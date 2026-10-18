@@ -700,7 +700,6 @@ long __rw_hash (const _CharT *lo, const _CharT *hi) _THROWS (())
 }
 
 #ifndef _RWSTD_NO_INSTANTIATE
-#  ifndef _RWSTD_NO_EXPLICIT_FUNC_INSTANTIATION
 
 // explicitly instantiate for compilers with automatic template
 // instantiation that don't emit symbols for implicitly instantiated
@@ -709,13 +708,12 @@ long __rw_hash (const _CharT *lo, const _CharT *hi) _THROWS (())
 
 template long __rw_hash (const char*, const char*) _THROWS(());
 
-#    ifndef _RWSTD_NO_WCHAR_T
+#  ifndef _RWSTD_NO_WCHAR_T
 
 template long __rw_hash (const wchar_t*, const wchar_t*) _THROWS(());
 
-#    endif   // _RWSTD_NO_WCHAR_T
+#  endif   // _RWSTD_NO_WCHAR_T
 
-#  endif   // _RWSTD_NO_EXPLICIT_FUNC_INSTANTIATION
 #endif   // _RWSTD_NO_INSTANTIATE
 
 

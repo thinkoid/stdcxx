@@ -39,7 +39,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 const lt_comp<base<cpy_ctor> >& 
@@ -84,8 +83,6 @@ FwdIter<lt_comp<base<cpy_ctor> > >
 max_element (FwdIter<lt_comp<base<cpy_ctor> > >,
              FwdIter<lt_comp<base<cpy_ctor> > >,
              binary_predicate<lt_comp<base<cpy_ctor> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

@@ -49,8 +49,6 @@ struct compare {
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template
 bool
 binary_search (FwdIter<lt_comp<assign<base<cpy_ctor> > > >, 
@@ -63,8 +61,6 @@ binary_search (FwdIter<lt_comp<assign<base<cpy_ctor> > > >,
                FwdIter<lt_comp<assign<base<cpy_ctor> > > >,
                const lt_comp<assign<base<cpy_ctor> > >&,
                compare<lt_comp<assign<base<cpy_ctor> > > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

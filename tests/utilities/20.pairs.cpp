@@ -52,8 +52,6 @@ bool less<Y>::operator() (const Y &a, const Y &b) const
 }   // namespace std
 
 
-#ifndef _RWSTD_NO_EXPLICIT_CTOR_INSTANTIATION
-
 typedef base<def_ctor> DefaultConstructible;
 typedef base<cpy_ctor> CopyConstructible;
 
@@ -73,8 +71,6 @@ template pair<CopyConstructible, CopyConstructible>::
          pair (const CopyConstructible&, const CopyConstructible&);
 
 }   // namespace std
-
-#endif   // _RWSTD_NO_EXPLICIT_CTOR_INSTANTIATION
 
 /**************************************************************************/
 

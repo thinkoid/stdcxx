@@ -37,8 +37,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template 
 bool
 includes (InputIter<lt_comp<base<no_ctor> > >,
@@ -53,8 +51,6 @@ includes (InputIter<lt_comp<base<no_ctor> > >,
           InputIter<lt_comp<base<no_ctor> > >,
           InputIter<lt_comp<base<no_ctor> > >,
           binary_predicate<lt_comp<base<no_ctor> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

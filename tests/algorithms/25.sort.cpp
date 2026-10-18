@@ -40,7 +40,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 void
@@ -63,8 +62,6 @@ void
 stable_sort (RandomAccessIter<lt_comp<assign<base<cpy_ctor> > > >, 
              RandomAccessIter<lt_comp<assign<base<cpy_ctor> > > >, 
              binary_predicate<lt_comp<assign<base<cpy_ctor> > > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

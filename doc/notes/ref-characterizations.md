@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 181 named C++ probes, five supporting C++
+The source census contains 170 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 181 named probes are discoverable by
+three different things.** All 170 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -112,6 +112,7 @@ its row is gone from the catalogue below.
 | `BOOL`, `TYPENAME`, `EXPLICIT`, `STATIC_CAST`, `DYNAMIC_CAST`, `CONST_CAST`, `REINTERPRET_CAST`, `NEW_CLASS_TEMPLATE_SYNTAX`, `NEW_FUNC_TEMPLATE_SYNTAX`, `NO_FOR_LOCAL_SCOPE` | `NO_BOOL` and the rest, one each | 2026-10-17, one commit | The keyword and syntax gates of C++98: every compiler of the matrix passes them. `_TYPENAME`, `_EXPLICIT`, the `_RWSTD_*_CAST` and `_RWSTD_SPECIALIZED_*` macros in `rw/_defs.h` were then spelled out as the keywords. `_RWSTD_NO_MUTABLE`, which never had a probe, went with them. |
 | `NAMESPACE` | `NO_NAMESPACE` | 2026-10-17 | The `namespace` keyword; every compiler of the matrix has it. Nine probes read the gate to put their names in `std`; they do so unconditionally now. `_RWSTD_NAMESPACE`, `_STD`, `_RW` and `_USING` in `rw/_defs.h` were then spelled out as `namespace`, `std`, `__rw` and `using`. |
 | `EXPLICIT_ARG`, `EXTERN_INLINE`, `FUNCTION_TRY_BLOCK`, `TEMPLATE_DEFAULT_ARG_CONVERSION`, `INSTANTIATE_DEFAULT_ARGS`, `STATIC_CONST_MEMBER_EXPR_CONST`, `EXPLICIT_MEMBER_INSTANTIATION`, `COLLAPSE_STATIC_LOCALS`, `COLLAPSE_TEMPLATE_LOCALS`, `EXTERN_C_EXCEPTIONS`, `LIB_EXCEPTIONS`, `THREAD_SAFE_ERRNO` | `NO_*`, one each | 2026-10-17, one commit | Nothing read the status macro and the probe printed nothing else; four took a support translation unit with them. |
+| `EXPLICIT_CTOR_INSTANTIATION`, `IMPLICIT_INSTANTIATION`, `STATIC_TEMPLATE_MEMBER_INIT`, `DEFAULT_TEMPLATE_ARGS`, `DEPENDENT_TEMPLATE`, `SPECIALIZATION_ON_RETURN_TYPE`, `EXPLICIT_MEMBER_SPECIALIZATION`, `EXPLICIT_FUNC_INSTANTIATION`, `EXPLICIT_INSTANTIATION`, `SPECIALIZED_FRIEND`, `OVERLOAD_OF_TEMPLATE_FUNCTION` | `NO_*`, one each | 2026-10-17, one commit | The small template gates: every compiler of the matrix passes them. `_RWSTD_SPECIALIZED_FRIEND`, `_RWSTD_DEFAULT_ARG` and `_RWSTD_DUMMY_ARG` went with them, spelled out or unused; the Borland branch beside the first was the last `__TURBOC__` in the tree. |
 
 ## 3. Outputs beyond the status macro
 
@@ -179,8 +180,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [CTYPE_BITS](../../etc/config/src/CTYPE_BITS.cpp) / `NO_CTYPE_BITS` + output | ctype constants | none |
 | [CV_VOID_SPECIALIZATIONS](../../etc/config/src/CV_VOID_SPECIALIZATIONS.cpp) / `NO_CV_VOID_SPECIALIZATIONS` | cv qualifiers on type void | L; `include/rw/_autoptr.h` |
 | [DAYLIGHT](../../etc/config/src/DAYLIGHT.cpp) / `NO_DAYLIGHT` | daylight variable in &lt;time.h&gt; | L; `src/time_put.cpp` |
-| [DEFAULT_TEMPLATE_ARGS](../../etc/config/src/DEFAULT_TEMPLATE_ARGS.cpp) / `NO_DEFAULT_TEMPLATE_ARGS` | default template arguments | L/T; `include/rw/_defs.h` |
-| [DEPENDENT_TEMPLATE](../../etc/config/src/DEPENDENT_TEMPLATE.cpp) / `NO_DEPENDENT_TEMPLATE` | dependent template | L; `include/rw/_defs.h` |
 | [DEPRECATED_LIBC_IN_STD](../../etc/config/src/DEPRECATED_LIBC_IN_STD.cpp) / `NO_DEPRECATED_LIBC_IN_STD` | deprecated C headers and namespace std | none |
 | [DIV_OVERLOADS](../../etc/config/src/DIV_OVERLOADS.cpp) / `NO_DIV_OVERLOADS` + output | overloads of div() | none |
 | [DUMMY_DEFAULT_ARG](../../etc/config/src/DUMMY_DEFAULT_ARG.cpp) / `NO_DUMMY_DEFAULT_ARG` | dummy default arguments | L; `include/rw/_defs.h` |
@@ -194,11 +193,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [EXCEPTION_SPECIFICATION](../../etc/config/src/EXCEPTION_SPECIFICATION.cpp) / `NO_EXCEPTION_SPECIFICATION` | exception specification | L/P/T; `include/rw/_defs.h` |
 | [EXCEPTION_SPECIFICATION_ON_NEW](../../etc/config/src/EXCEPTION_SPECIFICATION_ON_NEW.cpp) / `NO_EXCEPTION_SPECIFICATION_ON_NEW` | exception specification on new | L/P; `include/rw/_defs.h` |
 | [EXCEPTION_WHAT](../../etc/config/src/EXCEPTION_WHAT.cpp) / `NO_EXCEPTION_WHAT` | exception::what() | L; `src/exception.cpp` |
-| [EXPLICIT_CTOR_INSTANTIATION](../../etc/config/src/EXPLICIT_CTOR_INSTANTIATION.cpp) / `NO_EXPLICIT_CTOR_INSTANTIATION` | explicit instantiation of ctors | T; `tests/utilities/20.pairs.cpp` |
-| [EXPLICIT_FUNC_INSTANTIATION](../../etc/config/src/EXPLICIT_FUNC_INSTANTIATION.cpp) / `NO_EXPLICIT_FUNC_INSTANTIATION` | explicit function instantiation | L/P; `src/collate.cpp` |
-| [EXPLICIT_INSTANTIATION](../../etc/config/src/EXPLICIT_INSTANTIATION.cpp) / `NO_EXPLICIT_INSTANTIATION` | explicit instantiation | L/P/T; `include/rw/_defs.h` |
 | [EXPLICIT_INSTANTIATION_BEFORE_DEFINITION](../../etc/config/src/EXPLICIT_INSTANTIATION_BEFORE_DEFINITION.cpp) / `NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION` | instantiation before definition | L; `include/rw/_defs.h` |
-| [EXPLICIT_MEMBER_SPECIALIZATION](../../etc/config/src/EXPLICIT_MEMBER_SPECIALIZATION.cpp) / `NO_EXPLICIT_MEMBER_SPECIALIZATION` | explicit member specialization | L; `include/rw/_defs.h` |
 | [EXTERN_C_COMPATIBILITY](../../etc/config/src/EXTERN_C_COMPATIBILITY.cpp) / `NO_EXTERN_C_COMPATIBILITY` | compatibility of extern "C" and "C++" | L; `include/ansi/_cstdlib.h` |
 | [EXTERN_C_OVERLOAD](../../etc/config/src/EXTERN_C_OVERLOAD.cpp) / `NO_EXTERN_C_OVERLOAD` | overloading on extern "C" | L; `include/ansi/_cstdlib.h` |
 | [EXTERN_FUNCTION_TEMPLATE](../../etc/config/src/EXTERN_FUNCTION_TEMPLATE.cpp) / `NO_EXTERN_FUNCTION_TEMPLATE` | extern function template extension | L/P; `include/rw/_defs.h` |
@@ -227,7 +222,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [HONOR_STD](../../etc/config/src/HONOR_STD.cpp) / `NO_HONOR_STD` | if namespace std is honored | L/P/T; `include/ansi/cctype` |
 | [ICONV](../../etc/config/src/ICONV.cpp) / `NO_ICONV` + output | iconv() in &lt;iconv.h&gt; | V; `util/charmap.cpp` |
 | [ICONV_CONST_CHAR](../../etc/config/src/ICONV_CONST_CHAR.cpp) / `NO_ICONV_CONST_CHAR` | POSIX iconv() | P/T/V; `etc/config/src/ICONV.cpp` |
-| [IMPLICIT_INSTANTIATION](../../etc/config/src/IMPLICIT_INSTANTIATION.cpp) / `NO_IMPLICIT_INSTANTIATION` | implicit instantiation | L; `include/rw/_defs.h` |
 | [INFINITY](../../etc/config/src/INFINITY.cpp) / `NO_INFINITY` + output | infinity and NaN's | L/P; `src/limits_bits.cpp` |
 | [LCONV](../../etc/config/src/LCONV.cpp) / `NO_LCONV` + output | struct lconv in &lt;locale.h&gt; | none |
 | [LCONV_INT_FMAT](../../etc/config/src/LCONV_INT_FMAT.cpp) / `NO_LCONV_INT_FMAT` | C99 international lconv members | L/P/T; `src/punct.cpp` |
@@ -270,7 +264,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [OPERATOR_NEW_ARRAY_PLACEMENT](../../etc/config/src/OPERATOR_NEW_ARRAY_PLACEMENT.cpp) / `NO_OPERATOR_NEW_ARRAY_PLACEMENT` | operator new[] (size_t, void*) | L; `include/new` |
 | [OPERATOR_NEW_NOTHROW](../../etc/config/src/OPERATOR_NEW_NOTHROW.cpp) / `NO_OPERATOR_NEW_NOTHROW` | operator new (size_t, nothrow_t) | L/T; `include/new` |
 | [OPERATOR_NEW_PLACEMENT](../../etc/config/src/OPERATOR_NEW_PLACEMENT.cpp) / `NO_OPERATOR_NEW_PLACEMENT` | operator new (size_t, void*) | L; `include/rw/_new.h` |
-| [OVERLOAD_OF_TEMPLATE_FUNCTION](../../etc/config/src/OVERLOAD_OF_TEMPLATE_FUNCTION.cpp) / `NO_OVERLOAD_OF_TEMPLATE_FUNCTION` | complicated partial ordering | L; `include/ostream` |
 | [PART_SPEC_OVERLOAD](../../etc/config/src/PART_SPEC_OVERLOAD.cpp) / `NO_PART_SPEC_OVERLOAD` | partial ordering of function templates | L/P/T; `include/deque` |
 | [PLACEMENT_DELETE](../../etc/config/src/PLACEMENT_DELETE.cpp) / `NO_PLACEMENT_DELETE` | placement delete | L/T; `include/new` |
 | [POD_ZERO_INIT](../../etc/config/src/POD_ZERO_INIT.cpp) / `NO_POD_ZERO_INIT` | POD zero initialization | L; `include/rw/_traits.h` |
@@ -284,11 +277,8 @@ Token-pasted and script-generated names need family-level inspection.
 | [SETRLIMIT](../../etc/config/src/SETRLIMIT.cpp) / `NO_SETRLIMIT` | setrlimit() in &lt;sys/resource.h&gt; | P/T; `etc/config/src/GLOBAL_BAD_ALLOC.cpp` |
 | [SIG_ATOMIC_T](../../etc/config/src/SIG_ATOMIC_T.cpp) / `NO_SIG_ATOMIC_T` + output | signal support in &lt;signal.h&gt; | none |
 | [SIZE_T](../../etc/config/src/SIZE_T.cpp) / `NO_SIZE_T` + output | fpos_t, ptrdiff_t, and size_t | L; `include/ansi/cwchar` |
-| [SPECIALIZATION_ON_RETURN_TYPE](../../etc/config/src/SPECIALIZATION_ON_RETURN_TYPE.cpp) / `NO_SPECIALIZATION_ON_RETURN_TYPE` | specialization on return type | L; `include/rw/_defs.h` |
-| [SPECIALIZED_FRIEND](../../etc/config/src/SPECIALIZED_FRIEND.cpp) / `NO_SPECIALIZED_FRIEND` | template&lt;&gt; in friend specializations | L; `include/rw/_defs.h` |
 | [STATICS_IN_TEMPLATE](../../etc/config/src/STATICS_IN_TEMPLATE.cpp) / `NO_STATICS_IN_TEMPLATE` | references to static symbols in template | L; `include/rw/_defs.h` |
 | [STATIC_CONST_MEMBER_INIT](../../etc/config/src/STATIC_CONST_MEMBER_INIT.cpp) / `NO_STATIC_CONST_MEMBER_INIT` | const member initializer | L/T; `include/limits.cc` |
-| [STATIC_TEMPLATE_MEMBER_INIT](../../etc/config/src/STATIC_TEMPLATE_MEMBER_INIT.cpp) / `NO_STATIC_TEMPLATE_MEMBER_INIT` | initialization of static template data memebers | L; `include/rw/_config.h` |
 | [STD_BAD_ALLOC](../../etc/config/src/STD_BAD_ALLOC.cpp) / `NO_STD_BAD_ALLOC` | class std::bad_alloc | L/P/T; `include/new` |
 | [STD_BAD_CAST](../../etc/config/src/STD_BAD_CAST.cpp) / `NO_STD_BAD_CAST` | class std::bad_cast | L/P/T; `include/typeinfo` |
 | [STD_BAD_EXCEPTION](../../etc/config/src/STD_BAD_EXCEPTION.cpp) / `NO_STD_BAD_EXCEPTION` | class std::bad_exception | L/P; `include/exception` |

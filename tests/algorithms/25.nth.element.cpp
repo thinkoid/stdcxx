@@ -37,8 +37,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template
 void
 nth_element (RandomAccessIter<lt_comp<assign<base<cpy_ctor> > > >, 
@@ -51,8 +49,6 @@ nth_element (RandomAccessIter<lt_comp<assign<base<cpy_ctor> > > >,
              RandomAccessIter<lt_comp<assign<base<cpy_ctor> > > >,
              RandomAccessIter<lt_comp<assign<base<cpy_ctor> > > >,
              binary_predicate<lt_comp<assign<base<cpy_ctor> > > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

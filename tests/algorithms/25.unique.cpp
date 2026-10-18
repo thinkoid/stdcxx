@@ -37,8 +37,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 // also exercise LWG issue 241:
 // http://www.open-std.org/jtc1/sc22/wg21/docs/lwg-defects.html#241
 
@@ -65,8 +63,6 @@ unique_copy (InputIter<eq_comp<assign<base<cpy_ctor> > > >,
              InputIter<eq_comp<assign<base<cpy_ctor> > > >,
              OutputIter<eq_comp<assign<base<cpy_ctor> > > >,
              binary_predicate<eq_comp<assign<base<cpy_ctor> > > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

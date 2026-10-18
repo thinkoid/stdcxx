@@ -39,8 +39,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template
 pair <FwdIter<lt_comp<assign<base<cpy_ctor> > > >, 
       FwdIter<lt_comp<assign<base<cpy_ctor> > > > >
@@ -55,8 +53,6 @@ equal_range (FwdIter<lt_comp<assign<base<cpy_ctor> > > >,
              FwdIter<lt_comp<assign<base<cpy_ctor> > > >,
              const lt_comp<assign<base<cpy_ctor> > >&,
              binary_predicate<lt_comp<assign<base<cpy_ctor> > > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

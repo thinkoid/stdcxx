@@ -59,7 +59,7 @@ class istream_iterator
     : public iterator<input_iterator_tag, _TypeT, _Distance,
                       const _TypeT*, const _TypeT&>
 {
-    friend bool _RWSTD_SPECIALIZED_FRIEND (operator==)
+    friend bool operator== <>
         (const istream_iterator&, const istream_iterator&);
 
     typedef iterator<input_iterator_tag, _TypeT, _Distance,

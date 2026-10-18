@@ -38,7 +38,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 void
@@ -50,8 +49,6 @@ void
 random_shuffle (RandomAccessIter<assign<base<cpy_ctor> > >, 
                 RandomAccessIter<assign<base<cpy_ctor> > >,
                 func<const long>&);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

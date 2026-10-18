@@ -39,7 +39,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 void reverse (BidirIter<assign<base<cpy_ctor> > >, 
@@ -50,8 +49,6 @@ OutputIter<eq_comp<assign<base<> > > >
 reverse_copy (BidirIter<eq_comp<assign<base<> > > >, 
               BidirIter<eq_comp<assign<base<> > > >,
               OutputIter<eq_comp<assign<base<> > > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

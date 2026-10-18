@@ -38,7 +38,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 void
@@ -52,8 +51,6 @@ rotate_copy (FwdIter<assign<base<cpy_ctor> > >,
              FwdIter<assign<base<cpy_ctor> > >,
              FwdIter<assign<base<cpy_ctor> > >, 
              OutputIter<assign<base<cpy_ctor> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

@@ -2054,8 +2054,6 @@ int _rw_fmtarray (const FmtSpec &spec,
     return int (s - bufend);
 }
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template int _rw_quotechar (char*, UChar, int);
 template int _rw_quotechar (char*, char, int);
 template int _rw_quotechar (char*, UShrt, int);
@@ -2069,7 +2067,7 @@ template int _rw_fmtarray (const FmtSpec&, Buffer&, const UInt*, size_t, int);
 template int _rw_fmtarray (const FmtSpec&, Buffer&, const ULong*, size_t, int);
 
 
-#  ifndef _RWSTD_NO_NATIVE_WCHAR_T
+#ifndef _RWSTD_NO_NATIVE_WCHAR_T
 
 // avoid instantiating when wchar_t is not a fundamental type
 // (since it's most likely not distinct from one of the types
@@ -2077,9 +2075,7 @@ template int _rw_fmtarray (const FmtSpec&, Buffer&, const ULong*, size_t, int);
 template int _rw_quotechar (char*, wchar_t, int);
 template int _rw_fmtarray(const FmtSpec&, Buffer&, const wchar_t*, size_t, int);
 
-#  endif   // _RWSTD_NO_NATIVE_WCHAR_T
-
-#endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION
+#endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
 /********************************************************************/
 

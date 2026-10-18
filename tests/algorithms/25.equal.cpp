@@ -40,7 +40,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 bool
@@ -54,8 +53,6 @@ equal (InputIter<eq_comp<base<> > >,
        InputIter<eq_comp<base<> > >, 
        InputIter<eq_comp<base<> > >, 
        binary_predicate<eq_comp<base<> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

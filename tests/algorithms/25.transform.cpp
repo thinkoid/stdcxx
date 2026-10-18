@@ -38,7 +38,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 OutputIter<assign<base<> > >
@@ -54,8 +53,6 @@ transform (InputIter<assign<base<> > >,
            InputIter<assign<base<> > >,
            OutputIter<assign<base<> > >,
            binary_func<assign<base<> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

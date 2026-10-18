@@ -107,18 +107,18 @@ every one of them out, keyword by keyword, the casts last.
 | `EXPLICIT_INSTANTIATION_BEFORE_DEFINITION` | explicit instantiation before the definition | 9 | 0 | 1 | |
 | `FUNC_PARTIAL_SPEC` | overloading a function template | 9 | 0 | 2 | |
 | `FRIEND_TEMPLATE` | friend templates of templates | 8 | 0 | 2 | reads `EXPLICIT_FUNC_INSTANTIATION` |
-| `OVERLOAD_OF_TEMPLATE_FUNCTION` | partial ordering, the hard case | 4 | 0 | 1 | |
-| `SPECIALIZED_FRIEND` | `template <>` in a friend declaration | 3 | 0 | 1 | |
-| `EXPLICIT_INSTANTIATION` | explicit instantiation | 2 | 78 | 1 | `IMPLICIT_INSTANTIATION`, `INSTANTIATE_DEFAULT_ARGS` |
-| `EXPLICIT_FUNC_INSTANTIATION` | explicit instantiation of a function template | 2 | 0 | 1 | `FRIEND_TEMPLATE` |
-| `EXPLICIT_MEMBER_SPECIALIZATION` | explicit specialization of a member | 2 | 0 | 1 | |
+| `OVERLOAD_OF_TEMPLATE_FUNCTION` | partial ordering, the hard case | 4 | 0 | 1 | retired 2026-10-17 |
+| `SPECIALIZED_FRIEND` | `template <>` in a friend declaration | 3 | 0 | 1 | retired 2026-10-17 |
+| `EXPLICIT_INSTANTIATION` | explicit instantiation | 2 | 78 | 1 | `IMPLICIT_INSTANTIATION`, `INSTANTIATE_DEFAULT_ARGS`; retired 2026-10-17 |
+| `EXPLICIT_FUNC_INSTANTIATION` | explicit instantiation of a function template | 2 | 0 | 1 | `FRIEND_TEMPLATE`; retired 2026-10-17 |
+| `EXPLICIT_MEMBER_SPECIALIZATION` | explicit specialization of a member | 2 | 0 | 1 | retired 2026-10-17 |
 | `MEMBER_TEMPLATE_OVERLOAD` | member template overloads on the return type | 2 | 0 | 1 | retired 2026-10-17 |
-| `SPECIALIZATION_ON_RETURN_TYPE` | specialization on the return type | 2 | 0 | 1 | |
-| `DEPENDENT_TEMPLATE` | `::template` | 2 | 0 | 1 | |
-| `DEFAULT_TEMPLATE_ARGS` | default template arguments | 1 | 6 | 1 | |
-| `IMPLICIT_INSTANTIATION` | implicit instantiation | 1 | 0 | 1 | |
-| `STATIC_TEMPLATE_MEMBER_INIT` | initialization of a static member of a template | 1 | 0 | 1 | |
-| `EXPLICIT_CTOR_INSTANTIATION` | explicit instantiation of a constructor | 0 | 2 | 0 | |
+| `SPECIALIZATION_ON_RETURN_TYPE` | specialization on the return type | 2 | 0 | 1 | retired 2026-10-17 |
+| `DEPENDENT_TEMPLATE` | `::template` | 2 | 0 | 1 | retired 2026-10-17 |
+| `DEFAULT_TEMPLATE_ARGS` | default template arguments | 1 | 6 | 1 | retired 2026-10-17 |
+| `IMPLICIT_INSTANTIATION` | implicit instantiation | 1 | 0 | 1 | retired 2026-10-17 |
+| `STATIC_TEMPLATE_MEMBER_INIT` | initialization of a static member of a template | 1 | 0 | 1 | retired 2026-10-17 |
+| `EXPLICIT_CTOR_INSTANTIATION` | explicit instantiation of a constructor | 0 | 2 | 0 | retired 2026-10-17 |
 
 `COLLAPSE_TEMPLATE_STATICS` and `STATIC_TEMPLATE_MEMBER_INIT`
 together select `_RWSTD_NO_STATIC_MUTEX_INIT` in `_config.h`, read
@@ -248,6 +248,8 @@ Small first, so the pattern settles before the big three.
    day in the commit after.
 3. The template gates of 2.2, smallest first; `CLASS_PARTIAL_SPEC`
    with `PART_SPEC_OVERLOAD` and `FUNC_PARTIAL_SPEC` last of them.
+   The eleven with four library hits or fewer went 2026-10-17 in one
+   commit.
 4. The other language rules of 2.4.
 5. `LONG_DOUBLE`.
 6. `WCHAR_T` with `NATIVE_WCHAR_T`, the largest.

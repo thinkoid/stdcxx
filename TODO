@@ -115,23 +115,23 @@ are the same workaround, 25 sites and none respectively, and
 =_specialized.h=, is its target. The rebind macro was a workaround
 for an ancient Sun compiler; remove it (2026-10-16).
 
-Fix: spell the rebind at the eleven sites, delete the macro and its
-=_RWSTD_NO_DEPENDENT_TEMPLATE= branch; then the three sibling macros
-and the =_RWSTD_ALLOCATOR= gate with the =allocator_interface= side,
-and =DEPENDENT_TEMPLATE.cpp= once nothing reads its macro.
+Fix: spell the rebind at the eleven sites and delete the macro; then
+the three sibling macros and the =_RWSTD_ALLOCATOR= gate with the
+=allocator_interface= side. The =_RWSTD_NO_DEPENDENT_TEMPLATE= branch
+and its probe went with the small template gates on 2026-10-17.
 
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
 ** TODO The feature gates after the member templates
 
-Thirty-two gates ask whether the compiler accepts a C++98
+Twenty-one gates ask whether the compiler accepts a C++98
 construct, and no compiler the tree is built with (GCC, Clang, eccp
 in strict C++03) defines one of them. Retired so far: the member
 templates gate (bfbf7ac3 and the seven commits after it), the member
 template overload gate, the ten keyword and syntax gates of the
-note's 2.1 in one commit, and the namespace gate with its nine
-probes. The branch behind each cannot be compiled
+note's 2.1 in one commit, the namespace gate with its nine probes,
+and the eleven small template gates of 2.2 in one commit. The branch behind each cannot be compiled
 and rots. =doc/notes/analysis-feature-gates.md= is the census: the
 candidates by family with their footprint (chapter 2), sixteen
 probes nobody reads (3), what stays and why (4), the probes that

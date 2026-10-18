@@ -45,12 +45,8 @@ int foo (A<T> a, B<U> b)
     return b.bar (a.i);
 }
 
-#ifndef _RWSTD_NO_EXPLICIT_FUNC_INSTANTIATION
-
 // explicitly instantiate to detect bugs such as SunPro 5.3's PR #30227
 template int foo (A<int>, B<double>);
-
-#endif   // _RWSTD_NO_EXPLICIT_FUNC_INSTANTIATION
 
 int baz ()
 {

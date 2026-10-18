@@ -39,7 +39,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 void replace (FwdIter<eq_comp<assign<base<> > > >, 
@@ -68,8 +67,6 @@ replace_copy_if (InputIter<assign<base<> > > ,
                  OutputIter<assign<base<> > > , 
                  predicate<assign<base<> > > ,
                  const assign<base<> > &);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

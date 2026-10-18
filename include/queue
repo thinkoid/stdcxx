@@ -67,10 +67,10 @@ inline bool operator< (const queue<_TypeT, _Container>&,
 template <class _TypeT, class _Container>
 class queue
 {
-    friend bool _RWSTD_SPECIALIZED_FRIEND (operator==)
+    friend bool operator== <>
         (const queue&, const queue&);
 
-    friend bool _RWSTD_SPECIALIZED_FRIEND (operator<)
+    friend bool operator< <>
         (const queue&, const queue&);
 
 public:

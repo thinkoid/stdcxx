@@ -39,7 +39,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template 
 OutputIter<lt_comp<assign<base<cpy_ctor> > > >
@@ -57,8 +56,6 @@ set_intersection (InputIter<lt_comp<assign<base<cpy_ctor> > > >,
                   InputIter<lt_comp<assign<base<cpy_ctor> > > >,
                   OutputIter<lt_comp<assign<base<cpy_ctor> > > >,
                   binary_predicate<lt_comp<assign<base<cpy_ctor> > > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

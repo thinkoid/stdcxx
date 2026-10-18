@@ -222,12 +222,8 @@ struct MyClass
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 // explicitly instantiate to better exercise the template
 template class std::vector<MyClass, Allocator<MyClass> >;
-
-#endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 
 static int

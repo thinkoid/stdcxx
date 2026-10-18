@@ -39,7 +39,6 @@ namespace std {
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 template
 BidirIter<assign<base<cpy_ctor> > >
@@ -52,8 +51,6 @@ BidirIter<assign<base<cpy_ctor> > >
 stable_partition (BidirIter<assign<base<cpy_ctor> > >,
                   BidirIter<assign<base<cpy_ctor> > >,
                   predicate<assign<base<cpy_ctor> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

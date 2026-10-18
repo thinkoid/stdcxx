@@ -65,10 +65,10 @@ inline bool operator<(const stack<_TypeT, _Container>&,
 template <class _TypeT, class _Container>
 class stack
 {
-    friend bool _RWSTD_SPECIALIZED_FRIEND (operator==)
+    friend bool operator== <>
         (const stack&, const stack&);
 
-    friend bool _RWSTD_SPECIALIZED_FRIEND (operator<)
+    friend bool operator< <>
         (const stack&, const stack&);
 
 public:

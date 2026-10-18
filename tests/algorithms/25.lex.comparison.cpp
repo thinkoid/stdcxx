@@ -37,8 +37,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 // explicitly instantiate on types with minimum features
 // to verify that the algorithm imposes no requirements
 // beyond those specified
@@ -53,8 +51,6 @@ bool lexicographical_compare (InputIter<base<> >,
                               InputIter<base<> >, 
                               InputIter<base<> >,
                               binary_predicate<base<> >); 
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

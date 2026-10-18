@@ -37,8 +37,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template
 void
 fill (FwdIter<assign<base<> > >, FwdIter<assign<base<> > >,
@@ -48,8 +46,6 @@ template
 void
 fill_n (OutputIter<assign<base<> > >, Size<int>,
         const assign<base<> >&);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

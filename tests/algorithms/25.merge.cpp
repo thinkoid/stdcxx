@@ -37,8 +37,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template
 OutputIter<lt_comp<assign<base<cpy_ctor> > > >
 merge (InputIter<lt_comp<assign<base<cpy_ctor> > > >, 
@@ -68,8 +66,6 @@ inplace_merge (BidirIter<lt_comp<assign<base<cpy_ctor> > > >,
                BidirIter<lt_comp<assign<base<cpy_ctor> > > >,
                BidirIter<lt_comp<assign<base<cpy_ctor> > > >,
                binary_predicate<lt_comp<assign<base<cpy_ctor> > > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

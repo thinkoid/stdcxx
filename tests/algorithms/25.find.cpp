@@ -37,8 +37,6 @@
 
 namespace std { 
 
-#ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
-
 template
 InputIter<eq_comp<base<> > > 
 find (InputIter<eq_comp<base<> > >, InputIter<eq_comp<base<> > >, 
@@ -48,8 +46,6 @@ template
 InputIter<eq_comp<base<> > > 
 find_if (InputIter<eq_comp<base<> > >, InputIter<eq_comp<base<> > >, 
          predicate<eq_comp<base<> > >);
-
-#endif // _RWSTD_NO_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 
