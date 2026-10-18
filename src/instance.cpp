@@ -34,32 +34,3 @@
 
 #include <string>
 #include <rw/_mutex.h>
-
-#ifdef _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
-
-namespace __rw {
-
-#ifndef _RWSTD_NO_WCHAR_T
-
-typedef std::char_traits<wchar_t> Traits;
-typedef std::allocator<wchar_t>    Allocator;
-
-typedef __string_ref<wchar_t, Traits, Allocator> StringRef;
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-typedef std::char_traits<char> Traits;
-typedef std::allocator<char>    Allocator;
-
-typedef __string_ref<char, Traits, Allocator> StringRef;
-
-#endif   // _RWSTD_NO_WCHAR_T
-
-// FIXME: this won't work at all for other (non-char) specializations
-// try to allocate enough space for std::wstring plus some overhead
-_RWSTD_EXPORT unsigned long
-__nullref [4 * sizeof (StringRef) / sizeof (long) + 2];
-
-}   // namespace __rw
-
-#endif   // _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS

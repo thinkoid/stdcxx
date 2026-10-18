@@ -125,15 +125,15 @@ the non-debug recompile, the suite table) in =11S=.
 
 ** TODO The feature gates after the member templates
 
-Sixteen gates ask whether the compiler accepts a C++98 construct, and
+Fourteen gates ask whether the compiler accepts a C++98 construct, and
 no compiler the tree is built with (GCC, Clang, eccp in strict C++03)
 defines one of them (=EXPLICIT_INSTANTIATION_BEFORE_DEFINITION= left
 the list: =rw/_defs.h= defines it by hand under eccp). Retired so far:
 the member templates gate (bfbf7ac3 and the seven commits after it),
 the member template overload gate, the ten keyword and syntax gates of
 the note's 2.1 in one commit, the namespace gate with its nine probes,
-the eleven small template gates of 2.2 in one commit, and four medium
-ones in the next. The branch behind each cannot be compiled and rots.
+the eleven small template gates of 2.2 in one commit, four medium
+ones in the next, and the two static-member ones after. The branch behind each cannot be compiled and rots.
 =doc/notes/analysis-feature-gates.md= is the census: the candidates by
 family with their footprint (chapter 2), sixteen probes nobody reads
 (3), what stays and why (4), the probes that read each gate (5), and
@@ -142,12 +142,13 @@ the order (6). Largest: =WCHAR_T= (524 lines, 48 library files),
 (90, 16). Three sit between the families and wait on a decision:
 =HONOR_STD=, =RUNTIME_IN_STD=, =PLACEMENT_DELETE=.
 
-Fix: the member templates retirement's pattern, one gate or bundle
-per commit, in the note's order, the first two items done: the keyword gates, the template gates,
-the other language rules, =LONG_DOUBLE=, =WCHAR_T=; the reader-less
-probes went on 2026-10-17. Each commit takes the =#ifdef= branches, the
-twins, the dispatch macros, the probe and the probes that read it;
-=ref-characterizations.md= records each retirement.
+Fix: the member templates retirement's pattern, one gate or bundle per
+commit, in the note's order, the first two items done: the keyword
+gates, the template gates, the other language rules, =LONG_DOUBLE=,
+=WCHAR_T=; the reader-less probes went on 2026-10-17. Each commit
+takes the =#ifdef= branches, the twins, the dispatch macros, the probe
+and the probes that read it; =ref-characterizations.md= records each
+retirement.
 
 Check: =git grep= of the gate empty under =include=, =src= and
 =tests=; the suite equal to the pin in the GCC debug configuration

@@ -68,11 +68,6 @@
 #  endif
 
 
-#  if defined(_RWSTD_NO_STATIC_MUTEX_INIT)
-#    include <new>
-#    include <rw/_once.h>
-#  endif  //_RWSTD_NO_STATIC_MUTEX_INIT
-
 
 namespace __rw { 
 
@@ -107,23 +102,6 @@ public:
 
     void _C_release ();
 
-#  ifdef _RWSTD_NO_STATIC_MUTEX_INIT
-
-    // static initialization not an option, define ctor and dtor
-    // and make member mutex private
-
-    __rw_mutex_base ();
-
-    ~__rw_mutex_base ();
-
-private:
-
-    // not defined
-    __rw_mutex_base (const __rw_mutex_base&);
-    __rw_mutex_base& operator= (const __rw_mutex_base&);
-
-#  endif   // _RWSTD_NO_STATIC_MUTEX_INIT
-
     _RWSTD_MUTEX_T _C_mutex;   // the real thing
 };
 
@@ -142,8 +120,6 @@ class _RWSTD_EXPORT __rw_mutex: public __rw_mutex_base
 {
 public:
 
-#  ifndef _RWSTD_NO_STATIC_MUTEX_INIT
-
     __rw_mutex ();
 
     ~__rw_mutex ();
@@ -154,12 +130,8 @@ private:
     __rw_mutex (const __rw_mutex&);
     __rw_mutex& operator= (const __rw_mutex&);
 
-#  endif   // _RWSTD_NO_STATIC_MUTEX_INIT
-
 };
 
-
-#  ifndef _RWSTD_NO_STATIC_MUTEX_INIT
 
 // helper factory class - static member is guranteed to be constructed
 // during static initialization; objects of this POD class are not
@@ -175,15 +147,15 @@ struct __rw_static_mutex
 template <class _TypeT>
 __rw_mutex_base __rw_static_mutex<_TypeT>::_C_mutex
 
-#    ifdef _RWSTD_MUTEX_INITIALIZER
+#  ifdef _RWSTD_MUTEX_INITIALIZER
 
     = { _RWSTD_MUTEX_INITIALIZER }
 
-#      undef _RWSTD_MUTEX_INITIALIZER
-#    endif   // _RWSTD_MUTEX_INITIALIZER
+#    undef _RWSTD_MUTEX_INITIALIZER
+#  endif   // _RWSTD_MUTEX_INITIALIZER
         ;
 
-#    if _RWSTD_INSTANTIATE (_STATIC_MUTEX, _INT)
+#  if _RWSTD_INSTANTIATE (_STATIC_MUTEX, _INT)
 
 // explicitly instantiated to work around a g++ 2.95.2 bug on COFF systems
 // (such as IBM AIX or DEC OSF1) where it "forgets" to do so implicitly for
@@ -191,30 +163,18 @@ __rw_mutex_base __rw_static_mutex<_TypeT>::_C_mutex
 _RWSTD_INSTANTIATE_1 (class _RWSTD_TI_EXPORT __rw_static_mutex<int>);
 _RWSTD_INSTANTIATE_1 (class _RWSTD_TI_EXPORT __rw_static_mutex<size_t>);
 
-#    endif   // _RWSTD_INSTANTIATE (_STATIC_MUTEX, _INT)
+#  endif   // _RWSTD_INSTANTIATE (_STATIC_MUTEX, _INT)
 
 
 inline __rw_mutex::__rw_mutex ()
 
-#  else   // if defined (_RWSTD_NO_STATIC_MUTEX_INIT)
-
-inline __rw_mutex_base::__rw_mutex_base ()
-
-#  endif   // _RWSTD_NO_STATIC_MUTEX_INIT
 { 
     if (0 != _RWSTD_MUTEX_INIT (_C_mutex))
         __rw::__rw_throw (_RWSTD_ERROR_RUNTIME_ERROR, "synchronization error");
 }
 
-#  ifndef _RWSTD_NO_STATIC_MUTEX_INIT
-
 inline __rw_mutex::~__rw_mutex () 
 
-#  else   // if defined (_RWSTD_NO_STATIC_MUTEX_INIT)
-
-inline __rw_mutex_base::~__rw_mutex_base () 
-
-#  endif   // _RWSTD_NO_STATIC_MUTEX_INIT
 {
     _RWSTD_MUTEX_DESTROY (_C_mutex);
 }
@@ -230,8 +190,6 @@ template<class _TypeT, int _IntI> struct __rw_type { };
 // function with a ptr to that type to obtain an initialized mutex object
 // that is the same for each unique type passed to the function
 
-#  ifndef _RWSTD_NO_STATIC_MUTEX_INIT
-
 template <class _TypeT>
 inline
 __rw_mutex_base& __rw_get_static_mutex (_TypeT*)
@@ -239,49 +197,6 @@ __rw_mutex_base& __rw_get_static_mutex (_TypeT*)
     // POD mutex already initialized during static initialization
     return __rw_static_mutex<_TypeT>::_C_mutex;
 }
-
-#  else   // if defined (_RWSTD_NO_STATIC_MUTEX_INIT)
-
-#    ifdef _INLINE_WITH_STATICS
-
-template <class _TypeT>
-_INLINE_WITH_STATICS
-__rw_mutex_base& __rw_get_static_mutex (_TypeT*)
-
-#    else    // if !defined (_INLINE_WITH_STATICS)
-
-template <class _TypeT>
-__rw_mutex_base& __rw_get_static_mutex (_TypeT*)
-
-#    endif   // _INLINE_WITH_STATICS
-
-{
-    // allocate properly aligned memory for static mutex (necessary
-    // to prevent static local mutex from being destroyed during
-    // program termination)
-    union __mutex_buf_t {
-        long double __pad;   // force alignment (must be first)
-        char        __buf [sizeof (__rw_mutex_base)];
-    };
-
-    // using a named union to work around a bug in HP aCC 3.14.10 (JAGad03246)
-    static __mutex_buf_t __mutex_buf;
-
-    // the mutex is constructed in the buffer once
-    static __rw_once_t __once;
-
-    struct __mutex_init_t {
-        static void _C_construct () {
-            new (&__mutex_buf) __rw_mutex_base ();
-        }
-    };
-
-    __rw_once (&__once, __mutex_init_t::_C_construct);
-
-    return reinterpret_cast< __rw_mutex_base& >(__mutex_buf);
-}
-
-#  endif   //_RWSTD_NO_STATIC_MUTEX_INIT
 
 
 // clean up

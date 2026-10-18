@@ -33,12 +33,8 @@ template <class _CharT, bool _Intl>
 __rw::__rw_facet_id moneypunct<_CharT, _Intl>::id;
 
 
-#ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-
 template <class _CharT, bool _Intl>
 const bool moneypunct<_CharT, _Intl>::intl /* = _Intl */;
-
-#endif   // _RWSTD_NO_STATIC_CONST_MEMBER_INIT
 
 
 // outlined to avoid generating a vtable in each translation unit

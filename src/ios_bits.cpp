@@ -36,41 +36,41 @@
 namespace std { 
 
 // required to be defined by 9.4.2, p4, even if initialized inside class
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::boolalpha);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::dec);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::fixed);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::hex);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::internal);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::left);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::oct);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::right);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::scientific);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::showbase);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::showpoint);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::showpos);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::skipws);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::unitbuf);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::uppercase);
+const ios_base::fmtflags ios_base::boolalpha;
+const ios_base::fmtflags ios_base::dec;
+const ios_base::fmtflags ios_base::fixed;
+const ios_base::fmtflags ios_base::hex;
+const ios_base::fmtflags ios_base::internal;
+const ios_base::fmtflags ios_base::left;
+const ios_base::fmtflags ios_base::oct;
+const ios_base::fmtflags ios_base::right;
+const ios_base::fmtflags ios_base::scientific;
+const ios_base::fmtflags ios_base::showbase;
+const ios_base::fmtflags ios_base::showpoint;
+const ios_base::fmtflags ios_base::showpos;
+const ios_base::fmtflags ios_base::skipws;
+const ios_base::fmtflags ios_base::unitbuf;
+const ios_base::fmtflags ios_base::uppercase;
 
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::adjustfield);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::basefield);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::floatfield);
+const ios_base::fmtflags ios_base::adjustfield;
+const ios_base::fmtflags ios_base::basefield;
+const ios_base::fmtflags ios_base::floatfield;
 
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::iostate ios_base::goodbit);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::iostate ios_base::badbit);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::iostate ios_base::eofbit);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::iostate ios_base::failbit);
+const ios_base::iostate ios_base::goodbit;
+const ios_base::iostate ios_base::badbit;
+const ios_base::iostate ios_base::eofbit;
+const ios_base::iostate ios_base::failbit;
 
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::app);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::binary);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::in);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::out);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::trunc);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::openmode ios_base::ate);
+const ios_base::openmode ios_base::app;
+const ios_base::openmode ios_base::binary;
+const ios_base::openmode ios_base::in;
+const ios_base::openmode ios_base::out;
+const ios_base::openmode ios_base::trunc;
+const ios_base::openmode ios_base::ate;
 
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::seekdir ios_base::beg);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::seekdir ios_base::cur);
-_RWSTD_DEFINE_STATIC_CONST (const ios_base::seekdir ios_base::end);
+const ios_base::seekdir ios_base::beg;
+const ios_base::seekdir ios_base::cur;
+const ios_base::seekdir ios_base::end;
 
 
 }   // namespace std

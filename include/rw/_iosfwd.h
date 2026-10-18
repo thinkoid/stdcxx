@@ -83,8 +83,8 @@ struct istreambuf_iterator;
 
 
 // used in money_get and num_get facets
-#define _RWSTD_IOSTATE  _RWSTD_BITMASK_ENUM (__rw::__rw_iostate)
-#define _RWSTD_FMTFLAGS _RWSTD_BITMASK_ENUM (__rw::__rw_fmtflags)
+#define _RWSTD_IOSTATE  __rw::__rw_iostate
+#define _RWSTD_FMTFLAGS __rw::__rw_fmtflags
 
 
 namespace __rw {

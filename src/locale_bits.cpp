@@ -36,14 +36,14 @@
 namespace std { 
 
 
-_RWSTD_DEFINE_STATIC_CONST (const locale::category locale::none);
-_RWSTD_DEFINE_STATIC_CONST (const locale::category locale::collate);
-_RWSTD_DEFINE_STATIC_CONST (const locale::category locale::ctype);
-_RWSTD_DEFINE_STATIC_CONST (const locale::category locale::monetary);
-_RWSTD_DEFINE_STATIC_CONST (const locale::category locale::numeric);
-_RWSTD_DEFINE_STATIC_CONST (const locale::category locale::time);
-_RWSTD_DEFINE_STATIC_CONST (const locale::category locale::messages);
-_RWSTD_DEFINE_STATIC_CONST (const locale::category locale::all);
+const locale::category locale::none;
+const locale::category locale::collate;
+const locale::category locale::ctype;
+const locale::category locale::monetary;
+const locale::category locale::numeric;
+const locale::category locale::time;
+const locale::category locale::messages;
+const locale::category locale::all;
 
 
 }   // namespace std

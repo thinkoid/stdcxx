@@ -150,7 +150,7 @@ _RWSTD_EXPORT extern const long double __rw_ldbl_denorm_min;
 #  define _RWSTD_CLASS_END              };
 #  define _RWSTD_TYPEDEF(def)           typedef def;
 #  define _RWSTD_STATIC(ignore, type, name, value)            \
-          _RWSTD_STATIC_CONST (type, name = value)
+          static const type name = value
 #  define _RWSTD_STATIC_FUN(type, name, value)                \
           static type name () _THROWS (()) { return value; }
 
@@ -163,7 +163,7 @@ _RWSTD_EXPORT extern const long double __rw_ldbl_denorm_min;
 #  define _RWSTD_CLASS_END
 #  define _RWSTD_TYPEDEF(ignore)
 #  define _RWSTD_STATIC(limtype, type, name, value)           \
-     _RWSTD_DEFINE_STATIC_CONST (const type numeric_limits<limtype>::name)
+     const type numeric_limits<limtype>::name
 #  define _RWSTD_STATIC_FUN(ign1, ign2, ign3)
 
 #endif   // _RWSTD_DEFINE_EXPORTS
@@ -291,45 +291,45 @@ struct numeric_limits
     // they can be used where const expressions are required (such
     // as in template parameters)
 
-    _RWSTD_STATIC_CONST (bool, is_specialized = false);
+    static const bool is_specialized = false;
 
     static _TypeT (min)() _THROWS (()) { return _TypeT (); }
     static _TypeT (max)() _THROWS (()) { return _TypeT (); }
 
-    _RWSTD_STATIC_CONST (int, digits   = 0);
-    _RWSTD_STATIC_CONST (int, digits10 = 0);
+    static const int digits   = 0;
+    static const int digits10 = 0;
 
-    _RWSTD_STATIC_CONST (bool, is_signed  = false);
-    _RWSTD_STATIC_CONST (bool, is_integer = false);
-    _RWSTD_STATIC_CONST (bool, is_exact   = false);
+    static const bool is_signed  = false;
+    static const bool is_integer = false;
+    static const bool is_exact   = false;
 
-    _RWSTD_STATIC_CONST (int, radix = 0);
+    static const int radix = 0;
 
     static _TypeT epsilon () _THROWS (())     { return _TypeT (); }
     static _TypeT round_error () _THROWS (()) { return _TypeT (); }
 
-    _RWSTD_STATIC_CONST (int, min_exponent   = 0);
-    _RWSTD_STATIC_CONST (int, min_exponent10 = 0);
-    _RWSTD_STATIC_CONST (int, max_exponent   = 0);
-    _RWSTD_STATIC_CONST (int, max_exponent10 = 0);
+    static const int min_exponent   = 0;
+    static const int min_exponent10 = 0;
+    static const int max_exponent   = 0;
+    static const int max_exponent10 = 0;
 
-    _RWSTD_STATIC_CONST (bool, has_infinity             = false);
-    _RWSTD_STATIC_CONST (bool, has_quiet_NaN            = false);
-    _RWSTD_STATIC_CONST (bool, has_signaling_NaN        = false);
-    _RWSTD_STATIC_CONST (float_denorm_style, has_denorm = denorm_absent);
-    _RWSTD_STATIC_CONST (bool, has_denorm_loss          = false);
+    static const bool has_infinity             = false;
+    static const bool has_quiet_NaN            = false;
+    static const bool has_signaling_NaN        = false;
+    static const float_denorm_style has_denorm = denorm_absent;
+    static const bool has_denorm_loss          = false;
 
     static _TypeT infinity () _THROWS (())      { return _TypeT (); }
     static _TypeT quiet_NaN () _THROWS (())     { return _TypeT (); }
     static _TypeT signaling_NaN () _THROWS (()) { return _TypeT (); }
     static _TypeT denorm_min () _THROWS (())    { return _TypeT (); }
 
-    _RWSTD_STATIC_CONST (bool, is_iec559        = false);
-    _RWSTD_STATIC_CONST (bool, is_bounded       = false);
-    _RWSTD_STATIC_CONST (bool, is_modulo        = false);
-    _RWSTD_STATIC_CONST (bool, traps            = false);
-    _RWSTD_STATIC_CONST (bool, tinyness_before  = false);
-    _RWSTD_STATIC_CONST (float_round_style, round_style = round_toward_zero);
+    static const bool is_iec559        = false;
+    static const bool is_bounded       = false;
+    static const bool is_modulo        = false;
+    static const bool traps            = false;
+    static const bool tinyness_before  = false;
+    static const float_round_style round_style = round_toward_zero;
 };
 
 }   // namespace std

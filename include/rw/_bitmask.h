@@ -37,10 +37,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-#ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-#  define _RWSTD_BITMASK_ENUM(Bitmask)  Bitmask
-
-#  define _RWSTD_DEFINE_BITMASK_OPERATORS(Bitmask)                 \
+#define _RWSTD_DEFINE_BITMASK_OPERATORS(Bitmask)                 \
                                                                    \
     inline Bitmask& operator&= (Bitmask &__lhs, Bitmask __rhs) {   \
         return __lhs = Bitmask (long (__lhs) & __rhs);             \
@@ -70,14 +67,6 @@
         return Bitmask (~long (__rhs));                            \
     }                                                              \
     typedef void __rw_unused_typedef
-
-#else   // if defined (_RWSTD_NO_STATIC_CONST_MEMBER_INIT)
-#  define _RWSTD_BITMASK_ENUM(ignore)   int
-
-#  define _RWSTD_DEFINE_BITMASK_OPERATORS(ignore)   \
-   typedef void __rw_unused_typedef
-
-#endif   // _RWSTD_NO_STATIC_CONST_MEMBER_INIT
 
 
 #endif   // _RWSTD_RW_BITMASK_H_INCLUDED

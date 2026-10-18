@@ -101,9 +101,9 @@ every one of them out, keyword by keyword, the casts last.
 | `CLASS_PARTIAL_SPEC` | partial specialization | 79 | 6 | 16 | `VA_LIST` |
 | `PART_SPEC_OVERLOAD` | partial ordering of function templates | 29 | 3 | 7 | `VA_LIST` |
 | `TEMPLATE_ON_RETURN_TYPE` | function template overloads on the return type | 16 | 4 | 4 | retired 2026-10-17 |
-| `STATIC_CONST_MEMBER_INIT` | in-class initializer of a static const member | 12 | 7 | 5 | |
+| `STATIC_CONST_MEMBER_INIT` | in-class initializer of a static const member | 12 | 7 | 5 | retired 2026-10-17 |
 | `NONDEDUCED_CONTEXT` | nondeduced contexts | 10 | 0 | 4 | retired 2026-10-17 |
-| `COLLAPSE_TEMPLATE_STATICS` | one static member per template instance across translation units | 10 | 0 | 5 | |
+| `COLLAPSE_TEMPLATE_STATICS` | one static member per template instance across translation units | 10 | 0 | 5 | retired 2026-10-17 |
 | `EXPLICIT_INSTANTIATION_BEFORE_DEFINITION` | explicit instantiation before the definition | 9 | 0 | 1 | not a candidate after all: `rw/_defs.h` defines it by hand when `EXTERN_TEMPLATE_BEFORE_DEFINITION` fails, so the branch is live under eccp (chapter 4) |
 | `FUNC_PARTIAL_SPEC` | overloading a function template | 9 | 0 | 2 | retired 2026-10-17 |
 | `FRIEND_TEMPLATE` | friend templates of templates | 8 | 0 | 2 | reads `EXPLICIT_FUNC_INSTANTIATION`; retired 2026-10-17 |
@@ -253,7 +253,9 @@ Small first, so the pattern settles before the big three.
    with `PART_SPEC_OVERLOAD` and `FUNC_PARTIAL_SPEC` last of them.
    The eleven with four library hits or fewer went 2026-10-17 in one
    commit; `FRIEND_TEMPLATE`, `FUNC_PARTIAL_SPEC`, `NONDEDUCED_CONTEXT`
-   and `TEMPLATE_ON_RETURN_TYPE` in the next.
+   and `TEMPLATE_ON_RETURN_TYPE` in the next; `STATIC_CONST_MEMBER_INIT`
+   and `COLLAPSE_TEMPLATE_STATICS`, with the static mutex fallback they
+   alone enabled, in the one after.
 4. The other language rules of 2.4.
 5. `LONG_DOUBLE`.
 6. `WCHAR_T` with `NATIVE_WCHAR_T`, the largest.

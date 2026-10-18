@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 166 named C++ probes, five supporting C++
+The source census contains 164 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 166 named probes are discoverable by
+three different things.** All 164 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -114,6 +114,7 @@ its row is gone from the catalogue below.
 | `EXPLICIT_ARG`, `EXTERN_INLINE`, `FUNCTION_TRY_BLOCK`, `TEMPLATE_DEFAULT_ARG_CONVERSION`, `INSTANTIATE_DEFAULT_ARGS`, `STATIC_CONST_MEMBER_EXPR_CONST`, `EXPLICIT_MEMBER_INSTANTIATION`, `COLLAPSE_STATIC_LOCALS`, `COLLAPSE_TEMPLATE_LOCALS`, `EXTERN_C_EXCEPTIONS`, `LIB_EXCEPTIONS`, `THREAD_SAFE_ERRNO` | `NO_*`, one each | 2026-10-17, one commit | Nothing read the status macro and the probe printed nothing else; four took a support translation unit with them. |
 | `EXPLICIT_CTOR_INSTANTIATION`, `IMPLICIT_INSTANTIATION`, `STATIC_TEMPLATE_MEMBER_INIT`, `DEFAULT_TEMPLATE_ARGS`, `DEPENDENT_TEMPLATE`, `SPECIALIZATION_ON_RETURN_TYPE`, `EXPLICIT_MEMBER_SPECIALIZATION`, `EXPLICIT_FUNC_INSTANTIATION`, `EXPLICIT_INSTANTIATION`, `SPECIALIZED_FRIEND`, `OVERLOAD_OF_TEMPLATE_FUNCTION` | `NO_*`, one each | 2026-10-17, one commit | The small template gates: every compiler of the matrix passes them. `_RWSTD_SPECIALIZED_FRIEND`, `_RWSTD_DEFAULT_ARG` and `_RWSTD_DUMMY_ARG` went with them, spelled out or unused; the Borland branch beside the first was the last `__TURBOC__` in the tree. |
 | `FRIEND_TEMPLATE`, `FUNC_PARTIAL_SPEC`, `NONDEDUCED_CONTEXT`, `TEMPLATE_ON_RETURN_TYPE` | `NO_*`, one each | 2026-10-17, one commit | Four more template gates every compiler of the matrix passes. The facet and temporary-buffer macros that spelled the return-type workaround (`_STD_USE_FACET` and kin) and the three local size-type macros went with them, spelled out. |
+| `STATIC_CONST_MEMBER_INIT`, `COLLAPSE_TEMPLATE_STATICS` | `NO_*`, one each | 2026-10-17, one commit | In-class initializers of static const members and one static per template instance across translation units; every compiler of the matrix passes. The static mutex initialization fallback, `_RWSTD_NO_STATIC_MUTEX_INIT`, had no definer left and went too; `_RWSTD_STATIC_CONST`, `_RWSTD_DEFINE_STATIC_CONST` and `_RWSTD_BITMASK_ENUM` are spelled out. |
 
 ## 3. Outputs beyond the status macro
 
@@ -177,7 +178,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [BAD_TYPEID_WHAT](../../etc/config/src/BAD_TYPEID_WHAT.cpp) / `NO_BAD_TYPEID_WHAT` | bad_typeid::what() | L; `src/typeinfo.cpp` |
 | [BITS_TYPES___MBSTATE_T_H](../../etc/config/src/BITS_TYPES___MBSTATE_T_H.cpp) / `NO_BITS_TYPES___MBSTATE_T_H` | __mbstate_t in &lt;bits/types/__mbstate_t.h&gt; | L; `include/rw/_mbstate.h` |
 | [CLASS_PARTIAL_SPEC](../../etc/config/src/CLASS_PARTIAL_SPEC.cpp) / `NO_CLASS_PARTIAL_SPEC` | partial template specialization | L/P/T/E; `include/algorithm` |
-| [COLLAPSE_TEMPLATE_STATICS](../../etc/config/src/COLLAPSE_TEMPLATE_STATICS.cpp) / `NO_COLLAPSE_TEMPLATE_STATICS` | static template members | L; `include/rw/_config.h` |
 | [CTYPE_BITS](../../etc/config/src/CTYPE_BITS.cpp) / `NO_CTYPE_BITS` + output | ctype constants | none |
 | [CV_VOID_SPECIALIZATIONS](../../etc/config/src/CV_VOID_SPECIALIZATIONS.cpp) / `NO_CV_VOID_SPECIALIZATIONS` | cv qualifiers on type void | L; `include/rw/_autoptr.h` |
 | [DAYLIGHT](../../etc/config/src/DAYLIGHT.cpp) / `NO_DAYLIGHT` | daylight variable in &lt;time.h&gt; | L; `src/time_put.cpp` |
@@ -276,7 +276,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [SIG_ATOMIC_T](../../etc/config/src/SIG_ATOMIC_T.cpp) / `NO_SIG_ATOMIC_T` + output | signal support in &lt;signal.h&gt; | none |
 | [SIZE_T](../../etc/config/src/SIZE_T.cpp) / `NO_SIZE_T` + output | fpos_t, ptrdiff_t, and size_t | L; `include/ansi/cwchar` |
 | [STATICS_IN_TEMPLATE](../../etc/config/src/STATICS_IN_TEMPLATE.cpp) / `NO_STATICS_IN_TEMPLATE` | references to static symbols in template | L; `include/rw/_defs.h` |
-| [STATIC_CONST_MEMBER_INIT](../../etc/config/src/STATIC_CONST_MEMBER_INIT.cpp) / `NO_STATIC_CONST_MEMBER_INIT` | const member initializer | L/T; `include/limits.cc` |
 | [STD_BAD_ALLOC](../../etc/config/src/STD_BAD_ALLOC.cpp) / `NO_STD_BAD_ALLOC` | class std::bad_alloc | L/P/T; `include/new` |
 | [STD_BAD_CAST](../../etc/config/src/STD_BAD_CAST.cpp) / `NO_STD_BAD_CAST` | class std::bad_cast | L/P/T; `include/typeinfo` |
 | [STD_BAD_EXCEPTION](../../etc/config/src/STD_BAD_EXCEPTION.cpp) / `NO_STD_BAD_EXCEPTION` | class std::bad_exception | L/P; `include/exception` |

@@ -30,27 +30,16 @@
 namespace std {
 
 
-#ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-   // MSVC 7.0 allows initializers for static const integral members
-   // but out-of-line definitions cause multiply defined symbol errors
-   // (see PR #26562)
-
 template <class _CharT, class _Traits, class _Allocator>
 const typename basic_string<_CharT, _Traits, _Allocator>::size_type
 basic_string<_CharT, _Traits, _Allocator>::
 npos /* = SIZE_MAX */;
 
-#endif   // _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-
-
-#ifndef _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
 
 template <class _CharT, class _Traits, class _Allocator>
 __rw::__null_ref<_CharT, _Traits, _Allocator>
 basic_string<_CharT, _Traits, _Allocator>::
 _C_null_ref;
-
-#endif   // _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
 
 
 template <class _CharT, class _Traits, class _Allocator>

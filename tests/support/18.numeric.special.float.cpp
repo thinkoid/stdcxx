@@ -908,16 +908,9 @@ void test_limits (FloatT, const char *tname, const char *fmt)
     rw_warn (!big_endian, 0, __LINE__, "Intel x86 is little-endian");
 #endif
 
-#ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-
-#  define CHECK_CONST(const_int)   \
+#define CHECK_CONST(const_int)   \
          enum { e = const_int };     \
          (void)&const_int
-#else
-   // static const integral members must be usable
-   //  as constant integral expressions
-#  define CHECK_CONST(const_int)      enum { e = const_int }
-#endif   // _RWSTD_NO_STATIC_CONST_MEMBER_INIT
 
 
 // compare against a computed value

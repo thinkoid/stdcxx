@@ -38,19 +38,19 @@
 namespace std {
 
 
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::space);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::print);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::cntrl);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::upper);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::lower);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::alpha);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::digit);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::punct);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::xdigit);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::alnum);
-_RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::graph);
+const ctype_base::mask ctype_base::space;
+const ctype_base::mask ctype_base::print;
+const ctype_base::mask ctype_base::cntrl;
+const ctype_base::mask ctype_base::upper;
+const ctype_base::mask ctype_base::lower;
+const ctype_base::mask ctype_base::alpha;
+const ctype_base::mask ctype_base::digit;
+const ctype_base::mask ctype_base::punct;
+const ctype_base::mask ctype_base::xdigit;
+const ctype_base::mask ctype_base::alnum;
+const ctype_base::mask ctype_base::graph;
 
-_RWSTD_DEFINE_STATIC_CONST (const size_t ctype<char>::table_size);
+const size_t ctype<char>::table_size;
 
 
 }   // namespace std

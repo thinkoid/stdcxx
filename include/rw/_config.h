@@ -135,15 +135,6 @@
 #  define _INLINE_WITH_STATICS inline
 #endif   // !__GNUG__ || __GNUG__ > 2 || __GNUG_MINOR__ > 96
 
-#ifdef _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
-   // static mutex initialization depends on the compiler's (and the
-   // linker's in gcc's case) ability to correctly handle explicitly
-   // initialized static members of class templates
-#  ifndef _RWSTD_NO_STATIC_MUTEX_INIT
-#    define _RWSTD_NO_STATIC_MUTEX_INIT
-#  endif
-#endif   // _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
-
 /********************** Environment ***************************************/
 
 #if defined (_RWSTD_NO_WCHAR_T) && !defined (_RWSTD_NO_NATIVE_WCHAR_T)

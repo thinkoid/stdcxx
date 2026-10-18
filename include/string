@@ -143,7 +143,7 @@ public:
 
 #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
-    _RWSTD_STATIC_CONST (size_type, npos = size_type (_RWSTD_SIZE_MAX));
+    static const size_type npos = size_type (_RWSTD_SIZE_MAX);
 
     // 21.3.1, p2
     explicit basic_string (const allocator_type &__alloc = allocator_type ())
@@ -792,23 +792,11 @@ public:
 
     friend struct __rw::__string_ref<value_type, traits_type, allocator_type>;
 
-#ifndef _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
-
     static __rw::__null_ref<_CharT, _Traits, _Allocator> _C_null_ref;
 
     static __rw::__null_ref<_CharT, _Traits, _Allocator>* _C_nullref () {
         return &_C_null_ref;
     }
-
-#else   // if defined (_RWSTD_NO_COLLAPSE_TEMPLATE_STATICS)
-
-    static __rw::__null_ref<_CharT, _Traits, _Allocator>* _C_nullref () {
-        typedef __rw::__null_ref<_CharT, _Traits, _Allocator> _NullRef;
-
-        return reinterpret_cast< _NullRef* >(__rw::__nullref);
-    }
-
-#endif   // _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
 
     _C_string_ref_type * _C_get_rep (size_type, size_type);
 

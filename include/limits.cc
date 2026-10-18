@@ -28,8 +28,7 @@
 
 namespace std { 
 
-#if    !defined (_RWSTD_NO_STATIC_CONST_MEMBER_INIT) \
-    && !defined (_RWSTD_DEFINE_EXPORTS)
+#ifndef _RWSTD_DEFINE_EXPORTS
 
 
 template <class _TypeT>
@@ -98,7 +97,7 @@ const bool numeric_limits<_TypeT>::tinyness_before;
 template <class _TypeT>
 const float_round_style numeric_limits<_TypeT>::round_style;
 
-#endif   // !_RWSTD_NO_STATIC_CONST_MEMBER_INIT && !_RWSTD_DEFINE_EXPORTS
+#endif   // _RWSTD_DEFINE_EXPORTS
 
 
 }   // namespace std

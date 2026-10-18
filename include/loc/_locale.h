@@ -159,14 +159,14 @@ struct _RWSTD_CLASS_EXPORT locale
     typedef __rw::__rw_facet_id id;
 
     // values (including none) must not conflict with any LC_XXX constants
-    _RWSTD_STATIC_CONST (category, none     = __rw::__rw_cat_none);
-    _RWSTD_STATIC_CONST (category, collate  = __rw::__rw_cat_collate);
-    _RWSTD_STATIC_CONST (category, ctype    = __rw::__rw_cat_ctype);
-    _RWSTD_STATIC_CONST (category, monetary = __rw::__rw_cat_monetary);
-    _RWSTD_STATIC_CONST (category, numeric  = __rw::__rw_cat_numeric);
-    _RWSTD_STATIC_CONST (category, time     = __rw::__rw_cat_time);
-    _RWSTD_STATIC_CONST (category, messages = __rw::__rw_cat_messages);
-    _RWSTD_STATIC_CONST (category, all      = __rw::__rw_cat_all);
+    static const category none     = __rw::__rw_cat_none;
+    static const category collate  = __rw::__rw_cat_collate;
+    static const category ctype    = __rw::__rw_cat_ctype;
+    static const category monetary = __rw::__rw_cat_monetary;
+    static const category numeric  = __rw::__rw_cat_numeric;
+    static const category time     = __rw::__rw_cat_time;
+    static const category messages = __rw::__rw_cat_messages;
+    static const category all      = __rw::__rw_cat_all;
 
     // 22.1.1.2, p1
     _RWSTD_MEMBER_EXPORT locale () _THROWS (());

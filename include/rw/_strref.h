@@ -110,8 +110,7 @@ struct __string_ref
 
 #if     defined (_RWSTD_REENTRANT)              \
     && !defined (_RWSTD_ONE_STRING_MUTEX)       \
-    && !defined (_RWSTD_NO_STRING_MUTEX)        \
-    && !defined (_RWSTD_NO_STATIC_MUTEX_INIT)
+    && !defined (_RWSTD_NO_STRING_MUTEX)
 
     void _C_init (size_type __cap, size_type __size) {
 
@@ -150,8 +149,8 @@ struct __string_ref
 
     void _C_destroy () { }
 
-#endif // _RWSTD_REENTRANT && !_RWSTD_ONE_STRING_MUTEX && 
-       // !_RWSTD_NO_STRING_MUTEX && !_RWSTD_NO_STATIC_MUTEX_INIT
+#endif // _RWSTD_REENTRANT && !_RWSTD_ONE_STRING_MUTEX
+       // && !_RWSTD_NO_STRING_MUTEX
 
 
     int _C_get_ref () const {
@@ -264,12 +263,6 @@ struct __null_ref
     _CharT _C_eos;
 };
 
-
-#ifdef _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
-
-extern _RWSTD_EXPORT unsigned long __nullref [];
-
-#endif   // _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
 
 }   // namespace __rw
 

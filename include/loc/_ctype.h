@@ -70,19 +70,19 @@ struct _RWSTD_CLASS_EXPORT locale;
 struct _RWSTD_EXPORT ctype_base
 {
     // 22.2.1, p1 - mask is a bitmask type (see 17.3.3.1.2)
-    typedef _RWSTD_BITMASK_ENUM (__rw::__rw_ctype_mask) mask;
+    typedef __rw::__rw_ctype_mask mask;
 
-    _RWSTD_STATIC_CONST (mask, space  = __rw::__rw_space);
-    _RWSTD_STATIC_CONST (mask, print  = __rw::__rw_print);
-    _RWSTD_STATIC_CONST (mask, cntrl  = __rw::__rw_cntrl);
-    _RWSTD_STATIC_CONST (mask, upper  = __rw::__rw_upper);
-    _RWSTD_STATIC_CONST (mask, lower  = __rw::__rw_lower);
-    _RWSTD_STATIC_CONST (mask, alpha  = __rw::__rw_alpha);
-    _RWSTD_STATIC_CONST (mask, digit  = __rw::__rw_digit);
-    _RWSTD_STATIC_CONST (mask, punct  = __rw::__rw_punct);
-    _RWSTD_STATIC_CONST (mask, xdigit = __rw::__rw_xdigit);
-    _RWSTD_STATIC_CONST (mask, alnum  = __rw::__rw_alnum);
-    _RWSTD_STATIC_CONST (mask, graph  = __rw::__rw_graph);
+    static const mask space  = __rw::__rw_space;
+    static const mask print  = __rw::__rw_print;
+    static const mask cntrl  = __rw::__rw_cntrl;
+    static const mask upper  = __rw::__rw_upper;
+    static const mask lower  = __rw::__rw_lower;
+    static const mask alpha  = __rw::__rw_alpha;
+    static const mask digit  = __rw::__rw_digit;
+    static const mask punct  = __rw::__rw_punct;
+    static const mask xdigit = __rw::__rw_xdigit;
+    static const mask alnum  = __rw::__rw_alnum;
+    static const mask graph  = __rw::__rw_graph;
 };
 
 
@@ -234,7 +234,7 @@ public:
 #endif
     }
 
-    _RWSTD_STATIC_CONST (_RWSTD_SIZE_T, table_size = 256);
+    static const _RWSTD_SIZE_T table_size = 256;
 
     explicit
     ctype (const mask* = 0, bool = false, _RWSTD_SIZE_T = 0) _THROWS (());

@@ -497,8 +497,6 @@ test_locale ()
     // 21.1.1.1.1
     const std::locale::category *pcat = (int*)0;
 
-#ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-
     // verify that category constants are defined
     pcat = &std::locale::none;
     pcat = &std::locale::collate;
@@ -508,8 +506,6 @@ test_locale ()
     pcat = &std::locale::time;
     pcat = &std::locale::messages;
     pcat = &std::locale::all;
-
-#endif   // _RWSTD_NO_STATIC_CONST_MEMBER_INIT
 
     // verify that category constants are constant integral expressions
     switch (*pcat) {
@@ -772,17 +768,8 @@ struct CtypeCharDerived: std::ctype<char>
 
     static void test_protected_members () {
 
-#ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-
         // verify that table_size is properly defined
         const std::size_t *psz = &std::ctype<char>::table_size;
-
-#else
-
-        const std::size_t dummy = std::ctype<char>::table_size;
-        const std::size_t *psz  = &dummy;
-
-#endif   // _RWSTD_NO_STATIC_CONST_MEMBER_INIT
 
         // verify that table_size is an integral constant expression
         switch (*psz) {
@@ -849,12 +836,8 @@ test_ctype (const char* cname)
     // whose address can be taken
     switch (m) {
 
-#ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
    // see lwg issue 339
-#  define ADDR(name)     pm = &std::ctype_base::name
-#else
-#  define ADDR(ignore)   (void)0
-#endif
+#define ADDR(name)     pm = &std::ctype_base::name
 
     // working around an IBM VAC++ bug #559
     case std::ctype_base::mask (): break;

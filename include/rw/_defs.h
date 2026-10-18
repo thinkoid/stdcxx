@@ -700,17 +700,6 @@
 #endif   // _RWSTD_DEFINE_EXTERNS
 
 
-// allows static const integral or enum class members to be initialized
-// inside the class and defined (w/o being initialized) outside
-// of the class (as required by 9.4.2, p4)
-#ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-#  define _RWSTD_STATIC_CONST(type, init)    static const type init
-#  define _RWSTD_DEFINE_STATIC_CONST(decl)   decl
-#else   // if defined (_RWSTD_NO_STATIC_CONST_MEMBER_INIT)
-#  define _RWSTD_STATIC_CONST(ignore, init)  enum { init }
-#  define _RWSTD_DEFINE_STATIC_CONST(ignore)   /* empty */
-#endif   // _RWSTD_NO_STATIC_CONST_MEMBER_INIT
-
 #ifndef _RWSTD_NO_STATICS_IN_TEMPLATE
 #  define _RWSTD_INTERNAL   static
 #else   // if defined (_RWSTD_NO_STATICS_IN_TEMPLATE)

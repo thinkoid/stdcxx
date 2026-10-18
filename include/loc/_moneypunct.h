@@ -107,7 +107,7 @@ struct moneypunct: __rw::__rw_facet, public money_base
 
     static __rw::__rw_facet_id id;
 
-    _RWSTD_STATIC_CONST (bool, intl = _Intl);
+    static const bool intl = _Intl;
 
 protected:
 
