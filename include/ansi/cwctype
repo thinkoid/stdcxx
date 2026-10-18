@@ -69,9 +69,7 @@ namespace std {
 #  endif
 #endif   // WEOF
 
-#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
-
-#  ifndef _RWSTD_NO_WCTYPE_H
+#ifndef _RWSTD_NO_WCTYPE_H
 
 namespace std {
 
@@ -113,9 +111,7 @@ namespace std {
 
 }   // std
 
-#  endif   // _RWSTD_NO_WCTYPE_H
-
-#endif   // !_RWSTD_NO_USING_LIBC_IN_STD
+#endif   // _RWSTD_NO_WCTYPE_H
 
 #endif   // _RWSTD_CWCTYPE_INCLUDED
 

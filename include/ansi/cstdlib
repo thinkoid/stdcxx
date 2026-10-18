@@ -87,8 +87,6 @@ inline ldiv_t div (long __x, long __y)
 
 #undef ldiv
 
-#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
-
 namespace std {
 
 
@@ -120,23 +118,23 @@ inline unsigned long abs (unsigned long __x)
 #endif   // _RWSTD_NO_ABS_ULONG
 
 #ifdef _RWSTD_LONG_LONG
-#  ifdef _RWSTD_NO_ABS_LLONG
+#ifdef _RWSTD_NO_ABS_LLONG
 
 inline _RWSTD_LONG_LONG abs (_RWSTD_LONG_LONG __x)
 {
     return __x < (_RWSTD_LONG_LONG)0 ? -__x : __x;
 }
 
-#  endif   // _RWSTD_NO_ABS_LLONG
+#endif   // _RWSTD_NO_ABS_LLONG
 
-#  ifdef _RWSTD_NO_ABS_ULLONG
+#ifdef _RWSTD_NO_ABS_ULLONG
 
 inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
 {
     return __x;
 }
 
-#  endif   // _RWSTD_NO_ABS_ULLONG
+#endif   // _RWSTD_NO_ABS_ULLONG
 #endif   // _RWSTD_LONG_LONG
 
 #ifdef _RWSTD_NO_DIV_LONG
@@ -214,8 +212,6 @@ inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
     using ::wctomb;
 
 }   // namespace std
-
-#endif   // !_RWSTD_NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CSTDLIB_INCLUDED
 

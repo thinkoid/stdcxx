@@ -132,8 +132,6 @@ inline void* memchr (void *__p, int __c, size_t __n)
 #endif   // NULL
 
 
-#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
-
 namespace std {
 
     using ::size_t;
@@ -162,8 +160,6 @@ namespace std {
     using ::strxfrm;
 
 }   // std
-
-#endif   // !NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CSTRING_INCLUDED
 

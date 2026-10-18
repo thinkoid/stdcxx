@@ -98,8 +98,6 @@ namespace std {
 #endif   // WCHAR_MAX
 
 
-#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
-
 namespace std {
 
 #ifndef _RWSTD_NO_SIZE_T
@@ -188,8 +186,6 @@ using ::wmemmove;
 using ::wmemset;
 
 }   // std
-
-#endif   // !_RWSTD_NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CWCHAR_INCLUDED
 

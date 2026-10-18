@@ -82,11 +82,7 @@
 
 /*** SunOS 5.6 and prior **************************************************/
 
-#  ifndef _RWSTD_NO_USING_LIBC_IN_STD
-
 namespace std {
-
-#  endif   // _RWSTD_NO_USING_LIBC_IN_STD
 
 extern "C" {
 
@@ -103,11 +99,7 @@ struct mbstate_t
 
 }   // extern "C"
 
-#  ifndef _RWSTD_NO_USING_LIBC_IN_STD
-
 }   // namespace std
-
-#  endif   // _RWSTD_NO_USING_LIBC_IN_STD
 
 #  define _RWSTD_MBSTATE_T   std::mbstate_t
 

@@ -63,8 +63,6 @@ namespace std {
 #  include _RWSTD_ANSI_C_ERRNO_H
 #endif   // errno ...
 
-#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
-
 namespace std {
 
 // 17.4.1.2, p5 - errno may be a macro
@@ -72,12 +70,10 @@ namespace std {
 using ::errno;
 
    // lwg issue 310 - errno shall be a macro
-#  define errno errno
+#define errno errno
 #endif   // errno
 
 }   // std
-
-#endif   // !_RWSTD_NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CERRNO_INCLUDED
 

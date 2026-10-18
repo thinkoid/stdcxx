@@ -74,8 +74,6 @@ namespace std {
 #  define stderr stderr
 #endif
 
-#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
-
 namespace std {
 
     using ::size_t;
@@ -130,51 +128,49 @@ namespace std {
 
 
 // 17.4.1.2, p6 - masking macros are not allowed
-#  undef fpos_t
-#  undef remove
-#  undef rename
-#  undef tmpfile
-#  undef tmpnam
-#  undef fclose
-#  undef fflush
-#  undef fopen
-#  undef freopen
-#  undef setbuf
-#  undef setvbuf
-#  undef fprintf
-#  undef fscanf
-#  undef printf
-#  undef scanf
-#  undef sprintf
-#  undef sscanf
-#  undef vfprintf
-#  undef vprintf
-#  undef vsprintf
-#  undef fgetc
-#  undef fgets
-#  undef fputc
-#  undef fputs
-#  undef getc
-#  undef getchar
-#  undef gets
-#  undef putc
-#  undef putchar
-#  undef puts
-#  undef ungetc
-#  undef fread
-#  undef fwrite
-#  undef fgetpos
-#  undef fseek
-#  undef fsetpos
-#  undef ftell
-#  undef rewind
-#  undef clearerr
-#  undef feof
-#  undef ferror
-#  undef perror
+#undef fpos_t
+#undef remove
+#undef rename
+#undef tmpfile
+#undef tmpnam
+#undef fclose
+#undef fflush
+#undef fopen
+#undef freopen
+#undef setbuf
+#undef setvbuf
+#undef fprintf
+#undef fscanf
+#undef printf
+#undef scanf
+#undef sprintf
+#undef sscanf
+#undef vfprintf
+#undef vprintf
+#undef vsprintf
+#undef fgetc
+#undef fgets
+#undef fputc
+#undef fputs
+#undef getc
+#undef getchar
+#undef gets
+#undef putc
+#undef putchar
+#undef puts
+#undef ungetc
+#undef fread
+#undef fwrite
+#undef fgetpos
+#undef fseek
+#undef fsetpos
+#undef ftell
+#undef rewind
+#undef clearerr
+#undef feof
+#undef ferror
+#undef perror
 
-
-#endif   // !__NO_HONOR_STD && !_NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CSTDIO_INCLUDED
 
