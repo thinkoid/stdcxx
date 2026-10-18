@@ -157,7 +157,6 @@ int fputc (int, FILE*);
 int fputs (const char*, FILE*);
 int getc (FILE*);
 int getchar (void);
-char* gets (char*);
 int putc (int, FILE*);
 int putchar (int);
 int puts (const char*);

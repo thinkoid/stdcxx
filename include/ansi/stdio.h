@@ -63,7 +63,6 @@ using std::ftell;
 using std::fwrite;
 using std::getc;
 using std::getchar;
-using std::gets;
 using std::perror;
 using std::printf;
 using std::putc;
