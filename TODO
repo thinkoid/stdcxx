@@ -157,10 +157,11 @@ as garbage, a =setlocale= return pointer reused after a later call.
 German locales there, not =en_US= and =de_DE=: the first match of
 the test's pattern is whatever =locale -a= lists first.
 
-Fix: the tests that race a database locale build it under a name the
-C library cannot know (=rw_localedef='s fourth argument), then every
-locale is installed on all test hosts at once, and the pins are
-measured again.
+Fix: every locale installed on the remaining test host, the Shift_JIS
+one by hand where it is missing, then the pins measured again. The
+first-use section of =22.locale.codecvt.mt= builds its database as
+=rwtest_de_DE.ISO-8859-1= since 2026-10-18 and runs on a host that
+has every C library locale.
 
 Check: with every locale installed, no MT program notes that the C
 library knows its database locale, and the =numpunct=, =codecvt1=

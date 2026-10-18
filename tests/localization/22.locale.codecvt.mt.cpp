@@ -410,15 +410,18 @@ test_first_use ()
 
     // a locale that only the library's database has: a thread that
     // finds the facet's data missing falls back to the C library,
-    // which must not know the name for the conversion to fail
+    // which must not know the name for the conversion to fail. The
+    // database is built under a name of the test's own, so that a
+    // host with every C library locale installed keeps the test
     rw_set_locale_root ();
 
-    const char* const locname = rw_localedef ("-w", "de_DE", "ISO-8859-1", 0);
+    const char* const locname =
+        rw_localedef ("-w", "de_DE", "ISO-8859-1", "rwtest_de_DE.ISO-8859-1");
 
     if (0 == locname) {
         rw_warn (false, 0, __LINE__,
-                 "failed to build locale de_DE.ISO-8859-1; "
-                 "skipping the first use test");
+                 "failed to build locale rwtest_de_DE.ISO-8859-1 from "
+                 "de_DE and ISO-8859-1; skipping the first use test");
         return 0;
     }
 
