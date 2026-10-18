@@ -111,15 +111,11 @@ __rw_put_time (const __rw_facet*, char*, size_t,
                char, char, int, int);
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 // also declared in _time_put.cc
 _RWSTD_EXPORT wchar_t*
 __rw_put_time (const __rw_facet*, wchar_t*, size_t,
                std::ios_base&, wchar_t, const tm*,
                char, char, int, int);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 /***************************************************************************/
@@ -440,21 +436,10 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     // advance buffer pointer past the end of the structure
     pbuf += sizeof *pun;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     // reserve offset 0 for the empty string (both narrow and wide)
     *reinterpret_cast< wchar_t* >(pbuf) = L'\0';
 
     size_t off = sizeof (wchar_t);
-
-#else   // if defined (_RWSTD_NO_WCHAR_T)
-
-    // reserve offset 0 for the empty string
-    *pbuf = '\0';
-
-    size_t off = sizeof (char);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 #ifndef _RWSTD_NO_NL_LANGINFO
 
@@ -604,8 +589,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
             static_cast< _RWSTD_UINT32_T >(off);
         off += size;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         // make sure wide string is properly aligned
         const size_t align = off % sizeof (wchar_t);
         if (align)
@@ -629,8 +612,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         pmem [nl_items [i].moff [1]] =
             static_cast< _RWSTD_UINT32_T >(off);
         off += size * sizeof (wchar_t);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     }
 
@@ -691,8 +672,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
             static_cast< _RWSTD_UINT32_T >(off);
         off                         += len + 1;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
         // make sure wide strings are properly aligned
         const size_t align = off % sizeof (wchar_t);
         if (align)
@@ -711,8 +690,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
         pun->day_off [1][t.tm_wday] = static_cast< _RWSTD_UINT32_T >(off);
         off                         += (len + 1) * sizeof (wchar_t);
 
-#  endif   // _RWSTD_NO_WCHAR_T
-
     }
 
     // copy abbreaviated and full names of months
@@ -728,8 +705,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 
         pun->mon_off [0][t.tm_mon]  = static_cast< _RWSTD_UINT32_T >(off);
         off                        += len + 1;
-
-#  ifndef _RWSTD_NO_WCHAR_T
 
         // make sure wide strings are properly aligned
         const size_t align = off % sizeof (wchar_t);
@@ -748,8 +723,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 
         pun->mon_off [1][t.tm_mon]  = static_cast< _RWSTD_UINT32_T >(off);
         off                        += (len + 1) * sizeof (wchar_t);
-
-#  endif   // _RWSTD_NO_WCHAR_T
 
     }
 
@@ -801,8 +774,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     pun->era_d_fmt_off [0]   = static_cast< _RWSTD_UINT32_T >(off);
     pun->era_t_fmt_off [0]   = static_cast< _RWSTD_UINT32_T >(off);
     off                     += 1;
-
-#  ifndef _RWSTD_NO_WCHAR_T
 
     const size_t align = off % sizeof (wchar_t);
     if (align)
@@ -896,7 +867,6 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     pun->t_fmt_ampm_off [1] = static_cast< _RWSTD_UINT32_T >(off);
     off                    += size * sizeof (wchar_t);
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_NL_LANGINFO
 
     // set `impdata' and `impsize' (base dtor will delete); the stores
@@ -992,11 +962,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
 
     typedef std::char_traits<char> CTraits;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     typedef std::char_traits<wchar_t> WTraits;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     if (wide)
         flags |= __rw_wide;
@@ -1004,13 +970,9 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
     for (size_t i = 0; i != count; ++i) {
         names [i] = __rw_get_timepunct (pfacet, flags, i);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
         if (wide)
             sizes [i] = WTraits::length ((const wchar_t*)names [i]);
         else
-
-#endif   // _RWSTD_NO_WCHAR_T
 
             sizes [i] = CTraits::length ((const char*)names [i]);
     }
@@ -1023,13 +985,9 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
         for (size_t j = count; j != 2 * count; ++j) {
             names [j] = __rw_get_timepunct (pfacet, flags_2, j - count);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
             if (wide)
                 sizes [j] = WTraits::length ((const wchar_t*)names [j]);
             else
-
-#endif   // _RWSTD_NO_WCHAR_T
 
                 sizes [j] = CTraits::length ((const char*)names [j]);
         }
@@ -1481,8 +1439,6 @@ __rw_fmt_time (const __rw_facet *pfacet, char *buf, size_t bufsize,
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 static wchar_t*
 __rw_fmt_time (const __rw_facet *pfacet, wchar_t *wbuf, size_t bufsize,
                std::ios_base &flags, wchar_t fill, const tm *tmb,
@@ -1618,8 +1574,6 @@ __rw_fmt_time (const __rw_facet *pfacet, wchar_t *wbuf, size_t bufsize,
 
     return wbuf;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 // returns true iff `y' is a leap year
@@ -1972,9 +1926,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
                    || 'c' == fmt || 'r' == fmt || 'x' == fmt || 'X' == fmt);
 
     static const union {
-#ifndef _RWSTD_NO_WCHAR_T
         wchar_t wide_data [1];
-#endif   // _RWSTD_NO_WCHAR_T
         char data [4];
     } null_fmt = { { 0 } };
 
@@ -2022,9 +1974,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
             tpd.fmt = ptime->era_d_t_fmt (wide);
 
         if (   !tpd.fmt
-#ifndef _RWSTD_NO_WCHAR_T
             ||  (wide && !*static_cast< const wchar_t* >(tpd.fmt))
-#endif   // _RWSTD_NO_WCHAR_T
             || (!wide && !*static_cast< const char* >(tpd.fmt)))
             tpd.fmt = ptime->d_t_fmt (wide);
 
@@ -2357,9 +2307,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
             tpd.fmt = ptime->era_d_fmt (wide);
 
         if (   !tpd.fmt
-#ifndef _RWSTD_NO_WCHAR_T
             ||  (wide && !*static_cast< const wchar_t* >(tpd.fmt))
-#endif   // _RWSTD_NO_WCHAR_T
             || (!wide && !*static_cast< const char* >(tpd.fmt)))
             tpd.fmt = ptime->d_fmt (wide);
 
@@ -2373,9 +2321,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
             tpd.fmt = ptime->era_t_fmt (wide);
 
         if (   !tpd.fmt
-#ifndef _RWSTD_NO_WCHAR_T
             ||  (wide && !*static_cast< const wchar_t* >(tpd.fmt))
-#endif   // _RWSTD_NO_WCHAR_T
             || (!wide && !*static_cast< const char* >(tpd.fmt)))
             tpd.fmt = ptime->t_fmt (wide);
 
@@ -2614,8 +2560,6 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 _RWSTD_EXPORT wchar_t*
 __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
                std::ios_base &flags, wchar_t fill, const tm *tmb,
@@ -2727,8 +2671,6 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
 
     return wbuf + res;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 }   // namespace __rw

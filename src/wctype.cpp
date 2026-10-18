@@ -30,13 +30,11 @@
 
 #include <rw/_defs.h>
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 #include <limits.h>
 #include <locale.h>
 
 #ifndef _RWSTD_NO_WCHAR_H
-#  include <wchar.h>   // for wctob()
+#include <wchar.h>   // for wctob()
 #endif   // _RWSTD_NO_WCHAR_H
 
 #include <string.h>   // for memset()
@@ -50,7 +48,7 @@
 #include "use_facet.h"
 
 #ifdef _RWSTD_NO_EQUAL_CTYPE_MASK
-#  include <rw/_once.h>   // for __rw_once()
+#include <rw/_once.h>   // for __rw_once()
 #endif   // _RWSTD_NO_EQUAL_CTYPE_MASK
 
 // utf8 encoding maximum size
@@ -309,7 +307,7 @@ __rw_classic_wide_tab_once_init = _RWSTD_ONCE_INIT;
 static void
 __rw_init_classic_wide_tab ()
 {
-#  ifdef _RWSTDDEBUG
+#ifdef _RWSTDDEBUG
 
     static int init;
 
@@ -318,7 +316,7 @@ __rw_init_classic_wide_tab ()
 
     ++init;
 
-#  endif   // _RWSTDDEBUG
+#endif   // _RWSTDDEBUG
 
     // init the classic wide tab
     wchar_t wc_array [std::ctype<char>::table_size];
@@ -962,5 +960,3 @@ do_widen (const char *lo, const char *hi, char_type *dest) const
 
 _RWSTD_DEFINE_FACET_FACTORY (static, ctype, <wchar_t>, wctype);
 _RWSTD_SPECIALIZE_USE_FACET (wctype);
-
-#endif   // _RWSTD_NO_WCHAR_T

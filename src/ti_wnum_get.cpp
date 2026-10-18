@@ -45,12 +45,8 @@
 #include "use_facet.h"
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
-#  define TARGS_W   <wchar_t, _RWSTD_ISTREAMBUF_ITER (wchar_t) >
+#define TARGS_W   <wchar_t, _RWSTD_ISTREAMBUF_ITER (wchar_t) >
 
 _RWSTD_SPECIALIZE_FACET_ID (num_get, TARGS_W);
 _RWSTD_DEFINE_FACET_FACTORY (static, num_get, TARGS_W, wnum_get);
 _RWSTD_SPECIALIZE_USE_FACET (wnum_get);
-
-#endif   // _RWSTD_NO_WCHAR_T

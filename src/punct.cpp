@@ -581,8 +581,6 @@ __rw_get_punct(const __rw_facet *pfacet, int flags, char)
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 /* template <> */ _RWSTD_EXPORT
 const wchar_t*
 __rw_get_punct(const __rw_facet *pfacet, int flags, wchar_t)
@@ -596,8 +594,6 @@ __rw_get_punct(const __rw_facet *pfacet, int flags, wchar_t)
 
     return CPWChar (__rw_get_numpunct (pfacet, flags));
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 const char*

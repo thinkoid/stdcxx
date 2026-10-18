@@ -131,8 +131,6 @@ __rw_bitset (unsigned long *bits, size_t maxbits,
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <> _RWSTD_EXPORT void
 __rw_bitset (unsigned long *bits, size_t maxbits,
              const wchar_t *str, size_t slen,
@@ -181,8 +179,6 @@ __rw_bitset (unsigned long *bits, size_t maxbits,
         }
     }
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 // table of bitcounts in each of the 256 values

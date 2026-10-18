@@ -129,8 +129,6 @@ __rw_strlen (const char *str)
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 _RWSTD_EXPORT wchar_t*
 __rw_wmemcpy (wchar_t *dst, const wchar_t *src, size_t nwchars)
 {
@@ -214,7 +212,5 @@ __rw_wcslen (const wchar_t *wstr)
 
     return static_cast< size_t >(wstr - begin);
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }   // namespace __rw

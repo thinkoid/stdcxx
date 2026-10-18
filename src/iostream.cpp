@@ -202,14 +202,10 @@ _RWSTD_DEFINE_STREAM_OBJECT (filebuf, ostream, cout, cout, STDOUT);
 _RWSTD_DEFINE_STREAM_OBJECT (filebuf, ostream, cerr, cerr, STDERR);
 _RWSTD_DEFINE_STREAM_OBJECT (filebuf, ostream, clog, cerr, STDERR);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 _RWSTD_DEFINE_STREAM_OBJECT (wfilebuf, wistream, wcin,  wcin,  STDIN);
 _RWSTD_DEFINE_STREAM_OBJECT (wfilebuf, wostream, wcout, wcout, STDOUT);
 _RWSTD_DEFINE_STREAM_OBJECT (wfilebuf, wostream, wcerr, wcerr, STDERR);
 _RWSTD_DEFINE_STREAM_OBJECT (wfilebuf, wostream, wclog, wcerr, STDERR);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 // allow basic_ostream<> inline member functions to refer to the standard
@@ -294,8 +290,6 @@ ios_base::Init::_C_init ()
     pclog->_C_nolock = 0;
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     wistream* const pwcin  = _INIT (wfilebuf, wistream, wcin,  wcin,  STDIN);
     wostream* const pwcout = _INIT (wfilebuf, wostream, wcout, wcout, STDOUT);
     wostream* const pwcerr = _INIT (wfilebuf, wostream, wcerr, wcerr, STDERR);
@@ -326,7 +320,6 @@ ios_base::Init::_C_init ()
     pwcerr->_C_nolock = 0;
     pwclog->_C_nolock = 0;
 
-#endif   // _RWSTD_NO_WCHAR_T
 }
 
 
@@ -369,8 +362,6 @@ ios_base::Init::~Init ()
         ++caught;
     }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
     _RWSTD_ASSERT (&wcout && &wcerr && &wclog);
 
     _TRY {
@@ -394,8 +385,6 @@ ios_base::Init::~Init ()
         fprintf (stderr, fmt, "wclog");
         ++caught;
     }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
     if (caught)
         abort ();

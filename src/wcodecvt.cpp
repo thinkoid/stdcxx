@@ -160,8 +160,6 @@ __rw_mbsinit (const StateT *psrc)
 #define max(a,b)    ((a) > (b)) ? (a) : (b)
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 // behaves just like mbrlen(), except that if the character pointed to
 // by `str' is the NUL character and `emax' is non-zero, the function
 // returns 1
@@ -1585,16 +1583,10 @@ do_max_length () const _THROWS (())
     return int (max_len);
 }
 
-#endif   // _RWSTD_NO_WCHAR_T
-
 }   // namespace std
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
-#  define TARGS_W   <wchar_t, char, _RWSTD_MBSTATE_T>
+#define TARGS_W   <wchar_t, char, _RWSTD_MBSTATE_T>
 
 _RWSTD_DEFINE_FACET_FACTORY (static, codecvt, TARGS_W, wcodecvt);
 _RWSTD_SPECIALIZE_USE_FACET (wcodecvt);
-
-#endif   // _RWSTD_NO_WCHAR_T

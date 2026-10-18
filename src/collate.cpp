@@ -86,8 +86,6 @@ namespace __rw {
 int __rw_get_cat (int) _THROWS (());
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 _RWSTD_INTERNAL void 
 __rw_append_weight (const __rw::__rw_collate_t *impl,
                     const unsigned            *weights,
@@ -106,8 +104,6 @@ __rw_append_weight (const __rw::__rw_collate_t *impl,
       
     }
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 _RWSTD_INTERNAL void 
@@ -264,8 +260,6 @@ __rw_process_offsets (__rw::__rw_collate_t *impl,
     }
 }
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 static int
 __rw_get_w_ce_offset (const __rw_collate_t *impl,
                       const wchar_t** cur_char,
@@ -355,8 +349,6 @@ __rw_get_wchar_offset (const __rw_collate_t *impl,
     }
     return -1;
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 static int
@@ -550,8 +542,6 @@ __rw_strnxfrm (const char *src, size_t nchars)
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 
 // same as wcsxfrm() except that it takes the number of characters
 // in an array that may contain embedded NULs; these are inserted
@@ -668,8 +658,6 @@ __rw_wcsnxfrm (const wchar_t *src, size_t nchars)
     return res;
 }
 
-#endif   // _RWSTD_NO_WCHAR_T
-
 
 template <class _CharT>
 long __rw_hash (const _CharT *lo, const _CharT *hi) _THROWS (())
@@ -708,11 +696,7 @@ long __rw_hash (const _CharT *lo, const _CharT *hi) _THROWS (())
 
 template long __rw_hash (const char*, const char*) _THROWS(());
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 template long __rw_hash (const wchar_t*, const wchar_t*) _THROWS(());
-
-#  endif   // _RWSTD_NO_WCHAR_T
 
 #endif   // _RWSTD_NO_INSTANTIATE
 
@@ -899,8 +883,6 @@ do_transform (const char* low, const char* high) const
     return out;
 }
 
-
-#ifndef _RWSTD_NO_WCHAR_T
 
 __rw::__rw_facet_id collate<wchar_t>::id;
 
@@ -1159,8 +1141,6 @@ do_transform (const wchar_t* low, const wchar_t* high) const
         return out;
     }
 }
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 

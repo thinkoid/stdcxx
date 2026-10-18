@@ -43,10 +43,6 @@
 #include "use_facet.h"
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 _RWSTD_SPECIALIZE_FACET_ID (messages, <wchar_t>);
 _RWSTD_DEFINE_FACET_FACTORY (static, messages, <wchar_t>, wmessages);
 _RWSTD_SPECIALIZE_USE_FACET (wmessages);
-
-#endif   // _RWSTD_NO_WCHAR_T

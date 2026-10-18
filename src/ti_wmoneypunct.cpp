@@ -43,8 +43,6 @@
 #include "use_facet.h"
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 #define TA_W0   <wchar_t, false>
 #define TA_W1   <wchar_t, true>
 
@@ -55,5 +53,3 @@ _RWSTD_SPECIALIZE_USE_FACET (wmoneypunct);
 _RWSTD_SPECIALIZE_FACET_ID (moneypunct, TA_W1);
 _RWSTD_DEFINE_FACET_FACTORY (static, moneypunct, TA_W1, wmoneypunct_intl);
 _RWSTD_SPECIALIZE_USE_FACET (wmoneypunct_intl);
-
-#endif   // _RWSTD_NO_WCHAR_T
