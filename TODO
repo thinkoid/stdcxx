@@ -149,7 +149,7 @@ dispatch macros together; the probes and the macro go with the last
 group; =ref-characterizations.md= records the retirement. The build
 modes (=_RWSTD_NO_EXCEPTIONS= and the rest) and the host
 characterizations are not this entry. Done: =vector=, =deque= with
-the dispatch macros. Remaining: =list=, =string=, the =rw/= headers,
+the dispatch macros, =list=. Remaining: =string=, the =rw/= headers,
 =complex=, =bitset= and =set=, =locale=, then the probes.
 
 Check: =git grep _RWSTD_NO_MEMBER_TEMPLATES= empty under =include=,
