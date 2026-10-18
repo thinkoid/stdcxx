@@ -94,39 +94,38 @@ namespace std {
 // functions are outlined to prevent linker errors in optimized shared builds
 
 // guard definitions when compiling with gcc with -fno-honor-std   
-#ifndef _RWSTD_NO_HONOR_STD
     
-#  if defined (_RWSTD_NO_STD_TERMINATE)
+#if defined (_RWSTD_NO_STD_TERMINATE)
 
 // 18.6.3.3
 _RWSTD_EXPORT void terminate ()
 {
-#    ifndef _RWSTD_NO_GLOBAL_TERMINATE
+#  ifndef _RWSTD_NO_GLOBAL_TERMINATE
 
     ::terminate ();
 
-#    else   // if defined (_RWSTD_NO_GLOBAL_TERMINATE)
+#  else   // if defined (_RWSTD_NO_GLOBAL_TERMINATE)
 
     abort ();
 
-#    endif   // _RWSTD_NO_GLOBAL_TERMINATE
+#  endif   // _RWSTD_NO_GLOBAL_TERMINATE
 
 }
 
-#  endif   // _RWSTD_NO_STD_TERMINATE
+#endif   // _RWSTD_NO_STD_TERMINATE
 
 
-#  if defined (_RWSTD_NO_STD_SET_TERMINATE)
+#if defined (_RWSTD_NO_STD_SET_TERMINATE)
 
 // 18.6.3.2
 _RWSTD_EXPORT terminate_handler
 set_terminate (terminate_handler handler) _THROWS (())
 {
-#    ifndef _RWSTD_NO_GLOBAL_SET_TERMINATE
+#  ifndef _RWSTD_NO_GLOBAL_SET_TERMINATE
 
     return ::set_terminate (handler);
 
-#    else   // if defined (_RWSTD_NO_GLOBAL_SET_TERMINATE)
+#  else   // if defined (_RWSTD_NO_GLOBAL_SET_TERMINATE)
 
     static terminate_handler current;
 
@@ -138,24 +137,24 @@ set_terminate (terminate_handler handler) _THROWS (())
 
     return save;
 
-#    endif   // _RWSTD_NO_GLOBAL_SET_TERMINATE
+#  endif   // _RWSTD_NO_GLOBAL_SET_TERMINATE
 
 }
 
-#  endif   // _RWSTD_NO_STD_SET_TERMINATE
+#endif   // _RWSTD_NO_STD_SET_TERMINATE
 
 
-#  if defined (_RWSTD_NO_STD_SET_UNEXPECTED)
+#if defined (_RWSTD_NO_STD_SET_UNEXPECTED)
 
 // 18.6.2.3
 _RWSTD_EXPORT unexpected_handler
 set_unexpected (unexpected_handler handler)  _THROWS (())
 {
-#    ifndef _RWSTD_NO_GLOBAL_SET_UNEXPECTED
+#  ifndef _RWSTD_NO_GLOBAL_SET_UNEXPECTED
 
     return ::set_unexpected (handler);
 
-#    else   // if defined (_RWSTD_NO_GLOBAL_SET_UNEXPECTED)
+#  else   // if defined (_RWSTD_NO_GLOBAL_SET_UNEXPECTED)
 
     static unexpected_handler current;
 
@@ -167,60 +166,58 @@ set_unexpected (unexpected_handler handler)  _THROWS (())
 
     return save;
 
-#    endif   // _RWSTD_NO_GLOBAL_SET_UNEXPECTED
+#  endif   // _RWSTD_NO_GLOBAL_SET_UNEXPECTED
 
 }
 
-#  endif   // _RWSTD_NO_STD_SET_UNEXPECTED
+#endif   // _RWSTD_NO_STD_SET_UNEXPECTED
 
 
-#  if defined (_RWSTD_NO_STD_UNEXPECTED)
+#if defined (_RWSTD_NO_STD_UNEXPECTED)
 
 // 18.6.2.4
 _RWSTD_EXPORT void unexpected ()
 {
-#    ifndef _RWSTD_NO_GLOBAL_UNEXPECTED
+#  ifndef _RWSTD_NO_GLOBAL_UNEXPECTED
 
     ::unexpected ();
 
-#    else   // if defined (_RWSTD_NO_GLOBAL_UNEXPECTED)
+#  else   // if defined (_RWSTD_NO_GLOBAL_UNEXPECTED)
 
     abort ();
 
-#    endif   // _RWSTD_NO_GLOBAL_UNEXPECTED
+#  endif   // _RWSTD_NO_GLOBAL_UNEXPECTED
 
 }
 
-#  endif   // _RWSTD_NO_STD_UNEXPECTED
+#endif   // _RWSTD_NO_STD_UNEXPECTED
 
 
-#  if defined (_RWSTD_NO_STD_UNCAUGHT_EXCEPTION)
+#if defined (_RWSTD_NO_STD_UNCAUGHT_EXCEPTION)
 
 // 18.6.4
 _RWSTD_EXPORT bool uncaught_exception () _THROWS (())
 {
-#    ifndef _RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION
+#  ifndef _RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION
 
     return ::UNCAUGHT_EXCEPTION ();
 
-#    else   // if defined (_RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION)
+#  else   // if defined (_RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION)
 
-#      ifndef _RWSTD_NO_EXCEPTIONS
+#    ifndef _RWSTD_NO_EXCEPTIONS
 
     return true;
 
-#      else   // if defined (_RWSTD_NO_EXCEPTIONS)
+#    else   // if defined (_RWSTD_NO_EXCEPTIONS)
 
     return false;
 
-#      endif   // _RWSTD_NO_EXCEPTIONS
+#    endif   // _RWSTD_NO_EXCEPTIONS
 
-#    endif   // _RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION
+#  endif   // _RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION
 }
 
-#  endif   // _RWSTD_NO_STD_UNCAUGHT_EXCEPTION
-
-#endif   // _RWSTD_NO_HONOR_STD
+#endif   // _RWSTD_NO_STD_UNCAUGHT_EXCEPTION
 
 }   // namespace std
 
@@ -236,8 +233,7 @@ _RWSTD_EXPORT bool uncaught_exception () _THROWS (())
 // class exception members
 
 #  if    !defined (_RWSTD_NO_STD_EXCEPTION)    \
-      || !defined (_RWSTD_NO_RUNTIME_IN_STD)   \
-      || 2 == __GNUG__ && !defined (_RWSTD_NO_HONOR_STD)
+      || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
 namespace std { 
 
@@ -290,8 +286,7 @@ const char* exception::what () const _THROWS (())
 
 
 #  if    !defined (_RWSTD_NO_STD_EXCEPTION)    \
-      || !defined (_RWSTD_NO_RUNTIME_IN_STD)   \
-      || 2 == __GNUG__ && !defined (_RWSTD_NO_HONOR_STD)
+      || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
 }   // namespace std
 
@@ -302,8 +297,7 @@ const char* exception::what () const _THROWS (())
 // class bad_exception members
 
 #  if    !defined (_RWSTD_NO_STD_BAD_EXCEPTION)    \
-      || !defined (_RWSTD_NO_RUNTIME_IN_STD)   \
-      || 2 == __GNUG__ && !defined (_RWSTD_NO_HONOR_STD)
+      || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
 namespace std { 
 
@@ -360,8 +354,7 @@ const char* bad_exception::what () const _THROWS (())
 
 
 #  if    !defined (_RWSTD_NO_STD_BAD_EXCEPTION)    \
-      || !defined (_RWSTD_NO_RUNTIME_IN_STD)   \
-      || 2 == __GNUG__ && !defined (_RWSTD_NO_HONOR_STD)
+      || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
 }   // namespace std
 

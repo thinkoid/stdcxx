@@ -27,14 +27,6 @@
 #include "config.h"
 #include "nodbg.h"
 
-#if 2 == __GNUG__
-#  ifndef _RWSTD_NO_HONOR_STD
-#    ifdef _RWSTD_NO_STD_TERMINATE
-#      include "terminate.h"
-#    endif   // _RWSTD_NO_STD_TERMINATE
-#  endif   // _RWSTD_NO_HONOR_STD
-#endif   // gcc 2.x
-
 
 // 18.4.1.1
 // -3- Required behavior: Return a non-null pointer ... or else throw 

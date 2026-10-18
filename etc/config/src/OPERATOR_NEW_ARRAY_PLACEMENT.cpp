@@ -30,11 +30,9 @@
 #  define throw()
 #endif   // _RWSTD_NO_EXCEPTION_SPECIFICATION
 
-#ifndef _RWSTD_NO_HONOR_STD
-#  ifdef _RWSTD_NO_STD_TERMINATE
-#    include "terminate.h"
-#  endif   // _RWSTD_NO_STD_TERMINATE
-#endif   // _RWSTD_NO_HONOR_STD
+#ifdef _RWSTD_NO_STD_TERMINATE
+#  include "terminate.h"
+#endif   // _RWSTD_NO_STD_TERMINATE
 
 
 void* operator new[] (size_t, void*) throw ();

@@ -39,16 +39,10 @@ using std::div_t;
 using std::ldiv_t;
 using std::size_t;
 
-#if !defined (__GNUG__) || __GNUG__ > 2
-
-// prevent collisions with gcc's intrinsic functions
 using std::abort;
 using std::abs;
 using std::exit;
 using std::labs;
-
-#endif   // gcc > 2
-
 using std::atexit;
 using std::atof;
 using std::atoi;

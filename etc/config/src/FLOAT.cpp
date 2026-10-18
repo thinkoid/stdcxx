@@ -65,11 +65,9 @@ enum {
 
 #include "float_defs.h"   // for FLT_XXX, DBL_XXX, LDBL_XXX constants
 
-#ifndef _RWSTD_NO_HONOR_STD
-#  ifdef _RWSTD_NO_STD_TERMINATE
-#    include "terminate.h"
-#  endif   // _RWSTD_NO_STD_TERMINATE
-#endif   // _RWSTD_NO_HONOR_STD
+#ifdef _RWSTD_NO_STD_TERMINATE
+#  include "terminate.h"
+#endif   // _RWSTD_NO_STD_TERMINATE
 
 
 // print a floating point number, either as a string (if the stringized

@@ -37,17 +37,11 @@ using std::size_t;
 
 using std::memchr;
 
-#if !defined (__GNUG__) || __GNUG__ > 2
-
-// predeclared intrinsic functions cannot be redeclared
 using std::memcmp;
 using std::memcpy;
 using std::strcmp;
 using std::strcpy;
 using std::strlen;
-
-#endif   // < gcc 3.0
-
 using std::memmove;
 using std::memset;
 using std::strcat;

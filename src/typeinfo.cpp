@@ -149,7 +149,7 @@ namespace std {
 
 #    endif   // _RWSTD_NO_RUNTIME_IN_STD
 
-#    if defined (__GNUG__) && !defined (_RWSTD_NO_HONOR_STD)
+#    ifdef __GNUG__
 
 // define member functions inline in namespace std (they are defined
 // as members of ::type_info (as opposed to std::type_info) in libstdc++
@@ -170,10 +170,10 @@ bool type_info::operator!= (const type_info &rhs) const
     return !(*this == rhs);
 }
 
-#    endif   // defined (__GNUG__) && !defined (_RWSTD_NO_HONOR_STD)
+#    endif   // __GNUG__
 
 
-#    if defined (__GNUG__) && !defined (_RWSTD_NO_HONOR_STD)
+#    ifdef __GNUG__
 
 // define member function in namespace std (it is defined as a member
 // of ::type_info (as opposed to std::type_info) in libstdc++
@@ -183,7 +183,7 @@ bool type_info::before (const type_info &rhs) const
     return 0 > __rw::__rw_ticmp (*this, rhs);
 }
 
-#    endif   //  __GNUG__ && !_RWSTD_NO_HONOR_STD
+#    endif   // __GNUG__
 
 
 #    ifndef _RWSTD_NO_RUNTIME_IN_STD

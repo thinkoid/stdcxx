@@ -128,13 +128,6 @@
 
 /********************** Miscellaneous *************************************/
 
-// g++ cannot inline functions that take a variable number of arguments
-// or functions that contain static (local) variables
-#if !defined (__GNUG__) || __GNUG__ > 2 || __GNUG_MINOR__ > 96
-#  define _INLINE_VARARGS      inline
-#  define _INLINE_WITH_STATICS inline
-#endif   // !__GNUG__ || __GNUG__ > 2 || __GNUG_MINOR__ > 96
-
 /********************** Environment ***************************************/
 
 #ifndef _RWSTD_NO_STL_SPECIALIZATION

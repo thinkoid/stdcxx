@@ -589,8 +589,7 @@
    | _RWSTD_IOS_IN       | _RWSTD_IOS_OUT        \
    | _RWSTD_IOS_TRUNC    | _RWSTD_IOS_ATE)
 
-#if    !defined (_RWSTD_NO_STATIC_IOSTREAM_INIT)  \
-    && !defined (_RWSTD_NO_IOSTREAM_OBJECT_REFS)
+#ifndef _RWSTD_NO_STATIC_IOSTREAM_INIT
    // standard iostream objects are references
 #  define _RWSTD_IOSTREAM_OBJECT(name)   &name
 #else
@@ -599,7 +598,7 @@
    // that get destroyed during program lifetime or as objects
    // of some POD type that do not get destroyed at all
 #  define _RWSTD_IOSTREAM_OBJECT(name)   name
-#endif   //  _RWSTD_NO_STATIC_IOSTREAM_INIT && !_RWSTD_NO_IOSTREAM_OBJECT_REFS
+#endif   // _RWSTD_NO_STATIC_IOSTREAM_INIT
 
 
 // exceptions can be completely disabled (bodies of catch blocks are still
@@ -619,11 +618,7 @@
 
 
 // support for building the new locale (v.3)
-#ifndef _RWSTD_NO_HONOR_STD
-#  define _RWSTD_USE_FACET(type, arg)   std::use_facet< type >(arg)
-#else
-#  define _RWSTD_USE_FACET(type, arg)   use_facet< type >(arg)
-#endif
+#define _RWSTD_USE_FACET(type, arg)   std::use_facet< type >(arg)
 
 
 // to prevent warnings about unused arguments

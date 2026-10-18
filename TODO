@@ -96,55 +96,43 @@ except the =21.cwchar= coverage, which adds assertions.
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
-** TODO The feature gates after the member templates
+** TODO The g++ 3.0 to 3.2 workarounds
 
-The gates that ask whether the compiler accepts a C++98 construct,
-which no compiler the tree is built with (GCC, Clang, eccp in strict
-C++03) defines, are retired (=EXPLICIT_INSTANTIATION_BEFORE_DEFINITION=
-left the list: =rw/_defs.h= defines it by hand under eccp). Retired so
-far:
-the member templates gate (bfbf7ac3 and the seven commits after it),
-the member template overload gate, the ten keyword and syntax gates of
-the note's 2.1 in one commit, the namespace gate with its nine probes,
-the eleven small template gates of 2.2 in one commit, four medium ones
-in the next, the two static-member ones after, and the partial
-specialization pair last; the seven other language rules of 2.4 in one
-commit; =LONG_DOUBLE= on 2026-10-18, the five host-fact probes that
-read it printing their long double answers unconditionally;
-=WCHAR_T= with =NATIVE_WCHAR_T= the same day in three commits,
-headers, sources, tests with the probes. The branch behind each
-could not be compiled and rotted. =doc/notes/analysis- feature-gates.md= is
-the census: the candidates by family with their footprint (chapter 2),
-sixteen probes nobody reads (3), what stays and why (4), the probes
-that read each gate (5), and the order (6). Largest: =WCHAR_T= (524
-lines, 48 library files), =LONG_DOUBLE= (154, 12), =NAMESPACE= (145,
-32), =CLASS_PARTIAL_SPEC= (90, 16). Three sit between the families and
-wait on a decision: =HONOR_STD=, =RUNTIME_IN_STD=, =PLACEMENT_DELETE=.
-Two of them are one decision, whether the tree still claims g++ 2.9x:
-=rw/_config-gcc.h= sets =_RWSTD_NO_PLACEMENT_DELETE= by hand under
-=__GNUG__ <= 2= beside two more such blocks, the extern template
-syntax and =_RWSTD_NO_IOSTREAM_OBJECT_REFS=, which is read only when
-=HONOR_STD= is off, and =src/exception.cpp= disjoins =HONOR_STD= with
-=2 == __GNUG__= four times. =RUNTIME_IN_STD= is the other kind: every
-library condition on it is a disjunction with a =STD_*= probe, which
-stay (2026-10-17), and its probe overrides their stray answers (under
-GCC =bad_exception= is found in neither namespace and the probe
-undefines =_RWSTD_NO_STD_BAD_EXCEPTION=); retiring it leaves those
-probes without library readers. It waits on the runtime family's
-review, not on this entry.
+The tree stopped claiming g++ 2.9x on 2026-10-18, when =HONOR_STD=
+and =PLACEMENT_DELETE= were retired with every =__GNUG__ <= 2= block.
+Its successor is still served: =src/collate.cpp=, =exception.cpp=,
+=iostream.cpp= and =strstream.cpp= force =_RWSTD_NO_EXTERN_TEMPLATE=
+under =3 == __GNUG__ && 3 > __GNUC_MINOR__= (a gcc bug, PR 29570),
+=rw/_config-gcc.h= grants =_RWSTD_ATTRIBUTE_NOTHROW= only from 3.3,
+=src/locale_body.cpp= works around a gcc 3.1 optimizer bug on SPARC
+when it clears the facet table, and =tests/utilities/20.auto.ptr.cpp=
+skips a member-address check below 3.x. None is a gate; each is a
+version test with no probe behind it.
 
-Fix: the member templates retirement's pattern, one gate or bundle per
-commit, in the note's order: the keyword gates, the template gates,
-the other language rules, =LONG_DOUBLE= and =WCHAR_T= done; the
-reader-less probes went on 2026-10-17. Each commit
-takes the =#ifdef= branches, the twins, the dispatch macros, the probe
-and the probes that read it; =ref-characterizations.md= records each
-retirement.
+Fix: name the floor GCC the tree claims, the oldest the certification
+runs, and remove the blocks below it. The SPARC one keeps its
+=__i386__= operand either way; whether it stays as a host fact is a
+decision.
 
-Check: =git grep= of the gate empty under =include=, =src= and
-=tests=; the suite equal to the pin in the GCC debug configuration
-after every commit; =make config= under =eccp= unchanged in every
-other macro.
+Check: the gate retirements' oracles: preprocessed tokens, library
+and test objects, fresh =config.h= under gcc and eccp, the suite at
+the pin.
+
+** TODO =_RWSTD_USE_FACET= has one definition
+
+=_RWSTD_USE_FACET (type, arg)= in =include/rw/_defs.h= spelled
+=std::use_facet< type >(arg)=, or the unqualified call when
+=_RWSTD_NO_HONOR_STD= was defined. That gate went on 2026-10-18 and
+the macro has one definition at 60 sites: the convenience header,
+the facet sources under =include/loc=, =src/use_facet.h= and
+=22.locale.moneypunct=. It was kept on 2026-10-17 only because the
+gate was still open.
+
+Fix: spell the call at the sites, the one-definition macros' pattern
+of 2026-10-17; a type argument that carries a comma needs a hand.
+
+Check: preprocessed tokens identical but for the spelling; the suite
+at the pin.
 
 ** TODO The twins' seam in the range members of =vector= and =deque=
 
@@ -203,6 +191,23 @@ asserts =date_order= for the =C= locale and one named locale.
 
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
+
+** TODO =22.locale.synopsis= skips two checks under every GCC
+
+The signature checks of =use_facet<ctype<charT> >= and
+=has_facet<ctype<charT> >= sit under
+=#if !(defined (__GNUG__) || __GNUG__ > 2 || __GNUC_MINOR__ > 96)=,
+written in 2005 to skip a g++ 2.95 and 2.96 internal error and an
+MSVC 6.0 bug. The negation covers the whole disjunction, so the
+condition is true only when =__GNUG__= is not defined at all: the two
+checks run under eccp and never under GCC or Clang. Left in place on
+2026-10-18 when the other g++ 2.9x blocks went, since enabling them
+changes what the suite compiles under GCC.
+
+Fix: drop the condition and the two workaround comments.
+
+Check: the test compiles and passes under GCC, Clang and eccp; the
+suite table gains nothing but the two assertions.
 
 ** TODO The suite against other libraries
 

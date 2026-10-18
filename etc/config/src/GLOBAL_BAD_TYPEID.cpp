@@ -41,14 +41,6 @@ class bad_typeid { };
 #endif   // _RWSTD_NO_TYPEINFO
 
 
-#if 2 == __GNUG__
-#  ifndef _RWSTD_NO_HONOR_STD
-#    ifdef _RWSTD_NO_STD_TERMINATE
-#      include "terminate.h"
-#    endif   // _RWSTD_NO_STD_TERMINATE
-#  endif   // _RWSTD_NO_HONOR_STD
-#endif   // gcc 2.x
-
 
 struct S { virtual ~S () { } };
 

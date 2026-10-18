@@ -37,68 +37,31 @@
 
    // explicitly instantiate
 
-#  if !defined (_RWSTD_NO_HONOR_STD)
-
      // work around an EDG front end bug (see, for example, PR #25292)
 
      // verify that names are declared [only] in namespace std
 
-#    define TEST_CLASS_DEF(name, Tparam)                          \
+#  define TEST_CLASS_DEF(name, Tparam)                          \
             template class std::name Tparam;                      \
             void name (void *name)
-#    define TEST_CLASS_DEF_2(name, Tparam1, Tparam2)              \
+#  define TEST_CLASS_DEF_2(name, Tparam1, Tparam2)              \
             template class std::name Tparam1, Tparam2;            \
             void name (void *name)
-#    define TEST_CLASS_DEF_3(name, Tparam1, Tparam2, Tparam3)     \
+#  define TEST_CLASS_DEF_3(name, Tparam1, Tparam2, Tparam3)     \
             template class std::name Tparam1, Tparam2, Tparam3;   \
             void name (void *name)
 
-#  else   // if defined (_RWSTD_NO_HONOR_STD)
-
-     // verify that names do not collide with function argument names
-
-#    define TEST_CLASS_DEF(name, Tparam)                          \
-            template class std::name Tparam;                      \
-            void foo (void *name)
-#    define TEST_CLASS_DEF_2(name, Tparam1, Tparam2)              \
-            template class std::name Tparam1, Tparam2;            \
-            void foo (void *name)
-#    define TEST_CLASS_DEF_3(name, Tparam1, Tparam2, Tparam3)     \
-            template class std::name Tparam1, Tparam2, Tparam3;   \
-            void foo (void *name)
-#  endif   // !_RWSTD_NO_HONOR_STD
-
-#  if defined __GNUG__ && __GNUG__ < 3 && __GNU_MINOR__ < 96
-
-     // working around a bug in g++ 2.95.2 (PR #23151)
-#    define TEST_FUNCTION_DEF(decl)        \
-            namespace std {       \
-               template decl;              \
-            }   /* namespace std */        \
-            typedef void unused_typedef
-#  else
 #    define TEST_FUNCTION_DEF(decl)   template decl
-#  endif
 
 #else   // if defined (_RWSTD_EXPLICIT_INSTANTIATION)
 
    // classes will implicitly instantiated below
 
-#  if !defined (_RWSTD_NO_HONOR_STD)
-
      // verify that names are declared [only[ in namespace std
 
-#    define TEST_CLASS_DEF(name, ignore)             void name (void *name)
-#    define TEST_CLASS_DEF_2(name, ign1, ign2)       void name (void *name)
-#    define TEST_CLASS_DEF_3(name, ign1, ign2, ign3) void name (void *name)
-
-#  else   // if defined (_RWSTD_NO_HONOR_STD)
-
-#    define TEST_CLASS_DEF(name, ignore)             void foo (void *name)
-#    define TEST_CLASS_DEF_2(name, ign1, ign2)       void foo (void *name)
-#    define TEST_CLASS_DEF_3(name, ign1, ign2, ign3) void foo (void *name)
-
-#  endif   // !_RWSTD_NO_HONOR_STD
+#  define TEST_CLASS_DEF(name, ignore)             void name (void *name)
+#  define TEST_CLASS_DEF_2(name, ign1, ign2)       void name (void *name)
+#  define TEST_CLASS_DEF_3(name, ign1, ign2, ign3) void name (void *name)
 
 #  define TEST_FUNCTION_DEF(ignore)   void unused_typedef
 
@@ -473,16 +436,7 @@ test_binders ()
 
 #undef CTOR_ARG_LIST
 
-#if defined __GNUG__ && __GNUG__ < 3 && __GNU_MINOR__ < 96
-    // broken out of the macro definition to work around
-    // a bug in g++ 2.95.2 parser
-    std::minus<int> obj_minus;
-
-   // use std::negate<> as an argument in negator ctors
-#  define CTOR_ARG_LIST (obj_minus, 1)
-#else
 #  define CTOR_ARG_LIST (std::minus<int>(), 1)
-#endif
 
     // 20.3.6.1, p1 and p2
     TEST_UNARY_OP (binder1st<std::minus<int> >, 1 -, 0);

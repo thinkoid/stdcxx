@@ -154,9 +154,9 @@ compilers.
 
 | gate | question | lib | tests | files | read by |
 | --- | --- | --- | --- | --- | --- |
-| `HONOR_STD` | the compiler honors `namespace std` (g++ 2's `-fhonor-std`) | 38 | 14 | 17 | 27 probes |
-| `RUNTIME_IN_STD` | the runtime's classes live in `std` | 33 | 7 | 5 | 30 probes; prints macros |
-| `PLACEMENT_DELETE` | placement `operator delete` | 13 | 4 | 4 | `_config-gcc.h` defines it for gcc 2.9x |
+| `HONOR_STD` | the compiler honors `namespace std` (g++ 2's `-fhonor-std`) | 38 | 14 | 17 | 27 probes; retired 2026-10-18 |
+| `RUNTIME_IN_STD` | the runtime's classes live in `std` | 33 | 7 | 5 | 30 probes; prints macros; kept 2026-10-18 |
+| `PLACEMENT_DELETE` | placement `operator delete` | 13 | 4 | 4 | `_config-gcc.h` defined it for gcc 2.9x; retired 2026-10-18 |
 
 `HONOR_STD` is a language question with a runtime answer: g++ 2.x
 put the runtime in the global namespace. `RUNTIME_IN_STD` is the
@@ -164,6 +164,16 @@ runtime half of it, and the runtime probes depend on both. They go
 together or not at all, after the runtime probes' own review.
 `PLACEMENT_DELETE` is a language feature with a hand-set workaround
 for a gcc 2.9x internal error; the workaround goes with it.
+
+Decided 2026-10-18. `HONOR_STD` and `PLACEMENT_DELETE` were one
+question, whether the tree still claims g++ 2.9x, and the answer was
+no: both went in one commit with every `__GNUG__ <= 2` block in the
+tree. `RUNTIME_IN_STD` is the other kind and stays: every library
+condition on it is a disjunction with a `STD_*` probe, which stay
+(chapter 4), and its probe overrides their stray answers; under GCC
+`bad_exception` is found in neither namespace and the probe undefines
+`_RWSTD_NO_STD_BAD_EXCEPTION` on the strength of the other ten.
+Retiring it would leave those probes without library readers.
 
 ## 3. Probes nobody reads
 
@@ -213,6 +223,8 @@ probes that print values (`LIMITS`, `FLOAT`, `LCONV`, `VA_LIST`,
 - **Compiler extensions**: `FUNC` (`__func__`, C99 and C++11),
   `PRETTY_FUNCTION`. A conforming C++03 compiler may lack them;
   eccp happens to have both.
+- `RUNTIME_IN_STD`, the aggregator of the runtime ABI probes (2.5):
+  kept with them, 2026-10-18.
 - `ATOMIC_OPS`, a success stub (`ref-characterizations.md` 2.1).
 
 ## 5. Dependencies
@@ -263,4 +275,5 @@ Small first, so the pattern settles before the big three.
 6. `WCHAR_T` with `NATIVE_WCHAR_T`, the largest: done 2026-10-18, three
    commits, headers, sources, tests with the two probes.
 7. The probes of chapter 3, any time, one commit; done 2026-10-17.
-8. The three of 2.5, after a decision.
+8. The three of 2.5, after a decision: `HONOR_STD` and `PLACEMENT_DELETE`
+   retired 2026-10-18 with the g++ 2.9x blocks; `RUNTIME_IN_STD` kept.

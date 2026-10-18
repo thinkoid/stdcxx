@@ -51,28 +51,6 @@
 #  define _RWSTD_NO_DEPRECATED_C_HEADERS
 #endif   // _RWSTD_NO_PURE_C_HEADERS
 
-#if __GNUG__ <= 2 && __GNUC_MINOR__ < 97
-     // prevent gcc 2.9x ICE
-#  define _RWSTD_NO_PLACEMENT_DELETE
-#endif   // gcc 2.9x
-
-#if __GNUG__ < 3
-     // gcc 2.x doesn't understand the extern template syntax
-     // but only issues a warning: ANSI C++ forbids the use
-     // of `extern' on explicit instantiations
-#  ifndef _RWSTD_NO_EXTERN_TEMPLATE
-#    define _RWSTD_NO_EXTERN_TEMPLATE
-#  endif   // _RWSTD_NO_EXTERN_TEMPLATE
-#endif   // gcc 2.x
-
-#if __GNUG__ <= 2 && __GNUC_MINOR__ < 97 && defined (_RWSTD_NO_HONOR_STD)
-     // standard iostream objects are declared as objects of their respective
-     // types by defined as POD's to prevent their destruction during program
-     // lifetime (done to work around a g++ 2.95.2 bug that prevents g++
-     // from deducing the type of references to the objects in template code)
-#  define _RWSTD_NO_IOSTREAM_OBJECT_REFS
-#endif   //__GNUG__ <= 2 && __GNUC_MINOR__ < 97 && _RWSTD_NO_HONOR_STD
-
 #define _RWSTD_GNUC_ATTRIBUTE(attr)   __attribute__ (attr)
 
 // gcc attribute((noreturn)) indicates that a function doesn't return

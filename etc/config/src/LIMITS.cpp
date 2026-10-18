@@ -43,11 +43,9 @@
 #include "types.h"   // for type_name()
 
 
-#ifndef _RWSTD_NO_HONOR_STD
-#  ifdef _RWSTD_NO_STD_TERMINATE
-#    include "terminate.h"
-#  endif   // _RWSTD_NO_STD_TERMINATE
-#endif   // _RWSTD_NO_HONOR_STD
+#ifdef _RWSTD_NO_STD_TERMINATE
+#  include "terminate.h"
+#endif   // _RWSTD_NO_STD_TERMINATE
 
 
 // set to 1 if this is not a two's complement architecture

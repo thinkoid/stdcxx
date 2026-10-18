@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 152 named C++ probes, five supporting C++
+The source census contains 150 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 152 named probes are discoverable by
+three different things.** All 150 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -119,6 +119,7 @@ its row is gone from the catalogue below.
 | `POD_ZERO_INIT`, `NESTED_CLASS_ACCESS`, `NONCLASS_ARROW_RETURN`, `EXTERN_C_COMPATIBILITY`, `DUMMY_DEFAULT_ARG`, `CV_VOID_SPECIALIZATIONS`, `EMPTY_MEM_INITIALIZER` | `NO_*`, one each | 2026-10-17, one commit | The other language rules of C++98: value-initialization of a POD, a nested class's access (CWG 45), `operator->` returning a pointer, `extern "C"` function types, a dummy default argument, specializations on cv-qualified `void`, an empty mem-initializer. Every compiler of the matrix passes; `DUMMY_DEFAULT_ARG` had lost its last reader earlier in the day. `_RWSTD_OPERATOR_ARROW` is spelled out. |
 | `LONG_DOUBLE` | `NO_LONG_DOUBLE` | 2026-10-18 | Whether `long double` is a type of its own that overload resolution can pick; every compiler of the matrix passes. The gate hid the long double half of the numeric and money facets, `numeric_limits<long double>`, `complex<long double>`, the `<cmath>` overloads and the bit patterns in `limits_bits.cpp`; with it defined the library replaced a required virtual of `money_get` with a double one, so that build was never conforming. The five host-fact probes that read it (`FLOAT`, `INFINITY`, `LIMITS`, `MATH_OVERLOADS`, `VA_LIST`) print their long double answers unconditionally. |
 | `WCHAR_T`, `NATIVE_WCHAR_T` | `NO_WCHAR_T`, `NO_NATIVE_WCHAR_T` | 2026-10-18, three commits | `wchar_t` has been a keyword since C++98 and every compiler of the matrix has it; `NATIVE_WCHAR_T` was Visual C++'s `/Zc:wchar_t-`, and `rw/_config.h` derived it from `WCHAR_T`. The gate hid the wide half of the library: the `w` typedefs of `<iosfwd>`, the wide facets and their instantiation units, `wcodecvt.cpp`, `wctype.cpp`, 31 conditions in `time_put.cpp` alone, and the wide cases of 74 tests. `LIMITS` prints `_RWSTD_WCHAR_SIZE` and the `wchar_t` limits unconditionally. |
+| `HONOR_STD`, `PLACEMENT_DELETE` | `NO_HONOR_STD`, `NO_PLACEMENT_DELETE` | 2026-10-18 | g++ 2.9x's `-fhonor-std` and its placement-delete internal error. The tree no longer claims that compiler: every `__GNUG__ <= 2` block went with the two gates, in `rw/_config-gcc.h`, `rw/_config.h`, `<new>`, `<valarray>`, the `<cxxx>` headers, the sources, five probes, two tests and the locale utility. The 25 probes that put their names in `std` under `HONOR_STD` do so unconditionally. `RUNTIME_IN_STD` stays, by decision (`analysis-feature-gates.md` 2.5). |
 
 ## 3. Outputs beyond the status macro
 
@@ -217,7 +218,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [GLOBAL_TYPE_INFO](../../etc/config/src/GLOBAL_TYPE_INFO.cpp) / `NO_GLOBAL_TYPE_INFO` | class ::type_info | L/P; `src/typeinfo.cpp` |
 | [GLOBAL_UNCAUGHT_EXCEPTION](../../etc/config/src/GLOBAL_UNCAUGHT_EXCEPTION.cpp) / `NO_GLOBAL_UNCAUGHT_EXCEPTION` | ::uncaught_exception() | L/P/T; `include/rw/_defs.h` |
 | [GLOBAL_UNEXPECTED](../../etc/config/src/GLOBAL_UNEXPECTED.cpp) / `NO_GLOBAL_UNEXPECTED` | ::unexpected() | L/P; `src/exception.cpp` |
-| [HONOR_STD](../../etc/config/src/HONOR_STD.cpp) / `NO_HONOR_STD` | if namespace std is honored | L/P/T; `include/ansi/cctype` |
 | [ICONV](../../etc/config/src/ICONV.cpp) / `NO_ICONV` + output | iconv() in &lt;iconv.h&gt; | V; `util/charmap.cpp` |
 | [ICONV_CONST_CHAR](../../etc/config/src/ICONV_CONST_CHAR.cpp) / `NO_ICONV_CONST_CHAR` | POSIX iconv() | P/T/V; `etc/config/src/ICONV.cpp` |
 | [INFINITY](../../etc/config/src/INFINITY.cpp) / `NO_INFINITY` + output | infinity and NaN's | L/P; `src/limits_bits.cpp` |
@@ -257,7 +257,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [OPERATOR_NEW_ARRAY_PLACEMENT](../../etc/config/src/OPERATOR_NEW_ARRAY_PLACEMENT.cpp) / `NO_OPERATOR_NEW_ARRAY_PLACEMENT` | operator new[] (size_t, void*) | L; `include/new` |
 | [OPERATOR_NEW_NOTHROW](../../etc/config/src/OPERATOR_NEW_NOTHROW.cpp) / `NO_OPERATOR_NEW_NOTHROW` | operator new (size_t, nothrow_t) | L/T; `include/new` |
 | [OPERATOR_NEW_PLACEMENT](../../etc/config/src/OPERATOR_NEW_PLACEMENT.cpp) / `NO_OPERATOR_NEW_PLACEMENT` | operator new (size_t, void*) | L; `include/rw/_new.h` |
-| [PLACEMENT_DELETE](../../etc/config/src/PLACEMENT_DELETE.cpp) / `NO_PLACEMENT_DELETE` | placement delete | L/T; `include/new` |
 | [POSIX_MADVISE](../../etc/config/src/POSIX_MADVISE.cpp) / `NO_POSIX_MADVISE` | posix_madvise() in &lt;sys/mman.h&gt; | none |
 | [PRETTY_FUNCTION](../../etc/config/src/PRETTY_FUNCTION.cpp) / `NO_PRETTY_FUNCTION` | __PRETTY_FUNCTION__ | L/T; `include/rw/_defs.h` |
 | [PTR_EXCEPTION_SPEC](../../etc/config/src/PTR_EXCEPTION_SPEC.cpp) / `NO_PTR_EXCEPTION_SPEC` | pointer exception specification | T; `tests/diagnostics/19.std.exceptions.cpp` |

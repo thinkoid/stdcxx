@@ -73,9 +73,7 @@ struct nothrow_t { };
 #endif   // !_RWSTD_NO_STD_NOTHROW_T || _RWSTD_NO_GLOBAL_NOTHROW_T
 
 
-#if    defined (_RWSTD_NO_STD_NOTHROW)           \
-    && (    defined (_RWSTD_NO_GLOBAL_NOTHROW)   \
-        || !defined (_RWSTD_NO_HONOR_STD))
+#ifdef _RWSTD_NO_STD_NOTHROW
 #  define _RWSTD_EXPORT_NOTHROW   _RWSTD_EXPORT
 #else
 #  define _RWSTD_EXPORT_NOTHROW   /* empty */
@@ -147,20 +145,13 @@ public:
 
 #else   // if _RWSTD_NO_STD_BAD_ALLOC && _RWSTD_NO_RUNTIME_IN_STD
 
-   // working around a gcc 2.x bug (PR #24400)
-#  if !defined (__GNUG__) || __GNUG__ > 2
-
 namespace std {
 
 using ::bad_alloc;
 
-#    define _RWSTD_BAD_ALLOC std::bad_alloc
+#  define _RWSTD_BAD_ALLOC std::bad_alloc
 
 }   // namespace std
-
-#  else
-#    define _RWSTD_BAD_ALLOC ::bad_alloc
-#  endif   // gcc > 2.x
 #endif   // _RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD
 
 
@@ -207,14 +198,11 @@ void operator delete (void*) _NEW_THROWS (());
 
 // guarded in case a compiler has trouble with these
 // (e.g. gcc 2.95.2 in conjunction with placement new)
-#ifndef _RWSTD_NO_PLACEMENT_DELETE
 
-#  ifdef _RWSTD_NO_OPERATOR_DELETE_NOTHROW
+#ifdef _RWSTD_NO_OPERATOR_DELETE_NOTHROW
 _RWSTD_EXPORT
-#  endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW
+#endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW
 void operator delete (void*, const std::nothrow_t&) _NEW_THROWS (());
-
-#endif   // _RWSTD_NO_PLACEMENT_DELETE
 
 // 18.4.1.2 - replaceable
 #ifdef _RWSTD_NO_OPERATOR_NEW_ARRAY
@@ -232,14 +220,10 @@ _RWSTD_EXPORT
 #endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY
 void operator delete[] (void*) _NEW_THROWS (());
 
-#ifndef _RWSTD_NO_PLACEMENT_DELETE
-
-#  ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
+#ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
 _RWSTD_EXPORT
-#  endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
+#endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
 void operator delete[] (void*, const std::nothrow_t&) _NEW_THROWS (());
-
-#endif   // _RWSTD_NO_PLACEMENT_DELETE
 
 // 18.4.1.3, p2 - not replaceable (see <rw/_new.h>)
 // void* operator new (_RWSTD_SIZE_T, void*) _NEW_THROWS (());
@@ -261,18 +245,16 @@ inline void* operator new[] (_RWSTD_SIZE_T, void *__ptr) _NEW_THROWS (())
 #endif   // _RWSTD_NO_OPERATOR_NEW_ARRAY_PLACEMENT
 
 
-#ifndef _RWSTD_NO_PLACEMENT_DELETE
-
 // 18.4.1.3, p7 - not replaceable (see <rw/_new.h>)
 // void operator delete (void*, void*) _NEW_THROWS (());
 
 // 18.4.1.3, p9 - not replaceable
-#  ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY_PLACEMENT
+#ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY_PLACEMENT
 _RWSTD_EXPORT
-#  endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_PLACEMENT
+#endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_PLACEMENT
 void operator delete[] (void*, void*) _NEW_THROWS (());
 
-#  if defined (_RWSTD_NO_OPERATOR_DELETE_ARRAY_PLACEMENT)
+#if defined (_RWSTD_NO_OPERATOR_DELETE_ARRAY_PLACEMENT)
 
 // not replaceable
 inline void operator delete[] (void*, void*) _NEW_THROWS (())
@@ -280,9 +262,7 @@ inline void operator delete[] (void*, void*) _NEW_THROWS (())
     // no-op, inline for efficiency
 }
 
-#  endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_PLACEMENT
-
-#endif   // _RWSTD_NO_PLACEMENT_DELETE
+#endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_PLACEMENT
 
 
 #endif   // _RWSTD_NEW_INCLUDED

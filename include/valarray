@@ -2266,20 +2266,9 @@ valarray<_TypeT>::operator[](const valarray<_RWSTD_SIZE_T>& __rhs) const
 {
     __rw::__rw_array <_TypeT> __tmp = __rw::__rw_array <_TypeT>(__rhs.size ());
 
-#if defined (__GNUG__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 97
-
-    for (_RWSTD_SIZE_T __i = 0; __i != __rhs.size (); ++__i) {
-        // prevent a g++ 2.95.2 ICE
-        _TypeT *__place = __tmp.begin () + __i;
-        new (__place) _TypeT ((*this)[__rhs [__i]]);
-    }
-
-#else   // if __GNUG__ >= 2.97
-
     for (_RWSTD_SIZE_T __i = 0; __i != __rhs.size (); ++__i)
         new (&__tmp [__i]) _TypeT ((*this)[__rhs [__i]]);
 
-#endif   // __GNUG__ >= 2.97
 
     return valarray (__tmp);
 }

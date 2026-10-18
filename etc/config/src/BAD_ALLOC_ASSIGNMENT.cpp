@@ -54,14 +54,6 @@
 #include "config.h"
 
 
-#if 2 == __GNUG__
-#  ifndef _RWSTD_NO_HONOR_STD
-#    ifdef _RWSTD_NO_STD_TERMINATE
-#      include "terminate.h"
-#    endif   // _RWSTD_NO_STD_TERMINATE
-#  endif   // _RWSTD_NO_HONOR_STD
-#endif   // gcc 2.x
-
 
 #ifndef _RWSTD_NO_RUNTIME_IN_STD
 #  define NAMESPACE(name)     namespace name

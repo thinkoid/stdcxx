@@ -54,14 +54,6 @@
 
 #include "aliases.h"
 
-#if __GNUG__ == 2 && __GNUC_MINOR__ == 96
-#  include <unistd.h>     // for close()
-
-// declare the POSIX (but not ANSI C) function mkstemp()
-extern "C" int mkstemp (char*) _LIBC_THROWS ();
-
-#endif   // gcc 2.96
-
 
 struct alias_t
 {
@@ -495,30 +487,11 @@ char* get_installed_locales (int loc_cat /* = LC_INVALID_CAT */)
     const char* const save_localename = std::setlocale (LC_ALL, 0);
     std::setlocale (LC_ALL, "C");
 
-#if __GNUG__ == 2 && __GNUC_MINOR__ == 96
-
-    // create a temporary file for the output of `locale -a'
-    char fname_buf [L_tmpnam] = "/tmp/tmpfile-XXXXXX";
-    const char *fname = fname_buf;
-
-    // avoid using tmpnam() to prevent the bogus gcc 2.96 warning:
-    //     the use of `tmpnam' is dangerous, better use `mkstemp'
-    const int fd = mkstemp (fname_buf);
-
-    if (-1 == fd) {
-        std::perror ("mkstemp() failed");
-        std::abort();
-    }
-
-    close (fd);
-
-#else   // if !defined (gcc 2.96)
 
     // create a temporary file for the output of `locale -a'
     char fname_buf [L_tmpnam];
     const char *fname = std::tmpnam (fname_buf);
 
-#endif   // gcc 2.96
 
     if (!fname) {
         std::perror ("tmpnam() failed");

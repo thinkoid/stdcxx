@@ -27,78 +27,70 @@
 #include <stdio.h>
 
 
-#ifndef _RWSTD_NO_HONOR_STD
-#  define STD_NAME(name)     name
-#else   // if defined (_RWSTD_NO_HONOR_STD)
-#  define STD_NAME(ignore)   ""
-#endif   // _RWSTD_NO_HONOR_STD
-
 const char* const std_defs[] = {
 
-   // avoid false positives if namespace std is not honored
-
 #ifdef _RWSTD_NO_STD_BAD_ALLOC
-    STD_NAME ("BAD_ALLOC"),
+    "BAD_ALLOC",
 #else
     "",
 #endif   // _RWSTD_NO_STD_BAD_ALLOC
 
 #ifdef _RWSTD_NO_STD_BAD_CAST
-    STD_NAME ("BAD_CAST"),
+    "BAD_CAST",
 #else
     "",
 #endif   // _RWSTD_NO_STD_BAD_CAST
 
 #ifdef _RWSTD_NO_STD_BAD_EXCEPTION
-    STD_NAME ("BAD_EXCEPTION"),
+    "BAD_EXCEPTION",
 #else
     "",
 #endif   // _RWSTD_NO_STD_BAD_EXCEPTION
 
 #ifdef _RWSTD_NO_STD_BAD_TYPEID
-    STD_NAME ("BAD_TYPEID"),
+    "BAD_TYPEID",
 #else
     "",
 #endif   // _RWSTD_NO_STD_BAD_TYPEID
 
 #ifdef _RWSTD_NO_STD_EXCEPTION
-    STD_NAME ("EXCEPTION"),
+    "EXCEPTION",
 #else
     "",
 #endif   // _RWSTD_NO_STD_EXCEPTION
 
 #ifdef _RWSTD_NO_STD_SET_NEW_HANDLER
-    STD_NAME ("SET_NEW_HANDLER"),
+    "SET_NEW_HANDLER",
 #else
     "",
 #endif   // _RWSTD_NO_STD_SET_NEW_HANDLER
 
 #ifdef _RWSTD_NO_STD_SET_TERMINATE
-    STD_NAME ("SET_TERMINATE"),
+    "SET_TERMINATE",
 #else
     "",
 #endif   // _RWSTD_NO_STD_SET_TERMINATE
 
 #ifdef _RWSTD_NO_STD_SET_UNEXPECTED
-    STD_NAME ("SET_UNEXPECTED"),
+    "SET_UNEXPECTED",
 #else
     "",
 #endif   // _RWSTD_NO_STD_SET_UNEXPECTED
 
 #ifdef _RWSTD_NO_STD_TERMINATE
-    STD_NAME ("TERMINATE"),
+    "TERMINATE",
 #else
     "",
 #endif   // _RWSTD_NO_STD_TERMINATE
 
 #ifdef _RWSTD_NO_STD_UNCAUGHT_EXCEPTION
-    STD_NAME ("UNCAUGHT_EXCEPTION"),
+    "UNCAUGHT_EXCEPTION",
 #else
     "",
 #endif   // _RWSTD_NO_STD_UNCAUGHT_EXCEPTION
 
 #ifdef _RWSTD_NO_STD_UNEXPECTED
-    STD_NAME ("UNEXPECTED"),
+    "UNEXPECTED",
 #else
     "",
 #endif   // _RWSTD_NO_STD_UNEXPECTED

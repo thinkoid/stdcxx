@@ -48,13 +48,7 @@
 #    define _RWSTD_BAD_ALLOC std::bad_alloc
   #else   // if _RWSTD_NO_STD_BAD_ALLOC && _RWSTD_NO_RUNTIME_IN_STD
 
-     // working around a gcc 2.x bug (PR #24400)
-#    if !defined (__GNUG__) || __GNUG__ > 2
-
-#      define _RWSTD_BAD_ALLOC std::bad_alloc
-#    else
-#      define _RWSTD_BAD_ALLOC ::bad_alloc
-#    endif   // gcc > 2.x
+#    define _RWSTD_BAD_ALLOC std::bad_alloc
 #  endif   // _RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD
 #endif   // _RWSTD_BAD_ALLOC
 

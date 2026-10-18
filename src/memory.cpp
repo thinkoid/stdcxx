@@ -109,8 +109,7 @@ operator new (size_t __size, const std::nothrow_t&) _NEW_THROWS (())
 #endif   // _RWSTD_NO_OPERATOR_NEW_NOTHROW
 
 
-#if    defined (_RWSTD_NO_OPERATOR_DELETE_NOTHROW) \
-    && !defined (_RWSTD_NO_PLACEMENT_DELETE)
+#ifdef _RWSTD_NO_OPERATOR_DELETE_NOTHROW
 
 _RWSTD_EXPORT void
 operator delete (void* __ptr, const std::nothrow_t&) _NEW_THROWS (())
@@ -118,7 +117,7 @@ operator delete (void* __ptr, const std::nothrow_t&) _NEW_THROWS (())
     free (__ptr);
 }
 
-#endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW && _RWSTD_NO_PLACEMENT_DELETE
+#endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW
 
 #ifdef _RWSTD_NO_OPERATOR_NEW_ARRAY
 
@@ -158,8 +157,7 @@ operator delete[] (void* __ptr) _NEW_THROWS (())
 #endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY
 
 
-#if     defined (_RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW) \
-    && !defined (_RWSTD_NO_PLACEMENT_DELETE)
+#ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
 
 _RWSTD_EXPORT void
 operator delete[] (void* __ptr, const std::nothrow_t&) _NEW_THROWS (())
@@ -167,7 +165,7 @@ operator delete[] (void* __ptr, const std::nothrow_t&) _NEW_THROWS (())
     ::operator delete[] (__ptr);  // ::operator delete[] doesn't throw
 }
 
-#endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW && _RWSTD_NO_PLACEMENT_DELETE
+#endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
 
 //**************************************************************************
 
@@ -178,35 +176,13 @@ namespace std {
 
 // define std::nothrow only if the symbol doesn't appear
 // in the compiler support library to prevent linker errors
-// (with gcc -fno-honor-std, don't define if global version exists)
-// +----------+-------------------+--------------------+----------------+
-// | define?  | _NO_STD_NOTHROW_T | _NO_GLOBAL_NOTHROW | _NO_HONOR_STD  |
-// +----------+-------------------+--------------------+----------------+
-// |    yes   |      defined      |        defined     |    defined     |
-// +----------+-------------------+--------------------+----------------+
-// |    yes   |      defined      |        defined     |   !defined     |
-// +----------+-------------------+--------------------+----------------+
-// |    no    |      defined      |       !defined     |    defined     |
-// +----------+-------------------+--------------------+----------------+
-// |    no    |      defined      |       !defined     |   !defined     |
-// +----------+-------------------+--------------------+----------------+
-// |    no    |     !defined      |        defined     |    defined     |
-// +----------+-------------------+--------------------+----------------+
-// |    no    |     !defined      |        defined     |   !defined     |
-// +----------+-------------------+--------------------+----------------+
-// |    no    |     !defined      |       !defined     |    defined     |
-// +----------+-------------------+--------------------+----------------+
-// |    no    |     !defined      |       !defined     |   !defined     |
-// +----------+-------------------+--------------------+----------------+
 
-#if    defined (_RWSTD_NO_STD_NOTHROW)           \
-    && (    defined (_RWSTD_NO_GLOBAL_NOTHROW)   \
-        || !defined (_RWSTD_NO_HONOR_STD))
+#ifdef _RWSTD_NO_STD_NOTHROW
 
 // HP aCC 3.30 fails to emit data symbols for extern consts
 _RWSTD_EXPORT extern const nothrow_t nothrow = nothrow_t ();
 
-#endif   // _RWSTD_NO_STD_NOTHROW && _RWSTD_NO_GLOBAL_NOTHROW || ...
+#endif   // _RWSTD_NO_STD_NOTHROW
 
 }   // namespace std
 

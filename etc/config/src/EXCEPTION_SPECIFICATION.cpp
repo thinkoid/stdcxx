@@ -28,8 +28,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifndef _RWSTD_NO_HONOR_STD
-#  ifdef _RWSTD_NO_STD_TERMINATE
+#ifdef _RWSTD_NO_STD_TERMINATE
 
 namespace std {
 
@@ -40,8 +39,7 @@ void terminate ()
 
 }   // std
 
-#  endif   // _RWSTD_NO_STD_TERMINATE
-#endif   // _RWSTD_NO_HONOR_STD
+#endif   // _RWSTD_NO_STD_TERMINATE
 
 extern "C" {
 

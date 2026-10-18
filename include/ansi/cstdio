@@ -74,8 +74,7 @@ namespace std {
 #  define stderr stderr
 #endif
 
-#if !defined (_RWSTD_NO_HONOR_STD) && \
-    !defined (_RWSTD_NO_USING_LIBC_IN_STD)
+#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
 namespace std {
 

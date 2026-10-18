@@ -579,7 +579,7 @@ __rw_locale (const char *name)
            _C_byname_facet_bits = _C_all;
    }
 
-#if defined (__i386__) || !defined (__GNUG__) || __GNUG__ < 3
+#if defined (__i386__) || !defined (__GNUG__)
 
    memset (_C_std_facets, 0, sizeof _C_std_facets);
 

@@ -88,15 +88,13 @@ namespace std {
 #endif   // NULL
 
 
-#if !defined (_RWSTD_NO_HONOR_STD)
-
 
 #ifndef WCHAR_MIN
-#  define WCHAR_MIN   _RWSTD_WCHAR_MIN
+#define WCHAR_MIN   _RWSTD_WCHAR_MIN
 #endif   // WCHAR_MIN
 
 #ifndef WCHAR_MAX
-#  define WCHAR_MAX   _RWSTD_WCHAR_MAX
+#define WCHAR_MAX   _RWSTD_WCHAR_MAX
 #endif   // WCHAR_MAX
 
 
@@ -192,8 +190,6 @@ using ::wmemset;
 }   // std
 
 #endif   // !_RWSTD_NO_USING_LIBC_IN_STD
-
-#endif   // !_RWSTD_NO_HONOR_STD
 
 #endif   // _RWSTD_CWCHAR_INCLUDED
 

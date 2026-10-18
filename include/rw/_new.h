@@ -56,15 +56,13 @@ operator new (_RWSTD_SIZE_T, void *__ptr) _NEW_THROWS (())
 #endif   // _RWSTD_NO_OPERATOR_NEW_PLACEMENT
 
 
-#ifndef _RWSTD_NO_PLACEMENT_DELETE
-
 void operator delete (void*, void*) _NEW_THROWS (());
 
-#  ifdef _RWSTD_NO_OPERATOR_DELETE_PLACEMENT
+#ifdef _RWSTD_NO_OPERATOR_DELETE_PLACEMENT
 
        // remember to disable definitions of placement new and
        // placement delete in MSVC's <new.h> later in this file
-#  define _RWSTD_DEFINE_PLACEMENT_NEW_INLINE
+#define _RWSTD_DEFINE_PLACEMENT_NEW_INLINE
 
 // not replaceable, no-op
 inline void
@@ -73,8 +71,7 @@ operator delete (void*, void*) _NEW_THROWS (())
     // no-op
 }
 
-#  endif   // _RWSTD_NO_OPERATOR_DELETE_PLACEMENT
-#endif   // _RWSTD_NO_PLACEMENT_DELETE
+#endif   // _RWSTD_NO_OPERATOR_DELETE_PLACEMENT
 
 #ifdef _RWSTD_DEFINE_PLACEMENT_NEW_INLINE
 #  define __PLACEMENT_NEW_INLINE

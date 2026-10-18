@@ -36,11 +36,9 @@
 // proclimits.h must be included only after #if[n]def _RWSTD_NO_SETRLIMIT
 #include "proclimits.h"
 
-#ifndef _RWSTD_NO_HONOR_STD
-#  ifdef _RWSTD_NO_STD_TERMINATE
-#    include "terminate.h"
-#  endif   // _RWSTD_NO_STD_TERMINATE
-#endif   // _RWSTD_NO_HONOR_STD
+#ifdef _RWSTD_NO_STD_TERMINATE
+#  include "terminate.h"
+#endif   // _RWSTD_NO_STD_TERMINATE
 
 // will fail if namespaces aren't supported
 namespace std {

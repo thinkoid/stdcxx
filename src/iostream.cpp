@@ -82,8 +82,6 @@
 // via calls to placement new after being zero-initialized (not constructed)
 // at definition time (by the means of the __rw_aligned_buffer trick)
 
-#  ifndef _RWSTD_NO_IOSTREAM_OBJECT_REFS
-
 // cin, cout, and the other Standard iostream objects are references to
 // these objects which of caurse violates 27.3 but avoids the potential
 // for destruction prior to any other objects with static storage duration
@@ -110,41 +108,6 @@
   typedef void __rw_unused_typedef
 
 #define _OBJECT(ignore, name)   name
-
-#  else   // if defined (_RWSTD_NO_IOSTREAM_OBJECT_REFS)
-
-// cin, cout, and the other Standard iostream objects are defined to be
-// specializations of the POD type __rw::__rw_aligned_buffer<[i|o]stream>
-// but declared in <iostream> to be extern [i|o]stream
-// since the type information isn't encoded (mangled) in data names this
-// lie is transparent to the compiler/linker as neither ever sees both
-// declarations
-
-// buftype: basic_filebuf specialization
-// stream:  [w]istream or [w]ostream
-// name:    name of the standard iostream object
-// ignN:    ignored
-#define _RWSTD_DEFINE_STREAM_OBJECT(buftype, stream, name, ign1, ign2)      \
-  namespace __rw {                                                 \
-    /* static character buffer to prevent dynamic allocation */             \
-    static std::stream::char_type __rw_##name##_databuf [512];              \
-    /* static indestructible `basic_filebuf<>' object */                    \
-    static __rw_aligned_buffer<std::buftype> __rw_##name##_buffer;          \
-  }   /* namespace __rw */                                                  \
-  namespace std {                                                  \
-    /* extern  indestructible `basic_[i|o]stream<>' object */               \
-    _RWSTD_EXPORT __rw::__rw_aligned_buffer<stream> name;                   \
-  }   /* namespace std */                                                   \
-  namespace __rw {                                                 \
-    /* reference to the actual object for convenience */                    \
-    static __rw_aligned_buffer<std::stream>&                                \
-        __rw_indestructible_##name = std::name;                             \
-  }   /* namespace __rw */                                                  \
-  typedef void __rw_unused_typedef
-
-#define _OBJECT(type, name)   reinterpret_cast< type& >(name)
-
-#  endif   // _RWSTD_NO_IOSTREAM_OBJECT_REFS
 
 // expression returning the address of the initialized object
 #define _INIT(buftype, stream, name, buf, f)                                  \

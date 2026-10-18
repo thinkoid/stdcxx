@@ -340,8 +340,6 @@ run_test (int, char* [])
 
         try {
 
-#if !defined (__GNUG__) || __GNUG__ > 2
-
             B *b = 0;
 
             // 5.2.8, p2 - typeid(0) throws std::bad_typeid
@@ -349,13 +347,6 @@ run_test (int, char* [])
 
             _RWSTD_UNUSED (b);
             _RWSTD_UNUSED (ti);
-
-#else
-
-            // working around a gcc 2.x bug
-            caught = "SIGSEGV (program dumps core)";
-
-#endif   // gcc < 3.0
 
         }
         catch (const std::bad_typeid &bt) {

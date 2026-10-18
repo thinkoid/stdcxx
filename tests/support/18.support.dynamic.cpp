@@ -287,8 +287,7 @@ int run_test (int, char* [])
 
 #endif // defined _RWSTD_NO_OPERATOR_NEW_NOTHROW
 
-#if defined (_RWSTD_NO_OPERATOR_DELETE_NOTHROW) && \
-   !defined (_RWSTD_NO_PLACEMENT_DELETE)
+#ifdef _RWSTD_NO_OPERATOR_DELETE_NOTHROW
 
         // verify that the nothrow version of operator delete provided
         // by our library prevents exceptions from propagating
@@ -303,7 +302,7 @@ int run_test (int, char* [])
                    "operator delete(void*) called by "
                    "operator delete(void*, nothrow_t)");
 
-#endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW && _RWSTD_NO_PLACEMENT_DELETE
+#endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW
 
 #ifdef _RWSTD_NO_OPERATOR_NEW_ARRAY
 
@@ -341,8 +340,7 @@ int run_test (int, char* [])
 
 #endif // defined _RWSTD_NO_OPERATOR_DELETE_ARRAY
 
-#if defined (_RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW) && \
-   !defined ( _RWSTD_NO_PLACEMENT_DELETE)
+#ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
 
         TEST_OP_THROWS ((operator delete[] (0, std::nothrow)), true,
                         "operator delete[] (void*, nothrow_t) doesn't "
@@ -352,8 +350,7 @@ int run_test (int, char* [])
                    "operator delete(void*) called by "
                    "operator delete[](void*, nothrow_t)");
 
-#endif // _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW &&
-        // !_RWSTD_NO_PLACEMENT_DELETE
+#endif // _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
 
         // verify that the nothrow form of operator new provided by our
         // library isn't recursively implemented in terms of the ordinary

@@ -132,8 +132,7 @@ inline void* memchr (void *__p, int __c, size_t __n)
 #endif   // NULL
 
 
-#if !defined (_RWSTD_NO_HONOR_STD) && \
-    !defined (_RWSTD_NO_USING_LIBC_IN_STD)
+#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
 namespace std {
 
@@ -164,7 +163,7 @@ namespace std {
 
 }   // std
 
-#endif   // !NO_NAMESPACE && !NO_HONOR_STD && !NO_USING_LIBC_IN_STD
+#endif   // !NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CSTRING_INCLUDED
 

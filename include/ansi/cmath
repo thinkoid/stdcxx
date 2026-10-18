@@ -583,7 +583,7 @@ inline long double tanh (long double __x)
 
 // using statements must come after the overloads.
 // working around MSVC6 PR# 27677
-#if !defined (_RWSTD_NO_HONOR_STD) && !defined (_RWSTD_NO_USING_LIBC_IN_STD)
+#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
 using ::acos;
 using ::asin;
@@ -608,7 +608,7 @@ using ::sqrt;
 using ::tan;
 using ::tanh;
 
-#endif   // !_RWSTD_NO_HONOR_STD && !_RWSTD_NO_USING_LIBC_IN_STD
+#endif   // !_RWSTD_NO_USING_LIBC_IN_STD
 
 #if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 }   // namespace std
