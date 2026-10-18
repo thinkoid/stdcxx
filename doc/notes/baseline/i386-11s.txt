@@ -158,7 +158,7 @@ NAME                                     STATUS WARN  ASSERTS FAILED PERCNT
 23.vector.bool.stdcxx-1062                 NOUT    0                       
 23.vector.bool.stdcxx-235                  NOUT    0                       
 23.vector.capacity                            0    0   857048      0   100%
-23.vector.cons                                0    0        9      0   100%
+23.vector.cons                                0    0    2889      0   100%
 23.vector.cons.stdcxx-294                  NOUT    0                       
 23.vector.modifiers                           0    0    16942      0   100%
 23.vector.stdcxx-1037                      NOUT    0                       
@@ -280,5 +280,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            90
-  Assertions:            11910909
+  Assertions:            11913789
   Failed assertions:            0

@@ -38,7 +38,7 @@
 
 /**************************************************************************/
 
-static unsigned rw_opt_nloops;
+static unsigned rw_opt_nloops = 32;
 static int      rw_opt_no_int_spec;
 static int      rw_opt_no_short_spec;
 static int      rw_opt_no_types;
