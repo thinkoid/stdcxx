@@ -34,8 +34,6 @@
 
 #    include <cmath>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 using std::acos;
 using std::asin;
 using std::atan2;
@@ -59,7 +57,6 @@ using std::sqrt;
 using std::tan;
 using std::tanh;
 
-#    endif   // _RWSTD_NO_NAMESPACE
 #  endif   // _RWSTD_MATH_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_MATH_H

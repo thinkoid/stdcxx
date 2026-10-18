@@ -46,10 +46,6 @@
 #  define _TEST_EXPORT
 
 
-#if defined (_RWSTD_NO_NAMESPACE) && !defined std
-#  define std   /* empty */
-#endif   // _RWSTD_NO_NAMESPACE && !std
-
 
 
 #if defined (_RWSTD_NO_EXCEPTIONS)

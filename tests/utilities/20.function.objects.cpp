@@ -37,7 +37,7 @@
 
    // explicitly instantiate
 
-#  if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD)
+#  if !defined (_RWSTD_NO_HONOR_STD)
 
      // work around an EDG front end bug (see, for example, PR #25292)
 
@@ -53,7 +53,7 @@
             template class std::name Tparam1, Tparam2, Tparam3;   \
             void name (void *name)
 
-#  else   // if defined (_RWSTD_NO_NAMESPACE) || defined (_RWSTD_NO_HONOR_STD)
+#  else   // if defined (_RWSTD_NO_HONOR_STD)
 
      // verify that names do not collide with function argument names
 
@@ -66,7 +66,7 @@
 #    define TEST_CLASS_DEF_3(name, Tparam1, Tparam2, Tparam3)     \
             template class std::name Tparam1, Tparam2, Tparam3;   \
             void foo (void *name)
-#  endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_HONOR_STD
+#  endif   // !_RWSTD_NO_HONOR_STD
 
 #  if defined __GNUG__ && __GNUG__ < 3 && __GNU_MINOR__ < 96
 
@@ -84,7 +84,7 @@
 
    // classes will implicitly instantiated below
 
-#  if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD)
+#  if !defined (_RWSTD_NO_HONOR_STD)
 
      // verify that names are declared [only[ in namespace std
 
@@ -92,13 +92,13 @@
 #    define TEST_CLASS_DEF_2(name, ign1, ign2)       void name (void *name)
 #    define TEST_CLASS_DEF_3(name, ign1, ign2, ign3) void name (void *name)
 
-#  else   // if defined (_RWSTD_NO_NAMESPACE) || defined (_RWSTD_NO_HONOR_STD)
+#  else   // if defined (_RWSTD_NO_HONOR_STD)
 
 #    define TEST_CLASS_DEF(name, ignore)             void foo (void *name)
 #    define TEST_CLASS_DEF_2(name, ign1, ign2)       void foo (void *name)
 #    define TEST_CLASS_DEF_3(name, ign1, ign2, ign3) void foo (void *name)
 
-#  endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_HONOR_STD
+#  endif   // !_RWSTD_NO_HONOR_STD
 
 #  define TEST_FUNCTION_DEF(ignore)   void unused_typedef
 

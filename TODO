@@ -125,12 +125,13 @@ the non-debug recompile, the suite table) in =11S=.
 
 ** TODO The feature gates after the member templates
 
-Thirty-three gates ask whether the compiler accepts a C++98
+Thirty-two gates ask whether the compiler accepts a C++98
 construct, and no compiler the tree is built with (GCC, Clang, eccp
 in strict C++03) defines one of them. Retired so far: the member
 templates gate (bfbf7ac3 and the seven commits after it), the member
-template overload gate, and the ten keyword and syntax gates of the
-note's 2.1 in one commit. The branch behind each cannot be compiled
+template overload gate, the ten keyword and syntax gates of the
+note's 2.1 in one commit, and the namespace gate with its nine
+probes. The branch behind each cannot be compiled
 and rots. =doc/notes/analysis-feature-gates.md= is the census: the
 candidates by family with their footprint (chapter 2), sixteen
 probes nobody reads (3), what stays and why (4), the probes that
@@ -141,8 +142,7 @@ families and wait on a decision: =HONOR_STD=, =RUNTIME_IN_STD=,
 =PLACEMENT_DELETE=.
 
 Fix: the member templates retirement's pattern, one gate or bundle
-per commit, in the note's order, the first item and the keyword
-bundle done: the keyword gates, the template gates,
+per commit, in the note's order, the first two items done: the keyword gates, the template gates,
 the other language rules, =LONG_DOUBLE=, =WCHAR_T=, then the
 reader-less probes. Each commit takes the =#ifdef= branches, the
 twins, the dispatch macros, the probe and the probes that read it;
@@ -157,11 +157,13 @@ other macro.
 
 =_TYPENAME=, =_EXPLICIT=, =_RWSTD_STATIC_CAST=, =_RWSTD_CONST_CAST=,
 =_RWSTD_REINTERPRET_CAST=, =_RWSTD_DYNAMIC_CAST=,
-=_RWSTD_SPECIALIZED_CLASS= and =_RWSTD_SPECIALIZED_FUNCTION= in
+=_RWSTD_SPECIALIZED_CLASS=, =_RWSTD_SPECIALIZED_FUNCTION=,
+=_RWSTD_NAMESPACE=, =_STD=, =_RW= and =_USING= in
 =include/rw/_defs.h= each had two definitions, one per side of a
 keyword gate. The gates are retired and each macro has one
-definition, the keyword itself. About 1200 lines of the library and
-500 of the tests spell the macro where the keyword would do.
+definition, the keyword or the name itself. About 1200 lines of the
+library and 500 of the tests spell the keyword macros, and 2200 and
+150 the namespace ones, where the keyword or the name would do.
 
 Fix: one commit per macro, a mechanical replacement; the cast macros
 need a scanner that finds the top-level comma of each call. Whether

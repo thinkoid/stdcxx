@@ -160,8 +160,6 @@ const char* const cwctype_macros [] = {
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_NAMESPACE
-
 // check types
 
 namespace Fallback {
@@ -242,21 +240,6 @@ test_types ()
 
     // TO DO: exercise wctype_t requirements (must be a scalar type)
 }
-
-#else   // if defined (_RWSTD_NO_NAMESPACE)
-
-const char std_name[] = "";
-
-static void
-test_types ()
-{
-    rw_info (0, 0, 0,
-             "types %s::wint_t, %1s::wctrans_t, and %1s::wctype_t", std_name);
-
-    rw_note (0, 0, 0, "_RWSTD_NO_NAMESPACE defined, cannot test");
-}
-
-#endif   // _RWSTD_NO_NAMESPACE
 
 /**************************************************************************/
 

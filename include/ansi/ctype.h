@@ -35,8 +35,6 @@
 
 #    include <cctype>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 using std::isalnum;
 using std::isalpha;
 using std::iscntrl;
@@ -51,7 +49,6 @@ using std::isxdigit;
 using std::tolower;
 using std::toupper;
 
-#    endif   // _RWSTD_NO_NAMESPACE
 #  endif   // _RWSTD_CTYPE_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_CTYPE_H

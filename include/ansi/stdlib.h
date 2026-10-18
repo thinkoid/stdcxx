@@ -35,8 +35,6 @@
 
 #    include <cstdlib>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 using std::div_t;
 using std::ldiv_t;
 using std::size_t;
@@ -75,8 +73,6 @@ using std::strtoul;
 using std::system;
 using std::wcstombs;
 using std::wctomb;
-
-#    endif   // _RWSTD_NO_NAMESPACE
 
 #  endif   // _RWSTD_STDLIB_H_INCLUDED
 

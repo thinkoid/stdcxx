@@ -45,25 +45,21 @@
 
 #include <stddef.h>   // for size_t
 
-#ifndef _RWSTD_NO_NAMESPACE
-# ifndef _RWSTD_NO_STD_NOTHROW_T   
+#ifndef _RWSTD_NO_STD_NOTHROW_T   
 
 namespace std {
 
-# endif // _RWSTD_NO_STD_NOTHROW_T
-#endif // _RWSTD_NO_NAMESPACE
+#endif // _RWSTD_NO_STD_NOTHROW_T
     
 struct nothrow_t { };
 
-#ifndef _RWSTD_NO_NAMESPACE
-# ifndef _RWSTD_NO_STD_NOTHROW_T   
+#ifndef _RWSTD_NO_STD_NOTHROW_T   
 
 }  // end namespace std
 
 using std::nothrow_t;
 
-# endif // _RWSTD_NO_STD_NOTHROW_T
-#endif // _RWSTD_NO_NAMESPACE
+#endif // _RWSTD_NO_STD_NOTHROW_T
 
 
 #ifdef _RWSTD_NO_EXCEPTION_SPECIFICATION

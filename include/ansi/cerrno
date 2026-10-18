@@ -63,7 +63,7 @@ _RWSTD_NAMESPACE (std) {
 #  include _RWSTD_ANSI_C_ERRNO_H
 #endif   // errno ...
 
-#if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_USING_LIBC_IN_STD)
+#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
 namespace std {
 
@@ -77,7 +77,7 @@ using ::errno;
 
 }   // std
 
-#endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_USING_LIBC_IN_STD
+#endif   // !_RWSTD_NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CERRNO_INCLUDED
 

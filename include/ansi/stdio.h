@@ -34,8 +34,6 @@
 
 #    include <cstdio>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 using std::FILE;
 
 #ifndef _RWSTD_NO_FPOS_T
@@ -86,7 +84,6 @@ using std::vfprintf;
 using std::vprintf;
 using std::vsprintf;
 
-#    endif   // _RWSTD_NO_NAMESPACE
 #  endif   // _RWSTD_STDIO_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_STDIO_H

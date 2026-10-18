@@ -34,8 +34,6 @@
 
 #    include <cwctype>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 using std::wctrans_t;
 using std::wctype_t;
 using std::wint_t;
@@ -58,7 +56,6 @@ using std::towupper;
 using std::wctrans;
 using std::wctype;
 
-#    endif   // _RWSTD_NO_NAMESPACE
 #  endif   // _RWSTD_WCTYPE_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_WCTYPE_H

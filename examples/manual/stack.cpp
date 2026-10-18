@@ -34,9 +34,7 @@
 
 int main ()
 {
-#ifndef _RWSTD_NO_NAMESPACE
   using namespace std;
-#endif
 
   //
   // Make a stack using a vector container.

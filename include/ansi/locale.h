@@ -34,13 +34,10 @@
 
 #    include <clocale>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 using std::lconv;
 
 using std::localeconv;
 using std::setlocale;
-#    endif   // _RWSTD_NO_NAMESPACE
 #  endif   // _RWSTD_LOCALE_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_LOCALE_H

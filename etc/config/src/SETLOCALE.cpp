@@ -26,12 +26,8 @@
 
 #include "config.h"
 
-#ifndef _RWSTD_NO_NAMESPACE
-
 namespace std { }
 using namespace std;
-
-#endif   // _RWSTD_NO_NAMESPACE
 
 int main ()
 {

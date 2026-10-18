@@ -37,13 +37,10 @@
 
 #  include <csetjmp>
 
-#  ifndef _RWSTD_NO_NAMESPACE
-
 using std::jmp_buf;
 
 using std::longjmp;
 
-#  endif   // _RWSTD_NO_NAMESPACE
 #else
 #  include _RWSTD_ANSI_C_SETJMP_H
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

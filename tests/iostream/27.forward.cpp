@@ -32,11 +32,7 @@
 //            below in order not to accidentally bring in any missing
 //            definitions from the #included header
 
-#ifndef _RWSTD_NO_NAMESPACE
-#  define std std
-#else
-#  define std
-#endif   // _RWSTD_NO_NAMESPACE
+#define std std
 
 typedef char C;
 

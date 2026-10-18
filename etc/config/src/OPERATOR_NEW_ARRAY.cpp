@@ -26,17 +26,11 @@
 
 #include <stddef.h>
 
-#ifndef _RWSTD_NO_NAMESPACE
 namespace std {
-#endif
 
     struct bad_alloc {};
 
-#ifndef _RWSTD_NO_NAMESPACE
 }
-#else
-# define std
-#endif
 
 #ifdef _RWSTD_NO_EXCEPTION_SPECIFICATION
 #  define throw(e)

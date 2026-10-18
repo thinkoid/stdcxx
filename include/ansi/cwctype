@@ -69,7 +69,7 @@ _RWSTD_NAMESPACE (std) {
 #  endif
 #endif   // WEOF
 
-#if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD) && \
+#if !defined (_RWSTD_NO_HONOR_STD) && \
       !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
 #  ifndef _RWSTD_NO_WCTYPE_H
@@ -116,7 +116,7 @@ namespace std {
 
 #  endif   // _RWSTD_NO_WCTYPE_H
 
-#endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_HONOR_STD && !_RWSTD_NO_USING_LIBC_IN_STD
+#endif   // !_RWSTD_NO_HONOR_STD && !_RWSTD_NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CWCTYPE_INCLUDED
 

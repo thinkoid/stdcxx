@@ -60,7 +60,7 @@ _RWSTD_NAMESPACE (std) {
 
 #include _RWSTD_ANSI_C_SETJMP_H
 
-#if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD) && \
+#if !defined (_RWSTD_NO_HONOR_STD) && \
     !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
 namespace std {
@@ -71,7 +71,7 @@ using ::longjmp;
 
 }   // std
 
-#endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_HONOR_STD && !_RWSTD_NO_USING_LIBC_IN_STD
+#endif   // !_RWSTD_NO_HONOR_STD && !_RWSTD_NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CSETJMP_INCLUDED
 

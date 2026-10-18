@@ -34,12 +34,9 @@
 
 #    include <cstddef>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 using std::ptrdiff_t;
 using std::size_t;
 
-#    endif   // _RWSTD_NO_NAMESPACE
 #  endif   // _RWSTD_STDDEF_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_STDDEF_H

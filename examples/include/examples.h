@@ -34,10 +34,6 @@
 #define EXAMPLES_H_INCLUDED
 
 
-#ifdef _RWSTD_NO_NAMESPACE
-# define std
-#endif   // _RWSTD_NO_NAMESPACE
-
 
 
 #include <cstddef>  // for ptrdiff_t

@@ -71,16 +71,12 @@ public:
 
 #else   // if _RWSTD_NO_STD_EXCEPTION && _RWSTD_NO_RUNTIME_IN_STD
 
-#  ifndef _RWSTD_NO_NAMESPACE
-
 namespace std {
 
 using ::exception;
 
 
 }   // namespace std
-
-#  endif   // _RWSTD_NO_NAMESPACE
 
 #endif   // _RWSTD_NO_STD_EXCEPTION, _RWSTD_NO_RUNTIME_IN_STD
 
@@ -120,16 +116,12 @@ public:
 
 #else   // if _RWSTD_NO_STD_BAD_EXCEPTION && _RWSTD_NO_RUNTIME_IN_STD
 
-#  ifndef _RWSTD_NO_NAMESPACE
-
 namespace std {
 
 using ::bad_exception;
 
 
 }   // namespace std
-
-#  endif   // _RWSTD_NO_NAMESPACE
 
 #endif   // _RWSTD_NO_STD_BAD_EXCEPTION, _RWSTD_NO_RUNTIME_IN_STD
 

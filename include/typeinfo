@@ -46,10 +46,6 @@ _RWSTD_NAMESPACE (std) {
 #endif   // _RWSTD_NO_STD_TYPE_INFO
 
 
-#ifndef _RWSTD_NO_NAMESPACE
-#endif   // _RWSTD_NO_NAMESPACE
-
-
 // 18.5.1
 class type_info
 {
@@ -95,7 +91,6 @@ private:
 }   // namespace std
 
 #else   // if defined (_RWSTD_NO_STD_TYPE_INFO)
-#  ifndef _RWSTD_NO_NAMESPACE
 
 namespace std {
 
@@ -103,7 +98,6 @@ using ::type_info;
 
 }   // namespace std
 
-#  endif   // _RWSTD_NO_NAMESPACE
 #endif   // _RWSTD_NO_STD_TYPE_INFO
 
 
@@ -138,7 +132,6 @@ public:
 }   // namespace std
 
 #else   // if defined (_RWSTD_NO_STD_BAD_CAST)
-#  ifndef _RWSTD_NO_NAMESPACE
 
 namespace std {
 
@@ -146,7 +139,6 @@ using ::bad_cast;
 
 }   // namespace std
 
-#  endif   // _RWSTD_NO_NAMESPACE
 #endif   // _RWSTD_NO_STD_BAD_CAST
 
 
@@ -182,7 +174,6 @@ public:
 }   // namespace std
 
 #else   // if defined (_RWSTD_NO_STD_BAD_TYPEID)
-#  ifndef _RWSTD_NO_NAMESPACE
 
 namespace std {
 
@@ -190,7 +181,6 @@ using ::bad_typeid;
 
 }   // namespace std
 
-#  endif   // _RWSTD_NO_NAMESPACE
 #endif   // _RWSTD_NO_STD_BAD_TYPEID
 
 

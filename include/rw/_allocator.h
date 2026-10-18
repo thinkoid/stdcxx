@@ -296,8 +296,6 @@ operator== (const allocator<_TypeT>&, const allocator<_TypeU>&)  _THROWS (())
 }
 
 
-#ifndef _RWSTD_NO_NAMESPACE
-
 template <class _TypeT, class _TypeU>
 inline bool
 operator!= (const allocator<_TypeT>& __x,
@@ -305,8 +303,6 @@ operator!= (const allocator<_TypeT>& __x,
 {
     return !(__x == __y);
 }
-
-#endif   // _RWSTD_NO_NAMESPACE
 
 
 }   // namespace std

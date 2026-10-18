@@ -87,7 +87,7 @@ inline ldiv_t div (long __x, long __y)
 
 #undef ldiv
 
-#if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD) && \
+#if !defined (_RWSTD_NO_HONOR_STD) && \
     !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
 namespace std {
@@ -218,7 +218,7 @@ inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
 
 }   // namespace std
 
-#endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_HONOR_STD && !_RWSTD_NO_USING_LIBC_IN_STD
+#endif   // !_RWSTD_NO_HONOR_STD && !_RWSTD_NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CSTDLIB_INCLUDED
 

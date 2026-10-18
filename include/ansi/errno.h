@@ -35,18 +35,14 @@
 
 #    include <cerrno>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
-#      ifndef errno
+#    ifndef errno
 
 // be prepared to handle 17.4.1.2, p5 and lwg issue 310
 // which say that errno may and must be a macro, respectively
 
 using std::errno;
 
-#      endif   // errno
-
-#    endif   // _RWSTD_NO_NAMESPACE
+#    endif   // errno
 
 #  endif   // _RWSTD_ERRNO_H_INCLUDED
 

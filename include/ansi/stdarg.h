@@ -35,13 +35,9 @@
 
 #    include <cstdarg>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 // not implemented - va_list is declared in the global namespace
 // see <ansi/_cstdarg.h>
 // using std::va_list;
-
-#    endif   // _RWSTD_NO_NAMESPACE
 
 #  endif   // _RWSTD_STDARG_H_INCLUDED
 

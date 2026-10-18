@@ -91,12 +91,12 @@ void is_explicit (const bogus_exception&) { }
 // explicitly #including <string> first; std::string must still
 // be declared (but not necessarily defined)
 
-#if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD)
+#if !defined (_RWSTD_NO_HONOR_STD)
    // declare a global function with the same name as exception
 #  define TEST_NAMESPACE_DEF(T) void T ()
 #else
 #  define TEST_NAMESPACE_DEF(ignore) (void)0
-#endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_HONOR_STD
+#endif   // !_RWSTD_NO_HONOR_STD
 
 
 #ifndef _RWSTD_NO_PTR_EXCEPTION_SPEC

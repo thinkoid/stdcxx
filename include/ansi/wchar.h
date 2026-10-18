@@ -34,8 +34,6 @@
 
 #    include <cwchar>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 #ifndef _RWSTD_NO_MBSTATE_T
 using std::mbstate_t;
 #endif
@@ -93,7 +91,6 @@ using std::wmemset;
 using std::wprintf;
 using std::wscanf;
 
-#    endif   // _RWSTD_NO_NAMESPACE
 #  endif   // _RWSTD_WCHAR_H_INCLUDED
 
 #else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)

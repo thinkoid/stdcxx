@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 194 named C++ probes, nine supporting C++
+The source census contains 193 named C++ probes, nine supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 194 named probes are discoverable by
+three different things.** All 193 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -61,7 +61,7 @@ conditions as well. No preprocessing or build was performed here.
 
 | group | status on the supported compilers |
 |---|---|
-| Old language deficiencies: `NAMESPACE`, partial specialization, and until 2026-10-17 `BOOL`, `EXPLICIT`, `TYPENAME` and the casts | Every probe passes in the six configurations and under eccp in strict C++03. These gates are being retired one by one, the branch they select with them, since no compiler the tree is built with takes that branch and it cannot be compiled; `analysis-feature-gates.md` is the census and the order, and 2.2 lists what has gone. |
+| Old language deficiencies: partial specialization, and until 2026-10-17 `NAMESPACE`, `BOOL`, `EXPLICIT`, `TYPENAME` and the casts | Every probe passes in the six configurations and under eccp in strict C++03. These gates are being retired one by one, the branch they select with them, since no compiler the tree is built with takes that branch and it cannot be compiled; `analysis-feature-gates.md` is the census and the order, and 2.2 lists what has gone. |
 | Obsolete mechanisms: dynamic exception specifications | The probes fail in the six configurations, and that is their job: a failing probe selects the path the compiler's dialect needs. |
 | Runtime ABI: exception classes, allocation functions, RTTI members and namespace placement | Questions about the runtime, not the language. A historical ABI probe is not a description of public API support. |
 | Platform facts: sizes, typedefs, floating point, C structures, conversion interfaces, locale naming | Retain characterization or deliberately replace it with an equally sound source of the information. |
@@ -110,6 +110,7 @@ its row is gone from the catalogue below.
 | `MEMBER_TEMPLATES` | `NO_MEMBER_TEMPLATES` | 2026-10-17, bfbf7ac3 and the seven commits after it | GCC, Clang and eccp in strict C++03 pass it, and no compiler since about 2000 fails it. The branch it selected, the namespace-scope twins of the containers' range members among the rest, could not be compiled and rotted unseen. |
 | `MEMBER_TEMPLATE_OVERLOAD` | `NO_MEMBER_TEMPLATE_OVERLOAD` | 2026-10-17 | The same three compilers pass it. Its one reader, the condition on `bitset::to_string`, keeps the return-type gate alone. |
 | `BOOL`, `TYPENAME`, `EXPLICIT`, `STATIC_CAST`, `DYNAMIC_CAST`, `CONST_CAST`, `REINTERPRET_CAST`, `NEW_CLASS_TEMPLATE_SYNTAX`, `NEW_FUNC_TEMPLATE_SYNTAX`, `NO_FOR_LOCAL_SCOPE` | `NO_BOOL` and the rest, one each | 2026-10-17, one commit | The keyword and syntax gates of C++98: every compiler of the matrix passes them. `_TYPENAME`, `_EXPLICIT`, the `_RWSTD_*_CAST` and `_RWSTD_SPECIALIZED_*` macros in `rw/_defs.h` keep their one definition. `_RWSTD_NO_MUTABLE`, which never had a probe, went with them. |
+| `NAMESPACE` | `NO_NAMESPACE` | 2026-10-17 | The `namespace` keyword; every compiler of the matrix has it. Nine probes read the gate to put their names in `std`; they do so unconditionally now. `_RWSTD_NAMESPACE`, `_STD`, `_RW` and `_USING` in `rw/_defs.h` keep their one definition. |
 
 ## 3. Outputs beyond the status macro
 
@@ -252,7 +253,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [MBSTATE_T](../../etc/config/src/MBSTATE_T.cpp) / `NO_MBSTATE_T` + output | mbstate_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/wchar.h` |
 | [MMAP](../../etc/config/src/MMAP.cpp) / `NO_MMAP` | mmap() and munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [MUNMAP](../../etc/config/src/MUNMAP.cpp) / `NO_MUNMAP` + output | munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
-| [NAMESPACE](../../etc/config/src/NAMESPACE.cpp) / `NO_NAMESPACE` | namespaces | L/P/T/E; `include/ansi/cctype` |
 | [NATIVE_WCHAR_T](../../etc/config/src/NATIVE_WCHAR_T.cpp) / `NO_NATIVE_WCHAR_T` | if wchar_t is a native type | L/P/T; `include/limits` |
 | [NESTED_CLASS_ACCESS](../../etc/config/src/NESTED_CLASS_ACCESS.cpp) / `NO_NESTED_CLASS_ACCESS` | member class access | L/T; `include/istream` |
 | [NEWLINE](../../etc/config/src/NEWLINE.cpp) / `NO_NEWLINE` + output | newline (CR or CR-LF) | none |

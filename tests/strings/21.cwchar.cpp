@@ -459,8 +459,6 @@ test_macros ()
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_NAMESPACE
-
 // check types
 
 namespace Fallback {
@@ -543,22 +541,6 @@ test_types ()
     rw_assert (tm_defined ((const test_tm*)0), 0, 0,
                "%s::tm not defined", std_name);
 }
-
-#else   // if defined (_RWSTD_NO_NAMESPACE)
-
-const char std_name[] = "";
-
-static void
-test_types ()
-{
-    rw_info (0, 0, 0,
-             "types %s::size_t, %1$s::mbstate_t, %1$s::wint_t, and %1$s::tm",
-             std_name);
-
-    rw_note (0, 0, 0, "_RWSTD_NO_NAMESPACE defined, cannot test");
-}
-
-#endif   // _RWSTD_NO_NAMESPACE
 
 /**************************************************************************/
 

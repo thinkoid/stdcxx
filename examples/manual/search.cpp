@@ -32,9 +32,7 @@
 
 int main ()
 {
-#ifndef _RWSTD_NO_NAMESPACE
   using namespace std;
-#endif
 
   //
   // Initialize a list sequence and subsequence with characters.

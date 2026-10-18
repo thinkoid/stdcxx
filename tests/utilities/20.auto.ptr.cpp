@@ -36,7 +36,7 @@
 
    // explicitly instantiate
 
-#  if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD)
+#  if !defined (_RWSTD_NO_HONOR_STD)
 
      // verify that names are declared [only[ in namespace std
 
@@ -44,7 +44,7 @@
             template class std::name Tparam                       \
             /* void name (void *name) */
 
-#  else   // if defined (_RWSTD_NO_NAMESPACE) || defined (_RWSTD_NO_HONOR_STD)
+#  else   // if defined (_RWSTD_NO_HONOR_STD)
 
      // verify that names do not collide with function argument names
 
@@ -52,23 +52,23 @@
             template class std::name Tparam;                      \
             void foo (void *name)
 
-#  endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_HONOR_STD
+#  endif   // !_RWSTD_NO_HONOR_STD
 
 #else   // if defined (_RWSTD_EXPLICIT_INSTANTIATION)
 
    // classes will implicitly instantiated below
 
-#  if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD)
+#  if !defined (_RWSTD_NO_HONOR_STD)
 
      // verify that names are declared [only] in namespace std
 
 #    define TEST_CLASS_DEF(name, ignore)             void name (void *name)
 
-#  else   // if defined (_RWSTD_NO_NAMESPACE) || defined (_RWSTD_NO_HONOR_STD)
+#  else   // if defined (_RWSTD_NO_HONOR_STD)
 
 #    define TEST_CLASS_DEF(name, ignore)             void foo (void *name)
 
-#  endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_HONOR_STD
+#  endif   // !_RWSTD_NO_HONOR_STD
 
 #endif   // _RWSTD_EXPLICIT_INSTANTIATION
 

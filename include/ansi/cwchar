@@ -88,7 +88,7 @@ _RWSTD_NAMESPACE (std) {
 #endif   // NULL
 
 
-#if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD)
+#if !defined (_RWSTD_NO_HONOR_STD)
 
 
 #ifndef WCHAR_MIN
@@ -193,7 +193,7 @@ using ::wmemset;
 
 #endif   // !_RWSTD_NO_USING_LIBC_IN_STD
 
-#endif   // !_RWSTD_NO_NAMESPACE && !_RWSTD_NO_HONOR_STD
+#endif   // !_RWSTD_NO_HONOR_STD
 
 #endif   // _RWSTD_CWCHAR_INCLUDED
 

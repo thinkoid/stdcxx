@@ -424,23 +424,12 @@
 
 #define _RWSTD_SPECIALIZED_CLASS template<>
 
-// for compilers or environments that do not support namespaces
-#ifndef _RWSTD_NO_NAMESPACE
-#  define _RWSTD_NAMESPACE(name)    namespace name
-#  define _USING(name)              using name
+#define _RWSTD_NAMESPACE(name)    namespace name
+#define _USING(name)              using name
 
-#  undef _STD
-#  define _STD   std
-#  define _RW    __rw
-
-#else   // if defined (_RWSTD_NO_NAMESPACE)
-#  define _RWSTD_NAMESPACE(ignore)    extern "C++"
-#  define _USING(ignore)              typedef void __rw_unused_type
-
-#  undef _STD
-#  define _STD
-#  define _RW
-#endif   // _RWSTD_NO_NAMESPACE
+#undef _STD
+#define _STD   std
+#define _RW    __rw
 
 //
 // for compilers that don't like specialized friends
@@ -603,11 +592,7 @@
 
 // macro for qualifying C library names in the std namespace
 #ifndef _RWSTD_NO_LIBC_IN_STD
-#  ifndef _RWSTD_NO_NAMESPACE
-#    define _RWSTD_C std
-#  else
-#    define _RWSTD_C /* empty */
-#  endif   // _RWSTD_NO_LIBC_IN_STD
+#  define _RWSTD_C std
 #else
 #  define _RWSTD_C   /* empty */
 #endif

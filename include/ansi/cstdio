@@ -74,7 +74,7 @@ _RWSTD_NAMESPACE (std) {
 #  define stderr stderr
 #endif
 
-#if !defined (_RWSTD_NO_NAMESPACE) && !defined (_RWSTD_NO_HONOR_STD) && \
+#if !defined (_RWSTD_NO_HONOR_STD) && \
     !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
 namespace std {
@@ -175,7 +175,7 @@ namespace std {
 #  undef perror
 
 
-#endif   // !_NO_NAMESPACE && !__NO_HONOR_STD && !_NO_USING_LIBC_IN_STD
+#endif   // !__NO_HONOR_STD && !_NO_USING_LIBC_IN_STD
 
 #endif   // _RWSTD_CSTDIO_INCLUDED
 

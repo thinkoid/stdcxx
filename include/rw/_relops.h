@@ -51,8 +51,6 @@
 _RWSTD_NAMESPACE (std) { 
 
 
-#ifndef _RWSTD_NO_NAMESPACE
-
 // rel_ops contents not available if namespaces are disabled
 // to avoid ambiguities with other overloaded operators
 
@@ -86,8 +84,6 @@ inline bool operator>= (const _TypeT& __x, const _TypeT& __y)
 
 }   // namespace rel_ops
 
-
-#endif   // _RWSTD_NO_NAMESPACE
 
 }   // namespace std
 

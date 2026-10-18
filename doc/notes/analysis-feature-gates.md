@@ -73,7 +73,7 @@ by" names the probes that read the gate (chapter 5).
 
 | gate | question | lib | tests | files | read by |
 | --- | --- | --- | --- | --- | --- |
-| `NAMESPACE` | the `namespace` keyword | 75 | 36 | 32 | nine probes |
+| `NAMESPACE` | the `namespace` keyword | 75 | 36 | 32 | nine probes; retired 2026-10-17 |
 | `BOOL` | `bool`, `true`, `false` | 18 | 23 | 8 | `LIMITS`; retired 2026-10-17 |
 | `TYPENAME` | the `typename` keyword | 5 | 4 | 2 | three probes; retired 2026-10-17 |
 | `EXPLICIT` | the `explicit` keyword | 1 | 17 | 1 | retired 2026-10-17 |
@@ -88,8 +88,9 @@ went with the bundle, as did `_RWSTD_NO_MUTABLE`, a gate this census
 could not list: no probe yields it, nothing defines it, and two
 places read it. The bundle left `_TYPENAME`, `_EXPLICIT`, the
 `_RWSTD_*_CAST` and the `_RWSTD_SPECIALIZED_*` macros in `rw/_defs.h`
-with their one definition; whether to spell them out is a sweep of
-its own, queued.
+with their one definition, as the `NAMESPACE` retirement left
+`_RWSTD_NAMESPACE`, `_STD`, `_RW` and `_USING`; whether to spell them
+out is a sweep of its own, queued.
 
 ### 2.2 Templates
 
@@ -240,7 +241,8 @@ Small first, so the pattern settles before the big three.
    last. `MEMBER_TEMPLATE_OVERLOAD`: retired in the commit after
    them.
 2. The keyword gates of 2.1 as one bundle, done 2026-10-17 in one
-   commit; `NAMESPACE` on its own for its nine probes.
+   commit; `NAMESPACE` on its own for its nine probes, done the same
+   day in the commit after.
 3. The template gates of 2.2, smallest first; `CLASS_PARTIAL_SPEC`
    with `PART_SPEC_OVERLOAD` and `FUNC_PARTIAL_SPEC` last of them.
 4. The other language rules of 2.4.

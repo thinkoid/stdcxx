@@ -33,8 +33,6 @@
 #    define _RWSTD_STRING_H_INCLUDED
 #    include <cstring>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 using std::size_t;
 
 using std::memchr;
@@ -67,7 +65,6 @@ using std::strstr;
 using std::strtok;
 using std::strxfrm;
 
-#    endif   // _RWSTD_NO_NAMESPACE
 #  endif   // _RWSTD_STRING_H_INCLUDED
 
 #else

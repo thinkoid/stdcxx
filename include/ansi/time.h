@@ -35,8 +35,6 @@
 
 #    include <ctime>
 
-#    ifndef _RWSTD_NO_NAMESPACE
-
 using std::clock_t;
 using std::size_t;
 using std::time_t;
@@ -51,8 +49,6 @@ using std::localtime;
 using std::mktime;
 using std::strftime;
 using std::time;
-
-#    endif   // _RWSTD_NO_NAMESPACE
 
 #  endif   // _RWSTD_TIME_H_INCLUDED
 

@@ -340,8 +340,6 @@ missing_64_bit_macros[] = {
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_NAMESPACE
-
 // check types
 
 #define DEFINE_TYPE(name)                                       \
@@ -632,16 +630,6 @@ test_types ()
         TEST_REQUIRED_TYPE (uint_fast64_t,   64, false);
     }
 }
-
-#else   // if defined (_RWSTD_NO_NAMESPACE)
-
-static void
-test_types ()
-{
-    rw_note (0, 0, 0, "_RWSTD_NO_NAMESPACE defined, cannot test");
-}
-
-#endif   // _RWSTD_NO_NAMESPACE
 
 /**************************************************************************/
 
