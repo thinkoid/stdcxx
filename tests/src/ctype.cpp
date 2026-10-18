@@ -1149,7 +1149,9 @@ do_widen (char ch) const
     if (narrow_ && wide_)
         return char_type (_rw_widen_table (*this, mf_widen, uch));
 
-    return ch;
+    // the unsigned value, as the range form widens it; the character
+    // itself would sign-extend where char is signed
+    return char_type (uch);
 }
 
 

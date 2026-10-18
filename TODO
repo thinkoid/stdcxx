@@ -140,8 +140,10 @@ the byte, with =from_next= and =to_next= unmoved, and the =out=
 checks after them), =do_length= disagrees with the C library once
 in each of the three ja_JP locales, and the wide =out= of the
 "codeset ISO-8859-15 of locale an_ES" section returns =error= for
-eight bytes, four checks each. A host with =en_US.UTF-8= alone
-takes the old path through =find_locale= and keeps its 306.
+eight bytes, four checks each; the x86_64 host with the same
+locales fails the same 929 in all six configurations. A host with
+=en_US.UTF-8= alone takes the old path through =find_locale= and
+keeps its 306.
 =22.locale.time.get= found =en_AG= and =de_AT= as its English and
 German locales there, not =en_US= and =de_DE=: the first match of
 the test's pattern is whatever =locale -a= lists first.
