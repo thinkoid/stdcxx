@@ -281,12 +281,10 @@ test_synopsis (std::bitset<0>*)
 
     MEMFUN (unsigned long, to_ulong, () const);
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
      // working around HP aCC bugs PR #23312 and bug #503
 
-#  define PARAMLIST_3(T)   T, std::char_traits<T>, std::allocator<T>
-#  define PARAMLIST_2(T)   T, std::char_traits<T>
+#define PARAMLIST_3(T)   T, std::char_traits<T>, std::allocator<T>
+#define PARAMLIST_2(T)   T, std::char_traits<T>
 
     // exercise the overloaded member template function and ordinary
     // member function to_string()
@@ -295,20 +293,18 @@ test_synopsis (std::bitset<0>*)
     MEMFUN (std::basic_string<PARAMLIST_3 (char) >,
             to_string, (char, char) const);
 
-#  ifndef _RWSTD_NO_WCHAR_T
+#ifndef _RWSTD_NO_WCHAR_T
 
     MEMFUN (std::basic_string<PARAMLIST_3 (wchar_t) >,
             to_string<PARAMLIST_3 (wchar_t) >, (wchar_t, wchar_t) const);
 
-#  endif   // _RWSTD_NO_WCHAR_T
+#endif   // _RWSTD_NO_WCHAR_T
 
     MEMFUN (std::basic_string<PARAMLIST_3 (int) >,
             to_string<PARAMLIST_3 (int) >, (int, int) const);
 
-#  undef PARAMLIST_3
-#  undef PARAMLIST_2
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
+#undef PARAMLIST_3
+#undef PARAMLIST_2
 
     MEMFUN (std::size_t, size, () const);
     MEMFUN (std::size_t, count, () const);
@@ -340,15 +336,14 @@ test_synopsis (std::bitset<0>*)
     FUN (std::basic_ostream< PARAMLIST (char) >&, std::operator<<,
          (std::basic_ostream< PARAMLIST (char) >&, const Bitset&));
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-#  ifndef _RWSTD_NO_WCHAR_T
+#ifndef _RWSTD_NO_WCHAR_T
 
     FUN (std::basic_istream< PARAMLIST (wchar_t) >&, std::operator>>,
          (std::basic_istream< PARAMLIST (wchar_t) >&, Bitset&));
     FUN (std::basic_ostream< PARAMLIST (wchar_t) >&, std::operator<<,
          (std::basic_ostream< PARAMLIST (wchar_t) >&, const Bitset&));
 
-#  endif   // _RWSTD_NO_WCHAR_T
+#endif   // _RWSTD_NO_WCHAR_T
 
     // MSVC is too dumb to handle bitset inserters and extractors
     // parametrized on multiple template paramenters
@@ -356,8 +351,6 @@ test_synopsis (std::bitset<0>*)
          (std::basic_istream< PARAMLIST (int) >&, Bitset&));
     FUN (std::basic_ostream< PARAMLIST (int) >&, std::operator<<,
          (std::basic_ostream< PARAMLIST (int) >&, const Bitset&));
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
 #undef PARAMLIST
 
@@ -828,8 +821,6 @@ int compare (const UserChar str[], const char s[], const char bits [2])
 }
 
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-
 // call the bitset<N>::to_string() member function template,
 // explicitly specifying all three template arguments,
 // and 2, 1, or 0 of the two default function arguments
@@ -956,8 +947,6 @@ bitset_to_string_1 (const std::bitset<N> &bs, int nfargs,
     return bs.template to_string<UserChar>(zero, one);
 }
 
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
-
 
 // call the bitset<N>::to_string() ordinary member function,
 // explicitly specifying none of the three template arguments,
@@ -1044,8 +1033,6 @@ void test_to_string (std::bitset<N>*, charT*, Traits*, Alloc*,
     assign (one, 'x');
 
     int pos;
-
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
 
     ////////////////////////////////////////////////////////////////////////
     // exercise the overload of the to_string() member function template
@@ -1200,8 +1187,6 @@ void test_to_string (std::bitset<N>*, charT*, Traits*, Alloc*,
                "mismatch at bit %d", N,
                to_string (ts.bits (), "ox").c_str (),
                TO_STR (str1), pos);
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
 
 
     ////////////////////////////////////////////////////////////////////////

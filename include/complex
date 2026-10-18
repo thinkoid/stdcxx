@@ -90,19 +90,6 @@ operator/ (const complex<_TypeT> &__lhs, const complex<_TypeT> &__rhs)
 }
 
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
-#  define _RWSTD_MEMBER_TEMPLATE(name)  \
-          template <class _TypeX>       \
-          complex<value_type>& name (const complex<_TypeX> &__rhs)
-
-#else   // if defined (_RWSTD_NO_MEMBER_TEMPLATES)
-
-#  define _RWSTD_MEMBER_TEMPLATE(name)     \
-          complex<value_type>& name (const complex &__rhs)
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATES
-
-
 // 26.2.3 - complex specializations
 
 _RWSTD_SPECIALIZED_CLASS
@@ -133,28 +120,28 @@ public:
         return _C_re;
     }
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATE
-
     template <class _TypeT>
     complex& operator= (const complex<_TypeT>& __rhs) {
         return (_C_re = __rhs.real ()), (_C_im = __rhs.imag ()), *this;
     }
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATE
     
-    _RWSTD_MEMBER_TEMPLATE (operator+=) {
+    template <class _TypeX>
+    complex<value_type>& operator+= (const complex<_TypeX> &__rhs) {
         return (_C_re += __rhs.real ()), (_C_im += __rhs.imag ()), *this;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator-=) {
+    template <class _TypeX>
+    complex<value_type>& operator-= (const complex<_TypeX> &__rhs) {
         return (_C_re -= __rhs.real ()), (_C_im -= __rhs.imag ()), *this;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator*=) {
+    template <class _TypeX>
+    complex<value_type>& operator*= (const complex<_TypeX> &__rhs) {
         return *this = *this * complex<value_type>(__rhs);
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator/=) {
+    template <class _TypeX>
+    complex<value_type>& operator/= (const complex<_TypeX> &__rhs) {
         return *this = *this / complex<value_type>(__rhs);
     }
 
@@ -212,28 +199,28 @@ public:
         return _C_re;
     }
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATE
-
     template <class _TypeT>
     complex& operator= (const complex<_TypeT>& __rhs) {
         return (_C_re = __rhs.real ()), (_C_im = __rhs.imag ()), *this;
     }
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATE
     
-    _RWSTD_MEMBER_TEMPLATE (operator+=) {
+    template <class _TypeX>
+    complex<value_type>& operator+= (const complex<_TypeX> &__rhs) {
         return (_C_re += __rhs.real ()), (_C_im += __rhs.imag ()), *this;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator-=) {
+    template <class _TypeX>
+    complex<value_type>& operator-= (const complex<_TypeX> &__rhs) {
         return (_C_re -= __rhs.real ()), (_C_im -= __rhs.imag ()), *this;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator*=) {
+    template <class _TypeX>
+    complex<value_type>& operator*= (const complex<_TypeX> &__rhs) {
         return *this = *this * complex<value_type>(__rhs);
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator/=) {
+    template <class _TypeX>
+    complex<value_type>& operator/= (const complex<_TypeX> &__rhs) {
         return *this = *this / complex<value_type>(__rhs);
     }
 
@@ -290,30 +277,30 @@ public:
         return _C_re;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator+=) {
+    template <class _TypeX>
+    complex<value_type>& operator+= (const complex<_TypeX> &__rhs) {
         return (_C_re += __rhs.real ()), (_C_im += __rhs.imag ()), *this;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator-=) {
+    template <class _TypeX>
+    complex<value_type>& operator-= (const complex<_TypeX> &__rhs) {
         return (_C_re -= __rhs.real ()), (_C_im -= __rhs.imag ()), *this;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator*=) {
+    template <class _TypeX>
+    complex<value_type>& operator*= (const complex<_TypeX> &__rhs) {
         return *this = *this * complex<value_type>(__rhs);
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator/=) {
+    template <class _TypeX>
+    complex<value_type>& operator/= (const complex<_TypeX> &__rhs) {
         return *this = *this / complex<value_type>(__rhs);
     }
-
-#ifndef _RWSTD_NO_MEMBER_TEMPLATE
 
     template <class _TypeT>
     complex& operator= (const complex<_TypeT>& __rhs) {
         return (_C_re = __rhs.real ()), (_C_im = __rhs.imag ()), *this;
     }
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATE
 
     complex& operator+= (value_type __rhs) {
         return _C_re += __rhs, *this;
@@ -379,8 +366,6 @@ public:
         return _C_re;
     }
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATE
-
     template <class _TypeU>
     complex (const complex<_TypeU>& __rhs)
         : _C_re (_RWSTD_STATIC_CAST (value_type, __rhs.real ())),
@@ -391,22 +376,24 @@ public:
         // not recursive: calls the compiler-generated operator=()
         return *this = complex (__rhs);
     }
-
-#endif   // _RWSTD_NO_MEMBER_TEMPLATE
     
-    _RWSTD_MEMBER_TEMPLATE (operator+=) {
+    template <class _TypeX>
+    complex<value_type>& operator+= (const complex<_TypeX> &__rhs) {
         return *this = *this + __rhs;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator-=) {
+    template <class _TypeX>
+    complex<value_type>& operator-= (const complex<_TypeX> &__rhs) {
         return *this = *this - __rhs;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator*=) {
+    template <class _TypeX>
+    complex<value_type>& operator*= (const complex<_TypeX> &__rhs) {
         return *this = *this * __rhs;
     }
 
-    _RWSTD_MEMBER_TEMPLATE (operator/=) {
+    template <class _TypeX>
+    complex<value_type>& operator/= (const complex<_TypeX> &__rhs) {
         return *this = *this / __rhs;
     }
 
