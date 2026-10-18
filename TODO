@@ -143,8 +143,8 @@ families and wait on a decision: =HONOR_STD=, =RUNTIME_IN_STD=,
 
 Fix: the member templates retirement's pattern, one gate or bundle
 per commit, in the note's order, the first two items done: the keyword gates, the template gates,
-the other language rules, =LONG_DOUBLE=, =WCHAR_T=, then the
-reader-less probes. Each commit takes the =#ifdef= branches, the
+the other language rules, =LONG_DOUBLE=, =WCHAR_T=; the reader-less
+probes went on 2026-10-17. Each commit takes the =#ifdef= branches, the
 twins, the dispatch macros, the probe and the probes that read it;
 =ref-characterizations.md= records each retirement.
 

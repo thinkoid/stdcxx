@@ -169,6 +169,8 @@ for a gcc 2.9x internal error; the workaround goes with it.
 
 No reader of the status macro anywhere in the tree and no other
 output. The probe file goes, with its support file where one exists.
+Done 2026-10-17, one commit, the twelve below (`CONST_CAST` and
+`REINTERPRET_CAST` had gone with the keyword bundle).
 
 `CONST_CAST`, `REINTERPRET_CAST`, `EXPLICIT_ARG`, `EXTERN_INLINE`
 (`extern_inline.lib.cpp`), `FUNCTION_TRY_BLOCK`,
@@ -249,5 +251,5 @@ Small first, so the pattern settles before the big three.
 4. The other language rules of 2.4.
 5. `LONG_DOUBLE`.
 6. `WCHAR_T` with `NATIVE_WCHAR_T`, the largest.
-7. The probes of chapter 3, any time, one commit.
+7. The probes of chapter 3, any time, one commit; done 2026-10-17.
 8. The three of 2.5, after a decision.
