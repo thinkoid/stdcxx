@@ -534,19 +534,6 @@ run_test (int, char**)
         rw_info (0, 0, 0,
                  "template <class T> const T& std::use_facet (const locale&)");
 
-#ifdef _RWSTD_NO_DYNAMIC_CAST
-
-        // if dynamic_cast isn't supported, then [has,use]_facet()
-        // can't reliably detect if a facet is installed or not.
-        rw_warn (0 != opt_no_exceptions, 0, __LINE__,
-                 "dynamic_cast not supported "
-                 "(macro _RWSTD_NO_DYNAMIC_CAST is #defined), "
-                 "disabling exceptions tests");
-
-        opt_no_exceptions = 1;
-
-#endif   // _RWSTD_NO_DYNAMIC_CAST
-
 
 #ifdef _RWSTD_NO_THREAD_SAFE_EXCEPTIONS
 

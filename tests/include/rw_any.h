@@ -38,9 +38,7 @@ class _TEST_EXPORT rw_any_t
 {
 public:
 
-#ifndef _RWSTD_NO_BOOL
     rw_any_t (bool);
-#endif   // _RWSTD_NO_BOOL
 
     rw_any_t (char);
     rw_any_t (signed char);
@@ -135,9 +133,7 @@ private:
         signed char    schar_;
         unsigned char  uchar_;
         char           char_;
-#ifndef _RWSTD_NO_BOOL
         bool           bool_;
-#endif   // _RWSTD_NO_BOOL
     } val_;
 
     char      *str_;

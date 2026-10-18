@@ -60,14 +60,10 @@ struct num_put: _RW::__rw_facet
 
     virtual ~num_put () _RWSTD_ATTRIBUTE_NOTHROW;
 
-#ifndef _RWSTD_NO_BOOL
-
     iter_type put (iter_type __it, ios_base& __flags, char_type __fill,
                    bool __val) const {
         return do_put (__it, __flags, __fill, __val);
     }
-
-#endif   // _RWSTD_NO_BOOL
 
     iter_type put (iter_type __it, ios_base &__flags, char_type __fill,
                    long __val) const {
@@ -121,8 +117,6 @@ struct num_put: _RW::__rw_facet
 
 protected:
 
-#ifndef _RWSTD_NO_BOOL
-
     virtual iter_type
     do_put (iter_type __it, ios_base &__flags, char_type __fill,
             bool __val) const {
@@ -130,8 +124,6 @@ protected:
                           __flags.flags () & _RWSTD_IOS_BOOLALPHA
                           ? _C_bool : _C_int, _TO_VOID (__val));
     }
-
-#endif   // _RWSTD_NO_BOOL
 
     virtual iter_type
     do_put (iter_type __it, ios_base &__flags, char_type __fill,

@@ -185,12 +185,8 @@ struct __rw_is_fundamental<long double> { enum { _C_val = 1 }; };
 
 #endif   // _RWSTD_NO_LONG_DOUBLE
 
-#ifndef _RWSTD_NO_BOOL
-
 _RWSTD_SPECIALIZED_CLASS
 struct __rw_is_fundamental<bool> { enum { _C_val = 1 }; };
-
-#endif   // _RWSTD_NO_BOOL
 
 #ifndef _RWSTD_NO_NATIVE_WCHAR_T
 

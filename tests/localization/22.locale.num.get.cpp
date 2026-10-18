@@ -2616,9 +2616,7 @@ run_tests (CharType ctype, const char *cname,
     else                                                        \
         rw_note (0, __FILE__, __LINE__, "%s test disabled", tname)
 
-#ifndef _RWSTD_NO_BOOL
     TEST (bool,   "bool");
-#endif   // _RWSTD_NO_BOOL
 
     TEST (long,   "long");
     TEST (ulong,  "unsigned long");

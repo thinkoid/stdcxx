@@ -47,7 +47,7 @@
 #include <rw/_defs.h>
 
 
-#if !defined (_RWSTD_NO_BOOL) && !defined (_RWSTD_NO_VECTOR_BOOL)
+#ifndef _RWSTD_NO_VECTOR_BOOL
 
 #  if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
 
@@ -138,4 +138,4 @@ resize (size_type __new_size, bool __c)
 
 
 #  endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
-#endif   //  !defined (_RWSTD_NO_BOOL) && !defined (_RWSTD_NO_VECTOR_BOOL)
+#endif   // _RWSTD_NO_VECTOR_BOOL

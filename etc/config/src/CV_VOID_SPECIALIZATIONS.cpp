@@ -24,11 +24,7 @@
 
 #include "config.h"
 
-#ifdef _RWSTD_NO_NEW_CLASS_TEMPLATE_SYNTAX
-#  define _RWSTD_SPECIALIZED_CLASS
-#else
-#  define _RWSTD_SPECIALIZED_CLASS template<>
-#endif
+#define _RWSTD_SPECIALIZED_CLASS template<>
 
 template <class T>
 struct S {};

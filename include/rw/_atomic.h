@@ -72,20 +72,18 @@ struct __rw_atomic_value
 
 /********************** generic bool functions ************************/
 
-#    ifndef _RWSTD_NO_BOOL
-
-#      if   _RWSTD_BOOL_SIZE == _RWSTD_CHAR_SIZE  \
+#    if   _RWSTD_BOOL_SIZE == _RWSTD_CHAR_SIZE  \
          && !defined (_RWSTD_NO_CHAR_ATOMIC_OPS)
-#        define _RWSTD_BOOL_TYPE char
-#      elif _RWSTD_BOOL_SIZE == _RWSTD_SHORT_SIZE \
+#      define _RWSTD_BOOL_TYPE char
+#    elif _RWSTD_BOOL_SIZE == _RWSTD_SHORT_SIZE \
          && !defined (_RWSTD_NO_SHORT_ATOMIC_OPS)
-#        define _RWSTD_BOOL_TYPE short
-#      elif _RWSTD_BOOL_SIZE == _RWSTD_INT_SIZE   \
+#      define _RWSTD_BOOL_TYPE short
+#    elif _RWSTD_BOOL_SIZE == _RWSTD_INT_SIZE   \
          && !defined (_RWSTD_NO_INT_ATOMIC_OPS)
-#        define _RWSTD_BOOL_TYPE int
-#      endif
+#      define _RWSTD_BOOL_TYPE int
+#    endif
 
-#      ifdef _RWSTD_BOOL_TYPE
+#    ifdef _RWSTD_BOOL_TYPE
 
 _RWSTD_NAMESPACE (__rw) {
 
@@ -100,10 +98,8 @@ __rw_atomic_exchange (bool &__x, bool __y, bool)
 
 }   // namespace __rw
 
-#        undef _RWSTD_BOOL_TYPE
-#      endif   // _RWSTD_BOOL_TYPE
-
-#    endif   // _RWSTD_NO_BOOL
+#      undef _RWSTD_BOOL_TYPE
+#    endif   // _RWSTD_BOOL_TYPE
 
 
 /********************** generic long functions ************************/

@@ -234,10 +234,8 @@ int main ()
 
     // compute sizes of fundamental types
 
-#ifndef _RWSTD_NO_BOOL
     printf ("#define _RWSTD_BOOL_SIZE   %2u /* sizeof (bool) */\n",
             SIZEOF (bool));
-#endif   // _RWSTD_NO_BOOL
 
     printf ("#define _RWSTD_CHAR_SIZE   %2u /* sizeof (char) */\n",
             SIZEOF (char));
@@ -275,12 +273,8 @@ int main ()
 
     const unsigned char_bits = compute_char_bits ();
 
-#ifndef _RWSTD_NO_BOOL
-
     printf ("#define _RWSTD_BOOL_MIN   !!0\n");
     printf ("#define _RWSTD_BOOL_MAX    !0\n");
-
-#endif   // _RWSTD_NO_BOOL
 
     if (0 == no_twos_complement) {
         // comment out the next #define (this is two's complement

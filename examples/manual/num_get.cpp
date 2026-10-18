@@ -48,7 +48,6 @@ int main ()
     const std::num_get<char, Iter> &ng =
         std::use_facet<std::num_get<char, Iter> >(loc);
 
-#ifndef _RWSTD_NO_BOOL
     {
         // Build an istringstream from the buffer and construct
         // beginning and ending iterators on it.
@@ -61,7 +60,6 @@ int main ()
         // Get the boolean value from the stream.
         ng.get (begin, end, ins, state, bval);
     }
-#endif
 
     std::cout << bval << '\n';
 

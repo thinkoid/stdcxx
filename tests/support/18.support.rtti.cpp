@@ -206,7 +206,6 @@ run_test (int, char* [])
         // exercise 18.5.2, class bad_cast functionality
 
 #ifndef _RWSTD_NO_EXCEPTIONS
-#  ifndef _RWSTD_NO_DYNAMIC_CAST
 
         const char *caught = "no exception";
 
@@ -300,7 +299,6 @@ run_test (int, char* [])
         _RWSTD_UNUSED (d1);
         _RWSTD_UNUSED (b);
 
-#  endif   // _RWSTD_NO_DYNAMIC_CAST
 #endif   // _RWSTD_NO_EXCEPTIONS
     }
 

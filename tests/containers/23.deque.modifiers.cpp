@@ -1288,8 +1288,6 @@ void test_erase ()
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_EXPLICIT
-
 struct DR_438
 {
     static bool cast_used;
@@ -1302,10 +1300,6 @@ struct DR_438
 };
 
 bool DR_438::cast_used;
-
-#else
-#  define NO_DR_438_TEST "_RWSTD_NO_EXPLICIT #defined"
-#endif   // _RWSTD_NO_EXPLICIT
 
 
 void test_dr_438 ()

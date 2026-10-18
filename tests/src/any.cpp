@@ -36,8 +36,6 @@
 #include <string.h>      // for memset()
 
 
-#ifndef _RWSTD_NO_BOOL
-
 rw_any_t::rw_any_t (bool value)
     : str_ (0), tid_ (t_bool)
 {
@@ -50,8 +48,6 @@ rw_any_t::rw_any_t (bool value)
     memset (&val_, 0, sizeof val_);
     val_.bool_ = value;
 }
-
-#endif   // _RWSTD_NO_BOOL
 
 rw_any_t::rw_any_t (char value)
     : str_ (0), tid_ (t_char)

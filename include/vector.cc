@@ -560,8 +560,6 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
 
 #ifndef _RWSTD_NO_VECTOR_BOOL
 
-#ifndef _RWSTD_NO_BOOL
-
 #if !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) 
   template <class _Allocator>
   template<class _InputIter>
@@ -686,8 +684,6 @@ _C_insert (iterator __it, bool __x)
   }
 
 #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
-
-#endif   // _RWSTD_NO_BOOL
 
 #endif   // _RWSTD_NO_VECTOR_BOOL
 

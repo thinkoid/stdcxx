@@ -803,8 +803,6 @@ induce_exception (RuntimeExceptionId reid, const char *name)
 
     case E_bad_cast: {   /////////////////////////////////////////////
 
-#ifndef _RWSTD_NO_DYNAMIC_CAST
-
         Derived1 b;
         Base &a = b;
 
@@ -813,13 +811,6 @@ induce_exception (RuntimeExceptionId reid, const char *name)
 
         return E_error;
 
-#else   // if defined (_RWSTD_NO_DYNAMIC_CAST)
-
-        why = "_RWSTD_NO_DYNAMIC_CAST is #defined";
-
-        break;   // unable to induce bad_cast
-
-#endif   // _RWSTD_NO_DYNAMIC_CAST
     }
 
     case E_bad_exception: {   ////////////////////////////////////////

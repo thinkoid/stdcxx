@@ -630,10 +630,8 @@ swap (vector<_TypeT, _Allocator> &__x, vector<_TypeT, _Allocator> &__y)
 
 #ifndef _RWSTD_NO_VECTOR_BOOL
 
-#ifndef _RWSTD_NO_BOOL
-
    // number of bits in a machine word
-#  define _RWSTD_WORD_BIT (int (_RWSTD_CHAR_BIT * sizeof (unsigned int)))
+#define _RWSTD_WORD_BIT (int (_RWSTD_CHAR_BIT * sizeof (unsigned int)))
 
 
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
@@ -653,11 +651,11 @@ class _RWSTD_EXPORT
 
 vector<bool, _Allocator >: private _Allocator
 {
-#if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) && !defined (_RWSTD_NO_TYPENAME)
+#ifdef _RWSTD_NO_CLASS_PARTIAL_SPEC
     // clear _TYPENAME
-#  undef _TYPENAME
-#  define _TYPENAME
-#endif  // _RWSTD_NO_CLASS_PARTIAL_SPEC && !_RWSTD_NO_TYPENAME
+#undef _TYPENAME
+#define _TYPENAME
+#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
     typedef _RWSTD_REBIND(_Allocator, unsigned int)       _C_value_alloc_type;
     typedef vector                                        _C_self;
@@ -671,11 +669,11 @@ public:
     typedef _TYPENAME _C_value_alloc_type::pointer          pointer;
     typedef _TYPENAME _C_value_alloc_type::const_pointer    const_pointer;
 
-#if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) && !defined (_RWSTD_NO_TYPENAME)
+#ifdef _RWSTD_NO_CLASS_PARTIAL_SPEC
     // restore _TYPENAME
-#  undef _TYPENAME
-#  define _TYPENAME   typename
-#endif  // _RWSTD_NO_CLASS_PARTIAL_SPEC && !_RWSTD_NO_TYPENAME
+#undef _TYPENAME
+#define _TYPENAME   typename
+#endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
     class iterator;
     class const_iterator;
@@ -1264,8 +1262,6 @@ public:
 };
 
 #undef _Allocator 
-
-#endif   // _RWSTD_NO_BOOL
 
 #endif   // _RWSTD_NO_VECTOR_BOOL
 

@@ -101,7 +101,6 @@ struct Limits<int>
 };
 
 
-#ifndef _RWSTD_NO_BOOL
 _RWSTD_SPECIALIZED_CLASS
 struct Limits<bool>
 {  
@@ -123,8 +122,6 @@ struct Limits<bool>
         return 0;
     }
 };
-
-#endif //_RWSTD_NO_BOOL
 
 
 _RWSTD_SPECIALIZED_CLASS
@@ -584,11 +581,7 @@ run_test (int, char**)
 #define TEST(T, fmt)   run_test ((T*)0, #T, fmt)
 
 
-#ifndef _RWSTD_NO_BOOL
-
     TEST (bool, "%#b");
-
-#endif //_RWSTD_NO_BOOL
   
 
     TEST (char, "%{#c}");

@@ -375,8 +375,6 @@ test_facets ()
 
 /***************************************************************************/
 
-#ifndef _RWSTD_NO_EXPLICIT
-
 // helper to verify that locale and facet ctors are explicit
 // not defined since they must not be referenced if test is successful
 void is_explicit (const std::locale&);
@@ -385,12 +383,12 @@ void is_explicit (const std::locale::facet&);
 void is_explicit (const std::collate<char>&);
 void is_explicit (const std::ctype<char>&);
 
-#  ifndef _RWSTD_NO_WCHAR_T
+#ifndef _RWSTD_NO_WCHAR_T
 
 void is_explicit (const std::collate<wchar_t>&);
 void is_explicit (const std::ctype<wchar_t>&);
 
-#  endif   // _RWSTD_NO_WCHAR_T
+#endif   // _RWSTD_NO_WCHAR_T
 
 struct has_implicit_ctor
 {
@@ -408,8 +406,6 @@ struct has_implicit_ctor
 
 // calls to the overloaded is_explicit() resolve to the function below
 void is_explicit (const has_implicit_ctor&) { /* empty */ }
-
-#endif   // _RWSTD_NO_EXPLICIT
 
 /***************************************************************************/
 

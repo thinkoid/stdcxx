@@ -207,15 +207,11 @@ struct NumPut: std::num_put<charT, charT*>
 
     NumPut (std::size_t ref = 0): Base (ref) { }
 
-#ifndef _RWSTD_NO_BOOL
-
     virtual iter_type
     do_put (iter_type it, std::ios_base &f, char_type fill, bool v) const {
         ++ncalls_ [test_bool];
         return Base::do_put (it, f, fill, v);
     }
-
-#endif   // _RWSTD_NO_BOOL
 
     virtual iter_type
     do_put (iter_type it, std::ios_base &f, char_type fill, long v) const {
@@ -504,11 +500,7 @@ void direct_use_test (charT, const char *cname)
 #define DIRECT_USE_TEST(T) \
     np.put (std::ostreambuf_iterator<charT>(&sb), ios, charT (), (T)0)
 
-#ifndef _RWSTD_NO_BOOL
-
     DIRECT_USE_TEST (bool);
-
-#endif   // _RWSTD_NO_BOOL
 
     DIRECT_USE_TEST (unsigned long);
     DIRECT_USE_TEST (long);
@@ -555,7 +547,6 @@ void direct_use_test (charT, const char *cname)
 template <class charT>
 void bool_test (charT, const char *cname)
 {
-#ifndef _RWSTD_NO_BOOL
 
     rw_info (0, 0, __LINE__, "std::num_put<%s>::put (..., bool)", cname);
 
@@ -650,8 +641,6 @@ void bool_test (charT, const char *cname)
 
     TEST (T, false, boolalpha | internal, 0,4, ',', "", ",,,,");
     TEST (T, true,  boolalpha | internal, 0,4, ',', "", ",,,\001");
-
-#endif   // _RWSTD_NO_BOOL
 
 }
 
@@ -2138,9 +2127,7 @@ void numput_virtuals_test (charT, const char *cname)
     // function calls the appropriate implementation standard do_xxx()
     // member function
 
-#ifndef _RWSTD_NO_BOOL
     ASSERT (bool, 1, bool, "bool", "bool");
-#endif   // _RWSTD_NO_BOOL
 
     ASSERT (long,  1, long, "long", "long");
     ASSERT (ulong, 1, ulong, "unsigned long", "unsigned long");
@@ -2186,11 +2173,7 @@ void run_tests (charT, const char *cname)
         rw_note (0, __FILE__, __LINE__, "%s test disabled",     \
                  tname && *tname ? tname : #T)
 
-#ifndef _RWSTD_NO_BOOL
-
     TEST (bool, "");
-
-#endif   // _RWSTD_NO_BOOL
 
     
     // NOTE: there is no num_put::put(..., short)

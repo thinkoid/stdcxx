@@ -51,10 +51,6 @@
 #endif   // _RWSTD_NO_NAMESPACE && !std
 
 
-#if defined (_RWSTD_NO_TYPENAME) && !defined (typename)
-#  define typename /* ignore */
-#endif   // _RWSTD_NO_TYPENAME && !typename
-
 
 #if defined (_RWSTD_NO_EXCEPTIONS)
 #  ifndef try
@@ -69,9 +65,6 @@
 #endif   // _RWSTD_NO_EXCEPTIONS
 
 // give the for-init-variable a local scope
-#ifdef _RWSTD_NO_FOR_LOCAL_SCOPE
-#  define for   if (0); else for
-#endif   // _RWSTD_NO_FOR_LOCAL_SCOPE
 
 
 // convenience macro for exception specification on function pointers

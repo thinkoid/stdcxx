@@ -634,16 +634,7 @@ size_t __rw_facet_id::_C_init () const _THROWS (())
     // generate a unique id
     const size_t new_id = _RWSTD_ATOMIC_PREINCREMENT (__rw_id_gen, false);
 
-#ifndef _RWSTD_NO_MUTABLE
-
     _RWSTD_ATOMIC_STORE_RELEASE (_C_id, new_id, false);
-
-#else   // if defined (_RWSTD_NO_MUTABLE)
-
-    _RWSTD_ATOMIC_STORE_RELEASE (
-        _RWSTD_CONST_CAST (__rw_facet_id*, this)->_C_id, new_id, false);
-
-#endif   // _RWSTD_NO_MUTABLE
 
     return new_id;
 }

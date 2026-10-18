@@ -74,16 +74,22 @@ by" names the probes that read the gate (chapter 5).
 | gate | question | lib | tests | files | read by |
 | --- | --- | --- | --- | --- | --- |
 | `NAMESPACE` | the `namespace` keyword | 75 | 36 | 32 | nine probes |
-| `BOOL` | `bool`, `true`, `false` | 18 | 23 | 8 | `LIMITS` |
-| `TYPENAME` | the `typename` keyword | 5 | 4 | 2 | three probes |
-| `EXPLICIT` | the `explicit` keyword | 1 | 17 | 1 | |
-| `STATIC_CAST` | `static_cast` | 3 | 0 | 1 | |
-| `DYNAMIC_CAST` | `dynamic_cast` | 3 | 11 | 1 | |
-| `NEW_CLASS_TEMPLATE_SYNTAX` | `template <>` on a class specialization | 1 | 0 | 1 | `CV_VOID_SPECIALIZATIONS` |
-| `NEW_FUNC_TEMPLATE_SYNTAX` | `template <>` on a function specialization | 1 | 0 | 1 | |
-| `NO_FOR_LOCAL_SCOPE` | the scope of a for-init-statement | 0 | 4 | 0 | |
+| `BOOL` | `bool`, `true`, `false` | 18 | 23 | 8 | `LIMITS`; retired 2026-10-17 |
+| `TYPENAME` | the `typename` keyword | 5 | 4 | 2 | three probes; retired 2026-10-17 |
+| `EXPLICIT` | the `explicit` keyword | 1 | 17 | 1 | retired 2026-10-17 |
+| `STATIC_CAST` | `static_cast` | 3 | 0 | 1 | retired 2026-10-17 |
+| `DYNAMIC_CAST` | `dynamic_cast` | 3 | 11 | 1 | retired 2026-10-17 |
+| `NEW_CLASS_TEMPLATE_SYNTAX` | `template <>` on a class specialization | 1 | 0 | 1 | `CV_VOID_SPECIALIZATIONS`; retired 2026-10-17 |
+| `NEW_FUNC_TEMPLATE_SYNTAX` | `template <>` on a function specialization | 1 | 0 | 1 | retired 2026-10-17 |
+| `NO_FOR_LOCAL_SCOPE` | the scope of a for-init-statement | 0 | 4 | 0 | retired 2026-10-17 |
 
-`CONST_CAST` and `REINTERPRET_CAST` have no reader; chapter 3.
+`CONST_CAST` and `REINTERPRET_CAST` have no reader; chapter 3. Both
+went with the bundle, as did `_RWSTD_NO_MUTABLE`, a gate this census
+could not list: no probe yields it, nothing defines it, and two
+places read it. The bundle left `_TYPENAME`, `_EXPLICIT`, the
+`_RWSTD_*_CAST` and the `_RWSTD_SPECIALIZED_*` macros in `rw/_defs.h`
+with their one definition; whether to spell them out is a sweep of
+its own, queued.
 
 ### 2.2 Templates
 
@@ -233,8 +239,8 @@ Small first, so the pattern settles before the big three.
    it, one header group per commit, the probe and its two readers
    last. `MEMBER_TEMPLATE_OVERLOAD`: retired in the commit after
    them.
-2. The keyword gates of 2.1 as one bundle; `NAMESPACE` on its own
-   for its nine probes.
+2. The keyword gates of 2.1 as one bundle, done 2026-10-17 in one
+   commit; `NAMESPACE` on its own for its nine probes.
 3. The template gates of 2.2, smallest first; `CLASS_PARTIAL_SPEC`
    with `PART_SPEC_OVERLOAD` and `FUNC_PARTIAL_SPEC` last of them.
 4. The other language rules of 2.4.

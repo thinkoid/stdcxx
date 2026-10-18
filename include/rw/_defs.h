@@ -382,32 +382,14 @@
 #define _RWSTD_CLASS_EXPORT    /* empty */
 #define _RWSTD_MEMBER_EXPORT   /* empty */
 
-#ifdef _RWSTD_NO_BOOL
-#  define bool    int
-#  define false   0
-#  define true    1
-#endif // _RWSTD_NO_BOOL
+
+#define _TYPENAME   typename
 
 
-#ifndef _RWSTD_NO_TYPENAME
-#  define _TYPENAME   typename
-#else
-#  define _TYPENAME   /* empty */
-#endif
+#define _EXPLICIT   explicit
 
 
-#ifndef _RWSTD_NO_EXPLICIT
-#  define _EXPLICIT   explicit
-#else
-#  define _EXPLICIT   /* empty */
-#endif
-
-
-#ifndef _RWSTD_NO_MUTABLE
-#  define _MUTABLE   mutable
-#else
-#  define _MUTABLE   /* empty */
-#endif
+#define _MUTABLE   mutable
 
 
 //
@@ -428,37 +410,19 @@
 
 // Macro for casting, using either the "old" method
 // or the new C++ cast system
-#ifndef _RWSTD_NO_STATIC_CAST
-#  define _RWSTD_STATIC_CAST(T, x)      static_cast< T >(x)
-#  define _RWSTD_REINTERPRET_CAST(T, x) reinterpret_cast< T >(x)
-#  define _RWSTD_CONST_CAST(T, x)       const_cast< T >(x)
-#else   // if defined (_RWSTD_NO_STATIC_CAST)
-#  define _RWSTD_STATIC_CAST(T, x)      ((T)x)
-#  define _RWSTD_REINTERPRET_CAST(T, x) ((T)x)
-#  define _RWSTD_CONST_CAST(T, x)       ((T)x)
-#endif   // _RWSTD_NO_STATIC_CAST
+#define _RWSTD_STATIC_CAST(T, x)      static_cast< T >(x)
+#define _RWSTD_REINTERPRET_CAST(T, x) reinterpret_cast< T >(x)
+#define _RWSTD_CONST_CAST(T, x)       const_cast< T >(x)
 
-#ifndef _RWSTD_NO_DYNAMIC_CAST
-#  define _RWSTD_DYNAMIC_CAST(T, x)      dynamic_cast< T >(x)
-#else   // if defined (_RWSTD_NO_DYNAMIC_CAST)
-#  define _RWSTD_DYNAMIC_CAST(T, x)      ((T)x)
-#endif   // _RWSTD_NO_DYNAMIC_CAST
+#define _RWSTD_DYNAMIC_CAST(T, x)      dynamic_cast< T >(x)
 
 //
 // Macros for the new template specialization syntax
 //
 
-#ifdef _RWSTD_NO_NEW_FUNC_TEMPLATE_SYNTAX
-#  define _RWSTD_SPECIALIZED_FUNCTION
-#else
-#  define _RWSTD_SPECIALIZED_FUNCTION template<>
-#endif
+#define _RWSTD_SPECIALIZED_FUNCTION template<>
 
-#ifdef _RWSTD_NO_NEW_CLASS_TEMPLATE_SYNTAX
-#  define _RWSTD_SPECIALIZED_CLASS
-#else
-#  define _RWSTD_SPECIALIZED_CLASS template<>
-#endif
+#define _RWSTD_SPECIALIZED_CLASS template<>
 
 // for compilers or environments that do not support namespaces
 #ifndef _RWSTD_NO_NAMESPACE
