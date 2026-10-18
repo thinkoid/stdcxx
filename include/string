@@ -83,7 +83,7 @@ public:
 
     typedef  _RWSTD_ALLOC_TYPE(allocator_type, value_type)          
         _C_value_alloc_type;
-    typedef  _RWSTD_REBIND(allocator_type, _C_string_ref_type)  
+    typedef typename allocator_type::template rebind<_C_string_ref_type>::other
         _C_ref_alloc_type;
 
     typedef typename allocator_type::size_type        size_type;

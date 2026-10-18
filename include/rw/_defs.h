@@ -627,14 +627,12 @@
 #endif   // _RWSTD_NO_EXCEPTIONS
 
 
-// for compilers that can't handle standard allocators we provide four
-// workarounds: _RWSTD_REBIND, used in place of _Allocator::rebind, allows
-// containers to use the same allocator for different data types
-// _RWSTD_ALLOC_TYPE is required to "rebind", or rather wrap,  the user
-// supplied non-conforming allocator in allocator_interface so that the
-// container need not be aware of the allocator's special properties (namely
-// the fact that the allocator allocates in terms of bytes rather than
-// elemements)
+// for compilers that can't handle standard allocators we provide three
+// workarounds: _RWSTD_ALLOC_TYPE is required to "rebind", or rather wrap,
+// the user supplied non-conforming allocator in allocator_interface so that
+// the container need not be aware of the allocator's special properties
+// (namely the fact that the allocator allocates in terms of bytes rather
+// than elemements)
 //
 // _RWSTD_VALUE_ALLOC creates a temporary allocator_interface wrapper
 // from the given parameter (usually *this) when allocating values in
@@ -643,14 +641,7 @@
 // a value allocator, allowing access to inherited allocator members
 // outside of the class.  For non-conforming compilers, this macro is
 // equivalent to _RWSTD_VALUE_ALLOC.
-//
-// NOTE: the spaces around type below are necessary to prevent errors
-//       if `to' is a template-id and the preprocessor doesn't put
-//       the spaces there automatically (GNU does, Sun does not)
 #ifdef _RWSTD_ALLOCATOR
-#  define _RWSTD_REBIND(from, to) \
-            typename from::template rebind < to >::other
-
 #  define _RWSTD_ALLOC_TYPE(Allocator, ignore)        \
           Allocator
 #  define _RWSTD_VALUE_ALLOC(ignore, object, call)    \
@@ -658,10 +649,8 @@
 #  define _RWSTD_VALUE_ALLOC_CAST(rvalue)             \
           static_cast< allocator_type& >(rvalue)
 #else   // if !defined (_RWSTD_ALLOCATOR)
-#  define _RWSTD_REBIND(from, to) \
-          std::allocator_interface < from, to >
 #  define _RWSTD_ALLOC_TYPE(Allocator, T)             \
-          _RWSTD_REBIND (Allocator, T)
+          std::allocator_interface < Allocator, T >
 #  define _RWSTD_VALUE_ALLOC(Allocator, object, call) \
            Allocator (object).call
 #  define _RWSTD_VALUE_ALLOC_CAST(rvalue)             \

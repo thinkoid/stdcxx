@@ -611,7 +611,8 @@ class
 
 vector<bool, _Allocator >: private _Allocator
 {
-    typedef _RWSTD_REBIND(_Allocator, unsigned int)       _C_value_alloc_type;
+    typedef typename _Allocator::template rebind<unsigned int>::other
+            _C_value_alloc_type;
     typedef vector                                        _C_self;
 public:
 

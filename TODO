@@ -115,10 +115,10 @@ are the same workaround, 25 sites and none respectively, and
 =_specialized.h=, is its target. The rebind macro was a workaround
 for an ancient Sun compiler; remove it (2026-10-16).
 
-Fix: spell the rebind at the eleven sites and delete the macro; then
-the three sibling macros and the =_RWSTD_ALLOCATOR= gate with the
-=allocator_interface= side. The =_RWSTD_NO_DEPENDENT_TEMPLATE= branch
-and its probe went with the small template gates on 2026-10-17.
+Fix: the three sibling macros and the =_RWSTD_ALLOCATOR= gate with the
+=allocator_interface= side. The rebind was spelled at its eleven sites
+and the macro deleted on 2026-10-18; the =_RWSTD_NO_DEPENDENT_TEMPLATE=
+branch and its probe went with the small template gates on 2026-10-17.
 
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
