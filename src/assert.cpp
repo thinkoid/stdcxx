@@ -39,7 +39,7 @@
 
 #  include <execinfo.h>
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // declare with attribute((nothrow)) since the function calls
 // others that may not be declared nothrow
@@ -60,7 +60,7 @@ __rw_stack_trace (int fd) _RWSTD_DEFINE_NOTHROW
 
 }   // namespace __rw
 
-#  define STACK_TRACE()   _RW::__rw_stack_trace (2)
+#  define STACK_TRACE()   __rw::__rw_stack_trace (2)
 
 #endif
 
@@ -69,7 +69,7 @@ __rw_stack_trace (int fd) _RWSTD_DEFINE_NOTHROW
 #endif   // !defined (STACK_TRACE)
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 _RWSTD_EXPORT void

@@ -75,7 +75,7 @@
 typedef unsigned char UChar;
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
  
 #undef min
 #undef max
@@ -89,9 +89,9 @@ int __rw_get_cat (int) _THROWS (());
 #ifndef _RWSTD_NO_WCHAR_T
 
 _RWSTD_INTERNAL void 
-__rw_append_weight (const _RW::__rw_collate_t *impl,
+__rw_append_weight (const __rw::__rw_collate_t *impl,
                     const unsigned            *weights,
-                    _STD::wstring             &out)
+                    std::wstring              &out)
 {
     // append the weight(s) to the out string
     for (int i = 0; i < impl->longest_weight; ++i, ++weights) {
@@ -111,9 +111,9 @@ __rw_append_weight (const _RW::__rw_collate_t *impl,
 
 
 _RWSTD_INTERNAL void 
-__rw_append_weight (const _RW::__rw_collate_t *impl, 
+__rw_append_weight (const __rw::__rw_collate_t *impl, 
                     const unsigned int        *weights, 
-                    _STD::string              &out)
+                    std::string               &out)
 {
     // append the weight(s) to the out string
     for (int i = 0; i < impl->longest_weight; ++i, ++weights) {
@@ -151,7 +151,7 @@ __rw_append_weight (const _RW::__rw_collate_t *impl,
 
 template <class _STR_T>
 static void
-__rw_process_offsets (_RW::__rw_collate_t  *impl,
+__rw_process_offsets (__rw::__rw_collate_t *impl,
                       const unsigned      **start,
                       const unsigned      **end,
                       _STR_T               &out)
@@ -190,7 +190,7 @@ __rw_process_offsets (_RW::__rw_collate_t  *impl,
 
                     // qualify the call to make sure the function
                     // is found during lookup when declared static
-                    _RW::__rw_append_weight (impl, weightp, out);
+                    __rw::__rw_append_weight (impl, weightp, out);
                 }
                 break;
 
@@ -202,7 +202,7 @@ __rw_process_offsets (_RW::__rw_collate_t  *impl,
 
                     // qualify the call to make sure the function
                     // is found during lookup when declared static
-                    _RW::__rw_append_weight (impl, weightp, out);
+                    __rw::__rw_append_weight (impl, weightp, out);
                 }
                 break;
 
@@ -221,14 +221,14 @@ __rw_process_offsets (_RW::__rw_collate_t  *impl,
                         typedef typename _STR_T::value_type CharT;
 
                         const CharT ign =
-                            _STD::numeric_limits<CharT>::max ();
+                            std::numeric_limits<CharT>::max ();
 
                         out += ign;
                     }
                     else {
                         // qualify the call to make sure the function
                         // is found during lookup when declared static
-                        _RW::__rw_append_weight (impl, weightp, out);
+                        __rw::__rw_append_weight (impl, weightp, out);
                     }
                 }
                 break;
@@ -243,14 +243,14 @@ __rw_process_offsets (_RW::__rw_collate_t  *impl,
                         typedef typename _STR_T::value_type CharT;
 
                         const CharT ign =
-                            _STD::numeric_limits<CharT>::max ();
+                            std::numeric_limits<CharT>::max ();
 
                         out += ign;
                     }
                     else
                         // qualify the call to make sure the function
                         // is found during lookup when declared static
-                        _RW::__rw_append_weight (impl, weightp, out);
+                        __rw::__rw_append_weight (impl, weightp, out);
                 }
                 break;
             }
@@ -286,7 +286,7 @@ __rw_get_w_ce_offset (const __rw_collate_t *impl,
 
             // convert the next wchar_t character to a utf8 encoded character
             const size_t nbytes =
-                _RW::__rw_itoutf8 (**cur_char, utf8_enc);
+                __rw::__rw_itoutf8 (**cur_char, utf8_enc);
 
             for (size_t i = 0; i < nbytes; i++) {
 
@@ -330,7 +330,7 @@ __rw_get_wchar_offset (const __rw_collate_t *impl,
     while (*cur_char < end) {
         // convert the next wchar_t character to a utf8 encoded character
         const size_t nbytes =
-            _RW::__rw_itoutf8 (**cur_char, utf8_enc);
+            __rw::__rw_itoutf8 (**cur_char, utf8_enc);
 
         for (size_t i = 0; i < nbytes; i++) {
             const unsigned c1 = impl->get_first_char_in_w_tab (cur_tab);
@@ -439,10 +439,10 @@ __rw_is_invalid (const unsigned int* first_tab, const char *from)
 // same as strxfrm() except that it takes the number of characters
 // in an array that may contain embedded NULs; these are inserted
 // into the transformed string
-static _STD::string
+static std::string
 __rw_strnxfrm (const char *src, size_t nchars)
 {
-    _STD::string res;
+    std::string res;
 
     char buf [256];
     char *pbuf = buf;
@@ -499,7 +499,7 @@ __rw_strnxfrm (const char *src, size_t nchars)
                 if (pbuf != buf)
                     delete[] pbuf;
 
-                return _STD::string ();
+                return std::string ();
             }
 
             size_t res_size = res.size ();
@@ -556,10 +556,10 @@ __rw_strnxfrm (const char *src, size_t nchars)
 // same as wcsxfrm() except that it takes the number of characters
 // in an array that may contain embedded NULs; these are inserted
 // into the transformed string
-static _STD::wstring
+static std::wstring
 __rw_wcsnxfrm (const wchar_t *src, size_t nchars)
 {
-    _STD::wstring res;
+    std::wstring res;
 
     wchar_t buf [256];
     wchar_t *pbuf = buf;
@@ -571,7 +571,7 @@ __rw_wcsnxfrm (const wchar_t *src, size_t nchars)
 
         if (src [0]) {
 
-            typedef _STD::char_traits<wchar_t> Traits;
+            typedef std::char_traits<wchar_t> Traits;
 
             const wchar_t* const last = Traits::find (src, nchars, L'\0');
 
@@ -617,7 +617,7 @@ __rw_wcsnxfrm (const wchar_t *src, size_t nchars)
                 if (pbuf != buf)
                     delete[] pbuf;
 
-                return _STD::wstring ();
+                return std::wstring ();
             }
 
             size_t res_size = res.size ();
@@ -687,7 +687,7 @@ long __rw_hash (const _CharT *lo, const _CharT *hi) _THROWS (())
     long res = 0;
 
     for ( ; lo != hi; ++lo) {
-        typedef _STD::char_traits<_CharT> _Traits;
+        typedef std::char_traits<_CharT> _Traits;
 
         res = (res << one_eighth) + _Traits::to_int_type (*lo);
 
@@ -722,10 +722,10 @@ template long __rw_hash (const wchar_t*, const wchar_t*) _THROWS(());
 }    // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
-_RW::__rw_facet_id collate<char>::id;
+__rw::__rw_facet_id collate<char>::id;
 
 
 // outlined to avoid generating a vtable in each translation unit
@@ -776,7 +776,7 @@ do_hash (const char_type *__lo, const char_type *__hi) const
     __lo = __str.data ();
     __hi = __lo + __str.length ();
 
-    const long res = _RW::__rw_hash (__lo, __hi);
+    const long res = __rw::__rw_hash (__lo, __hi);
 
     return res;
 }
@@ -814,25 +814,25 @@ do_transform (const char* low, const char* high) const
 {
     _RWSTD_ASSERT (low <= high);
 
-    const int ccvt_cat = _RW::__rw_get_cat ((_C_wcodecvt_byname + 1) / 2);
+    const int ccvt_cat = __rw::__rw_get_cat ((_C_wcodecvt_byname + 1) / 2);
 
-    _RW::__rw_collate_t* const impl = 
-        _RWSTD_CONST_CAST (_RW::__rw_collate_t*,
-            _RWSTD_STATIC_CAST (const _RW::__rw_collate_t*, _C_data ()));
+    __rw::__rw_collate_t* const impl = 
+        _RWSTD_CONST_CAST (__rw::__rw_collate_t*,
+            _RWSTD_STATIC_CAST (const __rw::__rw_collate_t*, _C_data ()));
 
     if (!impl || (this->_C_opts & this->_C_use_libc)) {
 
         // set the global libc locale in a thread-safe way
-        const _RW::__rw_setlocale clocale (_C_name, _RWSTD_LC_COLLATE);
+        const __rw::__rw_setlocale clocale (_C_name, _RWSTD_LC_COLLATE);
 
-        return _RW::__rw_strnxfrm (low, high - low);
+        return __rw::__rw_strnxfrm (low, high - low);
     }
 
     _RWSTD_ASSERT (0 != impl);
 
     // the maximum size that we could need to hold all the weight offsets
     // is high - low
-    _RW::__rw_pod_array<const unsigned int*, 1024> indexes;
+    __rw::__rw_pod_array<const unsigned int*, 1024> indexes;
 
     // first go through the string getting a weight offset for
     // each character, in the process check for collating elements.
@@ -840,15 +840,15 @@ do_transform (const char* low, const char* high) const
 
     // lazily initialized in the first iteration of the loop
     // in which the facet data is needed (possibly never)
-    const _RW::__rw_codecvt_t* cvt = 0;
+    const __rw::__rw_codecvt_t* cvt = 0;
 
     for (; tmp_lo < high; tmp_lo++) {
         const char* tmp_lo2 = tmp_lo;
-        int ret = _RW::__rw_get_n_ce_offset (impl, &tmp_lo2, high);
+        int ret = __rw::__rw_get_n_ce_offset (impl, &tmp_lo2, high);
 
         if (ret == -1) {
             tmp_lo2 = tmp_lo;
-            ret = _RW::__rw_get_char_offset (impl, &tmp_lo2, high);
+            ret = __rw::__rw_get_char_offset (impl, &tmp_lo2, high);
             if (ret == -1) {
                 // The character is not explicitely defined, but it
                 // may have been defined implicitly by UNDEFINED.
@@ -860,8 +860,8 @@ do_transform (const char* low, const char* high) const
 
                     size_t size;
                     if (0 == cvt) {
-                        cvt = _RWSTD_STATIC_CAST (const _RW::__rw_codecvt_t*, 
-                                                  _RW::__rw_get_facet_data (
+                        cvt = _RWSTD_STATIC_CAST (const __rw::__rw_codecvt_t*, 
+                                                  __rw::__rw_get_facet_data (
                                                       ccvt_cat, size, _C_name, 
                                                       impl->codeset_name ()));
 
@@ -869,7 +869,7 @@ do_transform (const char* low, const char* high) const
                             return string_type ();   // error
                     }
 
-                    if (_RW::__rw_is_invalid (cvt->n_to_w_tab(), tmp_lo2))
+                    if (__rw::__rw_is_invalid (cvt->n_to_w_tab(), tmp_lo2))
                         return string_type ();   // error
 
                     const unsigned int* const pwt =
@@ -895,7 +895,7 @@ do_transform (const char* low, const char* high) const
     }
     // now process the weights
     string_type out;
-    _RW::__rw_process_offsets (impl, indexes.data (),
+    __rw::__rw_process_offsets (impl, indexes.data (),
                                indexes.data () + indexes.size (), out);
 
     return out;
@@ -904,7 +904,7 @@ do_transform (const char* low, const char* high) const
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_RW::__rw_facet_id collate<wchar_t>::id;
+__rw::__rw_facet_id collate<wchar_t>::id;
 
 
 // outlined to avoid generating a vtable in each translation unit
@@ -955,7 +955,7 @@ do_hash (const char_type *__lo, const char_type *__hi) const
     __lo = __str.data ();
     __hi = __lo + __str.length ();
 
-    const long res = _RW::__rw_hash (__lo, __hi);
+    const long res = __rw::__rw_hash (__lo, __hi);
 
     return res;
 }
@@ -986,7 +986,7 @@ do_compare (const wchar_t* low1, const wchar_t* high1,
     }
 
     // use the system C library to compare the strings
-    _RW::__rw_setlocale clocale (this->_C_name, _RWSTD_LC_COLLATE);
+    __rw::__rw_setlocale clocale (this->_C_name, _RWSTD_LC_COLLATE);
     
     size_t len1 = high1 - low1;
     size_t len2 = high2 - low2;
@@ -1073,37 +1073,37 @@ collate_byname<wchar_t>::string_type
 collate_byname<wchar_t>::
 do_transform (const wchar_t* low, const wchar_t* high) const
 {
-    const int ccvt_cat = _RW::__rw_get_cat ((_C_wcodecvt_byname + 1) / 2);
+    const int ccvt_cat = __rw::__rw_get_cat ((_C_wcodecvt_byname + 1) / 2);
 
-    _RW::__rw_collate_t *impl = 
-        _RWSTD_CONST_CAST (_RW::__rw_collate_t*, _RWSTD_STATIC_CAST (
-            const _RW::__rw_collate_t*, _C_data ()));
+    __rw::__rw_collate_t *impl = 
+        _RWSTD_CONST_CAST (__rw::__rw_collate_t*, _RWSTD_STATIC_CAST (
+            const __rw::__rw_collate_t*, _C_data ()));
 
     if (!impl || (this->_C_opts & this->_C_use_libc)) {
 
         // set the global libc locale in a thread-safe way
-        const _RW::__rw_setlocale clocale (_C_name, _RWSTD_LC_COLLATE);
+        const __rw::__rw_setlocale clocale (_C_name, _RWSTD_LC_COLLATE);
 
-        return _RW::__rw_wcsnxfrm (low, high - low);
+        return __rw::__rw_wcsnxfrm (low, high - low);
     }
     else {
         _RWSTD_ASSERT (0 != impl);
         // the maximum size that we could need to hold all the weight offsets
         // is high - low
-        _RW::__rw_pod_array<const unsigned int*, 1024> indexes;
+        __rw::__rw_pod_array<const unsigned int*, 1024> indexes;
 
         // lazily initialized in the first iteration of the loop
         // in which the facet data is needed (possibly never)
-        const _RW::__rw_codecvt_t* cvt = 0;
+        const __rw::__rw_codecvt_t* cvt = 0;
 
         // first go through the string getting a weight offset for
         // each character, in the process check for collating elements.
         for (const wchar_t* tmp_lo =low; tmp_lo < high; tmp_lo++) {
             const wchar_t* tmp_lo2 = tmp_lo;
-            int ret = _RW::__rw_get_w_ce_offset (impl, &tmp_lo2, high);
+            int ret = __rw::__rw_get_w_ce_offset (impl, &tmp_lo2, high);
             if (ret == -1) {
                 tmp_lo2 = tmp_lo;
-                ret = _RW::__rw_get_wchar_offset (impl, &tmp_lo2, high);
+                ret = __rw::__rw_get_wchar_offset (impl, &tmp_lo2, high);
                 if (ret == -1) {
                     // The character is not explicitely defined, but it
                     // may have been defined implicitly by UNDEFINED.
@@ -1116,8 +1116,8 @@ do_transform (const wchar_t* low, const wchar_t* high) const
 
 
                         if (0 == cvt) {
-                            cvt = _RWSTD_STATIC_CAST(const _RW::__rw_codecvt_t*,
-                                                     _RW::__rw_get_facet_data (
+                            cvt = _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*,
+                                                     __rw::__rw_get_facet_data (
                                                         ccvt_cat, size, _C_name,
                                                         impl->codeset_name ()));
 
@@ -1128,11 +1128,11 @@ do_transform (const wchar_t* low, const wchar_t* high) const
                         char tmp [_RWSTD_MB_MAX];
 
                         const size_t nbytes =
-                            _RW::__rw_itoutf8 (*tmp_lo2, tmp);
+                            __rw::__rw_itoutf8 (*tmp_lo2, tmp);
 
                         tmp [nbytes] = '\0';
 
-                        if (_RW::__rw_is_invalid (cvt->w_to_n_tab (), tmp))
+                        if (__rw::__rw_is_invalid (cvt->w_to_n_tab (), tmp))
                             return 0;
 
                         const unsigned int *pwt =
@@ -1156,7 +1156,7 @@ do_transform (const wchar_t* low, const wchar_t* high) const
         }
         // now process the weights
         string_type out;
-        _RW::__rw_process_offsets (impl, indexes.data (),
+        __rw::__rw_process_offsets (impl, indexes.data (),
                                    indexes.data () + indexes.size (), out);
 
         return out;

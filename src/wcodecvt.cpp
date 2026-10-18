@@ -123,7 +123,7 @@ enum {
 typedef _RWSTD_MBSTATE_T StateT;
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 static const struct {
@@ -182,7 +182,7 @@ __rw_libc_mbrlen (_RWSTD_MBSTATE_T &state,
 
 // does a simple transliteration of the UTF-8 encoded character string
 static unsigned int
-__rw_xlit (const _RW::__rw_codecvt_t* impl,
+__rw_xlit (const __rw::__rw_codecvt_t* impl,
            const char *utf8s, size_t sz)
 {
     const unsigned int* const ptbls = impl->get_xliteration_tab ();
@@ -212,7 +212,7 @@ __rw_xlit (const _RW::__rw_codecvt_t* impl,
 }
 
 
-static _STD::codecvt_base::result
+static std::codecvt_base::result
 __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
                  const char       *from, 
                  const char       *from_end,
@@ -224,7 +224,7 @@ __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
     _RWSTD_ASSERT (from <= from_end);
     _RWSTD_ASSERT (to <= to_limit);
 
-    _STD::codecvt_base::result res = _STD::codecvt_base::ok;
+    std::codecvt_base::result res = std::codecvt_base::ok;
 
     // compute the length of the source sequence in bytes and
     // the size of the destination buffer in wide characters
@@ -244,7 +244,7 @@ __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
 
         // -1 indicates an invalid sequence (i.e., error)
         if (nbytes == size_t (-1)) {
-        res = _STD::codecvt_base::error;
+        res = std::codecvt_base::error;
             break;
         }
  
@@ -272,18 +272,18 @@ __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
     // if the conversion has exhausted all space in the destination
     // range AND there are more COMPLETE characters in the source
     // range then we have a "partial" conversion
-    if (res == _STD::codecvt_base::ok && src_len && !dst_size) {
+    if (res == std::codecvt_base::ok && src_len && !dst_size) {
         _RWSTD_MBSTATE_T tmp_state = state;
         size_t tmp = __rw_libc_mbrlen (tmp_state, psrc, src_len);
         if (tmp < size_t (-2))
-            res = _STD::codecvt_base::partial;
+            res = std::codecvt_base::partial;
     }
 
     return res;
 }
 
 
-static _STD::codecvt_base::result
+static std::codecvt_base::result
 __rw_libc_do_out (_RWSTD_MBSTATE_T &state,
                   const wchar_t    *from, 
                   const wchar_t    *from_end,
@@ -309,7 +309,7 @@ __rw_libc_do_out (_RWSTD_MBSTATE_T &state,
     const size_t mb_cur_max = size_t (MB_CUR_MAX);
 
     // the result of conversion
-    _STD::codecvt_base::result res = _STD::codecvt_base::ok;
+    std::codecvt_base::result res = std::codecvt_base::ok;
 
     // the size of the available space in the destination range
     size_t dst_free = size_t (to_limit - to_next);
@@ -343,7 +343,7 @@ __rw_libc_do_out (_RWSTD_MBSTATE_T &state,
 
         // -1 is returned as an indication of an illegal sequence
         if (_RWSTD_SIZE_MAX == dst_len) {
-            res = _STD::codecvt_base::error;
+            res = std::codecvt_base::error;
             break;
         }
  
@@ -365,7 +365,7 @@ __rw_libc_do_out (_RWSTD_MBSTATE_T &state,
                 // restore the state to the value prior to the last
                 // conversion and return partial
                 state = save_state;
-                res   = _STD::codecvt_base::partial;
+                res   = std::codecvt_base::partial;
                 break;
             } 
 
@@ -385,7 +385,7 @@ __rw_libc_do_out (_RWSTD_MBSTATE_T &state,
 }
 
 
-static _STD::codecvt_base::result
+static std::codecvt_base::result
 __rw_libc_do_unshift (_RWSTD_MBSTATE_T& state, char*& to_next, char* to_limit)
 {
     // save current state
@@ -399,18 +399,18 @@ __rw_libc_do_unshift (_RWSTD_MBSTATE_T& state, char*& to_next, char* to_limit)
     ret = wcrtomb (tmp, wchar_t (0), &state);
 
     if (_RWSTD_SIZE_MAX == ret)
-        return  _STD::codecvt_base::error;
+        return  std::codecvt_base::error;
 
     if (ret > size_t (to_limit - to_next)) {
         // restore the state and return partial
         state = tmp_state;
-        return _STD::codecvt_base::partial;
+        return std::codecvt_base::partial;
     }
 
     // copy the shift sequence
     memcpy (to_next, tmp, ret);
     to_next += ret;
-    return _STD::codecvt_base::ok;
+    return std::codecvt_base::ok;
 }
 
 
@@ -473,13 +473,13 @@ __rw_utf8validate (const char* from, size_t nbytes)
 }
 
 
-static _STD::codecvt_base::result
+static std::codecvt_base::result
 __rw_libstd_do_in (const char                *from_end,
                    const char               *&from_next,
                    wchar_t                   *to_limit,
                    wchar_t                  *&to_next,
                    int                        flags,
-                   const _RW::__rw_codecvt_t *impl)
+                   const __rw::__rw_codecvt_t *impl)
 {
     // use UCS as the internal encoding if `impl' is 0
     // (i.e., if the codecvt database is not available)
@@ -489,17 +489,17 @@ __rw_libstd_do_in (const char                *from_end,
     const bool use_ucs    = 0 != UCS_TYPE (flags);
     const bool strict_utf = 0 != (flags & __rw_strict);
 
-    _STD::codecvt_base::result res;
+    std::codecvt_base::result res;
     
     for (const unsigned* const tab = impl ? impl->n_to_w_tab () : 0; ; ) {
 
         if (from_next == from_end) {
-            res = _STD::codecvt_base::ok;
+            res = std::codecvt_base::ok;
             break;
         }
 
         if (to_next == to_limit) {
-            res = _STD::codecvt_base::partial;
+            res = std::codecvt_base::partial;
             break;
         }
 
@@ -518,14 +518,14 @@ __rw_libstd_do_in (const char                *from_end,
             if (_RWSTD_UINT_MAX == off) {
                 // the source sequence forms neither a valid multibyte
                 // character, nor is it an initial subsequence of one
-                res = _STD::codecvt_base::error;
+                res = std::codecvt_base::error;
                 break;
             }
 
             if (from == from_next) {
                 // the source sequence forms an incomplete initial
                 // subsequence of a valid multibyte character
-                res = _STD::codecvt_base::partial;
+                res = std::codecvt_base::partial;
                 break;
             }
 
@@ -552,14 +552,14 @@ __rw_libstd_do_in (const char                *from_end,
             if (!from) {
                 // the source sequence forms neither a valid UTF-8
                 // character, nor is it an initial subsequence of one
-                res = _STD::codecvt_base::error;
+                res = std::codecvt_base::error;
                 break;
             }
 
             if (from_next == from) {
                 // the source sequence forms an incomplete initial
                 // subsequence of a valid UTF-8 character
-                res = _STD::codecvt_base::partial;
+                res = std::codecvt_base::partial;
                 break;
             }
 
@@ -574,7 +574,7 @@ __rw_libstd_do_in (const char                *from_end,
 }
 
 
-static _STD::codecvt_base::result
+static std::codecvt_base::result
 __rw_libstd_do_out (const wchar_t             *from,
                     const wchar_t             *from_end,
                     const wchar_t            *&from_next,
@@ -582,10 +582,10 @@ __rw_libstd_do_out (const wchar_t             *from,
                     char                      *to_limit,
                     char                     *&to_next,
                     int                        flags,
-                    const _RW::__rw_codecvt_t *impl)
+                    const __rw::__rw_codecvt_t *impl)
 {
     // final result of the transformation
-    _STD::codecvt_base::result res = _STD::codecvt_base::ok;
+    std::codecvt_base::result res = std::codecvt_base::ok;
 
     const bool use_ucs = IS_UCS (flags);
 
@@ -598,7 +598,7 @@ __rw_libstd_do_out (const wchar_t             *from,
     for (from_next = from, to_next = to; from_next != from_end; ++from_next) {
 
         if (to_next == to_limit) {
-            res = _STD::codecvt_base::partial;
+            res = std::codecvt_base::partial;
             break;
         }
 
@@ -616,7 +616,7 @@ __rw_libstd_do_out (const wchar_t             *from,
 
             if (   (WIntT (0xd800U) <= wi && wi <= WIntT (0xdfffU))
                 || (WIntT (0xfffeU) <= wi && wi <= WIntT (0xffffU))) {
-                res = _STD::codecvt_base::error;
+                res = std::codecvt_base::error;
                 break;
             }
         }
@@ -643,20 +643,20 @@ __rw_libstd_do_out (const wchar_t             *from,
                 // try transliteration
                 off = __rw_xlit (impl, utfbuf, utf8_len);
                 if (0 == off) {
-                    res = _STD::codecvt_base::error;
+                    res = std::codecvt_base::error;
                     break;
                 }
             }
 
             if (_RWSTD_UINT_MAX == off) {
                 // the sequence does not form a valid character
-                res = _STD::codecvt_base::error;
+                res = std::codecvt_base::error;
                 break;
             }
 
             if (utf == utfbuf) {
                 // the next multibyte character position was incomplete
-                res = _STD::codecvt_base::ok;
+                res = std::codecvt_base::ok;
                 break;
             }
 
@@ -666,7 +666,7 @@ __rw_libstd_do_out (const wchar_t             *from,
             // check that there's enough space in the destination sequence
             utf8_len = *utf ? strlen (utf) : 1;
             if (bytes_avail < utf8_len) {
-                res = _STD::codecvt_base::partial;
+                res = std::codecvt_base::partial;
                 break;
             }
 
@@ -684,7 +684,7 @@ __rw_libstd_do_out (const wchar_t             *from,
                 utf8_len = __rw_itoutf8 (*from_next, utfbuf);
 
                 if (bytes_avail < utf8_len) {
-                    res = _STD::codecvt_base::partial;
+                    res = std::codecvt_base::partial;
                     break;
                 }
 
@@ -807,7 +807,7 @@ __rw_libstd_do_length (const char*                from,
                        const char*                from_end, 
                        size_t                     imax,
                        int                        flags,
-                       const _RW::__rw_codecvt_t* impl)  
+                       const __rw::__rw_codecvt_t* impl) 
 {
     // use UCS as the internal encoding if `impl' is 0
     // (i.e., if the codecvt database is not available)
@@ -863,15 +863,15 @@ __rw_libstd_do_length (const char*                from,
 }  //  namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
         
 
-_RW::__rw_facet_id codecvt<wchar_t, char, _RWSTD_MBSTATE_T>::id;
+__rw::__rw_facet_id codecvt<wchar_t, char, _RWSTD_MBSTATE_T>::id;
 
 
 /* explicit */ codecvt<wchar_t, char, _RWSTD_MBSTATE_T>::
 codecvt (size_t __ref /* = 0 */) _THROWS (())
-    : _RW::__rw_facet (__ref)
+    : __rw::__rw_facet (__ref)
 {
     // no-op
 }
@@ -934,7 +934,7 @@ do_out (state_type         &state,
     to_next   = to;
 
     // verify that the conversion state is valid
-    const int mbstate_valid = _RW::__rw_mbsinit (&state);
+    const int mbstate_valid = __rw::__rw_mbsinit (&state);
 
     _RWSTD_ASSERT (0 != mbstate_valid);
     if (!mbstate_valid)
@@ -974,7 +974,7 @@ do_in (state_type         &state,
     from_next = from;
     to_next   = to;
 
-    const int mbstate_valid = _RW::__rw_mbsinit (&state);
+    const int mbstate_valid = __rw::__rw_mbsinit (&state);
 
     _RWSTD_ASSERT (0 != mbstate_valid);
     if (!mbstate_valid)
@@ -1007,7 +1007,7 @@ do_unshift (state_type   &state,
     // next pointer must always be set before returning, even on error
     to_next = to;
 
-    const int mbstate_valid = _RW::__rw_mbsinit (&state);
+    const int mbstate_valid = __rw::__rw_mbsinit (&state);
 
     _RWSTD_ASSERT (0 != mbstate_valid);
     if (!mbstate_valid)
@@ -1030,7 +1030,7 @@ do_length (state_type        &state,
     // verify that the range is valid
     _RWSTD_ASSERT (!from == !from_end);
 
-    const int mbstate_valid = _RW::__rw_mbsinit (&state);
+    const int mbstate_valid = __rw::__rw_mbsinit (&state);
 
     _RWSTD_ASSERT (0 != mbstate_valid);
     if (!mbstate_valid)
@@ -1047,17 +1047,17 @@ codecvt_byname<wchar_t, char, _RWSTD_MBSTATE_T>::
 codecvt_byname (const char *name, size_t ref)
     : codecvt<wchar_t, char, _RWSTD_MBSTATE_T>(ref)
 {
-    _C_flags = _RW::__rw_encoding_from_name (name);
+    _C_flags = __rw::__rw_encoding_from_name (name);
 
 #if 0
 
     // FIXME: reliably detect whether the encoding is really stateless
     //        when `name' refers to a libc locale name
 
-    if (_RW::stateless == (_C_flags & 0xf)) {
-        const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
+    if (__rw::stateless == (_C_flags & 0xf)) {
+        const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
-        _C_flags = mbtowc (0, 0, 0) ? _RW::stateful : _RW::stateless;
+        _C_flags = mbtowc (0, 0, 0) ? __rw::stateful : __rw::stateless;
     }
 
 #endif   // 0/1
@@ -1076,9 +1076,9 @@ codecvt_byname (const char *name, size_t ref)
 
             int flags = 0;
 
-            for (size_t i = 0; i != _RW::__rw_n_ucsmods; ++i) {
-                if (!strcmp (_RW::__rw_ucsmods [i].mod, mod_nam)) {
-                    flags = _RW::__rw_ucsmods [i].flags;
+            for (size_t i = 0; i != __rw::__rw_n_ucsmods; ++i) {
+                if (!strcmp (__rw::__rw_ucsmods [i].mod, mod_nam)) {
+                    flags = __rw::__rw_ucsmods [i].flags;
                     break;
                 }
             }
@@ -1191,56 +1191,56 @@ do_in (state_type&         state,
     // test the type of the encoding that the facet is interpreting
     switch (ISO2022_TYPE (_C_flags)) {
 
-    case _RW::stateless: {
+    case __rw::stateless: {
 
         // obtain the mapping of the database file
-        const _RW::__rw_codecvt_t* const impl =
-            _RWSTD_STATIC_CAST (const _RW::__rw_codecvt_t*, this->_C_data ());
+        const __rw::__rw_codecvt_t* const impl =
+            _RWSTD_STATIC_CAST (const __rw::__rw_codecvt_t*, this->_C_data ());
     
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
-            const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
+            const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
             // verify that either the encoding is stateful
             // or the state is in its initial shift state
             const bool mbstate_valid =
-               mbtowc (0, 0, 0) || _RW::__rw_mbsinit (&state);
+               mbtowc (0, 0, 0) || __rw::__rw_mbsinit (&state);
 
             _RWSTD_ASSERT (mbstate_valid);
             if (!mbstate_valid)
                 break;
 
-            res = _RW::__rw_libc_do_in (state, 
+            res = __rw::__rw_libc_do_in (state, 
                                         from, from_end, from_next,
                                         to, to_limit, to_next);
         }
         else {
 
             // verify that the state is in its initial shift state
-            const int mbstate_valid = _RW::__rw_mbsinit (&state);
+            const int mbstate_valid = __rw::__rw_mbsinit (&state);
             _RWSTD_ASSERT (mbstate_valid);
             if (!mbstate_valid)
                 break;
 
-            res = _RW::__rw_libstd_do_in (from_end, from_next,
+            res = __rw::__rw_libstd_do_in (from_end, from_next,
                                           to_limit, to_next,
                                           _C_flags, impl);
         }
         break;
     }
 
-    case _RW::iso2022_jp:
-        res =  _RW::__rw_iso2022jp_do_in (state, from_next, from_end, 
+    case __rw::iso2022_jp:
+        res =  __rw::__rw_iso2022jp_do_in (state, from_next, from_end, 
                                           to_next, to_limit);
         break;
 
-    case _RW::iso2022_jp2:
-        res =  _RW::__rw_iso2022jp2_do_in (state, from_next, from_end, 
+    case __rw::iso2022_jp2:
+        res =  __rw::__rw_iso2022jp2_do_in (state, from_next, from_end, 
                                            to_next, to_limit);
         break;
 
-    case _RW::iso2022_kr:
-    case _RW::iso2022_cn:
+    case __rw::iso2022_kr:
+    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1277,52 +1277,52 @@ do_out (state_type         &state,
     // test the type of the encoding that the facet is interpreting
     switch (ISO2022_TYPE (_C_flags)) {
 
-    case _RW::stateless: {
+    case __rw::stateless: {
 
         // obtain the mapping of the database file
-        const _RW::__rw_codecvt_t* impl = 
-            _RWSTD_STATIC_CAST(const _RW::__rw_codecvt_t*, this->_C_data ());
+        const __rw::__rw_codecvt_t* impl = 
+            _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, this->_C_data ());
     
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
-            const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
+            const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
             // verify that either the encoding is stateful
             // or the state is in its initial shift state
             const bool mbstate_valid =
-               mbtowc (0, 0, 0) || _RW::__rw_mbsinit (&state);
+               mbtowc (0, 0, 0) || __rw::__rw_mbsinit (&state);
 
             _RWSTD_ASSERT (mbstate_valid);
             if (!mbstate_valid)
                 break;
 
-            res = _RW::__rw_libc_do_out (state, from, from_end, from_next,
+            res = __rw::__rw_libc_do_out (state, from, from_end, from_next,
                                          to, to_limit, to_next);
         }
         else {
             // verify that the state is in its initial shift state
-            const int mbstate_valid = _RW::__rw_mbsinit (&state);
+            const int mbstate_valid = __rw::__rw_mbsinit (&state);
             _RWSTD_ASSERT (mbstate_valid);
             if (!mbstate_valid)
                 break;
 
             // use own implementation
-            res = _RW::__rw_libstd_do_out (from, from_end, from_next,
+            res = __rw::__rw_libstd_do_out (from, from_end, from_next,
                                            to, to_limit, to_next,
                                            _C_flags, impl);
         }
         break;
     }
-    case _RW::iso2022_jp:
-        res = _RW::__rw_iso2022jp_do_out (state, from_next, from_end, 
+    case __rw::iso2022_jp:
+        res = __rw::__rw_iso2022jp_do_out (state, from_next, from_end, 
                                           to_next, to_limit);
         break;
-    case _RW::iso2022_jp2:
-        res = _RW::__rw_iso2022jp2_do_out (state, from_next, from_end, 
+    case __rw::iso2022_jp2:
+        res = __rw::__rw_iso2022jp2_do_out (state, from_next, from_end, 
                                            to_next, to_limit);
         break;
-    case _RW::iso2022_kr:
-    case _RW::iso2022_cn:
+    case __rw::iso2022_kr:
+    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1352,45 +1352,45 @@ do_unshift (state_type&   state,
     // test the type of the encoding that the facet is interpreting
     switch (ISO2022_TYPE (_C_flags)) {
 
-    case _RW::stateless: {
+    case __rw::stateless: {
 
         // obtain the mapping of the database file
-        const _RW::__rw_codecvt_t* const impl =
-            _RWSTD_STATIC_CAST (const _RW::__rw_codecvt_t*, this->_C_data ());
+        const __rw::__rw_codecvt_t* const impl =
+            _RWSTD_STATIC_CAST (const __rw::__rw_codecvt_t*, this->_C_data ());
 
         if (USE_LIBC (impl, _C_flags)) {
 
-            const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
+            const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
             
             if (mbtowc (0, 0, 0) == 0) {
                 // verify that the state is in its initial shift state
-                const int mbstate_valid = _RW::__rw_mbsinit (&state);
+                const int mbstate_valid = __rw::__rw_mbsinit (&state);
                 _RWSTD_ASSERT (mbstate_valid);
 
                 res = mbstate_valid ? noconv : error;
             }
             else
-                res = _RW::__rw_libc_do_unshift (state, to_next, to_limit);
+                res = __rw::__rw_libc_do_unshift (state, to_next, to_limit);
         }
         else {
             // use our own implementation
 
             // verify that the state is in its initial shift state
-            const int mbstate_valid = _RW::__rw_mbsinit (&state);
+            const int mbstate_valid = __rw::__rw_mbsinit (&state);
             _RWSTD_ASSERT (mbstate_valid);
 
             res = mbstate_valid ? noconv : error;
         }
         break;
     }
-    case _RW::iso2022_jp:
-        res = _RW::__rw_iso2022jp_do_unshift (state, to_next, to_limit);
+    case __rw::iso2022_jp:
+        res = __rw::__rw_iso2022jp_do_unshift (state, to_next, to_limit);
         break;
-    case _RW::iso2022_jp2:
-        res = _RW::__rw_iso2022jp2_do_unshift (state, to_next, to_limit);
+    case __rw::iso2022_jp2:
+        res = __rw::__rw_iso2022jp2_do_unshift (state, to_next, to_limit);
         break;
-    case _RW::iso2022_kr:
-    case _RW::iso2022_cn:
+    case __rw::iso2022_kr:
+    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1417,47 +1417,47 @@ do_length (state_type&        state,
     // test the type of the encoding that the facet is interpreting
     switch (ISO2022_TYPE (_C_flags)) {
 
-    case _RW::stateless: {
+    case __rw::stateless: {
 
         // obtain the mapping of the database file
-        const _RW::__rw_codecvt_t* impl = 
-            _RWSTD_STATIC_CAST(const _RW::__rw_codecvt_t*, this->_C_data ());
+        const __rw::__rw_codecvt_t* impl = 
+            _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, this->_C_data ());
 
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
-            const _RW::__rw_setlocale clocale (this->_C_name, LC_CTYPE);
+            const __rw::__rw_setlocale clocale (this->_C_name, LC_CTYPE);
 
             // verify that either the encoding is stateful
             // or the state is in its initial shift state
             const bool mbstate_valid =
-                mbtowc (0, 0, 0) || _RW::__rw_mbsinit (&state);
+                mbtowc (0, 0, 0) || __rw::__rw_mbsinit (&state);
 
             _RWSTD_ASSERT (mbstate_valid);
             if (!mbstate_valid)
                 break;
 
-            len = _RW::__rw_libc_do_length (state, from, from_end, cmax);
+            len = __rw::__rw_libc_do_length (state, from, from_end, cmax);
         }
         else {
             // verify that the state is in its initial shift state
-            const int mbstate_valid = _RW::__rw_mbsinit (&state);
+            const int mbstate_valid = __rw::__rw_mbsinit (&state);
             _RWSTD_ASSERT (mbstate_valid);
             if (!mbstate_valid)
                 break;
 
-            len = _RW::__rw_libstd_do_length (from, from_end,
+            len = __rw::__rw_libstd_do_length (from, from_end,
                                               cmax, _C_flags, impl);
         }
         break;
     }
-    case _RW::iso2022_jp:
-        len = _RW::__rw_iso2022jp_do_length (state, from, from_end, cmax);
+    case __rw::iso2022_jp:
+        len = __rw::__rw_iso2022jp_do_length (state, from, from_end, cmax);
         break;
-    case _RW::iso2022_jp2:
-        len = _RW::__rw_iso2022jp2_do_length (state, from, from_end, cmax);
+    case __rw::iso2022_jp2:
+        len = __rw::__rw_iso2022jp2_do_length (state, from, from_end, cmax);
         break;
-    case _RW::iso2022_kr:
-    case _RW::iso2022_cn:
+    case __rw::iso2022_kr:
+    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1486,15 +1486,15 @@ do_encoding () const _THROWS (())
     // test the type of the encoding that the facet is interpreting
     switch (ISO2022_TYPE (_C_flags)) {
 
-    case _RW::stateless: {
+    case __rw::stateless: {
         // obtain the database file mapping
-        const _RW::__rw_codecvt_t* impl = 
-            _RWSTD_STATIC_CAST(const _RW::__rw_codecvt_t*, this->_C_data ());
+        const __rw::__rw_codecvt_t* impl = 
+            _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, this->_C_data ());
 
         if (USE_LIBC (impl, _C_flags)) {
             // 7.20.7.2 of C99: if first arg is 0, mbtowc() returns non-zero 
             // or 0 whether or not the encoding is stateful or stateless
-            const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
+            const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
             if (mbtowc (0, 0, 0)) {
                 // in a stateful encoding, the number of extern_type
@@ -1523,14 +1523,14 @@ do_encoding () const _THROWS (())
 
         break;
     }
-    case _RW::iso2022_jp:
-        enc = _RW::__rw_iso2022jp_do_encoding ();
+    case __rw::iso2022_jp:
+        enc = __rw::__rw_iso2022jp_do_encoding ();
         break;
-    case _RW::iso2022_jp2:
-        enc = _RW::__rw_iso2022jp2_do_encoding ();
+    case __rw::iso2022_jp2:
+        enc = __rw::__rw_iso2022jp2_do_encoding ();
         break;
-    case _RW::iso2022_kr:
-    case _RW::iso2022_cn:
+    case __rw::iso2022_kr:
+    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1550,14 +1550,14 @@ do_max_length () const _THROWS (())
     // test the type of the encoding that the facet is interpreting
     switch (ISO2022_TYPE (_C_flags)) {
 
-    case _RW::stateless: {
+    case __rw::stateless: {
         // obtain the database file mapping
-        const _RW::__rw_codecvt_t* impl = 
-            _RWSTD_STATIC_CAST(const _RW::__rw_codecvt_t*, this->_C_data ());
+        const __rw::__rw_codecvt_t* impl = 
+            _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, this->_C_data ());
             
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
-            const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
+            const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
             max_len = size_t (MB_CUR_MAX);
         }
@@ -1570,14 +1570,14 @@ do_max_length () const _THROWS (())
         }
         break;
     }
-    case _RW::iso2022_jp:
-        max_len = _RW::__rw_iso2022jp_do_max_length ();
+    case __rw::iso2022_jp:
+        max_len = __rw::__rw_iso2022jp_do_max_length ();
         break;
-    case _RW::iso2022_jp2:
-        max_len = _RW::__rw_iso2022jp2_do_max_length ();
+    case __rw::iso2022_jp2:
+        max_len = __rw::__rw_iso2022jp2_do_max_length ();
         break;
-    case _RW::iso2022_kr:
-    case _RW::iso2022_cn:
+    case __rw::iso2022_kr:
+    case __rw::iso2022_cn:
     default:
         break;
     };

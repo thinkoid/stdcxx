@@ -546,7 +546,7 @@ test_types ()
 
 int ncalls;
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template <class FileT, class WCharT>
 int fwprintf (FileT*, const WCharT*, ...) { return ncalls++; }

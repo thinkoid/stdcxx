@@ -32,7 +32,7 @@
 #include <rw/_once.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 // the values of __rw_once_t::_C_state

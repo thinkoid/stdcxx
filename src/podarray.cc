@@ -26,7 +26,7 @@
  * 
  **************************************************************************/
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 template <class _TypeT, _SizeT _Size>
 __rw_pod_array<_TypeT, _Size>&

@@ -127,7 +127,7 @@ typedef std::list<ListValueType, ListAllocator> ListType;
 
 static int list_swap_called;
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
     // define an explicit specialization of the list::swap() member
     // to verify tha the non-member swap function calls the member

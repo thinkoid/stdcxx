@@ -38,7 +38,7 @@
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // avoid a conflicting exception structure on platforms where
 // struct exception is defined unguarded in <math.h>
@@ -130,7 +130,7 @@ _RWSTD_NAMESPACE (std) {
 
 
 #if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 #endif  // !_RWSTD_NO_USING_LIBC_IN_STD
 
 // float overloads
@@ -141,7 +141,7 @@ inline float abs (float __x)
 }
 #  undef _RWSTD_NO_ABS_FLT
 #  else
-_USING (::abs);
+using ::abs;
 #endif   // _RWSTD_NO_ABS_FLT
 
 #if defined (_RWSTD_NO_ACOS_FLT)
@@ -344,7 +344,7 @@ inline double abs (double __x)
 }
 #  undef _RWSTD_NO_ABS_DBL
 #  else
-_USING (::abs);
+using ::abs;
 #endif   // _RWSTD_NO_ABS_DBL
 
 
@@ -385,7 +385,7 @@ inline long double abs (long double __x)
 }
 #  undef _RWSTD_NO_ABS_LDBL
 #  else
-_USING (::abs);
+using ::abs;
 #endif   // _RWSTD_NO_ABS_LDBL
 
 
@@ -589,28 +589,28 @@ inline long double tanh (long double __x)
 // working around MSVC6 PR# 27677
 #if !defined (_RWSTD_NO_HONOR_STD) && !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
-_USING (::acos);
-_USING (::asin);
-_USING (::atan);
-_USING (::atan2);
-_USING (::ceil);
-_USING (::cos);
-_USING (::cosh);
-_USING (::exp);
-_USING (::fabs);
-_USING (::floor);
-_USING (::fmod);
-_USING (::frexp);
-_USING (::ldexp);
-_USING (::log);
-_USING (::log10);
-_USING (::modf);
-_USING (::pow);
-_USING (::sin);
-_USING (::sinh);
-_USING (::sqrt);
-_USING (::tan);
-_USING (::tanh);
+using ::acos;
+using ::asin;
+using ::atan;
+using ::atan2;
+using ::ceil;
+using ::cos;
+using ::cosh;
+using ::exp;
+using ::fabs;
+using ::floor;
+using ::fmod;
+using ::frexp;
+using ::ldexp;
+using ::log;
+using ::log10;
+using ::modf;
+using ::pow;
+using ::sin;
+using ::sinh;
+using ::sqrt;
+using ::tan;
+using ::tanh;
 
 #endif   // !_RWSTD_NO_HONOR_STD && !_RWSTD_NO_USING_LIBC_IN_STD
 

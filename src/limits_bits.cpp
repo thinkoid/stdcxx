@@ -39,7 +39,7 @@
 #include <rw/_defs.h>  
                        
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 #ifndef _RWSTD_NO_INFINITY
 

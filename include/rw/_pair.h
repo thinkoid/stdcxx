@@ -48,7 +48,7 @@
 #endif   // _RWSTD_RW_FUNCBASE_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 20.2.2
@@ -110,12 +110,12 @@ template <class _TypeT, class _TypeU>
 inline bool
 operator< (const pair<_TypeT, _TypeU>& __x, const pair<_TypeT, _TypeU>& __y)
 {
-    _STD::less<_TypeT> __lessT;
+    std::less<_TypeT> __lessT;
 
     // follows resolution of lwg issue 348
     return    __lessT (__x.first, __y.first)
            || (   !__lessT (__y.first, __x.first)
-               &&  _STD::less<_TypeU>()(__x.second, __y.second));
+               &&  std::less<_TypeU>()(__x.second, __y.second));
 }
 
 

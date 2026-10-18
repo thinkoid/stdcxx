@@ -41,7 +41,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
@@ -59,7 +59,7 @@ typedef basic_streambuf<wchar_t> wstreambuf;
 
 
 template<class _CharT, class _Traits>
-class basic_streambuf: public _RW::__rw_synchronized
+class basic_streambuf: public __rw::__rw_synchronized
 {
 public:
     typedef _CharT                          char_type;
@@ -504,7 +504,7 @@ _C_is_valid () const
 
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_BASIC_STREAMBUF, _CHAR)
 

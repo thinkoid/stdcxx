@@ -35,7 +35,7 @@
 // which __sync made an acquire barrier only; a caller that needs less
 // gets it from a decision about its own site, not from this header
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 #ifndef _RWSTD_NO_CHAR_ATOMIC_OPS
 

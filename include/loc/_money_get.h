@@ -45,11 +45,11 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 template <class _CharT, class _InputIter = istreambuf_iterator<_CharT> >
-struct money_get: _RW::__rw_facet
+struct money_get: __rw::__rw_facet
 {
     typedef _CharT     char_type;
     typedef _InputIter iter_type;
@@ -58,7 +58,7 @@ struct money_get: _RW::__rw_facet
     string_type;
 
     explicit money_get (_RWSTD_SIZE_T __ref = 0)
-        : _RW::__rw_facet (__ref) { }
+        : __rw::__rw_facet (__ref) { }
 
     iter_type get (iter_type __begin, iter_type __end, bool __intl,
                    ios_base &__flags, _RWSTD_IOSTATE &__err,
@@ -72,7 +72,7 @@ struct money_get: _RW::__rw_facet
         return do_get (__begin, __end, __intl, __flags, __err, __str);
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
@@ -111,12 +111,12 @@ private:
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
 template <>
-_RW::__rw_facet_id money_get<char, istreambuf_iterator<char> >::id;
+__rw::__rw_facet_id money_get<char, istreambuf_iterator<char> >::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
 template <>
-_RW::__rw_facet_id money_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
+__rw::__rw_facet_id money_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
@@ -130,7 +130,7 @@ _RW::__rw_facet_id money_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_MONEY_GET, _CHAR)
 

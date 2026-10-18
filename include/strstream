@@ -41,7 +41,7 @@
 #endif
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
   
 
 // D.7.1

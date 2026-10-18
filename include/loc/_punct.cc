@@ -31,7 +31,7 @@
 #include <loc/_ctype.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 template <class _CharT, class _InputIter>
@@ -41,7 +41,7 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
                             _RWSTD_SIZE_T         __count,
                             _RWSTD_SIZE_T        &__inx,
                             int                  &__err,
-                            _STD::ios_base       *__flags)
+                            std::ios_base        *__flags)
 {
     const _RWSTD_SIZE_T __badval = _RWSTD_SIZE_MAX;
 
@@ -60,8 +60,8 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
 
     __inx = __badval;   // invalidate
 
-    const _STD::ctype<_CharT> *__ctp = __flags ?
-        &_RWSTD_USE_FACET (_STD::ctype<_CharT>, __flags->getloc ()) : 0;
+    const std::ctype<_CharT> *__ctp = __flags ?
+        &_RWSTD_USE_FACET (std::ctype<_CharT>, __flags->getloc ()) : 0;
 
     _CharT __ch;
 
@@ -75,7 +75,7 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
             __ch = *__it;
 
         if (__ctp && __num != __badval) {
-            if (__ctp->is (_STD::ctype_base::digit, __ch))
+            if (__ctp->is (std::ctype_base::digit, __ch))
                 __num = __num * 10 + __ctp->narrow (__ch, '0') - '0';
             else
                 __num = __badval;
@@ -84,7 +84,7 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
         // iterate over all names, clear bits of those that do not match
         for (_RWSTD_SIZE_T __k = 0; __k != __count; ++__k) {
 
-            typedef _STD::char_traits<_CharT> _Traits;
+            typedef std::char_traits<_CharT> _Traits;
 
             const _RWSTD_SIZE_T __mask =
                 _RWSTD_STATIC_CAST (_RWSTD_SIZE_T, 1UL) << __k;
@@ -167,7 +167,7 @@ __endloop:
 
             __ch = *__it;
 
-            if (__ctp->is (_STD::ctype_base::digit, __ch))
+            if (__ctp->is (std::ctype_base::digit, __ch))
                 __num = __num * 10 + __ctp->narrow (__ch, '0') - '0';
             else
                 break;

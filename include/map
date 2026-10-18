@@ -50,12 +50,12 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 // This is used in the implementation of map and multimap.
 template <class _TypeT, class _TypeU>
-struct __select1st : public _STD::unary_function<_TypeT, _TypeU>
+struct __select1st : public std::unary_function<_TypeT, _TypeU>
 {
     const _TypeU& operator () (const _TypeT& __x) const {
         return __x.first;
@@ -66,7 +66,7 @@ struct __select1st : public _STD::unary_function<_TypeT, _TypeU>
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 template <class _Key, class _TypeT,
           class _Compare = less<_Key>,
@@ -83,8 +83,8 @@ public:
     
 private:
     
-    typedef _RW::__rb_tree<key_type, value_type,
-                           _RW::__select1st<value_type, key_type>, 
+    typedef __rw::__rb_tree<key_type, value_type,
+                           __rw::__select1st<value_type, key_type>, 
                            key_compare, allocator_type> _C_repT;
     _C_repT _C_rep;
 
@@ -291,8 +291,8 @@ public:
 
 private:
     
-    typedef _RW::__rb_tree<key_type, value_type, 
-                           _RW::__select1st<value_type, key_type>, 
+    typedef __rw::__rb_tree<key_type, value_type, 
+                           __rw::__select1st<value_type, key_type>, 
                            key_compare, allocator_type> _C_repT;
     _C_repT _C_rep;
 

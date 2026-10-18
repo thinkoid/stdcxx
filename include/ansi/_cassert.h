@@ -34,15 +34,15 @@
 #if !defined (NDEBUG)
 #  if defined (__GNUG__)
 #    define assert(expr)                                                   \
-     ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, \
+     ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, \
                                                 __PRETTY_FUNCTION__))
 #  elif !defined (_RWSTD_NO_FUNC)
 #    define assert(expr)                                                   \
-     ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, \
+     ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, \
                                            __func__))
 #  else   // if !__GNUG__ && _RWSTD_NO_FUNC
 #    define assert(expr)   \
-     ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, 0))
+     ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, 0))
 #  endif
 #else   //  if !defined (NDEBUG)
 #  define assert(ignore)   ((void)0)

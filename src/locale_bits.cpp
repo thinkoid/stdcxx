@@ -33,7 +33,7 @@
 #include <loc/_locale.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 _RWSTD_DEFINE_STATIC_CONST (const locale::category locale::none);

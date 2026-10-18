@@ -676,7 +676,7 @@ void test_insert_at_end ()
         std::size_t n_asgn;
 
         // compute the next (non-zero) capacity of the container
-        nextcap = _RW::__rw_new_capacity (nextcap + 1, (Vector*)0);
+        nextcap = __rw::__rw_new_capacity (nextcap + 1, (Vector*)0);
 
         // insert elements at the end of the container until its size
         // reaches its capacity, verifying that each of the insertions

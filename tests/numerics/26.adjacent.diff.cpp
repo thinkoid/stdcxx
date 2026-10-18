@@ -51,7 +51,7 @@ const minus<T>& operator- (const minus<T>& lhs, const minus<T>& rhs) {
     return lhs;
 }
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it

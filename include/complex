@@ -39,7 +39,7 @@
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // 26.2.2
 template <class _TypeT>

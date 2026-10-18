@@ -40,7 +40,7 @@
 #  endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // throws an exception identified by first argument, optional arguments
 // (if any) used to format the exception object's what() string

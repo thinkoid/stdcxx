@@ -40,7 +40,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 template <class _TypeT, class _Allocator>
 list<_TypeT, _Allocator>::

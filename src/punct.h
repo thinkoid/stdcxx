@@ -27,7 +27,7 @@
 #include <rw/_defs.h>     
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 const char*

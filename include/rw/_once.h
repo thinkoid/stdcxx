@@ -38,7 +38,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // the state of a one-time initialization: valid when zero-initialized,
 // so a flag with static storage duration needs no initializer and is

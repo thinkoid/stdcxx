@@ -48,7 +48,7 @@
     snprintf (buf, size, _RWSTD_CONST_CAST (char*, fmt), arg)
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 static const char __rw_digits[] =
     "0123456789abcdefghijklmnopqrstuvwxyz"
@@ -117,7 +117,7 @@ __rw_dtoa (char *buf, _ULLong i, unsigned flags)
 {
     // get the maximum number of decimal digits for an unsigned long
     // with the largest magnitude, plus 1 for the (optional) sign
-    const size_t dig10 = _STD::numeric_limits<_ULLong>::digits10 + 2U;
+    const size_t dig10 = std::numeric_limits<_ULLong>::digits10 + 2U;
 
     char*             end   = buf + dig10;
     const char* const begin = end;
@@ -204,7 +204,7 @@ __rw_itoa (char *buf, _ULLong i, unsigned flags)
 
     // maximum number of base-digits
     const int digits =
-        (_STD::numeric_limits<_ULLong>::digits + bits - 1) / bits;
+        (std::numeric_limits<_ULLong>::digits + bits - 1) / bits;
 
     int j;
 
@@ -252,7 +252,7 @@ __rw_dtoa (char *buf, unsigned long i, unsigned flags)
     // get the maximum number of decimal digits for an unsigned long
     // with the largest magnitude, plus 1 for the (optional) sign
     const size_t dig10 =
-        _STD::numeric_limits<unsigned long>::digits10 + 2U;
+        std::numeric_limits<unsigned long>::digits10 + 2U;
 
     char*             end   = buf + dig10;
     const char* const begin = end;
@@ -345,7 +345,7 @@ __rw_itoa (char *buf, unsigned long i, unsigned flags)
     if (i) {
         // maximum number of digits in the given base (basemask + 1)
         const int digits =
-            (_STD::numeric_limits<unsigned long>::digits + bits - 1) / bits;
+            (std::numeric_limits<unsigned long>::digits + bits - 1) / bits;
 
         j = digits - 1;
         while (!(i & (long (basemask) << j * bits)))

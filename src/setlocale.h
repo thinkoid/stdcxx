@@ -37,7 +37,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // class provides synchronized access to the C setlocale() facility
 // if the first argument is 0, ctor locks, obtains the name of the

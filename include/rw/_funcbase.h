@@ -48,7 +48,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 20.3.1 - Base
@@ -61,8 +61,8 @@ struct unary_function
 
 
 #define _RWSTD_UNARY_FUNCTION_TYPES(T, U)                                    \
-  typedef typename _STD::unary_function<T, U>::argument_type argument_type; \
-  typedef typename _STD::unary_function<T, U>::result_type    result_type
+  typedef typename std::unary_function<T, U>::argument_type argument_type; \
+  typedef typename std::unary_function<T, U>::result_type     result_type
 
 
 template <class _Arg1, class _Arg2, class _Result>
@@ -75,11 +75,11 @@ struct binary_function
 
 
 #define _RWSTD_BINARY_FUNCTION_TYPES(T, U, V)                              \
-  typedef typename _STD::binary_function<T, U, V>::second_argument_type    \
+  typedef typename std::binary_function<T, U, V>::second_argument_type     \
           second_argument_type;                                            \
-  typedef typename _STD::binary_function<T, U, V>::first_argument_type     \
+  typedef typename std::binary_function<T, U, V>::first_argument_type      \
           first_argument_type;                                             \
-  typedef typename _STD::binary_function<T, U, V>::result_type             \
+  typedef typename std::binary_function<T, U, V>::result_type              \
           result_type
 
 

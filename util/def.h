@@ -456,13 +456,13 @@ private:
 
     // the structures used to hold the offsets for each locale category
     // and any non-pointer locale information
-    _RW::__rw_punct_t num_punct_out_;
-    _RW::__rw_ctype_t ctype_out_;
-    _RW::__rw_time_t time_out_;
-    _RW::__rw_collate_t collate_out_;
-    _RW::__rw_mon_t mon_out_;
-    _RW::__rw_num_t num_out_;
-    _RW::__rw_messages_t messages_out_;
+    __rw::__rw_punct_t num_punct_out_;
+    __rw::__rw_ctype_t ctype_out_;
+    __rw::__rw_time_t time_out_;
+    __rw::__rw_collate_t collate_out_;
+    __rw::__rw_mon_t mon_out_;
+    __rw::__rw_num_t num_out_;
+    __rw::__rw_messages_t messages_out_;
 
     // structures used for internally holding locale information
     // LC_CTYPE structures
@@ -495,7 +495,7 @@ private:
         std::string fmt;
         std::wstring wname;
         std::wstring wfmt;
-        _RW::__rw_time_t::era_t era_out;
+        __rw::__rw_time_t::era_t era_out;
     };
 
     std::list<era_st> era_list_;

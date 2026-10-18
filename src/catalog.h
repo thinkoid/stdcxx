@@ -45,7 +45,7 @@
 #define _RWCAT_COOKIE            0xAB34BC56
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 #ifndef _RWSTD_USE_RC
@@ -79,8 +79,8 @@ public:
 class __rw_cat
 {
 public:
-    typedef _STD::map<int, _STD::string, _STD::less<int>,
-                      _STD::allocator<_STD::pair<const int, _STD::string> > >
+    typedef std::map<int, std::string, std::less<int>,
+                      std::allocator<std::pair<const int, std::string> > >
     __cat_type;
 
     typedef __cat_type::value_type __msg_type;
@@ -120,7 +120,7 @@ public:
 }   // namespace __rw
 
 
-typedef _RW::__rw_cat* nl_catd;
+typedef __rw::__rw_cat* nl_catd;
 typedef int            nl_item;
 
 int         catclose (nl_catd);

@@ -66,7 +66,7 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 #endif   // _RWSTD_NO_PURE_C_HEADERS
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 #define _RWSTD_FILENO(f) fileno (f)

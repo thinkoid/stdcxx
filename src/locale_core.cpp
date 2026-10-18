@@ -40,12 +40,12 @@
 #include <sys/stat.h>   // for stat()
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // outlined to hide implementation details
 locale::locale () _THROWS (())
-    : _C_body (_RW::__rw_locale::_C_manage (0, 0))
+    : _C_body (__rw::__rw_locale::_C_manage (0, 0))
 {
     _RWSTD_ASSERT (0 != _C_body);
 }
@@ -65,9 +65,9 @@ locale::~locale () _THROWS (())
 {
     _RWSTD_ASSERT (0 != _C_body);
 
-    if (_C_body->_C_is_managed (_RW::__rw_cat_none)) {
+    if (_C_body->_C_is_managed (__rw::__rw_cat_none)) {
         // body is globally managed, let manager dispose of it
-        _RW::__rw_locale::_C_manage (_C_body, _C_body->_C_name);
+        __rw::__rw_locale::_C_manage (_C_body, _C_body->_C_name);
     }
     else {
         // body is not globally managed, delete it
@@ -102,7 +102,7 @@ locale::_C_get_std_facet (facet::_C_facet_type  type,
 #ifndef _RWSTD_LOCALE_ROOT_ENVVAR
 #  define _RWSTD_LOCALE_ROOT_ENVVAR "RWSTD_LOCALE_ROOT"
 #endif
-        _RW::__rw_chararray pathname;
+        __rw::__rw_chararray pathname;
 
         if (next != nm) {
             // look up the value of the environment variable
@@ -128,17 +128,17 @@ locale::_C_get_std_facet (facet::_C_facet_type  type,
 
     nm = _C_body->_C_name;
 
-    _RW::__rw_chararray locname;
+    __rw::__rw_chararray locname;
 
     if (next && *next) {
 
         // compute the facet category from the value of its id
-        const int facet_cat = _RW::__rw_get_cat (int (inx + 1));
+        const int facet_cat = __rw::__rw_get_cat (int (inx + 1));
 
         // determine the locale name of the given category
         size_t i = 0;
-        for (; i != sizeof _RW::__rw_cats / sizeof *_RW::__rw_cats; ++i) {
-            if (_RW::__rw_cats [i].cat == facet_cat) {
+        for (; i != sizeof __rw::__rw_cats / sizeof *__rw::__rw_cats; ++i) {
+            if (__rw::__rw_cats [i].cat == facet_cat) {
 
                 const size_t nmlen = size_t (next - nm);
 
@@ -157,27 +157,27 @@ locale::_C_get_std_facet (facet::_C_facet_type  type,
 
     _RWSTD_ASSERT (0 != nm);
 
-    const bool byname = !_RW::__rw_is_C (nm);
+    const bool byname = !__rw::__rw_is_C (nm);
 
     type = facet::_C_facet_type (type + byname);
 
-    if (   type == 1 + _RW::__rw_facet::_C_money_get
-        || type == 1 + _RW::__rw_facet::_C_money_put
-        || type == 1 + _RW::__rw_facet::_C_num_get
-        || type == 1 + _RW::__rw_facet::_C_num_put
-        || type == 1 + _RW::__rw_facet::_C_wmoney_get
-        || type == 1 + _RW::__rw_facet::_C_wmoney_put
-        || type == 1 + _RW::__rw_facet::_C_wnum_get
-        || type == 1 + _RW::__rw_facet::_C_wnum_put) {
+    if (   type == 1 + __rw::__rw_facet::_C_money_get
+        || type == 1 + __rw::__rw_facet::_C_money_put
+        || type == 1 + __rw::__rw_facet::_C_num_get
+        || type == 1 + __rw::__rw_facet::_C_num_put
+        || type == 1 + __rw::__rw_facet::_C_wmoney_get
+        || type == 1 + __rw::__rw_facet::_C_wmoney_put
+        || type == 1 + __rw::__rw_facet::_C_wnum_get
+        || type == 1 + __rw::__rw_facet::_C_wnum_put) {
         type = facet::_C_facet_type (type - 1);
         nm = 0;
     }
 
     // add facet for the simple named locale (or retrieve existing)
-    typedef _RW::__rw_facet::_C_facet_type FacetType;
+    typedef __rw::__rw_facet::_C_facet_type FacetType;
 
     facet* const pfacet =
-        _RW::__rw_facet::_C_manage (0, FacetType (type), nm, ctor);
+        __rw::__rw_facet::_C_manage (0, FacetType (type), nm, ctor);
 
     _RWSTD_ASSERT (0 != pfacet);
 
@@ -208,7 +208,7 @@ locale::_C_get_std_facet (facet::_C_facet_type  type,
 
     if (!filled) {
         // the facet outlives the call: the slot holds a reference
-        _RW::__rw_facet::_C_manage (pfacet, pfacet->_C_type,
+        __rw::__rw_facet::_C_manage (pfacet, pfacet->_C_type,
                                     pfacet->_C_name, 0);
     }
 

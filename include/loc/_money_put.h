@@ -43,14 +43,14 @@
 #include <loc/_facet.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 struct _RWSTD_EXPORT ios_base;
 
 
 // 22.2.6.2
 template <class _CharT, class _OutputIter = ostreambuf_iterator<_CharT> >
-struct money_put: _RW::__rw_facet
+struct money_put: __rw::__rw_facet
 {
     typedef _CharT      char_type;
     typedef _OutputIter iter_type;
@@ -60,7 +60,7 @@ struct money_put: _RW::__rw_facet
     string_type;
 
     explicit money_put (_RWSTD_SIZE_T __ref = 0)
-        : _RW::__rw_facet (__ref) { }
+        : __rw::__rw_facet (__ref) { }
 
     virtual ~money_put () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -75,7 +75,7 @@ struct money_put: _RW::__rw_facet
         return do_put (__it, __intl, __flags, __fill, __val);
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
@@ -99,12 +99,12 @@ private:
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
 template <>
-_RW::__rw_facet_id money_put<char, ostreambuf_iterator<char> >::id;
+__rw::__rw_facet_id money_put<char, ostreambuf_iterator<char> >::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
 template <>
-_RW::__rw_facet_id money_put<wchar_t, ostreambuf_iterator<wchar_t> >::id;
+__rw::__rw_facet_id money_put<wchar_t, ostreambuf_iterator<wchar_t> >::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
@@ -118,7 +118,7 @@ _RW::__rw_facet_id money_put<wchar_t, ostreambuf_iterator<wchar_t> >::id;
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_MONEY_PUT, _CHAR)
 

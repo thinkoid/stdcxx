@@ -47,7 +47,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _TypeT, class _Container = deque<_TypeT> > 

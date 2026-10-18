@@ -175,7 +175,7 @@ void my_new_handler ()
 }
 
 //  grab default throw procedure
-void (*default_throw_proc)(int, char*) = _RW::__rw_throw_proc;
+void (*default_throw_proc)(int, char*) = __rw::__rw_throw_proc;
 
 bool my_throw_proc_called = false;
 
@@ -378,7 +378,7 @@ int run_test (int, char* [])
 
         alloc.init ();      // reset the allocator
 
-        _RW::__rw_throw_proc = my_throw_proc; // set the throw func
+        __rw::__rw_throw_proc = my_throw_proc; // set the throw func
         my_throw_proc_called = false;
 
         for (std::size_t i = 0; i < 10; ++i) {
@@ -393,7 +393,7 @@ int run_test (int, char* [])
                 // allocation
                 alloc._bytesRequested = ~i;   // reset
 
-                ptr = _RWSTD_STATIC_CAST (char*, _RW::__rw_allocate (i));
+                ptr = _RWSTD_STATIC_CAST (char*, __rw::__rw_allocate (i));
                 rw_assert (alloc._bytesRequested == i, 0, __LINE__,
                            "__rw_allocate (%u) requested %u bytes",
                            i, alloc._bytesRequested);
@@ -407,7 +407,7 @@ int run_test (int, char* [])
                            "my_throw_proc called");
 
                 // deallocation
-                _RW::__rw_deallocate (ptr, i);
+                __rw::__rw_deallocate (ptr, i);
 
                 rw_assert (alloc.deleteCalled (),
                            0, __LINE__,

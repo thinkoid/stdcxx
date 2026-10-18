@@ -55,7 +55,7 @@
 
 #if !defined (_RWSTD_NO_STD_NOTHROW_T) || defined (_RWSTD_NO_GLOBAL_NOTHROW_T)
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #endif   // !_RWSTD_NO_STD_NOTHROW_T || _RWSTD_NO_GLOBAL_NOTHROW_T
 
@@ -90,7 +90,7 @@ _RWSTD_EXPORT_NOTHROW extern const nothrow_t nothrow;
 #endif   // !_RWSTD_NO_GLOBAL_NOTHROW_T && _RWSTD_NO_STD_NOTHROW
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #if defined (_RWSTD_NO_STD_NOTHROW_T) && !defined (_RWSTD_NO_GLOBAL_NOTHROW_T)
 
@@ -109,13 +109,13 @@ _RWSTD_EXPORT_NOTHROW extern const nothrow_t nothrow;
 #if    !defined (_RWSTD_NO_STD_BAD_ALLOC) \
     || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #endif   // _RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD
 
 
 // 18.4.2.1
-class _RWSTD_EXPORT bad_alloc: public _STD::exception
+class _RWSTD_EXPORT bad_alloc: public std::exception
 {
 public:
     // 18.4.2.1, p2
@@ -141,7 +141,7 @@ public:
 #if    !defined (_RWSTD_NO_STD_BAD_ALLOC) \
     || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
-#  define _RWSTD_BAD_ALLOC _STD::bad_alloc
+#  define _RWSTD_BAD_ALLOC std::bad_alloc
 
 }   // namespace std
 
@@ -150,11 +150,11 @@ public:
    // working around a gcc 2.x bug (PR #24400)
 #  if !defined (__GNUG__) || __GNUG__ > 2
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
-_USING (::bad_alloc);
+using ::bad_alloc;
 
-#    define _RWSTD_BAD_ALLOC _STD::bad_alloc
+#    define _RWSTD_BAD_ALLOC std::bad_alloc
 
 }   // namespace std
 
@@ -171,7 +171,7 @@ _USING (::bad_alloc);
   // that the declaration matches the one in the compiler's <new.h>
   // (the function is defined in our library)
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #endif   // !_RWSTD_NO_STD_SET_NEW_HANDLER || MSVC
 
@@ -185,10 +185,10 @@ _RWSTD_EXPORT new_handler set_new_handler (new_handler) _THROWS (());
 
 #else   // !!defined (_RWSTD_NO_STD_SET_NEW_HANDLER)
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
-_USING (::new_handler);
-_USING (::set_new_handler);
+using ::new_handler;
+using ::set_new_handler;
 
 }   // namespace std
 
@@ -201,7 +201,7 @@ void* operator new (_RWSTD_SIZE_T) _NEW_THROWS ((_RWSTD_BAD_ALLOC));
 #ifdef _RWSTD_NO_OPERATOR_NEW_NOTHROW
 _RWSTD_EXPORT
 #endif   // _RWSTD_NO_OPERATOR_NEW_NOTHROW
-void* operator new (_RWSTD_SIZE_T, const _STD::nothrow_t&) _NEW_THROWS (());
+void* operator new (_RWSTD_SIZE_T, const std::nothrow_t&) _NEW_THROWS (());
 
 void operator delete (void*) _NEW_THROWS (());
 
@@ -212,7 +212,7 @@ void operator delete (void*) _NEW_THROWS (());
 #  ifdef _RWSTD_NO_OPERATOR_DELETE_NOTHROW
 _RWSTD_EXPORT
 #  endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW
-void operator delete (void*, const _STD::nothrow_t&) _NEW_THROWS (());
+void operator delete (void*, const std::nothrow_t&) _NEW_THROWS (());
 
 #endif   // _RWSTD_NO_PLACEMENT_DELETE
 
@@ -225,7 +225,7 @@ void* operator new[] (_RWSTD_SIZE_T) _NEW_THROWS ((_RWSTD_BAD_ALLOC));
 #ifdef _RWSTD_NO_OPERATOR_NEW_ARRAY_NOTHROW
 _RWSTD_EXPORT
 #endif   // _RWSTD_NO_OPERATOR_NEW_ARRAY_NOTHROW
-void* operator new[] (_RWSTD_SIZE_T, const _STD::nothrow_t&) _NEW_THROWS (());
+void* operator new[] (_RWSTD_SIZE_T, const std::nothrow_t&) _NEW_THROWS (());
 
 #ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY
 _RWSTD_EXPORT
@@ -237,7 +237,7 @@ void operator delete[] (void*) _NEW_THROWS (());
 #  ifdef _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
 _RWSTD_EXPORT
 #  endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_NOTHROW
-void operator delete[] (void*, const _STD::nothrow_t&) _NEW_THROWS (());
+void operator delete[] (void*, const std::nothrow_t&) _NEW_THROWS (());
 
 #endif   // _RWSTD_NO_PLACEMENT_DELETE
 

@@ -37,19 +37,19 @@
 
 #ifdef _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-typedef _STD::char_traits<wchar_t> Traits;
-typedef _STD::allocator<wchar_t>   Allocator;
+typedef std::char_traits<wchar_t> Traits;
+typedef std::allocator<wchar_t>    Allocator;
 
 typedef __string_ref<wchar_t, Traits, Allocator> StringRef;
 
 #else   // if defined (_RWSTD_NO_WCHAR_T)
 
-typedef _STD::char_traits<char> Traits;
-typedef _STD::allocator<char>   Allocator;
+typedef std::char_traits<char> Traits;
+typedef std::allocator<char>    Allocator;
 
 typedef __string_ref<char, Traits, Allocator> StringRef;
 

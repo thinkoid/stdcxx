@@ -45,7 +45,7 @@
 
 #ifdef _RWSTD_REENTRANT
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // names the type of the value an ordered store writes in a context
 // that deduces nothing: the object alone selects the overload, and the
@@ -85,7 +85,7 @@ struct __rw_atomic_value
 
 #    ifdef _RWSTD_BOOL_TYPE
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 inline bool
 __rw_atomic_exchange (bool &__x, bool __y, bool)
@@ -110,7 +110,7 @@ __rw_atomic_exchange (bool &__x, bool __y, bool)
 
 #      undef _RWSTD_NO_LONG_ATOMIC_OPS
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 inline long
 __rw_atomic_preincrement (long &__x, bool)
@@ -171,7 +171,7 @@ __rw_atomic_exchange (unsigned long &__x,
 
 #      undef _RWSTD_NO_LLONG_ATOMIC_OPS
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
     
 inline _RWSTD_LONG_LONG
 __rw_atomic_preincrement (_RWSTD_LONG_LONG &__x, bool)
@@ -226,7 +226,7 @@ __rw_atomic_exchange (unsigned _RWSTD_LONG_LONG &__x,
 
 #else   // if !defined (_RWSTD_REENTRANT)
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
     
 // atomic in a single-threaded environment
 template <class _TypeT, class _TypeU>
@@ -243,7 +243,7 @@ _TypeT __rw_atomic_exchange (_TypeT &__t, const _TypeU &__u, bool)
 #endif   // _RWSTD_REENTRANT
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // available in all environments (ST and MT), used along with
 // __rw_atomic_exchange<>() from conditional expressions in iostreams

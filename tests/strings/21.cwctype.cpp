@@ -278,7 +278,7 @@ enum {
         return ret (-1);                        \
     } typedef void rw_unused_typedef
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 TEST_FUNCTION (iswalnum, int);
 TEST_FUNCTION (iswalpha, int);

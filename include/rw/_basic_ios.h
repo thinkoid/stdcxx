@@ -51,7 +51,7 @@
 #endif   // _RWSTD_RW_IOSFWD_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
@@ -214,7 +214,7 @@ protected:
 
     // (conditionally) returns a pointer to a mutex in the associated
     // basic_streambuf object
-    _RW::__rw_mutex* _C_bufmutex () const;
+    __rw::__rw_mutex* _C_bufmutex () const;
 
 private:
 
@@ -290,7 +290,7 @@ basic_ios<_CharT, _Traits>::init (streambuf_type *__sb)
 
 
 template<class _CharT, class _Traits>
-inline _RW::__rw_mutex*
+inline __rw::__rw_mutex*
 basic_ios<_CharT, _Traits>::_C_bufmutex () const
 {
     // the buffer of an unlocked stream is not locked either
@@ -307,7 +307,7 @@ basic_ios<_CharT, _Traits>::_C_bufmutex () const
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_BASIC_IOS, _CHAR)
 

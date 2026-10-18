@@ -29,7 +29,7 @@
 #include <loc/_locale.h>   // for use_facet
 #include <loc/_ctype.h>    // for ctype
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 _RWSTD_EXPORT _RWSTD_SIZE_T
 __rw_put_num (char**, _RWSTD_SIZE_T, unsigned, int, _RWSTD_STREAMSIZE,
@@ -47,7 +47,7 @@ __rw_iter_failed (const _OutputIter&) { return false; }
 // error C2667: '__rw_iter_failed' : none of 2 overloads have a best conversion
 template <class _CharT, class _Traits>
 inline bool
-__rw_iter_failed (/*const */_STD::ostreambuf_iterator<_CharT, _Traits> &__it)
+__rw_iter_failed (/*const */std::ostreambuf_iterator<_CharT, _Traits> &__it)
 {
     return __it.failed ();
 }
@@ -55,11 +55,11 @@ __rw_iter_failed (/*const */_STD::ostreambuf_iterator<_CharT, _Traits> &__it)
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _CharT, class _OutputIter>
-_RW::__rw_facet_id num_put<_CharT, _OutputIter>::id;
+__rw::__rw_facet_id num_put<_CharT, _OutputIter>::id;
 
 
 template <class _CharT, class _OutputIter /* = ostreambuf_iterator<_CharT> */>
@@ -91,7 +91,7 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
 
     // format value, ignore C++ decimal_point and thousands_sep
     _RWSTD_SIZE_T __res =
-        _RW::__rw_put_num (&__pbuf, sizeof __buf, __f, __type,
+        __rw::__rw_put_num (&__pbuf, sizeof __buf, __f, __type,
                            __prec, __pval, __grp);
 
     // for bool values and boolalpha bit set, retrieve the "truth" string
@@ -143,10 +143,10 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
         // internal padding only between the leading "0x"
         // prefix or the leading sign and the number
 
-        if (43 /* '+' or '-' */ == _RW::__rw_digit_map [_UChar (*__p)])
+        if (43 /* '+' or '-' */ == __rw::__rw_digit_map [_UChar (*__p)])
             *__it++ = __ctp.widen (*__p++);
         else if (   '0' == *__p && __res > 2
-                 && 33 == /* 'X' */ _RW::__rw_digit_map [_UChar (__p [1])]) {
+                 && 33 == /* 'X' */ __rw::__rw_digit_map [_UChar (__p [1])]) {
             *__it++ = __ctp.widen (*__p++);
             *__it++ = __ctp.widen (*__p++);
         }
@@ -156,12 +156,12 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
             *__it = __fill;
     }
 
-    if (__type & _RW::__rw_facet::_C_integral && !*__grp && __prec >= 0) {
+    if (__type & __rw::__rw_facet::_C_integral && !*__grp && __prec >= 0) {
         // optimized for integer output, no grouping
         for (const char *__end = __pbuf + __res; __p != __end; ++__p, ++__it)
             *__it = __ctp.widen (*__p);
     }
-    else if (_RW::__rw_facet::_C_bool == __type) {
+    else if (__rw::__rw_facet::_C_bool == __type) {
         // boolalpha output
         for (_RWSTD_SIZE_T __i = 0; __i != __res; ++__i, ++__it)
             *__it = __boolstr [__i];

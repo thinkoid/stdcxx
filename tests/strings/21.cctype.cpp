@@ -127,7 +127,7 @@ const char* const cctype_macros [] = {
 
 int function_called;
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 TEST_FUNCTION (isalnum);
 TEST_FUNCTION (isalpha);

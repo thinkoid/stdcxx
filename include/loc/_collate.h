@@ -43,7 +43,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _CharT>
@@ -51,7 +51,7 @@ class collate;
 
 
 template <class _CharT>
-class collate: public _RW::__rw_facet
+class collate: public __rw::__rw_facet
 {
 public:
     typedef _CharT char_type;
@@ -60,7 +60,7 @@ public:
     string_type;
 
     explicit collate (_RWSTD_SIZE_T __refs = 0)
-        : _RW::__rw_facet (__refs) { }
+        : __rw::__rw_facet (__refs) { }
 
     virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -80,7 +80,7 @@ public:
         return do_hash (__low, __high);
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
@@ -98,7 +98,7 @@ protected:
 
 
 template <>
-class _RWSTD_EXPORT collate<char>: public _RW::__rw_facet
+class _RWSTD_EXPORT collate<char>: public __rw::__rw_facet
 {
 public:
     typedef char char_type;
@@ -107,7 +107,7 @@ public:
     string_type;
 
     explicit collate (_RWSTD_SIZE_T __refs = 0)
-        : _RW::__rw_facet (__refs) { }
+        : __rw::__rw_facet (__refs) { }
 
     virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -127,7 +127,7 @@ public:
         return do_hash (__low, __high);
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
@@ -146,7 +146,7 @@ protected:
 #ifndef   _RWSTD_NO_WCHAR_T
 
 template <>
-class _RWSTD_EXPORT collate<wchar_t>: public _RW::__rw_facet
+class _RWSTD_EXPORT collate<wchar_t>: public __rw::__rw_facet
 {
 public:
     typedef wchar_t char_type;
@@ -155,7 +155,7 @@ public:
     string_type;
 
     explicit collate (_RWSTD_SIZE_T __refs = 0) _THROWS (())
-        : _RW::__rw_facet (__refs) { }
+        : __rw::__rw_facet (__refs) { }
 
     virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -175,7 +175,7 @@ public:
         return do_hash (__low, __high);
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 

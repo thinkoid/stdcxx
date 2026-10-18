@@ -44,7 +44,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 #ifdef _RWSTD_NO_EXTERN_MEMBER_TEMPLATE
@@ -78,7 +78,7 @@ public:
     typedef typename traits_type::char_type       value_type;
     typedef _Allocator                            allocator_type;
 
-    typedef _RW::__string_ref<value_type, traits_type, allocator_type>
+    typedef __rw::__string_ref<value_type, traits_type, allocator_type>
      _C_string_ref_type;
 
     typedef  _RWSTD_ALLOC_TYPE(allocator_type, value_type)          
@@ -95,10 +95,10 @@ public:
 
 #ifndef _RWSTD_NO_DEBUG_ITER
 
-    typedef _RW::__rw_debug_iter <basic_string, pointer, pointer>
+    typedef __rw::__rw_debug_iter <basic_string, pointer, pointer>
         iterator;
     
-    typedef _RW::__rw_debug_iter <basic_string, const_pointer, pointer>
+    typedef __rw::__rw_debug_iter <basic_string, const_pointer, pointer>
         const_iterator;
 
     iterator _C_make_iter (const pointer& __ptr) {
@@ -127,16 +127,16 @@ public:
 
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
-    typedef _STD::reverse_iterator<const_iterator> const_reverse_iterator;
-    typedef _STD::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef std::reverse_iterator<iterator>        reverse_iterator;
 
 #else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
 
-    typedef _STD::reverse_iterator<const_iterator, 
+    typedef std::reverse_iterator<const_iterator, 
       random_access_iterator_tag, value_type, 
       const_reference, const_pointer, difference_type>
       const_reverse_iterator;
-    typedef _STD::reverse_iterator<iterator, 
+    typedef std::reverse_iterator<iterator, 
       random_access_iterator_tag, value_type, 
       reference, pointer, difference_type>
       reverse_iterator;
@@ -790,22 +790,22 @@ public:
 
     void _C_unlink (pointer);   
 
-    friend struct _RW::__string_ref<value_type, traits_type, allocator_type>;
+    friend struct __rw::__string_ref<value_type, traits_type, allocator_type>;
 
 #ifndef _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
 
-    static _RW::__null_ref<_CharT, _Traits, _Allocator> _C_null_ref;
+    static __rw::__null_ref<_CharT, _Traits, _Allocator> _C_null_ref;
 
-    static _RW::__null_ref<_CharT, _Traits, _Allocator>* _C_nullref () {
+    static __rw::__null_ref<_CharT, _Traits, _Allocator>* _C_nullref () {
         return &_C_null_ref;
     }
 
 #else   // if defined (_RWSTD_NO_COLLAPSE_TEMPLATE_STATICS)
 
-    static _RW::__null_ref<_CharT, _Traits, _Allocator>* _C_nullref () {
-        typedef _RW::__null_ref<_CharT, _Traits, _Allocator> _NullRef;
+    static __rw::__null_ref<_CharT, _Traits, _Allocator>* _C_nullref () {
+        typedef __rw::__null_ref<_CharT, _Traits, _Allocator> _NullRef;
 
-        return _RWSTD_REINTERPRET_CAST (_NullRef*, _RW::__nullref);
+        return _RWSTD_REINTERPRET_CAST (_NullRef*, __rw::__nullref);
     }
 
 #endif   // _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
@@ -1457,13 +1457,13 @@ operator>= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 #endif   // _RWSTD_RW_STRINGIO_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 #ifndef _RWSTD_NO_FUNC_PARTIAL_SPEC
 
 #  ifndef _RWSTD_NO_NONDEDUCED_CONTEXT
 #    define _RWSTD_STRING_SIZE_TYPE \
-            typename _STD::basic_string<_CharT, _Traits, _Allocator>::size_type
+            typename std::basic_string<_CharT, _Traits, _Allocator>::size_type
 #  else
 #    define _RWSTD_STRING_SIZE_TYPE _RWSTD_SIZE_T
 #  endif   // _RWSTD_NO_NONDEDUCED_CONTEXT
@@ -1474,7 +1474,7 @@ _RWSTD_NAMESPACE (__rw) {
 template <class _CharT, class _Traits, class _Allocator>
 inline _RWSTD_STRING_SIZE_TYPE
 __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE __size,
-                   const _STD::basic_string<_CharT, _Traits, _Allocator>*)
+                   const std::basic_string<_CharT, _Traits, _Allocator>*)
 {
     typedef _RWSTD_STRING_SIZE_TYPE _RWSizeT;
 
@@ -1500,11 +1500,11 @@ __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE __size,
 // are provided for char and wchar_t; the general case is given in <memory>
 
 template <>
-inline _RWSTD_STRING_SIZE_TYPE (_STD::string)
-__rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (_STD::string) __size,
-                   const _STD::string*)
+inline _RWSTD_STRING_SIZE_TYPE (std::string)
+__rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (std::string) __size,
+                   const std::string*)
 {
-    typedef _RWSTD_STRING_SIZE_TYPE (_STD::string) _RWSizeT;
+    typedef _RWSTD_STRING_SIZE_TYPE (std::string) _RWSizeT;
 
     const _RWSizeT __ratio = _RWSizeT (  (_RWSTD_STRING_CAPACITY_RATIO << 10)
                                        / _RWSTD_RATIO_DIVIDER);
@@ -1516,11 +1516,11 @@ __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (_STD::string) __size,
 }                     
 
 template <>
-inline _RWSTD_STRING_SIZE_TYPE (_STD::wstring)
-__rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (_STD::wstring) __size,
-                   const _STD::wstring*)
+inline _RWSTD_STRING_SIZE_TYPE (std::wstring)
+__rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (std::wstring) __size,
+                   const std::wstring*)
 {
-    typedef _RWSTD_STRING_SIZE_TYPE (_STD::wstring) _RWSizeT;
+    typedef _RWSTD_STRING_SIZE_TYPE (std::wstring) _RWSizeT;
 
     const _RWSizeT __ratio = _RWSizeT (  (_RWSTD_STRING_CAPACITY_RATIO << 10)
                                        / _RWSTD_RATIO_DIVIDER);
@@ -1545,7 +1545,7 @@ __rw_new_capacity (_RWSTD_STRING_SIZE_TYPE (_STD::wstring) __size,
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_BASIC_STRING, _CHAR)
 

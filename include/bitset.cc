@@ -26,7 +26,7 @@
  * 
  **************************************************************************/
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 #if 8 == _RWSTD_CHAR_BIT
@@ -119,16 +119,16 @@ void __rw_bitset (unsigned long *__bits, _RWSTD_SIZE_T __maxbits,
 
 
 template <_RWSTD_SIZE_T _Size, class _CharT, class _Traits> 
-_STD::basic_istream<_CharT, _Traits>&  
-__rw_extract_bitset (_STD::basic_istream<_CharT, _Traits> &__strm,
-                     _STD::bitset<_Size>                  &__x)
+std::basic_istream<_CharT, _Traits>&   
+__rw_extract_bitset (std::basic_istream<_CharT, _Traits> &__strm,
+                     std::bitset<_Size>                   &__x)
 {
-    typedef _STD::basic_istream<_CharT, _Traits> _Istream;
+    typedef std::basic_istream<_CharT, _Traits> _Istream;
 
     typename _Istream::iostate __err (__strm.goodbit);
 
 
-    _STD::bitset<_Size> __tmp;
+    std::bitset<_Size> __tmp;
 
     _RWSTD_SIZE_T __bit = _Size;
 
@@ -168,7 +168,7 @@ __rw_extract_bitset (_STD::basic_istream<_CharT, _Traits> &__strm,
         }
     }
     _CATCH (...) {
-        __strm.setstate (__strm.badbit | _RW::__rw_rethrow);
+        __strm.setstate (__strm.badbit | __rw::__rw_rethrow);
     }
 
     if (_Size && _Size == __bit)

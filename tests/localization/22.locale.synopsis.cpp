@@ -200,7 +200,7 @@ test_convenience_funs ()
     FUN (charT, std::tolower, (charT, const std::locale&));
 }
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // verify that specializations are present in the lib
 template <> class ctype<char>;
@@ -444,7 +444,7 @@ struct StringTypes
 };
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // user-defined character type; used to exercise requirements in Table 52
 // i.e., specializations of facets on types other than char and wchar_t

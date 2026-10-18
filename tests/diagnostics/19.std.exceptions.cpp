@@ -380,8 +380,8 @@ run_test (int, char* [])
     _TRY {
         // see if replacement operator new throws an exception
         // when called indirectly, i.e., from the library binary
-        void* const p = _RW::__rw_allocate (sizeof long_str, 0);
-        _RW::__rw_deallocate (p, 0);
+        void* const p = __rw::__rw_allocate (sizeof long_str, 0);
+        __rw::__rw_deallocate (p, 0);
         new_throws = 0;
 
         rw_assert (false, 0, __LINE__,

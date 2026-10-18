@@ -37,7 +37,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 // will grow an array of POD elements, never shrinks
@@ -81,7 +81,7 @@ __rw_realloc (void *array, size_t size, size_t &n, int inx)
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 /* static */ ios_base::_C_usr_data*
@@ -179,7 +179,7 @@ void ios_base::_C_fire_event (event ev, bool reentrant)
 
             if (!cba) {
                 // clear may throw...
-                _C_set (_C_state | badbit, _C_except | _RW::__rw_locked,
+                _C_set (_C_state | badbit, _C_except | __rw::__rw_locked,
                         _C_rdbuf);
                 return;
             }
@@ -348,7 +348,7 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
 #  ifdef _RWSTD_NO_NEW_THROWS
 
             if (!_C_usr)
-                _RW::__rw_throw (_RWSTD_ERROR_FIRST + 3 /* BAD_ALLOC */);
+                __rw::__rw_throw (_RWSTD_ERROR_FIRST + 3 /* BAD_ALLOC */);
 
 #  endif   // _RWSTD_NO_NEW_THROWS
 
@@ -420,7 +420,7 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
     _C_except = except;
 
     // leave state alone but throw an exception if necessary
-    _C_set (_C_state, _C_except | _RW::__rw_locked, _C_rdbuf);
+    _C_set (_C_state, _C_except | __rw::__rw_locked, _C_rdbuf);
 }
 
 
@@ -432,7 +432,7 @@ long& ios_base::iword (int inx)
         _C_usr = _C_usr_data::_C_alloc (&ios_base::_C_fire_event);
 
     long* const ia = _C_usr
-        ? _RWSTD_STATIC_CAST (long*, _RW::__rw_realloc (_C_usr->_C_iarray,
+        ? _RWSTD_STATIC_CAST (long*, __rw::__rw_realloc (_C_usr->_C_iarray,
                                                         sizeof (long),
                                                         _C_usr->_C_isize,
                                                         inx))
@@ -445,7 +445,7 @@ long& ios_base::iword (int inx)
         return (_C_usr->_C_iarray = ia)[inx];
     }
 
-    _C_set (_C_state | badbit, _C_except | _RW::__rw_locked, _C_rdbuf);
+    _C_set (_C_state | badbit, _C_except | __rw::__rw_locked, _C_rdbuf);
 
     // returns a reference to a dummy object on failure (27.4.2.5, p3)
     static long dummy_iword;
@@ -462,7 +462,7 @@ void*& ios_base::pword (int inx)
         _C_usr = _C_usr_data::_C_alloc (&ios_base::_C_fire_event);
 
     void** const pa = _C_usr
-        ? _RWSTD_STATIC_CAST (void**, _RW::__rw_realloc (_C_usr->_C_parray,
+        ? _RWSTD_STATIC_CAST (void**, __rw::__rw_realloc (_C_usr->_C_parray,
                                                          sizeof (void*),
                                                          _C_usr->_C_psize,
                                                          inx))
@@ -475,7 +475,7 @@ void*& ios_base::pword (int inx)
         return (_C_usr->_C_parray = pa)[inx];
     }
 
-    _C_set (_C_state | badbit, _C_except | _RW::__rw_locked, _C_rdbuf);
+    _C_set (_C_state | badbit, _C_except | __rw::__rw_locked, _C_rdbuf);
 
     // returns a reference to a dummy object on failure (27.4.2.5, p3)
     static void *dummy_pword;
@@ -502,7 +502,7 @@ register_callback (event_callback fun, int inx)
     if (_C_usr) {
         sz  = _C_usr->_C_cbsize;
         cba = _RWSTD_STATIC_CAST (EventCB*,
-                                  _RW::__rw_realloc (_C_usr->_C_cbarray,
+                                  __rw::__rw_realloc (_C_usr->_C_cbarray,
                                                      sizeof (EventCB),
                                                      _C_usr->_C_cbsize,
                                                      int (sz)));
@@ -519,7 +519,7 @@ register_callback (event_callback fun, int inx)
     }
     else {
         // not required by 27.4.2.6
-        _C_set (_C_state | badbit, _C_except | _RW::__rw_locked, _C_rdbuf);
+        _C_set (_C_state | badbit, _C_except | __rw::__rw_locked, _C_rdbuf);
     }
 }
 

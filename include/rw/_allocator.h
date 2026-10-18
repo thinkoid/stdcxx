@@ -51,7 +51,7 @@
 #endif   // _RWSTD_SPECIALIZED_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // [de]allocate storage (in bytes)
 _RWSTD_EXPORT void*
@@ -63,7 +63,7 @@ __rw_deallocate (void*, _RWSTD_SIZE_T, int = 0) _THROWS (());
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 template <class _TypeT> class
@@ -145,9 +145,9 @@ public:
 
 #ifdef _RWSTD_ALLOCATOR
         return _RWSTD_STATIC_CAST (pointer,
-                   _RW::__rw_allocate (__n * sizeof (value_type)));
+                   __rw::__rw_allocate (__n * sizeof (value_type)));
 #else
-        return _RWSTD_STATIC_CAST (pointer, _RW::__rw_allocate (__n));
+        return _RWSTD_STATIC_CAST (pointer, __rw::__rw_allocate (__n));
 #endif   // _RWSTD_ALLOCATOR
     }
 
@@ -157,7 +157,7 @@ public:
     void deallocate (void* __p, size_type __n) _THROWS (())
 #endif   // _RWSTD_ALLOCATOR
     {
-        _RW::__rw_deallocate (__p, __n);
+        __rw::__rw_deallocate (__p, __n);
     }
 
     // 20.4.1.1, p11 - the largest N for which allocate (N) might succeed
@@ -168,7 +168,7 @@ public:
     }
 
     void construct (pointer __p, const_reference __val) {
-        _RW::__rw_construct (__p, __val);
+        __rw::__rw_construct (__p, __val);
     }
     
     // declared as nothrow since the behavior of programs that
@@ -246,7 +246,7 @@ public:
     }
 
     void construct (pointer __p, const_reference __val) {
-        _RW::__rw_construct(__p, __val);
+        __rw::__rw_construct(__p, __val);
     }
 
     void destroy (pointer __p) const {

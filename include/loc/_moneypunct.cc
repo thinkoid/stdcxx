@@ -27,10 +27,10 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 template <class _CharT, bool _Intl>
-_RW::__rw_facet_id moneypunct<_CharT, _Intl>::id;
+__rw::__rw_facet_id moneypunct<_CharT, _Intl>::id;
 
 
 #ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT

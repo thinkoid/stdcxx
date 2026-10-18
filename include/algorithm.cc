@@ -40,7 +40,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _FwdIter1, class _FwdIter2, class _Dist>
@@ -90,7 +90,7 @@ _FwdIter1 __find_end (_FwdIter1 __first1, _FwdIter1 __last1,
     _FwdIter1 __res = __last1;
 
     while (__dist2 >= __dist1) {
-        if (_STD::equal (__first2, __last2, __first1, __pred))
+        if (std::equal (__first2, __last2, __first1, __pred))
             __res = __first1;
 
         __dist2 = _DISTANCE (++__first1, __last1, _Dist);
@@ -110,7 +110,7 @@ _FwdIter1 find_first_of (_FwdIter1 __first1, _FwdIter1 __last1,
         return __last1;
 
     for (_FwdIter1 __next = __first1; !(__next == __last1); ++__next)
-        if (!(_STD::find (__first2, __last2, *__next) == __last2))
+        if (!(std::find (__first2, __last2, *__next) == __last2))
             return __next;
 
     return __last1;
@@ -375,7 +375,7 @@ _FwdIter
 unique (_FwdIter __first, _FwdIter __last)
 {
     // find the first of two equal elements
-    __first = _STD::adjacent_find (__first, __last);
+    __first = std::adjacent_find (__first, __last);
 
     if (__first == __last)
         return __first;
@@ -399,7 +399,7 @@ template <class _FwdIter, class _BinaryPredicate>
 _FwdIter
 unique (_FwdIter __first, _FwdIter __last, _BinaryPredicate __pred)
 {
-    __first = _STD::adjacent_find (__first, __last, __pred);
+    __first = std::adjacent_find (__first, __last, __pred);
 
     if (__first == __last)
         return __first;
@@ -510,7 +510,7 @@ void __rotate (_FwdIter __first, _FwdIter __middle,
     _RWSTD_ASSERT_IN_RANGE (__middle, __first, __last); 
 
     for (_FwdIter __i = __middle; ; ) {
-        _STD::iter_swap (__first, __i);
+        std::iter_swap (__first, __i);
         ++__i;
         if (++__first == __middle) {
             if (__i == __last)
@@ -600,7 +600,7 @@ void random_shuffle (_RandomAccessIter __first, _RandomAccessIter __last,
             // returned value must be non-negative and less than the limit
             _RWSTD_ASSERT (0 <= __rndoff && __rndoff < __limit);
 
-            _STD::iter_swap (__i, __first + __rndoff);
+            std::iter_swap (__i, __first + __rndoff);
         }
     }
 }
@@ -629,7 +629,7 @@ _BidirIter partition (_BidirIter __first, _BidirIter __last, _Predicate __pred)
             else
                 --__last;
         }
-        _STD::iter_swap (__first, __last);
+        std::iter_swap (__first, __last);
     }
 }
 
@@ -644,16 +644,16 @@ _BidirIter __inplace_stable_partition (_BidirIter __first, _BidirIter __last,
         return __pred (*__first) ? __last : __first;
 
     _BidirIter __middle = __first;
-    _STD::advance (__middle, __dist / 2);
+    std::advance (__middle, __dist / 2);
     _BidirIter
         __first_cut = __inplace_stable_partition (__first, __middle, __pred,
                                                   __dist / 2);
     _BidirIter
         __second_cut = __inplace_stable_partition (__middle, __last, __pred,
                                                  __dist - __dist / 2);
-    _STD::rotate (__first_cut, __middle, __second_cut);
+    std::rotate (__first_cut, __middle, __second_cut);
     __dist = _DISTANCE (__middle, __second_cut, _Dist);
-    _STD::advance (__first_cut, __dist);
+    std::advance (__first_cut, __dist);
     return __first_cut;
 }
 
@@ -702,11 +702,11 @@ _BidirIter __stable_partition_adaptive (_BidirIter __first, _BidirIter __last,
             }
             __fill_pointer = __dist;
         }
-        _STD::copy (__buf, __buf + __dist, __res1);
+        std::copy (__buf, __buf + __dist, __res1);
         return __res1;
     }
     _BidirIter __middle = __first;
-    _STD::advance (__middle, __dist / 2);
+    std::advance (__middle, __dist / 2);
 
     // (__dist / 2)'s type may not be the same as that of __dist,
     // hence the seemingly redundant casts below
@@ -721,9 +721,9 @@ _BidirIter __stable_partition_adaptive (_BidirIter __first, _BidirIter __last,
                                      __buf, __buf_size,
                                      __fill_pointer, (_TypeT*)0);
 
-    _STD::rotate (__first_cut, __middle, __second_cut);
+    std::rotate (__first_cut, __middle, __second_cut);
     __dist = _DISTANCE (__middle, __second_cut, _Dist);
-    _STD::advance (__first_cut, __dist);
+    std::advance (__first_cut, __dist);
     return __first_cut;
 }
 
@@ -742,7 +742,7 @@ _BidirIter __stable_partition (_BidirIter __first, _BidirIter __last,
     // call an extension of get_temporary_buffer<>() in case partial class
     // specialization (and iterator_traits<>) isn't supported by compiler
     pair<_TypeT*, _Dist> __pair =
-        _STD::get_temporary_buffer (__dist, (_TypeT*)0);
+        std::get_temporary_buffer (__dist, (_TypeT*)0);
 
     if (__pair.first == 0)
         return __inplace_stable_partition (__first, __last, __pred, __dist);
@@ -757,7 +757,7 @@ _BidirIter __stable_partition (_BidirIter __first, _BidirIter __last,
     for (_TypeT *__ptr = __pair.first + __fill; !(__pair.first == __ptr--); )
         (*__ptr).~_TypeT ();
 
-    _STD::return_temporary_buffer (__pair.first);
+    std::return_temporary_buffer (__pair.first);
 
     return __res;
 }
@@ -782,7 +782,7 @@ _RandomAccessIter __unguarded_partition (_RandomAccessIter __first,
         if (!(__first < __last))
             return __first;
 
-        _STD::iter_swap (__first, __last);
+        std::iter_swap (__first, __last);
     }
 }
 
@@ -838,7 +838,7 @@ inline void __linear_insert (_RandomAccessIter __first,
     const _TypeT __val = *__last;
 
     if (__val < *__first) {
-        _STD::copy_backward (__first, __last, __last + 1);
+        std::copy_backward (__first, __last, __last + 1);
         *__first = __val;
     }
     else
@@ -854,7 +854,7 @@ __linear_insert (_RandomAccessIter __first, _RandomAccessIter __last, _TypeT*,
     const _TypeT __val = *__last;
 
     if (__comp (__val, *__first)) {
-        _STD::copy_backward (__first, __last, __last + 1);
+        std::copy_backward (__first, __last, __last + 1);
         *__first = __val;
     }
     else
@@ -913,14 +913,14 @@ void __merge_sort_loop (_RandomAccessIter1 __first,
     const _Dist __two_step = 2 * __step;
 
     while (__last - __first >= __two_step) {
-        __res = _STD::merge (__first, __first + __step,
+        __res = std::merge (__first, __first + __step,
                              __first + __step, __first + __two_step, __res,
                              __comp);
         __first += __two_step;
     }
-    __step = (_STD::min)(_Dist (__last - __first), __step);
+    __step = (std::min)(_Dist (__last - __first), __step);
 
-    _STD::merge (__first, __first + __step, __first + __step, __last,
+    std::merge (__first, __first + __step, __first + __step, __last,
                  __res, __comp);
 }
 
@@ -1007,14 +1007,14 @@ __stable_sort (_RandomAccessIter __first, _RandomAccessIter __last,
     // call an extension of get_temporary_buffer<>() in case partial class
     // specialization (and iterator_traits<>) isn't supported by compiler
     pair<_TypeT*, _Dist> __p =
-        _STD::get_temporary_buffer (_Dist (__last - __first), (_TypeT*)0);
+        std::get_temporary_buffer (_Dist (__last - __first), (_TypeT*)0);
 
     if (__p.first == 0)
         __inplace_stable_sort (__first, __last, __comp);
     else {
-        _Dist __len = (_STD::min)(_Dist (__p.second),
+        _Dist __len = (std::min)(_Dist (__p.second),
                                       _Dist (__last - __first));
-        _STD::copy (__first, __first + __len,
+        std::copy (__first, __first + __len,
                     raw_storage_iterator<_TypeT*, _TypeT>(__p.first));
 
         __stable_sort_adaptive (__first, __last, __p.first, __p.second,
@@ -1023,7 +1023,7 @@ __stable_sort (_RandomAccessIter __first, _RandomAccessIter __last,
         for (_TypeT *__ptr = __p.first + __len; !(__p.first == --__ptr); )
             (*__ptr).~_TypeT ();
 
-        _STD::return_temporary_buffer (__p.first);
+        std::return_temporary_buffer (__p.first);
     }
 }
 
@@ -1034,14 +1034,14 @@ void __partial_sort (_RandomAccessIter __first, _RandomAccessIter __middle,
 {
     _RWSTD_ASSERT_IN_RANGE (__middle, __first, __last);
 
-    _STD::make_heap (__first, __middle, __comp);
+    std::make_heap (__first, __middle, __comp);
 
     for (_RandomAccessIter __i = __middle; __i < __last; ++__i)
         if (__comp (*__i, *__first))
             __pop_heap (__first, __middle, __i, *__i, __comp,
                         _RWSTD_DIFFERENCE_TYPE (_RandomAccessIter));
 
-    _STD::sort_heap (__first, __middle, __comp);
+    std::sort_heap (__first, __middle, __comp);
 }
 
 
@@ -1065,7 +1065,7 @@ _RandomAccessIter __partial_sort_copy (_InputIter __first,
     for (; !(__first == __last) && !(__res == __last2); ++__first, ++__res)
         *__res = *__first;
 
-    _STD::make_heap (__first2, __res, __comp);
+    std::make_heap (__first2, __res, __comp);
 
     for (; !(__first == __last); ++__first) {
         if (__comp (*__first, *__first2))
@@ -1073,7 +1073,7 @@ _RandomAccessIter __partial_sort_copy (_InputIter __first,
                            *__first, __comp);
     }
 
-    _STD::sort_heap (__first2, __res, __comp);
+    std::sort_heap (__first2, __res, __comp);
 
     return __res;
 }
@@ -1146,7 +1146,7 @@ _FwdIter __lower_bound (_FwdIter __first, _FwdIter __last,
         const _Dist __half = __dist / 2;
         _FwdIter __middle = __first;
 
-        _STD::advance (__middle, __half);
+        std::advance (__middle, __half);
 
         if (__comp (*__middle, __val)) {
             __first = __middle;
@@ -1200,7 +1200,7 @@ _FwdIter __upper_bound (_FwdIter __first, _FwdIter __last,
         const _Dist __half = __dist / 2;
         _FwdIter __middle = __first;
 
-        _STD::advance (__middle, __half);
+        std::advance (__middle, __half);
 
         if (__comp (__val, *__middle))
             __dist = __half;
@@ -1253,7 +1253,7 @@ __equal_range (_FwdIter __first, _FwdIter __last, const _TypeT& __val,
         const _Dist __half = __dist / 2;
         _FwdIter __middle = __first;
 
-        _STD::advance (__middle, __half);
+        std::advance (__middle, __half);
 
         if (__comp (*__middle, __val)) {
             __first = __middle;
@@ -1264,12 +1264,12 @@ __equal_range (_FwdIter __first, _FwdIter __last, const _TypeT& __val,
             __dist = __half;
         else {
             const _FwdIter __left =
-                _STD::lower_bound (__first, __middle, __val, __comp);
+                std::lower_bound (__first, __middle, __val, __comp);
 
-            _STD::advance (__first, __dist);
+            std::advance (__first, __dist);
 
             const _FwdIter __right =
-                _STD::upper_bound (++__middle, __first, __val, __comp);
+                std::upper_bound (++__middle, __first, __val, __comp);
 
             return pair<_FwdIter, _FwdIter>(__left, __right);
         }
@@ -1301,10 +1301,10 @@ __equal_range (_RandomAccessIter __first, _RandomAccessIter __last,
             __dist = __half;
         else {
             const _RandomAccessIter __left =
-                _STD::lower_bound (__first, __middle, __val, __comp);
+                std::lower_bound (__first, __middle, __val, __comp);
 
             const _RandomAccessIter __right =
-                _STD::upper_bound (__middle + 1, __first + __dist,
+                std::upper_bound (__middle + 1, __first + __dist,
                                    __val, __comp);
 
             return pair<_RandomAccessIter, _RandomAccessIter>(__left, __right);
@@ -1337,7 +1337,7 @@ _OutputIter merge (_InputIter1 __first1, _InputIter1 __last1,
             ++__first1;
         }
     }
-    return _STD::copy (__first2, __last2, _STD::copy(__first1, __last1, __res));
+    return std::copy (__first2, __last2, std::copy(__first1, __last1, __res));
 }
 
 
@@ -1355,7 +1355,7 @@ void __merge_without_buffer (_BidirIter __first,
 
     if (__dist1 + __dist2 == 2) {
         if (__comp (*__middle, *__first))
-            _STD::iter_swap (__first, __middle);
+            std::iter_swap (__first, __middle);
         return;
     }
 
@@ -1366,23 +1366,23 @@ void __merge_without_buffer (_BidirIter __first,
 
     if (__dist1 > __dist2) {
         __dist11 = __dist1 / 2;
-        _STD::advance (__first_cut, __dist11);
-        __second_cut = _STD::lower_bound (__middle, __last,
+        std::advance (__first_cut, __dist11);
+        __second_cut = std::lower_bound (__middle, __last,
                                           *__first_cut, __comp);
         __dist22 = _DISTANCE (__middle, __second_cut, _Dist);
     }
     else {
         __dist22 = __dist2 / 2;
-        _STD::advance (__second_cut, __dist22);
-        __first_cut = _STD::upper_bound (__first, __middle,
+        std::advance (__second_cut, __dist22);
+        __first_cut = std::upper_bound (__first, __middle,
                                             *__second_cut, __comp);
         __dist11 = _DISTANCE (__first, __first_cut, _Dist);
     }
-    _STD::rotate (__first_cut, __middle, __second_cut);
+    std::rotate (__first_cut, __middle, __second_cut);
 
     _BidirIter __middle2 = __first_cut;
 
-    _STD::advance (__middle2, __dist22);
+    std::advance (__middle2, __dist22);
 
     __merge_without_buffer (__first, __first_cut, __middle2,
                             __dist11, __dist22, __comp);
@@ -1401,19 +1401,19 @@ _BidirIter1 __rotate_adaptive (_BidirIter1 __first,
     _RWSTD_ASSERT_IN_RANGE (__middle, __first, __last);
 
     if (__dist1 > __dist2 && __dist2 <= __buf_size) {
-        _BidirIter2 __buf_end = _STD::copy (__middle, __last, __buf);
-        _STD::copy_backward (__first, __middle, __last);
-        return _STD::copy (__buf, __buf_end, __first);
+        _BidirIter2 __buf_end = std::copy (__middle, __last, __buf);
+        std::copy_backward (__first, __middle, __last);
+        return std::copy (__buf, __buf_end, __first);
     }
 
     if (__dist1 <= __buf_size) {
-        _BidirIter2 __buf_end = _STD::copy (__first, __middle, __buf);
-        _STD::copy (__middle, __last, __first);
-        return _STD::copy_backward (__buf, __buf_end, __last);
+        _BidirIter2 __buf_end = std::copy (__first, __middle, __buf);
+        std::copy (__middle, __last, __first);
+        return std::copy_backward (__buf, __buf_end, __last);
     }
 
-    _STD::rotate (__first, __middle, __last);
-    _STD::advance (__first, __dist2);
+    std::rotate (__first, __middle, __last);
+    std::advance (__first, __dist2);
     return __first;
 }
 
@@ -1430,22 +1430,22 @@ _BidirIter3 __merge_backward (_BidirIter1 __first1,
     _RWSTD_ASSERT_RANGE (__first2, __last2);
 
     if (__first1 == __last1)
-        return _STD::copy_backward (__first2, __last2, __res);
+        return std::copy_backward (__first2, __last2, __res);
 
     if (__first2 == __last2)
-        return _STD::copy_backward (__first1, __last1, __res);
+        return std::copy_backward (__first1, __last1, __res);
 
     for (--__last1, --__last2; ; ) {
         if (*__last2 < *__last1) {
             *--__res = *__last1;
             if (__first1 == __last1)
-                return _STD::copy_backward (__first2, ++__last2, __res);
+                return std::copy_backward (__first2, ++__last2, __res);
             --__last1;
         }
         else {
             *--__res = *__last2;
             if (__first2 == __last2)
-                return _STD::copy_backward (__first1, ++__last1, __res);
+                return std::copy_backward (__first1, ++__last1, __res);
             --__last2;
         }
     }
@@ -1465,21 +1465,21 @@ _BidirIter3 __merge_backward (_BidirIter1 __first1,
     _RWSTD_ASSERT_RANGE (__first2, __last2);
 
     if (__first1 == __last1)
-        return _STD::copy_backward (__first2, __last2, __res);
+        return std::copy_backward (__first2, __last2, __res);
     if (__first2 == __last2)
-        return _STD::copy_backward (__first1, __last1, __res);
+        return std::copy_backward (__first1, __last1, __res);
 
     for (--__last1, --__last2; ; ) {
         if (__comp (*__last2, *__last1)) {
             *--__res = *__last1;
             if (__first1 == __last1)
-                return _STD::copy_backward (__first2, ++__last2, __res);
+                return std::copy_backward (__first2, ++__last2, __res);
             --__last1;
         }
         else {
             *--__res = *__last2;
             if (__first2 == __last2)
-                return _STD::copy_backward (__first1, ++__last1, __res);
+                return std::copy_backward (__first1, ++__last1, __res);
             --__last2;
         }
     }
@@ -1497,12 +1497,12 @@ void __merge_adaptive (_BidirIter __first, _BidirIter __middle,
     
     if (__dist1 <= __dist2 && __dist1 <= __buf_size)
     {
-        _Pointer __buf_end = _STD::copy (__first, __middle, __buf);
-        _STD::merge (__buf, __buf_end, __middle, __last, __first, __comp);
+        _Pointer __buf_end = std::copy (__first, __middle, __buf);
+        std::merge (__buf, __buf_end, __middle, __last, __first, __comp);
     }
     else if (__dist2 <= __buf_size)
     {
-        _Pointer __buf_end = _STD::copy (__middle, __last, __buf);
+        _Pointer __buf_end = std::copy (__middle, __last, __buf);
         __merge_backward (__first, __middle, __buf, __buf_end, __last,
                           __comp);
     }
@@ -1515,16 +1515,16 @@ void __merge_adaptive (_BidirIter __first, _BidirIter __middle,
         if (__dist1 > __dist2)
         {
             __dist11 = __dist1 / 2;
-            _STD::advance (__first_cut, __dist11);
-            __second_cut = _STD::lower_bound (__middle, __last, *__first_cut,
+            std::advance (__first_cut, __dist11);
+            __second_cut = std::lower_bound (__middle, __last, *__first_cut,
                                               __comp);
             __dist22 = _DISTANCE (__middle, __second_cut, _Dist);
         }
         else
         {
             __dist22 = __dist2 / 2;
-            _STD::advance (__second_cut, __dist22);
-            __first_cut = _STD::upper_bound (__first, __middle, *__second_cut,
+            std::advance (__second_cut, __dist22);
+            __first_cut = std::upper_bound (__first, __middle, *__second_cut,
                                                 __comp);
             __dist11 = _DISTANCE (__first, __first_cut, _Dist);
         }
@@ -1552,16 +1552,16 @@ void __inplace_merge (_BidirIter __first, _BidirIter __middle,
     // call an extension of get_temporary_buffer<>() in case partial class
     // specialization (and iterator_traits<>) isn't supported by compiler
     pair<_TypeT*, _Dist> __pair =
-        _STD::get_temporary_buffer (__dist1 + __dist2, (_TypeT*)0);
+        std::get_temporary_buffer (__dist1 + __dist2, (_TypeT*)0);
 
     if (__pair.first == 0) {
         __merge_without_buffer (__first, __middle, __last, __dist1, __dist2,
                                 __comp);
     }
     else {
-        _Dist __dist = (_STD::min)(__pair.second, __dist1 + __dist2);
+        _Dist __dist = (std::min)(__pair.second, __dist1 + __dist2);
         
-        _STD::fill_n (raw_storage_iterator<_TypeT*, _TypeT> (__pair.first),
+        std::fill_n (raw_storage_iterator<_TypeT*, _TypeT> (__pair.first),
                       __dist, *__first);
         __merge_adaptive (__first, __middle, __last, __dist1, __dist2,
                           __pair.first, __pair.second, __comp);
@@ -1570,7 +1570,7 @@ void __inplace_merge (_BidirIter __first, _BidirIter __middle,
              !(__pair.first == --__ptr); )
             (*__ptr).~_TypeT ();
 
-        _STD::return_temporary_buffer (__pair.first);
+        std::return_temporary_buffer (__pair.first);
     }
 }
 
@@ -1627,8 +1627,8 @@ _OutputIter set_union (_InputIter1 __first1, _InputIter1 __last1,
             ++__first2;
         }
     }
-    return _STD::copy (__first2, __last2,
-                       _STD::copy (__first1, __last1, __res));
+    return std::copy (__first2, __last2,
+                       std::copy (__first1, __last1, __res));
 }
 
 
@@ -1681,7 +1681,7 @@ _OutputIter set_difference (_InputIter1 __first1, _InputIter1 __last1,
         }
     }
 
-    return _STD::copy (__first1, __last1, __res);
+    return std::copy (__first1, __last1, __res);
 }
 
 
@@ -1714,7 +1714,7 @@ _OutputIter set_symmetric_difference (_InputIter1 __first1,
         }
     }
 
-    return _STD::copy (__first2, __last2, _STD::copy(__first1, __last1, __res));
+    return std::copy (__first2, __last2, std::copy(__first1, __last1, __res));
 }
 
 //
@@ -1787,7 +1787,7 @@ bool next_permutation (_BidirIter __first, _BidirIter __last, _Compare __comp)
                 if (__comp (*__i, *--__j))
                     break;
 
-            _STD::iter_swap (__i, __j);
+            std::iter_swap (__i, __j);
 
             __first = __ii;
             __res   = true;
@@ -1800,7 +1800,7 @@ bool next_permutation (_BidirIter __first, _BidirIter __last, _Compare __comp)
         }
     }
 
-    _STD::reverse (__first, __last);
+    std::reverse (__first, __last);
 
     return __res;
 }
@@ -1832,7 +1832,7 @@ bool prev_permutation (_BidirIter __first, _BidirIter __last, _Compare __comp)
                 if (__comp (*--__j, *__i))
                     break;
 
-            _STD::iter_swap (__i, __j);
+            std::iter_swap (__i, __j);
 
             __first = __ii;
             __res   = true;
@@ -1845,7 +1845,7 @@ bool prev_permutation (_BidirIter __first, _BidirIter __last, _Compare __comp)
         }
     }
 
-    _STD::reverse (__first, __last);
+    std::reverse (__first, __last);
 
     return __res;
 }

@@ -37,7 +37,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 _RWSTD_EXPORT void*
 __rw_fopen (const char*, int, long) _RWSTD_ATTRIBUTE_NOTHROW;

@@ -843,15 +843,15 @@ write_ctype (std::string dir_name)
         // calculate the offsets for the wchar_t arrays
         ctype_out_.wtoupper_off = 0;
         ctype_out_.wtolower_off = unsigned (ctype_out_.wtoupper_off 
-            + upper_.size() * sizeof (_RW::__rw_upper_elm));
+            + upper_.size() * sizeof (__rw::__rw_upper_elm));
         ctype_out_.wmask_off = unsigned (ctype_out_.wtolower_off
-            + lower_.size() * sizeof (_RW::__rw_lower_elm));
+            + lower_.size() * sizeof (__rw::__rw_lower_elm));
         ctype_out_.wmask_s = unsigned (mask_.size());
 
         // calculate the offsets for the codeset name string and character
         // map name string
         ctype_out_.codeset_off = unsigned (ctype_out_.wmask_off
-            + mask_.size() * sizeof (_RW::__rw_mask_elm));
+            + mask_.size() * sizeof (__rw::__rw_mask_elm));
         ctype_out_.charmap_off = unsigned (ctype_out_.codeset_off 
             + charmap_.get_code_set_name().size() + 1);
        
@@ -870,15 +870,15 @@ write_ctype (std::string dir_name)
 
         // print out the wide character arrays
         for(upper_iter u_pos = upper_.begin(); u_pos != upper_.end(); u_pos++){
-            _RW::__rw_upper_elm elm = {u_pos->first, u_pos->second};
+            __rw::__rw_upper_elm elm = {u_pos->first, u_pos->second};
             out.write((char*)&elm, sizeof(elm));
         }
         for(lower_iter l_pos = lower_.begin(); l_pos != lower_.end(); l_pos++){
-            _RW::__rw_lower_elm elm = {l_pos->first, l_pos->second};
+            __rw::__rw_lower_elm elm = {l_pos->first, l_pos->second};
             out.write((char*)&elm, sizeof(elm));
         }
         for(mask_iter m_pos = mask_.begin(); m_pos != mask_.end(); m_pos++){
-            _RW::__rw_mask_elm elm = {m_pos->first, m_pos->second};
+            __rw::__rw_mask_elm elm = {m_pos->first, m_pos->second};
             out.write((char*)&elm, sizeof(elm));
         }
 

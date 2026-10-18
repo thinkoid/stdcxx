@@ -74,11 +74,11 @@
 #  endif  //_RWSTD_NO_STATIC_MUTEX_INIT
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // a using declaration (rather than a directive)
 // used to work around yet another MSVC 6.0 bug
-_USING (std::exception);
+using std::exception;
 
 class __rw_thread_error : public exception
 {
@@ -101,7 +101,7 @@ public:
 
     void _C_acquire () {
         if (0 != _RWSTD_MUTEX_LOCK (_C_mutex))
-            _RW::__rw_throw (_RWSTD_ERROR_RUNTIME_ERROR,
+            __rw::__rw_throw (_RWSTD_ERROR_RUNTIME_ERROR,
                              "synchronization error");
     }
 
@@ -203,7 +203,7 @@ inline __rw_mutex_base::__rw_mutex_base ()
 #  endif   // _RWSTD_NO_STATIC_MUTEX_INIT
 { 
     if (0 != _RWSTD_MUTEX_INIT (_C_mutex))
-        _RW::__rw_throw (_RWSTD_ERROR_RUNTIME_ERROR, "synchronization error");
+        __rw::__rw_throw (_RWSTD_ERROR_RUNTIME_ERROR, "synchronization error");
 }
 
 #  ifndef _RWSTD_NO_STATIC_MUTEX_INIT
@@ -356,7 +356,7 @@ struct _RWSTD_EXPORT __rw_synchronized
 
 #else   // if !defined (_RWSTD_REENTRANT)
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // dummy classes used as a base class in single-threaded environments
 

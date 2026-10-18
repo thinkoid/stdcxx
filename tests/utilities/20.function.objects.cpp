@@ -72,7 +72,7 @@
 
      // working around a bug in g++ 2.95.2 (PR #23151)
 #    define TEST_FUNCTION_DEF(decl)        \
-            _RWSTD_NAMESPACE (std) {       \
+            namespace std {       \
                template decl;              \
             }   /* namespace std */        \
             typedef void unused_typedef
@@ -268,7 +268,7 @@ test_arithmetic_operations ()
 
 // tested fununctions are in a private namespace 
 #undef N
-#define N _RW
+#define N __rw
 
     TEST_UNARY_OP (identity<int>,           +, 3);
     TEST_UNARY_OP (unary_plus<int>,         +, 4);

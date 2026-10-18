@@ -35,10 +35,10 @@
 #include <string.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 inline int
-__rw_ticmp (const _STD::type_info &lhs, const _STD::type_info &rhs)
+__rw_ticmp (const std::type_info &lhs, const std::type_info &rhs)
 {
     const char* const n1 = lhs.name ();
     const char* const n2 = rhs.name ();
@@ -70,7 +70,7 @@ __rw_ticmp (const _STD::type_info &lhs, const _STD::type_info &rhs)
 // or if they are not found to be defined in either namespace std or
 // in the global namespace
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #    endif   // _RWSTD_NO_STD_TYPE_INFO
 
@@ -86,7 +86,7 @@ type_info::~type_info () { }
 
 bool type_info::before (const type_info &rhs) const
 {
-    return 0 > _RW::__rw_ticmp (*this, rhs);
+    return 0 > __rw::__rw_ticmp (*this, rhs);
 }
 
 #    endif   // _RWSTD_NO_TYPE_INFO_BEFORE
@@ -145,7 +145,7 @@ bool type_info::operator!= (const type_info &rhs) const
 
 #    ifndef _RWSTD_NO_RUNTIME_IN_STD
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #    endif   // _RWSTD_NO_RUNTIME_IN_STD
 
@@ -180,7 +180,7 @@ bool type_info::operator!= (const type_info &rhs) const
 // unless lib is built with -fhonor-std
 bool type_info::before (const type_info &rhs) const
 {
-    return 0 > _RW::__rw_ticmp (*this, rhs);
+    return 0 > __rw::__rw_ticmp (*this, rhs);
 }
 
 #    endif   //  __GNUG__ && !_RWSTD_NO_HONOR_STD
@@ -200,7 +200,7 @@ bool type_info::before (const type_info &rhs) const
 
 #  ifndef _RWSTD_NO_STD_BAD_CAST
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #  endif   // _RWSTD_NO_STD_BAD_CAST
 
@@ -265,7 +265,7 @@ const char* bad_cast::what () const _THROWS (())
 
 #  ifndef _RWSTD_NO_STD_BAD_TYPEID
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #  endif   // _RWSTD_NO_STD_BAD_TYPEID
 

@@ -30,21 +30,21 @@
 #include <rw/_select.h>
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 template <class _CharT, class _Traits, class _NativeType>
-_STD::basic_ostream<_CharT, _Traits>&
-__rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
+std::basic_ostream<_CharT, _Traits>&
+__rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
              _NativeType                           __val)
 {
-    const typename _STD::basic_ostream<_CharT, _Traits>::sentry
+    const typename std::basic_ostream<_CharT, _Traits>::sentry
         __opfx (__strm);
 
     _TRY {
 
-        typedef _STD::ostreambuf_iterator<_CharT, _Traits> _Iter;
-        typedef _STD::num_put<_CharT, _Iter>               _NumPut;
+        typedef std::ostreambuf_iterator<_CharT, _Traits> _Iter;
+        typedef std::num_put<_CharT, _Iter>                _NumPut;
 
         if (__opfx && _STD_USE_FACET (_NumPut, __strm.getloc ())
             .put (_Iter (__strm), __strm, __strm.fill (), __val).failed ()) {
@@ -52,11 +52,11 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
             // this may throw but the exception will just be caught
             // and rethrown below; this optimizes for the common case
             // (i.e., success) but pessimizes the case of failure
-            __strm.setstate (_STD::ios_base::badbit);
+            __strm.setstate (std::ios_base::badbit);
         }
     }
     _CATCH (...) {
-        __strm.setstate (_STD::ios_base::badbit | _RW::__rw_rethrow);
+        __strm.setstate (std::ios_base::badbit | __rw::__rw_rethrow);
     }
 
     return __strm;
@@ -68,7 +68,7 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
 // i.e., ostream and char* and wostream and wchar_t*
 template <class _CharT, class _Traits>
 inline _RWSTD_STREAMSIZE
-__rw_sputn (_STD::basic_ostream<_CharT, _Traits> &__strm,
+__rw_sputn (std::basic_ostream<_CharT, _Traits> &__strm,
             const _CharT *__s, _RWSTD_STREAMSIZE __len, __rw_true_t)
 {
     _RWSTD_ASSERT (!__len || __len > 0 && 0 != __s);
@@ -89,13 +89,13 @@ __rw_sputn (_STD::basic_ostream<_CharT, _Traits> &__strm,
 // char_type is not char (e.g., wostream or user-defined)
 template <class _CharT, class _Traits>
 inline _RWSTD_STREAMSIZE
-__rw_sputn (_STD::basic_ostream<_CharT, _Traits> &__strm,
+__rw_sputn (std::basic_ostream<_CharT, _Traits> &__strm,
             const char *__s, _RWSTD_STREAMSIZE __len, __rw_false_t)
 {
     _RWSTD_ASSERT (!__len || __len > 0 && 0 != __s);
 
-    const _STD::ctype<_CharT>& __ctp =
-        _STD_USE_FACET (_STD::ctype<_CharT>, __strm.getloc ());
+    const std::ctype<_CharT>& __ctp =
+        _STD_USE_FACET (std::ctype<_CharT>, __strm.getloc ());
 
     for (_RWSTD_STREAMSIZE __i = 0; __i < __len; ++__i) {
 
@@ -112,8 +112,8 @@ __rw_sputn (_STD::basic_ostream<_CharT, _Traits> &__strm,
 
 
 template<class _CharT, class _Traits, class _StringT>
-_STD::basic_ostream<_CharT, _Traits>&
-__rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
+std::basic_ostream<_CharT, _Traits>&
+__rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
              const _StringT                       *__s,
              _RWSTD_STREAMSIZE                     __len,
              _RWSTD_STREAMSIZE                     __width)
@@ -121,7 +121,7 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
     _RWSTD_ASSERT (0 != __strm.rdbuf ());
     _RWSTD_ASSERT (0 != __s);
       
-    _STD::ios_base::iostate __err = _STD::ios_base::goodbit;
+    std::ios_base::iostate __err = std::ios_base::goodbit;
 
     // writes out max(len, width) characters, padding appropriately
     // with the fill character if (len < width);
@@ -131,7 +131,7 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
 
     _TRY {
   
-        const typename _STD::basic_ostream<_CharT, _Traits>::sentry
+        const typename std::basic_ostream<_CharT, _Traits>::sentry
             __opfx (__strm);
 
         if (__opfx) {
@@ -145,20 +145,20 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
 
             if (__pad > 0) {
                 const int __padbits =
-                    _STD::ios_base::adjustfield & __strm.flags ();
+                    std::ios_base::adjustfield & __strm.flags ();
 
                 // output left padding (output is right-aligned by default)
-                if (   _STD::ios_base::left != __padbits
+                if (   std::ios_base::left != __padbits
                     && __pad != __strm._C_pad (__pad)
                     // write out (not necessarily null-terminated) string
                     || __len != __rw_sputn (__strm, __s, __len, _Same ())
                     // output right padding (output is left-aligned)
-                    || _STD::ios_base::left == __padbits
+                    || std::ios_base::left == __padbits
                     && __pad != __strm._C_pad (__pad))
-                    __err = _STD::ios_base::badbit;
+                    __err = std::ios_base::badbit;
             }
             else if (__len != __rw_sputn (__strm, __s, __len, _Same ())) {
-                __err = _STD::ios_base::badbit;
+                __err = std::ios_base::badbit;
             }
 
             // 21.3.7.9, p4: the inserter calls width(0) after the
@@ -169,7 +169,7 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits> &__strm,
     _CATCH (...) {
         // set badbit and rethrow the caught exception if badbit
         // is also set in exceptions()
-        __strm.setstate (_STD::ios_base::badbit | _RW::__rw_rethrow);
+        __strm.setstate (std::ios_base::badbit | __rw::__rw_rethrow);
     }
 
     if (__err) {

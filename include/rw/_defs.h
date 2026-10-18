@@ -371,7 +371,7 @@
 
 // working around an HP aCC bug (PR #25354 and 22610)
 #define _RWSTD_NEW_CAPACITY(ignore, what, from)   \
-      _RW::__rw_new_capacity (from, what)
+      __rw::__rw_new_capacity (from, what)
 
 // set up MSVC DLL export/import directives
 // _DLL - defined by the compiler when either -MD or -MDd is used
@@ -407,26 +407,19 @@
 
 #define _RWSTD_DYNAMIC_CAST(T, x)      dynamic_cast< T >(x)
 
-#define _RWSTD_NAMESPACE(name)    namespace name
-#define _USING(name)              using name
-
-#undef _STD
-#define _STD   std
-#define _RW    __rw
-
 //
 // for compilers that don't like specialized friends
 // such as operator== in template classes
 //
 #ifdef _RWSTD_NO_SPECIALIZED_FRIEND
 #  ifdef __TURBOC__
-#    define _RWSTD_SPECIALIZED_FRIEND(name)   (_STD::name)
+#    define _RWSTD_SPECIALIZED_FRIEND(name)   (std::name)
 #  else   // if !defined (__TURBOC__)
 #    define _RWSTD_SPECIALIZED_FRIEND(name)   name
 #  endif   // __TURBOC__
 #else   // if defined (_RWSTD_NO_SPECIALIZED_FRIEND)
 #  ifdef __TURBOC__
-#    define _RWSTD_SPECIALIZED_FRIEND(name)   (_STD::name)
+#    define _RWSTD_SPECIALIZED_FRIEND(name)   (std::name)
 #  else   // if !defined (__TURBOC__)
      // the space between `name' and `<>' is necessary
      // to prevent ..._FRIEND (operator<) from expanding into operator<<>
@@ -454,32 +447,32 @@
 #ifdef _RWSTD_REENTRANT
 // synchronizes access by all objects holding the same mutex
 #  define _RWSTD_MT_GUARD(mutex)  \
-          _RW::__rw_guard _RWSTD_PASTE (__guard, __LINE__) (mutex)
+          __rw::__rw_guard _RWSTD_PASTE (__guard, __LINE__) (mutex)
 
 // synchronizes access by all threads holding the same mutex 
 #  define _RWSTD_MT_STATIC_GUARD(type)                               \
-          typedef _RW::__rw_type<type,__LINE__> _UniqueType;         \
+          typedef __rw::__rw_type<type,__LINE__> _UniqueType;        \
           _RWSTD_MT_CLASS_GUARD(_UniqueType)
 
 // synchronizes access by all objects of the same type
 #  define _RWSTD_MT_CLASS_GUARD(type)                                \
-          _RWSTD_MT_GUARD (_RW::__rw_get_static_mutex ((type*)0))
+          _RWSTD_MT_GUARD (__rw::__rw_get_static_mutex ((type*)0))
 
 #  define _RWSTD_ATOMIC_PREINCREMENT(x, mutex)                       \
-          _RW::__rw_atomic_preincrement (x, mutex)
+          __rw::__rw_atomic_preincrement (x, mutex)
 
 #  define _RWSTD_ATOMIC_PREDECREMENT(x, mutex)                       \
-          _RW::__rw_atomic_predecrement (x, mutex)
+          __rw::__rw_atomic_predecrement (x, mutex)
 
 #  define _RWSTD_ATOMIC_SWAP(x, y, mutex)                            \
-          _RW::__rw_atomic_exchange  (x, y, mutex)
+          __rw::__rw_atomic_exchange (x, y, mutex)
 
 // conditional swap used in iostreams: an unlocked stream (a user's
 // stream, as opposed to the standard objects) exchanges without a lock
 #  define _RWSTD_ATOMIC_IO_SWAP(x, y, mutex)                         \
           (this->_C_nolock ?                                         \
-              _RW::__rw_ordinary_exchange  (x, y)                    \
-           :  _RW::__rw_atomic_exchange  (x, y, mutex))
+              __rw::__rw_ordinary_exchange (x, y)                    \
+           :  __rw::__rw_atomic_exchange (x, y, mutex))
 
 // a release store of a flag makes the data written before it visible
 // to a thread that reads the flag with an acquire load and takes no
@@ -487,13 +480,13 @@
 // thread fills with the same value and that publishes nothing else,
 // where it compiles to the ordinary access but is not a data race
 #  define _RWSTD_ATOMIC_LOAD_ACQUIRE(x, mutex)                       \
-          _RW::__rw_atomic_load_acquire (x, mutex)
+          __rw::__rw_atomic_load_acquire (x, mutex)
 #  define _RWSTD_ATOMIC_LOAD_RELAXED(x, mutex)                       \
-          _RW::__rw_atomic_load_relaxed (x, mutex)
+          __rw::__rw_atomic_load_relaxed (x, mutex)
 #  define _RWSTD_ATOMIC_STORE_RELEASE(x, y, mutex)                   \
-          _RW::__rw_atomic_store_release (x, y, mutex)
+          __rw::__rw_atomic_store_release (x, y, mutex)
 #  define _RWSTD_ATOMIC_STORE_RELAXED(x, y, mutex)                   \
-          _RW::__rw_atomic_store_relaxed (x, y, mutex)
+          __rw::__rw_atomic_store_relaxed (x, y, mutex)
 
 #  define _RWSTD_STRING_ATOMIC_PREINCREMENT(x, mutex)              \
             _RWSTD_ATOMIC_PREINCREMENT (x, mutex)
@@ -518,7 +511,7 @@
 #    define _RWSTD_THREAD_PREDECREMENT(x, ignore)                    \
         (--(x))
 #    define _RWSTD_THREAD_SWAP(x, y, ignore)                         \
-        _RW::__rw_ordinary_exchange  (x, y)
+        __rw::__rw_ordinary_exchange (x, y)
 
 #  endif   // _RWSTD_NO_TLS
 
@@ -531,10 +524,10 @@
 #  define _RWSTD_ATOMIC_PREINCREMENT(x, ignore)     ++(x)
 #  define _RWSTD_ATOMIC_PREDECREMENT(x, ignore)     --(x)
 #  define _RWSTD_ATOMIC_SWAP(x, y, ignore)  \
-          _RW::__rw_atomic_exchange ((x), (y), false)
+          __rw::__rw_atomic_exchange ((x), (y), false)
 
 #  define _RWSTD_ATOMIC_IO_SWAP(x, y, ignore)  \
-          _RW::__rw_ordinary_exchange ((x), (y))
+          __rw::__rw_ordinary_exchange ((x), (y))
 
 #  define _RWSTD_ATOMIC_LOAD_ACQUIRE(x, ignore)         (x)
 #  define _RWSTD_ATOMIC_LOAD_RELAXED(x, ignore)         (x)
@@ -713,7 +706,7 @@
           _RWSTD_STATIC_CAST (allocator_type&, rvalue)
 #else   // if !defined (_RWSTD_ALLOCATOR)
 #  define _RWSTD_REBIND(from, to) \
-          _STD::allocator_interface < from, to >
+          std::allocator_interface < from, to >
 #  define _RWSTD_ALLOC_TYPE(Allocator, T)             \
           _RWSTD_REBIND (Allocator, T)
 #  define _RWSTD_VALUE_ALLOC(Allocator, object, call) \
@@ -731,19 +724,19 @@
 //       the spaces there automatically (GNU does, Sun does not)
 #ifndef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
 
-#  define _STD_HAS_FACET(type, arg)    _STD::has_facet < type >(arg)
+#  define _STD_HAS_FACET(type, arg)    std::has_facet < type >(arg)
 #  define _HAS_FACET(type, arg)        has_facet < type >(arg)
 
-#  define _STD_USE_FACET(type, arg)    _STD::use_facet < type >(arg)
+#  define _STD_USE_FACET(type, arg)    std::use_facet < type >(arg)
 #  define _USE_FACET(type, arg)        use_facet < type >(arg)
 
 #  define _GET_TEMP_BUFFER(type, size) get_temporary_buffer < type >(size)
 #else   // if defined (_RWSTD_NO_TEMPLATE_ON_RETURN_TYPE)
 
-#  define _STD_HAS_FACET(type, arg)    _STD::has_facet (arg, (type*)(0))
+#  define _STD_HAS_FACET(type, arg)    std::has_facet (arg, (type*)(0))
 #  define _HAS_FACET(type, arg)        has_facet (arg, (type*)(0))
 
-#  define _STD_USE_FACET(type, arg)    _STD::use_facet (arg, (type*)(0))
+#  define _STD_USE_FACET(type, arg)    std::use_facet (arg, (type*)(0))
 #  define _USE_FACET(type, arg)        use_facet (arg, (type*)(0))
 
 #  define _GET_TEMP_BUFFER(type, size) get_temporary_buffer (size, (type*)0)
@@ -752,7 +745,7 @@
 // working around g++ 2.95.2 -fno-honor-std inability to use std::use_facet
 #if    defined (__GNUG__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 97 \
     && defined (_RWSTD_NO_HONOR_STD)
-   // use_facet is introduced into namespace _RW via a using declaration
+   // use_facet is introduced into namespace __rw via a using declaration
 #  undef _STD_HAS_FACET
 #  define _STD_HAS_FACET(type, arg)    _HAS_FACET (type, arg)
 
@@ -763,13 +756,13 @@
 // support for building the new locale (v.3)
 #ifndef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
 #  ifndef _RWSTD_NO_HONOR_STD
-#    define _RWSTD_USE_FACET(type, arg)   _STD::use_facet< type >(arg)
+#    define _RWSTD_USE_FACET(type, arg)   std::use_facet< type >(arg)
 #  else
 #    define _RWSTD_USE_FACET(type, arg)   use_facet< type >(arg)
 #  endif
 #else   // if defined (_RWSTD_NO_TEMPLATE_ON_RETURN_TYPE)
 #  ifndef _RWSTD_NO_HONOR_STD
-#    define _RWSTD_USE_FACET(type, arg)   _STD::use_facet(arg, (type*)(0))
+#    define _RWSTD_USE_FACET(type, arg)   std::use_facet(arg, (type*)(0))
 #  else
 #    define _RWSTD_USE_FACET(type, arg)   use_facet(arg, (type*)(0))
 #  endif
@@ -844,30 +837,30 @@
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 #  define _RWSTD_VALUE_TYPE(iterT) \
-       (typename _STD::iterator_traits< iterT >::value_type*)0
+       (typename std::iterator_traits< iterT >::value_type*)0
 #  define _RWSTD_DIFFERENCE_TYPE(iterT)   \
-       (typename _STD::iterator_traits< iterT >::difference_type*)0
+       (typename std::iterator_traits< iterT >::difference_type*)0
 
 #  define _RWSTD_ITERATOR_CATEGORY(iterT, ignore) \
-         typename _STD::iterator_traits< iterT >::iterator_category ()
+         typename std::iterator_traits< iterT >::iterator_category ()
 
 #  define _RWSTD_REVERSE_ITERATOR(iterT, ign1, ign2, ign3) \
-       _STD::reverse_iterator<iterT>
+       std::reverse_iterator<iterT>
 
 #else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
 
 #  define _RWSTD_VALUE_TYPE(iterT) __value_type ((iterT*)0)
    // assume default ctor is defined and accessible
 #  define _RWSTD_DIFFERENCE_TYPE(iterT)   \
-       _STD::__distance_type (iterT ())
+       std::__distance_type (iterT ())
    // macro cannot use the default ctor to construct a temporary
    // with the type of the first argument since the default ctor
    // may not exist or be accessible (e.g., istream_iterator<>)
 #  define _RWSTD_ITERATOR_CATEGORY(ignore, iter) \
-       _STD::__iterator_category (iter)
+       std::__iterator_category (iter)
 
 #  define _RWSTD_REVERSE_ITERATOR(iterT, Ref, Ptr, Tag)         \
-       _STD::reverse_iterator<iterT, _STD::Tag, value_type,     \
+       std::reverse_iterator<iterT, std::Tag, value_type,       \
                               Ref, Ptr, difference_type>
 
 #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
@@ -881,21 +874,21 @@
 #  ifndef _RWSTD_NO_PRETTY_FUNCTION
      // gcc, HP aCC, and Intel C++ all support __PRETTY_FUNCTION__
 #    define _RWSTD_ASSERT(expr)                                            \
-     ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, \
+     ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, \
                                                 __PRETTY_FUNCTION__))
 #  elif !defined (_RWSTD_NO_FUNC)
      // C99 specifies the __func__ special identifier
 #    define _RWSTD_ASSERT(expr)                                            \
-     ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, \
+     ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, \
                                                 __func__))
 #  elif defined (__FUNCSIG__)
      // MSVC macro
 #    define _RWSTD_ASSERT(expr)                                            \
-     ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, \
+     ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, \
                                                 __FUNCSIG__))
 #  else   // if _RWSTD_NO_PRETTY_FUNCTION && _RWSTD_NO_FUNC
 #    define _RWSTD_ASSERT(expr)   \
-     ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, 0))
+     ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, 0))
 #  endif
 #elif defined (_RWSTD_ASSUME)
 #  define _RWSTD_ASSERT(expr)   _RWSTD_ASSUME (expr)
@@ -923,7 +916,7 @@
 
 #define _RWSTD_FILE_LINE   __FILE__ ":" _RWSTD_STRSTR (__LINE__)
 
-#define _RWSTD_REQUIRES(pred, args)   (pred) ? (void)0 : _RW::__rw_throw args
+#define _RWSTD_REQUIRES(pred, args)   (pred) ? (void)0 : __rw::__rw_throw args
 
 
 // function exception specification
@@ -981,7 +974,7 @@
 // compilation with no runtime overhead; failed assertions are reported
 // as compilation errors
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // file may be #included from within an extern "C" block
 extern "C++" {
@@ -993,7 +986,7 @@ template <>
 struct __rw_compile_assert<true> { enum { _C_ok }; };
 
 #define _RWSTD_COMPILE_ASSERT(const_expr) \
-        ((void)_RW::__rw_compile_assert<(const_expr)>::_C_ok)
+        ((void)__rw::__rw_compile_assert<(const_expr)>::_C_ok)
 
 // called for failed assertions; does not return or throw
 void _RWSTD_EXPORT _RWSTD_NORETURN
@@ -1009,10 +1002,10 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 // for convenience
 #if !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
-#  define _DISTANCE(first, last, ignore) _STD::distance (first, last)
+#  define _DISTANCE(first, last, ignore) std::distance (first, last)
 #else
 // working around a SunPro 5.{3,4} bug (see PR #25958)
-#  define _DISTANCE(first, last, type) _RW::__rw_distance (first, last, type())
+#  define _DISTANCE(first, last, type) __rw::__rw_distance (first, last, type())
 #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 
 
@@ -1022,11 +1015,11 @@ __rw_assert_fail (const char*, const char*, int, const char*)
     && !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) \
     && !defined (_RWSTD_NO_DEBUG_ITER)
 #  define _RWSTD_ASSERT_RANGE(first, last) \
-      _RWSTD_ASSERT (_RW::__rw_valid_range (first, last))
+      _RWSTD_ASSERT (__rw::__rw_valid_range (first, last))
 #  define _RWSTD_ASSERT_IN_RANGE(it, first, last) \
-      _RWSTD_ASSERT (_RW::__rw_in_range (it, first, last))
+      _RWSTD_ASSERT (__rw::__rw_in_range (it, first, last))
 #  define _RWSTD_ASSERT_DEREF(it) \
-      _RWSTD_ASSERT (_RW::__rw_dereferenceable (it))
+      _RWSTD_ASSERT (__rw::__rw_dereferenceable (it))
 #else
 #  ifndef _RWSTD_NO_DEBUG_ITER
 #    define  _RWSTD_NO_DEBUG_ITER
@@ -1173,7 +1166,7 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 #ifndef _RWSTD_NO_STD_UNCAUGHT_EXCEPTION
    // function defined in namespace std in compiler support library 
-#  define _UNCAUGHT_EXCEPTION()   _STD::uncaught_exception()
+#  define _UNCAUGHT_EXCEPTION()   std::uncaught_exception()
 #elif !defined (_RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION)
    // function defined in global namespace in compiler support library 
 #  define _UNCAUGHT_EXCEPTION()   uncaught_exception()
@@ -1271,13 +1264,13 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 // helpers to make referring to the iterators easier
 #define _RWSTD_ISTREAMBUF_ITER(T)   \
-    _STD::istreambuf_iterator<T, _STD::char_traits<T > >
+    std::istreambuf_iterator<T, std::char_traits<T > >
 
 #define _RWSTD_OSTREAMBUF_ITER(T)   \
-    _STD::ostreambuf_iterator<T, _STD::char_traits<T > >
+    std::ostreambuf_iterator<T, std::char_traits<T > >
 
 // introduce namespace std so that "using namespace std;" always works
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 }   // namespace std
 
 

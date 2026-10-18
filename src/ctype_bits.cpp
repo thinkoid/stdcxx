@@ -35,7 +35,7 @@
 
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 _RWSTD_DEFINE_STATIC_CONST (const ctype_base::mask ctype_base::space);

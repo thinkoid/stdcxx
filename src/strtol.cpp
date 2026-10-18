@@ -42,7 +42,7 @@
 #endif   // EINVAL
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 typedef unsigned char UChar;

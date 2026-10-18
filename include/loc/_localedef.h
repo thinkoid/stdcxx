@@ -34,7 +34,7 @@
 
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // LC_CTYPE structures
 struct __rw_mask_elm

@@ -43,14 +43,14 @@
 #include <rw/_traits.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 struct _RWSTD_EXPORT ios_base;
 
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 enum {
     // bitset elements representing decimal_point, thousands_sep, grouping,
@@ -82,7 +82,7 @@ struct __rw_facet;
 
 template <class _CharT>
 inline const _CharT*
-__rw_get_punct (const _RW::__rw_facet*, int, _CharT)
+__rw_get_punct (const __rw::__rw_facet*, int, _CharT)
 {
     // body provided to work around bugs in compilers such as IBM
     // VAC++ 7.0 (see bug #562) that instantiate the function when
@@ -94,12 +94,12 @@ __rw_get_punct (const _RW::__rw_facet*, int, _CharT)
 // use overloading instead of specialization below to prevent
 // linker unsats when using Intel C++ on Windows (PR #29178)
 /* template <> */ _RWSTD_EXPORT
-const char* __rw_get_punct (const _RW::__rw_facet*, int, char);
+const char* __rw_get_punct (const __rw::__rw_facet*, int, char);
 
 #ifndef _RWSTD_NO_WCHAR_T
 
 /* template <> */ _RWSTD_EXPORT
-const wchar_t* __rw_get_punct (const _RW::__rw_facet*, int, wchar_t);
+const wchar_t* __rw_get_punct (const __rw::__rw_facet*, int, wchar_t);
 
 #endif   // _RWSTD_NO_WCHAR_T
 
@@ -119,7 +119,7 @@ template <class _CharT, class _InputIter>
 _InputIter __rw_match_name (_InputIter, _InputIter,
                             const _CharT* const*, const _RWSTD_SIZE_T*,
                             _RWSTD_SIZE_T, _RWSTD_SIZE_T&, int&,
-                            _STD::ios_base*);
+                            std::ios_base*);
 
 }   // namespace __rw
 
@@ -130,23 +130,23 @@ _InputIter __rw_match_name (_InputIter, _InputIter,
 
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 #define _RWSTD_ARG_LIST(charT)                                          \
         _RWSTD_ISTREAMBUF_ITER (charT), _RWSTD_ISTREAMBUF_ITER (charT), \
         const charT* const*, const _RWSTD_SIZE_T*, _RWSTD_SIZE_T,       \
-        _RWSTD_SIZE_T&, int&, _STD::ios_base*
+        _RWSTD_SIZE_T&, int&, std::ios_base*
 
 #if _RWSTD_INSTANTIATE (_PUNCT, _CHAR)
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _RW::__rw_istreambuf_iterator
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT __rw::__rw_istreambuf_iterator
                           __rw_match_name (_RWSTD_ARG_LIST (char)));
 
 #endif   // _RWSTD_INSTANTIATE (_PUNCT, _CHAR)
 
 #if _RWSTD_INSTANTIATE (_PUNCT, _WCHAR_T)
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _RW::__rw_wistreambuf_iterator
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT __rw::__rw_wistreambuf_iterator
                           __rw_match_name (_RWSTD_ARG_LIST (wchar_t)));
 
 #endif   // _RWSTD_INSTANTIATE (_PUNCT, _WCHAR_T)

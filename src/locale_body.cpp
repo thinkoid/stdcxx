@@ -67,27 +67,27 @@
 
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 // maps LC_XXX category values to their names
 extern const __rw_cats_t
 __rw_cats [] = {
 
-    // expands to { LC_XXX, "LC_XXX", _RW::__rw_locale::_C_xxx }
+    // expands to { LC_XXX, "LC_XXX", __rw::__rw_locale::_C_xxx }
     // the order of these is determined at config time and corresponds to
     // the order mixed/combined locale categories returned by setlocale()
-    _RWSTD_CAT_0 (_RW::__rw_locale),
-    _RWSTD_CAT_1 (_RW::__rw_locale),
-    _RWSTD_CAT_2 (_RW::__rw_locale),
-    _RWSTD_CAT_3 (_RW::__rw_locale),
-    _RWSTD_CAT_4 (_RW::__rw_locale),
+    _RWSTD_CAT_0 (__rw::__rw_locale),
+    _RWSTD_CAT_1 (__rw::__rw_locale),
+    _RWSTD_CAT_2 (__rw::__rw_locale),
+    _RWSTD_CAT_3 (__rw::__rw_locale),
+    _RWSTD_CAT_4 (__rw::__rw_locale),
 
 #ifdef _RWSTD_CAT_5
-    _RWSTD_CAT_5 (_RW::__rw_locale)
+    _RWSTD_CAT_5 (__rw::__rw_locale)
 #else   // if !defined (_RWSTD_CAT_5)
     // for Windoze (no LC_MESSAGES there)
-    _RWSTD_CAT_0 (_RW::__rw_locale)
+    _RWSTD_CAT_0 (__rw::__rw_locale)
 #endif   // _RWSTD_CAT_5
 
 };
@@ -646,17 +646,17 @@ _C_LC2facet_bits (int cat) _THROWS (())
         bits = 0;
 
         if (cat & __rw_cat_collate)
-            bits |= _RW::__rw_locale::_C_collate;
+            bits |= __rw::__rw_locale::_C_collate;
         if (cat & __rw_cat_ctype)
-            bits |= _RW::__rw_locale::_C_ctype;
+            bits |= __rw::__rw_locale::_C_ctype;
         if (cat & __rw_cat_monetary)
-            bits |= _RW::__rw_locale::_C_monetary;
+            bits |= __rw::__rw_locale::_C_monetary;
         if (cat & __rw_cat_numeric)
-            bits |= _RW::__rw_locale::_C_numeric;
+            bits |= __rw::__rw_locale::_C_numeric;
         if (cat & __rw_cat_time)
-            bits |= _RW::__rw_locale::_C_time;
+            bits |= __rw::__rw_locale::_C_time;
         if (cat & __rw_cat_messages)
-            bits |= _RW::__rw_locale::_C_messages;
+            bits |= __rw::__rw_locale::_C_messages;
         break;
     }
 
@@ -818,7 +818,7 @@ _C_manage (__rw_locale *plocale, const char *locname)
         __rw_once (&global_once, _C_global::_C_init);
 
         // re-entrant
-        _RWSTD_MT_STATIC_GUARD (_RW::__rw_locale);
+        _RWSTD_MT_STATIC_GUARD (__rw::__rw_locale);
 
         __rw_locale* const tmp = global;
 
@@ -867,7 +867,7 @@ _C_manage (__rw_locale *plocale, const char *locname)
 
     // re-entrant to protect static local data structures
     // (not the locales themselves)
-    _RWSTD_MT_STATIC_GUARD (_RW::__rw_locale);
+    _RWSTD_MT_STATIC_GUARD (__rw::__rw_locale);
 
     // determine whether `locname' refers to the classic C locale
     // (e.g., it could be any of "C", "POSIX", "C C C C C C", etc.)
@@ -1235,7 +1235,7 @@ _C_is_managed (int cat) const _THROWS (())
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 const locale&
@@ -1243,7 +1243,7 @@ locale::
 operator= (const locale &rhs) _THROWS (())
 {
     // copy body and bump up a ref count in `rhs'
-    _RW::__rw_locale* const body = rhs._C_body;
+    __rw::__rw_locale* const body = rhs._C_body;
 
     _RWSTD_ATOMIC_PREINCREMENT (rhs._C_body->_C_ref, false);
 

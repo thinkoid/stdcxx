@@ -35,7 +35,7 @@
 
 /**************************************************************************/
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it
@@ -80,7 +80,7 @@ const char* type_name (NoIterator, const UserClass*)
 
 unsigned iter_swap_calls;
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template <>
 void iter_swap (BidirIter<UserClass> i, BidirIter<UserClass> j)

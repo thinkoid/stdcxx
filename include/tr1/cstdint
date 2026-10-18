@@ -34,9 +34,9 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
-_RWSTD_NAMESPACE (tr1) {
+namespace tr1 {
 
 #ifndef _RWSTD_BNO_TWOS_COMPLEMENT
 #  define _RWSTD_T_MIN(tmax)   (-(tmax) - 1)

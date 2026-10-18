@@ -32,7 +32,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 _RWSTD_EXPORT int
 __rw_get_num (void*, const char*, int, int,
@@ -70,11 +70,11 @@ private:
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _CharT, class _InputIter>
-_RW::__rw_facet_id money_get<_CharT, _InputIter>::id;
+__rw::__rw_facet_id money_get<_CharT, _InputIter>::id;
 
 
 template <class _CharT, class _InputIter>
@@ -100,7 +100,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
     const string      __gr = __pun.grouping ();
     const money_base::pattern __pat = __pun.neg_format ();
 
-    _RWSTD_IOSTATE __ebits = _RW::__rw_goodbit;
+    _RWSTD_IOSTATE __ebits = __rw::__rw_goodbit;
 
     bool __needws = false;   // whitespace required?
     bool __seendp = false;   // seen decimal point in input
@@ -120,7 +120,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
     char *__pcur            = __buf;          // currently processed digit
     _RWSTD_SIZE_T __bufsize = sizeof __buf;   // size of allocated buffer
 
-    _RW::__rw_money_get_buffer __guard (__buf, __pbuf);   // frees __pbuf
+    __rw::__rw_money_get_buffer __guard (__buf, __pbuf);  // frees __pbuf
 
     typedef typename string_type::traits_type _Traits;
 
@@ -155,12 +155,12 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
             // other characters may be required to complete the format
             if (   sizeof __pat.field == __i + 1
                 || 2 == __i && money_base::symbol == __pat.field [3]
-                && (!(__fl & _RW::__rw_showbase) || 0 == __cs.size ())
+                && (!(__fl & __rw::__rw_showbase) || 0 == __cs.size ())
                 && !(   __sign < 0 && __ns.size () > 1
                      || __sign > 0 && __ps.size () > 1)
                 || 1 == __i && money_base::value == __pat.field [0]
                 && 0 == __ns.size () && 0 == __ps.size ()
-                && (0 == __cs.size () || !(__fl & _RW::__rw_showbase)))
+                && (0 == __cs.size () || !(__fl & __rw::__rw_showbase)))
                 break;
 
             _SizeT __nc = 0;
@@ -171,7 +171,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
             }
 
             if (__needws && !__nc)
-                __ebits |= _RW::__rw_failbit;
+                __ebits |= __rw::__rw_failbit;
 
             // beyond the one character money_base::space requires,
             // the whitespace read here is available to the currency
@@ -186,7 +186,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
             // it is consumed only if it is followed by characters
             // required to complete the pattern (see example in
             // 22.2.6.1.2, p3)
-            if (   __fl & _RW::__rw_showbase
+            if (   __fl & __rw::__rw_showbase
                 || __i < 2
                 || 2 == __i && (money_base::none != __pat.field [3])
                 || __sign < 0 && __ns.size () > 1
@@ -208,8 +208,8 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
 
                         // 22.2.6.1.2, p2: unless showbase is set,
                         //                 curr_symbol is optional
-                        if (__nread || __fl & _RW::__rw_showbase)
-                            __ebits |= _RW::__rw_failbit;
+                        if (__nread || __fl & __rw::__rw_showbase)
+                            __ebits |= __rw::__rw_failbit;
                         break;
                     }
 
@@ -227,7 +227,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
 
             if (__it == __end) {
                 if (__ps.size () && __ns.size ())
-                    __ebits |= _RW::__rw_failbit;
+                    __ebits |= __rw::__rw_failbit;
                 else
                     __sign = __ps.empty () - 1;
                 break;
@@ -283,7 +283,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                     // SIZE_MAX / 4, and the subtraction would wrap too
                     if (   _RWSTD_SIZE_MAX / 4 < __bufsize
                         || _RWSTD_SIZE_MAX / 4 - __bufsize < __npad)
-                        _RW::__rw_throw (_RWSTD_ERROR_FIRST + 3
+                        __rw::__rw_throw (_RWSTD_ERROR_FIRST + 3
                                          /* == bad_alloc */);
 
                     const _SizeT __newsize = (__bufsize + __npad) * 2;
@@ -363,13 +363,13 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
         }
 
         default:
-            __ebits = _RW::__rw_failbit;
+            __ebits = __rw::__rw_failbit;
             break;
 
         }
     }
 
-    if (!(__ebits & _RW::__rw_failbit)) {
+    if (!(__ebits & __rw::__rw_failbit)) {
 
         if (__pbuf [1]) {
 
@@ -407,7 +407,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
 
                 int __errtmp = 1;   // no duplicates allowed
 
-                __it = _RW::__rw_match_name (__it, __end, __names, __sizes,
+                __it = __rw::__rw_match_name (__it, __end, __names, __sizes,
                                              sizeof __names / sizeof *__names,
                                              __inx, __errtmp, 0);
 
@@ -417,7 +417,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                     // the input  and the first character of the sign
                     // does not form the complete (positive or negative)
                     // sign
-                    __ebits = _RW::__rw_failbit;
+                    __ebits = __rw::__rw_failbit;
                     __pbuf [1] = '\0';
                 }
                 else if (!_Traits::eq (*__ps.data (), *__ns.data ())) {
@@ -440,7 +440,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                 *__pbuf = '-';
             }
 
-            if (__pstr && !(__ebits & _RW::__rw_failbit)) {
+            if (__pstr && !(__ebits & __rw::__rw_failbit)) {
                 // skip over the leading sign and any redundant zeros after it
                 const char *__start = __pbuf + 1;
                 for (; '0' == *__start && '0' == __start [1]; ++__start);
@@ -482,23 +482,23 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                 // and (optionally) check grouping
 
                 const int __errtmp =
-                    _RW::__rw_get_num (__pval, __pbuf, _C_ldouble, 0,
+                    __rw::__rw_get_num (__pval, __pbuf, _C_ldouble, 0,
                                        __pgrpbuf, __pgrp - __pgrpbuf,
                                        __grs, __grn);
 
                 __ebits |= _RWSTD_IOSTATE (__errtmp);
             }
-            else if (0 > _RW::__rw_check_grouping (__pgrpbuf,
+            else if (0 > __rw::__rw_check_grouping (__pgrpbuf,
                                                    __pgrp - __pgrpbuf,
                                                    __grs, __grn))
-                __ebits |= _RW::__rw_failbit;
+                __ebits |= __rw::__rw_failbit;
         }
         else
-            __ebits |= _RW::__rw_failbit;
+            __ebits |= __rw::__rw_failbit;
     }
 
     if (__it == __end)
-        __ebits |= _RW::__rw_eofbit;
+        __ebits |= __rw::__rw_eofbit;
 
     __err |= __ebits;
 

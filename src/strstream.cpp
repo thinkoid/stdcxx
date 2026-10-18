@@ -46,7 +46,7 @@
 #include <strstream>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 /* virtual */

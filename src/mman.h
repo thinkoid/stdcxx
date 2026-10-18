@@ -33,7 +33,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 // maps a named file into memory as shared, read-only, returns

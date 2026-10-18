@@ -71,11 +71,11 @@
 
 void terminate () _RWSTD_GNUC_ATTRIBUTE ((__noreturn__));
 
-_STD::terminate_handler
-set_terminate (_STD::terminate_handler) _THROWS (());
+std::terminate_handler
+set_terminate (std::terminate_handler) _THROWS (());
 
-_STD::unexpected_handler
-set_unexpected (_STD::unexpected_handler) _THROWS (());
+std::unexpected_handler
+set_unexpected (std::unexpected_handler) _THROWS (());
 
 void unexpected ()  _RWSTD_GNUC_ATTRIBUTE ((__noreturn__));
 
@@ -86,7 +86,7 @@ void unexpected ()  _RWSTD_GNUC_ATTRIBUTE ((__noreturn__));
 _RWSTD_DLLIMPORT bool UNCAUGHT_EXCEPTION () _THROWS (());
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // define functions in namespace std to wrap any globals defined
 // defined in the compiler support library
@@ -239,7 +239,7 @@ _RWSTD_EXPORT bool uncaught_exception () _THROWS (())
       || !defined (_RWSTD_NO_RUNTIME_IN_STD)   \
       || 2 == __GNUG__ && !defined (_RWSTD_NO_HONOR_STD)
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #  endif   // !_RWSTD_NO_STD_EXCEPTION || !_RWSTD_NO_RUNTIME_IN_STD ...
 
@@ -305,7 +305,7 @@ const char* exception::what () const _THROWS (())
       || !defined (_RWSTD_NO_RUNTIME_IN_STD)   \
       || 2 == __GNUG__ && !defined (_RWSTD_NO_HONOR_STD)
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #  endif   // !_RWSTD_NO_STD_BAD_EXCEPTION || !_RWSTD_NO_RUNTIME_IN_STD ...
 
@@ -371,7 +371,7 @@ const char* bad_exception::what () const _THROWS (())
 
 /**************************************************************************/
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 static _RWSTD_THREAD char
@@ -507,7 +507,7 @@ char* __rw_vfmtwhat (char          *buf,      // buffer (allocate if 0)
                      int            id,       // catalog id of fmt string
                      va_list        va)       // variable arguments
 {
-    typedef _STD::messages<char> _Msgs;
+    typedef std::messages<char> _Msgs;
 
     static int             __catset =  1;   // catalog set
     static _Msgs::catalog  __cat    = -1;   // catalog id
@@ -543,7 +543,7 @@ char* __rw_vfmtwhat (char          *buf,      // buffer (allocate if 0)
             new (msgs._C_store ()) _Msgs;
 
             // always use the classic locale, not the current snapshot
-            __cat = msgs._C_data ()->open (__fn, _STD::locale::classic ());
+            __cat = msgs._C_data ()->open (__fn, std::locale::classic ());
         }
     };
 
@@ -555,7 +555,7 @@ char* __rw_vfmtwhat (char          *buf,      // buffer (allocate if 0)
     _RWSTD_MT_STATIC_GUARD (void);
 
     // retrieve error message from catalog and use it to format args
-    _STD::string fmat = msgs._C_data ()->get (__cat, __catset, id, "");
+    std::string fmat = msgs._C_data ()->get (__cat, __catset, id, "");
 
     if (fmat.empty ())
         return 0;   // failure to retrieve message
@@ -585,7 +585,7 @@ static void __rw_throw_exception (int id, char *what)
     // each or may not be defined in namespace std; avoid
     // complicated preprocessor logic by introducing the
     // whole namespace into scope
-    _USING (namespace std);
+    using namespace std;
 
     switch (id) {
     case _RWSTD_ERROR_FIRST + 1:
@@ -610,35 +610,35 @@ static void __rw_throw_exception (int id, char *what)
         throw bad_cast ();
 
     case _RWSTD_ERROR_LOGIC_ERROR:
-        throw (_STD::logic_error&)_STD::logic_error ()._C_assign (what, 0);
+        throw (std::logic_error&)std::logic_error ()._C_assign (what, 0);
 
     case _RWSTD_ERROR_DOMAIN_ERROR:
-        throw (_STD::domain_error&)_STD::domain_error ()._C_assign (what, 0);
+        throw (std::domain_error&)std::domain_error ()._C_assign (what, 0);
 
     case _RWSTD_ERROR_INVALID_ARGUMENT:
-        throw (_STD::invalid_argument&)
-            _STD::invalid_argument ()._C_assign (what, 0);
+        throw (std::invalid_argument&)
+            std::invalid_argument ()._C_assign (what, 0);
 
     case _RWSTD_ERROR_LENGTH_ERROR:
-        throw (_STD::length_error&)_STD::length_error ()._C_assign (what, 0);
+        throw (std::length_error&)std::length_error ()._C_assign (what, 0);
 
     case _RWSTD_ERROR_OUT_OF_RANGE:
-        throw (_STD::out_of_range&)_STD::out_of_range ()._C_assign (what, 0);
+        throw (std::out_of_range&)std::out_of_range ()._C_assign (what, 0);
 
     case _RWSTD_ERROR_RUNTIME_ERROR:
-        throw (_STD::runtime_error&)
-            _STD::runtime_error ()._C_assign (what, 0);
+        throw (std::runtime_error&)
+            std::runtime_error ()._C_assign (what, 0);
 
     case _RWSTD_ERROR_RANGE_ERROR:
-        throw (_STD::range_error&)_STD::range_error ()._C_assign (what, 0);
+        throw (std::range_error&)std::range_error ()._C_assign (what, 0);
 
     case _RWSTD_ERROR_OVERFLOW_ERROR:
-        throw (_STD::overflow_error&)
-            _STD::overflow_error ()._C_assign (what, 0);
+        throw (std::overflow_error&)
+            std::overflow_error ()._C_assign (what, 0);
 
     case _RWSTD_ERROR_UNDERFLOW_ERROR:
-        throw (_STD::underflow_error&)
-            _STD::underflow_error ()._C_assign (what, 0);
+        throw (std::underflow_error&)
+            std::underflow_error ()._C_assign (what, 0);
 
     case _RWSTD_ERROR_IOSTATE_BIT_SET:
         throw (__rw_failure&)
@@ -650,8 +650,8 @@ static void __rw_throw_exception (int id, char *what)
     case _RWSTD_ERROR_LOCALE_ERROR_NAME:
     case _RWSTD_ERROR_CODECVT:
     case _RWSTD_ERROR_BAD_POINTER:
-        throw (_STD::runtime_error&)
-            _STD::runtime_error ()._C_assign (what, 0);
+        throw (std::runtime_error&)
+            std::runtime_error ()._C_assign (what, 0);
     }
 
     __rw_free_what_buf (what);
@@ -709,13 +709,13 @@ _RWSTD_EXPORT void __rw_throw (int id, ...)
         va_copy (tmp_va, va);
 
         // try to format a string (look up format in a catalog)...
-        char *what = _RW::__rw_vfmtwhat (0, 0, id, tmp_va);
+        char *what = __rw::__rw_vfmtwhat (0, 0, id, tmp_va);
 
         va_end (tmp_va);
 
 #else   // if !defined (va_copy)
 
-        char *what = _RW::__rw_vfmtwhat (0, 0, id, va);
+        char *what = __rw::__rw_vfmtwhat (0, 0, id, va);
 
 #endif   // va_copy
 
@@ -731,7 +731,7 @@ _RWSTD_EXPORT void __rw_throw (int id, ...)
                 id = 0;
 
             // use error string to format
-            what = _RW::__rw_vfmtwhat (0, 0, errors [id], va);
+            what = __rw::__rw_vfmtwhat (0, 0, errors [id], va);
         }
 
         // end va list before throwing
@@ -744,25 +744,25 @@ _RWSTD_EXPORT void __rw_throw (int id, ...)
 
 
 __rw_exception::__rw_exception () _THROWS (())
-    : _STD::exception (), _C_what (0) { }
+    : std::exception (), _C_what (0) { }
 
 
 __rw_exception::__rw_exception (const __rw_exception &rhs)
-    : _STD::exception (rhs), _C_what (0)
+    : std::exception (rhs), _C_what (0)
 {
     _C_assign (rhs.what ());
 }
 
   
 /* explicit */ __rw_exception::__rw_exception (const char *str)
-    : _STD::exception (), _C_what (0)
+    : std::exception (), _C_what (0)
 {
     _C_assign (str);
 }
 
 
 // outlined to avoid circular dependency on <string>
-__rw_exception::__rw_exception (const _STD::string &whatstr)
+__rw_exception::__rw_exception (const std::string &whatstr)
     : _C_what (0)
 {
     _C_assign (whatstr.c_str (), whatstr.length ());

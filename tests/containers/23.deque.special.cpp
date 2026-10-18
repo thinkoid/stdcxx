@@ -43,7 +43,7 @@ typedef std::deque<DequeValueType, DequeAllocator> DequeType;
 
 int deque_swap_called;
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // define an explicit specialization of the deque::swap() member
 // to verify tha the non-member swap function calls the member
@@ -260,7 +260,7 @@ int run_test (int, char**)
 
         rw_info (0, 0, 0, 
                  "__rw::__rw_new_capacity<std::deque<UserClass> >(0) = %u",
-                 _RW::__rw_new_capacity (0, (Deque*)0));
+                 __rw::__rw_new_capacity (0, (Deque*)0));
 
         test_swap ();
     }

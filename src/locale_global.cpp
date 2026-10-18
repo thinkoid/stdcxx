@@ -40,13 +40,13 @@
 #include "locale_body.h"
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 extern __rw_mutex __rw_setlocale_mutex;
 
 }   // namespace __rw
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 /* static */ locale locale::global (const locale &rhs)
 {
@@ -57,7 +57,7 @@ _RWSTD_NAMESPACE (std) {
 
         // if the global locale has a name, call setlocale()
 
-        _RWSTD_MT_GUARD (_RW::__rw_setlocale_mutex);
+        _RWSTD_MT_GUARD (__rw::__rw_setlocale_mutex);
 
         // assumes all locale names (i.e., including those of combined
         // locales) are in a format understandable by setlocale()
@@ -69,7 +69,7 @@ _RWSTD_NAMESPACE (std) {
     }
 
     // set the global locale to `body', retrieve the previous value
-    _RW::__rw_locale* const tmp = _RW::__rw_locale::_C_manage (rhs._C_body, 0);
+    __rw::__rw_locale* const tmp = __rw::__rw_locale::_C_manage (rhs._C_body, 0);
 
     _RWSTD_ASSERT (0 != tmp);
 

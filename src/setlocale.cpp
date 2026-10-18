@@ -58,7 +58,7 @@
 #endif   // PATH_MAX
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // "setlocale" synchronization (internal, not exported)
 __rw_mutex __rw_setlocale_mutex;

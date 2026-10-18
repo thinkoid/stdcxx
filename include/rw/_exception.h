@@ -40,7 +40,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // forward declarations avoid circular dependencies
@@ -58,10 +58,10 @@ typedef basic_string<char, char_traits<char>, allocator<char> > string;
 
 }  // namespace std
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // base exception class inherited by all other exceptions
-class _RWSTD_EXPORT __rw_exception: public _STD::exception
+class _RWSTD_EXPORT __rw_exception: public std::exception
 {
 public:
 
@@ -69,7 +69,7 @@ public:
 
     __rw_exception (const __rw_exception&);
 
-    explicit __rw_exception (const _STD::string&);
+    explicit __rw_exception (const std::string&);
     
     explicit __rw_exception (const char*);
 

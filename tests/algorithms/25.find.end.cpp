@@ -36,7 +36,7 @@
 
 /**************************************************************************/
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 

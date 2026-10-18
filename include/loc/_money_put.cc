@@ -31,7 +31,7 @@
 #include <loc/_ctype.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 _RWSTD_EXPORT _RWSTD_SIZE_T
 __rw_put_num (char**, _RWSTD_SIZE_T, unsigned, int, _RWSTD_STREAMSIZE,
@@ -44,11 +44,11 @@ __rw_put_groups (char **, _RWSTD_SIZE_T, _RWSTD_SIZE_T,
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _CharT, class _OutputIter>
-_RW::__rw_facet_id money_put<_CharT, _OutputIter>::id;
+__rw::__rw_facet_id money_put<_CharT, _OutputIter>::id;
 
 
 // outlined to avoid generating a vtable in each translation unit
@@ -325,7 +325,7 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
     // format a floating point number in fixed precision into narrow buffer
     // will insert thousands_sep placeholders (';') accroding to grouping
     const _RWSTD_SIZE_T __n =
-        _RW::__rw_put_num (&__pbuf, sizeof __buf, _RWSTD_IOS_FIXED,
+        __rw::__rw_put_num (&__pbuf, sizeof __buf, _RWSTD_IOS_FIXED,
                            _C_ldouble | _C_ptr,
                            _RWSTD_STATIC_CAST (_RWSTD_STREAMSIZE, -__fd),
                            &__val, __grouping.c_str ());
@@ -408,7 +408,7 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
         *__pbuf = '\0';
 
         __ngroups =
-            _RW::__rw_put_groups (&__pbuf, __groups - __pbuf, sizeof __buf,
+            __rw::__rw_put_groups (&__pbuf, __groups - __pbuf, sizeof __buf,
                                   0, __grouping.c_str ());
         __pbuf [__ngroups] = '\0';
         __groups           = __pbuf;

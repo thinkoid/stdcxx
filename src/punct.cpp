@@ -50,7 +50,7 @@
 
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 static inline void
@@ -453,14 +453,14 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
 
     enum {
         // for syntactic convenience
-        none   = _STD::money_base::none,
-        space  = _STD::money_base::space,
-        symbol = _STD::money_base::symbol,
-        sign   = _STD::money_base::sign,
-        value  = _STD::money_base::value
+        none   = std::money_base::none,
+        space  = std::money_base::space,
+        symbol = std::money_base::symbol,
+        sign   = std::money_base::sign,
+        value  = std::money_base::value
     };
 
-    static const _STD::money_base::pattern pat[] = {
+    static const std::money_base::pattern pat[] = {
 
         // cs_precedes [0..1]:
         //

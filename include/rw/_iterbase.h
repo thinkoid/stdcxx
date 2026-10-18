@@ -50,7 +50,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 24.3.1 - Iterator traits
@@ -354,7 +354,7 @@ distance (_ForwardIterator __first, _ForwardIterator __last)
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // __rw_distance: Same purpose as 3-parameter distance function, but
 // with return value.
@@ -365,7 +365,7 @@ __rw_distance (const _ForwardIterator &__first,
                const _ForwardIterator &__last,
                _Distance               __n)
 {
-    _STD::__distance (__first, __last, __n,
+    std::__distance (__first, __last, __n,
                       _RWSTD_ITERATOR_CATEGORY (_ForwardIterator, __first));
     return __n;
 }
@@ -376,7 +376,7 @@ __rw_distance (const _ForwardIterator &__first,
 
 #ifndef _RWSTD_NO_DEBUG_ITER
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // __rw_debug_iter - iterator adapter with debugging support
 // _Iterator is either iterator or const_iterator; if the latter,
@@ -389,7 +389,7 @@ class __rw_debug_iter
 {
     typedef _Container                                container_type;
     typedef _Iterator                                 iterator_type;
-    typedef _STD::iterator_traits<iterator_type>      traits_type;
+    typedef std::iterator_traits<iterator_type>       traits_type;
 
 public:
 
@@ -557,7 +557,7 @@ public:
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 #ifndef _RWSTD_NO_NONDEDUCED_CONTEXT
@@ -567,9 +567,9 @@ _RWSTD_NAMESPACE (std) {
 #endif
 
 template <class _Cont, class _Iter, class _MutIter>
-inline _RW::__rw_debug_iter<_Cont, _Iter, _MutIter> 
+inline __rw::__rw_debug_iter<_Cont, _Iter, _MutIter> 
 operator+ (_RWSTD_CONT_DIFF_TYPE                               __n,
-           const _RW::__rw_debug_iter<_Cont, _Iter, _MutIter> &__x)
+           const __rw::__rw_debug_iter<_Cont, _Iter, _MutIter> &__x)
 {
     return __x + __n;
 }
@@ -579,7 +579,7 @@ operator+ (_RWSTD_CONT_DIFF_TYPE                               __n,
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 #define _RWSTD_DEBUG_ITER(cont, it, mutit) __rw_debug_iter< cont, it, mutit >

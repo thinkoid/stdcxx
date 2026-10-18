@@ -51,7 +51,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template <class _TypeT, class _Container = deque<_TypeT> >
 class queue;
@@ -197,7 +197,7 @@ public:
     priority_queue (const _Compare       &__cmp = _Compare (),
                     const container_type &__c   = container_type ())
         : c (__c), comp (__cmp) {
-            _STD::make_heap (c.begin (), c.end (), comp);
+            std::make_heap (c.begin (), c.end (), comp);
     }
 
     template <class _InputIter>
@@ -206,7 +206,7 @@ public:
                     const _Container &__c   = container_type ())
         : c (__c), comp (__cmp)  {
             c.insert (c.end (), __first, __last);
-            _STD::make_heap (c.begin (), c.end (), comp);
+            std::make_heap (c.begin (), c.end (), comp);
         }
 
     bool empty () const {
@@ -223,11 +223,11 @@ public:
 
     void push (const value_type &__x) {
         c.push_back (__x);
-        _STD::push_heap (c.begin (), c.end (), comp);
+        std::push_heap (c.begin (), c.end (), comp);
     }
 
     void pop () {
-        _STD::pop_heap (c.begin (), c.end (), comp);
+        std::pop_heap (c.begin (), c.end (), comp);
         c.pop_back ();
     }
 };

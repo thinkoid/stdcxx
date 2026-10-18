@@ -89,7 +89,7 @@
     } typedef void unused_typedef
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // abs() is not declared in the C header <math.h> but is required
 // to be declared in the C++ headers <math.h> and <cmath>
@@ -241,7 +241,7 @@ test_behavior ()
 static void
 test_declarations ()
 {
-    _USING (namespace std);
+    using namespace std;
 
     int i = 1;
     long l = 1;

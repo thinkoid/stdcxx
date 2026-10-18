@@ -117,15 +117,15 @@ static bool use_pcs = false;
 static bool is_utf8 = true;
 
 
-static const _RW::__rw_codecvt_t*  codecvt_st   = 0;
-static const _RW::__rw_collate_t*  collate_st   = 0;
-static const _RW::__rw_ctype_t*    ctype_st     = 0;
-static const _RW::__rw_time_t*     time_st      = 0;
-static const _RW::__rw_num_t*      num_st       = 0;
-static const _RW::__rw_mon_t*      mon_st       = 0;
-static const _RW::__rw_punct_t*    num_punct_st = 0;
-static const _RW::__rw_punct_t*    mon_punct_st = 0;
-static const _RW::__rw_messages_t* messages_st  = 0;
+static const __rw::__rw_codecvt_t* codecvt_st   = 0;
+static const __rw::__rw_collate_t* collate_st   = 0;
+static const __rw::__rw_ctype_t*   ctype_st     = 0;
+static const __rw::__rw_time_t*    time_st      = 0;
+static const __rw::__rw_num_t*     num_st       = 0;
+static const __rw::__rw_mon_t*     mon_st       = 0;
+static const __rw::__rw_punct_t*   num_punct_st = 0;
+static const __rw::__rw_punct_t*   mon_punct_st = 0;
+static const __rw::__rw_messages_t* messages_st = 0;
 
 
 static const char sect_lc_all[]      = "LC_ALL";
@@ -300,7 +300,7 @@ init_sections ()
 
     // initialize collate_st
     collate_st = init_section (loc_path_root, sect_lc_collate, 0,
-                               (_RW::__rw_collate_t*)0);
+                               (__rw::__rw_collate_t*)0);
 
     if (collate_st) {
         validate (collate_st->codeset_name ());
@@ -311,7 +311,7 @@ init_sections ()
 
     // initialize ctype_st
     ctype_st = init_section (loc_path_root, sect_lc_ctype, 0,
-                           (_RW::__rw_ctype_t*)0);
+                           (__rw::__rw_ctype_t*)0);
 
     if (ctype_st) {
         validate (ctype_st->codeset_name ());
@@ -328,10 +328,10 @@ init_sections ()
 
     // initialize mon_st
     mon_punct_st = init_section (loc_path_root, sect_lc_monetary, 0,
-                               (_RW::__rw_punct_t*)0);
+                               (__rw::__rw_punct_t*)0);
 
     if (0 != mon_punct_st) {
-        mon_st = _RWSTD_STATIC_CAST (const _RW::__rw_mon_t*,
+        mon_st = _RWSTD_STATIC_CAST (const __rw::__rw_mon_t*,
                                      mon_punct_st->get_ext());
         validate (mon_st, sizeof *mon_st);
     }
@@ -351,9 +351,9 @@ init_sections ()
 
     // initialize num_st
     num_punct_st = init_section (loc_path_root, sect_lc_numeric, 0,
-                               (_RW::__rw_punct_t*)0);
+                               (__rw::__rw_punct_t*)0);
     if (0 != num_punct_st) {
-        num_st = _RWSTD_STATIC_CAST (const _RW::__rw_num_t*,
+        num_st = _RWSTD_STATIC_CAST (const __rw::__rw_num_t*,
                                      num_punct_st->get_ext());
         validate (num_st, sizeof *mon_st);
     }
@@ -373,7 +373,7 @@ init_sections ()
 
     // initialize time_st
     time_st = init_section (loc_path_root, sect_lc_time, 0,
-                            (_RW::__rw_time_t*)0);
+                            (__rw::__rw_time_t*)0);
     if (time_st) {
         validate (time_st->codeset_name ());
 
@@ -389,7 +389,7 @@ init_sections ()
 
     // initialize messages_st
     messages_st = init_section (loc_path_root, sect_lc_messages, 0,
-                              (_RW::__rw_messages_t*)0);
+                              (__rw::__rw_messages_t*)0);
 
     if (messages_st) {
         validate (messages_st->codeset_name ());
@@ -407,7 +407,7 @@ init_sections ()
     if (codeset) {
         // initialize codecvt_st
         codecvt_st = init_section (loc_path_root, section, codeset,
-                                   (_RW::__rw_codecvt_t*)0);
+                                   (__rw::__rw_codecvt_t*)0);
     }
 }
 
@@ -1975,7 +1975,7 @@ print_era (const char *keyword, int print_cat)
         // print each era in the database according to the format
         // specified by POSIX
         for (unsigned int i = 0; i < time_st->era_count(); i++) {
-            const _RW::__rw_time_t::era_t *era_p = time_st->era (i);
+            const __rw::__rw_time_t::era_t *era_p = time_st->era (i);
             // first print the direction and the offset
             if (era_p->offset >= 0)
                 std::cout << "\"+:" << era_p->offset << ":";

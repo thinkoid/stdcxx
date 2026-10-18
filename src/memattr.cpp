@@ -75,7 +75,7 @@
   (  _RWSTD_REINTERPRET_CAST (const char*, addr1)  \
    - _RWSTD_REINTERPRET_CAST (const char*, addr2))
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 _RWSTD_EXPORT _RWSTD_SSIZE_T
 __rw_memattr (const void *addr, size_t nbytes, int attr)

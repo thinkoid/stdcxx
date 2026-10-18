@@ -39,7 +39,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 enum __rw_locale_category {
     __rw_cat_none     = 0x0100,
@@ -56,11 +56,11 @@ enum __rw_locale_category {
 class _RWSTD_EXPORT __rw_locale;
 
 inline const __rw_facet*
-__rw_get_std_facet (const _STD::locale&, __rw_facet::_C_facet_type,
+__rw_get_std_facet (const std::locale&, __rw_facet::_C_facet_type,
                     __rw_facet::_C_ctor_t*);
 
 inline const __rw_facet*
-__rw_get_facet_by_id (const _STD::locale&,
+__rw_get_facet_by_id (const std::locale&,
                       const __rw_facet_id&,
                       const __rw_facet*);
 
@@ -68,12 +68,12 @@ __rw_get_facet_by_id (const _STD::locale&,
 // const-qualifier from the type of Facet
 template <class _Facet>
 inline const __rw_facet*
-__rw_get_facet (const _STD::locale&, const _Facet*);
+__rw_get_facet (const std::locale&, const _Facet*);
 
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 // 22.1.2, p1
@@ -84,8 +84,8 @@ use_facet (const locale &__loc _RWSTD_DUMMY_ARG (const _Facet* = 0))
     // Facet could be a const SomeFacet; strip the const qualifier
     // and, for non-standard facets, use dynamic_cast to make sure
     // that the dynamic type of `pfacet' is the same as Facet
-    const _RW::__rw_facet* const __pfacet =
-        _RW::__rw_get_facet (__loc, (_Facet*)0);
+    const __rw::__rw_facet* const __pfacet =
+        __rw::__rw_get_facet (__loc, (_Facet*)0);
 
     _RWSTD_REQUIRES (__pfacet,
                      (_RWSTD_ERROR_BAD_CAST,
@@ -101,8 +101,8 @@ inline bool
 has_facet (const locale &__loc _RWSTD_DUMMY_ARG (const _Facet* = 0))
 {
     // Facet could be a const SomeFacet; strip the const qualifier 
-    const _RW::__rw_facet* const __pfacet =
-        _RW::__rw_get_facet (__loc, (_Facet*)0);
+    const __rw::__rw_facet* const __pfacet =
+        __rw::__rw_get_facet (__loc, (_Facet*)0);
 
     return 0 != __pfacet;
 }
@@ -153,20 +153,20 @@ struct _RWSTD_CLASS_EXPORT locale
     typedef int category;
 
     // 22.1.1.1.2
-    typedef _RW::__rw_facet facet;
+    typedef __rw::__rw_facet facet;
 
     // 22.1.1.1.3
-    typedef _RW::__rw_facet_id id;
+    typedef __rw::__rw_facet_id id;
 
     // values (including none) must not conflict with any LC_XXX constants
-    _RWSTD_STATIC_CONST (category, none     = _RW::__rw_cat_none);
-    _RWSTD_STATIC_CONST (category, collate  = _RW::__rw_cat_collate);
-    _RWSTD_STATIC_CONST (category, ctype    = _RW::__rw_cat_ctype);
-    _RWSTD_STATIC_CONST (category, monetary = _RW::__rw_cat_monetary);
-    _RWSTD_STATIC_CONST (category, numeric  = _RW::__rw_cat_numeric);
-    _RWSTD_STATIC_CONST (category, time     = _RW::__rw_cat_time);
-    _RWSTD_STATIC_CONST (category, messages = _RW::__rw_cat_messages);
-    _RWSTD_STATIC_CONST (category, all      = _RW::__rw_cat_all);
+    _RWSTD_STATIC_CONST (category, none     = __rw::__rw_cat_none);
+    _RWSTD_STATIC_CONST (category, collate  = __rw::__rw_cat_collate);
+    _RWSTD_STATIC_CONST (category, ctype    = __rw::__rw_cat_ctype);
+    _RWSTD_STATIC_CONST (category, monetary = __rw::__rw_cat_monetary);
+    _RWSTD_STATIC_CONST (category, numeric  = __rw::__rw_cat_numeric);
+    _RWSTD_STATIC_CONST (category, time     = __rw::__rw_cat_time);
+    _RWSTD_STATIC_CONST (category, messages = __rw::__rw_cat_messages);
+    _RWSTD_STATIC_CONST (category, all      = __rw::__rw_cat_all);
 
     // 22.1.1.2, p1
     _RWSTD_MEMBER_EXPORT locale () _THROWS (());
@@ -226,13 +226,13 @@ struct _RWSTD_CLASS_EXPORT locale
 
 private:
 
-    _RWSTD_MEMBER_EXPORT explicit locale (_RW::__rw_locale &__rhs) 
+    _RWSTD_MEMBER_EXPORT explicit locale (__rw::__rw_locale &__rhs) 
         _THROWS (())
         : _C_body (&__rhs) { }
 
-    _RWSTD_MEMBER_EXPORT locale (_RW::__rw_locale&, const facet*);
+    _RWSTD_MEMBER_EXPORT locale (__rw::__rw_locale&, const facet*);
 
-    _RW::__rw_locale *_C_body;     // reference-counted body
+    __rw::__rw_locale *_C_body;    // reference-counted body
 
     // (try to) retrieve a facet from a locale given an id
     // may initialize the id if it isn't initialized yet
@@ -242,29 +242,29 @@ private:
     _RWSTD_MEMBER_EXPORT const facet*
     _C_get_std_facet (facet::_C_facet_type, facet::_C_ctor_t*) const;
 
-    friend class  _RW::__rw_locale;
-    friend struct _RW::__rw_access;
+    friend class  __rw::__rw_locale;
+    friend struct __rw::__rw_access;
 
     // function arguments below are qualified to work around
     // a SunPro 5.5 and prior bug (PR #28626)
     friend const facet*
-    _RW::__rw_get_std_facet (const _STD::locale&,
-                             _RW::__rw_facet::_C_facet_type,
-                             _RW::__rw_facet::_C_ctor_t*);
+    __rw::__rw_get_std_facet (const std::locale&,
+                             __rw::__rw_facet::_C_facet_type,
+                             __rw::__rw_facet::_C_ctor_t*);
 
-    friend const _RW::__rw_facet*
-    _RW::__rw_get_facet_by_id (const _STD::locale&,
-                               const _RW::__rw_facet_id&,
-                               const _RW::__rw_facet*);
+    friend const __rw::__rw_facet*
+    __rw::__rw_get_facet_by_id (const std::locale&,
+                               const __rw::__rw_facet_id&,
+                               const __rw::__rw_facet*);
 };
 
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 inline const __rw_facet*
-__rw_get_facet_by_id (const _STD::locale &__loc,
+__rw_get_facet_by_id (const std::locale &__loc,
                       const __rw_facet_id      &__id,
                       const __rw_facet*)
 {
@@ -275,7 +275,7 @@ __rw_get_facet_by_id (const _STD::locale &__loc,
 
 template <class _Facet>
 inline const __rw_facet*
-__rw_get_facet (const _STD::locale &__loc, const _Facet *__dummy)
+__rw_get_facet (const std::locale &__loc, const _Facet *__dummy)
 {
     // resolves either to one of the overloads of __rw_get_facet_by_id
     // defined for the set of standard facets or the overload for the base
@@ -288,7 +288,7 @@ __rw_get_facet (const _STD::locale &__loc, const _Facet *__dummy)
 
 
 inline const __rw_facet*
-__rw_get_std_facet (const _STD::locale  &__loc,
+__rw_get_std_facet (const std::locale   &__loc,
                     __rw_facet::_C_facet_type  __type,
                     __rw_facet::_C_ctor_t     *__ctor)
 {
@@ -330,16 +330,16 @@ _RWSTD_EXPORT __rw_facet* __rw_ct_num_put (_RWSTD_SIZE_T, const char*);
 
 #define _RWSTD_OVERLOAD_GET_FACET(F)                 \
     _RWSTD_EXPORT const __rw_facet*                  \
-    __rw_get_facet_by_id (const _STD::locale&,       \
+    __rw_get_facet_by_id (const std::locale&,        \
                           const __rw_facet_id&, const F*)
 
-#define _Facet(name, T, U)   _STD::name<T, U >
+#define _Facet(name, T, U)   std::name<T, U >
 
-#define _InIter(T)    _STD::istreambuf_iterator< T, _STD::char_traits<T > >
-#define _OutIter(T)   _STD::ostreambuf_iterator< T, _STD::char_traits<T > >
+#define _InIter(T)    std::istreambuf_iterator< T, std::char_traits<T > >
+#define _OutIter(T)   std::ostreambuf_iterator< T, std::char_traits<T > >
 
 // convenience typedefs to allow them to be used as macro arguments
-typedef _STD::codecvt<char, char, _RWSTD_MBSTATE_T>    __rw_codecvt_c;
+typedef std::codecvt<char, char, _RWSTD_MBSTATE_T>     __rw_codecvt_c;
 typedef _Facet (moneypunct, char, false)               __rw_mpunct_c_0;
 typedef _Facet (moneypunct, char, true)                __rw_mpunct_c_1;
 typedef _Facet (money_get, char, _InIter (char))       __rw_mget_c;
@@ -355,7 +355,7 @@ typedef _Facet (time_put, char, _OutIter (char))       __rw_tput_c;
 
 template <>
 inline const __rw_facet*
-__rw_get_facet (const _STD::locale &__loc, const _STD::ctype<char>*)
+__rw_get_facet (const std::locale &__loc, const std::ctype<char>*)
 {
     return __rw_get_std_facet (__loc, __rw_facet::_C_ctype,
                                __rw_ct_ctype);
@@ -364,7 +364,7 @@ __rw_get_facet (const _STD::locale &__loc, const _STD::ctype<char>*)
 
 template <>
 inline const __rw_facet*
-__rw_get_facet (const _STD::locale &__loc, const _STD::numpunct<char>*)
+__rw_get_facet (const std::locale &__loc, const std::numpunct<char>*)
 {
     return __rw_get_std_facet (__loc, __rw_facet::_C_numpunct,
                                __rw_ct_numpunct);
@@ -373,7 +373,7 @@ __rw_get_facet (const _STD::locale &__loc, const _STD::numpunct<char>*)
 
 template <>
 inline const __rw_facet*
-__rw_get_facet (const _STD::locale &__loc, const __rw_nget_c*)
+__rw_get_facet (const std::locale &__loc, const __rw_nget_c*)
 {
     return __rw_get_std_facet (__loc, __rw_facet::_C_num_get,
                                __rw_ct_num_get);
@@ -382,7 +382,7 @@ __rw_get_facet (const _STD::locale &__loc, const __rw_nget_c*)
 
 template <>
 inline const __rw_facet*
-__rw_get_facet (const _STD::locale &__loc, const __rw_nput_c*)
+__rw_get_facet (const std::locale &__loc, const __rw_nput_c*)
 {
     return __rw_get_std_facet (__loc, __rw_facet::_C_num_put,
                                __rw_ct_num_put);
@@ -390,23 +390,23 @@ __rw_get_facet (const _STD::locale &__loc, const __rw_nput_c*)
 
 
 // declarations of __rw_get_facet_by_id overloads
-_RWSTD_OVERLOAD_GET_FACET (_STD::ctype<char>);
+_RWSTD_OVERLOAD_GET_FACET (std::ctype<char>);
 _RWSTD_OVERLOAD_GET_FACET (__rw_codecvt_c);
-_RWSTD_OVERLOAD_GET_FACET (_STD::collate<char>);
+_RWSTD_OVERLOAD_GET_FACET (std::collate<char>);
 _RWSTD_OVERLOAD_GET_FACET (__rw_mget_c);
 _RWSTD_OVERLOAD_GET_FACET (__rw_mput_c);
 _RWSTD_OVERLOAD_GET_FACET (__rw_mpunct_c_0);
 _RWSTD_OVERLOAD_GET_FACET (__rw_mpunct_c_1);
 _RWSTD_OVERLOAD_GET_FACET (__rw_nget_c);
 _RWSTD_OVERLOAD_GET_FACET (__rw_nput_c);
-_RWSTD_OVERLOAD_GET_FACET (_STD::numpunct<char>);
+_RWSTD_OVERLOAD_GET_FACET (std::numpunct<char>);
 _RWSTD_OVERLOAD_GET_FACET (__rw_tget_c);
 _RWSTD_OVERLOAD_GET_FACET (__rw_tput_c);
-_RWSTD_OVERLOAD_GET_FACET (_STD::messages<char>);
+_RWSTD_OVERLOAD_GET_FACET (std::messages<char>);
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-typedef _STD::codecvt<wchar_t, char, _RWSTD_MBSTATE_T>    __rw_codecvt_w;
+typedef std::codecvt<wchar_t, char, _RWSTD_MBSTATE_T>     __rw_codecvt_w;
 typedef _Facet (moneypunct, wchar_t, false)               __rw_mpunct_w_0;
 typedef _Facet (moneypunct, wchar_t, true)                __rw_mpunct_w_1;
 typedef _Facet (money_get, wchar_t, _InIter (wchar_t))    __rw_mget_w;
@@ -416,19 +416,19 @@ typedef _Facet (num_put, wchar_t, _OutIter (wchar_t))     __rw_nput_w;
 typedef _Facet (time_get, wchar_t, _InIter (wchar_t))     __rw_tget_w;
 typedef _Facet (time_put, wchar_t, _OutIter (wchar_t))    __rw_tput_w;
 
-_RWSTD_OVERLOAD_GET_FACET (_STD::ctype<wchar_t>);
+_RWSTD_OVERLOAD_GET_FACET (std::ctype<wchar_t>);
 _RWSTD_OVERLOAD_GET_FACET (__rw_codecvt_w);
-_RWSTD_OVERLOAD_GET_FACET (_STD::collate<wchar_t>);
+_RWSTD_OVERLOAD_GET_FACET (std::collate<wchar_t>);
 _RWSTD_OVERLOAD_GET_FACET (__rw_mget_w);
 _RWSTD_OVERLOAD_GET_FACET (__rw_mput_w);
 _RWSTD_OVERLOAD_GET_FACET (__rw_mpunct_w_0);
 _RWSTD_OVERLOAD_GET_FACET (__rw_mpunct_w_1);
 _RWSTD_OVERLOAD_GET_FACET (__rw_nget_w);
 _RWSTD_OVERLOAD_GET_FACET (__rw_nput_w);
-_RWSTD_OVERLOAD_GET_FACET (_STD::numpunct<wchar_t>);
+_RWSTD_OVERLOAD_GET_FACET (std::numpunct<wchar_t>);
 _RWSTD_OVERLOAD_GET_FACET (__rw_tget_w);
 _RWSTD_OVERLOAD_GET_FACET (__rw_tput_w);
-_RWSTD_OVERLOAD_GET_FACET (_STD::messages<wchar_t>);
+_RWSTD_OVERLOAD_GET_FACET (std::messages<wchar_t>);
 
 #endif   // _RWSTD_NO_WCHAR_T
 
@@ -442,7 +442,7 @@ _RWSTD_OVERLOAD_GET_FACET (_STD::messages<wchar_t>);
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 template <class _Facet>
@@ -461,7 +461,7 @@ inline locale::locale (const locale &__rhs, _Facet *__facet)
 
     // prevent passing `facet' the ctor if it is installed in `rhs'
     // to potentially avoid creating a whole new locale body
-    if (_RW::__rw_get_facet (__rhs, (_Facet*)0) == __facet)
+    if (__rw::__rw_get_facet (__rhs, (_Facet*)0) == __facet)
         __facet = 0;
 
     *this = locale (*__rhs._C_body, __facet);
@@ -492,7 +492,7 @@ locale::operator() (const basic_string<_CharT, _Traits, _Allocator> &__x,
                     const basic_string<_CharT, _Traits, _Allocator> &__y) const
 {
     // qualify collate to distinguish it from locale::collate
-    return use_facet<_STD::collate<_CharT> >(*this)
+    return use_facet<std::collate<_CharT> >(*this)
         .compare (__x.data (), __x.data () + __x.length (),
                   __y.data (), __y.data () + __y.length ()) < 0;
 }

@@ -49,7 +49,7 @@ struct RandomInteger
 {
     int operator () (int m) {
         // using a proprietary algorithm
-        return _RW::__rw_random (m);
+        return __rw::__rw_random (m);
     }
 };
 

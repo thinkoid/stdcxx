@@ -33,7 +33,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // required to be defined by 9.4.2, p4, even if initialized inside class
 _RWSTD_DEFINE_STATIC_CONST (const ios_base::fmtflags ios_base::boolalpha);

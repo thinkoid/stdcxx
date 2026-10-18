@@ -56,7 +56,7 @@
 #endif   // _RWSTD_RW_PAIR_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 // 20.4.2
@@ -100,7 +100,7 @@ public:
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 extern "C" {
 
@@ -117,7 +117,7 @@ __rw_tmpbuf (void**, _RWSTD_PTRDIFF_T, _RWSTD_SIZE_T);
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 // 20.4.3 only specifies a get_temporary_buffer<>() that takes a ptrdiff_t.
@@ -147,7 +147,7 @@ get_temporary_buffer (_Distance __nelems, _TypeT*)
 #endif   // gcc
 
     __res.second =
-        _RW::__rw_tmpbuf (_RWSTD_REINTERPRET_CAST (_VoidPtrT*, &__res.first),
+        __rw::__rw_tmpbuf (_RWSTD_REINTERPRET_CAST (_VoidPtrT*, &__res.first),
                           __nelems < 0 ? 0 : __nelems, sizeof (_TypeT));
 
     return __res;
@@ -183,7 +183,7 @@ return_temporary_buffer (_TypeT *__p)
 
 #endif   // gcc
 
-    _RW::__rw_tmpbuf (_RWSTD_REINTERPRET_CAST (_VoidPtrT*, &__p),
+    __rw::__rw_tmpbuf (_RWSTD_REINTERPRET_CAST (_VoidPtrT*, &__p),
                       0, sizeof (_TypeT));
 }
 

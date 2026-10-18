@@ -48,42 +48,42 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 template <class _CharT, class _Traits, class _NativeType>
-_STD::basic_istream<_CharT, _Traits>&
-__rw_extract (_STD::basic_istream<_CharT, _Traits>&, _NativeType&);
+std::basic_istream<_CharT, _Traits>&
+__rw_extract (std::basic_istream<_CharT, _Traits>&, _NativeType&);
 
 
 template <class _CharT, class _Traits>
-inline _STD::basic_istream<_CharT, _Traits>&
-__rw_extract (_STD::basic_istream<_CharT, _Traits> &__strm,
+inline std::basic_istream<_CharT, _Traits>&
+__rw_extract (std::basic_istream<_CharT, _Traits> &__strm,
               short                                &__val)
 {
     long __tmp = __val;
     __rw_extract (__strm, __tmp);
 
-    _STD::ios_base::iostate __err = _STD::ios_base::goodbit;
+    std::ios_base::iostate __err = std::ios_base::goodbit;
     __val = __rw_check_overflow_short (__tmp, __strm.flags (), __err);
 
-    if (_STD::ios_base::goodbit != __err)
+    if (std::ios_base::goodbit != __err)
         __strm.setstate (__err);
 
     return __strm;
 }
 
 template <class _CharT, class _Traits>
-inline _STD::basic_istream<_CharT, _Traits>&
-__rw_extract (_STD::basic_istream<_CharT, _Traits> &__strm,
+inline std::basic_istream<_CharT, _Traits>&
+__rw_extract (std::basic_istream<_CharT, _Traits> &__strm,
               int                                  &__val)
 {
     long __tmp = __val;
     __rw_extract (__strm, __tmp);
 
-    _STD::ios_base::iostate __err = _STD::ios_base::goodbit;
+    std::ios_base::iostate __err = std::ios_base::goodbit;
     __val = __rw_check_overflow_int (__tmp, __strm.flags (), __err);
 
-    if (_STD::ios_base::goodbit != __err)
+    if (std::ios_base::goodbit != __err)
         __strm.setstate (__err);
 
     return __strm;
@@ -92,7 +92,7 @@ __rw_extract (_STD::basic_istream<_CharT, _Traits> &__strm,
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
@@ -145,11 +145,11 @@ public:
 #endif   // _RWSTD_NO_NESTED_CLASS_ACCESS
 
     // 27.6.1.1.2
-    struct sentry: _RW::__rw_guard {
+    struct sentry: __rw::__rw_guard {
 
         // 27.6.1.1.2, p2 - assumes 0 != __strm.rdbuf ()
         explicit sentry (basic_istream &__strm, bool __noskipws = false)
-            : _RW::__rw_guard (__strm._C_bufmutex ()),
+            : __rw::__rw_guard (__strm._C_bufmutex ()),
               _C_ok (__strm._C_ipfx (__noskipws).good ()) { /* no-op */ }
 
         // 27.6.1.1.2, p8
@@ -186,61 +186,61 @@ public:
 #ifndef _RWSTD_NO_NATIVE_BOOL
 
     basic_istream& operator>> (bool &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
 #endif   // _RWSTD_NO_NATIVE_BOOL
 
     basic_istream& operator>>(short &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     basic_istream& operator>>(unsigned short &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     basic_istream& operator>>(int &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     basic_istream& operator>>(unsigned int &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     basic_istream& operator>>(long &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     basic_istream& operator>>(unsigned long &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     basic_istream& operator>>(float &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     basic_istream& operator>>(double &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     basic_istream& operator>>(long double &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
 #ifdef _RWSTD_LONG_LONG
 
     basic_istream& operator>>(_RWSTD_LONG_LONG &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     basic_istream& operator>>(unsigned _RWSTD_LONG_LONG &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
 #endif   // _RWSTD_LONG_LONG
 
     basic_istream& operator>>(void* &__val) {
-        return _RW::__rw_extract (*this, __val);
+        return __rw::__rw_extract (*this, __val);
     }
 
     // 27.6.1.2.3, p13
@@ -451,7 +451,7 @@ basic_istream<_CharT, _Traits>::peek ()
             __c = this->rdbuf ()->sgetc ();
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
 
@@ -545,7 +545,7 @@ ws (basic_istream<_CharT, _Traits> &__strm)
             __strm._C_ipfx (false, ios_base::eofbit);
         }
         _CATCH (...) {
-            __strm.setstate (ios_base::badbit | _RW::__rw_rethrow);
+            __strm.setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
 
@@ -585,7 +585,7 @@ public:
 
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_BASIC_ISTREAM, _CHAR)
 

@@ -40,11 +40,11 @@
 
 #ifdef _RWSTD_NO_LIBC_IN_STD
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // accomdate compilers that don't have size_t in namespace std
-_USING (::size_t);
-_USING (::ptrdiff_t);
+using ::size_t;
+using ::ptrdiff_t;
 
 }   // namespace std
 
@@ -53,7 +53,7 @@ _USING (::ptrdiff_t);
 
 #ifdef _RWSTD_NO_TEMPLATE_ON_RETURN_TYPE
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #define has_facet fake_has_facet
 #define use_facet fake_use_facet

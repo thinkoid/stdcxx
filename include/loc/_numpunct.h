@@ -44,12 +44,12 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 22.2.3.1
 template <class _CharT>
-struct numpunct: _RW::__rw_facet
+struct numpunct: __rw::__rw_facet
 {
     typedef _CharT char_type;
     typedef
@@ -57,7 +57,7 @@ struct numpunct: _RW::__rw_facet
     string_type;
 
     explicit numpunct (_RWSTD_SIZE_T __ref = 0)
-        : _RW::__rw_facet (__ref), _C_flags (0) { }
+        : __rw::__rw_facet (__ref), _C_flags (0) { }
 
     virtual ~numpunct () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -76,34 +76,34 @@ struct numpunct: _RW::__rw_facet
     // 22.2.3.1.1, p4
     string_type falsename () const;
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
     // 22.2.3.1.2, p1
     virtual char_type do_decimal_point () const {
-        return *_RW::__rw_get_punct (this, _RW::__rw_dp, char_type ());
+        return *__rw::__rw_get_punct (this, __rw::__rw_dp, char_type ());
     }
 
     // 22.2.3.1.2, p2
     virtual char_type do_thousands_sep () const {
-        return *_RW::__rw_get_punct (this, _RW::__rw_ts, char_type ());
+        return *__rw::__rw_get_punct (this, __rw::__rw_ts, char_type ());
     }
 
     // 22.2.3.1.2, p3
     virtual string do_grouping () const {
         return _RWSTD_REINTERPRET_CAST (const char*,
-                   _RW::__rw_get_punct (this, _RW::__rw_gr, char_type ()));
+                   __rw::__rw_get_punct (this, __rw::__rw_gr, char_type ()));
     }
 
     // 22.2.3.1.2, p4
     virtual string_type do_truename () const {
-        return _RW::__rw_get_punct (this, _RW::__rw_tn, char_type ());
+        return __rw::__rw_get_punct (this, __rw::__rw_tn, char_type ());
     }
 
     // 22.2.3.1.2, p4
     virtual string_type do_falsename () const {
-        return _RW::__rw_get_punct (this, _RW::__rw_fn, char_type ());
+        return __rw::__rw_get_punct (this, __rw::__rw_fn, char_type ());
     }
 
 private:
@@ -123,12 +123,12 @@ private:
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
 template <>
-_RW::__rw_facet_id numpunct<char>::id;
+__rw::__rw_facet_id numpunct<char>::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
 template <>
-_RW::__rw_facet_id numpunct<wchar_t>::id;
+__rw::__rw_facet_id numpunct<wchar_t>::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
@@ -198,7 +198,7 @@ public:
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_NUMPUNCT, _CHAR)
 

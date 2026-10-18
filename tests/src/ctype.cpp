@@ -1289,7 +1289,7 @@ do_narrow (const char_type *lo, const char_type *hi, char dflt, char *dst) const
 
 /**************************************************************************/
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 std::locale::id

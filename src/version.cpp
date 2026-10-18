@@ -30,7 +30,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 #ifdef _RWSTD_VER_STR
 

@@ -48,7 +48,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 26.4.1 - Accumulate

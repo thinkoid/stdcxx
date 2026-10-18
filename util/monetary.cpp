@@ -408,7 +408,7 @@ void Def::write_monetary (std::string dir_name)
     std::ofstream out (dir_name.c_str(), std::ios::binary);
     out.exceptions (std::ios::failbit | std::ios::badbit);
 
-    _RW::__rw_punct_t punct;
+    __rw::__rw_punct_t punct;
 
     // calculate the offsets for the mon_punct structure
     punct.decimal_point_off [1] = 0;

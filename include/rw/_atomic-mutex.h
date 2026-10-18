@@ -39,7 +39,7 @@
 #endif   // _RWSTD_RW_MUTEX_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
     
 // helper functions for atomic value [in|de]crement and exchange
 // the functions are atomic with respect to each other as long as

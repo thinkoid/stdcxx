@@ -59,14 +59,14 @@
 #endif
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 _RWSTD_EXPORT _RWSTD_SIZE_T __rw_rand (_RWSTD_SIZE_T);
 
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 25.1 - Non-modifying sequence operations [lib.alg.nonmodifying]
@@ -290,7 +290,7 @@ swap_ranges (_FwdIter1 __first1, _FwdIter1 __last1, _FwdIter2 __first2)
     _RWSTD_ASSERT_RANGE (__first1, __last1);
 
     for (; !(__first1 == __last1); ++__first1, ++__first2)
-        _STD::iter_swap (__first1, __first2);
+        std::iter_swap (__first1, __first2);
     return __first2;
 }
 
@@ -407,20 +407,20 @@ template <class _FwdIter, class _TypeT>
 inline _FwdIter
 remove (_FwdIter __first, _FwdIter __last, const _TypeT &__val)
 {
-    __first = _STD::find (__first, __last, __val);
+    __first = std::find (__first, __last, __val);
     _FwdIter __next = __first;
     return __first == __last ?
-        __first : _STD::remove_copy (++__next, __last, __first, __val);
+        __first : std::remove_copy (++__next, __last, __first, __val);
 }
 
 
 template <class _FwdIter, class _Predicate>
 inline _FwdIter remove_if (_FwdIter __first, _FwdIter __last, _Predicate __pred)
 {
-    __first = _STD::find_if (__first, __last, __pred);
+    __first = std::find_if (__first, __last, __pred);
     _FwdIter __next = __first;
     return __first == __last ?
-        __first : _STD::remove_copy_if (++__next, __last, __first, __pred);
+        __first : std::remove_copy_if (++__next, __last, __first, __pred);
 }
 
 
@@ -537,7 +537,7 @@ __reverse (_BidirIter __first, _BidirIter __last,
     // 25.2.9, p2: Complexity: exactly (last - first) / 2 calls
     //             to std::iter_swap()
     for (; !(__first == __last) && !(__first == --__last); ++__first)
-        _STD::iter_swap (__first, __last);
+        std::iter_swap (__first, __last);
 }
 
 
@@ -550,7 +550,7 @@ __reverse (_RandomAccessIter __first, _RandomAccessIter __last,
     //             to std::iter_swap()
     if (!(__first == __last))
         for (; __first < --__last; ++__first)
-            _STD::iter_swap (__first, __last);
+            std::iter_swap (__first, __last);
 }
 
 
@@ -585,9 +585,9 @@ inline void
 __rotate (_BidirIter __first, _BidirIter __middle, _BidirIter __last,
           _Dist*, bidirectional_iterator_tag)
 {
-    _STD::reverse (__first, __middle);
-    _STD::reverse (__middle, __last);
-    _STD::reverse (__first, __last);
+    std::reverse (__first, __middle);
+    std::reverse (__middle, __last);
+    std::reverse (__first, __last);
 }
 
 
@@ -621,7 +621,7 @@ inline _OutputIter
 rotate_copy (_FwdIter __first, _FwdIter __middle, _FwdIter __last,
              _OutputIter __res)
 {
-    return _STD::copy (__first, __middle, _STD::copy (__middle, __last, __res));
+    return std::copy (__first, __middle, std::copy (__middle, __last, __res));
 }
 
 
@@ -634,9 +634,9 @@ template <class _RandomAccessIter>
 inline void
 random_shuffle (_RandomAccessIter __first, _RandomAccessIter __last)
 {
-    _RWSTD_SIZE_T (*__rand) (_RWSTD_SIZE_T) = _RW::__rw_rand;
+    _RWSTD_SIZE_T (*__rand) (_RWSTD_SIZE_T) = __rw::__rw_rand;
     
-    _STD::random_shuffle (__first, __last, __rand);
+    std::random_shuffle (__first, __last, __rand);
 }
 
 
@@ -703,7 +703,7 @@ sort (_RandomAccessIter __first, _RandomAccessIter __last, _Compare __comp)
 template <class _RandomAccessIter>
 inline void sort (_RandomAccessIter __first, _RandomAccessIter __last)
 {
-    _STD::sort (__first, __last, _RWSTD_LESS (_RandomAccessIter));
+    std::sort (__first, __last, _RWSTD_LESS (_RandomAccessIter));
 }
 
 
@@ -748,7 +748,7 @@ inline void stable_sort (_RandomAccessIter __first, _RandomAccessIter __last,
 template <class _RandomAccessIter>
 inline void stable_sort (_RandomAccessIter __first, _RandomAccessIter __last)
 {
-    _STD::stable_sort (__first, __last, _RWSTD_LESS (_RandomAccessIter));
+    std::stable_sort (__first, __last, _RWSTD_LESS (_RandomAccessIter));
 }
 
 
@@ -777,7 +777,7 @@ inline void
 partial_sort (_RandomAccessIter __first, _RandomAccessIter __middle,
               _RandomAccessIter __last)
 {
-    _STD::partial_sort (__first, __middle, __last,
+    std::partial_sort (__first, __middle, __last,
                         _RWSTD_LESS (_RandomAccessIter));
 }
 
@@ -810,7 +810,7 @@ inline _RandomAccessIter
 partial_sort_copy (_InputIter __first1, _InputIter __last1,
                    _RandomAccessIter __first2, _RandomAccessIter __last2)
 {
-    return _STD::partial_sort_copy (__first1, __last1, __first2, __last2,
+    return std::partial_sort_copy (__first1, __last1, __first2, __last2,
                                     _RWSTD_LESS (_InputIter));
 }
 
@@ -834,7 +834,7 @@ template <class _RandomAccessIter>
 inline void nth_element (_RandomAccessIter __first, _RandomAccessIter __nth,
                          _RandomAccessIter __last)
 {
-    _STD::nth_element (__first, __nth, __last, _RWSTD_LESS (_RandomAccessIter));
+    std::nth_element (__first, __nth, __last, _RWSTD_LESS (_RandomAccessIter));
 }
 
 
@@ -876,7 +876,7 @@ template <class _FwdIter, class _TypeT>
 inline _FwdIter
 lower_bound (_FwdIter __first, _FwdIter __last, const _TypeT &__val)
 {
-    return _STD::lower_bound (__first, __last, __val,
+    return std::lower_bound (__first, __last, __val,
                               _RWSTD_LESS (_FwdIter));
 }
 
@@ -918,7 +918,7 @@ template <class _FwdIter, class _TypeT>
 inline _FwdIter
 upper_bound (_FwdIter __first, _FwdIter __last, const _TypeT &__val)
 {
-    return _STD::upper_bound (__first, __last, __val,
+    return std::upper_bound (__first, __last, __val,
                               _RWSTD_LESS (_FwdIter));
 }
 
@@ -960,7 +960,7 @@ template <class _FwdIter, class _TypeT>
 inline pair<_FwdIter, _FwdIter>
 equal_range (_FwdIter __first, _FwdIter __last, const _TypeT &__val)
 {
-    return _STD::equal_range (__first, __last, __val, _RWSTD_LESS (_FwdIter));
+    return std::equal_range (__first, __last, __val, _RWSTD_LESS (_FwdIter));
 }
 
 
@@ -969,7 +969,7 @@ template <class _FwdIter, class _TypeT, class _Compare>
 inline bool binary_search (_FwdIter __first, _FwdIter __last,
                            const _TypeT &__val, _Compare __comp)
 {
-    _FwdIter __i = _STD::lower_bound (__first, __last, __val, __comp);
+    _FwdIter __i = std::lower_bound (__first, __last, __val, __comp);
     return !(__i == __last) && !__comp(__val, *__i);
 }
 
@@ -978,7 +978,7 @@ template <class _FwdIter, class _TypeT>
 inline bool
 binary_search (_FwdIter __first, _FwdIter __last, const _TypeT &__val)
 {
-    return _STD::binary_search (__first, __last, __val, _RWSTD_LESS (_FwdIter));
+    return std::binary_search (__first, __last, __val, _RWSTD_LESS (_FwdIter));
 }
 
 
@@ -995,7 +995,7 @@ inline _OutputIter merge (_InputIter1 __first1, _InputIter1 __last1,
                           _InputIter2 __first2, _InputIter2 __last2,
                           _OutputIter __res)
 {
-    return _STD::merge (__first1, __last1, __first2, __last2, __res,
+    return std::merge (__first1, __last1, __first2, __last2, __res,
                         _RWSTD_LESS (_InputIter1));
 }
 
@@ -1023,7 +1023,7 @@ template <class _BidirIter>
 inline void
 inplace_merge (_BidirIter __first, _BidirIter __middle, _BidirIter __last)
 {
-    _STD::inplace_merge (__first, __middle, __last, _RWSTD_LESS (_BidirIter));
+    std::inplace_merge (__first, __middle, __last, _RWSTD_LESS (_BidirIter));
 }
 
 // 25.3.5 - Set operations on sorted structures
@@ -1036,7 +1036,7 @@ template <class _InputIter1, class _InputIter2>
 inline bool includes (_InputIter1 __first1, _InputIter1 __last1,
                       _InputIter2 __first2, _InputIter2 __last2)
 {
-    return _STD::includes (__first1, __last1, __first2, __last2,
+    return std::includes (__first1, __last1, __first2, __last2,
                            _RWSTD_LESS (_InputIter1));
 }
 
@@ -1053,7 +1053,7 @@ inline _OutputIter
 set_union (_InputIter1 __first1, _InputIter1 __last1,
            _InputIter2 __first2, _InputIter2 __last2, _OutputIter __res)
 {
-    return _STD::set_union (__first1, __last1, __first2, __last2, __res,
+    return std::set_union (__first1, __last1, __first2, __last2, __res,
                             _RWSTD_LESS (_InputIter1));
 }
 
@@ -1070,7 +1070,7 @@ inline _OutputIter
 set_intersection (_InputIter1 __first1, _InputIter1 __last1,
                   _InputIter2 __first2, _InputIter2 __last2, _OutputIter __res)
 {
-    return _STD::set_intersection (__first1, __last1, __first2, __last2,
+    return std::set_intersection (__first1, __last1, __first2, __last2,
                                    __res, _RWSTD_LESS (_InputIter1));
 }
 
@@ -1087,7 +1087,7 @@ inline _OutputIter
 set_difference (_InputIter1 __first1, _InputIter1 __last1,
                 _InputIter2 __first2, _InputIter2 __last2, _OutputIter __res)
 {
-    return _STD::set_difference (__first1, __last1, __first2, __last2,
+    return std::set_difference (__first1, __last1, __first2, __last2,
                                  __res, _RWSTD_LESS (_InputIter1));
 }
 
@@ -1105,7 +1105,7 @@ set_symmetric_difference (_InputIter1 __first1, _InputIter1 __last1,
                           _InputIter2 __first2, _InputIter2 __last2,
                           _OutputIter __res)
 {
-    return _STD::set_symmetric_difference (__first1, __last1,
+    return std::set_symmetric_difference (__first1, __last1,
                                            __first2, __last2,
                                            __res, _RWSTD_LESS (_InputIter1));
 }
@@ -1123,7 +1123,7 @@ _FwdIter min_element (_FwdIter, _FwdIter, _Compare);
 template <class _FwdIter>
 inline _FwdIter min_element (_FwdIter __first, _FwdIter __last)
 {
-    return _STD::min_element (__first, __last, _RWSTD_LESS (_FwdIter));
+    return std::min_element (__first, __last, _RWSTD_LESS (_FwdIter));
 }
 
 
@@ -1135,7 +1135,7 @@ _FwdIter max_element (_FwdIter, _FwdIter, _Compare);
 template <class _FwdIter>
 inline _FwdIter max_element (_FwdIter __first, _FwdIter __last)
 {
-    return _STD::max_element (__first, __last, _RWSTD_LESS (_FwdIter));
+    return std::max_element (__first, __last, _RWSTD_LESS (_FwdIter));
 }
 
 
@@ -1148,7 +1148,7 @@ bool next_permutation (_BidirIter, _BidirIter, _Compare);
 template <class _BidirIter>
 inline bool next_permutation (_BidirIter __first, _BidirIter __last)
 {
-    return _STD::next_permutation (__first, __last, _RWSTD_LESS (_BidirIter));
+    return std::next_permutation (__first, __last, _RWSTD_LESS (_BidirIter));
 }
 
 
@@ -1159,7 +1159,7 @@ bool prev_permutation (_BidirIter, _BidirIter, _Compare);
 template <class _BidirIter>
 inline bool prev_permutation (_BidirIter __first, _BidirIter __last)
 {
-    return _STD::prev_permutation (__first, __last, _RWSTD_LESS (_BidirIter));
+    return std::prev_permutation (__first, __last, _RWSTD_LESS (_BidirIter));
 }
 
 

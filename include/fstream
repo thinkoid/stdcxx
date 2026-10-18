@@ -54,7 +54,7 @@
 #endif   // _RWSTD_PBACK_SIZE
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
@@ -130,7 +130,7 @@ private:
 
     explicit
     basic_filebuf (int __fd, char_type* __buf, _RWSTD_STREAMSIZE __bufsz)
-        : _Streambuf (ios_base::openmode (_RW::__rw_fdmode (__fd))),
+        : _Streambuf (ios_base::openmode (__rw::__rw_fdmode (__fd))),
           _C_file (0), _C_cur_pos (), _C_beg_pos (), _C_pbacksize (0) {
         _C_open (__fd, 0, __buf, __bufsz);
     }
@@ -193,11 +193,11 @@ protected:
     // 27.8.1.4, p11
     virtual pos_type
     seekoff (off_type, ios_base::seekdir,
-             ios_base::openmode = _RW::__rw_in_out);
+             ios_base::openmode = __rw::__rw_in_out);
 
     // 27.8.1.4, p14
     virtual pos_type
-    seekpos (pos_type, ios_base::openmode = _RW::__rw_in_out);
+    seekpos (pos_type, ios_base::openmode = __rw::__rw_in_out);
 
     // 27.8.1.4, p16 - in input mode, repopulates buffer from file
     virtual int sync ();
@@ -441,7 +441,7 @@ public:
 
     explicit
     basic_fstream (const char         *__name,
-                   ios_base::openmode  __mode = _RW::__rw_in_out)
+                   ios_base::openmode  __mode = __rw::__rw_in_out)
         : basic_iostream<char_type, traits_type>(rdbuf ()) {
         open (__name, __mode);
     }
@@ -460,7 +460,7 @@ public:
     }
 
     void open (const char         *__name,
-               ios_base::openmode  __mode = _RW::__rw_in_out) {
+               ios_base::openmode  __mode = __rw::__rw_in_out) {
         this->clear (rdbuf ()->open (__name, __mode)
                      ? ios_base::goodbit : ios_base::failbit);
     }
@@ -484,7 +484,7 @@ private:
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_BASIC_FILEBUF, _CHAR)
 

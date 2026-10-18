@@ -38,7 +38,7 @@
 #define _RWSTD_RW_STRINGIO_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 template<class _CharT, class _Traits, class _Allocator>
@@ -76,14 +76,14 @@ operator<< (basic_ostream<_CharT, _Traits>&,
     && defined (_RWSTD_INCLUDE_STRING_INSERTER)
 #  define _RWSTD_STRING_INSERTER_INCLUDED
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template<class _CharT, class _Traits, class _Allocator>
 inline basic_ostream<_CharT, _Traits>&
 operator<< (basic_ostream<_CharT, _Traits>&                  __os,
             const basic_string<_CharT, _Traits, _Allocator>& __str)
 {
-    return _RW::__rw_insert (__os, __str.data (), __str.length (),
+    return __rw::__rw_insert (__os, __str.data (), __str.length (),
                              __os.width ());
 }
 
@@ -97,7 +97,7 @@ operator<< (basic_ostream<_CharT, _Traits>&                  __os,
 #  define _RWSTD_STRING_EXTRACTORS_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template<class _CharT, class _Traits, class _Allocator>
 inline basic_istream<_CharT, _Traits>& 
@@ -116,7 +116,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
 
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_BASIC_ISTREAM, _CHAR)
 

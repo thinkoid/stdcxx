@@ -54,12 +54,12 @@
   // Duplicates of the following functions exist in include/vector.cc.
   // Which set is used depends on the availability of partial specialization.
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 void vector<bool, allocator<bool> >::flip ()
 {
-    _USING (namespace rel_ops);
+    using namespace rel_ops;
 
     for (iterator __i = begin(); __i != end(); __i++)
         *__i = !*__i;

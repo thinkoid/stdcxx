@@ -36,7 +36,7 @@
 
 #ifdef __linux__
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 extern "C" {
 
@@ -45,7 +45,7 @@ extern int* __errno_location ();
 
  // 17.4.1.2, p5 - errno may be a macro
  // lwg issue 310 - errno must be a macro
-#define errno (*_STD::__errno_location ())
+#define errno (*std::__errno_location ())
 
 
 #define EDOM     33

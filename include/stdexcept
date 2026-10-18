@@ -35,7 +35,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 // classes below are _RWSTD_EXPORT'ed to prevent
@@ -43,14 +43,14 @@ _RWSTD_NAMESPACE (std) {
 
 
 // 19.1.1
-struct _RWSTD_EXPORT logic_error: _RW::__rw_exception
+struct _RWSTD_EXPORT logic_error: __rw::__rw_exception
 {
     explicit logic_error (const string& __str)
-        : _RW::__rw_exception (__str) { }
+        : __rw::__rw_exception (__str) { }
 
     // extension
     explicit logic_error (const char *__s = 0)
-        : _RW::__rw_exception (__s) { }
+        : __rw::__rw_exception (__s) { }
 
     virtual ~logic_error () _THROWS (());
 };
@@ -113,14 +113,14 @@ struct _RWSTD_EXPORT out_of_range: logic_error
 
 
 // 19.1.6
-struct _RWSTD_EXPORT runtime_error: _RW::__rw_exception
+struct _RWSTD_EXPORT runtime_error: __rw::__rw_exception
 {
     explicit runtime_error (const string &__str)
-        : _RW::__rw_exception (__str) { }
+        : __rw::__rw_exception (__str) { }
 
     // extension
     explicit runtime_error (const char *__s = 0)
-        : _RW::__rw_exception (__s) { }
+        : __rw::__rw_exception (__s) { }
 
     virtual ~runtime_error () _THROWS (());
 };

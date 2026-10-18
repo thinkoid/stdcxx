@@ -50,7 +50,7 @@
 #include <stddef.h>   // for size_t
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 // generator produces the same sequence of random numbers

@@ -27,11 +27,11 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _InternT, class _ExternT, class _StateT>
-_RW::__rw_facet_id codecvt<_InternT, _ExternT, _StateT>::id;
+__rw::__rw_facet_id codecvt<_InternT, _ExternT, _StateT>::id;
 
 
 // outlined to avoid generating a vtable in each translation unit

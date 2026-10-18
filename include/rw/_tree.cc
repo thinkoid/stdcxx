@@ -40,7 +40,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
@@ -289,7 +289,7 @@ _C_insert (_C_link_t __x, _C_link_t __y, const value_type &__v)
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
 void __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
-_C_insert (const value_type &__v, _STD::pair<iterator, bool> &__ret,
+_C_insert (const value_type &__v, std::pair<iterator, bool> &__ret,
            bool __dup)
 {
     _C_link_t __y = _C_end;              // end
@@ -303,7 +303,7 @@ _C_insert (const value_type &__v, _STD::pair<iterator, bool> &__ret,
         __x     = __x->_C_child [!__right];
     }
 
-    typedef _STD::pair<iterator, bool> _IterPair;
+    typedef std::pair<iterator, bool> _IterPair;
 
     if (__dup) {
         // allow insertion of duplicate keys
@@ -512,7 +512,7 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
         __y->_C_parent = __z->_C_parent;
 
         // swap y and z colors
-        _STD::swap (__y->_C_color, __z->_C_color);
+        std::swap (__y->_C_color, __z->_C_color);
 
         // __y now points to the deleted node 
         __y = __z;
@@ -768,7 +768,7 @@ typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::size_type
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 erase (const key_type &__x)
 {
-    const _STD::pair<iterator, iterator> __p = equal_range(__x);
+    const std::pair<iterator, iterator> __p = equal_range(__x);
 
     const size_type __n = _DISTANCE (__p.first, __p.second, size_type);
 

@@ -37,7 +37,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 enum encoding_type
 {
@@ -54,17 +54,17 @@ int __rw_encoding_from_name (const char*);
 
 
 // Conversions for ISO-2022-JP
-_STD::codecvt_base::result
+std::codecvt_base::result
 __rw_iso2022jp_do_in (_RWSTD_MBSTATE_T&,
                       const char*&, const char*,
                       wchar_t*&, wchar_t*);
 
-_STD::codecvt_base::result
+std::codecvt_base::result
 __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T&,
                        const wchar_t*&, const wchar_t*,
                        char*&, char*);
 
-_STD::codecvt_base::result 
+std::codecvt_base::result 
 __rw_iso2022jp_do_unshift (_RWSTD_MBSTATE_T&, char*&, char*);
 
 int  __rw_iso2022jp_do_encoding ();
@@ -78,17 +78,17 @@ bool __rw_iso2022_do_always_noconv ();
 
 
 // Conversions for ISO-2022-JP-2
-_STD::codecvt_base::result
+std::codecvt_base::result
 __rw_iso2022jp2_do_in (_RWSTD_MBSTATE_T&,
                        const char*&, const char*,
                        wchar_t*&, wchar_t*);
 
-_STD::codecvt_base::result
+std::codecvt_base::result
 __rw_iso2022jp2_do_out (_RWSTD_MBSTATE_T&,
                        const wchar_t*&, const wchar_t*,
                        char*&, char*);
 
-_STD::codecvt_base::result 
+std::codecvt_base::result 
 __rw_iso2022jp2_do_unshift (_RWSTD_MBSTATE_T&, char*&, char*);
 
 int  __rw_iso2022jp2_do_encoding  ();

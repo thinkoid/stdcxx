@@ -49,7 +49,7 @@ int opt_timeout = 60;
 // as a flag with static storage duration may be
 #define NROUNDS   200
 
-static _RW::__rw_once_t flags [NROUNDS];
+static __rw::__rw_once_t flags [NROUNDS];
 
 // the data each round's initializer publishes
 static int data [NROUNDS];
@@ -115,7 +115,7 @@ race_func (void*)
 #ifndef _RWSTD_NO_EXCEPTIONS
 
         try {
-            _RW::__rw_once (flags + race_round, init_func);
+            __rw::__rw_once (flags + race_round, init_func);
             break;
         }
         catch (int) {
@@ -126,7 +126,7 @@ race_func (void*)
 
 #else   // if defined (_RWSTD_NO_EXCEPTIONS)
 
-        _RW::__rw_once (flags + race_round, init_func);
+        __rw::__rw_once (flags + race_round, init_func);
         break;
 
 #endif   // _RWSTD_NO_EXCEPTIONS

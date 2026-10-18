@@ -45,13 +45,13 @@
    // preprocessor path or what command line options are used
 #  if    !defined (_RWSTD_NO_STD_BAD_ALLOC) \
       || !defined (_RWSTD_NO_RUNTIME_IN_STD)
-#    define _RWSTD_BAD_ALLOC _STD::bad_alloc
+#    define _RWSTD_BAD_ALLOC std::bad_alloc
   #else   // if _RWSTD_NO_STD_BAD_ALLOC && _RWSTD_NO_RUNTIME_IN_STD
 
      // working around a gcc 2.x bug (PR #24400)
 #    if !defined (__GNUG__) || __GNUG__ > 2
 
-#      define _RWSTD_BAD_ALLOC _STD::bad_alloc
+#      define _RWSTD_BAD_ALLOC std::bad_alloc
 #    else
 #      define _RWSTD_BAD_ALLOC ::bad_alloc
 #    endif   // gcc > 2.x
@@ -315,7 +315,7 @@ operator_new (size_t nbytes, bool array)
                       name [array], nbytes, *pst->break_at_seqno_);
 
         // abort() when a breakpoint has been reached
-        _RW::__rw_assert_fail (buffer, __FILE__, __LINE__, 0);
+        __rw::__rw_assert_fail (buffer, __FILE__, __LINE__, 0);
 
         // should not get here except when the program handles
         // SIGABRT and returns from the handler
@@ -365,7 +365,7 @@ operator_new (size_t nbytes, bool array)
             rw_snprintfa (buf, sizeof(buf),
                 "reached a breakpoint at of %zu calls", *pst->break_at_seqno_);
 
-            _RW::__rw_assert_fail (buf, __FILE__, __LINE__, name [array]);
+            __rw::__rw_assert_fail (buf, __FILE__, __LINE__, name [array]);
         }
 
         if (trace_sequence [0] <= seq_gen && seq_gen < trace_sequence [1])

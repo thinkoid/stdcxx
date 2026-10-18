@@ -97,7 +97,7 @@ intT exchange (intT &x, intT y)
 
 #else   // if defined (_RWSTD_REENTRANT)
 
-    return _RW::__rw_atomic_exchange (x, y, false);
+    return __rw::__rw_atomic_exchange (x, y, false);
 
 #endif   // _RWSTD_REENTRANT
 }

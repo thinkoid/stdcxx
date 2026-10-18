@@ -73,7 +73,7 @@
 #endif   // _RWSTD_RW_ITERATOR_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 template <class _Alloc, class _Val, class _Key, class _KeyOf>
@@ -121,10 +121,10 @@ struct __rw_rb_tree_node
 template <class _TypeT, class _DiffT,
           class _Pointer, class _Reference, class _Node>
 class __rw_tree_iter
-    : public _STD::iterator <_STD::bidirectional_iterator_tag,
+    : public std::iterator <std::bidirectional_iterator_tag,
                             _TypeT, _DiffT, _Pointer, _Reference>
 {
-    typedef _STD::iterator <_STD::bidirectional_iterator_tag,
+    typedef std::iterator <std::bidirectional_iterator_tag,
                            _TypeT, _DiffT, _Pointer, _Reference> _C_iter_base;
 public:
 
@@ -418,18 +418,18 @@ public:
 
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC
 
-    typedef _STD::reverse_iterator<const_iterator> const_reverse_iterator;
-    typedef _STD::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef std::reverse_iterator<iterator>        reverse_iterator;
 
 #else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
 
   typedef std::reverse_iterator<const_iterator, 
-        _STD::bidirectional_iterator_tag, value_type, 
+        std::bidirectional_iterator_tag, value_type, 
         const_reference, const_pointer, difference_type>
     const_reverse_iterator;
 
     typedef std::reverse_iterator<iterator, 
-        _STD::bidirectional_iterator_tag, value_type, 
+        std::bidirectional_iterator_tag, value_type, 
         reference, pointer, difference_type>
     reverse_iterator;
 
@@ -540,13 +540,13 @@ public:
     
     void swap (__rb_tree &__rhs) {
       if (get_allocator () == __rhs.get_allocator ()) {
-          _STD::swap (_C_buf_list, __rhs._C_buf_list);
-          _STD::swap (_C_free_list, __rhs._C_free_list);
-          _STD::swap (_C_next_avail, __rhs._C_next_avail);
-          _STD::swap (_C_last, __rhs._C_last);
-          _STD::swap (_C_end, __rhs._C_end);
-          _STD::swap (_C_size, __rhs._C_size);
-          _STD::swap (_C_cmp, __rhs._C_cmp);
+          std::swap (_C_buf_list, __rhs._C_buf_list);
+          std::swap (_C_free_list, __rhs._C_free_list);
+          std::swap (_C_next_avail, __rhs._C_next_avail);
+          std::swap (_C_last, __rhs._C_last);
+          std::swap (_C_end, __rhs._C_end);
+          std::swap (_C_size, __rhs._C_size);
+          std::swap (_C_cmp, __rhs._C_cmp);
       }
       else {
           __rb_tree __tmp = *this;
@@ -555,11 +555,11 @@ public:
       } 
     }
 
-    void _C_insert (const value_type&, _STD::pair<iterator, bool>&, bool);
+    void _C_insert (const value_type&, std::pair<iterator, bool>&, bool);
 
-    _STD::pair<iterator, bool>
+    std::pair<iterator, bool>
     insert (const value_type &__val, bool __dup) {
-        _STD::pair<iterator, bool> __ret;
+        std::pair<iterator, bool> __ret;
         return _C_insert (__val, __ret, __dup), __ret;
     }
 
@@ -621,13 +621,13 @@ public:
         return _RWSTD_CONST_CAST (__rb_tree*, this)->upper_bound (__key);
     }
 
-    _STD::pair<iterator, iterator> equal_range (const key_type&);
+    std::pair<iterator, iterator> equal_range (const key_type&);
 
-    _STD::pair<const_iterator, const_iterator>
+    std::pair<const_iterator, const_iterator>
     equal_range (const key_type& __key) const {
-        _STD::pair<iterator, iterator> __tmp =
+        std::pair<iterator, iterator> __tmp =
             _RWSTD_CONST_CAST (__rb_tree*, this)->equal_range (__key);
-        return _STD::pair<const_iterator, const_iterator>
+        return std::pair<const_iterator, const_iterator>
             (__tmp.first, __tmp.second);
     }
 
@@ -659,7 +659,7 @@ operator== (const __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>& __lhs,
             const __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>& __rhs)
 {
     return    __lhs.size () == __rhs.size ()
-           && _STD::equal (__lhs.begin (), __lhs.end (), __rhs.begin ());
+           && std::equal (__lhs.begin (), __lhs.end (), __rhs.begin ());
 }
 
 
@@ -668,7 +668,7 @@ inline bool
 operator< (const __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>& __lhs,
            const __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>& __rhs)
 {
-    return _STD::lexicographical_compare (__lhs.begin (), __lhs.end (),
+    return std::lexicographical_compare (__lhs.begin (), __lhs.end (),
                                           __rhs.begin (), __rhs.end ());
 }
 
@@ -813,7 +813,7 @@ inline typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::size_type
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 count (const _Key& __k) const
 {
-    _STD::pair<const_iterator, const_iterator> __p = equal_range (__k);
+    std::pair<const_iterator, const_iterator> __p = equal_range (__k);
     size_type __n = _DISTANCE (__p.first, __p.second, size_type);
     return __n;
 }
@@ -823,11 +823,11 @@ count (const _Key& __k) const
         typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator
                                                
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-inline _STD::pair<_RWSTD_RB_TREE_ITER , _RWSTD_RB_TREE_ITER >
+inline std::pair<_RWSTD_RB_TREE_ITER , _RWSTD_RB_TREE_ITER >
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 equal_range (const _Key& __k)
 {
-    return _STD::pair<iterator, iterator>(lower_bound (__k), upper_bound(__k));
+    return std::pair<iterator, iterator>(lower_bound (__k), upper_bound(__k));
 }
 
 

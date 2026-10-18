@@ -37,7 +37,7 @@
 #include "locale_body.h"
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 bool locale::operator== (const locale &rhs) const
@@ -127,13 +127,13 @@ bool locale::operator== (const locale &rhs) const
 
     // highest valid index
     const size_t maxinx =
-        rhs._C_body->_C_n_usr_facets + _RW::__rw_locale::_C_n_std_facets;
+        rhs._C_body->_C_n_usr_facets + __rw::__rw_locale::_C_n_std_facets;
 
     // locales with the same (non-0) number of user-defined
     // facets compare equal iff all the facets are identical
     for (size_t i = 0; i != _C_body->_C_n_usr_facets; ++i) {
 
-        const _RW::__rw_facet* const pf = _C_body->_C_usr_facets [i];
+        const __rw::__rw_facet* const pf = _C_body->_C_usr_facets [i];
 
         _RWSTD_ASSERT (0 != pf);
         _RWSTD_ASSERT (0 != pf->_C_pid);
@@ -148,11 +148,11 @@ bool locale::operator== (const locale &rhs) const
 
         // find the index of the facet in rhs if it's installed there
         size_t inx = rhs._C_body->_C_get_facet_inx (*pf->_C_pid);
-        if (maxinx <= inx || inx < _RW::__rw_locale::_C_n_std_facets)
+        if (maxinx <= inx || inx < __rw::__rw_locale::_C_n_std_facets)
             return false;
 
         // the index starts at _C_n_std_facets
-        inx -= _RW::__rw_locale::_C_n_std_facets;
+        inx -= __rw::__rw_locale::_C_n_std_facets;
 
         // if the two facets aren't the same objects the locales aren't
         // equal (since they may each behave differently)

@@ -40,7 +40,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _InputIter1, class _InputIter2>

@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _TypeT>
@@ -43,8 +43,8 @@ valarray<_TypeT> valarray<_TypeT>::shift (int __n) const
         
     // use copy- rather than direct-initialization to work around
     // a gcc 3.2 bug
-    _RW::__rw_array<_TypeT> __tmp =
-        _RW::__rw_array<_TypeT>(_TypeT (), __size);
+    __rw::__rw_array<_TypeT> __tmp =
+        __rw::__rw_array<_TypeT>(_TypeT (), __size);
 
     // 26.3.2.7, p5 - negative n shifts right, positive left
     if (__n < 0)
@@ -71,8 +71,8 @@ valarray<_TypeT> valarray<_TypeT>::cshift (int __n) const
 
     // use copy- rather than direct-initialization to work around
     // a gcc 3.2 bug
-    _RW::__rw_array<_TypeT> __tmp =
-        _RW::__rw_array<_TypeT>(_TypeT (), __size);
+    __rw::__rw_array<_TypeT> __tmp =
+        __rw::__rw_array<_TypeT>(_TypeT (), __size);
 
     // 26.3.2.7, p7 - negative n rotates right, positive left
     rotate_copy (_C_array.begin (),

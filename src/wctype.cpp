@@ -58,9 +58,9 @@
 #define _UTF8_MB_CUR_MAX   6
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
-typedef _STD::ctype_base::mask MaskT;
+typedef std::ctype_base::mask MaskT;
 
 extern const MaskT         __rw_classic_tab [];
 extern const unsigned char __rw_upper_tab [];
@@ -194,7 +194,7 @@ __rw_get_mask (__rw_ctype_t    *impl,
 }
 
 
-static _STD::ctype_byname<wchar_t>::char_type
+static std::ctype_byname<wchar_t>::char_type
 __rw_toupper (__rw_ctype_t* impl,
               wchar_t c, bool use_libstd,
               const char* locname)
@@ -236,7 +236,7 @@ __rw_toupper (__rw_ctype_t* impl,
 }
 
 
-static _STD::ctype_byname<wchar_t>::char_type
+static std::ctype_byname<wchar_t>::char_type
 __rw_tolower (__rw_ctype_t* impl,
               wchar_t c, bool use_libstd,
               const char* locname)
@@ -298,8 +298,8 @@ __rw_widen (const __rw_codecvt_t *cvt, bool use_libstd,
 #ifdef _RWSTD_NO_EQUAL_CTYPE_MASK
 
 // table of wide character classes
-static _STD::ctype_base::mask
-__rw_classic_wide_tab [_STD::ctype<char>::table_size];
+static std::ctype_base::mask
+__rw_classic_wide_tab [std::ctype<char>::table_size];
 
 // init-once flag for the classic wide tab
 static __rw_once_t
@@ -321,12 +321,12 @@ __rw_init_classic_wide_tab ()
 #  endif   // _RWSTDDEBUG
 
     // init the classic wide tab
-    wchar_t wc_array [_STD::ctype<char>::table_size];
+    wchar_t wc_array [std::ctype<char>::table_size];
 
-    for (wchar_t wc = 0; wc < _STD::ctype<char>::table_size; ++wc)
+    for (wchar_t wc = 0; wc < std::ctype<char>::table_size; ++wc)
         wc_array [wc] = wc;
 
-    __rw_get_mask (0, wc_array, wc_array + _STD::ctype<char>::table_size,
+    __rw_get_mask (0, wc_array, wc_array + std::ctype<char>::table_size,
                    __rw_all, __rw_classic_wide_tab, false, false, "C");
 }
 
@@ -335,26 +335,26 @@ __rw_init_classic_wide_tab ()
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
-_RW::__rw_facet_id ctype<wchar_t>::id;
+__rw::__rw_facet_id ctype<wchar_t>::id;
 
 
 ctype<wchar_t>::ctype (size_t ref) _THROWS (())
-    : _RW::__rw_facet (ref)
+    : __rw::__rw_facet (ref)
 {
 #ifndef _RWSTD_NO_EQUAL_CTYPE_MASK
-    _C_mask_tab  = _RW::__rw_classic_tab;
+    _C_mask_tab  = __rw::__rw_classic_tab;
 #else
     // initialize classic wide tab exactly once
-    _RW::__rw_once (&_RW::__rw_classic_wide_tab_once_init,
-                    _RW::__rw_init_classic_wide_tab);
+    __rw::__rw_once (&__rw::__rw_classic_wide_tab_once_init,
+                    __rw::__rw_init_classic_wide_tab);
 
-    _C_mask_tab  = _RW::__rw_classic_wide_tab;
+    _C_mask_tab  = __rw::__rw_classic_wide_tab;
 #endif
-    _C_upper_tab = _RWSTD_CONST_CAST (_UChar*, _RW::__rw_upper_tab);
-    _C_lower_tab = _RWSTD_CONST_CAST (_UChar*, _RW::__rw_lower_tab);
+    _C_upper_tab = _RWSTD_CONST_CAST (_UChar*, __rw::__rw_upper_tab);
+    _C_lower_tab = _RWSTD_CONST_CAST (_UChar*, __rw::__rw_lower_tab);
     _C_delete_it = false;
 
     memset (_C_narrow_tab, 0, sizeof _C_narrow_tab);
@@ -367,7 +367,7 @@ ctype<wchar_t>::~ctype ()
     if (_C_delete_it) {
         delete[] _RWSTD_CONST_CAST (mask*, _C_mask_tab);
 
-        if (_C_upper_tab != _RW::__rw_upper_tab) {
+        if (_C_upper_tab != __rw::__rw_upper_tab) {
             // lower_tab is allocated in the same block of memory
             // as upper_tab and must not be deleted
             delete[] _C_upper_tab;
@@ -540,16 +540,16 @@ ctype_byname (const char *name, size_t refs)
         return;
 
     // delayed initialization not used for efficiency
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-            _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
-                _RW::__rw_get_facet_data (LC_CTYPE, _C_impsize, _C_name)));
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+            _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
+                __rw::__rw_get_facet_data (LC_CTYPE, _C_impsize, _C_name)));
 
     _C_impdata = impl;
 
     // Memory map the codecvt database and store it for future use
     if (impl)
-        _C_cvtimpl = _RW::__rw_get_facet_data (LC_CTYPE, _C_cvtsize, 0, 
+        _C_cvtimpl = __rw::__rw_get_facet_data (LC_CTYPE, _C_cvtsize, 0, 
                                                impl->codeset_name ());
 
     if (impl == 0 || (this->_C_opts & this->_C_use_libc)) {
@@ -557,7 +557,7 @@ ctype_byname (const char *name, size_t refs)
         // set locale first to avoid unnecessary allocation
         // if `name' doesn't refer to a valid locale (and
         // __rw_setlocale throws an exception)
-        const _RW::__rw_setlocale clocale (name, LC_CTYPE);
+        const __rw::__rw_setlocale clocale (name, LC_CTYPE);
 
         _C_delete_it = true;
 
@@ -581,34 +581,34 @@ ctype_byname (const char *name, size_t refs)
             int m = 0;
 
             if ((::iswspace)(i))
-                m |= _RW::__rw_space;
+                m |= __rw::__rw_space;
 
             if ((::iswprint)(i))
-                m |= _RW::__rw_print;
+                m |= __rw::__rw_print;
 
             if ((::iswcntrl)(i))
-                m |= _RW::__rw_cntrl;
+                m |= __rw::__rw_cntrl;
 
             if ((::iswupper)(i))
-                m |= _RW::__rw_upper;
+                m |= __rw::__rw_upper;
 
             if ((::iswlower)(i))
-                m |= _RW::__rw_lower;
+                m |= __rw::__rw_lower;
 
             if ((::iswalpha)(i))
-                m |= _RW::__rw_alpha;
+                m |= __rw::__rw_alpha;
 
             if ((::iswdigit)(i))
-                m |= _RW::__rw_digit;
+                m |= __rw::__rw_digit;
 
             if ((::iswpunct)(i))
-                m |= _RW::__rw_punct;
+                m |= __rw::__rw_punct;
 
             if ((::iswxdigit)(i))
-                m |= _RW::__rw_xdigit;
+                m |= __rw::__rw_xdigit;
 
             if ((::iswgraph)(i))
-                m |= _RW::__rw_graph;
+                m |= __rw::__rw_graph;
 
             _RWSTD_CONST_CAST (mask*, _C_mask_tab) [i]  = mask (m);
 
@@ -640,7 +640,7 @@ ctype_byname<wchar_t>::
 {
     // Release the codecvt database at this level
     if (_C_cvtimpl != 0 && _C_cvtsize != 0)
-        _RW::__rw_release_facet_data (_C_cvtimpl, _C_cvtsize);
+        __rw::__rw_release_facet_data (_C_cvtimpl, _C_cvtsize);
 }
 
 
@@ -648,16 +648,16 @@ bool
 ctype_byname<wchar_t>::
 do_is (mask m, wchar_t c) const
 {
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
                                                _C_data ()));
 
     const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
     mask res = mask ();
 
-    _RW::__rw_get_mask (impl, &c, &c + 1, m, &res, false, libstd, _C_name);
+    __rw::__rw_get_mask (impl, &c, &c + 1, m, &res, false, libstd, _C_name);
 
     return res != 0;
 }
@@ -668,14 +668,14 @@ ctype_byname<wchar_t>::
 do_is (const char_type *lo, const char_type *hi, mask *mvec) const
 {
     _RWSTD_ASSERT (lo <= hi);
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
                                                _C_data ()));
 
     const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
-    return _RW::__rw_get_mask (impl, lo, hi, _RW::__rw_all,
+    return __rw::__rw_get_mask (impl, lo, hi, __rw::__rw_all,
                                mvec, false, libstd, _C_name);
 }
 
@@ -684,14 +684,14 @@ ctype_byname<wchar_t>::char_type
 ctype_byname<wchar_t>::
 do_toupper (char_type c) const
 {
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
                                                _C_data ()));
 
     const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
-    return _RW::__rw_toupper (impl, c, use_libstd, _C_name);
+    return __rw::__rw_toupper (impl, c, use_libstd, _C_name);
 }
 
 
@@ -699,14 +699,14 @@ ctype_byname<wchar_t>::char_type
 ctype_byname<wchar_t>::
 do_tolower (char_type c) const
 {
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
                                                _C_data ()));
 
     const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
-    return _RW::__rw_tolower (impl, c, use_libstd, _C_name);
+    return __rw::__rw_tolower (impl, c, use_libstd, _C_name);
 }
 
 
@@ -715,16 +715,16 @@ ctype_byname<wchar_t>::
 do_toupper (char_type *lo, const char_type *hi) const
 {
     _RWSTD_ASSERT (lo <= hi);
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
                                                _C_data ()));
 
     const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
     // FIXME: implement efficiently (__rw_toupper() may call setlocale())
     for ( ; lo < hi; ++lo)
-        *lo = _RW::__rw_toupper (impl, *lo, use_libstd, _C_name);
+        *lo = __rw::__rw_toupper (impl, *lo, use_libstd, _C_name);
     return lo;
 }
 
@@ -734,16 +734,16 @@ ctype_byname<wchar_t>::
 do_tolower (char_type *lo, const char_type *hi) const
 {
     _RWSTD_ASSERT (lo <= hi);
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
                                                _C_data ()));
 
     const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
     // FIXME: implement efficiently (__rw_tolower() may call setlocale())
     for ( ; lo < hi; ++lo)
-        *lo = _RW::__rw_tolower (impl, *lo, use_libstd, _C_name);
+        *lo = __rw::__rw_tolower (impl, *lo, use_libstd, _C_name);
     return lo;
 }
 
@@ -754,13 +754,13 @@ do_scan_is (mask m, const char_type* lo, const char_type* hi) const
 {
     _RWSTD_ASSERT (lo <= hi);
 
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
                                                _C_data ()));
     const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
-    return _RW::__rw_get_mask (impl, lo, hi, m, 0, true, libstd, _C_name);
+    return __rw::__rw_get_mask (impl, lo, hi, m, 0, true, libstd, _C_name);
 }
 
 
@@ -770,13 +770,13 @@ do_scan_not (mask m, const char_type *lo, const char_type *hi) const
 {
     _RWSTD_ASSERT (lo <= hi);
 
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-                           _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+                           _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
                                                _C_data ()));
     const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
-    return _RW::__rw_get_mask (impl, lo, hi, m, 0, false, libstd, _C_name);
+    return __rw::__rw_get_mask (impl, lo, hi, m, 0, false, libstd, _C_name);
 }
 
 
@@ -798,13 +798,13 @@ do_narrow (char_type c, char dfault) const
 
 #endif   // _RWSTD_WCHAR_MIN
 
-    const _RW::__rw_codecvt_t* cvt = 
-        _RWSTD_STATIC_CAST(const _RW::__rw_codecvt_t*, _C_cvtimpl);
+    const __rw::__rw_codecvt_t* cvt = 
+        _RWSTD_STATIC_CAST(const __rw::__rw_codecvt_t*, _C_cvtimpl);
 
     char ch = 0;
     if (0 == cvt || (this->_C_opts & this->_C_use_libc)) {
 
-        const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
+        const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
         const int tmp = wctob (c);
 
@@ -831,7 +831,7 @@ do_narrow (char_type c, char dfault) const
 
         char  tmp [_UTF8_MB_CUR_MAX + 1];
         char* ptmp = tmp;
-        size_t utf8_sz = _RW::__rw_itoutf8 (c, tmp);
+        size_t utf8_sz = __rw::__rw_itoutf8 (c, tmp);
 
 #if _RWSTD_WCHAR_MIN < 0
         // compute the invalid bit mask (the MSB set)
@@ -865,7 +865,7 @@ do_narrow (char_type c, char dfault) const
         // to have length of one
         const char* impl_raw = 
             _RWSTD_REINTERPRET_CAST(const char*, cvt);
-        size_t offset = wc + sizeof (_RW::__rw_codecvt_t);
+        size_t offset = wc + sizeof (__rw::__rw_codecvt_t);
 
         if (impl_raw [offset + 1])
             return dfault;
@@ -906,14 +906,14 @@ do_widen (char c) const
     // a table lookup to get the wide version of this character
     // otherwise we have to call setlocale() and btowc() to get the
     // corresponding wchar_t
-    const _RW::__rw_codecvt_t* cvt = 
-        _RWSTD_STATIC_CAST (const _RW::__rw_codecvt_t*, _C_cvtimpl);
+    const __rw::__rw_codecvt_t* cvt = 
+        _RWSTD_STATIC_CAST (const __rw::__rw_codecvt_t*, _C_cvtimpl);
 
     char_type ch;
 
     if (0 == cvt || (this->_C_opts & this->_C_use_libc)) {
 
-        const _RW::__rw_setlocale clocale (_C_name, LC_CTYPE);
+        const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
         // prevent sign extension if `c' is negative
         ch = btowc (u_c);

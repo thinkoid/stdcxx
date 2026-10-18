@@ -87,27 +87,27 @@ extern void tzset () _LIBC_THROWS ();
 #endif   // _RWSTD_NO_DAYLIGHT
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
-typedef _STD::ctype_base::mask MaskT;
+typedef std::ctype_base::mask MaskT;
 extern const MaskT __rw_classic_tab [];
 
 #define ISALPHA(c) \
-    (_RW::__rw_classic_tab [(unsigned char)c] & _RW::__rw_alpha)
+    (__rw::__rw_classic_tab [(unsigned char)c] & __rw::__rw_alpha)
 
 #define ISDIGIT(c) \
-    (_RW::__rw_classic_tab [(unsigned char)c] & _RW::__rw_digit)
+    (__rw::__rw_classic_tab [(unsigned char)c] & __rw::__rw_digit)
 
 
 size_t
-__rw_get_timepunct (const _RW::__rw_facet*, int,
+__rw_get_timepunct (const __rw::__rw_facet*, int,
                     const void*[], const size_t []);
 
 // also declared in _time_put.cc
 _RWSTD_EXPORT char*
 __rw_put_time (const __rw_facet*, char*, size_t,
-               _STD::ios_base&, char, const tm*,
+               std::ios_base&, char, const tm*,
                char, char, int, int);
 
 
@@ -116,7 +116,7 @@ __rw_put_time (const __rw_facet*, char*, size_t,
 // also declared in _time_put.cc
 _RWSTD_EXPORT wchar_t*
 __rw_put_time (const __rw_facet*, wchar_t*, size_t,
-               _STD::ios_base&, wchar_t, const tm*,
+               std::ios_base&, wchar_t, const tm*,
                char, char, int, int);
 
 #endif   // _RWSTD_NO_WCHAR_T
@@ -990,11 +990,11 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
         return 0;
     }
 
-    typedef _STD::char_traits<char> CTraits;
+    typedef std::char_traits<char> CTraits;
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-    typedef _STD::char_traits<wchar_t> WTraits;
+    typedef std::char_traits<wchar_t> WTraits;
 
 #endif   // _RWSTD_NO_WCHAR_T
 
@@ -1347,7 +1347,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
 
 static char*
 __rw_fmt_time (const __rw_facet *pfacet, char *buf, size_t bufsize,
-               _STD::ios_base &flags, char fill, const tm *tmb,
+               std::ios_base &flags, char fill, const tm *tmb,
                const char *pat)
 {
     _RWSTD_ASSERT (0 != tmb);
@@ -1485,7 +1485,7 @@ __rw_fmt_time (const __rw_facet *pfacet, char *buf, size_t bufsize,
 
 static wchar_t*
 __rw_fmt_time (const __rw_facet *pfacet, wchar_t *wbuf, size_t bufsize,
-               _STD::ios_base &flags, wchar_t fill, const tm *tmb,
+               std::ios_base &flags, wchar_t fill, const tm *tmb,
                const wchar_t *wpat)
 {
     _RWSTD_ASSERT (0 != tmb);
@@ -2516,7 +2516,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 
 _RWSTD_EXPORT char*
 __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
-               _STD::ios_base &flags, char fill, const tm *tmb,
+               std::ios_base &flags, char fill, const tm *tmb,
                char fmt, char mod, int width, int prec)
 {
     _RWSTD_ASSERT (0 != facet);
@@ -2618,7 +2618,7 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
 
 _RWSTD_EXPORT wchar_t*
 __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
-               _STD::ios_base &flags, wchar_t fill, const tm *tmb,
+               std::ios_base &flags, wchar_t fill, const tm *tmb,
                char fmt, char mod, int width, int prec)
 {
     _RWSTD_ASSERT (0 != facet);

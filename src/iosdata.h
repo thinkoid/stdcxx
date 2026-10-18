@@ -34,7 +34,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // POD-type
 struct ios_base::_C_usr_data

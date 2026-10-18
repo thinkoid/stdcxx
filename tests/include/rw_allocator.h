@@ -33,7 +33,7 @@
 #include <rw_testdefs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // declare to avoid dragging in all of <memory>
 // (yes, it is undefined for programs to do that)

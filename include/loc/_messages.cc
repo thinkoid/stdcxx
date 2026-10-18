@@ -29,11 +29,11 @@
 #include <loc/_ctype.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _CharT>
-_RW::__rw_facet_id messages<_CharT>::id;
+__rw::__rw_facet_id messages<_CharT>::id;
 
 
 // outlined to avoid generating a vtable in each translation unit
@@ -51,7 +51,7 @@ messages_base::catalog
 messages<_CharT>::
 do_open (const string& __fun, const locale&__loc) const
 {
-    return _RW::__rw_cat_open (__fun, __loc);
+    return __rw::__rw_cat_open (__fun, __loc);
 }
 
 
@@ -60,7 +60,7 @@ void
 messages<_CharT>::
 do_close (messages_base::catalog __cat) const
 {
-    _RW::__rw_cat_close (__cat);
+    __rw::__rw_cat_close (__cat);
 }
 
 
@@ -71,16 +71,16 @@ messages<_CharT>::do_get (messages_base::catalog __cat,
                           int                    __msgid,
                           const string_type     &__dfault) const
 {
-    const char* const __text = _RW::__rw_get_message (__cat, __set, __msgid);
+    const char* const __text = __rw::__rw_get_message (__cat, __set, __msgid);
  
     if (__text) {
-        typedef _STD::codecvt<_CharT, char, _RWSTD_MBSTATE_T>
+        typedef std::codecvt<_CharT, char, _RWSTD_MBSTATE_T>
             _CodeCvt;
 
         typedef typename _CodeCvt::state_type state_type;
 
         const _CodeCvt& __codecvt =
-            _RWSTD_USE_FACET (_CodeCvt, _RW::__rw_get_locale (__cat));
+            _RWSTD_USE_FACET (_CodeCvt, __rw::__rw_get_locale (__cat));
 
         if (sizeof (_CharT) == sizeof (char) && __codecvt.always_noconv ()) {
             // lwg issue 19: always_noconv() is only allowed to return
@@ -133,7 +133,7 @@ messages<_CharT>::do_get (messages_base::catalog __cat,
                 typedef ctype<_CharT> _Ctype;
 
                 const _Ctype& __ctp =
-                    _RWSTD_USE_FACET (_Ctype, _RW::__rw_get_locale (__cat));
+                    _RWSTD_USE_FACET (_Ctype, __rw::__rw_get_locale (__cat));
 
                 for (_SizeT __i = 0; __i != __src_len; ++__i)
                     __dst_first [__i] = __ctp.widen (__text [__i]);

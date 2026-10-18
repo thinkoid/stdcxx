@@ -37,14 +37,14 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 struct _RWSTD_CLASS_EXPORT locale;
 
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 class _RWSTD_EXPORT __rw_locale;
 
@@ -225,7 +225,7 @@ private:
     static __rw_facet*
     _C_manage (__rw_facet*, _C_facet_type, const char*, _C_ctor_t*);
 
-    friend struct _STD::locale;
+    friend struct std::locale;
     friend class __rw_locale;
     friend struct __rw_facet_id;
     friend struct __rw_access;
@@ -268,7 +268,7 @@ private:
     mutable _RWSTD_SIZE_T _C_id;            // unique id > 0
 
     friend class __rw_locale;
-    friend struct _STD::locale;
+    friend struct std::locale;
     friend struct __rw_access;
 };
 

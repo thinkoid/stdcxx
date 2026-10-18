@@ -65,7 +65,7 @@
 #endif   // WEOF
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 _RWSTD_EXPORT _RWSTD_SSIZE_T
  __rw_memattr (const void*, size_t, int);
@@ -704,7 +704,7 @@ _rw_pvasnprintf (Buffer &buf, const char *fmt, VarArgs *pva)
     size_t spec_bufsize = sizeof specbuf / sizeof *specbuf;
     size_t paramno = 0;
 
-    if (0 == fmt || 0 > _RW::__rw_memattr (fmt, _RWSTD_SIZE_MAX, -1))
+    if (0 == fmt || 0 > __rw::__rw_memattr (fmt, _RWSTD_SIZE_MAX, -1))
         return _rw_fmtbadaddr (pspec [0], buf, fmt);
 
     for (const char *fc = fmt; *fc; ) {
@@ -1613,7 +1613,7 @@ _rw_fmtmemptr (const FmtSpec &spec, Buffer &buf, memptr_t val)
 static int
 _rw_fmttm (const FmtSpec &spec, Buffer &buf, const tm *tmb)
 {
-    if (   0 == tmb || 0 > _RW::__rw_memattr (tmb, sizeof *tmb, -1)
+    if (   0 == tmb || 0 > __rw::__rw_memattr (tmb, sizeof *tmb, -1)
         || (size_t)tmb & (sizeof (int) - 1)) {
         return _rw_fmtbadaddr (spec, buf, tmb, sizeof (int));
     }
@@ -1828,7 +1828,7 @@ int _rw_fmtarray (const FmtSpec &spec,
     const size_t memlen =   _RWSTD_SIZE_MAX == nelems
                           ? _RWSTD_SIZE_MAX : nelems * sizeof *array;
     if (   0 == array
-        || 0 > _RW::__rw_memattr (array, memlen, -1)
+        || 0 > __rw::__rw_memattr (array, memlen, -1)
         || ((size_t)array & (sizeof *array - 1))) {
         // qualify the name of the static function in order to
         // allow it to be found when referenced from a template
@@ -2165,7 +2165,7 @@ _rw_fmtstrarray (FmtSpec *pspec, size_t paramno, Buffer &buf,
 
     int len = 0;
 
-    if (0 == argv || 0 > _RW::__rw_memattr (argv, sizeof *argv, -1))
+    if (0 == argv || 0 > __rw::__rw_memattr (argv, sizeof *argv, -1))
         return _rw_fmtbadaddr (spec, buf, argv);
 
     size_t argc = spec.prec;
@@ -2267,7 +2267,7 @@ _rw_fmtstr (const FmtSpec &spec, Buffer &buf, const char *str, size_t len)
     if (spec.fl_pound)
         return _rw_fmtarray (spec, buf, str, len, A_CHAR | A_ESC);
 
-    if (0 == str || 0 > _RW::__rw_memattr (str, len, -1))
+    if (0 == str || 0 > __rw::__rw_memattr (str, len, -1))
         return _rw_fmtbadaddr (spec, buf, str);
 
     if (_RWSTD_SIZE_MAX == len)
@@ -2341,7 +2341,7 @@ _rw_fmtwstr (const FmtSpec &spec, Buffer &buf,
     const size_t memlen =   _RWSTD_SIZE_MAX == len
                           ? _RWSTD_SIZE_MAX : len * sizeof *wstr;
     if (   0 == wstr
-        || 0 > _RW::__rw_memattr (wstr, memlen, -1)
+        || 0 > __rw::__rw_memattr (wstr, memlen, -1)
         || ((size_t)wstr & (sizeof *wstr - 1)))
         return _rw_fmtbadaddr (spec, buf, wstr, sizeof *wstr);
 
@@ -2537,7 +2537,7 @@ _rw_vasnprintf_ext (FmtSpec    *pspec,
         // std::bitset
         spec.param.ptr_ = PARAM (ptr_, pva);
         if (   0 == spec.param.ptr_
-            || 0 > _RW::__rw_memattr (spec.param.ptr_, spec.prec, -1))
+            || 0 > __rw::__rw_memattr (spec.param.ptr_, spec.prec, -1))
             len = _rw_fmtbadaddr (spec, buf, spec.param.ptr_, sizeof (long));
         else
             len = _rw_fmtbits (spec, buf, spec.param.ptr_, sizeof (long));
@@ -2546,7 +2546,7 @@ _rw_vasnprintf_ext (FmtSpec    *pspec,
     case 'b':   // %{b}
         spec.param.ptr_ = PARAM (ptr_, pva);
         if (   0 == spec.param.ptr_
-            || 0 > _RW::__rw_memattr (spec.param.ptr_, spec.prec, -1))
+            || 0 > __rw::__rw_memattr (spec.param.ptr_, spec.prec, -1))
             len = _rw_fmtbadaddr (spec, buf, spec.param.ptr_);
         else
             len = _rw_fmtbits (spec, buf, spec.param.ptr_, 1);
@@ -2793,7 +2793,7 @@ _rw_vasnprintf_ext (FmtSpec    *pspec,
 
             const std::wstring* const pstr = (std::wstring*)spec.param.ptr_;
 
-            if (   0 == pstr || 0 > _RW::__rw_memattr (pstr, sizeof *pstr, -1)
+            if (   0 == pstr || 0 > __rw::__rw_memattr (pstr, sizeof *pstr, -1)
                 || (size_t)pstr & (sizeof (pstr) - 1)) {
                 len = _rw_fmtbadaddr (spec, buf, pstr, sizeof pstr);
             }
@@ -2810,7 +2810,7 @@ _rw_vasnprintf_ext (FmtSpec    *pspec,
 
             const std::string* const pstr = (std::string*)spec.param.ptr_;
 
-            if (   0 == pstr || 0 > _RW::__rw_memattr (pstr, sizeof *pstr, -1)
+            if (   0 == pstr || 0 > __rw::__rw_memattr (pstr, sizeof *pstr, -1)
                 || (size_t)pstr & (sizeof (pstr) - 1)) {
                 len = _rw_fmtbadaddr (spec, buf, pstr, sizeof pstr);
             }

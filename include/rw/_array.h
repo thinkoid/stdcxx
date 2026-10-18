@@ -37,7 +37,7 @@
 #endif   // _RWSTD_RW_SPECIALIZED_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 template <class _TypeT>
@@ -130,7 +130,7 @@ inline __rw_array<_TypeT>::__rw_array (const_reference __val, size_type __n)
     if (__n) {
         _C_data = _RWSTD_STATIC_CAST (pointer,
                                       ::operator new (__n * sizeof *_C_data));
-        _STD::uninitialized_fill_n (_C_data, __n, __val);
+        std::uninitialized_fill_n (_C_data, __n, __val);
     }
     else
         _C_data = 0;
@@ -145,7 +145,7 @@ inline __rw_array<_TypeT>::__rw_array (const_pointer __data, size_type __n)
     if (__n) {
         _C_data = _RWSTD_STATIC_CAST (pointer,
                                       ::operator new (__n * sizeof *_C_data));
-        _STD::uninitialized_copy (__data, __data + __n, _C_data);
+        std::uninitialized_copy (__data, __data + __n, _C_data);
     }
     else
         _C_data = 0;
@@ -161,7 +161,7 @@ inline __rw_array<_TypeT>::__rw_array (const __rw_array<_TypeT> &__rhs)
     if (__rhs.size ()) {
         _C_data = _RWSTD_STATIC_CAST (pointer,
                                     ::operator new (_C_size * sizeof *_C_data));
-        _STD::uninitialized_copy (__rhs.begin (), __rhs.end (), begin ());
+        std::uninitialized_copy (__rhs.begin (), __rhs.end (), begin ());
     }
     else
         _C_data = 0;
@@ -174,7 +174,7 @@ __rw_array<_TypeT>::operator= (const __rw_array<_TypeT> &__rhs)
 {
     if (__rhs.size () == size ())
         // do not allocate, just copy for efficiency
-        _STD::copy (__rhs.begin (), __rhs.end (), begin ());
+        std::copy (__rhs.begin (), __rhs.end (), begin ());
     else
         // allocate and copy into a temporary, then swap
         __rw_array <_TypeT> (__rhs).swap (*this);
@@ -219,7 +219,7 @@ resize (size_type __size, const_reference __val /* = value_type () */)
     if ((_C_size = __size)) {
         _C_data = _RWSTD_STATIC_CAST (pointer,
                               ::operator new (_C_size * sizeof *_C_data));
-        _STD::uninitialized_fill_n (_C_data, _C_size, __val);
+        std::uninitialized_fill_n (_C_data, _C_size, __val);
     }
 }
 

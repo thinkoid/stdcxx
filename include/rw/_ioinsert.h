@@ -54,7 +54,7 @@
 #endif   // _RWSTD_RW_BASIC_IOS_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
@@ -74,18 +74,18 @@ typedef basic_ostream<wchar_t> wostream;
 }
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // helper - implements insertion of arithmetic and pointer types
 template <class _CharT, class _Traits, class _NativeType>
-_STD::basic_ostream<_CharT, _Traits>&
-__rw_insert (_STD::basic_ostream<_CharT, _Traits>&, _NativeType);
+std::basic_ostream<_CharT, _Traits>&
+__rw_insert (std::basic_ostream<_CharT, _Traits>&, _NativeType);
 
 
 // helper - implements insertion of character strigs
 template<class _CharT, class _Traits, class _StringT>
-_STD::basic_ostream<_CharT, _Traits>&
-__rw_insert (_STD::basic_ostream<_CharT, _Traits>&, const _StringT*,
+std::basic_ostream<_CharT, _Traits>&
+__rw_insert (std::basic_ostream<_CharT, _Traits>&, const _StringT*,
              _RWSTD_STREAMSIZE, _RWSTD_STREAMSIZE);
 
 }   // namespace __rw
@@ -108,31 +108,31 @@ __rw_insert (_STD::basic_ostream<_CharT, _Traits>&, const _StringT*,
 
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 #if _RWSTD_INSTANTIATE (_INSERT_INT, _CHAR)
 
 #  ifndef _RWSTD_NO_NATIVE_BOOL
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
-                          __rw_insert (_STD::ostream&, bool));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
+                          __rw_insert (std::ostream&, bool));
 
 #  endif   // _RWSTD_NO_NATIVE_BOOL
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
-                          __rw_insert (_STD::ostream&, long));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
+                          __rw_insert (std::ostream&, long));
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
-                          __rw_insert (_STD::ostream&, unsigned long));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
+                          __rw_insert (std::ostream&, unsigned long));
 
 #  ifdef _RWSTD_LONG_LONG
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
-                          __rw_insert (_STD::ostream&, _RWSTD_LONG_LONG));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
+                          __rw_insert (std::ostream&, _RWSTD_LONG_LONG));
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
-                          __rw_insert (_STD::ostream&,
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
+                          __rw_insert (std::ostream&,
                                        unsigned _RWSTD_LONG_LONG));
 
 #  endif   // _RWSTD_LONG_LONG
@@ -142,13 +142,13 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
 
 #if _RWSTD_INSTANTIATE (_INSERT_DBL, _CHAR)
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
-                          __rw_insert (_STD::ostream&, double));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
+                          __rw_insert (std::ostream&, double));
 
 #  ifndef _RWSTD_NO_LONG_DOUBLE
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
-                          __rw_insert (_STD::ostream&, long double));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
+                          __rw_insert (std::ostream&, long double));
 
 #  endif   // _RWSTD_NO_LONG_DOUBLE
 
@@ -157,11 +157,11 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
 
 #if _RWSTD_INSTANTIATE (_INSERT_PTR, _CHAR)
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
-                          __rw_insert (_STD::ostream&, const void*));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
+                          __rw_insert (std::ostream&, const void*));
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
-                          __rw_insert (_STD::ostream&, const char*,
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
+                          __rw_insert (std::ostream&, const char*,
                                        _RWSTD_STREAMSIZE, _RWSTD_STREAMSIZE));
 
 #endif   // _RWSTD_INSTANTIATE (_INSERT_PTR, _CHAR)
@@ -171,24 +171,24 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::ostream&
 
 #  ifndef _RWSTD_NO_NATIVE_BOOL
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_EXPORT _STD::wostream&
-                          __rw_insert (_STD::wostream&, bool));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_EXPORT std::wostream&
+                          __rw_insert (std::wostream&, bool));
 
 #  endif   // _RWSTD_NO_NATIVE_BOOL
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
-                          __rw_insert (_STD::wostream&, long));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
+                          __rw_insert (std::wostream&, long));
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
-                          __rw_insert (_STD::wostream&, unsigned long));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
+                          __rw_insert (std::wostream&, unsigned long));
 
 #  ifdef _RWSTD_LONG_LONG
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
-                          __rw_insert (_STD::wostream&, _RWSTD_LONG_LONG));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
+                          __rw_insert (std::wostream&, _RWSTD_LONG_LONG));
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
-                          __rw_insert (_STD::wostream&,
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
+                          __rw_insert (std::wostream&,
                                        unsigned _RWSTD_LONG_LONG));
 
 #  endif   // _RWSTD_LONG_LONG
@@ -197,13 +197,13 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
 
 #if _RWSTD_INSTANTIATE (_INSERT_DBL, _WCHAR_T)
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
-                          __rw_insert (_STD::wostream&, double));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
+                          __rw_insert (std::wostream&, double));
 
 #    ifndef _RWSTD_NO_LONG_DOUBLE
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
-                          __rw_insert (_STD::wostream&, long double));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
+                          __rw_insert (std::wostream&, long double));
 
 #  endif   // _RWSTD_NO_LONG_DOUBLE
 
@@ -211,15 +211,15 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
 
 #if _RWSTD_INSTANTIATE (_INSERT_PTR, _WCHAR_T)
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
-                      __rw_insert (_STD::wostream&, const void*));
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
+                      __rw_insert (std::wostream&, const void*));
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
-                          __rw_insert (_STD::wostream&, const char*,
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
+                          __rw_insert (std::wostream&, const char*,
                                        _RWSTD_STREAMSIZE, _RWSTD_STREAMSIZE));
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT _STD::wostream&
-                          __rw_insert (_STD::wostream&, const wchar_t*,
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
+                          __rw_insert (std::wostream&, const wchar_t*,
                                        _RWSTD_STREAMSIZE, _RWSTD_STREAMSIZE));
 
 #endif   // _RWSTD_INSTANTIATE (_INSERT_PTR, _WCHAR_T)

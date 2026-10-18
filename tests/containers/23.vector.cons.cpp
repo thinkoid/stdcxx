@@ -644,7 +644,7 @@ run_test (int /* argc */, char** /* argv */)
     try {
         // throw an exception to initialize the lib (allocates
         // memory that's never deallocated; shows up as leaks)
-        _RW::__rw_throw (_RWSTD_ERROR_LOGIC_ERROR, "", "");
+        __rw::__rw_throw (_RWSTD_ERROR_LOGIC_ERROR, "", "");
     }
     catch (...) {
     }

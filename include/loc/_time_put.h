@@ -45,20 +45,20 @@
 #include _RWSTD_CTIME
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 struct _RWSTD_EXPORT ios_base;
 
 
 // 22.2.5.3
 template <class _CharT, class _OutputIter = ostreambuf_iterator<_CharT> >
-struct time_put: _RW::__rw_facet
+struct time_put: __rw::__rw_facet
 {
     typedef _CharT      char_type;
     typedef _OutputIter iter_type;
 
     explicit time_put (_RWSTD_SIZE_T __refs = 0)
-        : _RW::__rw_facet (__refs) { }
+        : __rw::__rw_facet (__refs) { }
 
     virtual ~time_put () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -71,7 +71,7 @@ struct time_put: _RW::__rw_facet
         return do_put (__it, __flags, __fill, __tmb, __fmt, __modifier); 
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
@@ -84,12 +84,12 @@ protected:
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
 template <>
-_RW::__rw_facet_id time_put<char, ostreambuf_iterator<char> >::id;
+__rw::__rw_facet_id time_put<char, ostreambuf_iterator<char> >::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
 template <>
-_RW::__rw_facet_id time_put<wchar_t, ostreambuf_iterator<wchar_t> >::id;
+__rw::__rw_facet_id time_put<wchar_t, ostreambuf_iterator<wchar_t> >::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
@@ -120,7 +120,7 @@ public:
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_TIME_PUT, _CHAR)
 

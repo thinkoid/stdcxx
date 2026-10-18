@@ -721,7 +721,7 @@ void test_elem_access (const std::bitset<N>*)
 
 /**************************************************************************/
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template <>
 struct char_traits<UserChar>: UserTraits<UserChar> { };

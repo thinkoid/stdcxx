@@ -29,7 +29,7 @@
 #include <rw/_defs.h>     
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 _RWSTD_EXPORT extern const unsigned char

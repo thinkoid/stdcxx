@@ -30,7 +30,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // outlined to avoid generating a vtable in each translation unit
 // that uses the class

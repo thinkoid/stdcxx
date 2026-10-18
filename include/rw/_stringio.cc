@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template<class _CharT, class _Traits, class _Allocator>
@@ -198,7 +198,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
         }
     }
     _CATCH (...) {
-        __is.setstate (ios_base::badbit | _RW::__rw_rethrow);
+        __is.setstate (ios_base::badbit | __rw::__rw_rethrow);
     }
 
     if (!__gcount)
@@ -326,7 +326,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
             }
         }
         _CATCH (...) {
-            __is.setstate (ios_base::badbit | _RW::__rw_rethrow);
+            __is.setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
 
@@ -381,7 +381,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
             }
         }
         _CATCH (...) {
-            __is.setstate (ios_base::badbit | _RW::__rw_rethrow);
+            __is.setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
 

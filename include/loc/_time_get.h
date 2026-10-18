@@ -46,14 +46,14 @@
 #include _RWSTD_CTIME
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
-const void* __rw_get_timepunct (const _RW::__rw_facet*, int, _RWSTD_SIZE_T);
+const void* __rw_get_timepunct (const __rw::__rw_facet*, int, _RWSTD_SIZE_T);
 
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 22.2.5.1
@@ -65,14 +65,14 @@ struct _RWSTD_EXPORT time_base
 
 // 22.2.5.1
 template <class _CharT, class _InputIter = istreambuf_iterator<_CharT> >
-class time_get: public _RW::__rw_facet, public time_base
+class time_get: public __rw::__rw_facet, public time_base
 {
 public:
     typedef _CharT                         char_type;
     typedef _InputIter                     iter_type;
 
     explicit time_get (_RWSTD_SIZE_T __ref = 0)
-        : _RW::__rw_facet (__ref) { }
+        : __rw::__rw_facet (__ref) { }
 
     virtual ~time_get () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -111,7 +111,7 @@ public:
     }
 
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 
     // 22.4.5.1.1, p7-10 of ISO/IEC 14882:2011: a strptime over the
@@ -175,12 +175,12 @@ protected:
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
 template <>
-_RW::__rw_facet_id time_get<char, istreambuf_iterator<char> >::id;
+__rw::__rw_facet_id time_get<char, istreambuf_iterator<char> >::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
 template <>
-_RW::__rw_facet_id time_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
+__rw::__rw_facet_id time_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
@@ -211,7 +211,7 @@ public:
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_TIME_GET, _CHAR)
 

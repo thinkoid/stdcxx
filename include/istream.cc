@@ -27,23 +27,23 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 template <class _CharT, class _Traits, class _NativeType>
-_STD::basic_istream<_CharT, _Traits>&
-__rw_extract (_STD::basic_istream<_CharT, _Traits> &__strm,
+std::basic_istream<_CharT, _Traits>&
+__rw_extract (std::basic_istream<_CharT, _Traits> &__strm,
               _NativeType                          &__val)
 {
     _RWSTD_ASSERT (0 != __strm.rdbuf ());
 
-    typedef _STD::istreambuf_iterator<_CharT, _Traits> _Iter;
-    typedef _STD::num_get<_CharT, _Iter>               _NumGet;
+    typedef std::istreambuf_iterator<_CharT, _Traits> _Iter;
+    typedef std::num_get<_CharT, _Iter>                _NumGet;
 
-    _STD::ios_base::iostate __err = _STD::ios_base::goodbit;
+    std::ios_base::iostate __err = std::ios_base::goodbit;
 
     // eat leading whitespace, catching exceptions from sentry
-    const typename _STD::basic_istream<_CharT, _Traits>::sentry
+    const typename std::basic_istream<_CharT, _Traits>::sentry
         __ipfx (__strm /* , noskipws = false */);
 
     if (__ipfx) {
@@ -52,11 +52,11 @@ __rw_extract (_STD::basic_istream<_CharT, _Traits> &__strm,
                 .get (_Iter (__strm), _Iter (), __strm, __err, __val);
         }
         _CATCH (...) {
-            __strm.setstate (__strm.badbit | _RW::__rw_rethrow);
+            __strm.setstate (__strm.badbit | __rw::__rw_rethrow);
         }
     }
 
-    if (_STD::ios_base::goodbit != __err)
+    if (std::ios_base::goodbit != __err)
         __strm.setstate (__err);
 
     return __strm;
@@ -66,7 +66,7 @@ __rw_extract (_STD::basic_istream<_CharT, _Traits> &__strm,
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template<class _CharT, class _Traits>
@@ -138,7 +138,7 @@ _C_ipfx (bool __noskipws, ios_base::iostate __errbits)
         }
     }
     _CATCH (...) {
-        this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+        this->setstate (ios_base::badbit | __rw::__rw_rethrow);
     }
 
     if (__state)
@@ -189,7 +189,7 @@ _C_unsafe_get (streamsize *__cnt   /* = 0     */,
         }
     }
     _CATCH (...) {
-        this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+        this->setstate (ios_base::badbit | __rw::__rw_rethrow);
     }
 
     if (__err)
@@ -236,7 +236,7 @@ _C_get (basic_streambuf<char_type, traits_type> &__sb, int_type __delim)
                     // below should be propagated without setting
                     // badbit (whose purpose is to indicates the
                     // "badness" of *this, not some other object)
-                    __err = ios_base::failbit | _RW::__rw_rethrow;
+                    __err = ios_base::failbit | __rw::__rw_rethrow;
 
                     // set failbit and rethrow if failbit is set in
                     // exceptions() despite 27.6.1.3, p12, bullet 4
@@ -260,7 +260,7 @@ _C_get (basic_streambuf<char_type, traits_type> &__sb, int_type __delim)
             if (ios_base::goodbit == __err)
                 __err = ios_base::badbit;
 
-            this->setstate (__err | _RW::__rw_rethrow);
+            this->setstate (__err | __rw::__rw_rethrow);
         }
     }
 
@@ -383,7 +383,7 @@ read (char_type *__s, streamsize __n)
                 _C_gcount = __nread;
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
 
         if (__n != __nread)
@@ -428,7 +428,7 @@ readsome (char_type *__s, streamsize __n)
                 _C_gcount = __nread;
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
 
         if (__nread < 0) {
@@ -460,7 +460,7 @@ tellg ()
             return this->rdbuf ()->pubseekoff (0, ios_base::cur, ios_base::in);
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
 
@@ -484,7 +484,7 @@ putback (char_type __c)
                     return *this;
             }
             _CATCH (...) {
-                this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+                this->setstate (ios_base::badbit | __rw::__rw_rethrow);
             }
         }
 
@@ -513,7 +513,7 @@ unget ()
                     return *this;
             }
             _CATCH (...) {
-                this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+                this->setstate (ios_base::badbit | __rw::__rw_rethrow);
             }
         }
 
@@ -538,7 +538,7 @@ sync ()
                 return 0;
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
 
         this->setstate (ios_base::badbit);
@@ -630,7 +630,7 @@ get (char_type *__s, streamsize __n, char_type __delim)
                 __err |= ios_base::failbit;
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
 
@@ -765,7 +765,7 @@ getline (char_type *__line, streamsize __size, char_type __delim)
             }
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
 

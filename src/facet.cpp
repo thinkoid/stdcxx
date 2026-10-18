@@ -49,7 +49,7 @@
 #include "podarray.h"    // for __rw_chararry
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // computes LC_XXX category from a numeric facet id, returns the
 // LC_XXX category for standard facets, LC_ALL for all others
@@ -211,7 +211,7 @@ const void* __rw_facet::_C_get_data ()
         // the mapping failure can be attributed to the use of a
         // special name, eg <locale>.<codeset>@UCS-4 which calls
         // for the stripping of the special suffix
-        _RW::__rw_chararray strip_name;
+        __rw::__rw_chararray strip_name;
 
         const char*  pstr = strstr (locname.data (), "@UCS");
         const size_t plen = size_t (pstr - locname.data ());
@@ -268,8 +268,8 @@ const void* __rw_facet::_C_get_data ()
 
     // for codecvt_byname facet map the database indicated by 
     // codeset_name offset in LC_CTYPE database
-    const _RW::__rw_ctype_t* pctype  = 
-        _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*, pdata);
+    const __rw::__rw_ctype_t* pctype = 
+        _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*, pdata);
  
     _RWSTD_ASSERT (0 != pctype);
 
@@ -376,7 +376,7 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
         sizeof std_facet_buf / sizeof *std_facet_buf;
 
     // acquire lock
-    _RWSTD_MT_STATIC_GUARD (_RW::__rw_facet);
+    _RWSTD_MT_STATIC_GUARD (__rw::__rw_facet);
 
     if (pfacet) {
         // remove facet from the facet repository (if it is found) and

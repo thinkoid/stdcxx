@@ -41,7 +41,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 template <class _RandomAccessIter, class _Dist, class _TypeT, class _Compare>

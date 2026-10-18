@@ -41,7 +41,7 @@
 #endif   // _RWSTD_RW_ITERBASE_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 #ifndef _RWSTD_IOSFWD_INCLUDED

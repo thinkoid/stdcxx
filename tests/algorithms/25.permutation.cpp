@@ -35,7 +35,7 @@
 
 /**************************************************************************/
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // disable explicit instantiation for compilers that can't handle it
 #ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION

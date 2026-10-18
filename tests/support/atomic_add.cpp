@@ -95,7 +95,7 @@ T preincrement (T &x)
 
 #else   // if defined (_RWSTD_REENTRANT)
 
-    return _RW::__rw_atomic_preincrement (x, false);
+    return __rw::__rw_atomic_preincrement (x, false);
 
 #endif   // _RWSTD_REENTRANT
 }
@@ -110,7 +110,7 @@ T predecrement (T &x)
 
 #else   // if defined (_RWSTD_REENTRANT)
 
-    return _RW::__rw_atomic_predecrement (x, false);
+    return __rw::__rw_atomic_predecrement (x, false);
 
 #endif   // _RWSTD_REENTRANT
 }

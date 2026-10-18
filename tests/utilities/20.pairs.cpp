@@ -40,7 +40,7 @@ struct Y: UserClass { };
 int less_used;
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template <>
 bool less<Y>::operator() (const Y &a, const Y &b) const
@@ -57,7 +57,7 @@ bool less<Y>::operator() (const Y &a, const Y &b) const
 typedef base<def_ctor> DefaultConstructible;
 typedef base<cpy_ctor> CopyConstructible;
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // enclosing explicit instantiation within the declaring namespace
 // instead of qualifying it with its name to work around compiler

@@ -37,7 +37,7 @@
 #include <rw/_bitmask.h>
 #include <rw/_defs.h>
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 struct __rw_ctype_t;
 
@@ -62,7 +62,7 @@ _RWSTD_DEFINE_BITMASK_OPERATORS (__rw_ctype_mask);
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 struct _RWSTD_CLASS_EXPORT locale;
 
@@ -70,19 +70,19 @@ struct _RWSTD_CLASS_EXPORT locale;
 struct _RWSTD_EXPORT ctype_base
 {
     // 22.2.1, p1 - mask is a bitmask type (see 17.3.3.1.2)
-    typedef _RWSTD_BITMASK_ENUM (_RW::__rw_ctype_mask) mask;
+    typedef _RWSTD_BITMASK_ENUM (__rw::__rw_ctype_mask) mask;
 
-    _RWSTD_STATIC_CONST (mask, space  = _RW::__rw_space);
-    _RWSTD_STATIC_CONST (mask, print  = _RW::__rw_print);
-    _RWSTD_STATIC_CONST (mask, cntrl  = _RW::__rw_cntrl);
-    _RWSTD_STATIC_CONST (mask, upper  = _RW::__rw_upper);
-    _RWSTD_STATIC_CONST (mask, lower  = _RW::__rw_lower);
-    _RWSTD_STATIC_CONST (mask, alpha  = _RW::__rw_alpha);
-    _RWSTD_STATIC_CONST (mask, digit  = _RW::__rw_digit);
-    _RWSTD_STATIC_CONST (mask, punct  = _RW::__rw_punct);
-    _RWSTD_STATIC_CONST (mask, xdigit = _RW::__rw_xdigit);
-    _RWSTD_STATIC_CONST (mask, alnum  = _RW::__rw_alnum);
-    _RWSTD_STATIC_CONST (mask, graph  = _RW::__rw_graph);
+    _RWSTD_STATIC_CONST (mask, space  = __rw::__rw_space);
+    _RWSTD_STATIC_CONST (mask, print  = __rw::__rw_print);
+    _RWSTD_STATIC_CONST (mask, cntrl  = __rw::__rw_cntrl);
+    _RWSTD_STATIC_CONST (mask, upper  = __rw::__rw_upper);
+    _RWSTD_STATIC_CONST (mask, lower  = __rw::__rw_lower);
+    _RWSTD_STATIC_CONST (mask, alpha  = __rw::__rw_alpha);
+    _RWSTD_STATIC_CONST (mask, digit  = __rw::__rw_digit);
+    _RWSTD_STATIC_CONST (mask, punct  = __rw::__rw_punct);
+    _RWSTD_STATIC_CONST (mask, xdigit = __rw::__rw_xdigit);
+    _RWSTD_STATIC_CONST (mask, alnum  = __rw::__rw_alnum);
+    _RWSTD_STATIC_CONST (mask, graph  = __rw::__rw_graph);
 };
 
 
@@ -92,14 +92,14 @@ class ctype;
 
 
 template <class _CharT>
-class ctype: public _RW::__rw_facet, public ctype_base
+class ctype: public __rw::__rw_facet, public ctype_base
 {
 public:
 
     typedef _CharT char_type;
 
     explicit ctype (_RWSTD_SIZE_T __ref = 0)
-        : _RW::__rw_facet (__ref) { }
+        : __rw::__rw_facet (__ref) { }
 
 
     // 22.2.1.1.1, p1
@@ -163,7 +163,7 @@ public:
         return do_narrow (__lo, __hi, __dfault, __to);
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
@@ -218,7 +218,7 @@ protected:
 
 
 template <>
-class _RWSTD_EXPORT ctype<char>: public _RW::__rw_facet, public ctype_base
+class _RWSTD_EXPORT ctype<char>: public __rw::__rw_facet, public ctype_base
 {
     typedef unsigned char _UChar;
 
@@ -277,7 +277,7 @@ public:
         return do_narrow (__lo, __hi, __dfault, __to);
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
@@ -417,7 +417,7 @@ public:
 #ifndef _RWSTD_NO_WCHAR_T
 
 template <>
-class _RWSTD_EXPORT ctype<wchar_t>: public _RW::__rw_facet, public ctype_base
+class _RWSTD_EXPORT ctype<wchar_t>: public __rw::__rw_facet, public ctype_base
 {
     typedef unsigned char _UChar;
 
@@ -486,7 +486,7 @@ public:
         return do_narrow (__lo, __hi, __dfault, __to);
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 

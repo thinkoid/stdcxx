@@ -84,7 +84,7 @@
 
 #  ifndef _RWSTD_NO_USING_LIBC_IN_STD
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 #  endif   // _RWSTD_NO_USING_LIBC_IN_STD
 
@@ -109,7 +109,7 @@ struct mbstate_t
 
 #  endif   // _RWSTD_NO_USING_LIBC_IN_STD
 
-#  define _RWSTD_MBSTATE_T   _STD::mbstate_t
+#  define _RWSTD_MBSTATE_T   std::mbstate_t
 
 #endif   // _RWSTD_NO_MBSTATE_T && !_RWSTD_MBSTATE_T_DEFINED
 

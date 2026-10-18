@@ -42,7 +42,7 @@
 #include "setlocale.h"
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 // constructs a new locale name from two locale names, combining
@@ -271,7 +271,7 @@ _C_construct (const __rw_locale &one, const __rw_locale &other, int cat)
 }
 
 
-_RW::__rw_locale* __rw_locale::
+__rw::__rw_locale* __rw_locale::
 _C_combine (const __rw_facet *pfacet) const
 {
     _RWSTD_ASSERT (pfacet);
@@ -380,13 +380,13 @@ _C_combine (const __rw_facet *pfacet) const
         plocale = __rw_locale::_C_manage (0, locname.data ());
 
         _RWSTD_ASSERT (0 != plocale);
-        _RWSTD_ASSERT (plocale->_C_is_managed (_STD::locale::none));
+        _RWSTD_ASSERT (plocale->_C_is_managed (std::locale::none));
     }
     else {
         plocale = new __rw_locale (*this, pfacet);
         
         _RWSTD_ASSERT (0 != plocale);
-        _RWSTD_ASSERT (!plocale->_C_is_managed (_STD::locale::none));
+        _RWSTD_ASSERT (!plocale->_C_is_managed (std::locale::none));
     }
 
     return plocale;
@@ -406,7 +406,7 @@ _C_combine (const __rw_locale &other, int cat)
 
     // combining ctor: locale (const locale&, const locale&, cat)
 
-    if (this == &other || _STD::locale::none == cat) {
+    if (this == &other || std::locale::none == cat) {
         // same as copy ctor (copying all facets from `*this')
         // body may or may not be globally managed
         _RWSTD_ATOMIC_PREINCREMENT (_C_ref, false);
@@ -419,7 +419,7 @@ _C_combine (const __rw_locale &other, int cat)
     // 22.1.1.2, p14: only facets that implement categories in `cat' are
     // to be copied from `other', i.e., not necessarily user-defined facets
 
-    if (_RWSTD_LC_ALL == cat || _STD::locale::all == cat) {
+    if (_RWSTD_LC_ALL == cat || std::locale::all == cat) {
         // same as copy ctor (copying all facets from `other')
         // body may or may not be globally managed
         _RWSTD_ATOMIC_PREINCREMENT (other._C_ref, false);
@@ -428,7 +428,7 @@ _C_combine (const __rw_locale &other, int cat)
 
 #endif   // 0/1
 
-    if (   _C_is_managed (_STD::locale::all & ~cat)
+    if (   _C_is_managed (std::locale::all & ~cat)
         && other._C_is_managed (cat)) {
         
         // determine new locale name from `*this' and `other's, taking all of
@@ -443,7 +443,7 @@ _C_combine (const __rw_locale &other, int cat)
             __rw_locale* const plocale = __rw_locale::_C_manage (0, name_1);
 
             _RWSTD_ASSERT (0 != plocale);
-            _RWSTD_ASSERT (plocale->_C_is_managed (_STD::locale::none));
+            _RWSTD_ASSERT (plocale->_C_is_managed (std::locale::none));
 
             return plocale;
         }
@@ -458,7 +458,7 @@ _C_combine (const __rw_locale &other, int cat)
             __rw_locale::_C_manage (0, locname.data ());
 
         _RWSTD_ASSERT (0 != plocale);
-        _RWSTD_ASSERT (plocale->_C_is_managed (_STD::locale::none));
+        _RWSTD_ASSERT (plocale->_C_is_managed (std::locale::none));
 
         return plocale;
     }
@@ -469,7 +469,7 @@ _C_combine (const __rw_locale &other, int cat)
     // globally managed either
     __rw_locale *plocale = new __rw_locale (*this, other, cat);
 
-    _RWSTD_ASSERT (!plocale->_C_is_managed (_STD::locale::none));
+    _RWSTD_ASSERT (!plocale->_C_is_managed (std::locale::none));
 
     return plocale;
 }
@@ -554,7 +554,7 @@ _C_get_body (__rw_locale      *one,
         ++locname;
     }
 
-    if (!one && !other && !locname && _STD::locale::none == cat && !pfacet) {
+    if (!one && !other && !locname && std::locale::none == cat && !pfacet) {
         // implements default ctor: locale::locale () throw ()
         __rw_locale* const global = __rw_locale::_C_manage (0, 0);
 
@@ -563,7 +563,7 @@ _C_get_body (__rw_locale      *one,
         return global;
     }
 
-    if (one && !other && !locname && _STD::locale::none == cat && !pfacet) {
+    if (one && !other && !locname && std::locale::none == cat && !pfacet) {
         // copy ctor: locale::locale (const locale&)
         // or combining ctor: locale::locale (const locale&, Facet*)
         // (in the second case with Facet* being 0)
@@ -573,17 +573,17 @@ _C_get_body (__rw_locale      *one,
         return one;
     }
 
-    if (!one && !other && locname && _STD::locale::none == cat && !pfacet) {
+    if (!one && !other && locname && std::locale::none == cat && !pfacet) {
         // ctor: locale::locale (const char*)
         // if successful, body is globally managed
          __rw_locale* const plocale = __rw_locale::_C_manage (0, locname);
 
-         _RWSTD_ASSERT (!plocale || plocale->_C_is_managed (_STD::locale::none));
+         _RWSTD_ASSERT (!plocale || plocale->_C_is_managed (std::locale::none));
 
         return plocale;
     }
 
-    if (one && !other && !locname && _STD::locale::none == cat && pfacet) {
+    if (one && !other && !locname && std::locale::none == cat && pfacet) {
         // template ctor: locale::locale (const locale&, Facet*)
         // with `pfacet' being installed (e.g., adding or replacing
         // an existing one)
@@ -600,7 +600,7 @@ _C_get_body (__rw_locale      *one,
         // combining ctor: locale (const locale&, const char*, category)
 
         // construct a temporary locale from locale name `locname'
-        const _STD::locale tmp (locname);
+        const std::locale tmp (locname);
 
         // construct a locale combined from `one' and the temporary
         __rw_locale* const plocale = one->_C_combine (*tmp._C_body, cat);
@@ -621,7 +621,7 @@ _C_get_body (__rw_locale      *one,
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 // outlined to hide implementation details
@@ -633,7 +633,7 @@ locale (const char *locname)
                      (_RWSTD_ERROR_LOCALE_BAD_NAME,
                       _RWSTD_FUNC ("locale::locale (const char*)"), "(null)"));
 
-    _C_body = _RW::__rw_locale::_C_get_body (0, 0, locname, none, 0);
+    _C_body = __rw::__rw_locale::_C_get_body (0, 0, locname, none, 0);
 
     // verify 22.1.1.2, p7: `locname' must be valid
     _RWSTD_REQUIRES (_C_body,
@@ -652,7 +652,7 @@ locale (const locale &rhs, const char *locname, category cat)
                       _RWSTD_FUNC ("locale::locale (const locale&, "
                                    "const char*, category)"), "(null"));
 
-    _C_body = _RW::__rw_locale::_C_get_body (rhs._C_body, 0, locname, cat, 0);
+    _C_body = __rw::__rw_locale::_C_get_body (rhs._C_body, 0, locname, cat, 0);
 
     // verify 22.1.1.2, p10: `locname' must be valid
     _RWSTD_REQUIRES (_C_body,
@@ -665,7 +665,7 @@ locale (const locale &rhs, const char *locname, category cat)
 // outlined to hide implementation details
 locale::
 locale (const locale &one, const locale &other, category cat)
-    : _C_body (_RW::__rw_locale::_C_get_body (one._C_body, other._C_body,
+    : _C_body (__rw::__rw_locale::_C_get_body (one._C_body, other._C_body,
                                               0, cat, 0))
 {
     // verify 22.1.1.2, p14 (missing requirement): category must be valid
@@ -678,8 +678,8 @@ locale (const locale &one, const locale &other, category cat)
 
 // outlined to hide implementation details
 /* private */ locale::
-locale (_RW::__rw_locale &rhs, const facet *pfacet)
-    : _C_body (_RW::__rw_locale::_C_get_body (&rhs, 0, 0, none, pfacet))
+locale (__rw::__rw_locale &rhs, const facet *pfacet)
+    : _C_body (__rw::__rw_locale::_C_get_body (&rhs, 0, 0, none, pfacet))
 {
     // empty
 }
@@ -705,9 +705,9 @@ _C_get_facet (const id &fid) const
     // another thread may fill a standard facet's slot at any time,
     // with a release store (locale::_C_get_std_facet()); the slots
     // of user-defined facets are only filled by the constructors
-    const locale::facet* const pfacet = inx < _RW::__rw_locale::_C_n_std_facets
+    const locale::facet* const pfacet = inx < __rw::__rw_locale::_C_n_std_facets
         ? _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_body->_C_std_facets [inx], false)
-        : _C_body->_C_usr_facets [inx - _RW::__rw_locale::_C_n_std_facets];
+        : _C_body->_C_usr_facets [inx - __rw::__rw_locale::_C_n_std_facets];
 
     if (pfacet) {
         // facet id must have been initialized to point

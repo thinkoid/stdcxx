@@ -39,7 +39,7 @@
  * 
  **************************************************************************/
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 template <class _TypeT, class _Allocator>
 vector<_TypeT, _Allocator>&
@@ -160,7 +160,7 @@ _C_insert_1 (const iterator &__it, const_reference __x)
 
             // move the remaining elements from the range above one slot
             // toward the end starting with the last element
-            _STD::copy_backward (__it, end () - 2, __end);
+            std::copy_backward (__it, end () - 2, __end);
 
             // overwrite the element at the given position
             *__it = __x;
@@ -265,7 +265,7 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
 
         // construct copies of elements that will be moved beyond
         // the current end of the sequence controlled by *this
-        _STD::uninitialized_copy (__ucpbeg, _C_alloc._C_end,
+        std::uninitialized_copy (__ucpbeg, _C_alloc._C_end,
                                   _C_alloc._C_end, _C_alloc);
 
         // advance end to maintain consistent state
@@ -273,7 +273,7 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
 
         // copy elements the will be overwritten below
         // over the range of elements moved above
-        _STD::copy_backward (__movbeg, __ucpbeg, __ucpend);
+        std::copy_backward (__movbeg, __ucpbeg, __ucpend);
     }
     else {
 
@@ -283,7 +283,7 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
         const size_type __n1 = size () - __size1;
         const size_type __n2 = __n - __n1;
 
-        _STD::uninitialized_fill_n (_C_alloc._C_end, __n2, __x, _C_alloc);
+        std::uninitialized_fill_n (_C_alloc._C_end, __n2, __x, _C_alloc);
 
         const pointer __end = _C_alloc._C_end;
 
@@ -291,14 +291,14 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
 
         // construct copies of the range of elements [pos, end)
         // past the end of the range of elements inserted above
-        _STD::uninitialized_copy (__movbeg, __end, _C_alloc._C_end, _C_alloc);
+        std::uninitialized_copy (__movbeg, __end, _C_alloc._C_end, _C_alloc);
 
         _C_alloc._C_end += __end - __movbeg;
 
         __n = __n1;
     }
 
-    _STD::fill_n (__movbeg, __n, __x);
+    std::fill_n (__movbeg, __n, __x);
 }
 
 
@@ -493,7 +493,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
             // sequence being inserted into
             const size_type __size2a = __self->size () - __size1;
             _FwdIter __mid = __first;
-            _STD::advance (__mid, __size2a);
+            std::advance (__mid, __size2a);
 
             // construct copies of the trailing subsequence of the range
             // of elements being inserted, as if by a call to
@@ -513,7 +513,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
             __last = __mid;
         }
 
-        _STD::copy (__first, __last, __movbeg);
+        std::copy (__first, __last, __movbeg);
     }
     else {
         // 23.2.4.3, p1: If an exception is thrown other than by the copy
@@ -628,7 +628,7 @@ _C_insert (iterator __it, bool __x)
         // i.e., copy [it, end) over [end - (end - it), end)
         // or, given N = distance(it, end) before the insert,
         //       copy [it, end) over [end - N, end)
-        _STD::copy_backward (__it, __end, ++_C_end);
+        std::copy_backward (__it, __end, ++_C_end);
 
         // overwrite the element at the given position
         *__it = __x;

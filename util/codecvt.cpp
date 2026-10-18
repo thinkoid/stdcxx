@@ -465,7 +465,7 @@ write_codecvt (std::string dir_name)
     //////////////////////////////////////////////////////////////////
     // populate the codecvt structure before writing it out
     // in binary form to the file (the codecvt database)
-    _RW::__rw_codecvt_t codecvt_out;
+    __rw::__rw_codecvt_t codecvt_out;
     std::memset (&codecvt_out, 0, sizeof codecvt_out);
 
 #define UINT(x) _RWSTD_STATIC_CAST(unsigned, x)

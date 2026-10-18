@@ -45,14 +45,14 @@
 #include "use_facet.h"
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // table of character classes
-extern const _STD::ctype_base::mask
-__rw_classic_tab [_STD::ctype<char>::table_size] = {
+extern const std::ctype_base::mask
+__rw_classic_tab [std::ctype<char>::table_size] = {
 
 #undef  MASK
-#define MASK(x)   _STD::ctype_base::mask (x)
+#define MASK(x)   std::ctype_base::mask (x)
 
 #undef  LETTER
 #define LETTER(m) MASK (__rw_print | __rw_alpha | __rw_graph | m)
@@ -456,7 +456,7 @@ __rw_classic_tab [_STD::ctype<char>::table_size] = {
 
 // table of lowercase to uppercase character mappings
 extern const unsigned char
-__rw_upper_tab [_STD::ctype<char>::table_size + 1] = {
+__rw_upper_tab [std::ctype<char>::table_size + 1] = {
 
 #if 'A' == 0x41
 
@@ -537,7 +537,7 @@ __rw_upper_tab [_STD::ctype<char>::table_size + 1] = {
 
 // table of uppercase to lowercase character mappings
 extern const unsigned char
-__rw_lower_tab [_STD::ctype<char>::table_size + 1] = {
+__rw_lower_tab [std::ctype<char>::table_size + 1] = {
 
 #if 'A' == 0x41
 
@@ -623,18 +623,18 @@ _RWSTD_EXPORT __rw_facet* __rw_ct_ctype (size_t ref, const char *name)
     __rw_facet* pfacet;
 
     if (name) {
-        pfacet = new _STD::ctype_byname<char>(name, ref);
+        pfacet = new std::ctype_byname<char>(name, ref);
     }
     else {
-        static __rw_aligned_buffer<_STD::ctype<char> > f;
+        static __rw_aligned_buffer<std::ctype<char> > f;
         static __rw_facet* const pf = new (f._C_store ()) 
-            _STD::ctype<char> (__rw_classic_tab, false, ref);
+            std::ctype<char> (__rw_classic_tab, false, ref);
         pfacet = pf;
     }
 
     // set the pointer to the facet id
     __rw_access::_C_get_pid (*pfacet) =
-        &(__rw_access::_C_get_id (_STD::ctype<char>::id));
+        &(__rw_access::_C_get_id (std::ctype<char>::id));
 
     return pfacet;
 }
@@ -643,32 +643,32 @@ _RWSTD_EXPORT __rw_facet* __rw_ct_ctype (size_t ref, const char *name)
 }   // namespace __rw
 
 
-typedef _STD::ctype<char> __rw_ctype_facet;
+typedef std::ctype<char> __rw_ctype_facet;
 
 _RWSTD_SPECIALIZE_USE_FACET (ctype);
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
-_RW::__rw_facet_id ctype<char>::id;
+__rw::__rw_facet_id ctype<char>::id;
 
 
 ctype<char>::
 ctype (const mask *tab, bool del, size_t refs) _THROWS (())
-    : _RW::__rw_facet (refs),
+    : __rw::__rw_facet (refs),
     _C_mask_tab (tab),
     _C_delete_it (del)
 {
     // Save the passed table of mask values.
     if (!_C_mask_tab) {
-        _C_mask_tab  = _RW::__rw_classic_tab;
+        _C_mask_tab  = __rw::__rw_classic_tab;
         // prevent deletion if `tab' was false and `del' was true
         _C_delete_it = false;
     }
 
-    _C_upper_tab = _RWSTD_CONST_CAST (_UChar*, _RW::__rw_upper_tab);
-    _C_lower_tab = _RWSTD_CONST_CAST (_UChar*, _RW::__rw_lower_tab);
+    _C_upper_tab = _RWSTD_CONST_CAST (_UChar*, __rw::__rw_upper_tab);
+    _C_lower_tab = _RWSTD_CONST_CAST (_UChar*, __rw::__rw_lower_tab);
 
     memset (_C_narrow_tab, 0, sizeof _C_narrow_tab);
     memset (_C_wide_tab, 0, sizeof _C_wide_tab);
@@ -680,7 +680,7 @@ ctype<char>::~ctype () // nothrow
     if (_C_delete_it) {
         delete[] _RWSTD_CONST_CAST (mask*, _C_mask_tab);
 
-        if (_C_upper_tab != _RW::__rw_upper_tab) {
+        if (_C_upper_tab != __rw::__rw_upper_tab) {
             // lower_tab is allocated in the same block of memory
             // as upper_tab and must not be deleted
             delete[] _C_upper_tab;
@@ -691,7 +691,7 @@ ctype<char>::~ctype () // nothrow
 
 const ctype<char>::mask* ctype<char>::classic_table () _THROWS (())
 {
-    return _RW::__rw_classic_tab;
+    return __rw::__rw_classic_tab;
 }
 
 
@@ -868,17 +868,17 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
         return;
 
     // delayed initialization not used for efficiency
-    _RW::__rw_ctype_t* impl =
-        _RWSTD_CONST_CAST (_RW::__rw_ctype_t*,
-            _RWSTD_STATIC_CAST (const _RW::__rw_ctype_t*,
-                _RW::__rw_get_facet_data (LC_CTYPE, _C_impsize, _C_name)));
+    __rw::__rw_ctype_t* impl =
+        _RWSTD_CONST_CAST (__rw::__rw_ctype_t*,
+            _RWSTD_STATIC_CAST (const __rw::__rw_ctype_t*,
+                __rw::__rw_get_facet_data (LC_CTYPE, _C_impsize, _C_name)));
 
     _C_impdata = impl;
 
     if (impl == 0 || (this->_C_opts & this->_C_use_libc)) {
 
         // try to set locale first for exception safety
-        const _RW::__rw_setlocale clocale (name, LC_CTYPE);
+        const __rw::__rw_setlocale clocale (name, LC_CTYPE);
 
         // allocate memory for all three tables
         _C_mask_tab = new mask [table_size];
@@ -904,25 +904,25 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
             int m = 0;
 
             if ((::isspace)(i))
-                m |= _RW::__rw_space;
+                m |= __rw::__rw_space;
             if ((::isprint)(i))
-                m |= _RW::__rw_print;
+                m |= __rw::__rw_print;
             if ((::iscntrl)(i))
-                m |= _RW::__rw_cntrl;
+                m |= __rw::__rw_cntrl;
             if ((::isupper)(i))
-                m |= _RW::__rw_upper;
+                m |= __rw::__rw_upper;
             if ((::islower)(i))
-                m |= _RW::__rw_lower;
+                m |= __rw::__rw_lower;
             if ((::isalpha)(i))
-                m |= _RW::__rw_alpha;
+                m |= __rw::__rw_alpha;
             if ((::isdigit)(i))
-                m |= _RW::__rw_digit;
+                m |= __rw::__rw_digit;
             if ((::ispunct)(i))
-                m |= _RW::__rw_punct;
+                m |= __rw::__rw_punct;
             if ((::isxdigit)(i))
-                m |= _RW::__rw_xdigit;
+                m |= __rw::__rw_xdigit;
             if ((::isgraph)(i))
-                m |= _RW::__rw_graph;
+                m |= __rw::__rw_graph;
 
             _RWSTD_CONST_CAST (mask*, _C_mask_tab)[i] = mask (m);
         }

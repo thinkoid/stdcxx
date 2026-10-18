@@ -48,114 +48,114 @@
 #endif   // _RWSTD_RW_TRAITS_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
-struct _RWSTD_EXPORT ios_base: _RW::__rw_synchronized
+struct _RWSTD_EXPORT ios_base: __rw::__rw_synchronized
 {
     // 27.4.2.1.1
-    typedef _RW::__rw_failure failure;
+    typedef __rw::__rw_failure failure;
 
     // 27.4.2.1.2
-    typedef _RWSTD_BITMASK_ENUM (_RW::__rw_fmtflags) fmtflags;
+    typedef _RWSTD_BITMASK_ENUM (__rw::__rw_fmtflags) fmtflags;
 
     // insert and extract bool type in alphabetic format 
-    _RWSTD_STATIC_CONST (fmtflags, boolalpha = _RW::__rw_boolalpha);
+    _RWSTD_STATIC_CONST (fmtflags, boolalpha = __rw::__rw_boolalpha);
 
     // converts integer input or generates integer output in decimal base
-    _RWSTD_STATIC_CONST (fmtflags, dec = _RW::__rw_dec);
+    _RWSTD_STATIC_CONST (fmtflags, dec = __rw::__rw_dec);
 
     // generate floating-point output in fixed-point notation
-    _RWSTD_STATIC_CONST (fmtflags, fixed = _RW::__rw_fixed);
+    _RWSTD_STATIC_CONST (fmtflags, fixed = __rw::__rw_fixed);
 
     // converts integer input or generates integer output in hexadecimal base
-    _RWSTD_STATIC_CONST (fmtflags, hex = _RW::__rw_hex);
+    _RWSTD_STATIC_CONST (fmtflags, hex = __rw::__rw_hex);
 
     // adds fill characters at a designated internal point in certain generated
     // output, or identical to right if no such point is designated
-    _RWSTD_STATIC_CONST (fmtflags, internal = _RW::__rw_internal);
+    _RWSTD_STATIC_CONST (fmtflags, internal = __rw::__rw_internal);
 
     // adds fill characters on the right of certain generated output
-    _RWSTD_STATIC_CONST (fmtflags, left = _RW::__rw_left);
+    _RWSTD_STATIC_CONST (fmtflags, left = __rw::__rw_left);
 
     // converts integer input or generates integer output in octal base
-    _RWSTD_STATIC_CONST (fmtflags, oct = _RW::__rw_oct);
+    _RWSTD_STATIC_CONST (fmtflags, oct = __rw::__rw_oct);
 
     // adds fill characters on the left of certain generated output
-    _RWSTD_STATIC_CONST (fmtflags, right = _RW::__rw_right);
+    _RWSTD_STATIC_CONST (fmtflags, right = __rw::__rw_right);
 
     // generates floating-point output in scientific notation
-    _RWSTD_STATIC_CONST (fmtflags, scientific = _RW::__rw_scientific);
+    _RWSTD_STATIC_CONST (fmtflags, scientific = __rw::__rw_scientific);
 
     // generates a prefix indicating the numeric base of generated integer
     // output (oct - "0", dec - none, hex - "0x")
-    _RWSTD_STATIC_CONST (fmtflags, showbase = _RW::__rw_showbase);
+    _RWSTD_STATIC_CONST (fmtflags, showbase = __rw::__rw_showbase);
 
     // generates a decimal-point character unconditionally in generated
     // floating-point output
-    _RWSTD_STATIC_CONST (fmtflags, showpoint = _RW::__rw_showpoint);
+    _RWSTD_STATIC_CONST (fmtflags, showpoint = __rw::__rw_showpoint);
 
     // generates a + sign in non-negative generated numeric output
-    _RWSTD_STATIC_CONST (fmtflags, showpos = _RW::__rw_showpos);
+    _RWSTD_STATIC_CONST (fmtflags, showpos = __rw::__rw_showpos);
 
     // skips leading white space before certain input operations
-    _RWSTD_STATIC_CONST (fmtflags, skipws = _RW::__rw_skipws);
+    _RWSTD_STATIC_CONST (fmtflags, skipws = __rw::__rw_skipws);
 
     // flushes output after each output operation
-    _RWSTD_STATIC_CONST (fmtflags, unitbuf = _RW::__rw_unitbuf);
+    _RWSTD_STATIC_CONST (fmtflags, unitbuf = __rw::__rw_unitbuf);
 
     // replaces certain lowercase letters with their uppercase equivalents
     // in generated output
-    _RWSTD_STATIC_CONST (fmtflags, uppercase = _RW::__rw_uppercase);
+    _RWSTD_STATIC_CONST (fmtflags, uppercase = __rw::__rw_uppercase);
 
-    _RWSTD_STATIC_CONST (fmtflags, basefield = _RW::__rw_basefield);
-    _RWSTD_STATIC_CONST (fmtflags, adjustfield = _RW::__rw_adjustfield);
-    _RWSTD_STATIC_CONST (fmtflags, floatfield = _RW::__rw_floatfield);
+    _RWSTD_STATIC_CONST (fmtflags, basefield = __rw::__rw_basefield);
+    _RWSTD_STATIC_CONST (fmtflags, adjustfield = __rw::__rw_adjustfield);
+    _RWSTD_STATIC_CONST (fmtflags, floatfield = __rw::__rw_floatfield);
 
     // 27.4.2.1.3
-    typedef _RWSTD_BITMASK_ENUM (_RW::__rw_iostate) iostate;
+    typedef _RWSTD_BITMASK_ENUM (__rw::__rw_iostate) iostate;
 
-    _RWSTD_STATIC_CONST (iostate, goodbit = _RW::__rw_goodbit);
+    _RWSTD_STATIC_CONST (iostate, goodbit = __rw::__rw_goodbit);
 
     // indicates a loss of integrity in an input or output sequence
     // (such as an irrecoverable read error from a file); 
-    _RWSTD_STATIC_CONST (iostate, badbit = _RW::__rw_badbit);
+    _RWSTD_STATIC_CONST (iostate, badbit = __rw::__rw_badbit);
 
     // indicates that an input operation reached the end of an input sequence
-    _RWSTD_STATIC_CONST (iostate, eofbit = _RW::__rw_eofbit);
+    _RWSTD_STATIC_CONST (iostate, eofbit = __rw::__rw_eofbit);
 
     // indicates that an input operation failed to read the expected
     // characters, or that an output operation failed to generate the
     // desired characters
-    _RWSTD_STATIC_CONST (iostate, failbit = _RW::__rw_failbit);
+    _RWSTD_STATIC_CONST (iostate, failbit = __rw::__rw_failbit);
 
     // 27.4.2.1.4
-    typedef _RWSTD_BITMASK_ENUM (_RW::__rw_openmode) openmode;
+    typedef _RWSTD_BITMASK_ENUM (__rw::__rw_openmode) openmode;
 
     // seek to end before each write 
-    _RWSTD_STATIC_CONST (openmode, app = _RW::__rw_app);
+    _RWSTD_STATIC_CONST (openmode, app = __rw::__rw_app);
 
     // perform input and output in binary mode (as opposed to text mode)
-    _RWSTD_STATIC_CONST (openmode, binary = _RW::__rw_binary);
+    _RWSTD_STATIC_CONST (openmode, binary = __rw::__rw_binary);
 
     // open for input
-    _RWSTD_STATIC_CONST (openmode, in = _RW::__rw_in);
+    _RWSTD_STATIC_CONST (openmode, in = __rw::__rw_in);
 
     // open for output
-    _RWSTD_STATIC_CONST (openmode, out = _RW::__rw_out);
+    _RWSTD_STATIC_CONST (openmode, out = __rw::__rw_out);
 
     // truncate an existing stream when opening
-    _RWSTD_STATIC_CONST (openmode, trunc = _RW::__rw_trunc);
+    _RWSTD_STATIC_CONST (openmode, trunc = __rw::__rw_trunc);
 
     // open and seek to end immediately after opening 
-    _RWSTD_STATIC_CONST (openmode, ate = _RW::__rw_ate);
+    _RWSTD_STATIC_CONST (openmode, ate = __rw::__rw_ate);
 
-    typedef _RWSTD_BITMASK_ENUM (_RW::__rw_seekdir) seekdir;
+    typedef _RWSTD_BITMASK_ENUM (__rw::__rw_seekdir) seekdir;
 
     // 27.4.2.1.5, p1
-    _RWSTD_STATIC_CONST (seekdir, beg = _RW::__rw_beg);
-    _RWSTD_STATIC_CONST (seekdir, cur = _RW::__rw_cur);
-    _RWSTD_STATIC_CONST (seekdir, end = _RW::__rw_end);
+    _RWSTD_STATIC_CONST (seekdir, beg = __rw::__rw_beg);
+    _RWSTD_STATIC_CONST (seekdir, cur = __rw::__rw_cur);
+    _RWSTD_STATIC_CONST (seekdir, end = __rw::__rw_end);
 
 #ifndef _RWSTD_NO_DEPRECATED    
 

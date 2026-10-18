@@ -61,17 +61,17 @@ struct LifetimeChecker
 // make sure using declarations work (the test doesn't actually exploit
 // the fact that the names are introduced into the global namespace)
 
-_USING (std::cin);
-_USING (std::cout);
-_USING (std::cerr);
-_USING (std::clog);
+using std::cin;
+using std::cout;
+using std::cerr;
+using std::clog;
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-_USING (std::wcin);
-_USING (std::wcout);
-_USING (std::wcerr);
-_USING (std::wclog);
+using std::wcin;
+using std::wcout;
+using std::wcerr;
+using std::wclog;
 
 #endif   // _RWSTD_NO_WCHAR_T
 
@@ -322,7 +322,7 @@ run_test (int, char*[])
 #ifndef _RWSTD_BAD_ALLOC
      // #define if not #defined by <new> (SunPro #includes its
      // own <new> regardless of the preprocessor search path)
-#  define _RWSTD_BAD_ALLOC _STD::bad_alloc
+#  define _RWSTD_BAD_ALLOC std::bad_alloc
 #endif   // _RWSTD_BAD_ALLOC
 
 

@@ -125,21 +125,21 @@
 #ifndef _RWSTD_NO_PRETTY_FUNCTION
    // gcc, HP aCC, and Intel C++ all support __PRETTY_FUNCTION__
 #  define RW_ASSERT(expr)                                                \
-   ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, \
+   ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, \
                                               __PRETTY_FUNCTION__))
 #elif !defined (_RWSTD_NO_FUNC)
    // C99 specifies the __func__ special identifier
 #  define RW_ASSERT(expr)                                                \
-   ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, \
+   ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, \
                                               __func__))
 #elif defined (__FUNCSIG__)
    // MSVC macro
 #  define RW_ASSERT(expr)                                                \
-   ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, \
+   ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, \
                                               __FUNCSIG__))
 #else   // if _RWSTD_NO_PRETTY_FUNCTION && _RWSTD_NO_FUNC
 #  define RW_ASSERT(expr)   \
-   ((expr) ? (void)0 : _RW::__rw_assert_fail (#expr, __FILE__, __LINE__, 0))
+   ((expr) ? (void)0 : __rw::__rw_assert_fail (#expr, __FILE__, __LINE__, 0))
 #endif   // _RWSTD_NO_PRETTY_FUNCTION, _RWSTD_NO_FUNC
 
 // convenience macro to get number of elements in a c style array

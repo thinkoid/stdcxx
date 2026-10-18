@@ -37,7 +37,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 struct __rw_false_t { enum { _C_val }; };
 struct __rw_true_t { enum { _C_val = 1 }; };
@@ -83,7 +83,7 @@ _RWSTD_SPECIALIZE_IS_INT (wchar_t);
 
 
 #define _RWSTD_DISPATCH(iter)   \
-       (typename _RW::__rw_select_int< iter >::_SelectT (1L))
+       (typename __rw::__rw_select_int< iter >::_SelectT (1L))
 
 
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC

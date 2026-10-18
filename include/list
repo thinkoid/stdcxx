@@ -53,7 +53,7 @@
 #include <rw/_error.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 template <class _TypeT>
 struct __rw_list_node
@@ -204,10 +204,10 @@ public:
 
 #ifndef _RWSTD_NO_DEBUG_ITER
 
-    typedef _RW::__rw_debug_iter <list,_C_list_iter, _C_list_iter>
+    typedef __rw::__rw_debug_iter <list,_C_list_iter, _C_list_iter>
     iterator;
     
-    typedef _RW::__rw_debug_iter <list,_C_list_citer, _C_list_iter>
+    typedef __rw::__rw_debug_iter <list,_C_list_citer, _C_list_iter>
     const_iterator;
     
 
@@ -237,8 +237,8 @@ public:
 
 #if !defined (_RWSTD_NO_CLASS_PARTIAL_SPEC) 
 
-    typedef _STD::reverse_iterator<const_iterator> const_reverse_iterator;
-    typedef _STD::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef std::reverse_iterator<iterator>        reverse_iterator;
 
 #else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
 
@@ -297,8 +297,8 @@ protected:
         _C_free_buffers ()
 
 #  define _RWSTD_NODE_LIST_SWAP(other)                           \
-        _STD::swap (_C_buflist, other._C_buflist);               \
-        _STD::swap (_C_free_list, other._C_free_list)              
+        std::swap (_C_buflist, other._C_buflist);                \
+        std::swap (_C_free_list, other._C_free_list)               
 
 #  define _RWSTD_LIST_INSERT_RANGE(b,e,v)                        \
         _TRY {                                                   \
@@ -795,13 +795,13 @@ inline void
 list<_TypeT, _Allocator>::swap (list &__x)
 {
     if (get_allocator () == __x.get_allocator ()) {
-        _STD::swap (_C_node, __x._C_node); 
-        _STD::swap (_C_length, __x._C_length);
+        std::swap (_C_node, __x._C_node); 
+        std::swap (_C_length, __x._C_length);
 
         _RWSTD_NODE_LIST_SWAP(__x);
 
-        _STD::swap (_C_next_avail, __x._C_next_avail);
-        _STD::swap (_C_last, __x._C_last);
+        std::swap (_C_next_avail, __x._C_next_avail);
+        std::swap (_C_last, __x._C_last);
     }
     else {
         list __tmp (*this);

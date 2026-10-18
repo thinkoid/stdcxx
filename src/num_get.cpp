@@ -53,7 +53,7 @@
 
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 typedef unsigned char UChar;
@@ -236,7 +236,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 
 #ifdef _RWSTD_LONG_LONG
 
-            val.ull = _RW::__rw_strtoull (buf, &err, base);
+            val.ull = __rw::__rw_strtoull (buf, &err, base);
 
 #else   // if !defined (_RWSTD_LONG_LONG)
 
@@ -248,7 +248,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 
 #ifdef _RWSTD_LONG_LONG
 
-            val.ll = _RW::__rw_strtoll (buf, &err, base);
+            val.ll = __rw::__rw_strtoll (buf, &err, base);
 
 #else   // if !defined (_RWSTD_LONG_LONG)
 
@@ -257,19 +257,19 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 #endif   // _RWSTD_LONG_LONG
         }
         else if (type & __rw_facet::_C_signed || __rw_facet::_C_bool == type) {
-            val.l = _RW::__rw_strtol (buf, &err, base);
+            val.l = __rw::__rw_strtol (buf, &err, base);
         }
         else if (__rw_facet::_C_pvoid == type) {
 
 #if defined (_RWSTD_LONG_LONG) && _RWSTD_PTR_SIZE > _RWSTD_LONG_SIZE
             // assume pointers fit into long long
-            val.ull = _RW::__rw_strtoull (buf, &err, base);
+            val.ull = __rw::__rw_strtoull (buf, &err, base);
 #else
-            val.ul = _RW::__rw_strtoul (buf, &err, base);
+            val.ul = __rw::__rw_strtoul (buf, &err, base);
 #endif
         }
         else {
-            val.ul = _RW::__rw_strtoul (buf, &err, base);
+            val.ul = __rw::__rw_strtoul (buf, &err, base);
         }
 
         if (_RWSTD_EINVAL == err)

@@ -36,7 +36,7 @@
 
 #include <stdio.h>
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 #if 2 == _RWSTD_LONG_SIZE
 static const int    __rw_wbasebits =  1;
@@ -80,7 +80,7 @@ static const size_t __rw_wbasemask = 127;
 template <> _RWSTD_EXPORT void
 __rw_bitset (unsigned long *bits, size_t maxbits,
              const char *str, size_t slen,
-             const _STD::char_traits<char>*, char b0, char b1,
+             const std::char_traits<char>*, char b0, char b1,
              size_t pos, size_t n,
              const char *file, const char *fun)
 {
@@ -136,12 +136,12 @@ __rw_bitset (unsigned long *bits, size_t maxbits,
 template <> _RWSTD_EXPORT void
 __rw_bitset (unsigned long *bits, size_t maxbits,
              const wchar_t *str, size_t slen,
-             const _STD::char_traits<wchar_t>*, wchar_t b0, wchar_t b1,
+             const std::char_traits<wchar_t>*, wchar_t b0, wchar_t b1,
              size_t pos, size_t n,
              const char *file, const char *fun)
 {
     if (_RWSTD_SIZE_MAX == slen)
-        slen = _STD::char_traits<wchar_t>::length (str);
+        slen = std::char_traits<wchar_t>::length (str);
 
     // verify that `pos' is a valid offset into `str'
     _RWSTD_REQUIRES (pos <= slen,

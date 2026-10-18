@@ -47,14 +47,14 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 _RWSTD_EXPORT int __rw_fflush (void*, int) _RWSTD_ATTRIBUTE_NOTHROW;
 
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 template<class _CharT, class _Traits>
 class basic_ostream: virtual public basic_ios<_CharT, _Traits>
@@ -86,11 +86,11 @@ public:
 #endif   // _RWSTD_NO_NESTED_CLASS_ACCESS
 
     // 27.6.2.3
-    struct sentry: _RW::__rw_guard {
+    struct sentry: __rw::__rw_guard {
 
         explicit
         sentry (basic_ostream<char_type, traits_type> &__strm)
-            : _RW::__rw_guard (__strm.rdbuf () ? __strm._C_bufmutex () : 0),
+            : __rw::__rw_guard (__strm.rdbuf () ? __strm._C_bufmutex () : 0),
               _C_strm (__strm), _C_ok (_C_strm._C_opfx ().good ()) { }
 
         // 27.6.2.3, p4
@@ -102,7 +102,7 @@ public:
                  && -1 == _C_strm.rdbuf ()->pubsync ()) {
 
                 // prevent exceptions from propagating
-                _C_strm.setstate (ios_base::badbit | _RW::__rw_nothrow);
+                _C_strm.setstate (ios_base::badbit | __rw::__rw_nothrow);
             }    
         }
 
@@ -141,7 +141,7 @@ public:
 #ifndef _RWSTD_NO_NATIVE_BOOL
 
     basic_ostream& operator<< (bool __val) {
-        return _RW::__rw_insert (*this, __val);
+        return __rw::__rw_insert (*this, __val);
     }
 
 #endif   // _RWSTD_NO_NATIVE_BOOL
@@ -159,11 +159,11 @@ public:
     }
 
     basic_ostream& operator<< (long __val) {
-        return _RW::__rw_insert (*this, __val);
+        return __rw::__rw_insert (*this, __val);
     }
 
     basic_ostream& operator<< (unsigned long __val) {
-        return _RW::__rw_insert (*this, __val);
+        return __rw::__rw_insert (*this, __val);
     }
 
     basic_ostream& operator<< (float __val) {
@@ -171,41 +171,41 @@ public:
     }
 
     basic_ostream& operator<< (double __val) {
-        return _RW::__rw_insert (*this, __val);
+        return __rw::__rw_insert (*this, __val);
     }
 
     basic_ostream& operator<< (long double __val) {
-        return _RW::__rw_insert (*this, __val);
+        return __rw::__rw_insert (*this, __val);
     }
 
 #ifdef _RWSTD_LONG_LONG
 
     // extension
     basic_ostream& operator<< (unsigned _RWSTD_LONG_LONG __val) {
-        return _RW::__rw_insert (*this, __val);
+        return __rw::__rw_insert (*this, __val);
     }
 
     // extension
     basic_ostream& operator<< (_RWSTD_LONG_LONG __val) {
-        return _RW::__rw_insert (*this, __val);
+        return __rw::__rw_insert (*this, __val);
     }
 
 #endif   // _RWSTD_LONG_LONG
 
     basic_ostream& operator<< (const void *__val) {
-        return _RW::__rw_insert (*this, __val);
+        return __rw::__rw_insert (*this, __val);
     }
 
     // 27.6.2.6 - Unformatted output functions
 
     // 27.6.2.6, p2
     basic_ostream& put (char_type __c) {
-        return _RW::__rw_insert (*this, &__c, 1, 0 /* width */);
+        return __rw::__rw_insert (*this, &__c, 1, 0 /* width */);
     }
 
     // 27.6.2.6, p5
     basic_ostream& write (const char_type *__s, streamsize __len) {
-        return _RW::__rw_insert (*this, __s, __len, 0 /* width */);
+        return __rw::__rw_insert (*this, __s, __len, 0 /* width */);
     }
 
     // 27.6.2.6.3, p6
@@ -250,7 +250,7 @@ basic_ostream<_CharT, _Traits>::operator<< (short __val)
     const long __lval = !__bf || this->dec == __bf ?
         long (__val) : long (_RWSTD_STATIC_CAST (unsigned short, __val));
 
-    return _RW::__rw_insert (*this, __lval);
+    return __rw::__rw_insert (*this, __lval);
 }
 
 
@@ -266,7 +266,7 @@ basic_ostream<_CharT, _Traits>::operator<< (int __val)
     const long __lval = !__bf || this->dec == __bf ?
         long (__val) : long (_RWSTD_STATIC_CAST (unsigned int, __val));
 
-    return _RW::__rw_insert (*this, __lval);
+    return __rw::__rw_insert (*this, __lval);
 }
 
 
@@ -297,7 +297,7 @@ basic_ostream<_CharT, _Traits>::_C_opfx ()
     }
 
     if (_C_is_sync ())
-        _RW::__rw_fflush (_RWSTD_STATIC_CAST (ios_base*, this), 0);
+        __rw::__rw_fflush (_RWSTD_STATIC_CAST (ios_base*, this), 0);
 
     return *this;
 }
@@ -329,7 +329,7 @@ basic_ostream<_CharT, _Traits>::_C_pad (streamsize __len)
 #endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (_BASIC_OSTREAM)
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 // 27.6.2.5.4 - Character inserter template functions
@@ -338,7 +338,7 @@ template<class _CharT, class _Traits>
 inline basic_ostream<_CharT, _Traits>&
 operator<< (basic_ostream<_CharT, _Traits> &__strm, _CharT __c)
 {
-    return _RW::__rw_insert (__strm, &__c, 1, __strm.width ());
+    return __rw::__rw_insert (__strm, &__c, 1, __strm.width ());
 }
 
 
@@ -348,7 +348,7 @@ template<class _CharT, class _Traits>
 inline basic_ostream<_CharT, _Traits>&
 operator<< (basic_ostream<_CharT, _Traits> &__strm, char __c)
 {
-    return _RW::__rw_insert (__strm, &__c, 1, __strm.width ());
+    return __rw::__rw_insert (__strm, &__c, 1, __strm.width ());
 }
 
 
@@ -358,7 +358,7 @@ template <class _Traits>
 inline basic_ostream<char, _Traits>&
 operator<< (basic_ostream<char, _Traits> &__strm, char __c)
 {
-    return _RW::__rw_insert (__strm, &__c, 1, __strm.width ());
+    return __rw::__rw_insert (__strm, &__c, 1, __strm.width ());
 }
 
 #  else   // if defined (_RWSTD_NO_FUNC_PARTIAL_SPEC)
@@ -366,7 +366,7 @@ operator<< (basic_ostream<char, _Traits> &__strm, char __c)
 inline basic_ostream<char, char_traits<char> >&
 operator<< (basic_ostream<char, char_traits<char> > &__strm, char __c)
 {
-    return _RW::__rw_insert (__strm, &__c, 1, __strm.width ());
+    return __rw::__rw_insert (__strm, &__c, 1, __strm.width ());
 }
 
 #  endif   // _RWSTD_NO_FUNC_PARTIAL_SPEC
@@ -378,7 +378,7 @@ template<class _CharT, class _Traits>
 inline basic_ostream<_CharT, _Traits>&
 operator<< (basic_ostream<_CharT, _Traits> &__strm, const _CharT *__s)
 {
-    _RW::__rw_insert (__strm, __s, _Traits::length (__s), __strm.width ());
+    __rw::__rw_insert (__strm, __s, _Traits::length (__s), __strm.width ());
     return __strm;
 }
 
@@ -389,7 +389,7 @@ template<class _CharT, class _Traits>
 inline basic_ostream<_CharT, _Traits>&
 operator<< (basic_ostream<_CharT, _Traits> &__strm, const char *__s)
 {
-    _RW::__rw_insert (__strm, __s, char_traits<char>::length (__s),
+    __rw::__rw_insert (__strm, __s, char_traits<char>::length (__s),
                       __strm.width ());
     return __strm;
 }
@@ -401,7 +401,7 @@ template <class _Traits>
 inline basic_ostream<char, _Traits>&
 operator<< (basic_ostream<char, _Traits> &__strm, const char *__s)
 {
-    _RW::__rw_insert (__strm, __s, char_traits<char>::length (__s),
+    __rw::__rw_insert (__strm, __s, char_traits<char>::length (__s),
                       __strm.width ());
     return __strm;
 }
@@ -411,7 +411,7 @@ operator<< (basic_ostream<char, _Traits> &__strm, const char *__s)
 inline basic_ostream<char, char_traits<char> >&
 operator<< (basic_ostream<char, char_traits<char> >& __strm, const char *__s)
 {
-    _RW::__rw_insert (__strm, __s, streamsize (char_traits<char>::length (__s)),
+    __rw::__rw_insert (__strm, __s, streamsize (char_traits<char>::length (__s)),
                       __strm.width ());
     return __strm;
 }

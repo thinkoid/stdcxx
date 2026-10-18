@@ -378,7 +378,7 @@ void Def::write_time(std::string dir_name)
     time_out_.era_off = 0;
 
     time_out_.alt_digits_off = UINT (time_out_.era_off +
-        sizeof (_RW::__rw_time_t::era_t) * era_list_.size());
+        sizeof (__rw::__rw_time_t::era_t) * era_list_.size());
 
     // now calculate all the offsets for the wide string representations
     time_out_.abday_off[1][0] = UINT (time_out_.alt_digits_off +

@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template<class _CharT, class _Traits>
@@ -48,7 +48,7 @@ basic_ostream<_CharT, _Traits>::flush ()
                 __res = this->rdbuf ()->pubsync ();
             }
             _CATCH (...) {
-                this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+                this->setstate (ios_base::badbit | __rw::__rw_rethrow);
             }
 
             if (-1 == __res)
@@ -75,7 +75,7 @@ basic_ostream<_CharT, _Traits>::seekp (pos_type __pos)
             __res = this->rdbuf ()->pubseekpos (__pos, ios_base::out);
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
         if (-1 == __res)
             this->setstate (ios_base::failbit);   // lwg issue 129
@@ -100,7 +100,7 @@ basic_ostream<_CharT, _Traits>::seekp (off_type __off, ios_base::seekdir __dir)
             __res = this->rdbuf()->pubseekoff (__off, __dir, ios_base::out);
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
 
         if (-1 == __res)
@@ -124,7 +124,7 @@ basic_ostream<_CharT, _Traits>::tellp ()
             return this->rdbuf()->pubseekoff (0, ios_base::cur, ios_base::out);
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
 
@@ -207,7 +207,7 @@ operator<< (basic_streambuf<char_type, traits_type> *__sb)
             }
         }
         _CATCH (...) {
-            this->setstate (ios_base::badbit | _RW::__rw_rethrow);
+            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
     // 27.6.2.5.3.8

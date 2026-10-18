@@ -36,15 +36,15 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 // resetiosflags implementation
 struct __rw_resetiosflags
 {
-    void operator() (_STD::ios_base           &__strm,
-                     _STD::ios_base::fmtflags  __mask) const {
-        __strm.setf (_STD::ios_base::fmtflags (0), __mask);
+    void operator() (std::ios_base            &__strm,
+                     std::ios_base::fmtflags   __mask) const {
+        __strm.setf (std::ios_base::fmtflags (0), __mask);
     }
 };
 
@@ -52,8 +52,8 @@ struct __rw_resetiosflags
 // setiosflags implementation
 struct __rw_setiosflags
 {
-    void operator() (_STD::ios_base           &__strm,
-                     _STD::ios_base::fmtflags  __mask) const {
+    void operator() (std::ios_base            &__strm,
+                     std::ios_base::fmtflags   __mask) const {
         __strm.setf (__mask);
     }
 };
@@ -62,15 +62,15 @@ struct __rw_setiosflags
 // setbase implementation
 struct __rw_setbase
 {
-    void operator() (_STD::ios_base &__strm, int __base) const {
+    void operator() (std::ios_base &__strm, int __base) const {
 
         // 27.6.3, p5: 8, 10 and 16 select their base, any other
         // value clears basefield
-        __strm.setf (   8 == __base ? _STD::ios_base::oct
-                     : 10 == __base ? _STD::ios_base::dec
-                     : 16 == __base ? _STD::ios_base::hex
-                     : _STD::ios_base::fmtflags (0),
-                     _STD::ios_base::basefield);
+        __strm.setf (   8 == __base ? std::ios_base::oct
+                     : 10 == __base ? std::ios_base::dec
+                     : 16 == __base ? std::ios_base::hex
+                     : std::ios_base::fmtflags (0),
+                     std::ios_base::basefield);
     }
 };
 
@@ -80,7 +80,7 @@ template <class _CharT>
 struct __rw_setfill
 {
     template <class _Traits>
-    void operator() (_STD::basic_ios<_CharT, _Traits> &__strm,
+    void operator() (std::basic_ios<_CharT, _Traits> &__strm,
                      _CharT                            __ch) const {
         __strm.fill (__ch);
     }
@@ -90,7 +90,7 @@ struct __rw_setfill
 // setprecision implementation
 struct __rw_setprecision
 {
-    void operator() (_STD::ios_base &__strm, int __prec) const {
+    void operator() (std::ios_base &__strm, int __prec) const {
         __strm.precision (_RWSTD_STATIC_CAST (_RWSTD_STREAMSIZE, __prec));
     }
 };
@@ -99,7 +99,7 @@ struct __rw_setprecision
 // setw implementation
 struct __rw_setw
 {
-    void operator() (_STD::ios_base &__strm, int __width) const {
+    void operator() (std::ios_base &__strm, int __width) const {
         __strm.width (_RWSTD_STATIC_CAST (_RWSTD_STREAMSIZE, __width));
     }
 };
@@ -108,7 +108,7 @@ struct __rw_setw
 }   // namespace __rw
  
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
   
 // manipulator implementation
@@ -128,51 +128,51 @@ struct __rw_smanip
  
 
 // 27.6.3, p3
-inline __rw_smanip<_RW::__rw_resetiosflags, ios_base::fmtflags>
+inline __rw_smanip<__rw::__rw_resetiosflags, ios_base::fmtflags>
 resetiosflags (ios_base::fmtflags __mask)
 {
-    return __rw_smanip<_RW::__rw_resetiosflags, ios_base::fmtflags>(__mask);
+    return __rw_smanip<__rw::__rw_resetiosflags, ios_base::fmtflags>(__mask);
 }
  
 
 // 27.6.3, p4
-inline __rw_smanip<_RW::__rw_setiosflags, ios_base::fmtflags>
+inline __rw_smanip<__rw::__rw_setiosflags, ios_base::fmtflags>
 setiosflags (ios_base::fmtflags __mask)
 {
-    return __rw_smanip<_RW::__rw_setiosflags, ios_base::fmtflags>(__mask);
+    return __rw_smanip<__rw::__rw_setiosflags, ios_base::fmtflags>(__mask);
 }
 
 
 // 27.6.3, p5
-inline __rw_smanip<_RW::__rw_setbase, int>
+inline __rw_smanip<__rw::__rw_setbase, int>
 setbase (int __base)
 {
-    return __rw_smanip<_RW::__rw_setbase, int>(__base);
+    return __rw_smanip<__rw::__rw_setbase, int>(__base);
 }
 
 
 // 27.6.3, p6
 template <class _CharT>
-inline __rw_smanip<_RW::__rw_setfill<_CharT>, _CharT>
+inline __rw_smanip<__rw::__rw_setfill<_CharT>, _CharT>
 setfill (_CharT __ch)
 {
-    return __rw_smanip<_RW::__rw_setfill<_CharT>, _CharT>(__ch);
+    return __rw_smanip<__rw::__rw_setfill<_CharT>, _CharT>(__ch);
 }
 
 
 // 27.6.3, p7
-inline __rw_smanip<_RW::__rw_setprecision, int>
+inline __rw_smanip<__rw::__rw_setprecision, int>
 setprecision (int __prec)
 {
-    return __rw_smanip<_RW::__rw_setprecision, int>(__prec);
+    return __rw_smanip<__rw::__rw_setprecision, int>(__prec);
 }
 
 
 // 27.6.3, p8
-inline __rw_smanip<_RW::__rw_setw, int>
+inline __rw_smanip<__rw::__rw_setw, int>
 setw (int __width)
 {
-    return __rw_smanip<_RW::__rw_setw, int>(__width);
+    return __rw_smanip<__rw::__rw_setw, int>(__width);
 }
 
 

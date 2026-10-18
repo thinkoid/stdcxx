@@ -47,7 +47,7 @@
 // the vanilla EDG eccp (i.e., in strict conformance mode) to prevent
 // namespace pollutiuon
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 _RWSTD_EXPORT void* __rw_memcpy (void*, const void*, _RWSTD_SIZE_T);
 _RWSTD_EXPORT void* __rw_memmove (void*, const void*, _RWSTD_SIZE_T);
@@ -70,19 +70,19 @@ _RWSTD_EXPORT _RWSTD_SIZE_T __rw_wcslen (const wchar_t*);
 
 }   // namespace __rw
 
-#  define _RWSTD_MEMCPY    _RW::__rw_memcpy
-#  define _RWSTD_MEMCMP    _RW::__rw_memcmp
-#  define _RWSTD_MEMCHR    _RW::__rw_memchr
-#  define _RWSTD_MEMMOVE   _RW::__rw_memmove
-#  define _RWSTD_MEMSET    _RW::__rw_memset
-#  define _RWSTD_STRLEN    _RW::__rw_strlen
+#  define _RWSTD_MEMCPY    __rw::__rw_memcpy
+#  define _RWSTD_MEMCMP    __rw::__rw_memcmp
+#  define _RWSTD_MEMCHR    __rw::__rw_memchr
+#  define _RWSTD_MEMMOVE   __rw::__rw_memmove
+#  define _RWSTD_MEMSET    __rw::__rw_memset
+#  define _RWSTD_STRLEN    __rw::__rw_strlen
 
-#  define _RWSTD_WMEMCPY   _RW::__rw_wmemcpy
-#  define _RWSTD_WMEMCMP   _RW::__rw_wmemcmp
-#  define _RWSTD_WMEMCHR   _RW::__rw_wmemchr
-#  define _RWSTD_WMEMMOVE  _RW::__rw_wmemmove
-#  define _RWSTD_WMEMSET   _RW::__rw_wmemset
-#  define _RWSTD_WCSLEN    _RW::__rw_wcslen
+#  define _RWSTD_WMEMCPY   __rw::__rw_wmemcpy
+#  define _RWSTD_WMEMCMP   __rw::__rw_wmemcmp
+#  define _RWSTD_WMEMCHR   __rw::__rw_wmemchr
+#  define _RWSTD_WMEMMOVE  __rw::__rw_wmemmove
+#  define _RWSTD_WMEMSET   __rw::__rw_wmemset
+#  define _RWSTD_WCSLEN    __rw::__rw_wcslen
 #else   // !defined (_RWSTDDEBUG)
 
 #  if 4 <= __GNUG__
@@ -123,7 +123,7 @@ _RWSTD_EXPORT _RWSTD_SIZE_T __rw_wcslen (const wchar_t*);
 #endif   // !_RWSTDDEBUG && !(vanilla EDG eccp demo)
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 27.4.1, p2

@@ -56,7 +56,7 @@
 #endif   // _RWSTD_RW_ITERBASE_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 // 25.3.6 - Heap operations
@@ -92,7 +92,7 @@ inline void push_heap (_RandomAccessIter __first, _RandomAccessIter __last,
 template <class _RandomAccessIter>
 inline void push_heap (_RandomAccessIter __first, _RandomAccessIter __last)
 {
-    _STD::push_heap (__first, __last, _RWSTD_LESS (_RandomAccessIter));
+    std::push_heap (__first, __last, _RWSTD_LESS (_RandomAccessIter));
 }
 
 
@@ -131,7 +131,7 @@ pop_heap (_RandomAccessIter __first, _RandomAccessIter __last, _Compare __comp)
 template <class _RandomAccessIter>
 inline void pop_heap (_RandomAccessIter __first, _RandomAccessIter __last)
 {
-    _STD::pop_heap (__first, __last, _RWSTD_LESS (_RandomAccessIter));
+    std::pop_heap (__first, __last, _RWSTD_LESS (_RandomAccessIter));
 }
 
 
@@ -156,7 +156,7 @@ inline void make_heap (_RandomAccessIter __first, _RandomAccessIter __last,
 template <class _RandomAccessIter>
 inline void make_heap (_RandomAccessIter __first, _RandomAccessIter __last)
 {
-    _STD::make_heap (__first, __last, _RWSTD_LESS (_RandomAccessIter));
+    std::make_heap (__first, __last, _RWSTD_LESS (_RandomAccessIter));
 }
 
 
@@ -168,7 +168,7 @@ inline void sort_heap (_RandomAccessIter __first, _RandomAccessIter __last,
     _RWSTD_ASSERT_RANGE (__first, __last);
 
     for (; __last - __first > 1; --__last)
-        _STD::pop_heap (__first, __last, __comp);
+        std::pop_heap (__first, __last, __comp);
 }
 
 
@@ -176,7 +176,7 @@ inline void sort_heap (_RandomAccessIter __first, _RandomAccessIter __last,
 template <class _RandomAccessIter>
 inline void sort_heap (_RandomAccessIter __first, _RandomAccessIter __last)
 {
-    _STD::sort_heap (__first, __last, _RWSTD_LESS (_RandomAccessIter));
+    std::sort_heap (__first, __last, _RWSTD_LESS (_RandomAccessIter));
 }
 
 

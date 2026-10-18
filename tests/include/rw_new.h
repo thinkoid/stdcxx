@@ -138,7 +138,7 @@ _TEST_EXPORT void  operator_delete (void*, bool);
 #  ifndef _RWSTD_BAD_ALLOC
      // #define if not #defined by <new> (SunPro #includes its
      // own <new> regardless of the preprocessor search path)
-#    define _RWSTD_BAD_ALLOC _STD::bad_alloc
+#    define _RWSTD_BAD_ALLOC std::bad_alloc
 #  endif   // _RWSTD_BAD_ALLOC
 
 

@@ -37,7 +37,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // make sure buffer size is greater than zero
 typedef char _CharBuf [_RWSTD_TMPBUF_SIZE + !_RWSTD_TMPBUF_SIZE];

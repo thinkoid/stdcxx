@@ -51,8 +51,8 @@
 
      // definition for facets that come in both forms, plain and _byname
 #  define _RWSTD_DEFINE_FACET_FACTORY(Linkage, Facet, TArgs, fid)          \
-       typedef _STD:: Facet TArgs __rw_ ## fid ## _facet;                  \
-       _RWSTD_NAMESPACE (__rw)                                             \
+       typedef std:: Facet TArgs __rw_ ## fid ## _facet;                   \
+       namespace __rw                                             \
        {                                                                   \
            Linkage __rw_facet*                                             \
            __rw_ct_ ## fid (_RWSTD_SIZE_T ref, const char *name)           \
@@ -60,7 +60,7 @@
                __rw_facet* pfacet;                                         \
                if (name) {                                                 \
                    /* construct a _byname facet on the heap */             \
-                   pfacet = new _STD:: Facet ## _byname TArgs (name, ref); \
+                   pfacet = new std:: Facet ## _byname TArgs (name, ref); \
                }                                                           \
                else {                                                      \
                    /* construct an ordinary facet in static memory */      \
@@ -81,8 +81,8 @@
 
      // definition for facets such as num_get that do not have a _byname form
 #  define _RWSTD_DEFINE_FACET_FACTORY(Linkage, Facet, TArgs, fid)          \
-       typedef _STD:: Facet TArgs __rw_ ## fid ## _facet;                  \
-       _RWSTD_NAMESPACE (__rw)                                             \
+       typedef std:: Facet TArgs __rw_ ## fid ## _facet;                   \
+       namespace __rw                                             \
        {                                                                   \
            Linkage __rw_facet*                                             \
            __rw_ct_ ## fid (_RWSTD_SIZE_T ref, const char*)                \
@@ -108,10 +108,10 @@
    // each in a program when the compiler or linker don't
    // (e.g., VisualAge C++ on AIX)
 #  define _RWSTD_SPECIALIZE_FACET_ID(Facet, TArgs)        \
-      _RWSTD_NAMESPACE (std) {                            \
+      namespace std {                            \
           template <>                                     \
-          _RW::__rw_facet_id Facet TArgs::                \
-          id (_RW::__rw_facet_id::_C_Init);               \
+          __rw::__rw_facet_id Facet TArgs::               \
+          id (__rw::__rw_facet_id::_C_Init);              \
       }                                                   \
       typedef void __rw_unused_type
 #else   // if defined (_RWSTD_NO_SPECIALIZED_FACET_ID)
@@ -122,11 +122,11 @@
 
 
 #define _RWSTD_SPECIALIZE_USE_FACET(fid)                              \
-    _RWSTD_NAMESPACE (__rw) {                                         \
+    namespace __rw {                                         \
         _RWSTD_EXPORT                                                 \
         const __rw_facet*                                             \
         __rw_get_facet_by_id                                          \
-            (const _STD::locale &__loc,                               \
+            (const std::locale &__loc,                                \
              const __rw_facet_id&,                                    \
              const __rw_ ## fid ## _facet*) {                         \
             return __rw_get_std_facet (__loc, __rw_facet::_C_ ## fid, \

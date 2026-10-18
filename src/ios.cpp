@@ -40,7 +40,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // array of pointers to the 8 standard iostream objects
 _RWSTD_EXPORT const void* __rw_std_streams [8];
@@ -48,7 +48,7 @@ _RWSTD_EXPORT const void* __rw_std_streams [8];
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 ios_base::ios_base ()
@@ -171,9 +171,9 @@ void* ios_base::
 _C_set (unsigned state, unsigned except, void *rdbuf)
 {
     // the caller that passes __rw_locked holds the lock already
-    _RWSTD_MT_GUARD (_C_nolock || (except & _RW::__rw_locked) ? 0 : &_C_mutex);
+    _RWSTD_MT_GUARD (_C_nolock || (except & __rw::__rw_locked) ? 0 : &_C_mutex);
 
-    except &= ~_RW::__rw_locked;
+    except &= ~__rw::__rw_locked;
 
     if (!rdbuf)
         state |= badbit;
@@ -181,14 +181,14 @@ _C_set (unsigned state, unsigned except, void *rdbuf)
     void* const rdbuf_save = _C_rdbuf;
 
     _C_rdbuf  = rdbuf;
-    _C_state  = iostate (state & ~(_RW::__rw_nothrow | _RW::__rw_rethrow));
+    _C_state  = iostate (state & ~(__rw::__rw_nothrow | __rw::__rw_rethrow));
     _C_except = except;
 
 #ifndef _RWSTD_NO_EXCEPTIONS
 
-    if (!(state & _RW::__rw_nothrow) && (state & except)) {
+    if (!(state & __rw::__rw_nothrow) && (state & except)) {
 
-        if (state & _RW::__rw_rethrow)
+        if (state & __rw::__rw_rethrow)
             throw;
 
         const char *bit =
@@ -201,9 +201,9 @@ _C_set (unsigned state, unsigned except, void *rdbuf)
 
         // is `this' one of the standard iostreams or is it user-defined?
         const char *strm = "user-defined";
-        for (const void * const *ps = _RW::__rw_std_streams; *ps; ++ps) {
+        for (const void * const *ps = __rw::__rw_std_streams; *ps; ++ps) {
             if (this == *ps)
-                strm = streams [ps - _RW::__rw_std_streams];
+                strm = streams [ps - __rw::__rw_std_streams];
         }
 
         switch (state & except) {
@@ -233,7 +233,7 @@ _C_set (unsigned state, unsigned except, void *rdbuf)
             break;
         }
 
-        _RW::__rw_throw (_RWSTD_ERROR_IOSTATE_BIT_SET, strm, bit);
+        __rw::__rw_throw (_RWSTD_ERROR_IOSTATE_BIT_SET, strm, bit);
     }
 
 #endif   // !defined (_RWSTD_NO_EXCEPTIONS)

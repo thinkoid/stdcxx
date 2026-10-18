@@ -41,7 +41,7 @@
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 string locale::name () const
 {
@@ -72,16 +72,16 @@ string locale::name () const
             if (!next)
                 next = catnm + strlen (catnm);
 
-            _RWSTD_ASSERT (i != _RW::__rw_n_cats);
+            _RWSTD_ASSERT (i != __rw::__rw_n_cats);
 
             if (   result.size ()
-                ||   _RW::__rw_facet::_C_opts
-                   & _RW::__rw_facet::_C_prepend_cat_sep)
+                ||   __rw::__rw_facet::_C_opts
+                   & __rw::__rw_facet::_C_prepend_cat_sep)
                 result += *_RWSTD_CAT_SEP;
 
-            if (_RW::__rw_facet::_C_opts & _RW::__rw_facet::_C_use_cat_names) {
+            if (__rw::__rw_facet::_C_opts & __rw::__rw_facet::_C_use_cat_names) {
                 // prepend category name only if necessary
-                result += _RW::__rw_cats [i++].name;
+                result += __rw::__rw_cats [i++].name;
                 result += '=';
             }
 

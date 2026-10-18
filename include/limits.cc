@@ -26,7 +26,7 @@
  * 
  **************************************************************************/
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if    !defined (_RWSTD_NO_STATIC_CONST_MEMBER_INIT) \
     && !defined (_RWSTD_DEFINE_EXPORTS)

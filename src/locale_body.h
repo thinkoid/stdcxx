@@ -42,14 +42,14 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 struct _RWSTD_CLASS_EXPORT locale;
 
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 class _RWSTD_EXPORT __rw_locale
@@ -93,7 +93,7 @@ private:
 
     __rw_mutex    _C_mutex;
 
-    friend struct _STD::locale;
+    friend struct std::locale;
 
 public:
 

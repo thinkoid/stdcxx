@@ -39,7 +39,7 @@
 #include <iosfwd>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _TypeT, class _CharT, class _Traits, class _Distance>

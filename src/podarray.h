@@ -43,7 +43,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 // __rw_aligned_buffer specializations should be objects with static
@@ -198,7 +198,7 @@ public:
 private:
 
     static _RWSTD_SIZE_T _C_length (const _TypeT *__a) {
-        return _STD::char_traits<_TypeT>::length (__a);
+        return std::char_traits<_TypeT>::length (__a);
     }
 };
 
@@ -214,7 +214,7 @@ typedef __rw_pod_array<char, 256> __rw_chararray;
 #endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (_POD_ARRAY)
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 #if _RWSTD_INSTANTIATE (_POD_ARRAY, _CHAR)
 

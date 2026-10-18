@@ -52,7 +52,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template <class _TypeT, class _Allocator = allocator<_TypeT> >
 class vector;
@@ -76,9 +76,9 @@ public:
 
 #ifndef _RWSTD_NO_DEBUG_ITER
 
-    typedef _RW::__rw_debug_iter <vector, pointer, pointer>  iterator;
+    typedef __rw::__rw_debug_iter <vector, pointer, pointer> iterator;
     
-    typedef _RW::__rw_debug_iter <vector, const_pointer, pointer>
+    typedef __rw::__rw_debug_iter <vector, const_pointer, pointer>
         const_iterator;
 
     iterator _C_make_iter (pointer __ptr) {
@@ -106,17 +106,17 @@ public:
 
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
-    typedef _STD::reverse_iterator<const_iterator> const_reverse_iterator;
-    typedef _STD::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef std::reverse_iterator<iterator>        reverse_iterator;
 
 #else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
 
-    typedef _STD::reverse_iterator<const_iterator, 
+    typedef std::reverse_iterator<const_iterator, 
         random_access_iterator_tag, value_type, 
         const_reference, const_pointer, difference_type>
     const_reverse_iterator;
 
-    typedef _STD::reverse_iterator<iterator, 
+    typedef std::reverse_iterator<iterator, 
         random_access_iterator_tag, value_type,
         reference, pointer, difference_type>
     reverse_iterator;
@@ -509,7 +509,7 @@ erase (iterator __it)
     const iterator __next = __it + 1;
 
     if (__next != end ()) 
-        _STD::copy (__next, end (), __it);
+        std::copy (__next, end (), __it);
 
     _C_alloc.destroy (_C_alloc._C_end - 1);
     --_C_alloc._C_end;
@@ -526,7 +526,7 @@ erase (iterator __first, iterator __last)
     _RWSTD_ASSERT_RANGE (__first, __last);
     _RWSTD_ASSERT_RANGE (begin (), __first);
 
-    _C_destroy (_STD::copy (__last, end (), __first));
+    _C_destroy (std::copy (__last, end (), __first));
 
     return __first;
 }
@@ -571,7 +571,7 @@ operator== (const vector<_TypeT, _Allocator> &__x,
             const vector<_TypeT, _Allocator> &__y)
 {
     return __x.size () == __y.size ()
-        && _STD::equal(__x.begin (), __x.end (), __y.begin ());
+        && std::equal(__x.begin (), __x.end (), __y.begin ());
 }
 
 template <class _TypeT, class _Allocator>
@@ -579,7 +579,7 @@ inline bool
 operator< (const vector<_TypeT, _Allocator> &__x,
            const vector<_TypeT, _Allocator> &__y)
 {
-    return _STD::lexicographical_compare (__x.begin (), __x.end (),
+    return std::lexicographical_compare (__x.begin (), __x.end (),
                                           __y.begin (), __y.end ());
 }
 
@@ -791,7 +791,7 @@ public:
       
     class iterator
         : public _C_iter,
-          public _STD::iterator<random_access_iterator_tag,
+          public std::iterator<random_access_iterator_tag,
                                 value_type, _C_diff_t,
                                 pointer, _C_ref> {
     public:
@@ -864,7 +864,7 @@ public:
 
     class const_iterator
         : public _C_iter,
-          public _STD::iterator<random_access_iterator_tag,
+          public std::iterator<random_access_iterator_tag,
                                 value_type, _C_diff_t,
                                 const_pointer, _C_const_ref> {
     public:
@@ -938,17 +938,17 @@ public:
 
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
-    typedef _STD::reverse_iterator<const_iterator> const_reverse_iterator;
-    typedef _STD::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef std::reverse_iterator<iterator>        reverse_iterator;
 
 #else
 
-    typedef _STD::reverse_iterator<const_iterator, 
+    typedef std::reverse_iterator<const_iterator, 
         random_access_iterator_tag, value_type, 
         const_reference, const_pointer, difference_type>
     const_reverse_iterator;
 
-    typedef _STD::reverse_iterator<iterator, 
+    typedef std::reverse_iterator<iterator, 
         random_access_iterator_tag, value_type,
         reference, pointer, difference_type>
     reverse_iterator;
@@ -1223,9 +1223,9 @@ public:
     {
       if((_C_value_alloc_type)*this == (_C_value_alloc_type)__x)
       {
-        _STD::swap (_C_begin,  __x._C_begin);
-        _STD::swap (_C_end,    __x._C_end);
-        _STD::swap (_C_bufend, __x._C_bufend);
+        std::swap (_C_begin,   __x._C_begin);
+        std::swap (_C_end,     __x._C_end);
+        std::swap (_C_bufend, __x._C_bufend);
       }
       else
       {

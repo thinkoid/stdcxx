@@ -27,11 +27,11 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _CharT>
-_RW::__rw_facet_id collate<_CharT>::id;
+__rw::__rw_facet_id collate<_CharT>::id;
 
 
 // outlined to avoid generating a vtable in each translation unit

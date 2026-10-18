@@ -65,7 +65,7 @@
 #endif   // _RWSTD_NO_ATOMIC_OPS
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // chooses either a single global mutex or a mutex per string object
@@ -88,7 +88,7 @@ class basic_string;
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 #if    defined (_RWSTD_REENTRANT)        \
@@ -106,7 +106,7 @@ struct __string_ref
     typedef _CharT                                            char_type;
     typedef _Allocator                                        allocator_type;
     typedef typename allocator_type::size_type                size_type;
-    typedef _STD::basic_string<_CharT, _Traits, _Allocator>   string_type;
+    typedef std::basic_string<_CharT, _Traits, _Allocator>    string_type;
 
 #if     defined (_RWSTD_REENTRANT)              \
     && !defined (_RWSTD_ONE_STRING_MUTEX)       \
@@ -123,7 +123,7 @@ struct __string_ref
         _C_refs = 1 - _RWSTD_STRING_REF_OFFSET;
 
         if (0 != _RWSTD_MUTEX_INIT (this->_C_mutex._C_mutex))
-            _RW::__rw_throw (_RWSTD_ERROR_RUNTIME_ERROR,
+            __rw::__rw_throw (_RWSTD_ERROR_RUNTIME_ERROR,
                              "synchronization error");
 
 #  endif   // _RWSTD_NO_STRING_REF_COUNT

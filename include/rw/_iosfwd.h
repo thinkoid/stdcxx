@@ -37,7 +37,7 @@
 #endif   // _RWSTD_RW_BITMASK_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template<class _CharT>
 struct char_traits;
@@ -83,19 +83,19 @@ struct istreambuf_iterator;
 
 
 // used in money_get and num_get facets
-#define _RWSTD_IOSTATE  _RWSTD_BITMASK_ENUM (_RW::__rw_iostate)
-#define _RWSTD_FMTFLAGS _RWSTD_BITMASK_ENUM (_RW::__rw_fmtflags)
+#define _RWSTD_IOSTATE  _RWSTD_BITMASK_ENUM (__rw::__rw_iostate)
+#define _RWSTD_FMTFLAGS _RWSTD_BITMASK_ENUM (__rw::__rw_fmtflags)
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // for convenience
-typedef _STD::istreambuf_iterator<char, _STD::char_traits<char> >
+typedef std::istreambuf_iterator<char, std::char_traits<char> >
     __rw_istreambuf_iterator;
 
 #ifndef _RWSTD_NO_WCHAR_T
 
-typedef _STD::istreambuf_iterator<wchar_t, _STD::char_traits<wchar_t> >
+typedef std::istreambuf_iterator<wchar_t, std::char_traits<wchar_t> >
     __rw_wistreambuf_iterator;
 
 #endif   // _RWSTD_NO_WCHAR_T

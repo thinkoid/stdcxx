@@ -28,7 +28,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // complex number `a' raised to an integer power `n'

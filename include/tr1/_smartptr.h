@@ -37,7 +37,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 struct __rw_ptr_base
@@ -141,15 +141,15 @@ private:
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
-_RWSTD_NAMESPACE (tr1) {
+namespace tr1 {
 
 
 // 2.2.2 - class bad_weak_ptr
-struct bad_weak_ptr: _RW::__rw_exception
+struct bad_weak_ptr: __rw::__rw_exception
 {
-    bad_weak_ptr (): _RW::__rw_exception () { }
+    bad_weak_ptr (): __rw::__rw_exception () { }
 };
 
 
@@ -173,7 +173,7 @@ class shared_ptr
     friend shared_ptr<_TypeU>
     dynamic_pointer_cast (const shared_ptr<_TypeV>&);
 
-    typedef _RW::__rw_ptr_base _C_base;
+    typedef __rw::__rw_ptr_base _C_base;
 
     _C_base *_C_pbody;
     _TypeT  *_C_ptr;
@@ -197,12 +197,12 @@ public:
     template <class _TypeU>
     explicit
     shared_ptr (_TypeU *__ptr)
-        : _C_pbody (__ptr ? new _RW::__rw_ptr_body<_TypeU>(__ptr) : 0),
+        : _C_pbody (__ptr ? new __rw::__rw_ptr_body<_TypeU>(__ptr) : 0),
           _C_ptr (__ptr) { /* empty */ }
 
     template <class _TypeU, class _Deleter>
     shared_ptr (_TypeU *__ptr, _Deleter __del)
-        : _C_pbody (new _RW::__rw_ptr_deleter<_TypeU, _Deleter>(__ptr, __del)),
+        : _C_pbody (new __rw::__rw_ptr_deleter<_TypeU, _Deleter>(__ptr, __del)),
           _C_ptr (__ptr) { /* empty */ }
 
     shared_ptr (const shared_ptr &__rhs)
@@ -270,8 +270,8 @@ public:
 
     template <class _TypeU>
     shared_ptr& operator= (auto_ptr<_TypeU> &__rhs) {
-        _RW::__rw_ptr_body<_TypeU>* const __tmp =
-            new _RW::__rw_ptr_body<_TypeU>(__rhs.get ());
+        __rw::__rw_ptr_body<_TypeU>* const __tmp =
+            new __rw::__rw_ptr_body<_TypeU>(__rhs.get ());
         if (_C_pbody)
             _C_pbody->_C_unref ();
         _C_pbody = __tmp;
@@ -314,7 +314,7 @@ public:
         return _C_ptr;
     }
 
-    typename _RW::__rw_nonvoid_ref<element_type>::_C_ref
+    typename __rw::__rw_nonvoid_ref<element_type>::_C_ref
     operator*() const {
         _RWSTD_ASSERT (0 != get ());
         return *get ();
@@ -457,7 +457,7 @@ class weak_ptr
     template <class _TypeU>
     friend class shared_ptr;
 
-    typedef _RW::__rw_ptr_base _C_base;
+    typedef __rw::__rw_ptr_base _C_base;
 
     _C_base *_C_pbody;
     _TypeT  *_C_ptr;

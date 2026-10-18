@@ -50,7 +50,7 @@
 #endif   // _RWSTD_RW_ITERBASE_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // Reverse iterator.     
@@ -281,7 +281,7 @@ operator+ (_RWSTD_ITER_DIFF_TYPE (_Iterator, _Distance) __n,
 
 }   // namespace std
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // Reverse bidirectional iterator.       
 // This is needed to get around non-standard compilers that insist
@@ -293,7 +293,7 @@ template <class _Iterator, class _Category, class _TypeT,
           class _Pointer = _TypeT*, 
           class _Distance = _RWSTD_PTRDIFF_T>
 class __reverse_bi_iterator
-    : public _STD::iterator<_Category, _TypeT, _Distance, _Pointer, _Reference>
+    : public std::iterator<_Category, _TypeT, _Distance, _Pointer, _Reference>
 {
 public:
     typedef _Distance  difference_type;
@@ -385,7 +385,7 @@ inline bool operator!= (const _RWSTD_ITER_ID (__reverse_bi_iterator)& __x,
 
 }   // namespace __rw
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 

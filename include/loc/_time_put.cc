@@ -31,13 +31,13 @@
 #include <loc/_ctype.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 // defined in time_put.cpp
 _RWSTD_EXPORT char*
 __rw_put_time (const __rw_facet*, char*, _RWSTD_SIZE_T,
-               _STD::ios_base&, char, const _RWSTD_C::tm*,
+               std::ios_base&, char, const _RWSTD_C::tm*,
                char, char, int, int);
 
 #ifndef _RWSTD_NO_WCHAR_T
@@ -45,7 +45,7 @@ __rw_put_time (const __rw_facet*, char*, _RWSTD_SIZE_T,
 // defined in time_put.cpp
 _RWSTD_EXPORT wchar_t*
 __rw_put_time (const __rw_facet*, wchar_t*, _RWSTD_SIZE_T,
-               _STD::ios_base&, wchar_t, const _RWSTD_C::tm*,
+               std::ios_base&, wchar_t, const _RWSTD_C::tm*,
                char, char, int, int);
 
 #endif   // _RWSTD_NO_WCHAR_T
@@ -53,11 +53,11 @@ __rw_put_time (const __rw_facet*, wchar_t*, _RWSTD_SIZE_T,
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _CharT, class _OutputIter>
-_RW::__rw_facet_id time_put<_CharT, _OutputIter>::id;
+__rw::__rw_facet_id time_put<_CharT, _OutputIter>::id;
 
 
 // outlined to avoid generating a vtable in each translation unit
@@ -79,7 +79,7 @@ do_put (iter_type __it, ios_base &__flags, char_type __fill,
     char_type __buf [256];
 
     const char_type *__end =
-        _RW::__rw_put_time (this, __buf + 0, sizeof __buf / sizeof *__buf,
+        __rw::__rw_put_time (this, __buf + 0, sizeof __buf / sizeof *__buf,
                             __flags, __fill, __tmb, __fmt, __modifier, -1, -1);
 
     // number of fill chars to pad with

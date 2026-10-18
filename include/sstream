@@ -47,7 +47,7 @@
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
@@ -103,14 +103,14 @@ public:
     typedef typename traits_type::off_type off_type;
 
     explicit
-    basic_stringbuf (ios_base::openmode __mode = _RW::__rw_in_out)
+    basic_stringbuf (ios_base::openmode __mode = __rw::__rw_in_out)
         : basic_streambuf<char_type, traits_type>(__mode) {
         this->_C_own_buf (true);
     }
 
     explicit
     basic_stringbuf (const _C_string_type&,
-                     ios_base::openmode = _RW::__rw_in_out);
+                     ios_base::openmode = __rw::__rw_in_out);
 
     virtual ~basic_stringbuf ();
     
@@ -134,10 +134,10 @@ protected:
 
     virtual pos_type
     seekoff (off_type, ios_base::seekdir, ios_base::openmode =
-             _RW::__rw_in_out);
+             __rw::__rw_in_out);
     
     virtual pos_type
-    seekpos (pos_type, ios_base::openmode = _RW::__rw_in_out);
+    seekpos (pos_type, ios_base::openmode = __rw::__rw_in_out);
 
     virtual basic_streambuf<char_type, traits_type>*
     setbuf (char_type*, streamsize);
@@ -338,13 +338,13 @@ public:
     typedef typename traits_type::int_type off_type;
 
     explicit
-    basic_stringstream (ios_base::openmode __mode = _RW::__rw_in_out)
+    basic_stringstream (ios_base::openmode __mode = __rw::__rw_in_out)
         : basic_iostream<char_type, traits_type>(rdbuf ()),
           _C_sb (__mode) { }
 
     explicit
     basic_stringstream (const _C_string_type &__str,
-                        ios_base::openmode __mode = _RW::__rw_in_out)
+                        ios_base::openmode __mode = __rw::__rw_in_out)
         : basic_iostream<char_type, traits_type>(rdbuf ()),
           _C_sb (__str, __mode) { }
 
@@ -377,7 +377,7 @@ private:
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_BASIC_STRINGBUF, _CHAR)
 

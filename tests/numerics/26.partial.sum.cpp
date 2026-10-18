@@ -52,7 +52,7 @@ const plus<T>& operator+ (const plus<T>& lhs, const plus<T>& rhs)
     return lhs;
 }
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION
 

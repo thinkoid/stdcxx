@@ -38,7 +38,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // helper, implements bitset converting ctor
 template <class _CharT, class _Traits>
@@ -53,7 +53,7 @@ template <>
 _RWSTD_EXPORT void
 __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
              const char*, _RWSTD_SIZE_T,
-             const _STD::char_traits<char>*, char, char,
+             const std::char_traits<char>*, char, char,
              _RWSTD_SIZE_T, _RWSTD_SIZE_T,
              const char*, const char*);
 
@@ -63,7 +63,7 @@ template <>
 _RWSTD_EXPORT void
 __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
              const wchar_t*, _RWSTD_SIZE_T,
-             const _STD::char_traits<wchar_t>*, wchar_t, wchar_t,
+             const std::char_traits<wchar_t>*, wchar_t, wchar_t,
              _RWSTD_SIZE_T, _RWSTD_SIZE_T,
              const char*, const char*);
 
@@ -83,7 +83,7 @@ __rw_shr (unsigned long*, _RWSTD_SIZE_T, _RWSTD_SIZE_T) _THROWS (());
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 template <_RWSTD_SIZE_T _Size>
@@ -112,7 +112,7 @@ class bitset
                        const _Traits *__traits, _CharT __b0, _CharT __b1,
                        _RWSTD_SIZE_T __pos, _RWSTD_SIZE_T __n,
                        const char *__file, const char *__fun) {
-        _RW::__rw_bitset (_C_bits, _Size, __str, __len,
+        __rw::__rw_bitset (_C_bits, _Size, __str, __len,
                           __traits, __b0, __b1,
                           __pos, __n, __file, __fun);
     }
@@ -321,7 +321,7 @@ public:
 
     // 23.3.5.2, p35
     _RWSTD_SIZE_T count () const _THROWS (()) {
-        return _Size ? _RW::__rw_bit_count (_C_bits, _C_nelems) : 0;
+        return _Size ? __rw::__rw_bit_count (_C_bits, _C_nelems) : 0;
     }
 
     // 23.3.5.2, p36
@@ -418,7 +418,7 @@ inline bitset<_Size>&
 bitset<_Size>::operator<<= (_RWSTD_SIZE_T __n) _THROWS (())
 {
     if (_Size >= _C_elembits)
-        _RW::__rw_shl (_C_bits, _C_nelems, __n);
+        __rw::__rw_shl (_C_bits, _C_nelems, __n);
     else
         // prevent shifting by sizeof (_C_bits) * CHAR_BIT (undefined)
         _C_bits [0] <<= __n;
@@ -440,7 +440,7 @@ inline bitset<_Size>&
 bitset<_Size>::operator>>= (_RWSTD_SIZE_T __n) _THROWS (())
 {
     if (_Size >= _C_elembits)
-        _RW::__rw_shr (_C_bits, _C_nelems, __n);
+        __rw::__rw_shr (_C_bits, _C_nelems, __n);
     else
         // prevent shifting by sizeof (_C_bits) * CHAR_BIT (undefined)
         _C_bits [0] >>= __n;
@@ -530,17 +530,17 @@ operator^ (const bitset<_Size>& __lhs, const bitset<_Size>& __rhs) _THROWS (())
 
 }   // namespace std
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 template <_RWSTD_SIZE_T _Size, class _CharT, class _Traits>
-_STD::basic_istream<_CharT, _Traits>&
-__rw_extract_bitset (_STD::basic_istream<_CharT, _Traits>&,
-                     _STD::bitset<_Size>&);
+std::basic_istream<_CharT, _Traits>&
+__rw_extract_bitset (std::basic_istream<_CharT, _Traits>&,
+                     std::bitset<_Size>&);
 
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // 23.3.5.3, p8
 template <class _CharT, class _Traits, _RWSTD_SIZE_T _Size>
@@ -556,7 +556,7 @@ template <class _CharT, class _Traits, _RWSTD_SIZE_T _Size>
 inline basic_istream<_CharT, _Traits>&
 operator>> (basic_istream<_CharT, _Traits>& __strm, bitset<_Size>& __x)
 {
-    return _RW::__rw_extract_bitset (__strm, __x);
+    return __rw::__rw_extract_bitset (__strm, __x);
 }
 
 }   // namespace std

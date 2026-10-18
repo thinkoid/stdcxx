@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 #ifndef _RWSTD_NO_STATIC_CONST_MEMBER_INIT
@@ -46,7 +46,7 @@ npos /* = SIZE_MAX */;
 #ifndef _RWSTD_NO_COLLAPSE_TEMPLATE_STATICS
 
 template <class _CharT, class _Traits, class _Allocator>
-_RW::__null_ref<_CharT, _Traits, _Allocator>
+__rw::__null_ref<_CharT, _Traits, _Allocator>
 basic_string<_CharT, _Traits, _Allocator>::
 _C_null_ref;
 
@@ -451,8 +451,8 @@ replace (size_type __pos, size_type __len, size_type __count, value_type __val)
 
 template <class _CharT, class _Traits, class _Alloc,
           class _StringIter, class _InputIter>
-_STD::basic_string<_CharT, _Traits, _Alloc>& 
-__rw_replace (_STD::basic_string<_CharT, _Traits, _Alloc> &__s, 
+std::basic_string<_CharT, _Traits, _Alloc>& 
+__rw_replace (std::basic_string<_CharT, _Traits, _Alloc> &__s, 
               _StringIter __first1, _StringIter __last1,
               _InputIter __first2, _InputIter __last2) {
 
@@ -461,9 +461,9 @@ __rw_replace (_STD::basic_string<_CharT, _Traits, _Alloc> &__s,
     typedef _Alloc                                allocator_type;
     typedef typename allocator_type::size_type    size_type;
 
-    typedef _STD::basic_string<_CharT, _Traits, _Alloc> _C_string_type;
+    typedef std::basic_string<_CharT, _Traits, _Alloc> _C_string_type;
 
-    typedef _RW::__string_ref<value_type, traits_type, allocator_type>
+    typedef __rw::__string_ref<value_type, traits_type, allocator_type>
      _C_string_ref_type;
 
 
@@ -500,7 +500,7 @@ replace (iterator __first1, iterator __last1,
     // buffer, which __replace_aux overwrites as it reads (STDCXX-170);
     // the string's own pointer and iterator types skip the copy through
     // the non-template overloads in <string>
-    if (_STD::__is_bidirectional_iterator (_RWSTD_ITERATOR_CATEGORY(_InputIter,
+    if (std::__is_bidirectional_iterator (_RWSTD_ITERATOR_CATEGORY(_InputIter,
                                                                     __last2))) {
         _C_string_type __s3;
         __s3.__replace_aux (__s3.begin (), __s3.begin (), __first2, __last2);
@@ -555,8 +555,8 @@ replace (iterator __first1, iterator __last1,
 
 template <class _CharT, class _Traits, class _Alloc,
           class _StringIter, class _InputIter>
-_STD::basic_string<_CharT, _Traits, _Alloc>& 
-__rw_replace_aux (_STD::basic_string<_CharT, _Traits, _Alloc> &__s, 
+std::basic_string<_CharT, _Traits, _Alloc>& 
+__rw_replace_aux (std::basic_string<_CharT, _Traits, _Alloc> &__s, 
                   _StringIter __first1, _StringIter __last1,
                   _InputIter __first2, _InputIter __last2)
 {
@@ -569,7 +569,7 @@ __rw_replace_aux (_STD::basic_string<_CharT, _Traits, _Alloc> &__s,
     typedef typename allocator_type::const_pointer    const_pointer;
     typedef typename allocator_type::const_reference const_reference;
 
-    typedef _RW::__string_ref<value_type, traits_type, allocator_type>
+    typedef __rw::__string_ref<value_type, traits_type, allocator_type>
     _C_string_ref_type;
 
 #else   // if !defined (_RWSTD_NO_STRING_OUTLINED_MEMBER_TEMPLATES)

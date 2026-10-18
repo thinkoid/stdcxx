@@ -38,7 +38,7 @@
 #ifndef _RWSTD_NAMESPACE_STD_OPEN
 #define _RWSTD_NAMESPACE_STD_OPEN 2
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #endif   // _RWSTD_NAMESPACE_STD_OPEN
 

@@ -57,7 +57,7 @@
 #endif   // _RWSTD_RW_ITERBASE_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 #ifndef _RWSTD_NO_NONDEDUCED_CONTEXT
@@ -150,7 +150,7 @@ inline void __rw_destroy (_TypeT**, _TypeT**)
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 template <class _TypeT>
 class allocator;
@@ -174,7 +174,7 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
         }
     }
     _CATCH (...) {
-        _RW::__rw_destroy (__start, __res);
+        __rw::__rw_destroy (__start, __res);
         _RETHROW;
     }
 
@@ -218,10 +218,10 @@ uninitialized_fill (_ForwardIterator __first, _ForwardIterator __last,
 
     _TRY {
         for (; __first != __last; ++__first)
-            _RW::__rw_construct (&*__first, __x);
+            __rw::__rw_construct (&*__first, __x);
     }
     _CATCH (...) {
-        _RW::__rw_destroy (__start, __first);
+        __rw::__rw_destroy (__start, __first);
         _RETHROW;
     }
 }
@@ -236,10 +236,10 @@ uninitialized_fill_n (_ForwardIterator __first, _Size __n, const _TypeT& __x)
 
     _TRY {
         for (; __n; --__n, ++__first)
-            _RW::__rw_construct (&*__first, __x);
+            __rw::__rw_construct (&*__first, __x);
     }
     _CATCH (...) {
-        _RW::__rw_destroy (__start, __first);
+        __rw::__rw_destroy (__start, __first);
         _RETHROW;
     }
 }

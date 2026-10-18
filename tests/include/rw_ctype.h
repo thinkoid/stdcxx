@@ -213,7 +213,7 @@ protected:
 #endif   // _RWSTD_NO_WCHAR_T
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template <>
 class _TEST_EXPORT ctype<UserChar>

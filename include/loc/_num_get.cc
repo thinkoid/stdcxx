@@ -33,7 +33,7 @@
 #include <rw/_basic_ios.h>
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 _RWSTD_EXPORT int
  __rw_get_num (void*, const char*, int, int,
@@ -73,11 +73,11 @@ private:
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _CharT, class _InputIter>
-_RW::__rw_facet_id num_get<_CharT, _InputIter>::id;
+__rw::__rw_facet_id num_get<_CharT, _InputIter>::id;
 
 
 #ifndef _RWSTD_NO_NATIVE_BOOL
@@ -103,12 +103,12 @@ do_get (iter_type __begin, iter_type __end, ios_base &__flags,
         if (_RWSTD_STATIC_CAST (unsigned long, __lval) < 2)
             __val = 0L != __lval;
         else
-            __err |= _RW::__rw_failbit;
+            __err |= __rw::__rw_failbit;
 
         return __begin;
     }
 
-    __err = _RW::__rw_goodbit;
+    __err = __rw::__rw_goodbit;
 
     const numpunct<char_type> &__pun = 
         _RWSTD_USE_FACET (numpunct<char_type>, __flags.getloc ());
@@ -131,12 +131,12 @@ do_get (iter_type __begin, iter_type __end, ios_base &__flags,
 
     int __errtmp = 1;   // maximum number of allowed duplicates
 
-    __begin = _RW::__rw_match_name (__begin, __end, __names, __sizes,
+    __begin = __rw::__rw_match_name (__begin, __end, __names, __sizes,
                                     sizeof __names / sizeof *__names,
                                     __inx, __errtmp, 0);
 
     if (_RWSTD_SIZE_MAX == __inx)
-        __err |= _RW::__rw_failbit;
+        __err |= __rw::__rw_failbit;
     else
         __val = !!__inx;
 
@@ -154,7 +154,7 @@ num_get<_CharT, _InputIter>::
 _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
         _RWSTD_IOSTATE &__err, int __type, void *__pval) const
 {
-    __err = _RW::__rw_goodbit;
+    __err = __rw::__rw_goodbit;
 
     const int __fl = __flags.flags ();
 
@@ -173,7 +173,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     char *__pcur            = __buf;          // currently processed digit
     _RWSTD_SIZE_T __bufsize = sizeof __buf;   // size of allocated buffer
 
-    _RW::__rw_num_get_buffer __guard (__buf, __pbuf);   // frees __pbuf
+    __rw::__rw_num_get_buffer __guard (__buf, __pbuf);  // frees __pbuf
 
     const ctype<char_type> &__ctp = _RWSTD_USE_FACET (ctype<char_type>, __loc);
 
@@ -199,7 +199,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     // other basefield %d; pointers are parsed in base 16
     const unsigned __basefield = __fl & _RWSTD_IOS_BASEFIELD;
 
-    int __base =   _RW::__rw_facet::_C_pvoid == __type ? 16
+    int __base =   __rw::__rw_facet::_C_pvoid == __type ? 16
                  : 0                 == __basefield    ? 0
                  : _RWSTD_IOS_OCT    == __basefield    ? 8
                  : _RWSTD_IOS_HEX    == __basefield    ? 16
@@ -213,8 +213,8 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     // to avoid having to deal with the fact that it's optional
     *__pcur++ = '+';
 
-    static const _UChar _HexX = _RW::__rw_digit_map [_UChar ('X')];
-    static const _UChar _Sign = _RW::__rw_digit_map [_UChar ('+')];
+    static const _UChar _HexX = __rw::__rw_digit_map [_UChar ('X')];
+    static const _UChar _Sign = __rw::__rw_digit_map [_UChar ('+')];
 
     // 'x' or 'X' after a leading '0' (the same value for both),
     // any value outside the valid range [0, 36) is invalid and
@@ -229,7 +229,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
 
         if (__begin == __end) {
             // 22.2.2.1, p13
-            __err |= _RW::__rw_eofbit;
+            __err |= __rw::__rw_eofbit;
             break;
         }
 
@@ -243,7 +243,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
             // short block the copies overrun, so fail as new fails
             // for a block too large
             if (_RWSTD_SIZE_MAX / 4 < __bufsize)
-                _RW::__rw_throw (_RWSTD_ERROR_FIRST + 3 /* == bad_alloc */);
+                __rw::__rw_throw (_RWSTD_ERROR_FIRST + 3 /* == bad_alloc */);
 
             const _RWSTD_SIZE_T __newsize = __bufsize * 2;
 
@@ -274,7 +274,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
         const char   __dp = __decimal_point == __wc ? '.' : '\0';
 
         if (   __thousands_sep == __wc
-            && _RW::__rw_digit_map [_UChar (__pcur [-1])] < 36
+            && __rw::__rw_digit_map [_UChar (__pcur [-1])] < 36
             && (   __grpsz > 0
                 || __grpsz < 0
                 && (__grpsz = int((__grouping = __pun.grouping ()).size ())))) {
@@ -286,7 +286,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
             if (__pcur == __pbuf + 1) {
                 // 22.2.3.1, p2: thousands_sep not allowed to be first
                 // non-fatal error, set failbit but continue parsing
-                __err |= _RW::__rw_failbit;
+                __err |= __rw::__rw_failbit;
             }
 
             if (__grpend) {
@@ -304,7 +304,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
             if (0 == __len) {
                 // fatal error: thousands_sep characters must be separated
                 // by groups of one or more digits
-                __err |= _RW::__rw_failbit;                
+                __err |= __rw::__rw_failbit;               
                 return __begin;
             }
 
@@ -319,7 +319,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
             // 35 is not a digit (43 is either the plus sign or
             // the minus sign, for efficiency); the value 99
             // indicates an invalid character
-            const _UChar __digit = _RW::__rw_digit_map [_UChar (__ch)];
+            const _UChar __digit = __rw::__rw_digit_map [_UChar (__ch)];
 
             // 22.2.2.1.2, p8: Stage 8 calls for widening of the sequence
             // of narrow digits ("0123456789abcdefABCDEFX+-") and looking
@@ -346,7 +346,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
                 }
                 else {
                     if (/* 'E' or 'e' == __ch */
-                        14 == _RW::__rw_digit_map [_UChar (__ch)]) {
+                        14 == __rw::__rw_digit_map [_UChar (__ch)]) {
                         const _RWSTD_PTRDIFF_T __diff = __pcur - __pbuf;
 
                         if (2 == __diff && '.' == __pcur [-1])
@@ -360,13 +360,13 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
                             const char __ts =
                                 __ctp.narrow (__thousands_sep, '\0');
                             if (/* '+' or '-' == __ts */
-                                _Sign == _RW::__rw_digit_map [_UChar (__ts)])
+                                _Sign == __rw::__rw_digit_map [_UChar (__ts)])
                                 __grpsz = 0;
                         }
                     }
                     else if (   'e' == __pcur [-1]
                              && /* '+' or '-' == __ch */
-                                _Sign == _RW::__rw_digit_map [_UChar (__ch)]) {
+                                _Sign == __rw::__rw_digit_map [_UChar (__ch)]) {
                         // '+' or '-' only permitted (but not required)
                         // as the first character after 'e' or 'E'
 
@@ -455,7 +455,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
             // thousands_sep characters must be separated by groups of one
             // or more digits (i.e., valid input cannot start or end with
             // a thousands_sep); this needs to be clarified in the text
-            __err |= _RW::__rw_failbit;
+            __err |= __rw::__rw_failbit;
             return __begin;
         }
 
@@ -479,7 +479,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
 
     // 22.2.2.1.2, p11: Stage 3
     const int __errtmp =
-        _RW::__rw_get_num (__pval, __pbuf, __type, __fl2,
+        __rw::__rw_get_num (__pval, __pbuf, __type, __fl2,
                            __pgrpbuf, __pgrp - __pgrpbuf,
                            __grouping.data (), __grouping.size ());
 

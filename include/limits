@@ -86,7 +86,7 @@
 #endif   // _RWSTD_IS_IEC559
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 #ifndef _RWSTD_NO_OBJECT_MANGLING
 
@@ -253,7 +253,7 @@ _RWSTD_EXPORT extern const long double __rw_ldbl_denorm_min;
 #  define _RWSTD_LIMITS_PRIMARY_TEMPLATE_DEFINED
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 enum float_round_style
@@ -342,7 +342,7 @@ struct numeric_limits
 #define _RWSTD_LIMITS_INCLUDED
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 _RWSTD_CLASS_BEGIN (numeric_limits<float>)
@@ -375,10 +375,10 @@ _RWSTD_CLASS_BEGIN (numeric_limits<float>)
                    float_denorm_style (_RWSTD_FLT_HAS_DENORM));
     _RWSTD_STATIC (float, bool, has_denorm_loss, _RWSTD_HAS_DENORM_LOSS);
 
-    _RWSTD_STATIC_FUN (float, infinity,      _RW::__rw_flt_infinity)
-    _RWSTD_STATIC_FUN (float, quiet_NaN,     _RW::__rw_flt_qNaN)
-    _RWSTD_STATIC_FUN (float, signaling_NaN, _RW::__rw_flt_sNaN)
-    _RWSTD_STATIC_FUN (float, denorm_min,    _RW::__rw_flt_denorm_min)
+    _RWSTD_STATIC_FUN (float, infinity,      __rw::__rw_flt_infinity)
+    _RWSTD_STATIC_FUN (float, quiet_NaN,     __rw::__rw_flt_qNaN)
+    _RWSTD_STATIC_FUN (float, signaling_NaN, __rw::__rw_flt_sNaN)
+    _RWSTD_STATIC_FUN (float, denorm_min,    __rw::__rw_flt_denorm_min)
 
     _RWSTD_STATIC (float, bool, is_iec559,  _RWSTD_IS_IEC559);
     _RWSTD_STATIC (float, bool, is_bounded, true);
@@ -422,10 +422,10 @@ _RWSTD_CLASS_BEGIN (numeric_limits<double>)
                    float_denorm_style (_RWSTD_DBL_HAS_DENORM));
     _RWSTD_STATIC (double, bool, has_denorm_loss,   _RWSTD_HAS_DENORM_LOSS);
 
-    _RWSTD_STATIC_FUN (double, infinity,      _RW::__rw_dbl_infinity)
-    _RWSTD_STATIC_FUN (double, quiet_NaN,     _RW::__rw_dbl_qNaN)
-    _RWSTD_STATIC_FUN (double, signaling_NaN, _RW::__rw_dbl_sNaN)
-    _RWSTD_STATIC_FUN (double, denorm_min,    _RW::__rw_dbl_denorm_min)
+    _RWSTD_STATIC_FUN (double, infinity,      __rw::__rw_dbl_infinity)
+    _RWSTD_STATIC_FUN (double, quiet_NaN,     __rw::__rw_dbl_qNaN)
+    _RWSTD_STATIC_FUN (double, signaling_NaN, __rw::__rw_dbl_sNaN)
+    _RWSTD_STATIC_FUN (double, denorm_min,    __rw::__rw_dbl_denorm_min)
 
     _RWSTD_STATIC (double, bool, is_iec559,  _RWSTD_IS_IEC559);
     _RWSTD_STATIC (double, bool, is_bounded, true);
@@ -471,10 +471,10 @@ _RWSTD_CLASS_BEGIN (numeric_limits<long double>)
                    float_denorm_style (_RWSTD_LDBL_HAS_DENORM));
     _RWSTD_STATIC (long double, bool, has_denorm_loss, _RWSTD_HAS_DENORM_LOSS);
 
-    _RWSTD_STATIC_FUN (long double, infinity,      _RW::__rw_ldbl_infinity)
-    _RWSTD_STATIC_FUN (long double, quiet_NaN,     _RW::__rw_ldbl_qNaN)
-    _RWSTD_STATIC_FUN (long double, signaling_NaN, _RW::__rw_ldbl_sNaN)
-    _RWSTD_STATIC_FUN (long double, denorm_min,    _RW::__rw_ldbl_denorm_min)
+    _RWSTD_STATIC_FUN (long double, infinity,      __rw::__rw_ldbl_infinity)
+    _RWSTD_STATIC_FUN (long double, quiet_NaN,     __rw::__rw_ldbl_qNaN)
+    _RWSTD_STATIC_FUN (long double, signaling_NaN, __rw::__rw_ldbl_sNaN)
+    _RWSTD_STATIC_FUN (long double, denorm_min,    __rw::__rw_ldbl_denorm_min)
 
     _RWSTD_STATIC (long double, bool, is_iec559,  _RWSTD_IS_IEC559);
     _RWSTD_STATIC (long double, bool, is_bounded, true);

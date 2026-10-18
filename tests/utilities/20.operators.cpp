@@ -48,8 +48,8 @@
 
 /**************************************************************************/
 
-_USING (namespace std);
-_USING (namespace std::rel_ops);
+using namespace std;
+using namespace std::rel_ops;
 
 
 #ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION

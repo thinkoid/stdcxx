@@ -34,7 +34,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #ifdef __linux__
    // prevent multiple definitions of SEEK_XXX constants
@@ -94,15 +94,15 @@ struct FILE;
 #endif
 
 #ifndef stderr
-#  define stderr   _RW::__rw_stderr
+#  define stderr   __rw::__rw_stderr
 #endif
 
 #ifndef stdin
-#  define stdin   _RW::__rw_stdin
+#  define stdin   __rw::__rw_stdin
 #endif
 
 #ifndef stdout
-#  define stdout   _RW::__rw_stdout
+#  define stdout   __rw::__rw_stdout
 #endif
 
 #ifndef TMP_MAX
@@ -180,11 +180,11 @@ void perror (const char*);
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
-extern _STD::FILE* __rw_stdin;
-extern _STD::FILE* __rw_stdout;
-extern _STD::FILE* __rw_stderr;
+extern std::FILE* __rw_stdin;
+extern std::FILE* __rw_stdout;
+extern std::FILE* __rw_stderr;
 
 }   // namespace __rw
 

@@ -47,20 +47,20 @@
 #include <rw/_defs.h> 
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
-int __rw_cat_open (const _STD::string&, const _STD::locale&);
+int __rw_cat_open (const std::string&, const std::locale&);
 
 const char* __rw_get_message (int, int, int);
 
-const _STD::locale& __rw_get_locale (int);
+const std::locale& __rw_get_locale (int);
 
 void __rw_cat_close (int);
 
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 struct _RWSTD_EXPORT messages_base
@@ -71,7 +71,7 @@ struct _RWSTD_EXPORT messages_base
 
 // 22.2.7.1
 template <class _CharT>
-class messages: public _RW::__rw_facet,
+class messages: public __rw::__rw_facet,
                 public messages_base
 {
 public:
@@ -81,7 +81,7 @@ public:
                          allocator<char_type> > string_type;
 
     explicit messages (_RWSTD_SIZE_T __refs = 0)
-        : _RW::__rw_facet (__refs) { }
+        : __rw::__rw_facet (__refs) { }
 
     virtual ~messages () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -98,7 +98,7 @@ public:
         do_close (__c);
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
@@ -113,12 +113,12 @@ protected:
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
 template <>
-_RW::__rw_facet_id messages<char>::id;
+__rw::__rw_facet_id messages<char>::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
 template <>
-_RW::__rw_facet_id messages<wchar_t>::id;
+__rw::__rw_facet_id messages<wchar_t>::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
@@ -149,7 +149,7 @@ public:
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_MESSAGES, _CHAR)
 

@@ -33,7 +33,7 @@
 #include <loc/_locale.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 _RWSTD_EXPORT _RWSTD_SIZE_T
 __rw_get_timepunct (const __rw_facet *pfacet,
@@ -43,11 +43,11 @@ __rw_get_timepunct (const __rw_facet *pfacet,
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _CharT, class _InputIter>
-_RW::__rw_facet_id time_get<_CharT, _InputIter>::id;
+__rw::__rw_facet_id time_get<_CharT, _InputIter>::id;
 
 
 // outlined to avoid generating a vtable in each translation unit
@@ -75,7 +75,7 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
     // extension: `tmb' may be 0
     tm __tmp = __tmb ? *__tmb : tm ();
 
-    _RWSTD_IOSTATE __errtmp = _RW::__rw_goodbit;
+    _RWSTD_IOSTATE __errtmp = __rw::__rw_goodbit;
 
     char __fmt [] = { '\0', '\0' };
 
@@ -83,7 +83,7 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
 
         if (__errtmp) {
             // failed to match the whole pattern
-            __errtmp |= _RW::__rw_failbit;
+            __errtmp |= __rw::__rw_failbit;
             break;
         }
 
@@ -114,14 +114,14 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
                 ++__it;
             else {
                 // mismatch between pattern and input
-                __errtmp |= _RW::__rw_failbit;
+                __errtmp |= __rw::__rw_failbit;
                 break;
             }
         }
     }
 
     // store value only on success
-    if (!(__errtmp & ~_RW::__rw_eofbit) && __tmb)
+    if (!(__errtmp & ~__rw::__rw_eofbit) && __tmb)
         *__tmb = __tmp;
 
     __err |= __errtmp;
@@ -166,7 +166,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         for ( ; ; ++__it) {
 
             if (__it == __end) {
-                __err |= _RW::__rw_eofbit;
+                __err |= __rw::__rw_eofbit;
                 break;
             }
 
@@ -188,7 +188,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
     // get the number of punctuator (or format) string(s) and their values
     const _RWSTD_SIZE_T __cnt =
-        _RW::__rw_get_timepunct (this, __data, &__tmp,
+        __rw::__rw_get_timepunct (this, __data, &__tmp,
                                  &__pmem, __pv, __sizes);
 
     if (1 == __cnt) {
@@ -200,7 +200,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
                     __names [0], __names [0] + __sizes [0]);
     }
 
-    _RWSTD_IOSTATE __errtmp = _RW::__rw_goodbit;
+    _RWSTD_IOSTATE __errtmp = __rw::__rw_goodbit;
 
     if (__cnt > 1) {
 
@@ -215,7 +215,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         // the `names' array
         int __interr = int (__dup);
 
-        __it = _RW::__rw_match_name (__it, __end, __names, __sizes,
+        __it = __rw::__rw_match_name (__it, __end, __names, __sizes,
                                      __cnt, __inx, __interr, &__fl);
 
         __errtmp = _RWSTD_IOSTATE (__interr);
@@ -231,13 +231,13 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
                 while ('0' == __ctp.narrow (*__it, '\0')) {
 
                     if (++__it == __end) {
-                        __errtmp |= _RW::__rw_eofbit;
+                        __errtmp |= __rw::__rw_eofbit;
                         break;
                     }
                 }
             }
             else {
-                __errtmp |= _RW::__rw_failbit;
+                __errtmp |= __rw::__rw_failbit;
             }
         }
         else if ('p' == __fmt) {
@@ -252,12 +252,12 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
                 }
                 else {
                     // invalid data
-                    __errtmp |= _RW::__rw_failbit;
+                    __errtmp |= __rw::__rw_failbit;
                 }
             }
             else {
                 // invalid (or unimplemented) format
-                __errtmp |= _RW::__rw_failbit;
+                __errtmp |= __rw::__rw_failbit;
             }
         }
         else if (__pmem) {
@@ -268,7 +268,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
             else if (__inx < __cnt)
                 *__pmem = int (__inx % (__cnt / __dup));
             else
-                __errtmp |= _RW::__rw_failbit;
+                __errtmp |= __rw::__rw_failbit;
 
             const int __adj = __data [0];   // value to increment result by
             const int __fac = __data [1];   // value to multiply result by
@@ -280,11 +280,11 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
             // validate input value
             if (*__pmem < __lob || *__pmem > __hib)
-                __errtmp |= _RW::__rw_failbit;
+                __errtmp |= __rw::__rw_failbit;
         }
         else {
             // invalid (or unimplemented) format
-            __errtmp |= _RW::__rw_failbit;
+            __errtmp |= __rw::__rw_failbit;
         }
     }
     else if (__pmem) {
@@ -297,7 +297,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
         for ( ; ; ++__it, ++__nread) {
             if (__it == __end) {
-                __err |= _RW::__rw_eofbit;
+                __err |= __rw::__rw_eofbit;
                 break;
             }
 
@@ -345,19 +345,19 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
             // validate input value
             if (*__pmem < __lob || *__pmem > __hib)
-                __errtmp |= _RW::__rw_failbit;
+                __errtmp |= __rw::__rw_failbit;
         }
         else {
             // invalid data
-            __errtmp |= _RW::__rw_failbit;
+            __errtmp |= __rw::__rw_failbit;
         }
     }
     else {
         // invalid (or unimplemented) format
-        __errtmp |= _RW::__rw_failbit;
+        __errtmp |= __rw::__rw_failbit;
     }
 
-    if (!(__errtmp & ~_RW::__rw_eofbit) && __tmb)
+    if (!(__errtmp & ~__rw::__rw_eofbit) && __tmb)
         *__tmb = __tmp;
 
     __err |= __errtmp;

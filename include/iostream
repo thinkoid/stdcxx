@@ -38,19 +38,19 @@
 
 #ifndef _RWSTD_NO_STATIC_IOSTREAM_INIT
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // static stream initializer object defined in every translation unit
 // that (directly or otherwise) #includes this header (except the one
 // that defines iostream objects to prevent undesirable dependencies)
-static _STD::ios_base::Init __rw_stream_initializer;
+static std::ios_base::Init __rw_stream_initializer;
 
 }   // namespace __rw
 
 #endif   // _RWSTD_NO_STATIC_IOSTREAM_INIT
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 _RWSTD_EXPORT extern istream _RWSTD_IOSTREAM_OBJECT (cin);
 _RWSTD_EXPORT extern ostream _RWSTD_IOSTREAM_OBJECT (cout);

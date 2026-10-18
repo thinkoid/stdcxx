@@ -59,7 +59,7 @@ typedef std::allocator<Char> CharAllocator;
 typedef std::basic_string<Char, CharTraits, CharAllocator> String;
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 // specialize in order to easily induce exceptional conditions
 template <>
@@ -77,7 +77,7 @@ String::size_type String::max_size () const
 /* static */ void
 user_throw (int ex_id, char *what)
 {
-    _RW::__rw_free_what_buf (what);
+    __rw::__rw_free_what_buf (what);
 
 #ifndef _RWSTD_NO_EXCEPTIONS
 
@@ -103,7 +103,7 @@ test_simple_throw ()
 #ifdef _RWSTD_NO_EXCEPTIONS
 
     // prevent library from aborting if exception support is disabled
-    _RW::__rw_throw_proc = user_throw;
+    __rw::__rw_throw_proc = user_throw;
 
 #endif   // _RWSTD_NO_EXCEPTIONS
 
@@ -208,7 +208,7 @@ test_npos_ctor ()
 {
     rw_info (0, __FILE__, __LINE__, "21.3.1, p4 (npos)");
 
-    _RW::__rw_throw_proc = user_throw;
+    __rw::__rw_throw_proc = user_throw;
 
     // establish a chekpoint for memory leaks
     rwt_check_leaks (0, 0);

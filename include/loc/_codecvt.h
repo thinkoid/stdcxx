@@ -38,13 +38,13 @@
 #include <rw/_mbstate.h>   // for _RWSTD_MBSTATE_T
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 struct __rw_ctype_t;
 
 }   // namespace __rw
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // 22.2.1.5 - Template class codecvt
 
@@ -59,7 +59,7 @@ class codecvt;
 
 
 template <class _InternT, class _ExternT, class _StateT>
-class codecvt: public _RW::__rw_facet,
+class codecvt: public __rw::__rw_facet,
                public codecvt_base
 {
 public:
@@ -114,7 +114,7 @@ protected:
 
 public:
 
-    explicit codecvt (_RWSTD_SIZE_T __ref = 0): _RW::__rw_facet (__ref) { }
+    explicit codecvt (_RWSTD_SIZE_T __ref = 0): __rw::__rw_facet (__ref) { }
 
     virtual ~codecvt () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -164,7 +164,7 @@ public:
         return do_max_length();
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 };
 
@@ -173,7 +173,7 @@ public:
 
 template <>
 class _RWSTD_EXPORT codecvt<char, char, _RWSTD_MBSTATE_T>
-    : public _RW::__rw_facet,
+    : public __rw::__rw_facet,
       public codecvt_base
 {
 public:
@@ -226,7 +226,7 @@ public:
         return do_max_length ();
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
 protected:
 
@@ -295,7 +295,7 @@ always_noconv () const _THROWS (())
 
 template <>
 class _RWSTD_EXPORT codecvt<wchar_t, char, _RWSTD_MBSTATE_T>
-    : public _RW::__rw_facet,
+    : public __rw::__rw_facet,
       public codecvt_base
 {
 public:
@@ -380,7 +380,7 @@ public:
         return do_max_length ();
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 };
 
 

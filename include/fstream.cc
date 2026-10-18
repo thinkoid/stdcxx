@@ -27,7 +27,7 @@
  * 
  **************************************************************************/
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 template<class _CharT, class _Traits>
@@ -43,7 +43,7 @@ open (const char *__name, ios_base::openmode __mode)
 
     // a file the call creates gets the permissions fopen() gives it,
     // 0666 less the process's umask
-    _C_file = _RW::__rw_fopen (__name, __mode, 0666);
+    _C_file = __rw::__rw_fopen (__name, __mode, 0666);
 
     if (!_C_file)
         return 0;
@@ -55,10 +55,10 @@ open (const char *__name, ios_base::openmode __mode)
         // the end of a file is assumed to be in the initial shift state
         // this assumption is safe as long as the file has been properly
         // closed (or unshifted) after the last write operation on it
-        __pos = _RW::__rw_fseek (_C_file, 0, 0, ios_base::end);
+        __pos = __rw::__rw_fseek (_C_file, 0, 0, ios_base::end);
 
         if (-1L == __pos) {
-            _RW::__rw_fclose (_C_file, 0);
+            __rw::__rw_fclose (_C_file, 0);
             _C_file = 0;
             return 0;
         }
@@ -100,7 +100,7 @@ close ()
     _CATCH (...) {
         // either overflow() or codecvt::unshift() threw; close the
         // file anyway, as LWG issue 622 requires
-        _RW::__rw_fclose (_C_file, this->_C_state);
+        __rw::__rw_fclose (_C_file, this->_C_state);
 
         _C_file    = 0;
         _C_cur_pos = _C_beg_pos = pos_type (off_type (-1));
@@ -114,7 +114,7 @@ close ()
         _RETHROW;
     }
 
-    if (_RW::__rw_fclose (_C_file, this->_C_state))
+    if (__rw::__rw_fclose (_C_file, this->_C_state))
         __retval = 0;
 
     _C_file    = 0;
@@ -145,12 +145,12 @@ showmanyc ()
 
     // no prob if this fails for non-seekable devices
     const pos_type __end_pos =
-        _RW::__rw_fseek (_C_file, this->_C_state, 0, ios_base::end);
+        __rw::__rw_fseek (_C_file, this->_C_state, 0, ios_base::end);
 
     if (__end_pos != pos_type (off_type (-1))) {
 
         // restore position within file only if seek succeeded
-        _RW::__rw_fseek (_C_file, this->_C_state, _C_cur_pos, ios_base::beg);
+        __rw::__rw_fseek (_C_file, this->_C_state, _C_cur_pos, ios_base::beg);
 
         typedef typename traits_type::state_type _StateT;
         typedef codecvt<char_type, char, _StateT> _Codecvt;
@@ -223,7 +223,7 @@ underflow ()
         if (__cvt.always_noconv ()) {
             // no conversion required
             __nread = (__to_end - this->_C_buffer) - _C_pbacksize;
-            __nread = _RW::__rw_fread (_C_file, this->_C_state,
+            __nread = __rw::__rw_fread (_C_file, this->_C_state,
                                        this->_C_buffer + _C_pbacksize,
                                        sizeof (char_type) * __nread);
             if (__nread < 0)
@@ -266,7 +266,7 @@ underflow ()
                 if (_RWSTD_DEFAULT_BUFSIZE - (__from_base - __xbuf) < __n)
                     __n = _RWSTD_DEFAULT_BUFSIZE - (__from_base - __xbuf);
 
-                __n = _RW::__rw_fread (_C_file, this->_C_state,
+                __n = __rw::__rw_fread (_C_file, this->_C_state,
                                        __from_base, __n);
 
                 if (0 > __n)
@@ -491,7 +491,7 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
 
         const _RWSTD_STREAMSIZE __nbytes = sizeof (char_type) * __nwrote;
 
-        if (__nbytes != _RW::__rw_fwrite (_C_file, this->_C_state,
+        if (__nbytes != __rw::__rw_fwrite (_C_file, this->_C_state,
                                           __buf, __nbytes))
             return -1;  // error while writing
     }
@@ -522,12 +522,12 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
                 // write out the sequence successfully converted up
                 // to the point of the error in the internal sequence
                 // and fail
-                _RW::__rw_fwrite (_C_file, this->_C_state, __base, __nbytes);
+                __rw::__rw_fwrite (_C_file, this->_C_state, __base, __nbytes);
                     return traits_type::eof ();
 
             case codecvt_base::noconv:
                 // write the entire sequence
-                if (__nbytes != _RW::__rw_fwrite (_C_file, this->_C_state,
+                if (__nbytes != __rw::__rw_fwrite (_C_file, this->_C_state,
                                                   __base, __nbytes))
                     return traits_type::eof ();
 
@@ -549,7 +549,7 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
 
                 __nbytes = __to_next - __xbuf;
 
-                if (__nbytes != _RW::__rw_fwrite (_C_file, this->_C_state,
+                if (__nbytes != __rw::__rw_fwrite (_C_file, this->_C_state,
                                                   __xbuf, __nbytes))
                     return -1;
 
@@ -732,7 +732,7 @@ seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode)
         __off *= __width;
 
     // perform the seek and save the result
-    pos_type __pos = _RW::__rw_fseek (_C_file, this->_C_state, __off, __way);
+    pos_type __pos = __rw::__rw_fseek (_C_file, this->_C_state, __off, __way);
 
     if (__pos != pos_type (off_type (-1))) {
 
@@ -767,7 +767,7 @@ seekpos (pos_type __pos, ios_base::openmode)
             return pos_type (off_type (-1));
     }
 
-    if (   _RW::__rw_fseek (_C_file, this->_C_state, __pos, ios_base::beg)
+    if (   __rw::__rw_fseek (_C_file, this->_C_state, __pos, ios_base::beg)
         == pos_type (off_type (-1)))
         return pos_type (off_type (-1));
 
@@ -796,7 +796,7 @@ sync ()
             return -1;
 
         if (this->_C_state & _RWSTD_IOS_STDIO)
-            _RW::__rw_fflush (_C_file, this->_C_state);
+            __rw::__rw_fflush (_C_file, this->_C_state);
     }
 
     // get area active
@@ -887,7 +887,7 @@ sync ()
         // seek within the external file to the position
         // corresponding to the future beginning of the buffer
         const off_type __off =
-            _RW::__rw_fseek (_C_file, this->_C_state,
+            __rw::__rw_fseek (_C_file, this->_C_state,
                              _C_cur_pos, ios_base::beg);
 
         if (-1L == __off)
@@ -926,7 +926,7 @@ _C_open (int __fd, void *__file, char_type *__buf, streamsize __n)
     else {
         _RWSTD_ASSERT (!__file);
 
-        _C_file = _RW::__rw_fdopen (__fd);
+        _C_file = __rw::__rw_fdopen (__fd);
 
         if (!_C_file)
             return 0;
@@ -934,7 +934,7 @@ _C_open (int __fd, void *__file, char_type *__buf, streamsize __n)
         this->_C_state &= ~this->_C_stdio;
     }
 
-    this->_C_state |= _RW::__rw_fmode (_C_file, this->_C_state);
+    this->_C_state |= __rw::__rw_fmode (_C_file, this->_C_state);
 
     this->setg (0, 0, 0);
     this->setp (0, 0);
@@ -987,7 +987,7 @@ _C_unshift ()
         return true;
 
     const off_type __nwrote =
-        _RW::__rw_fwrite (_C_file, this->_C_state, __useq, __nbytes);
+        __rw::__rw_fwrite (_C_file, this->_C_state, __useq, __nbytes);
 
     if (__nwrote < 0)
         return false;

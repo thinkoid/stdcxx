@@ -51,7 +51,7 @@
 #include <rw/_iterbase.h>   // for iterator_traits, __rw_debug_iter
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 25.3.7, p1
@@ -135,7 +135,7 @@ inline void fill_n (_OutputIter __first, _Size __n, const _TypeT &__val)
 
 }   // namespace std
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 // `less than' function object - used by non-predicate forms
 // of algorithms to invoke the predicate forms for code reuse
@@ -150,7 +150,7 @@ struct __rw_lt
     }
 };
 
-#  define _RWSTD_LESS(ignore) _RW::__rw_lt ()
+#  define _RWSTD_LESS(ignore) __rw::__rw_lt ()
 
 
 // swaps values of 2 (possibly distinct) types
@@ -167,7 +167,7 @@ inline void __rw_swap (_TypeT& __a, _TypeU& __b)
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 25.2.2, p1
@@ -196,13 +196,13 @@ inline void iter_swap (_FwdIter1 __a, _FwdIter2 __b)
     typename iterator_traits<_FwdIter1>::reference __ref1 (*__a);
     typename iterator_traits<_FwdIter2>::reference __ref2 (*__b);
 
-    _RW::__rw_swap (__ref1, __ref2);
+    __rw::__rw_swap (__ref1, __ref2);
 
 #else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
 
     // the return type of std::iterator_traits<_FwdIter>::operator*()
     // must be (convertible to) a true reference (i.e., value_type&)
-    _RW::__rw_swap (*__a, *__b);
+    __rw::__rw_swap (*__a, *__b);
 
 #endif   // _RWSTD_NO_CLASS_PARTIAL_SPEC
 }
@@ -247,7 +247,7 @@ template <class _InputIter1, class _InputIter2>
 inline bool
 equal (_InputIter1 __first1, _InputIter1 __last1, _InputIter2 __first2)
 {
-    return __last1 == _STD::mismatch (__first1, __last1, __first2).first;
+    return __last1 == std::mismatch (__first1, __last1, __first2).first;
 }
 
 
@@ -255,7 +255,7 @@ template <class _InputIter1, class _InputIter2, class _BinaryPredicate>
 inline bool equal (_InputIter1 __first1, _InputIter1 __last1,
                    _InputIter2 __first2, _BinaryPredicate __pred)
 {
-    return __last1 == _STD::mismatch (__first1, __last1,
+    return __last1 == std::mismatch (__first1, __last1,
                                       __first2, __pred).first;
 }
 

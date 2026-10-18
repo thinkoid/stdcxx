@@ -54,7 +54,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 template <class _TypeT, class _Allocator = allocator<_TypeT> >
 class deque;
@@ -314,10 +314,10 @@ public:
 
 #ifndef _RWSTD_NO_DEBUG_ITER
 
-    typedef _RW::__rw_debug_iter<deque, _C_deque_iter, _C_deque_iter>
+    typedef __rw::__rw_debug_iter<deque, _C_deque_iter, _C_deque_iter>
         iterator;
     
-    typedef _RW::__rw_debug_iter<deque, _C_deque_citer, _C_deque_iter>
+    typedef __rw::__rw_debug_iter<deque, _C_deque_citer, _C_deque_iter>
         const_iterator;
     
     iterator _C_make_iter (const _C_deque_iter &__iter) { 
@@ -349,17 +349,17 @@ public:
 
 #ifndef _RWSTD_NO_CLASS_PARTIAL_SPEC 
 
-    typedef _STD::reverse_iterator<const_iterator> const_reverse_iterator;
-    typedef _STD::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef std::reverse_iterator<iterator>        reverse_iterator;
 
 #else   // if defined (_RWSTD_NO_CLASS_PARTIAL_SPEC)
 
-    typedef _STD::reverse_iterator<const_iterator, random_access_iterator_tag,
+    typedef std::reverse_iterator<const_iterator, random_access_iterator_tag,
                                    value_type, const_reference, const_pointer,
                                    difference_type>
         const_reverse_iterator;
 
-    typedef _STD::reverse_iterator<iterator, random_access_iterator_tag,
+    typedef std::reverse_iterator<iterator, random_access_iterator_tag,
                                    value_type, reference, pointer,
                                    difference_type>
         reverse_iterator;
@@ -845,7 +845,7 @@ operator== (const deque<_TypeT, _Allocator> &__lhs,
             const deque<_TypeT, _Allocator> &__rhs)
 {
     return    __lhs.size () == __rhs.size ()
-           && _STD::equal (__lhs.begin (), __lhs.end (), __rhs.begin ());
+           && std::equal (__lhs.begin (), __lhs.end (), __rhs.begin ());
 }
 
 
@@ -854,7 +854,7 @@ inline bool
 operator< (const deque<_TypeT, _Allocator> &__lhs,
            const deque<_TypeT, _Allocator> &__rhs)
 {
-    return _STD::lexicographical_compare (__lhs.begin (), __lhs.end (),
+    return std::lexicographical_compare (__lhs.begin (), __lhs.end (),
                                           __rhs.begin (), __rhs.end ());
 }
 

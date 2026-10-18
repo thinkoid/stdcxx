@@ -36,7 +36,7 @@
 
 /**************************************************************************/
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it

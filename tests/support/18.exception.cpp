@@ -458,7 +458,7 @@ test_uncaught_exception ()
 /**************************************************************************/
 
 // original throw proc
-static void (*const pthrow_proc_save)(int, char*) = _RW::__rw_throw_proc;
+static void (*const pthrow_proc_save)(int, char*) = __rw::__rw_throw_proc;
 
 // replaces the original throw proc
 static void
@@ -468,7 +468,7 @@ test_throw_proc (int id, char *s)
                "throw_proc expected %d, got %d (\"%s\")",
                expect_throw_proc, id, s);
 
-    _RW::__rw_free_what_buf (s);
+    __rw::__rw_free_what_buf (s);
 
     // signal that we were successfully called and with what value
     expect_throw_proc = -id;
@@ -535,7 +535,7 @@ test_rw_throw ()
         int caught = -1;
 
         // set up a new throw proc (prevent exceptions)
-        _RW::__rw_throw_proc = test_throw_proc;
+        __rw::__rw_throw_proc = test_throw_proc;
 
         // no exception should be thrown at this point
         expect_throw_proc = expect [i];
@@ -543,17 +543,17 @@ test_rw_throw ()
         const char format[] = _RWSTD_FILE_LINE;
         const char func[]   = "void test_rwt_hrow (Test&)";
 
-        _RW::__rw_throw (expect [i], format, func, empty, empty, empty);
+        __rw::__rw_throw (expect [i], format, func, empty, empty, empty);
 
         rw_assert (expect [i] == -expect_throw_proc, 0, __LINE__,
                    "%d. throw_proc (%d, ...) not called", i, expect [i]);
 
         try {
             // reestablish original throw proc
-            _RW::__rw_throw_proc = pthrow_proc_save;
+            __rw::__rw_throw_proc = pthrow_proc_save;
 
             // expect an exception
-            _RW::__rw_throw (expect [i], format, func, empty, empty, empty);
+            __rw::__rw_throw (expect [i], format, func, empty, empty, empty);
 
             rw_assert (false, 0, __LINE__,
                        "%d. __rw::__rw_throw(%d, ...) returned",
@@ -650,7 +650,7 @@ test_rw_throw ()
 
 
     // reestablish original throw proc
-    _RW::__rw_throw_proc = pthrow_proc_save;
+    __rw::__rw_throw_proc = pthrow_proc_save;
 
     char str    [1024];
     char result [2 * sizeof str];
@@ -679,7 +679,7 @@ test_rw_throw ()
         
         try {
             // expect an exception
-            _RW::__rw_throw (expect [en + 4], __FILE__, str,
+            __rw::__rw_throw (expect [en + 4], __FILE__, str,
                              empty, empty, empty);
 
             rw_assert (false, 0, __LINE__,

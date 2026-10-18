@@ -39,7 +39,7 @@
  * 
  **************************************************************************/
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 template <class _TypeT, class _Allocator>
@@ -55,12 +55,12 @@ operator= (const deque &__rhs)
     if (__size < __rhs.size ()) {
         const const_iterator __mid = __rhs.begin () + __size;
 
-        _STD::copy (__mid, __rhs.end (),
-                    _STD::inserter (*this, _STD::copy (__rhs.begin (), __mid,
+        std::copy (__mid, __rhs.end (),
+                    std::inserter (*this, std::copy (__rhs.begin (), __mid,
                                                        begin ())));
     }
     else
-        erase (_STD::copy (__rhs.begin (), __rhs.end (), begin ()), end ());
+        erase (std::copy (__rhs.begin (), __rhs.end (), begin ()), end ());
 
     return *this;
 }
@@ -129,12 +129,12 @@ erase (iterator __first, iterator __last)
     // its end; the pops may recentre an emptied deque, so the result
     // is rebuilt from the offset afterwards
     if (__off < size_type (end () - __last)) {
-        _STD::copy_backward (begin (), __first, __last);
+        std::copy_backward (begin (), __first, __last);
         while (__n--)
             pop_front ();
     }
     else {
-        _STD::copy (__last, end (), __first);
+        std::copy (__last, end (), __first);
         while (__n--)
             pop_back ();
     }
@@ -152,10 +152,10 @@ swap (deque<_TypeT, _Allocator> &__rhs)
 
     if (get_allocator () == __rhs.get_allocator ()) {
 
-        _STD::swap (_C_beg,       __rhs._C_beg);
-        _STD::swap (_C_end,       __rhs._C_end);
-        _STD::swap (_C_nodes,     __rhs._C_nodes);
-        _STD::swap (_C_node_size, __rhs._C_node_size);
+        std::swap (_C_beg,        __rhs._C_beg);
+        std::swap (_C_end,        __rhs._C_end);
+        std::swap (_C_nodes,      __rhs._C_nodes);
+        std::swap (_C_node_size, __rhs._C_node_size);
 
     }
     else {
@@ -234,15 +234,15 @@ void deque<_TypeT, _Allocator>::
 _C_move_nodes (size_type __from, size_type __to, size_type __n)
 {
     if (__to < __from) {
-        _STD::copy (_C_nodes + __from, _C_nodes + __from + __n, _C_nodes + __to);
+        std::copy (_C_nodes + __from, _C_nodes + __from + __n, _C_nodes + __to);
         const size_type __clear = __from < __to + __n ? __to + __n : __from;
-        _STD::fill (_C_nodes + __clear, _C_nodes + __from + __n, pointer ());
+        std::fill (_C_nodes + __clear, _C_nodes + __from + __n, pointer ());
     }
     else if (__from < __to) {
-        _STD::copy_backward (_C_nodes + __from, _C_nodes + __from + __n,
+        std::copy_backward (_C_nodes + __from, _C_nodes + __from + __n,
                              _C_nodes + __to + __n);
         const size_type __clear = __to < __from + __n ? __to : __from + __n;
-        _STD::fill (_C_nodes + __from, _C_nodes + __clear, pointer ());
+        std::fill (_C_nodes + __from, _C_nodes + __clear, pointer ());
     }
 }
 
@@ -329,15 +329,15 @@ void deque<_TypeT, _Allocator>::_C_reservation::_C_prepare ()
 
             _C_node_pointer __map =
                 _C_node_alloc_type (__d).allocate (__capacity + 1, _C_nodes);
-            _STD::fill (__map, __map + __capacity + 1, pointer ());
+            std::fill (__map, __map + __capacity + 1, pointer ());
 
             const size_type __first = (__capacity - __required) / 2
                                    + (_C_back ? 0 : __nnew);
             const size_type __cut = _C_back ? __reuse : _C_count - __reuse;
             if (_C_count) {
-                _STD::copy (_C_nodes + _C_first + __cut, _C_nodes + __last,
+                std::copy (_C_nodes + _C_first + __cut, _C_nodes + __last,
                             __map + __first);
-                _STD::copy (_C_nodes + _C_first, _C_nodes + _C_first + __cut,
+                std::copy (_C_nodes + _C_first, _C_nodes + _C_first + __cut,
                             __map + __first + _C_count - __cut);
             }
 
@@ -516,7 +516,7 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
                 __room._C_construct (__x);
             for (_C_deque_iter __from = __pos; __from != _C_end; ++__from)
                 __room._C_construct (*__from);
-            _STD::fill (__pos, _C_end, __x);
+            std::fill (__pos, _C_end, __x);
         }
         else {
             // the tail's last n are constructed past the old end, the
@@ -524,8 +524,8 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
             const _C_deque_iter __tail = _C_end - difference_type (__n);
             for (_C_deque_iter __from = __tail; __from != _C_end; ++__from)
                 __room._C_construct (*__from);
-            _STD::copy_backward (__pos, __tail, _C_end);
-            _STD::fill (__pos, __pos + difference_type (__n), __x);
+            std::copy_backward (__pos, __tail, _C_end);
+            std::fill (__pos, __pos + difference_type (__n), __x);
         }
     }
     else {
@@ -537,7 +537,7 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
                 __room._C_construct (*__from);
             while (__room._C_cur != _C_beg)
                 __room._C_construct (__x);
-            _STD::fill (_C_beg, __pos, __x);
+            std::fill (_C_beg, __pos, __x);
         }
         else {
             // the prefix's first n are constructed before the old
@@ -546,8 +546,8 @@ _C_insert_fill (size_type __off, size_type __n, const_reference __x)
             for (_C_deque_iter __from = _C_beg;
                  __room._C_cur != _C_beg; ++__from)
                 __room._C_construct (*__from);
-            _STD::copy (_C_beg + difference_type (__n), __pos, _C_beg);
-            _STD::fill (__pos - difference_type (__n), __pos, __x);
+            std::copy (_C_beg + difference_type (__n), __pos, _C_beg);
+            std::fill (__pos - difference_type (__n), __pos, __x);
         }
     }
 
@@ -674,12 +674,12 @@ _C_insert_range (iterator __it,
             // then the tail are constructed, the tail's old place takes
             // the rest of the range
             _Iterator __mid = __first;
-            _STD::advance (__mid, difference_type (__rem));
+            std::advance (__mid, difference_type (__rem));
             for (_Iterator __from = __mid; __from != __last; ++__from)
                 __room._C_construct (*__from);
             for (_Iter __from = __pos; __from != __end; ++__from)
                 __room._C_construct (*__from);
-            _STD::copy (__first, __mid, __pos);
+            std::copy (__first, __mid, __pos);
         }
         else {
             // the tail's last n are constructed past the old end, the
@@ -687,8 +687,8 @@ _C_insert_range (iterator __it,
             const _Iter __tail = __end - difference_type (__n);
             for (_Iter __from = __tail; __from != __end; ++__from)
                 __room._C_construct (*__from);
-            _STD::copy_backward (__pos, __tail, __end);
-            _STD::copy (__first, __last, __pos);
+            std::copy_backward (__pos, __tail, __end);
+            std::copy (__first, __last, __pos);
         }
     }
     else {
@@ -697,12 +697,12 @@ _C_insert_range (iterator __it,
             // range's part before the old beginning are constructed,
             // the prefix's old place takes the rest of the range
             _Iterator __mid = __first;
-            _STD::advance (__mid, difference_type (__n - __inx));
+            std::advance (__mid, difference_type (__n - __inx));
             for (_Iter __from = __beg; __from != __pos; ++__from)
                 __room._C_construct (*__from);
             for (_Iterator __from = __first; __from != __mid; ++__from)
                 __room._C_construct (*__from);
-            _STD::copy (__mid, __last, __beg);
+            std::copy (__mid, __last, __beg);
         }
         else {
             // the prefix's first n are constructed before the old
@@ -710,8 +710,8 @@ _C_insert_range (iterator __it,
             // takes the range
             for (_Iter __from = __beg; __room._C_cur != __beg; ++__from)
                 __room._C_construct (*__from);
-            _STD::copy (__beg + difference_type (__n), __pos, __beg);
-            _STD::copy (__first, __last, __pos - difference_type (__n));
+            std::copy (__beg + difference_type (__n), __pos, __beg);
+            std::copy (__first, __last, __pos - difference_type (__n));
         }
     }
 

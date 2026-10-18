@@ -38,62 +38,62 @@
 #ifdef _RWSTD_INT8_T
 
 // optional exact-width types
-_USING (std::tr1::int8_t);
-_USING (std::tr1::uint8_t);
+using std::tr1::int8_t;
+using std::tr1::uint8_t;
 
 #endif   // _RWSTD_INT8_T
 
-_USING (std::tr1::int_least8_t);
-_USING (std::tr1::uint_least8_t);
-_USING (std::tr1::int_fast8_t);
-_USING (std::tr1::uint_fast8_t);
+using std::tr1::int_least8_t;
+using std::tr1::uint_least8_t;
+using std::tr1::int_fast8_t;
+using std::tr1::uint_fast8_t;
 
 
 #ifdef _RWSTD_INT16_T
 
 // optional exact-width types
-_USING (std::tr1::int16_t);
-_USING (std::tr1::uint16_t);
+using std::tr1::int16_t;
+using std::tr1::uint16_t;
 
 #endif   // _RWSTD_INT16_T
 
-_USING (std::tr1::int_least16_t);
-_USING (std::tr1::uint_least16_t);
-_USING (std::tr1::int_fast16_t);
-_USING (std::tr1::uint_fast16_t);
+using std::tr1::int_least16_t;
+using std::tr1::uint_least16_t;
+using std::tr1::int_fast16_t;
+using std::tr1::uint_fast16_t;
 
 
 #ifdef _RWSTD_INT32_T
 
 // optional exact-width types
-_USING (std::tr1::int32_t);
-_USING (std::tr1::uint32_t);
+using std::tr1::int32_t;
+using std::tr1::uint32_t;
 
 #endif   // _RWSTD_INT32_T
 
-_USING (std::tr1::int_least32_t);
-_USING (std::tr1::uint_least32_t);
-_USING (std::tr1::int_fast32_t);
-_USING (std::tr1::uint_fast32_t);
+using std::tr1::int_least32_t;
+using std::tr1::uint_least32_t;
+using std::tr1::int_fast32_t;
+using std::tr1::uint_fast32_t;
 
 
 #ifdef _RWSTD_INT64_T
 
 // optional exact-width types
-_USING (std::tr1::int64_t);
-_USING (std::tr1::uint64_t);
+using std::tr1::int64_t;
+using std::tr1::uint64_t;
 
 #endif   // _RWSTD_INT64_T
 
-_USING (std::tr1::int_least64_t);
-_USING (std::tr1::uint_least64_t);
-_USING (std::tr1::int_fast64_t);
-_USING (std::tr1::uint_fast64_t);
+using std::tr1::int_least64_t;
+using std::tr1::uint_least64_t;
+using std::tr1::int_fast64_t;
+using std::tr1::uint_fast64_t;
 
-_USING (std::tr1::intmax_t);
-_USING (std::tr1::uintmax_t);
-_USING (std::tr1::intptr_t);
-_USING (std::tr1::uintptr_t);
+using std::tr1::intmax_t;
+using std::tr1::uintmax_t;
+using std::tr1::intptr_t;
+using std::tr1::uintptr_t;
 
 
 #endif   // _RWSTD_TR1_STDINT_H_INCLUDED

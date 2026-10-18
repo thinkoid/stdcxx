@@ -58,7 +58,7 @@ operator* (const plus_asgn<T> &lhs, const plus_asgn<T> &rhs)
 }
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // disable explicit instantiation for compilers (like MSVC)
 // that can't handle it

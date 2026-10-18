@@ -37,12 +37,12 @@
 #include "catalog.h"
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
-_USING (namespace std);
+using namespace std;
 
 
-typedef _STD::vector<__rw_cat*> CatVector;
+typedef std::vector<__rw_cat*> CatVector;
 
 static CatVector __rw_catlist (2);
   
@@ -85,7 +85,7 @@ static CatVector __rw_catlist (2);
 }   // namespace __rw
 
 
-_USING (namespace __rw);
+using namespace __rw;
 
 
 nl_catd catopen(const char* name, int oflag)

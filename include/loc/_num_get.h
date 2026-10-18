@@ -45,20 +45,20 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 22.2.2.1
 template <class _CharT, class _InputIter = istreambuf_iterator<_CharT> >
-struct num_get: _RW::__rw_facet
+struct num_get: __rw::__rw_facet
 {
     typedef _CharT     char_type;
     typedef _InputIter iter_type;
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
     explicit num_get (_RWSTD_SIZE_T __refs = 0)
-        : _RW::__rw_facet (__refs) { }
+        : __rw::__rw_facet (__refs) { }
 
 #ifndef _RWSTD_NO_NATIVE_BOOL
 
@@ -233,12 +233,12 @@ private:
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
 template <>
-_RW::__rw_facet_id num_get<char, istreambuf_iterator<char> >::id;
+__rw::__rw_facet_id num_get<char, istreambuf_iterator<char> >::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
 template <>
-_RW::__rw_facet_id num_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
+__rw::__rw_facet_id num_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
@@ -246,7 +246,7 @@ _RW::__rw_facet_id num_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 inline short
 __rw_check_overflow_short (long __lval, _RWSTD_FMTFLAGS __flags,
@@ -258,7 +258,7 @@ __rw_check_overflow_short (long __lval, _RWSTD_FMTFLAGS __flags,
     long __shrt_max;
 
     if (   __lval < 0
-        || (__flags & _RW::__rw_basefield) == _RW::__rw_dec) {
+        || (__flags & __rw::__rw_basefield) == __rw::__rw_dec) {
         // decimal parsing overflows outside the range below
         __shrt_max = long (_RWSTD_SHRT_MAX);
         __shrt_min = long (_RWSTD_SHRT_MIN);
@@ -272,11 +272,11 @@ __rw_check_overflow_short (long __lval, _RWSTD_FMTFLAGS __flags,
 
     // lwg issue 23: check for overflow
     if (__lval < __shrt_min) {
-        __err |= _RW::__rw_failbit;
+        __err |= __rw::__rw_failbit;
         return short (_RWSTD_SHRT_MIN);
     }
     else if (__lval > __shrt_max) {
-        __err |= _RW::__rw_failbit;
+        __err |= __rw::__rw_failbit;
         return short (_RWSTD_SHRT_MAX);
     }
 
@@ -300,7 +300,7 @@ __rw_check_overflow_int (long __lval, _RWSTD_FMTFLAGS __flags,
     long __int_max;
 
     if (   __lval < 0
-        || (__flags & _RW::__rw_basefield) == _RW::__rw_dec) {
+        || (__flags & __rw::__rw_basefield) == __rw::__rw_dec) {
         // decimal parsing overflows outside the range below
         __int_max = long (_RWSTD_INT_MAX);
         __int_min = long (_RWSTD_INT_MIN);
@@ -314,11 +314,11 @@ __rw_check_overflow_int (long __lval, _RWSTD_FMTFLAGS __flags,
 
     // lwg issue 23: check for overflow
     if (__lval < __int_min) {
-        __err |= _RW::__rw_failbit;
+        __err |= __rw::__rw_failbit;
         return int (_RWSTD_INT_MIN);
     }
     else if (__lval > __int_max) {
-        __err |= _RW::__rw_failbit;
+        __err |= __rw::__rw_failbit;
         return int (_RWSTD_INT_MAX);
     }
 
@@ -341,7 +341,7 @@ __rw_check_overflow_int (long __lval, _RWSTD_FMTFLAGS __flags,
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_NUM_GET, _CHAR)
 

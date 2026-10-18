@@ -94,18 +94,18 @@
 // name:    name of the standard iostream object
 // ignN:    ignored
 #define _RWSTD_DEFINE_STREAM_OBJECT(buftype, stream, name, ign1, ign2)        \
-  _RWSTD_NAMESPACE (__rw) {                                                   \
+  namespace __rw {                                                   \
     /* static character buffer to prevent dynamic allocation */               \
-    static _STD::stream::char_type __rw_##name##_databuf [512];               \
+    static std::stream::char_type __rw_##name##_databuf [512];                \
     /* static indestructible `basic_filebuf<>' object */                      \
-    static __rw_aligned_buffer<_STD::buftype> __rw_##name##_buffer;           \
+    static __rw_aligned_buffer<std::buftype> __rw_##name##_buffer;            \
     /* static indestructible `basic_[i|o]stream<>' object */                  \
-    static __rw_aligned_buffer<_STD::stream> __rw_indestructible_##name;      \
+    static __rw_aligned_buffer<std::stream> __rw_indestructible_##name;       \
   }   /* namespace __rw */                                                    \
-  _RWSTD_NAMESPACE (std) {                                                    \
+  namespace std {                                                    \
     /* reference (not object) to a basic_[i|o]stream<> object */              \
     _RWSTD_EXPORT stream &name                                                \
-        = _RWSTD_REINTERPRET_CAST (stream&, _RW::__rw_indestructible_##name); \
+        = _RWSTD_REINTERPRET_CAST (stream&, __rw::__rw_indestructible_##name); \
   }   /* namespace std */                                                     \
   typedef void __rw_unused_typedef
 
@@ -125,20 +125,20 @@
 // name:    name of the standard iostream object
 // ignN:    ignored
 #define _RWSTD_DEFINE_STREAM_OBJECT(buftype, stream, name, ign1, ign2)      \
-  _RWSTD_NAMESPACE (__rw) {                                                 \
+  namespace __rw {                                                 \
     /* static character buffer to prevent dynamic allocation */             \
-    static _STD::stream::char_type __rw_##name##_databuf [512];             \
+    static std::stream::char_type __rw_##name##_databuf [512];              \
     /* static indestructible `basic_filebuf<>' object */                    \
-    static __rw_aligned_buffer<_STD::buftype> __rw_##name##_buffer;         \
+    static __rw_aligned_buffer<std::buftype> __rw_##name##_buffer;          \
   }   /* namespace __rw */                                                  \
-  _RWSTD_NAMESPACE (std) {                                                  \
+  namespace std {                                                  \
     /* extern  indestructible `basic_[i|o]stream<>' object */               \
-    _RWSTD_EXPORT _RW::__rw_aligned_buffer<stream> name;                    \
+    _RWSTD_EXPORT __rw::__rw_aligned_buffer<stream> name;                   \
   }   /* namespace std */                                                   \
-  _RWSTD_NAMESPACE (__rw) {                                                 \
+  namespace __rw {                                                 \
     /* reference to the actual object for convenience */                    \
-    static __rw_aligned_buffer<_STD::stream>&                               \
-        __rw_indestructible_##name = _STD::name;                            \
+    static __rw_aligned_buffer<std::stream>&                                \
+        __rw_indestructible_##name = std::name;                             \
   }   /* namespace __rw */                                                  \
   typedef void __rw_unused_typedef
 
@@ -150,10 +150,10 @@
 #define _INIT(buftype, stream, name, buf, f)                                  \
   /* construct basic_[i|o]stream object backed by a filebuf object */         \
   /* backed by a static characater array                           */         \
-  new (&_RW::__rw_indestructible_##name) stream                               \
-          (new (&_RW::__rw_##name##_buffer) buftype                           \
-           (FILEREF (f), _RW::__rw_##name##_databuf,                          \
-     sizeof _RW::__rw_##name##_databuf / sizeof *_RW::__rw_##name##_databuf)) \
+  new (&__rw::__rw_indestructible_##name) stream                              \
+          (new (&__rw::__rw_##name##_buffer) buftype                          \
+           (FILEREF (f), __rw::__rw_##name##_databuf,                         \
+     sizeof __rw::__rw_##name##_databuf / sizeof *__rw::__rw_##name##_databuf)) \
 
 
 #else   // if defined (_RWSTD_NO_STATIC_IOSTREAM_INIT)
@@ -166,17 +166,17 @@
 // buf:     tied indestructible buffer
 // f:       associated file descriptor or FILE pointer
 #define _RWSTD_DEFINE_STREAM_OBJECT(buftype, stream, name, buf, f)           \
-  _RWSTD_NAMESPACE (__rw) {                                                  \
+  namespace __rw {                                                  \
     /* static character buffer to prevent dynamic allocation */              \
-    static _STD::stream::char_type __rw_##name##_databuf [512];              \
+    static std::stream::char_type __rw_##name##_databuf [512];               \
     /* static `basic_filebuf<>' object, destroyed at program termination */  \
-    static _STD::buftype __rw_##name##_buffer (FILEREF (f),                  \
+    static std::buftype __rw_##name##_buffer (FILEREF (f),                   \
         __rw_##name##_databuf,                                               \
         sizeof __rw_##name##_databuf / sizeof *__rw_##name##_databuf);       \
   }   /* namespace __rw */                                                   \
-  _RWSTD_NAMESPACE (std) {                                                   \
+  namespace std {                                                   \
     /* extern `basic_[i|o]stream<>' object, destroyed at termination */      \
-    _RWSTD_EXPORT stream name (&_RW::__rw_##buf##_buffer);                   \
+    _RWSTD_EXPORT stream name (&__rw::__rw_##buf##_buffer);                  \
   }   /* namespace std */                                                    \
   typedef void __rw_unused_typedef
 
@@ -218,7 +218,7 @@ _RWSTD_DEFINE_STREAM_OBJECT (wfilebuf, wostream, wclog, wcerr, STDERR);
 // which is the only header where they are declared and by the means of
 // which they are initialized - through the static initialization object)
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 #ifdef _RWSTD_NO_STATIC_IOSTREAM_INIT
 
@@ -243,16 +243,16 @@ static __rw_once_t __rw_ios_once;
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 ios_base::Init::Init ()
 {
     // every Init is counted, and the last one destroyed flushes the
     // streams; only the first constructs them, and the others wait
     // until it has (27.4.2.1.6, p3: the count never returns to zero)
-    _RWSTD_ATOMIC_PREINCREMENT (_RW::__rw_ios_initcnt, false);
+    _RWSTD_ATOMIC_PREINCREMENT (__rw::__rw_ios_initcnt, false);
 
-    _RW::__rw_once (&_RW::__rw_ios_once, _C_init);
+    __rw::__rw_once (&__rw::__rw_ios_once, _C_init);
 }
 
 
@@ -269,22 +269,22 @@ ios_base::Init::_C_init ()
 
     // stream objects expected to be arranged in this order
     // must be initialized dynamically (as opposed to statically)
-    _RW::__rw_std_streams[0] = _RWSTD_STATIC_CAST (ios_base*, pcin);
-    _RW::__rw_std_streams[1] = _RWSTD_STATIC_CAST (ios_base*, pcout);
-    _RW::__rw_std_streams[2] = _RWSTD_STATIC_CAST (ios_base*, pcerr);
-    _RW::__rw_std_streams[3] = _RWSTD_STATIC_CAST (ios_base*, pclog);
+    __rw::__rw_std_streams[0] = _RWSTD_STATIC_CAST (ios_base*, pcin);
+    __rw::__rw_std_streams[1] = _RWSTD_STATIC_CAST (ios_base*, pcout);
+    __rw::__rw_std_streams[2] = _RWSTD_STATIC_CAST (ios_base*, pcerr);
+    __rw::__rw_std_streams[3] = _RWSTD_STATIC_CAST (ios_base*, pclog);
 
     // 27.3.1, p2
     pcin->_C_usr = &_C_usr_data::_C_std_usr_data [0];
     pcin->_C_usr->_C_tie = pcout;
 
     // 27.3.1, p5
-    pcerr->_C_fmtfl |= _RW::__rw_unitbuf;
+    pcerr->_C_fmtfl |= __rw::__rw_unitbuf;
 
-    pcin->_C_fmtfl  |= _RW::__rw_sync_stdio;
-    pcout->_C_fmtfl |= _RW::__rw_sync_stdio;
-    pcerr->_C_fmtfl |= _RW::__rw_sync_stdio;
-    pclog->_C_fmtfl |= _RW::__rw_sync_stdio;
+    pcin->_C_fmtfl  |= __rw::__rw_sync_stdio;
+    pcout->_C_fmtfl |= __rw::__rw_sync_stdio;
+    pcerr->_C_fmtfl |= __rw::__rw_sync_stdio;
+    pclog->_C_fmtfl |= __rw::__rw_sync_stdio;
 
     // the standard objects are locked ([iostream.objects]), unlike the
     // streams basic_ios<>::init() leaves unlocked
@@ -303,22 +303,22 @@ ios_base::Init::_C_init ()
 
     // stream objects expected to be arranged in this order
     // must be initialized dynamically (as opposed to statically)
-    _RW::__rw_std_streams[4] = _RWSTD_STATIC_CAST (ios_base*, pwcin);
-    _RW::__rw_std_streams[5] = _RWSTD_STATIC_CAST (ios_base*, pwcout);
-    _RW::__rw_std_streams[6] = _RWSTD_STATIC_CAST (ios_base*, pwcerr);
-    _RW::__rw_std_streams[7] = _RWSTD_STATIC_CAST (ios_base*, pwclog);
+    __rw::__rw_std_streams[4] = _RWSTD_STATIC_CAST (ios_base*, pwcin);
+    __rw::__rw_std_streams[5] = _RWSTD_STATIC_CAST (ios_base*, pwcout);
+    __rw::__rw_std_streams[6] = _RWSTD_STATIC_CAST (ios_base*, pwcerr);
+    __rw::__rw_std_streams[7] = _RWSTD_STATIC_CAST (ios_base*, pwclog);
 
     // 27.3.2, p2
     pwcin->_C_usr = &_C_usr_data::_C_std_usr_data [1];
     pwcin->_C_usr->_C_tie = pwcout;
 
     // 27.3.2, p5
-    pwcerr->_C_fmtfl |= _RW::__rw_unitbuf;
+    pwcerr->_C_fmtfl |= __rw::__rw_unitbuf;
 
-    pwcin->_C_fmtfl  |= _RW::__rw_sync_stdio;
-    pwcout->_C_fmtfl |= _RW::__rw_sync_stdio;
-    pwcerr->_C_fmtfl |= _RW::__rw_sync_stdio;
-    pwclog->_C_fmtfl |= _RW::__rw_sync_stdio;
+    pwcin->_C_fmtfl  |= __rw::__rw_sync_stdio;
+    pwcout->_C_fmtfl |= __rw::__rw_sync_stdio;
+    pwcerr->_C_fmtfl |= __rw::__rw_sync_stdio;
+    pwclog->_C_fmtfl |= __rw::__rw_sync_stdio;
 
     // the standard objects are locked ([iostream.objects])
     pwcin->_C_nolock  = 0;
@@ -332,7 +332,7 @@ ios_base::Init::_C_init ()
 
 ios_base::Init::~Init ()
 {
-    if (_RWSTD_ATOMIC_PREDECREMENT (_RW::__rw_ios_initcnt, false))
+    if (_RWSTD_ATOMIC_PREDECREMENT (__rw::__rw_ios_initcnt, false))
         return;
 
     // put all standard iostream objects in unbuffered mode so that

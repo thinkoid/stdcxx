@@ -30,7 +30,7 @@
 
 #include <rw/_defs.h>
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 // prevent warnings caused by the entire translation being empty
 // issued by HP aCC (and perhaps some other compilers)

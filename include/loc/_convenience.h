@@ -39,7 +39,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // convenience interfaces: is*(char)

@@ -41,11 +41,11 @@
 #endif   // _RWSTD_RW_IOSFWD_H_INCLUDED
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 struct _RWSTD_EXPORT __rw_failure: __rw_exception
 {
-    explicit __rw_failure (const _STD::string &__what)
+    explicit __rw_failure (const std::string &__what)
         : __rw_exception (__what) { }
 
     // extension

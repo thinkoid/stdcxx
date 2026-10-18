@@ -30,7 +30,7 @@
 #include <stddef.h>   // for size_t
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 _RWSTD_EXPORT void*

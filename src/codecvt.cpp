@@ -51,7 +51,7 @@
 typedef _RWSTD_MBSTATE_T StateT;
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 static inline int
 __rw_mbsinit (const StateT *ps)
@@ -63,15 +63,15 @@ __rw_mbsinit (const StateT *ps)
 }   // namespace __rw
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
-_RW::__rw_facet_id codecvt<char, char, _RWSTD_MBSTATE_T>::id;
+__rw::__rw_facet_id codecvt<char, char, _RWSTD_MBSTATE_T>::id;
 
 
 codecvt<char, char, _RWSTD_MBSTATE_T>::
 codecvt (size_t refs /* = 0 */) _THROWS (())
-    : _RW::__rw_facet (refs), _C_always_noconv (-1)
+    : __rw::__rw_facet (refs), _C_always_noconv (-1)
 {
     // empty
 }
@@ -107,7 +107,7 @@ do_out (state_type         &state,
     to_next   = to;
 
     // verify that the conversion state is valid
-    const int mbstate_valid = _RW::__rw_mbsinit (&state);
+    const int mbstate_valid = __rw::__rw_mbsinit (&state);
 
     _RWSTD_ASSERT (0 != mbstate_valid);
     if (!mbstate_valid)
@@ -177,7 +177,7 @@ do_unshift (state_type   &state,
     // next pointer must always be set before returning, even on error
     to_next = to;
 
-    const int mbstate_valid = _RW::__rw_mbsinit (&state);
+    const int mbstate_valid = __rw::__rw_mbsinit (&state);
     _RWSTD_ASSERT (mbstate_valid);
 
     return mbstate_valid ? noconv : error;
@@ -214,7 +214,7 @@ do_length (state_type        &state,
     // verify that the range is valid
     _RWSTD_ASSERT (!from == !from_end);
 
-    const int mbstate_valid = _RW::__rw_mbsinit (&state);
+    const int mbstate_valid = __rw::__rw_mbsinit (&state);
     _RWSTD_ASSERT (mbstate_valid);
 
     if (!mbstate_valid)

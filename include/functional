@@ -48,7 +48,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 20.3.2 - Arithmetic operations
@@ -663,12 +663,12 @@ mem_fun_ref (_Result (_TypeT::*__fun)(_Arg) const)
 }   // namespace std
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 // extension: returns the argument
 template <class _TypeT>
-struct identity : _STD::unary_function<_TypeT, _TypeT>
+struct identity : std::unary_function<_TypeT, _TypeT>
 {
     _RWSTD_UNARY_FUNCTION_TYPES (_TypeT, _TypeT);
 
@@ -680,7 +680,7 @@ struct identity : _STD::unary_function<_TypeT, _TypeT>
 
 // extension: returns the result of applying the unary plus operator to arg
 template <class _TypeT>
-struct unary_plus : _STD::unary_function<_TypeT, _TypeT>
+struct unary_plus : std::unary_function<_TypeT, _TypeT>
 {
     _RWSTD_UNARY_FUNCTION_TYPES (_TypeT, _TypeT);
 
@@ -692,7 +692,7 @@ struct unary_plus : _STD::unary_function<_TypeT, _TypeT>
 
 // extension: returns the bitwise complement of the argument
 template <class _TypeT>
-struct bitwise_complement : _STD::unary_function<_TypeT, _TypeT>
+struct bitwise_complement : std::unary_function<_TypeT, _TypeT>
 {
     _RWSTD_UNARY_FUNCTION_TYPES (_TypeT, _TypeT);
 
@@ -704,7 +704,7 @@ struct bitwise_complement : _STD::unary_function<_TypeT, _TypeT>
 
 // extension: returns the bitwise or of the two arguments
 template <class _TypeT>
-struct bitwise_or : _STD::binary_function<_TypeT, _TypeT, _TypeT>
+struct bitwise_or : std::binary_function<_TypeT, _TypeT, _TypeT>
 {
     _RWSTD_BINARY_FUNCTION_TYPES (_TypeT, _TypeT, _TypeT);
 
@@ -717,7 +717,7 @@ struct bitwise_or : _STD::binary_function<_TypeT, _TypeT, _TypeT>
 
 // extension: returns the bitwise and of the two arguments
 template <class _TypeT>
-struct bitwise_and : _STD::binary_function<_TypeT, _TypeT, _TypeT>
+struct bitwise_and : std::binary_function<_TypeT, _TypeT, _TypeT>
 {
     _RWSTD_BINARY_FUNCTION_TYPES (_TypeT, _TypeT, _TypeT);
 
@@ -730,7 +730,7 @@ struct bitwise_and : _STD::binary_function<_TypeT, _TypeT, _TypeT>
 
 // extension: returns the exclusive or (XOR) of the two arguments
 template <class _TypeT>
-struct exclusive_or : _STD::binary_function<_TypeT, _TypeT, _TypeT>
+struct exclusive_or : std::binary_function<_TypeT, _TypeT, _TypeT>
 {
     _RWSTD_BINARY_FUNCTION_TYPES (_TypeT, _TypeT, _TypeT);
 
@@ -743,7 +743,7 @@ struct exclusive_or : _STD::binary_function<_TypeT, _TypeT, _TypeT>
 
 // extension: returns the left argument shifted left by the right argument
 template <class _TypeT>
-struct shift_left : _STD::binary_function<_TypeT, _TypeT, _TypeT>
+struct shift_left : std::binary_function<_TypeT, _TypeT, _TypeT>
 {
     _RWSTD_BINARY_FUNCTION_TYPES (_TypeT, _TypeT, _TypeT);
 
@@ -756,7 +756,7 @@ struct shift_left : _STD::binary_function<_TypeT, _TypeT, _TypeT>
 
 // extension: returns the left argument shifted right by the right argument
 template <class _TypeT>
-struct shift_right : _STD::binary_function<_TypeT, _TypeT, _TypeT>
+struct shift_right : std::binary_function<_TypeT, _TypeT, _TypeT>
 {
     _RWSTD_BINARY_FUNCTION_TYPES (_TypeT, _TypeT, _TypeT);
 

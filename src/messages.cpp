@@ -50,7 +50,7 @@
 #define _RWSTD_BAD_CATD ((nl_catd)-1)
 
 
-_RWSTD_NAMESPACE (__rw) { 
+namespace __rw { 
 
 
 // Implementation structure private to this module -- __rw_open_cat_data.
@@ -65,7 +65,7 @@ _RWSTD_NAMESPACE (__rw) {
 struct __rw_open_cat_data
 {
     nl_catd catd;
-    __rw_aligned_buffer<_STD::locale> loc;
+    __rw_aligned_buffer<std::locale> loc;
 };
 
 struct __rw_open_cat_page
@@ -159,7 +159,7 @@ __rw_manage_cat_data (int &cat,  __rw_open_cat_data *pcat_data)
                 catalogs [cat]->catd = pcat_data->catd;
                 memcpy (catalogs [cat]->loc._C_store (), 
                         pcat_data->loc._C_store (),
-                        sizeof (_STD::locale));
+                        sizeof (std::locale));
 
                 if (size_t (cat) > largest_cat)
                     largest_cat = size_t (cat);
@@ -176,7 +176,7 @@ __rw_manage_cat_data (int &cat,  __rw_open_cat_data *pcat_data)
                 catalogs [cat]->catd = pcat_data->catd;
                 memcpy (catalogs [cat]->loc._C_store (),
                         pcat_data->loc._C_store (),
-                        sizeof (_STD::locale));
+                        sizeof (std::locale));
 
                 if (size_t (cat) > largest_cat)
                     largest_cat = size_t (cat);
@@ -249,7 +249,7 @@ __rw_manage_cat_data (int &cat,  __rw_open_cat_data *pcat_data)
 
 // Open a message catalog and assign and return a handle for it.
 
-int __rw_cat_open (const _STD::string &cat_name, const _STD::locale &loc)
+int __rw_cat_open (const std::string &cat_name, const std::locale &loc)
 {
     _RWSTD_MT_CLASS_GUARD (__rw_open_cat_data);
 
@@ -260,7 +260,7 @@ int __rw_cat_open (const _STD::string &cat_name, const _STD::locale &loc)
     __rw_open_cat_data cat_data;
 
     cat_data.catd = catd;
-    new (cat_data.loc._C_store ()) _STD::locale (loc);
+    new (cat_data.loc._C_store ()) std::locale (loc);
 
     int cat = -1;
     __rw_manage_cat_data (cat, &cat_data);
@@ -299,7 +299,7 @@ const char* __rw_get_message (int cat, int set_num, int msg_num)
 
 
 // Get locale to be used for character translation for this message catalog.
-const _STD::locale& __rw_get_locale (int cat)
+const std::locale& __rw_get_locale (int cat)
 {
     _RWSTD_MT_CLASS_GUARD (__rw_open_cat_data);
 
@@ -330,7 +330,7 @@ void __rw_cat_close (int cat)
 
             catclose (pcat_data->catd);
 
-            _STD::locale* const ploc = pcat_data->loc._C_data ();
+            std::locale* const ploc = pcat_data->loc._C_data ();
 
             ploc->~locale ();
 

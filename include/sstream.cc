@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-_RWSTD_NAMESPACE (std) {
+namespace std {
 
 
 template<class _CharT, class _Traits, class _Allocator>

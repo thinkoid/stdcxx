@@ -1403,7 +1403,7 @@ int run_test (int, char**)
 
         rw_info (0, 0, 0, 
                  "__rw::__rw_new_capacity<std::deque<UserClass> >(0) = %zu",
-                 _RW::__rw_new_capacity (0, (Deque*)0));
+                 __rw::__rw_new_capacity (0, (Deque*)0));
 
         if (0 == rw_opt_no_assign)
             test_assign ();

@@ -38,7 +38,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (__rw) {
+namespace __rw {
 
 
 _RWSTD_EXPORT void*
@@ -69,7 +69,7 @@ __rw_allocate (size_t nbytes, int /* = 0 */)
 
     // fix broken ::operator new ()
     if (0 == ptr)
-        _RW::__rw_throw (_RWSTD_ERROR_FIRST + 3 /* == bad_alloc */);
+        __rw::__rw_throw (_RWSTD_ERROR_FIRST + 3 /* == bad_alloc */);
 
     return ptr;
 }
@@ -101,7 +101,7 @@ __rw_deallocate (void *p, size_t, int /* = 0 */) _THROWS (())
 #ifdef _RWSTD_NO_OPERATOR_NEW_NOTHROW
 
 _RWSTD_EXPORT void*
-operator new (size_t __size, const _STD::nothrow_t&) _NEW_THROWS (())
+operator new (size_t __size, const std::nothrow_t&) _NEW_THROWS (())
 {
     return malloc (__size);
 }
@@ -113,7 +113,7 @@ operator new (size_t __size, const _STD::nothrow_t&) _NEW_THROWS (())
     && !defined (_RWSTD_NO_PLACEMENT_DELETE)
 
 _RWSTD_EXPORT void
-operator delete (void* __ptr, const _STD::nothrow_t&) _NEW_THROWS (())
+operator delete (void* __ptr, const std::nothrow_t&) _NEW_THROWS (())
 {
     free (__ptr);
 }
@@ -133,7 +133,7 @@ operator new[] (size_t __size) _NEW_THROWS ((_RWSTD_BAD_ALLOC))
 #ifdef _RWSTD_NO_OPERATOR_NEW_ARRAY_NOTHROW
 
 _RWSTD_EXPORT void*
-operator new[] (size_t __size, const _STD::nothrow_t&) _NEW_THROWS (())
+operator new[] (size_t __size, const std::nothrow_t&) _NEW_THROWS (())
 {
     _TRY {
         return ::operator new (__size);
@@ -162,7 +162,7 @@ operator delete[] (void* __ptr) _NEW_THROWS (())
     && !defined (_RWSTD_NO_PLACEMENT_DELETE)
 
 _RWSTD_EXPORT void
-operator delete[] (void* __ptr, const _STD::nothrow_t&) _NEW_THROWS (())
+operator delete[] (void* __ptr, const std::nothrow_t&) _NEW_THROWS (())
 {
     ::operator delete[] (__ptr);  // ::operator delete[] doesn't throw
 }
@@ -174,7 +174,7 @@ operator delete[] (void* __ptr, const _STD::nothrow_t&) _NEW_THROWS (())
 //**************************************************************************
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 // define std::nothrow only if the symbol doesn't appear
 // in the compiler support library to prevent linker errors
@@ -217,7 +217,7 @@ _RWSTD_EXPORT extern const nothrow_t nothrow = nothrow_t ();
 #  if    !defined (_RWSTD_NO_STD_BAD_ALLOC)    \
       || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #  endif   // !_RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD ...
 

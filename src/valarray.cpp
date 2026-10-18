@@ -34,7 +34,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 size_t gslice::next_ind ()

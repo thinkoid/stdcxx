@@ -44,7 +44,7 @@
 #include <rw/_defs.h>
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 
 // 22.2.6.3
@@ -57,7 +57,7 @@ struct money_base
 
 // 22.2.6.3
 template <class _CharT, bool _Intl = false>
-struct moneypunct: _RW::__rw_facet, public money_base
+struct moneypunct: __rw::__rw_facet, public money_base
 {
     typedef _CharT char_type;
     typedef
@@ -65,7 +65,7 @@ struct moneypunct: _RW::__rw_facet, public money_base
     string_type;
 
     explicit moneypunct (_RWSTD_SIZE_T __refs = 0)
-        : _RW::__rw_facet (__refs) { }
+        : __rw::__rw_facet (__refs) { }
 
     virtual ~moneypunct () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -105,7 +105,7 @@ struct moneypunct: _RW::__rw_facet, public money_base
         return do_neg_format ();
     }
 
-    static _RW::__rw_facet_id id;
+    static __rw::__rw_facet_id id;
 
     _RWSTD_STATIC_CONST (bool, intl = _Intl);
 
@@ -113,74 +113,74 @@ protected:
 
     // 22.2.6.3.1, p1
     virtual char_type do_decimal_point () const {
-        return *_C_get (this, _RW::__rw_dp);
+        return *_C_get (this, __rw::__rw_dp);
     }
 
     // 22.2.6.3.1, p2
     virtual char_type do_thousands_sep () const {
-        return *_C_get (this, _RW::__rw_ts);
+        return *_C_get (this, __rw::__rw_ts);
     }
 
     // 22.2.6.3.1, p3
     virtual string do_grouping () const {
         return
-            _RWSTD_REINTERPRET_CAST (const char*, _C_get (this, _RW::__rw_gr));
+            _RWSTD_REINTERPRET_CAST (const char*, _C_get (this, __rw::__rw_gr));
     }
 
     // 22.2.6.3.1, p4
     virtual string_type do_curr_symbol () const {
-        return _C_get (this, _RW::__rw_cs);
+        return _C_get (this, __rw::__rw_cs);
     }
 
     // 22.2.6.3.1, p5
     virtual string_type do_positive_sign () const {
-        return _C_get (this, _RW::__rw_ps);
+        return _C_get (this, __rw::__rw_ps);
     }
 
     // 22.2.6.3.1, p5
     virtual string_type do_negative_sign () const {
-        return _C_get (this, _RW::__rw_ns);
+        return _C_get (this, __rw::__rw_ns);
     }
 
     // 22.2.6.3.1, p6
     virtual int do_frac_digits () const {
         return _RWSTD_STATIC_CAST(int, _RWSTD_REINTERPRET_CAST (_RWSTD_SIZE_T, 
-                                           _C_get (this, _RW::__rw_fd)));
+                                           _C_get (this, __rw::__rw_fd)));
     }
 
     // 22.2.6.3.1, p7
     virtual pattern do_pos_format () const {
         return *_RWSTD_REINTERPRET_CAST (const pattern*,
-                                         _C_get (this, _RW::__rw_pf));
+                                         _C_get (this, __rw::__rw_pf));
     }
 
     // 22.2.6.3.1, p5
     virtual pattern do_neg_format () const {
         return *_RWSTD_REINTERPRET_CAST (const pattern*,
-                                         _C_get (this, _RW::__rw_nf));
+                                         _C_get (this, __rw::__rw_nf));
     }
 
 private:
 
-    static const char_type* _C_get (const _RW::__rw_facet*, int);
+    static const char_type* _C_get (const __rw::__rw_facet*, int);
 };
 
 
 #ifndef _RWSTD_NO_SPECIALIZED_FACET_ID
 
 template <>
-_RW::__rw_facet_id moneypunct<char, false>::id;
+__rw::__rw_facet_id moneypunct<char, false>::id;
 
 template <>
-_RW::__rw_facet_id moneypunct<char, true>::id;
+__rw::__rw_facet_id moneypunct<char, true>::id;
 
 #  ifndef _RWSTD_NO_WCHAR_T
 
 template <>
-_RW::__rw_facet_id moneypunct<wchar_t, false>::id;
+__rw::__rw_facet_id moneypunct<wchar_t, false>::id;
 
 template <>
-_RW::__rw_facet_id moneypunct<wchar_t, true>::id;
+__rw::__rw_facet_id moneypunct<wchar_t, true>::id;
 
 #  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
@@ -188,15 +188,15 @@ _RW::__rw_facet_id moneypunct<wchar_t, true>::id;
 
 template <class _CharT, bool _Intl /* = false */>
 inline const _CharT*
-moneypunct<_CharT, _Intl>::_C_get (const _RW::__rw_facet *__pf, int __fl)
+moneypunct<_CharT, _Intl>::_C_get (const __rw::__rw_facet *__pf, int __fl)
 {
     if (intl)
-        __fl |= _RW::__rw_intl;
+        __fl |= __rw::__rw_intl;
 
-    __fl |= _RW::__rw_mon;
+    __fl |= __rw::__rw_mon;
 
     return _RWSTD_STATIC_CAST (const char_type*,
-                               _RW::__rw_get_punct(__pf, __fl, char_type()));
+                               __rw::__rw_get_punct(__pf, __fl, char_type()));
 }
 
 
@@ -226,7 +226,7 @@ public:
 
 
 
-_RWSTD_NAMESPACE (std) { 
+namespace std { 
 
 #if _RWSTD_INSTANTIATE (_MONEYPUNCT, _CHAR)
 
