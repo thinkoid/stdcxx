@@ -75,14 +75,11 @@ typedef basic_ifstream<char> ifstream;
 typedef basic_ofstream<char> ofstream;
 typedef basic_fstream<char>  fstream;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_filebuf<wchar_t>  wfilebuf;
 typedef basic_ifstream<wchar_t> wifstream;
 typedef basic_ofstream<wchar_t> wofstream;
 typedef basic_fstream<wchar_t>  wfstream;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_IOSFWD_INCLUDED
 
 

@@ -56,8 +56,6 @@ _RWSTD_EXPORT void* __rw_memset (void*, int, _RWSTD_SIZE_T);
 _RWSTD_EXPORT int __rw_memcmp (const void*, const void*, _RWSTD_SIZE_T);
 _RWSTD_EXPORT _RWSTD_SIZE_T __rw_strlen (const char*);
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 _RWSTD_EXPORT wchar_t* __rw_wmemcpy (wchar_t*, const wchar_t*, _RWSTD_SIZE_T);
 _RWSTD_EXPORT wchar_t* __rw_wmemmove (wchar_t*, const wchar_t*, _RWSTD_SIZE_T);
 _RWSTD_EXPORT const wchar_t*
@@ -65,8 +63,6 @@ __rw_wmemchr (const wchar_t*, wchar_t, _RWSTD_SIZE_T);
 _RWSTD_EXPORT wchar_t* __rw_wmemset (wchar_t*, wchar_t, _RWSTD_SIZE_T);
 _RWSTD_EXPORT int __rw_wmemcmp (const wchar_t*, const wchar_t*, _RWSTD_SIZE_T);
 _RWSTD_EXPORT _RWSTD_SIZE_T __rw_wcslen (const wchar_t*);
-
-#  endif   // _RWSTD_NO_WCHAR_T
 
 }   // namespace __rw
 
@@ -367,8 +363,6 @@ __s, static_cast< unsigned char >(__c), __n));
 };
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 // 21.1.3.2
 template <>               
 struct char_traits<wchar_t> 
@@ -447,8 +441,6 @@ struct char_traits<wchar_t>
         return __c;
     }
 };
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 }   // namespace std

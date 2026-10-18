@@ -86,12 +86,9 @@ protected:
 template <>
 __rw::__rw_facet_id time_put<char, ostreambuf_iterator<char> >::id;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 template <>
 __rw::__rw_facet_id time_put<wchar_t, ostreambuf_iterator<wchar_t> >::id;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
 
 

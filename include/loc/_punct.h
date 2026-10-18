@@ -96,12 +96,8 @@ __rw_get_punct (const __rw::__rw_facet*, int, _CharT)
 /* template <> */ _RWSTD_EXPORT
 const char* __rw_get_punct (const __rw::__rw_facet*, int, char);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 /* template <> */ _RWSTD_EXPORT
 const wchar_t* __rw_get_punct (const __rw::__rw_facet*, int, wchar_t);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 // extracts as many values from the given range as necessary to
 // (not necessarily unambiguously) match one or more names (in

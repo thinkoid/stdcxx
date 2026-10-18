@@ -50,11 +50,8 @@ class basic_streambuf;
 
 typedef basic_streambuf<char> streambuf;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_streambuf<wchar_t> wstreambuf;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_IOSFWD_INCLUDED
 
 

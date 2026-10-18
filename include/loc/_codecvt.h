@@ -288,8 +288,6 @@ always_noconv () const _THROWS (())
 }
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 // 22.2.1.5, p3 - converts between wide and narrow characters
 // of the native character set (i.e., widens and narrows)
 
@@ -384,8 +382,6 @@ public:
 };
 
 
-#endif // _RWSTD_NO_WCHAR_T
-
 
 // 22.2.1.6
 template <class _InternT, class _ExternT, class _StateT>
@@ -422,8 +418,6 @@ public:
 };
 
 
-
-#ifndef _RWSTD_NO_WCHAR_T
 
 template <>
 class _RWSTD_EXPORT codecvt_byname<wchar_t, char, _RWSTD_MBSTATE_T>
@@ -466,8 +460,6 @@ protected:
     virtual int do_max_length () const _THROWS (());
 };
 
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 }   // namespace std

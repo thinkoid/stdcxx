@@ -45,12 +45,8 @@ struct char_traits;
 template <>
 struct char_traits<char>;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <>
 struct char_traits<wchar_t>;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 struct _RWSTD_EXPORT ios_base;
@@ -93,12 +89,8 @@ namespace __rw {
 typedef std::istreambuf_iterator<char, std::char_traits<char> >
     __rw_istreambuf_iterator;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 typedef std::istreambuf_iterator<wchar_t, std::char_traits<wchar_t> >
     __rw_wistreambuf_iterator;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 enum __rw_fmtflags {

@@ -184,12 +184,8 @@ struct __rw_is_fundamental<long double> { enum { _C_val = 1 }; };
 template <>
 struct __rw_is_fundamental<bool> { enum { _C_val = 1 }; };
 
-#ifndef _RWSTD_NO_NATIVE_WCHAR_T
-
 template <>
 struct __rw_is_fundamental<wchar_t> { enum { _C_val = 1 }; };
-
-#endif   // _RWSTD_NO_NATIVE_WCHAR_T
 
 template <>
 struct __rw_is_fundamental<void> { enum { _C_val = 1 }; };

@@ -48,11 +48,8 @@ class basic_ios;
 
 typedef basic_ios<char> ios;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_ios<wchar_t> wios;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_RW_BASIC_IOS_H_INCLUDED
 
 
@@ -63,11 +60,8 @@ class basic_streambuf;
 
 typedef basic_streambuf<char> streambuf;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_streambuf<wchar_t> wstreambuf;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_STREAMBUF_INCLUDED
 
 
@@ -85,12 +79,9 @@ class basic_iostream;
 typedef basic_istream<char>  istream;
 typedef basic_iostream<char> iostream;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_istream<wchar_t>  wistream;
 typedef basic_iostream<wchar_t> wiostream;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_ISTREAM_INCLUDED
 
 
@@ -102,11 +93,8 @@ class basic_ostream;
 
 typedef basic_ostream<char, char_traits<char> > ostream;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_ostream<wchar_t, char_traits<wchar_t> > wostream;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_OSTREAM_INCLUDED
 
 
@@ -137,14 +125,11 @@ typedef basic_istringstream<char> istringstream;
 typedef basic_ostringstream<char> ostringstream;
 typedef basic_stringstream<char>  stringstream;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_stringbuf<wchar_t>     wstringbuf;
 typedef basic_istringstream<wchar_t> wistringstream;
 typedef basic_ostringstream<wchar_t> wostringstream;
 typedef basic_stringstream<wchar_t>  wstringstream;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_SSTREAM_INCLUDED
 
 
@@ -167,14 +152,11 @@ typedef basic_ifstream<char> ifstream;
 typedef basic_ofstream<char> ofstream;
 typedef basic_fstream<char>  fstream;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_filebuf<wchar_t>  wfilebuf;
 typedef basic_ifstream<wchar_t> wifstream;
 typedef basic_ofstream<wchar_t> wofstream;
 typedef basic_fstream<wchar_t>  wfstream;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_FSTREAM_INCLUDED
 
 

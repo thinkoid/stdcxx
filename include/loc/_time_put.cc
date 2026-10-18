@@ -40,15 +40,11 @@ __rw_put_time (const __rw_facet*, char*, _RWSTD_SIZE_T,
                std::ios_base&, char, const _RWSTD_C::tm*,
                char, char, int, int);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 // defined in time_put.cpp
 _RWSTD_EXPORT wchar_t*
 __rw_put_time (const __rw_facet*, wchar_t*, _RWSTD_SIZE_T,
                std::ios_base&, wchar_t, const _RWSTD_C::tm*,
                char, char, int, int);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }   // namespace __rw
 

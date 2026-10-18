@@ -783,12 +783,8 @@ public:
 
 typedef basic_string<char, char_traits<char>, allocator<char> > string;
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_string<wchar_t, char_traits<wchar_t>, allocator<wchar_t> >
 wstring;
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 template <class _CharT, class _Traits , class _Allocator>

@@ -137,11 +137,6 @@
 
 /********************** Environment ***************************************/
 
-#if defined (_RWSTD_NO_WCHAR_T) && !defined (_RWSTD_NO_NATIVE_WCHAR_T)
-#  define _RWSTD_NO_NATIVE_WCHAR_T
-#endif
-
-
 #ifndef _RWSTD_NO_STL_SPECIALIZATION
 // disable partial specialization for void* of STL sequences
 #  define _RWSTD_NO_STL_SPECIALIZATION

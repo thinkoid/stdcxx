@@ -57,8 +57,6 @@ __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
              _RWSTD_SIZE_T, _RWSTD_SIZE_T,
              const char*, const char*);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <>
 _RWSTD_EXPORT void
 __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
@@ -66,8 +64,6 @@ __rw_bitset (unsigned long*, _RWSTD_SIZE_T,
              const std::char_traits<wchar_t>*, wchar_t, wchar_t,
              _RWSTD_SIZE_T, _RWSTD_SIZE_T,
              const char*, const char*);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 // helper, implements bitset::count()
 _RWSTD_EXPORT _RWSTD_SIZE_T

@@ -105,12 +105,9 @@ class basic_iostream;
 typedef basic_istream<char>  istream;
 typedef basic_iostream<char> iostream;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_istream<wchar_t>  wistream;
 typedef basic_iostream<wchar_t> wiostream;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_IOSFWD_INCLUDED
 
 

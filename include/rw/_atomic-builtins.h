@@ -411,12 +411,11 @@ _RWSTD_DEFINE_ORDERED_ATOMICS (_RWSTD_LONG_LONG)
 _RWSTD_DEFINE_ORDERED_ATOMICS (unsigned _RWSTD_LONG_LONG)
 #endif   // _RWSTD_ORDERED_LLONG
 
-#if    !defined (_RWSTD_NO_NATIVE_WCHAR_T)                       \
-    && (   _RWSTD_WCHAR_SIZE == _RWSTD_INT_SIZE                  \
-        ||    _RWSTD_WCHAR_SIZE == _RWSTD_SHRT_SIZE              \
-           && !defined (_RWSTD_NO_SHORT_ATOMIC_OPS)              \
-        ||    _RWSTD_WCHAR_SIZE == _RWSTD_CHAR_SIZE              \
-           && !defined (_RWSTD_NO_CHAR_ATOMIC_OPS))
+#if       _RWSTD_WCHAR_SIZE == _RWSTD_INT_SIZE                  \
+    ||    _RWSTD_WCHAR_SIZE == _RWSTD_SHRT_SIZE              \
+       && !defined (_RWSTD_NO_SHORT_ATOMIC_OPS)              \
+    ||    _RWSTD_WCHAR_SIZE == _RWSTD_CHAR_SIZE              \
+       && !defined (_RWSTD_NO_CHAR_ATOMIC_OPS)
 _RWSTD_DEFINE_ORDERED_ATOMICS (wchar_t)
 #endif   // _RWSTD_WCHAR_SIZE
 

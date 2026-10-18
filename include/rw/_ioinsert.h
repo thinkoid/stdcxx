@@ -64,11 +64,8 @@ class basic_ostream;
 
 typedef basic_ostream<char> ostream;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_ostream<wchar_t> wostream;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_IOSFWD_INCLUDED
 
 }

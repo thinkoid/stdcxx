@@ -400,8 +400,6 @@ _RWSTD_OVERLOAD_GET_FACET (__rw_tget_c);
 _RWSTD_OVERLOAD_GET_FACET (__rw_tput_c);
 _RWSTD_OVERLOAD_GET_FACET (std::messages<char>);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 typedef std::codecvt<wchar_t, char, _RWSTD_MBSTATE_T>     __rw_codecvt_w;
 typedef _Facet (moneypunct, wchar_t, false)               __rw_mpunct_w_0;
 typedef _Facet (moneypunct, wchar_t, true)                __rw_mpunct_w_1;
@@ -425,8 +423,6 @@ _RWSTD_OVERLOAD_GET_FACET (std::numpunct<wchar_t>);
 _RWSTD_OVERLOAD_GET_FACET (__rw_tget_w);
 _RWSTD_OVERLOAD_GET_FACET (__rw_tput_w);
 _RWSTD_OVERLOAD_GET_FACET (std::messages<wchar_t>);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 // clean up
 #undef _RWSTD_OVERLOAD_GET_FACET

@@ -414,8 +414,6 @@ public:
 };
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <>
 class _RWSTD_EXPORT ctype<wchar_t>: public __rw::__rw_facet, public ctype_base
 {
@@ -665,8 +663,6 @@ private:
     const void    *_C_cvtimpl;     // codecvt database mapped by ctype facet
     _RWSTD_SIZE_T  _C_cvtsize;     // size of the above mapping
 };
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 
 }   // namespace std

@@ -143,8 +143,6 @@ protected:
 };
 
 
-#ifndef   _RWSTD_NO_WCHAR_T
-
 template <>
 class _RWSTD_EXPORT collate<wchar_t>: public __rw::__rw_facet
 {
@@ -190,8 +188,6 @@ protected:
     do_hash (const char_type*, const char_type*) const;
 };
 
-#endif   // _RWSTD_NO_WCHAR_T
-
 
 template <class _CharT>
 class collate_byname: public collate<_CharT>
@@ -231,8 +227,6 @@ protected:
 };
 
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 template <>
 class _RWSTD_EXPORT collate_byname<wchar_t>: public collate<wchar_t>
 {
@@ -255,8 +249,6 @@ protected:
     virtual string_type
     do_transform (const char_type*, const char_type*) const;
 };
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }   // namespace std
 

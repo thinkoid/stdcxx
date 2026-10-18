@@ -57,14 +57,10 @@ _RWSTD_EXPORT extern ostream _RWSTD_IOSTREAM_OBJECT (cout);
 _RWSTD_EXPORT extern ostream _RWSTD_IOSTREAM_OBJECT (cerr);
 _RWSTD_EXPORT extern ostream _RWSTD_IOSTREAM_OBJECT (clog);
 
-#ifndef _RWSTD_NO_WCHAR_T
-
 _RWSTD_EXPORT extern wistream _RWSTD_IOSTREAM_OBJECT (wcin);
 _RWSTD_EXPORT extern wostream _RWSTD_IOSTREAM_OBJECT (wcout);
 _RWSTD_EXPORT extern wostream _RWSTD_IOSTREAM_OBJECT (wcerr);
 _RWSTD_EXPORT extern wostream _RWSTD_IOSTREAM_OBJECT (wclog);
-
-#endif   // _RWSTD_NO_WCHAR_T
 
 }   // namespace std
 

@@ -115,12 +115,9 @@ protected:
 template <>
 __rw::__rw_facet_id messages<char>::id;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 template <>
 __rw::__rw_facet_id messages<wchar_t>::id;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID
 
 

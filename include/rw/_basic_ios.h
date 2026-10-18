@@ -60,11 +60,8 @@ class basic_ios;
 
 typedef basic_ios<char> ios;
 
-#  ifndef _RWSTD_NO_WCHAR_T
-
 typedef basic_ios<wchar_t> wios;
 
-#  endif   // _RWSTD_NO_WCHAR_T
 #endif   // _RWSTD_IOSFWD_INCLUDED
 
 
