@@ -61,7 +61,7 @@ conditions as well. No preprocessing or build was performed here.
 
 | group | status on the supported compilers |
 |---|---|
-| Old language deficiencies: `BOOL`, `NAMESPACE`, `EXPLICIT`, `TYPENAME`, casts, member templates, partial specialization | Every probe passes in the six configurations. Passing today is not a reason to remove a probe or its branch. |
+| Old language deficiencies: `BOOL`, `NAMESPACE`, `EXPLICIT`, `TYPENAME`, casts, partial specialization | Every probe passes in the six configurations and under eccp in strict C++03. These gates are being retired one by one, the branch they select with them, since no compiler the tree is built with takes that branch and it cannot be compiled; `analysis-feature-gates.md` is the census and the order, and 2.2 lists what has gone. |
 | Obsolete mechanisms: dynamic exception specifications | The probes fail in the six configurations, and that is their job: a failing probe selects the path the compiler's dialect needs. |
 | Runtime ABI: exception classes, allocation functions, RTTI members and namespace placement | Questions about the runtime, not the language. A historical ABI probe is not a description of public API support. |
 | Platform facts: sizes, typedefs, floating point, C structures, conversion interfaces, locale naming | Retain characterization or deliberately replace it with an equally sound source of the information. |
@@ -99,6 +99,15 @@ these probes intentionally avoid the host C++ headers and link to
 runtime support. A negative constructor, placement-new or namespace
 probe is an answer to its particular source/link experiment, not a
 claim that the compiler cannot implement that C++ facility.
+
+### 2.2 Retired probes
+
+A retired probe left together with every reader of its macro, and
+its row is gone from the catalogue below.
+
+| probe | macro | retired | why |
+|---|---|---|---|
+| `MEMBER_TEMPLATES` | `NO_MEMBER_TEMPLATES` | 2026-10-17, bfbf7ac3 and the seven commits after it | GCC, Clang and eccp in strict C++03 pass it, and no compiler since about 2000 fails it. The branch it selected, the namespace-scope twins of the containers' range members among the rest, could not be compiled and rotted unseen. |
 
 ## 3. Outputs beyond the status macro
 
@@ -243,7 +252,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [MATH_EXCEPTION](../../etc/config/src/MATH_EXCEPTION.cpp) / `NO_MATH_EXCEPTION` | struct exception in &lt;math.h&gt; | L; `include/ansi/cmath` |
 | [MATH_OVERLOADS](../../etc/config/src/MATH_OVERLOADS.cpp) / `NO_MATH_OVERLOADS` + output | function overloads in &lt;math.h&gt; | none |
 | [MBSTATE_T](../../etc/config/src/MBSTATE_T.cpp) / `NO_MBSTATE_T` + output | mbstate_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/wchar.h` |
-| [MEMBER_TEMPLATES](../../etc/config/src/MEMBER_TEMPLATES.cpp) / `NO_MEMBER_TEMPLATES` | member templates | L/P/T/E; `include/bitset` |
 | [MEMBER_TEMPLATE_OVERLOAD](../../etc/config/src/MEMBER_TEMPLATE_OVERLOAD.cpp) / `NO_MEMBER_TEMPLATE_OVERLOAD` | member template overloads on return type | L; `include/bitset` |
 | [MMAP](../../etc/config/src/MMAP.cpp) / `NO_MMAP` | mmap() and munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [MUNMAP](../../etc/config/src/MUNMAP.cpp) / `NO_MUNMAP` + output | munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |

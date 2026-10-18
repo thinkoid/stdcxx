@@ -7,8 +7,8 @@ A gate is a `_RWSTD_NO_*` macro that a characterization in
 into three families: language features, build modes, and host facts.
 This note lists the language-feature gates that no compiler the tree
 is built with defines, so that they can be retired one by one. The
-member templates gate is the first and is queued; the rest follow its
-pattern.
+member templates gate went first, on 2026-10-17 in bfbf7ac3 and the
+seven commits after it; the rest follow its pattern.
 
 - Three compilers have voted: GCC 16 and Clang (their `config.h` are
   equal, `analysis-clang.md`) and EDG's eccp 7.0 in strict C++03.
@@ -89,7 +89,7 @@ by" names the probes that read the gate (chapter 5).
 
 | gate | question | lib | tests | files | read by |
 | --- | --- | --- | --- | --- | --- |
-| `MEMBER_TEMPLATES` | member templates | 107 | 31 | 17 | `EXTERN_MEMBER_TEMPLATE`, `extern_template_imp` |
+| `MEMBER_TEMPLATES` | member templates | 107 | 31 | 17 | `EXTERN_MEMBER_TEMPLATE`, `extern_template_imp`; retired 2026-10-17 |
 | `CLASS_PARTIAL_SPEC` | partial specialization | 79 | 6 | 16 | `VA_LIST` |
 | `PART_SPEC_OVERLOAD` | partial ordering of function templates | 29 | 3 | 7 | `VA_LIST` |
 | `TEMPLATE_ON_RETURN_TYPE` | function template overloads on the return type | 16 | 4 | 4 | |
@@ -229,7 +229,9 @@ that read it together; the suite equal to the pin after every
 commit; `make config` under eccp unchanged in every other macro.
 Small first, so the pattern settles before the big three.
 
-1. `MEMBER_TEMPLATES` and `MEMBER_TEMPLATE_OVERLOAD`: queued.
+1. `MEMBER_TEMPLATES`: retired, bfbf7ac3 and the seven commits after
+   it, one header group per commit, the probe and its two readers
+   last. `MEMBER_TEMPLATE_OVERLOAD`: queued, with the rest.
 2. The keyword gates of 2.1 as one bundle; `NAMESPACE` on its own
    for its nine probes.
 3. The template gates of 2.2, smallest first; `CLASS_PARTIAL_SPEC`

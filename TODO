@@ -123,44 +123,12 @@ and =DEPENDENT_TEMPLATE.cpp= once nothing reads its macro.
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
-** TODO The member templates gate
-
-No configuration the tree has been built in defines
-=_RWSTD_NO_MEMBER_TEMPLATES=: GCC and Clang pass the =MEMBER_TEMPLATES=
-probe, and no compiler since about 2000 fails it. The gate is read in
-sixteen headers. Where it fires, every range constructor, =assign= and
-=insert= of =string=, =vector=, =list= and =deque= has a non-member
-twin, reached through =_RWSTD_ASSIGN_RANGE= and =_RWSTD_INSERT_RANGE=
-in =rw/_defs.h=, with friend declarations to let the twins at the
-internals. Nobody can compile that branch, so it rots unseen: the
-=deque= rewrite had to write its friend declarations blind, and the
-groom after it removed a forward-tag declaration there that had lost
-its definition. Version 5.0 owes 4.2.x no compatibility.
-
-The second compiler has voted. Under =eccp -A= (the entry "The
-=eccp= configuration" in the EDG chapter) =MEMBER_TEMPLATES=,
-=MEMBER_TEMPLATE_OVERLOAD= and =FUNCTION_TEMPLATE_OVERLOAD= pass as
-under GCC; =EXTERN_MEMBER_TEMPLATE= fails, as C++03 has no extern
-templates, and that macro is not this gate.
-
-Fix: retire the gate one header group at a time, each commit taking
-the =#ifdef= branches, the twins, the friend declarations and the
-dispatch macros together; the probes and the macro go with the last
-group; =ref-characterizations.md= records the retirement. The build
-modes (=_RWSTD_NO_EXCEPTIONS= and the rest) and the host
-characterizations are not this entry. Done: every header group.
-Remaining: the probes and the macro.
-
-Check: =git grep _RWSTD_NO_MEMBER_TEMPLATES= empty under =include=,
-=src= and =tests=; the suite equal to the pin in the GCC debug
-configuration after every commit; =make config= under =eccp= unchanged
-in every other macro.
-
 ** TODO The feature gates after the member templates
 
-Forty-five gates ask whether the compiler accepts a C++98 construct,
+Forty-four gates ask whether the compiler accepts a C++98 construct,
 and no compiler the tree is built with (GCC, Clang, eccp in strict
-C++03) defines one of them. The branch behind each cannot be compiled
+C++03) defines one of them. The member templates gate was the
+forty-fifth; bfbf7ac3 and the seven commits after it retired it. The branch behind each cannot be compiled
 and rots. =doc/notes/analysis-feature-gates.md= is the census: the
 candidates by family with their footprint (chapter 2), sixteen
 probes nobody reads (3), what stays and why (4), the probes that
@@ -170,8 +138,8 @@ lines, 48 library files), =LONG_DOUBLE= (154, 12), =NAMESPACE=
 families and wait on a decision: =HONOR_STD=, =RUNTIME_IN_STD=,
 =PLACEMENT_DELETE=.
 
-Fix: the member templates entry's pattern, one gate or bundle per
-commit, in the note's order: the keyword gates, the template gates,
+Fix: the member templates retirement's pattern, one gate or bundle
+per commit, in the note's order: the keyword gates, the template gates,
 the other language rules, =LONG_DOUBLE=, =WCHAR_T=, then the
 reader-less probes. Each commit takes the =#ifdef= branches, the
 twins, the dispatch macros, the probe and the probes that read it;
@@ -181,6 +149,22 @@ Check: =git grep= of the gate empty under =include=, =src= and
 =tests=; the suite equal to the pin in the GCC debug configuration
 after every commit; =make config= under =eccp= unchanged in every
 other macro.
+
+** TODO The twins' seam in the range members of =vector= and =deque=
+
+The seven out-of-class range members, =_C_assign_range= and
+=_C_insert_range= in =include/vector.cc= and =include/deque.cc=,
+open with =vector* const __self = this;= and reach every member
+through =__self->=. The alias let one body serve the member and its
+namespace-scope twin, which took the container as a parameter. The
+twins left with the member templates gate; the alias is what remains
+of the seam.
+
+Fix: drop the alias and the =__self->= qualification in each body.
+
+Check: the disassembly of a program that exercises the seven members
+unchanged in the debug and the optimized configuration; the suite
+equal to the pin.
 
 ** TODO Dead members and sources of the 4.2.x layout
 
@@ -1001,3 +985,15 @@ replacement =operator new= that writes to the stream while another
 thread ties it. Won't fix (2026-10-13): the report is expected. The
 rest of the table matches the plain one but for the reports. First run,
 2026-10-13 on aarch64: 419 seconds, 274 programs, 12 non-zero exits.
+
+** TODO =ref-characterizations.md= lags the tree by seven probes
+
+The catalogue in chapter 4 has 198 rows against 205 named probes in
+=etc/config/src=. The five =*_ATOMIC_OPS= probes and the two
+=OPERATOR_DELETE_*_SIZED= probes have no row; they arrived after the
+document's 2026-09-27 refresh. The counts in the tl;dr and chapter 2
+were brought to 205 with the member templates retirement; the rows
+were not written.
+
+Fix: the seven rows, in the catalogue's shape, and the support-file
+inventory of chapter 5 checked against the directory.
