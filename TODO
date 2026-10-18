@@ -155,6 +155,32 @@ Check: =git grep _RWSTD_NO_MEMBER_TEMPLATES= empty under =include=,
 configuration after every commit; =make config= under =eccp= unchanged
 in every other macro.
 
+** TODO The feature gates after the member templates
+
+Forty-five gates ask whether the compiler accepts a C++98 construct,
+and no compiler the tree is built with (GCC, Clang, eccp in strict
+C++03) defines one of them. The branch behind each cannot be compiled
+and rots. =doc/notes/analysis-feature-gates.md= is the census: the
+candidates by family with their footprint (chapter 2), sixteen
+probes nobody reads (3), what stays and why (4), the probes that
+read each gate (5), and the order (6). Largest: =WCHAR_T= (524
+lines, 48 library files), =LONG_DOUBLE= (154, 12), =NAMESPACE=
+(145, 32), =CLASS_PARTIAL_SPEC= (90, 16). Three sit between the
+families and wait on a decision: =HONOR_STD=, =RUNTIME_IN_STD=,
+=PLACEMENT_DELETE=.
+
+Fix: the member templates entry's pattern, one gate or bundle per
+commit, in the note's order: the keyword gates, the template gates,
+the other language rules, =LONG_DOUBLE=, =WCHAR_T=, then the
+reader-less probes. Each commit takes the =#ifdef= branches, the
+twins, the dispatch macros, the probe and the probes that read it;
+=ref-characterizations.md= records each retirement.
+
+Check: =git grep= of the gate empty under =include=, =src= and
+=tests=; the suite equal to the pin in the GCC debug configuration
+after every commit; =make config= under =eccp= unchanged in every
+other macro.
+
 ** TODO Dead members and sources of the 4.2.x layout
 
 The revival keeps neither source nor binary compatibility with
