@@ -44,10 +44,8 @@ template <class _CharT, class _Traits, class _Allocator>
 basic_stringbuf<_CharT, _Traits, _Allocator>::
 ~basic_stringbuf ()
 {
-    typedef _RWSTD_ALLOC_TYPE (allocator_type, char_type) _ValueAlloc;
-
     if (this->_C_own_buf ())
-        _ValueAlloc ().deallocate (this->_C_buffer, this->_C_bufsize);
+        allocator_type ().deallocate (this->_C_buffer, this->_C_bufsize);
 }
 
 
@@ -58,11 +56,9 @@ _C_str (const char_type *__s, _RWSTD_SIZE_T __slen)
 {
     _RWSTD_ASSERT (this->_C_is_valid ());
 
-    typedef _RWSTD_ALLOC_TYPE (allocator_type, char_type) _ValueAlloc;
-
     typedef _RWSTD_STREAMSIZE _Streamsize;
 
-    _ValueAlloc __alloc;
+    allocator_type __alloc;
 
     // new buffer and size
     char_type        *__buf;
@@ -340,11 +336,9 @@ setbuf (char_type* __buf, _RWSTD_STREAMSIZE __n)
 
     const bool __own_old_buf = this->_C_own_buf ();
 
-    typedef _RWSTD_ALLOC_TYPE (allocator_type, char_type) _ValueAlloc;
-
     if (0 == __buf) {
         // allocate a new buffer of the specified size
-        __buf = _ValueAlloc ().allocate (__n);
+        __buf = allocator_type ().allocate (__n);
         this->_C_own_buf (true);
     }
     else
@@ -354,7 +348,7 @@ setbuf (char_type* __buf, _RWSTD_STREAMSIZE __n)
     traits_type::copy (__buf, this->_C_buffer, __slen);
 
     if (__own_old_buf)
-        _ValueAlloc ().deallocate (this->_C_buffer, this->_C_bufsize);
+        allocator_type ().deallocate (this->_C_buffer, this->_C_bufsize);
 
     this->_C_buffer  = __buf;
     this->_C_bufsize = __n;

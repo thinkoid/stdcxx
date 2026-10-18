@@ -77,17 +77,11 @@ public:
     typedef void              value_type;
     typedef value_type*       pointer;
     typedef const value_type* const_pointer;
-   
 
-#ifdef _RWSTD_ALLOCATOR
-
-    template <class _TypeU> 
+    template <class _TypeU>
     struct rebind {
         typedef allocator<_TypeU> other;
     };
-
-#endif   // _RWSTD_ALLOCATOR
-    
 };
 
 
@@ -110,9 +104,7 @@ public:
         _RWSTD_UNUSED (__rhs);
     }
 
-#ifdef _RWSTD_ALLOCATOR
-
-    template <class _TypeU> 
+    template <class _TypeU>
     struct rebind {
         typedef allocator<_TypeU> other;
     };
@@ -126,9 +118,6 @@ public:
         return *this; 
     }
 
-#endif   // _RWSTD_ALLOCATOR
-
-
     pointer address (reference __x) const {
         // lwg issue 350
         return reinterpret_cast< pointer >(&reinterpret_cast< char& >(__x));
@@ -141,21 +130,11 @@ public:
     }
 
     pointer allocate (size_type __n, allocator<void>::const_pointer = 0) {
-
-#ifdef _RWSTD_ALLOCATOR
         return static_cast< pointer >(
             __rw::__rw_allocate (__n * sizeof (value_type)));
-#else
-        return static_cast< pointer >(__rw::__rw_allocate (__n));
-#endif   // _RWSTD_ALLOCATOR
     }
 
-#ifdef _RWSTD_ALLOCATOR        
-    void deallocate (pointer __p, size_type __n) _THROWS (())
-#else
-    void deallocate (void* __p, size_type __n) _THROWS (())
-#endif   // _RWSTD_ALLOCATOR
-    {
+    void deallocate (pointer __p, size_type __n) _THROWS (()) {
         __rw::__rw_deallocate (__p, __n);
     }
 
@@ -178,112 +157,6 @@ public:
         __p->~_TypeT ();
     }
 };
-
-
-// allocator_interface provides all types and typed functions.  Memory
-// allocated as raw bytes using the class provided by the Allocator
-// template parameter.  allocator_interface casts appropriately.
-//
-// Multiple allocator_interface objects can attach to a single 
-// allocator, thus allowing one allocator to allocate all storage
-// for a container, regardless of how many types are involved.
-//
-// The only real restriction is that pointer and reference are
-// hard coded as _TypeT* and _TypeT&.  Partial specialization would 
-// get around this.
-//
-#ifndef _RWSTD_ALLOCATOR
-
-template <class _Allocator, class _TypeT>
-class allocator_interface 
-{
-public:
-    typedef _Allocator                                allocator_type;
-    typedef _TypeT                                    value_type;
-    typedef value_type*                               pointer;
-    typedef const value_type*                         const_pointer;
-    typedef value_type&                               reference;
-    typedef const value_type&                         const_reference;
-    typedef typename allocator_type::size_type        size_type;
-    typedef typename allocator_type::difference_type difference_type;
-
-protected:
-    allocator_type _C_alloc;
-
-public:
-    allocator_interface()  _THROWS (())  { }
-
-    allocator_interface (const allocator_type &__alloc)  _THROWS (())
-    : _C_alloc (__alloc) { }
-
-    operator allocator_type& () {
-        return _C_alloc;
-    }
-
-    pointer address (reference __x) const {
-        // lwg issue 350
-        return reinterpret_cast< pointer >(&reinterpret_cast< char& >(__x));
-    }
-  
-    const_pointer address (const_reference __x) const {
-        // lwg issue 350
-        return reinterpret_cast< const_pointer >(
-            &reinterpret_cast< const char& >(__x));
-    }
-
-    size_type max_size () const { 
-        return _C_alloc.max_size () / sizeof (value_type);
-    }
-
-    pointer allocate (size_type __n, const void* __p = 0) {
-        return (pointer)_C_alloc.allocate (__n * sizeof (value_type), __p);
-    }
-
-    void deallocate (pointer __p, size_type __n) {
-        _C_alloc.deallocate (__p, __n);
-    }
-
-    void construct (pointer __p, const_reference __val) {
-        __rw::__rw_construct(__p, __val);
-    }
-
-    void destroy (pointer __p) const {
-        _RWSTD_ASSERT (0 != __p);
-        __p->~_TypeT ();
-    }
-};
-
-
-template <>
-class allocator_interface<allocator<void>, void> 
-{
-public:
-    typedef allocator<void> allocator_type;
-    typedef void*           pointer;
-    typedef const void*     const_pointer;      
-    typedef void            value_type;
-
-protected:
-    allocator_type _C_alloc;
-
-public:
-    allocator_interface () _THROWS (()) { }
-
-    allocator_interface (const allocator<void>& __rhs) _THROWS (())
-    : _C_alloc (__rhs) { }
-
-};
-
-
-template <class _TypeT, class _TypeU, class _TypeV, class _TypeW>
-inline bool
-operator== (const allocator_interface<_TypeT, _TypeU>&, 
-            const allocator_interface<_TypeV, _TypeW>&) _THROWS (())
-{
-    return true;
-}
-
-#endif  // _RWSTD_ALLOCATOR
 
 
 template <class _TypeT, class _TypeU>

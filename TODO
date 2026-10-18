@@ -96,33 +96,6 @@ except the =21.cwchar= coverage, which adds assertions.
 Check: the per-commit check of the removal (=config.h=, object code,
 the non-debug recompile, the suite table) in =11S=.
 
-** TODO The =_RWSTD_REBIND= macro and the allocator shims beside it
-
-=_RWSTD_REBIND (from, to)= in =include/rw/_defs.h= spells
-=typename from::template rebind<to>::other= at eleven sites in
-=deque=, =list=, =string=, =vector= and =_tree.h=. It exists for two
-compilers the matrix no longer has: one without the =template=
-keyword in a dependent name, =_RWSTD_NO_DEPENDENT_TEMPLATE=, which
-Sun's did not accept, and one without member templates at all,
-where the macro names =allocator_interface= instead. The second gate
-is =_RWSTD_ALLOCATOR=, defined unless
-=_RWSTD_NO_SIMPLE_DEFAULT_TEMPLATES= is, and nothing under
-=etc/config/src= characterizes that macro, so the
-=allocator_interface= side has been dead since the import.
-=_RWSTD_ALLOC_TYPE=, =_RWSTD_VALUE_ALLOC= and =_RWSTD_VALUE_ALLOC_CAST=
-are the same workaround, 25 sites and none respectively, and
-=allocator_interface= itself, in =_allocator.h= and
-=_specialized.h=, is its target. The rebind macro was a workaround
-for an ancient Sun compiler; remove it (2026-10-16).
-
-Fix: the three sibling macros and the =_RWSTD_ALLOCATOR= gate with the
-=allocator_interface= side. The rebind was spelled at its eleven sites
-and the macro deleted on 2026-10-18; the =_RWSTD_NO_DEPENDENT_TEMPLATE=
-branch and its probe went with the small template gates on 2026-10-17.
-
-Check: the per-commit check of the removal (=config.h=, object code,
-the non-debug recompile, the suite table) in =11S=.
-
 ** TODO The feature gates after the member templates
 
 Three gates ask whether the compiler accepts a C++98 construct, and no

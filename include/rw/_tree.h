@@ -255,10 +255,10 @@ class __rb_tree : private _Alloc
 private:
     
     typedef __rw_rb_tree_node<_Alloc,_Val,_Key,_KeyOf> _C_node_t; 
-    typedef _RWSTD_ALLOC_TYPE (_Alloc,_Val)            _C_val_alloc_t;
+    typedef _Alloc                                             _C_val_alloc_t;
     typedef typename _Alloc::template rebind<_Key>::other      _C_key_alloc_t;
     typedef typename _Alloc::template rebind<_C_node_t>::other _C_node_alloc_t;
-    typedef typename _C_node_alloc_t::pointer          _C_link_t;
+    typedef typename _C_node_alloc_t::pointer                  _C_link_t;
 
 public:
     
@@ -364,10 +364,8 @@ private:
         _C_link_t __tmp2 = _C_get_link ();
 
         _TRY {
-            _RWSTD_VALUE_ALLOC (_C_val_alloc_t, *this,
-                 construct (_RWSTD_VALUE_ALLOC (_C_val_alloc_t, *this,
-                                                address (__tmp2->_C_value)),
-                            __v));
+            allocator_type::construct (
+                allocator_type::address (__tmp2->_C_value), __v);
         }
         _CATCH (...) {
             _C_put_node (__tmp2, false);
@@ -386,9 +384,7 @@ private:
     void _C_put_node (_C_link_t __p, bool __destroy = true) { 
         __p->_C_child [1] = _C_free_list; 
         if (__destroy)  {
-            _RWSTD_VALUE_ALLOC (_C_val_alloc_t, *this,
-                destroy (_RWSTD_VALUE_ALLOC (_C_val_alloc_t, *this,
-                    address (__p->_C_value))));
+            allocator_type::destroy (allocator_type::address (__p->_C_value));
         }
         _C_free_list = __p; 
     }

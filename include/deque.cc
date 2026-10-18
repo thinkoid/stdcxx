@@ -204,8 +204,7 @@ deque<_TypeT, _Allocator>::_C_reservation::~_C_reservation ()
 {
     if (!_C_done) {
         for ( ; _C_base != _C_cur; ++_C_base)
-            _RWSTD_VALUE_ALLOC (_C_value_alloc_type, _C_deque,
-                                destroy (_C_base._C_address ()));
+            _C_deque.allocator_type::destroy (_C_base._C_address ());
         _C_restore ();
     }
 }

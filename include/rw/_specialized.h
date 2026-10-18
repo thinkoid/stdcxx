@@ -151,8 +151,6 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
 }
 
 
-#ifdef _RWSTD_ALLOCATOR
-
 // extension
 template <class _InputIterator, class _ForwardIterator, class _Allocator>
 inline _ForwardIterator
@@ -173,8 +171,6 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
 
     return __res;
 }
-
-#endif   // _RWSTD_ALLOCATOR
 
 
 // 20.4.4.2
@@ -214,8 +210,6 @@ uninitialized_fill_n (_ForwardIterator __first, _Size __n, const _TypeT& __x)
 }
 
 
-#ifdef _RWSTD_ALLOCATOR
-
 // extension
 template <class _ForwardIter, class _Size, class _TypeT, class _Allocator>
 inline void
@@ -234,64 +228,6 @@ uninitialized_fill_n (_ForwardIter __first, _Size __n,
         _RETHROW;
     }
 }
-
-#else   // if !defined (_RWSTD_ALLOCATOR)
-
-
-template <class _Allocator, class _TypeT>
-class allocator_interface;
-
-// Specializations for non-standard allocators.  When vector calls
-// uninitialized_{copy,fill_n} with non-standard allocator, a temporary
-// instance of allocator_interface is passed to these functions.  Since
-// C++ forbids temporaries to be passed as non-const references, we
-// use these specializations to pass a const reference (and we can force
-// allocator_interface members construct & destroy to be const).
-
-template <class _InputIterator, class _ForwardIterator,
-          class _Allocator, class _TypeT>
-inline _ForwardIterator
-uninitialized_copy (_InputIterator   __first,
-                    _InputIterator   __last,
-                    _ForwardIterator __res,
-                    allocator_interface<_Allocator, _TypeT> &__alloc)
-{
-    _ForwardIterator __start = __res;
-
-    _TRY {
-        for (; __first != __last; ++__first, ++__res)
-            __alloc.construct (__alloc.address (*__res), *__first);
-    }
-    _CATCH (...) {
-        for (; __start != __res; ++__start)
-            __alloc.destroy (__alloc.address (*__start));
-        _RETHROW;
-    }
-
-    return __res;
-}
-
-template <class _ForwardIter, class _Size,
-          class _TypeT, class _Allocator, class _TypeU>
-inline void
-uninitialized_fill_n (_ForwardIter __first, _Size __n,
-                      const _TypeT& __x,
-                      allocator_interface<_Allocator, _TypeU> &__alloc)
-{
-    _ForwardIter __start = __first;
-
-    _TRY {
-        for (; __n; --__n, ++__first)
-            __alloc.construct (__alloc.address (*__first), __x);
-    }
-    _CATCH (...) {
-        for (; __start != __first; ++__start)
-            __alloc.destroy (__alloc.address (*__start));
-        _RETHROW;
-    }
-}
-
-#endif   // _RWSTD_ALLOCATOR
 
 }   // namespace std
 

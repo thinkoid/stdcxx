@@ -72,9 +72,8 @@ _C_get_rep (size_type __cap, size_type __len)
     _C_string_ref_type* const __ret =
         static_cast< _C_string_ref_type* >(
             static_cast< void* >(
-                _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                    allocate (  __cap + sizeof (_C_string_ref_type)
-                              / sizeof (value_type) + 2))));
+                allocator_type::allocate (  __cap + sizeof (_C_string_ref_type)
+                                          / sizeof (value_type) + 2)));
 
     // avoid copy construction (mutex isn't copy-constructible)
     // _C_ref_alloc_type (*this).construct (__ret, _C_string_ref_type ());
@@ -83,8 +82,7 @@ _C_get_rep (size_type __cap, size_type __len)
     // set initial reference count, capacity, and length
     __ret->_C_init (__cap, __len);
 
-    _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                        construct (__ret->data () + __len, value_type ()));
+    allocator_type::construct (__ret->data () + __len, value_type ());
 
     return __ret;
 }

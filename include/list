@@ -192,7 +192,6 @@ public:
 
     typedef typename allocator_type::template rebind<_C_list_node>::other
             _C_node_alloc_type;
-    typedef _RWSTD_ALLOC_TYPE (allocator_type, value_type) _C_value_alloc_type;
 
 
     typedef __rw_list_iter<value_type, difference_type, pointer, reference>
@@ -710,15 +709,11 @@ list<_TypeT, _Allocator>::insert (iterator __it, const_reference __x)
 {
     _RWSTD_ASSERT_RANGE (begin (), __it);
 
-    // create temporary allocator for non-conforming compilers
-    //  which need to use allocator_interface
     _C_link_type __tmp = _C_get_node (false);
 
     _TRY {
-        _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                            construct (_RWSTD_VALUE_ALLOC
-                                       (_C_value_alloc_type, *this,
-                                        address ((*__tmp)._C_data)), __x));
+        allocator_type::construct (allocator_type::address ((*__tmp)._C_data),
+                                   __x);
     }
     _CATCH (...) {
         _C_put_node (__tmp);
@@ -757,9 +752,8 @@ list<_TypeT, _Allocator>::erase (iterator __it)
 
     --_C_length;
 
-    _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                        destroy (_RWSTD_VALUE_ALLOC (_C_value_alloc_type,
-                            *this, address ((*_ITER_NODE (__it))._C_data))));
+    allocator_type::destroy (
+        allocator_type::address ((*_ITER_NODE (__it))._C_data));
     _C_put_node (_ITER_NODE (__it));
 
     return __tmp;

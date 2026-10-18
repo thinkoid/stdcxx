@@ -300,7 +300,7 @@ public:
     typedef typename allocator_type::reference        reference;
     typedef typename allocator_type::const_reference const_reference;
 
-    typedef _RWSTD_ALLOC_TYPE (allocator_type, value_type) _C_value_alloc_type;
+    typedef allocator_type                           _C_value_alloc_type;
 
     // following two typedefs are used for convenience with debug iters
     typedef __rw_deque_iter<value_type, difference_type, pointer,
@@ -467,7 +467,7 @@ public:
     size_type max_size () const {
         const size_type __bufsize = _C_bufsize ();
         const size_type __values =
-            _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this, max_size ());
+            allocator_type::max_size ();
 
         if (__values < __bufsize)
             return 0;
@@ -634,8 +634,7 @@ private:
         void _C_commit ();
 
         void _C_construct (const_reference __x) {
-            _RWSTD_VALUE_ALLOC (_C_value_alloc_type, _C_deque,
-                                construct (_C_cur._C_address (), __x));
+            _C_deque.allocator_type::construct (_C_cur._C_address (), __x);
             ++_C_cur;
         }
 
@@ -746,8 +745,7 @@ deque<_TypeT, _Allocator>::push_front (const_reference __x)
     if (0 == _C_beg._C_offset ())
         _C_push (false, __x);
     else {
-        _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                            construct (_C_beg._C_address () - 1, __x));
+        allocator_type::construct (_C_beg._C_address () - 1, __x);
         --_C_beg;
     }
 
@@ -770,8 +768,7 @@ deque<_TypeT, _Allocator>::push_back (const_reference __x)
     if (0 == _C_end._C_cur)
         _C_push (true, __x);
     else {
-        _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                            construct (_C_end._C_address (), __x));
+        allocator_type::construct (_C_end._C_address (), __x);
         ++_C_end;
     }
 
@@ -784,8 +781,7 @@ inline void
 deque<_TypeT, _Allocator>::pop_front ()
 {
     _RWSTD_ASSERT (_C_is_valid (0));
-    _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                        destroy (_C_beg._C_address ()));
+    allocator_type::destroy (_C_beg._C_address ());
     ++_C_beg;
     _RWSTD_ASSERT (_C_is_valid ());
 }
@@ -797,8 +793,7 @@ deque<_TypeT, _Allocator>::pop_back ()
 {
     _RWSTD_ASSERT (_C_is_valid (0));
     --_C_end;
-    _RWSTD_VALUE_ALLOC (_C_value_alloc_type, *this,
-                        destroy (_C_end._C_address ()));
+    allocator_type::destroy (_C_end._C_address ());
     _RWSTD_ASSERT (_C_is_valid ());
 }
 

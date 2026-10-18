@@ -387,15 +387,6 @@
 #define _RWSTD_REDECLARED_DEFAULT(arg)   = arg
 
 
-//
-// If compiler supports member and default templates then it supports
-// the _RWSTD_ALLOCATOR
-//
-#ifndef _RWSTD_NO_SIMPLE_DEFAULT_TEMPLATES
-#  define _RWSTD_ALLOCATOR
-#endif
-
-
 #define _RWSTD_MB_CUR_MAX 16  // FIXME: must be determined dynamically
 
 // helper macros for token pasting
@@ -625,37 +616,6 @@
 #  define _THROW(ignore)   ((void)0)
 #  define _RETHROW         ((void)0)
 #endif   // _RWSTD_NO_EXCEPTIONS
-
-
-// for compilers that can't handle standard allocators we provide three
-// workarounds: _RWSTD_ALLOC_TYPE is required to "rebind", or rather wrap,
-// the user supplied non-conforming allocator in allocator_interface so that
-// the container need not be aware of the allocator's special properties
-// (namely the fact that the allocator allocates in terms of bytes rather
-// than elemements)
-//
-// _RWSTD_VALUE_ALLOC creates a temporary allocator_interface wrapper
-// from the given parameter (usually *this) when allocating values in
-// the sequence containers with non-conforming allocators.
-// _RWSTD_VALUE_ALLOC_CAST casts the given container to a reference to
-// a value allocator, allowing access to inherited allocator members
-// outside of the class.  For non-conforming compilers, this macro is
-// equivalent to _RWSTD_VALUE_ALLOC.
-#ifdef _RWSTD_ALLOCATOR
-#  define _RWSTD_ALLOC_TYPE(Allocator, ignore)        \
-          Allocator
-#  define _RWSTD_VALUE_ALLOC(ignore, object, call)    \
-          (object).allocator_type::call
-#  define _RWSTD_VALUE_ALLOC_CAST(rvalue)             \
-          static_cast< allocator_type& >(rvalue)
-#else   // if !defined (_RWSTD_ALLOCATOR)
-#  define _RWSTD_ALLOC_TYPE(Allocator, T)             \
-          std::allocator_interface < Allocator, T >
-#  define _RWSTD_VALUE_ALLOC(Allocator, object, call) \
-           Allocator (object).call
-#  define _RWSTD_VALUE_ALLOC_CAST(rvalue)             \
-          _C_value_alloc_type (rvalue)
-#endif   // _RWSTD_ALLOCATOR
 
 
 // support for building the new locale (v.3)
