@@ -1207,8 +1207,6 @@ global:
     _ZnajRKSt9nothrow_t;
     _Znwj;
     _ZnwjRKSt9nothrow_t;
-    __rw_atomic_add32;
-    __rw_atomic_xchg32;
     __rw_tmpbuf;
 
 local:

@@ -134,23 +134,6 @@ Check: the disassembly of a program that exercises the seven members
 unchanged in the debug and the optimized configuration; the suite
 equal to the pin.
 
-** TODO Dead members and sources of the 4.2.x layout
-
-The revival keeps neither source nor binary compatibility with
-4.2.x; the next version is 5.0, named from the state of the library
-when it is cut.
-Two things stayed only for that compatibility:
-- The =numpunct= cache members, unused since 2e196ebb
-  (=include/loc/_numpunct.h:117=).
-- =src/x86/atomic.s=, =src/x86_64/atomic.s= and the symbols they
-  export; no header has referred to them since the backend moved to
-  the =__atomic= built-ins.
-
-Fix: remove the members, remove the sources and their symbols.
-
-Check: the exported symbols lose exactly the assembly routines. The
-suites are otherwise unchanged.
-
 ** TODO =time_get::do_date_order= returns =no_order= in every locale
 
 The base facet returns =dateorder ()= and no byname facet overrides

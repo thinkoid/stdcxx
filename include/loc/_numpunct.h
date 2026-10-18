@@ -57,7 +57,7 @@ struct numpunct: __rw::__rw_facet
     string_type;
 
     explicit numpunct (_RWSTD_SIZE_T __ref = 0)
-        : __rw::__rw_facet (__ref), _C_flags (0) { }
+        : __rw::__rw_facet (__ref) { }
 
     virtual ~numpunct () _RWSTD_ATTRIBUTE_NOTHROW;
 
@@ -105,18 +105,6 @@ protected:
     virtual string_type do_falsename () const {
         return __rw::__rw_get_punct (this, __rw::__rw_fn, char_type ());
     }
-
-private:
-
-    // unused: the public members once cached the results of the
-    // virtuals here, unsynchronized in a facet that threads share;
-    // kept for binary compatibility until the next minor version
-    int         _C_flags;
-    string      _C_grouping;
-    string_type _C_truename;
-    string_type _C_falsename;
-    char_type   _C_decimal_point;
-    char_type   _C_thousands_sep;
 };
 
 
