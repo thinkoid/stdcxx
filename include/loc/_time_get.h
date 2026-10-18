@@ -131,9 +131,7 @@ public:
 
 protected:
 
-    virtual dateorder do_date_order()  const {
-        return dateorder ();
-    }
+    virtual dateorder do_date_order () const;
 
     virtual iter_type
     do_get_time (iter_type __it, iter_type __end, ios_base &__fl,

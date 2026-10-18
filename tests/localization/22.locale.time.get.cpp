@@ -262,6 +262,14 @@ void test_posix (charT, const char *cname)
     // set the global locale object
     std::locale::global (std::locale ("C"));
 
+    // 22.2.5.1.2, p1: the order of the components of the x format
+    rw_assert (std::time_base::mdy == std::use_facet<std::time_get<charT> >(
+                   std::locale ()).date_order (), 0, __LINE__,
+               "std::time_get<%s>::date_order() in locale (\"%s\") "
+               "== %d, got %d", cname, std::locale ().name ().c_str (),
+               std::time_base::mdy, std::use_facet<std::time_get<charT> >(
+                   std::locale ()).date_order ());
+
     // exercise abbreviated weekday names (time_get::get_weekday())
     FUNCTION ("get_weekday");
 
@@ -876,6 +884,14 @@ void test_english (charT, const char *cname, const char *locname)
         return;
     }
 
+    // 22.2.5.1.2, p1: the order of the components of the x format
+    rw_assert (std::time_base::mdy == std::use_facet<std::time_get<charT> >(
+                   std::locale ()).date_order (), 0, __LINE__,
+               "std::time_get<%s>::date_order() in locale (\"%s\") "
+               "== %d, got %d", cname, std::locale ().name ().c_str (),
+               std::time_base::mdy, std::use_facet<std::time_get<charT> >(
+                   std::locale ()).date_order ());
+
     // exercise abbreviated weekday names
     FUNCTION ("get_weekday");
     TEST (T (0, 0, 0, 0, 0, 0, 0), "Sun", 3, "a", 0, Eof);
@@ -993,6 +1009,14 @@ void test_german (charT, const char *cname, const char *locname)
         return;
     }
 
+    // 22.2.5.1.2, p1: the order of the components of the x format
+    rw_assert (std::time_base::dmy == std::use_facet<std::time_get<charT> >(
+                   std::locale ()).date_order (), 0, __LINE__,
+               "std::time_get<%s>::date_order() in locale (\"%s\") "
+               "== %d, got %d", cname, std::locale ().name ().c_str (),
+               std::time_base::dmy, std::use_facet<std::time_get<charT> >(
+                   std::locale ()).date_order ());
+
     // exercise abbreviated weekday names
     // these may be { So, Mo, Di, Mi, Do, Sa } (e.g., Compaq Tru64 UNIX)
     // or { Son, Mon, Die, Mit, Don, Sam } (e.g., Linux, SunOS, or Win32)
@@ -1046,6 +1070,14 @@ void test_danish (charT, const char *cname, const char *locname)
 
         return;
     }
+
+    // 22.2.5.1.2, p1: the order of the components of the x format
+    rw_assert (std::time_base::dmy == std::use_facet<std::time_get<charT> >(
+                   std::locale ()).date_order (), 0, __LINE__,
+               "std::time_get<%s>::date_order() in locale (\"%s\") "
+               "== %d, got %d", cname, std::locale ().name ().c_str (),
+               std::time_base::dmy, std::use_facet<std::time_get<charT> >(
+                   std::locale ()).date_order ());
 
     // exercise abbreviated weekday names
     // the length of <s><o/><n> and <l><o/><r> depends on the codeset

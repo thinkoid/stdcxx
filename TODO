@@ -41,26 +41,6 @@ Check: a section of =23.deque.storage= with a grown-then-drained deque
 that counts map reads per bufferful and finds a constant; the
 allocator section's ownership checks unchanged; the suite unchanged.
 
-** TODO =time_get::do_date_order= returns =no_order= in every locale
-
-The base facet returns =dateorder ()= and no byname facet overrides
-it, since the 2005 import. 22.2.5.1.2, p1 asks for the order of the
-components of the =x= format when it is composed of day, month and
-year, and footnote 233 allows =no_order= "in valid locales", so the
-library conforms. The =time_get= example prints =date_order ()= in
-the =C= locale, whose =x= is =%m/%d/%y=, and its expected output has
-said =mdy= since the import, so the example has shown =DIFF= on
-every platform the tree ever ran on. The suite does not assert
-=date_order= anywhere.
-
-Fix: decide. Either =do_date_order= reads the facet's =x= format and
-answers =dmy=, =mdy=, =ymd= or =ydm= when the format is one of the
-four, the convenience the footnote describes, or the expected output
-takes =0= and the example documents what the library does.
-
-Check: the =time_get= example row is clean, and =22.locale.time.get=
-asserts =date_order= for the =C= locale and one named locale.
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it

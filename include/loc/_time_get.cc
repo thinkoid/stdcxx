@@ -60,6 +60,97 @@ template <class _CharT, class _InputIter>
 }
 
 
+// 22.2.5.1.2, p1: the order of the day, month and year components
+// of the facet's x format. The order is read off the format: %d and
+// %e are the day, %b, %B, %h and %m the month, %C, %y and %Y the
+// year, %D and %F the sequences they stand for; the E and O
+// modifiers, %%, whitespace and the weekday conversions are skipped
+// since they do not take part in the order. A format that lacks one
+// of the three, repeats one, or carries any other conversion gives
+// no_order, which footnote 233 allows in a valid locale.
+template <class _CharT, class _InputIter>
+/* virtual */ typename time_get<_CharT, _InputIter>::dateorder
+time_get<_CharT, _InputIter>::
+do_date_order () const
+{
+    const char_type* __names [1];
+    _RWSTD_SIZE_T    __sizes [1];
+
+    const void** __pv =
+        reinterpret_cast< const void** >(__names);
+
+    tm   __tmp  = tm ();
+    int *__pmem = 0;
+
+    int __data [4] = {
+        'x', '\0', sizeof (char_type) > sizeof (char), 0
+    };
+
+    // the x format, a single string stored in `names [0]'
+    const _RWSTD_SIZE_T __cnt =
+        __rw::__rw_get_timepunct (this, __data, &__tmp,
+                                 &__pmem, __pv, __sizes);
+
+    if (1 != __cnt)
+        return no_order;
+
+    char          __order [3];
+    _RWSTD_SIZE_T __n = 0;
+
+    const char_type*       __p   = __names [0];
+    const char_type* const __end = __p + __sizes [0];
+
+    for ( ; __p != __end; ++__p) {
+
+        if (char_type ('%') != *__p)
+            continue;
+
+        if (++__p == __end)
+            break;
+
+        if (char_type ('E') == *__p || char_type ('O') == *__p)
+            if (++__p == __end)
+                break;
+
+        const char *__comp = "";
+
+        switch (*__p) {
+        case 'd': case 'e':                     __comp = "d";   break;
+        case 'b': case 'B': case 'h': case 'm': __comp = "m";   break;
+        case 'C': case 'y': case 'Y':           __comp = "y";   break;
+        case 'D':                               __comp = "mdy"; break;
+        case 'F':                               __comp = "ymd"; break;
+        case 'a': case 'A': case 'n': case 't': case '%':       break;
+        default:
+            return no_order;
+        }
+
+        for ( ; *__comp; ++__comp) {
+
+            if (3 == __n)
+                return no_order;
+
+            for (_RWSTD_SIZE_T __i = 0; __i != __n; ++__i)
+                if (__order [__i] == *__comp)
+                    return no_order;
+
+            __order [__n++] = *__comp;
+        }
+    }
+
+    if (3 != __n)
+        return no_order;
+
+    if ('d' == __order [0])
+        return 'm' == __order [1] ? dmy : no_order;
+
+    if ('m' == __order [0])
+        return 'd' == __order [1] ? mdy : no_order;
+
+    return 'm' == __order [1] ? ymd : ydm;
+}
+
+
 template <class _CharT, class _InputIter>
 typename time_get<_CharT, _InputIter>::iter_type
 time_get<_CharT, _InputIter>::
