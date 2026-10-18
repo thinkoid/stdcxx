@@ -62,39 +62,17 @@ constructor, the way the =deque= test's loop now runs.
 
 The removal of the C library function probes (f43be017..a44256a6)
 kept to the code that read the probe macros. Its census found dead
-or stale code beside them. No tracked configuration compiles any of
-it differently.
+or stale code beside them; most went on 2026-10-18. Two items remain.
 
-- =_RWSTD_NO_USING_LIBC_IN_STD= is defined nowhere. Fifteen headers
-  test it around their =namespace std= blocks.
-- =src/file.cpp= declares =fileno= under
-  =#ifndef _RWSTD_NO_PURE_C_HEADERS=, which the file defines above;
-  the block cannot be compiled.
-- =_cstdio.h= declares =gets= in =std= and =stdio.h= exports it, both
-  in pure-headers mode only. The default mode leaves it out, as
-  C++14 does.
-- =_RWSTD_FMT_TYPE=, =_RWSTD_FMT_ASSGN=, =_STRTOLL= and =_STRTOULL=
-  in =_defs.h= have had no user since the 2005 import.
-  =_RWSTD_WCSFTIME_ARG3_T= has no reader outside its
-  characterization. =config.h= carries =_RWSTD_NO_ABS_INT=; nothing
-  reads it.
-- =<cmath>='s =_FABSF= calls =fabsf= without the =::= of its 43
-  siblings. The 44 =_<F>F= and =_<F>L= macros could be inlined into
-  the overloads that call them.
 - =21.cwchar= exercises none of =wcscoll=, =wcsncat=, =vswprintf=,
   =vwprintf=, =getwchar=, =putwchar=.
 - =libc_decl.sh= only looks for headers now; its name says more.
   =headers.inc= holds one list, for one script.
-- Hypothesis: =__rw_get_timepunct= calls =wcsftime= with wide literal
-  formats whatever =_RWSTD_NO_WCSFTIME_WCHAR_T_FMAT= says; on a C
-  library whose third parameter is =const char*= it would not
-  compile. Check: =git log -L= on those calls for a platform note.
 
-Fix: one commit per item, each inert on the six configurations
-except the =21.cwchar= coverage, which adds assertions.
+Fix: one commit per item; the =21.cwchar= coverage adds assertions
+and moves the pin.
 
-Check: the per-commit check of the removal (=config.h=, object code,
-the non-debug recompile, the suite table) in =11S=.
+Check: the suite table; =make config= unchanged for the script.
 
 ** TODO The twins' seam in the range members of =vector= and =deque=
 

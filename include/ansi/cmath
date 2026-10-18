@@ -81,63 +81,13 @@ namespace std {
 #undef tan
 
 
-#define _ACOSF(x)    ::acosf (x)
-#define _ASINF(x)    ::asinf (x)
-#define _ATANF(x)    ::atanf (x)
-#define _ATAN2F(x, y)    ::atan2f (x, y)
-#define _CEILF(x)    ::ceilf (x)
-#define _COSF(x)    ::cosf (x)
-#define _COSHF(x)    ::coshf (x)
-#define _EXPF(x)    ::expf (x)
-#define _FABSF(x)    fabsf (x)
-#define _FLOORF(x)    ::floorf (x)
-#define _FMODF(x, y)    ::fmodf (x, y)
-#define _FREXPF(x, y)    ::frexpf (x, y)
-#define _LDEXPF(x, y)    ::ldexpf (x, y)
-#define _LOGF(x)    ::logf (x)
-#define _LOG10F(x)    ::log10f (x)
-#define _MODFF(x, y)    ::modff (x, y)
-#define _POWF(x, y)    ::powf (x, y)
-#define _SINF(x)    ::sinf (x)
-#define _SINHF(x)    ::sinhf (x)
-#define _SQRTF(x)    ::sqrtf (x)
-#define _TANF(x)    ::tanf (x)
-#define _TANHF(x)    ::tanhf (x)
-
-
-#define _ACOSL(x)    ::acosl (x)
-#define _ASINL(x)    ::asinl (x)
-#define _ATANL(x)    ::atanl (x)
-#define _ATAN2L(x, y)    ::atan2l (x, y)
-#define _CEILL(x)    ::ceill (x)
-#define _COSL(x)    ::cosl (x)
-#define _COSHL(x)    ::coshl (x)
-#define _EXPL(x)    ::expl (x)
-#define _FABSL(x)    ::fabsl (x)
-#define _FLOORL(x)    ::floorl (x)
-#define _FMODL(x, y)    ::fmodl (x, y)
-#define _FREXPL(x, y)    ::frexpl (x, y)
-#define _LDEXPL(x, y)    ::ldexpl (x, y)
-#define _LOGL(x)    ::logl (x)
-#define _LOG10L(x)    ::log10l (x)
-#define _MODFL(x, y)    ::modfl (x, y)
-#define _POWL(x, y)    ::powl (x, y)
-#define _SINL(x)    ::sinl (x)
-#define _SINHL(x)    ::sinhl (x)
-#define _SQRTL(x)    ::sqrtl (x)
-#define _TANL(x)    ::tanl (x)
-#define _TANHL(x)    ::tanhl (x)
-
-
-#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 namespace std { 
-#endif  // !_RWSTD_NO_USING_LIBC_IN_STD
 
 // float overloads
 #if defined (_RWSTD_NO_ABS_FLT)
 inline float abs (float __x)
 {
-    return _FABSF (__x);
+    return ::fabsf (__x);
 }
 #  undef _RWSTD_NO_ABS_FLT
 #  else
@@ -147,21 +97,21 @@ using ::abs;
 #if defined (_RWSTD_NO_ACOS_FLT)
 inline float acos (float __x)
 {
-    return _ACOSF (__x);
+    return ::acosf (__x);
 }
 #endif   // _RWSTD_NO_ACOS_FLT
 
 #if defined (_RWSTD_NO_ASIN_FLT)
 inline float asin (float __x)
 {
-    return _ASINF (__x);
+    return ::asinf (__x);
 }
 #endif   // _RWSTD_NO_ASIN_FLT
 
 #if defined (_RWSTD_NO_ATAN_FLT)
 inline float atan (float __x)
 {
-    return _ATANF (__x);
+    return ::atanf (__x);
 }
 #endif   // _RWSTD_NO_ATAN_FLT
 
@@ -169,7 +119,7 @@ inline float atan (float __x)
 #if defined (_RWSTD_NO_ATAN2_FLT)
 inline float atan2 (float __x, float __y)
 {
-    return _ATAN2F (__x, __y);
+    return ::atan2f (__x, __y);
 }
 #endif   // _RWSTD_NO_ATAN2_FLT
 
@@ -177,7 +127,7 @@ inline float atan2 (float __x, float __y)
 #if defined (_RWSTD_NO_CEIL_FLT)
 inline float ceil (float __x)
 {
-    return _CEILF (__x);
+    return ::ceilf (__x);
 }
 #endif   // _RWSTD_NO_CEIL_FLT
 
@@ -185,7 +135,7 @@ inline float ceil (float __x)
 #if defined (_RWSTD_NO_COS_FLT)
 inline float cos (float __x)
 {
-    return _COSF (__x);
+    return ::cosf (__x);
 }
 #endif   // _RWSTD_NO_COS_FLT
 
@@ -193,7 +143,7 @@ inline float cos (float __x)
 #if defined (_RWSTD_NO_COSH_FLT)
 inline float cosh (float __x)
 {
-    return _COSHF (__x);
+    return ::coshf (__x);
 }
 #endif   // _RWSTD_NO_COSH_FLT
 
@@ -201,7 +151,7 @@ inline float cosh (float __x)
 #if defined (_RWSTD_NO_EXP_FLT)
 inline float exp (float __x)
 {
-    return _EXPF (__x);
+    return ::expf (__x);
 }
 #endif   // _RWSTD_NO_EXP_FLT
 
@@ -209,7 +159,7 @@ inline float exp (float __x)
 #if defined (_RWSTD_NO_FABS_FLT)
 inline float fabs (float __x)
 {
-    return _FABSF (__x);
+    return ::fabsf (__x);
 }
 #  undef _RWSTD_NO_FABS_FLT
 #endif   // _RWSTD_NO_FABS_FLT
@@ -218,7 +168,7 @@ inline float fabs (float __x)
 #if defined (_RWSTD_NO_FLOOR_FLT)
 inline float floor (float __x)
 {
-    return _FLOORF (__x);
+    return ::floorf (__x);
 }
 #endif   // _RWSTD_NO_FLOOR_FLT
 
@@ -226,7 +176,7 @@ inline float floor (float __x)
 #if defined (_RWSTD_NO_FMOD_FLT)
 inline float fmod (float __x, float __y)
 {
-    return _FMODF (__x, __y);
+    return ::fmodf (__x, __y);
 }
 #endif   // _RWSTD_NO_FMOD_FLT
 
@@ -234,7 +184,7 @@ inline float fmod (float __x, float __y)
 #if defined (_RWSTD_NO_FREXP_FLT)
 inline float frexp (float __x, int *__e)
 {
-    return _FREXPF (__x, __e);
+    return ::frexpf (__x, __e);
 }
 #endif   // _RWSTD_NO_FREXP_FLT
 
@@ -242,7 +192,7 @@ inline float frexp (float __x, int *__e)
 #if defined (_RWSTD_NO_LDEXP_FLT_INT)
 inline float ldexp (float __x, int __e)
 {
-    return _LDEXPF (__x, __e);
+    return ::ldexpf (__x, __e);
 }
 #endif   // _RWSTD_NO_LDEXP_FLT_INT
 
@@ -250,7 +200,7 @@ inline float ldexp (float __x, int __e)
 #if defined (_RWSTD_NO_LOG_FLT)
 inline float log (float __x)
 {
-    return _LOGF (__x);
+    return ::logf (__x);
 }
 #endif   // _RWSTD_NO_LOG_FLT
 
@@ -258,7 +208,7 @@ inline float log (float __x)
 #if defined (_RWSTD_NO_LOG10_FLT)
 inline float log10 (float __x)
 {
-    return _LOG10F (__x);
+    return ::log10f (__x);
 }
 #endif   // _RWSTD_NO_LOG10_FLT
 
@@ -266,7 +216,7 @@ inline float log10 (float __x)
 #if defined (_RWSTD_NO_MODF_FLT)
 inline float modf (float __x, float *__y)
 {
-    return _MODFF (__x, __y);
+    return ::modff (__x, __y);
 }
 #endif   // _RWSTD_NO_MODF_FLT
 
@@ -274,7 +224,7 @@ inline float modf (float __x, float *__y)
 #ifdef _RWSTD_NO_POW_FLT
 inline float pow (float __x, float __y)
 {
-    return _POWF (__x, __y);
+    return ::powf (__x, __y);
 }
 #endif   // _RWSTD_NO_POW_FLT
 
@@ -297,7 +247,7 @@ inline float pow (float __x, int __y)
 #if defined (_RWSTD_NO_SIN_FLT)
 inline float sin (float __x)
 {
-    return _SINF (__x);
+    return ::sinf (__x);
 }
 #endif   // _RWSTD_NO_SIN_FLT
 
@@ -305,7 +255,7 @@ inline float sin (float __x)
 #if defined (_RWSTD_NO_SINH_FLT)
 inline float sinh (float __x)
 {
-    return _SINHF (__x);
+    return ::sinhf (__x);
 }
 #endif   // _RWSTD_NO_SINH_FLT
 
@@ -313,7 +263,7 @@ inline float sinh (float __x)
 #if defined (_RWSTD_NO_SQRT_FLT)
 inline float sqrt (float __x)
 {
-    return _SQRTF (__x);
+    return ::sqrtf (__x);
 }
 #endif   // _RWSTD_NO_SQRT_FLT
 
@@ -321,7 +271,7 @@ inline float sqrt (float __x)
 #if defined (_RWSTD_NO_TAN_FLT)
 inline float tan (float __x)
 {
-    return _TANF (__x);
+    return ::tanf (__x);
 }
 #endif   // _RWSTD_NO_TAN_FLT
 
@@ -329,7 +279,7 @@ inline float tan (float __x)
 #if defined (_RWSTD_NO_TANH_FLT)
 inline float tanh (float __x)
 {
-    return _TANHF (__x);
+    return ::tanhf (__x);
 }
 #endif   // _RWSTD_NO_TANH_FLT
 
@@ -379,7 +329,7 @@ inline double pow (double __x, int __y)
 #if defined (_RWSTD_NO_ABS_LDBL)
 inline long double abs (long double __x)
 {
-    return _FABSL (__x);
+    return ::fabsl (__x);
 }
 #undef _RWSTD_NO_ABS_LDBL
 #else
@@ -390,7 +340,7 @@ using ::abs;
 #if defined (_RWSTD_NO_ACOS_LDBL)
 inline long double acos (long double __x)
 {
-    return _ACOSL (__x);
+    return ::acosl (__x);
 }
 #endif   // _RWSTD_NO_ACOS_LDBL
 
@@ -398,7 +348,7 @@ inline long double acos (long double __x)
 #if defined (_RWSTD_NO_ASIN_LDBL)
 inline long double asin (long double __x)
 {
-    return _ASINL (__x);
+    return ::asinl (__x);
 }
 #endif   // _RWSTD_NO_ASIN_LDBL
 
@@ -406,7 +356,7 @@ inline long double asin (long double __x)
 #if defined (_RWSTD_NO_ATAN_LDBL)
 inline long double atan (long double __x)
 {
-    return _ATANL (__x);
+    return ::atanl (__x);
 }
 #endif   // _RWSTD_NO_ATAN_LDBL
 
@@ -414,7 +364,7 @@ inline long double atan (long double __x)
 #if defined (_RWSTD_NO_ATAN2_LDBL)
 inline long double atan2 (long double __x, long double __y)
 {
-    return _ATAN2L (__x, __y);
+    return ::atan2l (__x, __y);
 }
 #endif   // _RWSTD_NO_ATAN2_LDBL
 
@@ -422,7 +372,7 @@ inline long double atan2 (long double __x, long double __y)
 #if defined (_RWSTD_NO_CEIL_LDBL)
 inline long double ceil (long double __x)
 {
-    return _CEILL (__x);
+    return ::ceill (__x);
 }
 #endif   // _RWSTD_NO_CEIL_LDBL
 
@@ -430,7 +380,7 @@ inline long double ceil (long double __x)
 #if defined (_RWSTD_NO_COS_LDBL)
 inline long double cos (long double __x)
 {
-    return _COSL (__x);
+    return ::cosl (__x);
 }
 #endif   // _RWSTD_NO_COS_LDBL
 
@@ -438,7 +388,7 @@ inline long double cos (long double __x)
 #if defined (_RWSTD_NO_COSH_LDBL)
 inline long double cosh (long double __x)
 {
-    return _COSHL (__x);
+    return ::coshl (__x);
 }
 #endif   // _RWSTD_NO_COSH_LDBL
 
@@ -446,7 +396,7 @@ inline long double cosh (long double __x)
 #if defined (_RWSTD_NO_EXP_LDBL)
 inline long double exp (long double __x)
 {
-    return _EXPL (__x);
+    return ::expl (__x);
 }
 #endif   // _RWSTD_NO_EXP_LDBL
 
@@ -454,7 +404,7 @@ inline long double exp (long double __x)
 #if defined (_RWSTD_NO_FABS_LDBL)
 inline long double fabs (long double __x)
 {
-    return _FABSL (__x);
+    return ::fabsl (__x);
 }
 #undef _RWSTD_NO_FABS_LDBL
 #endif   // _RWSTD_NO_FABS_LDBL
@@ -463,7 +413,7 @@ inline long double fabs (long double __x)
 #if defined (_RWSTD_NO_FLOOR_LDBL)
 inline long double floor (long double __x)
 {
-    return _FLOORL (__x);
+    return ::floorl (__x);
 }
 #endif   // _RWSTD_NO_FLOOR_LDBL
 
@@ -471,7 +421,7 @@ inline long double floor (long double __x)
 #if defined (_RWSTD_NO_FMOD_LDBL)
 inline long double fmod (long double __x, long double __y)
 {
-    return _FMODL (__x, __y);
+    return ::fmodl (__x, __y);
 }
 #endif   // _RWSTD_NO_FMOD_LDBL
 
@@ -479,7 +429,7 @@ inline long double fmod (long double __x, long double __y)
 #if defined (_RWSTD_NO_FREXP_LDBL)
 inline long double frexp (long double __x, int *__e)
 {
-    return _FREXPL (__x, __e);
+    return ::frexpl (__x, __e);
 }
 #endif   // _RWSTD_NO_FREXP_LDBL
 
@@ -487,7 +437,7 @@ inline long double frexp (long double __x, int *__e)
 #if defined (_RWSTD_NO_LDEXP_LDBL_INT)
 inline long double ldexp (long double __x, int __e)
 {
-    return _LDEXPL (__x, __e);
+    return ::ldexpl (__x, __e);
 }
 #endif   // _RWSTD_NO_LDEXP_LDBL_INT
 
@@ -495,7 +445,7 @@ inline long double ldexp (long double __x, int __e)
 #if defined (_RWSTD_NO_LOG_LDBL)
 inline long double log (long double __x)
 {
-    return _LOGL (__x);
+    return ::logl (__x);
 }
 #endif   // _RWSTD_NO_LOG_LDBL
 
@@ -503,7 +453,7 @@ inline long double log (long double __x)
 #if defined (_RWSTD_NO_LOG10_LDBL)
 inline long double log10 (long double __x)
 {
-    return _LOG10L (__x);
+    return ::log10l (__x);
 }
 #endif   // _RWSTD_NO_LOG10_LDBL
 
@@ -511,7 +461,7 @@ inline long double log10 (long double __x)
 #if defined (_RWSTD_NO_MODF_LDBL)
 inline long double modf (long double __x, long double *__y)
 {
-    return _MODFL (__x, __y);
+    return ::modfl (__x, __y);
 }
 #endif   // _RWSTD_NO_MODF_LDBL
 
@@ -519,7 +469,7 @@ inline long double modf (long double __x, long double *__y)
 #ifdef _RWSTD_NO_POW_LDBL
 inline long double pow (long double __x, long double __y)
 {
-    return _POWL (__x, __y);
+    return ::powl (__x, __y);
 }
 #endif   // _RWSTD_NO_POW_LDBL
 
@@ -543,7 +493,7 @@ inline long double pow (long double __x, int __y)
 #if defined (_RWSTD_NO_SIN_LDBL)
 inline long double sin (long double __x)
 {
-    return _SINL (__x);
+    return ::sinl (__x);
 }
 #endif   // _RWSTD_NO_SIN_LDBL
 
@@ -551,7 +501,7 @@ inline long double sin (long double __x)
 #if defined (_RWSTD_NO_SINH_LDBL)
 inline long double sinh (long double __x)
 {
-    return _SINHL (__x);
+    return ::sinhl (__x);
 }
 #endif   // _RWSTD_NO_SINH_LDBL
 
@@ -559,7 +509,7 @@ inline long double sinh (long double __x)
 #if defined (_RWSTD_NO_SQRT_LDBL)
 inline long double sqrt (long double __x)
 {
-    return _SQRTL (__x);
+    return ::sqrtl (__x);
 }
 #endif   // _RWSTD_NO_SQRT_LDBL
 
@@ -567,7 +517,7 @@ inline long double sqrt (long double __x)
 #if defined (_RWSTD_NO_TAN_LDBL)
 inline long double tan (long double __x)
 {
-    return _TANL (__x);
+    return ::tanl (__x);
 }
 #endif   // _RWSTD_NO_TAN_LDBL
 
@@ -575,15 +525,13 @@ inline long double tan (long double __x)
 #if defined (_RWSTD_NO_TANH_LDBL)
 inline long double tanh (long double __x)
 {
-    return _TANHL (__x);
+    return ::tanhl (__x);
 }
 #endif   // _RWSTD_NO_TANH_LDBL
 
 
-
 // using statements must come after the overloads.
 // working around MSVC6 PR# 27677
-#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 
 using ::acos;
 using ::asin;
@@ -608,11 +556,7 @@ using ::sqrt;
 using ::tan;
 using ::tanh;
 
-#endif   // !_RWSTD_NO_USING_LIBC_IN_STD
-
-#if !defined (_RWSTD_NO_USING_LIBC_IN_STD)
 }   // namespace std
-#endif   // !_RWSTD_NO_USING_LIBC_IN_STD
 
 
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
