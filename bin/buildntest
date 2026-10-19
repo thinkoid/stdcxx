@@ -59,8 +59,8 @@
 #         to all.
 #                            
 #     -o <output-file>
-#         Specifies the name of the ouptut file to create. When omitted,
-#         defaults to STDOUT and STDERR.
+#         Specifies the name of the output file to create. When omitted,
+#         the script writes to STDOUT and STDERR.
 #
 #     -t <tests-to-build>
 #         Specifies the list of tests to build. When omitted, defaults
@@ -381,14 +381,8 @@ EOF
 ##########
 # main body of script
 
-# write the name of the script and all arguments
-echo "### running $0 $* [$#]"
-
-
 # process command line options
 while getopts ":knve:l:o:t:u:B:C:E:L:M:P:T:" opt_name; do
-
-    echo "$opt_name:$OPTARG"
 
     case $opt_name in
         # options with no arguments 
@@ -480,6 +474,15 @@ fi
 if [ "$run_tests" = "*" ]; then
     run_tests="$build_tests"
 fi
+
+
+# with -o, write everything from here on to the output file
+if [ "$outfile" != "" ]; then
+    exec > "$outfile" 2>&1
+fi
+
+# write the name of the script and all arguments
+echo "### running $0 $* [$#]"
 
 
 # remove command line options and their arguments from the command line
