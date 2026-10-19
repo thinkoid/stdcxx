@@ -93,24 +93,6 @@ Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
 =18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
 reads the new guard.
 
-** TODO A build from the 4 KiB-page kernel fails the locale tests under 16 KiB pages
-
-The madmac build =15D-gcc=, configured and built under a 4 KiB-page
-kernel, fails =22.locale.collate= and =22.locale.codecvt= under the
-16 KiB-page kernel of 2026-10-17: "failed to generate locale", a
-=mkstemp= that returns =EINVAL=, and glibc's =sysmalloc= assertion in
-=collate=; every =22.locale= row moves. The same tree configured fresh
-under the 16 KiB kernel passes every row, and the two =config.h= differ
-only in their OS release strings, so the cause is a built artifact, not
-a characterization. The container rows are equal in both builds.
-
-Fix: none until the cause is read. Rebuild one component of the old
-build at a time, =bin=, =rwtest=, =lib=, until the failure goes, then
-read what that component assumes about the page size.
-
-Check: the old build's =22.locale.collate= runs clean after the one
-rebuilt component; the fresh build unchanged.
-
 * Certification
 
 The scripts under =bin= and the nightly run: building the
