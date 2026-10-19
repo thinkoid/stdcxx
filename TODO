@@ -74,9 +74,6 @@ report is a builder's or the slot's.
 Fix, one commit per program, each rewrite verified with its fault
 put back under the sanitizer (reported in 25 runs of 25, clean on
 the fixed library), then its 15D row:
-- =22.locale.codecvt.mt=: the first-use section gated, the three
-  steady-state sections cut; they count nothing and cover the slot
-  only.
 - =22.locale.statics.mt=: the classic section cut; the global section
   gated, with the consistency check its own =FIXME= asks for: the
   locales returned plus the final global equal the set put in.

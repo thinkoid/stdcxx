@@ -173,7 +173,8 @@ Each locale MT test now runs 4 threads by default, whatever the
 processor count, at a size chosen under ThreadSanitizer
 (`analysis-locale-mt-sizing.md`). In 15D every one passes in about a
 second or less, and the rows are a reference. `22.locale.codecvt.mt`
-counts 1,600 assertions. `cons.mt`, `ctype.mt`, `messages.mt`,
+races the first conversion through a fresh wide `codecvt` facet, the
+gated way, and counts 1,600 assertions. `cons.mt`, `ctype.mt`, `messages.mt`,
 `moneypunct.mt`, `numpunct.mt` and `statics.mt` count none: their pass
 means every thread ran to the end without an error, a crash or a hang.
 
@@ -209,7 +210,7 @@ locale, and the program counts them, 88 per locale and character type.
 | `22.locale.codecvt` | 322 | 322 | 306 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
 | `21.string.stdcxx-162` | `NOUT` | `NOUT` | `ABRT` |
-| `22.locale.codecvt.mt` | 0 | 0 | 1600 |
+| `22.locale.codecvt.mt` | 400 | 400 | 1600 |
 
 Reasons, in order:
 
@@ -229,7 +230,8 @@ Reasons, in order:
   corrupt `mbstate_t`. Their state check sits under the locale lock.
 - The atomic operation tests count only in the thread-safe build.
 - `21.string.stdcxx-162`: chapter 3.1.
-- `22.locale.codecvt.mt` counts only with more than one thread.
+- `22.locale.codecvt.mt` counts two checks per thread and round: 400
+  with the one thread of a single-threaded build, 1,600 with four.
 
 The single-threaded builds run each MT test with one thread. Most
 count nothing there. Seven count the same in every build:

@@ -2,7 +2,8 @@
  *
  * 22.locale.codecvt.mt.cpp
  *
- * test exercising the thread safety of the codecvt facet
+ * test exercising the thread safety of the first conversion through
+ * a wide codecvt facet, which maps the facet's database
  *
  * $Id$
  *
@@ -26,361 +27,71 @@
  *
  **************************************************************************/
 
-#include <ios>        // for ios
-#include <iterator>   // for ostreambuf_iterator
-#include <locale>     // for locale, codecvt
-
+#include <locale>     // for locale, codecvt, use_facet
 #include <clocale>    // for setlocale(), LC_CTYPE
-#include <cstring>    // for memset(), strcpy(), strlen(), strncpy()
-#include <cwchar>     // for codecvt
+#include <cstring>    // for memset(), strcpy(), strncpy()
+#include <cwchar>     // for mbstate_t
+#include <exception>  // for exception
 
 #include <rw_locale.h>
 #include <rw_thread.h>
 #include <rw_driver.h>
-#include <rw_valcmp.h>    // for rw_strncmp ()
 
 
 // maximum number of threads allowed by the command line interface
 #define MAX_THREADS      32
-#define MAX_LOOPS    100000
 
 // the number of threads (4 in a thread-safe build, set in main ()
 // whatever the number of processors)
 int opt_nthreads = 1;
 
-// the number of times each thread should iterate (unless specified
-// otherwise on the command line)
-int opt_nloops = 256;
-
-// number of locales to use
-int opt_nlocales = MAX_THREADS;
-
-// should all threads share the same set of locale objects instead
-// of creating their own?
-int opt_shared_locale;
+// the number of locales the test constructs, one per round
+int opt_nrounds = 200;
 
 // default timeout used by each threaded section of this test
 int opt_timeout = 60;
 
 /**************************************************************************/
 
-// array of locale names to use for testing
-static const char*
-locales [MAX_THREADS];
-
-// number of locale names in the array
-static std::size_t
-nlocales;
-
-/**************************************************************************/
-
-//
-template <class internT> //, class externT = char, class stateT = std::mbstate_t>
-struct MyCodecvtData_T
-{
-    enum { BufferSize = 16 };
-
-    typedef char externT;
-    typedef std::mbstate_t stateT;
-    typedef std::codecvt_base::result resultT;
-    typedef std::size_t sizeT;
-
-    int encoding_;
-    sizeT length_;
-    int max_length_;
-    bool always_noconv_;
-
-    externT out_buffer_ [BufferSize];
-    resultT out_result_;
-    sizeT out_length_;
-    stateT out_state_;
-
-    internT in_buffer_  [BufferSize];
-    resultT in_result_;
-    sizeT in_length_;
-    stateT in_state_;
-};
-
-//
-struct MyCodecvtData
-{
-    // out, unshift, in, encoding, always_noconv, length, max_length
-    enum CvtId {
-        cvt_out,
-        cvt_unshift,
-        cvt_in,
-        cvt_encoding,
-        cvt_length,
-        cvt_max_length,
-        cvt_always_noconv,
-        cvt_max
-    };
-
-    // name of the locale the data corresponds to
-    const char* locale_name_;
-
-    // optionally set to the named locale for threads to share
-    std::locale locale_;
-
-    MyCodecvtData_T<char> char_data_;
-    MyCodecvtData_T<wchar_t> wchar_data_;
-
-} my_codecvt_data [MAX_THREADS];
-
-template <class charT>
-struct MyBuffer {
-    const charT* const str;
-    const int str_len;
-};
-
-const MyBuffer<char> nsrc [] = {
-    { "a\x80",       2 },
-    { "b",           1 },
-    { "c\0c",        3 },
-    { "ddd",         3 },
-    { "e\fce\0",     4 },
-    { "ff\0ffff",    5 },
-    { "gggg\0g",     6 },
-    { "hh\0hhhh",    7 },
-    { "i\ni\tiiii",  8 },
-    { "jjjjjjjjj",   9 },
-    { "kkkkkkkkkk", 10 }
-};
-
-const MyBuffer<wchar_t> wsrc [] = {
-    { L"\x0905\x0916", 2 },
-    { L"bb",           2 },
-    { L"\x106c",       2 },
-    { L"dddd",         4 },
-    { L"\xd800\xd801", 2 },
-    { L"ffffff",       6 },
-    { L"\xdfff\xffff", 2 },
-    { L"hhhhhhhh",     8 },
-    { L"i\0i\1i",      4 },
-    { L"jjjjjjjjjj",  10 },
-    { L"kkkkkkkkkkk", 11 }
-};
-
-/**************************************************************************/
-
-template <typename T>
-struct test_is_char
-{
-    enum { value = 0 };
-};
-
-template <>
-struct test_is_char<char>
-{
-    enum { value = 1 };
-};
-
-/**************************************************************************/
-
-template <class internT>
-void test_codecvt (const std::locale& loc,
-                   const MyBuffer<internT>& in,
-                   const MyBuffer<char>& out,
-                   const MyCodecvtData_T<internT>& data,
-                   const MyCodecvtData::CvtId id)
-{
-
-    typedef char externT;
-    typedef std::mbstate_t stateT;
-    typedef std::size_t sizeT;
-
-    typedef std::codecvt<internT, externT, stateT> code_cvt_type;
-
-    const code_cvt_type& cvt =
-        std::use_facet<code_cvt_type>(loc);
-
-    switch (id) {
-    case MyCodecvtData::cvt_out:
-    {
-        externT out_buffer [MyCodecvtData_T<internT>::BufferSize];
-        out_buffer [0] = externT ();
-
-        const int out_len = RW_COUNT_OF (out_buffer);
-
-        const internT* from      = in.str;
-        const internT* from_end  = in.str + in.str_len;
-        const internT* from_next = 0;
-
-        externT* to       = out_buffer;
-        externT* to_limit = out_buffer + out_len;
-        externT* to_next  = 0;
-
-        std::mbstate_t state = std::mbstate_t ();
-
-        const typename MyCodecvtData_T<internT>::resultT result =
-            cvt.out (state, from, from_end, from_next,
-                     to, to_limit, to_next);
-
-        const sizeT len = to_next - to;
-
-        RW_ASSERT (data.out_result_ == result);
-        RW_ASSERT (len == data.out_length_);
-        RW_ASSERT (!rw_strncmp (out_buffer, data.out_buffer_, len));
-    }
-        break;
-    case MyCodecvtData::cvt_unshift:
-    {
-        externT out_buffer [MyCodecvtData_T<internT>::BufferSize];
-        out_buffer [0] = externT ();
-
-        const int out_len = RW_COUNT_OF (out_buffer);
-
-        externT* to       = out_buffer;
-        externT* to_limit = out_buffer + out_len;
-        externT* to_next  = 0;
-
-        std::mbstate_t state = std::mbstate_t ();
-
-        const typename MyCodecvtData_T<internT>::resultT result =
-            cvt.unshift (state, to, to_limit, to_next);
-
-        // 22.2.1.5.2 p5
-        RW_ASSERT (to == to_next);
-
-        // 22.2.1.5.2 p6 required only for codecvt<char, char, mbstate_t>
-        RW_ASSERT (  !test_is_char<internT>::value
-                   || result == std::codecvt_base::noconv);
-    }
-        break;
-    case MyCodecvtData::cvt_in:
-    {
-        internT in_buffer [MyCodecvtData_T<internT>::BufferSize];
-        in_buffer [0] = internT ();
-
-        const int in_len  = RW_COUNT_OF (in_buffer);
-        const int out_len = RW_COUNT_OF (data.out_buffer_);
-
-        const externT* from      = data.out_buffer_;
-        const externT* from_end  = data.out_buffer_ + out_len;
-        const externT* from_next = 0;
-
-        internT* to       = in_buffer;
-        internT* to_limit = in_buffer + in_len;
-        internT* to_next  = 0;
-
-        std::mbstate_t state = std::mbstate_t ();
-
-        const typename MyCodecvtData_T<internT>::resultT result =
-            cvt.in (state, from, from_end, from_next,
-                    to, to_limit, to_next);
-
-        const sizeT len = to_next - to;
-
-        RW_ASSERT (data.in_result_ == result);
-        RW_ASSERT (len == data.in_length_);
-        RW_ASSERT (!rw_strncmp (in_buffer, data.in_buffer_, len));
-    }
-        break;
-    case MyCodecvtData::cvt_encoding:
-        RW_ASSERT (data.encoding_ == cvt.encoding ());
-        break;
-
-    case MyCodecvtData::cvt_length:
-    {
-        const externT* from = out.str;
-        const externT* from_end  = out.str + out.str_len;
-        const size_t   max  = 32;
-
-        std::mbstate_t state = std::mbstate_t ();
-
-        const sizeT len = cvt.length (state, from, from_end, max);
-
-        RW_ASSERT (data.length_ == len);
-    }
-        break;
-
-    case MyCodecvtData::cvt_max_length:
-        RW_ASSERT (data.max_length_ == cvt.max_length ());
-        break;
-    case MyCodecvtData::cvt_always_noconv:
-        RW_ASSERT (data.always_noconv_ == cvt.always_noconv ());
-        break;
-    case MyCodecvtData::cvt_max:
-        break;
-    }
-}
-
-/**************************************************************************/
-
-extern "C" {
-
-bool test_char;    // exercise codecvt<char,char>
-bool test_wchar;   // exercise codecvt<wchar_t,char>
-
-static void*
-thread_func (void*)
-{
-    const int ni = RW_COUNT_OF (nsrc);
-    const int wi = RW_COUNT_OF (wsrc);
-
-    for (int i = 0; i != opt_nloops; ++i) {
-
-        if (rw_thread_pool_timeout_expired ())
-            break;
-
-        const std::size_t inx = i % nlocales;
-        const MyCodecvtData& data = my_codecvt_data [inx];
-
-        // construct a named locale, get a reference to the codecvt
-        // facet from it and use it to format a random money value
-        const std::locale loc =
-            opt_shared_locale ? data.locale_
-                              : std::locale (data.locale_name_);
-
-        const MyCodecvtData::CvtId op =
-            MyCodecvtData::CvtId (i % MyCodecvtData::cvt_max);
-
-        if (test_char) {
-            test_codecvt<char>(loc, nsrc [inx % ni], nsrc [inx % ni],
-                               data.char_data_, op);
-        }
-
-        if (test_wchar) {
-            test_codecvt<wchar_t>(loc, wsrc [inx % wi], nsrc [inx % ni],
-                                  data.wchar_data_, op);
-        }
-    }
-
-    return 0;
-}
-
-/**************************************************************************/
+typedef std::codecvt<wchar_t, char, std::mbstate_t> CodeCvt;
 
 // the locale whose wide codecvt facet the threads use for the first time
-static const std::locale* first_use_locale;
+static const std::locale* race_locale;
+
+// the number of threads that have started in the current round
+static int nstarted;
 
 // what each thread saw in the current round, in a slot of its own;
 // the driver's diagnostics are not thread-safe, so the main thread
 // reads the slots after the join and asserts
-static struct FirstUseData {
+static struct RaceData {
     int     threw;       // 1 for a std::exception, 2 for anything else
     int     res;         // the result of in ()
     wchar_t dst [4];     // the characters in () produced
     char    what [512];  // the exception's what ()
-} first_use_data [MAX_THREADS];
+} race_data [MAX_THREADS];
 
-// converts through the facet of `first_use_locale', which no thread
-// has converted through yet; the first use maps the facet's database
+extern "C" {
+
+// converts through the facet of `race_locale', which no thread has
+// converted through yet; the first use maps the facet's database
 // (doc/notes/analysis-facet-first-use.md, chapter 2)
 static void*
-first_use_func (void* arg)
+race_func (void* arg)
 {
-    typedef std::codecvt<wchar_t, char, std::mbstate_t> CodeCvt;
-
-    FirstUseData& data = first_use_data [long (arg)];
+    RaceData& data = race_data [long (arg)];
 
     const char     src [] = "abc";
     const char*    from_next = 0;
     wchar_t*       to_next   = 0;
     std::mbstate_t state = std::mbstate_t ();
 
+    // start with the other threads so that they find the facet's
+    // data missing at the same time
+    rw_thread_gate (&nstarted, opt_nthreads);
+
     try {
-        const CodeCvt& cvt = std::use_facet<CodeCvt>(*first_use_locale);
+        const CodeCvt& cvt = std::use_facet<CodeCvt>(*race_locale);
 
         data.res = cvt.in (state, src, src + 3, from_next,
                            data.dst, data.dst + 3, to_next);
@@ -400,14 +111,9 @@ first_use_func (void* arg)
 
 /**************************************************************************/
 
-// the number of locales test_first_use constructs, one per round
-int opt_first_use_rounds = 200;
-
 static int
-test_first_use ()
+run_test (int, char**)
 {
-    typedef std::codecvt<wchar_t, char, std::mbstate_t> CodeCvt;
-
     // a locale that only the library's database has: a thread that
     // finds the facet's data missing falls back to the C library,
     // which must not know the name for the conversion to fail. The
@@ -421,7 +127,7 @@ test_first_use ()
     if (0 == locname) {
         rw_warn (false, 0, __LINE__,
                  "failed to build locale rwtest_de_DE.ISO-8859-1 from "
-                 "de_DE and ISO-8859-1; skipping the first use test");
+                 "de_DE and ISO-8859-1; skipping");
         return 0;
     }
 
@@ -431,20 +137,19 @@ test_first_use ()
     if (std::setlocale (LC_CTYPE, namebuf)) {
         std::setlocale (LC_CTYPE, "C");
         rw_note (false, 0, __LINE__,
-                 "the C library knows %#s; skipping the first use test",
-                 namebuf);
+                 "the C library knows %#s; skipping", namebuf);
         return 0;
     }
 
     rw_info (0, 0, 0,
-             "exercising the first use of std::codecvt<wchar_t, char> "
-             "in %#s from %d thread%{?}s%{;}, %d locale%{?}s%{;}",
+             "racing the first std::codecvt<wchar_t, char>::in() in %#s "
+             "from %d thread%{?}s%{;}, %d locale%{?}s%{;}",
              namebuf, opt_nthreads, 1 != opt_nthreads,
-             opt_first_use_rounds, 1 != opt_first_use_rounds);
+             opt_nrounds, 1 != opt_nrounds);
 
     int result = 0;
 
-    for (int i = 0; 0 == result && i != opt_first_use_rounds; ++i) {
+    for (int i = 0; 0 == result && i != opt_nrounds; ++i) {
 
         // each round a new locale, so that the facet and its data
         // are constructed anew
@@ -456,24 +161,25 @@ test_first_use ()
         // (doc/notes/analysis-facet-first-use.md, chapter 1)
         (void)std::use_facet<CodeCvt>(loc);
 
-        first_use_locale = &loc;
-        std::memset (first_use_data, 0, sizeof first_use_data);
+        race_locale = &loc;
+        nstarted    = 0;
+        std::memset (race_data, 0, sizeof race_data);
 
         void* args [MAX_THREADS];
         for (int j = 0; j != opt_nthreads; ++j)
             args [j] = (void*)long (j);
 
         result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                                 first_use_func, args,
+                                 race_func, args,
                                  std::size_t (opt_timeout));
 
         rw_error (result == 0, 0, __LINE__,
                   "rw_thread_pool(0, %d, 0, %{#f}, ...) failed",
-                  opt_nthreads, first_use_func);
+                  opt_nthreads, race_func);
 
         for (int j = 0; 0 == result && j != opt_nthreads; ++j) {
 
-            const FirstUseData& data = first_use_data [j];
+            const RaceData& data = race_data [j];
 
             if (1 == data.threw) {
                 rw_assert (false, 0, __LINE__,
@@ -501,211 +207,8 @@ test_first_use ()
             }
         }
 
-        first_use_locale = 0;
+        race_locale = 0;
     }
-
-    return result;
-}
-
-/**************************************************************************/
-
-template <class internT>
-void run_test_fill (const std::locale& loc,
-                    const MyBuffer<internT>& in,
-                    const MyBuffer<char>& out,
-                    MyCodecvtData_T<internT>& data)
-{
-
-    typedef char externT;
-    typedef std::mbstate_t stateT;
-
-    typedef std::codecvt<internT, externT, stateT> code_cvt_type;
-
-    const code_cvt_type& cvt =
-        std::use_facet<code_cvt_type>(loc);
-
-    //fill in the appropriate fields of data
-    data.encoding_      = cvt.encoding ();
-    data.max_length_    = cvt.max_length ();
-    data.always_noconv_ = cvt.always_noconv ();
-
-    // length
-    {
-        const externT* from = out.str;
-        const externT* from_end  = out.str + out.str_len;
-        const size_t   max  = 32;
-
-        std::mbstate_t state = std::mbstate_t ();
-
-        data.length_ = cvt.length (state, from, from_end, max);
-    }
-
-    // out
-    {
-        const int out_len = RW_COUNT_OF (data.out_buffer_);
-
-        const internT* from      = in.str;
-        const internT* from_end  = in.str + in.str_len;
-        const internT* from_next = 0;
-
-        externT* to       = data.out_buffer_;
-        externT* to_limit = data.out_buffer_ + out_len;
-        externT* to_next  = 0;
-
-        data.out_result_ = cvt.out (data.out_state_,
-                                    from, from_end, from_next,
-                                    to, to_limit, to_next);
-
-        data.out_length_ = to_next - to;
-    }
-
-    //// unshift
-    //{
-    //    externT* to       = data.out_buffer_;
-    //    externT* to_limit = data.out_buffer_ + RW_COUNT_OF (data.out_buffer_);
-    //    externT* to_next  = 0;
-
-    //    std::mbstate_t state = std::mbstate_t ();
-
-    //    data.shift_result_ = cvt.unshift (state, to, to_limit, to_next);
-    //}
-
-    // in
-    {
-        const int out_len = RW_COUNT_OF (data.out_buffer_);
-        const int in_len  = RW_COUNT_OF (data.in_buffer_);
-
-        const externT* from      = data.out_buffer_;
-        const externT* from_end  = data.out_buffer_ + out_len;
-        const externT* from_next = 0;
-
-        internT* to       = data.in_buffer_;
-        internT* to_limit = data.in_buffer_ + in_len;
-        internT* to_next  = 0;
-
-        data.in_result_ = cvt.in (data.in_state_,
-                                  from, from_end, from_next,
-                                  to, to_limit, to_next);
-
-        data.in_length_ = to_next - to;
-    }
-}
-
-static int
-run_test (int, char**)
-{
-    // find all installed locales for which setlocale (LC_ALL) succeeds
-    const char* const locale_list =
-        rw_opt_locales ? rw_opt_locales : rw_locales (_RWSTD_LC_ALL);
-
-    const std::size_t maxinx = RW_COUNT_OF (locales);
-
-    const int ni = RW_COUNT_OF (nsrc);
-    const int wi = RW_COUNT_OF (wsrc);
-
-    for (const char* name = locale_list;
-         *name;
-         name += std::strlen (name) + 1) {
-
-        const std::size_t inx = nlocales;
-        locales [inx] = name;
-
-        // fill in the money and results for this locale
-        MyCodecvtData& data = my_codecvt_data [inx];
-        data.locale_name_ = name;
-
-        try {
-            const std::locale loc (data.locale_name_);
-
-            run_test_fill<char>
-                (loc, nsrc [inx % ni], nsrc [inx % ni], data.char_data_);
-
-            run_test_fill<wchar_t>
-                (loc, wsrc [inx % wi], nsrc [inx % ni], data.wchar_data_);
-
-            if (opt_shared_locale)
-                data.locale_ = loc;
-
-            nlocales += 1;
-
-        }
-        catch (...) {
-            rw_warn (!rw_opt_locales, 0, __LINE__,
-                     "failed to create locale(%#s)", name);
-        }
-
-        if (nlocales == maxinx || nlocales == std::size_t (opt_nlocales))
-            break;
-    }
-
-    // avoid divide by zero in thread if there are no locales to test
-    rw_fatal (nlocales != 0, 0, __LINE__,
-              "failed to create one or more usable locales!");
-
-    rw_info (0, 0, 0,
-             "testing std::codecvt<charT> with %d thread%{?}s%{;}, "
-             "%d iteration%{?}s%{;} each, in %zu locales { %{ .*A@} }",
-             opt_nthreads, 1 != opt_nthreads,
-             opt_nloops, 1 != opt_nloops,
-             nlocales, int (nlocales), "%#s", locales);
-
-    ///////////////////////////////////////////////////////////////////////
-
-    rw_info (0, 0, 0, "exercising std::codecvt<char, char>");
-
-    test_char   = true;
-    test_wchar  = false;
-
-    // create and start a pool of threads and wait for them to finish
-    int result = 
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-    ///////////////////////////////////////////////////////////////////////
-
-    rw_info (0, 0, 0, "exercising std::codecvt<wchar_t, char>");
-
-    test_char   = false;
-    test_wchar  = true;
-
-    result = 
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-    ///////////////////////////////////////////////////////////////////////
-
-    rw_info (0, 0, 0, "exercising std::codecvt<char, char> and "
-                      "std::codecvt<wchar_t, char>");
-
-    test_char   = true;
-    test_wchar  = true;
-
-    result = 
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-    ///////////////////////////////////////////////////////////////////////
-
-#ifdef _RWSTD_REENTRANT
-
-    // last: it points RWSTD_LOCALE_ROOT at a directory of its own;
-    // only with threads, since a single one cannot race
-    if (0 == result)
-        result = test_first_use ();
-
-#endif   // _RWSTD_REENTRANT
 
     return result;
 }
@@ -727,16 +230,10 @@ int main (int argc, char *argv[])
                     "lib.locale.codecvt",
                     "thread safety", run_test,
                     "|-soft-timeout#0 "  // must be non-negative
-                    "|-nloops#0 "        // must be non-negative
-                    "|-nthreads#0-* "    // must be in [0, MAX_THREADS]
-                    "|-nlocales#0 "      // arg must be non-negative
-                    "|-locales= "        // must be provided
-                    "|-shared-locale# ",
+                    "|-nrounds#0 "       // must be non-negative
+                    "|-nthreads#0-* ",   // must be in [0, MAX_THREADS]
                     &opt_timeout,
-                    &opt_nloops,
+                    &opt_nrounds,
                     int (MAX_THREADS),
-                    &opt_nthreads,
-                    &opt_nlocales,
-                    &rw_opt_setlocales,
-                    &opt_shared_locale);
+                    &opt_nthreads);
 }
