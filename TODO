@@ -74,7 +74,6 @@ report is a builder's or the slot's.
 Fix, one commit per program, each rewrite verified with its fault
 put back under the sanitizer (reported in 25 runs of 25, clean on
 the fixed library), then its 15D row:
-- Retire =22.locale.time.put.mt=: no state of their own.
 - =22.locale.globals.mt= becomes the single-threaded
   =22.locale.globals=: its checks of =has_facet= and =use_facet= over
   every standard facet are conformance, and the =has_facet= answers
