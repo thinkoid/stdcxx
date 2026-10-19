@@ -2103,13 +2103,23 @@ test_inout (const char* tname)
 
         typedef unsigned char UChar;
 
+        // the C library's wide value of each byte, the expectation
+        // of the checks below and the value the charmap must map
+        // the byte to; the bytes were chosen because that value is
+        // not the byte's own
+        wchar_t wchars [sizeof chars];
+        std::mbstowcs (wchars, chars, std::strlen (chars));
+
+        std::setlocale (LC_ALL, "C");
+
         char charmap [sizeof chars * 40];
 
         charmap [0] = '\0';
 
-        for (const char* pc = chars; *pc; ++pc) {
+        for (std::size_t i = 0; chars [i]; ++i) {
             std::sprintf (charmap + std::strlen (charmap),
-                          "<U%04X> /x%02x\n", UChar (*pc), UChar (*pc));
+                          "<U%04X> /x%02x\n",
+                          unsigned (wchars [i]), UChar (chars [i]));
         }
 
         // the database takes the generated name, not the codeset's:
@@ -2123,11 +2133,6 @@ test_inout (const char* tname)
                        "failed to generate locale");
             return;
         }
-
-        wchar_t wchars [sizeof chars];
-        std::mbstowcs (wchars, chars, std::strlen (chars));
-
-        std::setlocale (LC_ALL, "C");
 
         for (std::size_t i = 0; chars [i]; ++i) {
 
