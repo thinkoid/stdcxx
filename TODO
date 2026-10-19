@@ -39,37 +39,6 @@ Check: the census of the tests that build, a table per library, and
 each disagreement read against the standard and filed where it
 belongs.
 
-** TODO All the C library's locales on the test hosts
-
-The six tables under =doc/notes/baseline= come from a host with
-every locale of glibc's =SUPPORTED= list and the Shift_JIS one built
-by hand (~localedef -c -f SHIFT_JIS -i ja_JP ja_JP.SHIFT_JIS~, a
-warning and exit status 1, since =SUPPORTED= leaves it out for its
-charmap not being ASCII-compatible). Two test hosts have them. The
-third generates =en_US.UTF-8= alone, so tests that loop over the
-installed locales see four, fourteen locale rows run fewer
-assertions (=ref-test-baseline.md=, chapter 2), and the verdict of
-=bin/driver= fails on them there. Three examples need the locales
-too: =numpunct= finds none of its German names and ends =DIFF=,
-=codecvt1= wants the three =ja_JP= locales and exits 1, =money_get=
-wants =en_US= and aborts on the uncaught =runtime_error=; the
-examples run against the C library's locales alone, the build's own
-databases not being built for them. The =numpunct= example's list of
-German names still carries the spellings of the retired platforms,
-AIX to Windows, and the error it reports names the last of them.
-=22.locale.time.get= takes the first English and German locales
-=locale -a= lists, =en_AG= and =de_AT= on a full host, and derives
-its expectation from the one it got. The first-use section of
-=22.locale.codecvt.mt= builds its database as
-=rwtest_de_DE.ISO-8859-1=, a name the C library cannot know, and
-runs on every host.
-
-Fix: every locale on the remaining host, the Shift_JIS one by hand.
-
-Check: the verdict of =bin/driver= names every table identical to
-its pin on each test host, and the =numpunct=, =codecvt1= and
-=money_get= examples run clean on each.
-
 ** WAITING ThreadSanitizer cannot follow =longjmp= on glibc 2.44
 
 Under the sanitizer every =longjmp= and =siglongjmp= dies with "can't
