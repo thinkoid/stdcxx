@@ -68,27 +68,6 @@ The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
 
-** TODO The tables depend on the locale variables of the shell
-
-The suite runs under the environment it inherits. =22.locale.moneypunct=
-exercises the native locale, the one ~setlocale (LC_ALL, "")~ names,
-and its row counts 135020 assertions with no =LANG= or =LC_= variable
-set, 135050 under ~LC_ALL=C~ and 135100 under ~LC_ALL=en_US.UTF-8~.
-The pins were taken from non-interactive =ssh= sessions, which set
-none. A driver run from a terminal that exports =LC_ALL= fails the
-verdict on that row alone, with every locale installed (armok,
-2026-10-19). =bin/buildntest= logs the environment and does not fix
-it; the =run= target of =etc/config/makefile.rules= fixes =TZ= and
-=TMPDIR= and nothing else.
-
-Fix (decided 2026-10-19): the =run= target clears =LANG=,
-=LANGUAGE= and every =LC_= variable beside setting =TZ=, so a table
-depends on the host's locales alone; =ref-test-baseline.md= says so.
-
-Check: =22.locale.moneypunct= counts 135020 from a shell with
-~LC_ALL=en_US.UTF-8~ exported, and the driver's verdict from a
-terminal is the one from a non-interactive =ssh=, all six tables.
-
 ** TODO The pins are named by architecture, the driver looks them up by it
 
 A pin is a configuration's table: the 15D table of an aarch64 host

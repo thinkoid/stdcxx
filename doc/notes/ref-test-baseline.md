@@ -106,7 +106,12 @@ and fourteen rows depend on it: `22.locale.codecvt`, `collate`,
 `moneypunct`, `name`, `numpunct` and `time.get`. A host with
 `en_US.UTF-8` alone runs fewer assertions in each, `22.locale.codecvt`
 306 for 618, and its tables differ from the pins in those rows and
-the totals.
+the totals. The `run` target of `etc/config/makefile.rules` clears
+`LANG`, `LANGUAGE` and the `LC_` variables before it runs the tests:
+`22.locale.moneypunct` exercises the native locale too, and counted
+135020 assertions under none, 135050 under `LC_ALL=C` and 135100
+under `LC_ALL=en_US.UTF-8` before the target cleared them. A table
+depends on the host's locales alone.
 
 `bin/driver` runs the certification. It exports one revision per
 configuration, builds each through `bin/buildntest`, runs its suite,

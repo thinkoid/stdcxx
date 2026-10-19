@@ -150,6 +150,10 @@ endif   # eq ($(NO_DOT_O),)
 # The variable TZ is used in examples and initialized in GNUmakefile.exm
 # (see rev.561060)
 #
+# The locale variables are cleared: the locale tests exercise the
+# native locale as well as the named ones, so their assertion counts
+# follow the environment, and the tables are pinned under none
+#
 # PlumHall specific:
 # for all "top level" tests that failed to build, find and build all
 # subtests (the little tests the main test consists of)
@@ -161,6 +165,9 @@ run runall run_all: $(BINDIR)/exec
         TOPDIR=$(TOPDIR);                                                 \
         TMPDIR=$${TMPDIR:-/tmp}/stdcxx-run-$$$$;                          \
         TZ=$(TZ);                                                         \
+        unset LANG LANGUAGE LC_ALL LC_ADDRESS LC_COLLATE LC_CTYPE          \
+              LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES LC_MONETARY     \
+              LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE LC_TIME;            \
         export LD_LIBRARY_PATH PATH TMPDIR TOPDIR TZ;                     \
         trap "rm -rf $$TMPDIR" HUP INT QUIT TERM EXIT;                    \
         mkdir -p $$TMPDIR;                                                \
@@ -175,6 +182,9 @@ run runall run_all: $(BINDIR)/exec
         TOPDIR=$(TOPDIR);                                                 \
         TMPDIR=$${TMPDIR:-/tmp}/stdcxx-run-$$$$;                          \
         TZ=$(TZ);                                                         \
+        unset LANG LANGUAGE LC_ALL LC_ADDRESS LC_COLLATE LC_CTYPE          \
+              LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES LC_MONETARY     \
+              LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE LC_TIME;            \
         export LD_LIBRARY_PATH PATH TMPDIR TOPDIR TZ;                     \
         trap "rm -rf $$TMPDIR" HUP INT QUIT TERM EXIT;                    \
         mkdir -p $$TMPDIR;                                                \
