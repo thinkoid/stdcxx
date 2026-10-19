@@ -472,6 +472,8 @@ get_arch ()
 
             *" ia64 "*) arch="IA64";;
 
+            *" aarch64 "*) arch="aarch64";;
+
             *" sparc "*) arch="SPARC";;
 
             *" x86_64 "*)

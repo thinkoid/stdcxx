@@ -385,7 +385,7 @@ BEGIN {
 }
 
 
-# extract x86 processor name and version
+# extract processor name and version
 /^ *#+ *cat  *\/proc\/cpuinfo/ {
 
     arch     = ""
@@ -428,6 +428,11 @@ BEGIN {
             break
 
     } while (0 < NF)
+
+    # an aarch64 cpuinfo names no model: the architecture comes from
+    # uname and the page shows it without a description
+    if (uname_output ~ " aarch64 ")
+        arch = "aarch64"
 
     # bail if no architecture could be determined
     if (arch == "" && archdesc == "")
