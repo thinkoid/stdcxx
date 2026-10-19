@@ -2295,19 +2295,31 @@ test_ascii (const char *locname, const char* native_locname)
         return;
     }
 
-    // conversion of the whole range failed,
-    // convert one character at a time
+    // conversion of the whole range failed: convert one byte at a
+    // time, each on its own, so that a lead byte of a multibyte
+    // character is not a character and is left out; mbsrtowcs()
+    // would read on past the byte to the end of the table
+    wchar_t wc [UCHAR_MAX + 1] = { 0 };
+    bool    converted [UCHAR_MAX + 1] = { false };
+
+    if (std::setlocale (LC_CTYPE, native_locname)) {
+
+        for (std::size_t i = 1; i != UCHAR_MAX + 1; ++i) {
+            std::mbstate_t state = std::mbstate_t ();
+
+            converted [i] = 1 == std::mbrtowc (wc + i, ext_ascii + i, 1, &state);
+        }
+
+        std::setlocale (LC_CTYPE, "C");
+    }
 
     for (std::size_t i = 1; i != UCHAR_MAX + 1; ++i) {
 
-        if (rwtest_convert_to_internal (use_libc, native_locname,
-                                        ext_ascii + i, 1,
-                                        wascii, int_num)) {
-            wascii [int_num] = L'\0';
+        if (converted [i]) {
+            const wchar_t ws [] = { wc [i], L'\0' };
 
             test_inout ('i', __LINE__, locname,
-                        ext_ascii + i, 1, 1,
-                        wascii, int_num, int_num,
+                        ext_ascii + i, 1, 1, ws, 1, 1,
                         std::codecvt_base::ok);
         }
     }
