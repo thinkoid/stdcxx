@@ -182,9 +182,11 @@ counts one check per thread and round. `22.locale.numpunct.mt` races
 the first use of a fresh `numpunct` facet, whose data the library
 builds from the C library, both specializations in turn, and counts
 one check per thread and two per round; `22.locale.moneypunct.mt`
-does the same for the four `moneypunct` facets in turn. `cons.mt` and
-`messages.mt` count none: their pass means every thread ran to the
-end without an error, a crash or a hang.
+does the same for the four `moneypunct` facets in turn.
+`22.locale.messages.mt` races `open` of one catalog from every thread
+at once and counts three checks per round, 600 in every build.
+`cons.mt` counts none: its pass means every thread ran to the end
+without an error, a crash or a hang.
 
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
@@ -250,9 +252,9 @@ Reasons, in order:
 The single-threaded builds run each MT test with one thread. Most
 count nothing there. Seven count the same in every build:
 `22.locale.use_facet.mt`, `22.locale.time.put.libc.mt` and
-`22.locale.statics.mt` 200 each, `22.locale.id.mt` 999,
-`22.locale.facet.mt` 8, `21.string.cons.mt` 16 and
-`21.string.push_back.mt` 2.
+`22.locale.statics.mt` 200 each, `22.locale.messages.mt` 600,
+`22.locale.id.mt` 999, `22.locale.facet.mt` 8, `21.string.cons.mt` 16
+and `21.string.push_back.mt` 2.
 
 ## 5. The same suite under Clang
 
