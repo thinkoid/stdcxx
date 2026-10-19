@@ -1,7 +1,5 @@
 #!/usr/bin/awk -f
 #
-# $Id$
-#
 ########################################################################
 #
 #  Licensed to the Apache Software  Foundation (ASF) under one or more
@@ -23,12 +21,11 @@
 ########################################################################
 #
 # SYNOPSIS
-#     myname [bodyonly=0|1 logdir=<logdir> version=<version>] logs...
+#     myname [bodyonly=0|1 logdir=<logdir>] logs...
 #
 # VARIABLES:
 #   bodyonly     when non-zero, suppresses the <html> tags
 #   logdir
-#   version      stdcxx version (branch) to generate results for.
 #
 ########################################################################
 
@@ -169,17 +166,6 @@ BEGIN {
 
 # detect the type of file
 1 == FNR {
-
-    if (svnpath == "") {
-
-        # initialize svnpath using version (assume trunk by default)
-        svnpath = "http://svn.apache.org/viewvc/stdcxx"
-
-        if (version == "" || version == "trunk")
-            svnpath = svnpath "/trunk"
-        else
-            svnpath = svnpath "/branches/" version
-    }
 
     section = 0
     runsection = 0
@@ -1049,22 +1035,8 @@ function get_dispname(section, compname)
     dir = ""
 
     if (1 == section) {
-        # compose a URL pointing to the character set description
-        # file and the locale defintion file in the repository
-        pos = index(compname, ".")
-        if (0 < pos) {
-            locale  = substr(compname, 1, pos - 1)
-            codeset = substr(compname, pos + 1);
-
-            url      = svnpath "/etc/nls/src/" locale "?view=markup"
-            dispname = "<a href=\"" url "\">" locale "</a>"
-
-            url      = svnpath "/etc/nls/charmaps/" codeset "?view=markup"
-            dispname = dispname ".<a href=\"" url "\">" codeset "</a>"
-        }
-        else {
-            dispname = compname
-        }
+        # a locale's name as it is
+        dispname = compname
     }
     else if (2 == section) {
         # link the name to the test's source in the tree, wherever

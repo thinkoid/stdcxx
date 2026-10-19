@@ -1,7 +1,5 @@
 #!/bin/sh
 #
-# $Id$
-#
 ########################################################################
 #
 #  Licensed to the Apache Software  Foundation (ASF) under one or more
@@ -65,10 +63,6 @@
 #     -t <list-of-tests>
 #          Generate a report for the specified list of tests with
 #          tests listed in columns and builds in rows.
-#
-#     -V <version>
-#          Stdcxx version (branch) to generate results for.
-#          When omitted, trunk is assumed.
 #
 ########################################################################
 
@@ -159,10 +153,6 @@ print_help ()
     echo "     -t <list-of-tests>"
     echo "          Generate a report for the specified list of tests with"
     echo "          tests listed in columns and builds in rows."
-    echo
-    echo "     -V <version>"
-    echo "          Stdcxx version (branch) to generate results for."
-    echo "          When omitted, trunk is assumed."
 }
 
 ######################################################################
@@ -537,7 +527,7 @@ get_compiler ()
 ######################################################################
 
 # process command line options
-while getopts ":hnsve:l:o:T:t:V:" opt_name; do
+while getopts ":hnsve:l:o:T:t:" opt_name; do
     case $opt_name in
         # options with no arguments 
 
@@ -581,11 +571,6 @@ while getopts ":hnsve:l:o:T:t:V:" opt_name; do
         t)  # argument is a list of tests to process
             test_list=$OPTARG
             components_in_rows=0
-            ;;
-
-        V)  # specify stdcxx branch/version to generate cross-build
-            # result views for (trunk by default)
-            version=$OPTARG
             ;;
 
         :)  # OPTARG is the option missing its argument
@@ -985,7 +970,7 @@ else
     xfails=""
 fi
 
-$xcomp bodyonly=1 logdir=$logdir version=$version $xfails $textlogs | output
+$xcomp bodyonly=1 logdir=$logdir $xfails $textlogs | output
 
 
 ######################################################################
