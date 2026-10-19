@@ -1,7 +1,7 @@
 # -*- mode: org -*-
 #+TITLE: The queue for the stdcxx revival
 #+STARTUP: overview
-#+OPTIONS: toc:nil
+#+OPTIONS: toc:nil ^:nil
 #+TODO: TODO WAITING | DONE
 
 The queue, one chapter per part of the tree, in the order the work is
