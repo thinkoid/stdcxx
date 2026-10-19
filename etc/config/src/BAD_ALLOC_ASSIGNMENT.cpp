@@ -184,8 +184,6 @@ int test_member (int argc, void *ptr)
 {
     // the code below must not be executed
 
-#  ifndef _RWSTD_NO_EXCEPTIONS
-
     try {
         try {
             if (1 < argc) {
@@ -240,15 +238,6 @@ int test_member (int argc, void *ptr)
     }
 
     return 3;
-
-#  else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    std::bad_alloc *pe = (std::bad_alloc*)ptr;
-    std::bad_alloc *pf = new std::bad_alloc (*pe);
-
-    return !(1 == ndefault_ctors && 1 == ncopy_ctors && pe->what_ == pf->what_);
-
-#  endif   // _RWSTD_NO_EXCEPTIONS
 
 }
 

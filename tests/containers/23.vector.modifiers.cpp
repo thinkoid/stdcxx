@@ -116,26 +116,19 @@ void exception_loop (int line, const char *fcall, bool capchg,
         *n_copy = UserClass::n_total_copy_ctor_;
         *n_asgn = UserClass::n_total_op_assign_;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // detect objects constructed but not destroyed after an exception
         const std::size_t count = UserClass::count_;
 
         // disable out of memory exceptions before copying iterators
         // (InputIter ctors may dynamically allocate memory)
         *pst->throw_at_calls_ [0] = std::size_t (-1);
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // create "deep" copies of the iterators to thwart
         // InpuIter's multi-pass detection
         const Iterator beg = copy_iter (first, (UserClass*)0);
         const Iterator end = copy_iter (last, (UserClass*)0);
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         *pst->throw_at_calls_ [0] = pst->new_calls_ [0] + throw_after + 1;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         try {
             if (-2 == n) {
@@ -150,8 +143,6 @@ void exception_loop (int line, const char *fcall, bool capchg,
             break;
         }
         catch (...) {
-
-#ifndef _RWSTD_NO_EXCEPTIONS
 
             // verify that an exception thrown during allocation
             // doesn't cause a change in the state of the vector
@@ -182,12 +173,8 @@ void exception_loop (int line, const char *fcall, bool capchg,
             // and force the next one to fail, and try to insert again
             ++throw_after;
 
-#endif   // _RWSTD_NO_EXCEPTIONS
-
         }   // catch
     }   // for
-
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     // verify that if exceptions are enabled and when capacity changes
     // at least one exception is thrown
@@ -206,18 +193,6 @@ void exception_loop (int line, const char *fcall, bool capchg,
     //               0, line,
     //               "line %d: %s: unexpectedly threw an exception",
     //               __LINE__, fcall);
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    _RWSTD_UNUSED (t);
-    _RWSTD_UNUSED (line);
-    _RWSTD_UNUSED (fcall);
-    _RWSTD_UNUSED (capchg);
-    _RWSTD_UNUSED (size);
-    _RWSTD_UNUSED (capacity);
-    _RWSTD_UNUSED (throw_after);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     *pst->throw_at_calls_ [0] = std::size_t (-1);
 

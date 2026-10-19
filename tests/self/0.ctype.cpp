@@ -212,8 +212,6 @@ test_is (charT*, const char *cname,
 
         int result = -1;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // let the first call call succeed and trigger an exception
         // on the second call to UserCtype::is()
         ctp.throw_at_calls_ [ctp.mf_is] =
@@ -250,13 +248,6 @@ test_is (charT*, const char *cname,
                        "%{?}unexpectedly threw%{:}failed to throw%{;}",
                        cname, m, ch, j == threw);
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        ++expect_calls;
-        result = ctp.is (m, ch);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         rw_assert (result, 0, __LINE__,
                    "UserCtype<%s>::is(%{LC}, %{#c}) == true",
@@ -629,8 +620,6 @@ test_widen (charT*, const char *cname)
                    && same (dst [2], make_char ('q', (charT*)0)), 0, __LINE__,
                    "UserCtype<%s>::widen(\"xzq\", ..., dst) == \"yzq\"", cname);
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // a fresh facet: the library's ctype<char> and ctype<wchar_t>
         // answer widen (char) from a table filled by the first call
         // and would not reach do_widen again
@@ -659,8 +648,6 @@ test_widen (charT*, const char *cname)
         }
         rw_assert (caught, 0, __LINE__, "UserCtype<%s>::widen(\"xzq\", ...) "
                    "throws the facet's exception for an invalid entry", cname);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     }
 }
@@ -732,8 +719,6 @@ test_narrow (charT*, const char *cname)
                    0, __LINE__, "UserCtype<%s>::narrow(\"yzw\", ..., '?', dst) "
                    "== \"x??\"", cname);
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // a fresh facet, as for widen
         UserCtype<charT> strict;
         strict.narrow_ = narrow_tab;
@@ -760,8 +745,6 @@ test_narrow (charT*, const char *cname)
         }
         rw_assert (caught, 0, __LINE__, "UserCtype<%s>::narrow(\"yzw\", ...) "
                    "throws the facet's exception for an invalid entry", cname);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     }
 }

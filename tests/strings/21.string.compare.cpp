@@ -747,8 +747,6 @@ void test_compare (charT, Traits*, Allocator*,
     const char* expected = 0;
     const char* caught   = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     if (1 == tcase.bthrow)
         expected = exceptions [1];
     else if (   2 == tcase.bthrow
@@ -756,13 +754,6 @@ void test_compare (charT, Traits*, Allocator*,
         expected = exceptions [1];
     else if (3 == tcase.bthrow)
         expected = exceptions [2];
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (tcase.bthrow)
-        return;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     try {
         switch (func.which_) {
@@ -816,8 +807,6 @@ void test_compare (charT, Traits*, Allocator*,
         }
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::out_of_range &ex) {
         caught = exceptions [1];
         rw_assert (caught == expected, 0, tcase.line,
@@ -853,8 +842,6 @@ void test_compare (charT, Traits*, Allocator*,
         str_state.assert_equal (rw_get_string_state (str),
                                 __LINE__, tcase.line, caught);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
 }
 

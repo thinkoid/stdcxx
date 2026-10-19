@@ -90,38 +90,6 @@ Fix, in order:
 Check: the six tables of a parallel run identical to those of a
 serial one, three runs over; the wall time recorded beside the tables.
 
-** TODO No configuration builds with exceptions off
-
-=_RWSTD_NO_EXCEPTIONS= is a build mode, set by =-fno-exceptions= in
-=include/rw/_config-gcc.h=, and =_TRY=, =_CATCH=, =_THROW= and
-=_RETHROW= in =rw/_defs.h= carry the library through it, the way
-libstdc++'s =__try= and =__catch= do. The six certified
-configurations all build with exceptions on. A 15D build with
-=CXXOPTS=-fno-exceptions= on every phase (2026-10-19, aarch64, GCC
-16): the library builds clean, so its 78 sites hold; =config.h= is
-the exceptions-on one, since the configuration ignores =CXXOPTS=,
-and the three characterizations that branch on the macro answered
-under exceptions. Nothing else builds. =util= uses bare =try= and
-=catch= in four files, =localedef= among them, so no locale
-database is built; the test driver has a bare =throw= in
-=exception.cpp= and =ctype.cpp=, and =21.strings.cpp= and
-=23.containers.cpp= assign =_rw_no_exceptions=, a name declared
-nowhere, under =#ifdef _RWSTD_NO_EXCEPTIONS=; 35 of the 268 tests
-fail to compile on bare =catch=, the other 233 fail to link for
-want of the driver; the examples fail in ten files on
-=examples.h='s =catch= macro of 2005 (=else if (0) for (ex ; 0 ; )=),
-which cannot take =catch (...)= or a reference. =tr1/_smartptr.h=
-throws =bad_weak_ptr= bare in =weak_ptr::lock=. 128 bare =try= in
-the tests, 20 in the examples, 7 in =util=.
-
-Fix: decide whether the mode is supported. If it is, one
-configuration of the nightly builds the library and the suite with
-=-fno-exceptions=; if it is not, the four macros follow the twelve
-spelled out on 2026-10-17 and the gate retires as a build mode.
-
-Check: the no-exceptions library and suite build, with the table
-pinned; or =git grep _TRY= empty.
-
 * Locales
 
 The locale sources and charmaps under =etc/nls=, the =localedef= that
@@ -667,11 +635,11 @@ rest of the table matches the plain one but for the reports. First run,
 
 ** TODO =ref-characterizations.md= lags the tree by seven probes
 
-The catalogue in chapter 4 has 142 rows against 149 named probes in
+The catalogue in chapter 4 has 141 rows against 148 named probes in
 =etc/config/src=. The five =*_ATOMIC_OPS= probes and the two
 =OPERATOR_DELETE_*_SIZED= probes have no row; they arrived after the
 document's 2026-09-27 refresh. The counts in the tl;dr and chapter 2
-followed every retirement since, down to 149 on 2026-10-18; the rows
+followed every retirement since, down to 148 on 2026-10-19; the rows
 were not written.
 
 Fix: the seven rows, in the catalogue's shape, and the support-file

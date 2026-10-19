@@ -47,8 +47,6 @@ int main (int argc, char *argv[])
 {
     (void)&argv;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     try {
         S s;
 
@@ -61,8 +59,6 @@ int main (int argc, char *argv[])
     }
     catch (...) {
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     return uncaught;
 }

@@ -255,8 +255,6 @@ void test_iterators (charT*, Traits*, Allocator*,
         const char* expected = 0;
         const char* caught   = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // by default excercise the exception safety of the function
         // by iteratively inducing an exception at each call to operator
         // new or Allocator::allocate() until the call succeeds
@@ -264,8 +262,6 @@ void test_iterators (charT*, Traits*, Allocator*,
         *pst->throw_at_calls_ [0] = pst->new_calls_ [0] + throw_count + 1;
         pal->throw_at_calls_ [pal->m_allocate] =
             pal->throw_at_calls_ [pal->m_allocate] + throw_count + 1;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // start checking for memory leaks
         rw_check_leaks (str.get_allocator ());
@@ -471,8 +467,6 @@ void test_iterators (charT*, Traits*, Allocator*,
             }
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const std::bad_alloc &ex) {
             caught = exceptions [1];
             rw_assert (0 == tcase.bthrow, 0, tcase.line,
@@ -494,8 +488,6 @@ void test_iterators (charT*, Traits*, Allocator*,
                 "unexpectedly%{;} caught %s",
                 __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // FIXME: verify the number of blocks the function call
         // is expected to allocate and detect any memory leaks

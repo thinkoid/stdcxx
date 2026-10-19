@@ -123,8 +123,6 @@ void test_capacity (Vector::size_type nelems)
     if (rw_opt_no_exceptions)
         return;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // exercise reserve exception
     const char *caught = 0;
 
@@ -153,8 +151,6 @@ void test_capacity (Vector::size_type nelems)
                    "vector<UserClass>(%zu).reserve(%zu) "
                    "expected length_error, got %s",
                    nelems, too_much, caught);
-
-#endif // _RWSTD_NO_EXCEPTIONS
 
 }
 

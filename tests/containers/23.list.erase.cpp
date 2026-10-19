@@ -292,18 +292,9 @@ void test_erase (T*, Allocator*,
     ListIter it_first (lst.begin ());
     _rw_advance (it_first, off1);
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // is some exception expected ?
     const char* expected = 0;
     const char* caught = 0;
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (tcase.bthrow)
-        return;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // start checking for memory leaks
     rwt_check_leaks (0, 0);
@@ -436,8 +427,6 @@ void test_erase (T*, Allocator*,
         delete [] got;
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::exception &ex) {
         caught = exceptions [1];
         rw_assert (0, 0, tcase.line,
@@ -452,8 +441,6 @@ void test_erase (T*, Allocator*,
                    "unexpectedly%{;} caught %s",
                    __LINE__, 0 != expected, expected, caught);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // FIXME: verify the number of blocks the function call
     // is expected to allocate and detect any memory leaks

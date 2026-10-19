@@ -1081,16 +1081,6 @@ _rw_toggle_options (int *opts, size_t count)
 static int
 _rw_run_test (int, char*[])
 {
-#ifdef _RWSTD_NO_EXCEPTIONS
-
-    rw_note (0, 0, 0, "exception tests disabled (macro "
-        "_RWSTD_NO_EXCEPTIONS #defined)");
-
-    // disable all exception tests and avoid further notes
-    _rw_no_exceptions       = 2;
-    _rw_no_exception_safety = 2;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // see if any option controlling a container function has been
     // explicitly enabled and if so disable all those that haven't

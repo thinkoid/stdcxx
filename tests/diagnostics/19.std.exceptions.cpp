@@ -34,7 +34,6 @@
 template <class Exception>
 int test_ex_spec (Exception*, const char *str)
 {
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     try {
         // also tests that exception objects can be constructed
@@ -46,12 +45,6 @@ int test_ex_spec (Exception*, const char *str)
     catch (...) {
         return 1;
     }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS);
-
-    _RWSTD_UNUSED (str);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     return 0;
 }
@@ -181,7 +174,6 @@ static int test_exception_defs ()
 template <class Exception>
 int test_throw (Exception*, const char *str)
 {
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     //////////////////////////////////////////////////////////////////
 
@@ -302,13 +294,6 @@ int test_throw (Exception*, const char *str)
         rw_assert (false, 0, __LINE__,
                    "threw %s, caught an unknown exception", str);
     }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS);
-
-    _RWSTD_UNUSED (t);
-    _RWSTD_UNUSED (str);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     return 0;
 }

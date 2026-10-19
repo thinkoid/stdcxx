@@ -231,13 +231,9 @@ void test_access (charT, Traits*, Allocator*,
     // the state of the object after an exception)
     const StringState str_state (rw_get_string_state (str));
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // is some exception expected ?
     const char* expected = 1 == tcase.bthrow ? exceptions[1] : 0;
     const char* caught = 0;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     try {
 
@@ -279,8 +275,6 @@ void test_access (charT, Traits*, Allocator*,
                    __LINE__, tcase.nres, char_value (*pres));
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::out_of_range &ex) {
         caught = exceptions [1];
         rw_assert (caught == expected, 0, tcase.line,
@@ -302,8 +296,6 @@ void test_access (charT, Traits*, Allocator*,
                    "unexpectedly%{;} caught %s",
                    __LINE__, 0 != expected, expected, caught);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     if (caught) {
         // verify that an exception thrown during allocation

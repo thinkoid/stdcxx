@@ -682,18 +682,9 @@ void test_find (charT, Traits*, Allocator*,
 
     std::size_t size = NPOS != tcase.size ? tcase.size : s_arg.max_size () + 1;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // no exceptions expected
     const char* expected = 0;
     const char* caught = 0;
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (tcase.bthrow)
-        return;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     try {
         std::size_t res = 0;
@@ -744,8 +735,6 @@ void test_find (charT, Traits*, Allocator*,
                    String::npos != res, res, String::npos == res);
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::exception &ex) {
         caught = exceptions [4];
         rw_assert (0, 0, tcase.line,
@@ -774,7 +763,6 @@ void test_find (charT, Traits*, Allocator*,
                    __LINE__, 0 != expected, expected, caught, caught);
     }
 
-#endif   // _RWSTD_NO_EXCEPTIONS
 }
 
 /**************************************************************************/

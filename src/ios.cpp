@@ -184,8 +184,6 @@ _C_set (unsigned state, unsigned except, void *rdbuf)
     _C_state  = iostate (state & ~(__rw::__rw_nothrow | __rw::__rw_rethrow));
     _C_except = except;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     if (!(state & __rw::__rw_nothrow) && (state & except)) {
 
         if (state & __rw::__rw_rethrow)
@@ -235,8 +233,6 @@ _C_set (unsigned state, unsigned except, void *rdbuf)
 
         __rw::__rw_throw (_RWSTD_ERROR_IOSTATE_BIT_SET, strm, bit);
     }
-
-#endif   // !defined (_RWSTD_NO_EXCEPTIONS)
 
     return rdbuf_save;
 }

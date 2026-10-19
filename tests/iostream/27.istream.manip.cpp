@@ -150,15 +150,7 @@ struct Streambuf: std::basic_streambuf<charT, Traits>
 
         if (throw_after_ == this->gptr () - this->eback ()) {
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
             throw throw_after_;
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-            return traits_type::eof ();
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         }
 
@@ -243,8 +235,6 @@ test_ws (const Traits*           /* dummy */,
     // underflow member function
     const int extract = is.good () && white == cbuf [0] ? int (err_after) : 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     bool caught = false;
 
     // on every other iteration set badbit in exceptions to check
@@ -277,12 +267,6 @@ test_ws (const Traits*           /* dummy */,
                "%u. std::ws (basic_istream<%s, %s>&);"
                " unexpectedly propagated exception",
                iter, cname, tname);
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    std::ws (is);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     //////////////////////////////////////////////////////////////////
     // verify that the expected number of whitespace characters have
@@ -326,8 +310,6 @@ test_ws (const Traits*           /* dummy */,
     }
     else if (white == cbuf [0] || !err_after) {
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // ...when any whitespace characters are extracted, or the
         // first character on the stream is peeked at, even if it's
         // not a space, and an exception is thrown during input,
@@ -338,11 +320,6 @@ test_ws (const Traits*           /* dummy */,
         else
             expect_state = std::ios_base::eofbit;
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        expect_state = std::ios_base::eofbit;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
     }
 
     rw_assert (is.rdstate () == expect_state, 0, __LINE__,

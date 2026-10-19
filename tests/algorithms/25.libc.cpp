@@ -54,13 +54,10 @@ extern "C" {
 
     static int c_comp (const void *x, const void *y) 
     {
-#ifndef _RWSTD_NO_EXCEPTIONS
 
         // verify that a thrown exception can be caught
         if (x >= global && x < global + sizeof global / sizeof *global)
             throw x;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         return   (*static_cast< const UserClass* >(x)).data_.val_
                - (*static_cast< const UserClass* >(y)).data_.val_;
@@ -71,13 +68,10 @@ extern "C++" {
 
     static int cxx_comp (const void *x, const void *y)
     {
-#ifndef _RWSTD_NO_EXCEPTIONS
 
         // verify that a thrown exception can be caught
         if (x >= global && x < global + sizeof global / sizeof *global)
             throw x;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         return   (*static_cast< const UserClass* >(x)).data_.val_
                - (*static_cast< const UserClass* >(y)).data_.val_;
@@ -120,7 +114,6 @@ test_qsort_exception (int          line,
                       std::size_t  nsrc,
                       bool         cxx) 
 {
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     // install a SIGABRT handler in case libc can't throw
     // exceptions and aborts instead (e.g., glibc/gcc)
@@ -152,15 +145,6 @@ test_qsort_exception (int          line,
                "line %d: extern \"C%{?}++%{;}\" qsort() failed to propagate "
                "exception", __LINE__, cxx);
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    _RWSTD_UNUSED (line);
-    _RWSTD_UNUSED (src);
-    _RWSTD_UNUSED (nsrc);
-    _RWSTD_UNUSED (key);
-    _RWSTD_UNUSED (cxx);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 }
 
 /**************************************************************************/
@@ -207,7 +191,6 @@ test_bsearch_exception (int         line,
                         const int  *key,
                         bool        cxx) 
 {
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     // install a SIGABRT handler in case libc can't throw
     // exceptions and aborts instead (e.g., glibc/gcc)
@@ -239,15 +222,6 @@ test_bsearch_exception (int         line,
                "line %d: extern \"C%{?}++%{;}\" bsearch() failed to propagate "
                "exception", __LINE__, cxx);
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    _RWSTD_UNUSED (line);
-    _RWSTD_UNUSED (src);
-    _RWSTD_UNUSED (nsrc);
-    _RWSTD_UNUSED (key);
-    _RWSTD_UNUSED (cxx);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 }
 
 /**************************************************************************/

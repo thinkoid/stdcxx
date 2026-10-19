@@ -33,8 +33,6 @@
 #include <examples.h>
 
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
 int main () {
     
     // First we'll incite and catch an exception from the C++ Standard
@@ -79,13 +77,3 @@ int main () {
     return 0;
 }
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-int main () {
-    
-    std::cout << "Exception support disabled.\n";
-
-    return 0;
-}
-
-#endif   // _RWSTD_NO_EXCEPTIONS

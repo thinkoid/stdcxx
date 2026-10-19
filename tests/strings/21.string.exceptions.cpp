@@ -35,18 +35,6 @@
 
 // uses setjmp() and longjmp() to verify correct function if exception
 // exception support is disabled
-#ifdef _RWSTD_NO_EXCEPTIONS
-#  include <csetjmp>
-
-int     id;   // "thrown" from user_throw () defined below
-jmp_buf env;  // used to implement fake exception handling
-
-#  undef try
-#  define try           if (0 == (id = setjmp (env)))
-
-#  undef catch
-#  define catch(ignore) else if (0 != id)
-#endif   // _RWSTD_NO_EXCEPTIONS
 
 
 // use a type that string isn't instantiated/specialized on by the library
@@ -79,15 +67,8 @@ user_throw (int ex_id, char *what)
 {
     __rw::__rw_free_what_buf (what);
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     throw ex_id;
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    longjmp (env, ex_id);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 }
 
 /**************************************************************************/
@@ -100,13 +81,6 @@ test_simple_throw ()
     // establish a chekpoint for memory leaks
     rwt_check_leaks (0, 0);
 
-#ifdef _RWSTD_NO_EXCEPTIONS
-
-    // prevent library from aborting if exception support is disabled
-    __rw::__rw_throw_proc = user_throw;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
-
     int thrown = 0;
 
     try {
@@ -117,19 +91,9 @@ test_simple_throw ()
                              _RWSTD_FUNC ("test_simple_throw ()"), 0, 0));
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (std::out_of_range&) {
         thrown = 1;
     }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    catch (int id) {
-        thrown = id == _RWSTD_ERROR_OUT_OF_RANGE;
-    }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     catch (...) {
         thrown = -1;
@@ -169,19 +133,10 @@ test_size_ctor ()
         // throws std::out_of_range if pos > str.size ()
         String s1 (s0, s0.size () + 1);
     }
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     catch (std::out_of_range&) {
         thrown = 1;
     }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    catch (int id) {
-        thrown = id == _RWSTD_ERROR_OUT_OF_RANGE;
-    }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     catch (...) {
         thrown = -1;

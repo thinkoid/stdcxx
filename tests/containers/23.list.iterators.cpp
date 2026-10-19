@@ -358,8 +358,6 @@ void test_iterators (T*, Allocator*,
         }
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::bad_alloc &ex) {
         rw_assert (0, 0, tcase.line,
                    "line %d. %{$FUNCALL} unexpectedly caught std::%s(%#s)",
@@ -375,8 +373,6 @@ void test_iterators (T*, Allocator*,
                    "line %d. %{$FUNCALL} unexpectedly caught %s",
                    __LINE__, exceptions [0]);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // FIXME: verify the number of blocks the function call
     // is expected to allocate and detect any memory leaks

@@ -205,8 +205,6 @@ run_test (int, char* [])
     if (1) {
         // exercise 18.5.2, class bad_cast functionality
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         const char *caught = "no exception";
 
         D1 d1;
@@ -299,7 +297,6 @@ run_test (int, char* [])
         _RWSTD_UNUSED (d1);
         _RWSTD_UNUSED (b);
 
-#endif   // _RWSTD_NO_EXCEPTIONS
     }
 
     if (1) {
@@ -333,8 +330,6 @@ run_test (int, char* [])
 
     if (1) {
         // exercise 18.5.3, class bad_typeid functionality
-
-#ifndef _RWSTD_NO_EXCEPTIONS
 
         const char *caught = "no exception";
 
@@ -406,7 +401,6 @@ run_test (int, char* [])
                    "that bad_typeid might be defined in the wrong namespace",
                    caught, expect);
 
-#endif   // _RWSTD_NO_EXCEPTIONS
     }
 
     return 0;

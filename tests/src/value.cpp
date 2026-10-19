@@ -99,15 +99,11 @@ UserClass::UserClass ()
     // (do so even if the function throws an exception below)
     ++n_total_def_ctor_;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     if (def_ctor_throw_ptr_ && n_total_def_ctor_ == *def_ctor_throw_ptr_) {
         DefCtor ex;
         ex.id_ = id_;
         throw ex;
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // initialize the object's value
     if (gen_)
@@ -134,8 +130,6 @@ UserClass::UserClass (const UserClass &rhs)
     // (do so even if the function throws an exception below)
     ++n_total_copy_ctor_;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // throw an exception if the number of calls
     // to the copy ctor reaches the given value
     if (copy_ctor_throw_ptr_ && n_total_copy_ctor_ == *copy_ctor_throw_ptr_) {
@@ -143,8 +137,6 @@ UserClass::UserClass (const UserClass &rhs)
         ex.id_ = id_;
         throw ex;
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // increment the number of successfully constructed objects
     ++count_;
@@ -160,8 +152,6 @@ UserClass::~UserClass ()
     // (do so even if the function throws an exception below)
     ++n_total_dtor_;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // throw an exception if the number of calls
     // to the class dtor reaches the given value
     if (dtor_throw_ptr_ && n_total_dtor_ == *dtor_throw_ptr_) {
@@ -169,8 +159,6 @@ UserClass::~UserClass ()
         ex.id_ = id_;
         throw ex;
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // decrement the number of objects in existence
     --count_;
@@ -259,8 +247,6 @@ assign (assign_op which, const UserClass &rhs)
     ++*p_total_op;
     ++*p_op;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // throw an exception if the number of calls to
     // the assignment operator reaches the given value
 
@@ -268,8 +254,6 @@ assign (assign_op which, const UserClass &rhs)
         pex->id_ = id_;
         throw *pex;
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // overwrite value and source id only when the operation
     // is successful (i.e., only when it doesn't throw)
@@ -345,8 +329,6 @@ UserClass::operator== (const UserClass &rhs) const
     // (do so even if the function throws an exception below)
     ++n_total_op_eq_;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // throw an exception if the number of calls
     // to operator== reaches the given value
 
@@ -355,8 +337,6 @@ UserClass::operator== (const UserClass &rhs) const
         ex.id_ = id_;
         throw ex;
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     return data_.val_ == rhs.data_.val_;
 }
@@ -382,8 +362,6 @@ UserClass::operator< (const UserClass &rhs) const
     // (do so even if the function throws an exception below)
     ++n_total_op_lt_;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // throw an exception if the number of calls
     // to operator== reaches the given value
 
@@ -392,8 +370,6 @@ UserClass::operator< (const UserClass &rhs) const
         ex.id_ = id_;
         throw ex;
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     return data_.val_ < rhs.data_.val_;
 }

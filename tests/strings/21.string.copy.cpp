@@ -200,22 +200,9 @@ void test_copy (charT, Traits*, Allocator*,
     // the state of the object after an exception)
     const StringState str_state (rw_get_string_state (str));
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // is some exception expected?
     const char* const expected = tcase.bthrow ? exceptions [1] : 0;
     const char* caught = 0;
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (tcase.bthrow) {
-        if (wres != wres_buf)
-            delete[] wres;
-
-        return;
-    }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     try {
         switch (func.which_) {
@@ -256,8 +243,6 @@ void test_copy (charT, Traits*, Allocator*,
         }
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::out_of_range &ex) {
         caught = exceptions [1];
         rw_assert (caught == expected, 0, tcase.line,
@@ -292,8 +277,6 @@ void test_copy (charT, Traits*, Allocator*,
                    "%{:}unexpectedly caught %s%{;}",
                    __LINE__, 0 != expected, expected, caught, caught);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     if (wres != wres_buf)
         delete[] wres;

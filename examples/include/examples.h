@@ -52,12 +52,6 @@ using ::ptrdiff_t;
 
 
 
-#ifdef _RWSTD_NO_EXCEPTIONS
-#  define try            if (1)
-#  define catch(ex)      else if (0) for (ex ; 0 ; )
-#  define throw(ignore)  abort ()
-#endif   // _RWSTD_NO_EXCEPTIONS
-
 
 
 // undefine macros #defined by some evil C libraries (e.g., MSVC)

@@ -516,8 +516,6 @@ void test_insert (T*, Allocator*,
         const char* expected = 0;
         const char* caught   = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         if (0 == tcase.bthrow) {
             // by default exercise the exception safety of the function
             // by iteratively inducing an exception at each call to operator
@@ -530,13 +528,6 @@ void test_insert (T*, Allocator*,
         else {
             // exceptions disabled for this test case
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        if (tcase.bthrow) 
-            return;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // pointer to the returned reference
         const List* ret_ptr = 0;
@@ -665,8 +656,6 @@ void test_insert (T*, Allocator*,
             delete [] got;
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const std::bad_alloc &ex) {
             caught = exceptions [1];
             rw_assert (0 == tcase.bthrow, 0, tcase.line,
@@ -688,8 +677,6 @@ void test_insert (T*, Allocator*,
                        "unexpectedly%{;} caught %s",
                        __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // FIXME: verify the number of blocks the function call
         // is expected to allocate and detect any memory leaks

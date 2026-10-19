@@ -66,8 +66,6 @@ int main (int argc, char *argv[])
     if ((*uncaught_exception)())
         result = result << 1 + 1;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     try {
         S s;
 
@@ -80,8 +78,6 @@ int main (int argc, char *argv[])
     }
     catch (...) {
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     if (uncaught)
         result = result << 1 + 1;

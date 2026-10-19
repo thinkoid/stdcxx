@@ -265,7 +265,6 @@ void test_has_facet (const char *loc_name, const char *cname)
         // verify that use facet doesn't throw an exception
         std::use_facet<Messages>(loc);
     }
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     catch (std::exception &ex) {
         rw_assert (0, 0, __LINE__,
@@ -314,8 +313,6 @@ void test_has_facet (const char *loc_name, const char *cname)
                    cname, 0 != loc_name, loc_name);
     }
 
-#endif   // _RWSTD_NO_EXCEPTIONS
-
 }
 
 /***************************************************************************/
@@ -357,8 +354,6 @@ open_catalog (const std::messages<charT> &msgs,
                    expect_exception, nlspath);
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (std::exception &ex) {
         rw_assert (expect_exception, 0, line,
                    "messages<%s>::open(%#s, locale(%#s)) unexpectedly "
@@ -371,8 +366,6 @@ open_catalog (const std::messages<charT> &msgs,
                    "threw an unknown exception; NLSPATH=%s",
                    cname, cat_name, loc.name ().c_str (), nlspath);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     return cat;
 }
@@ -396,8 +389,6 @@ close_catalog (const std::messages<charT> &msgs,
                    cname, cat);
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (std::exception &ex) {
         rw_assert (expect_exception, 0, line,
                    "messages<%s>::close(%d) unexpectedly "
@@ -410,8 +401,6 @@ close_catalog (const std::messages<charT> &msgs,
                    "threw an unknown exception",
                    cname, cat);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
 }
 
@@ -517,7 +506,6 @@ void test_get (const char *loc_name,
                    cname, bad_cat, int (sizeof *def), def,
                    int (sizeof *def), def, int (sizeof (charT)), &got);
     }
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     catch (std::exception &ex) {
         rw_assert (true, 0, __LINE__,
@@ -525,8 +513,6 @@ void test_get (const char *loc_name,
                    "exception(%#s)", cname, bad_cat, int (sizeof *def), def,
                    ex.what ());
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // Bad set id
     // When we use resource files for the message catalogs

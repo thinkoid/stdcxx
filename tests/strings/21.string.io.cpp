@@ -982,8 +982,6 @@ void test_io (charT*, Traits*, Allocator*,
 
         Streambuf& sbuf = test_inserter ? outbuf : inbuf;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // (name of) expected and caught exception
         const char* expected = 0;
         const char* caught   = 0;
@@ -1007,13 +1005,6 @@ void test_io (charT*, Traits*, Allocator*,
         else {
             // exceptions disabled for this test case
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        if (tcase.bthrow)
-            return;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // construct both stream objects even though only one will be used
         Istream is (&inbuf);
@@ -1080,7 +1071,6 @@ void test_io (charT*, Traits*, Allocator*,
                     return;
                 }
             }
-#ifndef _RWSTD_NO_EXCEPTIONS
 
             catch (std::ios_base::failure& ex) {
                 caught = exceptions [1];
@@ -1098,8 +1088,6 @@ void test_io (charT*, Traits*, Allocator*,
                            "unexpectedly%{;} caught %s",
                            __LINE__, 0 != expected, expected, caught);
             }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
             const std::streamsize ret_width = strm.width ();
             const Iostate         ret_state = strm.rdstate ();
@@ -1196,8 +1184,6 @@ void test_io (charT*, Traits*, Allocator*,
             }
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const std::bad_alloc &ex) {
             caught = exceptions [2];
             rw_assert (0, 0, tcase.line,
@@ -1219,8 +1205,6 @@ void test_io (charT*, Traits*, Allocator*,
                        "unexpectedly%{;} caught %s",
                        __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // FIXME: verify the number of blocks the function call
         // is expected to allocate and detect any memory leaks

@@ -342,8 +342,7 @@ test_effects ()
     rw_assert (what && 1 <= 1 + std::strlen (what), 0, __LINE__,
                "std::bad_exception::what()");
 
-#if    !defined (_RWSTD_NO_EXCEPTIONS) \
-    && !defined (_RWSTD_NO_EXCEPTION_SPECIFICATION)
+#ifndef _RWSTD_NO_EXCEPTION_SPECIFICATION
 
     struct S {
         static void foo () throw (double) {
@@ -379,7 +378,7 @@ test_effects ()
     expect_terminate = -1;
     expect_unexpected = -1;
 
-#endif   // _RWSTD_NO_EXCEPTIONS && ...
+#endif   // _RWSTD_NO_EXCEPTION_SPECIFICATION
 }
 
 /**************************************************************************/
@@ -407,22 +406,12 @@ test_uncaught_exception ()
 
 #else
 
-#  ifndef _RWSTD_NO_EXCEPTIONS
-
     expect = true;
-
-#  else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    expect = false;
-
-#  endif   // _RWSTD_NO_EXCEPTIONS)
 
 #endif
 
     rw_assert (uncaught == expect, 0, __LINE__,
                "std::uncaught_exception() == %d, got %d", expect, uncaught);
-
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     expect = true;
 
@@ -438,18 +427,6 @@ test_uncaught_exception ()
     }
     catch (...) {
     }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    expect = false;
-
-    {
-        UncaughtExceptionCheck chk;
-
-        chk.presult_ = &uncaught;
-    }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     rw_assert (uncaught == expect, 0, __LINE__,
                "std::uncaught_exception() == %d, got %d", expect, uncaught);
@@ -480,7 +457,6 @@ test_throw_proc (int id, char *s)
 static void
 test_rw_throw ()
 {
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     rw_info (0, 0, __LINE__, "__rw::__rw_throw()");
 
@@ -697,7 +673,6 @@ test_rw_throw ()
         str [j] = '0' + j % 10;
     }
 
-#endif   // _RWSTD_NO_EXCEPTIONS
 }
 
 /**************************************************************************/
@@ -889,7 +864,6 @@ opt_rt_exception [E_error];
 static void
 test_runtime ()
 {
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     rw_info (0, 0, __LINE__, "runtime support for exceptions");
 
@@ -964,7 +938,6 @@ test_runtime ()
                    ex_name);
     }
 
-#endif   // _RWSTD_NO_EXCEPTIONS
 }
 
 /**************************************************************************/

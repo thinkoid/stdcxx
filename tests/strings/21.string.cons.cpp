@@ -644,20 +644,11 @@ void test_cons (charT*, Traits*, Allocator*, const RangeBase<
     const char* expected = 0;
     const char* caught   = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     if (1 == tcase.bthrow && Cons (range) != func.which_ 
                           && Cons (range_alloc) != func.which_)
         expected = exceptions [1];      // out_of_range
     else if (2 == tcase.bthrow)
         expected = exceptions [2];      // length_error
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (tcase.bthrow)
-        return;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // pointer to the returned reference
     String* ret_ptr = 0;
@@ -776,8 +767,6 @@ void test_cons (charT*, Traits*, Allocator*, const RangeBase<
         }
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::out_of_range &ex) {
         caught = exceptions [1];
         rw_assert (caught == expected, 0, tcase.line,
@@ -813,8 +802,6 @@ void test_cons (charT*, Traits*, Allocator*, const RangeBase<
                    "unexpectedly%{;} caught %s",
                    __LINE__, 0 != expected, expected, caught);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     /* const */ std::size_t nbytes;
     const       std::size_t nblocks = rwt_check_leaks (&nbytes, 0);
@@ -876,8 +863,6 @@ void test_op_set (charT*, Traits*, Allocator*,
         const char* expected = 0;
         const char* caught   = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         if (0 == tcase.bthrow) {
             // by default excercise the exception safety of the function
             // by iteratively inducing an exception at each call to operator
@@ -890,14 +875,6 @@ void test_op_set (charT*, Traits*, Allocator*,
         else {
             // exceptions disabled for this test case
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        if (tcase.bthrow) {
-            return;
-        }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // start checking for memory leaks
         rw_check_leaks (str.get_allocator ());
@@ -956,8 +933,6 @@ void test_op_set (charT*, Traits*, Allocator*,
             }
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const std::bad_alloc &ex) {
             caught = exceptions [3];
             rw_assert (0 == tcase.bthrow, 0, tcase.line,
@@ -979,8 +954,6 @@ void test_op_set (charT*, Traits*, Allocator*,
                        "unexpectedly%{;} caught %s",
                        __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // FIXME: verify the number of blocks the function call
         // is expected to allocate and detect any memory leaks

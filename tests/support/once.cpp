@@ -86,12 +86,8 @@ init_func ()
 
     while (_RWSTD_ATOMIC_LOAD_RELAXED (nentered, false) < opt_nthreads);
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     if (race_throws && 1 == call)
         throw call;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     data [race_round] = race_round + 1;
 }
@@ -112,8 +108,6 @@ race_func (void*)
 
     for ( ; ; ) {
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         try {
             __rw::__rw_once (flags + race_round, init_func);
             break;
@@ -123,13 +117,6 @@ race_func (void*)
             // caller of a failed initialization may
             _RWSTD_ATOMIC_PREINCREMENT (nthrown, false);
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        __rw::__rw_once (flags + race_round, init_func);
-        break;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     }
 
@@ -157,10 +144,8 @@ run_test (int, char**)
 
     for (int i = 0; 0 == result && i != NROUNDS; ++i) {
 
-#ifndef _RWSTD_NO_EXCEPTIONS
         // every other round, the first call to the initializer throws
         race_throws = 0 != i % 2;
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         race_round = i;
         nstarted   = 0;

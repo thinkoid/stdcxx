@@ -301,16 +301,12 @@ test_extractor (CharT*, Traits*, ArithmeticType*,
     else {
         // set the stream object's initial state
 
-#ifndef _RWSTD_NO_EXCEPTIONS
         try {
             is.setstate (std::ios::iostate (init_state));
         }
         catch (...) {
             // ignore exceptions
         }
-#else   // if defined ( _RWSTD_NO_EXCEPTIONS)
-        is.setstate (std::ios::iostate (init_state));
-#endif   //  _RWSTD_NO_EXCEPTIONS
     }
 
     // construct a locale object that treats only the specified `white'
@@ -340,8 +336,6 @@ test_extractor (CharT*, Traits*, ArithmeticType*,
                 locale_data.decimal_point, locale_data.thousands_sep,
                 locale_data.grouping, locale_data.falsename,
                 locale_data.truename);
-
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     int caught = 0;
 
@@ -375,12 +369,6 @@ test_extractor (CharT*, Traits*, ArithmeticType*,
                "%{:}unexpectedly propagated"
                "%{;} exception",
                __LINE__, expect_exception);
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    is >> value;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // clear the text describing the type of failure when streambuf
     // didn't actually fail (or throw)

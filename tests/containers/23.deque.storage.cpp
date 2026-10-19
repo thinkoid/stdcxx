@@ -44,10 +44,8 @@ struct Value {
 
     Value (int n = 0): data (n) { ++live; }
     Value (const Value &rhs): data (rhs.data) {
-#ifndef _RWSTD_NO_EXCEPTIONS
         if (++copies == fail_copy)
             throw copies;
-#endif
         ++live;
     }
     ~Value () { --live; }
@@ -71,10 +69,8 @@ struct Source {
     pointer pos;
 
     static void touch () {
-#ifndef _RWSTD_NO_EXCEPTIONS
         if (++calls == fail)
             throw calls;
-#endif
     }
 
     Source (pointer p = 0): pos (p) { }
@@ -164,7 +160,6 @@ static void test_boundaries ()
 template <class Category>
 static void test_source (Category, const char *name)
 {
-#ifndef _RWSTD_NO_EXCEPTIONS
     typedef Source<Category> Iter;
     typedef std::deque<Value> Deque;
 
@@ -230,9 +225,6 @@ static void test_source (Category, const char *name)
             }
         }
     }
-#else
-    _RWSTD_UNUSED (name);
-#endif
 }
 
 // Keep allocation records outside the container so deallocation size and
@@ -320,10 +312,8 @@ struct Allocator: std::allocator<T> {
 
     T* allocate (size_type n, const void* = 0) {
         RW_ASSERT (n <= max_size ());
-#ifndef _RWSTD_NO_EXCEPTIONS
         if (++pool->calls == pool->fail)
             throw std::bad_alloc ();
-#endif
         T *p = std::allocator<T>::allocate (n);
         pool->record (p, n, is_value (p));
         return p;
@@ -471,7 +461,6 @@ static void test_allocator ()
                 d.push_back (Value (i));
                 pool.check ();
             }
-#ifndef _RWSTD_NO_EXCEPTIONS
             bool caught = false;
             try { d.push_back (Value (0)); }
             catch (const std::length_error&) { caught = true; }
@@ -480,7 +469,6 @@ static void test_allocator ()
             try { d.insert (d.begin (), OwnedDeque::size_type (-1), Value (0)); }
             catch (const std::length_error&) { caught = true; }
             rw_assert (caught, 0, __LINE__, "overflowing insertion did not throw");
-#endif
             pool.check ();
             d.clear ();
             const int blocks = pool.used;

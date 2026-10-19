@@ -340,25 +340,12 @@ void test_erase (charT, Traits*, Allocator*,
     const StringIter it_first (str.begin () + off1);
     const StringIter it_last  (it_first + ext1);
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // is some exception expected ?
     const char* expected = 0;
     if (1 == tcase.bthrow)
         expected = exceptions [1];
 
     const char* caught = 0;
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (tcase.bthrow) {
-        if (wres != wres_buf)
-            delete[] wres;
-
-        return;
-    }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // pointer to the returned reference
     const String* ret_ptr = 0;
@@ -458,8 +445,6 @@ void test_erase (charT, Traits*, Allocator*,
         }
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::out_of_range &ex) {
         caught = exceptions [1];
         rw_assert (caught == expected, 0, tcase.line,
@@ -481,8 +466,6 @@ void test_erase (charT, Traits*, Allocator*,
                    "unexpectedly%{;} caught %s",
                    __LINE__, 0 != expected, expected, caught);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     if (caught) {
         // verify that an exception thrown during allocation

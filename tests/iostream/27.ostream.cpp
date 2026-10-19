@@ -487,8 +487,6 @@ void test_sentry (charT)
                    cname, strm.rdstate ());
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     if (0 <= rw_opt_exceptions) {
 
         test_streambuf<charT> tsb_strm (0);
@@ -547,8 +545,6 @@ void test_sentry (charT)
                    cname, tied.rdstate ());
     }
 
-#endif   // _RWSTD_NO_EXCEPTIONS
-
     {
         rw_info (0, 0, __LINE__,
                  "std::basic_ostream<%s>::sentry::~sentry()", cname);
@@ -599,8 +595,6 @@ void test_sentry (charT)
                    "stream.flush () when ios::unitbuf is set",
                    cname);
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         if (0 <= rw_opt_exceptions) {
 
             // verify that os.flush() is not called if ios::unitbuf is set
@@ -630,8 +624,6 @@ void test_sentry (charT)
                        "std::uncaught_exception () == true when an exception "
                        "is pending (language runtime library error)");
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     }
 }

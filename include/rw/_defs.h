@@ -698,14 +698,13 @@
 
 
 // function exception specification
-#if    !defined (_RWSTD_NO_EXCEPTIONS) \
-    && !defined (_RWSTD_NO_EXCEPTION_SPECIFICATION)
+#ifndef _RWSTD_NO_EXCEPTION_SPECIFICATION
    // type_id_list is a possibly empty parenthesized list
    //of comma-separated type-id's
 #  define _THROWS(type_id_list)   throw type_id_list
-#else   // if _RWSTD_NO_EXCEPTIONS || _RWSTD_NO_EXCEPTION_SPECIFICATION
+#else   // if defined (_RWSTD_NO_EXCEPTION_SPECIFICATION)
 #  define _THROWS(ignore)         /* empty */
-#endif   // !_RWSTD_NO_EXCEPTIONS && !_RWSTD_NO_EXCEPTION_SPECIFICATION
+#endif   // _RWSTD_NO_EXCEPTION_SPECIFICATION
 
 
 // function exception specification on extern "C" libc functions

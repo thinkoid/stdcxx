@@ -168,8 +168,6 @@ void test_swap (charT*, Traits*,
         const char* expected = 0;
         const char* caught = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // no exceptions expected
         if (0 == tcase.bthrow) {
             // by default excercise the exception safety of the function
@@ -180,13 +178,6 @@ void test_swap (charT*, Traits*,
             pal->throw_at_calls_ [pal->m_allocate] =
                 pal->throw_at_calls_ [pal->m_allocate] + throw_count + 1;
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        if (tcase.bthrow)
-            return;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         try {
 
@@ -261,8 +252,6 @@ void test_swap (charT*, Traits*,
             }
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const std::exception &ex) {
             caught = exceptions [4];
             rw_assert (0, 0, tcase.line,
@@ -277,8 +266,6 @@ void test_swap (charT*, Traits*,
                        "unexpectedly%{;} caught %s",
                        __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // FIXME: verify the number of blocks the function call
         // is expected to allocate and detect any memory leaks

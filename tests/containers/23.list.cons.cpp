@@ -452,8 +452,6 @@ void test_cons (T*, Allocator*, const ContRangeBase<
         const char* expected = 0;
         const char* caught   = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         if (0 == tcase.bthrow) {
             // by default exercise the exception safety of the
             // function by iteratively inducing an exception at
@@ -464,14 +462,6 @@ void test_cons (T*, Allocator*, const ContRangeBase<
         else {
             // exceptions disabled for this test case
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        if (tcase.bthrow) {
-            return;
-        }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
 
         // pointer to the returned reference
@@ -603,8 +593,6 @@ void test_cons (T*, Allocator*, const ContRangeBase<
             }
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const UserClass::CopyCtor &ex) {
             caught = exceptions [3];
             rw_assert (0 == tcase.bthrow, 0, tcase.line,
@@ -636,8 +624,6 @@ void test_cons (T*, Allocator*, const ContRangeBase<
                        "unexpectedly%{;} caught %s",
                        __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // disable UserClass::CopyCtor exception
         if (!caught)
@@ -714,8 +700,6 @@ void test_op_set (T*, Allocator*,
         const char* expected = 0;
         const char* caught   = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         if (0 == tcase.bthrow) {
             // by default exercise the exception safety of the
             // function by iteratively inducing an exception at
@@ -730,14 +714,6 @@ void test_op_set (T*, Allocator*,
         else {
             // exceptions disabled for this test case
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        if (tcase.bthrow) {
-            return;
-        }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // start checking for memory leaks
         rw_check_leaks (lst.get_allocator ());
@@ -818,8 +794,6 @@ void test_op_set (T*, Allocator*,
             delete [] got;
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const std::bad_alloc &ex) {
             caught = exceptions [1];
             rw_assert (0 == tcase.bthrow, 0, tcase.line,
@@ -843,8 +817,6 @@ void test_op_set (T*, Allocator*,
                        "unexpectedly%{;} caught %s",
                        __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // FIXME: verify the number of blocks the function call
         // is expected to allocate and detect any memory leaks

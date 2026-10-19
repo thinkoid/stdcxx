@@ -144,8 +144,6 @@ void exception_loop (int line, MemberFunction mfun, const char *fcall,
 {
     const Deque::size_type off = it - deq.begin ();
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     rwt_free_store* const pst = rwt_get_free_store (0);
 
     for (int source = NewThrows; source <= AssignmentThrows; source <<= 1) {
@@ -214,14 +212,6 @@ void exception_loop (int line, MemberFunction mfun, const char *fcall,
             }
         }
     }
-
-#else
-
-    _RWSTD_UNUSED (exceptions);
-    _RWSTD_UNUSED (line);
-    _RWSTD_UNUSED (fcall);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     const std::size_t live = UserClass::count_;
     const std::size_t size = deq.size ();

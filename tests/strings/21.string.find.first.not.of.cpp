@@ -636,21 +636,12 @@ void test_find_first_not_of (charT, Traits*, Allocator*,
 
     std::size_t size = NPOS != tcase.size ? tcase.size : s_arg.max_size () + 1;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // is some exception expected ?
     const char* expected = 0;
     if (1 == tcase.bthrow)
         expected = exceptions [2];
 
     const char* caught = 0;
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (tcase.bthrow)
-        return;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     try {
 
@@ -701,8 +692,6 @@ void test_find_first_not_of (charT, Traits*, Allocator*,
                    String::npos != res, res, String::npos == res);
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::length_error &ex) {
         caught = exceptions [2];
         rw_assert (caught == expected, 0, tcase.line,
@@ -724,8 +713,6 @@ void test_find_first_not_of (charT, Traits*, Allocator*,
                    "unexpectedly%{;} caught %s",
                    __LINE__, 0 != expected, expected, caught);
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     if (caught) {
         // verify that an exception thrown during allocation

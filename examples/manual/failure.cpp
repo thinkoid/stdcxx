@@ -33,8 +33,6 @@
 #include <examples.h>
 
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
 int main ()
 {
     const std::ios::iostate allbits =
@@ -77,14 +75,3 @@ int main ()
     return 0;
 }
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-int main ()
-{
-    std::cout << "Exceptions not supported\n";
-
-    return 0;
-}
-
-
-#endif   // _RWSTD_NO_EXCEPTIONS

@@ -339,8 +339,6 @@ void test_operators (charT, Traits*, Allocator*,
         const char* expected = 0;
         const char* caught   = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         if (0 == tcase.bthrow) {
             // by default excercise the exception safety of the function
             // by iteratively inducing an exception at each call to operator
@@ -353,17 +351,6 @@ void test_operators (charT, Traits*, Allocator*,
         else {
             // exceptions disabled for this test case
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (tcase.bthrow) {
-        if (wres != wres_buf)
-            delete[] wres;
-
-        return;
-    }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         try {
 
@@ -525,8 +512,6 @@ void test_operators (charT, Traits*, Allocator*,
             }
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const std::bad_alloc &ex) {
             caught = exceptions [3];
             rw_assert (0 == tcase.bthrow, 0, tcase.line,
@@ -548,8 +533,6 @@ void test_operators (charT, Traits*, Allocator*,
                        "unexpectedly%{;} caught %s",
                        __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         if (caught) {
 

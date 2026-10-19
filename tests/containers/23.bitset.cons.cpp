@@ -331,8 +331,6 @@ void test_string_ctor (std::bitset<N>*,
                        bitstr, int (N), &bset);
     }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     catch (const std::out_of_range&) {
         caught = OutOfRange;
     } 
@@ -342,7 +340,6 @@ void test_string_ctor (std::bitset<N>*,
     catch (...) {
         caught = 3;
     }
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     rw_assert (except == caught, 0, line,
                "line %d: bitset<%u>::bitset(%s\"%s\", %u, %u) "
@@ -691,9 +688,6 @@ void test_ctors (const Traits*, const char *cname)
 static int
 run_test (int, char**)
 {
-#ifdef _RWSTD_NO_EXCEPTIONS
-    opt_no_exceptions = 1;
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     if (opt_no_exceptions)
         rw_note (0, 0, 0, "exception tests disabled");

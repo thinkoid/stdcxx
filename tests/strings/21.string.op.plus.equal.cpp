@@ -302,8 +302,6 @@ void test_op_plus_eq (charT, Traits*, Allocator*,
         const char* expected = 0;
         const char* caught   = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         if (1 == tcase.bthrow)
             expected = exceptions [2];      // length_error
         else if (0 == tcase.bthrow) {
@@ -318,17 +316,6 @@ void test_op_plus_eq (charT, Traits*, Allocator*,
         else {
             // exceptions disabled for this test case
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        if (tcase.bthrow) {
-            if (wres != wres_buf)
-                delete[] wres;
-
-            return;
-        }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // start checking for memory leaks
         rw_check_leaks (str.get_allocator ());
@@ -400,8 +387,6 @@ void test_op_plus_eq (charT, Traits*, Allocator*,
             }
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const std::length_error &ex) {
             caught = exceptions [2];
             rw_assert (caught == expected, 0, tcase.line,
@@ -430,8 +415,6 @@ void test_op_plus_eq (charT, Traits*, Allocator*,
                        "unexpectedly%{;} caught %s",
                        __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // FIXME: verify the number of blocks the function call
         // is expected to allocate and detect any memory leaks

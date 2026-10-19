@@ -194,15 +194,7 @@ _RWSTD_EXPORT bool uncaught_exception () _THROWS (())
 
 #  else   // if defined (_RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION)
 
-#    ifndef _RWSTD_NO_EXCEPTIONS
-
     return true;
-
-#    else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    return false;
-
-#    endif   // _RWSTD_NO_EXCEPTIONS
 
 #  endif   // _RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION
 }
@@ -562,7 +554,6 @@ __rw_mutex _RWSTD_EXPORT __rw_synchronized::_C_mutex;
 
 static void __rw_throw_exception (int id, char *what)
 {
-#ifndef _RWSTD_NO_EXCEPTIONS
 
     // exception, bad_exception, bad_cast, and bad_alloc
     // each or may not be defined in namespace std; avoid
@@ -639,27 +630,6 @@ static void __rw_throw_exception (int id, char *what)
 
     __rw_free_what_buf (what);
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (what) {
-        fprintf (stderr,"Exception: %s.\n", what);
-        __rw_free_what_buf (what);
-    }
-    else {
-        const char *__str;
-        switch (id) {
-        case _RWSTD_ERROR_FIRST + 0: __str = _RWSTD_ERROR_EXCEPTION; break;
-        case _RWSTD_ERROR_FIRST + 1: __str = _RWSTD_ERROR_BAD_EXCEPTION; break;
-        case _RWSTD_ERROR_FIRST + 2:  __str = _RWSTD_ERROR_BAD_ALLOC; break;
-        default: __str = "unknown exception";
-        }
-
-        fprintf (stderr, "Exception: %s.\n", __str);
-    }
-
-    abort ();
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 }
 
 // may be assigned to a user-defined handler (e.g., to prevent

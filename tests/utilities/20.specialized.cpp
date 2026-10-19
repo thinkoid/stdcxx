@@ -33,8 +33,6 @@
 
 /**************************************************************************/
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
 struct Y
 {
     static int count_;
@@ -389,20 +387,6 @@ run_test (int, char**)
 
     return 0;
 }
-
-#else   // _RWSTD_NO_EXCEPTIONS
-
-static int
-run_test (int, char**)
-{
-    rw_note (0, 0, 0,
-             "exceptions disabled (_RWSTD_NO_EXCEPTIONS #defined), "
-             "cannot test");
-
-    return 0;
-}
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
 /**************************************************************************/
 

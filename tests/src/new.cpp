@@ -319,8 +319,6 @@ operator_new (size_t nbytes, bool array)
         || reached_block_limit
         || reached_size_limit) {
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         try {
             const char * threw = "threw bad_alloc:";
 
@@ -351,25 +349,6 @@ operator_new (size_t nbytes, bool array)
             throw;
         }
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        if (reached_breakpoint) {
-            char buf[4096];
-
-            rw_snprintfa (buf, sizeof(buf),
-                "reached a breakpoint at of %zu calls", *pst->break_at_seqno_);
-
-            __rw::__rw_assert_fail (buf, __FILE__, __LINE__, name [array]);
-        }
-
-        if (trace_sequence [0] <= seq_gen && seq_gen < trace_sequence [1])
-            rw_fprintf (rw_stderr, "%s:%d: %s (%zu) --> %#p\n",
-                        __FILE__, __LINE__, name [array], nbytes, ptr);
-
-        return 0;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
-
     }
 
     const size_t block_size = nbytes + sizeof (Header) + sizeof (Guard);
@@ -379,8 +358,6 @@ operator_new (size_t nbytes, bool array)
         ptr = malloc (block_size);
 
     if (!ptr) {
-
-#ifndef _RWSTD_NO_EXCEPTIONS
 
         try {
             rw_throw (ex_bad_alloc,
@@ -394,9 +371,6 @@ operator_new (size_t nbytes, bool array)
             throw;
         }
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-        return ptr;
-#endif   // _RWSTD_NO_EXCEPTIONS
     }
 
     // invalidate storage

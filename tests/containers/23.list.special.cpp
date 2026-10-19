@@ -211,8 +211,6 @@ void test_swap (T*,
         const char* expected = 0;
         const char* caught = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // no exceptions expected
         if (0 == tcase.bthrow && a1 == a2) {
             // by default exercise the exception safety of the function
@@ -223,13 +221,6 @@ void test_swap (T*,
             pal->throw_at_calls_ [pal->m_allocate] =
                 pal->throw_at_calls_ [pal->m_allocate] + throw_count + 1;
         }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-        if (tcase.bthrow)
-            return;
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // start checking for memory leaks
         rw_check_leaks (src_list.get_allocator ());
@@ -275,8 +266,6 @@ void test_swap (T*,
             }
         }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         catch (const std::bad_alloc &ex) {
             caught = exceptions [1];
             rw_assert (0 == tcase.bthrow, 0, tcase.line,
@@ -298,8 +287,6 @@ void test_swap (T*,
                        "unexpectedly%{;} caught %s",
                        __LINE__, 0 != expected, expected, caught);
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         // FIXME: verify the number of blocks the function call
         // is expected to allocate and detect any memory leaks

@@ -341,8 +341,6 @@ void test_ctors ()
                            j);
             }
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
             // exercise vector exception safety
 
             bool thrown = false;
@@ -476,8 +474,6 @@ void test_ctors ()
                        "(const vector&) changed size of *this from "
                        "%zu to %zu after exception",
                        i / 2, v3.size ());
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
             // vectors go out of scope, must destroy all elements
         }
@@ -654,8 +650,6 @@ void test_ctor_exceptions (CtorKind kind, const char *fcall,
     rw_info (0, 0, 0, "std::vector<UserClass>::%s under injected failures",
              fcall);
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     rwt_free_store* const pst = rwt_get_free_store (0);
 
     for (std::size_t n = 0; n != rw_opt_nloops; ++n) {
@@ -736,13 +730,6 @@ void test_ctor_exceptions (CtorKind kind, const char *fcall,
         delete[] xsrc;
     }
 
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    _RWSTD_UNUSED (kind);
-    _RWSTD_UNUSED (dummy);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
-
 }
 
 /**************************************************************************/
@@ -756,8 +743,6 @@ run_test (int /* argc */, char** /* argv */)
     static int sign_noted  = 0;
     static int ctors_noted = 0;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     try {
         // throw an exception to initialize the lib (allocates
         // memory that's never deallocated; shows up as leaks)
@@ -765,8 +750,6 @@ run_test (int /* argc */, char** /* argv */)
     }
     catch (...) {
     }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
 // for convenience (in case default template arguments are disabled)
 #define VECTOR(T)  std::vector<T, std::allocator<T> >

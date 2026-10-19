@@ -112,8 +112,6 @@ struct Y: public UserClass
         // (do so even if the function throws an exception below)
         ++n_total_op_plus_assign_;
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
         // throw an exception if the number of calls
         // to operator== reaches the given value
 
@@ -123,8 +121,6 @@ struct Y: public UserClass
             ex.id_ = id_;
             throw ex;
         }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
         data_.val_ += rhs.data_.val_;
         return *this;

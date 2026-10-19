@@ -480,8 +480,6 @@ test (MemFun which) const
     self->allcalls_ ++;
     const int callno = self->ncalls_ [inx];
 
-#ifndef _RWSTD_NO_EXCEPTIONS
-
     // if the call counter is equal to the `fail_when_' watermark
     // and `shich' is set in the `throw_set_' bitmask, throw an
     // exception with the value of the member id
@@ -493,15 +491,6 @@ test (MemFun which) const
                   streambuf_func_names [inx], 
                   "%s", "test exception");
     }
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    if (callno == throw_when_ [inx] && throw_set_ & which) {
-        self->threw_ = which;
-        return false;
-    }
-
-#endif   // _RWSTD_NO_EXCEPTIONS
 
     // ...otherwise check if the member should succeed or fail
     // and return true or false, respectively

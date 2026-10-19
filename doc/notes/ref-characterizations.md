@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 149 named C++ probes, five supporting C++
+The source census contains 148 named C++ probes, five supporting C++
 translation units, one shell driver and 12 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 149 named probes are discoverable by
+three different things.** All 148 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -188,7 +188,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [DEPRECATED_LIBC_IN_STD](../../etc/config/src/DEPRECATED_LIBC_IN_STD.cpp) / `NO_DEPRECATED_LIBC_IN_STD` | deprecated C headers and namespace std | none |
 | [DIV_OVERLOADS](../../etc/config/src/DIV_OVERLOADS.cpp) / `NO_DIV_OVERLOADS` + output | overloads of div() | none |
 | [EQUAL_CTYPE_MASK](../../etc/config/src/EQUAL_CTYPE_MASK.cpp) / `NO_EQUAL_CTYPE_MASK` | that ctype mask's for char and wchar_t are equal | L; `src/wctype.cpp` |
-| [EXCEPTIONS](../../etc/config/src/EXCEPTIONS.cpp) / `NO_EXCEPTIONS` | exceptions | L/P/T/E; `include/rw/_config-gcc.h` |
 | [EXCEPTION_ASSIGNMENT](../../etc/config/src/EXCEPTION_ASSIGNMENT.cpp) / `NO_EXCEPTION_ASSIGNMENT` | exception assignment operator | L; `src/exception.cpp` |
 | [EXCEPTION_COPY_CTOR](../../etc/config/src/EXCEPTION_COPY_CTOR.cpp) / `NO_EXCEPTION_COPY_CTOR` | exception copy ctor | L; `src/exception.cpp` |
 | [EXCEPTION_DEFAULT_CTOR](../../etc/config/src/EXCEPTION_DEFAULT_CTOR.cpp) / `NO_EXCEPTION_DEFAULT_CTOR` | exception default ctor | L; `src/exception.cpp` |
