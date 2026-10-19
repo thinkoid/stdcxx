@@ -97,6 +97,15 @@ uppercase 64-bit.
 
 Chapter 4 lists where the three differ.
 
+`bin/driver` runs the certification. It exports one revision per
+configuration, builds each through `bin/buildntest`, runs its suite,
+writes a page per build, and compares each table with its pin. The
+two are normalized by `bin/norm`, which keeps the table from its
+heading to the failed assertions line, drops the timing columns and
+squeezes the blanks. The verdict counts the tables identical to their
+pins; one that differs fails the run, with the difference beside the
+log. `bin/derive-pin` writes a pin from a run log.
+
 The tables were pinned on 2026-09-30 from full rebuilds, after the
 address-space limit was scaled to the processor count (chapter 3.2)
 and the `setbase` extension and `bin` were removed
@@ -232,6 +241,7 @@ generates SSE code for i386, which carries a signaling NaN.
 
 Measured again at c40c5d16 on 2026-10-14, they match the GCC tables
 row for row, `21.string.stdcxx-162` included, but for the
-`18.numeric.special.float` row of the 32-bit build. The driver under `bin` builds with GCC only; the Clang run
-goes through the same `buildntest` call with `CXX=clang` on the make
-line.
+`18.numeric.special.float` row of the 32-bit build. `bin/driver`
+takes a Clang configuration as the build type with `-clang` appended
+and runs it through the same `buildntest` call with `CXX=clang` on
+the make line.

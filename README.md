@@ -33,7 +33,9 @@ pinned under `doc/notes/baseline` for each configuration
 measured, and `doc/notes/ref-test-baseline.md` reads them: what fails, why where
 that is known, and what is intended for each. `TODO` carries the
 same failures as queue entries, in the chapter of the part of the
-tree they belong to.
+tree they belong to. `bin/driver` runs the certification: each
+configuration built and run from an export of one revision, a page
+per build, and each table compared with its pin.
 
 The write-ups live under `doc/notes`, one directory, the kind in
 the file name's prefix. `ref-` documents describe the library as it
