@@ -39,41 +39,6 @@ Check: the census of the tests that build, a table per library, and
 each disagreement read against the standard and filed where it
 belongs.
 
-** TODO MT tests that provoke contention instead of waiting for it
-
-Every locale MT program provokes the race it covers: a few threads
-wait on a gate (=rw_thread_gate=) and start together at the first
-use of a fresh object, round after round, and a check judges each
-round. Each names what it races: the facet slot of a fresh body
-(=22.locale.use_facet.mt=, every standard facet in turn), the facet
-reference counts (=facet.mt=), a user facet's id (=id.mt=), the three
-builders of facet data from the C library (=numpunct.mt=,
-=moneypunct.mt=, =time.put.libc.mt=, with a leak check for the
-re-check under the lock), the wide =codecvt='s database on the first
-conversion (=codecvt.mt=), =ctype='s lazy caches (=ctype.mt=), the
-catalog repository (=messages.mt=), the global locale's swap
-(=statics.mt=) and the named-body repository (=cons.mt=). Each
-rewrite was verified with its fault put back under ThreadSanitizer,
-reported in 25 runs of 25 and clean on the fixed library, where a
-fault is known; =messages.mt= and =cons.mt= have none and are judged
-by the sanitizer alone. ThreadSanitizer reports a race from what
-ran, not from its timing, and is the judge. The classic body's first
-construction is reachable from no test program: the driver's
-=<iostream>= initializer builds the standard streams before =main=.
-
-The census of 2026-10-19 retired the six =get= and =put= programs,
-which held no state of their own, and turned =globals.mt= into the
-single-threaded =22.locale.globals=.
-
-Fix: the six pins are night-20261019d's, the first run of the
-rewritten suite on the host with every glibc locale: 268 programs,
-0 failed in all six.
-
-Check: every locale MT program names the race or the operation it
-covers, reports its fault under the sanitizer with the fault put back
-and stays clean on the fixed library, counts assertions in every
-configuration, and the six tables pin the rows.
-
 ** TODO All the C library's locales on the test hosts
 
 The six tables under =doc/notes/baseline= come from a host with
@@ -155,20 +120,17 @@ their pins.
 ** TODO Run the suites in parallel
 
 The six suites run one after another, nine minutes on 32 processors
-(night-20261019c), a minute or two each, most of it in a few long
-tests. The suites
-are already isolated from each other: separate build directories,
-each program's output beside it, and a =TMPDIR= of its own for every
-=make run= (=etc/config/makefile.rules=). They share only the
-processors, and only the 15D MT rows depend on the load.
+(night-20261019e), a minute or two each, most of it in a few long
+tests. The suites are already isolated from each other: separate
+build directories, each program's output beside it, and a =TMPDIR=
+of its own for every =make run= (=etc/config/makefile.rules=). They
+share only the processors. The locale MT programs provoke their
+races on fresh state through a gate, four threads each, so their
+rows no longer depend on the load.
 
 Fix, in order:
-- The MT entry under Tests, for the load sensitivity of the 15D MT
-  rows.
-- The configurations' suites at once: the four single-threaded ones
-  now, the thread-safe ones with them once the MT entry lands. A
-  command for =doc/notes/ref-test-baseline.md=, not a tool to
-  maintain.
+- The configurations' suites at once, all six. A command for
+  =doc/notes/ref-test-baseline.md=, not a tool to maintain.
 - One configuration's list split across several harness runs, only if
   a single-threaded suite grows past a few minutes. Within one run the
   tests share =TMPDIR= and the locales =localedef= builds; each shard

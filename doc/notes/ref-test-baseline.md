@@ -165,9 +165,9 @@ Until 2026-10-13 seven older locale MT tests ended in 15D with
 `HUP`: each ran one thread per processor, 32 on the machine the
 tables come from, and ran each threaded section to its own 60-second
 soft timeout, so the rows recorded the harness, not the library.
-They were then sized under ThreadSanitizer, and on 2026-10-19 the
-census in the `TODO` entry "MT tests that provoke contention instead
-of waiting for it" retired six of them, `money.get.mt`,
+They were then sized under ThreadSanitizer, and on 2026-10-19 a
+census of what each covered (the commits from 5c1368e6 to ed33d6d2)
+retired six of them, `money.get.mt`,
 `money.put.mt`, `num.get.mt`, `num.put.mt`, `time.get.mt` and
 `time.put.mt` (the `get` and `put` facets hold no state of their
 own), turned `globals.mt` into the single-threaded
@@ -195,28 +195,11 @@ The eleven, and what each races:
 | `22.locale.statics.mt` | the swap of the global locale, with the returned locales checked as a multiset | 200 |
 | `22.locale.cons.mt` | the named-body repository, one body per name constructed from every thread at once, and the combinations | 1,000 |
 
-The address-space limit below is the harness's, STDCXX-440's guard.
-
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
 that takes the machine's memory. In thread-safe builds the limit
 grows by 128 MiB per processor, since each thread maps an 8 MiB stack
 and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
-
-The four gated MT tests, `22.locale.use_facet.mt`,
-`22.locale.time.put.libc.mt`, `22.locale.id.mt` and
-`22.locale.facet.mt`, pass in every configuration.
-
-The `TODO` entry "MT tests that provoke contention instead of waiting
-for it" holds the census of what each older test covers against the
-gated ones, and the verdict on each: retired, gated or split.
-`22.locale.money.get.mt`, `money.put.mt`, `num.get.mt`, `num.put.mt`,
-`time.get.mt` and `time.put.mt` are retired: the `get` and `put` facets
-hold no state of their own, and every fault their programs reported was
-a builder's or the facet slot's. `22.locale.globals.mt` became the
-single-threaded `22.locale.globals`: its checks are conformance,
-`has_facet` and `use_facet` for every standard facet in every installed
-locale, and the program counts them, 88 per locale and character type.
 
 ## 4. Differences between configurations
 
