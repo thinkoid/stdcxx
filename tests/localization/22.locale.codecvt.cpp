@@ -2417,7 +2417,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
             cc._C_opts &= ~cc._C_use_libc;                              \
             TEST_LIBSTD (L,T,C,cc,f,s,i,is,o,os,ur,ar,er,lr,mr);        \
                                                                         \
-            if (C == true && rwtest_is_C_locale (f)) {                  \
+            if (C == true && rwtest_is_C_locale (L)) {                  \
                 cc._C_opts &= ~cc._C_use_libstd;                        \
                 cc._C_opts |=  cc._C_use_libc;                          \
                 TEST_LIBSTD(L,T,C,cc,f,s,i,is,o,os,ur,ar,er,lr,mr);     \
