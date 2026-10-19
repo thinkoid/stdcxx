@@ -65,8 +65,9 @@ The census of 2026-10-19 retired the six =get= and =put= programs,
 which held no state of their own, and turned =globals.mt= into the
 single-threaded =22.locale.globals=.
 
-Fix: the six pins re-derived from one night at the sprint's next
-sequence point; the rows are in every configuration now.
+Fix: the six pins are night-20261019d's, the first run of the
+rewritten suite on the host with every glibc locale: 268 programs,
+0 failed in all six.
 
 Check: every locale MT program names the race or the operation it
 covers, reports its fault under the sanitizer with the fault put back

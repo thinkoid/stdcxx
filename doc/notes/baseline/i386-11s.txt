@@ -89,48 +89,42 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 21.string.swap                                0    0    4134      0   100%
 22.locale.codecvt.do_out                      0    0    1494      0   100%
 22.locale.codecvt.length                      0    0     484      0   100%
-22.locale.codecvt.mt                          0    0       0      0   100%
+22.locale.codecvt.mt                          0    0     400      0   100%
 22.locale.codecvt                             0    0     638      0   100%
 22.locale.codecvt.stdcxx-435               NOUT    0                      
 22.locale.collate                             0    0  145854      0   100%
 22.locale.collate.stdcxx-1010              NOUT    0                      
-22.locale.cons.mt                             0    0       0      0   100%
+22.locale.cons.mt                             0    0     400      0   100%
 22.locale.cons.stdcxx-485                     0    0     128      0   100%
 22.locale.ctype.is                            0    0   25432      0   100%
-22.locale.ctype.mt                            0    0       0      0   100%
+22.locale.ctype.mt                            0    0     200      0   100%
 22.locale.ctype.narrow                        0    2    9768      0   100%
 22.locale.ctype                               0    0   91098      0   100%
 22.locale.ctype.scan                          0    0   17124      0   100%
 22.locale.ctype.tolower                       0    0   19388      0   100%
 22.locale.ctype.toupper                       0    0   19388      0   100%
 22.locale.facet.mt                            0    0       8      0   100%
-22.locale.globals.mt                          0    0       0      0   100%
+22.locale.globals                             0    0   78320      0   100%
 22.locale.id.mt                               0    0     999      0   100%
-22.locale.messages.mt                         0    0       0      0   100%
+22.locale.messages.mt                         0    0     600      0   100%
 22.locale.messages                            0    0     366      0   100%
 22.locale.messages.stdcxx-542                 0    0       0      0   100%
-22.locale.money.get.mt                        0    0       0      0   100%
 22.locale.money.get                           0    0    3960      0   100%
 22.locale.money.get.stdcxx-62              NOUT    0                      
-22.locale.money.put.mt                        0    0      64      0   100%
 22.locale.money.put                           0    0    1328      0   100%
-22.locale.moneypunct.mt                       0    0       0      0   100%
+22.locale.moneypunct.mt                       0    0     600      0   100%
 22.locale.moneypunct                          0    0  135020      0   100%
 22.locale.name                                0    0       1      0   100%
-22.locale.num.get.mt                          0    0       0      0   100%
 22.locale.num.get                             0    0   51894      0   100%
-22.locale.num.put.mt                          0    0       0      0   100%
 22.locale.num.put                             0    2    1481      0   100%
 22.locale.num.put.stdcxx-2                 NOUT    0                      
-22.locale.numpunct.mt                         0    0       0      0   100%
+22.locale.numpunct.mt                         0    0     600      0   100%
 22.locale.numpunct                            0    0    5366      0   100%
-22.locale.statics.mt                          0    0       0      0   100%
+22.locale.statics.mt                          0    0     200      0   100%
 22.locale.stdcxx-554                       NOUT    0                      
 22.locale.synopsis                            0    0      39      0   100%
-22.locale.time.get.mt                         0    0       0      0   100%
 22.locale.time.get                            0   24    2125      0   100%
 22.locale.time.put.libc.mt                    0    0     200      0   100%
-22.locale.time.put.mt                         0    0       0      0   100%
 22.locale.time.put                            0    0    2156      0   100%
 22.locale.use_facet.mt                        0    0     200      0   100%
 23.associative.stdcxx-16                   NOUT    0                      
@@ -274,11 +268,11 @@ atomic_add                                    0    0       0      0   100%
 atomic_xchg                                   0    0       0      0   100%
 once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   274
+  Programs:                   268
   Non-zero exit status:         0
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            60
-  Assertions:            12387468
+  Assertions:            12468724
   Failed assertions:            0
