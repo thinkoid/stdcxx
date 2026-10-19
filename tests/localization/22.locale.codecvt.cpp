@@ -882,6 +882,10 @@ rwtest_convert_to_internal (InternalEncoding conv,
                             const char*      ebuffer, std::size_t  elength,
                             wchar_t*         ibuffer, std::size_t& ilength)
 {
+    // on entry `ilength' is the capacity of `ibuffer', on return
+    // the number of wide characters stored in it
+    const std::size_t capacity = ilength;
+
     ilength = 0;
 
     if (!native_locname)
@@ -918,6 +922,8 @@ rwtest_convert_to_internal (InternalEncoding conv,
         if (iconv_t (-1) == id)
             ilength = std::size_t (-1);
         else {
+            ilength = capacity;
+
             rwtest_iconv_convert (id, ebuffer, elength, ibuffer, ilength);
 
             iconv_close (id);
@@ -2366,7 +2372,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
     test_virtuals<CodecvtBn> ("C");
     test_virtuals<CodecvtBnW> ("C");
 
-#define TEST_UCS_MODIFIER(T, mod, enc, locname, f, i, is)                    \
+#define TEST_UCS_MODIFIER(T, mod, enc, locname, native, f, i, is)            \
     do {                                                                     \
         char locname_mod [256];   /* <locale-name>@<modifier>*/              \
         if (*(mod))                                                          \
@@ -2380,7 +2386,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
                                                                              \
             cc._C_opts |= cc._C_use_libstd;                                  \
             cc._C_opts &= ~cc._C_use_libc;                                   \
-            test_ucs_modifier (locname_mod, enc, s, cc, f, i, is);           \
+            test_ucs_modifier (locname_mod, enc, native, cc, f, i, is);      \
                                                                              \
         } _CATCH (...) {                                                     \
             rw_assert (false, __FILE__, __LINE__,                            \
@@ -2570,20 +2576,20 @@ run_test (int /*unused*/, char* /*unused*/ [])
         // exercise the behavior of codecvt_byname<wchar_t, char, mbstate_t>
         // in constructed with one of the additional @UCS name modifiers
         TEST_UCS_MODIFIER (CodecvtBnW, "", use_libc,
-                           locales [i].locale_name, s, std::codecvt_base::ok,
-                           locales [i].nchars);
+                           locales [i].locale_name, native_locname, s,
+                           std::codecvt_base::ok, locales [i].nchars);
 
         const InternalEncoding which_ucs =
             sizeof (wchar_t) == 4 ? use_UCS4 : use_UCS2;
 
         TEST_UCS_MODIFIER (CodecvtBnW,
                            use_UCS4 == which_ucs ? "UCS-4" : "UCS-2", which_ucs,
-                           locales [i].locale_name, s, std::codecvt_base::ok,
-                           locales [i].nchars);
+                           locales [i].locale_name, native_locname, s,
+                           std::codecvt_base::ok, locales [i].nchars);
 
         TEST_UCS_MODIFIER (CodecvtBnW, "UCS", which_ucs,
-                           locales [i].locale_name, s, std::codecvt_base::ok,
-                           locales [i].nchars);
+                           locales [i].locale_name, native_locname, s,
+                           std::codecvt_base::ok, locales [i].nchars);
 
     }
 
