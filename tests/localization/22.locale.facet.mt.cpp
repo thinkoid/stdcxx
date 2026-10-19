@@ -81,20 +81,16 @@ std::locale::id Added::id;
 static const std::locale* base_locale;
 
 // the number of threads that have started in the current round
-static volatile int nstarted;
+static int nstarted;
 
 extern "C" {
 
 static void*
 race_func (void*)
 {
-    // cast nstarted to int& (see STDCXX-792)
-    _RWSTD_ATOMIC_PREINCREMENT (const_cast< int& >(nstarted), false);
-
-    // spin until all threads have been created so that they update
+    // start with the other threads so that they update
     // the reference counts of the base's facets at the same time
-    while (_RWSTD_ATOMIC_LOAD_RELAXED (
-               const_cast< int& >(nstarted), false) < opt_nthreads);
+    rw_thread_gate (&nstarted, opt_nthreads);
 
     // each locale built from the base takes a reference to each of
     // its facets, and its destruction returns them

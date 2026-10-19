@@ -90,6 +90,14 @@ rw_thread_pool (rw_thread_t*      /* tidarray */,
 _TEST_EXPORT int
 rw_thread_pool_timeout_expired ();
 
+// counts the calling thread in and spins until nthreads have: the
+// threads of a pool that gate this way make their first call at the
+// same time instead of as the pool creates them; the caller zeroes
+// *nstarted before each pool
+_TEST_EXPORT void
+rw_thread_gate (int* /* nstarted */, int /* nthreads */);
+
+
 // returns the number of logical processors/cores on the system,
 // or -1 on error
 _TEST_EXPORT int

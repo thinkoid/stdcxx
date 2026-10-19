@@ -58,7 +58,7 @@ typedef std::codecvt<wchar_t, char, std::mbstate_t> CodeCvt;
 static const std::locale* race_locale;
 
 // the number of threads that have started in the current round
-static volatile int nstarted;
+static int nstarted;
 
 extern "C" {
 
@@ -68,13 +68,9 @@ extern "C" {
 static void*
 race_func (void*)
 {
-    // cast nstarted to int& (see STDCXX-792)
-    _RWSTD_ATOMIC_PREINCREMENT (const_cast< int& >(nstarted), false);
-
-    // spin until all threads have been created so that they find
+    // start with the other threads so that they find
     // the slot empty at the same time
-    while (_RWSTD_ATOMIC_LOAD_RELAXED (
-               const_cast< int& >(nstarted), false) < opt_nthreads);
+    rw_thread_gate (&nstarted, opt_nthreads);
 
     (void)std::use_facet<CodeCvt>(*race_locale);
 

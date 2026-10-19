@@ -167,6 +167,15 @@ rw_thread_join (rw_thread_t, void**)
 /**************************************************************************/
 
 // retrieves the number of processors/cores on the system
+_TEST_EXPORT void
+rw_thread_gate (int *nstarted, int nthreads)
+{
+    _RWSTD_ATOMIC_PREINCREMENT (*nstarted, false);
+
+    while (_RWSTD_ATOMIC_LOAD_RELAXED (*nstarted, false) < nthreads);
+}
+
+
 _TEST_EXPORT int
 rw_get_cpus ()
 {

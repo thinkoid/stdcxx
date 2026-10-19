@@ -111,7 +111,7 @@ struct FuncTable<-1>
 static int race_round;
 
 // the number of threads that have started in the current round
-static volatile int nstarted;
+static int nstarted;
 
 // the number of installed facets has_facet did not find
 static int nmissed;
@@ -121,13 +121,9 @@ extern "C" {
 static void*
 race_func (void*)
 {
-    // cast nstarted to int& (see STDCXX-792)
-    _RWSTD_ATOMIC_PREINCREMENT (const_cast< int& >(nstarted), false);
-
-    // spin until all threads have been created so that they find
+    // start with the other threads so that they find
     // the id uninitialized at the same time
-    while (_RWSTD_ATOMIC_LOAD_RELAXED (
-               const_cast< int& >(nstarted), false) < opt_nthreads);
+    rw_thread_gate (&nstarted, opt_nthreads);
 
     if (!install_funcs [race_round] ())
         _RWSTD_ATOMIC_PREINCREMENT (nmissed, false);
