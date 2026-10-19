@@ -100,12 +100,16 @@ rwtest_wcstombs<char>(std::mbstate_t& /*unused*/, const char* /*unused*/,
 }
 
 
+// returns the number of bytes that form up to `cmax' complete
+// characters at `pe', what codecvt::length() returns (22.2.1.5.2 p10)
 static std::size_t
 rwtest_mbslen (std::mbstate_t& state,
                const char*     pe,
                const char*     limit,
                std::size_t     cmax)
 {
+    const char* const start = pe;
+
     std::size_t total = 0;
     std::size_t ret   = 0;
 
@@ -117,11 +121,15 @@ rwtest_mbslen (std::mbstate_t& state,
         if (ret >= std::size_t (-2))
             break;
 
+        // the NUL character is one byte long
+        if (0 == ret)
+            ret = 1;
+
         pe += ret;
         ++total;
     }
 
-    return total;
+    return pe - start;
 }
 
 /****************************************************************************/
