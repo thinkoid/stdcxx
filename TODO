@@ -41,45 +41,67 @@ belongs.
 
 ** TODO MT tests that provoke contention instead of waiting for it
 
-The older =22.locale.*.mt= tests run a few threads over a facet's
-operations for a number of rounds and pass when every thread reaches
-the end. Each runs at a size chosen under ThreadSanitizer, the
-smallest that still reports the fault the test was written for with
-that fault put back, and nothing on the fixed library
-(=doc/notes/analysis-locale-mt-sizing.md=, the method and each
-program's runs in 15D and 12D). Four threads whatever the processor
-count, the sizes the programs' defaults, overridable through their
-options; every one passes under the harness in 15D in about a second,
-and the six tables pin the rows (=ref-test-baseline.md=, chapter
-3.2). After the first round everything a test touches is cached and
-the rest measures the locks at rest; a race is caught only when the
-kernel's scheduling puts two threads in its window. Each test covers
-several facets, so a failure names a test, not a defect.
+The locale MT tests are of two shapes. The older ones run four
+threads over a facet's operations for a number of iterations and pass
+when every thread reaches the end, each at a size chosen under
+ThreadSanitizer, the smallest that still reports the fault the test
+was written for with that fault put back
+(=doc/notes/analysis-locale-mt-sizing.md=). After the first iteration
+everything a test touches is cached and the rest measures the locks
+at rest; a race is caught only when the kernel's scheduling puts two
+threads in its window, and a failure names a test, not a defect. The
+gated ones, =22.locale.use_facet.mt=, =22.locale.time.put.libc.mt=,
+=22.locale.id.mt= and =22.locale.facet.mt=, provoke their races: a
+few threads wait on a gate and start together at the first use of a
+fresh object, round after round, and a check judges each round.
+ThreadSanitizer reports a race from what ran, not from its timing,
+and is the judge.
 
-The four gated tests, =22.locale.use_facet.mt=,
-=22.locale.time.put.libc.mt=, =22.locale.id.mt= and
-=22.locale.facet.mt=, provoke their races instead: a few threads wait
-on a barrier and start together at the first use of a fresh object,
-round after round. They overlap the older tests. ThreadSanitizer
-reports a race from what ran, not from its timing, and is the judge.
+The census of 2026-10-19. The library has nine places where threads
+meet on fresh state: the facet slot of a fresh body, the facet
+reference counts, a user facet's id, the three builders of facet data
+from the C library (=numpunct=, =moneypunct=, time), the wide
+=codecvt='s database on the first conversion, =ctype='s lazy caches,
+the message catalog repository, the global locale's first set and
+swap, and the named-body repository. The gated four provoke the
+first three and the time builder. The classic body's first
+construction is reachable from no test program: the driver's
+=<iostream>= initializer builds the standard streams before =main=,
+and the first stream buffer constructs a locale. The =get= and =put=
+facets hold no state of their own; every fault their MT programs
+report is a builder's or the slot's.
 
-What the sizing found, for the census (the note's chapter 4):
-=22.locale.cons.mt= reaches no fixed fault, it never fills a facet
-slot; the classic section of =22.locale.statics.mt= races a classic
-locale its static array already built; the leak checks of
-=22.locale.time.put.libc.mt= and =22.locale.use_facet.mt= are the
-only detectors of their faults; =22.locale.money.put.mt= drops
-=C.utf8= without a word; six fixed commits were not put back; in 12D
-=22.locale.messages.mt= reports the slot fault in 86 runs of 100.
-
-Fix: a census of what each older test covers against the gated
-ones; each kept, split or retired with the reason, one race or one
-facet operation per program, each provoking its race the gated way.
+Fix, one commit per program, each rewrite verified with its fault
+put back under the sanitizer (reported in 25 runs of 25, clean on
+the fixed library), then its 15D row:
+- Retire =22.locale.money.put.mt=, =22.locale.num.get.mt=,
+  =22.locale.num.put.mt=, =22.locale.time.get.mt= and
+  =22.locale.time.put.mt=: no state of their own.
+- =22.locale.globals.mt= becomes the single-threaded
+  =22.locale.globals=: its checks of =has_facet= and =use_facet= over
+  every standard facet are conformance, and the =has_facet= answers
+  were never asserted. The slot coverage goes to =use_facet.mt=.
+- A gate helper in =rw_thread.h= for the hand copies of the spin.
+- =22.locale.codecvt.mt=: the first-use section gated, the three
+  steady-state sections cut; they count nothing and cover the slot
+  only.
+- =22.locale.statics.mt=: the classic section cut; the global section
+  gated, with the consistency check its own =FIXME= asks for: the
+  locales returned plus the final global equal the set put in.
+- =22.locale.use_facet.mt= widened to every standard facet;
+  =22.locale.time.put.libc.mt= widened to the wide readers.
+- =22.locale.ctype.mt= gated on the caches; =22.locale.numpunct.mt=
+  and =22.locale.moneypunct.mt= gated on their builders with a leak
+  check, the =time.put.libc= shape; =22.locale.messages.mt= gated on
+  the catalog repository; =22.locale.cons.mt= gated on the body
+  repository's one-body-per-name invariant, its rounds bounded by the
+  host's locale count.
+- The six pins re-derived from one night after.
 
 Check: every locale MT program names the race or the operation it
 covers, reports its fault under the sanitizer with the fault put back
-and stays clean on the fixed library, and the six tables pin the
-rows.
+and stays clean on the fixed library, counts assertions in every
+configuration, and the six tables pin the rows.
 
 ** TODO All the C library's locales on the test hosts
 
@@ -161,18 +183,17 @@ their pins.
 
 ** TODO Run the suites in parallel
 
-The six suites run one after another, about 26 minutes on 32
-processors. 14 of them are timeouts: seven older locale MT tests run
-into the harness's 60 seconds in each thread-safe suite. The rest is a
-minute or two per suite, most of it in a few long tests. The suites
+The six suites run one after another, nine minutes on 32 processors
+(night-20261019c), a minute or two each, most of it in a few long
+tests. The suites
 are already isolated from each other: separate build directories,
 each program's output beside it, and a =TMPDIR= of its own for every
 =make run= (=etc/config/makefile.rules=). They share only the
 processors, and only the 15D MT rows depend on the load.
 
 Fix, in order:
-- The MT entry under Tests. It removes the timeouts and the load
-  sensitivity.
+- The MT entry under Tests, for the load sensitivity of the 15D MT
+  rows.
 - The configurations' suites at once: the four single-threaded ones
   now, the thread-safe ones with them once the MT entry lands. A
   command for =doc/notes/ref-test-baseline.md=, not a tool to

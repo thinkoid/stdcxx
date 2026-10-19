@@ -132,10 +132,8 @@ the commit that changed its test: `19.cerrno` runs 4 assertions, not 5
 (d006f308); `21.char.traits.compare` is new (6bb238b6);
 `27.ostream.inserters.stdcxx-51` passes (415860cc). All six were
 measured again in full on 2026-10-09, when the `once` test of
-`__rw_once` came in with its 600 assertions. No other row moved, but
-`22.locale.money.get.mt` timed out once in 15D-clang on a loaded
-machine; alone it passes in 58 seconds, as it does at ee454d5a
-(chapter 3.2). The GCC tables were measured again in full on
+`__rw_once` came in with its 600 assertions. No other row moved. The
+GCC tables were measured again in full on
 2026-10-13, at bf5fbd46, after the locale MT tests took sizes of
 their own (`analysis-locale-mt-sizing.md`). Only their rows moved:
 the seven timeouts of 15D pass, `22.locale.codecvt.mt` counts 1,600
@@ -176,10 +174,10 @@ processor count, at a size chosen under ThreadSanitizer
 (`analysis-locale-mt-sizing.md`). In 15D every one passes in about a
 second or less, and the rows are a reference. `22.locale.codecvt.mt`
 counts 1,600 assertions. `cons.mt`, `ctype.mt`, `globals.mt`,
-`messages.mt`, `money.get.mt`, `moneypunct.mt`, `num.get.mt`,
-`num.put.mt`, `numpunct.mt`, `statics.mt`, `time.get.mt` and
-`time.put.mt` count none: their pass means every thread ran to the
-end without an error, a crash or a hang.
+`messages.mt`, `moneypunct.mt`, `num.get.mt`, `num.put.mt`,
+`numpunct.mt`, `statics.mt`, `time.get.mt` and `time.put.mt` count
+none: their pass means every thread ran to the end without an error,
+a crash or a hang.
 
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
@@ -192,8 +190,11 @@ The four gated MT tests, `22.locale.use_facet.mt`,
 `22.locale.facet.mt`, pass in every configuration.
 
 The `TODO` entry "MT tests that provoke contention instead of waiting
-for it" holds what is left: the census of what each older test
-covers against the gated ones.
+for it" holds the census of what each older test covers against the
+gated ones, and the verdict on each: retired, gated or split.
+`22.locale.money.get.mt` was the first to go: the facet holds no
+state of its own, and every fault the program reported was the
+`moneypunct` builder's or the facet slot's.
 
 ## 4. Differences between configurations
 
