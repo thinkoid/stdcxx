@@ -74,9 +74,6 @@ report is a builder's or the slot's.
 Fix, one commit per program, each rewrite verified with its fault
 put back under the sanitizer (reported in 25 runs of 25, clean on
 the fixed library), then its 15D row:
-- =22.locale.statics.mt=: the classic section cut; the global section
-  gated, with the consistency check its own =FIXME= asks for: the
-  locales returned plus the final global equal the set put in.
 - =22.locale.use_facet.mt= widened to every standard facet;
   =22.locale.time.put.libc.mt= widened to the wide readers.
 - =22.locale.ctype.mt= gated on the caches; =22.locale.numpunct.mt=

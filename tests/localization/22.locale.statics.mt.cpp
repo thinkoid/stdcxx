@@ -2,7 +2,8 @@
  *
  * 22.locale.statics.mt.cpp
  *
- * test exercising the thread safety of [lib.locale.statics]
+ * test exercising the thread safety of std::locale::global(), racing
+ * the swap of the global locale from several threads at once
  *
  * $Id$
  *
@@ -24,15 +25,15 @@
  * implied.   See  the License  for  the  specific language  governing
  * permissions and limitations under the License.
  *
- * Copyright 2007 Rogue Wave Software, Inc.
- *
  **************************************************************************/
 
-#include <locale>        // for locale
-#include <cstring>       // for strlen()
+#include <locale>      // for locale
+#include <string>      // for string
+#include <algorithm>   // for sort()
+#include <cstring>     // for strlen()
 
 #include <rw_locale.h>   // for rw_locales()
-#include <rw_thread.h>   // for rw_get_processors(), rw_thread_pool()
+#include <rw_thread.h>   // for rw_thread_gate(), rw_thread_pool()
 #include <rw_driver.h>   // for rw_test()
 
 
@@ -43,74 +44,48 @@
 // whatever the number of processors)
 int opt_nthreads = 1;
 
-// the number of times each thread should iterate (unless specified
-// otherwise on the command line)
-int opt_nloops = 256;
-
-int opt_classic;
-int opt_global;
+// the number of rounds, each a swap of the global locale from
+// every thread at once
+int opt_nrounds = 200;
 
 // default timeout used by each threaded section of this test
 int opt_timeout = 60;
 
 /**************************************************************************/
 
-// array of locale objects to use for testing
-static std::locale
-locales [MAX_THREADS];
+// the locales the threads make global, the C library's
+static std::locale locales [MAX_THREADS];
 
-// number of locale names in the array
-static std::size_t
-nlocales;
+// their names, for the diagnostics
+static const char* locale_names [MAX_THREADS];
 
-/**************************************************************************/
+// the number of locales in the arrays
+static std::size_t nlocales;
+
+// the round being raced
+static int race_round;
+
+// the number of threads that have started in the current round
+static int nstarted;
+
+// what each thread's call returned, in a slot of its own: the
+// locale that was global before, as the call saw it
+static std::locale returned [MAX_THREADS];
 
 extern "C" {
 
 static void*
-test_classic (void*)
+race_func (void *arg)
 {
-    static volatile int nthreads;
+    const long inx = long (arg);
 
-    // cast nthreads to int& (see STDCXX-792)
-    // casting should be removed after fixing STDCXX-794
-    _RWSTD_ATOMIC_PREINCREMENT (const_cast< int& >(nthreads), false);
+    // start with the other threads so that they swap the global
+    // locale at the same time
+    rw_thread_gate (&nstarted, opt_nthreads);
 
-    // spin until all threads have been created in order to icrease
-    // the odds that at least two of them will hit the tested function
-    // (and the lazy one-time initialization done by it) at the same
-    // time
-    while (_RWSTD_ATOMIC_LOAD_RELAXED (
-               const_cast< int& >(nthreads), false) < opt_nthreads);
+    returned [inx] =
+        std::locale::global (locales [(race_round + inx) % nlocales]);
 
-    const std::locale classic (std::locale::classic ());
-
-    _RWSTD_UNUSED (classic);
-
-    return 0;
-}
-
-
-static void*
-test_global (void*)
-{
-    for (std::size_t i = 0; i != std::size_t (opt_nloops); ++i) {
-
-        if (rw_thread_pool_timeout_expired ())
-            break;
-
-        const std::size_t inx = i % nlocales;
-
-        const std::locale last (std::locale::global (locales [inx]));
-
-        _RWSTD_UNUSED (last);
-
-        // FIXME: verify the consistency of the returned locale
-        // by making sure that it matches the locale passed to
-        // global() made by the last call to the function by
-        // the last thread
-    }
-    
     return 0;
 }
 
@@ -121,54 +96,86 @@ test_global (void*)
 static int
 run_test (int, char**)
 {
-    int result = 0;
+    // the installed locales, or those named on the command line
+    const char* const locale_list =
+        rw_opt_locales ? rw_opt_locales : rw_locales (_RWSTD_LC_ALL);
 
-    if (rw_note (0 <= opt_classic, 0, __LINE__,
-                 "std::locale::classic() test disabled")) {
+    const std::size_t maxinx = sizeof locales / sizeof *locales;
 
-        rw_info (0, 0, 0,
-                 "testing std::locale::classic() with %d thread%{?}s%{;}",
-                 opt_nthreads, 1 != opt_nthreads);
+    for (const char *name = locale_list;
+         *name && nlocales != maxinx;
+         name += std::strlen (name) + 1) {
 
-        // create and start a pool of threads and wait for them to finish
-        result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                                 test_classic, 0, std::size_t (opt_timeout));
+        locale_names [nlocales] = name;
+        locales [nlocales++]    = std::locale (name);
     }
 
-    if (rw_note (0 <= opt_global, 0, __LINE__,
-                 "std::locale::global(const std::locale&) test disabled")) {
+    rw_fatal (0 != nlocales, 0, __LINE__, "no locale to make global");
 
+    rw_info (0, 0, 0,
+             "racing std::locale::global(const std::locale&) from "
+             "%d thread%{?}s%{;}, %d round%{?}s%{;}, in %zu locale%{?}s%{;} "
+             "{ %{ .*A@} }",
+             opt_nthreads, 1 != opt_nthreads,
+             opt_nrounds, 1 != opt_nrounds,
+             nlocales, 1 != nlocales, int (nlocales), "%#s", locale_names);
 
-        // find all installed locales for which setlocale(LC_ALL) succeeds
-        const char* const locale_list =
-            rw_opt_locales ? rw_opt_locales : rw_locales (_RWSTD_LC_ALL);
+    int result = 0;
 
-        const std::size_t maxinx = sizeof locales / sizeof *locales;
+    for (int i = 0; 0 == result && i != opt_nrounds; ++i) {
 
-        const char* locale_names [MAX_THREADS];
+        // the global locale as the round starts
+        const std::locale initial;
 
-        for (const char *name = locale_list;
-             *name;
-             name += std::strlen (name) + 1) {
+        race_round = i;
+        nstarted   = 0;
 
-            locale_names [nlocales] = name;
-            locales [nlocales++]    = std::locale (name);
+        void* args [MAX_THREADS];
+        for (int j = 0; j != opt_nthreads; ++j)
+            args [j] = (void*)long (j);
 
-            if (nlocales == maxinx)
-                break;
+        result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
+                                 race_func, args,
+                                 std::size_t (opt_timeout));
+
+        rw_error (result == 0, 0, __LINE__,
+                  "rw_thread_pool(0, %d, 0, %{#f}, ...) failed",
+                  opt_nthreads, race_func);
+
+        if (result)
+            break;
+
+        // the global locale as the round ends
+        const std::locale final;
+
+        // each call returned the locale that was global just before
+        // it made its own global, so the locales returned plus the
+        // final global are the locales set plus the initial global,
+        // whatever the order of the calls; a return lost or seen
+        // twice breaks the equality
+        std::string set_names [MAX_THREADS + 1];
+        std::string got_names [MAX_THREADS + 1];
+
+        for (int j = 0; j != opt_nthreads; ++j) {
+            set_names [j] = locales [(i + j) % nlocales].name ();
+            got_names [j] = returned [j].name ();
         }
 
-        rw_info (0, 0, 0,
-                 "testing std::locale::global(const std::locale&) with "
-                 "%d thread%{?}s%{;}, %d iteration%{?}s%{;} each, in "
-                 "%zu locales { %{ .*A@} }",
-                 opt_nthreads, 1 != opt_nthreads,
-                 opt_nloops, 1 != opt_nloops,
-                 nlocales, int (nlocales), "%#s", locale_names);
+        set_names [opt_nthreads] = initial.name ();
+        got_names [opt_nthreads] = final.name ();
 
-        // create and start a pool of threads and wait for them to finish
-        result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                                 test_global, 0, std::size_t (opt_timeout));
+        std::sort (set_names, set_names + opt_nthreads + 1);
+        std::sort (got_names, got_names + opt_nthreads + 1);
+
+        bool same = true;
+        for (int j = 0; same && j != opt_nthreads + 1; ++j)
+            same = set_names [j] == got_names [j];
+
+        rw_assert (same, 0, __LINE__,
+                   "std::locale::global() from %d threads in round %d: "
+                   "the locales returned and the final global are the "
+                   "locales set and the initial global",
+                   opt_nthreads, i);
     }
 
     return result;
@@ -191,16 +198,12 @@ int main (int argc, char *argv[])
                     "lib.locale.statics",
                     "thread safety",
                     run_test,
-                    "|-classic~ "
-                    "|-global~ "
                     "|-soft-timeout#0 "  // must be non-negative
-                    "|-nloops#0 "        // arg must be non-negative
-                    "|-nthreads#0-* "    // arg must be in [0, MAX_THREADS]
-                    "|-locales= ",       // argument must be provided
-                    &opt_classic,
-                    &opt_global,
+                    "|-nrounds#0 "       // must be non-negative
+                    "|-nthreads#0-* "    // must be in [0, MAX_THREADS]
+                    "|-locales= ",       // must be provided
                     &opt_timeout,
-                    &opt_nloops,
+                    &opt_nrounds,
                     int (MAX_THREADS),
                     &opt_nthreads,
                     &rw_opt_setlocales);

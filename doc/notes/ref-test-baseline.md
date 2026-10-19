@@ -174,9 +174,11 @@ processor count, at a size chosen under ThreadSanitizer
 (`analysis-locale-mt-sizing.md`). In 15D every one passes in about a
 second or less, and the rows are a reference. `22.locale.codecvt.mt`
 races the first conversion through a fresh wide `codecvt` facet, the
-gated way, and counts 1,600 assertions. `cons.mt`, `ctype.mt`, `messages.mt`,
-`moneypunct.mt`, `numpunct.mt` and `statics.mt` count none: their pass
-means every thread ran to the end without an error, a crash or a hang.
+gated way, and counts 1,600 assertions. `22.locale.statics.mt` races
+the swap of the global locale and counts 200, one check per round.
+`cons.mt`, `ctype.mt`, `messages.mt`, `moneypunct.mt` and `numpunct.mt`
+count none: their pass means every thread ran to the end without an
+error, a crash or a hang.
 
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
@@ -235,9 +237,9 @@ Reasons, in order:
 
 The single-threaded builds run each MT test with one thread. Most
 count nothing there. Seven count the same in every build:
-`22.locale.use_facet.mt` and `22.locale.time.put.libc.mt` 200 each,
-`22.locale.id.mt` 999, `22.locale.facet.mt` 8,
-`22.locale.money.put.mt` 6, `21.string.cons.mt` 16 and
+`22.locale.use_facet.mt`, `22.locale.time.put.libc.mt` and
+`22.locale.statics.mt` 200 each, `22.locale.id.mt` 999,
+`22.locale.facet.mt` 8, `21.string.cons.mt` 16 and
 `21.string.push_back.mt` 2.
 
 ## 5. The same suite under Clang
