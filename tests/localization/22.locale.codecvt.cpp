@@ -1511,11 +1511,15 @@ test_inout (int which, int line, const char* name,
 
             // verify that the contents of the destination sequence
             // matches the expected sequence
-            const int cmp = std::memcmp (int_lo, sint, int_len);
+            const int cmp =
+                std::memcmp (int_lo, sint, int_len * sizeof (internT));
 
             if (cmp) {
-                rw_assert (false, __FILE__, __LINE__,
-                           "%d. %s -> %s, expected %s", __LINE__, fcall,
+                const char* const fmt = sizeof (internT) == sizeof (char)
+                    ? "%d. %s -> %{#s}, expected %{#s}"
+                    : "%d. %s -> %{#ls}, expected %{#ls}";
+
+                rw_assert (false, __FILE__, __LINE__, fmt, __LINE__, fcall,
                            int_lo, sint);
             }
         }
@@ -2249,12 +2253,12 @@ test_inout (const char* tname)
 
         }
         else {
-            // in relaxed mode the UTF-8 sequences below convert
-            // into the UCS characters U+3081 and U+30BF even
-            // though the UCS characters convert into 3-byte
-            // UTF-8 characters each (see below)
-            TEST_IN ("\xc2\x01", 2, 2, L"\x3081", 1, 1, ok);
-            TEST_IN ("\xc2\xff", 2, 2, L"\x30bf", 1, 1, ok);
+            // in relaxed mode the second byte is not checked for
+            // the 10xxxxxx pattern: its low six bits are taken as
+            // they are, so the sequences below convert as C2 81
+            // and C2 BF would
+            TEST_IN ("\xc2\x01", 2, 2, L"\x81", 1, 1, ok);
+            TEST_IN ("\xc2\xff", 2, 2, L"\xbf", 1, 1, ok);
         }
 
         TEST_OUT ("\xe3\x82\x81", 3, 3, L"\x3081", 1, 1, ok);
