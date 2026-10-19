@@ -363,15 +363,15 @@ public:
            const allocator_type &__alloc = allocator_type ())
         : allocator_type (__alloc) {
         _C_init ();
-        _TRY {
+        try {
             assign (__n, __x);
         }
-        _CATCH (...) {
+        catch (...) {
             // the destructor of an object whose constructor throws
             // does not run: destroy what assign built and free the storage
             clear ();
             _C_dealloc ();
-            _RETHROW;
+            throw;
         }
     }
 
@@ -380,26 +380,26 @@ public:
            const allocator_type &__alloc = allocator_type ())
         : allocator_type (__alloc) {
         _C_init ();
-        _TRY {
+        try {
             assign (__first, __last);
         }
-        _CATCH (...) {
+        catch (...) {
             clear ();
             _C_dealloc ();
-            _RETHROW;
+            throw;
         }
     }
 
     deque (const deque &__rhs)
         : allocator_type (__rhs.get_allocator ()) {
         _C_init ();
-        _TRY {
+        try {
             assign (__rhs.begin (), __rhs.end ());
         }
-        _CATCH (...) {
+        catch (...) {
             clear ();
             _C_dealloc ();
-            _RETHROW;
+            throw;
         }
     }
 

@@ -174,10 +174,10 @@ void exception_loop (int line, MemberFunction mfun, const char *fcall,
                 UserClass::op_assign_throw_count_ = assigns + ordinal;
 
             bool caught = false;
-            _TRY {
+            try {
                 exercise (mfun, trial, off, n, x, range_first, range_last);
             }
-            _CATCH (...) {
+            catch (...) {
                 caught = true;
             }
 

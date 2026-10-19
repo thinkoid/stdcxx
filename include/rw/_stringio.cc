@@ -47,7 +47,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
     // count of characters read from stream
     _SizeT __gcount = 0;
 
-    _TRY {
+    try {
 
         if (__ipfx) {
 
@@ -162,7 +162,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
             __is.width (0);
         }
     }
-    _CATCH (...) {
+    catch (...) {
         __is.setstate (ios_base::badbit | __rw::__rw_rethrow);
     }
 
@@ -204,7 +204,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
 
         basic_streambuf<_CharT, _Traits>* const __rdbuf = __is.rdbuf ();
 
-        _TRY {
+        try {
 
             for ( ; ; ) {
 
@@ -288,7 +288,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
                 }
             }
         }
-        _CATCH (...) {
+        catch (...) {
             __is.setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }

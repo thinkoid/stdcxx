@@ -278,13 +278,13 @@ strstreambuf::setbuf (char_type* buf, streamsize bufsize)
     const bool free_old_buf = _C_own_buf ();
     
     if (!buf) {
-        _TRY {
+        try {
             // allocate a new buffer
             buf = _C_palloc ?
                   static_cast< char_type* >(_C_palloc (bufsize))
                 : new char [bufsize];
         }
-        _CATCH (...) {
+        catch (...) {
             // catch all exceptions, indicate failure by returning 0
         }
 

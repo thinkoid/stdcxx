@@ -44,10 +44,10 @@ basic_ostream<_CharT, _Traits>::flush ()
 
             int __res = 0;
 
-            _TRY {
+            try {
                 __res = this->rdbuf ()->pubsync ();
             }
-            _CATCH (...) {
+            catch (...) {
                 this->setstate (ios_base::badbit | __rw::__rw_rethrow);
             }
 
@@ -71,10 +71,10 @@ basic_ostream<_CharT, _Traits>::seekp (pos_type __pos)
 
         pos_type __res = 0;
 
-        _TRY {
+        try {
             __res = this->rdbuf ()->pubseekpos (__pos, ios_base::out);
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
         if (-1 == __res)
@@ -96,10 +96,10 @@ basic_ostream<_CharT, _Traits>::seekp (off_type __off, ios_base::seekdir __dir)
 
         off_type __res = 0;
 
-        _TRY {
+        try {
             __res = this->rdbuf()->pubseekoff (__off, __dir, ios_base::out);
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
 
@@ -120,10 +120,10 @@ basic_ostream<_CharT, _Traits>::tellp ()
     if (!this->fail ()) {
         _RWSTD_MT_GUARD (this->_C_bufmutex ());
 
-        _TRY {
+        try {
             return this->rdbuf()->pubseekoff (0, ios_base::cur, ios_base::out);
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
@@ -150,7 +150,7 @@ operator<< (basic_streambuf<char_type, traits_type> *__sb)
 
         const sentry __opfx (*this);
 
-        _TRY {
+        try {
             
             if (__opfx) {
 
@@ -206,7 +206,7 @@ operator<< (basic_streambuf<char_type, traits_type> *__sb)
                 }
             }
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }

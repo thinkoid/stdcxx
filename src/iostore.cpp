@@ -52,11 +52,11 @@ __rw_realloc (void *array, size_t size, size_t &n, int inx)
 
     void *tmp;
 
-    _TRY {
+    try {
         // make sure index is dereferencable (cast prevents HP aCC warnings)
         tmp = operator new (static_cast< size_t >(++inx) * size);
     }
-    _CATCH (...) {
+    catch (...) {
         return 0;
     }
 
@@ -87,7 +87,7 @@ namespace std {
 /* static */ ios_base::_C_usr_data*
 ios_base::_C_usr_data::_C_alloc (_C_fire_fun pfire)
 {
-    _TRY {
+    try {
         // rely on zero-initialization of PODs
         _C_usr_data* const pdata = new _C_usr_data ();
 
@@ -113,7 +113,7 @@ ios_base::_C_usr_data::_C_alloc (_C_fire_fun pfire)
 
         return pdata;
     }
-    _CATCH (...) {
+    catch (...) {
         return 0;
     }
 }
@@ -160,7 +160,7 @@ void ios_base::_C_fire_event (event ev, bool reentrant)
 
     // caller expected to lock if necessary
 
-    _TRY {
+    try {
         // protect `cba' from an exception (copy only necessary
         // when `reentrant' is non-zero in which case we unlock
         // the mutex and allow registered callbacks to call the
@@ -205,7 +205,7 @@ void ios_base::_C_fire_event (event ev, bool reentrant)
                 _C_lock ();
         }
     }
-    _CATCH (...) {
+    catch (...) {
         if (reentrant) {
             return_temporary_buffer (cba);
 
@@ -214,7 +214,7 @@ void ios_base::_C_fire_event (event ev, bool reentrant)
             if (cba && !_C_nolock)
                 _C_lock ();
         }
-        _RETHROW;
+        throw;
     }
 }
 
@@ -244,7 +244,7 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
 
     char srcbuf [16];    // buffer to copy `src' to
 
-    _TRY {
+    try {
         // lock `rhs', *this not locked yet
         _RWSTD_MT_GUARD (rhs._C_nolock
                          ? 0 : &const_cast< ios_base& >(rhs)._C_mutex);
@@ -301,19 +301,19 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
         if (size <= sizeof srcbuf)
             src = memcpy (srcbuf, src, size);
     }
-    _CATCH (...) {
+    catch (...) {
         // *this is unmodified
         operator delete (ia);
         operator delete (pa);
         operator delete (cba);
 
-        _RETHROW;
+        throw;
     }
 
     // `rhs' unlocked, lock *this
     _RWSTD_MT_GUARD (_C_nolock ? 0 : &_C_mutex);
 
-    _TRY {
+    try {
         if (_C_usr) {
             // fire erase events (27.4.4.2, p17) - may throw
             if (_C_usr->_C_fire)
@@ -337,13 +337,13 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
 
         }
     }
-    _CATCH (...) {
+    catch (...) {
         // *this is unmodified
         operator delete (ia);
         operator delete (pa);
         operator delete (cba);
 
-        _RETHROW;
+        throw;
     }
 
     if (ia || pa || cba || ptie) {
@@ -380,17 +380,17 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
     memcpy (dst, src, size);
 
     if (_C_usr && _C_usr->_C_fire) {
-        _TRY {
+        try {
             // fire copy events (27.4.4.2, p17), may temporarily unlock
             // or throw
             (this->*_C_usr->_C_fire)(copyfmt_event, true /* reentrant */);
         }
-        _CATCH (...) {
+        catch (...) {
             // must still assign exceptions
             _C_except = except;
 
             // just rethrow caught exception (don't call clear())
-            _RETHROW;
+            throw;
         }
     }
 

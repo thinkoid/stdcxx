@@ -286,11 +286,11 @@ protected:
         std::swap (_C_free_list, other._C_free_list)               
 
 #  define _RWSTD_LIST_INSERT_RANGE(b,e,v)                        \
-        _TRY {                                                   \
+        try {                                                    \
             insert (b, e, v);                                    \
-        } _CATCH (...) {                                         \
+        } catch (...) {                                          \
             _RWSTD_NODE_LIST_FREE();                             \
-            _RETHROW;                                            \
+            throw;                                               \
         } typedef void __dummy_t
 
     _C_link_type _C_get_node (bool __empty_list = false) {
@@ -335,14 +335,14 @@ protected:
     if (!(__first == __last)) {                                 \
         iterator __start = __it;                                \
                                                                 \
-        _TRY {                                                  \
+        try {                                                   \
             __start = insert (__it, *__first);                  \
                                                                 \
             while (!(++__first == __last))                      \
                 insert (__it, *__first);                        \
-        } _CATCH (...) {                                        \
+        } catch (...) {                                         \
             erase (__start, __it);                              \
-            _RETHROW;                                           \
+            throw;                                              \
         }                                                       \
     } typedef void __dummy_t
 
@@ -591,14 +591,14 @@ protected:
         if (__n) {
             iterator __start = __it;
 
-            _TRY {
+            try {
                 __start = insert (__it, __x);
 
                 while (--__n)
                     insert (__it, __x);
-            } _CATCH (...) {
+            } catch (...) {
                 erase (__start, __it);
-                _RETHROW;
+                throw;
             }
         }
     }
@@ -711,13 +711,13 @@ list<_TypeT, _Allocator>::insert (iterator __it, const_reference __x)
 
     _C_link_type __tmp = _C_get_node (false);
 
-    _TRY {
+    try {
         allocator_type::construct (allocator_type::address ((*__tmp)._C_data),
                                    __x);
     }
-    _CATCH (...) {
+    catch (...) {
         _C_put_node (__tmp);
-        _RETHROW;
+        throw;
     }
 
     (*__tmp)._C_next = _ITER_NODE (__it);

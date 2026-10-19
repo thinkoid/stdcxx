@@ -601,22 +601,6 @@
 #endif   // _RWSTD_NO_STATIC_IOSTREAM_INIT
 
 
-// exceptions can be completely disabled (bodies of catch blocks are still
-// compiled but will be removed by the optimizing stage of the compiler)
-// this approach reveals any errors even if _RWSTD_NO_EXCEPTIONS is #defined
-#ifndef _RWSTD_NO_EXCEPTIONS
-#  define _TRY           try
-#  define _CATCH(ex)     catch (ex)
-#  define _THROW(ex)     throw ex
-#  define _RETHROW       throw
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-#  define _TRY
-#  define _CATCH(ignore)   while (0)
-#  define _THROW(ignore)   ((void)0)
-#  define _RETHROW         ((void)0)
-#endif   // _RWSTD_NO_EXCEPTIONS
-
-
 // to prevent warnings about unused arguments
 #define _RWSTD_UNUSED(arg)   ((void)&arg)
 

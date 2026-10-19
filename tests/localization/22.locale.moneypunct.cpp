@@ -400,7 +400,7 @@ check_moneypunct (const char *locname)
 
     bool success = true;
 
-    _TRY {
+    try {
 
         // get a pointer to lconv and copy data to a temporray buffer
         const std::lconv* const plconv = lconvdup (std::localeconv ());
@@ -474,7 +474,7 @@ check_moneypunct (const char *locname)
         // cast away constness to work around compiler bugs (e.g., MSVC 6)
         operator delete (const_cast< std::lconv* >(plconv));
     }
-    _CATCH (...) {
+    catch (...) {
         success = false;
     }
 

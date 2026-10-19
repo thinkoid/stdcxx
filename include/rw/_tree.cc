@@ -95,12 +95,12 @@ __rb_tree (const __rb_tree &__lnk)
     _C_free_list     = _C_next_avail = _C_last = 0;
     _C_end           = _C_get_node ();
     _C_end->_C_color = _C_node_t::_C_red;
-    _TRY { 
+    try {
         _C_end->_C_parent = _C_copy (__lnk._C_end->_C_parent, _C_end);
     }
-    _CATCH (...) {
+    catch (...) {
         _C_deallocate_buffers ();
-        _RETHROW;
+        throw;
     }
     if (_C_link_t () == _C_end->_C_parent) {
         _C_end->_C_child [0] =
@@ -139,13 +139,13 @@ _C_add_new_buffer ()
     _C_buf_ptr_t __buf = 
         _C_buf_alloc_t (*this).allocate (size_type (1), (void*)_C_buf_list);
 
-    _TRY {
+    try {
         __buf->_C_buffer = 
             _C_node_alloc_t (*this).allocate (__newsize, (void*)_C_last);
     }
-    _CATCH (...) {
+    catch (...) {
         _C_buf_alloc_t (*this).deallocate (__buf, 1);
-        _RETHROW;
+        throw;
     } 
     __buf->_C_next_buffer = _C_buf_list;
     __buf->size           = __newsize;

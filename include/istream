@@ -435,10 +435,10 @@ basic_istream<_CharT, _Traits>::peek ()
     int_type __c = traits_type::eof ();
 
     if (__ipfx) {
-        _TRY {
+        try {
             __c = this->rdbuf ()->sgetc ();
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
@@ -529,10 +529,10 @@ ws (basic_istream<_CharT, _Traits> &__strm)
     // if sentry is okay, skip whitespace and set eofbit
     // but not failbit if end-of-file is encountered
     if (__ipfx) {
-        _TRY {
+        try {
             __strm._C_ipfx (false, ios_base::eofbit);
         }
-        _CATCH (...) {
+        catch (...) {
             __strm.setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }

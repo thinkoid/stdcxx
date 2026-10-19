@@ -60,7 +60,7 @@ struct MemoryAllocator
         _bytesRequested = n;
         if (_failAlloc) {
             _failAlloc = false;
-            _THROW (std::bad_alloc ());
+            throw std::bad_alloc ();
         }
 #ifdef _RWSTD_NO_OPERATOR_NEW_NOTHROW
 
@@ -146,15 +146,15 @@ void operator delete (void* p) _THROWS (())
 
 
 #define TEST_OP_THROWS(expr,cond,tag)                \
-    _TRY {                                           \
+    try {                                            \
         alloc._failAlloc = true;                     \
         expr;                                        \
         rw_assert (cond, 0, __LINE__, tag);          \
     }                                                \
-    _CATCH (std::bad_alloc) {                        \
+    catch (std::bad_alloc) {                         \
         RW_ASSERT (!cond, 0, __LINE__, tag);         \
     }                                                \
-    _CATCH (...) {                                   \
+    catch (...) {                                    \
         rw_assert (!cond, 0, __LINE__, tag);         \
     }                                                \
     (void)0

@@ -34,7 +34,7 @@
 // verifies that typeid is correctly declared for MSVC (see PR #25603)
 void foo ()
 {
-    _THROW (0);   // must appear before #include <typeinfo>
+    throw 0;   // must appear before #include <typeinfo>
 }
 
 /**************************************************************************/

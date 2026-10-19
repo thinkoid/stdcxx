@@ -488,15 +488,15 @@ __rw_from_char (T*, const char *str, size_t len, bool sorted)
 
     T*array = 0;
 
-    _TRY {
+    try {
         array = new T [strlen_];
     }
-    _CATCH (...) {
+    catch (...) {
 
         if (str_buf_ != str_)
             delete[] str_;
 
-        _RETHROW;
+        throw;
     }
 
     typedef unsigned char UChar;

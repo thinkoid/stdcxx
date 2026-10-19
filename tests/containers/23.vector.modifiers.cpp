@@ -137,7 +137,7 @@ void exception_loop (int line, const char *fcall, bool capchg,
 
 #endif   // _RWSTD_NO_EXCEPTIONS
 
-        _TRY {
+        try {
             if (-2 == n) {
                 vec.insert (it, *x);
             }
@@ -149,7 +149,7 @@ void exception_loop (int line, const char *fcall, bool capchg,
             }
             break;
         }
-        _CATCH (...) {
+        catch (...) {
 
 #ifndef _RWSTD_NO_EXCEPTIONS
 

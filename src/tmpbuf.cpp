@@ -114,10 +114,10 @@ __rw_tmpbuf (void **pptr, _RWSTD_PTRDIFF_T nelems, size_t size)
         _RWSTD_THREAD_PREDECREMENT (__rw_buffer_busy, false);
     }
 
-    _TRY {
+    try {
         *pptr = __rw_allocate (nbytes, 0);
     }
-    _CATCH (...) {
+    catch (...) {
         *pptr  = 0;
         nbytes = 0;
     }

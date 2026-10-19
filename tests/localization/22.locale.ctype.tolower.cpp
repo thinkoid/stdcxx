@@ -82,7 +82,7 @@ const char* locale_root;
    const char* locale_list = rw_locale_query (LC_CTYPE, LOCALES);          \
    for (const char* locname = locale_list;                                 \
         locname && *locname; locname += std::strlen (locname) + 1) {       \
-       _TRY {                                                              \
+       try {                                                               \
            const std::locale loc (locname);                                \
            const std::ctype<char> &ctc =                                   \
                std::use_facet< std::ctype<char> >(loc);                     \
@@ -93,7 +93,7 @@ const char* locale_root;
 
 #define END_LOCALE_LOOP(locname)                                        \
        }                                                                \
-       _CATCH (...) {                                                   \
+       catch (...) {                                                    \
            rw_assert (0, 0, __LINE__,                                   \
                       "locale (\"%s\") threw an exception", locname);   \
        }                                                                \

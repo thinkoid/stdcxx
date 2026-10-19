@@ -371,7 +371,7 @@ void test_ctors (const std::bitset<N>*)
         test_set<N> ts;
         ts.set ();
 
-        _TRY {
+        try {
             const std::bitset<N> b = std::bitset<N>(std::string (ts.bits ()));
 
             if (N <= sizeof (unsigned long) * CHAR_BIT)
@@ -386,7 +386,7 @@ void test_ctors (const std::bitset<N>*)
                            N, test_set<N>(b).bits ());
 
         }
-        _CATCH (...) {
+        catch (...) {
             rw_assert (false,  0, __LINE__, (""));
         }
     }

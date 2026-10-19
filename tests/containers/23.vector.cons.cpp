@@ -689,10 +689,10 @@ void test_ctor_exceptions (CtorKind kind, const char *fcall,
                 bool        caught = false;
                 std::size_t size   = 0;
 
-                _TRY {
+                try {
                     size = construct (kind, n, val, src, first, last);
                 }
-                _CATCH (...) {
+                catch (...) {
                     caught = true;
                 }
 

@@ -357,10 +357,10 @@ check_libc (const char* charTname)
             //
             // FIXME test variable length multibyte encodings
             //
-            _TRY {
+            try {
                 check_libc_locale<charT> (charTname, locname, nfail);
             }
-            _CATCH (...) {
+            catch (...) {
                 rw_assert (false, __FILE__, __LINE__,
                            "locale(\"%s\") threw an exception", 
                            locname);
@@ -570,10 +570,10 @@ check_libstd_test_locale (const char* charTname)
 
         std::locale loc;
 
-        _TRY {
+        try {
             loc = std::locale (locname);
         }
-        _CATCH (...) {
+        catch (...) {
             const char* const var = std::getenv (LOCALE_ROOT);
 
             rw_assert (false, __FILE__, __LINE__,
@@ -819,10 +819,10 @@ check_libstd (const char* charTname)
 
             std::locale loc;
 
-            _TRY {
+            try {
                 loc = std::locale (locname);
             }
-            _CATCH (...) {
+            catch (...) {
                 const char* const var = std::getenv (LOCALE_ROOT);
 
                 rw_assert (false, __FILE__, __LINE__,

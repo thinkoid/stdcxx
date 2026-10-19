@@ -87,7 +87,7 @@ close ()
     // close() returns this on success, 0 on failure
     basic_filebuf *__retval = this;
 
-    _TRY {
+    try {
         // avoid expensive call to overflow() unless necessary
         if (this->pptr () != this->pbase () && this->_C_is_eof (overflow ()))
             __retval = 0;   // failure
@@ -97,7 +97,7 @@ close ()
         if (__retval && this->_C_out_last () && !_C_unshift ())
             __retval = 0;   // failure
     }
-    _CATCH (...) {
+    catch (...) {
         // either overflow() or codecvt::unshift() threw; close the
         // file anyway, as LWG issue 622 requires
         __rw::__rw_fclose (_C_file, this->_C_state);
@@ -111,7 +111,7 @@ close ()
         this->setp (0, 0);
 
         // rethrow the caught exception
-        _RETHROW;
+        throw;
     }
 
     if (__rw::__rw_fclose (_C_file, this->_C_state))

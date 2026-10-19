@@ -1672,10 +1672,10 @@ void test_user (charT, const char *tname)
     // construct a locale object from the binary database
     std::locale loc;
 
-    _TRY {
+    try {
         loc = std::locale (std::locale (), locname, std::locale::time);
     }
-    _CATCH (...) {
+    catch (...) {
         rw_error (0, 0, __LINE__,
                   "std::locale (std::locale (), \"%s\", std::locale::time) "
                   "unexpectedly threw an exception", locname);

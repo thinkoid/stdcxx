@@ -1353,10 +1353,10 @@ test_inout (int which, int line, const char* name,
 
     // try to construct a locale with the given name
     if (locale_name) {
-        _TRY {
+        try {
             loc = std::locale (locale_name);
         }
-        _CATCH (...) {
+        catch (...) {
             const char* const envvar = std::getenv (LOCALE_ROOT_ENVAR);
 
             rw_assert (false, __FILE__, __LINE__,
@@ -1375,11 +1375,11 @@ test_inout (int which, int line, const char* name,
 
         const Cvt* pcvt = 0;
 
-        _TRY {
+        try {
             // first try to construct the facet
             pcvt = new CvtByname (codecvt_name);
         }
-        _CATCH (...) {
+        catch (...) {
             const char* const envvar = std::getenv (LOCALE_ROOT_ENVAR);
 
             rw_assert (false, __FILE__, __LINE__,
@@ -1390,11 +1390,11 @@ test_inout (int which, int line, const char* name,
 
             return;
         }
-        _TRY {
+        try {
             // next try to install the facet in the locale object
             loc = std::locale (loc, pcvt);
         }
-        _CATCH (...) {
+        catch (...) {
             rw_assert (false, __FILE__, __LINE__,
                        "locale combining ctor unexpectedly threw "
                        "an exception; ");
@@ -1465,12 +1465,12 @@ test_inout (int which, int line, const char* name,
 
         std::codecvt_base::result res;
 
-        _TRY {
+        try {
             res = cvt.in (state,
                           ext_lo, ext_hi, ext_nxt,
                           int_lo, int_hi, int_nxt);
         }
-        _CATCH (...) {
+        catch (...) {
             rw_assert (false, __FILE__, __LINE__,
                        "%d. %s unexpectedly threw an exception",
                        __LINE__, fcall);
@@ -1556,12 +1556,12 @@ test_inout (int which, int line, const char* name,
 
         std::codecvt_base::result res;
 
-        _TRY {
+        try {
             res = cvt.out (state,
                            int_lo, int_hi, int_nxt,
                            ext_lo, ext_hi, ext_nxt);
         }
-        _CATCH (...) {
+        catch (...) {
             rw_assert (false, __FILE__, __LINE__,
                        "%d. %s unexpectedly threw an exception",
                        __LINE__, fcall);
@@ -2370,7 +2370,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
         else                                                                 \
             std::sprintf (locname_mod, "%s", locname);                       \
                                                                              \
-        _TRY {                                                               \
+        try {                                                                \
             const CodecvtBnW cc (locname_mod, 1);                            \
             std::locale loc = std::locale (std::locale::classic (), &cc);    \
                                                                              \
@@ -2378,7 +2378,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
             cc._C_opts &= ~cc._C_use_libc;                                   \
             test_ucs_modifier (locname_mod, enc, native, cc, f, i, is);      \
                                                                              \
-        } _CATCH (...) {                                                     \
+        } catch (...) {                                                      \
             rw_assert (false, __FILE__, __LINE__,                            \
                        "unexpected exception in locale test %s",             \
                        locname_mod);                                         \
@@ -2386,9 +2386,9 @@ run_test (int /*unused*/, char* /*unused*/ [])
     } while (0)
 
 #define TEST_LIBSTD(L,T,C,c,f,s,i,is,o,os,ur,ar,er,lr,mr)                  \
-    _TRY {                                                                 \
+    try {                                                                  \
         test_libstd_codecvt<T>(L,c,f,s,i,is,o,os,ur,ar,er,lr,mr);          \
-    } _CATCH (...) {                                                       \
+    } catch (...) {                                                        \
             rw_assert (false, __FILE__, __LINE__,                          \
                        "unexpected exception in conversion using %s "      \
                        "(locale %s)", C ? "C library" : "std library", L); \
@@ -2397,16 +2397,16 @@ run_test (int /*unused*/, char* /*unused*/ [])
 #define TEST_CONVERSION(T,L,C,f,s,i,is,o,os,ur,er,ar,lr,mr)             \
     do {                                                                \
         std::locale loc;                                                \
-        _TRY {                                                          \
+        try {                                                           \
             loc = std::locale (L);                                      \
-        } _CATCH (...) {                                                \
+        } catch (...) {                                                 \
             rw_assert (false, __FILE__, __LINE__,                       \
                        "locale(\"%s\") unexpectedly threw an "          \
                        "exception; " LOCALE_ROOT_ENVAR " = %s", L,      \
                        locale_root);                                    \
             break;                                                      \
         }                                                               \
-        _TRY {                                                          \
+        try {                                                           \
             const T &cc = create_##T (loc);                             \
                                                                         \
             cc._C_opts |=  cc._C_use_libstd;                            \
@@ -2418,7 +2418,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
                 cc._C_opts |=  cc._C_use_libc;                          \
                 TEST_LIBSTD(L,T,C,cc,f,s,i,is,o,os,ur,ar,er,lr,mr);     \
             }                                                           \
-        } _CATCH (...) {                                                \
+        } catch (...) {                                                 \
             rw_assert (false, __FILE__, __LINE__,                       \
                        "unexpected exception in locale test %s", L);    \
         }                                                               \
@@ -2480,7 +2480,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
         // unshift () as the first call on the wide facet of a locale
         // from the database must take the database's data, not fall
         // through to the C library, which does not know the name
-        _TRY {
+        try {
             const std::locale loc (locname);
 
             const CodecvtW &cc = std::use_facet<CodecvtW>(loc);
@@ -2498,7 +2498,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
                        "(locale (%#s)).unshift () as the first call == "
                        "noconv, got %d", locname, int (res));
         }
-        _CATCH (...) {
+        catch (...) {
             rw_assert (false, __FILE__, __LINE__,
                        "use_facet<codecvt<wchar_t, char, mbstate_t> >"
                        "(locale (%#s)).unshift () as the first call "

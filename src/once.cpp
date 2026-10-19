@@ -162,12 +162,12 @@ __rw_once (__rw_once_t *once, void (*func)())
     if (__rw_once_is_done (state) || !__rw_once_enter (state))
         return;
 
-    _TRY {
+    try {
         func ();
     }
-    _CATCH (...) {
+    catch (...) {
         __rw_once_leave (state, __rw_once_ready);
-        _RETHROW;
+        throw;
     }
 
     __rw_once_leave (state, __rw_once_done);

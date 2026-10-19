@@ -89,7 +89,7 @@ void do_test (int lineno, charT, const char *cname,
     InIter ibeg = InIter (istrm);
     InIter iend;
 
-    _TRY {
+    try {
         if (   '\0' == fmt [1]
             || ('E' ==  fmt [0] || ('O' == fmt [0] && '\0' == fmt [2]))) {
 
@@ -151,7 +151,7 @@ void do_test (int lineno, charT, const char *cname,
             iend  = tg.get (ibeg, iend, istrm, err, &x, fmtstr, end);
         }
     }
-    _CATCH (...) {
+    catch (...) {
         rw_error (0, 0, lineno,
                   "line %d. time_get<%s>::%s (%{*Ac}, ..., \"%s\") "
                   "unexpectedly threw an exception",
@@ -958,11 +958,11 @@ expected_date_order (const char *locname)
 template <class charT>
 void test_english (charT, const char *cname, const char *locname)
 {
-    _TRY {
+    try {
         // set the global locale object to the german locale
         std::locale::global (std::locale (locname));
     }
-    _CATCH (...) {
+    catch (...) {
         rw_error (0, 0, __LINE__,
                   "locale(%#s) unexpectedly threw an exception", locname);
 
@@ -1088,11 +1088,11 @@ void test_english (charT, const char *cname, const char *locname)
 template <class charT>
 void test_german (charT, const char *cname, const char *locname)
 {
-    _TRY {
+    try {
         // set the global locale object to the german locale
         std::locale::global (std::locale (locname));
     }
-    _CATCH (...) {
+    catch (...) {
         rw_error (0, 0, __LINE__,
                   "locale(%#s) unexpectedly threw an exception", locname);
 
@@ -1155,11 +1155,11 @@ void test_german (charT, const char *cname, const char *locname)
 template <class charT>
 void test_danish (charT, const char *cname, const char *locname)
 {
-    _TRY {
+    try {
         // set the global locale object to the german locale
         std::locale::global (std::locale (locname));
     }
-    _CATCH (...) {
+    catch (...) {
         rw_error (0, 0, __LINE__,
                   "locale(%#s) unexpectedly threw an exception", locname);
 
@@ -1539,10 +1539,10 @@ void test_user (charT, const char *cname, const char *locname)
     // construct a locale object from the binary database
     std::locale loc;
 
-    _TRY {
+    try {
         loc = std::locale (loc, locname, std::locale::time);
     }
-    _CATCH (...) {
+    catch (...) {
         rw_error (0, 0, __LINE__,
                   "locale (locale (), \"%s\", locale::time) "
                   "unexpectedly threw an exception", locname);

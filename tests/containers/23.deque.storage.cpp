@@ -401,7 +401,7 @@ static void test_allocator ()
                                 Value::fail_copy = Value::copies + ordinal;
                             else
                                 pool.fail = pool.calls + ordinal;
-                            _TRY {
+                            try {
                                 if (2 == kind)
                                     d.insert (d.begin () + off, input, input + n);
                                 else if (1 == kind)
@@ -411,7 +411,7 @@ static void test_allocator ()
                                 else
                                     d.push_back (input [0]);
                             }
-                            _CATCH (...) {
+                            catch (...) {
                                 caught = true;
                             }
                             pool.fail = 0;

@@ -316,7 +316,7 @@ void test_string_ctor (std::bitset<N>*,
     int caught = 0;
 
 
-    _TRY {
+    try {
         // invoke one of the overloads of the constructor
         const Bitset bset = bitset_ctor ((Bitset*)0, p, str, pos, n);
 

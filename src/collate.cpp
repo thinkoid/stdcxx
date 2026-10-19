@@ -486,16 +486,16 @@ __rw_strnxfrm (const char *src, size_t nchars)
 
             size_t res_size = res.size ();
 
-            _TRY {
+            try {
                 // resize the result string to fit itself plus the result
                 // of the transformation including the terminating NUL
                 // appended by strxfrm()
                 res.resize (res_size + dst_size + 1);
             }
-            _CATCH (...) {
+            catch (...) {
                 if (pbuf != buf)
                     delete[] pbuf;
-                _RETHROW;
+                throw;
             }
 
             strxfrm (&res [0] + res_size, psrc, dst_size + 1);
@@ -509,15 +509,15 @@ __rw_strnxfrm (const char *src, size_t nchars)
             size_t i = 0;
             for (; i < nchars && 0 == src [i]; ++i) ;
 
-            _TRY {
+            try {
                 // resize the result string to fit itself plus the 
                 // embedded NULs
                 res.resize (res.size () + i);
             }
-            _CATCH (...) {
+            catch (...) {
                 if (pbuf != buf)
                     delete[] pbuf;
-                _RETHROW;
+                throw;
             }
 
             nchars -= i;
@@ -602,16 +602,16 @@ __rw_wcsnxfrm (const wchar_t *src, size_t nchars)
 
             size_t res_size = res.size ();
 
-            _TRY {
+            try {
                 // resize the result string to fit itself plus the result
                 // of the transformation including the terminatin NUL
                 // appended by strxfrm()
                 res.resize (res_size + dst_size + 1);
             }
-            _CATCH (...) {
+            catch (...) {
                 if (pbuf != buf)
                     delete[] pbuf;
-                _RETHROW;
+                throw;
             }
 
             // transform the source string up to the terminating NUL
@@ -626,15 +626,15 @@ __rw_wcsnxfrm (const wchar_t *src, size_t nchars)
             size_t i = 0;
             for (; i < nchars && 0 == src [i]; ++i) ;
 
-            _TRY {
+            try {
                 // resize the result string to fit itself plus the 
                 // embedded NULs
                 res.resize (res.size () + i);
             }
-            _CATCH (...) {
+            catch (...) {
                 if (pbuf != buf)
                     delete[] pbuf;
-                _RETHROW;
+                throw;
             }
 
             nchars -= i;

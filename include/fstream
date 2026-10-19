@@ -227,10 +227,10 @@ private:
 template<class _CharT, class _Traits>
 inline basic_filebuf<_CharT, _Traits>::~basic_filebuf ()
 {
-    _TRY {
+    try {
         close ();
     }
-    _CATCH (...) {
+    catch (...) {
         // LWG issue 622: swallow all exceptions
     }
 

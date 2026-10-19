@@ -187,12 +187,12 @@ _C_reservation (deque &__deque, bool __back, size_type __n)
       _C_pos (__deque._C_span), _C_moved (0), _C_added (0),
       _C_alloc (0), _C_n (__n), _C_back (__back), _C_done (false)
 {
-    _TRY {
+    try {
         _C_prepare ();
     }
-    _CATCH (...) {
+    catch (...) {
         _C_restore ();
-        _RETHROW;
+        throw;
     }
 
     // the room is in place: construction starts at its near end

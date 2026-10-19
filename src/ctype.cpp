@@ -883,7 +883,7 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
         // allocate memory for all three tables
         _C_mask_tab = new mask [table_size];
 
-        _TRY {
+        try {
             // allocate for both the upper and lower table to avoid
             // having to allocate twice
             _C_upper_tab = new unsigned char [table_size * 2];
@@ -892,9 +892,9 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
             // set flag last, after allocation succeeds
             _C_delete_it = true;
         }
-        _CATCH (...) {
+        catch (...) {
             delete[] const_cast< mask* >(_C_mask_tab);
-            _RETHROW;
+            throw;
         }
 
         int i;

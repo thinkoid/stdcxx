@@ -169,7 +169,7 @@ bool check_numpunct (charT,
     RW_ASSERT ((std::strlen (tmploc) + 1) < sizeof locnamebuf);
     std::strcpy (locnamebuf, tmploc);
 
-    _TRY {
+    try {
 
         rw_info (0, 0, __LINE__,
                  "locale (%s) -> \"%s\"; LANG=%s, "
@@ -225,7 +225,7 @@ bool check_numpunct (charT,
         delete loc;
         loc = 0;
     }
-    _CATCH (...) {
+    catch (...) {
         return false;
     }
     return true;

@@ -353,7 +353,7 @@ run_test (int, char* [])
 
     int new_throws = 0;
 
-    _TRY {
+    try {
         // see if replacement operator new throws an exception
         // when called directly from the program
         void *p = ::operator new (sizeof long_str);
@@ -367,13 +367,13 @@ run_test (int, char* [])
                    sizeof long_str);
 
     }
-    _CATCH (...) {
+    catch (...) {
         new_throws = 1;
     }
 
     *pst->throw_at_calls_ [0] = pst->new_calls_ [0] + 1;
 
-    _TRY {
+    try {
         // see if replacement operator new throws an exception
         // when called indirectly, i.e., from the library binary
         void* const p = __rw::__rw_allocate (sizeof long_str, 0);
@@ -387,7 +387,7 @@ run_test (int, char* [])
                    sizeof long_str);
 
     }
-    _CATCH (...) {
+    catch (...) {
         new_throws = 1;
     }
 

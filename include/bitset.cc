@@ -132,7 +132,7 @@ __rw_extract_bitset (std::basic_istream<_CharT, _Traits> &__strm,
 
     _RWSTD_SIZE_T __bit = _Size;
 
-    _TRY {
+    try {
 
         // sentry may throw an exception
         const typename _Istream::sentry __ipfx (__strm);
@@ -167,7 +167,7 @@ __rw_extract_bitset (std::basic_istream<_CharT, _Traits> &__strm,
             __tmp >>= __bit;
         }
     }
-    _CATCH (...) {
+    catch (...) {
         __strm.setstate (__strm.badbit | __rw::__rw_rethrow);
     }
 

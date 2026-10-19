@@ -46,7 +46,7 @@ __rw_allocate (size_t nbytes, int /* = 0 */)
 {
     void *ptr = 0;
 
-    _TRY {
+    try {
 
 #ifndef _RWSTD_NO_NEW_OFLOW_SAFE
 
@@ -63,7 +63,7 @@ __rw_allocate (size_t nbytes, int /* = 0 */)
 #endif   // _RWSTD_NO_NEW_OFLOW_SAFE
 
     }
-    _CATCH (...) {
+    catch (...) {
         // prevent bad_alloc raised by the compiler
     }
 
@@ -134,10 +134,10 @@ operator new[] (size_t __size) _NEW_THROWS ((_RWSTD_BAD_ALLOC))
 _RWSTD_EXPORT void*
 operator new[] (size_t __size, const std::nothrow_t&) _NEW_THROWS (())
 {
-    _TRY {
+    try {
         return ::operator new (__size);
     }
-    _CATCH (...) {
+    catch (...) {
         void *__nil = 0;    // prevent a g++ 2.95.2 warning
         return __nil;       // about operator new returning 0
     }

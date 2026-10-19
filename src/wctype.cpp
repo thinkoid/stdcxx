@@ -563,15 +563,15 @@ ctype_byname (const char *name, size_t refs)
         //     size in array new must have integral type
         _C_mask_tab = new mask [size_t (_C_tab_size)];
 
-        _TRY {
+        try {
             // avoid doing one extra allocation by allocating
             // both the upper and lower tables in the same space
             _C_upper_tab = new _UChar [size_t (_C_tab_size) * 2];
             _C_lower_tab = _C_upper_tab + _C_tab_size;
         }
-        _CATCH (...) {
+        catch (...) {
             delete[] const_cast< mask* >(_C_mask_tab);
-            _RETHROW;
+            throw;
         }
 
         for (char_type i = 0; i <= char_type (_RWSTD_UCHAR_MAX); i++) {

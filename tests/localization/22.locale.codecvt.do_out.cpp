@@ -666,10 +666,10 @@ test_wcodecvt_byname_table_based ()
 
     std::locale loc;
 
-    _TRY {
+    try {
         loc = std::locale (locname);
     }
-    _CATCH (...) {
+    catch (...) {
         rw_error (0, 0, __LINE__, "locale(\"%s\") unexpectedly threw", locname);
         return;
     }
@@ -787,10 +787,10 @@ test_wcodecvt_byname_libc_based ()
 
     std::locale loc;
 
-    _TRY {
+    try {
         loc = std::locale (locname);
     }
-    _CATCH (...) {
+    catch (...) {
         rw_error (0, 0, __LINE__, "locale(\"%s\") unexpectedly threw", locname);
         return;
     }

@@ -200,13 +200,13 @@ _C_get_cat_names (char *buf, size_t bufsize) const
             // reallocate buffer if necessary
             char *tmp = 0;
 
-            _TRY {
+            try {
                 tmp = new char [bufsize *= 2];
             }
-            _CATCH (...) {
+            catch (...) {
                 if (buf != savebuf)
                     delete[] buf;
-                _RETHROW;
+                throw;
             }
 
             strcpy (tmp, buf);

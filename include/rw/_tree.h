@@ -363,13 +363,13 @@ private:
     _C_link_t _C_get_node (const_reference __v) {
         _C_link_t __tmp2 = _C_get_link ();
 
-        _TRY {
+        try {
             allocator_type::construct (
                 allocator_type::address (__tmp2->_C_value), __v);
         }
-        _CATCH (...) {
+        catch (...) {
             _C_put_node (__tmp2, false);
-            _RETHROW;
+            throw;
         }      
         return __tmp2;
     }
@@ -445,12 +445,12 @@ public:
 
         _C_init ();
 
-        _TRY {
+        try {
             insert (__first, __last, __dup);
         }
-        _CATCH (...) {
+        catch (...) {
             _C_deallocate_buffers ();
-            _RETHROW;
+            throw;
         }
     }
 

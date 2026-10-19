@@ -96,9 +96,23 @@ serial one, three runs over; the wall time recorded beside the tables.
 =include/rw/_config-gcc.h=, and =_TRY=, =_CATCH=, =_THROW= and
 =_RETHROW= in =rw/_defs.h= carry the library through it, the way
 libstdc++'s =__try= and =__catch= do. The six certified
-configurations all build with exceptions on, so the other side of
-those macros, 78 library sites and 41 in the tests, is live by
-construction and never compiled.
+configurations all build with exceptions on. A 15D build with
+=CXXOPTS=-fno-exceptions= on every phase (2026-10-19, aarch64, GCC
+16): the library builds clean, so its 78 sites hold; =config.h= is
+the exceptions-on one, since the configuration ignores =CXXOPTS=,
+and the three characterizations that branch on the macro answered
+under exceptions. Nothing else builds. =util= uses bare =try= and
+=catch= in four files, =localedef= among them, so no locale
+database is built; the test driver has a bare =throw= in
+=exception.cpp= and =ctype.cpp=, and =21.strings.cpp= and
+=23.containers.cpp= assign =_rw_no_exceptions=, a name declared
+nowhere, under =#ifdef _RWSTD_NO_EXCEPTIONS=; 35 of the 268 tests
+fail to compile on bare =catch=, the other 233 fail to link for
+want of the driver; the examples fail in ten files on
+=examples.h='s =catch= macro of 2005 (=else if (0) for (ex ; 0 ; )=),
+which cannot take =catch (...)= or a reference. =tr1/_smartptr.h=
+throws =bad_weak_ptr= bare in =weak_ptr::lock=. 128 bare =try= in
+the tests, 20 in the examples, 7 in =util=.
 
 Fix: decide whether the mode is supported. If it is, one
 configuration of the nightly builds the library and the suite with

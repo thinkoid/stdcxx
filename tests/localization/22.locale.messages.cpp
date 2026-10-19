@@ -150,14 +150,14 @@ find_named_locale ()
             if (std::strcmp (fullname, classic_name)) {
 
                 // skip over the C and POSIX locales
-                _TRY {
+                try {
                     const std::locale loc (name);
                     _RWSTD_UNUSED (loc);
 
                     std::setlocale (LC_ALL, "C");
                     return name;
                 }
-                _CATCH (...) { }
+                catch (...) { }
             }
         }
         name += std::strlen (name) + 1;

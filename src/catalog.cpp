@@ -92,7 +92,7 @@ nl_catd catopen(const char* name, int oflag)
 {
     __rw_cat* cat = 0;
     
-    _TRY {
+    try {
         cat = new __rw_cat(name,oflag);
 
         if (cat && cat->good()) {
@@ -104,7 +104,7 @@ nl_catd catopen(const char* name, int oflag)
             return cat->id();
         }
     }
-    _CATCH (...) {
+    catch (...) {
     }
 
     delete cat;
@@ -114,7 +114,7 @@ nl_catd catopen(const char* name, int oflag)
 
 const char * catgets(nl_catd catd, int set_num, int msg_num, const char* s)
 {
-    _TRY {
+    try {
 
         CatVector::size_type i = __catfind(catd);
         if (i < __rw_catlist.size())
@@ -122,7 +122,7 @@ const char * catgets(nl_catd catd, int set_num, int msg_num, const char* s)
 
         return s;
     }
-    _CATCH (...) {
+    catch (...) {
         return s;
     }
 }

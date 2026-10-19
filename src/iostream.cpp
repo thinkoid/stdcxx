@@ -293,48 +293,48 @@ ios_base::Init::~Init ()
 
     int caught = 0;
 
-    _TRY {
+    try {
         _OBJECT (ostream, cout).rdbuf ()->pubsetbuf (0, 0);
     }
-    _CATCH (...) {
+    catch (...) {
         fprintf (stderr, fmt, "cout");
         ++caught;
     }
-    _TRY {
+    try {
         _OBJECT (ostream, cerr).rdbuf ()->pubsetbuf (0, 0);
     }
-    _CATCH (...) {
+    catch (...) {
         fprintf (stderr, fmt, "cerr");
         ++caught;
     }
-    _TRY {
+    try {
         _OBJECT (ostream, clog).rdbuf ()->pubsetbuf (0, 0);
     }
-    _CATCH (...) {
+    catch (...) {
         fprintf (stderr, fmt, "clog");
         ++caught;
     }
 
     _RWSTD_ASSERT (&wcout && &wcerr && &wclog);
 
-    _TRY {
+    try {
         _OBJECT (wostream, wcout).rdbuf ()->pubsetbuf (0, 0);
     }
-    _CATCH (...) {
+    catch (...) {
         fprintf (stderr, fmt, "wcout");
         ++caught;
     }
-    _TRY {
+    try {
         _OBJECT (wostream, wcerr).rdbuf ()->pubsetbuf (0, 0);
     }
-    _CATCH (...) {
+    catch (...) {
         fprintf (stderr, fmt, "wcerr");
         ++caught;
     }
-    _TRY {
+    try {
         _OBJECT (wostream, wclog).rdbuf ()->pubsetbuf (0, 0);
     }
-    _CATCH (...) {
+    catch (...) {
         fprintf (stderr, fmt, "wclog");
         ++caught;
     }

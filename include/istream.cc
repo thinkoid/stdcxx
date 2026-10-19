@@ -47,11 +47,11 @@ __rw_extract (std::basic_istream<_CharT, _Traits> &__strm,
         __ipfx (__strm /* , noskipws = false */);
 
     if (__ipfx) {
-        _TRY {
+        try {
             std::use_facet< _NumGet >(__strm.getloc ())
                 .get (_Iter (__strm), _Iter (), __strm, __err, __val);
         }
-        _CATCH (...) {
+        catch (...) {
             __strm.setstate (__strm.badbit | __rw::__rw_rethrow);
         }
     }
@@ -85,7 +85,7 @@ _C_ipfx (bool __noskipws, ios_base::iostate __errbits)
 
     ios_base::iostate __state = ios_base::goodbit;
 
-    _TRY {        
+    try {
         if (this->tie ())
             this->tie ()->flush ();
 
@@ -137,7 +137,7 @@ _C_ipfx (bool __noskipws, ios_base::iostate __errbits)
             }
         }
     }
-    _CATCH (...) {
+    catch (...) {
         this->setstate (ios_base::badbit | __rw::__rw_rethrow);
     }
 
@@ -162,7 +162,7 @@ _C_unsafe_get (streamsize *__cnt   /* = 0     */,
     // initialize in case sgetc() below throws
     int_type __c (traits_type::eof ());
 
-    _TRY {
+    try {
 
         // get next char without extracting
         __c = this->rdbuf ()->sgetc ();
@@ -188,7 +188,7 @@ _C_unsafe_get (streamsize *__cnt   /* = 0     */,
                 ++*__cnt;   // increment number of extracted chars
         }
     }
-    _CATCH (...) {
+    catch (...) {
         this->setstate (ios_base::badbit | __rw::__rw_rethrow);
     }
 
@@ -214,7 +214,7 @@ _C_get (basic_streambuf<char_type, traits_type> &__sb, int_type __delim)
 
         _C_gcount = 0;
 
-        _TRY {
+        try {
             for ( ; ; ) {
                 int_type __c (this->rdbuf ()->sgetc ());
 
@@ -226,10 +226,10 @@ _C_get (basic_streambuf<char_type, traits_type> &__sb, int_type __delim)
                 if (traits_type::eq_int_type (__c, __delim))
                     break;
 
-                _TRY {
+                try {
                     __c = __sb.sputc (traits_type::to_char_type (__c));
                 }
-                _CATCH (...) {
+                catch (...) {
 
                     // indicate to the outer catch block the the
                     // exception rethrown from the call to setstate()
@@ -253,7 +253,7 @@ _C_get (basic_streambuf<char_type, traits_type> &__sb, int_type __delim)
                 this->rdbuf ()->sbumpc ();  
             }
         }
-        _CATCH (...) {
+        catch (...) {
             // will rethrow if `err' is set since the caught exception
             // is the one thrown during output and rethrown by setstate()
             // in the nested catch block above
@@ -376,13 +376,13 @@ read (char_type *__s, streamsize __n)
 
         streamsize __nread = 0;
 
-        _TRY {
+        try {
             __nread = this->rdbuf ()->sgetn (__s, __n);
 
             if (__nread >= 0)
                 _C_gcount = __nread;
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
 
@@ -411,7 +411,7 @@ readsome (char_type *__s, streamsize __n)
 
         streamsize __nread = 0;
 
-        _TRY {
+        try {
 
             const streamsize __in_avail = this->rdbuf ()->in_avail ();
 
@@ -427,7 +427,7 @@ readsome (char_type *__s, streamsize __n)
             if (__nread >= 0)
                 _C_gcount = __nread;
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
 
@@ -456,10 +456,10 @@ tellg ()
 
     if (__ipfx && !this->fail ()) {
 
-        _TRY {
+        try {
             return this->rdbuf ()->pubseekoff (0, ios_base::cur, ios_base::in);
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
@@ -478,12 +478,12 @@ putback (char_type __c)
     if (__ipfx) {
 
         if (this->rdbuf ()) {
-            _TRY {
+            try {
                 if (!traits_type::eq_int_type (this->rdbuf ()->sputbackc (__c),
                                                traits_type::eof ()))
                     return *this;
             }
-            _CATCH (...) {
+            catch (...) {
                 this->setstate (ios_base::badbit | __rw::__rw_rethrow);
             }
         }
@@ -506,13 +506,13 @@ unget ()
 
         if (this->rdbuf ()) {
 
-            _TRY {
+            try {
 
                 if (!traits_type::eq_int_type (this->rdbuf ()->sungetc (), 
                                                traits_type::eof ()))
                     return *this;
             }
-            _CATCH (...) {
+            catch (...) {
                 this->setstate (ios_base::badbit | __rw::__rw_rethrow);
             }
         }
@@ -533,11 +533,11 @@ sync ()
 
     if (__ipfx && this->rdbuf ()) {
 
-        _TRY {
+        try {
             if (-1 != this->rdbuf ()->pubsync ())
                 return 0;
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
 
@@ -569,7 +569,7 @@ get (char_type *__s, streamsize __n, char_type __delim)
 
         _C_gcount = 0;
 
-        _TRY {
+        try {
 
             basic_streambuf<char_type, traits_type>* const __rdbuf =
                 this->rdbuf ();
@@ -629,7 +629,7 @@ get (char_type *__s, streamsize __n, char_type __delim)
             if (!_C_gcount)
                 __err |= ios_base::failbit;
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }
@@ -676,7 +676,7 @@ getline (char_type *__line, streamsize __size, char_type __delim)
         basic_streambuf<char_type, traits_type>* const __rdbuf =
             this->rdbuf ();
 
-        _TRY {
+        try {
 
             for ( ; ; ) {
 
@@ -764,7 +764,7 @@ getline (char_type *__line, streamsize __size, char_type __delim)
                 }
             }
         }
-        _CATCH (...) {
+        catch (...) {
             this->setstate (ios_base::badbit | __rw::__rw_rethrow);
         }
     }

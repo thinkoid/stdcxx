@@ -134,7 +134,7 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
     const _ForwardIterator __start = __res;
     typedef typename iterator_traits<_ForwardIterator>::value_type _TypeT;
 
-    _TRY {
+    try {
         for (; __first != __last; ++__first, ++__res) {
             // avoid const-qualifying ptr to prevent an HP aCC 3 bug
             volatile void* /* const */ __ptr =
@@ -142,9 +142,9 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
             ::new (const_cast< void* >(__ptr)) _TypeT (*__first);
         }
     }
-    _CATCH (...) {
+    catch (...) {
         __rw::__rw_destroy (__start, __res);
-        _RETHROW;
+        throw;
     }
 
     return __res;
@@ -159,14 +159,14 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
 {
     _ForwardIterator __start = __res;
 
-    _TRY {
+    try {
         for (; __first != __last; ++__first, ++__res)
             __alloc.construct (__alloc.address (*__res), *__first);
     }
-    _CATCH (...) {
+    catch (...) {
         for (; __start != __res; ++__start)
             __alloc.destroy (__alloc.address (*__start));
-        _RETHROW;
+        throw;
     }
 
     return __res;
@@ -181,13 +181,13 @@ uninitialized_fill (_ForwardIterator __first, _ForwardIterator __last,
 {
     const _ForwardIterator __start = __first;
 
-    _TRY {
+    try {
         for (; __first != __last; ++__first)
             __rw::__rw_construct (&*__first, __x);
     }
-    _CATCH (...) {
+    catch (...) {
         __rw::__rw_destroy (__start, __first);
-        _RETHROW;
+        throw;
     }
 }
 
@@ -199,13 +199,13 @@ uninitialized_fill_n (_ForwardIterator __first, _Size __n, const _TypeT& __x)
 {
     const _ForwardIterator __start = __first;
 
-    _TRY {
+    try {
         for (; __n; --__n, ++__first)
             __rw::__rw_construct (&*__first, __x);
     }
-    _CATCH (...) {
+    catch (...) {
         __rw::__rw_destroy (__start, __first);
-        _RETHROW;
+        throw;
     }
 }
 
@@ -218,14 +218,14 @@ uninitialized_fill_n (_ForwardIter __first, _Size __n,
 {
     _ForwardIter __start = __first;
 
-    _TRY {
+    try {
         for (; __n; --__n, ++__first)
             __alloc.construct (__alloc.address (*__first), __x);
     }
-    _CATCH (...) {
+    catch (...) {
         for (; __start != __first; ++__start)
             __alloc.destroy (__alloc.address (*__start));
-        _RETHROW;
+        throw;
     }
 }
 

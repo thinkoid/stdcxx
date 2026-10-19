@@ -339,7 +339,7 @@ void* operator new (std::size_t n) _THROWS ((_RWSTD_BAD_ALLOC))
 
     void* const ptr = std::malloc (n);
     if (!ptr)
-        _THROW (_RWSTD_BAD_ALLOC ());
+        throw _RWSTD_BAD_ALLOC ();
 
     return ptr;
 }

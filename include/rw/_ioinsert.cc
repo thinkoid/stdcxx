@@ -41,7 +41,7 @@ __rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
     const typename std::basic_ostream<_CharT, _Traits>::sentry
         __opfx (__strm);
 
-    _TRY {
+    try {
 
         typedef std::ostreambuf_iterator<_CharT, _Traits> _Iter;
         typedef std::num_put<_CharT, _Iter>                _NumPut;
@@ -55,7 +55,7 @@ __rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
             __strm.setstate (std::ios_base::badbit);
         }
     }
-    _CATCH (...) {
+    catch (...) {
         __strm.setstate (std::ios_base::badbit | __rw::__rw_rethrow);
     }
 
@@ -129,7 +129,7 @@ __rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
     // (i.e., will leave it unchanged if sputn fails or throws an
     // exception)
 
-    _TRY {
+    try {
   
         const typename std::basic_ostream<_CharT, _Traits>::sentry
             __opfx (__strm);
@@ -166,7 +166,7 @@ __rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
             __strm.width (0);
         }
     }
-    _CATCH (...) {
+    catch (...) {
         // set badbit and rethrow the caught exception if badbit
         // is also set in exceptions()
         __strm.setstate (std::ios_base::badbit | __rw::__rw_rethrow);

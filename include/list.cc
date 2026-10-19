@@ -88,14 +88,14 @@ void list<_TypeT, _Allocator>::_C_add_buffer (bool __is_list_empty)
     _C_buf_pointer __tmp = 
         _C_buf_alloc_type (*this).allocate (1, (void*)_C_buflist);
 
-    _TRY {
+    try {
         __tmp->_C_buffer = 
            _C_node_alloc_type (*this).allocate (__next_buffer_size,
                                                 (void*)_C_last);
     }
-    _CATCH (...) {
+    catch (...) {
         _C_buf_alloc_type (*this).deallocate (__tmp, 1);
-        _RETHROW;
+        throw;
     }
 
     __tmp->_C_next_buf = _C_buflist;
