@@ -74,8 +74,8 @@ report is a builder's or the slot's.
 Fix, one commit per program, each rewrite verified with its fault
 put back under the sanitizer (reported in 25 runs of 25, clean on
 the fixed library), then its 15D row:
-- =22.locale.numpunct.mt= and =22.locale.moneypunct.mt= gated on
-  their builders with a leak check, the =time.put.libc= shape;
+- =22.locale.moneypunct.mt= gated on its builder with a leak check,
+  the =time.put.libc= shape;
   =22.locale.messages.mt= gated on the catalog repository;
   =22.locale.cons.mt= gated on the body repository's
   one-body-per-name invariant, its rounds bounded by the host's

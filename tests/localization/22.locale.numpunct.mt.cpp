@@ -2,7 +2,8 @@
  *
  * 22.locale.numpunct.mt.cpp
  *
- * test exercising the thread safety of the numpunct facet
+ * test exercising the thread safety of the first use of a numpunct
+ * facet, which builds the facet's data from the C library
  *
  * $Id$
  *
@@ -26,141 +27,101 @@
  *
  **************************************************************************/
 
-#include <locale>     // for locale, numpunct
+#include <locale>     // for locale, numpunct, use_facet
+#include <string>     // for string, wstring
+#include <cstring>    // for strcmp(), strlen()
 
-#include <clocale>    // for lconv, localeconv()
-#include <cstdlib>    // for mbstowcs()
-#include <cstring>    // for size_t, strcpy()
-
-#include <rw_locale.h>
-#include <rw_thread.h>
-#include <rw_driver.h>
-#include <rw_valcmp.h>
+#include <rw_locale.h>   // for rw_locales()
+#include <rw_new.h>      // for rwt_check_leaks()
+#include <rw_thread.h>   // for rw_thread_gate(), rw_thread_pool()
+#include <rw_driver.h>   // for rw_test()
 
 
 // maximum number of threads allowed by the command line interface
-#define MAX_THREADS   32
+#define MAX_THREADS      32
+
+// maximum number of locales the test cycles through
+#define MAX_LOCALES      64
 
 // the number of threads (4 in a thread-safe build, set in main ()
 // whatever the number of processors)
 int opt_nthreads = 1;
 
-// the number of times each thread should iterate (unless specified
-// otherwise on the command line)
-int opt_nloops = 256;
-
-// number of locales to use
-int opt_nlocales = MAX_THREADS;
-
-// should all threads share the same set of locale objects instead
-// of creating their own?
-int opt_shared_locale;
+// the number of rounds, each a fresh locale
+int opt_nrounds = 200;
 
 // default timeout used by each threaded section of this test
 int opt_timeout = 60;
 
 /**************************************************************************/
 
-// array of locale names to use for testing
-static const char*
-locales [MAX_THREADS];
+// the locales the rounds cycle through, the C library's other than
+// C and POSIX: the library's database has no data for them, so the
+// facets build theirs from the C library under __rw_setlocale
+static const char* locale_names [MAX_LOCALES];
 
-// number of locale names in the array
-static std::size_t
-nlocales;
+// the number of names in the array
+static std::size_t nlocales;
 
-/**************************************************************************/
+// the answers of the round's locale, computed by the main thread
+// through a locale that is gone before the round's is constructed,
+// so that the threads' facets are new
+static struct {
+    char         decimal_point;
+    char         thousands_sep;
+    std::string  grouping;
+    std::string  truename;
+    std::string  falsename;
+    wchar_t      wdecimal_point;
+    wchar_t      wthousands_sep;
+    std::wstring wtruename;
+    std::wstring wfalsename;
+} record;
 
-struct NumPunctData
-{
-    const char* locale_name_;
-    std::locale locale_;
+// the facets whose data the threads race to build, one per round
+static const std::numpunct<char>*    race_facet;
+static const std::numpunct<wchar_t>* race_wfacet;
 
-    std::string grouping_;
+// whether the round races the wide facet
+static bool race_wide;
 
-    char decimal_point_;
-    char thousands_sep_;
-    std::string truename_;
-    std::string falsename_;
+// the number of threads that have started in the current round
+static int nstarted;
 
-    wchar_t wdecimal_point_;
-    wchar_t wthousands_sep_;
-    std::wstring wtruename_;
-    std::wstring wfalsename_;
-
-} punct_data [MAX_THREADS];
-
+// per thread, the calls that disagreed with the record
+static int mismatches [MAX_THREADS];
 
 extern "C" {
 
-bool test_char;    // exercise num_put<char>
-bool test_wchar;   // exercise num_put<wchar_t>
-
-
+// the replacement operator new of rw_new.h keeps no lock: the threads
+// call the two members that allocate nothing, and the only allocation
+// they cause is the facet data's, under the lock of __rw_setlocale;
+// the main thread checks the string members after the round
 static void*
-thread_func (void*)
+race_func (void *arg)
 {
-    for (int i = 0; i != opt_nloops; ++i) {
+    const long inx = long (arg);
 
-        if (rw_thread_pool_timeout_expired ())
-            break;
+    // start with the other threads so that they find the facet's
+    // data missing at the same time
+    rw_thread_gate (&nstarted, opt_nthreads);
 
-        const std::size_t inx = std::size_t (i) % nlocales;
+    int bad = 0;
 
-        const NumPunctData& data = punct_data[inx];
-
-        // construct a named locale
-        const std::locale loc =
-            opt_shared_locale ? data.locale_
-                              : std::locale (data.locale_name_);
-
-        if (test_char) {
-            // exercise the narrow char specialization of the facet
-
-            const std::numpunct<char> &np =
-                std::use_facet<std::numpunct<char> >(loc);
-
-            const char        dp  = np.decimal_point ();
-            const char        ts  = np.thousands_sep ();
-            const std::string grp = np.grouping ();
-            const std::string tn  = np.truename ();
-            const std::string fn  = np.falsename ();
-
-            RW_ASSERT (dp == data.decimal_point_);
-            RW_ASSERT (ts == data.thousands_sep_);
-            RW_ASSERT (0 == rw_strncmp (grp.c_str (),
-                                        data.grouping_.c_str ()));
-            RW_ASSERT (0 == rw_strncmp (tn.c_str (),
-                                        data.truename_.c_str ()));
-            RW_ASSERT (0 == rw_strncmp (fn.c_str (),
-                                        data.falsename_.c_str ()));
-        }
-
-        // both specializations may be tested at the same time
-
-        if (test_wchar) {
-            // exercise the wide char specialization of the facet
-
-            const std::numpunct<wchar_t> &wp =
-                std::use_facet<std::numpunct<wchar_t> >(loc);
-
-            const wchar_t      dp  = wp.decimal_point ();
-            const wchar_t      ts  = wp.thousands_sep ();
-            const std::string  grp = wp.grouping ();
-            const std::wstring tn  = wp.truename ();
-            const std::wstring fn  = wp.falsename ();
-
-            RW_ASSERT (dp == data.wdecimal_point_);
-            RW_ASSERT (ts == data.wthousands_sep_);
-            RW_ASSERT (0 == rw_strncmp (grp.c_str (),
-                                        data.grouping_.c_str ()));
-            RW_ASSERT (0 == rw_strncmp (tn.c_str (),
-                                        data.wtruename_.c_str ()));
-            RW_ASSERT (0 == rw_strncmp (fn.c_str (),
-                                        data.wfalsename_.c_str ()));
-
-        }
+    if (race_wide) {
+        if (race_wfacet->decimal_point () != record.wdecimal_point)
+            ++bad;
+        if (race_wfacet->thousands_sep () != record.wthousands_sep)
+            ++bad;
     }
+    else {
+        if (race_facet->decimal_point () != record.decimal_point)
+            ++bad;
+        if (race_facet->thousands_sep () != record.thousands_sep)
+            ++bad;
+    }
+
+    mismatches [inx] = bad;
 
     return 0;
 }
@@ -172,117 +133,136 @@ thread_func (void*)
 static int
 run_test (int, char**)
 {
-    // find all installed locales for which setlocale(LC_ALL) succeeds
     const char* const locale_list =
         rw_opt_locales ? rw_opt_locales : rw_locales (_RWSTD_LC_ALL);
 
-    const std::size_t maxinx = sizeof punct_data / sizeof *punct_data;
-
-    // iterate over locales, initializing a global punct_data array
     for (const char *name = locale_list;
-         *name;
-         name += std::strlen (name) +1) {
+         *name && nlocales != MAX_LOCALES;
+         name += std::strlen (name) + 1) {
 
-        const std::size_t inx = nlocales;
-        locales [inx] = name;
+        if (std::strcmp (name, "C") && std::strcmp (name, "POSIX"))
+            locale_names [nlocales++] = name;
+    }
 
-        NumPunctData& data = punct_data [inx];
+    if (0 == nlocales) {
+        rw_warn (false, 0, __LINE__,
+                 "no installed locale other than C and POSIX; skipping");
+        return 0;
+    }
 
-        try {
-            std::locale loc(name);
-            data.locale_name_ = name;
+    rw_info (0, 0, 0,
+             "racing the first use of std::numpunct<char> and "
+             "std::numpunct<wchar_t>, in turn, from %d thread%{?}s%{;}, "
+             "%d round%{?}s%{;}, in %zu locale%{?}s%{;}",
+             opt_nthreads, 1 != opt_nthreads,
+             opt_nrounds, 1 != opt_nrounds,
+             nlocales, 1 != nlocales);
+
+    // a first round in this thread alone, for the allocations the
+    // library makes once per process
+    {
+        const std::locale loc (locale_names [0]);
+
+        (void)std::use_facet<std::numpunct<char> >(loc).grouping ();
+        (void)std::use_facet<std::numpunct<wchar_t> >(loc).grouping ();
+    }
+
+    int result = 0;
+
+    for (int i = 0; 0 == result && i != opt_nrounds; ++i) {
+
+        const char* const name = locale_names [std::size_t (i) % nlocales];
+
+        race_wide = 0 != i % 2;
+
+        // the record, through a locale of its own, before the
+        // checkpoint: its strings outlive the round
+        {
+            const std::locale loc (name);
 
             const std::numpunct<char> &np =
                 std::use_facet<std::numpunct<char> >(loc);
-
-            data.grouping_ = np.grouping ();
-
-            data.decimal_point_ = np.decimal_point ();
-            data.thousands_sep_ = np.thousands_sep ();
-
-            data.truename_  = np.truename ();
-            data.falsename_ = np.falsename ();
-
             const std::numpunct<wchar_t> &wp =
                 std::use_facet<std::numpunct<wchar_t> >(loc);
 
-            data.wdecimal_point_ = wp.decimal_point ();
-            data.wthousands_sep_ = wp.thousands_sep ();
-
-            data.wtruename_  = wp.truename ();
-            data.wfalsename_ = wp.falsename ();
-
-            if (opt_shared_locale)
-                data.locale_ = loc;
-
-            nlocales += 1;
-        }
-        catch (...) {
-            rw_warn (!rw_opt_locales, 0, __LINE__,
-                     "failed to create locale(%#s)", name);
+            record.decimal_point  = np.decimal_point ();
+            record.thousands_sep  = np.thousands_sep ();
+            record.grouping       = np.grouping ();
+            record.truename       = np.truename ();
+            record.falsename      = np.falsename ();
+            record.wdecimal_point = wp.decimal_point ();
+            record.wthousands_sep = wp.thousands_sep ();
+            record.wtruename      = wp.truename ();
+            record.wfalsename     = wp.falsename ();
         }
 
-        if (nlocales == maxinx || nlocales == std::size_t (opt_nlocales))
+        rwt_check_leaks (0, 0);
+
+        {
+            // each round a new locale, whose facets have no data yet;
+            // the slots are filled from this thread alone, so that
+            // the threads race only the data (the slot race is
+            // 22.locale.use_facet.mt's)
+            const std::locale loc (name);
+
+            race_facet  = &std::use_facet<std::numpunct<char> >(loc);
+            race_wfacet = &std::use_facet<std::numpunct<wchar_t> >(loc);
+            nstarted    = 0;
+
+            void* args [MAX_THREADS];
+            for (int j = 0; j != opt_nthreads; ++j)
+                args [j] = (void*)long (j);
+
+            result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
+                                     race_func, args,
+                                     std::size_t (opt_timeout));
+
+            rw_error (result == 0, 0, __LINE__,
+                      "rw_thread_pool(0, %d, 0, %{#f}, ...) failed",
+                      opt_nthreads, race_func);
+
+            for (int j = 0; 0 == result && j != opt_nthreads; ++j) {
+                rw_assert (0 == mismatches [j], 0, __LINE__,
+                           "std::numpunct<%s> in std::locale (%#s), "
+                           "round %d, thread %d: %d of decimal_point() "
+                           "and thousands_sep() disagree with the record",
+                           race_wide ? "wchar_t" : "char", name, i, j,
+                           mismatches [j]);
+            }
+
+            // the string members, from the data the threads built
+            const bool same =
+                race_wide
+                ? (   race_wfacet->grouping ()  == record.grouping
+                   && race_wfacet->truename ()  == record.wtruename
+                   && race_wfacet->falsename () == record.wfalsename)
+                : (   race_facet->grouping ()   == record.grouping
+                   && race_facet->truename ()   == record.truename
+                   && race_facet->falsename ()  == record.falsename);
+
+            rw_assert (same, 0, __LINE__,
+                       "std::numpunct<%s> in std::locale (%#s), round %d: "
+                       "grouping(), truename() and falsename() agree "
+                       "with the record",
+                       race_wide ? "wchar_t" : "char", name, i);
+
+            race_facet  = 0;
+            race_wfacet = 0;
+        }
+
+        // the facets and their data die with the only locale that
+        // holds them: no thread built data that was then overwritten
+        std::size_t nbytes;
+        const std::size_t nblocks = rwt_check_leaks (&nbytes, 0);
+
+        if (!rw_assert (0 == nblocks, 0, __LINE__,
+                        "std::numpunct<%s> in std::locale (%#s) from "
+                        "%d threads: %zu blocks (%zu bytes) outlive "
+                        "the locale in round %d",
+                        race_wide ? "wchar_t" : "char", name,
+                        opt_nthreads, nblocks, nbytes, i))
             break;
     }
-
-    // avoid divide by zero in thread if there are no locales to test
-    rw_fatal (nlocales != 0, 0, __LINE__,
-              "failed to create one or more usable locales!");
-
-    rw_info (0, 0, 0,
-             "testing std::numpunct<charT> with %d thread%{?}s%{;}, "
-             "%d iteration%{?}s%{;} each, in %zu locales { %{ .*A@} }",
-             opt_nthreads, 1 != opt_nthreads,
-             opt_nloops, 1 != opt_nloops,
-             nlocales, int (nlocales), "%#s", locales);
-
-    rw_info (0, 0, 0, "exercising std::numpunct<char>");
-
-    test_char  = true;
-    test_wchar = false;
-
-    // create and start a pool of threads and wait for them to finish
-    int result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-    rw_info (0, 0, 0, "exercising std::numpunct<wchar_t>");
-
-    test_char  = false;
-    test_wchar = true;
-
-    // start a pool of threads to exercise the thread safety
-    // of the wchar_t specialization
-    result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-    // exercise both the char and the wchar_t specializations
-    // at the same time
-
-    rw_info (0, 0, 0,
-             "exercising both std::numpunct<char> and std::numpunct<wchar_t>");
-
-    test_char  = true;
-    test_wchar = true;
-
-    // start a pool of threads to exercise wstring thread safety
-    result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
 
     return result;
 }
@@ -304,16 +284,12 @@ int main (int argc, char *argv[])
                     "lib.locale.numpunct",
                     "thread safety", run_test,
                     "|-soft-timeout#0 "  // must be non-negative
-                    "|-nloops#0 "       // must be non-negative
-                    "|-nthreads#0-* "   // must be in [0, MAX_THREADS]
-                    "|-nlocales#0 "     // arg must be non-negative
-                    "|-locales= "       // must be provided
-                    "|-shared-locale# ",
+                    "|-nrounds#0 "       // must be non-negative
+                    "|-nthreads#0-* "    // must be in [0, MAX_THREADS]
+                    "|-locales= ",       // must be provided
                     &opt_timeout,
-                    &opt_nloops,
+                    &opt_nrounds,
                     int (MAX_THREADS),
                     &opt_nthreads,
-                    &opt_nlocales,
-                    &rw_opt_setlocales,
-                    &opt_shared_locale);
+                    &rw_opt_setlocales);
 }

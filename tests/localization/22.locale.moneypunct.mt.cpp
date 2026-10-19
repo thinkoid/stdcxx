@@ -2,7 +2,8 @@
  *
  * 22.locale.moneypunct.mt.cpp
  *
- * test exercising the thread safety of the moneypunct facet
+ * test exercising the thread safety of the first use of a moneypunct
+ * facet, which builds the facet's data from the C library
  *
  * $Id$
  *
@@ -26,222 +27,197 @@
  *
  **************************************************************************/
 
-#include <ios>        // for ios
-#include <locale>     // for locale, moneypunct
+#include <locale>     // for locale, moneypunct, use_facet
+#include <string>     // for basic_string
+#include <cstring>    // for memcmp(), strcmp(), strlen()
 
-#include <cstdlib>    // for mbstowcs(), size_t
-#include <cstring>    // for strcpy()
-
-#include <rw_locale.h>
-#include <rw_thread.h>
-#include <rw_driver.h>
-#include <rw_valcmp.h>
+#include <rw_locale.h>   // for rw_locales()
+#include <rw_new.h>      // for rwt_check_leaks()
+#include <rw_thread.h>   // for rw_thread_gate(), rw_thread_pool()
+#include <rw_driver.h>   // for rw_test()
 
 
 // maximum number of threads allowed by the command line interface
-#define MAX_THREADS   32
+#define MAX_THREADS      32
+
+// maximum number of locales the test cycles through
+#define MAX_LOCALES      64
 
 // the number of threads (4 in a thread-safe build, set in main ()
 // whatever the number of processors)
 int opt_nthreads = 1;
 
-// the default number of times for each thread to iterate
-#define DFLT_LOOPS   256
-
-// the number of times each thread should iterate (will be set to
-// DFLT_LOOPS unless explicitly specified on the command line)
-int opt_nloops = -1;
+// the number of rounds, each a fresh locale
+int opt_nrounds = 200;
 
 // default timeout used by each threaded section of this test
 int opt_timeout = 60;
 
 /**************************************************************************/
 
-// number of locales to test
-static std::size_t
-nlocales;
+// the locales the rounds cycle through, the C library's other than
+// C and POSIX: the library's database has no data for them, so the
+// facets build theirs from the C library under __rw_setlocale
+static const char* locale_names [MAX_LOCALES];
 
-/**************************************************************************/
+// the number of names in the array
+static std::size_t nlocales;
 
-struct MoneypunctData
+// one of the four facets, the round's: its record, taken by the main
+// thread through a locale that is gone before the round's is
+// constructed, the facet of the round's locale, and the checks
+template <class charT, bool Intl>
+struct Race
 {
-    // the name of the locale the data goes with
-    const char* locale_name_;
+    typedef std::moneypunct<charT, Intl> Facet;
+    typedef std::basic_string<charT>     String;
 
-    char decimal_point_;
-    char thousands_sep_;
-    char grouping_ [32];
-    char curr_symbol_ [32];
-    char positive_sign_ [32];
-    char negative_sign_ [32];
-    int  frac_digits_;
-    char pos_format_ [32];
-    char neg_format_ [32];
+    static const Facet* facet;
 
-    char int_curr_symbol_ [32];
+    static charT                   decimal_point;
+    static charT                   thousands_sep;
+    static int                     frac_digits;
+    static std::money_base::pattern pos_format;
+    static std::money_base::pattern neg_format;
+    static std::string             grouping;
+    static String                  curr_symbol;
+    static String                  positive_sign;
+    static String                  negative_sign;
 
-    int  int_frac_digits_;
-    char int_pos_format_ [32];
-    char int_neg_format_ [32];
+    static void record (const std::locale &loc) {
+        const Facet &mp = std::use_facet<Facet>(loc);
 
-    wchar_t wdecimal_point_;
-    wchar_t wthousands_sep_;
-    wchar_t wcurr_symbol_ [32];
-    wchar_t wpositive_sign_ [32];
-    wchar_t wnegative_sign_ [32];
-
-    wchar_t wint_curr_symbol_ [32];
-
-} punct_data [MAX_THREADS];
-
-/**************************************************************************/
-
-bool test_char;    // exercise num_put<char>
-bool test_wchar;   // exercise num_put<wchar_t>
-
-static void
-thread_loop_body (std::size_t i)
-{
-    const std::size_t inx = std::size_t (i) % (nlocales ? nlocales : 1);
-
-    const MoneypunctData* const data = punct_data + inx;
-
-    // construct a named locale
-    const std::locale loc (data->locale_name_);
-
-    if (test_char) {
-        // exercise the narrow char, local specialization of the facet
-
-        typedef std::moneypunct<char, false> Punct;
-
-        const Punct &mp = std::use_facet<Punct>(loc);
-
-        const char           dp  = mp.decimal_point ();
-        const char           ts  = mp.thousands_sep ();
-        const std::string    grp = mp.grouping ();
-        const std::string    cur = mp.curr_symbol ();
-        const std::string    pos = mp.positive_sign ();
-        const std::string    neg = mp.negative_sign ();
-        const int            fd  = mp.frac_digits ();
-        const Punct::pattern pfm = mp.pos_format ();
-        const Punct::pattern nfm = mp.neg_format ();
-
-        RW_ASSERT (dp == data->decimal_point_);
-        RW_ASSERT (ts == data->thousands_sep_);
-        RW_ASSERT (fd == data->frac_digits_);
-        RW_ASSERT (!rw_strncmp (grp.c_str (), data->grouping_));
-        RW_ASSERT (!rw_strncmp (cur.c_str (), data->curr_symbol_));
-        RW_ASSERT (!rw_strncmp (pos.c_str (), data->positive_sign_));
-        RW_ASSERT (!rw_strncmp (neg.c_str (), data->negative_sign_));
-
-        RW_ASSERT (!std::memcmp (&pfm, data->pos_format_, 4));
-        RW_ASSERT (!std::memcmp (&nfm, data->neg_format_, 4));
+        decimal_point = mp.decimal_point ();
+        thousands_sep = mp.thousands_sep ();
+        frac_digits   = mp.frac_digits ();
+        pos_format    = mp.pos_format ();
+        neg_format    = mp.neg_format ();
+        grouping      = mp.grouping ();
+        curr_symbol   = mp.curr_symbol ();
+        positive_sign = mp.positive_sign ();
+        negative_sign = mp.negative_sign ();
     }
 
-    if (test_char) {
-        // exercise the narrow char, international specialization
-
-        typedef std::moneypunct<char, true> Punct;
-
-        const Punct &mp = std::use_facet<Punct>(loc);
-
-        const char           dp  = mp.decimal_point ();
-        const char           ts  = mp.thousands_sep ();
-        const std::string    grp = mp.grouping ();
-        const std::string    cur = mp.curr_symbol ();
-        const std::string    pos = mp.positive_sign ();
-        const std::string    neg = mp.negative_sign ();
-        const int            fd  = mp.frac_digits ();
-        const Punct::pattern pfm = mp.pos_format ();
-        const Punct::pattern nfm = mp.neg_format ();
-
-        RW_ASSERT (dp == data->decimal_point_);
-        RW_ASSERT (ts == data->thousands_sep_);
-        RW_ASSERT (fd == data->frac_digits_);
-        RW_ASSERT (!rw_strncmp (grp.c_str (), data->grouping_));
-        RW_ASSERT (!rw_strncmp (cur.c_str (), data->int_curr_symbol_));
-        RW_ASSERT (!rw_strncmp (pos.c_str (), data->positive_sign_));
-        RW_ASSERT (!rw_strncmp (neg.c_str (), data->negative_sign_));
-
-        RW_ASSERT (!std::memcmp (&pfm, data->int_pos_format_, 4));
-        RW_ASSERT (!std::memcmp (&nfm, data->int_neg_format_, 4));
+    static void take (const std::locale &loc) {
+        facet = &std::use_facet<Facet>(loc);
     }
 
-    // both specializations may be tested at the same time
-
-    if (test_wchar) {
-        // exercise the wide char, local specialization of the facet
-
-        typedef std::moneypunct<wchar_t, false> Punct;
-
-        const Punct &mp = std::use_facet<Punct>(loc);
-
-        const wchar_t        dp  = mp.decimal_point ();
-        const wchar_t        ts  = mp.thousands_sep ();
-        const std::string    grp = mp.grouping ();
-        const std::wstring   cur = mp.curr_symbol ();
-        const std::wstring   pos = mp.positive_sign ();
-        const std::wstring   neg = mp.negative_sign ();
-        const int            fd  = mp.frac_digits ();
-        const Punct::pattern pfm = mp.pos_format ();
-        const Punct::pattern nfm = mp.neg_format ();
-
-        RW_ASSERT (dp == data->wdecimal_point_);
-        RW_ASSERT (ts == data->wthousands_sep_);
-        RW_ASSERT (fd == data->frac_digits_);
-        RW_ASSERT (!rw_strncmp (grp.c_str (), data->grouping_));
-        RW_ASSERT (!rw_strncmp (cur.c_str (), data->wcurr_symbol_));
-        RW_ASSERT (!rw_strncmp (pos.c_str (), data->wpositive_sign_));
-        RW_ASSERT (!rw_strncmp (neg.c_str (), data->wnegative_sign_));
-
-        RW_ASSERT (!std::memcmp (&pfm, data->pos_format_, 4));
-        RW_ASSERT (!std::memcmp (&nfm, data->neg_format_, 4));
+    static void drop () {
+        facet = 0;
     }
 
-    if (test_wchar) {
-        // exercise the wide char, international specialization
+    // the members that allocate nothing, called by the threads
+    static int race () {
+        int bad = 0;
 
-        typedef std::moneypunct<wchar_t, true> Punct;
+        if (facet->decimal_point () != decimal_point)
+            ++bad;
+        if (facet->thousands_sep () != thousands_sep)
+            ++bad;
+        if (facet->frac_digits () != frac_digits)
+            ++bad;
 
-        const Punct &mp = std::use_facet<Punct>(loc);
+        const std::money_base::pattern pos = facet->pos_format ();
+        if (std::memcmp (&pos, &pos_format, sizeof pos))
+            ++bad;
 
-        const wchar_t        dp  = mp.decimal_point ();
-        const wchar_t        ts  = mp.thousands_sep ();
-        const std::string    grp = mp.grouping ();
-        const std::wstring   cur = mp.curr_symbol ();
-        const std::wstring   pos = mp.positive_sign ();
-        const std::wstring   neg = mp.negative_sign ();
-        const int            fd  = mp.frac_digits ();
-        const Punct::pattern pfm = mp.pos_format ();
-        const Punct::pattern nfm = mp.neg_format ();
+        const std::money_base::pattern neg = facet->neg_format ();
+        if (std::memcmp (&neg, &neg_format, sizeof neg))
+            ++bad;
 
-        RW_ASSERT (dp == data->wdecimal_point_);
-        RW_ASSERT (ts == data->wthousands_sep_);
-        RW_ASSERT (fd == data->frac_digits_);
-        RW_ASSERT (!rw_strncmp (grp.c_str (), data->grouping_));
-        RW_ASSERT (!rw_strncmp (cur.c_str (), data->wint_curr_symbol_));
-        RW_ASSERT (!rw_strncmp (pos.c_str (), data->wpositive_sign_));
-        RW_ASSERT (!rw_strncmp (neg.c_str (), data->wnegative_sign_));
-
-        RW_ASSERT (!std::memcmp (&pfm, data->int_pos_format_, 4));
-        RW_ASSERT (!std::memcmp (&nfm, data->int_neg_format_, 4));
+        return bad;
     }
 
-}
+    // the string members, checked by the main thread after the round
+    static bool strings () {
+        return    facet->grouping ()      == grouping
+               && facet->curr_symbol ()   == curr_symbol
+               && facet->positive_sign () == positive_sign
+               && facet->negative_sign () == negative_sign;
+    }
+};
 
+template <class charT, bool Intl>
+const std::moneypunct<charT, Intl>* Race<charT, Intl>::facet;
+
+template <class charT, bool Intl>
+charT Race<charT, Intl>::decimal_point;
+
+template <class charT, bool Intl>
+charT Race<charT, Intl>::thousands_sep;
+
+template <class charT, bool Intl>
+int Race<charT, Intl>::frac_digits;
+
+template <class charT, bool Intl>
+std::money_base::pattern Race<charT, Intl>::pos_format;
+
+template <class charT, bool Intl>
+std::money_base::pattern Race<charT, Intl>::neg_format;
+
+template <class charT, bool Intl>
+std::string Race<charT, Intl>::grouping;
+
+template <class charT, bool Intl>
+std::basic_string<charT> Race<charT, Intl>::curr_symbol;
+
+template <class charT, bool Intl>
+std::basic_string<charT> Race<charT, Intl>::positive_sign;
+
+template <class charT, bool Intl>
+std::basic_string<charT> Race<charT, Intl>::negative_sign;
+
+
+// the four facets, in the order the rounds cycle through them
+static const struct {
+    void (*record)(const std::locale&);
+    void (*take)(const std::locale&);
+    void (*drop)();
+    int  (*race)();
+    bool (*strings)();
+    const char* name;
+} kinds [] = {
+    { Race<char, false>::record,    Race<char, false>::take,
+      Race<char, false>::drop,      Race<char, false>::race,
+      Race<char, false>::strings,   "std::moneypunct<char, false>" },
+    { Race<char, true>::record,     Race<char, true>::take,
+      Race<char, true>::drop,       Race<char, true>::race,
+      Race<char, true>::strings,    "std::moneypunct<char, true>" },
+    { Race<wchar_t, false>::record, Race<wchar_t, false>::take,
+      Race<wchar_t, false>::drop,   Race<wchar_t, false>::race,
+      Race<wchar_t, false>::strings, "std::moneypunct<wchar_t, false>" },
+    { Race<wchar_t, true>::record,  Race<wchar_t, true>::take,
+      Race<wchar_t, true>::drop,    Race<wchar_t, true>::race,
+      Race<wchar_t, true>::strings, "std::moneypunct<wchar_t, true>" }
+};
+
+static const std::size_t nkinds = sizeof kinds / sizeof *kinds;
+
+// the round's facet
+static std::size_t race_kind;
+
+// the number of threads that have started in the current round
+static int nstarted;
+
+// per thread, the calls that disagreed with the record
+static int mismatches [MAX_THREADS];
 
 extern "C" {
 
+// the replacement operator new of rw_new.h keeps no lock: the threads
+// call the members that allocate nothing, and the only allocation
+// they cause is the facet data's, under the lock of __rw_setlocale;
+// the main thread checks the string members after the round
 static void*
-thread_func (void*)
+race_func (void *arg)
 {
-    for (int i = 0; i != opt_nloops; ++i) {
+    const long inx = long (arg);
 
-        if (rw_thread_pool_timeout_expired ())
-            break;
+    // start with the other threads so that they find the facet's
+    // data missing at the same time
+    rw_thread_gate (&nstarted, opt_nthreads);
 
-        thread_loop_body (std::size_t (i));
-    }
+    mismatches [inx] = kinds [race_kind].race ();
 
     return 0;
 }
@@ -253,200 +229,111 @@ thread_func (void*)
 static int
 run_test (int, char**)
 {
-    // find all installed locales for which setlocale(LC_ALL) succeeds
     const char* const locale_list =
         rw_opt_locales ? rw_opt_locales : rw_locales (_RWSTD_LC_ALL);
 
-    // array of locale names to use for testing
-    const char* locales [sizeof punct_data / sizeof *punct_data];
+    for (const char *name = locale_list;
+         *name && nlocales != MAX_LOCALES;
+         name += std::strlen (name) + 1) {
 
-    const std::size_t maxinx = sizeof locales / sizeof *locales;
-
-    // iterate over locales, initializing a global punct_data array
-    for (const char *name = locale_list; *name; name += std::strlen (name) +1) {
-
-        std::locale loc;
-
-        MoneypunctData* const pdata = punct_data + nlocales;
-
-        pdata->locale_name_ = name;
-        locales [nlocales]  = name;
-
-        try {
-            loc = std::locale (name);
-
-            typedef std::moneypunct<char, false> Punct;
-
-            const Punct &mp = std::use_facet<Punct>(loc);
-
-            const char           dp  = mp.decimal_point ();
-            const char           ts  = mp.thousands_sep ();
-            const std::string    grp = mp.grouping ();
-            const std::string    cur = mp.curr_symbol ();
-            const std::string    pos = mp.positive_sign ();
-            const std::string    neg = mp.negative_sign ();
-            const int            fd  = mp.frac_digits ();
-            const Punct::pattern pfm = mp.pos_format ();
-            const Punct::pattern nfm = mp.neg_format ();
-
-            pdata->decimal_point_ = dp;
-            pdata->thousands_sep_ = ts;
-            pdata->frac_digits_   = fd;
-
-            std::strcpy (pdata->grouping_, grp.c_str ());
-            std::strcpy (pdata->curr_symbol_, cur.c_str ());
-            std::strcpy (pdata->positive_sign_, pos.c_str ());
-            std::strcpy (pdata->negative_sign_, neg.c_str ());
-            std::memcpy (pdata->pos_format_, &pfm, sizeof pfm);
-            std::memcpy (pdata->neg_format_, &nfm, sizeof nfm);
-        }
-        catch (...) {
-            rw_warn (0, 0, __LINE__,
-                     "std::locale(%#s) threw an exception, skipping", name);
-            continue;
-        }
-
-        try {
-            typedef std::moneypunct<char, true> Punct;
-
-            const Punct &mp = std::use_facet<Punct>(loc);
-
-            const std::string    cur = mp.curr_symbol ();
-            const int            fd  = mp.frac_digits ();
-            const Punct::pattern pfm = mp.pos_format ();
-            const Punct::pattern nfm = mp.neg_format ();
-
-            pdata->int_frac_digits_ = fd;
-
-            std::strcpy (pdata->int_curr_symbol_, cur.c_str ());
-            std::memcpy (pdata->int_pos_format_, &pfm, sizeof pfm);
-            std::memcpy (pdata->int_neg_format_, &nfm, sizeof nfm);
-        }
-        catch (...) {
-            rw_warn (0, 0, __LINE__,
-                     "std::locale(%#s) threw an exception, skipping", name);
-            continue;
-        }
-
-        try {
-            typedef std::moneypunct<wchar_t, false> Punct;
-
-            const Punct &mp = std::use_facet<Punct>(loc);
-
-            const wchar_t      dp  = mp.decimal_point ();
-            const wchar_t      ts  = mp.thousands_sep ();
-            const std::wstring cur = mp.curr_symbol ();
-            const std::wstring pos = mp.positive_sign ();
-            const std::wstring neg = mp.negative_sign ();
-
-            pdata->wdecimal_point_ = dp;
-            pdata->wthousands_sep_ = ts;
-
-            typedef std::wstring::traits_type Traits;
-
-            Traits::copy (pdata->wcurr_symbol_,   cur.data (), cur.size ());
-            Traits::copy (pdata->wpositive_sign_, pos.data (), pos.size ());
-            Traits::copy (pdata->wnegative_sign_, neg.data (), neg.size ());
-        }
-        catch (...) {
-            rw_warn (0, 0, __LINE__,
-                     "std::locale(%#s) threw an exception, skipping", name);
-            continue;
-        }
-
-        try {
-            typedef std::moneypunct<wchar_t, true> Punct;
-
-            const Punct &mp = std::use_facet<Punct>(loc);
-
-            const std::wstring cur = mp.curr_symbol ();
-            const std::wstring pos = mp.positive_sign ();
-            const std::wstring neg = mp.negative_sign ();
-
-            typedef std::wstring::traits_type Traits;
-
-            Traits::copy (pdata->wint_curr_symbol_, cur.data (), cur.size ());
-        }
-        catch (...) {
-            rw_warn (0, 0, __LINE__,
-                     "std::locale(%#s) threw an exception, skipping", name);
-            continue;
-        }
-
-        ++nlocales;
-
-        if (nlocales == maxinx)
-            break;
+        if (std::strcmp (name, "C") && std::strcmp (name, "POSIX"))
+            locale_names [nlocales++] = name;
     }
 
-    // unless the number of iterations was explicitly specified
-    // on the command line, decrease the number to equal the number
-    // of excericsed locales when only one thread is being tested
-    if (1 == opt_nthreads && opt_nloops < 0)
-        opt_nloops = int (nlocales);
-
-    // when the number of iterations wasn't explicitly specified
-    // on the command line set it to the default value
-    if (opt_nloops < 0)
-        opt_nloops = DFLT_LOOPS;
-
-    rw_fatal (0 < nlocales, 0, __LINE__,
-              "must have at least one valid locale to test");
+    if (0 == nlocales) {
+        rw_warn (false, 0, __LINE__,
+                 "no installed locale other than C and POSIX; skipping");
+        return 0;
+    }
 
     rw_info (0, 0, 0,
-             "testing std::moneypunct<charT> with %d thread%{?}s%{;}, "
-             "%d iteration%{?}s%{;} each, in %zu locales { %{ .*A@} }",
+             "racing the first use of the four std::moneypunct facets, "
+             "in turn, from %d thread%{?}s%{;}, %d round%{?}s%{;}, "
+             "in %zu locale%{?}s%{;}",
              opt_nthreads, 1 != opt_nthreads,
-             opt_nloops, 1 != opt_nloops,
-             nlocales, int (nlocales), "%#s", locales);
+             opt_nrounds, 1 != opt_nrounds,
+             nlocales, 1 != nlocales);
 
-    rw_info (0, 0, 0, "exercising std::moneypunct<char>");
+    // a first round in this thread alone, every facet, for the
+    // allocations the library makes once per process
+    {
+        const std::locale loc (locale_names [0]);
 
-    test_char  = true;
-    test_wchar = false;
+        for (std::size_t k = 0; k != nkinds; ++k)
+            kinds [k].record (loc);
+    }
 
-    // create and start a pool of threads and wait for them to finish
-    int result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
+    int result = 0;
 
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
+    for (int i = 0; 0 == result && i != opt_nrounds; ++i) {
 
-    rw_info (0, 0, 0, "exercising std::moneypunct<wchar_t>");
+        const char* const name = locale_names [std::size_t (i) % nlocales];
 
-    test_char  = false;
-    test_wchar = true;
+        race_kind = std::size_t (i) % nkinds;
 
-    // start a pool of threads to exercise the thread safety
-    // of the wchar_t specialization
-    result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
+        // the record, through a locale of its own, before the
+        // checkpoint: its strings outlive the round
+        {
+            const std::locale loc (name);
+            kinds [race_kind].record (loc);
+        }
 
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
+        rwt_check_leaks (0, 0);
 
-    // exercise both the char and the wchar_t specializations
-    // at the same time
+        {
+            // each round a new locale, whose facet has no data yet;
+            // the slot is filled from this thread alone, so that the
+            // threads race only the data (the slot race is
+            // 22.locale.use_facet.mt's)
+            const std::locale loc (name);
 
-    rw_info (0, 0, 0,
-             "exercising both std::moneypunct<char> "
-             "and std::moneypunct<wchar_t>");
+            kinds [race_kind].take (loc);
+            nstarted = 0;
 
-    test_char  = true;
-    test_wchar = true;
+            void* args [MAX_THREADS];
+            for (int j = 0; j != opt_nthreads; ++j)
+                args [j] = (void*)long (j);
 
-    // start a pool of threads to exercise wstring thread safety
-    result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
+            result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
+                                     race_func, args,
+                                     std::size_t (opt_timeout));
 
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
+            rw_error (result == 0, 0, __LINE__,
+                      "rw_thread_pool(0, %d, 0, %{#f}, ...) failed",
+                      opt_nthreads, race_func);
+
+            for (int j = 0; 0 == result && j != opt_nthreads; ++j) {
+                rw_assert (0 == mismatches [j], 0, __LINE__,
+                           "%s in std::locale (%#s), round %d, thread "
+                           "%d: %d of the five scalar members disagree "
+                           "with the record",
+                           kinds [race_kind].name, name, i, j,
+                           mismatches [j]);
+            }
+
+            // the string members, from the data the threads built
+            rw_assert (kinds [race_kind].strings (), 0, __LINE__,
+                       "%s in std::locale (%#s), round %d: grouping(), "
+                       "curr_symbol(), positive_sign() and "
+                       "negative_sign() agree with the record",
+                       kinds [race_kind].name, name, i);
+
+            kinds [race_kind].drop ();
+        }
+
+        // the facet and its data die with the only locale that holds
+        // them: no thread built data that was then overwritten
+        std::size_t nbytes;
+        const std::size_t nblocks = rwt_check_leaks (&nbytes, 0);
+
+        if (!rw_assert (0 == nblocks, 0, __LINE__,
+                        "%s in std::locale (%#s) from %d threads: "
+                        "%zu blocks (%zu bytes) outlive the locale "
+                        "in round %d",
+                        kinds [race_kind].name, name, opt_nthreads,
+                        nblocks, nbytes, i))
+            break;
+    }
 
     return result;
 }
@@ -468,11 +355,11 @@ int main (int argc, char *argv[])
                     "lib.locale.moneypunct",
                     "thread safety", run_test,
                     "|-soft-timeout#0 "  // must be non-negative
-                    "|-nloops#0 "       // must be non-negative
-                    "|-nthreads#0-* "   // must be in [0, MAX_THREADS]
-                    "|-locales=",       // must be provided
+                    "|-nrounds#0 "       // must be non-negative
+                    "|-nthreads#0-* "    // must be in [0, MAX_THREADS]
+                    "|-locales= ",       // must be provided
                     &opt_timeout,
-                    &opt_nloops,
+                    &opt_nrounds,
                     int (MAX_THREADS),
                     &opt_nthreads,
                     &rw_opt_setlocales);
