@@ -68,6 +68,46 @@ The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
 
+** TODO The tables depend on the locale variables of the shell
+
+The suite runs under the environment it inherits. =22.locale.moneypunct=
+exercises the native locale, the one ~setlocale (LC_ALL, "")~ names,
+and its row counts 135020 assertions with no =LANG= or =LC_= variable
+set, 135050 under ~LC_ALL=C~ and 135100 under ~LC_ALL=en_US.UTF-8~.
+The pins were taken from non-interactive =ssh= sessions, which set
+none. A driver run from a terminal that exports =LC_ALL= fails the
+verdict on that row alone, with every locale installed (armok,
+2026-10-19). =bin/buildntest= logs the environment and does not fix
+it; the =run= target of =etc/config/makefile.rules= fixes =TZ= and
+=TMPDIR= and nothing else.
+
+Fix (decided 2026-10-19): the =run= target clears =LANG=,
+=LANGUAGE= and every =LC_= variable beside setting =TZ=, so a table
+depends on the host's locales alone; =ref-test-baseline.md= says so.
+
+Check: =22.locale.moneypunct= counts 135020 from a shell with
+~LC_ALL=en_US.UTF-8~ exported, and the driver's verdict from a
+terminal is the one from a non-interactive =ssh=, all six tables.
+
+** TODO The pins are named by architecture, the driver looks them up by it
+
+A pin is a configuration's table: the 15D table of an aarch64 host
+is the =x86_64= one row for row (armok, 2026-10-19, under the locale
+variables of the entry above cleared), and a lowercase build type
+already says 32-bit. The files under =doc/notes/baseline= carry the
+architecture of the host that recorded them, =x86_64-15D.txt=, as a
+description, and =bin/driver= since 61e3bd09 reads it as a key: it
+names the pin by ~uname -m~ and the configuration, finds none on an
+aarch64 host, and a run on madmac or armok needs =-p= with a copy
+under the aarch64 name.
+
+Fix (decided 2026-10-19): the pins take the configuration's name
+alone, =15D.txt=, =11s.txt=; =bin/driver= names them so, and
+=ref-test-baseline.md= follows.
+
+Check: =bin/driver= without =-p= gives its verdict on an aarch64
+host as on x86-64, six tables identical.
+
 ** TODO Run the suites in parallel
 
 The six suites run one after another, nine minutes on 32 processors
