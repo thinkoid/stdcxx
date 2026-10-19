@@ -173,10 +173,9 @@ Each locale MT test now runs 4 threads by default, whatever the
 processor count, at a size chosen under ThreadSanitizer
 (`analysis-locale-mt-sizing.md`). In 15D every one passes in about a
 second or less, and the rows are a reference. `22.locale.codecvt.mt`
-counts 1,600 assertions. `cons.mt`, `ctype.mt`, `globals.mt`,
-`messages.mt`, `moneypunct.mt`, `numpunct.mt` and `statics.mt` count
-none: their pass means every thread ran to the end without an error, a
-crash or a hang.
+counts 1,600 assertions. `cons.mt`, `ctype.mt`, `messages.mt`,
+`moneypunct.mt`, `numpunct.mt` and `statics.mt` count none: their pass
+means every thread ran to the end without an error, a crash or a hang.
 
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
@@ -194,7 +193,10 @@ gated ones, and the verdict on each: retired, gated or split.
 `22.locale.money.get.mt`, `money.put.mt`, `num.get.mt`, `num.put.mt`,
 `time.get.mt` and `time.put.mt` are retired: the `get` and `put` facets
 hold no state of their own, and every fault their programs reported was
-a builder's or the facet slot's.
+a builder's or the facet slot's. `22.locale.globals.mt` became the
+single-threaded `22.locale.globals`: its checks are conformance,
+`has_facet` and `use_facet` for every standard facet in every installed
+locale, and the program counts them, 88 per locale and character type.
 
 ## 4. Differences between configurations
 

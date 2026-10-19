@@ -286,7 +286,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [STD_UNEXPECTED](../../etc/config/src/STD_UNEXPECTED.cpp) / `NO_STD_UNEXPECTED` | std::unexpected() | L/P; `src/exception.cpp` |
 | [STRUCT_TM](../../etc/config/src/STRUCT_TM.cpp) / `NO_STRUCT_TM` + output | struct tm in &lt;time.h&gt; | L; `include/ansi/cwchar` |
 | [STRUCT_TM_IN_WCHAR_H](../../etc/config/src/STRUCT_TM_IN_WCHAR_H.cpp) / `NO_STRUCT_TM_IN_WCHAR_H` | struct tm declaration in &lt;wchar.h&gt; | L; `include/ansi/cwchar` |
-| [THREAD_SAFE_EXCEPTIONS](../../etc/config/src/THREAD_SAFE_EXCEPTIONS.cpp) / `NO_THREAD_SAFE_EXCEPTIONS` | if exceptions are thread safe | T; `tests/localization/22.locale.globals.mt.cpp` |
+| [THREAD_SAFE_EXCEPTIONS](../../etc/config/src/THREAD_SAFE_EXCEPTIONS.cpp) / `NO_THREAD_SAFE_EXCEPTIONS` | if exceptions are thread safe | none |
 | [TIMEZONE](../../etc/config/src/TIMEZONE.cpp) / `NO_TIMEZONE` | int timezone in &lt;time.h&gt; | L; `src/time_put.cpp` |
 | [TLS](../../etc/config/src/TLS.cpp) / `NO_TLS` + output | thread-local storage | L; `include/rw/_defs.h` |
 | [TM_GMTOFF](../../etc/config/src/TM_GMTOFF.cpp) / `NO_TM_GMTOFF` | tm_gmtoff in struct tm in &lt;time.h&gt; | L/T; `src/time_put.cpp` |
