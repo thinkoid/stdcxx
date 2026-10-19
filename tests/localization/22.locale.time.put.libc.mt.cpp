@@ -2,8 +2,9 @@
  *
  * 22.locale.time.put.libc.mt.cpp
  *
- * test exercising the thread safety of the first time_put call on
- * a facet whose data the library builds from the C library
+ * test exercising the thread safety of the first time_put::put() call,
+ * which builds the facet's data from the C library, in char and in
+ * wchar_t
  *
  * $Id$
  *
@@ -56,7 +57,8 @@ int opt_timeout = 60;
 
 /**************************************************************************/
 
-struct MyIos: std::basic_ios<char>
+template <class charT>
+struct MyIos: std::basic_ios<charT>
 {
     MyIos () {
         this->init (0);
@@ -64,25 +66,34 @@ struct MyIos: std::basic_ios<char>
 };
 
 
-struct MyStreambuf: std::basic_streambuf<char>
+template <class charT>
+struct MyStreambuf: std::basic_streambuf<charT>
 {
-    void pubsetp (char *pbeg, std::streamsize n) {
+    void pubsetp (charT *pbeg, std::streamsize n) {
         this->setp (pbeg, pbeg + n);
     }
 };
 
 
-// per-thread formatting state, constructed by main before the first
-// checkpoint so that the threads allocate nothing of their own
+// per-thread formatting state, both character types, constructed by
+// main before the first checkpoint so that the threads allocate
+// nothing of their own
 static struct {
-    MyIos       io;
-    MyStreambuf sb;
-    char        buf [64];
+    MyIos<char>          io;
+    MyStreambuf<char>    sb;
+    char                 buf [64];
+    MyIos<wchar_t>       wio;
+    MyStreambuf<wchar_t> wsb;
+    wchar_t              wbuf [64];
 } thread_data [MAX_THREADS];
 
 
-// the facet whose data the threads race to build
-static const std::time_put<char>* race_facet;
+// the facets whose data the threads race to build, one per round
+static const std::time_put<char>*    race_facet;
+static const std::time_put<wchar_t>* race_wfacet;
+
+// whether the round races the wide facet
+static bool race_wide;
 
 // the time the threads format
 static std::tm race_time;
@@ -104,12 +115,22 @@ race_func (void *arg)
     // the facet data missing at the same time
     rw_thread_gate (&nstarted, opt_nthreads);
 
-    MyStreambuf& sb = thread_data [inx].sb;
-    sb.pubsetp (thread_data [inx].buf, sizeof thread_data [inx].buf);
-
     // %A formats a weekday name, which only the facet data has
-    race_facet->put (std::ostreambuf_iterator<char>(&sb),
-                     thread_data [inx].io, ' ', &race_time, 'A');
+    if (race_wide) {
+        MyStreambuf<wchar_t>& sb = thread_data [inx].wsb;
+        sb.pubsetp (thread_data [inx].wbuf,
+                    sizeof thread_data [inx].wbuf / sizeof (wchar_t));
+
+        race_wfacet->put (std::ostreambuf_iterator<wchar_t>(&sb),
+                          thread_data [inx].wio, L' ', &race_time, 'A');
+    }
+    else {
+        MyStreambuf<char>& sb = thread_data [inx].sb;
+        sb.pubsetp (thread_data [inx].buf, sizeof thread_data [inx].buf);
+
+        race_facet->put (std::ostreambuf_iterator<char>(&sb),
+                         thread_data [inx].io, ' ', &race_time, 'A');
+    }
 
     return 0;
 }
@@ -154,20 +175,26 @@ run_test (int, char**)
     std::strcpy (namebuf, locname);
 
     rw_info (0, 0, 0,
-             "racing the first std::time_put<char>::put() in %#s "
+             "racing the first std::time_put<char>::put() and "
+             "std::time_put<wchar_t>::put(), in turn, in %#s "
              "from %d thread%{?}s%{;}, %d locale%{?}s%{;}",
              namebuf, opt_nthreads, 1 != opt_nthreads,
              opt_nrounds, 1 != opt_nrounds);
 
     race_time.tm_wday = 3;
 
-    // a first round in this thread alone, for the allocations
-    // the library makes once per process
+    // a first round in this thread alone, both facets, for the
+    // allocations the library makes once per process
     {
         const std::locale loc (namebuf);
 
-        race_facet = &std::use_facet<std::time_put<char> >(loc);
-        nstarted   = opt_nthreads;
+        race_facet  = &std::use_facet<std::time_put<char> >(loc);
+        race_wfacet = &std::use_facet<std::time_put<wchar_t> >(loc);
+        nstarted    = opt_nthreads;
+
+        race_wide = false;
+        race_func (0);
+        race_wide = true;
         race_func (0);
     }
 
@@ -178,11 +205,14 @@ run_test (int, char**)
         rwt_check_leaks (0, 0);
 
         {
-            // each round a new locale, whose facet has no data yet
+            // each round a new locale, whose facets have no data
+            // yet, and the other character type
             const std::locale loc (namebuf);
 
-            race_facet = &std::use_facet<std::time_put<char> >(loc);
-            nstarted   = 0;
+            race_facet  = &std::use_facet<std::time_put<char> >(loc);
+            race_wfacet = &std::use_facet<std::time_put<wchar_t> >(loc);
+            race_wide   = 0 != i % 2;
+            nstarted    = 0;
 
             void* args [MAX_THREADS];
             for (int j = 0; j != opt_nthreads; ++j)
@@ -196,7 +226,8 @@ run_test (int, char**)
                       "rw_thread_pool(0, %d, 0, %{#f}, ...) failed",
                       opt_nthreads, race_func);
 
-            race_facet = 0;
+            race_facet  = 0;
+            race_wfacet = 0;
         }
 
         // the facet and its data die with the only locale that holds
@@ -205,10 +236,11 @@ run_test (int, char**)
         const std::size_t nblocks = rwt_check_leaks (&nbytes, 0);
 
         if (!rw_assert (0 == nblocks, 0, __LINE__,
-                        "std::time_put<char>::put() in std::locale (%#s) "
+                        "std::time_put<%s>::put() in std::locale (%#s) "
                         "from %d threads: %zu blocks (%zu bytes) outlive "
                         "the locale in round %d",
-                        namebuf, opt_nthreads, nblocks, nbytes, i))
+                        0 != i % 2 ? "wchar_t" : "char", namebuf,
+                        opt_nthreads, nblocks, nbytes, i))
             break;
     }
 
