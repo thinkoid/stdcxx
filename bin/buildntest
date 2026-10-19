@@ -554,8 +554,8 @@ case "$osname" in
     cat /etc/*-release
 
     # output the amount of installed physical memory and swap space
-    echo; echo "### free -o:"
-    free -o
+    echo; echo "### free:"
+    free
 
     # output information about installed processors
     echo; echo "### cat /proc/cpuinfo:"
