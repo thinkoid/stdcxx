@@ -83,47 +83,34 @@ rows.
 
 ** TODO All the C library's locales on the test hosts
 
-The test hosts generate one glibc locale besides =C= and =POSIX=:
-=en_US.UTF-8=. Tests that loop over the installed locales see four.
-Three examples fail on it outright: =numpunct= finds none of its
-German names and ends =DIFF=, =codecvt1= wants =ja_JP.UTF-8=,
-=ja_JP.EUC-JP= and =ja_JP.Shift_JIS= and exits 1, =money_get= wants
-=en_US= and aborts on the uncaught =runtime_error=. =SUPPORTED= has
-no Shift_JIS locale, the charmap not being ASCII-compatible; glibc
-builds one by hand all the same, ~localedef -c -f SHIFT_JIS -i ja_JP
-ja_JP.SHIFT_JIS~, with a warning and exit status 1. The examples run against the C
-library's locales alone; the build's own databases are not built
-for them and =RWSTD_LOCALE_ROOT= is not set. Installing every locale
-in =/usr/share/i18n/SUPPORTED= widens them, but it also teaches the
-C library =de_DE.ISO-8859-1=, the name =rw_localedef= gives the
-database locale that the first-use section of =22.locale.codecvt.mt=
-races. The section then skips with a note and passes without testing
-anything. The =numpunct= example's list of German names still
-carries the spellings of the retired platforms, AIX to Windows, and
-the error it reports names the last of them. One host has every
-locale since 2026-10-14, =SUPPORTED= through =locale-gen= and the
-Shift_JIS one by hand: the three examples run clean there, and
-=22.locale.codecvt.mt= skips its first-use section there with the
-note. The other test hosts have =en_US.UTF-8= alone. On that host
-=22.locale.codecvt= runs 618 assertions, the sections gated on the C
-library knowing a named locale among them, against the pinned 306 of
-a host with =en_US.UTF-8= alone.
-=22.locale.time.get= found =en_AG= and =de_AT= as its English and
-German locales there, not =en_US= and =de_DE=: the first match of
-the test's pattern is whatever =locale -a= lists first. =bin/driver=
-compares each table with its pin and fails its verdict on these
-rows until they are pinned again.
+The six tables under =doc/notes/baseline= come from a host with
+every locale of glibc's =SUPPORTED= list and the Shift_JIS one built
+by hand (~localedef -c -f SHIFT_JIS -i ja_JP ja_JP.SHIFT_JIS~, a
+warning and exit status 1, since =SUPPORTED= leaves it out for its
+charmap not being ASCII-compatible). Two test hosts have them. The
+third generates =en_US.UTF-8= alone, so tests that loop over the
+installed locales see four, fourteen locale rows run fewer
+assertions (=ref-test-baseline.md=, chapter 2), and the verdict of
+=bin/driver= fails on them there. Three examples need the locales
+too: =numpunct= finds none of its German names and ends =DIFF=,
+=codecvt1= wants the three =ja_JP= locales and exits 1, =money_get=
+wants =en_US= and aborts on the uncaught =runtime_error=; the
+examples run against the C library's locales alone, the build's own
+databases not being built for them. The =numpunct= example's list of
+German names still carries the spellings of the retired platforms,
+AIX to Windows, and the error it reports names the last of them.
+=22.locale.time.get= takes the first English and German locales
+=locale -a= lists, =en_AG= and =de_AT= on a full host, and derives
+its expectation from the one it got. The first-use section of
+=22.locale.codecvt.mt= builds its database as
+=rwtest_de_DE.ISO-8859-1=, a name the C library cannot know, and
+runs on every host.
 
-Fix: every locale installed on the remaining test host, the Shift_JIS
-one by hand where it is missing, then the pins measured again. The
-first-use section of =22.locale.codecvt.mt= builds its database as
-=rwtest_de_DE.ISO-8859-1= since 2026-10-18 and runs on a host that
-has every C library locale.
+Fix: every locale on the remaining host, the Shift_JIS one by hand.
 
-Check: with every locale installed, no MT program notes that the C
-library knows its database locale, the =numpunct=, =codecvt1= and
-=money_get= examples run clean, and the verdict of =bin/driver= names
-every table identical to its pin.
+Check: the verdict of =bin/driver= names every table identical to
+its pin on each test host, and the =numpunct=, =codecvt1= and
+=money_get= examples run clean on each.
 
 ** WAITING ThreadSanitizer cannot follow =longjmp= on glibc 2.44
 

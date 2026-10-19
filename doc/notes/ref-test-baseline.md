@@ -11,15 +11,16 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 273 programs per configuration.
-- No assertion fails, in any configuration, under either compiler.
-- What fails, by cause:
-  - `21.string.stdcxx-162` in 15D. Its fix breaks the 4.2.x binary
-    interface and moves the minor version (chapter 3.1).
+- Every test builds. The harness runs 274 programs per configuration.
+- No assertion fails, no program exits non-zero or dies of a signal,
+  in any configuration, under either compiler.
+- The tables come from a host with every glibc locale installed. A
+  host with `en_US.UTF-8` alone differs from them in fourteen locale
+  rows (chapter 2).
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
 
-Toolchain: GCC 16.2.1, Clang 22.1.8, glibc 2.44, x86-64 Linux.
+Toolchain: GCC 16.2.1, Clang 23.1.1, glibc 2.44, x86-64 Linux.
 
 ## 1. Running the suite
 
@@ -91,11 +92,21 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 273 | 10,091,779 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 273 | 10,091,669 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 273 | 10,093,451 | 0 | 0 | 1 |
+| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 274 | 12,387,574 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 274 | 12,387,468 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 274 | 12,389,246 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
+
+The host the tables come from has every locale of glibc's
+`SUPPORTED` list and the Shift_JIS one built by hand. The locale
+tests run the sections gated on the C library knowing a named locale,
+and fourteen rows depend on it: `22.locale.codecvt`, `collate`,
+`cons.stdcxx-485`, the six `ctype` tests, `money.put.mt`,
+`moneypunct`, `name`, `numpunct` and `time.get`. A host with
+`en_US.UTF-8` alone runs fewer assertions in each, `22.locale.codecvt`
+306 for 618, and its tables differ from the pins in those rows and
+the totals.
 
 `bin/driver` runs the certification. It exports one revision per
 configuration, builds each through `bin/buildntest`, runs its suite,
@@ -134,18 +145,21 @@ assertions in 15D, not 12,800, and `22.locale.facet.mt` counts 8, not
 is gone, `18.exception` counts 1,097, `21.cwchar` 118, `21.cwctype`
 294, `22.locale.num.get` 51,894 and `23.bitset.cons` 1,677, in every
 configuration; the Clang tables took the locale MT rows of 2026-10-13
-in the same run.
+in the same run. All six were measured again on 2026-10-19, at
+d354aafd, on the host with every glibc locale, after the oracles of
+`22.locale.codecvt` were repaired (`analysis-test-fixtures.md`,
+chapter 4.5): the fourteen locale rows above grew, and nothing else
+moved.
 
 ## 3. What fails
 
-### 3.1 `21.string.stdcxx-162` in 15D
+### 3.1 `21.string.stdcxx-162`
 
-The test requires a string body of at most 24 bytes. In 15D every
-string body carries its own mutex, 64 bytes: the layout of every
-4.2.x release on Linux/x86-64. Atomic reference counts satisfy the
-test and break that binary interface. The revival does not keep it;
-the `TODO` entry on the next minor version makes the change. The row
-is `ABRT` in 15D and `NOUT`, a pass, elsewhere.
+Nothing fails. The test requires a string body of at most 24 bytes,
+and in 15D every string body of the 4.2.x releases carried its own
+mutex, 64 bytes, the layout of every release on Linux/x86-64. The
+mutex went with that binary interface; the row is `NOUT`, a pass, in
+every configuration.
 
 ### 3.2 The MT locale rows of 15D
 
@@ -230,9 +244,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 10,091,779 | 0 | 0 | 0 |
-| 11s-clang | 10,091,684 | 0 | 0 | 0 |
-| 15D-clang | 10,093,451 | 0 | 0 | 1 |
+| 11S-clang | 12,387,574 | 0 | 0 | 0 |
+| 11s-clang | 12,387,483 | 0 | 0 | 0 |
+| 15D-clang | 12,389,246 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134
