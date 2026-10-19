@@ -438,7 +438,7 @@ _rw_opt_no_stdout (int argc, char *argv[])
         // help mode: set argv[0] to the text of the help message
 
         static const char helpstr[] = {
-            "Prevents the program from using stdandard output for diagnostic\n"
+            "Prevents the program from using standard output for diagnostic\n"
             "messages. Instead, the driver will create a log file with a name\n"
             "obtained from the from the basename of the program source file,\n"
             "usually obtained by passing the value of the __FILE__ macro to\n"

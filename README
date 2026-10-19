@@ -292,7 +292,7 @@
   ${BUILDDIR}/rwtest/librwtest.a, which contains code for command line
   processing. When the tests are run by the test harness, they produce
   output  files  which  are  then   read  and  analyzed  by  the  exec
-  utility. The utility writes the  test results to stdandard output in
+  utility. The utility writes the  test results to standard output in
   a tabular  format, with columns  indicating the exit status  of each
   test,  the  number  of   failed  assertions,  the  total  number  of
   assertions, the number  of runtime warnings, and the  amount of time
