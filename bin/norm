@@ -1,0 +1,94 @@
+#!/bin/sh
+########################################################################
+#
+# script to normalize a table of test results for comparison
+#
+########################################################################
+#
+# Licensed to the Apache Software  Foundation (ASF) under one or more
+# contributor  license agreements.  See  the NOTICE  file distributed
+# with  this  work  for  additional information  regarding  copyright
+# ownership.   The ASF  licenses this  file to  you under  the Apache
+# License, Version  2.0 (the  "License"); you may  not use  this file
+# except in  compliance with the License.   You may obtain  a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the  License is distributed on an  "AS IS" BASIS,
+# WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
+# implied.   See  the License  for  the  specific language  governing
+# permissions and limitations under the License.
+#
+########################################################################
+#
+# USAGE:
+#
+#     norm <file>
+#
+# DESCRIPTION:
+#
+#     Writes the table of test results in the file, a make run log
+#     or a pin under doc/notes/baseline, in the form two such tables
+#     are compared in: from the NAME heading to the "Failed
+#     assertions" line of the summary, each row cut after the PERCNT
+#     column so that the three timing columns go, runs of blanks
+#     squeezed to one, blank lines dropped. The "Cumulative times"
+#     block, which a run log has and a pin does not, is dropped.
+#
+# EXAMPLE:
+#
+#     norm doc/notes/baseline/x86_64-15D.txt > pin.txt
+#     norm build/runall.log > table.txt
+#     diff pin.txt table.txt
+#
+#     The commands above compare the table of a 15D run with its pin.
+#
+########################################################################
+
+##########
+# global constants
+
+# the name of the script (used in diagnostic messages)
+readonly myname=${0##*/}
+
+
+##########
+# main body of script
+
+if [ $# -ne 1 ]; then
+    echo "$myname: usage: $myname <file>" >&2
+    exit 2
+fi
+
+awk '
+# the heading starts the table; the rows are cut after PERCNT
+/^NAME / {
+    on = 1
+    width = index($0, "PERCNT") + 5
+}
+
+on {
+    line = $0
+
+    # the cumulative times of a run log follow the last line kept
+    if (line ~ /^ *Cumulative times:/)
+        exit
+
+    # a summary line is kept whole; everything before it is a row
+    if (!summary && line !~ /^  [A-Z]/)
+        line = substr(line, 1, width)
+    else
+        summary = 1
+
+    gsub(/[ \t]+/, " ", line)
+    sub(/^ /, "", line)
+    sub(/ $/, "", line)
+
+    if (line != "")
+        print line
+
+    if (line ~ /^Failed assertions:/)
+        exit
+}' "$1"

@@ -1,0 +1,77 @@
+#!/bin/sh
+########################################################################
+#
+# script to derive a pin from a make run log
+#
+########################################################################
+#
+# Licensed to the Apache Software  Foundation (ASF) under one or more
+# contributor  license agreements.  See  the NOTICE  file distributed
+# with  this  work  for  additional information  regarding  copyright
+# ownership.   The ASF  licenses this  file to  you under  the Apache
+# License, Version  2.0 (the  "License"); you may  not use  this file
+# except in  compliance with the License.   You may obtain  a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the  License is distributed on an  "AS IS" BASIS,
+# WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
+# implied.   See  the License  for  the  specific language  governing
+# permissions and limitations under the License.
+#
+########################################################################
+#
+# USAGE:
+#
+#     derive-pin <run-log>
+#
+# DESCRIPTION:
+#
+#     Writes the table of test results in the make run log in the
+#     form of the pins under doc/notes/baseline: from the NAME
+#     heading to the "Failed assertions" line of the summary, each
+#     row cut after the PERCNT column so that the three timing
+#     columns go, the summary kept whole.
+#
+# EXAMPLE:
+#
+#     derive-pin build/runall.log > doc/notes/baseline/x86_64-15D.txt
+#
+#     The command above pins the table of a 15D run.
+#
+########################################################################
+
+##########
+# global constants
+
+# the name of the script (used in diagnostic messages)
+readonly myname=${0##*/}
+
+
+##########
+# main body of script
+
+if [ $# -ne 1 ]; then
+    echo "$myname: usage: $myname <run-log>" >&2
+    exit 2
+fi
+
+awk '
+# the heading starts the table; the rows are cut after PERCNT
+/^NAME / {
+    on = 1
+    width = index($0, "PERCNT") + 5
+}
+
+on {
+    # the summary is kept whole; everything before it is a row
+    if ($0 ~ /^PROGRAM SUMMARY:/)
+        summary = 1
+
+    print (summary ? $0 : substr($0, 1, width))
+
+    if ($0 ~ /^  Failed assertions:/)
+        exit
+}' "$1"
