@@ -468,7 +468,6 @@ test_libstd_do_in (const char* locale_name, const CodeCvtT& cc,
     delete [] C_buffer;
 }
 
-#define CCVT_MAX_LOCALE     5    // Max. number of locale to test
 #define CCVT_MB_CUR_MIN     1    // Minimum and maximum no. of
 #define CCVT_MB_CUR_MAX     6    // bytes per character
 
@@ -524,13 +523,13 @@ test_libstd_do_out (const char* locale_name, const CodeCvtT& cc,
                "(%s) %s::do_out Clib length check\n"
                "    C   library conversion size : %d\n"
                "    std library conversion size : %d\n",
-               locale_name, TypeName<CodecvtBnW>::name,
+               locale_name, TypeName<CodeCvtT>::name,
                C_res, (pen - pe));
 
     rw_assert (0 == std::memcmp (pe, C_pe, C_res), __FILE__, __LINE__,
                "(%s) %s::do_out Clib data check failed "
                "against C library conversion",
-               locale_name, TypeName<CodecvtBnW>::name);
+               locale_name, TypeName<CodeCvtT>::name);
 
     delete [] C_buffer;
 }
@@ -543,8 +542,6 @@ test_libstd_do_unshift (const CodeCvtT& cc,
                         std::size_t& sze,
                         CodecvtResult& res)
 {
-    // buffers types
-    typedef typename CodeCvtT::intern_type      intern_t;
     typedef typename CodeCvtT::extern_type      extern_t;
 
     extern_t* pe  = buffe;
@@ -577,9 +574,7 @@ test_libstd_do_length (const char* locale_name, const CodeCvtT& cc,
                        const typename CodeCvtT::extern_type* buffe,
                        std::size_t& sze, bool skip_C)
 {
-    // buffers types
-    typedef CodecvtBnW::intern_type     intern_t;
-    typedef CodecvtBnW::extern_type     extern_t;
+    typedef typename CodeCvtT::extern_type      extern_t;
 
     // the state
     std::mbstate_t state = std::mbstate_t ();
@@ -709,7 +704,7 @@ test_libstd_codecvt (const char* locale_name, const CodeCvtT& cc,
     // 22.2.1.5 p3, 22.2.1.5.2 p2 - test operation result
     rw_assert (res == out_res, __FILE__, __LINE__,
                "(%s) %s::do_out() == %s, got %s",
-               locale_name, TypeName<CodecvtBnW>::name,
+               locale_name, TypeName<CodeCvtT>::name,
                rwtest_codecvt_result (out_res), rwtest_codecvt_result (res));
 
     if (res == std::codecvt_base::noconv) {
@@ -728,7 +723,7 @@ test_libstd_codecvt (const char* locale_name, const CodeCvtT& cc,
                    __FILE__, __LINE__,
                    "(%s) %s::do_out conversion size: expected %d, got %d",
                    locale_name, TypeName<CodeCvtT>::name,
-                   in_res_sz, ilength);
+                   out_res_sz, eelength);
     }
 
     // Test the roundtrip conversion content and size
@@ -2358,15 +2353,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
     // here as opposed to at program startup to work around a
     // SunOS 5.7 bug in putenv() (PR ##30017)
     locale_root = rw_set_locale_root ();
-
-#if 0   // FIXME
-
-    // codecvt_byname<char, char, mbstate_t> behaves just like
-    // the base, codecvt<char, char, mbstate_t>, i.e., it does
-    // no conversion
-    test_inout (*this, char ());
-
-#endif   // 0/1
 
     test_inout<wchar_t> ("wchar_t");
 

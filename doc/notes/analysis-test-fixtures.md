@@ -248,15 +248,22 @@ the change has no compatibility cost.
 
 Done since, in the shape above: `analysis-collate-transform.md`.
 
-### 4.5 What remains in the codecvt row
+### 4.5 The codecvt row since
 
-With the files in place and the three repairs, `22.locale.codecvt`
-fails one assertion in both widths, number 1582, `out` of the
-three-character string "LBE" into a nine-byte buffer answering
-`partial` where `ok` is expected, which predates the files; and the
-process still aborts on the corrupt-state section, the `TODO` entry
-for the test. The collate row recorded the 101 mismatches of chapter
-4.4 until its entry was done.
+The row is clean in both widths. The one assertion that failed with
+the files in place, `out` of two characters into a nine-byte buffer
+answering `partial`, was the test counting the terminating NUL in
+its length; it and the abort on the corrupt-state section ended with
+2a4b5c5f. On a host with every C library locale the test runs the
+sections gated on the C library knowing a locale, and what those
+found was the test's own oracles: the Extended ASCII section handed
+a lead byte's pair to the C library and the byte alone to the facet,
+`length` was compared in characters, the charmap generated from an
+"interesting" locale mapped each byte to itself, two comparisons
+with the C library never ran, and the content check of a wide result
+compared a quarter of it. Each is repaired in its own commit. The
+collate row recorded the 101 mismatches of chapter 4.4 until its
+entry was done.
 
 ## 5. Regenerating
 

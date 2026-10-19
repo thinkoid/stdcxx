@@ -94,42 +94,6 @@ the fixed library, in 15D and in 12D. Every locale MT test passes in
 seconds under the harness in 15D on any processor count, and the 15D
 rows become a reference.
 
-** TODO =22.locale.codecvt= judges the library by wrong oracles
-
-With every C library locale installed the test fails 929 of 1253
-assertions, the same on x86_64 and aarch64, and the library's answer
-is the standard's in every one. Three oracles are wrong by
-construction. The Extended ASCII section converts one byte at a time
-through =mbsrtowcs= with the byte count as the limit on wide
-characters, so for a lead byte the C library converts the pair that
-follows in the table while the facet is handed the byte alone and
-answers =partial=: 75 bytes of EUC-JP and 37 of Shift_JIS, eight
-checks each, 896. The =length= comparison counts characters where the
-facet returns bytes, as 22.2.1.5.2 p10 says and as the table expects
-since 2026-09-15: one per Japanese locale, 3. The "interesting
-locale" section builds a charmap that maps each byte to its own
-value and expects the C library's mapping, which differs by the
-choice of the bytes: on an all-locale host the locale is
-=an_ES.ISO-8859-15=, eight bytes, four checks each, 32. Behind them
-two oracles never run: the libc half of =TEST_CONVERSION= asks
-=setlocale= about the input file's pathname, and =TEST_UCS_MODIFIER=
-passes the pathname as the native locale, so the comparison with
-=mbstowcs= and =iconv= is skipped without a note. The =in= checks of
-=test_inout= compare =int_len= bytes of a =wchar_t= array, a quarter
-of the characters. The =ext_ascii= table lacks 0x98 and repeats 0x89.
-The tree's =notes.txt= of 2026-10-19 has the line-by-line reading.
-
-Fix, one defect per commit: convert exactly one byte with =mbrtowc=
-and skip the bytes the C library does not convert alone; the length
-comparator returns bytes; the charmap takes the C library's wide
-value; then the two dead oracles enabled with the right name, the
-content check widened to =int_len * sizeof (internT)=, and the table
-completed, each with the counts it changes.
-
-Check: 0 failed on a host with every locale, the four-locale path
-(=LOCPATH= to an empty directory) at its pin, and the assertion count
-of the libc and =@UCS= sections risen in the tables.
-
 ** TODO All the C library's locales on the test hosts
 
 The test hosts generate one glibc locale besides =C= and =POSIX=:
@@ -154,9 +118,9 @@ locale since 2026-10-14, =SUPPORTED= through =locale-gen= and the
 Shift_JIS one by hand: the three examples run clean there, and
 =22.locale.codecvt.mt= skips its first-use section there with the
 note. The other test hosts have =en_US.UTF-8= alone. On that host
-=22.locale.codecvt= fails 929 of 1253 assertions; the entry
-"=22.locale.codecvt= judges the library by wrong oracles" has the
-cause, and a host with =en_US.UTF-8= alone keeps the pinned 306.
+=22.locale.codecvt= runs 618 assertions, the sections gated on the C
+library knowing a named locale among them, against the pinned 306 of
+a host with =en_US.UTF-8= alone.
 =22.locale.time.get= found =en_AG= and =de_AT= as its English and
 German locales there, not =en_US= and =de_DE=: the first match of
 the test's pattern is whatever =locale -a= lists first. =bin/driver=
