@@ -162,31 +162,40 @@ every configuration.
 ### 3.2 The MT locale rows of 15D
 
 Until 2026-10-13 seven older locale MT tests ended in 15D with
-`HUP`: `22.locale.ctype.mt`, `money.put.mt`, `num.get.mt`,
-`num.put.mt`, `numpunct.mt`, `time.get.mt` and `time.put.mt`. Each
-ran one thread per processor, 32 on the machine the tables come from,
-and ran each threaded section to its own 60-second soft timeout. The
-harness's 60 seconds cut them short, so the rows recorded the harness,
-not the library.
+`HUP`: each ran one thread per processor, 32 on the machine the
+tables come from, and ran each threaded section to its own 60-second
+soft timeout, so the rows recorded the harness, not the library.
+They were then sized under ThreadSanitizer, and on 2026-10-19 the
+census in the `TODO` entry "MT tests that provoke contention instead
+of waiting for it" retired six of them, `money.get.mt`,
+`money.put.mt`, `num.get.mt`, `num.put.mt`, `time.get.mt` and
+`time.put.mt` (the `get` and `put` facets hold no state of their
+own), turned `globals.mt` into the single-threaded
+`22.locale.globals`, and rewrote the rest to the gated shape.
 
-Each locale MT test now runs 4 threads by default, whatever the
-processor count, at a size chosen under ThreadSanitizer
-(`analysis-locale-mt-sizing.md`). In 15D every one passes in about a
-second or less, and the rows are a reference. `22.locale.codecvt.mt`
-races the first conversion through a fresh wide `codecvt` facet, the
-gated way, and counts 1,600 assertions. `22.locale.statics.mt` races
-the swap of the global locale and counts 200, one check per round.
-`22.locale.ctype.mt` races the first fill of the `widen` and `narrow`
-caches of a fresh `ctype` facet, both specializations in turn, and
-counts one check per thread and round. `22.locale.numpunct.mt` races
-the first use of a fresh `numpunct` facet, whose data the library
-builds from the C library, both specializations in turn, and counts
-one check per thread and two per round; `22.locale.moneypunct.mt`
-does the same for the four `moneypunct` facets in turn.
-`22.locale.messages.mt` races `open` of one catalog from every thread
-at once and counts three checks per round, 600 in every build.
-`cons.mt` counts none: its pass means every thread ran to the end
-without an error, a crash or a hang.
+Every locale MT program now provokes the race it covers: four
+threads, whatever the processor count, wait on a gate and start
+together at the first use of a fresh object, round after round, 200
+rounds, and a check judges each round. Each runs in about a second
+or less in 15D, and each counts in every configuration; with one
+thread, the single-threaded builds run the rounds without the race.
+The eleven, and what each races:
+
+| program | races | 15D |
+|---|---|---|
+| `22.locale.use_facet.mt` | the facet slot of a fresh body, every standard facet in turn; leak check | 200 |
+| `22.locale.facet.mt` | the facet reference counts | 8 |
+| `22.locale.id.mt` | a user facet's id | 999 |
+| `22.locale.codecvt.mt` | the wide `codecvt`'s database, on the first conversion | 1,600 |
+| `22.locale.ctype.mt` | the `widen` and `narrow` caches of a fresh `ctype` facet | 800 |
+| `22.locale.numpunct.mt` | the `numpunct` data built from the C library; leak check | 1,200 |
+| `22.locale.moneypunct.mt` | the `moneypunct` data, the four facets in turn; leak check | 1,200 |
+| `22.locale.time.put.libc.mt` | the `time_put` data, both character types in turn; leak check | 200 |
+| `22.locale.messages.mt` | the catalog repository, `open` of one catalog from every thread; leak check | 600 |
+| `22.locale.statics.mt` | the swap of the global locale, with the returned locales checked as a multiset | 200 |
+| `22.locale.cons.mt` | the named-body repository, one body per name constructed from every thread at once, and the combinations | 1,000 |
+
+The address-space limit below is the harness's, STDCXX-440's guard.
 
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
@@ -224,6 +233,7 @@ locale, and the program counts them, 88 per locale and character type.
 | `22.locale.ctype.mt` | 200 | 200 | 800 |
 | `22.locale.numpunct.mt` | 600 | 600 | 1200 |
 | `22.locale.moneypunct.mt` | 600 | 600 | 1200 |
+| `22.locale.cons.mt` | 400 | 400 | 1000 |
 
 Reasons, in order:
 
@@ -244,10 +254,11 @@ Reasons, in order:
 - The atomic operation tests count only in the thread-safe build.
 - `21.string.stdcxx-162`: chapter 3.1.
 - `22.locale.codecvt.mt` counts two checks per thread and round,
-  `22.locale.ctype.mt` one, and `22.locale.numpunct.mt` and
-  `22.locale.moneypunct.mt` one per thread and two per round: 400,
-  200 and 600 with the one thread of a single-threaded build, 1,600,
-  800 and 1,200 with four.
+  `22.locale.ctype.mt` one, `22.locale.numpunct.mt` and
+  `22.locale.moneypunct.mt` one per thread and two per round, and
+  `22.locale.cons.mt` one per thread and one per round: 400, 200, 600
+  and 400 with the one thread of a single-threaded build; 1,600, 800,
+  1,200 and 1,000 with four.
 
 The single-threaded builds run each MT test with one thread. Most
 count nothing there. Seven count the same in every build:

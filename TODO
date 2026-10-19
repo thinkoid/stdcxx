@@ -41,43 +41,32 @@ belongs.
 
 ** TODO MT tests that provoke contention instead of waiting for it
 
-The locale MT tests are of two shapes. The older ones run four
-threads over a facet's operations for a number of iterations and pass
-when every thread reaches the end, each at a size chosen under
-ThreadSanitizer, the smallest that still reports the fault the test
-was written for with that fault put back
-(=doc/notes/analysis-locale-mt-sizing.md=). After the first iteration
-everything a test touches is cached and the rest measures the locks
-at rest; a race is caught only when the kernel's scheduling puts two
-threads in its window, and a failure names a test, not a defect. The
-gated ones, =22.locale.use_facet.mt=, =22.locale.time.put.libc.mt=,
-=22.locale.id.mt= and =22.locale.facet.mt=, provoke their races: a
-few threads wait on a gate and start together at the first use of a
-fresh object, round after round, and a check judges each round.
-ThreadSanitizer reports a race from what ran, not from its timing,
-and is the judge.
-
-The census of 2026-10-19. The library has nine places where threads
-meet on fresh state: the facet slot of a fresh body, the facet
-reference counts, a user facet's id, the three builders of facet data
-from the C library (=numpunct=, =moneypunct=, time), the wide
-=codecvt='s database on the first conversion, =ctype='s lazy caches,
-the message catalog repository, the global locale's first set and
-swap, and the named-body repository. The gated four provoke the
-first three and the time builder. The classic body's first
+Every locale MT program provokes the race it covers: a few threads
+wait on a gate (=rw_thread_gate=) and start together at the first
+use of a fresh object, round after round, and a check judges each
+round. Each names what it races: the facet slot of a fresh body
+(=22.locale.use_facet.mt=, every standard facet in turn), the facet
+reference counts (=facet.mt=), a user facet's id (=id.mt=), the three
+builders of facet data from the C library (=numpunct.mt=,
+=moneypunct.mt=, =time.put.libc.mt=, with a leak check for the
+re-check under the lock), the wide =codecvt='s database on the first
+conversion (=codecvt.mt=), =ctype='s lazy caches (=ctype.mt=), the
+catalog repository (=messages.mt=), the global locale's swap
+(=statics.mt=) and the named-body repository (=cons.mt=). Each
+rewrite was verified with its fault put back under ThreadSanitizer,
+reported in 25 runs of 25 and clean on the fixed library, where a
+fault is known; =messages.mt= and =cons.mt= have none and are judged
+by the sanitizer alone. ThreadSanitizer reports a race from what
+ran, not from its timing, and is the judge. The classic body's first
 construction is reachable from no test program: the driver's
-=<iostream>= initializer builds the standard streams before =main=,
-and the first stream buffer constructs a locale. The =get= and =put=
-facets hold no state of their own; every fault their MT programs
-report is a builder's or the slot's.
+=<iostream>= initializer builds the standard streams before =main=.
 
-Fix, one commit per program, each rewrite verified with its fault
-put back under the sanitizer (reported in 25 runs of 25, clean on
-the fixed library), then its 15D row:
-- =22.locale.cons.mt= gated on the body repository's
-  one-body-per-name invariant, its rounds bounded by the host's
-  locale count.
-- The six pins re-derived from one night after.
+The census of 2026-10-19 retired the six =get= and =put= programs,
+which held no state of their own, and turned =globals.mt= into the
+single-threaded =22.locale.globals=.
+
+Fix: the six pins re-derived from one night at the sprint's next
+sequence point; the rows are in every configuration now.
 
 Check: every locale MT program names the race or the operation it
 covers, reports its fault under the sanitizer with the fault put back

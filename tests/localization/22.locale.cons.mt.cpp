@@ -2,7 +2,9 @@
  *
  * 22.locale.cons.mt.cpp
  *
- * test exercising the thread safety of locale ctors
+ * test exercising the thread safety of the locale constructors,
+ * racing the construction of one named locale, and its combination
+ * with another, from several threads at once
  *
  * $Id$
  *
@@ -26,127 +28,115 @@
  *
  **************************************************************************/
 
-#include <locale>     // for locale
-
+#include <locale>     // for locale, ctype, use_facet
 #include <cstring>    // for strlen()
 
-#include <rw_locale.h>
-#include <rw_thread.h>   // for rw_get_processors (), rw_thread_pool()
-#include <rw_driver.h>
+#include <rw_locale.h>   // for rw_locales()
+#include <rw_thread.h>   // for rw_thread_gate(), rw_thread_pool()
+#include <rw_driver.h>   // for rw_test()
 
 
 // maximum number of threads allowed by the command line interface
-#define MAX_THREADS   32
+#define MAX_THREADS      32
+
+// maximum number of locales the test cycles through
+#define MAX_LOCALES      64
 
 // the number of threads (4 in a thread-safe build, set in main ()
 // whatever the number of processors)
 int opt_nthreads = 1;
 
-// the number of times each thread should iterate (unless specified
-// otherwise on the command line)
-int opt_nloops = 256;
-
-// tristate flag set in response to the --no-combine/--enable-combine
-// command line option
-int opt_combine;
+// the number of rounds, each a name constructed from every thread
+int opt_nrounds = 200;
 
 // default timeout used by each threaded section of this test
 int opt_timeout = 60;
 
 /**************************************************************************/
 
-// array of locale names to use for testing
-static const char*
-locales [MAX_THREADS];
+// the locales the rounds cycle through, the C library's
+static const char* locale_names [MAX_LOCALES];
 
-// number of locale names in the array
-static std::size_t
-nlocales;
+// the number of names in the array
+static std::size_t nlocales;
 
-/**************************************************************************/
+// the categories the rounds cycle through
+static const std::locale::category categories [] = {
+    std::locale::all,
+    std::locale::collate,
+    std::locale::ctype,
+    std::locale::messages,
+    std::locale::monetary,
+    std::locale::numeric,
+    std::locale::time,
+    std::locale::none
+};
+
+static const std::size_t ncategories =
+    sizeof categories / sizeof *categories;
+
+// the round's name, the other name it is combined with, and the
+// category of the combination
+static const char* race_name;
+static const char* race_other;
+static std::locale::category race_category;
+
+// the number of threads that have started in the current round
+static int nstarted;
+
+// the locale each thread constructed, held until the main thread
+// has compared them: while every one is alive, one body per name
+// means one facet per slot
+static std::locale held [MAX_THREADS];
+
+// per thread, the checks of the combinations that failed
+static int mismatches [MAX_THREADS];
 
 extern "C" {
 
 static void*
-test_ctors (void*)
+race_func (void *arg)
 {
-    static const std::locale::category cats[] = {
-        std::locale::all,
-        std::locale::collate,
-        std::locale::ctype,
-        std::locale::messages,
-        std::locale::monetary,
-        std::locale::numeric,
-        std::locale::time,
-        std::locale::none
-    };
+    const long inx = long (arg);
 
-    static const std::size_t ncats = sizeof cats / sizeof *cats;
+    // start with the other threads so that they construct the body
+    // of the same name at the same time
+    rw_thread_gate (&nstarted, opt_nthreads);
 
-    // the next locale "advanced" in each iteration of the loop
-    std::locale next (locales [0]);
+    const std::locale first (race_name);
+    const std::locale second (race_name);
+    const std::locale other (race_other);
 
-    for (int i = 0; i != opt_nloops; ++i) {
+    int bad = 0;
 
-        if (rw_thread_pool_timeout_expired ())
-            break;
+    if (first != second)
+        ++bad;
 
-        // compute an index into the array of locales
-        const std::size_t linx = i % nlocales;
+    // the combination by name and by locale, and what each must be
+    const std::locale by_name (first, race_other, race_category);
+    const std::locale by_loc (first, other, race_category);
 
-        // create two locale objects from the same name and verify
-        // they are equal
-        const std::locale first (next.name ().c_str ());
-        const std::locale second (next.name ().c_str ());
-
-        RW_ASSERT (first == second);
-
-        // create another locale object as a copy of one of the two
-        // above and verify it's equal to the other
-        const std::locale third (first);
-
-        RW_ASSERT (second == third);
-
-        // compute the next index into the array of locales
-        const std::size_t ninx = (i + 1) % nlocales;
-        const char* const next_name = locales [ninx];
-
-        // create the next locale from a name
-        next = std::locale (next_name);
-
-        if (0 <= opt_combine) {
-            // compute an index into the array of categories
-            const std::size_t cinx = i % ncats;
-            const std::locale::category cat = cats [cinx];
-
-            // create a locale from another object and the name of yet
-            // another locale, combining some (none, one, or all) of their
-            // categories
-            const std::locale combined (first, next_name, cat);
-
-            // verify that the locales were created correctly
-            if (   std::locale::none == cat
-                || first == next) {
-                RW_ASSERT (combined == first);
-            }
-            else if (std::locale::all == cat)
-                RW_ASSERT (combined == next);
-            else
-                RW_ASSERT (combined != first && combined != next);
-
-            // repeat the step above but with a locale object
-            const std::locale combined_2 (first, next, cat);
-
-            if (   std::locale::none == cat
-                || first == next) {
-                RW_ASSERT (combined_2 == first);
-            }
-            else if (std::locale::all == cat)
-                RW_ASSERT (combined_2 == next);
-            else
-                RW_ASSERT (combined_2 != first && combined_2 != next);
-        }
+    if (std::locale::none == race_category || first == other) {
+        if (by_name != first)
+            ++bad;
+        if (by_loc != first)
+            ++bad;
     }
+    else if (std::locale::all == race_category) {
+        if (by_name != other)
+            ++bad;
+        if (by_loc != other)
+            ++bad;
+    }
+    else {
+        if (by_name == first || by_name == other)
+            ++bad;
+        if (by_loc == first || by_loc == other)
+            ++bad;
+    }
+
+    mismatches [inx] = bad;
+    held [inx]       = first;
 
     return 0;
 }
@@ -158,36 +148,80 @@ test_ctors (void*)
 static int
 run_test (int, char**)
 {
-    // find all installed locales for which setlocale(LC_ALL) succeeds
     const char* const locale_list =
         rw_opt_locales ? rw_opt_locales : rw_locales (_RWSTD_LC_ALL);
 
-    const std::size_t maxinx = sizeof locales / sizeof *locales;
+    for (const char *name = locale_list;
+         *name && nlocales != MAX_LOCALES;
+         name += std::strlen (name) + 1) {
 
-    for (const char *name = locale_list; *name; name += std::strlen (name) +1) {
-
-        locales [nlocales++] = name;
-
-        if (nlocales == maxinx)
-            break;
+        locale_names [nlocales++] = name;
     }
 
-    int result;
+    rw_fatal (0 != nlocales, 0, __LINE__, "no locale to construct");
 
     rw_info (0, 0, 0,
-             "testing std::locale ctors with %d thread%{?}s%{;}, "
-             "%d iteration%{?}s%{;} each, in %zu locales { %{ .*A@} }",
+             "racing the construction of a named locale, and its "
+             "combination with another, from %d thread%{?}s%{;}, "
+             "%d round%{?}s%{;}, in %zu locale%{?}s%{;}",
              opt_nthreads, 1 != opt_nthreads,
-             opt_nloops, 1 != opt_nloops,
-             nlocales, int (nlocales), "%#s", locales);
+             opt_nrounds, 1 != opt_nrounds,
+             nlocales, 1 != nlocales);
 
-    // create and start a pool of threads and wait for them to finish
-    result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                             test_ctors, 0, std::size_t (opt_timeout));
+    int result = 0;
 
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, test_ctors);
+    for (int i = 0; 0 == result && i != opt_nrounds; ++i) {
+
+        // the body of the round's name dies with the last locale that
+        // holds it, so each round constructs it anew
+        race_name     = locale_names [std::size_t (i) % nlocales];
+        race_other    = locale_names [std::size_t (i + 1) % nlocales];
+        race_category = categories [std::size_t (i) % ncategories];
+        nstarted      = 0;
+
+        void* args [MAX_THREADS];
+        for (int j = 0; j != opt_nthreads; ++j)
+            args [j] = (void*)long (j);
+
+        result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
+                                 race_func, args,
+                                 std::size_t (opt_timeout));
+
+        rw_error (result == 0, 0, __LINE__,
+                  "rw_thread_pool(0, %d, 0, %{#f}, ...) failed",
+                  opt_nthreads, race_func);
+
+        if (result)
+            break;
+
+        for (int j = 0; j != opt_nthreads; ++j) {
+            rw_assert (0 == mismatches [j], 0, __LINE__,
+                       "std::locale (%#s) combined with %#s for category "
+                       "%d, round %d, thread %d: %d checks failed",
+                       race_name, race_other, int (race_category), i, j,
+                       mismatches [j]);
+        }
+
+        // one body per name: with every thread's locale alive, the
+        // facet in a slot of the body is the same object through
+        // each of them
+        const std::ctype<char>* const facet =
+            &std::use_facet<std::ctype<char> >(held [0]);
+
+        bool same = true;
+
+        for (int j = 1; same && j != opt_nthreads; ++j)
+            same = facet == &std::use_facet<std::ctype<char> >(held [j]);
+
+        rw_assert (same, 0, __LINE__,
+                   "std::locale (%#s) constructed from %d threads at once, "
+                   "round %d: one body, the same ctype<char> facet "
+                   "through every locale",
+                   race_name, opt_nthreads, i);
+
+        for (int j = 0; j != opt_nthreads; ++j)
+            held [j] = std::locale::classic ();
+    }
 
     return result;
 }
@@ -208,14 +242,12 @@ int main (int argc, char *argv[])
     return rw_test (argc, argv, __FILE__,
                     "lib.locale.cons",
                     "thread safety", run_test,
-                    "|-combine~ "
                     "|-soft-timeout#0 "  // must be non-negative
-                    "|-nloops#0 "        // must be non-negative
+                    "|-nrounds#0 "       // must be non-negative
                     "|-nthreads#0-* "    // must be in [0, MAX_THREADS]
-                    "|-locales=",        // must be provided
-                    &opt_combine,
+                    "|-locales= ",       // must be provided
                     &opt_timeout,
-                    &opt_nloops,
+                    &opt_nrounds,
                     int (MAX_THREADS),
                     &opt_nthreads,
                     &rw_opt_setlocales);
