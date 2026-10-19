@@ -176,9 +176,11 @@ second or less, and the rows are a reference. `22.locale.codecvt.mt`
 races the first conversion through a fresh wide `codecvt` facet, the
 gated way, and counts 1,600 assertions. `22.locale.statics.mt` races
 the swap of the global locale and counts 200, one check per round.
-`cons.mt`, `ctype.mt`, `messages.mt`, `moneypunct.mt` and `numpunct.mt`
-count none: their pass means every thread ran to the end without an
-error, a crash or a hang.
+`22.locale.ctype.mt` races the first fill of the `widen` and `narrow`
+caches of a fresh `ctype` facet, both specializations in turn, and
+counts one check per thread and round. `cons.mt`, `messages.mt`,
+`moneypunct.mt` and `numpunct.mt` count none: their pass means every
+thread ran to the end without an error, a crash or a hang.
 
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
@@ -213,6 +215,7 @@ locale, and the program counts them, 88 per locale and character type.
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
 | `21.string.stdcxx-162` | `NOUT` | `NOUT` | `ABRT` |
 | `22.locale.codecvt.mt` | 400 | 400 | 1600 |
+| `22.locale.ctype.mt` | 200 | 200 | 800 |
 
 Reasons, in order:
 
@@ -232,8 +235,9 @@ Reasons, in order:
   corrupt `mbstate_t`. Their state check sits under the locale lock.
 - The atomic operation tests count only in the thread-safe build.
 - `21.string.stdcxx-162`: chapter 3.1.
-- `22.locale.codecvt.mt` counts two checks per thread and round: 400
-  with the one thread of a single-threaded build, 1,600 with four.
+- `22.locale.codecvt.mt` counts two checks per thread and round, and
+  `22.locale.ctype.mt` one: 400 and 200 with the one thread of a
+  single-threaded build, 1,600 and 800 with four.
 
 The single-threaded builds run each MT test with one thread. Most
 count nothing there. Seven count the same in every build:

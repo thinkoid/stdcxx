@@ -2,7 +2,8 @@
  *
  * 22.locale.ctype.mt.cpp
  *
- * test exercising the thread safety of the ctype facet
+ * test exercising the thread safety of the ctype facet's widen() and
+ * narrow() caches, racing their first fill on a fresh facet
  *
  * $Id$
  *
@@ -26,145 +27,100 @@
  *
  **************************************************************************/
 
-#include <locale>     // for locale, ctype
+#include <locale>     // for locale, ctype, use_facet
+#include <cstring>    // for strcmp(), strlen()
 
-#include <clocale>    // for lconv, localeconv()
-#include <cstdlib>    // for mbstowcs()
-#include <cstring>    // for size_t, strcpy()
-
-#include <rw_locale.h>
-#include <rw_thread.h>
-#include <rw_driver.h>
-#include <rw_valcmp.h>
+#include <rw_locale.h>   // for rw_locales()
+#include <rw_thread.h>   // for rw_thread_gate(), rw_thread_pool()
+#include <rw_driver.h>   // for rw_test()
 
 
 // maximum number of threads allowed by the command line interface
-#define MAX_THREADS   16
+#define MAX_THREADS      32
+
+// maximum number of locales the test cycles through
+#define MAX_LOCALES      64
 
 // the number of threads (4 in a thread-safe build, set in main ()
 // whatever the number of processors)
 int opt_nthreads = 1;
 
-// the number of times each thread should iterate (unless specified
-// otherwise on the command line)
-int opt_nloops = 256;
-
-// number of locales to use
-int opt_nlocales = MAX_THREADS;
-
-// should all threads share the same set of locale objects instead
-// of creating their own?
-int opt_shared_locale;
+// the number of rounds, each a fresh locale
+int opt_nrounds = 200;
 
 // default timeout used by each threaded section of this test
 int opt_timeout = 60;
 
 /**************************************************************************/
 
-// array of locale names to use for testing
-static const char*
-locales [MAX_THREADS];
+// the locales the rounds cycle through, the C library's other than
+// C and POSIX: the classic locale's facets live for the process,
+// with their caches filled
+static const char* locale_names [MAX_LOCALES];
 
-// number of locale names in the array
-static std::size_t
-nlocales;
+// the number of names in the array
+static std::size_t nlocales;
 
-/**************************************************************************/
+// the answers of the round's locale, computed by the main thread
+// through a locale that is gone before the round's is constructed,
+// so that the threads' facets are new; the caches hold the 256
+// values of char and the 256 wide characters below 256
+static struct {
+    char    widened [256];     // ctype<char>::widen (char)
+    char    narrowed [256];    // ctype<char>::narrow (char)
+    wchar_t wwidened [256];    // ctype<wchar_t>::widen (char)
+    char    wnarrowed [256];   // ctype<wchar_t>::narrow (wchar_t)
+} record;
 
-struct CtypeData
-{
-    // the name of the locale the data corresponds to
-    const char *locale_name_;
+// the locale whose ctype facets the threads use
+static const std::locale* race_locale;
 
-    // optionally set to the named locale for the threads to share
-    std::locale locale_;
+// whether the round races ctype<wchar_t> rather than ctype<char>
+static bool race_wide;
 
-    // results of ctype<charT>::widen(char) for char and wchar_t
-    char    widened_ [256];
-    wchar_t wwidened_ [256];
+// the number of threads that have started in the current round
+static int nstarted;
 
-    // array of wide characters to narrow and the number
-    // of valid elements in the array
-    wchar_t wide_ [1024];
-    std::size_t nwide_;
-
-    // results of ctype<charT>::narrow(charT, char) for char
-    // and wchar_t values of wide_ [i]
-    char narrowed_ [256];
-    char wnarrowed_ [1024];
-
-} ctype_data [MAX_THREADS];
-
+// per thread, the calls that disagreed with the record
+static int mismatches [MAX_THREADS];
 
 extern "C" {
 
-bool test_char;    // exercise num_put<char>
-bool test_wchar;   // exercise num_put<wchar_t>
-
-
 static void*
-thread_func (void*)
+race_func (void *arg)
 {
-    // number of narrow characters to test (should be 256)
-    const std::size_t nchars =
-        sizeof ctype_data->widened_ / sizeof *ctype_data->widened_;
+    const long inx = long (arg);
 
-    for (int i = 0; i != opt_nloops; ++i) {
+    // start with the other threads so that they fill the facet's
+    // caches at the same time
+    rw_thread_gate (&nstarted, opt_nthreads);
 
-        if (rw_thread_pool_timeout_expired ())
-            break;
+    int bad = 0;
 
-        const std::size_t inx = std::size_t (i) % nlocales;
+    if (race_wide) {
+        const std::ctype<wchar_t> &wct =
+            std::use_facet<std::ctype<wchar_t> >(*race_locale);
 
-        // save the name of the locale
-        const char* const locale_name = locales [inx];
-
-        const CtypeData* const data = ctype_data + inx;
-
-        // construct a named locale
-        const std::locale loc =
-            opt_shared_locale ? data->locale_ : std::locale (locale_name);
-
-        // "random" index/character value
-        const std::size_t cinx = std::size_t (i) % nchars;
-
-        if (test_char) {
-            // exercise the narrow char specialization of the facet
-
-            const std::ctype<char> &ct =
-                std::use_facet<std::ctype<char> >(loc);
-
-            const char wc = ct.widen (char (cinx));
-
-            RW_ASSERT (wc == data->widened_ [cinx]);
-
-            const char nc = ct.narrow (char (cinx), '\0');
-
-            RW_ASSERT (nc == data->narrowed_ [cinx]);
-        }
-
-        // both specializations may be tested at the same time
-
-        if (test_wchar) {
-            // exercise the wide char specialization of the facet
-
-            const std::ctype<wchar_t> &wct =
-                std::use_facet<std::ctype<wchar_t> >(loc);
-
-            // "random" index into the wide character array
-            const std::size_t winx =
-                std::size_t (i) % data->nwide_;
-
-            const wchar_t wc = wct.widen (char (cinx));
-
-            RW_ASSERT (wc == data->wwidened_ [cinx]);
-
-            const char nc = wct.narrow (data->wide_ [winx], L'\0');
-
-            RW_ASSERT (nc == data->wnarrowed_ [winx]);
-
+        for (std::size_t i = 0; i != 256; ++i) {
+            if (wct.widen (char (i)) != record.wwidened [i])
+                ++bad;
+            if (wct.narrow (wchar_t (i), '\0') != record.wnarrowed [i])
+                ++bad;
         }
     }
+    else {
+        const std::ctype<char> &ct =
+            std::use_facet<std::ctype<char> >(*race_locale);
+
+        for (std::size_t i = 0; i != 256; ++i) {
+            if (ct.widen (char (i)) != record.widened [i])
+                ++bad;
+            if (ct.narrow (char (i), '\0') != record.narrowed [i])
+                ++bad;
+        }
+    }
+
+    mismatches [inx] = bad;
 
     return 0;
 }
@@ -176,121 +132,91 @@ thread_func (void*)
 static int
 run_test (int, char**)
 {
-    // find all installed locales for which setlocale(LC_ALL) succeeds
     const char* const locale_list =
         rw_opt_locales ? rw_opt_locales : rw_locales (_RWSTD_LC_ALL);
 
-    const std::size_t maxinx = sizeof locales / sizeof *locales;
-
-    // iterate over locales, initializing a global ctype_data array
-    // with LC_CTYPE data obtained from each locale
-    for (const char *name = locale_list; *name;
+    for (const char *name = locale_list;
+         *name && nlocales != MAX_LOCALES;
          name += std::strlen (name) + 1) {
 
-        const std::size_t inx = nlocales;
+        if (std::strcmp (name, "C") && std::strcmp (name, "POSIX"))
+            locale_names [nlocales++] = name;
+    }
 
-        locales [inx] = name;
+    if (0 == nlocales) {
+        rw_warn (false, 0, __LINE__,
+                 "no installed locale other than C and POSIX; skipping");
+        return 0;
+    }
 
-        CtypeData* const pdata = ctype_data + nlocales;
+    rw_info (0, 0, 0,
+             "racing the first widen() and narrow() of std::ctype<char> "
+             "and std::ctype<wchar_t>, in turn, from %d thread%{?}s%{;}, "
+             "%d round%{?}s%{;}, in %zu locale%{?}s%{;}",
+             opt_nthreads, 1 != opt_nthreads,
+             opt_nrounds, 1 != opt_nrounds,
+             nlocales, 1 != nlocales);
 
-        // compute the number of wide characters to populate
-        const std::size_t nwide =
-            sizeof pdata->wide_ / sizeof pdata->wide_ [0];
+    int result = 0;
 
-        try {
+    for (int i = 0; 0 == result && i != opt_nrounds; ++i) {
+
+        const char* const name = locale_names [std::size_t (i) % nlocales];
+
+        race_wide = 0 != i % 2;
+
+        // the record, through a locale of its own
+        {
             const std::locale loc (name);
 
             const std::ctype<char> &ct =
                 std::use_facet<std::ctype<char> >(loc);
-
             const std::ctype<wchar_t> &wct =
                 std::use_facet<std::ctype<wchar_t> >(loc);
 
-            pdata->locale_name_ = name;
-
-            const std::size_t nchars =
-                sizeof pdata->widened_ / sizeof *pdata->widened_;
-
-            for (std::size_t i = 0; i != nchars; ++i) {
-                pdata->widened_  [i] = ct.widen (char (i));
-                pdata->wwidened_ [i] = wct.widen (char (i));
-                pdata->narrowed_ [i] = ct.narrow (char (i), '\0');
+            for (std::size_t j = 0; j != 256; ++j) {
+                record.widened   [j] = ct.widen (char (j));
+                record.narrowed  [j] = ct.narrow (char (j), '\0');
+                record.wwidened  [j] = wct.widen (char (j));
+                record.wnarrowed [j] = wct.narrow (wchar_t (j), '\0');
             }
-
-            pdata->nwide_ = rw_get_wchars (pdata->wide_, nwide);
-            for (std::size_t i = 0; i != pdata->nwide_; ++i)
-                pdata->wnarrowed_ [i] = wct.narrow (pdata->wide_ [i], L'\0');
-
-            if (opt_shared_locale)
-                pdata->locale_ = loc;
-
-            ++nlocales;
-        }
-        catch (...) {
-            // skip over a bad locale
         }
 
-        if (nlocales == maxinx || nlocales == std::size_t (opt_nlocales))
-            break;
+        // each round a new locale, whose facets have empty caches;
+        // the slots are filled from this thread alone, so that the
+        // threads race only the caches (the slot race is
+        // 22.locale.use_facet.mt's)
+        const std::locale loc (name);
+
+        (void)std::use_facet<std::ctype<char> >(loc);
+        (void)std::use_facet<std::ctype<wchar_t> >(loc);
+
+        race_locale = &loc;
+        nstarted    = 0;
+
+        void* args [MAX_THREADS];
+        for (int j = 0; j != opt_nthreads; ++j)
+            args [j] = (void*)long (j);
+
+        result = rw_thread_pool (0, std::size_t (opt_nthreads), 0,
+                                 race_func, args,
+                                 std::size_t (opt_timeout));
+
+        rw_error (result == 0, 0, __LINE__,
+                  "rw_thread_pool(0, %d, 0, %{#f}, ...) failed",
+                  opt_nthreads, race_func);
+
+        for (int j = 0; 0 == result && j != opt_nthreads; ++j) {
+            rw_assert (0 == mismatches [j], 0, __LINE__,
+                       "std::ctype<%s> in std::locale (%#s), round %d, "
+                       "thread %d: %d calls to widen() and narrow() "
+                       "disagree with the record",
+                       race_wide ? "wchar_t" : "char", name, i, j,
+                       mismatches [j]);
+        }
+
+        race_locale = 0;
     }
-
-    // avoid divide by zero in thread if there are no locales to test
-    rw_fatal (nlocales != 0, 0, __LINE__,
-              "failed to create one or more usable locales!");
-
-    rw_info (0, 0, 0,
-             "testing std::ctype<charT> with %d thread%{?}s%{;}, "
-             "%d iteration%{?}s%{;} each, in %zu locales { %{ .*A@} }",
-             opt_nthreads, 1 != opt_nthreads,
-             opt_nloops, 1 != opt_nloops,
-             nlocales, int (nlocales), "%#s", locales);
-
-    rw_info (0, 0, 0, "exercising std::ctype<char>");
-
-    test_char  = true;
-    test_wchar = false;
-
-    // create and start a pool of threads and wait for them to finish
-    int result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-    rw_info (0, 0, 0, "exercising std::ctype<wchar_t>");
-
-    test_char  = false;
-    test_wchar = true;
-
-    // start a pool of threads to exercise the thread safety
-    // of the wchar_t specialization
-    result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
-
-    // exercise both the char and the wchar_t specializations
-    // at the same time
-
-    rw_info (0, 0, 0,
-             "exercising both std::ctype<char> and std::ctype<wchar_t>");
-
-    test_char  = true;
-    test_wchar = true;
-
-    // start a pool of threads to exercise wstring thread safety
-    result =
-        rw_thread_pool (0, std::size_t (opt_nthreads), 0,
-                        thread_func, 0, std::size_t (opt_timeout));
-
-    rw_error (result == 0, 0, __LINE__,
-              "rw_thread_pool(0, %d, 0, %{#f}, 0) failed",
-              opt_nthreads, thread_func);
 
     return result;
 }
@@ -312,16 +238,12 @@ int main (int argc, char *argv[])
                     "lib.locale.ctype",
                     "thread safety", run_test,
                     "|-soft-timeout#0 "  // must be non-negative
-                    "|-nloops#0 "        // arg must be non-negative
-                    "|-nthreads#0-* "    // arg must be in [0, MAX_THREADS]
-                    "|-nlocales#0 "      // arg must be non-negative
-                    "|-locales= "        // arg must be provided
-                    "|-shared-locale# ",
+                    "|-nrounds#0 "       // must be non-negative
+                    "|-nthreads#0-* "    // must be in [0, MAX_THREADS]
+                    "|-locales= ",       // must be provided
                     &opt_timeout,
-                    &opt_nloops,
+                    &opt_nrounds,
                     int (MAX_THREADS),
                     &opt_nthreads,
-                    &opt_nlocales,
-                    &rw_opt_setlocales,
-                    &opt_shared_locale);
+                    &rw_opt_setlocales);
 }
