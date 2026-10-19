@@ -41,58 +41,45 @@ belongs.
 
 ** TODO MT tests that provoke contention instead of waiting for it
 
-The older =22.locale.*.mt= tests run one thread per processor, up to
-32, for 10,000 to 200,000 iterations each. Each threaded section runs
-to its own 60-second soft timeout. After the first iteration
-everything they touch is cached, and the rest measures the locks at
-rest. On 32 processors seven of them outlast the harness's 60-second
-timeout. The address-space limit grows with the processor count in
-thread-safe builds and no longer stops them. Each test covers several
-facets, so a failure names a test, not a defect.
+The older =22.locale.*.mt= tests run a few threads over a facet's
+operations for a number of rounds and pass when every thread reaches
+the end. Each runs at a size chosen under ThreadSanitizer, the
+smallest that still reports the fault the test was written for with
+that fault put back, and nothing on the fixed library
+(=doc/notes/analysis-locale-mt-sizing.md=, the method and each
+program's runs in 15D and 12D). Four threads whatever the processor
+count, the sizes the programs' defaults, overridable through their
+options; every one passes under the harness in 15D in about a second,
+and the six tables pin the rows (=ref-test-baseline.md=, chapter
+3.2). After the first round everything a test touches is cached and
+the rest measures the locks at rest; a race is caught only when the
+kernel's scheduling puts two threads in its window. Each test covers
+several facets, so a failure names a test, not a defect.
 
 The four gated tests, =22.locale.use_facet.mt=,
 =22.locale.time.put.libc.mt=, =22.locale.id.mt= and
-=22.locale.facet.mt=, find their races in seconds. A few threads wait
+=22.locale.facet.mt=, provoke their races instead: a few threads wait
 on a barrier and start together at the first use of a fresh object,
-round after round. They overlap the older tests.
+round after round. They overlap the older tests. ThreadSanitizer
+reports a race from what ran, not from its timing, and is the judge.
 
-A plain run catches a race only when the kernel's scheduling puts two
-threads in its window, and that is the same for every run on one
-kernel and changes with the next. ThreadSanitizer reports a race from
-what ran, not from its timing, and is the judge from here.
-
-Fix: first, with no change to the sources, run each program under the
-sanitizer at decreasing sizes through its own options, against the
-fixed library and with its fault put back. The smallest size that
-still reports the fault, and nothing on the fixed library, becomes
-the program's default. =doc/notes/analysis-locale-mt-sizing.md=
-records the method and each program's runs and times. Then a census
-of what each older test covers against the gated ones: each kept,
-split or retired with the reason, one race or one facet operation per
-program. Plain runs are sized for speed: a few threads whatever the
-processor count, short rounds on fresh state, the timeout a hang
-detector.
-
-State: all 18 programs are sized in 15D and pass in 12D (the note's
-chapter 5); the sizes are the programs' defaults, overridable through
-their options. The note's chapter 4 holds what the census needs:
-=22.locale.cons.mt= reaches no fixed fault (it never fills a facet
-slot); the classic section of =22.locale.statics.mt= races a classic
+What the sizing found, for the census (the note's chapter 4):
+=22.locale.cons.mt= reaches no fixed fault, it never fills a facet
+slot; the classic section of =22.locale.statics.mt= races a classic
 locale its static array already built; the leak checks of
-=22.locale.time.put.libc.mt= and =22.locale.use_facet.mt= are the only
-detectors of their faults; =22.locale.money.put.mt= drops =C.utf8=
-without a word; six fixed commits were not put back; in 12D
-=22.locale.messages.mt= reports the slot fault in 86 runs of 100. In
-the full GCC run at bf5fbd46 every locale MT test passes under the
-harness in 15D in about a second on 32 processors, and the GCC tables
-pin the rows (=ref-test-baseline.md=, chapter 3.2); the Clang tables
-are not yet measured at the new sizes.
+=22.locale.time.put.libc.mt= and =22.locale.use_facet.mt= are the
+only detectors of their faults; =22.locale.money.put.mt= drops
+=C.utf8= without a word; six fixed commits were not put back; in 12D
+=22.locale.messages.mt= reports the slot fault in 86 runs of 100.
 
-Check: every program in the note's table has a chosen size, a time,
-and runs under the sanitizer that report its fault and stay clean on
-the fixed library, in 15D and in 12D. Every locale MT test passes in
-seconds under the harness in 15D on any processor count, and the 15D
-rows become a reference.
+Fix: a census of what each older test covers against the gated
+ones; each kept, split or retired with the reason, one race or one
+facet operation per program, each provoking its race the gated way.
+
+Check: every locale MT program names the race or the operation it
+covers, reports its fault under the sanitizer with the fault put back
+and stays clean on the fixed library, and the six tables pin the
+rows.
 
 ** TODO All the C library's locales on the test hosts
 
