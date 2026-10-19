@@ -208,21 +208,6 @@ The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
 
-** TODO =genxviews= publishes to the Apache site
-
-=bin/genxviews= ran =xbuildgen= over the logs of every platform and
-wrote the cross-build pages under the Apache site's document root,
-with links into the subversion repository. Nothing calls it: the
-driver writes one page per build into the build's directory, and a
-night has no index that lists its pages.
-
-Fix: retire the script, or turn it into the night's index: one page
-in the night's directory that names each build, its verdict and its
-page.
-
-Check: =git grep genxviews= empty, or a night's directory holds
-=index.html= with a row per configuration.
-
 ** TODO Run the suites in parallel
 
 The six suites run one after another, about 26 minutes on 32

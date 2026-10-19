@@ -481,8 +481,8 @@ so aarch64 falls to the mutex fallback (the `std::locale` entry in
 `TODO` carries the port); the string atomics clause for binary
 compatibility with 4.1.x is a decision of its own; the version
 workarounds for old GCC releases wait for a stated minimum, step 6
-above; `bin/genxviews` and `etc/config/xfail.txt` name the 2008
-platforms as data and are records, like the original README.
+above; `etc/config/xfail.txt` names the 2008 platforms as data and
+is a record, like the original README.
 
 [power11]: https://newsroom.ibm.com/2025-07-08-ibm-power11-raises-the-bar-for-enterprise-it
 [t2080]: https://www.nxp.com/products/T2080
