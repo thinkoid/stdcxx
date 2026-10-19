@@ -196,8 +196,8 @@ OUTFILE=results.xml
 myname=${0##*/}
 
 if [ -z "$MAKE" ]; then
-    # let callers override the default gmake
-    MAKE=gmake
+    # let callers override the default make
+    MAKE=make
 fi
 
 # the name of the top-level source directory (TOPDIR)
