@@ -37,7 +37,7 @@
 #
 # EXAMPLE:
 #
-#     derive-pin build/runall.log > doc/notes/baseline/x86_64-15D.txt
+#     derive-pin build/runall.log > doc/notes/baseline/15D.txt
 #
 #     The command above pins the table of a 15D run.
 #

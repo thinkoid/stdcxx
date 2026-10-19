@@ -64,10 +64,8 @@
 #
 #     -p <pin-dir>
 #         Specifies the directory of the pins, named as under
-#         doc/notes/baseline: <arch>-<config>.txt, where the arch is
-#         the machine's, or i386 for a 32-bit build type on x86_64.
-#         When omitted, defaults to doc/notes/baseline of the
-#         exported revision.
+#         doc/notes/baseline: <config>.txt. When omitted, defaults to
+#         doc/notes/baseline of the exported revision.
 #
 #     -r <revision>
 #         Specifies the git revision to test. When omitted, defaults
@@ -153,21 +151,13 @@ log_name()
 
 
 ##########
-# pin_name(): writes the name of the pin of the given configuration:
-# the machine's architecture, i386 for a 32-bit build type on x86_64,
-# then the configuration
+# pin_name(): writes the name of the pin of the given configuration;
+# a pin is the configuration's table, whatever the machine
 pin_name()
 {
     cfg=$1
 
-    arch=$(uname -m)
-
-    # a lowercase letter in the build type is a 32-bit build
-    case $(build_type "$cfg") in
-        *[a-z]) [ "$arch" = x86_64 ] && arch=i386;;
-    esac
-
-    echo "$arch-$cfg.txt"
+    echo "$cfg.txt"
 }
 
 

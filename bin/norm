@@ -39,7 +39,7 @@
 #
 # EXAMPLE:
 #
-#     norm doc/notes/baseline/x86_64-15D.txt > pin.txt
+#     norm doc/notes/baseline/15D.txt > pin.txt
 #     norm build/runall.log > table.txt
 #     diff pin.txt table.txt
 #

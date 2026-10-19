@@ -16,7 +16,9 @@ harness's own table without the timing columns.
   in any configuration, under either compiler.
 - The tables come from a host with every glibc locale installed. A
   host with `en_US.UTF-8` alone differs from them in fourteen locale
-  rows (chapter 2).
+  rows (chapter 2). A pin is a configuration's table, whatever the
+  machine: the 15D table of an aarch64 host is the x86-64 one row for
+  row.
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
 
@@ -92,9 +94,9 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/x86_64-11S.txt` | 268 | 12,468,830 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/i386-11s.txt` | 268 | 12,468,724 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/x86_64-15D.txt` | 268 | 12,472,502 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,468,830 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,468,724 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,472,502 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -257,9 +259,8 @@ and `21.string.push_back.mt` 2.
 
 ## 5. The same suite under Clang
 
-`x86_64-11S-clang.txt`, `i386-11s-clang.txt` and
-`x86_64-15D-clang.txt` are the same three configurations built with
-Clang (`CONFIG=gcc.config CXX=clang` on the `config` line), run and
+`11S-clang.txt`, `11s-clang.txt` and `15D-clang.txt` are the same
+three configurations built with Clang (`CONFIG=gcc.config CXX=clang` on the `config` line), run and
 pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
