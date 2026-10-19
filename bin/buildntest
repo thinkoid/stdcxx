@@ -280,6 +280,10 @@ make_stage()
     # remove the longest prefix matching the pattern "*/"
     stagename="${stagedir##*/}"
 
+    # the warning and error counts of a build stage; a run stage
+    # reports none, so the previous stage's must not carry over
+    diags=""
+
     # a run of one directory is a runall stage, not its build stage
     case "$stageargs" in
         (runall*) stagename=runall;;
