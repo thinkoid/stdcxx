@@ -175,9 +175,9 @@ processor count, at a size chosen under ThreadSanitizer
 second or less, and the rows are a reference. `22.locale.codecvt.mt`
 counts 1,600 assertions. `cons.mt`, `ctype.mt`, `globals.mt`,
 `messages.mt`, `moneypunct.mt`, `num.get.mt`, `num.put.mt`,
-`numpunct.mt`, `statics.mt`, `time.get.mt` and `time.put.mt` count
-none: their pass means every thread ran to the end without an error,
-a crash or a hang.
+`numpunct.mt`, `statics.mt`, `time.get.mt` and `time.put.mt` count none:
+their pass means every thread ran to the end without an error, a crash
+or a hang.
 
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
@@ -192,9 +192,9 @@ The four gated MT tests, `22.locale.use_facet.mt`,
 The `TODO` entry "MT tests that provoke contention instead of waiting
 for it" holds the census of what each older test covers against the
 gated ones, and the verdict on each: retired, gated or split.
-`22.locale.money.get.mt` was the first to go: the facet holds no
-state of its own, and every fault the program reported was the
-`moneypunct` builder's or the facet slot's.
+`22.locale.money.get.mt` and `money.put.mt` are retired: the `get` and
+`put` facets hold no state of their own, and every fault their programs
+reported was a builder's or the facet slot's.
 
 ## 4. Differences between configurations
 
