@@ -186,50 +186,95 @@ unsigned int Def::process_order_stmt (collate_section_t& section)
 }
 
 
-// decimally increment the symbolic name, turning something like
-// <U1234> into <U1245>, or <jis234> to <jis235>
-static std::string
-dec_increment (const std::string &sym)
+// the symbolic names of a range <first>..<last> (ISO/IEC TR 14652):
+// the two names have the same length, share a prefix and differ in
+// a numeric suffix, hexadecimal for ".." and decimal for "....",
+// that counts from the one to the other; a generated name keeps the
+// width of the suffix, so <S0009>..<S000B> names <S0009>, <S000A>
+// and <S000B>
+struct symbol_range_t
 {
-    const char *pdig = sym.c_str ();
+    symbol_range_t (const std::string& first, const std::string& last,
+                    bool hex);
 
-    for (; !(std::isdigit (*pdig)); ++pdig);
+    // false when the two names do not form a range
+    bool valid () const { return valid_; }
 
-    char *end;
+    // the number of names, both ends included
+    unsigned long size () const { return to_ - from_ + 1; }
 
-    const unsigned long sym_val = std::strtoul (pdig, &end, 10);
+    // the n-th name, 0 the first
+    std::string name (unsigned long n) const;
 
-    char numstr [64];
-    std::sprintf (numstr, "%lu", sym_val + 1);
+private:
+    std::string   prefix_;
+    unsigned long from_;
+    unsigned long to_;
+    int           width_;
+    bool          hex_;
+    bool          valid_;
+};
 
-    std::string next_sym = sym.substr (0, pdig - sym.c_str ());
-    next_sym.append (numstr);
-    next_sym.append (end);
 
-    return next_sym;
+symbol_range_t::
+symbol_range_t (const std::string& first, const std::string& last, bool hex)
+    : from_ (0), to_ (0), width_ (0), hex_ (hex), valid_ (false)
+{
+    std::string::size_type prefix = 0;
+    for (; prefix < first.size () && prefix < last.size (); ++prefix)
+        if (first [prefix] != last [prefix])
+            break;
+
+    const int base = hex ? 16 : 10;
+
+    char* end_first = 0;
+    char* end_last  = 0;
+
+    from_ = std::strtoul (first.c_str () + prefix, &end_first, base);
+    to_   = std::strtoul (last.c_str () + prefix, &end_last, base);
+
+    // the names end in the closing bracket and nothing but the
+    // suffix follows the prefix
+    valid_ =    first.size () == last.size ()
+             && prefix + 1 < first.size ()
+             && 0 == std::strcmp (end_first, ">")
+             && 0 == std::strcmp (end_last, ">")
+             && from_ <= to_;
+
+    prefix_ = first.substr (0, prefix);
+    width_  = int (first.size () - prefix - 1);
 }
 
 
-// hexadecimally increment the symbolic name
-static std::string
-hex_increment (const std::string& sym)
+std::string symbol_range_t::
+name (unsigned long n) const
 {
-    const char *pdig = sym.c_str ();
-
-    for (; !(std::isxdigit (*pdig)); ++pdig);
-
-    char *end;
-
-    const unsigned long sym_val = std::strtoul (pdig, &end, 16);
-
     char numstr [64];
-    std::sprintf (numstr, "%lx", sym_val + 1);
+    std::sprintf (numstr, hex_ ? "%0*lX>" : "%0*lu>", width_, from_ + n);
 
-    std::string next_sym = sym.substr (0, pdig - sym.c_str ());
-    next_sym.append (numstr);
-    next_sym.append (end);
+    return prefix_ + numstr;
+}
 
-    return next_sym;
+
+// expand the range <first>..<last> of a collating-symbol definition
+static void
+expand_symbol_range (const Scanner::token_t&      first,
+                     const Scanner::token_t&      last,
+                     bool                         hex,
+                     std::list<Scanner::token_t>& out)
+{
+    const symbol_range_t range (first.name, last.name, hex);
+
+    if (!range.valid ())
+        issue_diag (E_RANGE, true, &last,
+                    "invalid names for collating-symbol range %s..%s\n",
+                    first.name.c_str (), last.name.c_str ());
+
+    for (unsigned long n = 0; n < range.size (); ++n) {
+        Scanner::token_t sym (first);
+        sym.name = range.name (n);
+        out.push_back (sym);
+    }
 }
 
 
@@ -294,6 +339,8 @@ void Def::preprocess_collation_definitions()
             case Scanner::tok_hex_ellipsis:   // "<FOO>..<BAR>"
             case Scanner::tok_dec_ellipsis:   // "<FOO>....<BAR>"
             {
+                // the kind of ellipsis, before the step to the end
+                const Scanner::token_id ellipsis = e_it->first.token;
 
                 if (++e_it != s_it->entries.end ())
                     next_elm = e_it->first.name;
@@ -303,7 +350,7 @@ void Def::preprocess_collation_definitions()
                                 " processing ellipsis during scan_ahead\n");
                 }
 
-                if (e_it->first.token == Scanner::tok_abs_ellipsis) {
+                if (ellipsis == Scanner::tok_abs_ellipsis) {
                     wchar_t w_cmap_cur_val 
                         = w_cmap.find(prev_elm)->second;
                     wchar_t w_cmap_end_val
@@ -331,15 +378,18 @@ void Def::preprocess_collation_definitions()
 
                 }
                 else {
-                    // we are incrementing the symbolic names
-                    std::string next_name = prev_elm;
-                    do {
-                        if (e_it->first.token == Scanner::tok_hex_ellipsis) 
-                            next_name = hex_increment (next_name);
-                        else 
-                            next_name = dec_increment (next_name);
+                    // the names after the first, the end included
+                    const symbol_range_t range (
+                        prev_elm, next_elm,
+                        ellipsis == Scanner::tok_hex_ellipsis);
 
-                        w_cmap_iter it = w_cmap.find (next_name);
+                    if (!range.valid ())
+                        issue_diag (E_RANGE, true, &e_it->first,
+                                    "invalid names for the range %s..%s\n",
+                                    prev_elm.c_str (), next_elm.c_str ());
+
+                    for (unsigned long n = 1; n < range.size (); ++n) {
+                        w_cmap_iter it = w_cmap.find (range.name (n));
                         if (it != w_cmap.end()) {
                             // process iteration
                             collate_info_t ci = {UINT_MAX, UINT_MAX, 0, 0};
@@ -348,7 +398,7 @@ void Def::preprocess_collation_definitions()
                             coll_map_.insert (
                                 std::make_pair (it->second, ci));
                         }
-                    } while (next_name != next_elm);
+                    }
                 }
 
                 prev_elm = next_elm;
@@ -462,7 +512,10 @@ void Def::process_order(collate_section_t& section,
                  || e_it->first.token == Scanner::tok_dec_ellipsis
                  || e_it->first.token == Scanner::tok_hex_ellipsis) {
 
-            // process line with ellipsis
+            // process line with ellipsis; its kind, before the step
+            // to the end
+            const Scanner::token_id ellipsis = e_it->first.token;
+
             Weights_t* weights_template = 
                 new Weights_t[collate_out_.num_weights];
             std::vector<bool> ordinal_weights;
@@ -485,7 +538,7 @@ void Def::process_order(collate_section_t& section,
                             " processing ellipsis\n");
             }
 
-            if (e_it->first.token == Scanner::tok_abs_ellipsis) {
+            if (ellipsis == Scanner::tok_abs_ellipsis) {
                 wchar_t w_cmap_cur_val 
                     = w_cmap.find(prev_elm)->second;
                 wchar_t w_cmap_end_val
@@ -508,20 +561,23 @@ void Def::process_order(collate_section_t& section,
 
             } else { 
 
-                // we are incrementing the symbolic names
-                std::string next_name = prev_elm;
-                do {
-                    if (e_it->first.token == Scanner::tok_hex_ellipsis) 
-                        next_name = hex_increment (next_name);
-                    else 
-                        next_name = dec_increment (next_name);
+                // the names after the first, the end included
+                const symbol_range_t range (
+                    prev_elm, next_elm,
+                    ellipsis == Scanner::tok_hex_ellipsis);
 
-                    w_cmap_iter it = w_cmap.find (next_name);
+                if (!range.valid ())
+                    issue_diag (E_RANGE, true, &e_it->first,
+                                "invalid names for the range %s..%s\n",
+                                prev_elm.c_str (), next_elm.c_str ());
+
+                for (unsigned long n = 1; n < range.size (); ++n) {
+                    w_cmap_iter it = w_cmap.find (range.name (n));
                     if (it != w_cmap.end()) {
                         add_to_coll (it->second, weights_template, 
                                      coll_value++, ordinal_weights, false);
                     }
-                } while (next_name != next_elm);
+                }
             }
 
             // store current left-hand symbol
@@ -1647,14 +1703,38 @@ void Def::preprocess_collate ()
                             "illegal collating-element expression\n");
             break;
         }
-        case Scanner::tok_coll_sym:
+        // a collating symbol definition declares a symbolic name
+        // that is not in the character map; the form of the phrase
+        // is one of:
+        // collating-symbol sym
+        // collating-symbol sym..sym
+        case Scanner::tok_coll_sym: {
             next = scanner_.next_token();
             if (next.token != Scanner::tok_sym_name)
                 issue_diag (E_SYNTAX, true, &next,
                             "symbolic name expected following "
                             "collating-symbol\n");
-            cs_list_.push_back (next);
+
+            const token_t first (next);
+
+            next = scanner_.next_token ();
+            if (   next.token != Scanner::tok_hex_ellipsis
+                && next.token != Scanner::tok_dec_ellipsis) {
+                cs_list_.push_back (first);
+                break;
+            }
+
+            const bool hex = next.token == Scanner::tok_hex_ellipsis;
+
+            next = scanner_.next_token ();
+            if (next.token != Scanner::tok_sym_name)
+                issue_diag (E_SYNTAX, true, &next,
+                            "symbolic name expected following the "
+                            "ellipsis in collating-symbol\n");
+
+            expand_symbol_range (first, next, hex, cs_list_);
             break;
+        }
         case Scanner::tok_script:
             next = scanner_.next_token ();
             if (next.token != Scanner::tok_sym_name)
@@ -1678,11 +1758,113 @@ void Def::preprocess_collate ()
             preprocess_reorder_section ();
             break;
 
+        case Scanner::tok_define:
+        case Scanner::tok_undef:
+        case Scanner::tok_ifdef:
+        case Scanner::tok_ifndef:
+        case Scanner::tok_else:
+        case Scanner::tok_endif:
+            process_conditional ();
+            break;
+
         default:
             break;
         }
     }
     while (Scanner::tok_end_tokens != next.token);
+}
+
+
+// the conditionals of the GNU sources, next being the directive:
+// define and undef name a symbol, ifdef and ifndef test it and take
+// the branch up to the else or the endif; the other branch is skipped
+void Def::process_conditional ()
+{
+    switch (next.token) {
+    case Scanner::tok_define:
+    case Scanner::tok_undef: {
+        const bool define = next.token == Scanner::tok_define;
+
+        next = scanner_.next_token ();
+        if (next.token != Scanner::tok_ndef)
+            issue_diag (E_SYNTAX, true, &next,
+                        "symbol expected following %s\n",
+                        define ? "define" : "undef");
+
+        if (define)
+            defined_.insert (next.name);
+        else
+            defined_.erase (next.name);
+        break;
+    }
+
+    case Scanner::tok_ifdef:
+    case Scanner::tok_ifndef: {
+        const bool ifdef = next.token == Scanner::tok_ifdef;
+
+        next = scanner_.next_token ();
+        if (next.token != Scanner::tok_ndef)
+            issue_diag (E_SYNTAX, true, &next,
+                        "symbol expected following %s\n",
+                        ifdef ? "ifdef" : "ifndef");
+
+        const bool defined = defined_.find (next.name) != defined_.end ();
+
+        // a branch not taken is skipped up to its else, where
+        // scanning resumes, or up to its endif
+        if (defined != ifdef)
+            skip_conditional (true);
+        break;
+    }
+
+    case Scanner::tok_else:
+        // the end of a branch taken: skip the other one
+        skip_conditional (false);
+        break;
+
+    case Scanner::tok_endif:
+        break;
+
+    default:
+        break;
+    }
+}
+
+
+// skip a branch of a conditional: the tokens up to the matching endif,
+// or up to the else of the same conditional when stop_at_else, with
+// nested conditionals skipped whole
+void Def::skip_conditional (bool stop_at_else)
+{
+    for (int depth = 0; ; ) {
+        next = scanner_.next_token ();
+
+        switch (next.token) {
+        case Scanner::tok_ifdef:
+        case Scanner::tok_ifndef:
+            ++depth;
+            break;
+
+        case Scanner::tok_else:
+            if (0 == depth && stop_at_else)
+                return;
+            break;
+
+        case Scanner::tok_endif:
+            if (0 == depth)
+                return;
+            --depth;
+            break;
+
+        case Scanner::tok_end_tokens:
+            issue_diag (E_SYNTAX, true, &next,
+                        "end of input inside a conditional\n");
+            return;
+
+        default:
+            break;
+        }
+    }
 }
 
 
@@ -1732,11 +1914,25 @@ void Def::preprocess_order ()
                             "parsing collate section\n");
             case  Scanner::tok_nl:
                 continue;
+            case Scanner::tok_define:
+            case Scanner::tok_undef:
+            case Scanner::tok_ifdef:
+            case Scanner::tok_ifndef:
+            case Scanner::tok_else:
+            case Scanner::tok_endif:
+                process_conditional ();
+                break;
             case Scanner::tok_comment:
                 scanner_.ignore_line ();
                 break;
+            // a collation definition, or the ellipsis that stands
+            // for the characters between the definitions around it
             case Scanner::tok_undefined:
             case Scanner::tok_sym_name: 
+            case Scanner::tok_abs_ellipsis:
+            case Scanner::tok_hex_ellipsis:
+            case Scanner::tok_dec_ellipsis:
+            case Scanner::tok_dbl_ellipsis:
             {
                 token_t sym (next);
                 section.entries.push_back (
@@ -2216,8 +2412,10 @@ bool Def::get_weight ( token_t&     w,
             collate_out_.longest_weight = k;
 
     }
-    else if (w.token == Scanner::tok_abs_ellipsis)
-        // return true if ellipsis are embedded in the weight
+    else if (   w.token == Scanner::tok_abs_ellipsis
+             || w.token == Scanner::tok_hex_ellipsis
+             || w.token == Scanner::tok_dec_ellipsis)
+        // an ellipsis as a weight is the element's own position
         ret = true;
     else
         warnings_occurred_ = 

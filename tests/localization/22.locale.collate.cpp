@@ -649,6 +649,167 @@ check_libstd_test_locale (const char* charTname)
 
 /**************************************************************************/
 
+// creates a second locale database from a definition in the forms
+// of the GNU libc sources that the test database above does not use:
+// a collating-symbol range, define with ifdef, ifndef, else and
+// endif, and an ellipsis entry with ellipsis weights
+static const char*
+make_range_locale ()
+{
+    static const char* locname;
+
+    if (locname)
+        return locname;
+
+    // the root the test database above was created in, when it was
+    const char* locale_root = std::getenv (LOCALE_ROOT);
+    if (0 == locale_root || '\0' == *locale_root)
+        locale_root = rw_set_locale_root ();
+    if (0 == locale_root)
+        return 0;
+
+    static const char charmap [] = {
+        "<code_set_name> \"RANGE-TEST\"\n"
+        "<mb_cur_max> 1\n<mb_cur_min> 1\n"
+        "CHARMAP\n"
+        "<U0061> \\x61\n<U0062> \\x62\n<U0063> \\x63\n<U0064> \\x64\n"
+        "<U0065> \\x65\n<U0066> \\x66\n<U0067> \\x67\n<U0068> \\x68\n"
+        "END CHARMAP\n"
+    };
+
+    static const char lc_collate [] = {
+        "LC_COLLATE\n"
+
+        // the range declares <L0>, <L1> and <L2>; the bare names
+        // order them
+        "collating-symbol <L0>..<L2>\n"
+        "<L0>\n<L1>\n<L2>\n"
+
+        // the GNU form of a conditional: it picks the order_start
+        // line of the section that follows
+        "define FORWARD\n"
+        "ifdef FORWARD\n"
+        "order_start forward;forward\n"
+        "else\n"
+        "order_start backward;backward\n"
+        "endif\n"
+        "<U0061> <L0>;<U0061>\n"
+        "<U0062> <L1>;<U0062>\n"
+        "<U0063> <L2>;<U0063>\n"
+
+        // the characters between d and g, each at its own position
+        // on both levels
+        "<U0064> <U0064>;<U0064>\n"
+        ".. ..;..\n"
+        "<U0067> <U0067>;<U0067>\n"
+        "order_end\n"
+
+        // the branch not taken holds a whole section
+        "ifndef NOT_DEFINED\n"
+        "order_start forward;forward\n"
+        "<U0068> <L2>;<U0068>\n"
+        "order_end\n"
+        "else\n"
+        "order_start forward;forward\n"
+        "<U0068> <L0>;<U0068>\n"
+        "order_end\n"
+        "endif\n"
+
+        "END LC_COLLATE\n"
+    };
+
+    const std::string srcfname =
+        std::string (locale_root) + _RWSTD_PATH_SEP + "range.src";
+    const std::string cmfname =
+        std::string (locale_root) + _RWSTD_PATH_SEP + "range.cm";
+
+    std::FILE* fout = std::fopen (srcfname.c_str (), "w");
+    if (!fout) {
+        rw_error (0, __FILE__, __LINE__,
+                  "fopen(%#s, \"w\") failed: %m", srcfname.c_str ());
+        return 0;
+    }
+
+    std::fputs (lc_collate, fout);
+    std::fclose (fout);
+
+    fout = std::fopen (cmfname.c_str (), "w");
+    if (!fout) {
+        rw_error (0, __FILE__, __LINE__,
+                  "fopen(%#s, \"w\") failed: %m", cmfname.c_str ());
+        return 0;
+    }
+
+    std::fputs (charmap, fout);
+    std::fclose (fout);
+
+    locname = "range-locale";
+
+    if (0 == rw_localedef ("-w", srcfname.c_str (), cmfname.c_str (), locname))
+        locname = 0;
+
+    return locname;
+}
+
+
+template <class charT>
+void
+check_libstd_range_locale (const char* charTname)
+{
+    rw_info (0, __FILE__, __LINE__,
+             "libstd std::collate<%s>::compare () collate database "
+             "in the forms of the GNU libc sources", charTname);
+
+    const char* const locname = make_range_locale ();
+    if (!locname) {
+        rw_assert (false, __FILE__, __LINE__,
+                   "unable to create a locale database");
+        return;
+    }
+
+    std::locale loc;
+
+    try {
+        loc = std::locale (locname);
+    }
+    catch (...) {
+        const char* const var = std::getenv (LOCALE_ROOT);
+
+        rw_assert (false, __FILE__, __LINE__,
+                   "std::locale(\"%s\") unexpectedly threw "
+                   "an exception; " LOCALE_ROOT "=%s",
+                   locname, var ? var : "(null)");
+        return;
+    }
+
+    const std::collate<charT> &co =
+        std::use_facet< std::collate<charT> >(loc);
+    co._C_opts |=  co._C_use_libstd;
+    co._C_opts &= ~co._C_use_libc;
+
+    // the range: <L0> before <L1> before <L2>
+    test_string (charTname, co, "a", "b", -1);
+    test_string (charTname, co, "b", "c", -1);
+
+    // the define: forward orders; backward ones would compare the
+    // strings from their ends and reverse the result
+    test_string (charTname, co, "ab", "ba", -1);
+
+    // the ellipsis: each character between d and g at its own
+    // position, in order; a character the ellipsis missed would
+    // get its weight after every defined one
+    test_string (charTname, co, "d", "e", -1);
+    test_string (charTname, co, "e", "f", -1);
+    test_string (charTname, co, "f", "g", -1);
+
+    // the branch taken: h shares its first weight with c, not
+    // with a, and parts from c at the second level
+    test_string (charTname, co, "h", "b", 1);
+    test_string (charTname, co, "h", "c", 1);
+}
+
+/**************************************************************************/
+
 template <class charT>
 void
 test_hash (const char* charTname, const std::collate<charT>& co,
@@ -1162,6 +1323,7 @@ void
 do_test (const char* charTname)
 {
     check_libstd_test_locale<charT> (charTname);
+    check_libstd_range_locale<charT> (charTname);
     check_libstd<charT> (charTname);
     check_libc<charT> (charTname);
     check_NUL<charT> (charTname);

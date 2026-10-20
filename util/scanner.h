@@ -165,6 +165,12 @@ public:
         tok_escape_char,     // <escape_char>
         tok_copy,            // copy directive
         tok_include,         // include directive
+        tok_define,          // define directive (LC_COLLATE)
+        tok_undef,           // undef directive
+        tok_ifdef,           // ifdef directive
+        tok_ifndef,          // ifndef directive
+        tok_else,            // else directive
+        tok_endif,           // endif directive
         tok_nl,              // newline
         tok_ndef,            // unknown/undefined token
         tok_end_tokens       // end of input

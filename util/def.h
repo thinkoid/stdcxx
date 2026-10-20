@@ -124,6 +124,9 @@ private:
     token_list_t  script_list_;
     token_list_t  cs_list_;
     token_list_t  sym_list_;
+
+    // the symbols named by define, tested by ifdef and ifndef
+    std::set<std::string> defined_;
     std::list<collate_elem_t>     ce_list_;
     std::list<collate_section_t>  section_list_;
 
@@ -133,6 +136,8 @@ private:
     void preprocess_reorder ();
     void preprocess_reorder_section ();
     void preprocess_collation_definitions();
+    void process_conditional ();
+    void skip_conditional (bool);
 
     void process_collation_definition ( bool, collate_entry_t&,
                                         unsigned int, unsigned int);

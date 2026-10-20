@@ -103,9 +103,40 @@ not a gap. =doc/notes/analysis-locale-sources.md= holds the survey. The facets c
 (=doc/notes/ref-locale.md=), so stale sources need not reach every
 =std::locale= a program constructs.
 
-Fix: in order. First the compiler: find what in the current sources
-it rejects, the Error 312 first, and extend the scanner and the =Def=
-writers until glibc's =en_US= builds. Then the shared tables together
+The compiler, 2026-10-20: =localedef= reads the collation templates
+now. The =<A>..<B>= form of =collating-symbol= (the handler took one
+name and dropped the rest; the old =i18n= declares four such ranges
+whose symbols nothing uses), =define=, =undef=, =ifdef=, =ifndef=,
+=else= and =endif=, the entries an ellipsis leads and the ellipsis
+as a weight (the parser dropped the entries and the kind of the
+ellipsis was read after the step to the end entry, so the Han block
+of =iso14651_t1= fell into the undefined characters); the symbolic
+increment keeps the width and case of the name where it wrote
+=<U4e01>= for =<U4E01>=. Of the 502 definitions in glibc's
+=SUPPORTED=, 487 build. The =en_US= databases against the C
+library's =en_US.UTF-8=: every classification and case mapping of
+every code point agrees but 135, CJK extension tails the class
+ranges cover and the C library does not classify; every collation of
+a word list and of 50000 random Latin, Greek and Cyrillic strings
+agrees, and 19 of 297266 single-character pairs differ, all over
+characters outside the table, which glibc ties and the library
+orders by code point. The 15 that do not build: 13 =reorder-after= a
+collating symbol with weighted entries (=fa_IR=, =az_IR=, =ps_AF=,
+=hu_HU=, =zh_CN=, =bo_CN=, =bo_IN=, =dz_BT=, =ml_IN=): the model keeps
+the bare symbols and the sections apart, so a weighted entry has no
+place after a symbol, and the check reads the first statement of the
+block only, Error 291 when that one has weights and Error 101 later
+when it has none; =mdf_RU= writes characters raw where a symbolic
+name is expected (Error 312); =cmn_TW= runs past five minutes on the
+pinyin template. The keyword table still lacks =alt_mon=,
+=ab_alt_mon=, =class=, =map=, =default_missing=, =symbol-equivalence=,
+=week=, =first_weekday=, =first_workday=, =date_fmt=, =yesstr= and
+=nostr=; the lines are skipped.
+
+Fix: in order. First the rest of the compiler: one ordering of
+symbols and entries in =util/collate.cpp= so =reorder-after= can
+place weighted entries after a symbol, raw characters in collation
+statements, the pinyin run time. Then the shared tables together
 with their charmaps, =i18n=, the transliteration and collation
 templates: refreshed leaf definitions alone leave the shared tables
 stale. Then the definitions, the legacy names kept through an
