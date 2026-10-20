@@ -255,6 +255,10 @@ void test_libstd_tolower (charT, const char *cname,
     TEST ('b', 'B');
     TEST ('c', 'C');
 
+    // a character below the first entry of the conversion table:
+    // the search must stop at the table's first entry
+    TEST ('\0', '\0');
+
     if (sizeof(charT) > 1)
         TEST ('\xa0', '\xa1');
 

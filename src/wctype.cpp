@@ -203,9 +203,12 @@ __rw_toupper (__rw_ctype_t* impl,
         size_t high = size_t (impl->wtoupper_s ());
         size_t cur;
 
+        // the bounds are half-open: an unsigned high steps to cur,
+        // never below zero
+
         __rw_upper_elm next_elm;
 
-        while (low <= high) {
+        while (low < high) {
             cur = (low + high) / 2;
             next_elm = impl->wtoupper_tab(cur);
             if (next_elm.lower == c) {
@@ -219,7 +222,7 @@ __rw_toupper (__rw_ctype_t* impl,
                 < static_cast< _RWSTD_UINT32_T >(c))
                 low = cur + 1;
             else
-                high = cur - 1;
+                high = cur;
         }
     }
     else {
@@ -245,9 +248,12 @@ __rw_tolower (__rw_ctype_t* impl,
         size_t high = size_t (impl->wtolower_s ());
         size_t cur;
 
+        // the bounds are half-open: an unsigned high steps to cur,
+        // never below zero
+
         __rw_lower_elm next_elm;
 
-        while (low <= high) {
+        while (low < high) {
             cur = (low + high) / 2;
             next_elm = impl->wtolower_tab(cur);
             if (next_elm.upper == c) {
@@ -261,7 +267,7 @@ __rw_tolower (__rw_ctype_t* impl,
                 < static_cast< _RWSTD_UINT32_T >(c))
                 low = cur + 1;
             else
-                high = cur - 1;
+                high = cur;
         }
     }
     else {
