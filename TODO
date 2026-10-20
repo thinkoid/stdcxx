@@ -68,28 +68,6 @@ The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
 
-** TODO Run the suites in parallel
-
-The six suites run one after another, nine minutes on 32 processors
-(night-20261019e), a minute or two each, most of it in a few long
-tests. The suites are already isolated from each other: separate
-build directories, each program's output beside it, and a =TMPDIR=
-of its own for every =make run= (=etc/config/makefile.rules=). They
-share only the processors. The locale MT programs provoke their
-races on fresh state through a gate, four threads each, so their
-rows no longer depend on the load.
-
-Fix, in order:
-- The configurations' suites at once, all six. A command for
-  =doc/notes/ref-test-baseline.md=, not a tool to maintain.
-- One configuration's list split across several harness runs, only if
-  a single-threaded suite grows past a few minutes. Within one run the
-  tests share =TMPDIR= and the locales =localedef= builds; each shard
-  needs its own, and the census of what else they share comes first.
-
-Check: the six tables of a parallel run identical to those of a
-serial one, three runs over; the wall time recorded beside the tables.
-
 * Locales
 
 The locale sources and charmaps under =etc/nls=, the =localedef= that
