@@ -1102,7 +1102,7 @@ do_transform (const wchar_t* low, const wchar_t* high) const
                         tmp [nbytes] = '\0';
 
                         if (__rw::__rw_is_invalid (cvt->w_to_n_tab (), tmp))
-                            return 0;
+                            return string_type ();   // error
 
                         const unsigned int *pwt =
                             impl->get_weight (impl->undefined_weight_idx);

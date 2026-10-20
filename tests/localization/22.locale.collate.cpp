@@ -551,6 +551,37 @@ void
 test_weight_val (const char*, const std::collate<charT>&,
                  charT, int, int, int, int, bool);
 
+// a character outside the character map has no weights: its
+// transform is empty and it compares before any character
+static void
+test_outside_charmap (const char*, const std::collate<char>&)
+{
+    // narrow characters are all in the map
+}
+
+static void
+test_outside_charmap (const char* charTname, const std::collate<wchar_t>& co)
+{
+    const wchar_t outside [] = { L'\x100', L'\0' };
+    const wchar_t inside []  = { L'a', L'\0' };
+
+    const std::wstring xfrm = co.transform (outside, outside + 1);
+
+    rw_assert (xfrm.empty (), __FILE__, __LINE__,
+               "libstd std::collate<%s>::transform() of a character "
+               "outside the character map: expected an empty string, "
+               "got %u elements", charTname, unsigned (xfrm.size ()));
+
+    const int ret = co.compare (outside, outside + 1, inside, inside + 1);
+
+    rw_assert (-1 == ret, __FILE__, __LINE__,
+               "libstd std::collate<%s>::compare() of a character "
+               "outside the character map with 'a': expected -1, got %d",
+               charTname, ret);
+}
+
+/**************************************************************************/
+
 template <class charT>
 void
 check_libstd_test_locale (const char* charTname)
@@ -641,6 +672,8 @@ check_libstd_test_locale (const char* charTname)
         // since ic and c are equivalent elements string they should hash
         // the same
         test_hash (charTname, co, "c", "ic");
+
+        test_outside_charmap (charTname, co);
     }
     else
         rw_assert (false, __FILE__, __LINE__,
