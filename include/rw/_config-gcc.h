@@ -31,17 +31,6 @@
 
 // _REENTRANT is defined by the -pthread compiler option
 
-#if !defined (_RWSTD_USE_PURE_C_HEADERS)
-     // disabled except when requested
-#  define _RWSTD_NO_PURE_C_HEADERS
-#endif   // !_RWSTD_USE_PURE_C_HEADERS
-
-#ifdef _RWSTD_NO_PURE_C_HEADERS
-     // deprecated C headers (the <xxx.h> kind) are fully implemented
-     // in terms of the pure C++ C library headers (the <cxxx> kind)
-#  define _RWSTD_NO_DEPRECATED_C_HEADERS
-#endif   // _RWSTD_NO_PURE_C_HEADERS
-
 #define _RWSTD_GNUC_ATTRIBUTE(attr)   __attribute__ (attr)
 
 // gcc attribute((noreturn)) indicates that a function doesn't return
@@ -55,15 +44,6 @@
 
 #ifdef _RWSTD_OS_LINUX
 
-#  ifdef _RWSTD_NO_NEW_HEADER
-#    undef _RWSTD_NO_NEW_HEADER
-#  endif   // _RWSTD_NO_NEW_HEADER
-
-     // our <cxxx> libc headers put the libc functions in namespace std
-#  ifdef _RWSTD_NO_LIBC_IN_STD
-#    undef _RWSTD_NO_LIBC_IN_STD
-#  endif   // _RWSTD_NO_LIBC_IN_STD
-
 #  ifdef _RWSTD_ANSI_C_LIMITS_H
        // prevent system header warnings
 #    undef _RWSTD_ANSI_C_LIMITS_H
@@ -74,10 +54,3 @@
    // force using /usr/include/math.h 
    // prevent recursion caused by pulling in gcc's own "fixed" header
 #undef _RWSTD_ANSI_C_MATH_H
-
-   // use new C++ libc headers
-#undef _RWSTD_NO_NEW_HEADER
-
-#undef _RWSTD_NO_LIBC_IN_STD
-
-#undef _RWSTD_NO_DEPRECATED_LIBC_IN_STD
