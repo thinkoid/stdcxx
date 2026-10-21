@@ -221,8 +221,11 @@ beside the six.
 
 Under =eccp -A=:
 - =26.valarray.transcend=: nine failed assertions on the =float=
-  functions (=std::acos (valarray<float>)= and kin); =config.h= has
-  no =float= or =long double= overloads of the =<cmath>= functions.
+  functions (=std::acos (valarray<float>)= and kin) in the first
+  build, where =<cmath>= forwarded its =float= and =long double=
+  overloads to the C99 functions glibc withholds from strict C++03.
+  The overloads forward to the =double= functions under
+  =_RWSTD_NO_C99_MATH= now; the row is to be rerun.
 - =18.limits.traps=: =numeric_limits<bool>::traps= is true, as for
   every integer type, but the test's =bool= division by zero did not
   trap. Outside the test, =bool= division by zero traps under =eccp=

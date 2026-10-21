@@ -87,7 +87,11 @@ namespace std {
 #if defined (_RWSTD_NO_ABS_FLT)
 inline float abs (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::fabsf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::fabs (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #  undef _RWSTD_NO_ABS_FLT
 #  else
@@ -97,21 +101,33 @@ using ::abs;
 #if defined (_RWSTD_NO_ACOS_FLT)
 inline float acos (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::acosf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::acos (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_ACOS_FLT
 
 #if defined (_RWSTD_NO_ASIN_FLT)
 inline float asin (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::asinf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::asin (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_ASIN_FLT
 
 #if defined (_RWSTD_NO_ATAN_FLT)
 inline float atan (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::atanf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::atan (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_ATAN_FLT
 
@@ -119,7 +135,11 @@ inline float atan (float __x)
 #if defined (_RWSTD_NO_ATAN2_FLT)
 inline float atan2 (float __x, float __y)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::atan2f (__x, __y);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::atan2 (double (__x), double (__y));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_ATAN2_FLT
 
@@ -127,7 +147,11 @@ inline float atan2 (float __x, float __y)
 #if defined (_RWSTD_NO_CEIL_FLT)
 inline float ceil (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::ceilf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::ceil (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_CEIL_FLT
 
@@ -135,7 +159,11 @@ inline float ceil (float __x)
 #if defined (_RWSTD_NO_COS_FLT)
 inline float cos (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::cosf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::cos (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_COS_FLT
 
@@ -143,7 +171,11 @@ inline float cos (float __x)
 #if defined (_RWSTD_NO_COSH_FLT)
 inline float cosh (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::coshf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::cosh (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_COSH_FLT
 
@@ -151,7 +183,11 @@ inline float cosh (float __x)
 #if defined (_RWSTD_NO_EXP_FLT)
 inline float exp (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::expf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::exp (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_EXP_FLT
 
@@ -159,7 +195,11 @@ inline float exp (float __x)
 #if defined (_RWSTD_NO_FABS_FLT)
 inline float fabs (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::fabsf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::fabs (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #  undef _RWSTD_NO_FABS_FLT
 #endif   // _RWSTD_NO_FABS_FLT
@@ -168,7 +208,11 @@ inline float fabs (float __x)
 #if defined (_RWSTD_NO_FLOOR_FLT)
 inline float floor (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::floorf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::floor (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_FLOOR_FLT
 
@@ -176,7 +220,11 @@ inline float floor (float __x)
 #if defined (_RWSTD_NO_FMOD_FLT)
 inline float fmod (float __x, float __y)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::fmodf (__x, __y);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::fmod (double (__x), double (__y));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_FMOD_FLT
 
@@ -184,7 +232,11 @@ inline float fmod (float __x, float __y)
 #if defined (_RWSTD_NO_FREXP_FLT)
 inline float frexp (float __x, int *__e)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::frexpf (__x, __e);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::frexp (double (__x), __e);
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_FREXP_FLT
 
@@ -192,7 +244,11 @@ inline float frexp (float __x, int *__e)
 #if defined (_RWSTD_NO_LDEXP_FLT_INT)
 inline float ldexp (float __x, int __e)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::ldexpf (__x, __e);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::ldexp (double (__x), __e);
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_LDEXP_FLT_INT
 
@@ -200,7 +256,11 @@ inline float ldexp (float __x, int __e)
 #if defined (_RWSTD_NO_LOG_FLT)
 inline float log (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::logf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::log (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_LOG_FLT
 
@@ -208,7 +268,11 @@ inline float log (float __x)
 #if defined (_RWSTD_NO_LOG10_FLT)
 inline float log10 (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::log10f (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::log10 (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_LOG10_FLT
 
@@ -216,7 +280,14 @@ inline float log10 (float __x)
 #if defined (_RWSTD_NO_MODF_FLT)
 inline float modf (float __x, float *__y)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::modff (__x, __y);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    double __i;
+    const double __r = ::modf (double (__x), &__i);
+    *__y = static_cast< float >(__i);
+    return static_cast< float >(__r);
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_MODF_FLT
 
@@ -224,7 +295,11 @@ inline float modf (float __x, float *__y)
 #ifdef _RWSTD_NO_POW_FLT
 inline float pow (float __x, float __y)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::powf (__x, __y);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::pow (double (__x), double (__y));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_POW_FLT
 
@@ -247,7 +322,11 @@ inline float pow (float __x, int __y)
 #if defined (_RWSTD_NO_SIN_FLT)
 inline float sin (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::sinf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::sin (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_SIN_FLT
 
@@ -255,7 +334,11 @@ inline float sin (float __x)
 #if defined (_RWSTD_NO_SINH_FLT)
 inline float sinh (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::sinhf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::sinh (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_SINH_FLT
 
@@ -263,7 +346,11 @@ inline float sinh (float __x)
 #if defined (_RWSTD_NO_SQRT_FLT)
 inline float sqrt (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::sqrtf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::sqrt (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_SQRT_FLT
 
@@ -271,7 +358,11 @@ inline float sqrt (float __x)
 #if defined (_RWSTD_NO_TAN_FLT)
 inline float tan (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::tanf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::tan (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_TAN_FLT
 
@@ -279,7 +370,11 @@ inline float tan (float __x)
 #if defined (_RWSTD_NO_TANH_FLT)
 inline float tanh (float __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::tanhf (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::tanh (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_TANH_FLT
 
@@ -329,7 +424,11 @@ inline double pow (double __x, int __y)
 #if defined (_RWSTD_NO_ABS_LDBL)
 inline long double abs (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::fabsl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::fabs (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #undef _RWSTD_NO_ABS_LDBL
 #else
@@ -340,7 +439,11 @@ using ::abs;
 #if defined (_RWSTD_NO_ACOS_LDBL)
 inline long double acos (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::acosl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::acos (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_ACOS_LDBL
 
@@ -348,7 +451,11 @@ inline long double acos (long double __x)
 #if defined (_RWSTD_NO_ASIN_LDBL)
 inline long double asin (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::asinl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::asin (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_ASIN_LDBL
 
@@ -356,7 +463,11 @@ inline long double asin (long double __x)
 #if defined (_RWSTD_NO_ATAN_LDBL)
 inline long double atan (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::atanl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::atan (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_ATAN_LDBL
 
@@ -364,7 +475,11 @@ inline long double atan (long double __x)
 #if defined (_RWSTD_NO_ATAN2_LDBL)
 inline long double atan2 (long double __x, long double __y)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::atan2l (__x, __y);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::atan2 (double (__x), double (__y));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_ATAN2_LDBL
 
@@ -372,7 +487,11 @@ inline long double atan2 (long double __x, long double __y)
 #if defined (_RWSTD_NO_CEIL_LDBL)
 inline long double ceil (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::ceill (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::ceil (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_CEIL_LDBL
 
@@ -380,7 +499,11 @@ inline long double ceil (long double __x)
 #if defined (_RWSTD_NO_COS_LDBL)
 inline long double cos (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::cosl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::cos (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_COS_LDBL
 
@@ -388,7 +511,11 @@ inline long double cos (long double __x)
 #if defined (_RWSTD_NO_COSH_LDBL)
 inline long double cosh (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::coshl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::cosh (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_COSH_LDBL
 
@@ -396,7 +523,11 @@ inline long double cosh (long double __x)
 #if defined (_RWSTD_NO_EXP_LDBL)
 inline long double exp (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::expl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::exp (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_EXP_LDBL
 
@@ -404,7 +535,11 @@ inline long double exp (long double __x)
 #if defined (_RWSTD_NO_FABS_LDBL)
 inline long double fabs (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::fabsl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::fabs (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #undef _RWSTD_NO_FABS_LDBL
 #endif   // _RWSTD_NO_FABS_LDBL
@@ -413,7 +548,11 @@ inline long double fabs (long double __x)
 #if defined (_RWSTD_NO_FLOOR_LDBL)
 inline long double floor (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::floorl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::floor (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_FLOOR_LDBL
 
@@ -421,7 +560,11 @@ inline long double floor (long double __x)
 #if defined (_RWSTD_NO_FMOD_LDBL)
 inline long double fmod (long double __x, long double __y)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::fmodl (__x, __y);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::fmod (double (__x), double (__y));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_FMOD_LDBL
 
@@ -429,7 +572,11 @@ inline long double fmod (long double __x, long double __y)
 #if defined (_RWSTD_NO_FREXP_LDBL)
 inline long double frexp (long double __x, int *__e)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::frexpl (__x, __e);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::frexp (double (__x), __e);
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_FREXP_LDBL
 
@@ -437,7 +584,11 @@ inline long double frexp (long double __x, int *__e)
 #if defined (_RWSTD_NO_LDEXP_LDBL_INT)
 inline long double ldexp (long double __x, int __e)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::ldexpl (__x, __e);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::ldexp (double (__x), __e);
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_LDEXP_LDBL_INT
 
@@ -445,7 +596,11 @@ inline long double ldexp (long double __x, int __e)
 #if defined (_RWSTD_NO_LOG_LDBL)
 inline long double log (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::logl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::log (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_LOG_LDBL
 
@@ -453,7 +608,11 @@ inline long double log (long double __x)
 #if defined (_RWSTD_NO_LOG10_LDBL)
 inline long double log10 (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::log10l (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::log10 (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_LOG10_LDBL
 
@@ -461,7 +620,14 @@ inline long double log10 (long double __x)
 #if defined (_RWSTD_NO_MODF_LDBL)
 inline long double modf (long double __x, long double *__y)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::modfl (__x, __y);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    double __i;
+    const double __r = ::modf (double (__x), &__i);
+    *__y = static_cast< long double >(__i);
+    return static_cast< long double >(__r);
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_MODF_LDBL
 
@@ -469,7 +635,11 @@ inline long double modf (long double __x, long double *__y)
 #ifdef _RWSTD_NO_POW_LDBL
 inline long double pow (long double __x, long double __y)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::powl (__x, __y);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::pow (double (__x), double (__y));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_POW_LDBL
 
@@ -493,7 +663,11 @@ inline long double pow (long double __x, int __y)
 #if defined (_RWSTD_NO_SIN_LDBL)
 inline long double sin (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::sinl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::sin (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_SIN_LDBL
 
@@ -501,7 +675,11 @@ inline long double sin (long double __x)
 #if defined (_RWSTD_NO_SINH_LDBL)
 inline long double sinh (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::sinhl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::sinh (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_SINH_LDBL
 
@@ -509,7 +687,11 @@ inline long double sinh (long double __x)
 #if defined (_RWSTD_NO_SQRT_LDBL)
 inline long double sqrt (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::sqrtl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::sqrt (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_SQRT_LDBL
 
@@ -517,7 +699,11 @@ inline long double sqrt (long double __x)
 #if defined (_RWSTD_NO_TAN_LDBL)
 inline long double tan (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::tanl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::tan (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_TAN_LDBL
 
@@ -525,7 +711,11 @@ inline long double tan (long double __x)
 #if defined (_RWSTD_NO_TANH_LDBL)
 inline long double tanh (long double __x)
 {
+#  ifndef _RWSTD_NO_C99_MATH
     return ::tanhl (__x);
+#  else   // if defined (_RWSTD_NO_C99_MATH)
+    return ::tanh (double (__x));
+#  endif   // _RWSTD_NO_C99_MATH
 }
 #endif   // _RWSTD_NO_TANH_LDBL
 
