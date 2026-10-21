@@ -1462,14 +1462,6 @@
      exporting  of symbols  from  classes that  have member  templates
      (e.g. locale class).
 
-  o  _RWSTD_NO_STRTOF_UFLOW   [auto, lib]
-     _RWSTD_NO_STRTOD_UFLOW
-     _RWSTD_NO_STRTOLD_UFLOW
-
-     Each of these macros is #defined when the corresponding C library
-     function fails to set errno (usually to ERANGE) on underflow.
- 
-
   8.3.8  Macros Controlling Implementation Properties
   ---------------------------------------------------
 

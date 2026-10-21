@@ -59,9 +59,7 @@ enum {
 };
 
 
-#include <errno.h>    // for ERANGE, errno
 #include <stdio.h>    // for printf()
-#include <stdlib.h>   // for strtod()
 
 #include "float_defs.h"   // for FLT_XXX, DBL_XXX, LDBL_XXX constants
 
@@ -181,50 +179,6 @@ int main ()
     PRINTFLT (LDBL_MIN, LDBL_FMT, LDBL_DIG, "L");
 #endif   // LDBL_MIN
 
-
-#if !defined (ERANGE)
-#  define ERANGE -1
-#endif   // ERANGE
-
-    errno = 0;
-
-    // determine whether strtof() sets errno on underflow
-    const float f = strtof ("1.0e-999", (char**)0);
-
-
-    if (f < 0.0 || f > 1.0 || !errno)
-        printf ("#define _RWSTD_NO_STRTOF_UFLOW\n");
-    else
-        printf ("// #define _RWSTD_NO_STRTOF_UFLOW    // %d%s\n",
-                errno, ERANGE == errno ? " (ERANGE)" : "");
-
-    errno = 0;
-
-    // determine whether strtod() sets errno on underflow
-    const double d = strtod ("1.0e-999", (char**)0);
-
-
-    if (d < 0.0 || d > 1.0 || !errno)
-        printf ("#define _RWSTD_NO_STRTOD_UFLOW\n");
-    else
-        printf ("// #define _RWSTD_NO_STRTOD_UFLOW    // %d%s\n",
-                errno, ERANGE == errno ? " (ERANGE)" : "");
-
-    errno = 0;
-
-    // HP-UX strtold() returns struct long_double
-    // the macro _LONG_DOUBLE is #defined when the struct is defined
-    // note that gcc's replacement <stdlib.h> may actually define the
-    // function with the correct signature
-
-    // determine whether strtold() sets errno on underflow
-    const long double ld = strtold ("1.0e-9999", (char**)0);
-
-    if (ld < 0.0 || ld > 1.0 || !errno)
-        printf ("#define _RWSTD_NO_STRTOLD_UFLOW\n");
-    else
-        printf ("// #define _RWSTD_NO_STRTOLD_UFLOW   // %d%s\n",
-                errno, ERANGE == errno ? " (ERANGE)" : "");
 
     return 0;
 }
