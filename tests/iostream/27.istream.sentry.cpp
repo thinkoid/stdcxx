@@ -60,11 +60,11 @@
     explicit sentry(basic_istream<charT, traits>& is, bool noskipws = false);
     -2- Effects: If is.good() is true, prepares for formatted or unformatted
         input. First, if is.tie() is not a null pointer, the function calls
-        is.tie()­>flush() to synchronize the output sequence with any
+        is.tie()->flush() to synchronize the output sequence with any
         associated external C stream. Except that this call can be suppressed
         if the put area of is.tie() is empty. Further an implementation is
         allowed to defer the call to flush until a call of
-        is->rdbuf()­>underflow occurs. If no such call occurs before the
+        is->rdbuf()->underflow occurs. If no such call occurs before the
         sentry object is destroyed, the call to flush may be eliminated
         entirely(279). If noskipws is zero and is.flags() & ios_base::skipws
         is nonzero, the function extracts and discards each character as long
@@ -98,9 +98,9 @@
             int_type c;
             typedef ctype<charT> ctype_type;
             const ctype_type& ctype = use_facet<ctype_type>(is.getloc());
-            while ((c = is.rdbuf()­>snextc()) != traits::eof()) {
+            while ((c = is.rdbuf()->snextc()) != traits::eof()) {
                 if (ctype.is(ctype.space,c)==0) {
-                    is.rdbuf()­>sputbackc (c);
+                    is.rdbuf()->sputbackc (c);
                     break;
                 }
             }

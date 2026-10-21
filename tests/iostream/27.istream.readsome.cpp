@@ -123,11 +123,11 @@ struct Streambuf: std::basic_streambuf<charT, Traits>
          exception, and return. Otherwise extracts characters and stores
          them into successive locations of an array whose first element
          is designated by s.
-         --  If rdbuf()­>in_avail() == ­1, calls setstate(eofbit) (which
+         --  If rdbuf()->in_avail() == -1, calls setstate(eofbit) (which
              may throw ios_base::failure (27.4.4.3)), and extracts no
              characters;
-         --  If rdbuf()­>in_avail() == 0, extracts no characters
-         --  If rdbuf()­>in_avail() > 0, extracts min(rdbuf()­>in_avail(),
+         --  If rdbuf()->in_avail() == 0, extracts no characters
+         --  If rdbuf()->in_avail() > 0, extracts min(rdbuf()->in_avail(),
              n)).
     -31- Returns: The number of characters extracted.
 

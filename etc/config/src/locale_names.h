@@ -126,7 +126,7 @@ const char* const test_locale_names[] = {
     "bg_BG.iso88595",
     "bg_BG.utf8",
     "bokmal",
-    "bokmål",
+    "bokm\345l",
     "br",
     "br_FR",
     "bs_BA",
