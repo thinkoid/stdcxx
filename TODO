@@ -199,14 +199,15 @@ unquoted, the shell splits it at its spaces, and every header probe
 fails. The file leaves when EDG enters the keyword.
 
 With no feature macro on the command line, =make config= under
-=eccp -A= (11S) writes a =config.h= in which 70 characterizations
-fail, against 75 under gcc; 28 macros are defined under =eccp= only
-and 40 under gcc only (the entry "The configuration under =eccp=
-against GCC's"). =make lib= then compiles 80 of 98 sources. Every
-failure is the entry "The C99 functions": =::qsort= missing at
-=include/ansi/_cstdlib.h:142= in 16 sources (the pure C header
-model), and =vsnprintf=, =snprintf=, =strtof=, =strtold=, =S_IFDIR=
-and =caddr_t= undefined.
+=eccp -A= (11S) configures (what differs from gcc's =config.h= is the
+entry "The configuration under =eccp= against GCC's"), and
+=make lib= then compiles all 98 sources: the
+C99 functions the library calls fall back on C90 behind their
+characterizations, and the library's own C header facts moved from
+=_config-gcc.h= to =_config.h= so that every compiler takes the
+wrapper model (the entry "The pure C headers"). The test driver, the
+utilities and the tests do not build yet (the entry "The test driver,
+the utilities and the tests under =eccp -A=").
 
 Fix: the entries below, in order. The gcc configuration is unchanged:
 its =makefile.in= gains an empty =PRELINKFLAGS= and =make -n lib=
@@ -257,44 +258,49 @@ identifier: =DAYLIGHT=, =TIMEZONE=, =TM_GMTOFF=, =MADVISE=
 (=caddr_t=), =THREAD_SAFE_EXCEPTIONS= (=pthread_setconcurrency=),
 =VSNPRINTF_RETURN= (=vsnprintf=), =VA_COPY=, =LCONV_INT_FMAT=. The
 first build of 2026-10-06 did not see them because its command line
-pinned =_XOPEN_SOURCE=. Whether the library wants these names under
-a strict compiler is the decision of "The C99 functions" entry.
+pinned =_XOPEN_SOURCE=. The library does not ask for these names: it
+builds without them. Whether the test driver, the utilities and the
+tests state a feature level is the entry "The test driver, the
+utilities and the tests under =eccp -A=".
 
 Fix: read each difference against the standard and the
 characterization.
 
 Check: every difference is correct for C++03 or has an entry.
 
-** TODO The C99 functions the library calls
+** TODO The test driver, the utilities and the tests under =eccp -A=
 
-The library calls =vsnprintf= (=src/exception.cpp=), =strtof= and
-=strtold= (=src/num_get.cpp=) and =snprintf= (=src/num_put.cpp=).
-C++03's C library is C90 with Amendment 1; none of the four is in it.
-Under =eccp -A= glibc does not declare them. Each had a fallback
-until 8760bf55: =vsprintf=, =strtod= clamped to =float=, =sscanf=.
-Its premise, that every tracked configuration takes the C library
-function, held for GCC and Clang only.
+The library builds under =eccp -A= with no feature macro on the
+command line. The test driver, the utilities and the tests do not:
+without a feature macro glibc shows strict C++03 the ISO names only,
+and these programs are POSIX programs, and glibc withholds the C95
+wide I/O functions too, which the library's =<cwchar>= re-exports.
+The first build of 2026-10-06 did not see this because its command
+line pinned =_XOPEN_SOURCE=.
 
-The first build exposed them with
-~-D_XOPEN_SOURCE=500 -D_DEFAULT_SOURCE~ in =eccp.config=. That is a
-pin and cannot stay.
+- =tests/src/thread.cpp= (=popen=, =pclose=),
+  =tests/src/environ.cpp= (=unsetenv=), =tests/src/process.cpp=
+  (=include/ansi/signal.h= under =_RWSTD_NO_DEPRECATED_C_HEADERS=
+  stops at line 63), =util/path.cpp= (=symlink=), =util/memchk.cpp=
+  (=getpagesize=, =mkstemp=), =util/time.cpp= (=std::sscanf=
+  undeclared, cause not read).
+- Fifteen test programs stop in =include/ansi/cwchar=, lines
+  143-157: =using ::fwprintf;= and the other wide I/O functions of
+  C95, which glibc declares under =__USE_ISOC95= only. C++03's C
+  library is C90 with Amendment 1, so the names are the library's
+  to provide; glibc exports them. Dropping them from =std= is not
+  conforming; declaring them is right while the symbols exist.
+- The programs the first build could not compile either (the entries
+  below) are unchanged.
 
-The C header model is part of the same question. =_config-gcc.h=
-selects the wrapper model for gcc (=_RWSTD_NO_PURE_C_HEADERS=,
-glibc's headers included by path); nothing selects it for =eccp=,
-which gets the pure model, RW's own C90 declarations in
-=include/ansi/_c*.h=. Under it 16 library sources stop at
-=include/ansi/_cstdlib.h:142=, "the global scope has no qsort"
-(#282), and =NEW_HEADER= fails for want of a =<cassert>=. The first
-build appended the two wrapper-model macros to =config.h= by hand.
+Fix: undecided. The POSIX sources can state their feature level, as
+=tests/src/file.cpp= does; the C95 names want either a
+characterization that lets =<cwchar>= declare them itself or a
+decision that glibc's gap is glibc's.
 
-Fix: undecided. The candidates: declare the functions where they are
-used, as =FLOAT.cpp= did; restore the fallbacks behind a
-characterization; or let the sources that need them state their
-feature level, as =tests/src/file.cpp= does.
-
-Check: the library builds under =eccp -A= with no feature macro on
-the command line, and the GCC and Clang tables do not move.
+Check: the driver, the utilities and the tests build under =eccp -A=
+with no feature macro on the command line, the suite runs and its
+table is pinned, and the GCC and Clang tables do not move.
 
 ** TODO The pure C headers
 
@@ -495,12 +501,11 @@ https://sourceware.org/bugzilla/show_bug.cgi?id=34717.
 Without the C99 names, as in C++03 with no feature macro, glibc
 defines no =fpclassify= and =src/fpclass.h= takes its stub branch:
 =__rw_signbit=, =__rw_isnan= and =__rw_isinf= return false,
-=__rw_isfinite= true. How the library classifies floating values
-under a strict compiler is undecided; =signbit= is C99 and not in
-C++03 either.
+=__rw_isfinite= true. That is the =eccp -A= build today: the library
+asks glibc for no C99 name. How =num_put= classifies floating values
+there shows in the run table, once the tests build.
 
-Fix: glibc's, for the header. The library side goes with the decision
-on the C99 functions.
+Fix: glibc's, for the header.
 
 Check: =src/fpclass.h= compiles under =eccp -A= with the C99 names
 requested and a glibc that fixes it.

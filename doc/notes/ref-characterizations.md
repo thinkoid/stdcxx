@@ -267,6 +267,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [SETRLIMIT](../../etc/config/src/SETRLIMIT.cpp) / `NO_SETRLIMIT` | setrlimit() in &lt;sys/resource.h&gt; | P/T; `etc/config/src/GLOBAL_BAD_ALLOC.cpp` |
 | [SIG_ATOMIC_T](../../etc/config/src/SIG_ATOMIC_T.cpp) / `NO_SIG_ATOMIC_T` + output | signal support in &lt;signal.h&gt; | none |
 | [SIZE_T](../../etc/config/src/SIZE_T.cpp) / `NO_SIZE_T` + output | fpos_t, ptrdiff_t, and size_t | L; `include/ansi/cwchar` |
+| [SNPRINTF](../../etc/config/src/SNPRINTF.cpp) / `NO_SNPRINTF` | snprintf() in &lt;stdio.h&gt; | L; `src/num_put.cpp` |
 | [STATICS_IN_TEMPLATE](../../etc/config/src/STATICS_IN_TEMPLATE.cpp) / `NO_STATICS_IN_TEMPLATE` | references to static symbols in template | L; `include/rw/_defs.h` |
 | [STD_BAD_ALLOC](../../etc/config/src/STD_BAD_ALLOC.cpp) / `NO_STD_BAD_ALLOC` | class std::bad_alloc | L/P/T; `include/new` |
 | [STD_BAD_CAST](../../etc/config/src/STD_BAD_CAST.cpp) / `NO_STD_BAD_CAST` | class std::bad_cast | L/P/T; `include/typeinfo` |
@@ -283,8 +284,11 @@ Token-pasted and script-generated names need family-level inspection.
 | [STD_TYPE_INFO](../../etc/config/src/STD_TYPE_INFO.cpp) / `NO_STD_TYPE_INFO` | class std::type_info | L/P; `include/typeinfo` |
 | [STD_UNCAUGHT_EXCEPTION](../../etc/config/src/STD_UNCAUGHT_EXCEPTION.cpp) / `NO_STD_UNCAUGHT_EXCEPTION` | std::uncaught_exception() | L/P/T; `include/rw/_defs.h` |
 | [STD_UNEXPECTED](../../etc/config/src/STD_UNEXPECTED.cpp) / `NO_STD_UNEXPECTED` | std::unexpected() | L/P; `src/exception.cpp` |
+| [STRTOF](../../etc/config/src/STRTOF.cpp) / `NO_STRTOF` | strtof() in &lt;stdlib.h&gt; | L; `src/num_get.cpp` |
+| [STRTOLD](../../etc/config/src/STRTOLD.cpp) / `NO_STRTOLD` | strtold() in &lt;stdlib.h&gt; | L; `src/num_get.cpp` |
 | [STRUCT_TM](../../etc/config/src/STRUCT_TM.cpp) / `NO_STRUCT_TM` + output | struct tm in &lt;time.h&gt; | L; `include/ansi/cwchar` |
 | [STRUCT_TM_IN_WCHAR_H](../../etc/config/src/STRUCT_TM_IN_WCHAR_H.cpp) / `NO_STRUCT_TM_IN_WCHAR_H` | struct tm declaration in &lt;wchar.h&gt; | L; `include/ansi/cwchar` |
+| [SWPRINTF](../../etc/config/src/SWPRINTF.cpp) / `NO_SWPRINTF` | swprintf() in &lt;wchar.h&gt; | L; `src/time_put.cpp` |
 | [THREAD_SAFE_EXCEPTIONS](../../etc/config/src/THREAD_SAFE_EXCEPTIONS.cpp) / `NO_THREAD_SAFE_EXCEPTIONS` | if exceptions are thread safe | none |
 | [TIMEZONE](../../etc/config/src/TIMEZONE.cpp) / `NO_TIMEZONE` | int timezone in &lt;time.h&gt; | L; `src/time_put.cpp` |
 | [TLS](../../etc/config/src/TLS.cpp) / `NO_TLS` + output | thread-local storage | L; `include/rw/_defs.h` |
@@ -297,6 +301,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [UNAME](../../etc/config/src/UNAME.cpp) / `NO_UNAME` + output | OS name and version | none |
 | [UNISTD_DECL](../../etc/config/src/UNISTD_DECL.cpp) / `NO_UNISTD_DECL` + output | the contents of &lt;unistd.h&gt; | none |
 | [VA_LIST](../../etc/config/src/VA_LIST.cpp) / `NO_VA_LIST` + output | the type of va_list | none |
+| [VSNPRINTF](../../etc/config/src/VSNPRINTF.cpp) / `NO_VSNPRINTF` | vsnprintf() in &lt;stdio.h&gt; | L; `src/exception.cpp` |
 | [VSNPRINTF_RETURN](../../etc/config/src/VSNPRINTF_RETURN.cpp) / `NO_VSNPRINTF_RETURN` + output | vsnprintf() return value | none |
 | [WCTRANS_T](../../etc/config/src/WCTRANS_T.cpp) / `NO_WCTRANS_T` + output | wctrans_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/cwctype` |
 | [WCTYPE_T](../../etc/config/src/WCTYPE_T.cpp) / `NO_WCTYPE_T` + output | wctype_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/cwctype` |

@@ -1302,11 +1302,13 @@
      #defined  when  the  respective   header  is  not  found  in  the
      preprocessor search path.
 
-  o  _RWSTD_NO_${FUN}[_IN_LIBC] [auto]
+  o  _RWSTD_NO_{SNPRINTF,VSNPRINTF,STRTOF,STRTOLD,SWPRINTF} [auto]
 
-     #defined when  the extern "C" function ${FUN}  declaration is not
-     found  in the  expected C  header, or  if the  extern  "C" symbol
-     ${FUN} is not found in the libc binary.
+     #defined when the C header does not declare the function, which
+     C99 or, for swprintf, C95 added, or the function does not work.
+     The library then falls back on C90: sprintf for snprintf,
+     vsprintf for vsnprintf, strtod for strtof, sscanf for strtold,
+     and sprintf widened for swprintf.
 
   o  _RWSTD_NO_{ABS,ACOS,ASIN,ATAN,ATAN2,CEIL,COS,COSH,EXP,FABS,FLOOR,
                 FMOD,FREXP,LDEXP,LOG,LOG10,MODF,POW,POW,SIN,SINH,SQRT,
