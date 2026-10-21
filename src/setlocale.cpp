@@ -182,7 +182,7 @@ char* __rw_locale_name (int cat, const char *locname, __rw_chararray &namebuf)
 
         // see if the directory containing the locale database exists
         struct stat sb;
-        if (0 == stat (locpath, &sb) && sb.st_mode & S_IFDIR) {
+        if (0 == stat (locpath, &sb) && S_ISDIR (sb.st_mode)) {
 
             namebuf.assign (locname);
 

@@ -92,8 +92,8 @@ __rw_memattr (const void *addr, size_t nbytes, int attr)
 
     // compute the address of the beginning of the page
     // to which the address `addr' belongs
-    caddr_t const page =
-        reinterpret_cast< caddr_t >(
+    char* const page =
+        reinterpret_cast< char* >(
             reinterpret_cast< size_t >(addr) & ~(pgsz - 1));
 
     // compute the maximum number of pages occuppied by the memory
@@ -104,7 +104,7 @@ __rw_memattr (const void *addr, size_t nbytes, int attr)
 
     for (size_t i = 0; i < npages; ++i) {
 
-        const caddr_t next = reinterpret_cast< char* >(page) + i * pgsz;
+        char* const next = page + i * pgsz;
 
 #if !defined (_RWSTD_NO_MADVISE)
 
