@@ -41,11 +41,15 @@
 #include "punct.h"    // for __rw_get_stdio_fmat
 
 
-// cast away constness of the format argument to prevent errors
-// on platforms such as HP-UX 11.00 that incorrectly declare it
-// without the const qualifier
-#define _SNPRINTF(buf, size, fmt, arg)   \
-    snprintf (buf, size, const_cast< char* >(fmt), arg)
+#ifndef _RWSTD_NO_SNPRINTF
+   // cast away constness of the format argument to prevent errors
+   // on platforms such as HP-UX 11.00 that incorrectly declare it
+   // without the const qualifier
+#  define _SNPRINTF(buf, size, fmt, arg)   \
+     snprintf (buf, size, const_cast< char* >(fmt), arg)
+#else   // if defined (_RWSTD_NO_SNPRINTF)
+#  define _SNPRINTF(buf, ignore, fmt, arg)   sprintf (buf, fmt, arg)
+#endif   // _RWSTD_NO_SNPRINTF
 
 
 namespace __rw { 

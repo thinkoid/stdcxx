@@ -2607,6 +2607,8 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
 
     if (_RWSTD_INT_MIN != tpd.val) {
 
+#ifndef _RWSTD_NO_SWPRINTF
+
         const wchar_t *fmtstr = 'z' == fmt ? L"%+*.*d" : L"%*.*d";
 
         res = swprintf (wbuf, 
@@ -2616,6 +2618,27 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
                         fmtstr,
                         width < 0 ? tpd.width : width,
                         prec < 0 ? tpd.prec : prec, tpd.val);
+
+#else   // if defined (_RWSTD_NO_SWPRINTF)
+
+        const char *fmtstr = 'z' == fmt ? "%+*.*d" : "%*.*d";
+
+        char buf [64];
+
+        res = size_t (sprintf (buf, fmtstr,
+                               width < 0 ? tpd.width : width,
+                               prec < 0 ? tpd.prec : prec, tpd.val));
+
+        _RWSTD_ASSERT (res < sizeof buf);
+
+        wchar_t *dst = wbuf;
+
+        for (const char *s = buf; *s; ++s, ++dst)
+            *dst = static_cast< unsigned char >(*s);
+
+        res = dst - wbuf;
+
+#endif   // _RWSTD_NO_SWPRINTF
 
     }
     else {
