@@ -870,8 +870,8 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
 
     // 22.2.6.1.2, p3: [Example: If showbase is off, then for
     // a negative sign value of "()" and a currency symbol of "L",
-    // in "(100 L)" the "L" is consumed; but if negative sign is "­",
-    // the "L" in "­100 L" is not consumed. ]
+    // in "(100 L)" the "L" is consumed; but if negative sign is "-",
+    // the "L" in "-100 L" is not consumed. ]
     TEST (T, -104.0, "(104 L)", 7, 0,        eofbit,  0, "-1@$", "L");
     TEST (T, -105.0, "(105 L)", 7, showbase, eofbit,  0, "-1@$", "L");
 

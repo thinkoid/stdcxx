@@ -266,7 +266,7 @@ void test_search (int line,
                _RWSTD_SIZE_MAX == off, off);
  
     // 25.1.9, p3:
-    // Complexity: At most (last1 ­ first1) * (last2 ­ first2)
+    // Complexity: At most (last1 - first1) * (last2 - first2)
     // applications of the corresponding predicate or operator
     const std::size_t max_op_eq = nseq1 * nseq2;
     const std::size_t op_called = pred_tag.pred_inx ? 
@@ -428,9 +428,9 @@ void test_search_n (int line, const char *seq, Size cnt, const char val,
                _RWSTD_SIZE_MAX == off, off);
  
     // 25.1.9, p7:
-    // Complexity: At most (last ­ first) * count
+    // Complexity: At most (last - first) * count
     // applications of the corresponding predicate or operator.
-    // In real cases the complexity should be at most (last ­ first)
+    // In real cases the complexity should be at most (last - first)
     const std::size_t max_op_eq = nseq * cnt;
     const std::size_t op_called = pred_tag.pred_inx ? 
         PredTag::Predicate::funcalls_
