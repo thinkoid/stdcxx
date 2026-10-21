@@ -184,6 +184,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [BAD_TYPEID_WHAT](../../etc/config/src/BAD_TYPEID_WHAT.cpp) / `NO_BAD_TYPEID_WHAT` | bad_typeid::what() | L; `src/typeinfo.cpp` |
 | [BITS_TYPES___MBSTATE_T_H](../../etc/config/src/BITS_TYPES___MBSTATE_T_H.cpp) / `NO_BITS_TYPES___MBSTATE_T_H` | __mbstate_t in &lt;bits/types/__mbstate_t.h&gt; | L; `include/rw/_mbstate.h` |
 | [C99_MATH](../../etc/config/src/C99_MATH.cpp) / `NO_C99_MATH` | the float and long double functions of C99 in &lt;math.h&gt; | L; `include/ansi/cmath` |
+| [CORRECT_ISO_CPP_WCHAR_H_PROTO](../../etc/config/src/CORRECT_ISO_CPP_WCHAR_H_PROTO.cpp) / `NO_CORRECT_ISO_CPP_WCHAR_H_PROTO` | glibc's C++ overloads in &lt;wchar.h&gt; compile | L; `include/ansi/cwchar`, `include/ansi/wchar.h` |
 | [CTYPE_BITS](../../etc/config/src/CTYPE_BITS.cpp) / `NO_CTYPE_BITS` + output | ctype constants | none |
 | [DAYLIGHT](../../etc/config/src/DAYLIGHT.cpp) / `NO_DAYLIGHT` | daylight variable in &lt;time.h&gt; | L; `src/time_put.cpp` |
 | [DEPRECATED_LIBC_IN_STD](../../etc/config/src/DEPRECATED_LIBC_IN_STD.cpp) / `NO_DEPRECATED_LIBC_IN_STD` | deprecated C headers and namespace std | none |
