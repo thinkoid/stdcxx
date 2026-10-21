@@ -1324,7 +1324,8 @@
 
      #defined  to disable  the use  of "pure"  C++ Standard  C library
      headers.  The  pure  headers   expose  only the  set  of  symbols
-     specified by the C++ and C standards and nothing more.
+     specified by the C++ and C standards and nothing more. #defined
+     by <rw/_config.h> unless _RWSTD_USE_PURE_C_HEADERS is #defined.
 
   o  _RWSTD_NO_WCSFTIME_WCHAR_T_FMAT [auto]
 

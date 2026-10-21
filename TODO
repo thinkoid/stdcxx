@@ -296,6 +296,35 @@ feature level, as =tests/src/file.cpp= does.
 Check: the library builds under =eccp -A= with no feature macro on
 the command line, and the GCC and Clang tables do not move.
 
+** TODO The pure C headers
+
+=include/ansi/_c*.h=, RW's own C90 declarations inside =std=, are the
+model a strict compiler would want: exactly the C++03 C library,
+whatever glibc hides. They are selected by =_RWSTD_USE_PURE_C_HEADERS=
+and no configuration has compiled them since the platform retirement.
+Two defects stand in the way of a strict build with them:
+- =_cstdio.h= declares =vfprintf=, =vprintf= and =vsprintf= with
+  =_RWSTD_VA_LIST=, the layout-compatible =__rw_va_list= of
+  =VA_LIST.cpp=, and =_cstdarg.h= defines =va_start= and =va_arg= by
+  byte arithmetic. On an ABI whose =va_list= is a structure (x86_64,
+  aarch64) the compiler's =va_list= converts to neither, so a call
+  with a real =va_list= does not compile and the macros compute the
+  wrong thing. =eccp= resolves =<stdarg.h>= to its own header first,
+  so the library sees the compiler's =va_list=.
+- =_cstdlib.h:141= qualifies =qsort= with =_RWSTD_C=, which is empty
+  under =_RWSTD_NO_LIBC_IN_STD=; the pure model has no global
+  =qsort= at that point. =bsearch= ten lines above calls its C
+  function unqualified. Since the library facts moved to =_config.h=
+  the macro is undefined for every compiler and the line compiles;
+  the inconsistency stays.
+
+Fix: a decision. The pure headers either defer to the compiler's
+=<stdarg.h>= for =va_list= and the macros, which makes =<cstdarg>=
+and the v-functions of =<cstdio>= wrappers, or they retire.
+
+Check: a build with =_RWSTD_USE_PURE_C_HEADERS= under =eccp -A= and
+under gcc, or the headers gone.
+
 ** TODO =__CORRECT_ISO_CPP_WCHAR_H_PROTO= needs GNU =__asm= labels
 
 =include/ansi/cwchar= and =include/ansi/wchar.h= define it
