@@ -168,15 +168,15 @@ unquoted, the shell splits it at its spaces, and every header probe
 fails. The file leaves when EDG enters the keyword.
 
 With no feature macro on the command line, =make config= under
-=eccp -A= (11S) writes a =config.h= in which 72 characterizations
-fail, against 75 under gcc; 31 macros are defined under =eccp= only
-and 102 under gcc only (the entry "The configuration under =eccp=
-against GCC's"). =make lib= then compiles 55 of 98 sources. Every
-failure is another entry of this chapter: =_RWSTD_FLT_*= undefined
-in 16 sources (=FLOAT.cpp=), =_RWSTD_LC_*= undefined (the ISO-8859-1
-sources), =::qsort= missing at =include/ansi/_cstdlib.h:142= in 16
-sources (the pure C header model, under "The C99 functions"),
-=vsnprintf= and =S_IFDIR= undefined (the same).
+=eccp -A= (11S) writes a =config.h= in which 71 characterizations
+fail, against 75 under gcc; 29 macros are defined under =eccp= only
+and 71 under gcc only (the entry "The configuration under =eccp=
+against GCC's"). =make lib= then compiles 72 of 98 sources. Every
+failure is another entry of this chapter: =_RWSTD_LC_*= undefined in
+16 sources (the ISO-8859-1 sources), =::qsort= missing at
+=include/ansi/_cstdlib.h:142= in 16 sources (the pure C header
+model, under "The C99 functions"), =vsnprintf=, =snprintf=, =strtof=,
+=strtold=, =S_IFDIR= and =caddr_t= undefined (the same).
 
 Fix: the entries below, in order. The gcc configuration is unchanged:
 its =makefile.in= gains an empty =PRELINKFLAGS= and =make -n lib=
@@ -266,19 +266,6 @@ feature level, as =tests/src/file.cpp= does.
 Check: the library builds under =eccp -A= with no feature macro on
 the command line, and the GCC and Clang tables do not move.
 
-** TODO =FLOAT.cpp= under a strict compiler
-
-The =FLOAT= characterization calls =strtof= and =strtold=, which
-strict C++03 does not declare. It fails, =config.h= has no
-=_RWSTD_FLT_*= macros, and =<limits>= does not compile. a44256a6
-removed the characterization's own declarations.
-
-Fix: declare the two functions in the characterization again, or
-probe underflow with =strtod= alone.
-
-Check: =FLOAT= passes under =eccp -A= and =config.h= carries the
-=_RWSTD_FLT_*= macros; the GCC and Clang =config.h= do not change.
-
 ** TODO =__CORRECT_ISO_CPP_WCHAR_H_PROTO= needs GNU =__asm= labels
 
 =include/ansi/cwchar= and =include/ansi/wchar.h= define it
@@ -347,10 +334,9 @@ is dependent and each callee it means has internal linkage.
 
 The characterization =STATICS_IN_TEMPLATE= fails the same way, #304
 on =static_function=, so =config.h= under =eccp -A= carries
-=_RWSTD_NO_STATICS_IN_TEMPLATE=. =src/num_get.cpp:458=, =:490= and
-=:532= draw #304 on =__rw::__rw_validate= in the first library build;
-the =_RWSTD_FLT_*= macros are missing there, so that may be a
-cascade. To be read again when =FLOAT= passes.
+=_RWSTD_NO_STATICS_IN_TEMPLATE=. =src/num_get.cpp= drew #304 three
+times on =__rw::__rw_validate= while the =_RWSTD_FLT_*= macros were
+missing; with =FLOAT= passing it compiles, so those were a cascade.
 
 Fix: read the C++03 text; then either give the callees external
 linkage or report to EDG.
