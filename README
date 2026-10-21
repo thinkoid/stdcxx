@@ -1302,6 +1302,13 @@
      #defined  when  the  respective   header  is  not  found  in  the
      preprocessor search path.
 
+  o  _RWSTD_NO_C99_MATH [auto]
+
+     #defined when <math.h> does not declare the float and long double
+     versions of the C90 functions (acosf, acosl, and the rest), which
+     C99 added. The float and long double overloads of <cmath> then
+     forward to the double functions.
+
   o  _RWSTD_NO_{SNPRINTF,VSNPRINTF,STRTOF,STRTOLD,SWPRINTF} [auto]
 
      #defined when the C header does not declare the function, which
@@ -1309,18 +1316,6 @@
      The library then falls back on C90: sprintf for snprintf,
      vsprintf for vsnprintf, strtod for strtof, sscanf for strtold,
      and sprintf widened for swprintf.
-
-  o  _RWSTD_NO_{ABS,ACOS,ASIN,ATAN,ATAN2,CEIL,COS,COSH,EXP,FABS,FLOOR,
-                FMOD,FREXP,LDEXP,LOG,LOG10,MODF,POW,POW,SIN,SINH,SQRT,
-                TAN,TANH}{D,DBL,F,FLT,L,LDBL}[_IN_LIBM] [auto]
-
-     #defined  when  the respective  functions  are  not found  during
-     autoconfiguration in  the <math.h> header or in  the libm library
-     binary.   For  example,  when   the  function  extern  "C"  float
-     acosf(float) is  not declared in  <math.h> on a platform  but the
-     symbol extern "C" acosf is  found in the libm library binary, the
-     macro   _RWSTD_NO_ACOSF   will   be   #defined  but   the   macro
-     _RWSTD_NO_ACOSF_IN_LIBM will be #undefined.
 
   o  _RWSTD_NO_PURE_C_HEADERS
 
