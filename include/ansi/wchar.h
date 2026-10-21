@@ -96,10 +96,13 @@ using std::wscanf;
 #else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
 
 // glibc declares the C++ overloads of wcschr, wcspbrk, wcsrchr, wcsstr
-// and wmemchr only when this is defined, and defines it only for GCC
-#  ifndef __CORRECT_ISO_CPP_WCHAR_H_PROTO
-#    define __CORRECT_ISO_CPP_WCHAR_H_PROTO
-#  endif   // __CORRECT_ISO_CPP_WCHAR_H_PROTO
+// and wmemchr only when this is defined, and defines it only for GCC;
+// the overloads carry asm labels not every compiler accepts
+#  ifndef _RWSTD_NO_CORRECT_ISO_CPP_WCHAR_H_PROTO
+#    ifndef __CORRECT_ISO_CPP_WCHAR_H_PROTO
+#      define __CORRECT_ISO_CPP_WCHAR_H_PROTO
+#    endif   // __CORRECT_ISO_CPP_WCHAR_H_PROTO
+#  endif   // _RWSTD_NO_CORRECT_ISO_CPP_WCHAR_H_PROTO
 
 #  include _RWSTD_ANSI_C_WCHAR_H
 

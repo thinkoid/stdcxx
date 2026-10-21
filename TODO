@@ -334,19 +334,22 @@ and the v-functions of =<cstdio>= wrappers, or they retire.
 Check: a build with =_RWSTD_USE_PURE_C_HEADERS= under =eccp -A= and
 under gcc, or the headers gone.
 
-** TODO =__CORRECT_ISO_CPP_WCHAR_H_PROTO= needs GNU =__asm= labels
+** TODO The C++ overloads of the wide string functions under =eccp=
 
-=include/ansi/cwchar= and =include/ansi/wchar.h= define it
-unconditionally. glibc declares the overloads behind it with =__asm=
-labels, which strict mode rejects: 60 errors in six sources. Guarded
-on =__GNUC__=, the sources compile and =21.cwchar= finds the C
-prototypes only: five failed assertions on the const overloads.
+glibc declares the C++ overloads of =wcschr=, =wcspbrk=, =wcsrchr=,
+=wcsstr= and =wmemchr= behind =__CORRECT_ISO_CPP_WCHAR_H_PROTO=, with
+=__asm= labels strict mode rejects. =CORRECT_ISO_CPP_WCHAR_H_PROTO=
+characterizes whether the compiler accepts them, and =<cwchar>= and
+=<wchar.h>= define the macro only when it does. Under =eccp -A= glibc
+then declares the C prototypes, =<cwchar>= re-exports them, and
+=21.cwchar= fails five assertions on the const overloads, as it did
+under Clang before 5569cc60.
 
-Fix: define the macro for compilers that accept glibc's declarations,
-and give the others the const-correct pair some other way.
+Fix: give a compiler without the glibc overloads the const-correct
+pair in =std=, the way the Clang repair did.
 
-Check: the library builds under =eccp -A=; =21.cwchar= passes there
-and its GCC and Clang rows do not move.
+Check: =21.cwchar= passes under =eccp -A= and its GCC and Clang rows
+do not move.
 
 ** TODO Tests that GCC and Clang let through
 

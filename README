@@ -1309,6 +1309,14 @@
      C99 added. The float and long double overloads of <cmath> then
      forward to the double functions.
 
+  o  _RWSTD_NO_CORRECT_ISO_CPP_WCHAR_H_PROTO [auto]
+
+     #defined when the compiler rejects the C++ overloads of wcschr,
+     wcspbrk, wcsrchr, wcsstr and wmemchr that glibc's <wchar.h>
+     declares behind __CORRECT_ISO_CPP_WCHAR_H_PROTO (they carry asm
+     labels). <cwchar> and <wchar.h> then leave the macro undefined
+     and re-export the C prototypes.
+
   o  _RWSTD_NO_{SNPRINTF,VSNPRINTF,STRTOF,STRTOLD,SWPRINTF} [auto]
 
      #defined when the C header does not declare the function, which
