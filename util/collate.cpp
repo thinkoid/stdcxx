@@ -2214,16 +2214,12 @@ void Def::list_collate ()
 }
 
 
-// FIXME - modify the algorithm to get log(N) complexity
-// Inserts an entry inside the section information;
-// searching for the appropriate entry in the list is
-// done in linear time 
+// Inserts the entries after the symbol s, removed first from where
+// they were; the search for s is linear, once per block
 bool Def::insert_entries (token_t& s, collate_entry_list_t& e)
 {
     // first remove these entries if found
-    collate_entry_list_t::iterator r_it = e.begin ();
-    for (; r_it != e.end (); ++r_it) 
-        remove_entry (*r_it);
+    remove_entries (e);
 
     // first search through the symbols list; the entries follow the
     // symbol there, definitions with weights as well as bare names
@@ -2260,34 +2256,49 @@ bool Def::insert_entries (token_t& s, collate_entry_list_t& e)
 }
 
 
-// FIXME - modify the algorithm to get log(N) complexity
-void Def::remove_entry (collate_entry_t& e)
+// erase from the list the first entries of the names counted in
+// pending, as many of each as its count, and count them off
+static void
+erase_pending (Def::collate_entry_list_t&          entries,
+               std::map<std::string, unsigned int>& pending)
 {
-    // search in the sym_list_, which holds definitions placed after
-    // a symbol as well as the symbols, and in the sections
-    collate_entry_list_t::iterator it = sym_list_.begin ();
-    for (; it != sym_list_.end (); ++it) {
-        if (it->first.name != e.first.name) 
+    Def::collate_entry_list_t::iterator it = entries.begin ();
+
+    while (it != entries.end () && !pending.empty ()) {
+        const std::map<std::string, unsigned int>::iterator p_it =
+            pending.find (it->first.name);
+
+        if (p_it == pending.end ()) {
+            ++it;
             continue;
-
-        sym_list_.erase (it);
-        return;
-    }
-
-    // search in the sections
-    std::list<collate_section_t>::iterator sect_it = section_list_.begin ();
-    while (sect_it != section_list_.end ()) {
-        std::list<collate_entry_t>::iterator e_it = sect_it->entries.begin ();
-        for (; e_it != sect_it->entries.end (); ++e_it) {
-            if (e_it->first.name != e.first.name)
-                continue;
-
-            sect_it->entries.erase (e_it);
-            return;
         }
-        ++sect_it;
+
+        it = entries.erase (it);
+
+        if (0 == --p_it->second)
+            pending.erase (p_it);
     }
-    return ;
+}
+
+
+// removes the first entry of each name in e from where it is, the
+// symbols list searched first, then the sections in order, the
+// first two of a name e holds twice; one pass for the whole list,
+// where a search per entry made the templates' reorder blocks of
+// tens of thousands of entries quadratic
+void Def::remove_entries (const collate_entry_list_t& e)
+{
+    std::map<std::string, unsigned int> pending;
+
+    collate_entry_list_t::const_iterator e_it = e.begin ();
+    for (; e_it != e.end (); ++e_it)
+        ++pending [e_it->first.name];
+
+    erase_pending (sym_list_, pending);
+
+    std::list<collate_section_t>::iterator sect_it = section_list_.begin ();
+    for (; sect_it != section_list_.end (); ++sect_it)
+        erase_pending (sect_it->entries, pending);
 }
 
 

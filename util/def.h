@@ -148,7 +148,7 @@ private:
     unsigned int process_order_stmt (collate_section_t&);
 
     bool insert_entries (token_t&, collate_entry_list_t&);
-    void remove_entry   (collate_entry_t&);
+    void remove_entries (const collate_entry_list_t&);
     void list_collate   ();
 
     // automatically fill any ctype categories that depend upon characters

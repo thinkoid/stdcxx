@@ -117,16 +117,18 @@ separators of 431 definitions were wrong (=zh_TW=, =ja_JP=, =ru_RU=,
 =fr_FR=, the euro sign of =de_DE=). The narrow strings still take the
 bytes as they are, right for a UTF-8 charmap only, and a
 transliteration statement that writes its character raw is still
-skipped (=de_DE=, =translit_emojis=). Of the 502 definitions in
-glibc's =SUPPORTED=, 501 build; =cmn_TW= runs past five minutes on its
-stroke template, and =zh_CN= takes over three on the pinyin one.
-Before the one sequence, 174 definitions built wrong: a
-=reorder-after= block that opens with a bare symbol lost the weights
-of its definitions, so =es_ES= put ñ and =sv_SE= å, ä and ö among the
-undefined characters. The era records of =LC_TIME= carry bytes nothing
-wrote (=Def::write_time= under valgrind), so two builds of a
-definition with =era= can differ. The keyword table still lacks
-=alt_mon=, =ab_alt_mon=, =class=, =map=, =default_missing=,
+skipped (=de_DE=, =translit_emojis=). Every one of the 502 definitions
+in glibc's =SUPPORTED= builds, each in under 30 s among ten in
+parallel; =cmn_TW=, which took nine minutes alone on its stroke
+template, takes 22 s, and =zh_CN= 20 s on the pinyin one, against 200
+s before: =reorder-after= removed each entry of a block from its old
+place by a search of its own. Before the one sequence, 174 definitions
+built wrong: a =reorder-after= block that opens with a bare symbol
+lost the weights of its definitions, so =es_ES= put ñ and =sv_SE= å, ä
+and ö among the undefined characters. The era records of =LC_TIME=
+carry bytes nothing wrote (=Def::write_time= under valgrind), so two
+builds of a definition with =era= can differ. The keyword table still
+lacks =alt_mon=, =ab_alt_mon=, =class=, =map=, =default_missing=,
 =symbol-equivalence=, =week=, =first_weekday=, =first_workday=,
 =date_fmt=, =yesstr= and =nostr=; the lines are skipped.
 
@@ -140,14 +142,13 @@ C library does not classify. The collation of =en_US=, =hu_HU=,
 =es_ES=, =sv_SE=, =fa_IR=, =ml_IN=, =zh_CN=, =mdf_RU= and =crh_RU=
 agrees but for the two classes of the entries below.
 
-Fix: in order. First the rest of the compiler: the run time of the
-stroke and pinyin templates, the keywords. Then the shared tables together
-with their charmaps, =i18n=, the transliteration and collation
-templates: refreshed leaf definitions alone leave the shared tables
-stale. Then the definitions, the legacy names kept through an
-explicit mapping. Then the databases regenerated and the decoded
-facet values compared with the glibc source baseline, the currency,
-numeric and date repairs staged separately.
+Fix: in order. First the rest of the compiler: the keywords. Then the
+shared tables together with their charmaps, =i18n=, the
+transliteration and collation templates: refreshed leaf definitions
+alone leave the shared tables stale. Then the definitions, the legacy
+names kept through an explicit mapping. Then the databases regenerated
+and the decoded facet values compared with the glibc source baseline,
+the currency, numeric and date repairs staged separately.
 
 Check: =localedef= builds every definition in the refreshed
 =etc/nls/src= with its charmap. The locale tests pass against their
