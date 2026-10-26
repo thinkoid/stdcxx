@@ -685,7 +685,8 @@ check_libstd_test_locale (const char* charTname)
 // creates a second locale database from a definition in the forms
 // of the GNU libc sources that the test database above does not use:
 // a collating-symbol range, define with ifdef, ifndef, else and
-// endif, and an ellipsis entry with ellipsis weights
+// endif, an ellipsis entry with ellipsis weights, and reorder-after
+// a collating symbol with collation definitions after it
 static const char*
 make_range_locale ()
 {
@@ -707,6 +708,7 @@ make_range_locale ()
         "CHARMAP\n"
         "<U0061> \\x61\n<U0062> \\x62\n<U0063> \\x63\n<U0064> \\x64\n"
         "<U0065> \\x65\n<U0066> \\x66\n<U0067> \\x67\n<U0068> \\x68\n"
+        "<U0069> \\x69\n<U006A> \\x6a\n"
         "END CHARMAP\n"
     };
 
@@ -747,6 +749,19 @@ make_range_locale ()
         "<U0068> <L0>;<U0068>\n"
         "order_end\n"
         "endif\n"
+
+        // a definition after a bare symbol, and a symbol with a
+        // definition after it: glibc keeps one sequence, so i takes
+        // its place right after <L1>, and j after <L3>, which comes
+        // right after <L2>; the second weight of each is its own
+        // place, before that of any character in a section
+        "collating-symbol <L3>\n"
+        "reorder-after <L1>\n"
+        "<U0069> <L1>;<U0069>\n"
+        "reorder-after <L2>\n"
+        "<L3>\n"
+        "<U006A> <L3>;<U006A>\n"
+        "reorder-end\n"
 
         "END LC_COLLATE\n"
     };
@@ -839,6 +854,13 @@ check_libstd_range_locale (const char* charTname)
     // with a, and parts from c at the second level
     test_string (charTname, co, "h", "b", 1);
     test_string (charTname, co, "h", "c", 1);
+
+    // the reorder: i between a and b, sharing the first weight of b
+    // and parting from it at the second level; j between c and d
+    test_string (charTname, co, "a", "i", -1);
+    test_string (charTname, co, "i", "b", -1);
+    test_string (charTname, co, "c", "j", -1);
+    test_string (charTname, co, "j", "d", -1);
 }
 
 /**************************************************************************/

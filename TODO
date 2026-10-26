@@ -103,40 +103,38 @@ not a gap. =doc/notes/analysis-locale-sources.md= holds the survey. The facets c
 (=doc/notes/ref-locale.md=), so stale sources need not reach every
 =std::locale= a program constructs.
 
-The compiler, 2026-10-20: =localedef= reads the collation templates
-now. The =<A>..<B>= form of =collating-symbol= (the handler took one
-name and dropped the rest; the old =i18n= declares four such ranges
-whose symbols nothing uses), =define=, =undef=, =ifdef=, =ifndef=,
-=else= and =endif=, the entries an ellipsis leads and the ellipsis
-as a weight (the parser dropped the entries and the kind of the
-ellipsis was read after the step to the end entry, so the Han block
-of =iso14651_t1= fell into the undefined characters); the symbolic
-increment keeps the width and case of the name where it wrote
-=<U4e01>= for =<U4E01>=. Of the 502 definitions in glibc's
-=SUPPORTED=, 487 build. The =en_US= databases against the C
-library's =en_US.UTF-8=: every classification and case mapping of
-every code point agrees but 135, CJK extension tails the class
-ranges cover and the C library does not classify; every collation of
-a word list and of 50000 random Latin, Greek and Cyrillic strings
-agrees, and 19 of 297266 single-character pairs differ, all over
-characters outside the table, which glibc ties and the library
-orders by code point. The 15 that do not build: 13 =reorder-after= a
-collating symbol with weighted entries (=fa_IR=, =az_IR=, =ps_AF=,
-=hu_HU=, =zh_CN=, =bo_CN=, =bo_IN=, =dz_BT=, =ml_IN=): the model keeps
-the bare symbols and the sections apart, so a weighted entry has no
-place after a symbol, and the check reads the first statement of the
-block only, Error 291 when that one has weights and Error 101 later
-when it has none; =mdf_RU= writes characters raw where a symbolic
-name is expected (Error 312); =cmn_TW= runs past five minutes on the
-pinyin template. The keyword table still lacks =alt_mon=,
-=ab_alt_mon=, =class=, =map=, =default_missing=, =symbol-equivalence=,
-=week=, =first_weekday=, =first_workday=, =date_fmt=, =yesstr= and
-=nostr=; the lines are skipped.
+The compiler: =localedef= reads the collation templates: the
+=<A>..<B>= range of =collating-symbol=, the conditionals =define=,
+=undef=, =ifdef=, =ifndef=, =else= and =endif=, the entries an
+ellipsis leads and the ellipsis as a weight. It keeps the bare
+collating symbols and the definitions =reorder-after= places after
+one of them in one sequence, as glibc does; a name nothing declares
+there is a new symbol. Of the 502 definitions in glibc's =SUPPORTED=,
+499 build. =crh_RU= writes characters raw in a =collating-element=
+string (Error 123) and =mdf_RU= in collation statements (Error 312);
+=cmn_TW= runs past five minutes on its stroke template, and =zh_CN=
+takes over three on the pinyin one. Before the one sequence, 174
+definitions built wrong: a =reorder-after= block that opens with a
+bare symbol lost the weights of its definitions, so =es_ES= put ñ
+and =sv_SE= å, ä and ö among the undefined characters. The keyword
+table still lacks =alt_mon=, =ab_alt_mon=, =class=, =map=,
+=default_missing=, =symbol-equivalence=, =week=, =first_weekday=,
+=first_workday=, =date_fmt=, =yesstr= and =nostr=; the lines are
+skipped.
 
-Fix: in order. First the rest of the compiler: one ordering of
-symbols and entries in =util/collate.cpp= so =reorder-after= can
-place weighted entries after a symbol, raw characters in collation
-statements, the pinyin run time. Then the shared tables together
+The oracles under =bin/oracle= compare a database with the C
+library under =setlocale= for the same locale: every classification
+and both case maps of every code point, and the collation of a word
+list, of 50000 random strings and of each printable character
+against the next. The classifications and case maps agree but for
+135 code points, CJK extension tails the class ranges cover and the
+C library does not classify. The collation of =en_US=, =hu_HU=,
+=es_ES=, =sv_SE=, =fa_IR=, =ml_IN= and =zh_CN= agrees but for the
+two classes of the entries below.
+
+Fix: in order. First the rest of the compiler: raw characters in
+collation statements, the run time of the stroke and pinyin
+templates, the keywords. Then the shared tables together
 with their charmaps, =i18n=, the transliteration and collation
 templates: refreshed leaf definitions alone leave the shared tables
 stale. Then the definitions, the legacy names kept through an
@@ -149,6 +147,58 @@ Check: =localedef= builds every definition in the refreshed
 pins, re-pinned where the data moved. The decoded currency, numeric
 and date values of the 139 shared definitions match the glibc
 sources they come from.
+
+** TODO Characters outside a collation table sort last, glibc's first
+
+A character that a definition does not name and no =UNDEFINED=
+covers gets its own position as its weight at every level
+(=add_missing_values= in =util/collate.cpp=), after every defined
+character. glibc gives such a character =IGNORE= at the first three
+levels and a weight at the fourth: =wcsxfrm= of U+743B, a Han
+character outside the pinyin table, writes no weight before the
+fourth level under =zh_CN.UTF-8=, so it sorts before every letter.
+POSIX leaves the place of an undefined character to the
+implementation. The oracles count 1584 disagreements of 50000 random
+strings over U+4E00 to U+9FFF in =zh_CN=, all over characters
+outside the table; U+061D in =fa_IR=; U+0D00, U+0D04, U+0D3B and
+U+0D3C in =ml_IN=; the 9 single-character pairs of 297266 that
+differ in =en_US=, at the boundaries of the CJK extension blocks and
+over the newest symbols. For these
+characters the narrow facet already orders as glibc does and the
+wide one does not.
+
+Fix: decide whether a definition without =UNDEFINED= follows glibc;
+if it does, give the missing characters =IGNORE= at every level but
+the last, and find why the narrow and wide facets part.
+
+Check: the collation oracle over those ranges finds no disagreement
+over a character outside the table.
+
+** TODO A character IGNOREd at a level sorts after a weight there
+
+The library and glibc part over strings that differ only in a
+character =IGNORE=d at some level. Under =sv_SE=, ü (=IGNORE= at the
+fourth level) against ÿ (its code point there), equal at the first
+three: glibc puts ü first, the library second. Under =en_US=, "é"
+against "é>", where =>= is =IGNORE= at the first three levels: glibc
+puts the shorter string first, the library second. The same shape
+accounts for the 1 disagreement of 50000 random strings in =en_US=
+and 3 in =fa_IR= and 6 in =ml_IN= once the characters outside the
+table are left out. Hypothesis: the fourth level of =iso14651_t1= is
+=forward,position=, and for an element =IGNORE=d at a position level
+the transform writes its =IGNORE= mark, =CHAR_MAX= narrow and
+=WCHAR_MAX= wide, which sorts after every weight
+(=doc/notes/analysis-collate-transform.md=); the punctuation of the
+=<SPECIAL>= section is read backward at the second level, so a
+string that mixes it with letters may mix directions as well.
+
+Fix: settle the hypothesis by the transform of each pair against
+=wcsxfrm=; then decide where the mark sorts, in =src/collate.cpp=,
+or what =localedef= writes.
+
+Check: the collation oracle finds no disagreement over strings of
+letters and characters =IGNORE=d at the first three levels in
+=en_US=, =sv_SE=, =fa_IR= and =ml_IN=.
 
 * EDG porting
 

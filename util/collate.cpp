@@ -288,12 +288,7 @@ void Def::preprocess_collation_definitions()
     std::string prev_elm;
     std::string next_elm;
 
-    token_list_t::iterator cs_it = sym_list_.begin ();
-    for (; cs_it != sym_list_.end (); ++cs_it) {
-        cs_map_iter csm_it = cs_map_.find (cs_it->name);
-        if (csm_it != cs_map_.end ())
-            csm_it->second = coll_value++;
-    }
+    process_symbols (false, coll_value);
 
     static token_list_t::size_type max_orders = 0;
 
@@ -413,6 +408,44 @@ void Def::preprocess_collation_definitions()
                 break;
             }
         }
+    }
+}
+
+
+// the entries outside the sections, in order, take the first
+// collation values: the bare collating symbols, and the definitions
+// that reorder-after placed after one of them; glibc keeps a single
+// sequence of symbols and definitions, so a definition may follow a
+// symbol and take its place there
+void Def::process_symbols (bool do_weights, unsigned int& coll_value)
+{
+    // the rules of the definitions here, from the last section: glibc
+    // gives an entry that reorder-after moves the rules of the section
+    // opened last
+    unsigned int order       = 0;
+    bool         order_known = false;
+
+    collate_entry_list_t::iterator e_it = sym_list_.begin ();
+    for (; e_it != sym_list_.end (); ++e_it) {
+        const std::string& name = e_it->first.name;
+
+        cs_map_iter csm_it = cs_map_.find (name);
+        if (csm_it != cs_map_.end ()) {
+            csm_it->second = coll_value++;
+            continue;
+        }
+
+        // a character, a collating element, or a name nothing
+        // declares, which is a new collating symbol, as in glibc
+        // after reorder-after, and as in a section here (see
+        // process_collation_definition)
+        if (!order_known && !section_list_.empty ()) {
+            order       = process_order_stmt (section_list_.back ());
+            order_known = true;
+        }
+
+        process_collation_definition (do_weights, *e_it,
+                                      coll_value++, order);
     }
 }
 
@@ -877,13 +910,8 @@ void Def::process_collate()
     // collation values 0 and 1 are reserved
     unsigned int coll_value = 2;
 
-    // FIXME: assign values to the collating-elements AGAIN
-    cs_it = sym_list_.begin ();
-    for (; cs_it != sym_list_.end (); ++cs_it) {
-        cs_map_iter csm_it = cs_map_.find (cs_it->name);
-        if (csm_it != cs_map_.end ())
-            csm_it->second = coll_value++;
-    }
+    // the symbols again, the definitions among them with their weights
+    process_symbols (true, coll_value);
 
     // process the sections
     std::list<collate_section_t>::iterator sect_it = 
@@ -1121,23 +1149,28 @@ void Def::dump_collate ()
 
     const std::map<std::string, wchar_t>& w_cmap = charmap_.get_w_cmap ();
 
-    token_list_t::iterator sl_it = sym_list_.begin ();
+    collate_entry_list_t::iterator sl_it = sym_list_.begin ();
     for (; sl_it != sym_list_.end (); ++sl_it) {
-        std::cout << sl_it->name << " % "; 
-        cs_map_iter cs_it = cs_map_.find (sl_it->name);
+        std::cout << sl_it->first.name;
+        token_list_t::iterator w_it = sl_it->second.begin ();
+        for (; w_it != sl_it->second.end (); ++w_it)
+            std::cout << (w_it == sl_it->second.begin () ? " " : ";")
+                      << w_it->name;
+        std::cout << " % ";
+        cs_map_iter cs_it = cs_map_.find (sl_it->first.name);
         if (cs_it != cs_map_.end ()) {
             std::cout << cs_it->second << '\n';
             continue;
         }
 
-        ce_map_iter ce_it = ce_map_.find (sl_it->name);
+        ce_map_iter ce_it = ce_map_.find (sl_it->first.name);
         if (ce_it != ce_map_.end ()) {
             std::cout << ce_it->second.coll_val << '\n';
             continue;
         }
         
         std::map<std::string, wchar_t >::const_iterator cw_it = 
-            w_cmap.find (sl_it->name);
+            w_cmap.find (sl_it->first.name);
         if (cw_it != w_cmap.end ()) {
             coll_map_iter cm_it = 
                 coll_map_.find (cw_it->second);
@@ -1744,7 +1777,7 @@ void Def::preprocess_collate ()
             script_list_.push_back(next);
             break;
         case Scanner::tok_sym_name:
-            sym_list_.push_back (next);
+            sym_list_.push_back (collate_entry_t (next, token_list_t ()));
             break;
         case Scanner::tok_order_start:
             preprocess_order();
@@ -2117,9 +2150,14 @@ void Def::list_collate ()
     std::cout << '\n';
 
     // print out general/global symbols' list
-    token_list_t::iterator sym_it = sym_list_.begin ();
+    collate_entry_list_t::iterator sym_it = sym_list_.begin ();
     while (sym_it != sym_list_.end ()) {
-        std::cout << (sym_it++)->name << '\n';
+        std::cout << sym_it->first.name << "   ";
+        token_list_t::iterator w_it = sym_it->second.begin ();
+        while (w_it != sym_it->second.end ())
+            std::cout << (w_it++)->name << ";";
+        std::cout << '\n';
+        ++sym_it;
     }
     std::cout << '\n';
 
@@ -2165,28 +2203,14 @@ bool Def::insert_entries (token_t& s, collate_entry_list_t& e)
     for (; r_it != e.end (); ++r_it) 
         remove_entry (*r_it);
 
-    // first search through the symbols list; if found check
-    // the collate_entry object; it should not have weights
-    token_list_t::iterator it = sym_list_.begin ();
+    // first search through the symbols list; the entries follow the
+    // symbol there, definitions with weights as well as bare names
+    collate_entry_list_t::iterator it = sym_list_.begin ();
     for (; it != sym_list_.end (); ++it) {
-        if (it->name != s.name) 
+        if (it->first.name != s.name) 
             continue;
 
-        // FIXME - all statements have to have no weights if they are
-        // to be inserted after collation symbols outside section boundaries;
-        // found it;  check one collate_entry_t object
-        if (!e.begin ()->second.empty ()) {
-            issue_diag (E_REORD, true, &s,
-                        "requested reorder-after: reference "
-                        "symbol %s was found outside section boundaries "
-                        "and the objects to be reordered are collation "
-                        "definitions\n", s.name.c_str ());
-        }
-
-        // insert the symbolic name there
-        collate_entry_list_t::iterator e_it = e.begin ();
-        for (; e_it != e.end (); ++e_it) 
-            it = sym_list_.insert (++it, e_it->first);
+        sym_list_.insert (++it, e.begin (), e.end ());
 
         return true;
     }
@@ -2217,16 +2241,15 @@ bool Def::insert_entries (token_t& s, collate_entry_list_t& e)
 // FIXME - modify the algorithm to get log(N) complexity
 void Def::remove_entry (collate_entry_t& e)
 {
-    // search in the sym_list_ and in the sections
-    if (e.second.empty ()) {
-        token_list_t::iterator it = sym_list_.begin ();
-        for (; it != sym_list_.end (); ++it) {
-            if (it->name != e.first.name) 
-                continue;
+    // search in the sym_list_, which holds definitions placed after
+    // a symbol as well as the symbols, and in the sections
+    collate_entry_list_t::iterator it = sym_list_.begin ();
+    for (; it != sym_list_.end (); ++it) {
+        if (it->first.name != e.first.name) 
+            continue;
 
-            sym_list_.erase (it);
-            return;
-        }
+        sym_list_.erase (it);
+        return;
     }
 
     // search in the sections

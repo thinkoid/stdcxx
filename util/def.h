@@ -123,7 +123,10 @@ private:
 
     token_list_t  script_list_;
     token_list_t  cs_list_;
-    token_list_t  sym_list_;
+
+    // the entries outside the sections, in order: the bare symbols
+    // and the definitions reorder-after placed after one of them
+    collate_entry_list_t sym_list_;
 
     // the symbols named by define, tested by ifdef and ifndef
     std::set<std::string> defined_;
@@ -138,6 +141,7 @@ private:
     void preprocess_collation_definitions();
     void process_conditional ();
     void skip_conditional (bool);
+    void process_symbols (bool, unsigned int&);
 
     void process_collation_definition ( bool, collate_entry_t&,
                                         unsigned int, unsigned int);
