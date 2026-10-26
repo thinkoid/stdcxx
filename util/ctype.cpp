@@ -628,6 +628,17 @@ process_xlit ()
             process_xlit_statement (nchars);
             break;
         }
+        case Scanner::tok_ndef: {
+            // a statement that writes its character raw is not read
+            // (see the TODO); translit_ignore and default_missing are
+            // skipped as LC_CTYPE keywords
+            std::string name;
+            if (raw_char_name (next.name.c_str (), name) == next.name.size ())
+                scanner_.ignore_line ();
+            else
+                skip_statement (lc_name);
+            break;
+        }
         case Scanner::tok_xlit_end: {
             if (nesting_level == 0)
                 return;
@@ -808,9 +819,11 @@ process_ctype ()
 
             break;
 
+        case Scanner::tok_ndef:
+            skip_statement (lc_name);
+            break;
+
         default:
-            // ignore locale specific character classes because the c++
-            // library does not make use of them
             scanner_.ignore_line();
             break;
 

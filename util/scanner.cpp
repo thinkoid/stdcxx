@@ -233,6 +233,7 @@ process_token (const char* name)
         { "backward", tok_backward },
         { "blank", tok_blank },
         { "cntrl", tok_cntrl },
+        { "codepoint_collation", tok_codepoint_collation },
         { "collating-element", tok_coll_elem },
         { "collating-symbol", tok_coll_sym },
         { "comment_char", tok_comment_char },
@@ -291,6 +292,9 @@ process_token (const char* name)
         { "reorder-end", tok_reorder_end },
         { "reorder-section-after", tok_reorder_section },
         { "reorder-section-end", tok_reorder_section_end },
+        // the GNU spelling of the two above
+        { "reorder-sections-after", tok_reorder_section },
+        { "reorder-sections-end", tok_reorder_section_end },
         { "script", tok_script },
         { "space", tok_space },
         { "t_fmt", tok_t_fmt },

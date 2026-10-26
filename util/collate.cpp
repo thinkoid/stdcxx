@@ -936,6 +936,25 @@ void Def::process_collate()
     for (; sect_it != section_list_.end (); ++sect_it)
         process_order (*sect_it, coll_value);
 
+    // the C locales of glibc order every character by its code point
+    // and define nothing else: one forward level, each character its
+    // own weight, in the order of the wide character values, which
+    // are the code points where wchar_t holds ISO 10646
+    if (codepoint_collation_) {
+        collate_out_.num_weights     = 1;
+        collate_out_.weight_type [0] = 0;
+
+        const std::vector<bool> ordinal_weights (1, true);
+
+        coll_map_iter it = coll_map_.begin ();
+        for (; it != coll_map_.end (); ++it)
+            if (UINT_MAX == it->second.offset)
+                add_to_coll (it->first, 0, coll_value++,
+                             ordinal_weights, false);
+
+        return;
+    }
+
     // check to make sure that all the elements in the codeset were added
     if (!undefined_keyword_found_) {
         std::vector<bool> ordinal_weights;
@@ -1815,6 +1834,14 @@ void Def::preprocess_collate ()
         case Scanner::tok_else:
         case Scanner::tok_endif:
             process_conditional ();
+            break;
+
+        case Scanner::tok_codepoint_collation:
+            codepoint_collation_ = true;
+            break;
+
+        case Scanner::tok_ndef:
+            skip_statement ("LC_COLLATE");
             break;
 
         default:

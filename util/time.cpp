@@ -340,6 +340,10 @@ void Def::process_time ()
                 alt_digits_.push_back (digit);
             }
             break;
+        case Scanner::tok_ndef:
+            skip_statement (lc_name);
+            break;
+
         default:
             break;
         }

@@ -682,6 +682,65 @@ check_libstd_test_locale (const char* charTname)
 
 /**************************************************************************/
 
+// the charmap of the locale databases below: a single byte for each
+// character, the byte of a character its code point
+static const char range_charmap [] = {
+    "<code_set_name> \"RANGE-TEST\"\n"
+    "<mb_cur_max> 1\n<mb_cur_min> 1\n"
+    "CHARMAP\n"
+    "<U0061> \\x61\n<U0062> \\x62\n<U0063> \\x63\n<U0064> \\x64\n"
+    "<U0065> \\x65\n<U0066> \\x66\n<U0067> \\x67\n<U0068> \\x68\n"
+    "<U0069> \\x69\n<U006A> \\x6a\n"
+    "<U00E0> \\xe0\n<U00E1> \\xe1\n"
+    "END CHARMAP\n"
+};
+
+
+// writes the definition and the charmap to <name>.src and <name>.cm
+// in the locale root and creates the locale database locname from
+// them in the root, the one the test database above was created in
+// when it was; returns locname, or 0 on failure
+static const char*
+create_locale (const char* locname, const char* name, const char* source)
+{
+    const char* locale_root = std::getenv (LOCALE_ROOT);
+    if (0 == locale_root || '\0' == *locale_root)
+        locale_root = rw_set_locale_root ();
+    if (0 == locale_root)
+        return 0;
+
+    const std::string srcfname =
+        std::string (locale_root) + _RWSTD_PATH_SEP + name + ".src";
+    const std::string cmfname =
+        std::string (locale_root) + _RWSTD_PATH_SEP + name + ".cm";
+
+    std::FILE* fout = std::fopen (srcfname.c_str (), "w");
+    if (!fout) {
+        rw_error (0, __FILE__, __LINE__,
+                  "fopen(%#s, \"w\") failed: %m", srcfname.c_str ());
+        return 0;
+    }
+
+    std::fputs (source, fout);
+    std::fclose (fout);
+
+    fout = std::fopen (cmfname.c_str (), "w");
+    if (!fout) {
+        rw_error (0, __FILE__, __LINE__,
+                  "fopen(%#s, \"w\") failed: %m", cmfname.c_str ());
+        return 0;
+    }
+
+    std::fputs (range_charmap, fout);
+    std::fclose (fout);
+
+    if (0 == rw_localedef ("-w", srcfname.c_str (), cmfname.c_str (), locname))
+        return 0;
+
+    return locname;
+}
+
+
 // creates a second locale database from a definition in the forms
 // of the GNU libc sources that the test database above does not use:
 // a collating-symbol range, define with ifdef, ifndef, else and
@@ -695,24 +754,6 @@ make_range_locale ()
 
     if (locname)
         return locname;
-
-    // the root the test database above was created in, when it was
-    const char* locale_root = std::getenv (LOCALE_ROOT);
-    if (0 == locale_root || '\0' == *locale_root)
-        locale_root = rw_set_locale_root ();
-    if (0 == locale_root)
-        return 0;
-
-    static const char charmap [] = {
-        "<code_set_name> \"RANGE-TEST\"\n"
-        "<mb_cur_max> 1\n<mb_cur_min> 1\n"
-        "CHARMAP\n"
-        "<U0061> \\x61\n<U0062> \\x62\n<U0063> \\x63\n<U0064> \\x64\n"
-        "<U0065> \\x65\n<U0066> \\x66\n<U0067> \\x67\n<U0068> \\x68\n"
-        "<U0069> \\x69\n<U006A> \\x6a\n"
-        "<U00E0> \\xe0\n<U00E1> \\xe1\n"
-        "END CHARMAP\n"
-    };
 
     static const char lc_collate [] = {
         "LC_COLLATE\n"
@@ -778,44 +819,34 @@ make_range_locale ()
         "END LC_COLLATE\n"
     };
 
-    const std::string srcfname =
-        std::string (locale_root) + _RWSTD_PATH_SEP + "range.src";
-    const std::string cmfname =
-        std::string (locale_root) + _RWSTD_PATH_SEP + "range.cm";
-
-    std::FILE* fout = std::fopen (srcfname.c_str (), "w");
-    if (!fout) {
-        rw_error (0, __FILE__, __LINE__,
-                  "fopen(%#s, \"w\") failed: %m", srcfname.c_str ());
-        return 0;
-    }
-
-    std::fputs (lc_collate, fout);
-    std::fclose (fout);
-
-    fout = std::fopen (cmfname.c_str (), "w");
-    if (!fout) {
-        rw_error (0, __FILE__, __LINE__,
-                  "fopen(%#s, \"w\") failed: %m", cmfname.c_str ());
-        return 0;
-    }
-
-    std::fputs (charmap, fout);
-    std::fclose (fout);
-
-    locname = "range-locale";
-
-    if (0 == rw_localedef ("-w", srcfname.c_str (), cmfname.c_str (), locname))
-        locname = 0;
+    locname = create_locale ("range-locale", "range", lc_collate);
 
     return locname;
 }
 
 
-// compares two strings of the characters whose values are the bytes
-// of str1 and str2: in the charmap of the database above the byte of
-// a character is its code point, and the code point is the value of
-// the wide character
+// creates a database from a definition whose LC_COLLATE is the one of
+// the C locales of the GNU libc: codepoint_collation
+static const char*
+make_codepoint_locale ()
+{
+    static const char* locname;
+
+    if (locname)
+        return locname;
+
+    static const char lc_collate [] = {
+        "LC_COLLATE\n"
+        "codepoint_collation\n"
+        "END LC_COLLATE\n"
+    };
+
+    locname = create_locale ("codepoint-locale", "codepoint", lc_collate);
+
+    return locname;
+}
+
+
 template <class charT>
 void
 test_bytes (const char* charTname, const std::collate<charT>& co,
@@ -911,6 +942,51 @@ check_libstd_range_locale (const char* charTname)
     test_bytes (charTname, co, "\xe0", "b", -1);
     test_bytes (charTname, co, "c", "\xe0\xe1", -1);
     test_bytes (charTname, co, "\xe0\xe1", "d", -1);
+}
+
+
+template <class charT>
+void
+check_libstd_codepoint_locale (const char* charTname)
+{
+    rw_info (0, __FILE__, __LINE__,
+             "libstd std::collate<%s>::compare () collate database "
+             "of codepoint_collation", charTname);
+
+    const char* const locname = make_codepoint_locale ();
+    if (!locname) {
+        rw_assert (false, __FILE__, __LINE__,
+                   "unable to create a locale database");
+        return;
+    }
+
+    std::locale loc;
+
+    try {
+        loc = std::locale (locname);
+    }
+    catch (...) {
+        const char* const var = std::getenv (LOCALE_ROOT);
+
+        rw_assert (false, __FILE__, __LINE__,
+                   "std::locale(\"%s\") unexpectedly threw "
+                   "an exception; " LOCALE_ROOT "=%s",
+                   locname, var ? var : "(null)");
+        return;
+    }
+
+    const std::collate<charT> &co =
+        std::use_facet< std::collate<charT> >(loc);
+    co._C_opts |=  co._C_use_libstd;
+    co._C_opts &= ~co._C_use_libc;
+
+    // every character at its code point, and a string before the
+    // strings it begins
+    test_bytes (charTname, co, "a", "b", -1);
+    test_bytes (charTname, co, "j", "\xe0", -1);
+    test_bytes (charTname, co, "\xe0", "\xe1", -1);
+    test_bytes (charTname, co, "ab", "b", -1);
+    test_bytes (charTname, co, "b", "ba", -1);
 }
 
 /**************************************************************************/
@@ -1429,6 +1505,7 @@ do_test (const char* charTname)
 {
     check_libstd_test_locale<charT> (charTname);
     check_libstd_range_locale<charT> (charTname);
+    check_libstd_codepoint_locale<charT> (charTname);
     check_libstd<charT> (charTname);
     check_libc<charT> (charTname);
     check_NUL<charT> (charTname);

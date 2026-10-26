@@ -539,6 +539,126 @@ void Def::auto_fill ()
 }
 
 
+// the keywords of the GNU sources, by category, that no facet of the
+// library reads: localedef skips their statements on purpose
+static const struct {
+    const char* category;
+    const char* keyword;
+} unused_keywords [] = {
+    // classes and maps past the ones std::ctype reads, alnum, which
+    // the library makes of alpha and digit, the digits printf writes
+    // for its I flag, and the transliteration defaults of iconv
+    { "LC_CTYPE", "alnum" },
+    { "LC_CTYPE", "charclass" },
+    { "LC_CTYPE", "charconv" },
+    { "LC_CTYPE", "class" },
+    { "LC_CTYPE", "default_missing" },
+    { "LC_CTYPE", "map" },
+    { "LC_CTYPE", "outdigit" },
+    { "LC_CTYPE", "translit_ignore" },
+
+    // an alias of a collating symbol, which only the LC_COLLATE of
+    // i18n uses and no definition copies, a bound on the number of
+    // weights and the declaration of a section name, which nothing
+    // the library builds depends on
+    { "LC_COLLATE", "coll_weight_max" },
+    { "LC_COLLATE", "section-symbol" },
+    { "LC_COLLATE", "symbol-equivalence" },
+
+    // a second currency (ISO/IEC TR 14652), which moneypunct has not
+    { "LC_MONETARY", "conversion_rate" },
+    { "LC_MONETARY", "duo_currency_symbol" },
+    { "LC_MONETARY", "duo_frac_digits" },
+    { "LC_MONETARY", "duo_int_curr_symbol" },
+    { "LC_MONETARY", "duo_int_frac_digits" },
+    { "LC_MONETARY", "duo_int_n_cs_precedes" },
+    { "LC_MONETARY", "duo_int_n_sep_by_space" },
+    { "LC_MONETARY", "duo_int_n_sign_posn" },
+    { "LC_MONETARY", "duo_int_p_cs_precedes" },
+    { "LC_MONETARY", "duo_int_p_sep_by_space" },
+    { "LC_MONETARY", "duo_int_p_sign_posn" },
+    { "LC_MONETARY", "duo_n_cs_precedes" },
+    { "LC_MONETARY", "duo_n_sep_by_space" },
+    { "LC_MONETARY", "duo_n_sign_posn" },
+    { "LC_MONETARY", "duo_p_cs_precedes" },
+    { "LC_MONETARY", "duo_p_sep_by_space" },
+    { "LC_MONETARY", "duo_p_sign_posn" },
+    { "LC_MONETARY", "duo_valid_from" },
+    { "LC_MONETARY", "duo_valid_to" },
+    { "LC_MONETARY", "uno_valid_from" },
+    { "LC_MONETARY", "uno_valid_to" },
+
+    // the calendar, the month names of the other grammatical case,
+    // and the format of date(1), none of which time_get or time_put
+    // reads
+    { "LC_TIME", "ab_alt_mon" },
+    { "LC_TIME", "alt_mon" },
+    { "LC_TIME", "cal_direction" },
+    { "LC_TIME", "date_fmt" },
+    { "LC_TIME", "era_year" },
+    { "LC_TIME", "first_weekday" },
+    { "LC_TIME", "first_workday" },
+    { "LC_TIME", "timezone" },
+    { "LC_TIME", "week" },
+
+    // the answers, past the expressions that match them
+    { "LC_MESSAGES", "nostr" },
+    { "LC_MESSAGES", "yesstr" }
+};
+
+
+void Def::skip_statement (const char* lc_name)
+{
+    assert (0 != lc_name);
+
+    const std::size_t nkeywords =
+        sizeof unused_keywords / sizeof *unused_keywords;
+
+    std::size_t i = 0;
+    for (; i != nkeywords; ++i)
+        if (   0 == std::strcmp (unused_keywords [i].category, lc_name)
+            && next.name == unused_keywords [i].keyword)
+            break;
+
+    if (i != nkeywords) {
+        issue_diag (I_SKIP, false, &next, "%s %s not read, skipping\n",
+                    lc_name, next.name.c_str ());
+
+        // the names charclass and charconv declare lead statements
+        // of their own
+        if (next.name == "charclass" || next.name == "charconv") {
+            while ((next = scanner_.next_token ()).token != Scanner::tok_nl)
+                ctype_names_.insert (next.name);
+            return;
+        }
+    }
+    else if (ctype_names_.find (next.name) == ctype_names_.end ()) {
+        warnings_occurred_ =
+            issue_diag (W_NOTSUP, false, &next,
+                        "unknown keyword %s in %s, ignoring the line\n",
+                        next.name.c_str (), lc_name)
+            || warnings_occurred_;
+    }
+
+    scanner_.ignore_line ();
+}
+
+
+void Def::skip_category (Scanner::token_id category)
+{
+    issue_diag (I_SKIP, false, &next, "%s not read, skipping\n",
+                next.name.c_str ());
+
+    while ((next = scanner_.next_token ()).token != Scanner::tok_end_tokens) {
+        if (   Scanner::tok_end == next.token
+            && category == (next = scanner_.next_token ()).token)
+            return;
+    }
+
+    issue_diag (E_SYNTAX, true, &next, "end of input inside a category\n");
+}
+
+
 void Def::process_input ()
 {
     while ((next = scanner_.next_token ()).token != Scanner::tok_end_tokens) {
@@ -576,6 +696,20 @@ void Def::process_input ()
         case Scanner::tok_nl:
             break;
 
+        // the categories of the GNU sources no facet reads
+        case Scanner::tok_addr:
+        case Scanner::tok_ident:
+        case Scanner::tok_measure:
+        case Scanner::tok_name:
+        case Scanner::tok_paper:
+        case Scanner::tok_phone:
+            skip_category (next.token);
+            break;
+
+        case Scanner::tok_ndef:
+            skip_statement ("the locale definition");
+            break;
+
         default:
             scanner_.ignore_line ();
             break;
@@ -607,6 +741,7 @@ Def::Def (const char* filename, const char* out_name, Charmap& char_map,
       mon_def_found_ (false),
       messages_def_found_ (false), 
       undefined_keyword_found_ (false),
+      codepoint_collation_ (false),
       no_position_ (no_position)
 
 {

@@ -130,6 +130,10 @@ void Def::process_numeric ()
             num_st_.wfalsename = convert_wstring (next);
             break;
 
+        case Scanner::tok_ndef:
+            skip_statement (lc_name);
+            break;
+
         default:
             break;
         }

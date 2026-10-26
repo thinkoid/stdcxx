@@ -111,6 +111,10 @@ void Def::process_messages()
             break;
         }
 
+        case Scanner::tok_ndef:
+            skip_statement (lc_name);
+            break;
+
         default:
             break;
         }

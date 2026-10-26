@@ -95,6 +95,7 @@ public:
         tok_backward,
         tok_position,
         tok_undefined,
+        tok_codepoint_collation,   // codepoint_collation (GNU)
         // 
         tok_string,
         tok_ignore,

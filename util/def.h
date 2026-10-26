@@ -158,6 +158,16 @@ private:
     // copy a category from one locale into the current locale
     void copy_category(int cat, std::string name);
 
+    // skip a statement led by an unknown token, quietly when it is a
+    // keyword no facet reads, with a warning otherwise
+    void skip_statement (const char*);
+
+    // skip a category no facet reads, up to its END
+    void skip_category (Scanner::token_id);
+
+    // the names of the classes and maps charclass and charconv declare
+    std::set<std::string> ctype_names_;
+
     // copy a file
     void copy_file(const std::string &name, const std::string &outname);
     
@@ -349,6 +359,9 @@ private:
 
     // specifies if the keyword UNDEFINED is used in the LC_COLLATE definition
     bool undefined_keyword_found_;
+
+    // the LC_COLLATE definition orders every character by its value
+    bool codepoint_collation_;
 
     // no_position_ is set by the "--no_position" command line option
     // when true forward,postion orders will be treated like forward orders

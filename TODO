@@ -127,28 +127,48 @@ built wrong: a =reorder-after= block that opens with a bare symbol
 lost the weights of its definitions, so =es_ES= put ñ and =sv_SE= å, ä
 and ö among the undefined characters. The era records of =LC_TIME=
 carry bytes nothing wrote (=Def::write_time= under valgrind), so two
-builds of a definition with =era= can differ. The keyword table still
-lacks =alt_mon=, =ab_alt_mon=, =class=, =map=, =default_missing=,
-=symbol-equivalence=, =week=, =first_weekday=, =first_workday=,
-=date_fmt=, =yesstr= and =nostr=; the lines are skipped.
+builds of a definition with =era= can differ. A statement led by a
+keyword no facet reads is skipped by a named table in =util/def.cpp=:
+=alt_mon=, =ab_alt_mon=, =date_fmt=, =week=, =first_weekday=,
+=first_workday=, =cal_direction=, =timezone= and =era_year= in
+=LC_TIME=; =yesstr= and =nostr=; =class=, =map=, =charclass=,
+=charconv= and the names those two declare, =outdigit=, =alnum=,
+=default_missing= and =translit_ignore= in =LC_CTYPE=;
+=symbol-equivalence=, used only by the =LC_COLLATE= of =i18n=, which
+no definition copies, =coll_weight_max= and =section-symbol=; the
+second currency of =LC_MONETARY=. The six categories of the GNU
+sources no facet reads are skipped whole. Any other keyword draws
+Warning 713; none of the 502 definitions draws one.
+=codepoint_collation= orders every character by its value, as glibc's
+C locales do; =C.UTF-8= tied every character before.
+=reorder-sections-after= and =reorder-sections-end= are glibc's
+spelling of =reorder-section-after= and =reorder-section-end=.
 
-The oracles under =bin/oracle= compare a database with the C
-library under =setlocale= for the same locale: every classification
-and both case maps of every code point, and the collation of a word
-list, of 50000 random strings and of each printable character
-against the next. The classifications and case maps agree but for
-135 code points, CJK extension tails the class ranges cover and the
-C library does not classify. The collation of =en_US=, =hu_HU=,
-=es_ES=, =sv_SE=, =fa_IR=, =ml_IN=, =zh_CN=, =mdf_RU= and =crh_RU=
-agrees but for the two classes of the entries below.
+The oracles under =bin/oracle= compare a database with the C library
+under =setlocale= for the same locale: every classification and both
+case maps of every code point, and the collation of a word list, of
+50000 random strings and of each printable character against the next.
+The classifications and case maps agree but for 135 code points at the
+ends of the CJK extension ranges of =i18n_ctype=: the database
+classifies 2B81E-2B81F, 2CEAE-2CEAF, 2EBE1-2EBEF and 3134B-3134F, past
+the ends of the ranges, and misses 2EBA1-2EBAF, 2EE1E-2EE2F,
+2EE40-2EE5D and 33440-3346F, inside them; the C library follows the
+ranges. =C.UTF-8= collates every other code point as the C library
+does and ties these. Hypothesis: the expansion of the =<A>..<B>= lines
+of the UTF-8 charmap, which come in runs of 64 code points, misplaces
+the ends of the runs; open. The collation of =en_US=, =hu_HU=,
+=es_ES=, =sv_SE=, =fa_IR=, =ml_IN=, =zh_CN=, =cmn_TW=, =mdf_RU= and
+=crh_RU= agrees but for the two classes of the entries below.
 
-Fix: in order. First the rest of the compiler: the keywords. Then the
-shared tables together with their charmaps, =i18n=, the
-transliteration and collation templates: refreshed leaf definitions
-alone leave the shared tables stale. Then the definitions, the legacy
-names kept through an explicit mapping. Then the databases regenerated
-and the decoded facet values compared with the glibc source baseline,
-the currency, numeric and date repairs staged separately.
+Fix: in order. First the rest of the compiler: the narrow strings and
+the transliteration statements written raw, the era bytes, the 135
+code points. Then the shared tables together with their charmaps,
+=i18n=, the transliteration and collation templates: refreshed leaf
+definitions alone leave the shared tables stale. Then the definitions,
+the legacy names kept through an explicit mapping. Then the databases
+regenerated and the decoded facet values compared with the glibc
+source baseline, the currency, numeric and date repairs staged
+separately.
 
 Check: =localedef= builds every definition in the refreshed
 =etc/nls/src= with its charmap. The locale tests pass against their

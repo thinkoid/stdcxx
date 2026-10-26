@@ -217,6 +217,10 @@ void Def::process_monetary ()
             pcharint = &mon_out_.n_sign_posn [1 /* int'l */ ];
             break;
 
+        case Scanner::tok_ndef:
+            skip_statement (lc_name);
+            break;
+
         default:
             break;
 
