@@ -278,6 +278,23 @@ expand_symbol_range (const Scanner::token_t&      first,
 }
 
 
+// a character written raw where a symbolic name is expected, as the
+// GNU sources write some, stands for its symbolic name; any other
+// token is left alone
+static void
+name_raw_char (Scanner::token_t& tok)
+{
+    std::string name;
+
+    if (   Scanner::tok_ndef == tok.token
+        && !tok.name.empty ()
+        && raw_char_name (tok.name.c_str (), name) == tok.name.size ()) {
+        tok.name  = name;
+        tok.token = Scanner::tok_sym_name;
+    }
+}
+
+
 // scanning ahead and adding all symbols to the collating symbols map
 void Def::preprocess_collation_definitions()
 {
@@ -1940,6 +1957,8 @@ void Def::preprocess_order ()
                  next.token == Scanner::tok_order_start )) {
 
             next = scanner_.next_token ();
+            name_raw_char (next);
+
             switch (next.token) {
             case Scanner::tok_end:
                 issue_diag (E_SYNTAX, true, &next,
@@ -1974,6 +1993,7 @@ void Def::preprocess_order ()
                 
                 next = scanner_.next_token ();
                 while (next.token != Scanner::tok_nl) {
+                    name_raw_char (next);
                     entry.second.push_back (next);
                     next = scanner_.next_token ();
                 }
@@ -2014,6 +2034,7 @@ void Def::preprocess_reorder ()
 
             // process the statements
             next = scanner_.next_token ();
+            name_raw_char (next);
 
             if (next.token == Scanner::tok_nl )
                 continue;
@@ -2026,6 +2047,7 @@ void Def::preprocess_reorder ()
 
                 next = scanner_.next_token ();
                 while (next.token != Scanner::tok_nl) { 
+                    name_raw_char (next);
                     entry.second.push_back (next);
                     next = scanner_.next_token ();
                 }

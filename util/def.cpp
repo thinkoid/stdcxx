@@ -312,6 +312,56 @@ std::string Def::convert_string (const std::string &str1)
 
 }
 
+// the GNU sources are UTF-8, and glibc reads a character written
+// raw, a string's included, as its code point
+std::size_t raw_char_name (const char* str, std::string& name)
+{
+    const unsigned char lead = (unsigned char)str [0];
+
+    std::size_t   len;
+    unsigned long wc;
+
+    // the length from the lead byte, and the bits it carries
+    if (lead < 0xc2 || 0xf5 <= lead)
+        return 0;
+
+    if (lead < 0xe0) {
+        len = 2;
+        wc  = lead & 0x1f;
+    }
+    else if (lead < 0xf0) {
+        len = 3;
+        wc  = lead & 0x0f;
+    }
+    else {
+        len = 4;
+        wc  = lead & 0x07;
+    }
+
+    for (std::size_t i = 1; i != len; ++i) {
+        const unsigned char c = (unsigned char)str [i];
+        if (0x80 != (c & 0xc0))
+            return 0;
+
+        wc = (wc << 6) | (c & 0x3f);
+    }
+
+    // overlong forms, surrogates and values past the last code point
+    static const unsigned long least [] = { 0, 0, 0x80, 0x800, 0x10000 };
+
+    if (   wc < least [len]
+        || (0xd800 <= wc && wc <= 0xdfff)
+        || 0x10ffff < wc)
+        return 0;
+
+    char buf [16];
+    std::sprintf (buf, wc <= 0xffff ? "<U%04lX>" : "<U%08lX>", wc);
+    name = buf;
+
+    return len;
+}
+
+
 // converts a collating element definition to an array of wide characters
 // (the wide characters the collating element is composed of).
 
@@ -395,11 +445,26 @@ Def::convert_wstring (const token_t& t)
                 return ret;
             }
         }
-        // the definition file contains a string with non-symbol names.
-        // process each character as it's actual character value.
-        // Locale definitions that use this may not be portable.
-        else 
-            ret += (wchar_t)str[idx++];
+        // a character written raw, by its symbolic name, as glibc
+        // reads it; any other non-symbol character is taken as the
+        // value of its byte, which may not be portable
+        else {
+            const std::size_t len = raw_char_name (str + idx, sym);
+
+            if (0 == len) {
+                ret += (wchar_t)str[idx++];
+                continue;
+            }
+
+            w_cmap_iter w_pos = charmap_.get_w_cmap().find (sym);
+            if (w_pos == charmap_.get_w_cmap().end()) {
+                ret.clear();
+                return ret;
+            }
+
+            ret += w_pos->second;
+            idx += int (len);
+        }
     }
 
     return ret;

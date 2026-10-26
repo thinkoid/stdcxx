@@ -610,6 +610,13 @@ private:
 };
 
 
+// the length of the UTF-8 sequence of one character at the start of
+// str, 0 when str starts with no such sequence (an ASCII character
+// included); when not 0, name is the symbolic name of the character,
+// <Uxxxx>, <Uxxxxxxxx> past the BMP, as the GNU charmaps spell it
+std::size_t raw_char_name (const char* str, std::string& name);
+
+
 inline std::string strip_quotes (const std::string& str)
 {
     assert (0 != str.size ());

@@ -685,8 +685,9 @@ check_libstd_test_locale (const char* charTname)
 // creates a second locale database from a definition in the forms
 // of the GNU libc sources that the test database above does not use:
 // a collating-symbol range, define with ifdef, ifndef, else and
-// endif, an ellipsis entry with ellipsis weights, and reorder-after
-// a collating symbol with collation definitions after it
+// endif, an ellipsis entry with ellipsis weights, reorder-after a
+// collating symbol with collation definitions after it, and
+// characters written raw in collation statements and strings
 static const char*
 make_range_locale ()
 {
@@ -709,6 +710,7 @@ make_range_locale ()
         "<U0061> \\x61\n<U0062> \\x62\n<U0063> \\x63\n<U0064> \\x64\n"
         "<U0065> \\x65\n<U0066> \\x66\n<U0067> \\x67\n<U0068> \\x68\n"
         "<U0069> \\x69\n<U006A> \\x6a\n"
+        "<U00E0> \\xe0\n<U00E1> \\xe1\n"
         "END CHARMAP\n"
     };
 
@@ -763,6 +765,16 @@ make_range_locale ()
         "<U006A> <L3>;<U006A>\n"
         "reorder-end\n"
 
+        // characters written raw, in UTF-8, as glibc reads them: the
+        // name and a weight of a statement, a collating-element
+        // string; a-grave right after a, the element of a-grave and
+        // a-acute among the first weights of c and j
+        "collating-element <AGRAVE-AACUTE> from \"\xc3\xa0\xc3\xa1\"\n"
+        "reorder-after <U0061>\n"
+        "\xc3\xa0 <L0>;\xc3\xa0\n"
+        "<AGRAVE-AACUTE> <L3>;<AGRAVE-AACUTE>\n"
+        "reorder-end\n"
+
         "END LC_COLLATE\n"
     };
 
@@ -797,6 +809,36 @@ make_range_locale ()
         locname = 0;
 
     return locname;
+}
+
+
+// compares two strings of the characters whose values are the bytes
+// of str1 and str2: in the charmap of the database above the byte of
+// a character is its code point, and the code point is the value of
+// the wide character
+template <class charT>
+void
+test_bytes (const char* charTname, const std::collate<charT>& co,
+            const char* str1, const char* str2, int expected_val)
+{
+    charT buf1 [16];
+    charT buf2 [16];
+
+    std::size_t len1 = 0;
+    for (; str1 [len1]; ++len1)
+        buf1 [len1] = charT ((unsigned char)str1 [len1]);
+
+    std::size_t len2 = 0;
+    for (; str2 [len2]; ++len2)
+        buf2 [len2] = charT ((unsigned char)str2 [len2]);
+
+    const int ret = co.compare (buf1, buf1 + len1, buf2, buf2 + len2);
+
+    if (ret != expected_val)
+        rw_assert (false, __FILE__, __LINE__,
+                   "libstd std::collate<%s>::compare"
+                   "(%#s, ..., %#s, ...) == %d, got %d",
+                   charTname, str1, str2, expected_val, ret);
 }
 
 
@@ -861,6 +903,14 @@ check_libstd_range_locale (const char* charTname)
     test_string (charTname, co, "i", "b", -1);
     test_string (charTname, co, "c", "j", -1);
     test_string (charTname, co, "j", "d", -1);
+
+    // the raw characters: a-grave between a and b; the element of
+    // a-grave and a-acute after c, which a-grave alone precedes,
+    // and before d
+    test_bytes (charTname, co, "a", "\xe0", -1);
+    test_bytes (charTname, co, "\xe0", "b", -1);
+    test_bytes (charTname, co, "c", "\xe0\xe1", -1);
+    test_bytes (charTname, co, "\xe0\xe1", "d", -1);
 }
 
 /**************************************************************************/
