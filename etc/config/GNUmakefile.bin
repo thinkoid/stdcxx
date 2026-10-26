@@ -28,12 +28,12 @@
 
 include ../makefile.in
 
-SRCDIRS = $(TOPDIR)/util
+SRCDIRS = $(TOPDIR)/util $(TOPDIR)/util/localedef
 
 # include common variables setting for all makefiles
 include ../makefile.common
 
-TARGET    = exec localedef locale gencat
+TARGET    = exec localedef localedef2 locale gencat
 
 # locale sources and related 
 NLSDIR = $(TOPDIR)/etc/nls
@@ -88,6 +88,12 @@ exec: runall.o cmdopt.o output.o util.o exec.o display.o
 localedef: localedef.o locale.o aliases.o charmap.o codecvt.o collate.o \
            ctype.o def.o diagnostic.o memchk.o messages.o monetary.o    \
            numeric.o path.o time.o scanner.o
+	@echo "$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS)" $(call CXX.repo,$<) \
+	>> $(LOGFILE)
+	$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(call CXX.repo,$<) $(TEEOPTS)
+
+# link the new localedef utility, built beside the old one
+localedef2: ldef.o diag.o reader.o cmap.o
 	@echo "$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS)" $(call CXX.repo,$<) \
 	>> $(LOGFILE)
 	$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(call CXX.repo,$<) $(TEEOPTS)
