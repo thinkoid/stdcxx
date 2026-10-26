@@ -181,6 +181,33 @@ pins, re-pinned where the data moved. The decoded currency, numeric
 and date values of the 139 shared definitions match the glibc
 sources they come from.
 
+** TODO =localedef= corrupts its heap now and then
+
+Four of about 1000 runs of the census over glibc's =SUPPORTED=, ten
+at a time, died in the destructor of =Def= (=mg_MG=, =oc_FR=,
+=so_DJ=, =kok_IN=): a segmentation fault in the =delete[]= of the
+weights of an undefined character whose pointer read 0x1000000000000,
+and "double free or corruption" in a =map<string, string>= whose
+string held =\377\377\377\377=. Each of the four builds 100 times out
+of 100 alone and ten at a time, and memcheck finds no invalid read or
+write in them. AddressSanitizer found a use after free: a token keeps
+a pointer to the name of the file it came from, and the lists of
+=LC_COLLATE= keep tokens past the =Scanner::close= of a copied file,
+so a diagnostic prints freed memory (garbled file names in the logs);
+that is a read and cannot corrupt the heap by itself. Two more
+defects of the kind: the rules word of the element of the undefined
+characters (=undef_char_info_=) is never set without =UNDEFINED=, and
+=get_installed_locales= (=util/aliases.cpp=) frees with =free= what
+=new[]= allocated and names its temporary file with =tmpnam=, which
+ten processes at once can share.
+
+Fix: keep the file names alive in the scanner for the tokens; set
+the undefined element; then a census under AddressSanitizer with
+recovery, ten at a time, to find the write.
+
+Check: two censuses in a row without a signal, and none under
+AddressSanitizer.
+
 ** TODO Characters outside a collation table sort last, glibc's first
 
 A character that a definition does not name and no =UNDEFINED=
