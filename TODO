@@ -19,6 +19,19 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
+** TODO =__rw_get_mask= halves a closed interval
+
+The binary search of =__rw_get_mask= in =src/wctype.cpp= keeps the
+closed-interval form that f32e1a22 took out of =__rw_toupper= and
+=__rw_tolower=: =high= starts at the count, the loop runs while =low
+<= high=, and =high = cur - 1=. A key below the first entry wraps
+=high= and one above the last reads one past the table.
+
+Fix: the half-open form of f32e1a22.
+
+Check: the ctype test's probe for L'\0' and for a character above
+the table under the database path, red against the current library.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -118,9 +131,14 @@ separators of 431 definitions were wrong (=zh_TW=, =ja_JP=, =ru_RU=,
 bytes, wrong in the 153 definitions whose charmap is not UTF-8
 (=ja_JP.EUC-JP=, =ru_RU.KOI8-R=, =el_GR=). A transliteration statement
 that writes its character raw is still skipped (=de_DE=,
-=translit_emojis=), and the runtime reads no transliteration at all
-(the path in =src/wcodecvt.cpp= is disabled), so what the compiler
-writes there goes unread until that is decided. Every one of the 502 definitions in glibc's
+=translit_emojis=), and the runtime reads no transliteration at all:
+the one call of =__rw_xlit= in =src/wcodecvt.cpp= sits behind a
+literal 0, so since the 2005 import, no reason recorded. What the
+compiler writes there goes unread until that is decided, and it is
+wrong besides: the table is written per codeset, so the first
+definition built with a charmap sets it for every other, and a
+duplicate key keeps the first entry, so an included file overrides
+the definition's own lines (=de_DE= gets Ä to A, not AE). Every one of the 502 definitions in glibc's
 =SUPPORTED= builds, each in under 30 s among ten in parallel;
 =cmn_TW=, which took nine minutes alone on its stroke template, takes
 22 s, and =zh_CN= 20 s on the pinyin one, against 200 s before:
@@ -132,10 +150,15 @@ among the undefined characters. An escaped character in a string
 stands for itself, as glibc reads it; the GNU sources escape the
 slash, so the LC_TIME strings of 262 definitions held doubled slashes
 (=en_US= wrote "%m//%d//%Y" for =%x=), the dates of every =era= were
-misread, and =es_PE= wrote "S//" for its sol. A date of an =era= that
-does not parse leaves bytes of the era record nothing wrote
-(=Def::parse_era=, =Def::write_time= under valgrind), and the year of
-the Buddhist era of =th_TH= comes out one above the C library's. A
+misread, and =es_PE= wrote "S//" for its sol. =Def::parse_era= reads the month and day of a date
+with =sscanf= into locals it never initializes and does not check the
+count, so a date that stops short writes stack bytes into the record
+(=util/time.cpp= lines 88-93; the end date takes the start's month
+and day when its own fail); no current glibc source takes that path.
+The year of the Buddhist era of =th_TH= comes out one above the C
+library's: the library stores the start year -543 as written, glibc
+subtracts 1900 and adds one because year -1 is 1 BC
+(=ld-time.c:313-316=), so =%Ey= of 2026 is 2570 here and 2569 there. A
 statement led by a keyword no facet reads is skipped by a named table
 in =util/def.cpp=: =alt_mon=, =ab_alt_mon=, =date_fmt=, =week=,
 =first_weekday=, =first_workday=, =cal_direction=, =timezone= and
@@ -163,9 +186,18 @@ classifies 2B81E-2B81F, 2CEAE-2CEAF, 2EBE1-2EBEF and 3134B-3134F, past
 the ends of the ranges, and misses 2EBA1-2EBAF, 2EE1E-2EE2F,
 2EE40-2EE5D and 33440-3346F, inside them; the C library follows the
 ranges. =C.UTF-8= collates every other code point as the C library
-does and ties these. Hypothesis: the expansion of the =<A>..<B>= lines
-of the UTF-8 charmap, which come in runs of 64 code points, misplaces
-the ends of the runs; open. The collation of =en_US=, =hu_HU=,
+does and ties these. Cause, by reading, not yet probed: the runs of the UTF-8
+charmap in CJK extensions E, F, H, I and J start off a 64-code-point
+boundary, and the range expansion in =util/charmap.cpp= (near line
+867) builds each name of a run by adding one to the last byte of the
+previous encoding without a carry, then takes the value from those
+bytes (line 678; =utf8_decode= at 229 checks nothing), so every name
+past the boundary lands 64 code points low. Inside a range the shift
+cancels; at the ends it classifies 24 code points the charmap does
+not list and misses 111 it does. glibc increments the bytes the same
+way but takes the value from the name (=charmap.c:1069=). The same
+bytes sit in the narrow map for 13199 names, so =codecvt= under the
+database may fail on those characters: unverified. The collation of =en_US=, =hu_HU=,
 =es_ES=, =sv_SE=, =fa_IR=, =ml_IN=, =zh_CN=, =cmn_TW=, =mdf_RU= and
 =crh_RU= agrees but for the two classes of the entries below.
 
@@ -203,11 +235,15 @@ sources they come from.
 ** TODO =localedef= corrupts its heap now and then
 
 Four of about 1000 runs of the census over glibc's =SUPPORTED=, ten
-at a time, died in the destructor of =Def= (=mg_MG=, =oc_FR=,
-=so_DJ=, =kok_IN=): a segmentation fault in the =delete[]= of the
-weights of an undefined character whose pointer read 0x1000000000000,
-and "double free or corruption" in a =map<string, string>= whose
-string held =\377\377\377\377=. Each of the four builds 100 times out
+at a time, died with a corrupt heap (=mg_MG=, =oc_FR=, =so_DJ=,
+=kok_IN=). The cores read: =mg_MG= in the destructor of =Def=, a
+=free= of a weights pointer of =coll_map_= that reads
+0x1000000000000; =so_DJ= and =oc_FR= earlier, in =write_codecvt=, on
+a tree node of a string-keyed map with the same value in a pointer
+slot; =kok_IN= "double free or corruption" in a =map<string, string>=
+whose string held =\377\377\377\377=. One stray word, 0 then
+0x00010000 as two 32-bit halves, in three different objects; the code
+that writes it is not found. Each of the four builds 100 times out
 of 100 alone and ten at a time, and memcheck finds no invalid read or
 write in them. AddressSanitizer found a use after free: a token keeps
 a pointer to the name of the file it came from, and the lists of
@@ -215,10 +251,14 @@ a pointer to the name of the file it came from, and the lists of
 so a diagnostic prints freed memory (garbled file names in the logs);
 that is a read and cannot corrupt the heap by itself. Two more
 defects of the kind: the rules word of the element of the undefined
-characters (=undef_char_info_=) is never set without =UNDEFINED=, and
+characters (=undef_char_info_=) is never set without =UNDEFINED=: read
+only in =write_collate=, after =write_codecvt=, so not the writer; its
+weights are never freed, a leak; its =order= word reaches the
+database unset on the =codepoint_collation= path. And
 =get_installed_locales= (=util/aliases.cpp=) frees with =free= what
 =new[]= allocated and names its temporary file with =tmpnam=, which
-ten processes at once can share.
+ten processes at once can share; it runs in every invocation, and
+under glibc's malloc the mismatch does no harm, so a weak suspect.
 
 Fix: keep the file names alive in the scanner for the tokens; set
 the undefined element; then a census under AddressSanitizer with
@@ -230,14 +270,26 @@ AddressSanitizer.
 ** TODO Characters outside a collation table sort last, glibc's first
 
 A character that a definition does not name and no =UNDEFINED=
-covers gets its own position as its weight at every level
+covers gets one shared collation value at every level
 (=add_missing_values= in =util/collate.cpp=), after every defined
 character. glibc gives such a character =IGNORE= at the first three
 levels and a weight at the fourth: =wcsxfrm= of U+743B, a Han
 character outside the pinyin table, writes no weight before the
 fourth level under =zh_CN.UTF-8=, so it sorts before every letter.
-POSIX leaves the place of an undefined character to the
-implementation. The oracles count 1584 disagreements of 50000 random
+POSIX (XBD 7.3.2.4) says the utility shall warn and place such
+characters at the end of the collation order, which =localedef= has
+done since the 2005 import. glibc's own comment in =ld-collate.c=
+means the same, but its =output_weight= returns 0 for =UNDEFINED=
+before writing weights, so a missing character takes weight index 0,
+the lowest defined character's, =IGNORE= at three levels in
+=iso14651_t1_common=: a defect of 1999 by reading, settled when
+=wcsxfrm= of U+743B equals that of U+0001 under =zh_CN.UTF-8=. The
+narrow facet agrees with glibc by accident: its byte lookup
+(=src/collate.cpp= near line 400) advances into the character before
+it misses, the validity check then starts on a continuation byte and
+=do_transform= returns an empty string, so a letter followed by a
+missing character sorts before the letter alone; the wide lookup does
+not advance and sorts last, as =localedef= intends. The oracles count 1584 disagreements of 50000 random
 strings over U+4E00 to U+9FFF in =zh_CN=, all over characters
 outside the table; U+061D in =fa_IR=; U+0D00, U+0D04, U+0D3B and
 U+0D3C in =ml_IN=; the 9 single-character pairs of 297266 that
@@ -246,9 +298,9 @@ over the newest symbols. For these
 characters the narrow facet already orders as glibc does and the
 wide one does not.
 
-Fix: decide whether a definition without =UNDEFINED= follows glibc;
-if it does, give the missing characters =IGNORE= at every level but
-the last, and find why the narrow and wide facets part.
+Fix: keep POSIX's order unless the =wcsxfrm= check shows glibc's is
+a rule; repair the narrow facet's miss path; record the oracle's
+disagreements over missing characters as explained residue.
 
 Check: the collation oracle over those ranges finds no disagreement
 over a character outside the table.
