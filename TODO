@@ -19,6 +19,19 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
+** TODO =__rw_get_mask= halves a closed interval
+
+The binary search of =__rw_get_mask= in =src/wctype.cpp= keeps the
+closed-interval form that f32e1a22 took out of =__rw_toupper= and
+=__rw_tolower=: =high= starts at the count, the loop runs while =low
+<= high=, and =high = cur - 1=. A key below the first entry wraps
+=high= and one above the last reads one past the table.
+
+Fix: the half-open form of f32e1a22.
+
+Check: the ctype test's probe for L'\0' and for a character above
+the table under the database path, red against the current library.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -73,6 +86,45 @@ their pins.
 The locale sources and charmaps under =etc/nls=, the =localedef= that
 compiles them and the databases the facets read.
 
+** TODO =localedef= is rewritten
+
+The compiler under =util= is one class: =Def= parses the definition,
+computes the collation and conversion tables and writes the seven
+images, with parse state, table state and output structs side by
+side as members, raw pointers for ownership and weight arrays freed
+by hand. It had a year of development, 2001 to 2002, and none after.
+In October 2026 it was patched until it read all 502 definitions of
+glibc's =SUPPORTED=: the collation templates, the conditionals, one
+sequence of collating symbols and definitions, raw characters,
+escapes, a keyword table. The patches hold, and the census under
+them found a heap corruption in about four runs of a thousand, in
+=Def='s destructor and in =write_codecvt=, a stray word no reading
+traced to a writer. The patches are parked on the branch
+=localedef-patches= (tag =localedef-patches-2026-10=), never merged;
+they are the specification of what a compiler for these sources
+must do, and that branch's =TODO= records what they still owed. A
+thin layer over =newlocale= needs POSIX 2008 names a strict C++03
+build does not see; a compiler that reads the C library's compiled
+locales ties the databases to its version; both were set aside.
+
+Fix: =doc/notes/plan-localedef.md=. A new compiler in
+=util/localedef=, C++03, beside the old one until acceptance. The
+front end first: a line reader, one production per statement over
+the tokens of a line, a model of plain structs with strings as UCS-4
+code points, collation entries kept symbolic in one sequence. In
+order: the reader, the charmap, the five scalar categories with
+=copy=, =LC_CTYPE=, =LC_COLLATE=; each step with the one check the
+plan names. Then the back end, the tables and the seven writers in
+the format =include/loc/_localedef.h= describes, as its own plan.
+
+Check: every definition of =etc/nls= and of glibc's =SUPPORTED=
+builds with its charmap, two builds byte-identical; each database
+byte-identical to the parked compiler's but where that one is known
+wrong (the 135 CJK code points, the era records, the unset words,
+the transliteration table), and there the C library decides through
+=bin/oracle=. The locale tests pass against their pins, re-pinned
+where the data moved.
+
 ** TODO The locale sources under =etc/nls= are glibc 2.2's
 
 The definitions and charmaps under =etc/nls= are copies from GNU libc
@@ -91,33 +143,95 @@ differs in 36, the month names in 45, the weekday names in 24;
 where glibc now does the opposite. The shared tables are older still:
 =i18n= says Unicode 3.0, the UTF-8 charmap's widths Unicode 3.2,
 against Unicode 14.0.0 in glibc's =i18n_ctype=; =U+1C90=, =U+1E900=
-and =U+1F600= are absent from the charmap. =localedef= cannot read
-the current sources: glibc's =en_US= with its UTF-8 charmap exits 4,
-Error 312, symbolic name =<S02D0>= not found at =iso14651_t1_common=
-line 63100, and the keyword table in =util/scanner.cpp= lacks
-=alt_mon=, =ab_alt_mon=, =class=, =map= and the conditionals. The
-survey compared source values and ran no collation or formatting
-oracle, so the counts are differences, not proven defects. The GNU
-categories outside the six of C++ (paper, address, measurement) are
-not a gap. =doc/notes/analysis-locale-sources.md= holds the survey. The facets can also read the C library's own locales
-(=doc/notes/ref-locale.md=), so stale sources need not reach every
-=std::locale= a program constructs.
+and =U+1F600= are absent from the charmap. The survey compared
+source values and ran no collation or formatting oracle, so the
+counts are differences, not proven defects. The GNU categories
+outside the six of C++ (paper, address, measurement) are not a gap.
+=doc/notes/analysis-locale-sources.md= holds the survey. The facets
+can also read the C library's own locales (=doc/notes/ref-locale.md=),
+so stale sources need not reach every =std::locale= a program
+constructs. The compiler in the tree cannot read the current sources;
+the entry above replaces it, and the import waits for it.
 
-Fix: in order. First the compiler: find what in the current sources
-it rejects, the Error 312 first, and extend the scanner and the =Def=
-writers until glibc's =en_US= builds. Then the shared tables together
-with their charmaps, =i18n=, the transliteration and collation
-templates: refreshed leaf definitions alone leave the shared tables
-stale. Then the definitions, the legacy names kept through an
-explicit mapping. Then the databases regenerated and the decoded
-facet values compared with the glibc source baseline, the currency,
-numeric and date repairs staged separately.
+Fix: after the new compiler. glibc 2.44's 371 definitions and 233
+charmaps (shipped gzipped; the compiler reads plain files) into
+=etc/nls=, the shared tables, =i18n=, the transliteration and
+collation templates with them; its =SUPPORTED= in place of =gen_list=
+(=etc/config/GNUmakefile.bin= and =tests/src/locale.cpp= read the
+two columns of =gen_list= and move =.euro= to =@euro=; the test
+build compiles every locale the list names, 502 against 165, so the
+build is measured); the legacy names =iw_IL=, =no_NO=, =sr_YU= and
+=sr_YU.cyrillic= kept through an explicit mapping. Then the
+databases regenerated and the decoded facet values compared with the
+C library through =bin/oracle= and with the glibc source baseline,
+the currency, numeric and date repairs staged separately.
 
 Check: =localedef= builds every definition in the refreshed
-=etc/nls/src= with its charmap. The locale tests pass against their
-pins, re-pinned where the data moved. The decoded currency, numeric
-and date values of the 139 shared definitions match the glibc
-sources they come from.
+=etc/nls/src= with its charmap, two builds byte-identical. The locale
+tests pass against their pins, re-pinned where the data moved. The
+decoded currency, numeric and date values of the 139 shared
+definitions match the glibc sources they come from.
+
+** TODO Characters outside a collation table sort last, glibc's first
+
+A character that a definition does not name and no =UNDEFINED=
+covers gets one shared collation value at every level, after every
+defined character. glibc gives such a character =IGNORE= at the
+first three levels and a weight at the fourth: =wcsxfrm= of U+743B,
+a Han character outside the pinyin table, writes no weight before
+the fourth level under =zh_CN.UTF-8=, so it sorts before every
+letter. POSIX (XBD 7.3.2.4) says the utility shall warn and place
+such characters at the end of the collation order, which =localedef=
+has done since the 2005 import. glibc's own comment in
+=ld-collate.c= means the same, but its =output_weight= returns 0 for
+=UNDEFINED= before writing weights, so a missing character takes
+weight index 0, the lowest defined character's, =IGNORE= at three
+levels in =iso14651_t1_common=: a defect of 1999 by reading, settled
+when =wcsxfrm= of U+743B equals that of U+0001 under =zh_CN.UTF-8=.
+The narrow facet agrees with glibc by accident: its byte lookup
+(=src/collate.cpp= near line 400) advances into the character before
+it misses, the validity check then starts on a continuation byte and
+=do_transform= returns an empty string, so a letter followed by a
+missing character sorts before the letter alone; the wide lookup
+does not advance and sorts last, as =localedef= intends. The oracles
+count 1584 disagreements of 50000 random strings over U+4E00 to
+U+9FFF in =zh_CN=, all over characters outside the table; U+061D in
+=fa_IR=; U+0D00, U+0D04, U+0D3B and U+0D3C in =ml_IN=; the 9
+single-character pairs of 297266 that differ in =en_US=, at the
+boundaries of the CJK extension blocks and over the newest symbols.
+
+Fix: keep POSIX's order unless the =wcsxfrm= check shows glibc's is
+a rule; repair the narrow facet's miss path; record the oracle's
+disagreements over missing characters as explained residue.
+
+Check: the collation oracle over those ranges finds no disagreement
+over a character outside the table.
+
+** TODO A character IGNOREd at a level sorts after a weight there
+
+The library and glibc part over strings that differ only in a
+character =IGNORE=d at some level. Under =sv_SE=, ü (=IGNORE= at the
+fourth level) against ÿ (its code point there), equal at the first
+three: glibc puts ü first, the library second. Under =en_US=, "é"
+against "é>", where =>= is =IGNORE= at the first three levels: glibc
+puts the shorter string first, the library second. The same shape
+accounts for the 1 disagreement of 50000 random strings in =en_US=
+and 3 in =fa_IR= and 6 in =ml_IN= once the characters outside the
+table are left out. Hypothesis: the fourth level of =iso14651_t1= is
+=forward,position=, and for an element =IGNORE=d at a position level
+the transform writes its =IGNORE= mark, =CHAR_MAX= narrow and
+=WCHAR_MAX= wide, which sorts after every weight
+(=doc/notes/analysis-collate-transform.md=); the punctuation of the
+=<SPECIAL>= section is read backward at the second level, so a
+string that mixes it with letters may mix directions as well.
+
+Fix: settle the hypothesis by the transform of each pair against
+=wcsxfrm=; then decide where the mark sorts, in =src/collate.cpp=,
+or what =localedef= writes.
+
+Check: the collation oracle finds no disagreement over strings of
+letters and characters =IGNORE=d at the first three levels in
+=en_US=, =sv_SE=, =fa_IR= and =ml_IN=.
 
 * EDG porting
 
