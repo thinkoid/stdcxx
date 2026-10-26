@@ -746,7 +746,8 @@ create_locale (const char* locname, const char* name, const char* source)
 // a collating-symbol range, define with ifdef, ifndef, else and
 // endif, an ellipsis entry with ellipsis weights, reorder-after a
 // collating symbol with collation definitions after it, and
-// characters written raw in collation statements and strings
+// characters written raw in collation statements and strings, and an
+// escaped character in a string
 static const char*
 make_range_locale ()
 {
@@ -814,6 +815,13 @@ make_range_locale ()
         "reorder-after <U0061>\n"
         "\xc3\xa0 <L0>;\xc3\xa0\n"
         "<AGRAVE-AACUTE> <L3>;<AGRAVE-AACUTE>\n"
+        "reorder-end\n"
+
+        // an escaped character in a string stands for itself, so the
+        // element is c and d, here among the first weights of a
+        "collating-element <C-D> from \"c\\d\"\n"
+        "reorder-after <L0>\n"
+        "<C-D> <L0>;<C-D>\n"
         "reorder-end\n"
 
         "END LC_COLLATE\n"
@@ -942,6 +950,9 @@ check_libstd_range_locale (const char* charTname)
     test_bytes (charTname, co, "\xe0", "b", -1);
     test_bytes (charTname, co, "c", "\xe0\xe1", -1);
     test_bytes (charTname, co, "\xe0\xe1", "d", -1);
+
+    // the escaped string: c and d together before b
+    test_string (charTname, co, "cd", "b", -1);
 }
 
 

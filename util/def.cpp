@@ -276,6 +276,14 @@ std::string Def::convert_string (const std::string &str1)
             idx = 0;
         }
 
+        // the escape character makes the character after it stand
+        // for itself, as glibc reads it: "%m//%d" for "%m/%d"
+        if (str[idx] == scanner_.escape_char () && str[idx + 1]) {
+            ret += str[idx + 1];
+            idx += 2;
+            continue;
+        }
+
         // '<' marks the beginning of a symbolic name
         // construct the name and look up its value in the cmap
         if (str[idx] == '<') {
@@ -411,6 +419,14 @@ Def::convert_wstring (const token_t& t)
 
     while (str[idx] != term) {
         sym.clear();
+
+        // the escape character makes the character after it stand
+        // for itself, as glibc reads it: "%m//%d" for "%m/%d"
+        if (str[idx] == scanner_.escape_char () && str[idx + 1]) {
+            ret += (wchar_t)str[idx + 1];
+            idx += 2;
+            continue;
+        }
 
         // '<' marks the beginning of a symbolic name
         // construct the name and look up its value in the cmap

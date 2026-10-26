@@ -125,15 +125,20 @@ s before: =reorder-after= removed each entry of a block from its old
 place by a search of its own. Before the one sequence, 174 definitions
 built wrong: a =reorder-after= block that opens with a bare symbol
 lost the weights of its definitions, so =es_ES= put ñ and =sv_SE= å, ä
-and ö among the undefined characters. The era records of =LC_TIME=
-carry bytes nothing wrote (=Def::write_time= under valgrind), so two
-builds of a definition with =era= can differ. A statement led by a
-keyword no facet reads is skipped by a named table in =util/def.cpp=:
-=alt_mon=, =ab_alt_mon=, =date_fmt=, =week=, =first_weekday=,
-=first_workday=, =cal_direction=, =timezone= and =era_year= in
-=LC_TIME=; =yesstr= and =nostr=; =class=, =map=, =charclass=,
-=charconv= and the names those two declare, =outdigit=, =alnum=,
-=default_missing= and =translit_ignore= in =LC_CTYPE=;
+and ö among the undefined characters. An escaped character in a string
+stands for itself, as glibc reads it; the GNU sources escape the
+slash, so the LC_TIME strings of 262 definitions held doubled slashes
+(=en_US= wrote "%m//%d//%Y" for =%x=), the dates of every =era= were
+misread, and =es_PE= wrote "S//" for its sol. A date of an =era= that
+does not parse leaves bytes of the era record nothing wrote
+(=Def::parse_era=, =Def::write_time= under valgrind), and the year of
+the Buddhist era of =th_TH= comes out one above the C library's. A
+statement led by a keyword no facet reads is skipped by a named table
+in =util/def.cpp=: =alt_mon=, =ab_alt_mon=, =date_fmt=, =week=,
+=first_weekday=, =first_workday=, =cal_direction=, =timezone= and
+=era_year= in =LC_TIME=; =yesstr= and =nostr=; =class=, =map=,
+=charclass=, =charconv= and the names those two declare, =outdigit=,
+=alnum=, =default_missing= and =translit_ignore= in =LC_CTYPE=;
 =symbol-equivalence=, used only by the =LC_COLLATE= of =i18n=, which
 no definition copies, =coll_weight_max= and =section-symbol=; the
 second currency of =LC_MONETARY=. The six categories of the GNU
