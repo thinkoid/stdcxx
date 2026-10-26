@@ -118,7 +118,9 @@ separators of 431 definitions were wrong (=zh_TW=, =ja_JP=, =ru_RU=,
 bytes, wrong in the 153 definitions whose charmap is not UTF-8
 (=ja_JP.EUC-JP=, =ru_RU.KOI8-R=, =el_GR=). A transliteration statement
 that writes its character raw is still skipped (=de_DE=,
-=translit_emojis=). Every one of the 502 definitions in glibc's
+=translit_emojis=), and the runtime reads no transliteration at all
+(the path in =src/wcodecvt.cpp= is disabled), so what the compiler
+writes there goes unread until that is decided. Every one of the 502 definitions in glibc's
 =SUPPORTED= builds, each in under 30 s among ten in parallel;
 =cmn_TW=, which took nine minutes alone on its stroke template, takes
 22 s, and =zh_CN= 20 s on the pinyin one, against 200 s before:
@@ -146,7 +148,8 @@ second currency of =LC_MONETARY=. The six categories of the GNU
 sources no facet reads are skipped whole. Any other keyword draws
 Warning 713; none of the 502 definitions draws one.
 =codepoint_collation= orders every character by its value, as glibc's
-C locales do; =C.UTF-8= tied every character before.
+C locales do; =C.UTF-8= tied every character before. Its collation
+database is 7 MB, one weight entry per character of the charmap.
 =reorder-sections-after= and =reorder-sections-end= are glibc's
 spelling of =reorder-section-after= and =reorder-section-end=.
 
@@ -166,17 +169,33 @@ the ends of the runs; open. The collation of =en_US=, =hu_HU=,
 =es_ES=, =sv_SE=, =fa_IR=, =ml_IN=, =zh_CN=, =cmn_TW=, =mdf_RU= and
 =crh_RU= agrees but for the two classes of the entries below.
 
-Fix: in order. First the rest of the compiler: the transliteration
-statements written raw, the era bytes, the 135 code points. Then the
-shared tables together with their charmaps, =i18n=, the
+Fix: in order. First the rest of the compiler: the tokens' file
+names kept alive past =Scanner::close= and the heap corruption found
+(the entry below); the transliteration statements written raw, or the
+decision that the compiler stops writing what the runtime does not
+read; the era records, every byte set, a date that does not parse
+reported, the =th_TH= year; the 135 code points, the run-expansion
+hypothesis settled against the =<A>..<B>= lines of the UTF-8 charmap.
+Then the shared tables together with their charmaps, =i18n=, the
 transliteration and collation templates: refreshed leaf definitions
-alone leave the shared tables stale. Then the definitions, the legacy
-names kept through an explicit mapping. Then the databases regenerated
-and the decoded facet values compared with the glibc source baseline,
-the currency, numeric and date repairs staged separately.
+alone leave the shared tables stale. Then the definitions: glibc's
+371 files and 233 charmaps (shipped gzipped; the compiler reads plain
+files), its =SUPPORTED= in place of =gen_list=
+(=etc/config/GNUmakefile.bin= and =tests/src/locale.cpp= read the two
+columns of =gen_list= and move =.euro= to =@euro=; the test build
+compiles every locale the list names, 502 against 165, so the build
+is measured), the legacy names =iw_IL=, =no_NO=, =sr_YU= and
+=sr_YU.cyrillic= kept through an explicit mapping. Then the databases
+regenerated and the decoded facet values compared with the C library
+through =bin/oracle= and with the glibc source baseline, the currency,
+numeric and date repairs staged separately. Two decisions precede the
+collation entries below: whether a definition without =UNDEFINED=
+places the undefined characters as glibc does, and whether the
+position-level =IGNORE= mark sorts low.
 
 Check: =localedef= builds every definition in the refreshed
-=etc/nls/src= with its charmap. The locale tests pass against their
+=etc/nls/src= with its charmap, two builds byte-identical. The locale
+tests pass against their
 pins, re-pinned where the data moved. The decoded currency, numeric
 and date values of the 139 shared definitions match the glibc
 sources they come from.
