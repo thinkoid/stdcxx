@@ -114,18 +114,19 @@ statement or in a string reads as its symbolic name, as glibc reads
 it. The wide strings took each byte of such a character for a
 character, so the wide month and day names, currency symbols and
 separators of 431 definitions were wrong (=zh_TW=, =ja_JP=, =ru_RU=,
-=fr_FR=, the euro sign of =de_DE=). The narrow strings still take the
-bytes as they are, right for a UTF-8 charmap only, and a
-transliteration statement that writes its character raw is still
-skipped (=de_DE=, =translit_emojis=). Every one of the 502 definitions
-in glibc's =SUPPORTED= builds, each in under 30 s among ten in
-parallel; =cmn_TW=, which took nine minutes alone on its stroke
-template, takes 22 s, and =zh_CN= 20 s on the pinyin one, against 200
-s before: =reorder-after= removed each entry of a block from its old
-place by a search of its own. Before the one sequence, 174 definitions
-built wrong: a =reorder-after= block that opens with a bare symbol
-lost the weights of its definitions, so =es_ES= put ñ and =sv_SE= å, ä
-and ö among the undefined characters. An escaped character in a string
+=fr_FR=, the euro sign of =de_DE=); the narrow strings took the UTF-8
+bytes, wrong in the 153 definitions whose charmap is not UTF-8
+(=ja_JP.EUC-JP=, =ru_RU.KOI8-R=, =el_GR=). A transliteration statement
+that writes its character raw is still skipped (=de_DE=,
+=translit_emojis=). Every one of the 502 definitions in glibc's
+=SUPPORTED= builds, each in under 30 s among ten in parallel;
+=cmn_TW=, which took nine minutes alone on its stroke template, takes
+22 s, and =zh_CN= 20 s on the pinyin one, against 200 s before:
+=reorder-after= removed each entry of a block from its old place by a
+search of its own. Before the one sequence, 174 definitions built
+wrong: a =reorder-after= block that opens with a bare symbol lost the
+weights of its definitions, so =es_ES= put ñ and =sv_SE= å, ä and ö
+among the undefined characters. An escaped character in a string
 stands for itself, as glibc reads it; the GNU sources escape the
 slash, so the LC_TIME strings of 262 definitions held doubled slashes
 (=en_US= wrote "%m//%d//%Y" for =%x=), the dates of every =era= were
@@ -165,15 +166,14 @@ the ends of the runs; open. The collation of =en_US=, =hu_HU=,
 =es_ES=, =sv_SE=, =fa_IR=, =ml_IN=, =zh_CN=, =cmn_TW=, =mdf_RU= and
 =crh_RU= agrees but for the two classes of the entries below.
 
-Fix: in order. First the rest of the compiler: the narrow strings and
-the transliteration statements written raw, the era bytes, the 135
-code points. Then the shared tables together with their charmaps,
-=i18n=, the transliteration and collation templates: refreshed leaf
-definitions alone leave the shared tables stale. Then the definitions,
-the legacy names kept through an explicit mapping. Then the databases
-regenerated and the decoded facet values compared with the glibc
-source baseline, the currency, numeric and date repairs staged
-separately.
+Fix: in order. First the rest of the compiler: the transliteration
+statements written raw, the era bytes, the 135 code points. Then the
+shared tables together with their charmaps, =i18n=, the
+transliteration and collation templates: refreshed leaf definitions
+alone leave the shared tables stale. Then the definitions, the legacy
+names kept through an explicit mapping. Then the databases regenerated
+and the decoded facet values compared with the glibc source baseline,
+the currency, numeric and date repairs staged separately.
 
 Check: =localedef= builds every definition in the refreshed
 =etc/nls/src= with its charmap. The locale tests pass against their

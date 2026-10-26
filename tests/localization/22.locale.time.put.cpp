@@ -28,6 +28,8 @@
 
 #include <ios>           // for basic_ios
 #include <locale>        // for locale, time_put
+#include <sstream>       // for basic_ostringstream
+#include <string>        // for basic_string
 
 #include <climits>       // for INT_MAX, INT_MIN, TZNAME_MAX
 #include <cstdio>        // for fprintf(), ...
@@ -1808,6 +1810,133 @@ void test_user (charT, const char *tname)
 
 /**************************************************************************/
 
+// formats tmb with the one-character directive fmt through the time_put
+// facet of loc and compares the result with the characters whose values
+// are the bytes of expect: in the charmap of the database below the byte
+// of a character is its code point, which is the value of the wide one
+template <class charT>
+void
+test_bytes (charT, const char* tname, const std::locale& loc,
+            const std::tm* tmb, char fmt, const char* expect)
+{
+    typedef std::ostreambuf_iterator<charT> Iter;
+
+    std::basic_ostringstream<charT> os;
+    os.imbue (loc);
+
+    std::use_facet<std::time_put<charT, Iter> >(loc).put (
+        Iter (os), os, charT (' '), tmb, fmt, 0);
+
+    std::basic_string<charT> want;
+    for (const char* pc = expect; *pc; ++pc)
+        want += charT ((unsigned char)*pc);
+
+    const bool success = os.str () == want;
+
+    if (!success)
+        rw_assert (false, 0, __LINE__,
+                   "time_put<%s>::put (..., '%c') in the database of the "
+                   "GNU forms: expected %#s", tname, fmt, expect);
+}
+
+
+// a definition in the forms of the GNU libc sources: the slash as the
+// escape character, so written twice in a string, and characters
+// written raw in UTF-8, here in a charmap that encodes them in one byte
+template <class charT>
+void test_gnu_forms (charT, const char* tname)
+{
+    rw_info (0, 0, 0,
+             "std::time_put<%s>, LC_TIME in the forms of the GNU sources",
+             tname);
+
+    static const char* locname;
+
+    if (0 == locname) {
+
+        // the printable ASCII characters and a-diaeresis, each in the
+        // byte of its code point
+        std::string charmap =
+            "<code_set_name> \"GNU-FORMS\"\n"
+            "<mb_cur_max> 1\n<mb_cur_min> 1\n"
+            "CHARMAP\n";
+
+        for (unsigned ch = 0x20; ch != 0x7f; ++ch) {
+            char line [32];
+            std::sprintf (line, "<U%04X> \\x%02x\n", ch, ch);
+            charmap += line;
+        }
+
+        charmap += "<U00E4> \\xe4\nEND CHARMAP\n";
+
+        static const char lc_time [] = {
+            "escape_char /\n"
+            "LC_TIME\n"
+            "abday \"Su\";\"Mo\";\"Tu\";\"We\";\"Th\";\"Fr\";\"Sa\"\n"
+            "day \"Sun\";\"Mon\";\"Tue\";\"Wed\";\"Thu\";\"Fri\";\"Sat\"\n"
+            "abmon \"Jan\";\"Feb\";\"M\xc3\xa4r\";\"Apr\";\"Mai\";\"Jun\";/\n"
+            "      \"Jul\";\"Aug\";\"Sep\";\"Okt\";\"Nov\";\"Dez\"\n"
+            "mon \"Januar\";\"Februar\";\"M\xc3\xa4rz\";\"April\";\"Mai\";/\n"
+            "    \"Juni\";\"Juli\";\"August\";\"September\";\"Oktober\";/\n"
+            "    \"November\";\"Dezember\"\n"
+            "am_pm \"\";\"\"\n"
+            "d_t_fmt \"%a %d %b %Y\"\n"
+            "d_fmt \"%d//%m//%Y\"\n"
+            "t_fmt \"%T\"\n"
+            "t_fmt_ampm \"\"\n"
+            "END LC_TIME\n"
+        };
+
+        const std::string srcfname =
+            std::string (locale_root) + _RWSTD_PATH_SEP + "gnu-forms.src";
+        const std::string cmfname =
+            std::string (locale_root) + _RWSTD_PATH_SEP + "gnu-forms.cm";
+
+        std::FILE* fout = std::fopen (srcfname.c_str (), "w");
+        if (fout) {
+            std::fputs (lc_time, fout);
+            std::fclose (fout);
+        }
+
+        fout = std::fopen (cmfname.c_str (), "w");
+        if (fout) {
+            std::fputs (charmap.c_str (), fout);
+            std::fclose (fout);
+        }
+
+        locname = rw_localedef ("-w", srcfname.c_str (), cmfname.c_str (),
+                                "gnu-forms");
+    }
+
+    if (!rw_error (0 != locname, 0, __LINE__,
+                   "failed to generate LC_TIME locale data"))
+        return;
+
+    std::locale loc;
+
+    try {
+        loc = std::locale (std::locale (), locname, std::locale::time);
+    }
+    catch (...) {
+        rw_error (0, 0, __LINE__,
+                  "std::locale (std::locale (), \"%s\", std::locale::time) "
+                  "unexpectedly threw an exception", locname);
+        return;
+    }
+
+    std::tm tmb = std::tm ();
+    tmb.tm_mday = 7;
+    tmb.tm_mon  = 2;
+    tmb.tm_year = 100;
+
+    // the raw a-diaeresis in its byte; the doubled slash as one
+    test_bytes (charT (), tname, loc, &tmb, 'B', "M\xe4rz");
+    test_bytes (charT (), tname, loc, &tmb, 'b', "M\xe4r");
+    test_bytes (charT (), tname, loc, &tmb, 'x', "07/03/2000");
+}
+
+/**************************************************************************/
+
 static int
 run_test (int, char*[])
 {
@@ -1825,6 +1954,11 @@ run_test (int, char*[])
     test_POSIX (wchar_t (), "wchar_t");
 
     test_user (wchar_t (), "wchar_t");
+
+    // the forms of the GNU sources
+    test_gnu_forms (char (), "char");
+
+    test_gnu_forms (wchar_t (), "wchar_t");
 
     return 0;
 

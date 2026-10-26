@@ -306,12 +306,24 @@ std::string Def::convert_string (const std::string &str1)
             }
         }
 
-        // the definition file contains a sting with non-symbol names.
-        // process each character as it's actual character value.
-        // Locale definitions that use this may not be portable.
+        // a character written raw, in the encoding of the charmap by
+        // its symbolic name, as glibc reads it; any other non-symbol
+        // character is taken as the value of its byte, which may not
+        // be portable
         else {
-            ret += (char)str[idx++];
-            
+            const std::size_t len = raw_char_name (str + idx, sym);
+
+            if (0 == len) {
+                ret += (char)str[idx++];
+                continue;
+            }
+
+            w_cmap_iter w_pos = charmap_.get_w_cmap().find (sym);
+            if (w_pos == charmap_.get_w_cmap().end())
+                return std::string();
+
+            ret += convert_to_ext(w_pos->second);
+            idx += int (len);
         }
     }
 
