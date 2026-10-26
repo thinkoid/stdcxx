@@ -534,6 +534,16 @@ process_xlit_statement (std::size_t &nchars)
     next = scanner_.next_token ();
     while (next.token != Scanner::tok_nl) {
 
+        // a replacement written raw, by its symbolic name
+        std::string       name;
+        const std::size_t len = Scanner::tok_ndef == next.token ?
+            raw_char_name (next.name.c_str (), name) : 0;
+
+        if (len && len == next.name.size ()) {
+            next.name  = name;
+            next.token = Scanner::tok_sym_name;
+        }
+
         switch (next.token) {
         case Scanner::tok_sym_name: {
             // convert this symbol to a string with the external encoding 
@@ -629,12 +639,18 @@ process_xlit ()
             break;
         }
         case Scanner::tok_ndef: {
-            // a statement that writes its character raw is not read
-            // (see the TODO); translit_ignore and default_missing are
-            // skipped as LC_CTYPE keywords
+            // a statement that writes its character raw, by the
+            // character's symbolic name, as glibc reads it;
+            // translit_ignore and default_missing are skipped as
+            // LC_CTYPE keywords
             std::string name;
-            if (raw_char_name (next.name.c_str (), name) == next.name.size ())
-                scanner_.ignore_line ();
+            const std::size_t len = raw_char_name (next.name.c_str (), name);
+
+            if (len && len == next.name.size ()) {
+                next.name  = name;
+                next.token = Scanner::tok_sym_name;
+                process_xlit_statement (nchars);
+            }
             else
                 skip_statement (lc_name);
             break;

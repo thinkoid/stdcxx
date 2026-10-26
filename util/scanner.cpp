@@ -48,6 +48,9 @@ struct ScannerContext
     std::ifstream file;            // file stream object
     std::string   filename;        // filename
 
+    // the name the tokens point to, kept by the scanner
+    const char* token_file;
+
     // comment and escape for current file
     char comment_char;
     char escape_char;
@@ -83,7 +86,7 @@ static void normal_path (std::string& s)
 
 ScannerContext::
 ScannerContext (const char* name, char cc, char ec)
-    : file (name),  filename (name),
+    : file (name),  filename (name), token_file (0),
       comment_char (cc), escape_char (ec),
     line (0) // , column (0)
 {
@@ -144,6 +147,7 @@ open (std::string name, char cc, char ec)
 
     try {
         context_ = new ScannerContext (name.c_str (), cc, ec);
+        context_->token_file = file_names_.insert (name).first->c_str ();
     }
     catch (loc_exception&) {
         context_ = 0;
@@ -372,7 +376,7 @@ next_token ()
     while (true) {
 
         // store the *current* file name
-        next_tok.file = context_->filename.c_str ();
+        next_tok.file = context_->token_file;
 
         // the assert above for eof checks if the caller has lost it;
         if (context_->file.eof ()) {

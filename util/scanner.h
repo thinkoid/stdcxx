@@ -29,6 +29,7 @@
 #ifndef RWSTD_UTIL_SCANNER_H_INCLUDED
 #define RWSTD_UTIL_SCANNER_H_INCLUDED
 
+#include <set>
 #include <string>
 #include <stack>
 #include <climits>   // for ULONG_MAX
@@ -234,6 +235,10 @@ private:
 
     // was the last token an escaped newline
     bool escaped_newline_;
+
+    // the names of the files opened, which the tokens point to: a
+    // token outlives the file it came from in the lists of LC_COLLATE
+    std::set<std::string> file_names_;
 };
 
 
