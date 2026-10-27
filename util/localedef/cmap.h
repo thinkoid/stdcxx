@@ -26,6 +26,8 @@
 #define RWSTD_UTIL_LOCALEDEF_CMAP_H_INCLUDED
 
 #include "diag.h"
+#include "model.h"
+#include "reader.h"
 
 #include <cstddef>   // for size_t
 #include <map>
@@ -85,5 +87,25 @@ private:
     std::map<long, std::size_t>        m_by_ucs;
     std::map<std::string, std::size_t> m_by_bytes;
 };
+
+
+// What a string resolves against: the charmap, for a symbolic name,
+// and the escape character in effect on the string's line.
+struct charset_t {
+    const cmap_t *cmap;
+    char          escape;
+};
+
+
+// The code points of a string token, by glibc's get_string() for a
+// locale file.  The escape character takes the next character as
+// itself: "//" is one slash under escape_char /.  A string has no
+// charcode form, so "\x41" is the three characters x41, as in glibc.
+// A <name> of U and 4 or 8 hexadecimal digits is that code point
+// whether or not the charmap has the name; any other name is the
+// charmap's.  A byte from 0x80 starts a character written raw in
+// UTF-8, which reads as its <Uxxxx> name.
+bool resolve (const token_t &tok, const charset_t &cs, ucs_string_t &ucs,
+              diag_t &diag);
 
 #endif   // RWSTD_UTIL_LOCALEDEF_CMAP_H_INCLUDED

@@ -53,9 +53,20 @@ void read_messages (reader_t &reader, const line_t &head, const cmap_t &cmap,
                     messages_def_t &def, std::string &copy, diag_t &diag);
 
 
+// The productions every category reader shares.
+
+// copy "name", at the keyword: the name of a locale, in the portable
+// characters.
+bool copy (tok_iter &it, tok_iter last, const charset_t &cs,
+           std::string &attr, diag_t &diag);
+
 // END category, the last line of a section, at it.  glibc ends the
 // section at any END line and reports one that names another category.
 bool end_of_section (tok_iter &it, tok_iter last, const token_t &head,
                      diag_t &diag);
+
+// A statement its category does not read, at its leading token: a
+// warning for a keyword or a word, an error for anything else.
+bool not_read (const token_t &lead, const char *category, diag_t &diag);
 
 #endif   // RWSTD_UTIL_LOCALEDEF_SCALAR_H_INCLUDED

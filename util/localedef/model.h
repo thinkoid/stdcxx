@@ -25,6 +25,7 @@
 #ifndef RWSTD_UTIL_LOCALEDEF_MODEL_H_INCLUDED
 #define RWSTD_UTIL_LOCALEDEF_MODEL_H_INCLUDED
 
+#include <map>
 #include <vector>
 
 
@@ -135,9 +136,62 @@ struct messages_def_t {
 };
 
 
-// The categories read so far.  LC_CTYPE and LC_COLLATE join when their
-// readers do.
+// A run of code points, first to last.  A single character is a run of
+// one, and so is an ellipsis over <Uxxxx> names.
+struct ucs_range_t {
+    long first;
+    long last;
+};
+
+// A character class as the source writes it: runs, not a table.  They
+// are in ascending order, and runs that overlap or touch are merged as
+// they are added, so that no two do.
+typedef std::vector<ucs_range_t> ucs_class_t;
+
+// One pair of a case map.
+struct ucs_pair_t {
+    long from;
+    long to;
+};
+
+// A case map in ascending order of from, one pair per character: a
+// later pair for a character replaces an earlier one, as in glibc.
+typedef std::vector<ucs_pair_t> ucs_map_t;
+
+// The transliteration table: a source of one or more code points and
+// its alternatives in order of preference.  An alternative may be
+// empty, and an entry may have none.
+typedef std::map<ucs_string_t, std::vector<ucs_string_t> > translit_t;
+
+
+// LC_CTYPE: the ten classes std::ctype_base gives a bit, blank, which
+// it has none for until C++11 and the old compiler skipped, the two
+// case maps and the transliteration.  alnum is alpha and digit, in the
+// library as in glibc; the alnum keyword, other classes and maps,
+// charclass, charconv, outdigit, default_missing and translit_ignore
+// are read and ignored.  A class or a map is unset when no statement
+// names it; glibc then supplies its default after reading.
+struct ctype_def_t {
+    field_t<ucs_class_t> upper;
+    field_t<ucs_class_t> lower;
+    field_t<ucs_class_t> alpha;
+    field_t<ucs_class_t> digit;
+    field_t<ucs_class_t> xdigit;
+    field_t<ucs_class_t> space;
+    field_t<ucs_class_t> print;
+    field_t<ucs_class_t> graph;
+    field_t<ucs_class_t> blank;
+    field_t<ucs_class_t> cntrl;
+    field_t<ucs_class_t> punct;
+    field_t<ucs_map_t>   toupper;
+    field_t<ucs_map_t>   tolower;
+    translit_t           translit;
+};
+
+
+// The categories read so far.  LC_COLLATE joins when its reader does.
 struct locale_def_t {
+    ctype_def_t    ctype;
     numeric_def_t  numeric;
     monetary_def_t monetary;
     time_def_t     time;

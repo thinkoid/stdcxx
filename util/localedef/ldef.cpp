@@ -22,13 +22,15 @@
  *
  **************************************************************************/
 
-// The new locale compiler.  For now it has three forms, each the check
+// The new locale compiler.  For now it has four forms, each the check
 // of one piece of the front end:
 //
 //   ldef --tokens FILE...                       the tokens of each line
 //   ldef --charmap FILE                         the entries of a charmap
 //   ldef --values -f CHARMAP -i FILE [-I DIR]   the values of the four
 //                                               scalar categories
+//   ldef --ctype -f CHARMAP -i FILE [-I DIR]    the classes, case maps
+//                                               and transliteration
 
 #include "cmap.h"
 #include "diag.h"
@@ -313,13 +315,13 @@ print_eras (const cmap_t &cmap, const std::vector<era_t> &eras)
 }
 
 
-static void
-dump_values (const char *charmap, const char *path, const char *dir,
-             diag_t &diag)
+// Reads the charmap and the definition, the locales it copies and
+// includes taken from dir, or from the definition's own directory.
+// False if a file could not be opened.
+static bool
+read_model (const char *charmap, const char *path, const char *dir,
+            cmap_t &cmap, locale_def_t &def, diag_t &diag)
 {
-    cmap_t       cmap;
-    locale_def_t def;
-
     std::string copy_dir;
 
     if (dir)
@@ -335,8 +337,22 @@ dump_values (const char *charmap, const char *path, const char *dir,
     }
     catch (const open_error_t &error) {
         report (error, diag);
-        return;
+        return false;
     }
+
+    return true;
+}
+
+
+static void
+dump_values (const char *charmap, const char *path, const char *dir,
+             diag_t &diag)
+{
+    cmap_t       cmap;
+    locale_def_t def;
+
+    if (!read_model (charmap, path, dir, cmap, def, diag))
+        return;
 
     const numeric_def_t &num = def.numeric;
 
@@ -395,12 +411,108 @@ dump_values (const char *charmap, const char *path, const char *dir,
 }
 
 
-// --values -f CHARMAP -i FILE [-I DIR], the options in any order
-static bool
-values_args (int argc, char *argv [], const char *&charmap,
-             const char *&input, const char *&dir)
+/**************************************************************************/
+// the classes, maps and transliteration of LC_CTYPE
+
+// The dump prints each class as a line "name N", N its runs, then one
+// run per line as first-last in hexadecimal, a single character as a
+// run of one; each case map as "name N" and one pair per line, from
+// and to in hexadecimal; then "translit N" and one entry per line: the
+// source in angle brackets, then the alternatives separated by
+// semicolons, each its code points in hexadecimal separated by spaces.
+// A class or a map the source leaves unset prints "name <unset>".
+
+static void
+print_class (const char *name, const field_t<ucs_class_t> &field)
 {
-    if (argc < 3 || 0 != std::strcmp ("--values", argv [1]) || argc % 2)
+    if (!field.set) {
+        std::printf ("%s <unset>\n", name);
+        return;
+    }
+
+    std::printf ("%s %lu\n", name, (unsigned long)field.value.size ());
+
+    for (std::size_t i = 0; i != field.value.size (); ++i)
+        std::printf ("%04lX-%04lX\n", field.value [i].first,
+                     field.value [i].last);
+}
+
+
+static void
+print_map (const char *name, const field_t<ucs_map_t> &field)
+{
+    if (!field.set) {
+        std::printf ("%s <unset>\n", name);
+        return;
+    }
+
+    std::printf ("%s %lu\n", name, (unsigned long)field.value.size ());
+
+    for (std::size_t i = 0; i != field.value.size (); ++i)
+        std::printf ("%04lX %04lX\n", field.value [i].from,
+                     field.value [i].to);
+}
+
+
+static void
+print_points (const ucs_string_t &ucs)
+{
+    for (std::size_t i = 0; i != ucs.size (); ++i)
+        std::printf (i ? " %04lX" : "%04lX", ucs [i]);
+}
+
+
+static void
+dump_ctype (const char *charmap, const char *path, const char *dir,
+            diag_t &diag)
+{
+    cmap_t       cmap;
+    locale_def_t def;
+
+    if (!read_model (charmap, path, dir, cmap, def, diag))
+        return;
+
+    const ctype_def_t &ctype = def.ctype;
+
+    print_class ("upper", ctype.upper);
+    print_class ("lower", ctype.lower);
+    print_class ("alpha", ctype.alpha);
+    print_class ("digit", ctype.digit);
+    print_class ("xdigit", ctype.xdigit);
+    print_class ("space", ctype.space);
+    print_class ("print", ctype.print);
+    print_class ("graph", ctype.graph);
+    print_class ("blank", ctype.blank);
+    print_class ("cntrl", ctype.cntrl);
+    print_class ("punct", ctype.punct);
+    print_map ("toupper", ctype.toupper);
+    print_map ("tolower", ctype.tolower);
+
+    std::printf ("translit %lu\n", (unsigned long)ctype.translit.size ());
+
+    for (translit_t::const_iterator it = ctype.translit.begin ();
+         it != ctype.translit.end (); ++it) {
+
+        std::putchar ('<');
+        print_points (it->first);
+        std::putchar ('>');
+
+        for (std::size_t i = 0; i != it->second.size (); ++i) {
+            std::putchar (i ? ';' : ' ');
+            print_points (it->second [i]);
+        }
+
+        std::putchar ('\n');
+    }
+}
+
+
+// OPTION -f CHARMAP -i FILE [-I DIR], the options in any order
+static bool
+model_args (int argc, char *argv [], const char *option,
+            const char *&charmap, const char *&input, const char *&dir)
+{
+    if (argc < 3 || 0 != std::strcmp (option, argv [1]) || argc % 2)
         return false;
 
     for (int i = 2; i < argc; i += 2) {
@@ -432,12 +544,15 @@ main (int argc, char *argv [])
         dump_tokens (argc, argv, diag);
     else if (3 == argc && 0 == std::strcmp ("--charmap", argv [1]))
         dump_charmap (argv [2], diag);
-    else if (values_args (argc, argv, charmap, input, dir))
+    else if (model_args (argc, argv, "--values", charmap, input, dir))
         dump_values (charmap, input, dir, diag);
+    else if (model_args (argc, argv, "--ctype", charmap, input, dir))
+        dump_ctype (charmap, input, dir, diag);
     else
         diag.error (e_cmdarg, nowhere,
                     "usage: ldef --tokens FILE... | ldef --charmap FILE | "
-                    "ldef --values -f CHARMAP -i FILE [-I DIR]");
+                    "ldef --values -f CHARMAP -i FILE [-I DIR] | "
+                    "ldef --ctype -f CHARMAP -i FILE [-I DIR]");
 
     return diag.exit_status ();
 }

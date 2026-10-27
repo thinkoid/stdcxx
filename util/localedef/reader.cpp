@@ -26,6 +26,7 @@
 
 #include <cerrno>    // for errno
 #include <climits>   // for LONG_MAX
+#include <cstdlib>   // for strtoul()
 #include <cstring>   // for strcmp(), strlen()
 
 
@@ -346,6 +347,125 @@ keyword_t
 keyword_of (const token_t &tok)
 {
     return tk_keyword == tok.kind ? keyword_t (tok.value) : kw_none;
+}
+
+
+bool
+is_ellipsis (token_kind_t kind)
+{
+    return    tk_ellipsis2 == kind || tk_ellipsis3 == kind
+           || tk_ellipsis4 == kind || tk_ellipsis2_2 == kind
+           || tk_ellipsis4_2 == kind;
+}
+
+
+// glibc's ld-ctype.c reports names that differ only in the case of a
+// hexadecimal digit, which give the same number, as no range; here,
+// as in ld-collate.c, they are a range of one.
+bool
+name_range (tok_iter &it, tok_iter last, name_range_t &attr, diag_t &diag)
+{
+    const token_t &from = *it++;
+
+    if (it == last || !is_ellipsis (it->kind))
+        return diag.error (e_syntax, where_of (it, last),
+                           "expected an ellipsis");
+
+    const token_kind_t ellipsis = it++->kind;
+
+    if (it == last || tk_symbol != it->kind)
+        return diag.error (e_syntax, where_of (it, last),
+                           "expected a symbolic name to end the range");
+
+    const token_t &to = *it++;
+
+    name_range_t value;
+
+    value.ellipsis = ellipsis;
+    value.ucs      = 0 <= from.value && 0 <= to.value;
+    value.base     =    tk_ellipsis4 == ellipsis
+                     || tk_ellipsis4_2 == ellipsis ? 10 : 16;
+    value.step     =    tk_ellipsis2_2 == ellipsis
+                     || tk_ellipsis4_2 == ellipsis ? 2 : 1;
+
+    if (value.ucs) {
+
+        if (to.value < from.value)
+            return diag.error (e_range, from.where, "to-value <%s> of range "
+                               "is smaller than from-value <%s>",
+                               to.text.c_str (), from.text.c_str ());
+
+        value.prefix = "U";
+        value.width  = 0;
+        value.first  = (unsigned long)from.value;
+        value.last   = (unsigned long)to.value;
+
+        attr = value;
+        return true;
+    }
+
+    if (0 <= from.value || 0 <= to.value)
+        return diag.error (e_pair, from.where, "ellipsis range must be "
+                           "marked by two operands of same type");
+
+    const std::string &a = from.text;
+    const std::string &b = to.text;
+
+    if (a.size () != b.size ())
+        return diag.error (e_pair, from.where, "`%s' and `%s' are not "
+                           "valid names for symbolic range",
+                           a.c_str (), b.c_str ());
+
+    std::size_t prefix = 0;
+
+    while (prefix < a.size () && a [prefix] == b [prefix])
+        ++prefix;
+
+    value.prefix.assign (a, 0, prefix);
+    value.width = int (a.size () - prefix);
+    value.first = 0;
+    value.last  = 0;
+
+    // two names alike are a range of the one name
+    if (prefix < a.size ()) {
+
+        char *end = 0;
+
+        value.first = std::strtoul (a.c_str () + prefix, &end, value.base);
+
+        bool valid = 0 == *end;
+
+        value.last = std::strtoul (b.c_str () + prefix, &end, value.base);
+
+        if (!valid || *end || value.last < value.first)
+            return diag.error (e_pair, from.where, "`%s' and `%s' are not "
+                               "valid names for symbolic range",
+                               a.c_str (), b.c_str ());
+    }
+
+    attr = value;
+
+    return true;
+}
+
+
+std::string
+range_member (const name_range_t &range, unsigned long n)
+{
+    char number [24];
+
+    if (range.ucs) {
+        std::sprintf (number, n < 0x10000UL ? "U%04lX" : "U%08lX", n);
+        return number;
+    }
+
+    if (0 == range.width)
+        return range.prefix;
+
+    std::sprintf (number, 16 == range.base ? "%0*lX" : "%0*lu",
+                  range.width, n);
+
+    return range.prefix + number;
 }
 
 

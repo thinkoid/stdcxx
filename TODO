@@ -126,8 +126,11 @@ builds with its charmap, two builds byte-identical; each database
 byte-identical to the parked compiler's but where that one is known
 wrong (the 135 CJK code points, the era records, the unset words,
 the transliteration table), and there the C library decides through
-=bin/oracle=. The locale tests pass against their pins, re-pinned
-where the data moved.
+=bin/oracle=; the transliteration table against glibc's compiled
+one, read entry by entry through =nl_langinfo= of the
+=_NL_CTYPE_TRANSLIT_= items, which is exact where =iconv= with
+=//TRANSLIT= shows only the first usable alternative. The locale
+tests pass against their pins, re-pinned where the data moved.
 
 ** TODO The charmap table costs five times its reader
 

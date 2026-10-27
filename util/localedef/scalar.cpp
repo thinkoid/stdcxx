@@ -34,143 +34,6 @@
 #include "scalar.h"
 
 #include <climits>   // for INT_MAX
-#include <cstdlib>   // for strtoul()
-
-
-/**************************************************************************/
-// strings
-
-// What a string resolves against: the charmap, for a symbolic name,
-// and the escape character in effect on the string's line.
-struct charset_t {
-    const cmap_t *cmap;
-    char          escape;
-};
-
-
-// The code point a symbolic name gives, as glibc's get_string() takes
-// it: U and 4 or 8 hexadecimal digits is that code point whether or
-// not the charmap has the name; any other name is the charmap's.
-static bool
-name_value (const std::string &name, const charset_t &cs,
-            const where_t &where, long &ucs, diag_t &diag)
-{
-    const bool u_form =
-           (5 == name.size () || 9 == name.size ()) && 'U' == name [0]
-        && name.find_first_not_of ("0123456789ABCDEFabcdef", 1)
-           == std::string::npos;
-
-    if (u_form) {
-
-        const unsigned long value = std::strtoul (name.c_str () + 1, 0, 16);
-
-        // the reader's limit for a <Uxxxx> symbol, and the charmap's
-        if (value < 0x80000000UL) {
-            ucs = long (value);
-            return true;
-        }
-    }
-
-    const cmap_entry_t* const entry = cs.cmap->find_name (name);
-
-    if (0 == entry)
-        return diag.error (e_ucs, where, "symbol `%s' not in charmap",
-                           name.c_str ());
-
-    if (entry->ucs < 0)
-        return diag.error (e_ucs, where, "symbol `%s' has no code point",
-                           name.c_str ());
-
-    ucs = entry->ucs;
-
-    return true;
-}
-
-
-// The code points of a string token, by glibc's get_string() for a
-// locale file.  The escape character takes the next character as
-// itself: "//" is one slash under escape_char /.  A string has no
-// charcode form, so "\x41" is the three characters x41, as in glibc.
-// A <name> is the code point name_value() gives.  A byte from 0x80
-// starts a character written raw in UTF-8, which reads as its <Uxxxx>
-// name.
-static bool
-resolve (const token_t &tok, const charset_t &cs, ucs_string_t &ucs,
-         diag_t &diag)
-{
-    const std::string &s = tok.text;
-
-    ucs.clear ();
-
-    for (std::size_t pos = 0; pos != s.size (); ) {
-
-        const unsigned char c = s [pos];
-
-        if (cs.escape == char (c)) {
-
-            // the reader keeps an escape only with the character after
-            // it; an escape that ends the text ends the string
-            if (pos + 1 == s.size ())
-                break;
-
-            const unsigned char next = s [pos + 1];
-
-            if (0x80 & next)
-                return diag.error (e_syntax, tok.where,
-                                   "illegal 8-bit escape sequence");
-
-            ucs.push_back (next);
-            pos += 2;
-            continue;
-        }
-
-        if ('<' == c) {
-
-            std::string name;
-            std::size_t end = pos + 1;
-
-            for (; end < s.size () && '>' != s [end]; ++end) {
-
-                if (cs.escape == s [end] && end + 1 < s.size ())
-                    ++end;
-
-                name += s [end];
-            }
-
-            if (end == s.size ())
-                return diag.error (e_symend, tok.where,
-                                   "unterminated symbolic name in string");
-
-            long value;
-
-            if (!name_value (name, cs, tok.where, value, diag))
-                return false;
-
-            ucs.push_back (value);
-            pos = end + 1;
-            continue;
-        }
-
-        if (0x80 & c) {
-
-            long              value;
-            const std::size_t len = scan_utf8 (s, pos, value);
-
-            if (0 == len)
-                return diag.error (e_mbchar, tok.where,
-                                   "invalid UTF-8 sequence in string");
-
-            ucs.push_back (value);
-            pos += len;
-            continue;
-        }
-
-        ucs.push_back (c);
-        ++pos;
-    }
-
-    return true;
-}
 
 
 /**************************************************************************/
@@ -647,7 +510,7 @@ era (tok_iter &it, tok_iter last, const charset_t &cs,
 
 // copy "name".  The name is a file name: glibc takes its bytes and
 // asks for the portable characters, here code points below 0x80.
-static bool
+bool
 copy (tok_iter &it, tok_iter last, const charset_t &cs, std::string &attr,
       diag_t &diag)
 {
@@ -705,7 +568,7 @@ end_of_section (tok_iter &it, tok_iter last, const token_t &head,
 // category or a word no table knows draws a warning; any other token
 // is a syntax error.  Either way the statement is skipped.  glibc
 // reports both as syntax errors.
-static bool
+bool
 not_read (const token_t &lead, const char *category, diag_t &diag)
 {
     if (tk_keyword == lead.kind || tk_ident == lead.kind)

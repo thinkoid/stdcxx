@@ -187,6 +187,37 @@ bool end_of_line (tok_iter it, tok_iter last, diag_t &diag);
 // The keyword of a token, kw_none when it is not one.
 keyword_t keyword_of (const token_t &tok);
 
+// True for the five ellipses.
+bool is_ellipsis (token_kind_t kind);
+
+
+// A range of symbolic names, <from> ellipsis <to>, as glibc's ld-ctype.c
+// and ld-collate.c read one.  Between two <Uxxxx> names the members are
+// the code points from one to the other.  Between two other names of
+// one length the names agree up to their first difference, and the rest
+// of each is a number, decimal after .... and ....(2)...., hexadecimal
+// after any other ellipsis; a member's name is the prefix and its
+// number in as many digits.  The (2) forms take every second member.
+// Which ellipsis a statement allows is the statement's to say.
+struct name_range_t {
+    token_kind_t  ellipsis;   // as written
+    bool          ucs;        // both names are <Uxxxx>
+    std::string   prefix;
+    int           base;       // 16 or 10
+    int           width;      // the digits of a member's number
+    unsigned long first;      // the numbers of the two ends, or their
+    unsigned long last;       // code points when ucs
+    int           step;       // 1, or 2 for the (2) forms
+};
+
+// <from> ellipsis <to>, at the first name.
+bool name_range (tok_iter &it, tok_iter last, name_range_t &attr,
+                 diag_t &diag);
+
+// The name of member n of a range, without the brackets.  A <Uxxxx>
+// member takes 4 digits below 0x10000 and 8 from there.
+std::string range_member (const name_range_t &range, unsigned long n);
+
 
 // The name and spelling of a kind, for dumps and messages.
 const char* kind_name (token_kind_t kind);

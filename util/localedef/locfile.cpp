@@ -25,30 +25,36 @@
 // The top level of a definition file: the keyword table of
 // plan-localedef.md, chapter 6, as it applies to the statements that
 // lead a section.  The categories the compiler reads go to their
-// readers; LC_CTYPE and LC_COLLATE are skipped until their readers
-// come; the six categories no facet reads are skipped whole.  The
-// comment_char and escape_char lines are the reader's.
+// readers; LC_COLLATE is skipped until its reader comes; the six
+// categories no facet reads are skipped whole.  The comment_char and
+// escape_char lines are the reader's.
 //
-// include is not read here.  glibc reads it in LC_CTYPE alone, inside
-// translit_start, and none of the four scalar categories of the 502
-// definitions of glibc's SUPPORTED has one.
+// A scalar category's copy is read after the category's END, from the
+// file pushed on the reader.  LC_CTYPE reads its copy where it is met,
+// since statements may follow it, and so it reads the locales its
+// translit_start sections include: through the read() of files_t,
+// which reads the named file at the depth above for LC_CTYPE alone.
 
+#include "lctype.h"
 #include "locfile.h"
 #include "reader.h"
 #include "scalar.h"
 
+#include <set>
 #include <vector>
 
 
 // The categories a file is read for.  The definition named on the
-// command line is read for all of them; a file read for a copy is read
-// for the one category copied, and its other sections are skipped.
+// command line is read for all of them; a file read for a copy or an
+// include is read for the one category, and its other sections are
+// skipped.
 enum {
     numeric_bit  = 1,
     monetary_bit = 2,
     time_bit     = 4,
     messages_bit = 8,
-    all_bits     = 15
+    ctype_bit    = 16,
+    all_bits     = 31
 };
 
 
@@ -115,19 +121,34 @@ push_copy (reader_t &reader, const std::string &dir, const std::string &name,
 }
 
 
-bool
-read_locale (const std::string &path, const std::string &dir,
-             const cmap_t &cmap, locale_def_t &def, diag_t &diag)
+// The files of one definition: the reader with its stack, the
+// directory the locales copy and include name, and the categories
+// wanted from the file at each depth, from 1.
+struct files_t: ctype_locales_t {
+
+    files_t (const std::string &d, const cmap_t &c, locale_def_t &l,
+             diag_t &g)
+        : reader (g), dir (d), cmap (c), def (l), diag (g) { }
+
+    // The sections of the files at depth and above, LC_CTYPE into ctype.
+    void read_sections (std::size_t depth, ctype_state_t &ctype);
+
+    virtual void read (const std::string &name, const token_t &at,
+                       ctype_state_t &state);
+
+    reader_t           reader;
+    const std::string &dir;
+    const cmap_t      &cmap;
+    locale_def_t      &def;
+    diag_t            &diag;
+    std::vector<int>   wanted;
+};
+
+
+void files_t::
+read_sections (std::size_t depth, ctype_state_t &ctype)
 {
-    const int errors = diag.errors ();
-
-    reader_t reader (diag);
-    reader.push (path, locale_file);
-
-    // the categories wanted from the file at each depth, from 1
-    std::vector<int> wanted (1, int (all_bits));
-
-    for (line_t line; reader.next (line); ) {
+    for (line_t line; reader.next (line, depth); ) {
 
         wanted.resize (reader.depth ());
 
@@ -139,6 +160,14 @@ read_locale (const std::string &path, const std::string &dir,
         std::string copy;
 
         switch (keyword_of (head)) {
+
+        case kw_lc_ctype:
+            if (0 == (wanted.back () & ctype_bit))
+                break;
+
+            end_of_line (++it, last, diag);
+            read_ctype (reader, line, cmap, ctype, *this, diag);
+            continue;
 
         case kw_lc_numeric:
             if (0 == (wanted.back () & numeric_bit))
@@ -176,9 +205,8 @@ read_locale (const std::string &path, const std::string &dir,
             push_copy (reader, dir, copy, head, messages_bit, wanted, diag);
             continue;
 
-        case kw_lc_ctype:
         case kw_lc_collate:
-            // steps 4 and 5 of the plan
+            // step 5 of the plan
             break;
 
         case kw_lc_address: case kw_lc_identification:
@@ -204,6 +232,57 @@ read_locale (const std::string &path, const std::string &dir,
 
         skip_section (reader, line, diag);
     }
+}
+
+
+// The LC_CTYPE of a locale a copy or an include names, read now from
+// the depth above the statement's.
+void files_t::
+read (const std::string &name, const token_t &at, ctype_state_t &state)
+{
+    if (copy_depth_max <= reader.depth ()) {
+        diag.error (e_syntax, at.where, "LC_CTYPE: copy and include "
+                    "nested more than %d deep", int (copy_depth_max));
+        return;
+    }
+
+    const std::string path = dir.empty () ? name : dir + '/' + name;
+
+    try {
+        reader.push (path, locale_file);
+    }
+    catch (const open_error_t&) {
+        diag.error (e_openrd, at.where, "cannot open locale definition "
+                    "file `%s'", path.c_str ());
+        return;
+    }
+
+    const std::size_t depth = reader.depth ();
+
+    wanted.resize (depth - 1);
+    wanted.push_back (ctype_bit);
+
+    read_sections (depth, state);
+}
+
+
+bool
+read_locale (const std::string &path, const std::string &dir,
+             const cmap_t &cmap, locale_def_t &def, diag_t &diag)
+{
+    const int errors = diag.errors ();
+
+    files_t files (dir, cmap, def, diag);
+
+    files.reader.push (path, locale_file);
+    files.wanted.assign (1, int (all_bits));
+
+    std::set<std::string> visited;
+    ctype_state_t         ctype (&def.ctype, visited);
+
+    files.read_sections (1, ctype);
+
+    finish_translit (ctype, def.ctype.translit);
 
     return errors == diag.errors ();
 }

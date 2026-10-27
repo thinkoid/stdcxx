@@ -129,15 +129,6 @@ is_utf8 (const std::string &code_set_name)
 /**************************************************************************/
 // the productions
 
-static bool
-is_ellipsis (token_kind_t kind)
-{
-    return    tk_ellipsis2 == kind || tk_ellipsis3 == kind
-           || tk_ellipsis4 == kind || tk_ellipsis2_2 == kind
-           || tk_ellipsis4_2 == kind;
-}
-
-
 // <code_set_name> name
 static bool
 code_set (tok_iter &it, tok_iter last, std::string &attr, diag_t &diag)
@@ -674,4 +665,125 @@ read (const std::string &path, diag_t &diag)
         diag.error (e_syntax, at_end, "premature end of file");
 
     return errors == diag.errors ();
+}
+
+
+/**************************************************************************/
+// strings and names against the charmap
+
+// The code point a symbolic name gives, as glibc's get_string() takes
+// it: U and 4 or 8 hexadecimal digits is that code point whether or
+// not the charmap has the name; any other name is the charmap's.
+static bool
+name_value (const std::string &name, const charset_t &cs,
+            const where_t &where, long &ucs, diag_t &diag)
+{
+    const bool u_form =
+           (5 == name.size () || 9 == name.size ()) && 'U' == name [0]
+        && name.find_first_not_of ("0123456789ABCDEFabcdef", 1)
+           == std::string::npos;
+
+    if (u_form) {
+
+        const unsigned long value = std::strtoul (name.c_str () + 1, 0, 16);
+
+        // the reader's limit for a <Uxxxx> symbol, and the charmap's
+        if (value < 0x80000000UL) {
+            ucs = long (value);
+            return true;
+        }
+    }
+
+    const cmap_entry_t* const entry = cs.cmap->find_name (name);
+
+    if (0 == entry)
+        return diag.error (e_ucs, where, "symbol `%s' not in charmap",
+                           name.c_str ());
+
+    if (entry->ucs < 0)
+        return diag.error (e_ucs, where, "symbol `%s' has no code point",
+                           name.c_str ());
+
+    ucs = entry->ucs;
+
+    return true;
+}
+
+
+bool
+resolve (const token_t &tok, const charset_t &cs, ucs_string_t &ucs,
+         diag_t &diag)
+{
+    const std::string &s = tok.text;
+
+    ucs.clear ();
+
+    for (std::size_t pos = 0; pos != s.size (); ) {
+
+        const unsigned char c = s [pos];
+
+        if (cs.escape == char (c)) {
+
+            // the reader keeps an escape only with the character after
+            // it; an escape that ends the text ends the string
+            if (pos + 1 == s.size ())
+                break;
+
+            const unsigned char next = s [pos + 1];
+
+            if (0x80 & next)
+                return diag.error (e_syntax, tok.where,
+                                   "illegal 8-bit escape sequence");
+
+            ucs.push_back (next);
+            pos += 2;
+            continue;
+        }
+
+        if ('<' == c) {
+
+            std::string name;
+            std::size_t end = pos + 1;
+
+            for (; end < s.size () && '>' != s [end]; ++end) {
+
+                if (cs.escape == s [end] && end + 1 < s.size ())
+                    ++end;
+
+                name += s [end];
+            }
+
+            if (end == s.size ())
+                return diag.error (e_symend, tok.where,
+                                   "unterminated symbolic name in string");
+
+            long value;
+
+            if (!name_value (name, cs, tok.where, value, diag))
+                return false;
+
+            ucs.push_back (value);
+            pos = end + 1;
+            continue;
+        }
+
+        if (0x80 & c) {
+
+            long              value;
+            const std::size_t len = scan_utf8 (s, pos, value);
+
+            if (0 == len)
+                return diag.error (e_mbchar, tok.where,
+                                   "invalid UTF-8 sequence in string");
+
+            ucs.push_back (value);
+            pos += len;
+            continue;
+        }
+
+        ucs.push_back (c);
+        ++pos;
+    }
+
+    return true;
 }
