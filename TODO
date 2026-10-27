@@ -125,6 +125,34 @@ the transliteration table), and there the C library decides through
 =bin/oracle=. The locale tests pass against their pins, re-pinned
 where the data moved.
 
+** TODO The charmap table costs five times its reader
+
+The new compiler's =cmap_t= expands every range of a charmap into
+one entry and indexes the entries three times, by name, code point
+and bytes, in =std::map=. glibc 2.44's UTF-8 charmap has 56097 lines
+and 4185 ranges; expanded, 297334 entries. Under the debug build
+=localedef2 --charmap= reads it in 3.0 s and 120 MB over the bare
+process, and =--tokens= over the same file takes 0.5 s and nothing:
+the table is 400 bytes an entry, two heap strings and three map
+nodes. The build runs the compiler once per locale, so a census of
+502 pays the table 502 times. Of the 297334 names, 5 are not
+=<Uxxxx>=, whose code point is the name.
+
+Fix: a range stays one record, first and last code point, the bytes
+of the first and the rule for the rest, in one vector sorted by code
+point as the files are. A lookup by code point is a binary search,
+and the bytes of a UTF-8 member are computed from the code point, as
+=define= computes them now. A =<Uxxxx>= name is looked up as its code
+point and no string is stored for it; the other names go in a small
+map. The bytes index is built on demand, and for UTF-8 is a decode.
+The interface stays, =find_name=, =find_ucs= and =find_bytes=;
+=entries ()= becomes an iteration that expands, since only the dump
+wants the expansion.
+
+Check: =localedef2 --charmap= over glibc's UTF-8 charmap prints the
+same 297334 lines as before, within twice the =--tokens= time and
+10 MB over the bare process.
+
 ** TODO The locale sources under =etc/nls= are glibc 2.2's
 
 The definitions and charmaps under =etc/nls= are copies from GNU libc
