@@ -190,6 +190,10 @@ keyword_t keyword_of (const token_t &tok);
 // True for the five ellipses.
 bool is_ellipsis (token_kind_t kind);
 
+// The spelling of an ellipsis, .. for tk_ellipsis2; empty for any other
+// kind.
+const char* ellipsis_text (token_kind_t kind);
+
 
 // A range of symbolic names, <from> ellipsis <to>, as glibc's ld-ctype.c
 // and ld-collate.c read one.  Between two <Uxxxx> names the members are

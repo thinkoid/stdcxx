@@ -25,16 +25,18 @@
 // The top level of a definition file: the keyword table of
 // plan-localedef.md, chapter 6, as it applies to the statements that
 // lead a section.  The categories the compiler reads go to their
-// readers; LC_COLLATE is skipped until its reader comes; the six
-// categories no facet reads are skipped whole.  The comment_char and
-// escape_char lines are the reader's.
+// readers; the six categories no facet reads are skipped whole.  The
+// comment_char and escape_char lines are the reader's.
 //
 // A scalar category's copy is read after the category's END, from the
-// file pushed on the reader.  LC_CTYPE reads its copy where it is met,
-// since statements may follow it, and so it reads the locales its
-// translit_start sections include: through the read() of files_t,
-// which reads the named file at the depth above for LC_CTYPE alone.
+// file pushed on the reader.  LC_CTYPE and LC_COLLATE read their copy
+// where it is met, since statements may follow it, and so LC_CTYPE
+// reads the locales its translit_start sections include: through the
+// two read() of files_t, which read the named file at the depth above
+// for the one category.  The two readers keep a callback each, so that
+// neither header knows the other's state.
 
+#include "lcollate.h"
 #include "lctype.h"
 #include "locfile.h"
 #include "reader.h"
@@ -54,7 +56,8 @@ enum {
     time_bit     = 4,
     messages_bit = 8,
     ctype_bit    = 16,
-    all_bits     = 31
+    collate_bit  = 32,
+    all_bits     = 63
 };
 
 
@@ -124,17 +127,27 @@ push_copy (reader_t &reader, const std::string &dir, const std::string &name,
 // The files of one definition: the reader with its stack, the
 // directory the locales copy and include name, and the categories
 // wanted from the file at each depth, from 1.
-struct files_t: ctype_locales_t {
+struct files_t: ctype_locales_t, collate_locales_t {
 
     files_t (const std::string &d, const cmap_t &c, locale_def_t &l,
              diag_t &g)
         : reader (g), dir (d), cmap (c), def (l), diag (g) { }
 
-    // The sections of the files at depth and above, LC_CTYPE into ctype.
-    void read_sections (std::size_t depth, ctype_state_t &ctype);
+    // The sections of the files at depth and above, LC_CTYPE into
+    // ctype and LC_COLLATE into collate, each 0 when not wanted.
+    void read_sections (std::size_t depth, ctype_state_t *ctype,
+                        collate_state_t *collate);
+
+    // Opens the locale a copy or an include names, at the depth above
+    // the statement's, to be read for one category.
+    bool open (const std::string &name, const token_t &at,
+               const char *category, int bit);
 
     virtual void read (const std::string &name, const token_t &at,
                        ctype_state_t &state);
+
+    virtual void read (const std::string &name, const token_t &at,
+                       collate_state_t &state);
 
     reader_t           reader;
     const std::string &dir;
@@ -146,7 +159,8 @@ struct files_t: ctype_locales_t {
 
 
 void files_t::
-read_sections (std::size_t depth, ctype_state_t &ctype)
+read_sections (std::size_t depth, ctype_state_t *ctype,
+               collate_state_t *collate)
 {
     for (line_t line; reader.next (line, depth); ) {
 
@@ -166,7 +180,7 @@ read_sections (std::size_t depth, ctype_state_t &ctype)
                 break;
 
             end_of_line (++it, last, diag);
-            read_ctype (reader, line, cmap, ctype, *this, diag);
+            read_ctype (reader, line, cmap, *ctype, *this, diag);
             continue;
 
         case kw_lc_numeric:
@@ -206,8 +220,12 @@ read_sections (std::size_t depth, ctype_state_t &ctype)
             continue;
 
         case kw_lc_collate:
-            // step 5 of the plan
-            break;
+            if (0 == (wanted.back () & collate_bit))
+                break;
+
+            end_of_line (++it, last, diag);
+            read_collate (reader, line, cmap, *collate, *this, diag);
+            continue;
 
         case kw_lc_address: case kw_lc_identification:
         case kw_lc_measurement: case kw_lc_name: case kw_lc_paper:
@@ -235,15 +253,14 @@ read_sections (std::size_t depth, ctype_state_t &ctype)
 }
 
 
-// The LC_CTYPE of a locale a copy or an include names, read now from
-// the depth above the statement's.
-void files_t::
-read (const std::string &name, const token_t &at, ctype_state_t &state)
+bool files_t::
+open (const std::string &name, const token_t &at, const char *category,
+      int bit)
 {
     if (copy_depth_max <= reader.depth ()) {
-        diag.error (e_syntax, at.where, "LC_CTYPE: copy and include "
-                    "nested more than %d deep", int (copy_depth_max));
-        return;
+        diag.error (e_syntax, at.where, "%s: copy and include nested more "
+                    "than %d deep", category, int (copy_depth_max));
+        return false;
     }
 
     const std::string path = dir.empty () ? name : dir + '/' + name;
@@ -254,15 +271,31 @@ read (const std::string &name, const token_t &at, ctype_state_t &state)
     catch (const open_error_t&) {
         diag.error (e_openrd, at.where, "cannot open locale definition "
                     "file `%s'", path.c_str ());
-        return;
+        return false;
     }
 
-    const std::size_t depth = reader.depth ();
+    wanted.resize (reader.depth () - 1);
+    wanted.push_back (bit);
 
-    wanted.resize (depth - 1);
-    wanted.push_back (ctype_bit);
+    return true;
+}
 
-    read_sections (depth, state);
+
+// The LC_CTYPE of a locale a copy or an include names, read now.
+void files_t::
+read (const std::string &name, const token_t &at, ctype_state_t &state)
+{
+    if (open (name, at, "LC_CTYPE", ctype_bit))
+        read_sections (reader.depth (), &state, 0);
+}
+
+
+// The LC_COLLATE of a locale a copy names, read now.
+void files_t::
+read (const std::string &name, const token_t &at, collate_state_t &state)
+{
+    if (open (name, at, "LC_COLLATE", collate_bit))
+        read_sections (reader.depth (), 0, &state);
 }
 
 
@@ -279,10 +312,12 @@ read_locale (const std::string &path, const std::string &dir,
 
     std::set<std::string> visited;
     ctype_state_t         ctype (&def.ctype, visited);
+    collate_state_t       collate (def.collate);
 
-    files.read_sections (1, ctype);
+    files.read_sections (1, &ctype, &collate);
 
     finish_translit (ctype, def.ctype.translit);
+    finish_collate (collate);
 
     return errors == diag.errors ();
 }

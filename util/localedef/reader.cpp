@@ -359,6 +359,20 @@ is_ellipsis (token_kind_t kind)
 }
 
 
+const char*
+ellipsis_text (token_kind_t kind)
+{
+    switch (kind) {
+    case tk_ellipsis2:   return "..";
+    case tk_ellipsis3:   return "...";
+    case tk_ellipsis4:   return "....";
+    case tk_ellipsis2_2: return "..(2)..";
+    case tk_ellipsis4_2: return "....(2)....";
+    default:             return "";
+    }
+}
+
+
 // glibc's ld-ctype.c reports names that differ only in the case of a
 // hexadecimal digit, which give the same number, as no range; here,
 // as in ld-collate.c, they are a range of one.

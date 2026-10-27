@@ -117,9 +117,11 @@ order: the reader, the charmap, the five scalar categories with
 plan names. The narrow strings of a locale whose charmap lacks a
 code point, =EUR= for the euro sign under ISO-8859-1, take the
 =LC_CTYPE= transliteration, as glibc writes them, so the writers
-need step 4's table. Then the back end, the tables and the seven
-writers in the format =include/loc/_localedef.h= describes, as its
-own plan.
+need step 4's table. The five steps of the front end are in: the
+model reads every one of the 502 definitions. Then the back end,
+the tables and the seven writers in the format
+=include/loc/_localedef.h= describes, as its own plan, the next
+piece.
 
 Check: every definition of =etc/nls= and of glibc's =SUPPORTED=
 builds with its charmap, two builds byte-identical; each database

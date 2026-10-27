@@ -31,6 +31,9 @@
 //                                               scalar categories
 //   ldef --ctype -f CHARMAP -i FILE [-I DIR]    the classes, case maps
 //                                               and transliteration
+//   ldef --collate -f CHARMAP -i FILE [-I DIR]  the declarations and
+//                                               the sequence of
+//                                               LC_COLLATE
 
 #include "cmap.h"
 #include "diag.h"
@@ -40,6 +43,7 @@
 
 #include <cstdio>    // for printf(), fwrite()
 #include <cstring>   // for strcmp(), strerror(), strrchr()
+#include <ctime>     // for clock()
 #include <set>
 #include <string>
 
@@ -507,6 +511,214 @@ dump_ctype (const char *charmap, const char *path, const char *dir,
 }
 
 
+/**************************************************************************/
+// the sequence of LC_COLLATE
+
+// The dump prints the declarations, then the sequence.  First
+// "codepoint_collation" when the source says it; then "symbols N" and
+// one declaration per line, a range as <first>..<last>; "elements N"
+// and per line the name and the string it stands for, as <Uxxxx>
+// names; "scripts N" and one per line; "sections N" and per line the
+// name, <> for the unnamed section, and the directions of each level
+// as order_start writes them.  Then "sequence N" and one entry per
+// line, as the source writes it: the file and the line that placed it,
+// the element, and the weights of the levels separated by semicolons.
+// A name is in angle brackets, a weight of several names in quotes, a
+// range as <first>..<last> with its members' first and last included,
+// a weight that is the element itself as the element, or for a range
+// as its ellipsis.  A line "% section <name>" stands before an entry
+// placed in another section than the one before it.  The entry count
+// and the time taken go to stderr.
+
+static const char*
+base_name (const std::string &path)
+{
+    const std::string::size_type slash = path.rfind ('/');
+
+    return path.c_str () + (std::string::npos == slash ? 0 : slash + 1);
+}
+
+
+static void
+print_range (const name_range_t &range)
+{
+    if (0 == range.width && !range.ucs) {
+        std::printf ("<%s>", range.prefix.c_str ());
+        return;
+    }
+
+    std::printf ("<%s>%s<%s>", range_member (range, range.first).c_str (),
+                 ellipsis_text (range.ellipsis),
+                 range_member (range, range.last).c_str ());
+}
+
+
+static void
+print_rules (const std::vector<int> &rules)
+{
+    for (std::size_t i = 0; i != rules.size (); ++i) {
+
+        const char *sep = i ? ";" : "";
+
+        if (rules [i] & dir_forward) {
+            std::printf ("%sforward", sep);
+            sep = ",";
+        }
+
+        if (rules [i] & dir_backward) {
+            std::printf ("%sbackward", sep);
+            sep = ",";
+        }
+
+        if (rules [i] & dir_position)
+            std::printf ("%sposition", sep);
+    }
+}
+
+
+static void
+print_element (const coll_entry_t &entry)
+{
+    switch (entry.kind) {
+
+    case ck_undefined:
+        std::fputs ("UNDEFINED", stdout);
+        break;
+
+    case ck_range:
+        print_range (entry.range);
+        break;
+
+    default:
+        std::printf ("<%s>", entry.name.c_str ());
+    }
+}
+
+
+static void
+print_weight (const coll_entry_t &entry, const coll_weight_t &weight)
+{
+    switch (weight.kind) {
+
+    case cw_ignore:
+        std::fputs ("IGNORE", stdout);
+        break;
+
+    case cw_self:
+        if (ck_range == entry.kind)
+            std::fputs (ellipsis_text (entry.range.ellipsis), stdout);
+        else
+            print_element (entry);
+        break;
+
+    case cw_names:
+        if (1 < weight.names.size ())
+            std::putchar ('"');
+
+        for (std::size_t i = 0; i != weight.names.size (); ++i)
+            std::printf ("<%s>", weight.names [i].c_str ());
+
+        if (1 < weight.names.size ())
+            std::putchar ('"');
+        break;
+    }
+}
+
+
+static void
+dump_collate (const char *charmap, const char *path, const char *dir,
+              diag_t &diag)
+{
+    const std::clock_t start = std::clock ();
+
+    cmap_t       cmap;
+    locale_def_t def;
+
+    if (!read_model (charmap, path, dir, cmap, def, diag))
+        return;
+
+    const std::clock_t read = std::clock ();
+
+    const collate_def_t &coll = def.collate;
+
+    if (coll.codepoint_collation)
+        std::puts ("codepoint_collation");
+
+    std::printf ("symbols %lu\n", (unsigned long)coll.symbols.size ());
+
+    for (std::size_t i = 0; i != coll.symbols.size (); ++i) {
+        print_range (coll.symbols [i]);
+        std::putchar ('\n');
+    }
+
+    std::printf ("elements %lu\n", (unsigned long)coll.elements.size ());
+
+    for (std::size_t i = 0; i != coll.elements.size (); ++i) {
+
+        std::printf ("<%s> \"", coll.elements [i].name.c_str ());
+
+        const ucs_string_t &value = coll.elements [i].value;
+
+        for (std::size_t j = 0; j != value.size (); ++j)
+            std::printf (value [j] < 0x10000L ? "<U%04lX>" : "<U%08lX>",
+                         value [j]);
+
+        std::puts ("\"");
+    }
+
+    std::printf ("scripts %lu\n", (unsigned long)coll.scripts.size ());
+
+    for (std::size_t i = 0; i != coll.scripts.size (); ++i)
+        std::printf ("<%s>\n", coll.scripts [i].c_str ());
+
+    std::printf ("sections %lu\n", (unsigned long)coll.sections.size ());
+
+    for (std::size_t i = 0; i != coll.sections.size (); ++i) {
+        std::printf ("<%s> ", coll.sections [i].name.c_str ());
+        print_rules (coll.sections [i].rules);
+        std::putchar ('\n');
+    }
+
+    std::printf ("sequence %lu\n", (unsigned long)coll.sequence.size ());
+
+    int section = -1;
+
+    for (std::size_t i = 0; i != coll.sequence.size (); ++i) {
+
+        const coll_entry_t &entry = coll.sequence [i];
+
+        if (entry.section != section && 0 <= entry.section)
+            std::printf ("%% section <%s>\n",
+                         coll.sections [entry.section].name.c_str ());
+
+        section = entry.section;
+
+        std::printf ("%s:%d: ", base_name (coll.files [entry.file]),
+                     entry.line);
+
+        print_element (entry);
+
+        for (std::size_t j = 0; j != entry.weights.size (); ++j) {
+            std::putchar (j ? ';' : ' ');
+            print_weight (entry, entry.weights [j]);
+        }
+
+        std::putchar ('\n');
+    }
+
+    std::fflush (stdout);
+
+    const std::clock_t end = std::clock ();
+
+    std::fprintf (stderr, "entries %lu, clock %.2f s: read %.2f s "
+                  "(charmap included), dump %.2f s\n",
+                  (unsigned long)coll.sequence.size (),
+                  double (end - start) / CLOCKS_PER_SEC,
+                  double (read - start) / CLOCKS_PER_SEC,
+                  double (end - read) / CLOCKS_PER_SEC);
+}
+
+
 // OPTION -f CHARMAP -i FILE [-I DIR], the options in any order
 static bool
 model_args (int argc, char *argv [], const char *option,
@@ -548,11 +760,14 @@ main (int argc, char *argv [])
         dump_values (charmap, input, dir, diag);
     else if (model_args (argc, argv, "--ctype", charmap, input, dir))
         dump_ctype (charmap, input, dir, diag);
+    else if (model_args (argc, argv, "--collate", charmap, input, dir))
+        dump_collate (charmap, input, dir, diag);
     else
         diag.error (e_cmdarg, nowhere,
                     "usage: ldef --tokens FILE... | ldef --charmap FILE | "
                     "ldef --values -f CHARMAP -i FILE [-I DIR] | "
-                    "ldef --ctype -f CHARMAP -i FILE [-I DIR]");
+                    "ldef --ctype -f CHARMAP -i FILE [-I DIR] | "
+                    "ldef --collate -f CHARMAP -i FILE [-I DIR]");
 
     return diag.exit_status ();
 }

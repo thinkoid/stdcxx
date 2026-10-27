@@ -25,7 +25,10 @@
 #ifndef RWSTD_UTIL_LOCALEDEF_MODEL_H_INCLUDED
 #define RWSTD_UTIL_LOCALEDEF_MODEL_H_INCLUDED
 
+#include "reader.h"   // for name_range_t
+
 #include <map>
+#include <string>
 #include <vector>
 
 
@@ -189,8 +192,98 @@ struct ctype_def_t {
 };
 
 
-// The categories read so far.  LC_COLLATE joins when its reader does.
+// LC_COLLATE stays symbolic: an element and its weights are names, as
+// the source writes them, and resolving them to numbers is the back
+// end's.  A name is the text between the brackets, but that a <Uxxxx>
+// name, or a character written raw, is U and 4 hexadecimal digits
+// below 0x10000 and 8 from there, as range_member() spells it, so that
+// <U00E5> and <U000000E5> are one name.
+
+// The directions of one level of a section, as bits.  position alone
+// reads as position and forward, as in glibc.
+enum {
+    dir_forward  = 1,
+    dir_backward = 2,
+    dir_position = 4
+};
+
+// A section, order_start to order_end: the script it is named for,
+// empty for the unnamed section, and the directions of each level.
+struct coll_section_t {
+    std::string      name;
+    std::vector<int> rules;
+};
+
+// collating-element <name> from "string"
+struct coll_element_t {
+    std::string  name;
+    ucs_string_t value;
+};
+
+// A weight of one level: names, more than one when a string writes
+// them, IGNORE, or the element itself, which a level the line leaves
+// out is.  For a range the element itself is each member.
+enum coll_weight_kind_t {
+    cw_names,
+    cw_ignore,
+    cw_self
+};
+
+struct coll_weight_t {
+    coll_weight_kind_t       kind;
+    std::vector<std::string> names;   // cw_names only
+};
+
+// What an entry orders.  A name nothing declares is a symbol, as in
+// glibc.  A range is the members an ellipsis line stands for, those
+// between the entries before and after it, kept as one entry.
+enum coll_kind_t {
+    ck_char,        // a <Uxxxx> name, a character raw, or a charmap name
+    ck_symbol,      // a collating symbol, declared or not
+    ck_element,     // a collating element
+    ck_undefined,   // UNDEFINED
+    ck_range        // an ellipsis line
+};
+
+// One entry of the sequence: what it orders, its weights, one per
+// level, the section it was placed in, and the line that placed it.
+struct coll_entry_t {
+    coll_kind_t                kind;
+    std::string                name;      // empty for UNDEFINED and a range
+    long                       ucs;       // a character's code point, or -1
+    name_range_t               range;     // ck_range: the members, first and
+                                          // last included
+    std::vector<coll_weight_t> weights;
+    int                        section;   // in sections; -1 before any
+    int                        file;      // in files
+    int                        line;
+};
+
+// LC_COLLATE: the declarations, the sections in the order they were
+// opened, and the sequence, one list in collation order with the
+// reorder-after blocks placed.  A collating symbol is declared by name
+// or by range, and a single name is a range of one with no digits.
+// symbol-equivalence, coll_weight_max and section-symbol are read and
+// ignored.  codepoint_collation orders every character by its value,
+// the back end's to apply.
+struct collate_def_t {
+
+    collate_def_t ()
+        : codepoint_collation (false) { }
+
+    bool                        codepoint_collation;
+    std::vector<name_range_t>   symbols;
+    std::vector<coll_element_t> elements;
+    std::vector<std::string>    scripts;
+    std::vector<coll_section_t> sections;
+    std::vector<coll_entry_t>   sequence;
+    std::vector<std::string>    files;   // the sources the entries name
+};
+
+
+// The categories read.
 struct locale_def_t {
+    collate_def_t  collate;
     ctype_def_t    ctype;
     numeric_def_t  numeric;
     monetary_def_t monetary;
