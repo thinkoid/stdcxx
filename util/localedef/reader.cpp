@@ -323,7 +323,31 @@ digit_value (char c)
 
 
 /**************************************************************************/
-// helpers shared with the charmap
+// helpers shared with the productions
+
+const where_t&
+where_of (tok_iter it, tok_iter last)
+{
+    return it == last ? (it - 1)->where : it->where;
+}
+
+
+bool
+end_of_line (tok_iter it, tok_iter last, diag_t &diag)
+{
+    if (it == last)
+        return true;
+
+    return diag.error (e_syntax, it->where, "trailing garbage at end of line");
+}
+
+
+keyword_t
+keyword_of (const token_t &tok)
+{
+    return tk_keyword == tok.kind ? keyword_t (tok.value) : kw_none;
+}
+
 
 const char*
 kind_name (token_kind_t kind)
@@ -1059,11 +1083,11 @@ directive_operand (const logical_t &line, std::size_t pos, char comment,
 
 
 bool reader_t::
-next (line_t &line)
+next (line_t &line, std::size_t depth)
 {
     logical_t text;
 
-    while (!m_files.empty ()) {
+    while (!m_files.empty () && depth <= m_files.size ()) {
 
         file_t &file = m_files.back ();
 
@@ -1101,6 +1125,7 @@ next (line_t &line)
 
         line.file   = file.name;
         line.number = text.first;
+        line.escape = file.escape;
         line.tokens.clear ();
 
         do

@@ -39,6 +39,7 @@ enum diag_id_t {
     e_mbchar = 308,   // ill-formed multibyte character
     e_range  = 311,   // invalid range
     e_syntax = 312,   // bad syntax
+    e_ucs    = 315,   // a name that gives no UCS character
     e_inval  = 399,   // invalid value
     e_cmdarg = 401,   // invalid command line argument
 

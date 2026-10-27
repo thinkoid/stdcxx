@@ -22,18 +22,22 @@
  *
  **************************************************************************/
 
-// The new locale compiler.  For now it has two forms, each the check of
-// one piece of the front end:
+// The new locale compiler.  For now it has three forms, each the check
+// of one piece of the front end:
 //
-//   ldef --tokens FILE...   the tokens of each line
-//   ldef --charmap FILE     the entries of a charmap
+//   ldef --tokens FILE...                       the tokens of each line
+//   ldef --charmap FILE                         the entries of a charmap
+//   ldef --values -f CHARMAP -i FILE [-I DIR]   the values of the four
+//                                               scalar categories
 
 #include "cmap.h"
 #include "diag.h"
+#include "locfile.h"
+#include "model.h"
 #include "reader.h"
 
 #include <cstdio>    // for printf(), fwrite()
-#include <cstring>   // for strcmp(), strerror()
+#include <cstring>   // for strcmp(), strerror(), strrchr()
 #include <set>
 #include <string>
 
@@ -161,18 +165,279 @@ dump_charmap (const char *path, diag_t &diag)
 }
 
 
+/**************************************************************************/
+// the values of the scalar categories
+
+// The dump prints one keyword=value line per keyword of the model, in
+// the forms of glibc's locale -k, so that the two compare line by line:
+// a string in quotes, an array of strings in one pair of quotes joined
+// by semicolons, a list of strings each in its quotes, numbers plain.
+// It differs where locale -k prints what the source does not say: an
+// unset keyword prints <unset>, where locale -k prints glibc's default;
+// a grouping prints as written, 0 included; a list prints all of its
+// strings, where locale -k stops at the first empty one.
+
+// The bytes of a string in the charmap's encoding.  A code point the
+// charmap does not have prints as its <Uxxxx> name.
+static void
+print_ucs (const cmap_t &cmap, const ucs_string_t &ucs)
+{
+    for (std::size_t i = 0; i != ucs.size (); ++i) {
+
+        const cmap_entry_t* const entry = cmap.find_ucs (ucs [i]);
+
+        if (entry)
+            std::fwrite (entry->bytes.data (), 1, entry->bytes.size (),
+                         stdout);
+        else
+            std::printf ("<U%04lX>", ucs [i]);
+    }
+}
+
+
+static bool
+print_unset (const char *keyword, bool set)
+{
+    std::printf ("%s=", keyword);
+
+    if (!set)
+        std::puts ("<unset>");
+
+    return set;
+}
+
+
+static void
+print_string (const char *keyword, const cmap_t &cmap,
+              const field_t<ucs_string_t> &field)
+{
+    if (!print_unset (keyword, field.set))
+        return;
+
+    std::putchar ('"');
+    print_ucs (cmap, field.value);
+    std::puts ("\"");
+}
+
+
+static void
+print_array (const char *keyword, const cmap_t &cmap,
+             const field_t<std::vector<ucs_string_t> > &field)
+{
+    if (!print_unset (keyword, field.set))
+        return;
+
+    std::putchar ('"');
+
+    for (std::size_t i = 0; i != field.value.size (); ++i) {
+
+        if (i)
+            std::putchar (';');
+
+        print_ucs (cmap, field.value [i]);
+    }
+
+    std::puts ("\"");
+}
+
+
+static void
+print_list (const cmap_t &cmap, const std::vector<ucs_string_t> &list)
+{
+    for (std::size_t i = 0; i != list.size (); ++i) {
+
+        std::fputs (i ? ";\"" : "\"", stdout);
+        print_ucs (cmap, list [i]);
+        std::putchar ('"');
+    }
+
+    std::putchar ('\n');
+}
+
+
+static void
+print_number (const char *keyword, const field_t<int> &field)
+{
+    if (print_unset (keyword, field.set))
+        std::printf ("%d\n", field.value);
+}
+
+
+static void
+print_grouping (const char *keyword, const field_t<std::vector<int> > &field)
+{
+    if (!print_unset (keyword, field.set))
+        return;
+
+    for (std::size_t i = 0; i != field.value.size (); ++i)
+        std::printf (i ? ";%d" : "%d", field.value [i]);
+
+    std::putchar ('\n');
+}
+
+
+static void
+print_date (const int date [3])
+{
+    std::printf ("%d/%d/%d", date [0], date [1], date [2]);
+}
+
+
+// After the era strings, one line per record: the fields parsed, the
+// dates as stored.  locale -k prints no such line.
+static void
+print_eras (const cmap_t &cmap, const std::vector<era_t> &eras)
+{
+    std::vector<ucs_string_t> texts;
+
+    for (std::size_t i = 0; i != eras.size (); ++i)
+        texts.push_back (eras [i].text);
+
+    std::printf ("era=");
+    print_list (cmap, texts);
+
+    for (std::size_t i = 0; i != eras.size (); ++i) {
+
+        const era_t &era = eras [i];
+
+        std::printf ("era-record=%c:%d:", era.direction, era.offset);
+        print_date (era.start);
+        std::putchar (':');
+        print_date (era.end);
+        std::putchar (':');
+        print_ucs (cmap, era.name);
+        std::putchar (':');
+        print_ucs (cmap, era.format);
+        std::putchar ('\n');
+    }
+}
+
+
+static void
+dump_values (const char *charmap, const char *path, const char *dir,
+             diag_t &diag)
+{
+    cmap_t       cmap;
+    locale_def_t def;
+
+    std::string copy_dir;
+
+    if (dir)
+        copy_dir = dir;
+    else {
+        const char* const slash = std::strrchr (path, '/');
+        copy_dir = slash ? std::string (path, slash) : std::string (".");
+    }
+
+    try {
+        cmap.read (charmap, diag);
+        read_locale (path, copy_dir, cmap, def, diag);
+    }
+    catch (const open_error_t &error) {
+        report (error, diag);
+        return;
+    }
+
+    const numeric_def_t &num = def.numeric;
+
+    print_string ("decimal_point", cmap, num.decimal_point);
+    print_string ("thousands_sep", cmap, num.thousands_sep);
+    print_grouping ("grouping", num.grouping);
+
+    const monetary_def_t &mon = def.monetary;
+
+    print_string ("int_curr_symbol", cmap, mon.int_curr_symbol);
+    print_string ("currency_symbol", cmap, mon.currency_symbol);
+    print_string ("mon_decimal_point", cmap, mon.mon_decimal_point);
+    print_string ("mon_thousands_sep", cmap, mon.mon_thousands_sep);
+    print_grouping ("mon_grouping", mon.mon_grouping);
+    print_string ("positive_sign", cmap, mon.positive_sign);
+    print_string ("negative_sign", cmap, mon.negative_sign);
+    print_number ("int_frac_digits", mon.int_frac_digits);
+    print_number ("frac_digits", mon.frac_digits);
+    print_number ("p_cs_precedes", mon.p_cs_precedes);
+    print_number ("p_sep_by_space", mon.p_sep_by_space);
+    print_number ("n_cs_precedes", mon.n_cs_precedes);
+    print_number ("n_sep_by_space", mon.n_sep_by_space);
+    print_number ("p_sign_posn", mon.p_sign_posn);
+    print_number ("n_sign_posn", mon.n_sign_posn);
+    print_number ("int_p_cs_precedes", mon.int_p_cs_precedes);
+    print_number ("int_p_sep_by_space", mon.int_p_sep_by_space);
+    print_number ("int_n_cs_precedes", mon.int_n_cs_precedes);
+    print_number ("int_n_sep_by_space", mon.int_n_sep_by_space);
+    print_number ("int_p_sign_posn", mon.int_p_sign_posn);
+    print_number ("int_n_sign_posn", mon.int_n_sign_posn);
+
+    const time_def_t &time = def.time;
+
+    print_array ("abday", cmap, time.abday);
+    print_array ("day", cmap, time.day);
+    print_array ("abmon", cmap, time.abmon);
+    print_array ("mon", cmap, time.mon);
+    print_array ("am_pm", cmap, time.am_pm);
+    print_string ("d_t_fmt", cmap, time.d_t_fmt);
+    print_string ("d_fmt", cmap, time.d_fmt);
+    print_string ("t_fmt", cmap, time.t_fmt);
+    print_string ("t_fmt_ampm", cmap, time.t_fmt_ampm);
+    print_eras (cmap, time.era);
+    print_string ("era_d_fmt", cmap, time.era_d_fmt);
+
+    if (print_unset ("alt_digits", time.alt_digits.set))
+        print_list (cmap, time.alt_digits.value);
+
+    print_string ("era_d_t_fmt", cmap, time.era_d_t_fmt);
+    print_string ("era_t_fmt", cmap, time.era_t_fmt);
+
+    const messages_def_t &msg = def.messages;
+
+    print_string ("yesexpr", cmap, msg.yesexpr);
+    print_string ("noexpr", cmap, msg.noexpr);
+}
+
+
+// --values -f CHARMAP -i FILE [-I DIR], the options in any order
+static bool
+values_args (int argc, char *argv [], const char *&charmap,
+             const char *&input, const char *&dir)
+{
+    if (argc < 3 || 0 != std::strcmp ("--values", argv [1]) || argc % 2)
+        return false;
+
+    for (int i = 2; i < argc; i += 2) {
+
+        if (0 == std::strcmp ("-f", argv [i]))
+            charmap = argv [i + 1];
+        else if (0 == std::strcmp ("-i", argv [i]))
+            input = argv [i + 1];
+        else if (0 == std::strcmp ("-I", argv [i]))
+            dir = argv [i + 1];
+        else
+            return false;
+    }
+
+    return charmap && input;
+}
+
+
 int
 main (int argc, char *argv [])
 {
     diag_t diag;
 
+    const char *charmap = 0;
+    const char *input   = 0;
+    const char *dir     = 0;
+
     if (2 < argc && 0 == std::strcmp ("--tokens", argv [1]))
         dump_tokens (argc, argv, diag);
     else if (3 == argc && 0 == std::strcmp ("--charmap", argv [1]))
         dump_charmap (argv [2], diag);
+    else if (values_args (argc, argv, charmap, input, dir))
+        dump_values (charmap, input, dir, diag);
     else
         diag.error (e_cmdarg, nowhere,
-                    "usage: ldef --tokens FILE... | ldef --charmap FILE");
+                    "usage: ldef --tokens FILE... | ldef --charmap FILE | "
+                    "ldef --values -f CHARMAP -i FILE [-I DIR]");
 
     return diag.exit_status ();
 }

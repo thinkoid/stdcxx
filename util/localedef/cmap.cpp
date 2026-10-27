@@ -129,26 +129,6 @@ is_utf8 (const std::string &code_set_name)
 /**************************************************************************/
 // the productions
 
-// The token to report at when a production runs out of them: the last
-// one.  Every production has consumed a token by then, so it - 1 is
-// the line's.
-static const where_t&
-where_of (tok_iter it, tok_iter last)
-{
-    return it == last ? (it - 1)->where : it->where;
-}
-
-
-static bool
-end_of_line (tok_iter it, tok_iter last, diag_t &diag)
-{
-    if (it == last)
-        return true;
-
-    return diag.error (e_syntax, it->where, "trailing garbage at end of line");
-}
-
-
 static bool
 is_ellipsis (token_kind_t kind)
 {

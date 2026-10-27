@@ -114,8 +114,12 @@ the tokens of a line, a model of plain structs with strings as UCS-4
 code points, collation entries kept symbolic in one sequence. In
 order: the reader, the charmap, the five scalar categories with
 =copy=, =LC_CTYPE=, =LC_COLLATE=; each step with the one check the
-plan names. Then the back end, the tables and the seven writers in
-the format =include/loc/_localedef.h= describes, as its own plan.
+plan names. The narrow strings of a locale whose charmap lacks a
+code point, =EUR= for the euro sign under ISO-8859-1, take the
+=LC_CTYPE= transliteration, as glibc writes them, so the writers
+need step 4's table. Then the back end, the tables and the seven
+writers in the format =include/loc/_localedef.h= describes, as its
+own plan.
 
 Check: every definition of =etc/nls= and of glibc's =SUPPORTED=
 builds with its charmap, two builds byte-identical; each database
@@ -661,10 +665,6 @@ the binary locale data they read. A reader of
 =doc/notes/analysis-locale-mt-race.md= needs this map first. Shape:
 =ref-string-replace.md=.
 
-** TODO Decision records
-
-One short file per irreversible choice of the revival: the C++03
-target, the platform retirement, the null-pointer literal, the commit
 ** TODO The codecvt database and its three tries
 
 A =ref-= note on the file =localedef= writes per codeset, the one
@@ -689,6 +689,10 @@ Material: =include/loc/_localedef.h=, =src/codecvt.cpp=,
 =util/codecvt.cpp= (=gen_mbchar_tables=, =gen_wchar_tables=,
 =gen_utf8_tables=), the header of a written =UTF-8= file.
 
+** TODO Decision records
+
+One short file per irreversible choice of the revival: the C++03
+target, the platform retirement, the null-pointer literal, the commit
 shape, the Clang configuration, the compatibility mutex in the string
 body. The tree
 has the outcomes; the reasons are in commit messages and private

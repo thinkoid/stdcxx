@@ -171,8 +171,21 @@ typedef std::vector<token_t>::const_iterator tok_iter;
 struct line_t {
     const char          *file;     // a name the reader owns
     int                  number;   // the physical line it starts on
+    char                 escape;   // the escape character in effect
     std::vector<token_t> tokens;
 };
+
+
+// The position to report at when a production runs out of tokens: the
+// last one's.  Every production has consumed a token by then, so it - 1
+// is the line's.
+const where_t& where_of (tok_iter it, tok_iter last);
+
+// True at the end of the line; otherwise reports trailing garbage.
+bool end_of_line (tok_iter it, tok_iter last, diag_t &diag);
+
+// The keyword of a token, kw_none when it is not one.
+keyword_t keyword_of (const token_t &tok);
 
 
 // The name and spelling of a kind, for dumps and messages.
@@ -218,11 +231,19 @@ public:
         return m_files.empty ();
     }
 
-    // The next line that has a token.  Blank and comment lines are
-    // skipped, and so are comment_char and escape_char lines, which the
-    // reader applies, since they change its own lexing.  False when the
-    // last file has ended.
-    bool next (line_t &line);
+    // The number of files open.  After next() it is the depth of the
+    // file the line came from, since next() pops the files that ended.
+    std::size_t depth () const {
+        return m_files.size ();
+    }
+
+    // The next line that has a token, from the file at depth or one
+    // above it.  Blank and comment lines are skipped, and so are
+    // comment_char and escape_char lines, which the reader applies,
+    // since they change its own lexing.  False when those files have
+    // ended; the files below stay open.  A section reads with the depth
+    // of its own file, so that it stops where the file does.
+    bool next (line_t &line, std::size_t depth = 1);
 
 private:
 
