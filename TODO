@@ -665,6 +665,30 @@ the binary locale data they read. A reader of
 
 One short file per irreversible choice of the revival: the C++03
 target, the platform retirement, the null-pointer literal, the commit
+** TODO The codecvt database and its three tries
+
+A =ref-= note on the file =localedef= writes per codeset, the one
+=codecvt_byname= reads: the header of =include/loc/_localedef.h=,
+then three tries of 256-entry pages of 32-bit words, one page per
+byte of a multibyte prefix, an entry the high bit marks as the
+number of the next page, =UINT_MAX= as no character, else the
+character's ordinal. =n_to_w_tab= reads the external encoding,
+=utf8_to_ext_tab= goes from the UTF-8 pivot to it, =w_to_n_tab= from
+the wide character's UTF-8 form to its multibyte string; then the
+=wchar_t= pairs, the multibyte strings and the transliteration
+table. The design is for an encoding that is not UTF-8. For UTF-8
+the external encoding is the pivot, so the three tries hold the same
+identity three times: of the 18.8 MB the old compiler writes for
+glibc 2.44's UTF-8 charmap, 4814 pages of 1 KB in each of the three,
+14.4 MB of the file, where glibc keeps no table for UTF-8 at all.
+The page count is one per distinct byte prefix, so the CJK and emoji
+ranges fill the four-byte tier. Whether the back end of the new
+compiler collapses the three for UTF-8 is a format change for after
+acceptance; the note records the format as it is and the cost.
+Material: =include/loc/_localedef.h=, =src/codecvt.cpp=,
+=util/codecvt.cpp= (=gen_mbchar_tables=, =gen_wchar_tables=,
+=gen_utf8_tables=), the header of a written =UTF-8= file.
+
 shape, the Clang configuration, the compatibility mutex in the string
 body. The tree
 has the outcomes; the reasons are in commit messages and private
