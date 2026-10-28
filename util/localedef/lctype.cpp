@@ -922,6 +922,9 @@ statement (tok_iter it, tok_iter last, const charset_t &cs,
     case kw_upper: case kw_lower: case kw_alpha: case kw_digit:
     case kw_xdigit: case kw_space: case kw_print: case kw_graph:
     case kw_blank: case kw_cntrl: case kw_punct:
+        // a class or a map statement makes the tables the locale's
+        // own, whatever it copied
+        state.def->copied.clear ();
         class_value (it, last, cs, *class_of (keyword, *state.def), diag);
         break;
 
@@ -930,6 +933,7 @@ statement (tok_iter it, tok_iter last, const charset_t &cs,
         break;
 
     case kw_toupper: case kw_tolower:
+        state.def->copied.clear ();
         map_value (it, last, cs, *map_of (keyword, *state.def), diag);
         break;
 
@@ -1048,8 +1052,16 @@ read_ctype (reader_t &reader, const line_t &head, const cmap_t &cmap,
             if (!first)
                 diag.error (e_syntax, lead.where, "LC_CTYPE: `copy' must be "
                             "the first statement of the category");
-            else if (copy (it, last, cs, copied, diag))
+            else if (copy (it, last, cs, copied, diag)) {
+
                 locales.read (copied, lead, state);
+
+                // the tables are the copied locale's: under its name,
+                // unless its section was itself a copy alone, whose
+                // name then stands for both
+                if (state.def && state.def->copied.empty ())
+                    state.def->copied = copied;
+            }
 
             continue;
         }

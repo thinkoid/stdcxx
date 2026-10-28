@@ -28,6 +28,7 @@
 #include "cmap.h"
 #include "model.h"
 
+#include <cstddef>   // for size_t
 #include <string>
 #include <vector>
 
@@ -46,6 +47,21 @@ struct image_names_t {
     std::string codeset;   // the charmap's <code_set_name>
     std::string charmap;   // the charmap file's name, without directories
 };
+
+// The characters POSIX's automatic inclusions, XBD 7.3.1, added to
+// each class of LC_CTYPE beyond the source's statements: one count
+// per class, in the order ctype_class_name() gives.
+enum { ctype_class_count = 11 };
+
+struct ctype_census_t {
+    unsigned added [ctype_class_count];
+};
+
+const char* ctype_class_name (std::size_t index);
+
+void write_ctype (const locale_def_t &def, const cmap_t &cmap,
+                  const image_names_t &names, std::vector<char> &image,
+                  ctype_census_t &census);
 
 void write_numeric (const locale_def_t &def, const cmap_t &cmap,
                     const image_names_t &names, std::vector<char> &image);

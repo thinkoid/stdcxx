@@ -94,7 +94,8 @@ localedef: localedef.o locale.o aliases.o charmap.o codecvt.o collate.o \
 
 # link the new localedef utility, built beside the old one
 localedef2: ldef.o diag.o reader.o cmap.o locfile.o scalar.o lctype.o \
-            lcollate.o pool.o wnumeric.o wmonetary.o wtime.o wmessages.o
+            lcollate.o pool.o wctype.o wnumeric.o wmonetary.o wtime.o \
+            wmessages.o
 	@echo "$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS)" $(call CXX.repo,$<) \
 	>> $(LOGFILE)
 	$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(call CXX.repo,$<) $(TEEOPTS)

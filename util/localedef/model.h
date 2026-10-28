@@ -189,6 +189,13 @@ struct ctype_def_t {
     field_t<ucs_map_t>   toupper;
     field_t<ucs_map_t>   tolower;
     translit_t           translit;
+
+    // The locale whose LC_CTYPE tables these are: the name a copy
+    // statement gives when no class or map statement follows it, the
+    // innermost such copy when the copied locale is itself one; empty
+    // otherwise.  The back end shares one file between the locales
+    // that copy the same one.
+    std::string          copied;
 };
 
 

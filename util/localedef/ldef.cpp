@@ -28,8 +28,9 @@
 //
 //   ldef [-c] [-w] -f CHARMAP -i FILE [-d DIR] [-I DIR] NAME
 //                                               the database DIR/NAME,
-//                                               the four scalar
-//                                               categories so far
+//                                               LC_CTYPE and the four
+//                                               scalar categories so
+//                                               far
 //   ldef --tokens FILE...                       the tokens of each line
 //   ldef --charmap FILE                         the entries of a charmap
 //   ldef --values -f CHARMAP -i FILE [-I DIR]   the values of the four
@@ -39,6 +40,9 @@
 //   ldef --collate -f CHARMAP -i FILE [-I DIR]  the declarations and
 //                                               the sequence of
 //                                               LC_COLLATE
+//   ldef --census -f CHARMAP -i FILE [-I DIR]   what POSIX's class
+//                                               defaults add to
+//                                               LC_CTYPE
 
 #include "cmap.h"
 #include "diag.h"
@@ -55,7 +59,8 @@
 #include <string>
 #include <vector>
 
-#include <sys/stat.h>   // for mkdir()
+#include <sys/stat.h>   // for mkdir(), stat()
+#include <unistd.h>     // for symlink(), unlink()
 
 
 static void
@@ -519,6 +524,32 @@ dump_ctype (const char *charmap, const char *path, const char *dir,
 }
 
 
+// The census prints one line per class, "name N", N the characters
+// POSIX's automatic inclusions added to the class beyond the source's
+// statements, which is the measure plan-localedef-backend.md 3.2 asks
+// for of where the standard's defaults part from the old compiler's.
+static void
+dump_census (const char *charmap, const char *path, const char *dir,
+             diag_t &diag)
+{
+    cmap_t       cmap;
+    locale_def_t def;
+
+    if (!read_model (charmap, path, dir, cmap, def, diag))
+        return;
+
+    const image_names_t names = { std::string (), std::string () };
+
+    std::vector<char> image;
+    ctype_census_t    census;
+
+    write_ctype (def, cmap, names, image, census);
+
+    for (std::size_t i = 0; i != ctype_class_count; ++i)
+        std::printf ("%s %u\n", ctype_class_name (i), census.added [i]);
+}
+
+
 /**************************************************************************/
 // the sequence of LC_COLLATE
 
@@ -778,6 +809,42 @@ write_file (const std::string &dir, const char *name,
 }
 
 
+// Writes the LC_CTYPE of a locale whose section is a copy alone: the
+// image goes to the shared file NAME.ctype.CHARMAP beside the locale
+// directory, the first locale to need it writing it, as in the old
+// compiler, and the locale's LC_CTYPE is a symbolic link to it with a
+// relative target, so that the database moves as one tree.  A file an
+// earlier build left where the link goes is removed first.
+static void
+share_ctype (const std::string &dir, const std::string &shared,
+             const std::vector<char> &image, diag_t &diag)
+{
+    const std::string::size_type slash = dir.rfind ('/');
+
+    const std::string parent =
+        std::string::npos == slash ? std::string (".") : dir.substr (0, slash);
+
+    struct stat st;
+
+    if (   0 != stat ((parent + '/' + shared).c_str (), &st)
+        && !write_file (parent, shared.c_str (), image, diag))
+        return;
+
+    const std::string link   = dir + "/LC_CTYPE";
+    const std::string target = "../" + shared;
+
+    if (0 != unlink (link.c_str ()) && ENOENT != errno) {
+        diag.error (e_openwr, nowhere, "%s cannot be removed: %s",
+                    link.c_str (), std::strerror (errno));
+        return;
+    }
+
+    if (0 != symlink (target.c_str (), link.c_str ()))
+        diag.error (e_openwr, nowhere, "%s cannot be linked to %s: %s",
+                    link.c_str (), target.c_str (), std::strerror (errno));
+}
+
+
 // The old driver's options for one locale: -c writes the database
 // although warnings were issued, -w mutes them, -d names the directory
 // the locale's own goes under, the current one otherwise, and -I the
@@ -831,9 +898,10 @@ write_args (int argc, char *argv [], write_opts_t &opts)
 }
 
 
-// Reads the definition and writes its database: the four scalar
-// categories, each as its file under DIR/NAME.  An error withholds the
-// output, as do warnings without -c, which is what the old driver did.
+// Reads the definition and writes its database: LC_CTYPE and the four
+// scalar categories, each as its file under DIR/NAME.  An error
+// withholds the output, as do warnings without -c, which is what the
+// old driver did.
 static void
 write_locale (const write_opts_t &opts, diag_t &diag)
 {
@@ -870,6 +938,15 @@ write_locale (const write_opts_t &opts, diag_t &diag)
     }
 
     std::vector<char> image;
+    ctype_census_t    census;
+
+    write_ctype (def, cmap, names, image, census);
+
+    if (def.ctype.copied.empty ())
+        write_file (dir, "LC_CTYPE", image, diag);
+    else
+        share_ctype (dir, def.ctype.copied + ".ctype." + names.charmap,
+                     image, diag);
 
     write_numeric (def, cmap, names, image);
     write_file (dir, "LC_NUMERIC", image, diag);
@@ -933,6 +1010,8 @@ main (int argc, char *argv [])
         dump_ctype (charmap, input, dir, diag);
     else if (model_args (argc, argv, "--collate", charmap, input, dir))
         dump_collate (charmap, input, dir, diag);
+    else if (model_args (argc, argv, "--census", charmap, input, dir))
+        dump_census (charmap, input, dir, diag);
     else if (write_args (argc, argv, opts)) {
         if (opts.quiet)
             diag.mute_warnings ();
@@ -946,7 +1025,8 @@ main (int argc, char *argv [])
                     "ldef --charmap FILE | "
                     "ldef --values -f CHARMAP -i FILE [-I DIR] | "
                     "ldef --ctype -f CHARMAP -i FILE [-I DIR] | "
-                    "ldef --collate -f CHARMAP -i FILE [-I DIR]");
+                    "ldef --collate -f CHARMAP -i FILE [-I DIR] | "
+                    "ldef --census -f CHARMAP -i FILE [-I DIR]");
 
     return diag.exit_status ();
 }

@@ -595,6 +595,7 @@ then say what each class includes automatically:
 - `alnum`, the characters of `alpha` and `digit`;
 - `space`, the six portable white-space characters and the
   characters of `blank`;
+- `blank`, the `<space>` and the `<tab>`;
 - `upper`, `lower`, `digit` and `xdigit`, the portable character
   set's letters A to Z and a to z, digits 0 to 9, and the hex
   letters, which no definition can leave out.
@@ -838,6 +839,17 @@ them and the code can say why.
   sizes the substituted string and gives both forms the parentheses.
   Seventeen definitions of the corpus, `en_HK`, `fr_CA` and their
   kin.
+- A `copy` in `LC_CTYPE` followed by class or map statements: the
+  old compiler linked the locale to the copied locale's shared file
+  and lost the statements, and linked every locale that copied it
+  past it to the same file. The new writer gives such a locale its
+  own tables, and the shared file of a locale that copies it is
+  named after it. `am_ET` adds `<U1361>` to `space` after its copy
+  of `i18n`, and fifteen Ethiopian definitions copy `am_ET`.
+- The target of the `LC_CTYPE` link: the old compiler wrote an
+  absolute target when the locale path was absolute, which the
+  tree's own build passes, so its database tree does not relocate.
+  The new writer's target is always relative, `../NAME.ctype.CHARMAP`.
 - A continued string list with a comment after a `;`: the old
   scanner ended the list at the comment, so `uk_UA` had six empty
   day names. The new reader reads the whole list.
