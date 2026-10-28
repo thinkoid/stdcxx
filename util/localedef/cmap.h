@@ -35,10 +35,10 @@
 #include <vector>
 
 
-// One character of a charmap.  The code point of a <Uxxxx> name is the
-// name's; any other name has one only in a UTF-8 charmap, from its
-// bytes.  Elsewhere glibc takes it from a repertoire map, and so will a
-// later step if one needs it.
+// One character of a charmap, as a lookup or the iteration gives it.
+// The code point of a <Uxxxx> name is the name's; any other name has
+// one only in a UTF-8 charmap, from its bytes.  Elsewhere glibc takes
+// it from a repertoire map, and so will a later step if one needs it.
 struct cmap_entry_t {
     std::string name;    // the symbolic name, without the brackets
     long        ucs;     // the UCS-4 code point, or -1 when unknown
@@ -50,8 +50,26 @@ struct cmap_entry_t {
 struct char_def_t;
 
 
-// A charmap: one table of entries in the order the file defines them,
-// and three indexes over it.
+// One line of the CHARMAP section as kept: a single character, or a
+// range of <Uxxxx> names, which every range of glibc's charmaps is.
+// A range is one record whatever its length: its members are named
+// by their code points, and their bytes follow from the first's.
+struct cmap_run_t {
+    long        first;    // code point of the first member, -1 for none
+    long        last;     // of the last; first for a single character
+    int         digits;   // 4 or 8 of a <Uxxxx> name; 0 for another
+    std::string name;     // a single's name, when not the <Uxxxx> form
+    std::string bytes;    // of the first member; none when they are
+                          // the code point's UTF-8 form
+};
+
+
+class cmap_iter_t;
+
+
+// A charmap: one table of runs in the order the file defines them,
+// and the indexes over it.  glibc's UTF-8 charmap, 297334 characters
+// in 4185 ranges, costs one record a line.
 class cmap_t
 {
 public:
@@ -63,14 +81,11 @@ public:
     // when path cannot be opened.
     bool read (const std::string &path, diag_t &diag);
 
-    const std::vector<cmap_entry_t>& entries () const {
-        return m_entries;
-    }
-
-    // 0 when nothing matches.  <U0041> and <U00000041> are one name.
-    const cmap_entry_t* find_name (const std::string &name) const;
-    const cmap_entry_t* find_ucs (long ucs) const;
-    const cmap_entry_t* find_bytes (const std::string &bytes) const;
+    // False when nothing matches, and entry is then unchanged.
+    // <U0041> and <U00000041> are one name.
+    bool find_name (const std::string &name, cmap_entry_t &entry) const;
+    bool find_ucs (long ucs, cmap_entry_t &entry) const;
+    bool find_bytes (const std::string &bytes, cmap_entry_t &entry) const;
 
     std::string code_set_name;
     int         mb_cur_max;
@@ -78,14 +93,49 @@ public:
 
 private:
 
+    friend class cmap_iter_t;
+
     bool define (const char_def_t &def, diag_t &diag);
     void add (const std::string &name, const std::string &bytes);
+    bool index (const cmap_run_t &run, std::size_t pos);
 
-    // The indexes hold positions in m_entries, which only grows.
-    std::vector<cmap_entry_t>          m_entries;
+    std::size_t rank (long ucs) const;
+    std::size_t run_of (long ucs) const;
+    void        expand (const cmap_run_t &run, long ucs,
+                        cmap_entry_t &entry) const;
+
+    bool m_utf8;   // a range member's bytes are its code point's
+
+    // The indexes hold positions in m_runs, which only grows.  A code
+    // point has one run, the first that defines it, in a vector in
+    // code point order for a binary search; a name that is not
+    // <Uxxxx> has its own index.  The index by bytes is built when
+    // first wanted, and not at all in a UTF-8 charmap, where the
+    // bytes decode to the code point.
+    std::vector<cmap_run_t>            m_runs;
+    std::vector<std::size_t>           m_by_ucs;
     std::map<std::string, std::size_t> m_by_name;
-    std::map<long, std::size_t>        m_by_ucs;
-    std::map<std::string, std::size_t> m_by_bytes;
+    mutable std::vector<std::size_t>   m_by_bytes;
+};
+
+
+// The characters of a charmap one at a time, in the order the file
+// defines them, a range expanded to its members.
+class cmap_iter_t
+{
+public:
+
+    explicit cmap_iter_t (const cmap_t &cmap)
+        : m_cmap (cmap), m_run (0), m_offset (0) { }
+
+    // False past the last character, and entry is then unchanged.
+    bool next (cmap_entry_t &entry);
+
+private:
+
+    const cmap_t &m_cmap;
+    std::size_t   m_run;      // the run of the next character
+    long          m_offset;   // and its distance from the run's first
 };
 
 

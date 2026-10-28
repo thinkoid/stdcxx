@@ -150,11 +150,9 @@ dump_charmap (const char *path, diag_t &diag)
         return;
     }
 
-    const std::vector<cmap_entry_t> &entries = cmap.entries ();
+    cmap_iter_t it (cmap);
 
-    for (std::size_t i = 0; i != entries.size (); ++i) {
-
-        const cmap_entry_t &entry = entries [i];
+    for (cmap_entry_t entry; it.next (entry); ) {
 
         std::printf ("<%s> ", entry.name.c_str ());
 
@@ -188,12 +186,12 @@ dump_charmap (const char *path, diag_t &diag)
 static void
 print_ucs (const cmap_t &cmap, const ucs_string_t &ucs)
 {
+    cmap_entry_t entry;
+
     for (std::size_t i = 0; i != ucs.size (); ++i) {
 
-        const cmap_entry_t* const entry = cmap.find_ucs (ucs [i]);
-
-        if (entry)
-            std::fwrite (entry->bytes.data (), 1, entry->bytes.size (),
+        if (cmap.find_ucs (ucs [i], entry))
+            std::fwrite (entry.bytes.data (), 1, entry.bytes.size (),
                          stdout);
         else
             std::printf ("<U%04lX>", ucs [i]);

@@ -135,34 +135,6 @@ one, read entry by entry through =nl_langinfo= of the
 =//TRANSLIT= shows only the first usable alternative. The locale
 tests pass against their pins, re-pinned where the data moved.
 
-** TODO The charmap table costs five times its reader
-
-The new compiler's =cmap_t= expands every range of a charmap into
-one entry and indexes the entries three times, by name, code point
-and bytes, in =std::map=. glibc 2.44's UTF-8 charmap has 56097 lines
-and 4185 ranges; expanded, 297334 entries. Under the debug build
-=localedef2 --charmap= reads it in 3.0 s and 120 MB over the bare
-process, and =--tokens= over the same file takes 0.5 s and nothing:
-the table is 400 bytes an entry, two heap strings and three map
-nodes. The build runs the compiler once per locale, so a census of
-502 pays the table 502 times. Of the 297334 names, 5 are not
-=<Uxxxx>=, whose code point is the name.
-
-Fix: a range stays one record, first and last code point, the bytes
-of the first and the rule for the rest, in one vector sorted by code
-point as the files are. A lookup by code point is a binary search,
-and the bytes of a UTF-8 member are computed from the code point, as
-=define= computes them now. A =<Uxxxx>= name is looked up as its code
-point and no string is stored for it; the other names go in a small
-map. The bytes index is built on demand, and for UTF-8 is a decode.
-The interface stays, =find_name=, =find_ucs= and =find_bytes=;
-=entries ()= becomes an iteration that expands, since only the dump
-wants the expansion.
-
-Check: =localedef2 --charmap= over glibc's UTF-8 charmap prints the
-same 297334 lines as before, within twice the =--tokens= time and
-10 MB over the bare process.
-
 ** TODO The locale sources under =etc/nls= are glibc 2.2's
 
 The definitions and charmaps under =etc/nls= are copies from GNU libc
@@ -293,6 +265,34 @@ direction bits.
 Check: the collation oracle finds no disagreement over strings of
 letters and characters subject to =IGNORE= at the first three
 levels in =en_US=, =sv_SE=, =fa_IR= and =ml_IN=.
+
+** TODO The localedef2 objects have no header dependencies
+
+=etc/config/GNUmakefile.bin= names =localedb.d= as the only
+dependency file, so a change to a header under =util/localedef=
+leaves the objects that include it stale. Found when a change to
+=cmap.h= left =ldef.o= behind and the binary hung in =~cmap_t= on
+the ABI mismatch, until the eight objects were removed by hand.
+
+Fix: generate a dependency file per object for the localedef2
+objects as the library's rules do, or list the headers.
+
+Check: touch =util/localedef/cmap.h= and =make localedef2= rebuilds
+every object that includes it.
+
+** TODO =scan_utf8= rejects the five- and six-byte forms =utf8_of= writes
+
+The charmap's =utf8_of= still writes the five- and six-byte forms of
+the original UTF-8 definition, and =scan_utf8=, glibc's decoder,
+rejects them, so a lookup by bytes of a character above U+10FFFF
+would fail where a lookup by code point succeeds. No charmap in the
+tree or on the build machine has such a character.
+
+Fix: decide the ceiling once, 0x10FFFF or the old 0x7FFFFFFF, and
+make the two agree.
+
+Check: a charmap with one character above U+10FFFF reads, and the
+character is found by name, by code point and by bytes alike.
 
 ** TODO The =utf8_to_ext= trie leaves an ordinal where the runtime reads an offset
 

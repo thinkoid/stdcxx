@@ -895,13 +895,13 @@ make_entry (const coll_reading_t &r, const coll_name_t &name,
     entry.line    = where.line;
     declared      = false;
 
-    const cmap_entry_t *cm = 0;
+    cmap_entry_t cm;
 
     if (0 <= name.ucs)
         entry.kind = ck_char;
-    else if (0 != (cm = r.cmap.find_name (name.name))) {
+    else if (r.cmap.find_name (name.name, cm)) {
         entry.kind = ck_char;
-        entry.ucs  = cm->ucs;
+        entry.ucs  = cm.ucs;
     }
     else if (r.state.elements.count (name.name))
         entry.kind = ck_element;
@@ -1576,13 +1576,15 @@ declare_symbol (tok_iter it, tok_iter last, coll_reading_t &r)
     const unsigned long count = range.width ? range.last - range.first + 1
                                             : 1;
 
+    cmap_entry_t cm;
+
     for (unsigned long i = 0; i != count; ++i) {
 
         const std::string name = range_member (range, range.first + i);
 
         const char *what = 0;
 
-        if (r.cmap.find_name (name))
+        if (r.cmap.find_name (name, cm))
             what = "in charmap";
         else if (is_symbol (state, name))
             what = "as collating symbol";
@@ -1623,9 +1625,11 @@ declare_element (tok_iter it, tok_iter last, const charset_t &cs,
 
     collate_state_t &state = r.state;
 
+    cmap_entry_t cm;
+
     const char *what = 0;
 
-    if (r.cmap.find_name (element.name))
+    if (r.cmap.find_name (element.name, cm))
         what = "in charmap";
     else if (is_symbol (state, element.name))
         what = "as collating symbol";

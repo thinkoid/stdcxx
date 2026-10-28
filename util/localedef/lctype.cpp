@@ -209,9 +209,9 @@ operand_of (const token_t &tok)
 static long
 name_ucs (const charset_t &cs, const std::string &name)
 {
-    const cmap_entry_t* const entry = cs.cmap->find_name (name);
+    cmap_entry_t entry;
 
-    return entry ? entry->ucs : -1;
+    return cs.cmap->find_name (name, entry) ? entry.ucs : -1;
 }
 
 
@@ -220,9 +220,9 @@ name_ucs (const charset_t &cs, const std::string &name)
 static long
 bytes_ucs (const charset_t &cs, const std::string &bytes)
 {
-    const cmap_entry_t* const entry = cs.cmap->find_bytes (bytes);
+    cmap_entry_t entry;
 
-    return entry ? entry->ucs : -1;
+    return cs.cmap->find_bytes (bytes, entry) ? entry.ucs : -1;
 }
 
 

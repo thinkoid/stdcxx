@@ -25,9 +25,9 @@
 #include "cmap.h"
 #include "reader.h"
 
+#include <algorithm> // for stable_sort(), upper_bound()
 #include <cstdio>    // for sprintf()
 #include <cstdlib>   // for strtoul()
-#include <utility>   // for make_pair()
 
 
 struct char_def_t {
@@ -89,20 +89,15 @@ name_ucs (const std::string &name)
 }
 
 
-// glibc spells every <Uxxxx> name as U and 8 digits before it looks
-// one up, so <U0041> and <U00000041> are one name.
+// The <Uxxxx> spelling of a code point in 4 or 8 digits, which is how
+// the members of a range are named.
 static std::string
-name_key (const std::string &name)
+u_name (long ucs, int digits)
 {
-    const long ucs = name_ucs (name);
+    char name [24];
+    std::sprintf (name, "U%0*lX", digits, ucs);
 
-    if (ucs < 0 || 'U' != name [0])
-        return name;
-
-    char key [24];
-    std::sprintf (key, "U%08lX", ucs);
-
-    return key;
+    return name;
 }
 
 
@@ -251,107 +246,66 @@ width_def (tok_iter &it, tok_iter last, width_def_t &attr, diag_t &diag)
 
 cmap_t::
 cmap_t ()
-    : mb_cur_max (0), mb_cur_min (0)
+    : mb_cur_max (0), mb_cur_min (0), m_utf8 (false)
 {
-}
-
-
-const cmap_entry_t* cmap_t::
-find_name (const std::string &name) const
-{
-    const std::map<std::string, std::size_t>::const_iterator it =
-        m_by_name.find (name_key (name));
-
-    return it == m_by_name.end () ? 0 : &m_entries [it->second];
-}
-
-
-const cmap_entry_t* cmap_t::
-find_ucs (long ucs) const
-{
-    const std::map<long, std::size_t>::const_iterator it =
-        m_by_ucs.find (ucs);
-
-    return it == m_by_ucs.end () ? 0 : &m_entries [it->second];
-}
-
-
-const cmap_entry_t* cmap_t::
-find_bytes (const std::string &bytes) const
-{
-    const std::map<std::string, std::size_t>::const_iterator it =
-        m_by_bytes.find (bytes);
-
-    return it == m_by_bytes.end () ? 0 : &m_entries [it->second];
-}
-
-
-// A name defined twice keeps its first definition, as in glibc, where
-// "all later definitions are simply discarded".  glibc still indexes
-// the later bytes; here the later line is dropped whole.
-void cmap_t::
-add (const std::string &name, const std::string &bytes)
-{
-    const std::string key = name_key (name);
-
-    if (m_by_name.count (key))
-        return;
-
-    cmap_entry_t entry;
-
-    entry.name  = name;
-    entry.ucs   = name_ucs (name);
-    entry.bytes = bytes;
-
-    long ucs;
-
-    if (   entry.ucs < 0 && is_utf8 (code_set_name)
-        && scan_utf8 (bytes, 0, ucs) == bytes.size ())
-        entry.ucs = ucs;
-
-    const std::size_t index = m_entries.size ();
-
-    m_entries.push_back (entry);
-
-    m_by_name [key] = index;
-    m_by_bytes.insert (std::make_pair (bytes, index));
-
-    if (0 <= entry.ucs)
-        m_by_ucs.insert (std::make_pair (entry.ucs, index));
 }
 
 
 // glibc's rule for the bytes of a range: the encoding is an integer of
 // as many base-256 digits as it has bytes, and each member's is one
 // more than the one before, the carry propagating into the bytes
-// before the last.
+// before the last.  Moves bytes on by n members; false when the carry
+// runs off the first byte.
 static bool
-increment (std::string &bytes)
+advance_bytes (std::string &bytes, unsigned long n)
 {
-    for (std::size_t i = bytes.size (); i-- != 0; ) {
+    for (std::size_t i = bytes.size (); i-- != 0 && n; ) {
 
-        const unsigned char byte = bytes [i];
+        const unsigned long sum = (unsigned char)bytes [i] + (n & 0xff);
 
-        bytes [i] = char ((byte + 1) & 0xff);
-
-        if (0xff != byte)
-            return true;
+        bytes [i] = char (sum & 0xff);
+        n         = (n >> 8) + (sum >> 8);
     }
 
-    return false;
+    return 0 == n;
+}
+
+
+// The distance in members from the first bytes of a range to bytes of
+// the same length, under the rule above; false past limit, or when
+// the bytes are before the first's.  The test before each digit bounds
+// n * 256 by limit + 255, so the arithmetic cannot overflow however
+// long the bytes are.
+static bool
+distance (const std::string &from, const std::string &to, long limit,
+          long &n)
+{
+    n = 0;
+
+    for (std::size_t i = 0; i != from.size (); ++i) {
+
+        if (n < 0 || (limit + 255) / 256 < n)
+            return false;
+
+        n = n * 256 + ((unsigned char)to [i] - (unsigned char)from [i]);
+    }
+
+    return 0 <= n && n <= limit;
 }
 
 
 // The UTF-8 form of a code point, up to the six bytes of the old
-// definition, which the tree's UTF-8 charmap still uses.
+// definition, which the tree's UTF-8 charmap still uses.  Built in an
+// array: the dump computes it once a character, and under the debug
+// library the checked string indexing was a tenth of its time.
 static std::string
 utf8_of (long ucs)
 {
-    std::string bytes;
+    char bytes [8];
 
     if (ucs < 0x80) {
-        bytes += char (ucs);
-        return bytes;
+        bytes [0] = char (ucs);
+        return std::string (bytes, 1);
     }
 
     int  len  = 2;
@@ -363,14 +317,280 @@ utf8_of (long ucs)
         lead = (lead >> 1) | 0x80;
     }
 
-    bytes.resize (len);
-
     for (int i = len - 1; 0 < i; --i, ucs >>= 6)
         bytes [i] = char (0x80 | (ucs & 0x3f));
 
     bytes [0] = char (lead | ucs);
 
-    return bytes;
+    return std::string (bytes, len);
+}
+
+
+// Orders runs by their bytes as integers under glibc's rule: by
+// length, then by value.  A run is named by its position; a lookup
+// compares a string against one.
+struct bytes_order_t {
+
+    const std::vector<cmap_run_t> *runs;
+
+    static bool before (const std::string &a, const std::string &b) {
+        return a.size () != b.size () ? a.size () < b.size () : a < b;
+    }
+
+    bool operator() (std::size_t a, std::size_t b) const {
+        return before ((*runs) [a].bytes, (*runs) [b].bytes);
+    }
+
+    bool operator() (const std::string &a, std::size_t b) const {
+        return before (a, (*runs) [b].bytes);
+    }
+};
+
+
+// The number of indexed runs that start at or before ucs: where a
+// run starting past ucs enters the index, and one past the only run
+// that can hold ucs, the runs being disjoint.  A search spelled out
+// over the arrays: under the debug library, the algorithms over its
+// checked iterators were a fifth of a dump's time.
+std::size_t cmap_t::
+rank (long ucs) const
+{
+    if (m_by_ucs.empty ())
+        return 0;
+
+    const cmap_run_t  *const runs   = &m_runs [0];
+    const std::size_t *const by_ucs = &m_by_ucs [0];
+
+    std::size_t lo = 0;
+    std::size_t hi = m_by_ucs.size ();
+
+    while (lo != hi) {
+
+        const std::size_t mid = lo + (hi - lo) / 2;
+
+        if (ucs < runs [by_ucs [mid]].first)
+            hi = mid;
+        else
+            lo = mid + 1;
+    }
+
+    return lo;
+}
+
+
+// The run that defines ucs, or the number of runs when none does.
+std::size_t cmap_t::
+run_of (long ucs) const
+{
+    const std::size_t n = rank (ucs);
+
+    if (0 == n)
+        return m_runs.size ();
+
+    const std::size_t pos = m_by_ucs [n - 1];
+
+    return ucs <= m_runs [pos].last ? pos : m_runs.size ();
+}
+
+
+// The member of run at ucs.  A run without bytes is a UTF-8 one, and
+// a member's bytes are its code point's form; otherwise they are the
+// first member's moved on by the distance.
+void cmap_t::
+expand (const cmap_run_t &run, long ucs, cmap_entry_t &entry) const
+{
+    entry.name = run.name.empty () ? u_name (ucs, run.digits) : run.name;
+    entry.ucs  = ucs;
+
+    if (run.bytes.empty ())
+        entry.bytes = utf8_of (ucs);
+    else {
+        entry.bytes = run.bytes;
+        advance_bytes (entry.bytes, (unsigned long)(ucs - run.first));
+    }
+}
+
+
+bool cmap_t::
+find_name (const std::string &name, cmap_entry_t &entry) const
+{
+    const long ucs = name_ucs (name);
+
+    // a <Uxxxx> name is its code point, in either spelling; a run of
+    // another name at that code point is not the name
+    if (0 <= ucs && 'U' == name [0]) {
+
+        const std::size_t pos = run_of (ucs);
+
+        if (pos == m_runs.size () || 0 == m_runs [pos].digits)
+            return false;
+
+        expand (m_runs [pos], ucs, entry);
+        return true;
+    }
+
+    const std::map<std::string, std::size_t>::const_iterator it =
+        m_by_name.find (name);
+
+    if (it == m_by_name.end ())
+        return false;
+
+    const cmap_run_t &run = m_runs [it->second];
+
+    expand (run, run.first, entry);
+    return true;
+}
+
+
+bool cmap_t::
+find_ucs (long ucs, cmap_entry_t &entry) const
+{
+    const std::size_t pos = run_of (ucs);
+
+    if (pos == m_runs.size ())
+        return false;
+
+    expand (m_runs [pos], ucs, entry);
+    return true;
+}
+
+
+bool cmap_t::
+find_bytes (const std::string &bytes, cmap_entry_t &entry) const
+{
+    if (m_utf8) {
+
+        if (bytes.empty ())
+            return false;
+
+        // a byte below 0x80 is its code point; scan_utf8() reads only
+        // the lead bytes of the longer forms
+        const unsigned char lead = bytes [0];
+
+        long ucs = lead;
+
+        if (lead < 0x80 ? 1 != bytes.size ()
+                        : scan_utf8 (bytes, 0, ucs) != bytes.size ())
+            return false;
+
+        // a single written in another form keeps those bytes, and its
+        // code point's regular form is not in the charmap
+        return find_ucs (ucs, entry) && entry.bytes == bytes;
+    }
+
+    const bytes_order_t order = { &m_runs };
+
+    if (m_by_bytes.empty ()) {
+
+        for (std::size_t i = 0; i != m_runs.size (); ++i)
+            m_by_bytes.push_back (i);
+
+        // stable, so that of two runs with the same bytes the earlier
+        // is the one found, as it was the one indexed before
+        std::stable_sort (m_by_bytes.begin (), m_by_bytes.end (), order);
+    }
+
+    std::vector<std::size_t>::const_iterator it =
+        std::upper_bound (m_by_bytes.begin (), m_by_bytes.end (), bytes,
+                          order);
+
+    if (it == m_by_bytes.begin ())
+        return false;
+
+    --it;
+
+    while (   it != m_by_bytes.begin ()
+           && m_runs [*(it - 1)].bytes == m_runs [*it].bytes)
+        --it;
+
+    const cmap_run_t &run = m_runs [*it];
+
+    long n;
+
+    if (   run.bytes.size () != bytes.size ()
+        || !distance (run.bytes, bytes, run.last - run.first, n))
+        return false;
+
+    expand (run, run.first + n, entry);
+    return true;
+}
+
+
+// Enters run, about to be stored at pos, in the index by code point;
+// false, and nothing entered, when a run has one of its code points
+// already: the first definition of a code point is the one found.
+// A charmap in code point order, as the UTF-8 one is, appends; one in
+// byte order inserts, at a cost linear in the index.
+bool cmap_t::
+index (const cmap_run_t &run, std::size_t pos)
+{
+    if (run.first < 0)
+        return false;
+
+    const std::size_t n = rank (run.last);
+
+    if (n && run.first <= m_runs [m_by_ucs [n - 1]].last)
+        return false;
+
+    m_by_ucs.insert (m_by_ucs.begin () + n, pos);
+
+    return true;
+}
+
+
+// A name defined twice keeps its first definition, as in glibc, where
+// "all later definitions are simply discarded".  glibc still indexes
+// the later bytes; here the later line is dropped whole.  A <Uxxxx>
+// name is its code point, and is defined twice when the code point
+// is; its spelling is kept only when it is not the members' form, so
+// that the dump prints it as written.
+void cmap_t::
+add (const std::string &name, const std::string &bytes)
+{
+    cmap_run_t run;
+
+    run.first  = name_ucs (name);
+    run.last   = run.first;
+    run.digits = 0;
+    run.bytes  = bytes;
+
+    const std::size_t pos    = m_runs.size ();
+    const bool        u_form = 0 <= run.first && 'U' == name [0];
+
+    if (u_form) {
+
+        run.digits = int (name.size ()) - 1;
+
+        if (name != u_name (run.first, run.digits))
+            run.name = name;
+    }
+    else {
+
+        if (m_by_name.count (name))
+            return;
+
+        run.name = name;
+
+        long ucs;
+
+        if (   run.first < 0 && m_utf8
+            && scan_utf8 (bytes, 0, ucs) == bytes.size ())
+            run.first = run.last = ucs;
+    }
+
+    // bytes that are the code point's UTF-8 form are not kept
+    if (m_utf8 && 0 <= run.first && bytes == utf8_of (run.first))
+        run.bytes.clear ();
+
+    // a <Uxxxx> name whose code point is taken is defined twice;
+    // another name is kept and found by its name
+    if (!index (run, pos) && u_form)
+        return;
+
+    if (!u_form)
+        m_by_name [name] = pos;
+
+    m_runs.push_back (run);
 }
 
 
@@ -458,10 +678,36 @@ define (const char_def_t &def, diag_t &diag)
         return diag.error (e_range, def.where, "upper limit in range "
                            "is smaller than lower limit");
 
+    // A range of <Uxxxx> names, which every range of glibc's charmaps
+    // is, is one record while its code points are new and its bytes
+    // last; a UTF-8 charmap needs no bytes for it.  Any other range
+    // is read as its members, one record each.
+    const bool u_range =
+           hex && 1 == step && 1 == prefix && 'U' == from [0]
+        && (4 == digits || 8 == digits) && last < 0x80000000UL;
+
+    std::string probe = def.bytes;
+
+    if (u_range && (m_utf8 || advance_bytes (probe, last - first))) {
+
+        cmap_run_t run;
+
+        run.first  = long (first);
+        run.last   = long (last);
+        run.digits = int (digits);
+
+        if (!m_utf8)
+            run.bytes = def.bytes;
+
+        if (index (run, m_runs.size ())) {
+            m_runs.push_back (run);
+            return true;
+        }
+    }
+
     // glibc increments once more after the last member, and reports a
     // range that ends at the top of its bytes as not representable;
     // here the increment is only between members.
-    const bool  utf8  = is_utf8 (code_set_name);
     std::string bytes = def.bytes;
 
     for (unsigned long n = first; n <= last; n += step) {
@@ -472,14 +718,14 @@ define (const char_def_t &def, diag_t &diag)
         const std::string name = from.substr (0, prefix) + number;
         const long        ucs  = name_ucs (name);
 
-        if (utf8 && 0 <= ucs) {
+        if (m_utf8 && 0 <= ucs) {
             add (name, utf8_of (ucs));
             continue;
         }
 
         add (name, bytes);
 
-        if (n + step <= last && !increment (bytes))
+        if (n + step <= last && !advance_bytes (bytes, 1))
             return diag.error (e_range, def.where,
                                "resulting bytes for range "
                                "not representable");
@@ -548,6 +794,8 @@ read (const std::string &path, diag_t &diag)
                 break;
 
             case kw_charmap:
+                m_utf8 = is_utf8 (code_set_name);
+
                 if (0 == mb_cur_max)
                     mb_cur_max = 1;
 
@@ -628,14 +876,17 @@ read (const std::string &path, diag_t &diag)
                 if (!width_def (it, last, def, diag))
                     break;
 
-                const cmap_entry_t* const from = find_name (def.from);
-                const cmap_entry_t* const to   =
-                    def.to.empty () ? from : find_name (def.to);
+                cmap_entry_t from;
+                cmap_entry_t to;
 
-                if (0 == from || 0 == to)
+                if (!find_name (def.from, from))
                     diag.error (e_inval, lead.where, "unknown character `%s'",
-                                (from ? def.to : def.from).c_str ());
-                else if (from->bytes.size () != to->bytes.size ())
+                                def.from.c_str ());
+                else if (!def.to.empty () && !find_name (def.to, to))
+                    diag.error (e_inval, lead.where, "unknown character `%s'",
+                                def.to.c_str ());
+                else if (!def.to.empty ()
+                         && from.bytes.size () != to.bytes.size ())
                     diag.error (e_range, lead.where, "number of bytes for "
                                 "byte sequence of beginning and end of "
                                 "range not the same");
@@ -669,6 +920,32 @@ read (const std::string &path, diag_t &diag)
 
 
 /**************************************************************************/
+// cmap_iter_t
+
+bool cmap_iter_t::
+next (cmap_entry_t &entry)
+{
+    const std::vector<cmap_run_t> &runs = m_cmap.m_runs;
+
+    if (m_run == runs.size ())
+        return false;
+
+    const cmap_run_t &run = runs [m_run];
+
+    m_cmap.expand (run, run.first + m_offset, entry);
+
+    if (run.first + m_offset == run.last) {
+        ++m_run;
+        m_offset = 0;
+    }
+    else
+        ++m_offset;
+
+    return true;
+}
+
+
+/**************************************************************************/
 // strings and names against the charmap
 
 // The code point a symbolic name gives, as glibc's get_string() takes
@@ -694,17 +971,17 @@ name_value (const std::string &name, const charset_t &cs,
         }
     }
 
-    const cmap_entry_t* const entry = cs.cmap->find_name (name);
+    cmap_entry_t entry;
 
-    if (0 == entry)
+    if (!cs.cmap->find_name (name, entry))
         return diag.error (e_ucs, where, "symbol `%s' not in charmap",
                            name.c_str ());
 
-    if (entry->ucs < 0)
+    if (entry.ucs < 0)
         return diag.error (e_ucs, where, "symbol `%s' has no code point",
                            name.c_str ());
 
-    ucs = entry->ucs;
+    ucs = entry.ucs;
 
     return true;
 }
