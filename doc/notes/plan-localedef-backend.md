@@ -751,7 +751,9 @@ I and J fail to convert in `do_in` and `do_out`. No oracle measures
 codecvt, so nobody has seen it fail. The new charmap takes the code
 point from the name and computes the bytes from it, so the new
 database is right by construction and byte identity fails in exactly
-those pages.
+those pages. Measured: the new compiler's `--charmap` dump of glibc
+2.44's UTF-8 charmap has 297334 members and every one's bytes are
+the UTF-8 form of its code point, the five blocks included.
 
 **Question.** What is the check for the codecvt file, where byte
 identity is known to fail?
