@@ -469,47 +469,68 @@ make_test_locale ()
         "collating-symbol <COLLATING_ELEMENT>\n"
         "collating-symbol <DIGIT>\n"
 
+        // the symbols <V025> through <V139> are named for the values
+        // they take: the order lists them after every other entry, and
+        // the 23 entries before them take the values 2 through 24
+        "collating-symbol <V025>....<V139>\n"
+
         "order_start forward;backward;forward,position\n"
         "<LETTER>\n"
         "<COLLATING_ELEMENT>\n"
         "<DIGIT>\n"
 
-        "<a> <a> <LETTER> IGNORE\n"
-        "<b> <b> <LETTER> IGNORE\n"
+        "<a> <a>;<LETTER>;IGNORE\n"
+        "<b> <b>;<LETTER>;IGNORE\n"
 
         // "<c>" will have a non-ignored position ordering
-        "<c> <c> <LETTER> <c>\n"
+        "<c> <c>;<LETTER>;<c>\n"
 
         // try giving "<d>" a many-to-one weight
-        "<d> \"<d><a>\" <LETTER> IGNORE\n"
+        "<d> \"<d><a>\";<LETTER>;IGNORE\n"
 
-        // try giving "<e>" a decimal value weight
-        "<e> \\d139 <LETTER> IGNORE\n"
+        // try giving "<e>", "<f>" and "<g>" a weight other than their
+        // own, once written as a value, decimal \d139, octal \36 and
+        // hex \x3A, an extension of the old scanner; the standard's
+        // syntax names the symbol that has the value instead
+        "<e> <V139>;<LETTER>;IGNORE\n"
+        "<f> <V030>;<LETTER>;IGNORE\n"
+        "<g> <V058>;<LETTER>;IGNORE\n"
 
-        // try giving "<f>" an octal value weight
-        "<f> \\36 <LETTER> IGNORE\n"
-
-        // try giving "<g>" a hex value weight
-        "<g> \\x3A <LETTER> IGNORE\n"
-
-        "<zero> <zero> <DIGIT> IGNORE\n"
-        "<one> <one> <DIGIT> <zero>\n"
-        "<two> <two> <DIGIT> IGNORE\n"
-        "<three> <three> <DIGIT> IGNORE\n"
-        "<er> <a> <COLLATING_ELEMENT> IGNORE\n"
+        "<zero> <zero>;<DIGIT>;IGNORE\n"
+        "<one> <one>;<DIGIT>;<zero>\n"
+        "<two> <two>;<DIGIT>;IGNORE\n"
+        "<three> <three>;<DIGIT>;IGNORE\n"
+        "<er> <a>;<COLLATING_ELEMENT>;IGNORE\n"
 
         // the <ic> collating element will be equivalent to the letter <c>
-        "<ic> <c> <LETTER> <c>\n"
+        "<ic> <c>;<LETTER>;<c>\n"
 
         // "<m>" and "<n>" tie on the first two levels and part only
         // at the position level, where "<m>" has a weight the narrow
-        // transform must spell in more than one byte and "<n>" one it
-        // spells in a single byte below the first's final byte; with
-        // an IGNOREd character in front of "<n>" the two strings
-        // differ only in where the IGNOREd element sits
-        "<m> <m> <LETTER> \\d128\n"
-        "<n> <m> <LETTER> \\d2\n"
-        "UNDEFINED IGNORE IGNORE IGNORE\n"
+        // transform must spell in more than one byte, <V128>'s 128,
+        // and "<n>" one it spells in a single byte below the first's
+        // final byte, <LETTER>'s 2; with an IGNOREd character in front
+        // of "<n>" the two strings differ only in where the IGNOREd
+        // element sits
+        "<m> <m>;<LETTER>;<V128>\n"
+        "<n> <m>;<LETTER>;<LETTER>\n"
+        "UNDEFINED IGNORE;IGNORE;IGNORE\n"
+
+        "<V025>\n<V026>\n<V027>\n<V028>\n<V029>\n<V030>\n<V031>\n<V032>\n"
+        "<V033>\n<V034>\n<V035>\n<V036>\n<V037>\n<V038>\n<V039>\n<V040>\n"
+        "<V041>\n<V042>\n<V043>\n<V044>\n<V045>\n<V046>\n<V047>\n<V048>\n"
+        "<V049>\n<V050>\n<V051>\n<V052>\n<V053>\n<V054>\n<V055>\n<V056>\n"
+        "<V057>\n<V058>\n<V059>\n<V060>\n<V061>\n<V062>\n<V063>\n<V064>\n"
+        "<V065>\n<V066>\n<V067>\n<V068>\n<V069>\n<V070>\n<V071>\n<V072>\n"
+        "<V073>\n<V074>\n<V075>\n<V076>\n<V077>\n<V078>\n<V079>\n<V080>\n"
+        "<V081>\n<V082>\n<V083>\n<V084>\n<V085>\n<V086>\n<V087>\n<V088>\n"
+        "<V089>\n<V090>\n<V091>\n<V092>\n<V093>\n<V094>\n<V095>\n<V096>\n"
+        "<V097>\n<V098>\n<V099>\n<V100>\n<V101>\n<V102>\n<V103>\n<V104>\n"
+        "<V105>\n<V106>\n<V107>\n<V108>\n<V109>\n<V110>\n<V111>\n<V112>\n"
+        "<V113>\n<V114>\n<V115>\n<V116>\n<V117>\n<V118>\n<V119>\n<V120>\n"
+        "<V121>\n<V122>\n<V123>\n<V124>\n<V125>\n<V126>\n<V127>\n<V128>\n"
+        "<V129>\n<V130>\n<V131>\n<V132>\n<V133>\n<V134>\n<V135>\n<V136>\n"
+        "<V137>\n<V138>\n<V139>\n"
 
         "order_end\n"
 
@@ -523,9 +544,11 @@ make_test_locale ()
         "reorder-after <g>\n"
         "<h>\n<i>\n<j>\n<k>\n"
 
-        // try to reorder "<a>" after "<b>"
+        // try to reorder "<a>" after "<b>"; the entry takes the
+        // directions of the last section opened, <ALL_FORWARD>'s, as
+        // reorder-after moves the cursor and not the section
         "reorder-after <b>\n"
-        "<a> <a> <LETTER> IGNORE\n"
+        "<a> <a>;<LETTER>;IGNORE\n"
         "reorder-end\n"
 
         "\nEND LC_COLLATE\n"
@@ -628,7 +651,7 @@ check_libstd_test_locale (const char* charTname)
 #define TEST(ch, w0, w1, w2, w3, w3_is_fp)                              \
         test_weight_val (charTname, co, charT (ch), w0, w1, w2, w3, w3_is_fp)
 
-        TEST ('a',       6, IGNORE,      2, IGNORE, true);
+        TEST ('a',       6, IGNORE,      2, IGNORE, false);
         TEST ('b',       5, IGNORE,      2, IGNORE, true);
         TEST ('c',       7, IGNORE,      2,      7, true);
         TEST ('d',       8,      6,      2, IGNORE, true);
