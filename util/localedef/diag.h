@@ -32,6 +32,7 @@
 // below 700, warnings from 700 to 799.  A log of either compiler names
 // the same fault by the same number.
 enum diag_id_t {
+    e_symused = 101,  // a weight names what the sequence does not order
     e_openrd = 109,   // a file cannot be opened for reading
     e_openwr = 110,   // a file cannot be opened for writing
     e_pair   = 111,   // invalid pair of names in a range
@@ -44,6 +45,7 @@ enum diag_id_t {
     e_inval  = 399,   // invalid value
     e_cmdarg = 401,   // invalid command line argument
 
+    w_missing = 704,  // characters the collation sequence leaves out
     w_syntax = 709,   // recoverable syntax error
     w_inval  = 711    // recoverable invalid value
 };

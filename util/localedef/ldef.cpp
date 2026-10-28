@@ -23,15 +23,14 @@
  **************************************************************************/
 
 // The new locale compiler.  It writes a locale database with the old
-// driver's options for one locale, and it has five dump forms, each
-// the check of one piece of the front end:
+// driver's options for one locale, and it has seven dump forms, each
+// the check of one piece of the compiler:
 //
 //   ldef [-c] [-w] -f CHARMAP -i FILE [-d DIR] [-I DIR] NAME
 //                                               the database DIR/NAME,
-//                                               LC_CTYPE, the codecvt
-//                                               database and the four
-//                                               scalar categories so
-//                                               far
+//                                               the six categories
+//                                               and the codecvt
+//                                               database
 //   ldef --tokens FILE...                       the tokens of each line
 //   ldef --charmap FILE                         the entries of a charmap
 //   ldef --values -f CHARMAP -i FILE [-I DIR]   the values of the four
@@ -44,8 +43,12 @@
 //   ldef --census -f CHARMAP -i FILE [-I DIR]   what POSIX's class
 //                                               defaults add to
 //                                               LC_CTYPE
+//   ldef --collate-numbers -f CHARMAP -i FILE [-I DIR]
+//                                               the collation numbering:
+//                                               values, rows, weights
 
 #include "cmap.h"
+#include "collnum.h"
 #include "diag.h"
 #include "locfile.h"
 #include "model.h"
@@ -53,6 +56,7 @@
 #include "writer.h"
 
 #include <cerrno>    // for errno
+#include <climits>   // for UINT_MAX
 #include <cstdio>    // for printf(), fwrite(), fopen()
 #include <cstring>   // for strcmp(), strerror(), strrchr()
 #include <ctime>     // for clock()
@@ -760,6 +764,159 @@ dump_collate (const char *charmap, const char *path, const char *dir,
 
 
 /**************************************************************************/
+// the collation numbering
+
+// The dump prints what the numbering gives the sequence, so that its
+// counts can be read against the old compiler's image: first the
+// levels and their directions, the longest weight, the largest
+// element, the values given, the rows, the shared row and the
+// characters left out; then one line per entry of the sequence in the
+// form of the --collate dump, followed by "% value" and, for an entry
+// with a row, "row R" and the words of each level, the levels
+// separated by semicolons and the words of one by commas, an unused
+// word as -.  A range prints its first and last value and row and the
+// words of its first member; an entry with no value prints "% -".
+// Before the sequence, "elements N" and per line an element's name,
+// its string as <Uxxxx> names and its row, or - when the charmap does
+// not spell it.  Under codepoint_collation the sequence is discarded
+// and the rows are printed in its place, one per line.
+
+static void
+print_words (const coll_numbering_t &num, std::size_t row)
+{
+    const unsigned* const words = num.row_words (row);
+
+    for (std::size_t j = 0; j != num.levels; ++j) {
+
+        std::putchar (j ? ';' : ' ');
+
+        for (unsigned k = 0; k != num.longest_weight; ++k) {
+
+            const unsigned word = words [j * num.longest_weight + k];
+
+            if (k)
+                std::putchar (',');
+
+            if (UINT_MAX == word)
+                std::putchar ('-');
+            else
+                std::printf ("%u", word);
+        }
+    }
+}
+
+
+static void
+dump_numbers (const char *charmap, const char *path, const char *dir,
+              diag_t &diag)
+{
+    cmap_t       cmap;
+    locale_def_t def;
+
+    if (!read_model (charmap, path, dir, cmap, def, diag))
+        return;
+
+    const collate_def_t &coll = def.collate;
+
+    coll_numbering_t num;
+
+    number_collate (coll, cmap, num, diag);
+
+    std::printf ("levels %lu ", (unsigned long)num.levels);
+    print_rules (num.rules);
+    std::printf ("\nlongest weight %u, largest element %u\n",
+                 num.longest_weight, num.largest_element);
+    std::printf ("values %u, rows %lu, undefined row %ld, missing %lu\n",
+                 num.next_value - 2, (unsigned long)num.rows.size (),
+                 num.undefined_row, (unsigned long)num.missing);
+
+    std::printf ("elements %lu\n", (unsigned long)coll.elements.size ());
+
+    for (std::size_t i = 0; i != coll.elements.size (); ++i) {
+
+        std::printf ("<%s> \"", coll.elements [i].name.c_str ());
+
+        const ucs_string_t &value = coll.elements [i].value;
+
+        for (std::size_t j = 0; j != value.size (); ++j)
+            std::printf (value [j] < 0x10000L ? "<U%04lX>" : "<U%08lX>",
+                         value [j]);
+
+        if (num.element_rows [i] < 0)
+            std::puts ("\" row -");
+        else
+            std::printf ("\" row %ld\n", num.element_rows [i]);
+    }
+
+    if (num.codepoint) {
+
+        std::puts ("codepoint_collation");
+
+        for (std::size_t i = 0; i != num.rows.size (); ++i) {
+            std::printf ("<%s> %% %u row %lu", num.rows [i].name.c_str (),
+                         num.rows [i].value, (unsigned long)i);
+            print_words (num, i);
+            std::putchar ('\n');
+        }
+
+        return;
+    }
+
+    bool undefined = false;
+
+    for (std::size_t i = 0; i != coll.sequence.size (); ++i) {
+
+        const coll_entry_t  &entry  = coll.sequence [i];
+        const coll_number_t &number = num.numbers [i];
+
+        print_element (entry);
+
+        for (std::size_t j = 0; j != entry.weights.size (); ++j) {
+            std::putchar (j ? ';' : ' ');
+            print_weight (entry, entry.weights [j]);
+        }
+
+        std::fputs (" % ", stdout);
+
+        if (0 == number.count)
+            std::fputs ("-", stdout);
+        else if (ck_range == entry.kind)
+            std::printf ("%u..%u", number.value,
+                         number.value + unsigned (number.count) - 1);
+        else
+            std::printf ("%u", number.value);
+
+        if (0 <= number.row) {
+
+            if (ck_range == entry.kind)
+                std::printf (" rows %ld..%ld", number.row,
+                             number.row + long (number.count) - 1);
+            else
+                std::printf (" row %ld", number.row);
+
+            print_words (num, std::size_t (number.row));
+        }
+
+        std::putchar ('\n');
+
+        if (ck_undefined == entry.kind)
+            undefined = true;
+    }
+
+    // the shared row the numbering added after the sequence
+    if (!undefined && 0 <= num.undefined_row) {
+
+        const std::size_t row = std::size_t (num.undefined_row);
+
+        std::printf ("UNDEFINED %% %u row %lu", num.rows [row].value,
+                     (unsigned long)row);
+        print_words (num, row);
+        std::putchar ('\n');
+    }
+}
+
+
+/**************************************************************************/
 // the locale database
 
 // Creates dir and the directories above it that are not there.  False
@@ -931,10 +1088,10 @@ write_args (int argc, char *argv [], write_opts_t &opts)
 }
 
 
-// Reads the definition and writes its database: LC_CTYPE and the four
-// scalar categories, each as its file under DIR/NAME, and the codecvt
-// database of the codeset beside it.  An error withholds the output,
-// as do warnings without -c, which is what the old driver did.
+// Reads the definition and writes its database: the six categories,
+// each as its file under DIR/NAME, and the codecvt database of the
+// codeset beside it.  An error withholds the output, as do warnings
+// without -c, which is what the old driver did.
 static void
 write_locale (const write_opts_t &opts, diag_t &diag)
 {
@@ -943,6 +1100,22 @@ write_locale (const write_opts_t &opts, diag_t &diag)
 
     if (!read_model (opts.charmap, opts.input, opts.dir, cmap, def, diag))
         return;
+
+    // the collation is numbered before the checks below, since the
+    // characters a sequence leaves out are a warning that counts with
+    // the reader's; a definition without the category writes no file,
+    // as in the old compiler
+    const collate_def_t &coll = def.collate;
+
+    const bool has_collate =
+           coll.codepoint_collation || !coll.sections.empty ()
+        || !coll.sequence.empty () || !coll.symbols.empty ()
+        || !coll.elements.empty ();
+
+    coll_numbering_t numbering;
+
+    if (has_collate)
+        number_collate (coll, cmap, numbering, diag);
 
     if (diag.errors ())
         return;
@@ -994,6 +1167,11 @@ write_locale (const write_opts_t &opts, diag_t &diag)
 
     write_messages (def, cmap, names, image);
     write_file (dir, "LC_MESSAGES", image, diag);
+
+    if (has_collate) {
+        write_collate (numbering, coll, cmap, names, image);
+        write_file (dir, "LC_COLLATE", image, diag);
+    }
 }
 
 
@@ -1047,6 +1225,9 @@ main (int argc, char *argv [])
         dump_collate (charmap, input, dir, diag);
     else if (model_args (argc, argv, "--census", charmap, input, dir))
         dump_census (charmap, input, dir, diag);
+    else if (model_args (argc, argv, "--collate-numbers", charmap, input,
+                         dir))
+        dump_numbers (charmap, input, dir, diag);
     else if (write_args (argc, argv, opts)) {
         if (opts.quiet)
             diag.mute_warnings ();
@@ -1061,7 +1242,8 @@ main (int argc, char *argv [])
                     "ldef --values -f CHARMAP -i FILE [-I DIR] | "
                     "ldef --ctype -f CHARMAP -i FILE [-I DIR] | "
                     "ldef --collate -f CHARMAP -i FILE [-I DIR] | "
-                    "ldef --census -f CHARMAP -i FILE [-I DIR]");
+                    "ldef --census -f CHARMAP -i FILE [-I DIR] | "
+                    "ldef --collate-numbers -f CHARMAP -i FILE [-I DIR]");
 
     return diag.exit_status ();
 }

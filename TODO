@@ -32,6 +32,50 @@ Fix: the half-open form of f32e1a22.
 Check: the ctype test's probe for L'\0' and for a character above
 the table under the database path, red against the current library.
 
+** TODO A collating element that is a prefix of another never yields
+
+=__rw_get_n_ce_offset= and its wide twin in =src/collate.cpp= return
+at the first leaf they meet, so an element whose spelling is a
+prefix of another's, =dz= before =dzs= in =hu_HU=, the Sinhala and
+Malayalam elements of =iso14651_t1_common=, matches the shorter and
+the longer one is never found. The old compiler's trie generator
+hid this by losing the shorter element's page; the new compiler's
+tries hold both.
+
+Fix: longest match in the element lookup, the walk going on past a
+leaf while the next byte continues, the last leaf kept.
+
+Check: the collate oracle over Hungarian words with =dzs= under
+=hu_HU.UTF-8= agrees with glibc.
+
+** TODO A character outside a code-point collation is dropped silently
+
+Under =codepoint_collation=, =C.UTF-8=, the table has no shared row
+(=undefined_optimization= 0), and a character the table lacks is
+left out of the transform in =src/collate.cpp= without a word, so two
+strings that differ only in such a character compare equal.
+
+Fix: decide the fallback, the code point itself as the weight as
+glibc's =strcmp= order gives, and write it.
+
+Check: =wcscoll= of two strings differing in a character above the
+charmap under =C.UTF-8= is non-zero.
+
+** TODO =reorder-sections-after= keeps the sections in opening order
+
+The front end records the sections in the order the source opens
+them and ignores =reorder-sections-after=; the parked compiler
+splices the section list at the named section. The tree's =hy_AM=
+uses the keyword and is among the 113 definitions the reader
+rejects, so the difference has not been seen in a database.
+
+Fix: move the sections in =lcollate.cpp= as glibc's =ld-collate.c=
+does for =reorder-sections-after=.
+
+Check: =--collate= of =hy_AM= lists the sections in the reordered
+order, and its =LC_COLLATE= compares against the reference as the
+others do.
+
 ** TODO =%y= and =%C= of a year before 1 leave their ranges
 
 =time_put= writes =%y= as =(1900 + tm_year) % 100= and =%C= as

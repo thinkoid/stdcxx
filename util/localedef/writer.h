@@ -80,6 +80,14 @@ void write_time (const locale_def_t &def, const cmap_t &cmap,
 void write_messages (const locale_def_t &def, const cmap_t &cmap,
                      const image_names_t &names, std::vector<char> &image);
 
+// LC_COLLATE, from the numbering of collnum.h, which the caller runs
+// first: its diagnostics are the definition's, not the writer's.
+struct coll_numbering_t;
+
+void write_collate (const coll_numbering_t &num, const collate_def_t &def,
+                    const cmap_t &cmap, const image_names_t &names,
+                    std::vector<char> &image);
+
 
 // The punctuation header the two numeric images open with, and its
 // strings, appended to image: decimal point and thousands separator,

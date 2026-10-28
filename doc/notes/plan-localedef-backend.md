@@ -831,6 +831,31 @@ them and the code can say why.
   members, no lookup of a missing character.
 - The narrow `...` range in `LC_CTYPE` sets mask bits for bytes the
   charmap does not list. The new writer sets bits for characters.
+- The direction word of a range member's row, and of the entry after
+  a range: the old compiler never set it, so the 20900 Han rows of
+  `zh_HK` and its kin lost the position bit of their fourth level.
+  The new writer gives every row its section's word.
+- An element that is a prefix of another, `dz` before `dzs` in
+  `hu_HU`, the Sinhala and Malayalam elements of the common table:
+  the old element-trie generator reused a page number for the longer
+  key and lost the shorter's page, so the shorter element was never
+  reached. The new tries are built by the shared builder.
+- The end of a range the charmap lacks: the old compiler gave it no
+  collating value; glibc positions it, and the new numbering gives
+  it one, so every later value is one higher, 4889 rows in `ko_KR`
+  under EUC-KR.
+- A weight that names an entry placed after `UNDEFINED`: the old
+  compiler's first pass did not count `UNDEFINED`, so the reference
+  resolved one short, Æ in the tree's `es_ES` taking "A" and a
+  stray value for "A" and "E". The new numbering resolves to the
+  entry's value.
+- A locale copied twice, `om_ET` copying `am_ET` and `om_KE`, both
+  of them `iso14651_t1`: the old compiler read the table twice and
+  wrote every row twice. The new reader reads a locale once a run.
+- An entry placed twice in one reorder block, `ml_IN`: the old
+  compiler kept both rows, glibc and the new reader move the entry.
+  And a `<Uxxxx>` name with lowercase hex digits, which the old
+  charmap lookup missed and took for a symbol.
 - A `sign_posn` of 0 in `LC_MONETARY`: the old compiler substituted
   the sign string `"()"` into the narrow sign after it had sized the
   strings, so every offset past the sign fell two bytes short, and
@@ -994,6 +1019,10 @@ database is byte-identical to the parked compiler's except:
   extension blocks judged by the structural check of 3.5, and the
   transliteration section empty;
 - the era records, where `strftime` under the C library decides;
+- `LC_COLLATE` wherever one of the old compiler's defects listed in
+  3.7 applies, which is most definitions: the file is read
+  structurally, header, rows and tries, and every difference is
+  attributed to a listed line or it is a defect;
 - the lines of section 3.7, each named in the comparison's output.
 
 The locale tests pass against their pins, re-pinned where the data
