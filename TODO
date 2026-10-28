@@ -32,6 +32,23 @@ Fix: the half-open form of f32e1a22.
 Check: the ctype test's probe for L'\0' and for a character above
 the table under the database path, red against the current library.
 
+** TODO =%y= and =%C= of a year before 1 leave their ranges
+
+=time_put= writes =%y= as =(1900 + tm_year) % 100= and =%C= as
+=((1900 + tm_year) / 100) % 100=, =src/time_put.cpp=: for the year
+-543 that is =-43= and =-05=, where XSH =strftime= bounds =%y= to
+[00,99] and glibc writes =57= and =-6=, so that =%C= times 100 plus
+=%y= is the year. The era oracle, =bin/oracle/time.cpp=, meets it on
+the day before the Buddhist era of =th_TH= and =lo_LA=, where no era
+matches and the unmodified conversions are written.
+
+Fix: floor the century and take the year modulo 100 into [00,99], as
+glibc does; the wide path shares the code.
+
+Check: the oracle's four disagreements at -543-12-31 under =th_TH=
+and =lo_LA= gone; the =time_put= test with a case for each of =%y=
+and =%C= at a negative year.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it

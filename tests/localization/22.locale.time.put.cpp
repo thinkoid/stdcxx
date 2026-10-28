@@ -1597,32 +1597,44 @@ void test_user (charT, const char *tname)
     };
 
     const time_data::era_data era[] = {
-        // some entries copied and modified from HP-UX 11.11 ja_JP.utf8
+        // the eras in the meaning of XBD 7.3.5, which glibc implements:
+        // the start date is the one nearest the era's first year and
+        // may be the later of the two in time; the direction says at
+        // which end of the era the years have the lower numbers; the
+        // offset is the number of the year at the start date; a date
+        // belongs to the era when it lies between the two dates, each
+        // compared as a whole, year, month, then day
         //
-        // # 1990-01-02 and onward:    "Heisei%EyNen" (1990 is Heisei 2 Nen.)
-        // # 1990-01-01 to 1990-01-02: "%C"           (no era specified)
-        // # 1989-01-08 to 1989-12-31: "HeiseiGannen"
-        // # 1927-01-01 to 1989-01-07: "Showa%EyNen"  (1927 is Showa 2 Nen.)
-        // # 1927-01-01 and prior:     "foo"
-        // era "+:2:1990/01/02:+*:<U????><U????>:%EC%Ey<U????>";
-        //     "+:1:1989/01/08:1989/12/31:<U????>:%EC<U????><U????>";
-        //     "+:2:1927/01/01:1989/01/07:<U????><U????>:%EC%Ey<U????>";
-        //     "-:7:1926/12/31:-*:foo:bar%EC%Ey"
+        // era "+:2:1990/01/02:+*:Heisei:%EC %Ey Nen";
+        //     "+:1:1989/01/08:1989/12/31:Heisei:%EC Gannen";
+        //     "+:2:1927/01/01:1989/01/07:Showa:%EC %Ey Nen";
+        //     "-:3:1924/01/01:1926/12/31:Count:%EC %Ey";
+        //     "-:2:1923/12/31:1922/01/01:Recount:%EC %Ey";
+        //     "+:1:1921/12/31:-*:Before:%EC %Ey"
+        //
+        // Before: counts up into the past, the form of the era before
+        //         the republic in zh_TW: 1921 is 1, 1900 is 22, 1800
+        //         is 122
+        // Recount: start later than end, counts down toward the end
+        //         date: 1923 is 2, 1922 is 1
+        // Count:  counts down toward the end date: 1924 is 3, 1925 is
+        //         2, 1926 is 1
+        // Showa:  1927 is 2, 1989-01-07 is 64
+        // Heisei Gannen: the first year, with no %Ey in the format
+        // 1990-01-01 belongs to no era: %EC, %Ey and %EY fall back
+        //         to %C, %y and %Y
+        // Heisei: 1990-01-02 is 2, 2002 is 14
+        //
+        // the start year stays positive throughout: the compiler
+        // the test runs stores a negative year as written, while
+        // the runtime reads the astronomical year, with a year 0
 
-        //   7|2        |1        | |2   starting year in an era
-        // <<<|>>>>>>>>>|>>>>>>>>>|.|>>> direction in which years increase
-        //    ^         ^         ^ ^
-        //    |         |         | |
-        //    |         |         | +-> Jan 2, 1990 (Heisei %Ey Nen)
-        //    |         |         +-> Dec 31, 1989 (%C)
-        //    |         +-> Jan 7, 1989 (Heisei Gannen)
-        //    +-> Jan 1, 1927 (Showa %Ey Nen)
-        //    +-< Dec 31, 1926 (foobar %Ey)
-
-        {  2,  2,  0, 90,  0,  0, INT_MAX, "Heisei", "%EC %Ey Nen" },
-        {  1,  8,  0, 89, 31, 11,      89, "Heisei", "%EC Gannen" },
-        {  2,  1,  0, 27,  7,  0,      89, "Showa",  "%EC %Ey Nen" },
-        { -7, 31, 11, 26,  0,  0, INT_MIN, "bar",    "foo%EC %Ey" },
+        {  2,  2,  0, 90,  0,  0, INT_MAX, "Heisei",  "%EC %Ey Nen" },
+        {  1,  8,  0, 89, 31, 11,      89, "Heisei",  "%EC Gannen" },
+        {  2,  1,  0, 27,  7,  0,      89, "Showa",   "%EC %Ey Nen" },
+        { -3,  1,  0, 24, 31, 11,      26, "Count",   "%EC %Ey" },
+        { -2, 31, 11, 23,  1,  0,      22, "Recount", "%EC %Ey" },
+        {  1, 31, 11, 21,  0,  0, INT_MIN, "Before",  "%EC %Ey" },
         { INT_MIN /* sentinel entry */, 0, 0, 0, 0, 0, 0, 0, 0 }
     };
 
@@ -1746,12 +1758,18 @@ void test_user (charT, const char *tname)
     // %EC: the name of the base year (period) in the locale's
     //      alternative representation.
     rw_info (0, 0, __LINE__,
-             "%%Ec: the name of the base year (period) in the locale's "
+             "%%EC: the name of the base year (period) in the locale's "
              "alternative representation");
-    TEST (T (0, 0, 0,  1,  0, -100), "%EC", 0, 0, ' ', era [3].name);
-    TEST (T (0, 0, 0,  1,  0,    0), "%EC", 0, 0, ' ', era [3].name);
+    TEST (T (0, 0, 0,  1,  0, -100), "%EC", 0, 0, ' ', era [5].name);
+    TEST (T (0, 0, 0,  1,  0,    0), "%EC", 0, 0, ' ', era [5].name);
+    TEST (T (0, 0, 0, 30, 11,   21), "%EC", 0, 0, ' ', era [5].name);
+    TEST (T (0, 0, 0, 31, 11,   21), "%EC", 0, 0, ' ', era [5].name);
+    TEST (T (0, 0, 0,  1,  0,   22), "%EC", 0, 0, ' ', era [4].name);
+    TEST (T (0, 0, 0, 31, 11,   23), "%EC", 0, 0, ' ', era [4].name);
+    TEST (T (0, 0, 0,  1,  0,   24), "%EC", 0, 0, ' ', era [3].name);
     TEST (T (0, 0, 0, 31, 11,   26), "%EC", 0, 0, ' ', era [3].name);
     TEST (T (0, 0, 0,  1,  0,   27), "%EC", 0, 0, ' ', era [2].name);
+    TEST (T (0, 0, 0, 20,  0,   27), "%EC", 0, 0, ' ', era [2].name);
     TEST (T (0, 0, 0,  7,  0,   89), "%EC", 0, 0, ' ', era [2].name);
     TEST (T (0, 0, 0,  8,  0,   89), "%EC", 0, 0, ' ', era [1].name);
     TEST (T (0, 0, 0, 31, 11,   89), "%EC", 0, 0, ' ', era [1].name);
@@ -1774,33 +1792,47 @@ void test_user (charT, const char *tname)
     //                                     "[[%H hrs][%M min][%S sec]]"
     TEST (T (22, 5, 18), "%EX", 0, 0, ' ', "[[18 hrs][05 min][22 sec]]");
 
-    // %Ey: the offset from %EC (year only) in the alternative representation.
+    // %Ey: the offset from %EC (year only) in the alternative
+    //      representation, in ordinary digits zero-padded to two
     rw_info (0, 0, __LINE__,
              "%%Ey: the offset from %%EC in the alternative representation");
-    TEST (T (0, 0, 0,  1,  0, -100), "%Ey", 0, 0, ' ', "133");   // grows down
-    TEST (T (0, 0, 0,  1,  0,    0), "%Ey", 0, 0, ' ', "33");    // grows down
-    TEST (T (0, 0, 0,  1,  0,    2), "%Ey", 0, 0, ' ', "31st");  // grows down
-    TEST (T (0, 0, 0,  1,  0,   20), "%Ey", 0, 0, ' ', "13th");  // grows down
-    TEST (T (0, 0, 0, 31, 11,   26), "%Ey", 0, 0, ' ', "7th");   // grows down
-    TEST (T (0, 0, 0,  1,  0,   27), "%Ey", 0, 0, ' ', "2nd");   // grows up
-    TEST (T (0, 0, 0,  7,  0,   89), "%Ey", 0, 0, ' ', "64");    // no era
-    TEST (T (0, 0, 0,  8,  0,   89), "%Ey", 0, 0, ' ', "1st");   // grows up
-    TEST (T (0, 0, 0, 31, 11,   89), "%Ey", 0, 0, ' ', "1st");   // grows up
-    TEST (T (0, 0, 0,  1,  0,   90), "%Ey", 0, 0, ' ', "90");    // grows up
-    TEST (T (0, 0, 0,  2,  0,   90), "%Ey", 0, 0, ' ', "2nd");   // grows up
-    TEST (T (0, 0, 0, 30,  3,  102), "%Ey", 0, 0, ' ', "14th");  // grows up
+    TEST (T (0, 0, 0,  1,  0, -100), "%Ey", 0, 0, ' ', "122");   // into the past
+    TEST (T (0, 0, 0,  1,  0,    0), "%Ey", 0, 0, ' ', "22");    // into the past
+    TEST (T (0, 0, 0,  1,  0,    2), "%Ey", 0, 0, ' ', "20");    // into the past
+    TEST (T (0, 0, 0,  1,  0,   20), "%Ey", 0, 0, ' ', "02");    // into the past
+    TEST (T (0, 0, 0, 30, 11,   21), "%Ey", 0, 0, ' ', "01");    // into the past
+    TEST (T (0, 0, 0, 31, 11,   21), "%Ey", 0, 0, ' ', "01");    // into the past
+    TEST (T (0, 0, 0,  1,  0,   22), "%Ey", 0, 0, ' ', "01");    // down to the end
+    TEST (T (0, 0, 0, 31, 11,   23), "%Ey", 0, 0, ' ', "02");    // down to the end
+    TEST (T (0, 0, 0,  1,  0,   24), "%Ey", 0, 0, ' ', "03");    // down to the end
+    TEST (T (0, 0, 0,  1,  0,   25), "%Ey", 0, 0, ' ', "02");    // down to the end
+    TEST (T (0, 0, 0, 31, 11,   26), "%Ey", 0, 0, ' ', "01");    // down to the end
+    TEST (T (0, 0, 0,  1,  0,   27), "%Ey", 0, 0, ' ', "02");    // grows up
+    TEST (T (0, 0, 0, 20,  0,   27), "%Ey", 0, 0, ' ', "02");    // grows up
+    TEST (T (0, 0, 0,  7,  0,   89), "%Ey", 0, 0, ' ', "64");    // grows up
+    TEST (T (0, 0, 0,  8,  0,   89), "%Ey", 0, 0, ' ', "01");    // grows up
+    TEST (T (0, 0, 0, 31, 11,   89), "%Ey", 0, 0, ' ', "01");    // grows up
+    TEST (T (0, 0, 0,  1,  0,   90), "%Ey", 0, 0, ' ', "90");    // no era
+    TEST (T (0, 0, 0,  2,  0,   90), "%Ey", 0, 0, ' ', "02");    // grows up
+    TEST (T (0, 0, 0, 30,  3,  102), "%Ey", 0, 0, ' ', "14");    // grows up
 
     // %EY: the full alternative year representation.
     rw_info (0, 0, __LINE__, "%%EY: the full alternative year representation");
-    TEST (T (0, 0, 0,  1,  0,    0), "%EY", 0, 0, ' ', "foobar 33");
-    TEST (T (0, 0, 0, 31, 11,   26), "%EY", 0, 0, ' ', "foobar 7th");
-    TEST (T (0, 0, 0,  1,  0,   27), "%EY", 0, 0, ' ', "Showa 2nd Nen");
+    TEST (T (0, 0, 0,  1,  0, -100), "%EY", 0, 0, ' ', "Before 122");
+    TEST (T (0, 0, 0,  1,  0,    0), "%EY", 0, 0, ' ', "Before 22");
+    TEST (T (0, 0, 0, 31, 11,   21), "%EY", 0, 0, ' ', "Before 01");
+    TEST (T (0, 0, 0,  1,  0,   22), "%EY", 0, 0, ' ', "Recount 01");
+    TEST (T (0, 0, 0, 31, 11,   23), "%EY", 0, 0, ' ', "Recount 02");
+    TEST (T (0, 0, 0,  1,  0,   24), "%EY", 0, 0, ' ', "Count 03");
+    TEST (T (0, 0, 0, 31, 11,   26), "%EY", 0, 0, ' ', "Count 01");
+    TEST (T (0, 0, 0,  1,  0,   27), "%EY", 0, 0, ' ', "Showa 02 Nen");
+    TEST (T (0, 0, 0, 20,  0,   27), "%EY", 0, 0, ' ', "Showa 02 Nen");
     TEST (T (0, 0, 0,  7,  0,   89), "%EY", 0, 0, ' ', "Showa 64 Nen");
     TEST (T (0, 0, 0,  8,  0,   89), "%EY", 0, 0, ' ', "Heisei Gannen");
     TEST (T (0, 0, 0, 31, 11,   89), "%EY", 0, 0, ' ', "Heisei Gannen");
     TEST (T (0, 0, 0,  1,  0,   90), "%EY", 0, 0, ' ', "1990");
-    TEST (T (0, 0, 0,  2,  0,   90), "%EY", 0, 0, ' ', "Heisei 2nd Nen");
-    TEST (T (0, 0, 0, 30,  3,  102), "%EY", 0, 0, ' ', "Heisei 14th Nen");
+    TEST (T (0, 0, 0,  2,  0,   90), "%EY", 0, 0, ' ', "Heisei 02 Nen");
+    TEST (T (0, 0, 0, 30,  3,  102), "%EY", 0, 0, ' ', "Heisei 14 Nen");
 
     // reset the global locale and delete the temporary combined locale
     std::locale::global (std::locale ("C"));

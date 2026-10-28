@@ -614,9 +614,10 @@ struct __rw_time_t
         _RWSTD_INT32_T  offset;         // year closest to start_date
 
         // the beginning of time is represented by INT_MIN stored in
-        // year [1], and CHAR_MIN in month [1] and day [1]
+        // year [i], and CHAR_MIN in month [i] and day [i]
         // the end of time is represented by INT_MAX stored in
-        // year [1], and CHAR_MAX in month [1] and day [1]
+        // year [i], and CHAR_MAX in month [i] and day [i]
+        // a year is the astronomical one, with a year 0 before year 1
         _RWSTD_INT32_T  year [2];       // start and end year
         char            month [2];      // start and end month [0..11]
         char            day [2];        // start and end day [1..31]

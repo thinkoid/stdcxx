@@ -84,12 +84,11 @@ strings_of (const field_t<std::vector<ucs_string_t> > &list, std::size_t n)
 }
 
 
-// One bound of an era as the old compiler stored it: the year in
-// full, the month from 0, the day from 1, and for -* and +* the
-// infinities _localedef.h names.  The model holds glibc's year, less
-// 1900 and with no year 0, so the year written is the astronomical
-// one.  Step 3 of the back-end plan redoes the records with the
-// runtime, and until then their bytes are outside the comparison.
+// One bound of an era: the year in full, the month from 0, the day
+// from 1, and for -* and +* the infinities _localedef.h names.  The
+// model holds glibc's year, less 1900 and with no year 0, so the year
+// written is the astronomical one, -542 for an era declared at -543,
+// which the runtime compares with 1900 + tm_year.
 static void
 era_bound (const int date [3], _RWSTD_INT32_T &year, char &month, char &day)
 {

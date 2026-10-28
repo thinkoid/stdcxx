@@ -1627,6 +1627,26 @@ __rw_iso_week (int& year, int yday, int wday)
 }
 
 
+// compares the date given by `year', `mon' and `mday' with the
+// bound `k' of the era `pera' (0 for its start date, 1 for its
+// end date), the year first, then the month, then the day, and
+// returns a negative, zero, or positive value as the date comes
+// before, falls on, or comes after the bound; the infinities
+// of a bound at either end of time decide at the year
+static int
+__rw_era_date_cmp (int year, int mon, int mday,
+                   const __rw_time_t::era_t *pera, int k)
+{
+    if (year != pera->year [k])
+        return year < pera->year [k] ? -1 : 1;
+
+    if (mon != pera->month [k])
+        return mon < pera->month [k] ? -1 : 1;
+
+    return mday - pera->day [k];
+}
+
+
 // returns a pointer to the era_t element describing the era
 // corresponding to the date pointed to by `tmb', or 0 if no
 // such era exists
@@ -1645,25 +1665,45 @@ __rw_get_era (const __rw_time_t *ptime, const tm *tmb)
 
         _RWSTD_ASSERT (0 != pera);
 
-        // offset <  0 implies direction of '-'
-        // offset >= 0 implies direction of '+'
-        const int b = pera->offset < 0;   // start index
-        const int e = !b;                 // end index
+        // the start date is the one nearest the era's first year
+        // and may be the later of the two (an era that counts into
+        // the past ends at the beginning of time): the date belongs
+        // to the era when it lies between the bounds in either order,
+        // each bound compared as a whole date so that a day in the
+        // first or last month of an era is tested against the bound
+        // of that month alone
+        const int cs =
+            __rw_era_date_cmp (year, tmb->tm_mon, tmb->tm_mday, pera, 0);
+        const int ce =
+            __rw_era_date_cmp (year, tmb->tm_mon, tmb->tm_mday, pera, 1);
 
-        // check to see if the specified date belongs to the era
-        if (   (year > pera->year [b] && year < pera->year [e])
-            || (   (year == pera->year [b] || year == pera->year [e])
-                && (   (   tmb->tm_mon > pera->month [b]
-                        && tmb->tm_mon < pera->month [e])
-                    || (    (   tmb->tm_mon == pera->month [b]
-                             || tmb->tm_mon == pera->month [e])
-                        && tmb->tm_mday >= pera->day [b]
-                        && tmb->tm_mday <= pera->day [e])))) {
+        if ((cs <= 0 && 0 <= ce) || (ce <= 0 && 0 <= cs))
             return pera;
-        }
     }
 
     return 0;
+}
+
+
+// returns the number of the year of the date pointed to by `tmb'
+// within the era `pera' that contains it
+static int
+__rw_get_era_year (const __rw_time_t::era_t *pera, const tm *tmb)
+{
+    // the offset numbers the year at the start date and its sign
+    // says whether the numbers grow toward the end date ('+') or
+    // shrink toward it ('-'); the end date may be earlier in time
+    // than the start date, and then the count against the calendar
+    // runs the other way
+    const bool backward =
+        0 < __rw_era_date_cmp (pera->year [0], pera->month [0],
+                               pera->day [0], pera, 1);
+    const bool shrinks = pera->offset < 0;
+
+    const int offset = shrinks ? -pera->offset : pera->offset;
+    const int delta  = 1900 + tmb->tm_year - pera->year [0];
+
+    return backward == shrinks ? offset + delta : offset - delta;
 }
 
 
@@ -2340,10 +2380,10 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
             const __rw_time_t::era_t* const pera = __rw_get_era (ptime, tmb);
 
             if (pera) {
-                tpd.altval = pera->offset < 0
-                    ? pera->year [0] - 1900 - tmb->tm_year - pera->offset
-                    : 1900 + tmb->tm_year - pera->year [0] + pera->offset;
-
+                // in ordinary digits, zero-padded to two as strftime()
+                // writes it; the alternative numeric symbols are %Oy's
+                tpd.val  = __rw_get_era_year (pera, tmb);
+                tpd.prec = 2;
                 break;
             }
         }
