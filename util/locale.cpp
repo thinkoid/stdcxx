@@ -72,11 +72,9 @@
 
 #include <loc/_localedef.h>
 
-#include "aliases.h"
-#include "charmap.h"
-#include "loc_exception.h"
+#include "localedef/cmap.h"
+#include "localedef/diag.h"
 #include "memchk.h"
-#include "diagnostic.h"
 
 /**************************************************************************/
 
@@ -114,7 +112,9 @@ static bool posix_output = true;
 // Character Set
 static bool use_pcs = false;
 
-static bool is_utf8 = true;
+// the sink of every diagnostic: an error ends the run, a warning is
+// printed unless muted by "-w" or "-w###"
+static diag_t diag;
 
 
 static const __rw::__rw_codecvt_t* codecvt_st   = 0;
@@ -150,14 +150,14 @@ int validate (const void *addr, std::size_t nbytes)
 
     if (nbytes != size) {
         if (size)
-            issue_diag (E_INVAL, true, 0,
-                        "invalid size at address %p: %u, expected %u\n",
+            diag.error (e_inval, nowhere,
+                        "invalid size at address %p: %u, expected %u",
                         addr, size, nbytes);
         else
-            issue_diag (E_INVAL, true, 0,
-                        "invalid address: %p (%u bytes)\n", addr, nbytes);
+            diag.error (e_inval, nowhere,
+                        "invalid address: %p (%u bytes)", addr, nbytes);
             
-        return -1;
+        std::exit (diag.exit_status ());
     }
 
     return 0;
@@ -171,13 +171,13 @@ int validate (const char *str)
         const std::size_t first_byte = memchk (str, 1);
 
         if (1 == first_byte)
-            issue_diag (E_INVAL, true, 0,
-                        "invalid string address: %p\n", str);
+            diag.error (e_inval, nowhere,
+                        "invalid string address: %p", str);
         else
-            issue_diag (E_INVAL, true, 0,
-                        "invalid string at %p: no terminating NUL\n", str);
+            diag.error (e_inval, nowhere,
+                        "invalid string at %p: no terminating NUL", str);
         
-        return -1;
+        std::exit (diag.exit_status ());
     }
 
     return 0;
@@ -412,106 +412,50 @@ init_sections ()
 }
 
 
-static const char*
-set_locale (int lc_cat, const char *locname, const std::string &charmap_name)
-{
-
-    assert (0 != locname);
-
-    locname = std::setlocale (lc_cat, locname);
-
-    if (locname)
-        return locname;
-
-    std::string encoding (charmap_name.substr (0, charmap_name.rfind ('.')));
-
-    std::vector<std::string> aliases;
-    get_cname_aliases (encoding, aliases);
-
-    std::vector<std::string>::iterator pos;
-
-    for (pos = aliases.begin(); !is_utf8 && pos != aliases.end(); pos++)
-        if (*pos == "utf8")
-            is_utf8 = true;
-
-    const char* names = get_installed_locales ();
-
-    for (; *names; names += std::strlen (names) + 1) {
-
-        if (0 != std::setlocale (LC_CTYPE, names)) {
-
-            const char* const codeset = nl_langinfo (CODESET);
-
-            for (pos = aliases.begin (); pos != aliases.end (); ++pos)
-                if (codeset == *pos)
-                    return names;
-        }
-    }
-
-    return 0;
-}
-
-
 /**************************************************************************/
 
-static const Charmap*
+static const cmap_t*
 get_charmap (int lc_cat)
 {
     if (!decode)
         return 0;
 
-    static const char* const lang        = std::getenv ("LANG");
-    static const char* const lc_all      = std::getenv (sect_lc_all);
-    static const char* const lc_collate  = std::getenv (sect_lc_collate);
-    static const char* const lc_ctype    = std::getenv (sect_lc_ctype);
-    static const char* const lc_messages = std::getenv (sect_lc_messages);
-    static const char* const lc_monetary = std::getenv (sect_lc_monetary);
-    static const char* const lc_numeric  = std::getenv (sect_lc_numeric);
-    static const char* const lc_time     = std::getenv (sect_lc_time);
-
-    static const Charmap* cmaps [6];
-    static bool           cmaps_tried [sizeof cmaps / sizeof *cmaps];
+    static const cmap_t* cmaps [6];
+    static bool          cmaps_tried [sizeof cmaps / sizeof *cmaps];
 
     const char* charmap = 0;
-    const char* locale  = 0;
 
-    const Charmap** cmap = 0;
+    const cmap_t** cmap = 0;
 
     switch (lc_cat) {
 
     case LC_COLLATE:
         charmap = collate_st ? collate_st->charmap_name () : "";
-        locale  = lc_collate;
         cmap    = cmaps + 0;
         break;
 
     case LC_CTYPE:
         charmap = ctype_st ? ctype_st->charmap_name () : "";
-        locale  = lc_ctype;
         cmap    = cmaps + 1;
         break;
 
     case LC_MESSAGES:
         charmap = messages_st ? messages_st->charmap_name () : "";
-        locale  = lc_messages;
         cmap    = cmaps + 2;
         break;
 
     case LC_MONETARY:
         charmap = mon_st ? mon_st->charmap_name () : "";
-        locale  = lc_monetary;
         cmap    = cmaps + 3;
         break;
 
     case LC_NUMERIC:
         charmap = num_st ? num_st->charmap_name () : "";
-        locale  = lc_numeric;
         cmap    = cmaps + 4;
         break;
 
     case LC_TIME:
         charmap = time_st ? time_st->charmap_name () : "";
-        locale  = lc_time;
         cmap    = cmaps + 5;
         break;
 
@@ -521,23 +465,10 @@ get_charmap (int lc_cat)
     assert (0 != cmap);
     assert (0 != charmap);
 
-    if (*cmap && (*cmap)->get_charmap_name () == charmap)
-        return *cmap;
-
     if (cmaps_tried [cmap - cmaps])
         return *cmap;
 
     cmaps_tried [cmap - cmaps] = true;
-
-    // LC_ALL overrides any other LC_XXX setting
-    if (lc_all && *lc_all)
-        locale = lc_all;
-
-    // when neither LC_ALL or LC_XX is specified fall back on LANG
-    if (0 == locale)
-        locale = lang ? lang : "POSIX";
-
-    set_locale (lc_cat, locale, charmap);
 
     // look for the charmap directory
     static const char* const src_root = std::getenv ("RWSTD_SRC_ROOT");
@@ -545,12 +476,12 @@ get_charmap (int lc_cat)
     if (0 == src_root) {
         static int warning_issued = 0;
         if (0 == warning_issued++)
-            issue_diag (W_CHARMAP, false, 0, "RWSTD_SRC_ROOT not set\n");
+            diag.warning (709, nowhere, "RWSTD_SRC_ROOT not set");
     }
     else if ('\0' == *charmap) {
         static int warning_issued = 0;
         if (0 == warning_issued++)
-            issue_diag (W_CHARMAP, false, 0, "no charmap name\n");
+            diag.warning (709, nowhere, "no charmap name");
     }
     else {
         std::string charmap_path = src_root;
@@ -560,17 +491,167 @@ get_charmap (int lc_cat)
         charmap_path += _RWSTD_PATH_SEP;
         charmap_path += charmap;
 
-        // search for a C library locale that uses the same encoding
-        std::string std_encoding (charmap);
+        cmap_t* const map = new cmap_t;
 
-        std::string C_locale (get_C_encoding_locale (std_encoding));
+        // a charmap that cannot be read ends the run
+        try {
+            if (!map->read (charmap_path, diag))
+                std::exit (diag.exit_status ());
+        }
+        catch (const open_error_t &error) {
+            diag.error (e_openrd, nowhere,
+                        "%s could not be opened for reading: %s",
+                        error.path.c_str (), std::strerror (error.error));
+            std::exit (diag.exit_status ());
+        }
 
-        *cmap = new Charmap (C_locale.c_str (), charmap_path.c_str(),
-                             0 == std::strcmp ("utf8.cm", charmap),
-                             false, true, false);
+        *cmap = map;
     }
 
     return cmap ? *cmap : 0;
+}
+
+
+// the symbolic names of the Portable Character Set by code, as the
+// old compiler's charmap reader spelled them; 0 where it gave none
+static const char* const
+portable_charset[] = {
+    /* 0x00       */ "<NUL>",
+    /* 0x01   SOH */ 0,
+    /* 0x02   STX */ 0,
+    /* 0x03   ETX */ 0,
+    /* 0x04   EOT */ 0,
+    /* 0x05   ENQ */ 0,
+    /* 0x06   ACK */ 0,
+    /* 0x07   BEL */ "<alert>",
+    /* 0x08       */ "<backspace>",
+    /* 0x09   TAB */ "<tab>",
+    /* 0x0a       */ "<newline>",
+    /* 0x0b       */ "<vertical-tab>",
+    /* 0x0c       */ "<form-feed>",
+    /* 0x0d       */ "<carriage-return>",
+    /* 0x0e   SO  */ 0,
+    /* 0x0f   SI  */ 0,
+    /* 0x10   DLE */ 0,
+    /* 0x11   DC1 */ 0,
+    /* 0x12   DC2 */ 0,
+    /* 0x13   DC3 */ 0,
+    /* 0x14   DC4 */ 0,
+    /* 0x15   NAK */ 0,
+    /* 0x16   SYN */ 0,
+    /* 0x17   ETB */ 0,
+    /* 0x18   CAN */ 0,
+    /* 0x19   EM  */ 0,
+    /* 0x1a   SUB */ 0,
+    /* 0x1b   ESC */ 0,
+    /* 0x1c   IS4 */ 0,
+    /* 0x1d   IS3 */ 0,
+    /* 0x1e   IS2 */ 0,
+    /* 0x1f   IS1 */ 0,
+    /* 0x20   SPC */ "<space>",
+    /* 0x21    !  */ "<exclamation-mark>",
+    /* 0x22    '  */ "<quotation-mark>",
+    /* 0x23    #  */ "<number-sign>",
+    /* 0x24    $  */ "<dollar-sign>",
+    /* 0x25    %  */ "<percent-sign>",
+    /* 0x26    &  */ "<ampersand>",
+    /* 0x27    '  */ "<apostrophe>",
+    /* 0x28    (  */ "<left-parenthesis>",
+    /* 0x29    )  */ "<right-parenthesis>",
+    /* 0x2a    *  */ "<asterisk>",
+    /* 0x2b    +  */ "<plus-sign>",
+    /* 0x2c    ,  */ "<comma>",
+    /* 0x2d    -  */ "<hyphen>",   // "<hyphen-minus>",
+    /* 0x2e    .  */ "<period>",   // "<full-stop>",
+    /* 0x2f    /  */ "<slash>",    // "<solidus>",
+    /* 0x30    0  */ "<zero>",
+    /* 0x31    1  */ "<one>",
+    /* 0x32    2  */ "<two>",
+    /* 0x33    3  */ "<three>",
+    /* 0x34    4  */ "<four>",
+    /* 0x35    5  */ "<five>",
+    /* 0x36    6  */ "<six>",
+    /* 0x37    7  */ "<seven>",
+    /* 0x38    8  */ "<eight>",
+    /* 0x39    9  */ "<nine>",
+    /* 0x3a    :  */ "<colon>",
+    /* 0x3b    ;  */ "<semicolon>",
+    /* 0x3c    <  */ "<less-than-sign>",
+    /* 0x3d    =  */ "<equals-sign>",
+    /* 0x3e    >  */ "<greater-than-sign>",
+    /* 0x3f    ?  */ "<question-mark>",
+    /* 0x40    @  */ "<commercial-at>",
+    /* 0x41    A  */ "<A>",
+    /* 0x42    B  */ "<B>",
+    /* 0x43    C  */ "<C>",
+    /* 0x44    D  */ "<D>",
+    /* 0x45    E  */ "<E>",
+    /* 0x46    F  */ "<F>",
+    /* 0x47    G  */ "<G>",
+    /* 0x48    H  */ "<H>",
+    /* 0x49    I  */ "<I>",
+    /* 0x4a    J  */ "<J>",
+    /* 0x4b    K  */ "<K>",
+    /* 0x4c    L  */ "<L>",
+    /* 0x4d    M  */ "<M>",
+    /* 0x4e    N  */ "<N>",
+    /* 0x4f    O  */ "<O>",
+    /* 0x50    P  */ "<P>",
+    /* 0x51    Q  */ "<Q>",
+    /* 0x52    R  */ "<R>",
+    /* 0x53    S  */ "<S>",
+    /* 0x54    T  */ "<T>",
+    /* 0x55    U  */ "<U>",
+    /* 0x56    V  */ "<V>",
+    /* 0x57    W  */ "<W>",
+    /* 0x58    X  */ "<X>",
+    /* 0x59    Y  */ "<Y>",
+    /* 0x5a    Z  */ "<Z>",
+    /* 0x5b    [  */ "<left-square-bracket>",
+    /* 0x5c    \  */ "<backslash>",    // "<reverse-solidus>",
+    /* 0x5d    ]  */ "<right-square-bracket>",
+    /* 0x5e    ^  */ "<circumflex>",   // "<circumflex-accent>",
+    /* 0x5f    _  */ "<underscore>",   // "<low-line>",
+    /* 0x60    `  */ "<grave-accent>",
+    /* 0x61    a  */ "<a>",
+    /* 0x62    b  */ "<b>",
+    /* 0x63    c  */ "<c>",
+    /* 0x64    d  */ "<d>",
+    /* 0x65    e  */ "<e>",
+    /* 0x66    f  */ "<f>",
+    /* 0x67    g  */ "<g>",
+    /* 0x68    h  */ "<h>",
+    /* 0x69    i  */ "<i>",
+    /* 0x6a    j  */ "<j>",
+    /* 0x6b    k  */ "<k>",
+    /* 0x6c    l  */ "<l>",
+    /* 0x6d    m  */ "<m>",
+    /* 0x6e    n  */ "<n>",
+    /* 0x6f    o  */ "<o>",
+    /* 0x70    p  */ "<p>",
+    /* 0x71    q  */ "<q>",
+    /* 0x72    r  */ "<r>",
+    /* 0x73    s  */ "<s>",
+    /* 0x74    t  */ "<t>",
+    /* 0x75    u  */ "<u>",
+    /* 0x76    v  */ "<v>",
+    /* 0x77    w  */ "<w>",
+    /* 0x78    x  */ "<x>",
+    /* 0x79    y  */ "<y>",
+    /* 0x7a    z  */ "<z>",
+    /* 0x7b    {  */ "<left-brace>",    // "<left-curly-bracket>",
+    /* 0x7c    |  */ "<vertical-line>",
+    /* 0x7d    }  */ "<right-brace>",   // "<right-curly-bracket>",
+    /* 0x7e    ~  */ "<tilde>",
+    /* 0x7f       */ 0
+};
+
+
+// the symbolic name of a charmap entry as a charmap writes it
+static std::string
+sym_name (const cmap_entry_t &entry)
+{
+    return '<' + entry.name + '>';
 }
 
 
@@ -601,9 +682,9 @@ escape_value (unsigned val, bool always = false)
         ret += char (val);
     }
     else if (   use_pcs && val <= UChar ('~')
-             && Charmap::portable_charset [val]) {
+             && portable_charset [val]) {
         // use symbols from the Portable Character Set
-        ret += Charmap::portable_charset [val];
+        ret += portable_charset [val];
     }
     else if (val < sizeof printable - 1 && ' ' != printable [val] && !always) {
         // represent non-space printable characters as themselves
@@ -648,7 +729,7 @@ escape_value (unsigned val, bool always = false)
 
 
 static std::string
-create_str (const char* str, const wchar_t* wstr, const Charmap *charmap)
+create_str (const char* str, const wchar_t* wstr, const cmap_t *charmap)
 {
     if (0 == str)
         str = "";
@@ -665,27 +746,22 @@ create_str (const char* str, const wchar_t* wstr, const Charmap *charmap)
         return ret;
     }
 
-    typedef std::map <UChar, std::string>::const_iterator rn_cmap_iter;
-    typedef std::map <wchar_t, std::string>::const_iterator rw_cmap_iter;
-
     if (0 == ctype_st || 1 == ctype_st->mb_cur_max) {
         // look up each character in the character map and (try
         // to) get the symbolic name associated with each, falling
         // back on ordinary formatting using escape sequences when
         // the character is not found in the map
 
-        const rn_cmap_iter end = charmap->get_rn_cmap ().end ();
-
         for (; *str != '\0'; ++str) {
             const UChar uc = UChar (*str);
-            const rn_cmap_iter it = charmap->get_rn_cmap ().find (uc);
 
-            ret += (it == end) ? escape_value (uc) : it->second;
+            cmap_entry_t entry;
+
+            ret += charmap->find_bytes (std::string (1, char (uc)), entry)
+                ? sym_name (entry) : escape_value (uc);
         }
     }
     else {
-        const rw_cmap_iter end = charmap->get_rw_cmap ().end ();
-
         if (0 == wstr)
             wstr = L"";
 
@@ -693,9 +769,10 @@ create_str (const char* str, const wchar_t* wstr, const Charmap *charmap)
 
             const unsigned uc = unsigned (*wstr);
 
-            const rw_cmap_iter it = charmap->get_rw_cmap ().find (uc);
+            cmap_entry_t entry;
 
-            ret += (it == end) ? escape_value (uc) : it->second;
+            ret += charmap->find_ucs (long (uc), entry)
+                ? sym_name (entry) : escape_value (uc);
         }
     }
 
@@ -705,23 +782,21 @@ create_str (const char* str, const wchar_t* wstr, const Charmap *charmap)
 
 // formats a character in human readable form
 static std::string
-create_str (unsigned ch, const Charmap *charmap)
+create_str (unsigned ch, const cmap_t *charmap)
 {
-    typedef std::map <wchar_t, std::string>::const_iterator rw_cmap_iter;
-
     std::string ret;
 
     if (charmap) {
-        // look up character in the reverse wide character map
-        const rw_cmap_iter ch_pos = charmap->get_rw_cmap ().find (ch);
+        // look up the character by its code point
+        cmap_entry_t entry;
 
-        if (ch_pos == charmap->get_rw_cmap ().end ()) {
+        if (!charmap->find_ucs (long (ch), entry)) {
             // issue a warning when not found and format it below
-            issue_diag (W_CHAR, true, 0, "wide character L'\\%x' "
-                        "not found in character map\n", ch);
+            diag.warning (708, nowhere, "wide character L'\\%x' "
+                          "not found in character map", ch);
         }
         else
-            return ch_pos->second;
+            return sym_name (entry);
     }
 
     return escape_value (ch);
@@ -808,9 +883,8 @@ write_coll_info (const std::string &ch, unsigned int idx,
                  unsigned int tab_num)
 {
     if (collate_st->num_elms > 1) {
-        const Charmap* const cmap = get_charmap (LC_COLLATE);
+        const cmap_t* const cmap = get_charmap (LC_COLLATE);
 
-        typedef std::map <std::string, wchar_t>::const_iterator n_cmap2_iter;
         const unsigned int* tab = collate_st->get_n_tab (tab_num);
         unsigned int first = collate_st->get_first_char_in_n_tab(tab_num);
         for (unsigned int i = first; i <= UCHAR_MAX; i++) {
@@ -826,11 +900,10 @@ write_coll_info (const std::string &ch, unsigned int idx,
                     // we found the offset to the weight
                     if (cmap) {
                         // first we need to print the symbolic name
-                        n_cmap2_iter n_cmap2_it =
-                            cmap->get_mb_cmap().find(new_ch);
-                        if (n_cmap2_it != cmap->get_mb_cmap().end())
-                            std::cout << cmap->get_rw_cmap().find(
-                                n_cmap2_it->second)->second;
+                        cmap_entry_t entry;
+                        if (   cmap->find_bytes (new_ch, entry)
+                            && cmap->find_ucs (entry.ucs, entry))
+                            std::cout << sym_name (entry);
                     }
                     else {
                         for (unsigned int j = 0; j < idx; j++) {
@@ -868,7 +941,7 @@ print_ce_info (unsigned                             tab_num,
 
     std::string mbchar;
 
-    const Charmap* const cmap = get_charmap (LC_COLLATE);
+    const cmap_t* const cmap = get_charmap (LC_COLLATE);
 
     for (unsigned i = first; i <= last; ++i) {
 
@@ -902,18 +975,14 @@ print_ce_info (unsigned                             tab_num,
                 if (0 == cmap)
                     std::cout << mbchar << "\"\n";
                 else {
-                    const std::map<std::string, wchar_t> &cm =
-                        cmap->get_mb_cmap ();
-
                     unsigned ch = 0;
 
                     for (unsigned j = 1; j <= mbchar.size (); ++j) {
-                        const std::map<std::string, wchar_t>::const_iterator
-                            it = cm.find (mbchar.substr (ch, j));
+                        cmap_entry_t entry;
 
-                        if (it != cm.end ()) {
-                            std::cout << (cmap->get_rw_cmap ().find
-                                          (it->second))->second;
+                        if (   cmap->find_bytes (mbchar.substr (ch, j), entry)
+                            && cmap->find_ucs (entry.ucs, entry)) {
+                            std::cout << sym_name (entry);
                             ch = j;
                         }
                     }
@@ -986,8 +1055,9 @@ print_lc_collate (const char *section, int)
                 std::cout << "backward,position";
                 break;
             default:
-                issue_diag (502, true, 0, "invalid order type found "
-                            "in collate definition\n");
+                diag.error (502, nowhere, "invalid order type found "
+                            "in collate definition");
+                std::exit (diag.exit_status ());
             }
             if (i == collate_st->num_weights - 1)
                 std::cout << '\n';
@@ -1063,7 +1133,7 @@ print_mask (const char *section, int mask)
     int nchars = 0;
 
     if (0 != ctype_st) {
-        const Charmap* const cmap = get_charmap (LC_CTYPE);
+        const cmap_t* const cmap = get_charmap (LC_CTYPE);
 
         // go through the entire mask_table and print out each
         // character that has the specified mask, counting the
@@ -1144,7 +1214,7 @@ print_toupper (const char *keyword, int print_cat)
 
     if (0 != ctype_st) {
 
-        const Charmap* const cmap = get_charmap (LC_CTYPE);
+        const cmap_t* const cmap = get_charmap (LC_CTYPE);
 
         const std::size_t count = ctype_st->wtoupper_s ();
 
@@ -1196,7 +1266,7 @@ print_tolower (const char *keyword, int print_cat)
 
     if (0 != ctype_st) {
 
-        const Charmap* const cmap = get_charmap (LC_CTYPE);
+        const cmap_t* const cmap = get_charmap (LC_CTYPE);
 
         const std::size_t count = ctype_st->wtolower_s ();
 
@@ -1332,7 +1402,7 @@ print_decimal_point (const char *keyword, int print_cat)
         const wchar_t* const wdp =
             static_cast< const wchar_t* >(num_punct_st->decimal_point (1));
 
-        const Charmap* const cmap = get_charmap (LC_NUMERIC);
+        const cmap_t* const cmap = get_charmap (LC_NUMERIC);
 
         std::cout <<  '"' << create_str (dp, wdp, cmap) << "\"\n";
     }
@@ -1358,7 +1428,7 @@ print_thousands_sep (const char *keyword, int print_cat)
         const wchar_t* const wts =
             static_cast< const wchar_t* >(num_punct_st->thousands_sep (1));
 
-        const Charmap* const cmap = get_charmap (LC_NUMERIC);
+        const cmap_t* const cmap = get_charmap (LC_NUMERIC);
 
         std::cout <<  '"' << create_str (ts, wts, cmap) << "\"\n";
     }
@@ -1441,7 +1511,7 @@ print_int_curr_symbol (const char *keyword, int print_cat)
         const wchar_t* const wcs =
             static_cast< const wchar_t* >(mon_st->curr_symbol (1, 1));
 
-        const Charmap* const cmap = get_charmap (LC_MONETARY);
+        const cmap_t* const cmap = get_charmap (LC_MONETARY);
 
         std::cout << '"' << create_str (cs, wcs, cmap) << "\"\n";
     }
@@ -1467,7 +1537,7 @@ print_currency_symbol (const char *keyword, int print_cat)
         const wchar_t* const wcs =
             static_cast< const wchar_t* >(mon_st->curr_symbol (0, 1));
 
-        const Charmap* const cmap = get_charmap (LC_MONETARY);
+        const cmap_t* const cmap = get_charmap (LC_MONETARY);
 
         std::cout << '"' << create_str (cs, wcs, cmap) << "\"\n";
     }
@@ -1493,7 +1563,7 @@ print_mon_decimal_point (const char *keyword, int print_cat)
         const wchar_t* const wdp =
             static_cast< const wchar_t* >(mon_punct_st->decimal_point (1));
 
-        const Charmap* const cmap = get_charmap (LC_MONETARY);
+        const cmap_t* const cmap = get_charmap (LC_MONETARY);
 
         std::cout << '"' << create_str (dp, wdp, cmap) << "\"\n";
     }
@@ -1519,7 +1589,7 @@ print_mon_thousands_sep (const char *keyword, int print_cat)
         const wchar_t* const wts =
             static_cast< const wchar_t* >(mon_punct_st->thousands_sep (1));
 
-        const Charmap* const cmap = get_charmap (LC_MONETARY);
+        const cmap_t* const cmap = get_charmap (LC_MONETARY);
 
         std::cout << '"' << create_str (ts, wts, cmap) << "\"\n";
     }
@@ -1569,7 +1639,7 @@ print_positive_sign (const char *keyword, int print_cat)
         const wchar_t* const wps =
             static_cast< const wchar_t* >(mon_st->positive_sign (1));
 
-        const Charmap* const cmap = get_charmap (LC_MONETARY);
+        const cmap_t* const cmap = get_charmap (LC_MONETARY);
 
         std::cout << '"' << create_str (ps, wps, cmap) << "\"\n";
     }
@@ -1595,7 +1665,7 @@ print_negative_sign (const char *keyword, int print_cat)
         const wchar_t* const wns =
             static_cast< const wchar_t* >(mon_st->negative_sign (1));
         
-        const Charmap* const cmap = get_charmap (LC_MONETARY);
+        const cmap_t* const cmap = get_charmap (LC_MONETARY);
 
         std::cout << '"' << create_str (ns, wns, cmap) << "\"\n";
     }
@@ -1809,7 +1879,7 @@ print_time_keyword (const char *keyword, int print_cat,
     if (keyword)
         print_keyword (keyword);
 
-    const Charmap* const cmap = get_charmap (LC_TIME);
+    const cmap_t* const cmap = get_charmap (LC_TIME);
 
     const char*    const str  = static_cast< const char* >(vstr);
     const wchar_t* const wstr = static_cast< const wchar_t* >(vwstr);
@@ -1970,7 +2040,7 @@ print_era (const char *keyword, int print_cat)
         std::cout << "\"\"\n";
     }
     else {
-        const Charmap* const cmap = get_charmap (LC_TIME);
+        const cmap_t* const cmap = get_charmap (LC_TIME);
 
         // print each era in the database according to the format
         // specified by POSIX
@@ -2229,7 +2299,7 @@ print_noexpr (const char *keyword, int print_cat)
         const wchar_t* const wno
             = static_cast< const wchar_t* >(messages_st->noexpr (1));
 
-        const Charmap* const cmap = get_charmap (LC_MESSAGES);
+        const cmap_t* const cmap = get_charmap (LC_MESSAGES);
 
         std::cout << '"' << create_str (no, wno, cmap) << "\"\n";
     }
@@ -2255,7 +2325,7 @@ print_yesexpr (const char *keyword, int print_cat)
         const wchar_t* const wyes
             = static_cast< const wchar_t* >(messages_st->yesexpr (1));
 
-        const Charmap* const cmap = get_charmap (LC_MESSAGES);
+        const cmap_t* const cmap = get_charmap (LC_MESSAGES);
 
         std::cout << '"' << create_str (yes, wyes, cmap) << "\"\n";
     }
@@ -2803,7 +2873,7 @@ static const struct {
 };
 
 
-int locale_main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
     const char* const program_name = argv [0];
 
@@ -2863,9 +2933,9 @@ int locale_main (int argc, char *argv[])
 
             case 'w':
                 if (std::strlen (*argv) == 1)
-                    issue_diag (W_DISABLE, 0, 0, 0);
+                    diag.mute_warnings ();
                 else
-                    issue_diag (std::atoi (++*argv), 0, 0, 0);
+                    diag.mute_warning (std::atoi (++*argv));
                 break;
 
             case '?':
@@ -2886,14 +2956,16 @@ int locale_main (int argc, char *argv[])
                 // fall through...
 
             default:
-                issue_diag (504, true, 0, "%s: invalid option "
-                            "-%s\n", program_name, *argv);
+                diag.error (504, nowhere, "%s: invalid option "
+                            "-%s", program_name, *argv);
+                return diag.exit_status ();
             }
         }
 
         if (0 == *argv) {
-            issue_diag (505, true, 0, "%s: missing argument\n Try '"
-                        "%s --help'\n", program_name, program_name);
+            diag.error (505, nowhere, "%s: missing argument\n Try '"
+                        "%s --help'", program_name, program_name);
+            return diag.exit_status ();
         }
 
         for (; 0 != *argv; ++argv) {

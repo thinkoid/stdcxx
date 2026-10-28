@@ -34,9 +34,14 @@ replaces the base name of its own path with `localedef`, prepends
 `locale_main`, which is `util/locale.cpp`: 2915 lines that map a
 locale's database files and print them, `locale -a`, `-m`, `-k`,
 `-c`, `-h`, `--charmap`, `--help`. It reads the databases through
-`_localedef.h`, not through the compiler, and of the old compiler's
-files it needs only `aliases.cpp`, `diagnostic.cpp`, `memchk.cpp`
-and `loc_exception.h`. The sanity test of the utilities,
+`_localedef.h`, not through the compiler, but `-h` prints characters
+by their names in the charmap the locale was built from, and it
+reads that charmap with the old compiler's `Charmap`, hence its
+`Scanner`. Its diagnostics go to the old sink, `issue_diag` of
+`diagnostic.cpp`, whose header includes `scanner.h`; an error there
+throws `loc_exception`. `aliases.cpp` serves only the C library
+locale `Charmap` wants, and `memchk.cpp` the checks of the mapped
+files. The sanity test of the utilities,
 `run_utils -s`, checks `locale --help`, `-a`, `-m` and `-k LC_ALL`
 and fails 39 of 45 assertions with the new compiler in
 `localedef`'s place, because the new driver has no such mode.
@@ -210,6 +215,9 @@ Each of the four questions is decided as recommended, 2026-10-28.
   (a); the ctype fixture's two lines become comments.
 - The old driver's generation options and `--ucs` go, 2.3 (a).
 - The parked branch becomes the tag `localedef-old`, 2.4 (a).
+- `locale.cpp` is ported onto `cmap_t` and `diag_t` instead of
+  keeping the old charmap reader, 2026-10-28: the reader would
+  otherwise hold `charmap.cpp` and `scanner.cpp` past the cutover.
 - After this plan the import of glibc's current sources into
   `etc/nls` is the next piece, its own plan.
 

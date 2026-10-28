@@ -85,7 +85,7 @@ exec: runall.o cmdopt.o output.o util.o exec.o display.o
 	$(LD) $^ -o $@ $(LDFLAGS.exec) $(LDLIBS) $(call CXX.repo,$<) $(TEEOPTS)
 
 # link the localedef utility
-localedef: localedef.o locale.o aliases.o charmap.o codecvt.o collate.o \
+localedef: localedef.o aliases.o charmap.o codecvt.o collate.o \
            ctype.o def.o diagnostic.o memchk.o messages.o monetary.o    \
            numeric.o path.o time.o scanner.o
 	@echo "$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS)" $(call CXX.repo,$<) \
@@ -100,8 +100,9 @@ localedef2: ldef.o diag.o reader.o cmap.o locfile.o scalar.o lctype.o \
 	>> $(LOGFILE)
 	$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(call CXX.repo,$<) $(TEEOPTS)
 
-# link the locale utility
-locale: locale_stub.o
+# link the locale utility, which reads charmaps with the new compiler's
+# reader and reports through its diagnostic sink
+locale: locale.o memchk.o cmap.o diag.o reader.o
 	@echo "$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS)" $(call CXX.repo,$<) \
 	>> $(LOGFILE)
 	$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(call CXX.repo,$<) $(TEEOPTS)

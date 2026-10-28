@@ -559,33 +559,12 @@ int localedef_main (int argc, char *argv[])
 }
 
 
-// defined in locale.cpp
-int locale_main (int, char*[]);
-
-
 int main (int argc, char *argv[])
 {
     int exit_status = EXIT_OK;
 
     try {
-
-        if (1 < argc && 0 == std::strcmp (argv [1], "--locale-mode")) {
-
-            // invoked with the special option ""--locale-mode"
-            // to act like the locale utility
-
-            // remove argv [1] from command line
-            for (int i = 2; argv [i]; ++i)
-                argv [i - 1] = argv [i];
-
-            // NULL-terminate argv
-            argv [argc - 1] = 0;
-
-            exit_status = locale_main (argc - 1, argv);
-        }
-        else {
-            exit_status = localedef_main (argc, argv);
-        }
+        exit_status = localedef_main (argc, argv);
     }
     catch (const std::ios::failure& error) {
         std::cerr << "Error: I/O exception: " << error.what () << '\n';

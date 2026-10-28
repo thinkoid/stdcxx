@@ -364,18 +364,34 @@ Check: a definition with =p_sign_posn 5= draws the diagnostic; the
 The acceptance of =doc/notes/plan-localedef-backend.md= is done:
 every database of the corpus is the new compiler's or explained,
 and the 40 locale tests sit on their pins with it in
-=bin/localedef='s place. One thing holds the old one in the tree:
-=util/locale= is a stub that executes =localedef --locale-mode=, so
-the =locale= utility and its sanity test (39 of 45 assertions,
-=locale -k=) need that mode in the new compiler or a =locale= of its
-own.
+=bin/localedef='s place. Nothing holds the old one in the tree but
+the cutover itself. =locale= is a program of its own: it reads a
+charmap with =cmap_t= and reports through =diag_t=, and links none of
+the old compiler's objects.
 
-Fix: the locale mode, then =localedef= built from
-=util/localedef=, =util/*.cpp= of the old compiler removed, the
-=localedef2= target gone.
+Fix: the cutover, step 3 of =doc/notes/plan-localedef-removal.md=:
+=localedef= built from =util/localedef=, the old compiler's
+=util/*.cpp= removed with =aliases.cpp=, =diagnostic.cpp= and
+=loc_exception.h=, the =localedef2= target gone.
 
 Check: =make locales= and the locale tests on their pins in every
 configuration, the bin sanity test clean.
+
+** TODO The sanity test's name patterns fail on the tree's own names
+
+=run_utils -s=, with =RWSTD_LOCALE_ROOT= at the build's =nls= and
+=RWSTD_SRC_ROOT= at =etc/nls=, fails 251 of 464 assertions with
+either compiler and either =locale=. =locale -a= lists the root
+directory, codeset databases such as =ISO-8859-1= among the locales,
+and the check wants every name in the =xx_YY= form: 55 fail.
+=locale -m= lists =etc/nls/charmaps=, whose files carry glibc's names
+without the =.cm= suffix the check greps for: all 196 fail.
+
+Fix, to decide: =locale -a= lists only the locale directories, or
+the check skips the codeset databases; the =-m= check takes any file
+of the directory as a charmap.
+
+Check: the sanity test in that environment fails no assertion.
 
 ** TODO The localedef2 objects have no header dependencies
 
