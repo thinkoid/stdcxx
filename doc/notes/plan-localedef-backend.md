@@ -830,6 +830,21 @@ them and the code can say why.
   members, no lookup of a missing character.
 - The narrow `...` range in `LC_CTYPE` sets mask bits for bytes the
   charmap does not list. The new writer sets bits for characters.
+- A `sign_posn` of 0 in `LC_MONETARY`: the old compiler substituted
+  the sign string `"()"` into the narrow sign after it had sized the
+  strings, so every offset past the sign fell two bytes short, and
+  it left the wide sign as written, so `moneypunct<wchar_t>` printed
+  a minus where the narrow facet printed parentheses. The new writer
+  sizes the substituted string and gives both forms the parentheses.
+  Seventeen definitions of the corpus, `en_HK`, `fr_CA` and their
+  kin.
+- A continued string list with a comment after a `;`: the old
+  scanner ended the list at the comment, so `uk_UA` had six empty
+  day names. The new reader reads the whole list.
+- A string with a code point the charmap lacks: the old compiler
+  wrote both forms empty; the new keeps the wide form and
+  transliterates the narrow one, 2.2 and 3.3. One hundred and
+  eighteen files of the corpus, all under 8-bit charmaps.
 
 ## 4. The shape
 

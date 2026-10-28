@@ -33,6 +33,7 @@
 // the same fault by the same number.
 enum diag_id_t {
     e_openrd = 109,   // a file cannot be opened for reading
+    e_openwr = 110,   // a file cannot be opened for writing
     e_pair   = 111,   // invalid pair of names in a range
     e_symend = 127,   // unterminated symbolic name
     e_ifmt   = 135,   // invalid integer format
@@ -87,13 +88,19 @@ public:
         return m_errors ? 4 : 0;
     }
 
+    // -w of the old driver: a warning is counted and not printed.
+    void mute_warnings () {
+        m_muted = true;
+    }
+
 private:
 
     diag_t (const diag_t&);           // not defined
     void operator= (const diag_t&);   // not defined
 
-    int m_errors;
-    int m_warnings;
+    int  m_errors;
+    int  m_warnings;
+    bool m_muted;
 };
 
 

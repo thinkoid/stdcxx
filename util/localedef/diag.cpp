@@ -43,7 +43,7 @@ print (const char *severity, int id, const where_t &where,
 
 diag_t::
 diag_t ()
-    : m_errors (0), m_warnings (0)
+    : m_errors (0), m_warnings (0), m_muted (false)
 {
 }
 
@@ -66,6 +66,9 @@ bool diag_t::
 warning (int id, const where_t &where, const char *fmt, ...)
 {
     ++m_warnings;
+
+    if (m_muted)
+        return false;
 
     std::va_list va;
     va_start (va, fmt);

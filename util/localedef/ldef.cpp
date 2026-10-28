@@ -22,9 +22,14 @@
  *
  **************************************************************************/
 
-// The new locale compiler.  For now it has four forms, each the check
-// of one piece of the front end:
+// The new locale compiler.  It writes a locale database with the old
+// driver's options for one locale, and it has five dump forms, each
+// the check of one piece of the front end:
 //
+//   ldef [-c] [-w] -f CHARMAP -i FILE [-d DIR] [-I DIR] NAME
+//                                               the database DIR/NAME,
+//                                               the four scalar
+//                                               categories so far
 //   ldef --tokens FILE...                       the tokens of each line
 //   ldef --charmap FILE                         the entries of a charmap
 //   ldef --values -f CHARMAP -i FILE [-I DIR]   the values of the four
@@ -40,12 +45,17 @@
 #include "locfile.h"
 #include "model.h"
 #include "reader.h"
+#include "writer.h"
 
-#include <cstdio>    // for printf(), fwrite()
+#include <cerrno>    // for errno
+#include <cstdio>    // for printf(), fwrite(), fopen()
 #include <cstring>   // for strcmp(), strerror(), strrchr()
 #include <ctime>     // for clock()
 #include <set>
 #include <string>
+#include <vector>
+
+#include <sys/stat.h>   // for mkdir()
 
 
 static void
@@ -717,6 +727,167 @@ dump_collate (const char *charmap, const char *path, const char *dir,
 }
 
 
+/**************************************************************************/
+// the locale database
+
+// Creates dir and the directories above it that are not there.  False
+// with errno set when one cannot be created.
+static bool
+make_dirs (const std::string &dir)
+{
+    std::string::size_type slash = dir.find ('/', 1);
+
+    for (;;) {
+
+        const std::string prefix = dir.substr (0, slash);
+
+        if (0 != mkdir (prefix.c_str (), 0755) && EEXIST != errno)
+            return false;
+
+        if (std::string::npos == slash)
+            return true;
+
+        slash = dir.find ('/', slash + 1);
+    }
+}
+
+
+// Writes one image as the file name in dir.
+static bool
+write_file (const std::string &dir, const char *name,
+            const std::vector<char> &image, diag_t &diag)
+{
+    const std::string path = dir + '/' + name;
+
+    std::FILE* const file = std::fopen (path.c_str (), "wb");
+
+    if (!file)
+        return diag.error (e_openwr, nowhere, "%s cannot be opened for "
+                           "writing: %s", path.c_str (),
+                           std::strerror (errno));
+
+    const bool written =
+           image.empty ()
+        || 1 == std::fwrite (&image [0], image.size (), 1, file);
+
+    if (0 != std::fclose (file) || !written)
+        return diag.error (e_openwr, nowhere, "%s could not be written: %s",
+                           path.c_str (), std::strerror (errno));
+
+    return true;
+}
+
+
+// The old driver's options for one locale: -c writes the database
+// although warnings were issued, -w mutes them, -d names the directory
+// the locale's own goes under, the current one otherwise, and -I the
+// directory the locales a copy names are read from.
+struct write_opts_t {
+    const char *charmap;
+    const char *input;
+    const char *dir;
+    const char *outdir;
+    const char *name;
+    bool        force;
+    bool        quiet;
+};
+
+
+// [-c] [-w] -f CHARMAP -i FILE [-d DIR] [-I DIR] NAME, in any order
+static bool
+write_args (int argc, char *argv [], write_opts_t &opts)
+{
+    for (int i = 1; i < argc; ++i) {
+
+        const char* const arg = argv [i];
+
+        if ('-' != arg [0]) {
+            if (opts.name)
+                return false;
+
+            opts.name = arg;
+            continue;
+        }
+
+        if (0 == std::strcmp ("-c", arg))
+            opts.force = true;
+        else if (0 == std::strcmp ("-w", arg))
+            opts.quiet = true;
+        else if (i + 1 == argc)
+            return false;
+        else if (0 == std::strcmp ("-f", arg))
+            opts.charmap = argv [++i];
+        else if (0 == std::strcmp ("-i", arg))
+            opts.input = argv [++i];
+        else if (0 == std::strcmp ("-d", arg))
+            opts.outdir = argv [++i];
+        else if (0 == std::strcmp ("-I", arg))
+            opts.dir = argv [++i];
+        else
+            return false;
+    }
+
+    return opts.charmap && opts.input && opts.name;
+}
+
+
+// Reads the definition and writes its database: the four scalar
+// categories, each as its file under DIR/NAME.  An error withholds the
+// output, as do warnings without -c, which is what the old driver did.
+static void
+write_locale (const write_opts_t &opts, diag_t &diag)
+{
+    cmap_t       cmap;
+    locale_def_t def;
+
+    if (!read_model (opts.charmap, opts.input, opts.dir, cmap, def, diag))
+        return;
+
+    if (diag.errors ())
+        return;
+
+    if (diag.warnings () && !opts.force) {
+        std::fputs ("Warnings occurred - No output produced\n", stderr);
+        return;
+    }
+
+    // the charmap file's name stands for the code set when the charmap
+    // names none, as in the old compiler
+    image_names_t names;
+
+    names.charmap = base_name (opts.charmap);
+    names.codeset =
+        cmap.code_set_name.empty () ? names.charmap : cmap.code_set_name;
+
+    const std::string dir =
+        opts.outdir ? std::string (opts.outdir) + '/' + opts.name
+                    : std::string (opts.name);
+
+    if (!make_dirs (dir)) {
+        diag.error (e_openwr, nowhere, "%s cannot be created: %s",
+                    dir.c_str (), std::strerror (errno));
+        return;
+    }
+
+    std::vector<char> image;
+
+    write_numeric (def, cmap, names, image);
+    write_file (dir, "LC_NUMERIC", image, diag);
+
+    write_monetary (def, cmap, names, image);
+    write_file (dir, "LC_MONETARY", image, diag);
+
+    write_time (def, cmap, names, image);
+    write_file (dir, "LC_TIME", image, diag);
+
+    write_messages (def, cmap, names, image);
+    write_file (dir, "LC_MESSAGES", image, diag);
+}
+
+
+/**************************************************************************/
+// the command line
+
 // OPTION -f CHARMAP -i FILE [-I DIR], the options in any order
 static bool
 model_args (int argc, char *argv [], const char *option,
@@ -750,6 +921,8 @@ main (int argc, char *argv [])
     const char *input   = 0;
     const char *dir     = 0;
 
+    write_opts_t opts = { 0, 0, 0, 0, 0, false, false };
+
     if (2 < argc && 0 == std::strcmp ("--tokens", argv [1]))
         dump_tokens (argc, argv, diag);
     else if (3 == argc && 0 == std::strcmp ("--charmap", argv [1]))
@@ -760,9 +933,17 @@ main (int argc, char *argv [])
         dump_ctype (charmap, input, dir, diag);
     else if (model_args (argc, argv, "--collate", charmap, input, dir))
         dump_collate (charmap, input, dir, diag);
+    else if (write_args (argc, argv, opts)) {
+        if (opts.quiet)
+            diag.mute_warnings ();
+
+        write_locale (opts, diag);
+    }
     else
         diag.error (e_cmdarg, nowhere,
-                    "usage: ldef --tokens FILE... | ldef --charmap FILE | "
+                    "usage: ldef [-c] [-w] -f CHARMAP -i FILE [-d DIR] "
+                    "[-I DIR] NAME | ldef --tokens FILE... | "
+                    "ldef --charmap FILE | "
                     "ldef --values -f CHARMAP -i FILE [-I DIR] | "
                     "ldef --ctype -f CHARMAP -i FILE [-I DIR] | "
                     "ldef --collate -f CHARMAP -i FILE [-I DIR]");
