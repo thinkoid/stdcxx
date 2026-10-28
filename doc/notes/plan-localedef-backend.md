@@ -716,6 +716,20 @@ written. The runtime change rides with the time writer's step, since
 the records it reads change meaning in the same commit, and the
 `time_put` test is re-pinned there.
 
+**glibc against the text.** glibc 2.44 implements XBD 7.3.5 as
+written, measured with `date` under the installed locales: the
+direction relative to the dates, so that the pre-republican era of
+`zh_TW`, `+` and ending at `-*`, makes 1911 民前01年 and the year
+100 民前1812年; no year 0, so that the Buddhist era declared at
+-543 makes 2026 พ.ศ. 2569; the whole date against the bounds, so
+that 2019-04-30 is 平成31年 and 2019-05-01 令和01年; and the
+unmodified conversion when no era matches, as XSH `strftime`
+prescribes. Beyond the text and not against it: `%Ey` is zero-padded
+to two digits, the start date accepts the infinities too, and
+令和元年 for a first year is a second one-year era in the `ja_JP`
+source, not a rule. The runtime takes the two-digit padding, the
+one choice the text leaves.
+
 **Still open.** Whether `time_get` should read the era records at
 all: it parses the `E` modifier and drops it, and its test leaves
 `%Ey` and `%EY` unexercised. That is a Library entry, not the
