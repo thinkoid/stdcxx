@@ -812,7 +812,9 @@ These need no decision; they are listed so the comparison can expect
 them and the code can say why.
 
 - The old compiler writes the codecvt database even after a parse
-  error, then aborts. The new one writes nothing after an error.
+  error, then aborts, so a broken source leaves a database behind.
+  The new one reports the error, exits with status 4, and leaves no
+  database: the error is not hidden, the output is withheld.
 - The old table generators number pages from static counters that a
   second locale in one process would continue. The new ones start
   from zero per file.
