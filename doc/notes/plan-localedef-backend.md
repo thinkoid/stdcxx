@@ -852,6 +852,19 @@ them and the code can say why.
 - A locale copied twice, `om_ET` copying `am_ET` and `om_KE`, both
   of them `iso14651_t1`: the old compiler read the table twice and
   wrote every row twice. The new reader reads a locale once a run.
+- The direction word of a row placed by `reorder-after` after a
+  `copy`: the old compiler wrote the section of the entry it follows,
+  the new writes the last section opened, as glibc does, whose
+  `reorder-after` moves the cursor and not the current section.
+  Fourteen definitions of the tree, `br_FR`, `hu_HU`, `sv_SE` among
+  them.
+- The code point of a multibyte character: the old compiler took it
+  from `iconv` of the character's bytes and fell back to the name;
+  the new takes the charmap's `<Uxxxx>` name. The tree's 2007 CJK
+  charmaps and the host's `iconv` tables disagree in places,
+  `BIG5-HKSCS` 0x8862, `GB18030` 0x8135F437, `EUC-TW` 0x8EA5FAB8, so
+  the old `LC_CTYPE` and codecvt files of those codesets carry the
+  host's reading and the new carry the charmap's.
 - An entry placed twice in one reorder block, `ml_IN`: the old
   compiler kept both rows, glibc and the new reader move the entry.
   And a `<Uxxxx>` name with lowercase hex digits, which the old

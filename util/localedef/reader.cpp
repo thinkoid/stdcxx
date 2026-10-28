@@ -707,8 +707,18 @@ next (token_t &tok)
             return false;
 
         // The comment character counts only where a token would start.
-        // A comment ends with its physical line: glibc reads the line
-        // after a continued comment as more of the statement.
+        // A comment ends with its physical line, and the escape
+        // character at its end still continues the statement on the
+        // next line: glibc's lr_next() removes the escape and the
+        // newline before its lexer sees the line, and lr_token() goes
+        // on with the statement where a comment ends short of a
+        // newline.  glibc's sources write it that way (uk_UA lists
+        // its day names one per continued line, each with a comment
+        // before the escape; zh_CN comments out a range inside a
+        // continued class), so a comment whose text ends in the escape
+        // character is a continuation here too, as it is in glibc;
+        // the tree's iso14651_t1 had one, which glibc rejects as this
+        // reader did, and it was fixed in the source.
         if (comment == s [pos]) {
             pos = end_of_physical (pos);
             continue;

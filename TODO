@@ -327,24 +327,6 @@ Check: the collation oracle finds no disagreement over strings of
 letters and characters subject to =IGNORE= at the first three
 levels in =en_US=, =sv_SE=, =fa_IR= and =ml_IN=.
 
-** TODO A comment line ending in the escape character joins the next line
-
-The reader strips a comment and then still joins the next physical
-line when the stripped line ended in the escape character. The
-tree's =etc/nls/src/iso14651_t1= declares =escape_char /= and its
-comment lines 565 and 566 end in =/=, so two entries land on one
-logical line and =LC_COLLATE= stops at line 566 with a syntax error:
-113 of the 165 definitions of =etc/nls/gen_list= do not build. glibc
-joins continued lines before it handles comments, and loses the
-U+0338 line of that file silently.
-
-Fix: in =util/localedef/reader.cpp=, a comment line is complete:
-no continuation is read after it, as glibc orders the two steps.
-
-Check: every definition of =etc/nls/gen_list= reads with its
-charmap, and the four scalar files of the 113 compare against the
-reference as the other 52 do.
-
 ** TODO =number_value= accepts any integer for the monetary small ints
 
 glibc bounds =sign_posn=, =cs_precedes= and =sep_by_space= and their
