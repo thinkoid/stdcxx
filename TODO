@@ -118,10 +118,11 @@ plan names. The narrow strings of a locale whose charmap lacks a
 code point, =EUR= for the euro sign under ISO-8859-1, take the
 =LC_CTYPE= transliteration, as glibc writes them, so the writers
 need step 4's table. The five steps of the front end are in: the
-model reads every one of the 502 definitions. Then the back end,
-the tables and the seven writers in the format
-=include/loc/_localedef.h= describes, as its own plan, the next
-piece.
+model reads every one of the 502 definitions. The back end, the
+tables and the seven writers in the format =include/loc/_localedef.h=
+describes, is planned in =doc/notes/plan-localedef-backend.md=: the
+format questions with their directions, the order of work, one check
+per step.
 
 Check: every definition of =etc/nls= and of glibc's =SUPPORTED=
 builds with its charmap, two builds byte-identical; each database
@@ -223,8 +224,13 @@ has done since the 2005 import. glibc's own comment in
 =ld-collate.c= means the same, but its =output_weight= returns 0 for
 =UNDEFINED= before writing weights, so a missing character takes
 weight index 0, the lowest defined character's, =IGNORE= at three
-levels in =iso14651_t1_common=: a defect of 1999 by reading, settled
-when =wcsxfrm= of U+743B equals that of U+0001 under =zh_CN.UTF-8=.
+levels in =iso14651_t1_common=: a defect of 1999 by reading, and
+measured on glibc 2.44: under =zh_CN.UTF-8= U+743B transforms to
+three empty levels and a fourth-level value, as U+0001 does, and
+sorts before it; under =de_DE.UTF-8= the same character gets a
+distinct primary weight after every letter, because the common
+table gives the Han block computed weights and only the pinyin
+table's reorder leaves the rest of the block undefined.
 The narrow facet agrees with glibc by accident: its byte lookup
 (=src/collate.cpp= near line 400) advances into the character before
 it misses, the validity check then starts on a continuation byte and
@@ -237,38 +243,76 @@ U+9FFF in =zh_CN=, all over characters outside the table; U+061D in
 single-character pairs of 297266 that differ in =en_US=, at the
 boundaries of the CJK extension blocks and over the newest symbols.
 
-Fix: keep POSIX's order unless the =wcsxfrm= check shows glibc's is
-a rule; repair the narrow facet's miss path; record the oracle's
-disagreements over missing characters as explained residue.
+Fix: POSIX's order and the library's rule, decided 2026-10-28 with
+the back-end plan; repair the narrow facet's miss path; record the
+oracle's disagreements over missing characters as explained
+residue.
 
 Check: the collation oracle over those ranges finds no disagreement
 over a character outside the table.
 
-** TODO A character IGNOREd at a level sorts after a weight there
+** TODO A character ignored at a level sorts after a weight there
 
-The library and glibc part over strings that differ only in a
-character =IGNORE=d at some level. Under =sv_SE=, ü (=IGNORE= at the
+The library and glibc part over strings that differ only in a character
+subject to =IGNORE= at some level. Under =sv_SE=, ü (=IGNORE= at the
 fourth level) against ÿ (its code point there), equal at the first
 three: glibc puts ü first, the library second. Under =en_US=, "é"
 against "é>", where =>= is =IGNORE= at the first three levels: glibc
 puts the shorter string first, the library second. The same shape
-accounts for the 1 disagreement of 50000 random strings in =en_US=
-and 3 in =fa_IR= and 6 in =ml_IN= once the characters outside the
-table are left out. Hypothesis: the fourth level of =iso14651_t1= is
-=forward,position=, and for an element =IGNORE=d at a position level
-the transform writes its =IGNORE= mark, =CHAR_MAX= narrow and
+accounts for the 1 disagreement of 50000 random strings in =en_US= and 3
+in =fa_IR= and 6 in =ml_IN= once the characters outside the table are
+left out. Hypothesis: the fourth level of =iso14651_t1= is
+=forward,position=, and for an element subject to =IGNORE= at a position
+level the transform writes its =IGNORE= mark, =CHAR_MAX= narrow and
 =WCHAR_MAX= wide, which sorts after every weight
 (=doc/notes/analysis-collate-transform.md=); the punctuation of the
-=<SPECIAL>= section is read backward at the second level, so a
-string that mixes it with letters may mix directions as well.
+=<SPECIAL>= section is read backward at the second level, so a string
+that mixes it with letters may mix directions as well.
 
-Fix: settle the hypothesis by the transform of each pair against
-=wcsxfrm=; then decide where the mark sorts, in =src/collate.cpp=,
-or what =localedef= writes.
+POSIX (XBD 7.3.2.3) decides both pairs: at a =position= level "the
+string containing an element not subject to IGNORE after the fewest
+collating elements subject to IGNORE from the start of the compare
+shall collate first", and a string exhausted of such elements
+collates first; at every other level elements subject to IGNORE
+behave as if removed (7.3.2.4). glibc's spelling, a count of the
+ignored elements before each weighted one and nothing after the
+last, realizes that; the library's mark, sorting after every weight,
+puts a string with a trailing ignored element after the same string
+without it, which the standard forbids. Agreement with glibc on
+other strings is no evidence either way.
+
+Fix: a runtime change in =src/collate.cpp=, the count spelling of
+=__rw_process_offsets= with the prefix-free rule the weights got in
+2026; the standard is the specification and glibc, whose spelling
+realizes it clause by clause, a usable oracle for position levels; first
+the transform of each pair against =wcsxfrm=, level by level, to see
+whether the backward second level adds a second cause. Decided
+2026-10-28 with the back-end plan: the writer keeps the zero and the
+direction bits.
 
 Check: the collation oracle finds no disagreement over strings of
-letters and characters =IGNORE=d at the first three levels in
-=en_US=, =sv_SE=, =fa_IR= and =ml_IN=.
+letters and characters subject to =IGNORE= at the first three
+levels in =en_US=, =sv_SE=, =fa_IR= and =ml_IN=.
+
+** TODO The =utf8_to_ext= trie leaves an ordinal where the runtime reads an offset
+
+The third trie of the codecvt database is keyed by the UTF-8 form of
+the UCS value and read under the =@UCS= modifier and by the ISO-2022
+converter. It is meant to leaf to the byte offset of the external
+string, as =w_to_n= does. By reading, =gen_utf8_tables= in
+=util/codecvt.cpp= takes its leaf from the ordinal map that
+=gen_mbchar_tables= builds, and =write_codecvt= adds the offset of
+the string block to it, so the leaf is an ordinal plus an offset.
+Before 2338aa59 the byte-offset map was used. Nothing has noticed
+because no test names a locale with =@UCS=.
+
+Fix: =doc/notes/plan-localedef-backend.md= 3.6: reproduced for the
+acceptance run, then =utf8_to_ext= aliased to =w_to_n= for UTF-8 and
+the byte offset written for the other codesets.
+
+Check: a locale named with =@UCS= converts one non-ASCII character
+out through =codecvt_byname<wchar_t, char>::out=, red against the
+old database.
 
 * EDG porting
 

@@ -23,8 +23,13 @@ definition, computes the collation and conversion tables and writes
 the seven images, with the parse state, the table state and the
 output structs side by side as members. Its ownership is raw
 pointers; its weights are arrays freed by hand in a destructor. It
-had about a year of development, 2001 to 2002, and none after,
-against the library's 2002 to 2008.
+had about a year of development, 2001 to 2002, and none after. The
+library it serves is older: its copyright line starts in 1994, and
+the history page of the user's guide calls it a code base shipping
+for over a decade at the 2005 contribution. The locale subsystem the
+compiler writes databases for dates from 2001, a rewrite of the
+library's earlier locale implementation; the compiler and the
+`codecvt` facet were the last pieces of that rewrite to be written.
 
 In October 2026 it was patched until it read all 502 definitions of
 glibc's `SUPPORTED`: the collation templates, the conditionals, the
