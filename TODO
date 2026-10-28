@@ -76,6 +76,24 @@ Check: =--collate= of =hy_AM= lists the sections in the reordered
 order, and its =LC_COLLATE= compares against the reference as the
 others do.
 
+** TODO =std::string::push_back= leaks a representation under valgrind
+
+Valgrind on =localedef2= building =aa_DJ= with =ISO-8859-1= reports
+290 bytes definitely lost in 5 blocks, every block allocated by
+=std::string::_C_get_rep= from =std::string::replace= from
+=push_back=, reached from the compiler's =scan_charcode= in
+=reader.cpp=, which appends bytes to a string it holds by value. No
+pointer to the blocks survives, so the library's string body let a
+representation go in a grow path, 15D debug under GCC. Zero errors
+otherwise: no uninitialized read anywhere in the compiler.
+
+Fix: find the =replace= path of =string.cc= that allocates a new
+representation and loses the old one; a test with =push_back= past
+the capacity under the leak checker.
+
+Check: =valgrind --leak-check=full= on the same run reports nothing
+definitely lost.
+
 ** TODO =%y= and =%C= of a year before 1 leave their ranges
 
 =time_put= writes =%y= as =(1900 + tm_year) % 100= and =%C= as
