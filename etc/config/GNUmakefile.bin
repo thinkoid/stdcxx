@@ -33,7 +33,7 @@ SRCDIRS = $(TOPDIR)/util $(TOPDIR)/util/localedef
 # include common variables setting for all makefiles
 include ../makefile.common
 
-TARGET    = exec localedef localedef2 locale gencat
+TARGET    = exec localedef locale gencat
 
 # locale sources and related 
 NLSDIR = $(TOPDIR)/etc/nls
@@ -84,18 +84,10 @@ exec: runall.o cmdopt.o output.o util.o exec.o display.o
 	>> $(LOGFILE)
 	$(LD) $^ -o $@ $(LDFLAGS.exec) $(LDLIBS) $(call CXX.repo,$<) $(TEEOPTS)
 
-# link the localedef utility
-localedef: localedef.o aliases.o charmap.o codecvt.o collate.o \
-           ctype.o def.o diagnostic.o memchk.o messages.o monetary.o    \
-           numeric.o path.o time.o scanner.o
-	@echo "$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS)" $(call CXX.repo,$<) \
-	>> $(LOGFILE)
-	$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(call CXX.repo,$<) $(TEEOPTS)
-
-# link the new localedef utility, built beside the old one
-localedef2: ldef.o diag.o reader.o cmap.o locfile.o scalar.o lctype.o \
-            lcollate.o pool.o trie.o collnum.o wctype.o wcodecvt.o \
-            wnumeric.o wmonetary.o wtime.o wmessages.o wcollate.o
+# link the localedef utility, the compiler under util/localedef
+localedef: ldef.o diag.o reader.o cmap.o locfile.o scalar.o lctype.o \
+           lcollate.o pool.o trie.o collnum.o wctype.o wcodecvt.o \
+           wnumeric.o wmonetary.o wtime.o wmessages.o wcollate.o
 	@echo "$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS)" $(call CXX.repo,$<) \
 	>> $(LOGFILE)
 	$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(call CXX.repo,$<) $(TEEOPTS)

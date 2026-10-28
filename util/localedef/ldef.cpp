@@ -26,24 +26,28 @@
 // driver's options for one locale, and it has seven dump forms, each
 // the check of one piece of the compiler:
 //
-//   ldef [-c] [-w] -f CHARMAP -i FILE [-d DIR] [-I DIR] NAME
+//   localedef [-c] [-w] -f CHARMAP -i FILE [-d DIR] [-I DIR] NAME
 //                                               the database DIR/NAME,
 //                                               the six categories
 //                                               and the codecvt
 //                                               database
-//   ldef --tokens FILE...                       the tokens of each line
-//   ldef --charmap FILE                         the entries of a charmap
-//   ldef --values -f CHARMAP -i FILE [-I DIR]   the values of the four
+//   localedef --tokens FILE...                  the tokens of each line
+//   localedef --charmap FILE                    the entries of a charmap
+//   localedef --values -f CHARMAP -i FILE [-I DIR]
+//                                               the values of the four
 //                                               scalar categories
-//   ldef --ctype -f CHARMAP -i FILE [-I DIR]    the classes, case maps
+//   localedef --ctype -f CHARMAP -i FILE [-I DIR]
+//                                               the classes, case maps
 //                                               and transliteration
-//   ldef --collate -f CHARMAP -i FILE [-I DIR]  the declarations and
+//   localedef --collate -f CHARMAP -i FILE [-I DIR]
+//                                               the declarations and
 //                                               the sequence of
 //                                               LC_COLLATE
-//   ldef --census -f CHARMAP -i FILE [-I DIR]   what POSIX's class
+//   localedef --census -f CHARMAP -i FILE [-I DIR]
+//                                               what POSIX's class
 //                                               defaults add to
 //                                               LC_CTYPE
-//   ldef --collate-numbers -f CHARMAP -i FILE [-I DIR]
+//   localedef --collate-numbers -f CHARMAP -i FILE [-I DIR]
 //                                               the collation numbering:
 //                                               values, rows, weights
 
@@ -1349,15 +1353,15 @@ main (int argc, char *argv [])
     }
     else
         diag.error (e_cmdarg, nowhere,
-                    "usage: ldef [-c] [-w] [-w###] [--no_position] "
+                    "usage: localedef [-c] [-w] [-w###] [--no_position] "
                     "-f CHARMAP -i FILE [-d DIR] [-I DIR] NAME | "
-                    "ldef --tokens FILE... | "
-                    "ldef --charmap FILE | "
-                    "ldef --values -f CHARMAP -i FILE [-I DIR] | "
-                    "ldef --ctype -f CHARMAP -i FILE [-I DIR] | "
-                    "ldef --collate -f CHARMAP -i FILE [-I DIR] | "
-                    "ldef --census -f CHARMAP -i FILE [-I DIR] | "
-                    "ldef --collate-numbers -f CHARMAP -i FILE [-I DIR]");
+                    "localedef --tokens FILE... | "
+                    "localedef --charmap FILE | "
+                    "localedef --values -f CHARMAP -i FILE [-I DIR] | "
+                    "localedef --ctype -f CHARMAP -i FILE [-I DIR] | "
+                    "localedef --collate -f CHARMAP -i FILE [-I DIR] | "
+                    "localedef --census -f CHARMAP -i FILE [-I DIR] | "
+                    "localedef --collate-numbers -f CHARMAP -i FILE [-I DIR]");
 
     return diag.exit_status ();
 }

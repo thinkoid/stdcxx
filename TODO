@@ -78,7 +78,7 @@ others do.
 
 ** TODO =std::string::push_back= leaks a representation under valgrind
 
-Valgrind on =localedef2= building =aa_DJ= with =ISO-8859-1= reports
+Valgrind on =localedef= building =aa_DJ= with =ISO-8859-1= reports
 290 bytes definitely lost in 5 blocks, every block allocated by
 =std::string::_C_get_rep= from =std::string::replace= from
 =push_back=, reached from the compiler's =scan_charcode= in
@@ -178,16 +178,16 @@ sequence of collating symbols and definitions, raw characters,
 escapes, a keyword table. The patches hold, and the census under
 them found a heap corruption in about four runs of a thousand, in
 =Def='s destructor and in =write_codecvt=, a stray word no reading
-traced to a writer. The patches are parked on the branch
-=localedef-patches= (tag =localedef-patches-2026-10=), never merged;
-they are the specification of what a compiler for these sources
-must do, and that branch's =TODO= records what they still owed. A
+traced to a writer. The patches are kept as the tag
+=localedef-old=, never merged; they are the specification of what a
+compiler for these sources must do, and that tag's =TODO= records
+what they still owed. A
 thin layer over =newlocale= needs POSIX 2008 names a strict C++03
 build does not see; a compiler that reads the C library's compiled
 locales ties the databases to its version; both were set aside.
 
 Fix: =doc/notes/plan-localedef.md=. A new compiler in
-=util/localedef=, C++03, beside the old one until acceptance. The
+=util/localedef=, C++03, now the tree's =localedef=. The
 front end first: a line reader, one production per statement over
 the tokens of a line, a model of plain structs with strings as UCS-4
 code points, collation entries kept symbolic in one sequence. In
@@ -359,24 +359,6 @@ does, with its diagnostic.
 Check: a definition with =p_sign_posn 5= draws the diagnostic; the
 502 of =SUPPORTED= draw none.
 
-** TODO The old compiler goes
-
-The acceptance of =doc/notes/plan-localedef-backend.md= is done:
-every database of the corpus is the new compiler's or explained,
-and the 40 locale tests sit on their pins with it in
-=bin/localedef='s place. Nothing holds the old one in the tree but
-the cutover itself. =locale= is a program of its own: it reads a
-charmap with =cmap_t= and reports through =diag_t=, and links none of
-the old compiler's objects.
-
-Fix: the cutover, step 3 of =doc/notes/plan-localedef-removal.md=:
-=localedef= built from =util/localedef=, the old compiler's
-=util/*.cpp= removed with =aliases.cpp=, =diagnostic.cpp= and
-=loc_exception.h=, the =localedef2= target gone.
-
-Check: =make locales= and the locale tests on their pins in every
-configuration, the bin sanity test clean.
-
 ** TODO The sanity test's name patterns fail on the tree's own names
 
 =run_utils -s=, with =RWSTD_LOCALE_ROOT= at the build's =nls= and
@@ -393,7 +375,7 @@ of the directory as a charmap.
 
 Check: the sanity test in that environment fails no assertion.
 
-** TODO The localedef2 objects have no header dependencies
+** TODO The =localedef= objects have no header dependencies
 
 =etc/config/GNUmakefile.bin= names =localedb.d= as the only
 dependency file, so a change to a header under =util/localedef=
@@ -401,10 +383,10 @@ leaves the objects that include it stale. Found when a change to
 =cmap.h= left =ldef.o= behind and the binary hung in =~cmap_t= on
 the ABI mismatch, until the eight objects were removed by hand.
 
-Fix: generate a dependency file per object for the localedef2
+Fix: generate a dependency file per object for the =localedef=
 objects as the library's rules do, or list the headers.
 
-Check: touch =util/localedef/cmap.h= and =make localedef2= rebuilds
+Check: touch =util/localedef/cmap.h= and =make localedef= rebuilds
 every object that includes it.
 
 ** TODO =scan_utf8= rejects the five- and six-byte forms =utf8_of= writes

@@ -53,9 +53,7 @@
  *       -L$B/lib -Wl,-R$B/lib -lstd15D -lsupc++ -lm
  *
  * Run, with the database for ja_JP.UTF-8 under $ROOT (from
- * "localedef -c -f UTF-8 -i ja_JP ja_JP.UTF-8" run in $ROOT; while
- * localedef2 writes the scalar categories only, its LC_TIME for the
- * same definition replaces the one in $ROOT/ja_JP.UTF-8):
+ * "localedef -c -f UTF-8 -i ja_JP ja_JP.UTF-8" run in $ROOT):
  *
  *   RWSTD_LOCALE_ROOT=$ROOT ./time-oracle -c ja_JP.utf8 ja_JP.UTF-8
  *
