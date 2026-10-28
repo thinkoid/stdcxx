@@ -89,6 +89,80 @@ name_ucs (const std::string &name)
 }
 
 
+// The code point of a symbolic name of the portable character set,
+// XBD 6.1, in both spellings the table gives where it gives two, and
+// the names of the control characters, -1 for any other name.  A
+// charmap that names its characters this way, as the test suite's do,
+// gives the code point nowhere else: the old compiler took it from
+// iconv of the bytes under the code set, and the plan takes it from
+// the name.
+static long
+pcs_ucs (const std::string &name)
+{
+    struct pcs_t {
+        const char *name;
+        long        ucs;
+    };
+
+    static const pcs_t pcs [] = {
+        { "NUL", 0x00 }, { "SOH", 0x01 }, { "STX", 0x02 }, { "ETX", 0x03 },
+        { "EOT", 0x04 }, { "ENQ", 0x05 }, { "ACK", 0x06 },
+        { "alert", 0x07 }, { "BEL", 0x07 },
+        { "backspace", 0x08 }, { "BS", 0x08 },
+        { "tab", 0x09 }, { "HT", 0x09 },
+        { "newline", 0x0A }, { "LF", 0x0A },
+        { "vertical-tab", 0x0B }, { "VT", 0x0B },
+        { "form-feed", 0x0C }, { "FF", 0x0C },
+        { "carriage-return", 0x0D }, { "CR", 0x0D },
+        { "SO", 0x0E }, { "SI", 0x0F }, { "DLE", 0x10 }, { "DC1", 0x11 },
+        { "DC2", 0x12 }, { "DC3", 0x13 }, { "DC4", 0x14 }, { "NAK", 0x15 },
+        { "SYN", 0x16 }, { "ETB", 0x17 }, { "CAN", 0x18 }, { "EM", 0x19 },
+        { "SUB", 0x1A }, { "ESC", 0x1B },
+        { "IS4", 0x1C }, { "FS", 0x1C }, { "IS3", 0x1D }, { "GS", 0x1D },
+        { "IS2", 0x1E }, { "RS", 0x1E }, { "IS1", 0x1F }, { "US", 0x1F },
+        { "space", 0x20 }, { "exclamation-mark", 0x21 },
+        { "quotation-mark", 0x22 }, { "number-sign", 0x23 },
+        { "dollar-sign", 0x24 }, { "percent-sign", 0x25 },
+        { "ampersand", 0x26 }, { "apostrophe", 0x27 },
+        { "left-parenthesis", 0x28 }, { "right-parenthesis", 0x29 },
+        { "asterisk", 0x2A }, { "plus-sign", 0x2B }, { "comma", 0x2C },
+        { "hyphen-minus", 0x2D }, { "hyphen", 0x2D },
+        { "full-stop", 0x2E }, { "period", 0x2E },
+        { "solidus", 0x2F }, { "slash", 0x2F },
+        { "zero", 0x30 }, { "one", 0x31 }, { "two", 0x32 }, { "three", 0x33 },
+        { "four", 0x34 }, { "five", 0x35 }, { "six", 0x36 }, { "seven", 0x37 },
+        { "eight", 0x38 }, { "nine", 0x39 },
+        { "colon", 0x3A }, { "semicolon", 0x3B }, { "less-than-sign", 0x3C },
+        { "equals-sign", 0x3D }, { "greater-than-sign", 0x3E },
+        { "question-mark", 0x3F }, { "commercial-at", 0x40 },
+        { "left-square-bracket", 0x5B },
+        { "reverse-solidus", 0x5C }, { "backslash", 0x5C },
+        { "right-square-bracket", 0x5D },
+        { "circumflex-accent", 0x5E }, { "circumflex", 0x5E },
+        { "low-line", 0x5F }, { "underscore", 0x5F }, { "underline", 0x5F },
+        { "grave-accent", 0x60 },
+        { "left-curly-bracket", 0x7B }, { "left-brace", 0x7B },
+        { "vertical-line", 0x7C },
+        { "right-curly-bracket", 0x7D }, { "right-brace", 0x7D },
+        { "tilde", 0x7E }, { "DEL", 0x7F }
+    };
+
+    // the letters are their own names
+    if (1 == name.size ()) {
+        const char c = name [0];
+
+        if (('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z'))
+            return c;
+    }
+
+    for (std::size_t i = 0; i != sizeof pcs / sizeof *pcs; ++i)
+        if (name == pcs [i].name)
+            return pcs [i].ucs;
+
+    return -1;
+}
+
+
 // The <Uxxxx> spelling of a code point in 4 or 8 digits, which is how
 // the members of a range are named.
 static std::string
@@ -577,6 +651,9 @@ add (const std::string &name, const std::string &bytes)
             return;
 
         run.name = name;
+
+        if (run.first < 0)
+            run.first = run.last = pcs_ucs (name);
 
         long ucs;
 

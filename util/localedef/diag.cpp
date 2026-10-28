@@ -24,8 +24,9 @@
 
 #include "diag.h"
 
-#include <cstdarg>   // for va_list
-#include <cstdio>    // for fprintf(), vfprintf()
+#include <algorithm>   // for find()
+#include <cstdarg>     // for va_list
+#include <cstdio>      // for fprintf(), vfprintf()
 
 
 static void
@@ -67,7 +68,9 @@ warning (int id, const where_t &where, const char *fmt, ...)
 {
     ++m_warnings;
 
-    if (m_muted)
+    if (   m_muted
+        || m_muted_ids.end ()
+           != std::find (m_muted_ids.begin (), m_muted_ids.end (), id))
         return false;
 
     std::va_list va;

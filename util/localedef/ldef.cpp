@@ -58,6 +58,7 @@
 #include <cerrno>    // for errno
 #include <climits>   // for UINT_MAX
 #include <cstdio>    // for printf(), fwrite(), fopen()
+#include <cstdlib>   // for strtol()
 #include <cstring>   // for strcmp(), strerror(), strrchr()
 #include <ctime>     // for clock()
 #include <set>
@@ -1038,7 +1039,10 @@ share_codecvt (const std::string &dir, const cmap_t &cmap,
 // The old driver's options for one locale: -c writes the database
 // although warnings were issued, -w mutes them, -d names the directory
 // the locale's own goes under, the current one otherwise, and -I the
-// directory the locales a copy names are read from.
+// directory the locales a copy names are read from.  --no_position
+// writes a forward,position level as forward, in the header and in
+// every row's word, as the old driver did; the collate test builds
+// its locales with it.
 struct write_opts_t {
     const char *charmap;
     const char *input;
@@ -1047,12 +1051,14 @@ struct write_opts_t {
     const char *name;
     bool        force;
     bool        quiet;
+    bool        no_position;
 };
 
 
-// [-c] [-w] -f CHARMAP -i FILE [-d DIR] [-I DIR] NAME, in any order
+// [-c] [-w] [-w###] [--no_position] -f CHARMAP -i FILE [-d DIR] [-I DIR]
+// NAME, in any order; -w### mutes the one warning in diag as it is read
 static bool
-write_args (int argc, char *argv [], write_opts_t &opts)
+write_args (int argc, char *argv [], write_opts_t &opts, diag_t &diag)
 {
     for (int i = 1; i < argc; ++i) {
 
@@ -1070,6 +1076,17 @@ write_args (int argc, char *argv [], write_opts_t &opts)
             opts.force = true;
         else if (0 == std::strcmp ("-w", arg))
             opts.quiet = true;
+        else if ('w' == arg [1] && arg [2]) {
+            char *end = 0;
+            const long id = std::strtol (arg + 2, &end, 10);
+
+            if (*end)
+                return false;
+
+            diag.mute_warning (int (id));
+        }
+        else if (0 == std::strcmp ("--no_position", arg))
+            opts.no_position = true;
         else if (i + 1 == argc)
             return false;
         else if (0 == std::strcmp ("-f", arg))
@@ -1100,6 +1117,15 @@ write_locale (const write_opts_t &opts, diag_t &diag)
 
     if (!read_model (opts.charmap, opts.input, opts.dir, cmap, def, diag))
         return;
+
+    if (opts.no_position)
+        for (std::size_t i = 0; i != def.collate.sections.size (); ++i) {
+
+            std::vector<int> &rules = def.collate.sections [i].rules;
+
+            for (std::size_t j = 0; j != rules.size (); ++j)
+                rules [j] &= ~dir_position;
+        }
 
     // the collation is numbered before the checks below, since the
     // characters a sequence leaves out are a warning that counts with
@@ -1178,6 +1204,86 @@ write_locale (const write_opts_t &opts, diag_t &diag)
 /**************************************************************************/
 // the command line
 
+// --help and -? of the old driver, whose first line the locale
+// utilities' sanity test looks for
+static void
+print_help ()
+{
+    static const char msg[] =
+        "NAME\n"
+        "\tlocaledef - generate a locale environment\n"
+        "\n"
+        "SYNOPSIS\n"
+        "\tlocaledef [-c][-w[###]][--no_position] -f charmap_file\n"
+        "\t\t-i locale_definition [-d output_dir][-I source_dir]\n"
+        "\t\tlocale_name\n"
+        "\n"
+        "\tlocaledef --tokens file...\n"
+        "\n"
+        "\tlocaledef --charmap charmap_file\n"
+        "\n"
+        "\tlocaledef --values | --ctype | --collate | --census\n"
+        "\t\t| --collate-numbers -f charmap_file -i locale_definition\n"
+        "\t\t[-I source_dir]\n"
+        "\n"
+        "DESCRIPTION\n"
+        "\tThe localedef utility sets up the language environment for the\n"
+        "\tnamed locale. localedef reads a locale definition file and\n"
+        "\tcreates a locale database with the name specified on the\n"
+        "\tcommand line, under output_dir when one is given. The codecvt\n"
+        "\tdatabase of the character set is written beside the locale,\n"
+        "\tonce per character set. The forms with a long option print\n"
+        "\twhat the utility read instead of writing a database.\n"
+        "\n"
+        "OPTIONS\n"
+        "\tThe localedef utility recognizes the following options:\n"
+        "\n"
+        "\t-c\tCreate output irrespective of warnings.\n"
+        "\n"
+        "\t-f charmap_file\n"
+        "\t\tUse charmap_file for the symbolic names of the definition.\n"
+        "\n"
+        "\t-i locale_definition\n"
+        "\t\tUse locale_definition as input.\n"
+        "\n"
+        "\t-d output_dir\n"
+        "\t\tSpecify the directory where the generated locale database\n"
+        "\t\tfiles should be placed.\n"
+        "\n"
+        "\t-I source_dir\n"
+        "\t\tSpecify the directory where the definitions a copy\n"
+        "\t\tstatement names are located.\n"
+        "\n"
+        "\t-w\tDisable all warning messages.\n"
+        "\n"
+        "\t-w###\n"
+        "\t\tDisable warning number ###.\n"
+        "\n"
+        "\t--no_position\n"
+        "\t\tWrite a forward,position collation level as forward.\n"
+        "\n"
+        "\t--tokens\tPrint the tokens of the files.\n"
+        "\n"
+        "\t--charmap\tPrint the characters of the character map.\n"
+        "\n"
+        "\t--values\tPrint the scalar categories of the definition.\n"
+        "\n"
+        "\t--ctype\tPrint the LC_CTYPE classes and maps.\n"
+        "\n"
+        "\t--collate\tPrint the LC_COLLATE model.\n"
+        "\n"
+        "\t--census\tPrint what the POSIX class defaults add to LC_CTYPE.\n"
+        "\n"
+        "\t--collate-numbers\n"
+        "\t\tPrint the collating values and rows of the definition.\n"
+        "\n"
+        "\t-?\n"
+        "\t--help\tPrint out this message.\n";
+
+    std::fputs (msg, stdout);
+}
+
+
 // OPTION -f CHARMAP -i FILE [-I DIR], the options in any order
 static bool
 model_args (int argc, char *argv [], const char *option,
@@ -1211,7 +1317,14 @@ main (int argc, char *argv [])
     const char *input   = 0;
     const char *dir     = 0;
 
-    write_opts_t opts = { 0, 0, 0, 0, 0, false, false };
+    write_opts_t opts = { 0, 0, 0, 0, 0, false, false, false };
+
+    for (int i = 1; i < argc; ++i)
+        if (   0 == std::strcmp ("--help", argv [i])
+            || 0 == std::strcmp ("-?", argv [i])) {
+            print_help ();
+            return 0;
+        }
 
     if (2 < argc && 0 == std::strcmp ("--tokens", argv [1]))
         dump_tokens (argc, argv, diag);
@@ -1228,7 +1341,7 @@ main (int argc, char *argv [])
     else if (model_args (argc, argv, "--collate-numbers", charmap, input,
                          dir))
         dump_numbers (charmap, input, dir, diag);
-    else if (write_args (argc, argv, opts)) {
+    else if (write_args (argc, argv, opts, diag)) {
         if (opts.quiet)
             diag.mute_warnings ();
 
@@ -1236,8 +1349,9 @@ main (int argc, char *argv [])
     }
     else
         diag.error (e_cmdarg, nowhere,
-                    "usage: ldef [-c] [-w] -f CHARMAP -i FILE [-d DIR] "
-                    "[-I DIR] NAME | ldef --tokens FILE... | "
+                    "usage: ldef [-c] [-w] [-w###] [--no_position] "
+                    "-f CHARMAP -i FILE [-d DIR] [-I DIR] NAME | "
+                    "ldef --tokens FILE... | "
                     "ldef --charmap FILE | "
                     "ldef --values -f CHARMAP -i FILE [-I DIR] | "
                     "ldef --ctype -f CHARMAP -i FILE [-I DIR] | "

@@ -26,6 +26,7 @@
 #define RWSTD_UTIL_LOCALEDEF_DIAG_H_INCLUDED
 
 #include <string>
+#include <vector>
 
 
 // The numbers of the old compiler's scheme (util/diagnostic.h): errors
@@ -95,14 +96,21 @@ public:
         m_muted = true;
     }
 
+    // -w### of the old driver: the one warning is counted and not
+    // printed.
+    void mute_warning (int id) {
+        m_muted_ids.push_back (id);
+    }
+
 private:
 
     diag_t (const diag_t&);           // not defined
     void operator= (const diag_t&);   // not defined
 
-    int  m_errors;
-    int  m_warnings;
-    bool m_muted;
+    int              m_errors;
+    int              m_warnings;
+    bool             m_muted;
+    std::vector<int> m_muted_ids;
 };
 
 

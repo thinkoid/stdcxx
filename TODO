@@ -341,6 +341,31 @@ does, with its diagnostic.
 Check: a definition with =p_sign_posn 5= draws the diagnostic; the
 502 of =SUPPORTED= draw none.
 
+** TODO The old compiler goes
+
+The acceptance of =doc/notes/plan-localedef-backend.md= is done:
+every database of the corpus is the new compiler's or explained,
+and 36 of 40 locale tests sit on their pins with it in
+=bin/localedef='s place. Three things hold the old one in the
+tree. =util/locale= is a stub that executes =localedef
+--locale-mode=, so the =locale= utility and its sanity test (39 of
+45 assertions, =locale -k=) need that mode in the new compiler or a
+=locale= of its own. The fixture of =22.locale.ctype=, =.is= and
+=.scan= has two lines that are neither comments nor statements,
+=locale.src:5= and =:11=, which the old scanner skipped; made
+comments, the three rows return to their pins. The fixture of
+=22.locale.collate= writes its weights space-separated and as raw
+byte codes, =\d139=, =\36=, =\x3A=, which no glibc-shaped reader
+and not glibc's own =localedef= accept; rewritten in the standard's
+syntax, the two failed assertions and the 36 missing ones return.
+
+Fix: the locale mode, the two fixtures, then =localedef= built from
+=util/localedef=, =util/*.cpp= of the old compiler removed, the
+=localedef2= target gone.
+
+Check: =make locales= and the locale tests on their pins in every
+configuration, the bin sanity test clean.
+
 ** TODO The localedef2 objects have no header dependencies
 
 =etc/config/GNUmakefile.bin= names =localedb.d= as the only

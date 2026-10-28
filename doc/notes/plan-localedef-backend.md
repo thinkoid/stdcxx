@@ -864,7 +864,11 @@ them and the code can say why.
   charmaps and the host's `iconv` tables disagree in places,
   `BIG5-HKSCS` 0x8862, `GB18030` 0x8135F437, `EUC-TW` 0x8EA5FAB8, so
   the old `LC_CTYPE` and codecvt files of those codesets carry the
-  host's reading and the new carry the charmap's.
+  host's reading and the new carry the charmap's. Where `iconv`
+  decodes a byte string to a sequence, HKSCS 8862 to U+00CA U+0304,
+  the old compiler took the sequence's first code point, so U+00CA
+  carries the classes of the charmap's name for 8862, `<UF325>`, in
+  the old `LC_CTYPE`.
 - An entry placed twice in one reorder block, `ml_IN`: the old
   compiler kept both rows, glibc and the new reader move the entry.
   And a `<Uxxxx>` name with lowercase hex digits, which the old
@@ -1041,3 +1045,30 @@ database is byte-identical to the parked compiler's except:
 The locale tests pass against their pins, re-pinned where the data
 moved. Then the old compiler goes, and the import of the current
 sources begins.
+
+**Result, 2026-10-28.** Every one of the 667 definitions builds on
+both sides. Two builds of the new compiler are byte-identical, 3458
+files and 663 links; one of four builds carried two single bits set
+in two `LC_COLLATE` files that fourteen rebuilds did not reproduce,
+a hardware question, not the compiler's. Against the reference, no
+category has an unexplained difference:
+
+- the four scalar categories, 2527 files identical, 141 explained
+  by the lines of 3.7;
+- `LC_CTYPE`, 650 identical or the same link, 17 explained; the
+  shared files 54 identical, 5 explained;
+- the 59 codecvt databases, 54 identical in every section, the rest
+  the CJK blocks, U+5344 and the tree's `iconv`-read charmaps, the
+  self-check of 3.5 with zero failures on all 59;
+- `LC_COLLATE`, 21 identical, 646 explained, every one under a line
+  of 3.7.
+
+The locale tests, 15D under GCC, with the new compiler in the old
+one's place: 36 of 40 rows on their pins, the era test among them.
+The four that moved are two test fixtures written in a syntax only
+the old compiler read, two non-comment lines in the ctype fixture
+and space-separated raw-byte weights in the collate one; glibc's
+`localedef` rejects the same lines. No pin moved. Before the old
+compiler can go: those fixtures rewritten, and a home for the
+`locale` utility's mode, which `util/locale` reaches by executing
+`localedef --locale-mode`.
