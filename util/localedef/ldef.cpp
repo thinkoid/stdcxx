@@ -28,7 +28,8 @@
 //
 //   ldef [-c] [-w] -f CHARMAP -i FILE [-d DIR] [-I DIR] NAME
 //                                               the database DIR/NAME,
-//                                               LC_CTYPE and the four
+//                                               LC_CTYPE, the codecvt
+//                                               database and the four
 //                                               scalar categories so
 //                                               far
 //   ldef --tokens FILE...                       the tokens of each line
@@ -809,6 +810,18 @@ write_file (const std::string &dir, const char *name,
 }
 
 
+// The directory a locale's directory is in, where the files shared
+// between locales go.
+static std::string
+parent_of (const std::string &dir)
+{
+    const std::string::size_type slash = dir.rfind ('/');
+
+    return std::string::npos == slash ? std::string (".")
+                                      : dir.substr (0, slash);
+}
+
+
 // Writes the LC_CTYPE of a locale whose section is a copy alone: the
 // image goes to the shared file NAME.ctype.CHARMAP beside the locale
 // directory, the first locale to need it writing it, as in the old
@@ -819,10 +832,7 @@ static void
 share_ctype (const std::string &dir, const std::string &shared,
              const std::vector<char> &image, diag_t &diag)
 {
-    const std::string::size_type slash = dir.rfind ('/');
-
-    const std::string parent =
-        std::string::npos == slash ? std::string (".") : dir.substr (0, slash);
+    const std::string parent = parent_of (dir);
 
     struct stat st;
 
@@ -842,6 +852,29 @@ share_ctype (const std::string &dir, const std::string &shared,
     if (0 != symlink (target.c_str (), link.c_str ()))
         diag.error (e_openwr, nowhere, "%s cannot be linked to %s: %s",
                     link.c_str (), target.c_str (), std::strerror (errno));
+}
+
+
+// Writes the codecvt database of the codeset beside the locale
+// directory under the codeset's name, unless a file of that name is
+// there already: the database is a function of the charmap alone, so
+// the first locale built with it writes it and the rest skip it, as
+// in the old compiler.
+static void
+share_codecvt (const std::string &dir, const cmap_t &cmap,
+               const image_names_t &names, diag_t &diag)
+{
+    const std::string parent = parent_of (dir);
+
+    struct stat st;
+
+    if (0 == stat ((parent + '/' + names.codeset).c_str (), &st))
+        return;
+
+    std::vector<char> image;
+
+    write_codecvt (cmap, names, image);
+    write_file (parent, names.codeset.c_str (), image, diag);
 }
 
 
@@ -899,9 +932,9 @@ write_args (int argc, char *argv [], write_opts_t &opts)
 
 
 // Reads the definition and writes its database: LC_CTYPE and the four
-// scalar categories, each as its file under DIR/NAME.  An error
-// withholds the output, as do warnings without -c, which is what the
-// old driver did.
+// scalar categories, each as its file under DIR/NAME, and the codecvt
+// database of the codeset beside it.  An error withholds the output,
+// as do warnings without -c, which is what the old driver did.
 static void
 write_locale (const write_opts_t &opts, diag_t &diag)
 {
@@ -947,6 +980,8 @@ write_locale (const write_opts_t &opts, diag_t &diag)
     else
         share_ctype (dir, def.ctype.copied + ".ctype." + names.charmap,
                      image, diag);
+
+    share_codecvt (dir, cmap, names, diag);
 
     write_numeric (def, cmap, names, image);
     write_file (dir, "LC_NUMERIC", image, diag);

@@ -147,6 +147,11 @@ struct charset_t {
 };
 
 
+// The UTF-8 form of a code point, up to the six bytes of the old
+// definition, which the tree's UTF-8 charmap still uses.
+std::string utf8_of (long ucs);
+
+
 // The code points of a string token, by glibc's get_string() for a
 // locale file.  The escape character takes the next character as
 // itself: "//" is one slash under escape_char /.  A string has no

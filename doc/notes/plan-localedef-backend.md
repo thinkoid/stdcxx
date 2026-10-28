@@ -857,6 +857,16 @@ them and the code can say why.
   wrote both forms empty; the new keeps the wide form and
   transliterates the narrow one, 2.2 and 3.3. One hundred and
   eighteen files of the corpus, all under 8-bit charmaps.
+- A code point the charmap defines twice: both compilers decode
+  each byte string to it; the old compiler encoded it to the lower
+  of the two byte strings, the new to the first definition's, as
+  glibc does. `EUC-TW` defines U+5344 at `a4bf` and again at
+  `8ea3a1b8`, so one `w_to_n` leaf differs; `ARMSCII-8`'s five
+  repeated punctuation marks have their ASCII byte lower, and agree.
+  In `LC_CTYPE` the second byte string has no classes in either
+  compiler, as in glibc, where `btowc` of `a4` under `hy_AM` is `)`
+  and `ispunct` of `a4` is false.
+
 
 ## 4. The shape
 

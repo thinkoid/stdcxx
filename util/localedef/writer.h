@@ -63,6 +63,11 @@ void write_ctype (const locale_def_t &def, const cmap_t &cmap,
                   const image_names_t &names, std::vector<char> &image,
                   ctype_census_t &census);
 
+// The codecvt database of the charmap's codeset, which no category
+// of the definition enters into.
+void write_codecvt (const cmap_t &cmap, const image_names_t &names,
+                    std::vector<char> &image);
+
 void write_numeric (const locale_def_t &def, const cmap_t &cmap,
                     const image_names_t &names, std::vector<char> &image);
 

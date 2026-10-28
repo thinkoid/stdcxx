@@ -178,8 +178,11 @@ portable_bits (long ucs)
 // of code point, one element per code point: those a class holds,
 // and those the portable rule gives a bit whether or not the source
 // names them.  Alongside, the single-byte characters and their bytes,
-// for the narrow table; a code point the charmap encodes twice has
-// both bytes.
+// for the narrow table, by a code point's first definition only: a
+// second byte string of a code point decodes to it but has no
+// classes, in glibc (under its hy_AM.ARMSCII-8, btowc of a4 is the
+// right parenthesis and ispunct of a4 is false) and in the old
+// compiler alike.
 static void
 collect (const ctype_def_t &ctype, const cmap_t &cmap,
          std::vector<elem_t> &elems,
@@ -187,6 +190,7 @@ collect (const ctype_def_t &ctype, const cmap_t &cmap,
 {
     cmap_iter_t  iter (cmap);
     cmap_entry_t entry;
+    cmap_entry_t first;
 
     while (iter.next (entry)) {
 
@@ -205,7 +209,8 @@ collect (const ctype_def_t &ctype, const cmap_t &cmap,
 
         elems.push_back (elem);
 
-        if (1 == entry.bytes.size ())
+        if (   1 == entry.bytes.size ()
+            && cmap.find_ucs (entry.ucs, first) && first.bytes == entry.bytes)
             narrow.push_back (
                 std::make_pair (entry.ucs, (unsigned char)entry.bytes [0]));
     }

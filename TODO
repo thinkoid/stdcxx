@@ -355,9 +355,11 @@ the string block to it, so the leaf is an ordinal plus an offset.
 Before 2338aa59 the byte-offset map was used. Nothing has noticed
 because no test names a locale with =@UCS=.
 
-Fix: =doc/notes/plan-localedef-backend.md= 3.6: reproduced for the
-acceptance run, then =utf8_to_ext= aliased to =w_to_n= for UTF-8 and
-the byte offset written for the other codesets.
+Fix: =doc/notes/plan-localedef-backend.md= 3.6, closed by 2.1 (b):
+the new compiler's writer sets =utf8_to_ext_tab_off= equal to
+=w_to_n_tab_off= for every codeset and writes no third trie, since
+the internal =wchar_t= is the UCS value on every target. The old
+writer keeps the defect; the entry leaves with it.
 
 Check: a locale named with =@UCS= converts one non-ASCII character
 out through =codecvt_byname<wchar_t, char>::out=, red against the

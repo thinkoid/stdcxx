@@ -294,11 +294,10 @@ distance (const std::string &from, const std::string &to, long limit,
 }
 
 
-// The UTF-8 form of a code point, up to the six bytes of the old
-// definition, which the tree's UTF-8 charmap still uses.  Built in an
-// array: the dump computes it once a character, and under the debug
-// library the checked string indexing was a tenth of its time.
-static std::string
+// Built in an array: the dump computes it once a character, and under
+// the debug library the checked string indexing was a tenth of its
+// time.
+std::string
 utf8_of (long ucs)
 {
     char bytes [8];
@@ -539,11 +538,19 @@ index (const cmap_run_t &run, std::size_t pos)
 
 
 // A name defined twice keeps its first definition, as in glibc, where
-// "all later definitions are simply discarded".  glibc still indexes
-// the later bytes; here the later line is dropped whole.  A <Uxxxx>
-// name is its code point, and is defined twice when the code point
-// is; its spelling is kept only when it is not the members' form, so
-// that the dump prints it as written.
+// "all later definitions are simply discarded".  A code point defined
+// twice, under <Uxxxx> names, is kept both times: glibc indexes the
+// later bytes as well, so that they decode to the code point while
+// the code point encodes to the first bytes, and the old compiler
+// decoded both.  ARMSCII-8 defines five ASCII punctuation marks a
+// second time, EUC-TW U+5344, ISIRI-3342 52 of its ASCII characters;
+// GB18030 repeats 22 lines whole.  So the later definition is a record of
+// its own, iterated and found by bytes, outside the code point index,
+// which keeps giving the first; in a UTF-8 charmap, where the lookup
+// by bytes goes through the code point, it is found only when its
+// bytes are the regular form.  A <Uxxxx> name is its code point, and
+// its spelling is kept only when it is not the members' form, so that
+// the dump prints it as written.
 void cmap_t::
 add (const std::string &name, const std::string &bytes)
 {
@@ -582,10 +589,9 @@ add (const std::string &name, const std::string &bytes)
     if (m_utf8 && 0 <= run.first && bytes == utf8_of (run.first))
         run.bytes.clear ();
 
-    // a <Uxxxx> name whose code point is taken is defined twice;
-    // another name is kept and found by its name
-    if (!index (run, pos) && u_form)
-        return;
+    // a code point already indexed keeps its first definition there;
+    // this one is still a record, and another name is found by its name
+    index (run, pos);
 
     if (!u_form)
         m_by_name [name] = pos;
