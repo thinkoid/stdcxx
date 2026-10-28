@@ -71,7 +71,8 @@ locale [-c][-k] name...
 <P>Extensions of this implementation:</P>
 
 <PRE>
-locale [-c][-h][-k][-l][-w][-wN][--help] name...
+locale [-c][-k][-ck][-h][-l][-p][-w][-wN] name...
+locale --help | -? | --charmap
 </PRE>
 <A NAME="sec4"><H3>Description</H3></A>
 <P>The <SAMP>locale</SAMP> utility reads a locale database produced by the <SAMP>localedef</SAMP> utility and writes out information about the current locale environment or about all public locales to <SAMP>stdout</SAMP>. The current locale environment is determined by the setting of environment variables <SAMP>LANG</SAMP>, <SAMP>LC_ALL</SAMP>, <SAMP>LC_COLLATE</SAMP>, <SAMP>LC_CTYPE</SAMP>, <SAMP>LC_NUMERIC</SAMP>, <SAMP>LC_MONETARY</SAMP>, <SAMP>LC_TIME</SAMP>, and <SAMP>LC_MESSAGES</SAMP>. When invoked without operands, <SAMP>locale</SAMP> writes out the setting of locale environment variables. When invoked with arguments, it writes out values assigned to the keywords in locale categories. The behavior of the utility is affected by the environment variables <SAMP>${RWSTD_LOCALE_ROOT}</SAMP> and <SAMP>${RWSTD_SRC_ROOT}</SAMP>. </P>
@@ -86,17 +87,17 @@ locale [-c][-h][-k][-l][-w][-wN][--help] name...
 </tr>
 <tr><td valign=top><P CLASS="TABLE"><SAMP>-a</SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Write out information about all public locales, including the C and POSIX locales.</P>
+<td valign=top><P CLASS="TABLE">Write out information about all public locales, including the C locale.</P>
 </td>
 </tr>
 <tr><td valign=top><P CLASS="TABLE"><SAMP>-c</SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Write out the names of specified locale categories. The option improves readability when more than one locale category is specified.</P>
+<td valign=top><P CLASS="TABLE">Write out the names of specified locale categories. The option improves readability when more than one locale category is specified. <SAMP>-ck</SAMP> is <SAMP>-c</SAMP> and <SAMP>-k</SAMP> together; no other options combine in one argument.</P>
 </td>
 </tr>
 <tr><td valign=top><P CLASS="TABLE"><SAMP>-k</SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Write out the values of the specified keywords.</P>
+<td valign=top><P CLASS="TABLE">Write out the names and values of the specified keywords.</P>
 </td>
 </tr>
 <tr><td valign=top><P CLASS="TABLE"><SAMP>-m</SAMP></P>
@@ -123,7 +124,7 @@ locale [-c][-h][-k][-l][-w][-wN][--help] name...
 <td valign=top><P CLASS="TABLE">Disable warning number <SAMP><I>N</I></SAMP>. The option can be repeated any number of times to disable multiple warnings.</P>
 </td>
 </tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>--help</SAMP></P>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--help</SAMP>, <SAMP>-?</SAMP></P>
 </td>
 <td valign=top><P CLASS="TABLE">Print a usage message to <SAMP>stdout</SAMP> and exit with <SAMP>0</SAMP> exit status.</P>
 </td>
@@ -133,14 +134,30 @@ locale [-c][-h][-k][-l][-w][-wN][--help] name...
 <td valign=top><P CLASS="TABLE">Use the character set description file associated with the locale database to write out symbolic character names rather than the character values.</P>
 </td>
 </tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>-l</SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">Write out the locale information in the format of a locale definition, readable by the <SAMP>localedef</SAMP> utility.</P>
+</td>
+</tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>-p</SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">As <SAMP>-l</SAMP>, and write characters by the symbolic names of the Portable Character Set where it has one.</P>
+</td>
+</tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--charmap</SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">Write out the character map of the current <SAMP>LC_CTYPE</SAMP> character set, read from its codecvt database, in the format of a character set description file, followed by the counts of its tables, and exit.</P>
+</td>
+</tr>
 </TABLE>
+<P>The options come before the operands, each in its own argument. <SAMP>-a</SAMP>, <SAMP>-m</SAMP>, <SAMP>--help</SAMP>, <SAMP>-?</SAMP> and <SAMP>--charmap</SAMP> act when they are read and end the run.</P>
 <A NAME="sec6"><H3>Operands</H3></A>
 <P>The following operands are accepted:</P>
 
 <UL><PRE><B><I>name</I></B>
 </PRE></UL>
 <UL>
-<P>The name of a locale category, or the reserved keyword <SAMP>charmap</SAMP>. The set of recognized locale categories is <SAMP>LC_COLLATE</SAMP>, <SAMP>LC_CTYPE</SAMP>, <SAMP>LC_MONETARY</SAMP>, <SAMP>LC_NUMERIC</SAMP>, <SAMP>LC_TIME</SAMP>, and <SAMP>LC_MESSAGES</SAMP>.</P>
+<P>The name of a locale category, the name of a keyword in a locale category, or the reserved keyword <SAMP>charmap</SAMP>. The set of recognized locale categories is <SAMP>LC_COLLATE</SAMP>, <SAMP>LC_CTYPE</SAMP>, <SAMP>LC_MONETARY</SAMP>, <SAMP>LC_NUMERIC</SAMP>, <SAMP>LC_TIME</SAMP>, and <SAMP>LC_MESSAGES</SAMP>, and <SAMP>LC_ALL</SAMP> for all of them. A name the utility does not recognize writes nothing.</P>
 </UL>
 
 <A NAME="sec7"><H3>Environment Variables</H3></A>
@@ -195,13 +212,13 @@ locale [-c][-h][-k][-l][-w][-wN][--help] name...
 
 <A NAME="idx833"></A><PRE><B>RWSTD_LOCALE_ROOT</B></PRE>
 <UL>
-<P>The pathname of the root of the directory tree containing locale databases produced by <SAMP>localedef</SAMP>. The value of this environment variable is used when the <SAMP>-m</SAMP> option is specified, or unless the locale environment variables contain the slash character.</P>
+<P>The pathname of the root of the directory tree containing locale databases produced by <SAMP>localedef</SAMP>. The value of this environment variable is used when the <SAMP>-a</SAMP> option is specified, or unless the locale environment variables contain the slash character. When it is unset, locale databases are looked up in the current working directory.</P>
 </UL>
 
 
 <A NAME="idx834"></A><PRE><B>RWSTD_SRC_ROOT</B></PRE>
 <UL>
-<P>The pathname of the root of the directory tree containing character set description files and locale definition files. The character set description files are assumed to reside in <SAMP>${RWSTD_SRC_ROOT}/charmaps</SAMP>, the locale definition files in <SAMP>${RWSTD_SRC_ROOT}/src</SAMP>. The value of this environment variable is used when the <SAMP>-h</SAMP> option is specified.</P>
+<P>The pathname of the root of the directory tree containing character set description files and locale definition files. The character set description files are assumed to reside in <SAMP>${RWSTD_SRC_ROOT}/charmaps</SAMP>, the locale definition files in <SAMP>${RWSTD_SRC_ROOT}/src</SAMP>. The value of this environment variable is used when the <SAMP>-h</SAMP> or the <SAMP>-m</SAMP> option is specified.</P>
 </UL>
 
 <A NAME="sec8"><H3>Input</H3></A>
@@ -209,11 +226,11 @@ locale [-c][-h][-k][-l][-w][-wN][--help] name...
 <A NAME="sec9"><H3>Output</H3></A>
 <P>On success, and unless extended options are specified, the format of output produced by <SAMP>locale</SAMP> to <SAMP>stdout</SAMP> follows the requirements of IEEE Std 1003.1-2001 on the <SAMP>locale</SAMP> utility.</P>
 <P>When invoked without any operands, <SAMP>locale</SAMP> writes to <SAMP>stdout</SAMP> the settings of all locale environment variables, starting with <SAMP>LANG</SAMP> first. Values of variables overridden by <SAMP>LANG</SAMP> are quoted in double-quotes.</P>
-<P>When invoked with the <SAMP>-a</SAMP> option, <SAMP>locale</SAMP> writes to <SAMP>stdout</SAMP> the names of all public locales found in the directory specified by the <SAMP>${RWSTD_LOCALE_ROOT}</SAMP> variable, or the current working directory if the variable is unset or empty.</P>
+<P>When invoked with the <SAMP>-a</SAMP> option, <SAMP>locale</SAMP> writes to <SAMP>stdout</SAMP> <SAMP>C</SAMP> and the names of the entries of the directory specified by the <SAMP>${RWSTD_LOCALE_ROOT}</SAMP> variable. When the variable is unset, it writes <SAMP>C</SAMP> and the output of the system's <SAMP>/usr/bin/locale -a</SAMP>.</P>
 <P>When invoked with the <SAMP>-c</SAMP> option, <SAMP>locale</SAMP> writes to <SAMP>stdout</SAMP> the name of each specified locale category; otherwise the names of categories are omitted. Refer to  the Environment Variables section of this entry for a list of recognized locale categories.</P>
 <P>When invoked with the <SAMP>-k</SAMP> option, <SAMP>locale</SAMP> writes to <SAMP>stdout</SAMP> the names and values of the specified keywords; otherwise only the values of the specified keywords are written.</P>
-<P>When invoked with the <SAMP>-m</SAMP> option, <SAMP>locale</SAMP> writes to <SAMP>stdout</SAMP> the names of all available charmaps.</P>
-<P>Any warning or error diagnostic messages produced by <SAMP>localedef</SAMP> are sent to <SAMP>stderr</SAMP>.</P>
+<P>When invoked with the <SAMP>-m</SAMP> option, <SAMP>locale</SAMP> writes to <SAMP>stdout</SAMP> the names of the files in <SAMP>${RWSTD_SRC_ROOT}/charmaps</SAMP>, and nothing when the variable is unset.</P>
+<P>Any warning or error diagnostic messages produced by <SAMP>locale</SAMP> are sent to <SAMP>stderr</SAMP>.</P>
 <A NAME="sec10"><H3>Exit Status</H3></A>
 <P><A HREF="localeutility.html#Table&nbsp;24">Table&nbsp;24</A> illustrates the <SAMP>locale</SAMP> utility exits with the corresponding status. </P>
 <H4><A NAME="Table&nbsp;24">Table&nbsp;24: locale utility exit status&nbsp;</A></H4>
@@ -228,9 +245,9 @@ locale [-c][-h][-k][-l][-w][-wN][--help] name...
 <td valign=top><P CLASS="TABLE">No errors occurred and output was successfully produced.</P>
 </td>
 </tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>&gt; 0</SAMP></P>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>4</SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">An error occurred that prevented locale from successfully producing output.</P>
+<td valign=top><P CLASS="TABLE">An error occurred that prevented locale from successfully producing output: an invalid option, options without an operand, a locale database that fails its validity check, or a character set description file that <SAMP>-h</SAMP> cannot read.</P>
 </td>
 </tr>
 </TABLE>
@@ -238,7 +255,7 @@ locale [-c][-h][-k][-l][-w][-wN][--help] name...
 <P>The first of the following two commands, <SAMP>localedef</SAMP>, will create a locale database named <SAMP>french@euro</SAMP> in the directory <SAMP>/tmp</SAMP>. The second, <SAMP>locale</SAMP>, will write to <SAMP>stdout</SAMP> the names and values of the keywords for the <SAMP>LC_TIME</SAMP> locale category for the just created locale database. Since <SAMP>-c</SAMP> is specified, <SAMP>locale</SAMP> also writes out the name of the category. Please note that the following example uses extensions of this implementation to the <SAMP>locale</SAMP> utility.</P>
 
 <UL><PRE>
-$ localedef -c -f -w nls/charmaps/ISO-8859-15 \<br>   -i nls/src fr_FR.euro/tmp/french@euro
+$ localedef -c -w -f nls/charmaps/ISO-8859-15 \<br>   -i nls/src/fr_FR.euro /tmp/french@euro
 $ LC_TIME=/tmp/french@euro locale -ck LC_TIME
 LC_TIME
 abday="dim";"lun";"mar";"mer";"jeu";"ven";"sam"

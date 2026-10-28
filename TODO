@@ -64,8 +64,8 @@ charmap under =C.UTF-8= is non-zero.
 ** TODO =reorder-sections-after= keeps the sections in opening order
 
 The front end records the sections in the order the source opens
-them and ignores =reorder-sections-after=; the parked compiler
-splices the section list at the named section. The tree's =hy_AM=
+them and ignores =reorder-sections-after=; the old compiler
+spliced the section list at the named section. The tree's =hy_AM=
 uses the keyword and is among the 113 definitions the reader
 rejects, so the difference has not been seen in a database.
 
@@ -167,11 +167,12 @@ compiles them and the databases the facets read.
 
 ** TODO =localedef= is rewritten
 
-The compiler under =util= is one class: =Def= parses the definition,
-computes the collation and conversion tables and writes the seven
-images, with parse state, table state and output structs side by
-side as members, raw pointers for ownership and weight arrays freed
-by hand. It had a year of development, 2001 to 2002, and none after.
+The old compiler under =util= was one class: =Def= parsed the
+definition, computed the collation and conversion tables and wrote
+the seven images, with parse state, table state and output structs
+side by side as members, raw pointers for ownership and weight
+arrays freed by hand. It had a year of development, 2001 to 2002,
+and none after.
 In October 2026 it was patched until it read all 502 definitions of
 glibc's =SUPPORTED=: the collation templates, the conditionals, one
 sequence of collating symbols and definitions, raw characters,
@@ -205,7 +206,7 @@ per step.
 
 Check: every definition of =etc/nls= and of glibc's =SUPPORTED=
 builds with its charmap, two builds byte-identical; each database
-byte-identical to the parked compiler's but where that one is known
+byte-identical to the old compiler's but where that one is known
 wrong (the 135 CJK code points, the era records, the unset words,
 the transliteration table), and there the C library decides through
 =bin/oracle=; the transliteration table against glibc's compiled
@@ -239,8 +240,8 @@ outside the six of C++ (paper, address, measurement) are not a gap.
 =doc/notes/analysis-locale-sources.md= holds the survey. The facets
 can also read the C library's own locales (=doc/notes/ref-locale.md=),
 so stale sources need not reach every =std::locale= a program
-constructs. The compiler in the tree cannot read the current sources;
-the entry above replaces it, and the import waits for it.
+constructs. The old compiler could not read the current sources;
+its replacement, the entry above, reads them.
 
 Fix: after the new compiler. glibc 2.44's 371 definitions and 233
 charmaps (shipped gzipped; the compiler reads plain files) into
@@ -375,6 +376,20 @@ of the directory as a charmap.
 
 Check: the sanity test in that environment fails no assertion.
 
+** TODO =locale --help= leaves out =-p= and shows the options combined
+
+=print_help= in =util/locale.cpp= lists every option =main= parses
+but =-p=. Its synopsis, =locale [-ckhlw] name ...=, shows the
+options combined in one argument, but =main= reads one option per
+argument, =-ck= the one combination. The reference page,
+=doc/stdlibref/localeutility.html=, follows the code.
+
+Fix: add =-p= to the message and spell the synopsis as the page
+does.
+
+Check: =locale --help= lists each option =main= parses, and the
+sanity test still finds its first line.
+
 ** TODO The =localedef= objects have no header dependencies
 
 =etc/config/GNUmakefile.bin= names =localedb.d= as the only
@@ -402,28 +417,6 @@ make the two agree.
 
 Check: a charmap with one character above U+10FFFF reads, and the
 character is found by name, by code point and by bytes alike.
-
-** TODO The =utf8_to_ext= trie leaves an ordinal where the runtime reads an offset
-
-The third trie of the codecvt database is keyed by the UTF-8 form of
-the UCS value and read under the =@UCS= modifier and by the ISO-2022
-converter. It is meant to leaf to the byte offset of the external
-string, as =w_to_n= does. By reading, =gen_utf8_tables= in
-=util/codecvt.cpp= takes its leaf from the ordinal map that
-=gen_mbchar_tables= builds, and =write_codecvt= adds the offset of
-the string block to it, so the leaf is an ordinal plus an offset.
-Before 2338aa59 the byte-offset map was used. Nothing has noticed
-because no test names a locale with =@UCS=.
-
-Fix: =doc/notes/plan-localedef-backend.md= 3.6, closed by 2.1 (b):
-the new compiler's writer sets =utf8_to_ext_tab_off= equal to
-=w_to_n_tab_off= for every codeset and writes no third trie, since
-the internal =wchar_t= is the UCS value on every target. The old
-writer keeps the defect; the entry leaves with it.
-
-Check: a locale named with =@UCS= converts one non-ASCII character
-out through =codecvt_byname<wchar_t, char>::out=, red against the
-old database.
 
 * EDG porting
 
@@ -559,9 +552,8 @@ line pinned =_XOPEN_SOURCE=.
 - =tests/src/thread.cpp= (=popen=, =pclose=),
   =tests/src/environ.cpp= (=unsetenv=), =tests/src/process.cpp=
   (=include/ansi/signal.h= under =_RWSTD_NO_DEPRECATED_C_HEADERS=
-  stops at line 63), =util/path.cpp= (=symlink=), =util/memchk.cpp=
-  (=getpagesize=, =mkstemp=), =util/time.cpp= (=std::sscanf=
-  undeclared, cause not read).
+  stops at line 63), =util/memchk.cpp= (=getpagesize=,
+  =mkstemp=).
 - Fifteen test programs stop in =include/ansi/cwchar=, lines
   143-157: =using ::fwprintf;= and the other wide I/O functions of
   C95, which glibc declares under =__USE_ISOC95= only. C++03's C
@@ -824,30 +816,6 @@ Facets and their ids, the facet index scheme, =locale_body=, how
 the binary locale data they read. A reader of
 =doc/notes/analysis-locale-mt-race.md= needs this map first. Shape:
 =ref-string-replace.md=.
-
-** TODO The codecvt database and its three tries
-
-A =ref-= note on the file =localedef= writes per codeset, the one
-=codecvt_byname= reads: the header of =include/loc/_localedef.h=,
-then three tries of 256-entry pages of 32-bit words, one page per
-byte of a multibyte prefix, an entry the high bit marks as the
-number of the next page, =UINT_MAX= as no character, else the
-character's ordinal. =n_to_w_tab= reads the external encoding,
-=utf8_to_ext_tab= goes from the UTF-8 pivot to it, =w_to_n_tab= from
-the wide character's UTF-8 form to its multibyte string; then the
-=wchar_t= pairs, the multibyte strings and the transliteration
-table. The design is for an encoding that is not UTF-8. For UTF-8
-the external encoding is the pivot, so the three tries hold the same
-identity three times: of the 18.8 MB the old compiler writes for
-glibc 2.44's UTF-8 charmap, 4814 pages of 1 KB in each of the three,
-14.4 MB of the file, where glibc keeps no table for UTF-8 at all.
-The page count is one per distinct byte prefix, so the CJK and emoji
-ranges fill the four-byte tier. Whether the back end of the new
-compiler collapses the three for UTF-8 is a format change for after
-acceptance; the note records the format as it is and the cost.
-Material: =include/loc/_localedef.h=, =src/codecvt.cpp=,
-=util/codecvt.cpp= (=gen_mbchar_tables=, =gen_wchar_tables=,
-=gen_utf8_tables=), the header of a written =UTF-8= file.
 
 ** TODO Decision records
 

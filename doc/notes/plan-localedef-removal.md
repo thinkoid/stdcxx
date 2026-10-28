@@ -229,3 +229,38 @@ definitions of `etc/nls`; the sanity test and the functionality
 scripts pass; the locale tests sit on their pins in the six
 configurations of the nightly; `make install` installs the two
 utilities.
+
+## 6. Result
+
+Steps 1 to 4 are in, 2026-10-28.
+
+- Step 1, 1d00e9d5, the fixtures. The ctype fixture is copied in
+  three tests, `22.locale.ctype`, `22.locale.ctype.is` and
+  `22.locale.ctype.scan`; its two lines are comments in each. The
+  collate fixture's value weights were literal weight ordinals, as
+  the old compiler read them, not character codes, as 2.2 took
+  them. The rewrite names symbols `<V025>` to `<V139>` that keep
+  those ordinals, and puts semicolons between the levels.
+- Step 2, d535a43b, `locale`. It needed more of the old compiler
+  than 1.1 first said: `-h` read charmaps with its `Charmap` and
+  `Scanner`, and the diagnostics went to its sink. Ported onto
+  `cmap_t` and `diag_t`, it links `memchk.o` and the new compiler's
+  `cmap.o`, `diag.o` and `reader.o`. An error now exits 4; the stub
+  exited 0. On `de_DE.UTF-8` the output of `-k`, `-h -k`, `-a`,
+  `-m` and `--help` is byte-identical to the old utility's. The
+  sanity test fails 251 of 464 assertions of its own with either
+  compiler, name patterns the tree's names do not fit; `TODO` has
+  the entry.
+- Step 3, ec1b536d, the cutover. `localedef` links the eighteen
+  objects of `util/localedef`, and `localedef2` is gone. The old
+  compiler's 22 files left, and with them `util/codeset_aliases`
+  and `util/gen_list`, which nothing had read since the 2005
+  import. The branch is the tag `localedef-old`. A clean 15D build
+  under GCC builds the 165 definitions of `etc/nls`, and the 40
+  locale tests sit on their pins.
+- Step 4, the documentation. The two reference pages describe the
+  options and behaviour the two programs have. The `TODO` entries
+  on the three tries and on the `utf8_to_ext` leaves left with the
+  writer they described.
+
+Step 5, the nightly's six configurations on their pins, is pending.

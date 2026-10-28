@@ -22,9 +22,9 @@
  *
  **************************************************************************/
 
-// The new locale compiler.  It writes a locale database with the old
-// driver's options for one locale, and it has seven dump forms, each
-// the check of one piece of the compiler:
+// The locale compiler.  It writes the locale database of one locale,
+// and it has seven dump forms, each the check of one piece of the
+// compiler:
 //
 //   localedef [-c] [-w] -f CHARMAP -i FILE [-d DIR] [-I DIR] NAME
 //                                               the database DIR/NAME,
@@ -1040,7 +1040,7 @@ share_codecvt (const std::string &dir, const cmap_t &cmap,
 }
 
 
-// The old driver's options for one locale: -c writes the database
+// The options for one locale: -c writes the database
 // although warnings were issued, -w mutes them, -d names the directory
 // the locale's own goes under, the current one otherwise, and -I the
 // directory the locales a copy names are read from.  --no_position
@@ -1208,8 +1208,8 @@ write_locale (const write_opts_t &opts, diag_t &diag)
 /**************************************************************************/
 // the command line
 
-// --help and -? of the old driver, whose first line the locale
-// utilities' sanity test looks for
+// --help and -?, whose first line the locale utilities' sanity test
+// looks for
 static void
 print_help ()
 {

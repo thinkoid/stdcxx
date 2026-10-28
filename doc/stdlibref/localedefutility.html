@@ -54,16 +54,19 @@
 <P>A utility program to define a localization environment. </P>
 <A NAME="sec3"><H3>Synopsis</H3></A>
 
-<PRE>localedef [-c][-f <I>charmap</I>][-i <I>sourcefile</I>][-u <I>code_set_name</I>]         <I>name</I>
+<PRE>localedef [-c] -f <I>charmap</I> -i <I>sourcefile</I> <I>name</I>
 </PRE>
 <P>Extensions of this implementation:</P>
 
 <PRE>
-localedef [-w][-w<I>N</I>][-f <I>charmap</I>][-i <I>sourcefile</I>][--help][--ucs]         <I>name</I>
-localedef -g [-m <I>locale_list</I>][-r <I>charmap_dir</I>][-s <I>source_dir</I>]         [-d <I>output_dir</I>]
+localedef [-c][-w][-w<I>N</I>][--no_position] -f <I>charmap</I> -i <I>sourcefile</I>         [-d <I>output_dir</I>][-I <I>source_dir</I>] <I>name</I>
+localedef --help | -?
+localedef --tokens <I>file</I>...
+localedef --charmap <I>charmap</I>
+localedef --values | --ctype | --collate | --census | --collate-numbers         -f <I>charmap</I> -i <I>sourcefile</I> [-I <I>source_dir</I>]
 </PRE>
 <A NAME="sec4"><H3>Description</H3></A>
-<P>The <SAMP>localedef</SAMP> utility reads one or more locale definition files and character set description files and translates them into binary files suitable for interpretation by this implementation of the C++ Standard Library. The binary files produced by <SAMP>localedef</SAMP> are referred to in this document as <I>locale databases</I>. In particular, the localization library makes use of this information to implement its behavior. The behavior of the utility is affected by the environment variable <SAMP>${RWSTD_SRC_ROOT}</SAMP>.</P>
+<P>The <SAMP>localedef</SAMP> utility reads a locale definition file, the definitions its <SAMP>copy</SAMP> statements name, and a character set description file, and translates them into binary files suitable for interpretation by this implementation of the C++ Standard Library. The binary files produced by <SAMP>localedef</SAMP> are referred to in this document as <I>locale databases</I>. In particular, the localization library makes use of this information to implement its behavior. Beside the locale database the utility writes the codecvt database of the character set, once per character set. The forms that begin with <SAMP>--tokens</SAMP>, <SAMP>--charmap</SAMP>, <SAMP>--values</SAMP>, <SAMP>--ctype</SAMP>, <SAMP>--collate</SAMP>, <SAMP>--census</SAMP> or <SAMP>--collate-numbers</SAMP> print what the utility read and write no database; each is the check of one part of the utility.</P>
 <A NAME="sec5"><H3>Options</H3></A>
 <P><A HREF="localedefutility.html#Table&nbsp;25">Table&nbsp;25</A> illustrates options that conform to the requirements of the IEEE Std 1003.1-2001 (POSIX) standard. </P>
 <H4><A NAME="Table&nbsp;25">Table&nbsp;25: localedef option requirements of the IEEE Std. 1003.1-2001 (POSIX) standard&nbsp;</A></H4>
@@ -80,20 +83,16 @@ localedef -g [-m <I>locale_list</I>][-r <I>charmap_dir</I>][-s <I>source_dir</I>
 </tr>
 <tr><td valign=top><P CLASS="TABLE"><SAMP>-f </SAMP><SAMP><I>charmap</I></SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Use <SAMP><I>charmap</I></SAMP> as the pathname of the character set description file.</P>
+<td valign=top><P CLASS="TABLE">Use <SAMP><I>charmap</I></SAMP> as the pathname of the character set description file. This implementation requires the option.</P>
 </td>
 </tr>
 <tr><td valign=top><P CLASS="TABLE"><SAMP>-i </SAMP><SAMP><I>sourcefile</I></SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Use <SAMP><I>sourcefile</I></SAMP> as the pathname of the locale description file. If this option is not specified, <SAMP>localdef</SAMP> reads the locale definition from its standard input.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>-u </SAMP><SAMP><I>code_set_name</I></SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Use <SAMP><I>code_set_name</I></SAMP> as the target mapping for character symbols and collating element symbols whose encoding values are defined in terms of the ISO/IEC 10646-1:2000 standard position constant values.</P>
+<td valign=top><P CLASS="TABLE">Use <SAMP><I>sourcefile</I></SAMP> as the pathname of the locale description file. This implementation requires the option; <SAMP>localedef</SAMP> does not read its standard input.</P>
 </td>
 </tr>
 </TABLE>
+<P>The POSIX option <SAMP>-u</SAMP> is not supported.</P>
 <P><A HREF="localedefutility.html#Table&nbsp;26">Table&nbsp;26</A> illustrates options that are provided as extensions to the IEEE Std 1003.1-2001 (POSIX) standard.   </P>
 <H4><A NAME="Table&nbsp;26">Table&nbsp;26: localedef option extensions to the IEEE Std 1003.1-2001 (POSIX) standard&nbsp;</A></H4>
 <TABLE BORDER="1" CELLPADDING="3" CELLSPACING="3">
@@ -104,81 +103,102 @@ localedef -g [-m <I>locale_list</I>][-r <I>charmap_dir</I>][-s <I>source_dir</I>
 </tr>
 <tr><td valign=top><P CLASS="TABLE"><SAMP>-w</SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Disable all warnings.</P>
+<td valign=top><P CLASS="TABLE">Disable all warnings. A warning is still counted, and without <SAMP>-c</SAMP> it still withholds the output.</P>
 </td>
 </tr>
 <tr><td valign=top><P CLASS="TABLE"><SAMP>-w</SAMP><SAMP><I>N</I></SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Disable warning number <SAMP><I>N</I></SAMP>, where <SAMP><I>N</I></SAMP> is a non-negative integer. The option can be repeated any number of times to disable multiple warnings.</P>
+<td valign=top><P CLASS="TABLE">Disable warning number <SAMP><I>N</I></SAMP>, where <SAMP><I>N</I></SAMP> is a non-negative integer. The option can be repeated any number of times to disable multiple warnings. As with <SAMP>-w</SAMP>, the warning is still counted.</P>
 </td>
 </tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>-g</SAMP></P>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>-d </SAMP><SAMP><I>output_dir</I></SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Enter <SAMP><I>batch mode</I></SAMP>.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE">-m <SAMP><I>locale_list</I></SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Use <SAMP><I>locale_list</I></SAMP> as the name of a file containing a list associating locale names with the names of encodings. This option is only allowed in batch mode.</P>
+<td valign=top><P CLASS="TABLE">Create the locale database under <SAMP><I>output_dir</I></SAMP>, as <SAMP><I>output_dir</I>/<I>name</I></SAMP>.</P>
 </td>
 </tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>-r</SAMP> <SAMP><I>charmap_dir</I></SAMP></P>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>-I </SAMP><SAMP><I>source_dir</I></SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Use <SAMP><I>charmap_dir</I></SAMP> as the name of the directory under which <SAMP>localedef</SAMP> should look for character set description files. This option is only allowed in batch mode.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>-r</SAMP> <SAMP><I>source_dir</I></SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Use <SAMP><I>source_dir</I></SAMP> as the name of the directory under which <SAMP>localedef</SAMP> should look for locale definition files. This option is only allowed in batch mode.</P>
+<td valign=top><P CLASS="TABLE">Read the locale definitions that <SAMP>copy</SAMP> statements name from <SAMP><I>source_dir</I></SAMP>. Without the option they are read from the directory of <SAMP><I>sourcefile</I></SAMP>.</P>
 </td>
 </tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>-d output_dir</SAMP></P>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--no_position</SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Use <SAMP><I>output_dir</I></SAMP> as the name of the directory under which <SAMP>localedef</SAMP> should place binary files produced in batch mode.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>--ucs</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Use the Universal Character Set (either UCS-4 or UCS-2) to encode characters of type <SAMP>wchar_t</SAMP>. This option may require character set description files in an extended format.</P>
+<td valign=top><P CLASS="TABLE">Write a <SAMP>forward,position</SAMP> collation level as <SAMP>forward</SAMP>.</P>
 </td>
 </tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>--help</SAMP></P>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--help</SAMP>, <SAMP>-?</SAMP></P>
 </td>
 <td valign=top><P CLASS="TABLE">Print a usage message to <SAMP>stdout</SAMP> and exit with <SAMP>0</SAMP> exit status.</P>
 </td>
 </tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--tokens </SAMP><SAMP><I>file</I>...</SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">Print the tokens of each line of the files.</P>
+</td>
+</tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--charmap </SAMP><SAMP><I>charmap</I></SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">Print the entries of the character set description file.</P>
+</td>
+</tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--values</SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">Print the values of the four scalar categories, <SAMP>LC_NUMERIC</SAMP>, <SAMP>LC_MONETARY</SAMP>, <SAMP>LC_TIME</SAMP> and <SAMP>LC_MESSAGES</SAMP>.</P>
+</td>
+</tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--ctype</SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">Print the classes, case maps and transliteration of <SAMP>LC_CTYPE</SAMP>.</P>
+</td>
+</tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--collate</SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">Print the declarations and the collation sequence of <SAMP>LC_COLLATE</SAMP>.</P>
+</td>
+</tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--census</SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">Print, for each character class, the number of characters the POSIX class defaults add to <SAMP>LC_CTYPE</SAMP> beyond the statements of the definition.</P>
+</td>
+</tr>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>--collate-numbers</SAMP></P>
+</td>
+<td valign=top><P CLASS="TABLE">Print the collation numbering of the definition: the collating values, the rows and the weights.</P>
+</td>
+</tr>
 </TABLE>
+<P>The options of the first form may be given in any order. In the other forms the long option comes first. The forms that print take <SAMP>-f</SAMP> and <SAMP>-i</SAMP>, and <SAMP>-I</SAMP>, as the synopsis shows, and write no files.</P>
 <A NAME="sec6"><H3>Operands</H3></A>
 <P>The following operands are accepted:</P>
 
 <UL><PRE><B><I>name</I></B>
 </PRE></UL>
 <UL>
-<P>The name of a locale database to produce. If <I>name</I> contains at least one slash character it is considered to be a pathname, and will be created under the directory tree specified. Otherwise, <I>name</I> is considered to be a filename and will be created in the current working directory.</P>
+<P>The name of a locale database to produce. With <SAMP>-d</SAMP> it is taken relative to <SAMP><I>output_dir</I></SAMP>. Otherwise, if <I>name</I> contains at least one slash character it is considered to be a pathname, and will be created under the directory tree specified; if not, <I>name</I> is considered to be a filename and will be created in the current working directory. Directories along the path that do not exist are created.</P>
 </UL>
 
 <A NAME="sec7"><H3>Environment Variables</H3></A>
 
 <A NAME="idx835"></A><PRE><B>RWSTD_SRC_ROOT</B></PRE>
 <UL>
-<P>The pathname of the root of the directory tree containing character set description files and locale definition files. The character set description files are assumed to reside in <SAMP>${RWSTD_SRC_ROOT}/charmaps</SAMP>, the locale definition files in <SAMP>${RWSTD_SRC_ROOT}/src</SAMP>.</P>
+<P><SAMP>localedef</SAMP> reads no environment variable, this one included. The character set description file and the locale definition file are the pathnames that <SAMP>-f</SAMP> and <SAMP>-i</SAMP> give. The <A HREF="localeutility.html">locale</A> utility reads <SAMP>RWSTD_SRC_ROOT</SAMP>.</P>
 </UL>
 
 <A NAME="sec8"><H3>Input</H3></A>
-<P>Unless the <SAMP>-i</SAMP> option is used, <SAMP>localedef</SAMP> reads the locale definition from <SAMP>stdin</SAMP>. Otherwise, <SAMP>localedef</SAMP> reads the locale definition from the filename specified with the <SAMP>-i</SAMP> option. The utility also attempts to read files named by any copy directives that appear in the locale definition. <SAMP>localedef</SAMP> reads character set descriptions from the files specified with the <SAMP>-f</SAMP> option.</P>
+<P><SAMP>localedef</SAMP> reads the locale definition from the filename specified with the <SAMP>-i</SAMP> option. The utility also reads the files named by any copy directives that appear in the locale definition, from the directory specified with the <SAMP>-I</SAMP> option, or from the directory of the locale definition. <SAMP>localedef</SAMP> reads the character set description from the file specified with the <SAMP>-f</SAMP> option.</P>
 <P>The required format of the character set description file follows that described in section 6.4, Character Set Description File, of IEEE Std 1003.1-2001.</P>
 <P>The required format of the locale definition file follows that described in section 7.3, Locale Definition, of IEEE Std 1003.1-2001. </P>
 <P>Any files that conform to the required format can be used with <SAMP>localedef</SAMP> to produce binary locale database files suitable for use with the Apache C++ Standard Library.</P>
 <P>A limited number of character set description files and locale definition files in the conforming format can be purchased from The Open Group. See   <SAMP>http://www.opengroup.org/pubs/catalog/lo.htm</SAMP>.</P>
 <P>Character set description files and locale definition files in an extended format can be obtained without charge from the JTC1/SC22/WG15 -- POSIX pages at <SAMP>ftp://dkuug.dk/i18n/WG15-collection/</SAMP>. These files are distributed with the Apache C++ Standard Library sources.</P>
-<P>Additionally, the <SAMP>localedef</SAMP> utility also accepts files in an extended format used by GNU C library, glibc 2<br><SAMP>(http://www.gnu.org/software/libc/libc.html)</SAMP>. The locale definition files that accompany glibc 2.2.5 are distributed with the Apache C++ Standard Library sources. </P>
-<P>Finally, <SAMP>localedef</SAMP> utility accepts files shipped with HP-UX 11.00 and later. The character set description files are installed in<br><SAMP>/usr/lib/nls/loc/charmaps</SAMP>, the locale definition files are in <br><SAMP>/usr/lib/nls/loc/src</SAMP>. These files are not distributed with the Apache C++ Standard Library sources.</P>
+<P>Additionally, the <SAMP>localedef</SAMP> utility also accepts files in an extended format used by GNU C library, glibc 2<br><SAMP>(http://www.gnu.org/software/libc/libc.html)</SAMP>. It reads them by the lexical rules of glibc's own <SAMP>localedef</SAMP>, and it reads the locale definitions and character set description files of glibc 2.44. The locale definition files that accompany glibc 2.2.5 are distributed with the Apache C++ Standard Library sources. </P>
 <A NAME="sec9"><H3>Output</H3></A>
-<P>On success, <SAMP>localedef</SAMP> will create one or more files. If the <SAMP>name</SAMP> argument does not contain the slash character, files are created in the current working directory. Otherwise, the output files will be created in the directory specified by <SAMP>name</SAMP>. The following directory tree describes the organization of the output files:</P>
+<P>On success, <SAMP>localedef</SAMP> will create one or more files. It creates the directory <SAMP><I>name</I></SAMP>, under <SAMP><I>output_dir</I></SAMP> when <SAMP>-d</SAMP> is given, and writes the locale database into it. It writes the codecvt database of the character set, the <SAMP><I>encoding</I></SAMP> file, into the directory that holds <SAMP><I>name</I></SAMP>, unless a file of that name is there already. The following directory tree describes the organization of the output files:</P>
 
 <UL><PRE><I>encoding<br>name</I>/<br><I>name</I>/LC_COLLATE<br><I>name</I>/LC_CTYPE<br><I>name</I>/LC_MONETARY<br><I>name</I>/LC_NUMERIC<br><I>name</I>/LC_TIME<br><I>name</I>/LC_MESSAGES 
 </PRE></UL>
-<P>The name of the <SAMP><I>encoding</I></SAMP> file reflects the used character set definition as specified by the <SAMP>-f</SAMP> option. The name of the directory name corresponds to the name argument passed to <SAMP>localedef</SAMP>. Under the directory, <SAMP>localedef</SAMP> creates up to six files named <SAMP>LC_COLLATE</SAMP>, <SAMP>LC_CTYPE</SAMP>, etc., one for each section that appears in the locale definition.</P>
+<P>The name of the <SAMP><I>encoding</I></SAMP> file is the <SAMP>&lt;code_set_name&gt;</SAMP> of the character set description file specified by the <SAMP>-f</SAMP> option, or the base name of that file when it gives none. The name of the directory name corresponds to the name argument passed to <SAMP>localedef</SAMP>. Under the directory, <SAMP>localedef</SAMP> creates the files <SAMP>LC_CTYPE</SAMP>, <SAMP>LC_MONETARY</SAMP>, <SAMP>LC_NUMERIC</SAMP>, <SAMP>LC_TIME</SAMP> and <SAMP>LC_MESSAGES</SAMP>, a category the definition leaves out taking the default values, and <SAMP>LC_COLLATE</SAMP> when the definition has that category. When the <SAMP>LC_CTYPE</SAMP> category of the definition is only a <SAMP>copy</SAMP> of another locale's, its image goes to the file <SAMP><I>source</I>.ctype.<I>charmap</I></SAMP> beside the directory, <SAMP><I>source</I></SAMP> the copied locale and <SAMP><I>charmap</I></SAMP> the base name of the character set description file, and <SAMP><I>name</I>/LC_CTYPE</SAMP> is a symbolic link to it.</P>
+<P>An error in the input withholds every file. So do warnings, unless <SAMP>-c</SAMP> is given; <SAMP>localedef</SAMP> then writes <SAMP>Warnings occurred - No output produced</SAMP> to <SAMP>stderr</SAMP>.</P>
 <P>Any warning or error diagnostic messages produced by <SAMP>localedef</SAMP> are sent to <SAMP>stderr</SAMP>.</P>
 <A NAME="sec10"><H3>Exit Status</H3></A>
 <P>The <SAMP>localedef</SAMP> utility exits with the status codes listed in <A HREF="localedefutility.html#Table&nbsp;27">Table&nbsp;27</A>:  </P>
@@ -191,22 +211,12 @@ localedef -g [-m <I>locale_list</I>][-r <I>charmap_dir</I>][-s <I>source_dir</I>
 </tr>
 <tr><td valign=top><P CLASS="TABLE"><SAMP>0</SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">No errors occurred and locale databases were successfully created.</P>
+<td valign=top><P CLASS="TABLE">No errors occurred. The locale database was created, or, when warnings occurred without <SAMP>-c</SAMP>, no files were written.</P>
 </td>
 </tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>1</SAMP></P>
+<tr><td valign=top><P CLASS="TABLE"><SAMP>4</SAMP></P>
 </td>
-<td valign=top><P CLASS="TABLE">Warnings occurred and locale databases were successfully created.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>2</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">The locale specification exceeded implementation limits or the coded character set or sets used are not supported, and no locale databases were created.</P>
-</td>
-</tr>
-<tr><td valign=top><P CLASS="TABLE"><SAMP>&gt; 3</SAMP></P>
-</td>
-<td valign=top><P CLASS="TABLE">Warnings or errors occurred and no locale databases were created.</P>
+<td valign=top><P CLASS="TABLE">An error occurred: an invalid command line, an error in the input, or a file that could not be read or written.</P>
 </td>
 </tr>
 </TABLE>

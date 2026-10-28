@@ -29,8 +29,8 @@
 #include <vector>
 
 
-// The numbers of the old compiler's scheme (util/diagnostic.h): errors
-// below 700, warnings from 700 to 799.  A log of either compiler names
+// The numbers of the old compiler's scheme: errors below 700,
+// warnings from 700 to 799.  A log of either compiler names
 // the same fault by the same number.
 enum diag_id_t {
     e_symused = 101,  // a weight names what the sequence does not order
@@ -91,13 +91,12 @@ public:
         return m_errors ? 4 : 0;
     }
 
-    // -w of the old driver: a warning is counted and not printed.
+    // -w: a warning is counted and not printed.
     void mute_warnings () {
         m_muted = true;
     }
 
-    // -w### of the old driver: the one warning is counted and not
-    // printed.
+    // -w###: the one warning is counted and not printed.
     void mute_warning (int id) {
         m_muted_ids.push_back (id);
     }
