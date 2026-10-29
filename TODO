@@ -111,6 +111,49 @@ Check: the oracle's four disagreements at -543-12-31 under =th_TH=
 and =lo_LA= gone; the =time_put= test with a case for each of =%y=
 and =%C= at a negative year.
 
+** TODO =time_put= rejects =%OC= and =%Op=
+
+=src/time_put.cpp= takes after =O= the conversions C99 and POSIX list,
+=d e H I m M S u U V w W y=, and writes =%O= and drops the letter for
+any other. glibc takes =%OC=, the century in =alt_digits=, and =%Op=
+as =%p=, and four of its definitions use them: =lzh_TW= =d_fmt=
+"%OC%Oy年%B%Od日", =my_MM= =d_fmt= "%OC%Oy %b %Od %A", =mnw_MM= and
+=shn_MM= with =%Op= in =d_t_fmt=. The library writes =%O廿六年...=
+where glibc writes =廿廿六年...=. Found by =bin/oracle/scalar.cpp=
+(class C).
+
+Fix: accept =C= after =O=, through =altval= as =%Oy=, and =p= as =%p=,
+in the modifier checks of =src/time_put.cpp= and
+=include/loc/_time_put.cc=; or record the difference as an extension
+the library does not take, and leave the four locales' =%x= and =%c=
+as they are.
+
+Check: the oracle's class C is empty, or the record names the four.
+
+** TODO =%r= with an empty =t_fmt_ampm= writes nothing
+
+=gd_GB=, =hy_AM=, =sm_WS= and =su_ID= set =t_fmt= or =d_t_fmt= to =%r=
+and =t_fmt_ampm= to "". glibc's =%r= uses =%I:%M:%S %p= when
+=t_fmt_ampm= is empty; the library formats the empty string as
+written, so =%X= in =gd_GB= is "" where glibc writes "09:05:09 f".
+Found by =bin/oracle/scalar.cpp= (class D).
+
+Fix: a decision: the same fallback in the ='r'= case of
+=src/time_put.cpp=, or the literal reading, recorded.
+
+Check: the oracle's class D is empty, or the record names the six.
+
+** TODO Two pattern-table comments name the wrong pattern
+
+=src/punct.cpp= labels entry 013, ="\4\1\3\2"= {value, space, sign,
+symbol}, as ="\4\3\3\2"=; =tests/localization/22.locale.moneypunct.cpp=
+labels entry 021 as ="\3\\14\2"=. The data is right in both.
+
+Fix: the two comments.
+
+Check: none; the oracle's copy of the table reads the corrected
+comment.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -211,6 +254,30 @@ Check: =localedef= builds every definition in the refreshed
 tests pass against their pins, re-pinned where the data moved. The
 decoded currency, numeric and date values of the 139 shared
 definitions match the glibc sources they come from.
+
+** TODO =localedef= leaves the international money formats unset
+
+A definition that sets the domestic =p_cs_precedes=, =p_sep_by_space=,
+=p_sign_posn= and their =n_= counterparts and none of the =int_p_= and
+=int_n_= fields, 478 of the 502 in =SUPPORTED=, gets =pos_format= and
+=neg_format= of =CHAR_MAX= in all four parts in =moneypunct<char,
+true>= and =moneypunct<wchar_t, true>=: =small_int= in
+=util/localedef/wmonetary.cpp= writes =CHAR_MAX= for an unset keyword
+and =format_of= turns a =CHAR_MAX= =sign_posn= into four =CHAR_MAX=
+parts. glibc's =ld-monetary.c= gives an unset =int_= field the
+domestic value. The old compiler did the same as ours. International
+=money_put= writes nothing for -123456 in =en_US.UTF-8=, where the
+domestic facet writes =-$1,234.56=. Found by =bin/oracle/scalar.cpp=
+(class A of its first run).
+
+Fix: in =write_monetary=, an unset =int_p_= or =int_n_= field takes
+its domestic value before =format_of=, as glibc does. Open: a
+=sign_posn= of =CHAR_MAX= still yields four =CHAR_MAX= parts, not a
+pattern C++ allows (22.2.6.3 p1); =src/punct.cpp= yields four =none=,
+not one either; only =C.UTF-8= reaches it.
+
+Check: the oracle's class A is empty over the 502; international
+=money_put= in =en_US.UTF-8= writes =-USD 1,234.56=.
 
 ** TODO Characters outside a collation table sort last, glibc's first
 
