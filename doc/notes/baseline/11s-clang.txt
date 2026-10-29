@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            60
-  Assertions:            12468745
+  Assertions:            12468821
   Failed assertions:            0

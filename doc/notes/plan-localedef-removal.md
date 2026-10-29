@@ -263,4 +263,8 @@ Steps 1 to 4 are in, 2026-10-28.
   on the three tries and on the `utf8_to_ext` leaves left with the
   writer they described.
 
-Step 5, the nightly's six configurations on their pins, is pending.
+- Step 5, the nightly of 2026-10-28 on 7d286cde. The six
+  configurations are on their pins row for row. The only difference
+  was the pinned `Assertions:` total, 76 under the sum of its rows
+  in every table since 592e858e re-pinned `22.locale.time.put`
+  without it; the totals are corrected with this result.

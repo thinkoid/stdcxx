@@ -165,56 +165,6 @@ their pins.
 The locale sources and charmaps under =etc/nls=, the =localedef= that
 compiles them and the databases the facets read.
 
-** TODO =localedef= is rewritten
-
-The old compiler under =util= was one class: =Def= parsed the
-definition, computed the collation and conversion tables and wrote
-the seven images, with parse state, table state and output structs
-side by side as members, raw pointers for ownership and weight
-arrays freed by hand. It had a year of development, 2001 to 2002,
-and none after.
-In October 2026 it was patched until it read all 502 definitions of
-glibc's =SUPPORTED=: the collation templates, the conditionals, one
-sequence of collating symbols and definitions, raw characters,
-escapes, a keyword table. The patches hold, and the census under
-them found a heap corruption in about four runs of a thousand, in
-=Def='s destructor and in =write_codecvt=, a stray word no reading
-traced to a writer. The patches are kept as the tag
-=localedef-old=, never merged; they are the specification of what a
-compiler for these sources must do, and that tag's =TODO= records
-what they still owed. A
-thin layer over =newlocale= needs POSIX 2008 names a strict C++03
-build does not see; a compiler that reads the C library's compiled
-locales ties the databases to its version; both were set aside.
-
-Fix: =doc/notes/plan-localedef.md=. A new compiler in
-=util/localedef=, C++03, now the tree's =localedef=. The
-front end first: a line reader, one production per statement over
-the tokens of a line, a model of plain structs with strings as UCS-4
-code points, collation entries kept symbolic in one sequence. In
-order: the reader, the charmap, the five scalar categories with
-=copy=, =LC_CTYPE=, =LC_COLLATE=; each step with the one check the
-plan names. The narrow strings of a locale whose charmap lacks a
-code point, =EUR= for the euro sign under ISO-8859-1, take the
-=LC_CTYPE= transliteration, as glibc writes them, so the writers
-need step 4's table. The five steps of the front end are in: the
-model reads every one of the 502 definitions. The back end, the
-tables and the seven writers in the format =include/loc/_localedef.h=
-describes, is planned in =doc/notes/plan-localedef-backend.md=: the
-format questions with their directions, the order of work, one check
-per step.
-
-Check: every definition of =etc/nls= and of glibc's =SUPPORTED=
-builds with its charmap, two builds byte-identical; each database
-byte-identical to the old compiler's but where that one is known
-wrong (the 135 CJK code points, the era records, the unset words,
-the transliteration table), and there the C library decides through
-=bin/oracle=; the transliteration table against glibc's compiled
-one, read entry by entry through =nl_langinfo= of the
-=_NL_CTYPE_TRANSLIT_= items, which is exact where =iconv= with
-=//TRANSLIT= shows only the first usable alternative. The locale
-tests pass against their pins, re-pinned where the data moved.
-
 ** TODO The locale sources under =etc/nls= are glibc 2.2's
 
 The definitions and charmaps under =etc/nls= are copies from GNU libc
