@@ -374,13 +374,18 @@ The shared =LC_CTYPE= file of a charmap and the charmap's codecvt
 database are written beside the locale directories by the first
 locale to need them: =share_ctype= and =share_codecvt= in
 =util/localedef/ldef.cpp= =stat= the file and write it when absent.
-Two locales of one charmap built at once, as =make -j locales=
-builds them, both write. Every writer writes the same bytes, so the
-file is whole once every writer is done; a reader that opens it
-between a truncation and the end of a write sees a short file.
+Two locales that need one file, built at once, both write. The build
+seeds, 52a86884's successor: the first locale of each codeset is
+built alone and the others wait on it, which covers the codecvt
+database and the ctype file the seed writes. A locale whose
+=LC_CTYPE= copies another definition than the seed's, the =am_ET=
+and =tr_TR= groups, still writes its ctype file beside a sibling
+built at once. Every writer writes the same bytes, so the file is
+whole once every writer is done; a reader that opens it between a
+truncation and the end of a write sees a short file.
 
 Fix: =write_file= writes to a temporary name in the directory and
-renames it over the final name; the first rename wins and no reader
+renames it over the final name; the rename is atomic and no reader
 sees a partial file. The locale's own files take the same path at no
 cost.
 

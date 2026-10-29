@@ -115,9 +115,14 @@ atomic all the same. The debug compiler takes 12 s on a UTF-8
 definition and 3 s on an eight-bit one; the 502 take about 70
 minutes in one process.
 
-Decision: the build runs under `-j`; step 2 builds the set once
-more in one process and compares; the atomic write is a queue entry
-of its own.
+Decision: the build seeds. The first locale of each codeset is
+built alone and writes the codeset's codecvt database and the
+shared ctype file; the other locales of the codeset are order-only
+dependents of it, so under `-j` they start when it is done. A
+locale whose `LC_CTYPE` copies another definition than the seed's
+(`am_ET`, `tr_TR`) still shares its ctype file with its siblings
+under `-j`; the queue keeps that residue. Step 2 builds the set in
+one process and compares.
 
 ### 2.6 What stays
 
