@@ -3,27 +3,14 @@
 <mb_cur_min> 1
 <comment_char> %
 <escape_char> /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% https://en.wikipedia.org/wiki/GBK
+
+% https://www-01.ibm.com/software/globalization/ccsid/ccsid936.html
+% alias CP936
+
+% ftp://ftp.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WindowsBestFit
+% alias MS936
+% alias WINDOWS-936
 
 CHARMAP
 <U0000>     /x00         NULL (NUL)
@@ -154,6 +141,8 @@ CHARMAP
 <U007D>     /x7d         RIGHT CURLY BRACKET
 <U007E>     /x7e         TILDE
 <U007F>     /x7f         DELETE (DEL)
+% This isn't in GBK 1.0, but Microsoft added it to their CP936 page.
+<U20AC>     /x80         EURO SIGN
 
 <U4E02>     /x81/x40     <CJK>
 <U4E04>     /x81/x41     <CJK>
@@ -6264,7 +6253,7 @@ CHARMAP
 <U300F>     /xa1/xbb     RIGHT WHITE CORNER BRACKET
 <U3016>     /xa1/xbc     LEFT WHITE LENTICULAR BRACKET
 <U3017>     /xa1/xbd     RIGHT WHITE LENTICULAR BRACKET
-<U3010>     /xa1/xbe     LEFT BLACK LENTICULAR
+<U3010>     /xa1/xbe     LEFT BLACK LENTICULAR BRACKET
 <U3011>     /xa1/xbf     RIGHT BLACK LENTICULAR BRACKET
 <U00B1>     /xa1/xc0     PLUS-MINUS SIGN
 <U00D7>     /xa1/xc1     MULTIPLICATION SIGN
@@ -6284,8 +6273,8 @@ CHARMAP
 <U2220>     /xa1/xcf     ANGLE
 <U2312>     /xa1/xd0     ARC
 <U2299>     /xa1/xd1     CIRCLED DOT OPERATOR
-<U222B>     /xa1/xd2     SQUARE IMAGE OF
-<U222E>     /xa1/xd3     SQUARE ORIGINAL OF OR EQUAL TO
+<U222B>     /xa1/xd2     INTEGRAL
+<U222E>     /xa1/xd3     CONTOUR INTEGRAL
 <U2261>     /xa1/xd4     IDENTICAL TO
 <U224C>     /xa1/xd5     ALL EQUAL TO
 <U2248>     /xa1/xd6     ALMOST EQUAL TO
@@ -6414,7 +6403,7 @@ CHARMAP
 <UFF01>     /xa3/xa1     FULLWIDTH EXCLAMATION MARK
 <UFF02>     /xa3/xa2     FULLWIDTH QUOTATION MARK
 <UFF03>     /xa3/xa3     FULLWIDTH NUMBER SIGN
-<UFFE5>     /xa3/xa4     FULLWIDTH DOLLAR SIGN
+<UFFE5>     /xa3/xa4     FULLWIDTH YEN SIGN
 <UFF05>     /xa3/xa5     FULLWIDTH PERCENT SIGN
 <UFF06>     /xa3/xa6     FULLWIDTH AMPERSAND
 <UFF07>     /xa3/xa7     FULLWIDTH APOSTROPHE

@@ -1,27 +1,6 @@
 <code_set_name> MAC-SAMI
 <comment_char> %
 <escape_char> /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % source:  http://www.indigo.ie/egt/standards/se/mac-sami.html
 % author:  Regnor Jernsletten <Regnor.Jernsletten@sami.uit.no>
 % date:    2001-07-31
@@ -206,8 +185,8 @@ CHARMAP
 <U00D8>     /xaf         LATIN CAPITAL LETTER O WITH STROKE
 <U0110>     /xb0         LATIN CAPITAL LETTER D WITH STROKE
 <U014A>     /xb1         LATIN CAPITAL LETTER ENG
-<U821E>     /xb2         LATIN CAPITAL LETTER H WITH CARON
-<U821F>     /xb3         LATIN SMALL LETTER H WITH CARON
+<U021E>     /xb2         LATIN CAPITAL LETTER H WITH CARON
+<U021F>     /xb3         LATIN SMALL LETTER H WITH CARON
 <U0160>     /xb4         LATIN CAPITAL LETTER S WITH CARON
 <U0166>     /xb5         LATIN CAPITAL LETTER T WITH STROKE
 <U2202>     /xb6         PARTIAL DIFFERENTIAL
@@ -234,8 +213,8 @@ CHARMAP
 <U00C0>     /xcb         LATIN CAPITAL LETTER A WITH GRAVE
 <U00C3>     /xcc         LATIN CAPITAL LETTER A WITH TILDE
 <U00D5>     /xcd         LATIN CAPITAL LETTER O WITH TILDE
-<U0152>     /xce         LATIN CAPITAL LETTER LIGATURE OE
-<U0153>     /xcf         LATIN SMALL LETTER LIGATURE OE
+<U0152>     /xce         LATIN CAPITAL LIGATURE OE
+<U0153>     /xcf         LATIN SMALL LIGATURE OE
 <U2013>     /xd0         EN DASH
 <U2014>     /xd1         EM DASH
 <U201C>     /xd2         LEFT DOUBLE QUOTATION MARK
@@ -279,7 +258,7 @@ CHARMAP
 <U01EE>     /xf8         LATIN CAPITAL LETTER EZH WITH CARON
 <U01EF>     /xf9         LATIN SMALL LETTER EZH WITH CARON
 <U01E4>     /xfa         LATIN CAPITAL LETTER G WITH STROKE
-<U01E5>     /xfb         LATIN SMALLL LETTER G WITH STROKE
+<U01E5>     /xfb         LATIN SMALL LETTER G WITH STROKE
 <U01E6>     /xfc         LATIN CAPITAL LETTER G WITH CARON
 <U01E7>     /xfd         LATIN SMALL LETTER G WITH CARON
 <U01E8>     /xfe         LATIN CAPITAL LETTER K WITH CARON

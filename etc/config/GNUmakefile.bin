@@ -43,16 +43,15 @@ LOCDIR = $(BUILDDIR)/nls
 # have to carry the path with them in the rule target.
 VPATH += $(LOCDIR)
 
-# list of locales to build
-# first compose a full name from gen_list in the form
-#   <locale name>.<codeset>
-# then move the known modifiers (@euro and @cyrillic) to the end
-# of the name
+# list of locales to build, read from SUPPORTED and then legacy
+# first drop the codeset a locale name carries (it is the charmap's)
+# then compose a full name in the form
+#   <locale name>.<codeset>[@<modifier>]
+# with the modifier moved after the codeset
 LOCALES :=                                                                 \
-    $(shell sed -e s:"^ *\([^ ]*\)  *\([^ ]*\) *":"\1\.\2":g               \
-                -e s:"\([^.]*\)\(.euro\)\([^ ]*\)":"\1\3@euro":g           \
-                -e s:"\([^.]*\)\(.cyrillic\)\([^ ]*\)":"\1\3@cyrillic":g   \
-                $(NLSDIR)/gen_list)
+    $(shell sed -e s:"^ *\([^ .@]*\)\.[^ @]*":"\1":g                       \
+                -e s:"^\([^ .@]*\)\([^ ]*\)  *\([^ ]*\) *":"\1\.\3\2":g    \
+                $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy)
 
 ## Filter from RUNTARGET only the scripts
 RUNTARGET := $(filter %.sh,$(RUNTARGET))
@@ -109,7 +108,7 @@ gencat: gencat.o
 locales: localedef $(LOCALES)
 
 # the rule builds the scripts that are run by the runall script
-$(RUNTARGET): $(NLSDIR)/gen_list
+$(RUNTARGET): $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy
 	@(echo "making $@...";                                               \
           echo "#!/bin/sh" > $@;                                             \
           locname=`echo $@ | sed "s:^\./::g;s:\.sh$$::g"`;                   \
@@ -122,19 +121,19 @@ $(RUNTARGET): $(NLSDIR)/gen_list
 
 # the rule presents as dependencies the source files corresponding
 # to that locale; it is run once for each entry in LOCALES
-$(LOCALES): $(NLSDIR)/gen_list
-	@(lname=`echo $@ | sed "s:\([^.]*\)\.\([^@]*\)\(.*\):\1\3:;y:@:.:"`; \
+$(LOCALES): $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy
+	@(lname=`echo $@ | sed "s:\([^.]*\)\.\([^@]*\)\(.*\):\1\3:"`;        \
           cname=`echo $@ | sed "s:\([^.]*\)\.\([^@]*\)\(.*\):\2:"`;          \
           echo "./localedef -w -c -f $(NLSDIR)/charmaps/$$cname"             \
                "-i $(NLSDIR)/src/$$lname $(LOCDIR)/$@";                      \
           ./localedef -w -c -f $(NLSDIR)/charmaps/$$cname                    \
                       -i $(NLSDIR)/src/$$lname $(LOCDIR)/$@)
 
-$(DEPENDDIR)/localedb.d: $(DEPENDDIR) $(NLSDIR)/gen_list
+$(DEPENDDIR)/localedb.d: $(DEPENDDIR) $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy
 	@(echo "# generated locale dependencies" > $@;                      \
           for f in ""$(LOCALES); do                                         \
               lname=`echo $$f |                                             \
-                sed "s:\([^.]*\)\.\([^@]*\)\(.*\):\1\3:;y:@:.:"`;           \
+                sed "s:\([^.]*\)\.\([^@]*\)\(.*\):\1\3:"`;                  \
               cname=`echo $$f | sed "s:\([^.]*\)\.\([^@]*\)\(.*\):\2:"`;    \
               f=$$f;                                                        \
               echo "generating dependencies for $$f";                       \

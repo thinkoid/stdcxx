@@ -3,27 +3,6 @@
 <escape_char> /
 <mb_cur_max> 2
 <mb_cur_min> 1
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 CHARMAP
 %
@@ -362,6 +341,7 @@ CHARMAP
 <U2121>     /xa2/xe5     TELEPHONE SIGN
 <U20AC>     /xa2/xe6     EURO SIGN
 <U00AE>     /xa2/xe7     REGISTERED SIGN
+<U327E>     /xa2/xe8     CIRCLED HANGUL IEUNG U
 <UFF01>     /xa3/xa1     FULLWIDTH EXCLAMATION MARK
 <UFF02>     /xa3/xa2     FULLWIDTH QUOTATION MARK
 <UFF03>     /xa3/xa3     FULLWIDTH NUMBER SIGN

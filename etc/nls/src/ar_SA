@@ -1,63 +1,46 @@
 comment_char %
-escape_char  /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+escape_char /
+
+% This file is part of the GNU C Library and contains locale data.
+% The Free Software Foundation does not claim any copyright interest
+% in the locale data contained in this file.  The foregoing does not
+% affect the license of the GNU C Library as a whole.  It does not
+% exempt you from the conditions of the license if your use would
+% otherwise be governed by that license.
+
 % Arabic Locale
-% Charset: ISO-8859-6
 % By: Salvador Sabanal, LinuxLab, SAP AG <salvador.sabanal@sap.com>
 % Date: Oct. 18, 1999
-% Adjusted to glibc mnemonics --drepper 2000-02-12
-% Adjusted to glibc mnemonics --strassburger 2000-09-28
 
 LC_IDENTIFICATION
 title      "Arabic locale for Saudi Arabia"
 source     ""
 address    ""
 contact    ""
-email      "bug-glibc@gnu.org"
+email      "libc-alpha@sourceware.org"
 tel        ""
 fax        ""
 language   "Arabic"
 territory  "Saudi Arabia"
 revision   "1.0"
 date       "2000-06-29"
-%
-category  "ar_SA:2000";LC_IDENTIFICATION
-category  "ar_SA:2000";LC_CTYPE
-category  "ar_SA:2000";LC_COLLATE
-category  "ar_SA:2000";LC_TIME
-category  "ar_SA:2000";LC_NUMERIC
-category  "ar_SA:2000";LC_MONETARY
-category  "ar_SA:2000";LC_MESSAGES
-category  "ar_SA:2000";LC_PAPER
-category  "ar_SA:2000";LC_NAME
-category  "ar_SA:2000";LC_ADDRESS
-category  "ar_SA:2000";LC_TELEPHONE
 
+category "i18n:2012";LC_IDENTIFICATION
+category "i18n:2012";LC_CTYPE
+category "i18n:2012";LC_COLLATE
+category "i18n:2012";LC_TIME
+category "i18n:2012";LC_NUMERIC
+category "i18n:2012";LC_MONETARY
+category "i18n:2012";LC_MESSAGES
+category "i18n:2012";LC_PAPER
+category "i18n:2012";LC_NAME
+category "i18n:2012";LC_ADDRESS
+category "i18n:2012";LC_TELEPHONE
+category "i18n:2012";LC_MEASUREMENT
 END LC_IDENTIFICATION
 
 LC_CTYPE
-copy "i18n"
+copy "ar_EG"
 END LC_CTYPE
 
 
@@ -287,13 +270,13 @@ END LC_COLLATE
 % Set up the LC_MONETARY category
 
 LC_MONETARY
-int_curr_symbol	"<U0053><U0041><U0052><U0020>"
-currency_symbol	"<U0631><U064A><U0627><U0644>"
-mon_decimal_point	"<U002E>"
+int_curr_symbol	"SAR "
+currency_symbol	"ر.س"
+mon_decimal_point	"."
 mon_thousands_sep	""
 mon_grouping	-1
 positive_sign	""
-negative_sign	"<U002D>"
+negative_sign	"-"
 int_frac_digits	2
 frac_digits	2
 p_cs_precedes	0
@@ -308,107 +291,94 @@ END LC_MONETARY
 % Set up the LC_NUMERIC category
 
 LC_NUMERIC
-decimal_point	"<U002E>"
+decimal_point	"."
 thousands_sep	""
 grouping	-1
 END LC_NUMERIC
 
 
-% Set up the LC_TIME category
-% d_t_fmt	"%A %.1d %B %Y  %.1H:%M:%S"
-% d_fmt	"%A %.1d %B %Y"
-% t_fmt	"%.1H:%M:%S"
-% t_fmt_ampm	"%.1H:%M:%S"
-
 LC_TIME
-d_t_fmt	"<U0025><U0041><U0020><U0025><U002E><U0031><U0064><U0020><U0025><U0042><U0020><U0025><U0059><U0020><U0020><U0025><U002E><U0031><U0048><U003A><U0025><U004D><U003A><U0025><U0053>"
-d_fmt	"<U0025><U0041><U0020><U0025><U002E><U0031><U0064><U0020><U0025><U0042><U0020><U0025><U0059>"
-t_fmt	"<U0025><U002E><U0031><U0048><U003A><U0025><U004D><U003A><U0025><U0053>"
-t_fmt_ampm	"<U0025><U002E><U0031><U0048><U003A><U0025><U004D><U003A><U0025><U0053>"
-day	"<U0627><U0644><U0623><U062D><U062F>"; /
-	"<U0627><U0644><U0625><U062B><U0646><U064A><U0646>"; /
-	"<U0627><U0644><U062B><U0644><U0627><U062B><U0627><U0621>"; /
-	"<U0627><U0644><U0623><U0631><U0628><U0639><U0627><U0621>"; /
-	"<U0627><U0644><U062E><U0645><U064A><U0633>"; /
-	"<U0627><U0644><U062C><U0645><U0639><U0640><U0629>"; /
-	"<U0627><U0644><U0633><U0628><U062A>"
-abday	"<U0053><U0075><U006E>"; /
-	"<U004D><U006F><U006E>"; /
-	"<U0054><U0075><U0065>"; /
-	"<U0057><U0065><U0064>"; /
-	"<U0054><U0068><U0075>"; /
-	"<U0046><U0072><U0069>"; /
-	"<U0053><U0061><U0074>"
-mon	"<U0643><U0627><U0646><U0648><U0646><U0020><U0627><U0644><U062B><U0627><U0646><U064A>"; /
-	"<U0634><U0628><U0627><U0637>"; /
-	"<U0622><U0630><U0627><U0631>"; /
-	"<U0646><U064A><U0633><U0640><U0627><U0646>"; /
-	"<U0623><U064A><U0627><U0631>"; /
-	"<U062D><U0632><U064A><U0631><U0627><U0646>"; /
-	"<U062A><U0640><U0645><U0640><U0648><U0632>"; /
-	"<U0622><U0628>"; /
-	"<U0623><U064A><U0644><U0648><U0644>"; /
-	"<U062A><U0634><U0631><U064A><U0646><U0020><U0627><U0644><U0623><U0648><U0644>"; /
-	"<U062A><U0634><U0631><U064A><U0646><U0020><U0627><U0644><U062B><U0627><U0646><U064A>"; /
-	"<U0643><U0627><U0646><U0648><U0646><U0020><U0627><U0644><U0623><U0648><U0644>"
-abmon	"<U004A><U0061><U006E>"; /
-	"<U0046><U0065><U0062>"; /
-	"<U004D><U0061><U0072>"; /
-	"<U0041><U0070><U0072>"; /
-	"<U004D><U0061><U0079>"; /
-	"<U004A><U0075><U006E>"; /
-	"<U004A><U0075><U006C>"; /
-	"<U0041><U0075><U0067>"; /
-	"<U0053><U0065><U0070>"; /
-	"<U004F><U0063><U0074>"; /
-	"<U004E><U006F><U0076>"; /
-	"<U0044><U0065><U0063>"
+d_t_fmt	"%A %e %B %Y %k:%M:%S"
+date_fmt	"%A %e %B %Y %Z %k:%M:%S"
+d_fmt	"%A %e %B %Y"
+t_fmt	"%k:%M:%S"
+t_fmt_ampm	"%k:%M:%S"
+day	"الأحد"; /
+	"الإثنين"; /
+	"الثلاثاء"; /
+	"الأربعاء"; /
+	"الخميس"; /
+	"الجمعـة"; /
+	"السبت"
+abday	"ح"; /
+	"ن"; /
+	"ث"; /
+	"ر"; /
+	"خ"; /
+	"ج"; /
+	"س"
+mon	"يناير";/
+	"فبراير";/
+	"مارس";/
+	"أبريل";/
+	"مايو";/
+	"يونيو";/
+	"يوليو";/
+	"أغسطس";/
+	"سبتمبر";/
+	"أكتوبر";/
+	"نوفمبر";/
+	"ديسمبر"
+abmon	"يناير";/
+	"فبراير";/
+	"مارس";/
+	"أبريل";/
+	"مايو";/
+	"يونيو";/
+	"يوليو";/
+	"أغسطس";/
+	"سبتمبر";/
+	"أكتوبر";/
+	"نوفمبر";/
+	"ديسمبر"
 am_pm	"";""
 era_d_fmt	""
-date_fmt	"<U0025><U0061><U0020><U0025><U0062><U0020><U0025><U0065>/
-<U0020><U0025><U0048><U003A><U0025><U004D><U003A><U0025><U0053><U0020>/
-<U0025><U005A><U0020><U0025><U0059>"
+week 7;19971130;1
+first_workday 1
 END LC_TIME
 
 
-% Set up the LC_MESSAGES category
-% yesexpr = "^(\346|\346\331\345)"
-% noexpr  = "^(\344|\344\307)"
-
 LC_MESSAGES
-yesstr	"<U0646><U0639><U0645>"
-nostr	"<U0644><U0627>"
-yesexpr	"<U005E><U0028><U0646><U007C><U0646><U0639><U0645><U0029>"
-noexpr	"<U005E><U0028><U0644><U007C><U0644><U0627><U0029>"
+copy "ar_EG"
 END LC_MESSAGES
 
 LC_PAPER
-% FIXME
-height   297
-% FIXME
-width    210
+copy "i18n"
 END LC_PAPER
 
 LC_TELEPHONE
-tel_int_fmt    "<U002B><U0025><U0063><U0020><U0025><U0061><U0020><U0025>/
-<U006C>"
-int_prefix     "<U0039><U0036><U0036>"
+tel_int_fmt    "+%c %a %l"
+int_prefix     "966"
+int_select  "00"
 END LC_TELEPHONE
 
 LC_MEASUREMENT
-% FIXME
-measurement    1
+copy "i18n"
 END LC_MEASUREMENT
 
 LC_NAME
-name_fmt    "<U0025><U0064><U0025><U0074><U0025><U0067><U0025><U0074>/
-<U0025><U006D><U0025><U0074><U0025><U0066>"
+name_fmt    "%d%t%g%t%m%t%f"
 END LC_NAME
 
 LC_ADDRESS
-postal_fmt    "<U0025><U0066><U0025><U004E><U0025><U0061><U0025><U004E>/
-<U0025><U0064><U0025><U004E><U0025><U0062><U0025><U004E><U0025><U0073>/
-<U0020><U0025><U0068><U0020><U0025><U0065><U0020><U0025><U0072><U0025>/
-<U004E><U0025><U0025><U007A><U0020><U0025><U0054><U0025>/
-<U004E><U0025><U0063><U0025><U004E>"
+postal_fmt    "%f%N%a%N%d%N%b%N%s %h %e %r%N%z %T%N%c%N"
+country_name "المملكة العربية السعودية"
+country_ab2 "SA"
+country_ab3 "SAU"
+country_num 682
+country_car  "KSA"
+lang_name    "العربية"
+lang_ab      "ar"
+lang_term    "ara"
+lang_lib    "ara"
 END LC_ADDRESS

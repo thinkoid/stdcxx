@@ -1,198 +1,208 @@
 comment_char %
-escape_char  /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+escape_char /
+
+% This file is part of the GNU C Library and contains locale data.
+% The Free Software Foundation does not claim any copyright interest
+% in the locale data contained in this file.  The foregoing does not
+% affect the license of the GNU C Library as a whole.  It does not
+% exempt you from the conditions of the license if your use would
+% otherwise be governed by that license.
+
 % Persian Language Locale for Iran with UTF-8 character set
-% Source: The FarsiWeb Project
-% Address: Computing Center, Sharif University of Technology
-%    Azadi Ave, Tehran, Iran
+% Source: Sharif FarsiWeb, Inc.
+% Address: 5, Shahid Ghasemi Habibollah, Azadi Ave, Tehran, Iran
 % Contact: Roozbeh Pournader
-% Email: roozbeh@sharif.edu
-% Tel: +98 21 6022378
+% Email: roozbeh@farsiweb.info
+% Tel: +98 21 6022372
 % Fax: +98 21 6019568
 % Language: fa
 % Territory: IR
-% Revision: 2.1
-% Date: 2001-03-18
+% Revision: 3.0
+% Date: 2005-04-06
 % Users: general
-% Repertoiremap:
-% Charset: UTF-8
-% Distribution and use is free, also
-% for commercial purposes.
 
 LC_IDENTIFICATION
 title      "Persian locale for Iran"
-source     "The FarsiWeb Project"
-address    "Computing Center, Sharif University of Technology, Azadi Ave, Tehran, Iran"
+source     "Sharif FarsiWeb, Inc."
+address    "5, Shahid Ghasemi Habibollah, Azadi Ave, Tehran, Iran"
 contact    "Roozbeh Pournader"
-email      "roozbeh@sharif.edu"
-tel        "+98 21 6022378"
-fax        "+98 21 6019568"
+email      "roozbeh@farsiweb.info"
+tel        ""
+fax        ""
 language   "Persian"
 territory  "Iran"
-revision   "2.1"
-date       "2001-03-18"
-%
-category  "fa_IR:2001";LC_IDENTIFICATION
-category  "fa_IR:2001";LC_CTYPE
-category  "fa_IR:2001";LC_COLLATE
-category  "fa_IR:2001";LC_TIME
-category  "fa_IR:2001";LC_NUMERIC
-category  "fa_IR:2001";LC_MONETARY
-category  "fa_IR:2001";LC_MESSAGES
-category  "fa_IR:2001";LC_PAPER
-category  "fa_IR:2001";LC_NAME
-category  "fa_IR:2001";LC_ADDRESS
-category  "fa_IR:2001";LC_TELEPHONE
+revision   "3.0"
+date       "2005-04-06"
 
+category "i18n:2012";LC_IDENTIFICATION
+category "i18n:2012";LC_CTYPE
+category "i18n:2012";LC_COLLATE
+category "i18n:2012";LC_TIME
+category "i18n:2012";LC_NUMERIC
+category "i18n:2012";LC_MONETARY
+category "i18n:2012";LC_MESSAGES
+category "i18n:2012";LC_PAPER
+category "i18n:2012";LC_NAME
+category "i18n:2012";LC_ADDRESS
+category "i18n:2012";LC_TELEPHONE
+category "i18n:2012";LC_MEASUREMENT
 END LC_IDENTIFICATION
 
 LC_CTYPE
 copy "i18n"
 
+% Persian uses the alternate digits U+06F0..U+06F9
 outdigit <U06F0>..<U06F9>
+
+% This is used in the scanf family of functions to read Persian numbers
+% using "%Id" and such.
+map to_inpunct; /
+  (<U0030>,<U06F0>); /
+  (<U0031>,<U06F1>); /
+  (<U0032>,<U06F2>); /
+  (<U0033>,<U06F3>); /
+  (<U0034>,<U06F4>); /
+  (<U0035>,<U06F5>); /
+  (<U0036>,<U06F6>); /
+  (<U0037>,<U06F7>); /
+  (<U0038>,<U06F8>); /
+  (<U0039>,<U06F9>); /
+  (<U002E>,<U066B>); /
+  (<U002C>,<U066C>)
+
+% This is used in the printf family of functions to write Persian floating
+% point numbers using "%If" and such.
+map to_outpunct; /
+  (<U002E>,<U066B>); /
+  (<U002C>,<U066C>)
+
+translit_start
+include "translit_combining";""
+translit_end
 END LC_CTYPE
 
 LC_COLLATE
 copy "iso14651_t1"
 
-% The Persian alphabet order is: ALEF WITH MADDA ABOVE, ALEF, HAMZA (all
-% kinds), BEH, PEH, TEH, JEEM, TCHEH, HAH, KHAH, DAL, THAL, REH, ZAIN, JEH,
-% SEEN, SHEEN, SAD, DAD, TAH, ZAH, AIN, GHAIN, FEH, QAF, KAF, GAF, LAM,
-% MEEM, NOON, WAW, HEH, YEH.
-% The various kind of HAMZA are sorted as ALEF WITH HAMZA ABOVE, ALEF WITH
-% HAMZA BELOW, WAW WITH HAMZA ABOVE, YEH WITH HAMZA ABOVE.
+% CLDR collation rules for Persian:
+% (see: https://unicode.org/cldr/trac/browser/trunk/common/collation/fa.xml)
 %
-% TODO: add "Waw + Hamza Above -> Waw With Hamza Above" suport and things
-% like that.
+% 		<collation type="standard">
+% 			<cr><![CDATA[
+% <collations>
+%   <collation type="standard">
+%     <cr><![CDATA[
+%     	[normalization on]
+%     	[reorder Arab]
+%     	&َ<<ِ<<ُ<<ً<<ٍ<<ٌ
+%     	&[before 1]ا<آ
+%     	&ا<<ٱ<ء
+%     	<<أ<<ٲ<<إ<<ٳ<<ؤ
+%     	<<یٔ<<<ىٔ<<<ئ
+%     	&ک<<*ڪګكڬڭڮ
+%     	&ۏ<ه<<ە<<ہ<<ة<<ۃ<<ۀ<<ھ
+%     	&ی<<*ىےيېۑۍێ
+%     ]]></cr>
+%   </collation>
+% </collations>
 %
-% TODO: add Arabic contextual forms support.
+% And CLDR also lists the following
+% index characters:
+% (see: https://unicode.org/cldr/trac/browser/trunk/common/main/fa.xml)
+%
+% <exemplarCharacters type="index">[آ ا ب پ ت ث ج چ ح خ د ذ ر ز ژ س ش ص ض ط ظ ع غ ف ق ک گ ل م ن و ه ی]</exemplarCharacters>
+%
+% The following rules implement the same order for glibc.
 
-collating-symbol <AHY> % accent hamza over yeh
-collating-symbol <ADL> % dotless
-collating-symbol <ADO> % with dots over
-collating-symbol <AWO> % with wasla over
-collating-symbol <alef_madda>
-collating-symbol <yeh>
+collating-symbol <arabic-letter-heh>
 
-reorder-after <BAS>
-<AHA>
+collating-element <arabic-letter-farsi-yeh-with-hamza-above> from "<U06CC><U0654>"
+collating-element <arabic-letter-alef-maksura-with-hamza-above> from "<U0649><U0654>"
 
-<AHS>
-<AWO>
-<AHY>
-<ADL>
-<ADO>
-<AYE>
-<YBA>
+% &َ<<ِ<<ُ<<ً<<ٍ<<ٌ
+reorder-after <FATHA>
+<KASRA>
+<DAMMA>
+<FATHATAN>
+<KASRATAN>
+<DAMMATAN>
 
-reorder-after <th>
-<alef_madda>
-<alef>
-<hamza>
+% &[before 1]ا<آ
+reorder-after <S08AC> % ARABIC LETTER ROHINGYA YEH
+<S0622> % ARABIC LETTER ALEF WITH MADDA ABOVE
 
-reorder-after <waw>
-<heh>
-<yeh>
+% &ا<<ٱ<ء<<أ<<ٲ<<إ<<ٳ<<ؤ<<یٔ<<<ىٔ<<<ئ
+% Entry in iso14651_t1_common:
+%
+%    <U0627> <S0627>;<BASE>;<MIN>;<U0627> % ARABIC LETTER ALEF
+%
+% So we make <U0671> sort like <S0627> with a secondary difference:
+<U0671> <S0627>;"<BASE><VRNT1>";<MIN>;<U0671> % ARABIC LETTER ALEF WASLA
 
-% Persian uses fatha, kasra, damma, fathatan, kasratan, dammatan order.
+reorder-after <S0627> % ARABIC LETTER ALEF
+<S0621> % ARABIC LETTER HAMZA
 
-reorder-after <U066D>
-<U064E> IGNORE;IGNORE;IGNORE;<U064E> %<fatha_no>
-<UFE76> IGNORE;IGNORE;IGNORE;<UFE76> %<fatha_is>
-<UFE77> IGNORE;IGNORE;IGNORE;<UFE77> %<fatha_me>
-<U0650> IGNORE;IGNORE;IGNORE;<U0650> %<kasra_no>
-<UFE7A> IGNORE;IGNORE;IGNORE;<UFE7A> %<kasra_is>
-<UFE7B> IGNORE;IGNORE;IGNORE;<UFE7B> %<kasra_me>
-<U064F> IGNORE;IGNORE;IGNORE;<U064F> %<damma_no>
-<UFE78> IGNORE;IGNORE;IGNORE;<UFE78> %<damma_is>
-<UFE79> IGNORE;IGNORE;IGNORE;<UFE79> %<damma_me>
-<U064B> IGNORE;IGNORE;IGNORE;<U064B> %<fathatan_no>
-<UFE70> IGNORE;IGNORE;IGNORE;<UFE70> %<fathatan_is>
-<UFE71> IGNORE;IGNORE;IGNORE;<UFE71> %<fathatan_me>
-<U064D> IGNORE;IGNORE;IGNORE;<U064D> %<kasratan_no>
-<UFE74> IGNORE;IGNORE;IGNORE;<UFE74> %<kasratan_is>
-<U064C> IGNORE;IGNORE;IGNORE;<U064C> %<dammatan_no>
-<UFE72> IGNORE;IGNORE;IGNORE;<UFE72> %<dammatan_is>
+<U0623> <S0621>;"<BASE><VRNT1><VRNT1>";<MIN>;<U0623> % ARABIC LETTER ALEF WITH HAMZA ABOVE
+<U0672> <S0621>;"<BASE><VRNT1><VRNT2>";<MIN>;<U0672> % ARABIC LETTER ALEF WITH WAVY HAMZA ABOVE
+<U0625> <S0621>;"<BASE><VRNT1><VRNT3>";<MIN>;<U0625> % ARABIC LETTER ALEF WITH HAMZA BELOW
+<U0673> <S0621>;"<BASE><VRNT1><VRNT4>";<MIN>;<U0673> % ARABIC LETTER ALEF WITH WAVY HAMZA BELOW
+<U0624> <S0621>;"<BASE><VRNT1><VRNT5>";<MIN>;<U0624> % ARABIC LETTER WAW WITH HAMZA ABOVE
+<arabic-letter-farsi-yeh-with-hamza-above> <S0621>;"<BASE><VRNT2><VRNT1>";<MIN>;<U06CC>
+<arabic-letter-alef-maksura-with-hamza-above> <S0621>;"<BASE><VRNT2><VRNT1>";<CAP>;<U0649>
+<U0626> <S0621>;"<BASE><VRNT2><VRNT1>";<COMPATCAP>;<U0626> % ARABIC LETTER YEH WITH HAMZA ABOVE
 
-reorder-after <UFE7F>
-<U0653> IGNORE;IGNORE;IGNORE;<U0653> %<madda_no>   
-<U0654> IGNORE;IGNORE;IGNORE;<U0654> %<hamzaabove_no>
-<U0655> IGNORE;IGNORE;IGNORE;<U0655> %<hamzabelow_no>
-<U0670> IGNORE;IGNORE;IGNORE;<U0670> %<supalef_no>
+% &ک<<*ڪګكڬڭڮ
+% Entry for ک in iso14651_t1_common:
+%
+%    <U06A9> <S06A9>;<BASE>;<MIN>;<U06A9> % ARABIC LETTER KEHEH
+%
+% So we make ڪ ګ ك ڬ ڭ ڮ sort like <S06A9> with secondary differences:
+<U06AA> <S06A9>;"<BASE><VRNT1><VRNT1>";<MIN>;<U06AA> % ڪ ARABIC LETTER SWASH KAF
+<U06AB> <S06A9>;"<BASE><VRNT1><VRNT2>";<MIN>;<U06AB> % ګ ARABIC LETTER KAF WITH RING
+<U0643> <S06A9>;"<BASE><VRNT1><VRNT3>";<MIN>;<U0643> % ك ARABIC LETTER KAF
+<U06AC> <S06A9>;"<BASE><VRNT1><VRNT4>";<MIN>;<U06AC> % ڬ ARABIC LETTER KAF WITH DOT ABOVE
+<U06AD> <S06A9>;"<BASE><VRNT1><VRNT5>";<MIN>;<U06AD> % ڭ ARABIC LETTER NG
+<U06AE> <S06A9>;"<BASE><VRNT2><VRNT1>";<MIN>;<U06AE> % ڮ ARABIC LETTER KAF WITH THREE DOTS BELOW
 
-% Persian digits are sorted before Arabic ones: they are the basic forms.
-reorder-after <U0621>
-<U06F0> <0>;<BAS>;<MIN>;IGNORE
-<U0660> <0>;<PCL>;<MIN>;IGNORE
-<U06F1> <1>;<BAS>;<MIN>;IGNORE
-<U0661> <1>;<PCL>;<MIN>;IGNORE
-<U06F2> <2>;<BAS>;<MIN>;IGNORE
-<U0662> <2>;<PCL>;<MIN>;IGNORE
-<U06F3> <3>;<BAS>;<MIN>;IGNORE
-<U0663> <3>;<PCL>;<MIN>;IGNORE
-<U06F4> <4>;<BAS>;<MIN>;IGNORE
-<U0664> <4>;<PCL>;<MIN>;IGNORE
-<U06F5> <5>;<BAS>;<MIN>;IGNORE
-<U0665> <5>;<PCL>;<MIN>;IGNORE
-<U06F6> <6>;<BAS>;<MIN>;IGNORE
-<U0666> <6>;<PCL>;<MIN>;IGNORE
-<U06F7> <7>;<BAS>;<MIN>;IGNORE
-<U0667> <7>;<PCL>;<MIN>;IGNORE
-<U06F8> <8>;<BAS>;<MIN>;IGNORE
-<U0668> <8>;<PCL>;<MIN>;IGNORE
-<U06F9> <9>;<BAS>;<MIN>;IGNORE
-<U0669> <9>;<PCL>;<MIN>;IGNORE
+% &ۏ<ه<<ە<<ہ<<ة<<ۃ<<ۀ<<ھ
+reorder-after <S06CF> % ARABIC LETTER WAW WITH DOT ABOVE
+<arabic-letter-heh>
 
-% And then the letters:
+% &ۏ<ه<<ە<<ہ<<ة<<ۃ<<ۀ<<ھ
+<U0647> <arabic-letter-heh>;<BASE>;<MIN>;<U0647> % ه ARABIC LETTER HEH
+<U06D5> <arabic-letter-heh>;"<BASE><VRNT1><VRNT1>";<MIN>;<U06D5> % ARABIC LETTER AE
+<U06C1> <arabic-letter-heh>;"<BASE><VRNT1><VRNT2>";<MIN>;<U06C1> % ARABIC LETTER HEH GOAL
+<U0629> <arabic-letter-heh>;"<BASE><VRNT1><VRNT3>";<MIN>;<U0629> % ARABIC LETTER TEH MARBUTA
+<U06C3> <arabic-letter-heh>;"<BASE><VRNT1><VRNT4>";<MIN>;<U06C3> % ARABIC LETTER TEH MARBUTA GOAL
+<U06C0> <arabic-letter-heh>;"<BASE><VRNT1><VRNT5>";"<MIN><MIN>";<U06C0> % ARABIC LETTER HEH WITH YEH ABOVE
+<U06BE> <arabic-letter-heh>;"<BASE><VRNT2><VRNT1>";<MIN>;<U06BE> % ARABIC LETTER HEH DOACHASHMEE
 
-<U0622> <alef_madda>;<BAS>;<MIN>;IGNORE
-<U0623> <hamza>;<AHA>;<MIN>;IGNORE
-<U0624> <hamza>;<AHW>;<MIN>;IGNORE
-<U0625> <hamza>;<AHS>;<MIN>;IGNORE
-<U0626> <hamza>;<AHY>;<MIN>;IGNORE
-reorder-after <U0648>
-<U0629> <heh>;<ADO>;<MIN>;IGNORE
-<U06C0> <heh>;<AHA>;<MIN>;IGNORE
-reorder-after <U0642>
-<U06A9> <kaf>;<BAS>;<MIN>;IGNORE
-<U0643> <kaf>;<PCL>;<MIN>;IGNORE
-reorder-after <U0648>
-<U06CC> <yeh>;<BAS>;<MIN>;IGNORE
-<U0649> <yeh>;<ADL>;<MIN>;IGNORE
-<U064A> <yeh>;<AYE>;<MIN>;IGNORE
+% &ی<<*ىےيېۑۍێ
+% Entry for  in iso14651_t1_common:
+%
+%    <U06CC> <S06CC>;<BASE>;<MIN>;<U06CC> % ARABIC LETTER FARSI YEH
+%
+% So we make ى ے ي ې ۑ ۍ ێ sort like <S06CC> with secondary differences:
+<U0649> <S06CC>;"<BASE><VRNT1><VRNT1>";<MIN>;<U0649> % ARABIC LETTER ALEF MAKSURA
+<U06D2> <S06CC>;"<BASE><VRNT1><VRNT2>";<MIN>;<U06D2> % ARABIC LETTER YEH BARREE
+<U064A> <S06CC>;"<BASE><VRNT1><VRNT3>";<MIN>;<U064A> % ARABIC LETTER YEH
+<U06D0> <S06CC>;"<BASE><VRNT1><VRNT4>";<MIN>;<U06D0> % ARABIC LETTER E
+<U06D1> <S06CC>;"<BASE><VRNT1><VRNT5>";<MIN>;<U06D1> % ARABIC LETTER YEH WITH THREE DOTS BELOW
+<U06CD> <S06CC>;"<BASE><VRNT2><VRNT1>";<MIN>;<U06CD> % ARABIC LETTER YEH WITH TAIL
+<U06CE> <S06CC>;"<BASE><VRNT2><VRNT2>";<MIN>;<U06CE> % ARABIC LETTER YEH WITH SMALL V
+
 reorder-end
 
 END LC_COLLATE
 
 LC_MONETARY
-int_curr_symbol   "<U0049><U0052><U0052><U0020>"
-currency_symbol   "<U0631><U06CC><U0627><U0644>"
-mon_decimal_point "<U066B>"
-mon_thousands_sep "<U066C>"
+int_curr_symbol   "IRR "
+currency_symbol   "ریال"
+mon_decimal_point "٫"
+mon_thousands_sep "٬"
 mon_grouping      3
 positive_sign     ""
-negative_sign     "<U002D>"
+negative_sign     "-"
 int_frac_digits   0
 frac_digits       0
 % The following positioning is based on Unicode 3.0 bidirectional algorithm,
@@ -214,105 +224,172 @@ int_n_sign_posn       1
 END LC_MONETARY
 
 LC_NUMERIC
-decimal_point     "<U066B>"
-thousands_sep     "<U066C>"
+decimal_point     "."
+thousands_sep     ","
 grouping          3
 END LC_NUMERIC
 
 LC_TIME
-abday   "<U06CC><U002E>";"<U062F><U002E>";"<U0633><U002E>";/
-        "<U0686><U002E>";"<U067E><U002E>";"<U062C><U002E>";/
-        "<U0634><U002E>"
-day     "<U06CC><U06A9><U200C><U0634><U0646><U0628><U0647>";/
-        "<U062F><U0648><U0634><U0646><U0628><U0647>";/
-        "<U0633><U0647><U200C><U0634><U0646><U0628><U0647>";/
-        "<U0686><U0647><U0627><U0631><U0634><U0646><U0628><U0647>";/
-        "<U067E><U0646><U062C><U200C><U0634><U0646><U0628><U0647>";/
-        "<U062C><U0645><U0639><U0647>";/
-        "<U0634><U0646><U0628><U0647>"
-mon     "<U0698><U0627><U0646><U0648><U06CC><U0647>";/
-        "<U0641><U0648><U0631><U06CC><U0647>";/
-        "<U0645><U0627><U0631><U0633>";/
-        "<U0622><U0648><U0631><U06CC><U0644>";/
-        "<U0645><U0647>";/
-        "<U0698><U0648><U0626><U0646>";/
-        "<U0698><U0648><U0626><U06CC><U0647>";/
-        "<U0627><U0648><U062A>";/
-        "<U0633><U067E><U062A><U0627><U0645><U0628><U0631>";/
-        "<U0627><U0643><U062A><U0628><U0631>";/
-        "<U0646><U0648><U0627><U0645><U0628><U0631>";/
-        "<U062F><U0633><U0627><U0645><U0628><U0631>"
-abmon   "<U0698><U0627><U0646>";"<U0641><U0648><U0631>";/
-        "<U0645><U0627><U0631>";"<U0622><U0648><U0631>";/
-        "<U0645><U0640><U0647>";"<U0698><U0648><U0646>";/
-        "<U0698><U0648><U06CC>";"<U0627><U0648><U062A>";/
-        "<U0633><U067E><U062A>";"<U0627><U0643><U062A>";/
-        "<U0646><U0648><U0627>";"<U062F><U0633><U0627>"
-am_pm   "<U0635><U0628><U062D>";"<U0639><U0635><U0631>"
-d_t_fmt "<U202B><U0025><U0041><U0020><U0025><U0065><U0020><U0025>/
-<U0042><U0020><U0025><U0059><U060C><U0020><U0025><U0049><U003A>/
-<U0025><U004D><U003A><U0025><U0053><U0020><U0025><U0070><U202C>"
-d_fmt   "<U0025><U0059><U002F><U0025><U006D><U002F><U0025><U0064>"
-t_fmt   "<U0025><U0048><U003A><U0025><U004D><U003A><U0025><U0053>"
-t_fmt_ampm    "<U202B><U0025><U0049><U003A><U0025><U004D><U003A><U0025>/
-<U0053><U0020><U0025><U0070><U202C>"
-%date_fmt "<U0025><U0061><U0020><U0025><U0062><U0020><U0025><U0065><U0020>/
-%<U0025><U0048><U003A><U0025><U004D><U003A><U0025><U0053><U0020><U0025>/
-%<U005A><U0020><U0025><U0059>"
+% Alternative digits are used for Persian numerals in date and time. This is
+% a hack, until a new prefix is defined for alternative digits.
+alt_digits	"۰۰";"۰۱";/
+		"۰۲";"۰۳";/
+		"۰۴";"۰۵";/
+		"۰۶";"۰۷";/
+		"۰۸";"۰۹";/
+		"۱۰";"۱۱";/
+		"۱۲";"۱۳";/
+		"۱۴";"۱۵";/
+		"۱۶";"۱۷";/
+		"۱۸";"۱۹";/
+		"۲۰";"۲۱";/
+		"۲۲";"۲۳";/
+		"۲۴";"۲۵";/
+		"۲۶";"۲۷";/
+		"۲۸";"۲۹";/
+		"۳۰";"۳۱";/
+		"۳۲";"۳۳";/
+		"۳۴";"۳۵";/
+		"۳۶";"۳۷";/
+		"۳۸";"۳۹";/
+		"۴۰";"۴۱";/
+		"۴۲";"۴۳";/
+		"۴۴";"۴۵";/
+		"۴۶";"۴۷";/
+		"۴۸";"۴۹";/
+		"۵۰";"۵۱";/
+		"۵۲";"۵۳";/
+		"۵۴";"۵۵";/
+		"۵۶";"۵۷";/
+		"۵۸";"۵۹";/
+		"۶۰";"۶۱";/
+		"۶۲";"۶۳";/
+		"۶۴";"۶۵";/
+		"۶۶";"۶۷";/
+		"۶۸";"۶۹";/
+		"۷۰";"۷۱";/
+		"۷۲";"۷۳";/
+		"۷۴";"۷۵";/
+		"۷۶";"۷۷";/
+		"۷۸";"۷۹";/
+		"۸۰";"۸۱";/
+		"۸۲";"۸۳";/
+		"۸۴";"۸۵";/
+		"۸۶";"۸۷";/
+		"۸۸";"۸۹";/
+		"۹۰";"۹۱";/
+		"۹۲";"۹۳";/
+		"۹۴";"۹۵";/
+		"۹۶";"۹۷";/
+		"۹۸";"۹۹"
+% Persian doesn't have abbreviations for weekdays and month names, so
+% "abday" is the same as "day" and "abmon" is the same as "mon"
+abday   "یکشنبه";/
+        "دوشنبه";/
+        "سه‌شنبه";/
+        "چهارشنبه";/
+        "پنجشنبه";/
+        "جمعه";/
+        "شنبه"
+day     "یکشنبه";/
+        "دوشنبه";/
+        "سه‌شنبه";/
+        "چهارشنبه";/
+        "پنجشنبه";/
+        "جمعه";/
+        "شنبه"
+mon     "ژانویه";/
+        "فوریه";/
+        "مارس";/
+        "آوریل";/
+        "مه";/
+        "ژوئن";/
+        "ژوئیه";/
+        "اوت";/
+        "سپتامبر";/
+        "اكتبر";/
+        "نوامبر";/
+        "دسامبر"
+abmon   "ژانویه";/
+        "فوریه";/
+        "مارس";/
+        "آوریل";/
+        "مه";/
+        "ژوئن";/
+        "ژوئیه";/
+        "اوت";/
+        "سپتامبر";/
+        "اكتبر";/
+        "نوامبر";/
+        "دسامبر"
+% Persian does not have the 12-hour format
+am_pm   "";""
+t_fmt_ampm    ""
+%
+% Appropriate date representation (%x)
+d_fmt   "%Oy//%Om//%Od"
+%
+% Appropriate time representation (%X)
+t_fmt   "%OH:%OM:%OS"
+%
+% FIXME: need to add "HAMZA ABOVE" after January, February, May, July when used
+% before a year
+%
+% Appropriate date and time representation (%c)
+%       "<RLE>%A %Oe %B %Oy<ARABIC COMMA> %OH:%OM:%OS<PDF>"
+d_t_fmt "‫%A %Oe %B %Oy، %OH:%OM:%OS‬"
+%
+% Appropriate date representation (date(1))
+%       "<RLE>%A %Oe %B %Oy<ARABIC COMMA> <SEEN><ALEF><AIN><TEH> %OH:%OM:%OS (%Z)<PDF>"
+date_fmt "‫%A %Oe %B %Oy، ساعت /
+%OH:%OM:%OS (%Z)‬"
+week 7;19971130;1
 first_weekday 7
-first_workday 7
 cal_direction 3
-%week    7;19971206;4
-%time_zone "???"
+first_workday 7
 END LC_TIME
 
 LC_MESSAGES
-yesexpr "<U005B><U0079><U0059><U0628><U0066><U005D><U002E><U002A>"
-noexpr  "<U005B><U006E><U004E><U062E><U0646><U006F><U005D><U002E><U002A>"
+yesexpr "^[+1yYآبHf]"
+noexpr  "^[-0nNخنok]"
+yesstr  "بله"
+nostr   "نه"
 END LC_MESSAGES
 
 LC_PAPER
-height   297
-width    210
+copy "i18n"
 END LC_PAPER
-
-LC_TELEPHONE
-tel_int_fmt    "<U202A><U002B><U0025><U0063><U0020><U0025><U0061><U0020>/
-<U0025><U006C><U202C>"
-tel_dom_fmt    "<U202A><U0025><U0041><U2012><U0025><U006C><U202C>"
-int_select     "<U0030><U0030>"
-int_prefix     "<U0039><U0038>"
-END LC_TELEPHONE
-
-LC_MEASUREMENT
-measurement    1
-END LC_MEASUREMENT
 
 LC_NAME
 name_gen    ""
-name_miss   "<U062E><U0627><U0646><U0645>"
-name_ms     "<U062E><U0627><U0646><U0645>"
-name_mrs    "<U062E><U0627><U0646><U0645>"
-name_mr     "<U0622><U0642><U0627><U06CC>"
-name_fmt    "<U0025><U0064><U0025><U0074><U0025><U0073><U0025><U0074>/
-<U0025><U0067><U0025><U0074><U0025><U006D><U0025><U0074><U0025><U0066>"
+name_miss   "خانم"
+name_ms     "خانم"
+name_mrs    "خانم"
+name_mr     "آقای"
+name_fmt    "%d%t%s%t%g%t%m%t%f"
 END LC_NAME
 
 LC_ADDRESS
-% FIXME
-postal_fmt    "<U0025><U0066><U0025><U004E><U0025><U0061><U0025><U004E>/
-<U0025><U0064><U0025><U004E><U0025><U0062><U0025><U004E><U0025><U0073>/
-<U0020><U0025><U0068><U0020><U0025><U0065><U0020><U0025><U0072><U0025>/
-<U004E><U0025><U0025><U007A><U0020><U0025><U0054><U0025>/
-<U004E><U0025><U0063><U0025><U004E>"
-country_name   "<U0627><U06CC><U0631><U0627><U0646>"
-country_ab2    "<U0049><U0052>"
-country_ab3    "<U0049><U0052><U004E>"
+postal_fmt    "%f%N%a%N%d%N%b%N%s %h %e %r%N%z %T%N%c%N"
+country_name   "ایران"
+country_ab2    "IR"
+country_ab3    "IRN"
 country_num    364
-country_car    "<U0049><U0052>"
-country_isbn   "<U0039><U0036><U0034>"
-lang_name      "<U0641><U0627><U0631><U0633><U06CC>"
-lang_ab        "<U0066><U0061>"
-lang_term      "<U0066><U0061><U0073>"
-lang_lib       "<U0070><U0065><U0072>"
+country_car    "IR"
+country_isbn   964
+lang_name      "فارسی"
+lang_ab        "fa"
+lang_term      "fas"
+lang_lib       "per"
 END LC_ADDRESS
+
+LC_TELEPHONE
+tel_int_fmt    "‪+%c %a %l‬"
+tel_dom_fmt    "‪%A‒%l‬"
+int_select     "00"
+int_prefix     "98"
+END LC_TELEPHONE
+
+LC_MEASUREMENT
+copy "i18n"
+END LC_MEASUREMENT

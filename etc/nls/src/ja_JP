@@ -1,27 +1,13 @@
 comment_char %
-escape_char  /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+escape_char /
+
+% This file is part of the GNU C Library and contains locale data.
+% The Free Software Foundation does not claim any copyright interest
+% in the locale data contained in this file.  The foregoing does not
+% affect the license of the GNU C Library as a whole.  It does not
+% exempt you from the conditions of the license if your use would
+% otherwise be governed by that license.
+
 % Name:    localedef for ja_JP
 % Version: 0.7
 % Date:    1999-12-05
@@ -32,26 +18,26 @@ title      "Japanese language locale for Japan"
 source     "HANATAKA, Shinya, hanataka@abyss.rim.or.jp"
 address    ""
 contact    ""
-email      "bug-glibc@gnu.org"
+email      "libc-alpha@sourceware.org"
 tel        ""
 fax        ""
 language   "Japanese"
 territory  "Japan"
 revision   "1.0"
 date       "2000-07-20"
-%
-category  "ja_JP:2000";LC_IDENTIFICATION
-category  "ja_JP:2000";LC_CTYPE
-category  "ja_JP:2000";LC_COLLATE
-category  "ja_JP:2000";LC_TIME
-category  "ja_JP:2000";LC_NUMERIC
-category  "ja_JP:2000";LC_MONETARY
-category  "ja_JP:2000";LC_MESSAGES
-category  "ja_JP:2000";LC_PAPER
-category  "ja_JP:2000";LC_NAME
-category  "ja_JP:2000";LC_ADDRESS
-category  "ja_JP:2000";LC_TELEPHONE
 
+category "i18n:2012";LC_IDENTIFICATION
+category "i18n:2012";LC_CTYPE
+category "i18n:2012";LC_COLLATE
+category "i18n:2012";LC_TIME
+category "i18n:2012";LC_NUMERIC
+category "i18n:2012";LC_MONETARY
+category "i18n:2012";LC_MESSAGES
+category "i18n:2012";LC_PAPER
+category "i18n:2012";LC_NAME
+category "i18n:2012";LC_ADDRESS
+category "i18n:2012";LC_TELEPHONE
+category "i18n:2012";LC_MEASUREMENT
 END LC_IDENTIFICATION
 
 LC_CTYPE
@@ -1692,6 +1678,7 @@ tojkata	(<U3041>,<U30A1>);(<U3042>,<U30A2>);(<U3043>,<U30A3>);/
 
 translit_start
 
+include "translit_combining";""
 include "translit_cjk_variants";""
 
 translit_end
@@ -14892,146 +14879,160 @@ END LC_COLLATE
 
 
 LC_MESSAGES
-yesexpr "<U005E><U0028><U005B><U0079><U0059><UFF59><UFF39><U005D>/
-<U007C><U306F><U3044><U007C><U30CF><U30A4><U0029>"
-noexpr  "<U005E><U0028><U005B><U006E><U004E><UFF4E><UFF2E><U005D>/
-<U007C><U3044><U3044><U3048><U007C><U30A4><U30A4><U30A8><U0029>"
-yesstr  "<U306F><U3044>"
-nostr   "<U3044><U3044><U3048>"
+yesexpr "^([+1yYｙＹ]|はい|ハイ)"
+noexpr  "^([-0nNｎＮ]|いいえ|イイエ)"
+yesstr  "はい"
+nostr   "いいえ"
 END LC_MESSAGES
 
 
 LC_MONETARY
-int_curr_symbol		"<U004A><U0050><U0059><U0020>"
-currency_symbol		"<UFFE5>"
-mon_decimal_point	"<U002E>"
-mon_thousands_sep	"<U002C>"
+int_curr_symbol		"JPY "
+currency_symbol		"￥"
+mon_decimal_point	"."
+mon_thousands_sep	","
 mon_grouping		3
 positive_sign		""
-negative_sign		"<U002D>"
+negative_sign		"-"
 int_frac_digits		0
 frac_digits		0
 p_cs_precedes		1
 p_sep_by_space		0
 n_cs_precedes		1
 n_sep_by_space		0
-p_sign_posn		1
+p_sign_posn		4
 n_sign_posn		4
+int_p_sep_by_space	2
+int_n_sep_by_space	2
 END LC_MONETARY
 
 
 LC_NUMERIC
-decimal_point		"<U002E>"
-thousands_sep		"<U002C>"
+decimal_point		"."
+thousands_sep		","
 grouping		3
 END LC_NUMERIC
 
 
 LC_TIME
-abday	"<U65E5>";"<U6708>";"<U706B>";"<U6C34>";"<U6728>";"<U91D1>";"<U571F>"
+abday	"日";"月";"火";"水";"木";"金";"土"
 
-day	"<U65E5><U66DC><U65E5>";"<U6708><U66DC><U65E5>";/
-	"<U706B><U66DC><U65E5>";"<U6C34><U66DC><U65E5>";/
-	"<U6728><U66DC><U65E5>";"<U91D1><U66DC><U65E5>";/
-	"<U571F><U66DC><U65E5>"
+day	"日曜日";"月曜日";/
+	"火曜日";"水曜日";/
+	"木曜日";"金曜日";/
+	"土曜日"
 
-abmon	"<U0020><U0031><U6708>";"<U0020><U0032><U6708>";/
-	"<U0020><U0033><U6708>";"<U0020><U0034><U6708>";/
-	"<U0020><U0035><U6708>";"<U0020><U0036><U6708>";/
-	"<U0020><U0037><U6708>";"<U0020><U0038><U6708>";/
-	"<U0020><U0039><U6708>";"<U0031><U0030><U6708>";/
-	"<U0031><U0031><U6708>";"<U0031><U0032><U6708>"
+abmon	" 1月";" 2月";/
+	" 3月";" 4月";/
+	" 5月";" 6月";/
+	" 7月";" 8月";/
+	" 9月";"10月";/
+	"11月";"12月"
 
-mon	"<U0031><U6708>";"<U0032><U6708>";/
-	"<U0033><U6708>";"<U0034><U6708>";/
-	"<U0035><U6708>";"<U0036><U6708>";/
-	"<U0037><U6708>";"<U0038><U6708>";/
-	"<U0039><U6708>";"<U0031><U0030><U6708>";/
-	"<U0031><U0031><U6708>";"<U0031><U0032><U6708>"
+mon	"1月";"2月";/
+	"3月";"4月";/
+	"5月";"6月";/
+	"7月";"8月";/
+	"9月";"10月";/
+	"11月";"12月"
 
-d_t_fmt	"<U0025><U0059><U5E74><U0025><U006D><U6708><U0025><U0064><U65E5><U0020><U0025><U0048><U6642><U0025><U004D><U5206><U0025><U0053><U79D2>"
+d_t_fmt	"%Y年%m月%d日 %H時%M分%S秒"
 
-d_fmt	"<U0025><U0059><U5E74><U0025><U006D><U6708><U0025><U0064><U65E5>"
+d_fmt	"%Y年%m月%d日"
 
-t_fmt	"<U0025><U0048><U6642><U0025><U004D><U5206><U0025><U0053><U79D2>"
+t_fmt	"%H時%M分%S秒"
 
-am_pm	"<U5348><U524D>";"<U5348><U5F8C>"
+am_pm	"午前";"午後"
 
-t_fmt_ampm "<U0025><U0070><U0025><U0049><U6642><U0025><U004D><U5206><U0025><U0053><U79D2>"
+t_fmt_ampm "%p%I時%M分%S秒"
 
-era	"<U002B><U003A><U0032><U003A><U0031><U0039><U0039><U0030><U002F><U0030><U0031><U002F><U0030><U0031><U003A><U002B><U002A><U003A><U5E73><U6210><U003A><U0025><U0045><U0043><U0025><U0045><U0079><U5E74>";/
-	"<U002B><U003A><U0031><U003A><U0031><U0039><U0038><U0039><U002F><U0030><U0031><U002F><U0030><U0038><U003A><U0031><U0039><U0038><U0039><U002F><U0031><U0032><U002F><U0033><U0031><U003A><U5E73><U6210><U003A><U0025><U0045><U0043><U5143><U5E74>";/
-	"<U002B><U003A><U0032><U003A><U0031><U0039><U0032><U0037><U002F><U0030><U0031><U002F><U0030><U0031><U003A><U0031><U0039><U0038><U0039><U002F><U0030><U0031><U002F><U0030><U0037><U003A><U662D><U548C><U003A><U0025><U0045><U0043><U0025><U0045><U0079><U5E74>";/
-	"<U002B><U003A><U0031><U003A><U0031><U0039><U0032><U0036><U002F><U0031><U0032><U002F><U0032><U0035><U003A><U0031><U0039><U0032><U0036><U002F><U0031><U0032><U002F><U0033><U0031><U003A><U662D><U548C><U003A><U0025><U0045><U0043><U5143><U5E74>";/
-	"<U002B><U003A><U0032><U003A><U0031><U0039><U0031><U0033><U002F><U0030><U0031><U002F><U0030><U0031><U003A><U0031><U0039><U0032><U0036><U002F><U0031><U0032><U002F><U0032><U0034><U003A><U5927><U6B63><U003A><U0025><U0045><U0043><U0025><U0045><U0079><U5E74>";/
-	"<U002B><U003A><U0032><U003A><U0031><U0039><U0031><U0032><U002F><U0030><U0037><U002F><U0033><U0030><U003A><U0031><U0039><U0031><U0032><U002F><U0031><U0032><U002F><U0033><U0031><U003A><U5927><U6B63><U003A><U0025><U0045><U0043><U5143><U5E74>";/
-	"<U002B><U003A><U0036><U003A><U0031><U0038><U0037><U0033><U002F><U0030><U0031><U002F><U0030><U0031><U003A><U0031><U0039><U0031><U0032><U002F><U0030><U0037><U002F><U0032><U0039><U003A><U660E><U6CBB><U003A><U0025><U0045><U0043><U0025><U0045><U0079><U5E74>";/
-	"<U002B><U003A><U0031><U003A><U0030><U0030><U0030><U0031><U002F><U0030><U0031><U002F><U0030><U0031><U003A><U0031><U0038><U0037><U0032><U002F><U0031><U0032><U002F><U0033><U0031><U003A><U897F><U66A6><U003A><U0025><U0045><U0043><U0025><U0045><U0079><U5E74>";/
-	"<U002B><U003A><U0031><U003A><U002D><U0030><U0030><U0030><U0031><U002F><U0031><U0032><U002F><U0033><U0031><U003A><U002D><U002A><U003A><U7D00><U5143><U524D><U003A><U0025><U0045><U0043><U0025><U0045><U0079><U5E74>"
+% The era names are laid out in groups of 2 to account for the desire
+% to avoid using '1' for the first era year.  Instead of '1' we use
+% 元 or <GAN> as the first era year.
+%
+% The following dates and their names are recorded below in descending
+% date order (note that 年 or <NEN> follows each date).
+% <REIWA> -> <HEISEI> -> <SHOWA> -> <TAISHO> -> <MEIJI> -> <AD> -> <BC>
+%
+% Each string is an era description segment with the format:
+% "direction:offset:start_date:end_date:era_name:era_format"
+%
+% Note:
+% - The '+*' entry in end_date means "forever going forward"
+% - The '-*' entry in end_date means "forever going backwards" counting up.
+% - Negative year number in start_date is prior to AD 1 (BC) counting up.
+% - The last entry 紀元前 in era_name means BC.
+% - The second-to-last entry 西暦 in era_name means AD.
+%
+era	"+:2:2020//01//01:+*:令和:%EC%Ey年";/
+	"+:1:2019//05//01:2019//12//31:令和:%EC元年";/
+	"+:2:1990//01//01:2019//04//30:平成:%EC%Ey年";/
+	"+:1:1989//01//08:1989//12//31:平成:%EC元年";/
+	"+:2:1927//01//01:1989//01//07:昭和:%EC%Ey年";/
+	"+:1:1926//12//25:1926//12//31:昭和:%EC元年";/
+	"+:2:1913//01//01:1926//12//24:大正:%EC%Ey年";/
+	"+:1:1912//07//30:1912//12//31:大正:%EC元年";/
+	"+:6:1873//01//01:1912//07//29:明治:%EC%Ey年";/
+	"+:1:0001//01//01:1872//12//31:西暦:%EC%Ey年";/
+	"+:1:-0001//12//31:-*:紀元前:%EC%Ey年"
 
-era_d_fmt	"<U0025><U0045><U0059><U0025><U006D><U6708><U0025><U0064><U65E5>"
+era_d_fmt	"%EY%m月%d日"
 
-era_d_t_fmt	"<U0025><U0045><U0059><U0025><U006D><U6708><U0025><U0064><U65E5><U0020><U0025><U0048><U6642><U0025><U004D><U5206><U0025><U0053><U79D2>"
+era_d_t_fmt	"%EY%m月%d日 %H時%M分%S秒"
 
-% "%Y<NEN> %b %e<NICHI> %A %H:%M:%S %Z"
-date_fmt	"<U0025><U0059><U5E74><U0020><U0025><U0062><U0020><U0025>/
-<U0065><U65E5><U0020><U0025><U0041><U0020><U0025><U0048><U003A><U0025>/
-<U004D><U003A><U0025><U0053><U0020><U0025><U005A>"
+date_fmt	"%Y年 %b %e日 %A %H:%M:%S %Z"
 
-alt_digits	"<U3007>";"<U4E00>";"<U4E8C>";"<U4E09>";"<U56DB>";"<U4E94>";/
-		"<U516D>";"<U4E03>";"<U516B>";"<U4E5D>";"<U5341>";/
-		"<U5341><U4E00>";"<U5341><U4E8C>";"<U5341><U4E09>";/
-		"<U5341><U56DB>";"<U5341><U4E94>";"<U5341><U516D>";/
-		"<U5341><U4E03>";"<U5341><U516B>";"<U5341><U4E5D>";/
-		"<U4E8C><U5341>";"<U4E8C><U5341><U4E00>";/
-		"<U4E8C><U5341><U4E8C>";"<U4E8C><U5341><U4E09>";/
-		"<U4E8C><U5341><U56DB>";"<U4E8C><U5341><U4E94>";/
-		"<U4E8C><U5341><U516D>";"<U4E8C><U5341><U4E03>";/
-		"<U4E8C><U5341><U516B>";"<U4E8C><U5341><U4E5D>";/
-		"<U4E09><U5341>";"<U4E09><U5341><U4E00>";/
-		"<U4E09><U5341><U4E8C>";"<U4E09><U5341><U4E09>";/
-		"<U4E09><U5341><U56DB>";"<U4E09><U5341><U4E94>";/
-		"<U4E09><U5341><U516D>";"<U4E09><U5341><U4E03>";/
-		"<U4E09><U5341><U516B>";"<U4E09><U5341><U4E5D>";/
-		"<U56DB><U5341>";"<U56DB><U5341><U4E00>";/
-		"<U56DB><U5341><U4E8C>";"<U56DB><U5341><U4E09>";/
-		"<U56DB><U5341><U56DB>";"<U56DB><U5341><U4E94>";/
-		"<U56DB><U5341><U516D>";"<U56DB><U5341><U4E03>";/
-		"<U56DB><U5341><U516B>";"<U56DB><U5341><U4E5D>";/
-		"<U4E94><U5341>";"<U4E94><U5341><U4E00>";/
-		"<U4E94><U5341><U4E8C>";"<U4E94><U5341><U4E09>";/
-		"<U4E94><U5341><U56DB>";"<U4E94><U5341><U4E94>";/
-		"<U4E94><U5341><U516D>";"<U4E94><U5341><U4E03>";/
-		"<U4E94><U5341><U516B>";"<U4E94><U5341><U4E5D>";/
-		"<U516D><U5341>";"<U516D><U5341><U4E00>";/
-		"<U516D><U5341><U4E8C>";"<U516D><U5341><U4E09>";/
-		"<U516D><U5341><U56DB>";"<U516D><U5341><U4E94>";/
-		"<U516D><U5341><U516D>";"<U516D><U5341><U4E03>";/
-		"<U516D><U5341><U516B>";"<U516D><U5341><U4E5D>";/
-		"<U4E03><U5341>";"<U4E03><U5341><U4E00>";/
-		"<U4E03><U5341><U4E8C>";"<U4E03><U5341><U4E09>";/
-		"<U4E03><U5341><U56DB>";"<U4E03><U5341><U4E94>";/
-		"<U4E03><U5341><U516D>";"<U4E03><U5341><U4E03>";/
-		"<U4E03><U5341><U516B>";"<U4E03><U5341><U4E5D>";/
-		"<U516B><U5341>";"<U516B><U5341><U4E00>";/
-		"<U516B><U5341><U4E8C>";"<U516B><U5341><U4E09>";/
-		"<U516B><U5341><U56DB>";"<U516B><U5341><U4E94>";/
-		"<U516B><U5341><U516D>";"<U516B><U5341><U4E03>";/
-		"<U516B><U5341><U516B>";"<U516B><U5341><U4E5D>";/
-		"<U4E5D><U5341>";"<U4E5D><U5341><U4E00>";/
-		"<U4E5D><U5341><U4E8C>";"<U4E5D><U5341><U4E09>";/
-		"<U4E5D><U5341><U56DB>";"<U4E5D><U5341><U4E94>";/
-		"<U4E5D><U5341><U516D>";"<U4E5D><U5341><U4E03>";/
-		"<U4E5D><U5341><U516B>";"<U4E5D><U5341><U4E5D>"
+alt_digits	"〇";"一";"二";"三";"四";"五";/
+		"六";"七";"八";"九";"十";/
+		"十一";"十二";"十三";/
+		"十四";"十五";"十六";/
+		"十七";"十八";"十九";/
+		"二十";"二十一";/
+		"二十二";"二十三";/
+		"二十四";"二十五";/
+		"二十六";"二十七";/
+		"二十八";"二十九";/
+		"三十";"三十一";/
+		"三十二";"三十三";/
+		"三十四";"三十五";/
+		"三十六";"三十七";/
+		"三十八";"三十九";/
+		"四十";"四十一";/
+		"四十二";"四十三";/
+		"四十四";"四十五";/
+		"四十六";"四十七";/
+		"四十八";"四十九";/
+		"五十";"五十一";/
+		"五十二";"五十三";/
+		"五十四";"五十五";/
+		"五十六";"五十七";/
+		"五十八";"五十九";/
+		"六十";"六十一";/
+		"六十二";"六十三";/
+		"六十四";"六十五";/
+		"六十六";"六十七";/
+		"六十八";"六十九";/
+		"七十";"七十一";/
+		"七十二";"七十三";/
+		"七十四";"七十五";/
+		"七十六";"七十七";/
+		"七十八";"七十九";/
+		"八十";"八十一";/
+		"八十二";"八十三";/
+		"八十四";"八十五";/
+		"八十六";"八十七";/
+		"八十八";"八十九";/
+		"九十";"九十一";/
+		"九十二";"九十三";/
+		"九十四";"九十五";/
+		"九十六";"九十七";/
+		"九十八";"九十九"
+week 7;19971130;1
 END LC_TIME
 
 
 LC_PAPER
-% This is the ISO_IEC TR14652 Locale definition for the
-% LC_PAPER category
-height      297
-width       210
-
+copy "i18n"
 END LC_PAPER
 
 
@@ -15039,13 +15040,12 @@ LC_NAME
 % This is the ISO_IEC TR14652 Locale definition for the
 % LC_NAME category.
 %
-name_fmt    "<U0025><U0070><U0025><U0074><U0025><U0066><U0025><U0074>/
-<U0025><U0067>"
-name_gen    "<U69D8>"
-name_mr     "<U004D><U0072><U002E>"
-name_mrs    "<U004D><U0072><U0073><U002E>"
-name_miss   "<U004D><U0069><U0073><U0073><U002E>"
-name_ms     "<U004D><U0073><U002E>"
+name_fmt    "%p%t%f%t%g"
+name_gen    "様"
+name_mr     "Mr."
+name_mrs    "Mrs."
+name_miss   "Miss."
+name_ms     "Ms."
 
 END LC_NAME
 
@@ -15053,25 +15053,31 @@ END LC_NAME
 LC_ADDRESS
 % This is the ISO_IEC TR14652 Locale definition for the
 % LC_ADDRESS
-postal_fmt  "<U0025><U007A><U0025><U0063><U0025><U0054><U0025><U0073>/
-<U0025><U0062><U0025><U0065><U0025><U0072>"
-
+postal_fmt  "%z%c%T%s%b%e%r"
+country_name "日本"
+country_ab2 "JP"
+country_ab3 "JPN"
+country_num 392
+country_car "J"
+lang_name    "日本語"
+lang_ab      "ja"
+lang_term    "jpn"
+lang_lib    "jpn"
 END LC_ADDRESS
 
 
 LC_TELEPHONE
 % This is the ISO_IEC TR14652 Locale definition for the
 %
-tel_int_fmt "<U002B><U0025><U0063><U0020><U003B><U0025><U0061><U0020>/
-<U003B><U0025><U006C>"
-int_prefix  "<U0038><U0031>"
+tel_int_fmt "+%c ;%a /
+;%l"
+% 010
+int_select   "010"
+int_prefix  "81"
 
 END LC_TELEPHONE
 
 
 LC_MEASUREMENT
-% This is the ISO_IEC TR14652 Locale definition for the
-%
-measurement 1
-
+copy "i18n"
 END LC_MEASUREMENT

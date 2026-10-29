@@ -1,41 +1,25 @@
 comment_char %
-escape_char  /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+escape_char /
+
+% This file is part of the GNU C Library and contains locale data.
+% The Free Software Foundation does not claim any copyright interest
+% in the locale data contained in this file.  The foregoing does not
+% affect the license of the GNU C Library as a whole.  It does not
+% exempt you from the conditions of the license if your use would
+% otherwise be governed by that license.
+
 % Korean language locale for Republic of Korea (South Korea)
 % Source:
 % Address:
-% Contact:
-% Email:
+% Contact: Won-kyu Park
+% Email:   wkpark@chem.skku.ac.kr
 % Fax:
 % Language: ko
 % Territory: KR
-% Revision: 1.1
-% Date: 2000-11-09
+% Revision: 1.2
+% Date: 2026-02-19
 % Application: general
 % Users: general
-% Repertoiremap: mnemonic.ds
-% Distribution and use is free, also for commercial purposes.
 
 %Changes:
 % 1999-06-07: Won-kyu Park <wkpark@chem.skku.ac.kr>
@@ -59,32 +43,35 @@ escape_char  /
 %       Some cosmetic changes
 % 2001-10-08: Won-kyu Park <wkpark@chem.skku.ac.kr>
 %       Fixed a typo in Hangul portion of LC_COLLATE
+% 2026-02-19: Jiho Lee <elmitash@gmail.com>
+%	Updated LC_ADDRESS to follow the modern South Korean address format
+%	Update LC_NAME to the standard Korean order (Surname + Given Name)
 
 LC_IDENTIFICATION
 title      "Korean locale for Republic of Korea"
 source     ""
 address    ""
 contact    ""
-email      "bug-glibc@gnu.org"
+email      "libc-alpha@sourceware.org"
 tel        ""
 fax        ""
 language   "Korean"
-territory  "Republic of Korea"
-revision   "1.1"
-date       "2000-11-09"
-%
-category  "ko_KR:2000";LC_IDENTIFICATION
-category  "ko_KR:2000";LC_CTYPE
-category  "ko_KR:2000";LC_COLLATE
-category  "ko_KR:2000";LC_TIME
-category  "ko_KR:2000";LC_NUMERIC
-category  "ko_KR:2000";LC_MONETARY
-category  "ko_KR:2000";LC_MESSAGES
-category  "ko_KR:2000";LC_PAPER
-category  "ko_KR:2000";LC_NAME
-category  "ko_KR:2000";LC_ADDRESS
-category  "ko_KR:2000";LC_TELEPHONE
+territory  "South Korea"
+revision   "1.2"
+date       "2026-02-19"
 
+category "i18n:2012";LC_IDENTIFICATION
+category "i18n:2012";LC_CTYPE
+category "i18n:2012";LC_COLLATE
+category "i18n:2012";LC_TIME
+category "i18n:2012";LC_NUMERIC
+category "i18n:2012";LC_MONETARY
+category "i18n:2012";LC_MESSAGES
+category "i18n:2012";LC_PAPER
+category "i18n:2012";LC_NAME
+category "i18n:2012";LC_ADDRESS
+category "i18n:2012";LC_TELEPHONE
+category "i18n:2012";LC_MEASUREMENT
 END LC_IDENTIFICATION
 
 LC_COLLATE
@@ -1200,13 +1187,13 @@ order_start forward
 <U044E>
 <U044F>
 %%%
-% HANGUL SYLLABLES 
+% HANGUL SYLLABLES
 <UAC00>
 ..
 <UD7A3>
 %%%
 % HANJA. For the moment, Hanjas defined in KS X 1001
-% are enumerated in the order they're listed in KS X 1001. 
+% are enumerated in the order they're listed in KS X 1001.
 <U4F3D>
 <U4F73>
 <U5047>
@@ -6112,6 +6099,7 @@ hanja	<U3400>..<U4DB5>;<U4E00>..<U9FA5>;<UF900>..<UFA0B>;<UFA0C>..<UFA2D>
 
 translit_start
 
+include "translit_combining";""
 include "translit_hangul";""
 
 translit_end
@@ -6120,13 +6108,13 @@ END LC_CTYPE
 
 LC_MONETARY
 
-int_curr_symbol		"<U004B><U0052><U0057><U0020>"
-currency_symbol		"<UFFE6>"
-mon_decimal_point	"<U002E>"
-mon_thousands_sep	"<U002C>"
-mon_grouping		3;3
+int_curr_symbol		"KRW "
+currency_symbol		"₩"
+mon_decimal_point	"."
+mon_thousands_sep	","
+mon_grouping		3
 positive_sign		""
-negative_sign		"<U002D>"
+negative_sign		"-"
 int_frac_digits		0
 frac_digits		0
 p_cs_precedes		1
@@ -6145,121 +6133,110 @@ END LC_MONETARY
 
 LC_NUMERIC
 
-decimal_point		"<U002E>"
-thousands_sep		"<U002C>"
-grouping		3;3
+decimal_point		"."
+thousands_sep		","
+grouping		3
 
 END LC_NUMERIC
 
 LC_TIME
 
-abday    "<UC77C>";/
-	 "<UC6D4>";"<UD654>";/
-         "<UC218>";"<UBAA9>";/
-         "<UAE08>";"<UD1A0>"
-day      "<UC77C><UC694><UC77C>";/
-         "<UC6D4><UC694><UC77C>";/
-         "<UD654><UC694><UC77C>";/
-         "<UC218><UC694><UC77C>";/
-         "<UBAA9><UC694><UC77C>";/
-         "<UAE08><UC694><UC77C>";/
-         "<UD1A0><UC694><UC77C>"
+abday    "일";/
+	 "월";"화";/
+         "수";"목";/
+         "금";"토"
+day      "일요일";/
+         "월요일";/
+         "화요일";/
+         "수요일";/
+         "목요일";/
+         "금요일";/
+         "토요일"
 
 % (%b) "%mWEOL" where %m is space-filled instead of zero-filled
 
-abmon    "<U0020><U0031><UC6D4>";"<U0020><U0032><UC6D4>";/
-         "<U0020><U0033><UC6D4>";"<U0020><U0034><UC6D4>";/
-         "<U0020><U0035><UC6D4>";"<U0020><U0036><UC6D4>";/
-         "<U0020><U0037><UC6D4>";"<U0020><U0038><UC6D4>";/
-         "<U0020><U0039><UC6D4>";"<U0031><U0030><UC6D4>";/
-         "<U0031><U0031><UC6D4>";"<U0031><U0032><UC6D4>"
+abmon    " 1월";" 2월";/
+         " 3월";" 4월";/
+         " 5월";" 6월";/
+         " 7월";" 8월";/
+         " 9월";"10월";/
+         "11월";"12월"
 
-mon      "<UC77C><UC6D4>";"<UC774><UC6D4>";/
-         "<UC0BC><UC6D4>";"<UC0AC><UC6D4>";/
-         "<UC624><UC6D4>";"<UC720><UC6D4>";/
-         "<UCE60><UC6D4>";"<UD314><UC6D4>";/
-         "<UAD6C><UC6D4>";"<UC2DC><UC6D4>";/
-         "<UC2ED><UC77C><UC6D4>";"<UC2ED><UC774><UC6D4>"
+mon      "1월";"2월";/
+         "3월";"4월";/
+         "5월";"6월";/
+         "7월";"8월";/
+         "9월";"10월";/
+         "11월";"12월"
 
 % Appropriate date and time representation (%c)
-% "%x (%a) %r"
-d_t_fmt "<U0025><U0078><U0020><U0028><U0025><U0061><U0029><U0020><U0025><U0072>"
+d_t_fmt "%x (%a) %r"
 
 % Appropriate date representation (%x)
-% "%Y<NYEON> %m<WEOL> %d<IL>   
-d_fmt /
-"<U0025><U0059><UB144><U0020><U0025><U006D><UC6D4><U0020><U0025><U0064><UC77C>"
-%d_fmt	"<U0025><U0059><UB144><U0020><U0025><U006D><UC6D4><U0020><U0025><U0065><UC77C>"
+% "%Y<NYEON> %m<WEOL> %d<IL>
+d_fmt "%Y년 %m월 %d일"
 
 % Appropriate time representation (%X)
-%  "%H<SI> %M<BUN> %S<CHO>" 
-t_fmt    "<U0025><U0048><UC2DC><U0020><U0025><U004D><UBD84><U0020><U0025><U0053><UCD08>"
+%  "%H<SI> %M<BUN> %S<CHO>"
+t_fmt    "%H시 %M분 %S초"
 
-% Strings for AM/PM (%p) 
+% Strings for AM/PM (%p)
 % "<O><JEON>";"<O><HU>"
-am_pm	"<UC624><UC804>";"<UC624><UD6C4>"
+am_pm	"오전";"오후"
 
 % Appropriate AM/PM time representation (%r)
-%  "%p %H<SI> %M<BUN> %S<CHO>" 
-t_fmt_ampm "<U0025><U0070><U0020><U0025><U0049><UC2DC><U0020><U0025><U004D><UBD84><U0020><U0025><U0053><UCD08>"
+%  "%p %H<SI> %M<BUN> %S<CHO>"
+t_fmt_ampm "%p %I시 %M분 %S초"
 
-% Appropriate date representation (date(1))  "%Y. %m. %d. (%a) %H:%M:%S %Z"
-date_fmt  /
-"<U0025><U0059><U002E><U0020><U0025><U006D><U002E><U0020><U0025><U0064><U002E>/
-<U0020><U0028><U0025><U0061><U0029>/
-<U0020><U0025><U0048><U003A><U0025><U004D><U003A><U0025><U0053>/
-<U0020><U0025><U005A>"
+% Appropriate date representation (date(1))
+date_fmt  "%Y. %m. %d. (%a) %H:%M:%S %Z"
 
+week 7;19971130;1
 END LC_TIME
 
-% NOTES on LC_MESSAGES
-%
-% Any string starting with any form of Latin Y and Korea
-% `Yea' are recognized as affirmative answer.  Negative answer is
-% recognized by Latin N and Hangul `A' (which stands for ``Anio'').
-
 LC_MESSAGES
-
-yesexpr	"<U005E><U005B><U0079><U0059><UC608><U005D>"
-
-noexpr	"<U005E><U005B><U006E><U004E><UC544><UB2C8><UC624><U005D>"
-
+yesexpr "^[+1yYｙＹ예]"
+noexpr  "^[-0nNｎＮ아]"
+nostr   "아니요"
+yesstr  "예"
 END LC_MESSAGES
 
 LC_PAPER
-% FIXME
-height   297
-% FIXME
-width    210
+copy "i18n"
 END LC_PAPER
 
 LC_TELEPHONE
-% "+%c %a %l"
-tel_int_fmt "<U002B><U0025><U0063><U0020><U0025><U0061><U0020><U0025><U006C>"
+tel_int_fmt "+%c %a %l"
 % Alternative form:  "+%c (0)%a-%l"
 
 %    "(%A) %l"  : (areacode) local_number
-tel_dom_fmt    "<U0028><U0025><U0041><U0029><U0020><U0025><U006C>"
-%    Alternative form : 
+tel_dom_fmt    "(%A) %l"
+%    Alternative form :
 %    "%A-%l"  : areacode-local_number
-%tel_dom_fmt    "<U0025><U0041><U002D><U0020><U0025><U006C>"
-int_prefix     "<U0038><U0032>"
+%tel_dom_fmt    "%A- %l"
+int_prefix     "82"
+int_select     "001"
 END LC_TELEPHONE
 
 LC_MEASUREMENT
-% FIXME
-measurement    1
+copy "i18n"
 END LC_MEASUREMENT
 
 LC_NAME
-name_fmt    "<U0025><U0064><U0025><U0074><U0025><U0067><U0025><U0074>/
-<U0025><U006D><U0025><U0074><U0025><U0066>"
+name_fmt    "%f%g"
 END LC_NAME
 
 LC_ADDRESS
-postal_fmt    "<U0025><U0066><U0025><U004E><U0025><U0061><U0025><U004E>/
-<U0025><U0064><U0025><U004E><U0025><U0062><U0025><U004E><U0025><U0073>/
-<U0020><U0025><U0068><U0020><U0025><U0065><U0020><U0025><U0072><U0025>/
-<U004E><U0025><U0025><U007A><U0020><U0025><U0054><U0025>/
-<U004E><U0025><U0063><U0025><U004E>"
+postal_fmt    "%c%N%S %T %l %s %h%N%b %e %r%N%f %d%N%n %a%N%z"
+
+country_name "대한민국"
+country_ab2 "KR"
+country_ab3 "KOR"
+country_num 410
+country_isbn "979-11,978-89"
+country_car    "ROK"
+lang_name    "한국어"
+lang_ab      "ko"
+lang_term    "kor"
+lang_lib    "kor"
 END LC_ADDRESS

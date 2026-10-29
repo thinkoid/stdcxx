@@ -1,27 +1,6 @@
 <code_set_name> ISO_5428
 <comment_char> %
 <escape_char> /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % version: 1.0
 %  source: ECMA registry
 
@@ -110,8 +89,8 @@ CHARMAP
 <U03B3>     /x64         GREEK SMALL LETTER GAMMA
 <U03B4>     /x65         GREEK SMALL LETTER DELTA
 <U03B5>     /x66         GREEK SMALL LETTER EPSILON
-<UE01A>     /x67         GREEK SMALL LETTER STIGMA <ISO-IR-55_47>
-<UE01B>     /x68         GREEK SMALL LETTER DIGAMMA <ISO-IR-55_48>
+<U03DB>     /x67         GREEK SMALL LETTER STIGMA
+<U03DD>     /x68         GREEK SMALL LETTER DIGAMMA
 <U03B6>     /x69         GREEK SMALL LETTER ZETA
 <U03B7>     /x6a         GREEK SMALL LETTER ETA
 <U03B8>     /x6b         GREEK SMALL LETTER THETA
@@ -123,7 +102,7 @@ CHARMAP
 <U03BE>     /x71         GREEK SMALL LETTER XI
 <U03BF>     /x72         GREEK SMALL LETTER OMICRON
 <U03C0>     /x73         GREEK SMALL LETTER PI
-<UE01C>     /x74         GREEK SMALL LETTER KOPPA <ISO-IR-55_54>
+<U03DF>     /x74         GREEK SMALL LETTER KOPPA
 <U03C1>     /x75         GREEK SMALL LETTER RHO
 <U03C3>     /x76         GREEK SMALL LETTER SIGMA
 <U03C2>     /x77         GREEK SMALL LETTER FINAL SIGMA
@@ -133,6 +112,6 @@ CHARMAP
 <U03C7>     /x7b         GREEK SMALL LETTER CHI
 <U03C8>     /x7c         GREEK SMALL LETTER PSI
 <U03C9>     /x7d         GREEK SMALL LETTER OMEGA
-<UE01D>     /x7e         GREEK SMALL LETTER SAMPI <ISO-IR-55_5E>
+<U03E1>     /x7e         GREEK SMALL LETTER SAMPI
 <U007F>     /x7f         DELETE (DEL)
 END CHARMAP

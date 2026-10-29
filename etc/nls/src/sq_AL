@@ -1,81 +1,224 @@
-comment_char    %
-escape_char     /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+comment_char %
+escape_char /
+
+% This file is part of the GNU C Library and contains locale data.
+% The Free Software Foundation does not claim any copyright interest
+% in the locale data contained in this file.  The foregoing does not
+% affect the license of the GNU C Library as a whole.  It does not
+% exempt you from the conditions of the license if your use would
+% otherwise be governed by that license.
+
 % Albanian language locale for Albania.
-% Contributed by Kentaroh Noji <knoji@jp.ibm.com> and
-% Tetsuji Orita <orita@jp.ibm.com>.
 
 LC_IDENTIFICATION
 title      "Albanian language locale for Albania"
 source     "IBM Globalization Center of Competency, Yamato Software Laboratory"
 address    "1623-14, Shimotsuruma, Yamato-shi, Kanagawa-ken, 242-8502, Japan"
 contact    ""
-email      "bug-glibc@gnu.org"
+email      "libc-alpha@sourceware.org"
 tel        ""
 fax        ""
 language   "Albanian"
 territory  "Albania"
-revision   "1.0"
-date       "2000-07-21"
-%
-category  "sq_AL:2000";LC_IDENTIFICATION
-category  "sq_AL:2000";LC_CTYPE
-category  "sq_AL:2000";LC_COLLATE
-category  "sq_AL:2000";LC_TIME
-category  "sq_AL:2000";LC_NUMERIC
-category  "sq_AL:2000";LC_MONETARY
-category  "sq_AL:2000";LC_MESSAGES
-category  "sq_AL:2000";LC_PAPER
-category  "sq_AL:2000";LC_NAME
-category  "sq_AL:2000";LC_ADDRESS
-category  "sq_AL:2000";LC_TELEPHONE
+revision   "1.1"
+date       "2004-07-01"
 
+category "i18n:2012";LC_IDENTIFICATION
+category "i18n:2012";LC_CTYPE
+category "i18n:2012";LC_COLLATE
+category "i18n:2012";LC_TIME
+category "i18n:2012";LC_NUMERIC
+category "i18n:2012";LC_MONETARY
+category "i18n:2012";LC_MESSAGES
+category "i18n:2012";LC_PAPER
+category "i18n:2012";LC_NAME
+category "i18n:2012";LC_ADDRESS
+category "i18n:2012";LC_TELEPHONE
+category "i18n:2012";LC_MEASUREMENT
 END LC_IDENTIFICATION
 
 LC_CTYPE
 copy "i18n"
+
+translit_start
+include  "translit_combining";""
+translit_end
 END LC_CTYPE
 
 LC_COLLATE
+% CLDR collation rules for :
+% (see: https://unicode.org/cldr/trac/browser/trunk/common/collation/sq.xml)
+%
+% <collation type="standard" >
+%   <cr><![CDATA[
+%     &[before 1]D<ç<<<Ç
+%     &[before 1]E<dh<<<Dh<<<DH
+%     &[before 1]F<ë<<<Ë
+%     &[before 1]H<gj<<<Gj<<<GJ
+%     &[before 1]M<ll<<<Ll<<<LL
+%     &[before 1]O<nj<<<Nj<<<NJ
+%     &[before 1]S<rr<<<Rr<<<RR
+%     &[before 1]T<sh<<<Sh<<<SH
+%     &[before 1]U<th<<<Th<<<TH
+%     &[before 1]Y<xh<<<Xh<<<XH
+%     &[before 1]Ʒ<zh<<<Zh<<<ZH
+%   ]]></cr>
+% </collation  >
+% <collation draft="unconfirmed" alt="proposed" type="standard" >
+%   <cr><![CDATA[
+%     &[before 1]D<ç<<<Ç
+%     &[before 1]E<dh<<<dH<<<Dh<<<DH
+%     &[before 1]F<ë<<<Ë
+%     &[before 1]H<gj<<<gJ<<<Gj<<<GJ
+%     &[before 1]M<ll<<<lL<<<Ll<<<LL
+%     &[before 1]O<nj<<<nJ<<<Nj<<<NJ
+%     &[before 1]S<rr<<<rR<<<Rr<<<RR
+%     &[before 1]T<sh<<<sH<<<Sh<<<SH
+%     &[before 1]U<th<<<tH<<<Th<<<TH
+%     &[before 1]Y<xh<<<xH<<<Xh<<<XH
+%     &[before 1]Ʒ<zh<<<zH<<<Zh<<<ZH
+%   ]]></cr>
+% </collation  >
+%
+% And CLDR also lists the following
+% index characters:
+% (see: https://unicode.org/cldr/trac/browser/trunk/common/main/sq.xml)
+%
+% <exemplarCharacters type="index">[A B C Ç D {DH} E Ë F G {GJ} H I J K L {LL} M N {NJ} O P Q R {RR} S {SH} T {TH} U V X {XH} Y Z {ZH}]</exemplarCharacters>
+%
+% The following rules implement the same order for glibc.
 
-% Copy the template from ISO/IEC 14651
 copy "iso14651_t1"
+
+collating-symbol <c-cedilla>
+collating-symbol <dh-digraph>
+collating-symbol <e-diaeresis>
+collating-symbol <gj-digraph>
+collating-symbol <ll-digraph>
+collating-symbol <nj-digraph>
+collating-symbol <rr-digraph>
+collating-symbol <sh-digraph>
+collating-symbol <th-digraph>
+collating-symbol <xh-digraph>
+collating-symbol <zh-digraph>
+
+collating-element <dh> from "dh"
+collating-element <dH> from "dH"
+collating-element <Dh> from "Dh"
+collating-element <DH> from "DH"
+collating-element <gj> from "gj"
+collating-element <gJ> from "gJ"
+collating-element <Gj> from "Gj"
+collating-element <GJ> from "GJ"
+collating-element <ll> from "ll"
+collating-element <lL> from "lL"
+collating-element <Ll> from "Ll"
+collating-element <LL> from "LL"
+collating-element <nj> from "nj"
+collating-element <nJ> from "nJ"
+collating-element <Nj> from "Nj"
+collating-element <NJ> from "NJ"
+collating-element <rr> from "rr"
+collating-element <rR> from "rR"
+collating-element <Rr> from "Rr"
+collating-element <RR> from "RR"
+collating-element <sh> from "sh"
+collating-element <sH> from "sH"
+collating-element <Sh> from "Sh"
+collating-element <SH> from "SH"
+collating-element <th> from "th"
+collating-element <tH> from "tH"
+collating-element <Th> from "Th"
+collating-element <TH> from "TH"
+collating-element <xh> from "xh"
+collating-element <xH> from "xH"
+collating-element <Xh> from "Xh"
+collating-element <XH> from "XH"
+collating-element <zh> from "zh"
+collating-element <zH> from "zH"
+collating-element <Zh> from "Zh"
+collating-element <ZH> from "ZH"
+
+reorder-after <BEFORE-D>
+<c-cedilla>
+reorder-after <BEFORE-E>
+<dh-digraph>
+reorder-after <BEFORE-F>
+<e-diaeresis>
+reorder-after <BEFORE-H>
+<gj-digraph>
+reorder-after <BEFORE-M>
+<ll-digraph>
+reorder-after <BEFORE-O>
+<nj-digraph>
+reorder-after <BEFORE-S>
+<rr-digraph>
+reorder-after <BEFORE-T>
+<sh-digraph>
+reorder-after <BEFORE-U>
+<th-digraph>
+reorder-after <BEFORE-Y>
+<xh-digraph>
+reorder-after <BEFORE-EZH>
+<zh-digraph>
+
+<U00E7> <c-cedilla>;"<BASE><BASE>";"<MIN><MIN>";IGNORE % ç
+<U00C7> <c-cedilla>;"<BASE><BASE>";"<CAP><MIN>";IGNORE % Ç
+<dh>    <dh-digraph>;"<BASE><BASE>";"<MIN><MIN>";IGNORE
+<dH>    <dh-digraph>;"<BASE><BASE>";"<MIN><CAP>";IGNORE
+<Dh>    <dh-digraph>;"<BASE><BASE>";"<CAP><MIN>";IGNORE
+<DH>    <dh-digraph>;"<BASE><BASE>";"<CAP><CAP>";IGNORE
+<U00EB> <e-diaeresis>;"<BASE><BASE>";"<MIN><MIN>";IGNORE % ë
+<U00CB> <e-diaeresis>;"<BASE><BASE>";"<CAP><MIN>";IGNORE % Ë
+<gj>    <gj-digraph>;"<BASE><BASE>";"<MIN><MIN>";IGNORE
+<gJ>    <gj-digraph>;"<BASE><BASE>";"<MIN><CAP>";IGNORE
+<Gj>    <gj-digraph>;"<BASE><BASE>";"<CAP><MIN>";IGNORE
+<GJ>    <gj-digraph>;"<BASE><BASE>";"<CAP><CAP>";IGNORE
+<ll>    <ll-digraph>;"<BASE><BASE>";"<MIN><MIN>";IGNORE
+<lL>    <ll-digraph>;"<BASE><BASE>";"<MIN><CAP>";IGNORE
+<Ll>    <ll-digraph>;"<BASE><BASE>";"<CAP><MIN>";IGNORE
+<LL>    <ll-digraph>;"<BASE><BASE>";"<CAP><CAP>";IGNORE
+<nj>    <nj-digraph>;"<BASE><BASE>";"<MIN><MIN>";IGNORE
+<nJ>    <nj-digraph>;"<BASE><BASE>";"<MIN><CAP>";IGNORE
+<Nj>    <nj-digraph>;"<BASE><BASE>";"<CAP><MIN>";IGNORE
+<NJ>    <nj-digraph>;"<BASE><BASE>";"<CAP><CAP>";IGNORE
+<rr>    <rr-digraph>;"<BASE><BASE>";"<MIN><MIN>";IGNORE
+<rR>    <rr-digraph>;"<BASE><BASE>";"<MIN><CAP>";IGNORE
+<Rr>    <rr-digraph>;"<BASE><BASE>";"<CAP><MIN>";IGNORE
+<RR>    <rr-digraph>;"<BASE><BASE>";"<CAP><CAP>";IGNORE
+<sh>    <sh-digraph>;"<BASE><BASE>";"<MIN><MIN>";IGNORE
+<sH>    <sh-digraph>;"<BASE><BASE>";"<MIN><CAP>";IGNORE
+<Sh>    <sh-digraph>;"<BASE><BASE>";"<CAP><MIN>";IGNORE
+<SH>    <sh-digraph>;"<BASE><BASE>";"<CAP><CAP>";IGNORE
+<th>    <th-digraph>;"<BASE><BASE>";"<MIN><MIN>";IGNORE
+<tH>    <th-digraph>;"<BASE><BASE>";"<MIN><CAP>";IGNORE
+<Th>    <th-digraph>;"<BASE><BASE>";"<CAP><MIN>";IGNORE
+<TH>    <th-digraph>;"<BASE><BASE>";"<CAP><CAP>";IGNORE
+<xh>    <xh-digraph>;"<BASE><BASE>";"<MIN><MIN>";IGNORE
+<xH>    <xh-digraph>;"<BASE><BASE>";"<MIN><CAP>";IGNORE
+<Xh>    <xh-digraph>;"<BASE><BASE>";"<CAP><MIN>";IGNORE
+<XH>    <xh-digraph>;"<BASE><BASE>";"<CAP><CAP>";IGNORE
+<zh>    <zh-digraph>;"<BASE><BASE>";"<MIN><MIN>";IGNORE
+<zH>    <zh-digraph>;"<BASE><BASE>";"<MIN><CAP>";IGNORE
+<Zh>    <zh-digraph>;"<BASE><BASE>";"<CAP><MIN>";IGNORE
+<ZH>    <zh-digraph>;"<BASE><BASE>";"<CAP><CAP>";IGNORE
+
+reorder-end
 
 END LC_COLLATE
 
 LC_MONETARY
 % This is the POSIX Locale definition the LC_MONETARY category.
-% These are generated based on XML base Locale difintion file
+% These are generated based on XML base Locale definition file
 % for IBM Class for Unicode/Java
 %
-int_curr_symbol       "<U0041><U004C><U004C><U0020>"
-currency_symbol       "<U004C><U0065><U006B>"
-mon_decimal_point     "<U002C>"
-mon_thousands_sep     "<U002E>"
+int_curr_symbol       "ALL "
+currency_symbol       "L"
+mon_decimal_point     ","
+mon_thousands_sep     "."
 mon_grouping          3
 positive_sign         ""
-negative_sign         "<U002D>"
+negative_sign         "-"
 int_frac_digits       3
 frac_digits           3
 p_cs_precedes         1
@@ -91,8 +234,8 @@ END LC_MONETARY
 LC_NUMERIC
 % This is the POSIX Locale definition for the LC_NUMERIC  category.
 %
-decimal_point          "<U002C>"
-thousands_sep          "<U002E>"
+decimal_point          ","
+thousands_sep          "."
 grouping               3
 %
 END LC_NUMERIC
@@ -100,88 +243,77 @@ END LC_NUMERIC
 
 LC_TIME
 % This is the POSIX Locale definition for the LC_TIME category.
-% These are generated based on XML base Locale difintion file
+% These are generated based on XML base Locale definition file
 % for IBM Class for Unicode/Java
 %
 % Abbreviated weekday names (%a)
-abday       "<U0044><U0069><U0065><U0020>";"<U0048><U00EB><U006E><U0020>";/
-            "<U004D><U0061><U0072><U0020>";"<U004D><U00EB><U0072><U0020>";/
-            "<U0045><U006E><U006A><U0020>";"<U0050><U0072><U0065><U0020>";/
-            "<U0053><U0068><U0074><U0020>"
+abday       "Die";"Hën";/
+	    "Mar";"Mër";/
+	    "Enj";"Pre";"Sht"
 %
 % Full weekday names (%A)
-day         "<U0065><U0020><U0064><U0069><U0065><U006C><U0020>";/
-            "<U0065><U0020><U0068><U00EB><U006E><U00EB><U0020>";/
-            "<U0065><U0020><U006D><U0061><U0072><U0074><U00EB><U0020>";/
-            "<U0065><U0020><U006D><U00EB><U0072><U006B><U0075><U0072>/
-<U00EB><U0020>";/
-            "<U0065><U0020><U0065><U006E><U006A><U0074><U0065><U0020>";/
-            "<U0065><U0020><U0070><U0072><U0065><U006D><U0074><U0065><U0020>";/
-            "<U0065><U0020><U0073><U0068><U0074><U0075><U006E><U00EB><U0020>"
+day         "e diel";/
+	    "e hënë";/
+	    "e martë";/
+	    "e mërkurë";/
+	    "e enjte";/
+	    "e premte";/
+	    "e shtunë"
 %
 % Abbreviated month names (%b)
-abmon       "<U004A><U0061><U006E>";"<U0053><U0068><U006B>";/
-            "<U004D><U0061><U0072>";"<U0050><U0072><U0069>";/
-            "<U004D><U0061><U006A>";"<U0051><U0065><U0072>";/
-            "<U004B><U006F><U0072>";"<U0047><U0073><U0068>";/
-            "<U0053><U0068><U0074>";"<U0054><U0065><U0074>";/
-            "<U004E><U00EB><U006E>";"<U0044><U0068><U006A>"
+abmon       "Jan";"Shk";/
+	    "Mar";"Pri";/
+	    "Maj";"Qer";/
+	    "Kor";"Gsh";/
+	    "Sht";"Tet";/
+	    "Nën";"Dhj"
 %
 % Full month names (%B)
-mon         "<U006A><U0061><U006E><U0061><U0072>";/
-            "<U0073><U0068><U006B><U0075><U0072><U0074>";/
-            "<U006D><U0061><U0072><U0073>";/
-            "<U0070><U0072><U0069><U006C><U006C>";/
-            "<U006D><U0061><U006A>";/
-            "<U0071><U0065><U0072><U0073><U0068><U006F><U0072>";/
-            "<U006B><U006F><U0072><U0072><U0069><U006B>";/
-            "<U0067><U0075><U0073><U0068><U0074>";/
-            "<U0073><U0068><U0074><U0061><U0074><U006F><U0072>";/
-            "<U0074><U0065><U0074><U006F><U0072>";/
-            "<U006E><U00EB><U006E><U0074><U006F><U0072>";/
-            "<U0064><U0068><U006A><U0065><U0074><U006F><U0072>"
+mon         "janar";/
+	    "shkurt";/
+	    "mars";/
+	    "prill";/
+	    "maj";/
+	    "qershor";/
+	    "korrik";/
+	    "gusht";/
+	    "shtator";/
+	    "tetor";/
+	    "nëntor";/
+	    "dhjetor"
 %
 % Equivalent of AM PM
-am_pm       "<U0050><U0044>";"<U004D><U0044>"
+am_pm       "PD";"MD"
 %
 % Appropriate date and time representation
-% %Y-%b-%d%I.%M.%S. %Z
-d_t_fmt     "<U0025><U0059><U002D><U0025><U0062><U002D><U0025><U0064>/
-<U0020><U0025><U0049><U002E><U0025><U004D><U002E><U0025><U0053><U002E>/
-<U0025><U0070><U0020><U0025><U005A>"
+d_t_fmt     "%a %-d %b %Y %I:%M:%S.%p"
+%
+% Appropriate date and time representation for date(1)
+date_fmt    "%a %-d %b %Y %I:%M:%S.%p %Z"
 %
 % Appropriate date representation
-% %Y-%b-%d
-d_fmt       "<U0025><U0059><U002D><U0025><U0062><U002D><U0025><U0064>"
+d_fmt       "%-d.%-m.%y"
 %
 % Appropriate time representation
-% %I.%M.%S. %Z
-t_fmt       "<U0025><U0049><U002E><U0025><U004D><U002E><U0025><U0053>/
-<U002E><U0020><U0025><U005A>"
+t_fmt       "%I:%M:%S.%p %Z"
 %
 % Appropriate 12 h time representation (%r)
-t_fmt_ampm  "<U0025><U0049><U002E><U0025><U004D><U002E><U0025><U0053>/
-<U002E><U0025><U0070><U0020><U0025><U005A>"
-%
-% Appropriate date representation (date(1))   "%a %b %e %H:%M:%S %Z %Y"
-date_fmt       "<U0025><U0061><U0020><U0025><U0062><U0020><U0025><U0065>/
-<U0020><U0025><U0048><U003A><U0025><U004D><U003A><U0025><U0053><U0020>/
-<U0025><U005A><U0020><U0025><U0059>"
+t_fmt_ampm  "%I:%M:%S.%p %Z"
+week 7;19971130;1
+first_weekday 2
 END LC_TIME
 
 
 LC_MESSAGES
-yesexpr "<U005E><U005B><U0079><U0059><U005D><U002E><U002A>"
-noexpr  "<U005E><U005B><U006E><U004E><U005D><U002E><U002A>"
+yesexpr "^[+1yYpP]"
+noexpr  "^[-0nNjJ]"
+yesstr  "po"
+nostr   "jo"
 END LC_MESSAGES
 
 
 LC_PAPER
-% This is the ISO_IEC TR14652 Locale definition for the
-% LC_PAPER category
-height      297
-width       210
-
+copy "i18n"
 END LC_PAPER
 
 
@@ -189,13 +321,12 @@ LC_NAME
 % This is the ISO_IEC TR14652 Locale definition for the
 % LC_NAME category.
 %
-name_fmt    "<U0025><U0070><U0025><U0074><U0025><U0066><U0025><U0074>/
-<U0025><U0067>"
+name_fmt    "%p%t%f%t%g"
 name_gen    ""
-name_mr     "<U004D><U0072><U002E>"
-name_mrs    "<U004D><U0072><U0073><U002E>"
-name_miss   "<U004D><U0069><U0073><U0073><U002E>"
-name_ms     "<U004D><U0073><U002E>"
+name_mr     "Z."
+name_mrs    "Znj."
+name_miss   "Zsh."
+name_ms     "Znj."
 
 END LC_NAME
 
@@ -203,25 +334,29 @@ END LC_NAME
 LC_ADDRESS
 % This is the ISO_IEC TR14652 Locale definition for the
 % LC_ADDRESS
-postal_fmt  "<U0025><U007A><U0025><U0063><U0025><U0054><U0025><U0073>/
-<U0025><U0062><U0025><U0065><U0025><U0072>"
-
+postal_fmt  "%z%c%T%s%b%e%r"
+country_name "Shqipëri"
+country_ab2 "AL"
+country_ab3 "ALB"
+country_num 008
+country_car    "AL"
+lang_name    "shqip"
+lang_ab      "sq"
+lang_term    "sqi"
+lang_lib    "alb"
 END LC_ADDRESS
 
 
 LC_TELEPHONE
 % This is the ISO_IEC TR14652 Locale definition for the
 %
-tel_int_fmt "<U002B><U0025><U0063><U0020><U003B><U0025><U0061><U0020>/
-<U003B><U0025><U006C>"
-int_prefix     "<U0033><U0035><U0035>"
+tel_int_fmt "+%c ;%a ;%l"
+int_prefix     "355"
+int_select     "00"
 
 END LC_TELEPHONE
 
 
 LC_MEASUREMENT
-% This is the ISO_IEC TR14652 Locale definition for the
-%
-measurement 1
-
+copy "i18n"
 END LC_MEASUREMENT

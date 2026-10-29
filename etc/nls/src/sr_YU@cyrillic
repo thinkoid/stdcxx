@@ -1,0 +1,29 @@
+comment_char %
+escape_char /
+
+% sr_YU@cyrillic is the name glibc 2.2 gave sr_RS. The tree keeps the
+% name; every category is a copy of sr_RS.
+
+LC_CTYPE
+copy "sr_RS"
+END LC_CTYPE
+
+LC_COLLATE
+copy "sr_RS"
+END LC_COLLATE
+
+LC_MONETARY
+copy "sr_RS"
+END LC_MONETARY
+
+LC_NUMERIC
+copy "sr_RS"
+END LC_NUMERIC
+
+LC_TIME
+copy "sr_RS"
+END LC_TIME
+
+LC_MESSAGES
+copy "sr_RS"
+END LC_MESSAGES

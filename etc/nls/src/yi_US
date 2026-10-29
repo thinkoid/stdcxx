@@ -1,78 +1,58 @@
 comment_char %
-escape_char  /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+escape_char /
+
+% This file is part of the GNU C Library and contains locale data.
+% The Free Software Foundation does not claim any copyright interest
+% in the locale data contained in this file.  The foregoing does not
+% affect the license of the GNU C Library as a whole.  It does not
+% exempt you from the conditions of the license if your use would
+% otherwise be governed by that license.
+
 %
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
+% 2003-08-16: corrections from Raphael Finkel <raphael@cs.uky.edu>
 %
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% charset "CP1255"
-% Distribution and use is free, also for commercial purposes.
 
 LC_IDENTIFICATION
-title "Yiddish Language locale"
+title "Yiddish Language locale for the USA"
 source "http:////www.uyip.org//"
 address ""
 contact "Pablo Saratxaga"
 email "pablo@mandrakesoft.com"
 tel ""
 fax ""
-language "yi"
-territory "US"
-revision "0.3"
-date "2001-01-28"
+language "Yiddish"
+territory "United States"
+revision "0.4"
+date "2003-08-16"
 
-category "yi_US:2000";LC_IDENTIFICATION
-category "yi_US:2000";LC_COLLATE
-category "yi_US:2000";LC_CTYPE
-category "yi_US:2000";LC_MESSAGES
-category "yi_US:2000";LC_MONETARY
-category "yi_US:2000";LC_NUMERIC
-category "yi_US:2000";LC_TIME
-category "yi_US:2000";LC_PAPER
-category "yi_US:2000";LC_MEASUREMENT
-category "yi_US:2000";LC_TELEPHONE
-category "yi_US:2000";LC_ADDRESS
-
-% ISO/IEC 14652: Converted comments to LC_IDENTIFICATION
-%  added LC_PAPER, LC_MEASUREMENT, LC_IDENTIFICATION, LC_ADDRESS
-% -- mckinstry@computer.org, 2000-07-03
-
+category "i18n:2012";LC_IDENTIFICATION
+category "i18n:2012";LC_COLLATE
+category "i18n:2012";LC_CTYPE
+category "i18n:2012";LC_MESSAGES
+category "i18n:2012";LC_MONETARY
+category "i18n:2012";LC_NUMERIC
+category "i18n:2012";LC_TIME
+category "i18n:2012";LC_PAPER
+category "i18n:2012";LC_MEASUREMENT
+category "i18n:2012";LC_TELEPHONE
+category "i18n:2012";LC_ADDRESS
 END LC_IDENTIFICATION
 
 
 LC_ADDRESS
-postal_fmt "<U0025><U0064><U0025><U004E><U0025><U0066><U0025><U004E><U0025><U0064><U0025><U004E><U0025><U0062><U0025><U004E>/
-<U0025><U0073><U0020><U0025><U0068><U0020><U0035><U0065><U0020><U0025><U0072><U0025><U004E>/
-<U0025><U0043><U0025><U007A><U0020><U0025><U0054><U0025><U004E><U0025><U0063><U0025><U004E>"
-% FIXME country_name "United States" in Yiddish?
-% FIXME country_post "US" for United States?
+postal_fmt "%d%N%f%N%d%N%b%N%s %h 5e %r%N%C%z %T%N%c%N"
+country_name "פֿאַראייניגטע שטאַטן"
+country_post "USA"
 country_ab2 "US"
 country_ab3 "USA"
 country_num 840
-country_car "USA"
+country_car   "USA"
 % FIXME Check which isbn for Yiddish in USA
 country_isbn "0"
-% FIXME lang_name yiddish in yiddish?
-lang_ab "yi"
-lang_term "yid"
-lang_lib "yid"
+lang_name "ייִדיש"
+lang_ab      "yi"
+lang_term    "yid"
+lang_lib     "yid"
 END LC_ADDRESS
 
 LC_CTYPE
@@ -83,67 +63,116 @@ include "translit_combining";""
 
 % if digraphs are not available (this is the case with iso-8859-8)
 % then use the single letters
-<U05F0> "<U05D5><U05D5>";"<U0077><U0077>"
-<U05F1> "<U05D5><U05D9>";"<U0077><U006A>"
-<U05F2> "<U05D9><U05D9>";"<U006A><U006A>"
+<U05F0> "<U05D5><U05D5>";"ww"
+<U05F1> "<U05D5><U05D9>";"wj"
+<U05F2> "<U05D9><U05D9>";"jj"
 translit_end
 
 END LC_CTYPE
 
 LC_COLLATE
+% CLDR collation rules for Yiddish:
+% (see: https://unicode.org/cldr/trac/browser/trunk/common/collation/yi.xml)
+%
+% <collation type="standard">
+%   <cr><![CDATA[
+%     [normalization on]
+%     [reorder Hebr]
+%     &[before 2]''<<׳ # GERESH just before APOSTROPHE (secondary difference)
+%     &[before 2]'\"'<<״ # GERSHAYIM just before QUOTATION MARK (secondary difference)
+%     &ב<בֿ
+%     &ו<<וּ<<וו<<וי
+%     &י<<יִ<<יי<<ײַ
+%     &[before 1]כ<כּ
+%     &[before 1]פ<פּ
+%     &פֿ<<<ף
+%     &ש<שׂ
+%     &[before 1]ת<תּ
+%   ]]></cr>
+% </collation>
+%
+% And CLDR also lists the following
+% index characters:
+% (see: https://unicode.org/cldr/trac/browser/trunk/common/main/yi.xml)
+%
+% <exemplarCharacters type="index">[\u05C2 \u05BC \u05BF א ב ג ד ה ו ז ח ט י כ ל מ נ ס ע פ צ ק ר ש ת]</exemplarCharacters>
+%
+% The following rules implement the same order for glibc.
 copy "iso14651_t1"
 
-collating-symbol  <b-h-yi>
-collating-element <B+'H-> from "<U05D1><U05BF>"
-collating-symbol  <k-m-yi>
-collating-element <K+.MH> from "<U05DB><U05BC>"
-collating-symbol  <p-m-yi>
-collating-element <P+.MH> from "<U05E4><U05BC>"
-collating-symbol  <p-h-yi>
-collating-element <P+'H-> from "<U05E4><U05BF>"
-collating-symbol  <s-h-yi>
-collating-element <Sh'H.L> from "<U05E9><U05C2>"
-collating-symbol  <t-m-yi>
-collating-element <T+.MH> from "<U05EA><U05BC>"
+collating-symbol  <bet-rafe>
+collating-element <bet-with-combining-rafe> from "<U05D1><U05BF>" % ב + ֿ = בֿ
+collating-symbol  <kaf-dagesh>
+collating-element <kaf-with-combining-dagesh> from "<U05DB><U05BC>" % כ + ּ = כּ
+collating-symbol  <pe-dagesh>
+collating-element <pe-with-combining-dagesh> from "<U05E4><U05BC>" % פ + ּ = פּ
+collating-symbol  <pe-rafe>
+collating-element <pe-with-combining-rafe> from "<U05E4><U05BF>" % פ + ֿ = פֿ
+collating-symbol  <shin-sin-dot>
+collating-element <shin-with-combining-sin-dot> from "<U05E9><U05C2>" % ש + ׂ = שׂ
+collating-symbol  <tav-dagesh>
+collating-element <tav-with-combining-dagesh> from "<U05EA><U05BC>" % ת + ּ = תּ
 
-reorder-after <bet>
-<b-h-yi>
-reorder-after <yod>
-<k-m-yi>
-reorder-after <ayin>
-<p-m-yi>
-<p-h-yi>
-reorder-after <shin>
-<s-h-yi>
-<t-m-yi>
+collating-element <vav-with-combining-dagesh> from "<U05D5><U05BC>" % ו + ּ = וּ
+collating-element <vav-vav>                   from "<U05D5><U05D5>" % ו + ו = וו
+collating-element <vav-yod>                   from "<U05D5><U05D9>" % ו + י = וי
+collating-element <yod-with-combining-hiriq>  from "<U05D9><U05B4>" % י + ִ = יִ
+collating-element <yod-yod>                   from "<U05D9><U05D9>" % י + י = יי
+collating-element <double-yod-with-combining-patah>  from "<U05F2><U05B7>" % ײ + ַ = ײַ
 
-reorder-after <U05D1>
-<B+'H->	<b-h-yi>;<PCT>;<MIN>;IGNORE
-reorder-after <U05D5>
-<05F0>	"<vav><vav>";"<LIG><LIG>";IGNORE;IGNORE
-<05F1>	"<vav><yod>";"<LIG><LIG>";IGNORE;IGNORE
-reorder-after <U05D9>
-<05F2>	"<yod><yod>";"<LIG><LIG>";IGNORE;IGNORE
-<K+.MH>	<k-m-yi>;<PCT>;<MIN>;IGNORE
-reorder-after <U05E2>
-<P+.MH>	<p-m-yi>;<PCT>;<MIN>;IGNORE
-<P+'H->	<p-h-yi>;<PCT>;<MIN>;IGNORE
-reorder-after <U05E9>
-<Sh'H.L>	<s-h-yi>;<PCT>;<MIN>;IGNORE
-<T+.MH>	<t-m-yi>;<PCT>;<MIN>;IGNORE
+reorder-after <S05D1> % HEBREW LETTER BET
+<bet-rafe>
+reorder-after <S05D9> % HEBREW LETTER YOD
+<kaf-dagesh>
+reorder-after <S05E2> % HEBREW LETTER AYIN
+<pe-dagesh>
+reorder-after <S05E4> % HEBREW LETTER PE
+<pe-rafe>
+reorder-after <S05E9> % HEBREW LETTER SHIN
+<shin-sin-dot>
+<tav-dagesh>
+
+% &[before 2]''<<׳ # GERESH just before APOSTROPHE (secondary difference)
+<U05F3> IGNORE;<VRNT1>;IGNORE;<U05F3> % HEBREW PUNCTUATION GERESH
+<U0027> IGNORE;<VRNT2>;IGNORE;<U0027> % APOSTROPHE
+% &[before 2]'\"'<<״ # GERSHAYIM just before QUOTATION MARK (secondary difference)
+<U05F4> IGNORE;<VRNT1>;IGNORE;<U05F4> % HEBREW PUNCTUATION GERSHAYIM
+<U0022> IGNORE;<VRNT2>;IGNORE;<U0022> % QUOTATION MARK
+% &ב<בֿ
+<bet-with-combining-rafe> <bet-rafe>;"<BASE><BASE>";IGNORE;IGNORE % ב + ֿ = בֿ
+% &ו<<וּ<<וו<<וי
+<U05D5>                     <S05D5>;"<BASE><BASE>";<MIN>;<U05D5> % ו HEBREW LETTER VAV
+<vav-with-combining-dagesh> <S05D5>;"<BASE><VRNT1>";<MIN>;"<U05D5><U05BC>" % ו + ּ = וּ
+<vav-vav>                   <S05D5>;"<BASE><VRNT2>";<MIN>;"<U05D5><U05D5>" % ו + ו = וו
+<vav-yod>                   <S05D5>;"<BASE><VRNT3>";<MIN>;"<U05D5><U05D9>" % ו + י = וי
+% &י<<יִ<<יי<<ײַ
+<U05D9>                     <S05D9>;"<BASE><BASE>";<MIN>;<U05D9> % י HEBREW LETTER YOD
+<yod-with-combining-hiriq>  <S05D9>;"<BASE><VRNT1>";<MIN>;"<U05D9><U05B4>" % י + ִ = יִ
+<yod-yod>                   <S05D9>;"<BASE><VRNT2>";<MIN>;"<U05D9><U05D9>" % י + י = יי
+<double-yod-with-combining-patah> <S05D9>;"<BASE><VRNT3>";<MIN>;"<U05F2><U05B7>" % ײ + ַ = ײַ% &[before 1]כ<כּ
+<kaf-with-combining-dagesh>	<kaf-dagesh>;"<BASE><BASE>";IGNORE;IGNORE % כ + ּ = כּ
+% &[before 1]פ<פּ
+<pe-with-combining-dagesh>	<pe-dagesh>;"<BASE><BASE>";IGNORE;IGNORE % פ + ּ = פּ
+% &פֿ<<<ף
+<pe-with-combining-rafe>	<pe-rafe>;"<BASE><BASE>";<MIN>;IGNORE % פ + ֿ = פֿ
+<U05E3>                         <pe-rafe>;"<BASE><BASE>";<CAP>;IGNORE % ף
+% &ש<שׂ
+<shin-with-combining-sin-dot>	<shin-sin-dot>;"<BASE><BASE>";IGNORE;IGNORE % ש + ׂ = שׂ
+% &[before 1]ת<תּ
+<tav-with-combining-dagesh>	<tav-dagesh>;"<BASE><BASE>";IGNORE;IGNORE % ת + ּ = תּ
 
 reorder-end
 
 END LC_COLLATE
 
 LC_MONETARY
-int_curr_symbol   "<U0055><U0053><U0044><U0020>"
-currency_symbol   "<U0024>"
-mon_decimal_point "<U002E>"
-mon_thousands_sep "<U002C>"
-mon_grouping      3;3
+int_curr_symbol   "USD "
+currency_symbol   "$"
+mon_decimal_point "."
+mon_thousands_sep ","
+mon_grouping      3
 positive_sign     ""
-negative_sign     "<U002D>"
+negative_sign     "-"
 int_frac_digits   2
 frac_digits       2
 p_cs_precedes     1
@@ -171,47 +200,49 @@ copy "en_US"
 END LC_NUMERIC
 
 LC_TIME
-abday   "<U05D6><U05D5><U05E0><U0027>";"<U05DE><U05D0><U05B8><U05E0><U0027>";"<U05D3><U05D9><U05E0><U0027>";/
-        "<U05DE><U05D9><U05D8><U0027>";"<U05D3><U05D0><U05B8><U05E0><U0027>";"<U05E4><U05BF><U05E8><U05F2><U05B7><U0027>";/
-	"<U05E9><U05D1><U05EA>"
-day     "<U05D6><U05D5><U05E0><U05D8><U05D9><U05E7>";/
-        "<U05DE><U05D0><U05B8><U05E0><U05D8><U05D9><U05E7>";/
-        "<U05D3><U05D9><U05E0><U05E1><U05D8><U05D9><U05E7>";/
-        "<U05DE><U05D9><U05D8><U05F0><U05D0><U05B8><U05DA>";/
-        "<U05D3><U05D0><U05B8><U05E0><U05E2><U05E8><U05E9><U05D8><U05D9><U05E7>";/
-        "<U05E4><U05BF><U05E8><U05F2><U05B7><U05D8><U05D9><U05E7>";/
-        "<U05E9><U05D1><U05EA>"
-mon     "<U05D9><U05D0><U05B7><U05E0><U05D5><U05D0><U05B7><U05E8>";/
-	"<U05E4><U05BF><U05E2><U05D1><U05E8><U05D5><U05D0><U05B7><U05E8>";/
-        "<U05DE><U05D0><U05B7><U05E8><U05E5>";/
-        "<U05D0><U05B7><U05E4><U05BC><U05E8><U05D9><U05DC>";/
-        "<U05DE><U05F2><U05B7>";/
-        "<U05D9><U05D5><U05E0><U05D9>";/
-        "<U05D9><U05D5><U05DC><U05D9>";/
-        "<U05D0><U05F1><U05D2><U05E1><U05D8>";/
-        "<U05E1><U05E2><U05E4><U05BC><U05D8><U05E2><U05DE><U05D1><U05E2><U05E8>";/
-        "<U05D0><U05B8><U05E7><U05D8><U05D0><U05B8><U05D1><U05E2><U05E8>";/
-        "<U05E0><U0041><U05B8><U05F0><U05E2><U05DE><U05D1><U05E2><U05E8>";/
-        "<U05D3><U05E6><U05DE><U05D1><U05E8>"
-abmon   "<U05D9><U05D0><U05B7><U05E0><U0027>";"<U05E4><U05BF><U05E2><U05D1><U0027>";/
-        "<U05DE><U05D0><U05B7><U05E8><U0027>";"<U05D0><U05B7><U05E4><U05BC><U05E8><U0027>";/
-        "<U05DE><U05F2><U05B7>";"<U05D9><U05D5><U05E0><U0027>";/
-        "<U05D9><U05D5><U05DC><U0027>";"<U05D0><U05F1><U05D2><U0027>";/
-        "<U05E1><U05E2><U05E4><U05BC><U0027>";"<U05D0><U05B8><U05E7><U05D8><U0027>";/
-        "<U05E0><U05D0><U05B8><U05F0><U0027>";"<U05D3><U05E2><U05E6><U0027>"
-d_t_fmt "<U0025><U005A><U0020><U0025><U0048><U003A><U0025><U004D><U003A><U0025><U0053><U0020><U0025><U0059><U0020><U0025><U0062><U0020><U0025><U0064><U0020><U0025><U0061>"
-d_fmt   "<U0025><U0064><U002F><U0025><U006D><U002F><U0025><U0079>"
-t_fmt   "<U0025><U0048><U003A><U0025><U004D><U003A><U0025><U0053>"
-am_pm   "<U0041><U004D>";"<U0050><U004D>"
-t_fmt_ampm  "<U0025><U0049><U003A><U0025><U004D><U003A><U0025><U0053><U0020><U0025><U0050>"
+abday   "זונ'";"מאָנ'";"דינ'";/
+        "מיט'";"דאָנ'";"פֿרײַ'";/
+	"שבת"
+day     "זונטיק";/
+        "מאָנטיק";/
+        "דינסטיק";/
+        "מיטװאָך";/
+        "דאָנערשטיק";/
+        "פֿרײַטיק";/
+        "שבת"
+mon     "יאַנואַר";/
+	"פֿעברואַר";/
+        "מערץ";/
+        "אַפּריל";/
+        "מיי";/
+        "יוני";/
+        "יולי";/
+        "אויגוסט";/
+        "סעפּטעמבער";/
+        "אקטאבער";/
+        "נאוועמבער";/
+        "דעצעמבער"
+abmon   "יאַנ";"פֿעב";/
+        "מאַר";"אַפּר";/
+        "מײַ ";"יונ";/
+        "יול";"אױג";/
+        "סעפּ";"אָקט";/
+        "נאָװ";"דעצ"
+d_t_fmt  "%H:%M:%S %Y %b %d %a"
+date_fmt "%Z %H:%M:%S %Y %b %d %a"
+d_fmt   "%d//%m//%y"
+t_fmt   "%H:%M:%S"
+am_pm   "AM";"PM"
+t_fmt_ampm  "%I:%M:%S %P"
 cal_direction	3
+week 7;19971130;1
 END LC_TIME
 
 LC_MESSAGES
-yesexpr "<U005E><U005B><U0059><U0079><U05D9><U005D><U002E><U002A>"
-noexpr  "<U005E><U005B><U004E><U006E><U05E0><U05E7><U005D><U002E><U002A>"
-yesstr	"<U05D9><U05D0><U05B7>"
-nostr	"<U05E7><U05F2><U05DF>"
+yesexpr "^[+1yYי]"
+noexpr  "^[-0nNנק]"
+yesstr  "יאָ"
+nostr   "קײן"
 END LC_MESSAGES
 
 LC_NAME

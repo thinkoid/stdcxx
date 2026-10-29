@@ -1,31 +1,15 @@
+escape_char /
 comment_char %
-escape_char  /
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Licensed to the Apache Software  Foundation (ASF) under one or more
-% contributor  license agreements.  See  the NOTICE  file distributed
-% with  this  work  for  additional information  regarding  copyright
-% ownership.   The ASF  licenses this  file to  you under  the Apache
-% License, Version  2.0 (the  License); you may  not use  this file  
-% except in  compliance with the License.   You may obtain  a copy of
-% the License at
-%
-% http://www.apache.org/licenses/LICENSE-2.0
-%
-% Unless required by applicable law or agreed to in writing, software
-% distributed under the  License is distributed on an  "AS IS" BASIS,
-% WITHOUT  WARRANTIES OR CONDITIONS  OF ANY  KIND, either  express or
-% implied.   See  the License  for  the  specific language  governing
-% permissions and limitations under the License.
-%
-% Copyright 1999-2007 Rogue Wave Software, Inc.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+
+% This file is part of the GNU C Library and contains locale data.
+% The Free Software Foundation does not claim any copyright interest
+% in the locale data contained in this file.  The foregoing does not
+% affect the license of the GNU C Library as a whole.  It does not
+% exempt you from the conditions of the license if your use would
+% otherwise be governed by that license.
+
 % Transliterations of encircled characters.
-% Generated through
-%   $ grep '^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;<circle>[^;]*;' UnicodeData.txt | \
-%     sed -e 's/^\([^;]*\);\([^;]*\);[^;]*;[^;]*;[^;]*;<circle> \([^;]*\);.*$/<U\1> "<U0028 \3 0029>"% \2/' -e 'h' -e 's/^\([^%]*\)% .*$/\1/' -e 's/\([0-9A-F]\) \([0-9A-F]\)/\1><U\2/g' -e 'x' -e 's/^[^%]*\(% .*\)$/\1/' -e 'G'
+% Generated automatically from UnicodeData.txt by gen_translit_circle.py on 2025-08-18 for Unicode 17.0.0.
 
 LC_CTYPE
 
@@ -177,6 +161,44 @@ translit_start
 <U24E9> "<U0028><U007A><U0029>"
 % CIRCLED DIGIT ZERO
 <U24EA> "<U0028><U0030><U0029>"
+% CIRCLED IDEOGRAPH QUESTION
+<U3244> "<U0028><U554F><U0029>"
+% CIRCLED IDEOGRAPH KINDERGARTEN
+<U3245> "<U0028><U5E7C><U0029>"
+% CIRCLED IDEOGRAPH SCHOOL
+<U3246> "<U0028><U6587><U0029>"
+% CIRCLED IDEOGRAPH KOTO
+<U3247> "<U0028><U7B8F><U0029>"
+% CIRCLED NUMBER TWENTY ONE
+<U3251> "<U0028><U0032><U0031><U0029>"
+% CIRCLED NUMBER TWENTY TWO
+<U3252> "<U0028><U0032><U0032><U0029>"
+% CIRCLED NUMBER TWENTY THREE
+<U3253> "<U0028><U0032><U0033><U0029>"
+% CIRCLED NUMBER TWENTY FOUR
+<U3254> "<U0028><U0032><U0034><U0029>"
+% CIRCLED NUMBER TWENTY FIVE
+<U3255> "<U0028><U0032><U0035><U0029>"
+% CIRCLED NUMBER TWENTY SIX
+<U3256> "<U0028><U0032><U0036><U0029>"
+% CIRCLED NUMBER TWENTY SEVEN
+<U3257> "<U0028><U0032><U0037><U0029>"
+% CIRCLED NUMBER TWENTY EIGHT
+<U3258> "<U0028><U0032><U0038><U0029>"
+% CIRCLED NUMBER TWENTY NINE
+<U3259> "<U0028><U0032><U0039><U0029>"
+% CIRCLED NUMBER THIRTY
+<U325A> "<U0028><U0033><U0030><U0029>"
+% CIRCLED NUMBER THIRTY ONE
+<U325B> "<U0028><U0033><U0031><U0029>"
+% CIRCLED NUMBER THIRTY TWO
+<U325C> "<U0028><U0033><U0032><U0029>"
+% CIRCLED NUMBER THIRTY THREE
+<U325D> "<U0028><U0033><U0033><U0029>"
+% CIRCLED NUMBER THIRTY FOUR
+<U325E> "<U0028><U0033><U0034><U0029>"
+% CIRCLED NUMBER THIRTY FIVE
+<U325F> "<U0028><U0033><U0035><U0029>"
 % CIRCLED HANGUL KIYEOK
 <U3260> "<U0028><U1100><U0029>"
 % CIRCLED HANGUL NIEUN
@@ -233,6 +255,12 @@ translit_start
 <U327A> "<U0028><U1111><U1161><U0029>"
 % CIRCLED HANGUL HIEUH A
 <U327B> "<U0028><U1112><U1161><U0029>"
+% CIRCLED KOREAN CHARACTER CHAMKO
+<U327C> "<U0028><U110E><U1161><U11B7><U1100><U1169><U0029>"
+% CIRCLED KOREAN CHARACTER JUEUI
+<U327D> "<U0028><U110C><U116E><U110B><U1174><U0029>"
+% CIRCLED HANGUL IEUNG U
+<U327E> "<U0028><U110B><U116E><U0029>"
 % CIRCLED IDEOGRAPH ONE
 <U3280> "<U0028><U4E00><U0029>"
 % CIRCLED IDEOGRAPH TWO
@@ -331,6 +359,36 @@ translit_start
 <U32AF> "<U0028><U5354><U0029>"
 % CIRCLED IDEOGRAPH NIGHT
 <U32B0> "<U0028><U591C><U0029>"
+% CIRCLED NUMBER THIRTY SIX
+<U32B1> "<U0028><U0033><U0036><U0029>"
+% CIRCLED NUMBER THIRTY SEVEN
+<U32B2> "<U0028><U0033><U0037><U0029>"
+% CIRCLED NUMBER THIRTY EIGHT
+<U32B3> "<U0028><U0033><U0038><U0029>"
+% CIRCLED NUMBER THIRTY NINE
+<U32B4> "<U0028><U0033><U0039><U0029>"
+% CIRCLED NUMBER FORTY
+<U32B5> "<U0028><U0034><U0030><U0029>"
+% CIRCLED NUMBER FORTY ONE
+<U32B6> "<U0028><U0034><U0031><U0029>"
+% CIRCLED NUMBER FORTY TWO
+<U32B7> "<U0028><U0034><U0032><U0029>"
+% CIRCLED NUMBER FORTY THREE
+<U32B8> "<U0028><U0034><U0033><U0029>"
+% CIRCLED NUMBER FORTY FOUR
+<U32B9> "<U0028><U0034><U0034><U0029>"
+% CIRCLED NUMBER FORTY FIVE
+<U32BA> "<U0028><U0034><U0035><U0029>"
+% CIRCLED NUMBER FORTY SIX
+<U32BB> "<U0028><U0034><U0036><U0029>"
+% CIRCLED NUMBER FORTY SEVEN
+<U32BC> "<U0028><U0034><U0037><U0029>"
+% CIRCLED NUMBER FORTY EIGHT
+<U32BD> "<U0028><U0034><U0038><U0029>"
+% CIRCLED NUMBER FORTY NINE
+<U32BE> "<U0028><U0034><U0039><U0029>"
+% CIRCLED NUMBER FIFTY
+<U32BF> "<U0028><U0035><U0030><U0029>"
 % CIRCLED KATAKANA A
 <U32D0> "<U0028><U30A2><U0029>"
 % CIRCLED KATAKANA I
@@ -425,6 +483,18 @@ translit_start
 <U32FD> "<U0028><U30F1><U0029>"
 % CIRCLED KATAKANA WO
 <U32FE> "<U0028><U30F2><U0029>"
+% CIRCLED ITALIC LATIN CAPITAL LETTER C
+<U0001F12B> "<U0028><U0043><U0029>"
+% CIRCLED ITALIC LATIN CAPITAL LETTER R
+<U0001F12C> "<U0028><U0052><U0029>"
+% CIRCLED CD
+<U0001F12D> "<U0028><U0043><U0044><U0029>"
+% CIRCLED WZ
+<U0001F12E> "<U0028><U0057><U005A><U0029>"
+% CIRCLED IDEOGRAPH ADVANTAGE
+<U0001F250> "<U0028><U5F97><U0029>"
+% CIRCLED IDEOGRAPH ACCEPT
+<U0001F251> "<U0028><U53EF><U0029>"
 
 translit_end
 
