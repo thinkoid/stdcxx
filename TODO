@@ -19,19 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =__rw_get_mask= halves a closed interval
-
-The binary search of =__rw_get_mask= in =src/wctype.cpp= keeps the
-closed-interval form that f32e1a22 took out of =__rw_toupper= and
-=__rw_tolower=: =high= starts at the count, the loop runs while =low
-<= high=, and =high = cur - 1=. A key below the first entry wraps
-=high= and one above the last reads one past the table.
-
-Fix: the half-open form of f32e1a22.
-
-Check: the ctype test's probe for L'\0' and for a character above
-the table under the database path, red against the current library.
-
 ** TODO A collating element that is a prefix of another never yields
 
 =__rw_get_n_ce_offset= and its wide twin in =src/collate.cpp= return

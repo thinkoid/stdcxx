@@ -85,10 +85,13 @@ __rw_get_mask (__rw_ctype_t    *impl,
             size_t low  = 0;
             size_t high = size_t (impl->wmask_s);
 
+            // the bounds are half-open: an unsigned high steps to cur,
+            // never below zero
+
             if (vec)
                 *vec = MaskT ();
 
-            while (low <= high) {
+            while (low < high) {
 
                 const size_t cur = (low + high) / 2;
                 const __rw_mask_elm next_elm = impl->wmask_tab (cur);
@@ -116,7 +119,7 @@ __rw_get_mask (__rw_ctype_t    *impl,
                     < static_cast< _RWSTD_UINT32_T >(*beg))
                     low = cur + 1;
                 else
-                    high = cur - 1;
+                    high = cur;
             }
 
             if (vec)

@@ -731,6 +731,12 @@ void test_libstd_mask (charT, const char *cname,
     rw_assert (ct.is (m, ch), 0, __LINE__,                      \
                "ctype<%s>::is(%d, %d) failed", cname, m, ch)
 
+#undef TEST_NOT
+#define TEST_NOT(ch, m)                                         \
+    rw_assert (!ct.is (m, ch), 0, __LINE__,                     \
+               "ctype<%s>::is(%d, %d) unexpectedly succeeded",  \
+               cname, m, ch)
+
     // make sure the characters have the correct masks
     TEST (charT ('a'), ALPHA);
     TEST (charT ('a'), LOWER);
@@ -814,6 +820,18 @@ void test_libstd_mask (charT, const char *cname,
         TEST (ct.widen ('\xa2'), GRAPH);
         TEST (ct.widen ('\xa2'), PRINT);
         TEST (ct.widen ('\xa0'), DIGIT | GRAPH | PRINT);
+    }
+
+    // a character below the first entry of the mask table, U+0000
+    // is in no class of this locale, and one above its last: the
+    // search must stop at the table's bounds
+    if (sizeof (charT) > 1) {
+        const std::ctype_base::mask all =
+              ALPHA | DIGIT | SPACE | PUNCT | CNTRL
+            | UPPER | LOWER | PRINT | GRAPH | XDIGIT;
+
+        TEST_NOT (charT ('\0'),   all);
+        TEST_NOT (charT (0xffff), all);
     }
 }
 
@@ -978,7 +996,6 @@ void test_libstd (charT, const char *cname)
               "<U0042>;<U0043>;<U1000>;<U1001>\n"
         "digit <U0031>;<U0032>;<U0033>;<U1002>\n"
         "space <U0020>\n"
-        "cntrl <U0000>\n"
         "#     <!>      <\">\n"
         "punct <U0021>; <U0022>\n"
         "graph <U0041>;<U0042>;<U0043>;<U0061>;<U0062>;<U0063>;"
