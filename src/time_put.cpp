@@ -1403,9 +1403,9 @@ __rw_fmt_time (const __rw_facet *pfacet, char *buf, size_t bufsize,
 
                 switch (fmt) {
                     // check valid format modifiers
-                case 'd': case 'e': case 'H': case 'I': case 'm': case 'M':
-                case 'S': case 'u': case 'U': case 'V': case 'w': case 'W':
-                case 'y':
+                case 'C': case 'd': case 'e': case 'H': case 'I': case 'm':
+                case 'M': case 'p': case 'S': case 'u': case 'U': case 'V':
+                case 'w': case 'W': case 'y':
                     break;
 
                 case '\0':
@@ -1539,9 +1539,9 @@ __rw_fmt_time (const __rw_facet *pfacet, wchar_t *wbuf, size_t bufsize,
 
                 switch (fmt) {
                     // check valid format modifiers
-                case 'd': case 'e': case 'H': case 'I': case 'm': case 'M':
-                case 'S': case 'u': case 'U': case 'V': case 'w': case 'W':
-                case 'y':
+                case 'C': case 'd': case 'e': case 'H': case 'I': case 'm':
+                case 'M': case 'p': case 'S': case 'u': case 'U': case 'V':
+                case 'w': case 'W': case 'y':
                     break;
 
                 case '\0':
@@ -2026,6 +2026,8 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
         //      as a decimal number (00-99). [tm_year]
         // %EC: the name of the base year (period) in the locale's
         //      alternative representation.
+        // %OC: the century, using the locale's alternative numeric
+        //      symbols (an extension of the C library).
 
         if ('E' == mod) {
             const __rw_time_t::era_t *pera = __rw_get_era (ptime, tmb);
@@ -2039,10 +2041,15 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 
         // the century is floored so that %C * 100 + %y is the year;
         // a negative one is not zero-padded, as the C library writes it
-        const int year = 1900 + tmb->tm_year;
+        const int year    = 1900 + tmb->tm_year;
+        const int century = (year / 100 - (year % 100 < 0)) % 100;
 
-        tpd.val  = (year / 100 - (year % 100 < 0)) % 100;
-        tpd.prec = tpd.val < 0 ? 1 : 2;
+        if ('O' == mod)
+            tpd.altval = century;
+        else
+            tpd.val = century;
+
+        tpd.prec = century < 0 ? 1 : 2;
         break;
     }
 
@@ -2214,8 +2221,9 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
     }
 
     case 'p':
-        // %p: the locale's equivalent of the AM/PM designations
-        //     associated with a 12-hour clock. [tm_hour]
+        // %p:  the locale's equivalent of the AM/PM designations
+        //      associated with a 12-hour clock. [tm_hour]
+        // %Op: equivalent to %p (an extension of the C library).
         tpd.fmt = ptime->am_pm ((tmb->tm_hour / 12) % 2U, wide);
         break;
 

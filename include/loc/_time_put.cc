@@ -147,9 +147,9 @@ put (iter_type __it, ios_base &__flags, char_type __fill, const tm *__tmb,
 
                 switch (__fmt) {
                     // check valid format modifiers
-                case 'd': case 'e': case 'H': case 'I': case 'm': case 'M':
-                case 'S': case 'u': case 'U': case 'V': case 'w': case 'W':
-                case 'y':
+                case 'C': case 'd': case 'e': case 'H': case 'I': case 'm':
+                case 'M': case 'p': case 'S': case 'u': case 'U': case 'V':
+                case 'w': case 'W': case 'y':
                     ++__pat;
                     break;
 

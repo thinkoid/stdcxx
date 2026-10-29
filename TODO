@@ -19,25 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =time_put= rejects =%OC= and =%Op=
-
-=src/time_put.cpp= takes after =O= the conversions C99 and POSIX list,
-=d e H I m M S u U V w W y=, and writes =%O= and drops the letter for
-any other. glibc takes =%OC=, the century in =alt_digits=, and =%Op=
-as =%p=, and four of its definitions use them: =lzh_TW= =d_fmt=
-"%OC%Oy年%B%Od日", =my_MM= =d_fmt= "%OC%Oy %b %Od %A", =mnw_MM= and
-=shn_MM= with =%Op= in =d_t_fmt=. The library writes =%O廿六年...=
-where glibc writes =廿廿六年...=. Found by =bin/oracle/scalar.cpp=
-(class C).
-
-Fix: accept =C= after =O=, through =altval= as =%Oy=, and =p= as =%p=,
-in the modifier checks of =src/time_put.cpp= and
-=include/loc/_time_put.cc=; or record the difference as an extension
-the library does not take, and leave the four locales' =%x= and =%c=
-as they are.
-
-Check: the oracle's class C is empty, or the record names the four.
-
 ** TODO =%r= with an empty =t_fmt_ampm= writes nothing
 
 =gd_GB=, =hy_AM=, =sm_WS= and =su_ID= set =t_fmt= or =d_t_fmt= to =%r=

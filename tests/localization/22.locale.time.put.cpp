@@ -716,6 +716,16 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0, -2443), "%C", 0, 0, ' ', "-6");
     TEST (T (0, 0, 0, 1, 0, -2443), "%C", 0, 0, ' ', "%C");
 
+    // %OC: the century, using the locale's alternative numeric symbols
+    //      (an extension of the C library), the ordinary digits in "C"
+    rw_info (0, 0, __LINE__,
+             "%%OC: the century, using alternative digits");
+    TEST (T (0, 0, 0, 1, 0,     0), "%OC", 0, 0, ' ', "19");
+    TEST (T (0, 0, 0, 1, 0, -1000), "%OC", 0, 0, ' ', "09");
+    TEST (T (0, 0, 0, 1, 0,   103), "%OC", 0, 0, ' ', "20");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%OC", 0, 0, ' ', "-6");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%OC", 0, 0, ' ', "%OC");
+
     // %EC: the name of the base year (period) in the locale's
     //      alternative representation.
     rw_info (0, 0, __LINE__,
@@ -984,6 +994,12 @@ void test_POSIX (charT, const char *tname)
     TEST (T ( 0,  0, 13), "%p", 0, 0, ' ', "%p");
     TEST (T ( 0,  0, 23), "%p", 0, 0, ' ', "%p");
     TEST (T ( 0,  0, -8), "%p", 0, 0, ' ', 0 /* unspecified */);
+
+    // %Op: equivalent to %p (an extension of the C library)
+    rw_info (0, 0, __LINE__, "%%Op: equivalent to %%p");
+    TEST (T ( 0,  0,  9), "%Op", 0, 0, ' ', "AM");
+    TEST (T ( 0,  0, 21), "%Op", 0, 0, ' ', "PM");
+    TEST (T ( 0,  0, 21), "%Op", 0, 0, ' ', "%Op");
 
     // %r: the locale's 12-hour clock time. [tm_hour, tm_min, tm_sec]
     rw_info (0, 0, __LINE__, "%%r: the locale's 12-hour clock time");
