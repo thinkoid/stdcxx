@@ -928,20 +928,57 @@ write_coll_info (const std::string &ch, unsigned int idx,
 
 
 static void
+print_ce (const std::string                   &mb_str,
+          unsigned                             elem,
+          std::map<std::string, unsigned int> &ce_map)
+{
+    static unsigned ce_num = 0;
+
+    const cmap_t* const cmap = get_charmap (LC_COLLATE);
+
+    // do a lookup in the narrow character maps and find the
+    // symbolic names for the characters that make up this
+    // collating element
+
+    // sym is sized at 13 because there will never be more then
+    // 99,999 collating elements
+    char sym [13];
+    std::sprintf (sym, "<RW_CE_%u>", ce_num++);
+
+    ce_map.insert (std::make_pair (sym, elem));
+    std::cout << "collating-element " << sym << " from \"";
+
+    if (0 == cmap)
+        std::cout << mb_str << "\"\n";
+    else {
+        unsigned ch = 0;
+
+        for (unsigned j = 1; j <= mb_str.size (); ++j) {
+            cmap_entry_t entry;
+
+            if (   cmap->find_bytes (mb_str.substr (ch, j), entry)
+                && cmap->find_ucs (entry.ucs, entry)) {
+                std::cout << sym_name (entry);
+                ch = j;
+            }
+        }
+
+        std::cout << "\"\n";
+    }
+}
+
+
+static void
 print_ce_info (unsigned                             tab_num,
                const std::string                   &mb_str,
                std::map<std::string, unsigned int> &ce_map)
 {
-    static unsigned ce_num = 0;
-
     const unsigned* const tab = collate_st->get_n_ce_tab (tab_num);
 
     const unsigned first = collate_st->get_first_char_in_n_ce_tab (tab_num);
     const unsigned last  = collate_st->get_last_char_in_n_ce_tab (tab_num);
 
     std::string mbchar;
-
-    const cmap_t* const cmap = get_charmap (LC_COLLATE);
 
     for (unsigned i = first; i <= last; ++i) {
 
@@ -953,43 +990,20 @@ print_ce_info (unsigned                             tab_num,
         if (elem != UINT_MAX) {
 
             if (elem & 0x80000000) {
-                // it's an offset to another table. recursively call
-                // print_ce_info with the new table number.
+                // it's an offset to another table. an element that is
+                // a prefix of a longer one is the leaf of that table,
+                // not an entry in this one; print it, then recursively
+                // call print_ce_info with the new table number.
+                const unsigned leaf =
+                    collate_st->get_n_ce_leaf (elem &~ 0x80000000);
+
+                if (leaf != UINT_MAX)
+                    print_ce (mbchar, leaf, ce_map);
 
                 print_ce_info (elem &~ 0x80000000, mbchar, ce_map);
             }
-            else {
-                // we found the end of the collating element
-                // now we need to do a lookup in the narrow character maps
-                // and find the symbolic names for the characters that make
-                // up this collating element
-
-                // sym is sized at 13 because there will never be more then
-                // 99,999 collating elements
-                char sym [13];
-                std::sprintf (sym, "<RW_CE_%u>", ce_num++);
-
-                ce_map.insert (std::make_pair (sym, elem));
-                std::cout << "collating-element " << sym << " from \"";
-
-                if (0 == cmap)
-                    std::cout << mbchar << "\"\n";
-                else {
-                    unsigned ch = 0;
-
-                    for (unsigned j = 1; j <= mbchar.size (); ++j) {
-                        cmap_entry_t entry;
-
-                        if (   cmap->find_bytes (mbchar.substr (ch, j), entry)
-                            && cmap->find_ucs (entry.ucs, entry)) {
-                            std::cout << sym_name (entry);
-                            ch = j;
-                        }
-                    }
-
-                    std::cout << "\"\n";
-                }
-            }
+            else
+                print_ce (mbchar, elem, ce_map);
         }
     }
 }

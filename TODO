@@ -19,22 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO A collating element that is a prefix of another never yields
-
-=__rw_get_n_ce_offset= and its wide twin in =src/collate.cpp= return
-at the first leaf they meet, so an element whose spelling is a
-prefix of another's, =dz= before =dzs= in =hu_HU=, the Sinhala and
-Malayalam elements of =iso14651_t1_common=, matches the shorter and
-the longer one is never found. The old compiler's trie generator
-hid this by losing the shorter element's page; the new compiler's
-tries hold both.
-
-Fix: longest match in the element lookup, the walk going on past a
-leaf while the next byte continues, the last leaf kept.
-
-Check: the collate oracle over Hungarian words with =dzs= under
-=hu_HU.UTF-8= agrees with glibc.
-
 ** TODO A character outside a code-point collation is dropped silently
 
 Under =codepoint_collation=, =C.UTF-8=, the table has no shared row
@@ -923,6 +907,43 @@ replacement =operator new= that writes to the stream while another
 thread ties it. Won't fix (2026-10-13): the report is expected. The
 rest of the table matches the plain one but for the reports. First run,
 2026-10-13 on aarch64: 419 seconds, 274 programs, 12 non-zero exits.
+
+** TODO The collate image's element tries and their leaf table
+
+=doc/notes/ref-locale.md= does not describe the leaf table of the
+element tries. It must state these facts:
+
+- A trie page is indexed by byte value and written from its first
+  used byte to its last. An entry holds one word: the leaf of a key
+  that ends at that byte, or the number of the next page with the
+  high bit set, never both.
+- The per-page tables are indexed by page number, one entry per
+  page: the offset table, the first-char and last-char tables, and
+  the leaf table.
+- Why the leaf table exists. A key that is a proper prefix of
+  another, =dz= before =dzs= in =hu_HU=, is fully read on arriving at
+  a page whose entry had to be the pointer. That page's word in the
+  leaf table records the shorter key's leaf; it is =UINT_MAX= for the
+  many pages whose path is no element. One path leads to each page,
+  so no two keys collide, and the root's word is always =UINT_MAX=.
+  The walk: the root's entry for =d= points to page D; page D's entry
+  for =z= points to page DZ, since =dzs= continues; page DZ's word in
+  the leaf table is the leaf of =dz=; page DZ's entry for =s= is the
+  leaf of =dzs=.
+- The lookup, =__rw_get_n_ce_offset= and =__rw_get_w_ce_offset= in
+  =src/collate.cpp=, matches the longest prefix. On entering a page
+  it remembers the page's leaf and the cursor when the leaf is set,
+  and goes on. On a miss it returns the remembered leaf with the
+  cursor rewound. An entry leaf ends the walk as the longest.
+- The character tries and the codecvt tries have no leaf table: a
+  character ends a walk. The alternative, a second word per entry,
+  was rejected: it doubles every element page for 26 keys in the
+  corpus.
+
+=doc/notes/plan-localedef-backend.md= overstates what the shared
+builder did in its bullet on prefix elements: the builder kept the
+shorter key and dropped the longer. The leaf table records the
+shorter key's leaf on the page.
 
 ** TODO =ref-characterizations.md= lags the tree by seven probes
 

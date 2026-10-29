@@ -225,6 +225,8 @@ struct __rw_collate_t
     _RWSTD_UINT32_T w_ce_first_char_off;
     _RWSTD_UINT32_T n_ce_last_char_off;
     _RWSTD_UINT32_T w_ce_last_char_off;
+    _RWSTD_UINT32_T n_ce_leaf_tab_off;   // offset to the leaf of each page
+    _RWSTD_UINT32_T w_ce_leaf_tab_off;
 
     _RWSTD_UINT32_T undefined_weight_idx;
 
@@ -292,6 +294,22 @@ struct __rw_collate_t
     _RWSTD_UINT8_T get_last_char_in_w_ce_tab (_RWSTD_UINT32_T tabno) const {
         return *((const _RWSTD_UINT8_T*)this + sizeof *this 
                  + w_ce_last_char_off + tabno);
+    }
+
+    // the leaf of the element whose bytes are the path to page `tabno',
+    // UINT_MAX when no element ends there
+    _RWSTD_UINT32_T get_n_ce_leaf (_RWSTD_UINT32_T tabno) const {
+        return *(const _RWSTD_UINT32_T*)(
+            (_RWSTD_SIZE_T)((const char*)this + sizeof *this
+                            + n_ce_leaf_tab_off
+                            + (tabno * sizeof (_RWSTD_UINT32_T))));
+    }
+
+    _RWSTD_UINT32_T get_w_ce_leaf (_RWSTD_UINT32_T tabno) const {
+        return *(const _RWSTD_UINT32_T*)(
+            (_RWSTD_SIZE_T)((const char*)this + sizeof *this
+                            + w_ce_leaf_tab_off
+                            + (tabno * sizeof (_RWSTD_UINT32_T))));
     }
 
     const _RWSTD_UINT32_T* get_n_tab (_RWSTD_UINT32_T tabno) const {

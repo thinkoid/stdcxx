@@ -265,6 +265,12 @@ __rw_get_w_ce_offset (const __rw_collate_t *impl,
 
         char utf8_enc [_RWSTD_MB_MAX];
 
+        // the longest element read so far that is a prefix of a
+        // longer one, and the character it ends with: a miss further
+        // on falls back to it
+        int            last_leaf = -1;
+        const wchar_t* last_char = *cur_char;
+
         const unsigned int* tab;
         while (*cur_char < end) {
 
@@ -278,23 +284,40 @@ __rw_get_w_ce_offset (const __rw_collate_t *impl,
                 const unsigned c2 = impl->get_last_char_in_w_ce_tab (cur_tab);
 
                 if (UChar (utf8_enc [i]) < c1 || UChar (utf8_enc [i]) > c2)
-                    return -1;
+                    goto miss;
         
                 tab = impl->get_w_ce_tab (cur_tab);
             
                 const unsigned int next_off = tab [UChar (utf8_enc [i]) - c1];
                 if (next_off == _RWSTD_UINT_MAX) {
-                    return -1;
+                    goto miss;
                 }
 
                 if (next_off & 0x80000000) {
                     cur_tab = next_off &~ 0x80000000;
+
+                    // an element ends only with a whole character
+                    if (i + 1 == nbytes) {
+                        const unsigned leaf = impl->get_w_ce_leaf (cur_tab);
+
+                        if (leaf != _RWSTD_UINT_MAX) {
+                            last_leaf = int (leaf);
+                            last_char = *cur_char;
+                        }
+                    }
                     continue;
                 }
 
                 return next_off;
             }
             (*cur_char)++;
+        }
+
+    miss:
+
+        if (-1 != last_leaf) {
+            *cur_char = last_char;
+            return last_leaf;
         }
     }
     return -1;
@@ -350,26 +373,44 @@ __rw_get_n_ce_offset (const __rw_collate_t *impl,
         unsigned int cur_tab = 0;
         const unsigned int* tab;
 
+        // the longest element read so far that is a prefix of a
+        // longer one, and its last byte: a miss further on falls
+        // back to it
+        int         last_leaf = -1;
+        const char* last_char = *cur_char;
+
         while (*cur_char < end ) {
             const unsigned c1 = impl->get_first_char_in_n_ce_tab (cur_tab);
             const unsigned c2 = impl->get_last_char_in_n_ce_tab (cur_tab);
             if (UChar (**cur_char) < c1 || UChar (**cur_char) > c2)
-                return -1;
+                break;
 
             tab = impl->get_n_ce_tab (cur_tab);
 
             unsigned int next_off = tab [UChar (**cur_char) - c1];
             if (next_off == _RWSTD_UINT_MAX) {
-                return -1;
+                break;
             }
 
             if (next_off & 0x80000000) {
                 (*cur_char)++;
                 cur_tab = next_off &~ 0x80000000;
+
+                const unsigned leaf = impl->get_n_ce_leaf (cur_tab);
+
+                if (leaf != _RWSTD_UINT_MAX) {
+                    last_leaf = int (leaf);
+                    last_char = *cur_char - 1;
+                }
             }
             else {
                 return next_off;
             }
+        }
+
+        if (-1 != last_leaf) {
+            *cur_char = last_char;
+            return last_leaf;
         }
     }
     return -1;

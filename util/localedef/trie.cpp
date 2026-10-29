@@ -43,7 +43,8 @@ bytes_before (const std::string &a, const std::string &b)
 
 
 // The page of the keys in [lo, hi), which share their first depth
-// bytes.  The keys being sorted, the ones through one byte are
+// bytes; leaf is the page's own, the leaf of the key spelled by
+// exactly those bytes.  The keys being sorted, the ones through one byte are
 // adjacent and a key that ends at that byte is the first of them.
 // The page is numbered when it is made and filled as its bytes are
 // walked, each subtrie made before the next byte, which is the
@@ -51,8 +52,8 @@ bytes_before (const std::string &a, const std::string &b)
 // reached by its number, never held by reference.
 static void
 build_page (const std::vector<trie_key_t> &keys, std::size_t lo,
-            std::size_t hi, std::size_t depth, const trie_rules_t &rules,
-            std::vector<trie_page_t> &pages)
+            std::size_t hi, std::size_t depth, unsigned leaf,
+            const trie_rules_t &rules, std::vector<trie_page_t> &pages)
 {
     const std::size_t number = pages.size ();
 
@@ -61,6 +62,7 @@ build_page (const std::vector<trie_key_t> &keys, std::size_t lo,
     for (unsigned i = 0; i != 256; ++i)
         page.word [i] = UINT_MAX;
 
+    page.leaf  = leaf;
     page.first = -1;
     page.last  = -1;
 
@@ -95,10 +97,17 @@ build_page (const std::vector<trie_key_t> &keys, std::size_t lo,
             for (std::size_t k = from; k != j && !valued; ++k)
                 valued = UINT_MAX != keys [k].leaf;
 
+            // the key that ends here, if any, goes on as the leaf of
+            // the page of the longer keys, or takes the word when they
+            // get none
+            const unsigned ending = ends ? keys [i].leaf : UINT_MAX;
+
             if (valued) {
                 word = unsigned (pages.size ()) | trie_page_bit;
-                build_page (keys, from, j, depth + 1, rules, pages);
+                build_page (keys, from, j, depth + 1, ending, rules, pages);
             }
+            else
+                word = ending;
         }
 
         if (UINT_MAX != word) {
@@ -129,5 +138,5 @@ build_trie (const std::vector<trie_key_t> &keys, const trie_rules_t &rules,
     while (lo != keys.size () && keys [lo].bytes.empty ())
         ++lo;
 
-    build_page (keys, lo, keys.size (), 0, rules, pages);
+    build_page (keys, lo, keys.size (), 0, UINT_MAX, rules, pages);
 }

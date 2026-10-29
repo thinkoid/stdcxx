@@ -25,10 +25,10 @@
 // LC_COLLATE: the __rw_collate_t header, then the tries of the
 // collating elements, narrow and wide, the weight table, the tries of
 // the characters, narrow and wide, the four tables of page offsets,
-// the first byte of each character page, the first and the last byte
-// of each element page, and the two names, as the old compiler laid
-// them out.  The numbers are the numbering's, collnum.h; this file
-// turns them into bytes.
+// the two tables of element page leaves, the first byte of each
+// character page, the first and the last byte of each element page,
+// and the two names.  The numbers are the numbering's, collnum.h;
+// this file turns them into bytes.
 //
 // The narrow tries are keyed by the charmap's bytes, the wide ones by
 // the UTF-8 form of the wchar_t, which is the code point on every
@@ -43,10 +43,11 @@
 // page's position in words from the first page of its trie.
 //
 // A key that is a prefix of another, one element of two letters at
-// the head of one of three, keeps its leaf, and the longer key is
-// never reached: the runtime returns at the first leaf it meets.  The
-// old generator meant the same and mislaid the longer key's page, so
-// its tables differ there.
+// the head of one of three, dz and dzs in hu_HU, leads to a page like
+// the longer key, and its leaf is that page's leaf, one word per page
+// in the leaf table of its trie: an entry holds one word, the page or
+// a leaf, never both.  The runtime matches the longest element,
+// falling back to the last page leaf it passed.
 
 #include "collnum.h"
 #include "pool.h"
@@ -206,6 +207,16 @@ add_offsets (const std::vector<trie_page_t> &pages, bool to_end, pool_t &pool)
 }
 
 
+// The leaf of each page, UINT_MAX for a page no key ends on arriving
+// at.
+static void
+add_leaves (const std::vector<trie_page_t> &pages, pool_t &pool)
+{
+    for (std::size_t i = 0; i != pages.size (); ++i)
+        pool.add (&pages [i].leaf, sizeof pages [i].leaf);
+}
+
+
 static void
 add_bounds (const std::vector<trie_page_t> &pages, bool to_end, bool last,
             pool_t &pool)
@@ -229,9 +240,11 @@ write_collate (const coll_numbering_t &num, const collate_def_t &def,
                const cmap_t &cmap, const image_names_t &names,
                std::vector<char> &image)
 {
-    // a leaf ends a walk, and a prefix whose keys all lack a leaf
-    // gets no page
-    const trie_rules_t rules = { true, false };
+    // a character ends a walk, an element goes on to the longer
+    // elements it is a prefix of, and a prefix whose keys all lack a
+    // leaf gets no page
+    const trie_rules_t char_rules    = { true, false };
+    const trie_rules_t element_rules = { false, false };
 
     std::vector<trie_key_t>  narrow;
     std::vector<trie_key_t>  wide;
@@ -245,18 +258,18 @@ write_collate (const coll_numbering_t &num, const collate_def_t &def,
     element_keys (num, def, cmap, narrow, wide);
 
     if (!narrow.empty ())
-        build_trie (narrow, rules, n_ce);
+        build_trie (narrow, element_rules, n_ce);
 
     if (!wide.empty ())
-        build_trie (wide, rules, w_ce);
+        build_trie (wide, element_rules, w_ce);
 
     narrow.clear ();
     wide.clear ();
 
     character_keys (num, cmap, narrow, wide);
 
-    build_trie (narrow, rules, n_char);
-    build_trie (wide, rules, w_char);
+    build_trie (narrow, char_rules, n_char);
+    build_trie (wide, char_rules, w_char);
 
     const unsigned word = sizeof (unsigned);
 
@@ -280,8 +293,12 @@ write_collate (const coll_numbering_t &num, const collate_def_t &def,
         hdr.w_char_off_tab_off + unsigned (w_char.size ()) * word;
     hdr.w_ce_off_tab_off =
         hdr.n_ce_off_tab_off + unsigned (n_ce.size ()) * word;
-    hdr.n_char_first_char_off =
+    hdr.n_ce_leaf_tab_off =
         hdr.w_ce_off_tab_off + unsigned (w_ce.size ()) * word;
+    hdr.w_ce_leaf_tab_off =
+        hdr.n_ce_leaf_tab_off + unsigned (n_ce.size ()) * word;
+    hdr.n_char_first_char_off =
+        hdr.w_ce_leaf_tab_off + unsigned (w_ce.size ()) * word;
     hdr.w_char_first_char_off =
         hdr.n_char_first_char_off + unsigned (n_char.size ());
     hdr.n_ce_first_char_off =
@@ -330,6 +347,10 @@ write_collate (const coll_numbering_t &num, const collate_def_t &def,
     add_offsets (w_char, true, pool);
     add_offsets (n_ce, false, pool);
     add_offsets (w_ce, false, pool);
+
+    // words, so before the bytes of the bounds
+    add_leaves (n_ce, pool);
+    add_leaves (w_ce, pool);
 
     add_bounds (n_char, true, false, pool);
     add_bounds (w_char, true, false, pool);
