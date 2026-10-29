@@ -243,14 +243,14 @@ so stale sources need not reach every =std::locale= a program
 constructs. The old compiler could not read the current sources;
 its replacement, the entry above, reads them.
 
-Fix: after the new compiler. glibc 2.44's 371 definitions and 233
-charmaps (shipped gzipped; the compiler reads plain files) into
-=etc/nls=, the shared tables, =i18n=, the transliteration and
-collation templates with them; its =SUPPORTED= in place of =gen_list=
-(=etc/config/GNUmakefile.bin= and =tests/src/locale.cpp= read the
-two columns of =gen_list= and move =.euro= to =@euro=; the test
-build compiles every locale the list names, 502 against 165, so the
-build is measured); the legacy names =iw_IL=, =no_NO=, =sr_YU= and
+Fix: =doc/notes/plan-locale-sources.md=. glibc 2.44's 371
+definitions and 233 charmaps (shipped gzipped; the compiler reads
+plain files) into =etc/nls=, the shared tables, =i18n=, the
+transliteration and collation templates with them; its =SUPPORTED=
+in place of =gen_list= (=etc/config/GNUmakefile.bin= reads the two
+columns of =gen_list= and moves =.euro= to =@euro=; the test build
+compiles every locale the list names, 502 against 165, so the build
+is measured); the legacy names =iw_IL=, =no_NO=, =sr_YU= and
 =sr_YU.cyrillic= kept through an explicit mapping. Then the
 databases regenerated and the decoded facet values compared with the
 C library through =bin/oracle= and with the glibc source baseline,
@@ -417,6 +417,39 @@ make the two agree.
 
 Check: a charmap with one character above U+10FFFF reads, and the
 character is found by name, by code point and by bytes alike.
+
+** TODO =localedef= writes the shared files in place
+
+The shared =LC_CTYPE= file of a charmap and the charmap's codecvt
+database are written beside the locale directories by the first
+locale to need them: =share_ctype= and =share_codecvt= in
+=util/localedef/ldef.cpp= =stat= the file and write it when absent.
+Two locales of one charmap built at once, as =make -j locales=
+builds them, both write. Every writer writes the same bytes, so the
+file is whole once every writer is done; a reader that opens it
+between a truncation and the end of a write sees a short file.
+
+Fix: =write_file= writes to a temporary name in the directory and
+renames it over the final name; the first rename wins and no reader
+sees a partial file. The locale's own files take the same path at no
+cost.
+
+Check: =make -j16 locales= twice into two directories and =make
+locales= once, the three trees byte-identical; a =localedef= run
+killed mid-write leaves no file under the final name.
+
+** TODO =etc/nls/posix= is read by nothing
+
+=etc/nls/posix= holds a second, smaller set of definitions and
+charmaps (81 and 594 files, =C.src=, =ascii.cm=, Perforce =$Id=
+lines) beside =etc/nls/src= and =etc/nls/charmaps=. No makefile,
+script, test or document names it; it came with the 2005 import and
+was never wired.
+
+Fix: remove the directory, or name what it was for.
+
+Check: =git grep posix/= finds no reference; the build and the suite
+are unchanged.
 
 * EDG porting
 
