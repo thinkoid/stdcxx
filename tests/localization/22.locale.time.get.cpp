@@ -1464,7 +1464,9 @@ make_LC_TIME ()
     // 70 symbols, more than the 64 bits of one size_t that once held
     // the names, short of the 100 that localedef allows; time_get
     // reads plain digits only for a value that has no symbol, or for
-    // 0 when its symbol is empty, so %OC on 70..99 reads digits
+    // 0 when its symbol is empty, so %OC on 70..99 reads digits;
+    // the symbol for 40 begins the one for 41, as lzh_TW's 20 begins
+    // its 21 through 29
     const char* const alt_digits[] = {
         "",      "1st",  "2nd",  "3rd",  "4th",
          "5th",  "6th",  "7th",  "8th",  "9th",
@@ -1474,7 +1476,7 @@ make_LC_TIME ()
         "25th", "26th", "27th", "28th", "29th",
         "30th", "31st", "32nd", "33rd", "34th",
         "35th", "36th", "37th", "38th", "39th",
-        "40th", "41st", "42nd", "43rd", "44th",
+        "forty", "forty-one", "42nd", "43rd", "44th",
         "45th", "46th", "47th", "48th", "49th",
         "50th", "51st", "52nd", "53rd", "54th",
         "55th", "56th", "57th", "58th", "59th",
@@ -1650,6 +1652,14 @@ void test_user (charT, const char *cname, const char *locname)
     // names past the 64th, more than one size_t has bits for
     TEST (T (0, 0, 0, 0, 0,  4600), "65th", 4, "%OC", 0, Good);
     TEST (T (0, 0, 0, 0, 0,  5000), "69th", 4, "%OC", 0, Good);
+    // a name that a later, longer name begins with, complete when the
+    // longer one dies on the next character, which stays unread
+    TEST (T (0, 0, 0, 0, 0,  2100),     "fortyX", 5, "%OC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,  2200), "forty-oneX", 9, "%OC", 0, Good);
+    // the longer name dies a character later: taking the shorter one
+    // would need the consumed '-' put back, which an input iterator
+    // cannot do
+    TEST (T (0, 0, 0, 0, 0,     0),    "forty-X", 6, "%OC", 0, Fail);
     // digits past the list of names
     TEST (T (0, 0, 0, 0, 0,  5100), "70th", 2, "%OC", 0, Good);
     TEST (T (0, 0, 0, 0, 0,  6100),   "80", 2, "%OC", 0, Eof);

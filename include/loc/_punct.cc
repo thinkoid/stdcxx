@@ -76,6 +76,10 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
     for (; (   (__bits [0] | __bits [1] | __bits [2] | __bits [3])
             || __num != __badval) && !__err; ++__it, ++__pos) {
 
+        // a `name' complete before the current char, forgotten
+        // below when the char does not continue it
+        _RWSTD_SIZE_T __done = __badval;
+
         if (__it == __end) {
             __err |= _RWSTD_IOS_EOFBIT;
             __ch   = _CharT ();
@@ -132,6 +136,14 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
                 }
                 else {
                     if (1 == __nmatch) {
+                        // no `name' matches the current char; take the
+                        // one complete before it, leaving the char unread
+                        // (a longer `name' that dies a char or more later
+                        // has consumed chars that an input iterator
+                        // cannot put back, so that input still fails)
+                        if (__badval == __inx)
+                            __inx = __done;
+
                         if (__badval == __inx && __badval == __num)
                             return __it;
                         goto __endloop;
@@ -143,7 +155,11 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
                             // ...and we're at eof, return successfully
                             return __it;
                         }
-                        // otherwise forget the match
+                        // otherwise forget the match, remembering
+                        // a complete one
+                        if (__pos == __sizes [__k])
+                            __done = __k;
+
                         __inx = __badval;
                     }
 
