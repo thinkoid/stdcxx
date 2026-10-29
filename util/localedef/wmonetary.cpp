@@ -56,6 +56,16 @@ small_int (const field_t<int> &field)
 }
 
 
+// One of the six international small integers: an unset keyword takes
+// its domestic counterpart's value, CHAR_MAX when that is unset too,
+// as glibc's monetary_finish() gives it; a -1 as written stays CHAR_MAX.
+static char
+small_int (const field_t<int> &field, const field_t<int> &domestic)
+{
+    return field.set ? small_int (field) : small_int (domestic);
+}
+
+
 // The format array of the old compiler's create_format(): the order
 // of sign, symbol and value from sign_posn and cs_precedes, then the
 // place of the space from sep_by_space.  A sign_posn of CHAR_MAX, no
@@ -164,17 +174,23 @@ write_monetary (const locale_def_t &def, const cmap_t &cmap,
     hdr.frac_digits [0]    = small_int (mon.frac_digits);
     hdr.frac_digits [1]    = small_int (mon.int_frac_digits);
     hdr.p_cs_precedes [0]  = small_int (mon.p_cs_precedes);
-    hdr.p_cs_precedes [1]  = small_int (mon.int_p_cs_precedes);
+    hdr.p_cs_precedes [1]  = small_int (mon.int_p_cs_precedes,
+                                        mon.p_cs_precedes);
     hdr.p_sep_by_space [0] = small_int (mon.p_sep_by_space);
-    hdr.p_sep_by_space [1] = small_int (mon.int_p_sep_by_space);
+    hdr.p_sep_by_space [1] = small_int (mon.int_p_sep_by_space,
+                                        mon.p_sep_by_space);
     hdr.n_cs_precedes [0]  = small_int (mon.n_cs_precedes);
-    hdr.n_cs_precedes [1]  = small_int (mon.int_n_cs_precedes);
+    hdr.n_cs_precedes [1]  = small_int (mon.int_n_cs_precedes,
+                                        mon.n_cs_precedes);
     hdr.n_sep_by_space [0] = small_int (mon.n_sep_by_space);
-    hdr.n_sep_by_space [1] = small_int (mon.int_n_sep_by_space);
+    hdr.n_sep_by_space [1] = small_int (mon.int_n_sep_by_space,
+                                        mon.n_sep_by_space);
     hdr.p_sign_posn [0]    = small_int (mon.p_sign_posn);
-    hdr.p_sign_posn [1]    = small_int (mon.int_p_sign_posn);
+    hdr.p_sign_posn [1]    = small_int (mon.int_p_sign_posn,
+                                        mon.p_sign_posn);
     hdr.n_sign_posn [0]    = small_int (mon.n_sign_posn);
-    hdr.n_sign_posn [1]    = small_int (mon.int_n_sign_posn);
+    hdr.n_sign_posn [1]    = small_int (mon.int_n_sign_posn,
+                                        mon.n_sign_posn);
 
     for (int intl = 0; intl != 2; ++intl) {
         format_of (hdr.pos_format [intl], hdr.p_sign_posn [intl],
