@@ -19,23 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO International =money_put= writes two spaces after the currency code
-
-=money_put<char>= with =intl= true and =showbase= writes
-=-USD  1,234.56= for -123456 under =en_US.UTF-8=: the international
-=curr_symbol= is ="USD "=, the fourth character of C's
-=int_curr_symbol= being the separator, and the pattern {sign, symbol,
-space, value} adds a space of its own. glibc's =strfmon("%i")= writes
-one space. A hypothesis, seen while checking the international
-formats, not a finding: the standard may want the facet to drop the
-code's trailing space, or the pattern's space to stand for it.
-
-Fix: open, after reading 22.2.6.3.2 on =curr_symbol= and 22.2.6.2.2
-on the =space= element.
-
-Check: the bytes =money_put= writes for the case above against the
-reading; a pin in =22.locale.money.put= either way.
-
 ** TODO The wide collate facet compares through the C library by default
 
 =collate_byname<wchar_t>::do_compare= in =src/collate.cpp= goes to

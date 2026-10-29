@@ -763,6 +763,35 @@ void ldbl_test (charT)
 
     TEST (T, -1014, "~1,01.4", ' ', 0, 1, -1, FMT ("~2"), "\2");
     TEST (T, -1015, "~1,01.5", ' ', 0, 1, -1, FMT (",3"), "\2");
+
+    // 22.2.6.3, p2: where `symbol' appears, the sequence of characters
+    // returned by curr_symbol() is permitted; the value `space'
+    // indicates that at least one space is required at that position.
+    // Footnote 242: for international instantiations the symbol is
+    // always four characters long, usually three letters and a space.
+    // Both spaces are written, the symbol's and the pattern's; the
+    // C library's strfmon() writes one for the same data.
+
+    static const charT curr_symbol3 [8] = { 'U', 'S', 'D', ' ', '\0' };
+    Punct<charT, false>::curr_symbol_   = curr_symbol3;
+
+    static const charT signs3[][8] = {
+        // negative            positive
+        { '-', '\0' }, { '\0' }
+    };
+
+    Punct<charT, false>::negative_sign_ = signs3 [0];
+    Punct<charT, false>::positive_sign_ = signs3 [1];
+    Punct<charT, false>::thousands_sep_ = ',';
+    Punct<charT, false>::decimal_point_ = '.';
+
+    f = "\3\2\1\4";   // { sign, symbol, space, value }
+
+    TEST (T, -123456, "-USD  1,234.56", ' ', Showbase, 2, 0, f, "\3");
+    TEST (T, +123456,  "USD  1,234.56", ' ', Showbase, 2, 0, f, "\3");
+
+    // the one space is the symbol's
+    TEST (T, -123456,  "-USD 1,234.56", ' ', Showbase, 2, 0, "\3\2\4\0", "\3");
 }
 
 /**************************************************************************/
