@@ -24,6 +24,9 @@ everything the revival has not changed. Section 8.3.4's function
 macros, `_RWSTD_NO_<F>`, `_RWSTD_NO_<F>_IN_LIBC` and `_IN_LIBM`, are
 gone since a44256a6; `doc/notes/history-libc-declarations.md` records
 what they did.
+Section 4.3's sources under `etc/nls` are glibc's current
+`localedata` since cb1f2768; `doc/notes/ref-locale.md` chapter 6
+describes them.
 
 ## Status
 

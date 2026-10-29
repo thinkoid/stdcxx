@@ -39,9 +39,11 @@ name. Nothing else reads `gen_list`.
 `tests/src/locale.cpp` reads `etc/nls/countries`, `languages` and
 `encodings`, maps between the host's locale names and canonical
 ones. The tests compile a handful of definitions by name: `de_DE`,
-`fr_FR`, `ja_JP`, `sv_SE`, `th_TH`, `hr_HR`, with their charmaps; all
-exist in glibc's set. `etc/nls/posix` is a second, smaller set that
-nothing references since the 2005 import.
+`fr_FR`, `ja_JP`, `sv_SE`, `th_TH`, `hr_HR`, with their charmaps. The
+definitions all exist in glibc's set; one charmap does not under its
+name: `22.locale.codecvt` names `Shift_JIS`, glibc's file is
+`SHIFT_JIS`, and the lookup is case sensitive. `etc/nls/posix` is a
+second, smaller set that nothing references since the 2005 import.
 
 The installed package is glibc 2.44+r50+g1848099f063e-1: `localedata`
 as of glibc commit 1848099f063e. `/usr/share/i18n/SUPPORTED` lists
@@ -164,3 +166,57 @@ refreshed `etc/nls/src` with its charmap, two builds byte-identical;
 the locale tests pass against their pins, re-pinned where the data
 moved; the decoded currency, numeric and date values of the shared
 definitions match the glibc sources they come from.
+
+## 5. Result
+
+Steps 1 to 4 are in, 2026-10-29.
+
+- Step 1, cb1f2768, the import. `etc/nls/src` holds glibc's 371
+  definitions and `etc/nls/charmaps` its 233 charmaps, uncompressed,
+  byte for byte from glibc 2.44+r50+g1848099f063e-1. `SUPPORTED`
+  replaces `gen_list`. The four legacy names came in first as stub
+  definitions copying their successors, listed in `etc/nls/legacy`.
+  A fresh 15D build compiled the 502 and the four stubs in 4 min
+  14 s under `-j16`. 52a86884 dropped the stubs and `legacy`; the
+  build reads `SUPPORTED` alone.
+- Step 2, 8ebe1461, the suite. Two rows of the 15D suite moved, and
+  both fixtures now follow the data. `22.locale.codecvt` named its
+  charmap `Shift_JIS`, glibc's `SHIFT_JIS`; the database did not
+  build and 113 assertions were skipped. `22.locale.collate` failed 26
+  assertions: glibc's `sv_SE` sorts W as a letter of its own after
+  V, where 2.2 sorted the W words among the V words. With the two
+  fixtures corrected, the 15D table is on its pin with zero
+  failures, and nothing was re-pinned.
+- Step 2, 68d455e0, the seeds. The first locale of each codeset is
+  built alone, and the other locales of the codeset start when it
+  is done. On a fresh 15D the seeded build of the 502 takes 4 min
+  36 s under `-j16` and is byte-identical to the unseeded one.
+- Step 3, b68897f4, the oracle. `bin/oracle/scalar.cpp` compares
+  `numpunct`, `moneypunct` and the names and formats of `time_put`
+  with `localeconv`, `strftime` and `wcsftime` under `setlocale`.
+  Over the 502, against the 15D build, in 3 s: 2102 disagreements
+  in 481 locales, 200 values the facet cannot hold, 21 locales
+  clean. No name, narrow value or domestic pattern disagrees. The
+  disagreements fall in four classes:
+  - 1912 are the international money formats of 478 locales, which
+    `localedef` leaves unset where glibc copies the domestic ones;
+  - 158 are wide currency symbols and separators under eight-bit
+    charmaps, where the reference is glibc's narrow
+    transliteration;
+  - 16 are `%OC` and `%Op`, glibc extensions `time_put` does not
+    take;
+  - 16 come from an empty `t_fmt_ampm`, which glibc's `%r` replaces
+    with `%I:%M:%S %p`.
+
+  The three classes in the library are queue entries, with a fourth
+  for two pattern-table comments the mapping found wrong.
+- Step 4, the documentation. `ref-locale.md` describes the sources
+  and the refresh. `analysis-locale-sources.md` closes on the
+  import. The queue entry on the 2.2 sources leaves. `README.md`
+  names no locale source and is unchanged.
+
+- The serial build against the parallel one. `make locales` in one
+  process into a second directory took 59 min 48 s on the 15D build,
+  59 CPU-minutes, and the 502 locales, the codecvt databases and the
+  shared ctype files are byte-identical to the seeded parallel
+  build's.

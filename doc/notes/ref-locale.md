@@ -200,7 +200,7 @@ central repository contention, while constructing by name and changing
 the global locale converge on shared machinery. Lazy facet lookup
 avoids that machinery after a slot is populated, but **the repository
 lock is not a lock around subsequent reads and writes in the body or
-facet**. Chapter 6 identifies those separate boundaries.
+facet**. Chapter 7 identifies those separate boundaries.
 
 ## 5. Where the locale data comes from
 
@@ -225,7 +225,61 @@ the C locale use `__rw_setlocale` to lock, save, switch and restore it.
 This process-wide state is distinct from the C++ collection of facets;
 the library's lock coordinates its own participating calls.
 
-## 6. The threading picture
+## 6. The sources under `etc/nls`
+
+The databases are compiled from glibc's locale sources.
+`etc/nls/src` and `etc/nls/charmaps` hold the `localedata` of the
+glibc package 2.44+r50+g1848099f063e-1, glibc commit 1848099f063e:
+371 definitions and 233 charmaps. The files are glibc's, byte for
+byte, without a header of the tree's, so a refresh is a copy and a
+diff. They keep glibc's names; a variant with a modifier is a file
+of its own, `de_DE@euro`, `sr_RS@latin`. The package ships the
+charmaps gzipped; the tree holds them uncompressed, since
+`localedef` reads plain files.
+
+`etc/nls/SUPPORTED` is the list of the locales the build compiles,
+the package's `/usr/share/i18n/SUPPORTED` as it is: 502 lines, each
+a locale's name and its charmap. `etc/config/GNUmakefile.bin`
+composes the locale's name from the two columns: the name less any
+codeset, a dot, the charmap, then the modifier.
+
+- `aa_DJ ISO-8859-1` is `aa_DJ.ISO-8859-1`.
+- `aa_DJ.UTF-8 UTF-8` is `aa_DJ.UTF-8`.
+- `de_DE@euro ISO-8859-15` is `de_DE.ISO-8859-15@euro`.
+
+The composed name is the locale's database directory under the
+build's `nls`. The rule for a locale takes the definition and the
+charmap back from it: the definition is the name less its codeset,
+`de_DE@euro`, a file in `etc/nls/src`. The first locale of each
+codeset is built alone and writes the codeset's shared files; the
+other locales of the codeset start under `-j` when it is done.
+
+`countries`, `languages` and `encodings` are the tree's own: the
+test driver reads them to map the host's locale names to canonical
+ones. `posix` is an older set of definitions that nothing reads;
+`TODO` has the entry.
+
+The refresh, from the top of the tree, after an upgrade of the
+glibc package:
+
+```sh
+rm etc/nls/src/* etc/nls/charmaps/*
+cp /usr/share/i18n/locales/* etc/nls/src/
+for f in /usr/share/i18n/charmaps/*.gz; do
+    gzip -dc "$f" > etc/nls/charmaps/"$(basename "$f" .gz)"
+done
+cp /usr/share/i18n/SUPPORTED etc/nls/
+```
+
+Then `make locales` in the build's `bin` directory and the suite
+against its pin. glibc's own `localedata/SUPPORTED` is a makefile
+fragment, one `name/charmap \` per line; the installed package
+renders it to the two columns the build reads. A refresh from a
+glibc source tree converts the list first.
+`doc/notes/plan-locale-sources.md` records the first import and the
+two test fixtures it moved.
+
+## 7. The threading picture
 
 The important boundaries in a reentrant build are:
 
@@ -254,7 +308,7 @@ A lock inside initialization alone does not establish that another
 thread can safely read the initialized state: the data-loading slow
 path always took a mutex, and its unlocked checks were the problem.
 
-## 7. Where to look
+## 8. Where to look
 
 | subject | source |
 |---|---|
@@ -266,7 +320,8 @@ path always took a mutex, and its unlocked checks were the problem.
 | A concrete lazy cache | `include/loc/_numpunct.h`, `src/punct.cpp` |
 | Global and classic locales | `src/locale_global.cpp`, `src/locale_classic.cpp` |
 | C locale coordination and file mapping | `src/setlocale.h`, `src/setlocale.cpp`, `src/mman.cpp` |
-| Database production and layouts | `util/localedef.cpp`, `include/loc/_localedef.h` |
+| Locale sources and the list the build compiles | `etc/nls`, `etc/config/GNUmakefile.bin` |
+| Database production and layouts | `util/localedef/`, `include/loc/_localedef.h` |
 
 Written by OpenAI LeChuck.
 Brought up to date with the tree of 2026-09-27 by Claude.

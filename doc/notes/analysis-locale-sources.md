@@ -229,3 +229,17 @@ syr, szl_PL, ta_LK, tcy_IN, the_NP, tig_ER, tk_TM, tn_ZA, to_TO, tok,
 tpi_PG, tr_CY, ts_ZA, tt_RU@iqtelif, ug_CN, unm_US, ur_IN,
 uz_UZ@cyrillic, ve_ZA, wa_BE, wa_BE@euro, wae_CH, wal_ET, wo_SN,
 xh_ZA, yo_NG, yue_HK, yuw_PG, zgh_MA, zu_ZA.
+
+## 9. Outcome
+
+cb1f2768 replaced the sources. `etc/nls/src` and `etc/nls/charmaps`
+hold the `localedata` of the installed package, glibc
+2.44+r50+g1848099f063e-1, which is glibc commit 1848099f063e, byte
+for byte. That is a different snapshot from the 60a2ae4098 this
+survey compared with. The 139 shared definitions carry glibc's
+values now; the counts of chapters 3 and 4 describe the tree before
+the import. The four legacy names are gone, 52a86884.
+`doc/notes/plan-locale-sources.md` records the steps and their
+checks. `bin/oracle/scalar.cpp` compares the decoded numeric,
+monetary and time values with the C library's; the plan's chapter 5
+has its first run.
