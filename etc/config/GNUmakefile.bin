@@ -43,7 +43,7 @@ LOCDIR = $(BUILDDIR)/nls
 # have to carry the path with them in the rule target.
 VPATH += $(LOCDIR)
 
-# list of locales to build, read from SUPPORTED and then legacy
+# list of locales to build, read from SUPPORTED
 # first drop the codeset a locale name carries (it is the charmap's)
 # then compose a full name in the form
 #   <locale name>.<codeset>[@<modifier>]
@@ -51,7 +51,7 @@ VPATH += $(LOCDIR)
 LOCALES :=                                                                 \
     $(shell sed -e s:"^ *\([^ .@]*\)\.[^ @]*":"\1":g                       \
                 -e s:"^\([^ .@]*\)\([^ ]*\)  *\([^ ]*\) *":"\1\.\3\2":g    \
-                $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy)
+                $(NLSDIR)/SUPPORTED)
 
 ## Filter from RUNTARGET only the scripts
 RUNTARGET := $(filter %.sh,$(RUNTARGET))
@@ -108,7 +108,7 @@ gencat: gencat.o
 locales: localedef $(LOCALES)
 
 # the rule builds the scripts that are run by the runall script
-$(RUNTARGET): $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy
+$(RUNTARGET): $(NLSDIR)/SUPPORTED
 	@(echo "making $@...";                                               \
           echo "#!/bin/sh" > $@;                                             \
           locname=`echo $@ | sed "s:^\./::g;s:\.sh$$::g"`;                   \
@@ -121,7 +121,7 @@ $(RUNTARGET): $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy
 
 # the rule presents as dependencies the source files corresponding
 # to that locale; it is run once for each entry in LOCALES
-$(LOCALES): $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy
+$(LOCALES): $(NLSDIR)/SUPPORTED
 	@(lname=`echo $@ | sed "s:\([^.]*\)\.\([^@]*\)\(.*\):\1\3:"`;        \
           cname=`echo $@ | sed "s:\([^.]*\)\.\([^@]*\)\(.*\):\2:"`;          \
           echo "./localedef -w -c -f $(NLSDIR)/charmaps/$$cname"             \
@@ -129,7 +129,7 @@ $(LOCALES): $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy
           ./localedef -w -c -f $(NLSDIR)/charmaps/$$cname                    \
                       -i $(NLSDIR)/src/$$lname $(LOCDIR)/$@)
 
-$(DEPENDDIR)/localedb.d: $(DEPENDDIR) $(NLSDIR)/SUPPORTED $(NLSDIR)/legacy
+$(DEPENDDIR)/localedb.d: $(DEPENDDIR) $(NLSDIR)/SUPPORTED
 	@(echo "# generated locale dependencies" > $@;                      \
           for f in ""$(LOCALES); do                                         \
               lname=`echo $$f |                                             \

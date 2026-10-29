@@ -201,7 +201,7 @@ in place of =gen_list= (=etc/config/GNUmakefile.bin= reads the two
 columns of =gen_list= and moves =.euro= to =@euro=; the test build
 compiles every locale the list names, 502 against 165, so the build
 is measured); the legacy names =iw_IL=, =no_NO=, =sr_YU= and
-=sr_YU.cyrillic= kept through an explicit mapping. Then the
+=sr_YU.cyrillic= go, glibc corrected them. Then the
 databases regenerated and the decoded facet values compared with the
 C library through =bin/oracle= and with the glibc source baseline,
 the currency, numeric and date repairs staged separately.

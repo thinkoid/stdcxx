@@ -13,9 +13,8 @@ The 371 definitions and the 233 charmaps of the installed glibc
 package replace the 179 and 196 under `etc/nls`, verbatim, under
 glibc's own file names. Its `SUPPORTED` replaces `gen_list` as the
 list of the locales the build compiles; the build reads its two
-columns. The four names glibc no longer has stay as stub definitions
-that copy their successors, listed in a file of their own. The
-build compiles 506 locales where it compiled 165. Four steps, one
+columns. The four names glibc no longer has go. The build compiles
+502 locales where it compiled 165. Four steps, one
 check each: the import and a fresh build, the suite and a second
 build, a scalar oracle against the C library, the documentation.
 
@@ -99,12 +98,10 @@ tree names them but the characterization's list of host locale
 names, which is not about these sources. The queue entry, in
 7fc0bf66, keeps them through an explicit mapping.
 
-Decision: four stub definitions under `etc/nls/src`, named `iw_IL`,
-`no_NO`, `sr_YU` and `sr_YU@cyrillic`, each category a `copy` of the
-successor, under the tree's header; listed in `etc/nls/legacy`, two
-columns as `SUPPORTED`, which the build reads after it. The
-successors' charmaps: `ISO-8859-8`, `ISO-8859-1`, `ISO-8859-2`,
-`ISO-8859-5`, the ones `gen_list` gave them.
+Decision: dropped. Yugoslavia is gone, and the other three are
+2.2's spellings of locales glibc has since corrected; a stub that
+copies the successor keeps a wrong name alive. The queue entry's
+mapping is withdrawn with this plan.
 
 ### 2.5 The build under `-j`
 
@@ -115,7 +112,7 @@ charmap built at once both write. Every writer writes the same
 bytes, so the files are whole once every writer is done, and the
 tests read them after `make locales` returns; the write is not
 atomic all the same. The debug compiler takes 12 s on a UTF-8
-definition and 3 s on an eight-bit one; the 506 take about 70
+definition and 3 s on an eight-bit one; the 502 take about 70
 minutes in one process.
 
 Decision: the build runs under `-j`; step 2 builds the set once
@@ -131,9 +128,9 @@ of its own.
 
 1. The import. `etc/nls/src` and `etc/nls/charmaps` emptied and
    refilled from the package, the charmaps uncompressed; `SUPPORTED`
-   and `legacy` in, `gen_list` out; the four stubs; the build reads
-   the two lists. Check: a fresh 15D build, `make -j16 locales`
-   builds the 506 locales and the 30 codecvt databases, every
+   in, `gen_list` out; the build reads it. Check: a fresh 15D build,
+   `make -j16 locales` builds the 502 locales and the 30 codecvt
+   databases, every
    `localedef` exits 0, the time recorded.
 2. The suite and a second build. Check: the 15D suite against its
    pin; every row that moves is explained by the source difference
