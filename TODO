@@ -19,24 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =%Oy= carries no century and =%C= never combines with =%y=
-
-The alternative-digit path of =time_get= stores =%Oy='s value as
-read, so "廿六" is =tm_year= 26, the year 1926; the POSIX pivot
-(69..99 -> 19xx, 00..68 -> 20xx) runs only on the ordinary-digit
-=%y= path. A =%C= parsed before or after never combines: =%y=
-overwrites =tm_year=. XSH =strptime= says =%C= with =%y= gives the
-year, =%y= alone pivots. =lzh_TW='s =%x= reads 1926 in the wide
-facet since the matcher keeps a complete prefix name.
-
-Fix: apply the pivot on the =%Oy= path too, and combine a parsed
-century with a parsed two-digit year in =include/loc/_time_get.cc=
-where the format carries both.
-
-Check: =22.locale.time.get= rows for =%Oy= alone and for =%C%y= /
-=%OC%Oy= in both orders; the round trip's =lzh_TW= =%x= reading
-2026.
-
 ** TODO =%p= after =%OI= or =%OH= sets the hour one too high
 
 =time_get='s =%p= adds =12 * inx + 1= to =tm_hour=, which assumes the
@@ -57,6 +39,28 @@ for the =%p= after =%H= rule before choosing.
 Check: =22.locale.time.get= rows for "%OI:%OM:%OS %p" and
 "%OH:%OM:%OS %p" at 09:05:09 AM and PM; the round trip's =%X= under
 the three locales at the right hour.
+
+** TODO The numeric conversions of =time_get= read every digit
+
+=do_get= in =include/loc/_time_get.cc= reads digits until a
+non-digit, with no field width: =%C= on "1926" reads 1926 and fails
+the century's bound, so "%C%y" on "1926" cannot parse, and =%y= on
+"2026" reads a full year, an extension of the library, which the
+format walk cannot tell from two digits ("%C %y" on "19 2026" gives
+1926: the century wins). glibc's =strptime= reads at most two digits
+for =%C=, =%d=, =%e=, =%H=, =%I=, =%m=, =%M=, =%S=, =%U=, =%W=, =%y=,
+three for =%j= and four for =%Y=, so adjacent conversions separate
+themselves. Seen while pinning =%C= with =%y=: the rows had to take
+separators.
+
+Fix: a digit count per conversion beside the bounds in
+=__rw_get_timepunct='s data (=src/time_put.cpp=), honoured by the
+digit loop of =do_get=; a decision on =%y= above 99, which XSH does
+not allow and the library takes as a full year.
+
+Check: =22.locale.time.get= rows "%C%y" on "1926" -> 26, "%m%d%y" on
+"041426" -> April 14 2026, "%Y%m%d" on "20261028"; the existing
+"%C" on "100" row (Fail now) re-read.
 
 ** TODO The narrow facet matches multibyte names byte by byte
 

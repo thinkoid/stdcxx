@@ -182,6 +182,17 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
 
     char __fmt [] = { '\0', '\0' };
 
+    // the century of a %C or %OC and the two digits of a %y, %Oy or
+    // the %y of %D, read back from tm_year as each is parsed, -1 until
+    // then; the two combine at the end of the pattern whatever their
+    // order, as in the C library's strptime. A %Y is a full year: it
+    // drops the two digits parsed before it, and a %C with a %Y and no
+    // %y after it leaves the value of %Y. Each pattern combines only
+    // what it parsed itself: the pattern of a %x or %c combines its own
+    // %OC%Oy, and a %C outside a %x or %c does not reach a %y inside it
+    int __century = -1;
+    int __yy      = -1;
+
     for (; __pat != __pat_end; ++__pat) {
 
         if (__errtmp) {
@@ -201,6 +212,16 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
             else {
                 __it = do_get (__it, __end, __fl, __errtmp, &__tmp, __ch,
                                __fmt [1]);
+
+                if (!(__errtmp & ~__rw::__rw_eofbit) && 'E' != __fmt [1]) {
+                    if ('C' == __ch)
+                        __century = (__tmp.tm_year + 1900) / 100;
+                    else if ('y' == __ch || 'D' == __ch)
+                        __yy = (__tmp.tm_year + 1900) % 100;
+                    else if ('Y' == __ch)
+                        __yy = -1;
+                }
+
                 __fmt [0] = __fmt [1] = '\0';   // reset
             }
         }
@@ -223,9 +244,16 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
         }
     }
 
-    // store value only on success
-    if (!(__errtmp & ~__rw::__rw_eofbit) && __tmb)
-        *__tmb = __tmp;
+    if (!(__errtmp & ~__rw::__rw_eofbit)) {
+
+        // XSH strptime: %C is the century, %y the year within it
+        if (0 <= __century && 0 <= __yy)
+            __tmp.tm_year = __century * 100 + __yy - 1900;
+
+        // store value only on success
+        if (__tmb)
+            *__tmb = __tmp;
+    }
 
     __err |= __errtmp;
 
@@ -378,8 +406,17 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
             *__pmem = *__pmem * __fac + __adj;
 
-            const int __lob = __data [2];   // lower bound on valid input
-            const int __hib = __data [3];   // upper bound on valid input
+            int __lob = __data [2];   // lower bound on valid input
+            int __hib = __data [3];   // upper bound on valid input
+
+            if ('y' == __fmt && *__pmem < 100) {
+                // %Oy pivots as %y does below
+                __lob =  69;
+                __hib = 168;
+
+                if (*__pmem < 69)
+                    *__pmem += 100;
+            }
 
             // validate input value
             if (*__pmem < __lob || *__pmem > __hib)

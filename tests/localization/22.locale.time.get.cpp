@@ -840,6 +840,19 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0, 0, 0, -1900),     " 0", 2, " %Y", 0, Eof);
     TEST (T (0, 0, 0, 0, 0,    99), "\t1999", 5, " %Y", 0, Eof);
 
+    // %C and %y combine in either order: the century and the year
+    // within it; a %Y is a full year and keeps its value
+    STEP ("%C with %y: the year within the century");
+    TEST (T (0, 0, 0,  0, 0,    26),       "19 26",  5, "%C %y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,   126),       "20 26",  5, "%C %y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0, -1801),       "00 99",  5, "%C %y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,    26),       "19/26",  5, "%C/%y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,    26),       "26 19",  5, "%y %C",    0, Eof);
+    TEST (T (0, 0, 0, 14, 3,    26), "19 04/14/26", 11, "%C %D",    0, Eof);
+    TEST (T (0, 0, 0, 14, 3,    26), "04/14/26 19", 11, "%D %C",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,    26),     "20 1926",  7, "%C %Y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,    26),  "20 99 1926", 10, "%C %y %Y", 0, Eof);
+
     STEP ("invalid pattern");
     TEST (T (0), "0", 0, "E", 0, Fail);
     TEST (T (0), "0", 0, "i", 0, Fail);
@@ -1783,7 +1796,18 @@ void test_user (charT, const char *cname, const char *locname)
     // %Oy: The year (offset from %C ) using the locale's alternative
     //      numeric symbols.
     STEP ("%Oy: year offset from %C using alternative numeric symbols");
-    rw_warn (0, 0, __LINE__, "%%Oy not being exercised");
+    // with no century, 69..99 are 1969..1999 and 0..68 2000..2068
+    TEST (T (0, 0, 0, 0, 0, 100),        "0", 1, "%Oy",    0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 101),      "1st", 3, "%Oy",    0, Good);
+    TEST (T (0, 0, 0, 0, 0, 131),     "31st", 4, "%Oy",    0, Good);
+    TEST (T (0, 0, 0, 0, 0, 168),     "68th", 4, "%Oy",    0, Good);
+    TEST (T (0, 0, 0, 0, 0,  69),     "69th", 4, "%Oy",    0, Good);
+    TEST (T (0, 0, 0, 0, 0,  99),       "99", 2, "%Oy",    0, Eof);
+    TEST (T (0, 0, 0, 0, 0,   0),      "100", 3, "%Oy",    0, Eof | Fail);
+    // a century combines with the year in either order
+    TEST (T (0, 0, 0, 0, 0,  26), "19th26th", 8, "%OC%Oy", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 126), "20th26th", 8, "%OC%Oy", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,  26), "26th19th", 8, "%Oy%OC", 0, Good);
 }
 
 /**************************************************************************/
