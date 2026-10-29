@@ -193,6 +193,20 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
     int __century = -1;
     int __yy      = -1;
 
+    // the hour of the last %I, %OI, %l, %H, %OH or %k read back from
+    // tm_hour, -1 until then, and whether it was on the 12-hour clock
+    // (stored less one, 0..11); and the half of the day of the last %p
+    // or %Op, 0 for AM and 1 for PM, -1 until then. do_get applies a
+    // %p to the hour it finds, which is right only after a %I; the two
+    // settle at the end of the pattern whatever their order, as in the
+    // C library's strptime: a %p adds the 12 hours to a 12-hour hour
+    // and is parsed and ignored after a 24-hour one. As with the
+    // century, each pattern settles only what it parsed itself: a %p
+    // outside a %X or %r does not reach the %I inside it
+    int  __hour   = -1;
+    bool __hour12 = false;
+    int  __pm     = -1;
+
     for (; __pat != __pat_end; ++__pat) {
 
         if (__errtmp) {
@@ -210,6 +224,14 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
                 // FIXME: handle the "%.[0-9]*" HP-UX extension
             }
             else {
+                // the hour a %p finds; after an hour, which settles at
+                // the end, a %p reads its half against 0, since do_get
+                // fails a 24-hour hour of 12 or more
+                int __hour0 = __tmp.tm_hour;
+
+                if ('p' == __ch && 'E' != __fmt [1] && 0 <= __hour)
+                    __tmp.tm_hour = __hour0 = 0;
+
                 __it = do_get (__it, __end, __fl, __errtmp, &__tmp, __ch,
                                __fmt [1]);
 
@@ -220,6 +242,20 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
                         __yy = (__tmp.tm_year + 1900) % 100;
                     else if ('Y' == __ch)
                         __yy = -1;
+                    else if ('I' == __ch || 'l' == __ch) {
+                        __hour   = __tmp.tm_hour;
+                        __hour12 = true;
+                    }
+                    else if ('H' == __ch || 'k' == __ch) {
+                        __hour   = __tmp.tm_hour;
+                        __hour12 = false;
+                    }
+                    else if ('p' == __ch) {
+                        // do_get adds 1 for AM and 13 for PM to an hour
+                        // below 11, and makes 11 into 0 for AM, 12 for PM
+                        __pm = 11 == __hour0 ? 12 == __tmp.tm_hour
+                                             : 13 == __tmp.tm_hour - __hour0;
+                    }
                 }
 
                 __fmt [0] = __fmt [1] = '\0';   // reset
@@ -249,6 +285,17 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
         // XSH strptime: %C is the century, %y the year within it
         if (0 <= __century && 0 <= __yy)
             __tmp.tm_year = __century * 100 + __yy - 1900;
+
+        // XSH strptime: %p is the locale's a.m. or p.m., %I the hour on
+        // the 12-hour clock; noon and midnight as do_get makes them
+        if (0 <= __hour && 0 <= __pm) {
+            if (!__hour12)
+                __tmp.tm_hour = __hour;
+            else if (11 == __hour)
+                __tmp.tm_hour = __pm ? 12 : 0;
+            else
+                __tmp.tm_hour = __hour + (__pm ? 13 : 1);
+        }
 
         // store value only on success
         if (__tmb)

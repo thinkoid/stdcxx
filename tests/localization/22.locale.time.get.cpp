@@ -724,6 +724,19 @@ void test_posix (charT, const char *cname)
     TEST (T ( 0,  0,  0),    "09:05:09",  8, "r", 0, Eof | Fail);
     TEST (T ( 0,  0,  0), "13:00:00 PM",  2, "r", 0, Fail);
 
+    // %p settles the hour at the end of the pattern whatever the order,
+    // as in the C library's strptime: it adds the 12 hours to a %I and
+    // is parsed and ignored after a %H
+    STEP ("%p with the hour: the 12 hours of a %I, none of a %H");
+    TEST (T ( 9,  5,  9), "09:05:09 AM", 11, "%H:%M:%S %p", 0, Good);
+    TEST (T ( 9,  5,  9), "09:05:09 PM", 11, "%H:%M:%S %p", 0, Good);
+    TEST (T ( 9,  5, 21), "21:05:09 PM", 11, "%H:%M:%S %p", 0, Good);
+    TEST (T ( 9,  5, 21), "09:05:09 PM", 11, "%I:%M:%S %p", 0, Good);
+    TEST (T ( 0,  0,  0), "12:00:00 AM", 11, "%I:%M:%S %p", 0, Good);
+    TEST (T ( 0,  0, 12), "12:00:00 PM", 11, "%I:%M:%S %p", 0, Good);
+    TEST (T ( 0,  0, 21),       "PM 09",  5, "%p %I",       0, Eof);
+    TEST (T ( 0,  0,  0),       "AM 12",  5, "%p %I",       0, Eof);
+
 
     // %R The time as %H:%M.
     STEP ("%R: the time as %H:%M");
@@ -1716,13 +1729,22 @@ void test_user (charT, const char *cname, const char *locname)
     // %OI: The hour (12-hour clock) using the locale's alternative
     //      numeric symbols.
     STEP ("%OI: the hour (12-hour clock) using alternative numeric symbols");
-    TEST (T (0, 0,  0),    "0", 1, "%OI", 0, Eof);
-    TEST (T (0, 0,  0),  "000", 3, "%OI", 0, Eof);
-    TEST (T (0, 0,  3),  "3rd", 3, "%OI", 0, Good);
-    TEST (T (0, 0, 11), "11th", 4, "%OI", 0, Good);
-    TEST (T (0, 0, 12), "12th", 4, "%OI", 0, Good);
+    // stored as %I is, the hour less one; there is no hour 0
+    TEST (T (0, 0,  0),    "0", 1, "%OI", 0, Eof | Fail);
+    TEST (T (0, 0,  0),  "000", 3, "%OI", 0, Eof | Fail);
+    TEST (T (0, 0,  0),  "1st", 3, "%OI", 0, Good);
+    TEST (T (0, 0,  2),  "3rd", 3, "%OI", 0, Good);
+    TEST (T (0, 0,  8),  "9th", 3, "%OI", 0, Good);
+    TEST (T (0, 0, 10), "11th", 4, "%OI", 0, Good);
+    TEST (T (0, 0, 11), "12th", 4, "%OI", 0, Good);
     TEST (T (0, 0,  0), "13th", 4, "%OI", 0, Fail);
     TEST (T (0, 0,  0),   "14", 2, "%OI", 0, Eof | Fail);
+
+    // %p after %OI adds the 12 hours, after %OH it is parsed and ignored
+    STEP ("%p with %OI and %OH");
+    TEST (T (9, 5,  9),  "9th:5th:9th [A.M.]", 18, "%OI:%OM:%OS %p", 0, Good);
+    TEST (T (9, 5, 21),  "9th:5th:9th [P.M.]", 18, "%OI:%OM:%OS %p", 0, Good);
+    TEST (T (9, 5, 21), "21st:5th:9th [P.M.]", 19, "%OH:%OM:%OS %p", 0, Good);
 
     // %Om: The month using the locale's alternative numeric symbols.
     STEP ("%Om: the month using alternative numeric symbols");

@@ -1110,8 +1110,10 @@ __rw_get_timepunct (const __rw_facet *pfacet,
 
         case 'I':
             // %OI: hour (12-hour clock) using the alternative numeric symbols
+            //      stored less one, as %I is, so that %p applies to both
             *pmem = &tmb->tm_hour;
-            hib   = 12;
+            adj   = -1;
+            hib   = 11;
             break;
 
         case 'm':

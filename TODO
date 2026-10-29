@@ -19,27 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =%p= after =%OI= or =%OH= sets the hour one too high
-
-=time_get='s =%p= adds =12 * inx + 1= to =tm_hour=, which assumes the
-hour came from =%I= and sits at 0..11 (=%I= stores with =adj -1=,
-=hib 11=). =%OI= stores 1..12 (=adj 0=, =hib 12=, =src/time_put.cpp=
-in =__rw_get_timepunct='s =O= switch), so "09:05:09 AM" read with
-"%OI:%OM:%OS %p" gives 10:05:09, and the PM half 22:05:09. After
-=%OH= (=shn_MM='s =t_fmt= is "%OH:%OM:%OS %p") the hour is also one
-too high, and 12 or more fails outright. Seen in the time_put/time_get
-round trip under =my_MM=, =mnw_MM= and =shn_MM= once the 64-name cap
-was lifted; the abort had hidden it.
-
-Fix: store =%OI= as =%I= does (0..11, =adj -1=, =hib 11=), and let
-=%p= after a 24-hour =%H=/=%OH= set only the half it names, or leave
-the hour as read when it is already 12 or more; read XSH =strptime=
-for the =%p= after =%H= rule before choosing.
-
-Check: =22.locale.time.get= rows for "%OI:%OM:%OS %p" and
-"%OH:%OM:%OS %p" at 09:05:09 AM and PM; the round trip's =%X= under
-the three locales at the right hour.
-
 ** TODO The numeric conversions of =time_get= read every digit
 
 =do_get= in =include/loc/_time_get.cc= reads digits until a
@@ -61,6 +40,23 @@ not allow and the library takes as a full year.
 Check: =22.locale.time.get= rows "%C%y" on "1926" -> 26, "%m%d%y" on
 "041426" -> April 14 2026, "%Y%m%d" on "20261028"; the existing
 "%C" on "100" row (Fail now) re-read.
+
+** TODO =time_get= has no =%Z=
+
+The parsing side of =__rw_get_timepunct= (=src/time_put.cpp=) has
+no case for =Z=, so =do_get= fails it as an unimplemented format and
+any pattern that carries it fails whole: =shn_MM='s =d_t_fmt= ends in
+"%Op %Z", so its =%c= does not round-trip after the hour fix; 59
+imported definitions put =%Z= in =d_t_fmt=. glibc's =strptime= reads
+=%Z= as a run of non-space characters and converts nothing ("Read
+timezone but perform no conversion"); =%z= it parses as an offset.
+
+Fix: =%Z= skips a run of non-space characters and stores nothing;
+=%z=, if absent too, reads =[+-]hhmm= into =tm_gmtoff= where the
+=tm= has it (=_RWSTD_NO_TM_GMTOFF=) and is skipped otherwise.
+
+Check: =22.locale.time.get= rows for "%H:%M %Z" on "09:05 UTC" and
+"09:05 EST5EDT"; the round trip's =shn_MM= =%c= equal.
 
 ** TODO The narrow facet matches multibyte names byte by byte
 
