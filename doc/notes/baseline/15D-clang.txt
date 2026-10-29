@@ -100,7 +100,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 22.locale.ctype.mt                            0    0     800      0   100%
 22.locale.ctype.narrow                        0    2    9768      0   100%
 22.locale.ctype                               0    0   91098      0   100%
-22.locale.ctype.scan                          0    0   17124      0   100%
+22.locale.ctype.scan                          0    0   17126      0   100%
 22.locale.ctype.tolower                       0    0   19390      0   100%
 22.locale.ctype.toupper                       0    0   19390      0   100%
 22.locale.facet.mt                            0    0       8      0   100%
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            60
-  Assertions:            12472586
+  Assertions:            12472588
   Failed assertions:            0

@@ -81,6 +81,8 @@ __rw_get_mask (__rw_ctype_t    *impl,
 
         for (; beg != end; ++beg) {
 
+            bool found = false;
+
             // using binary search look up the character and its mask
             size_t low  = 0;
             size_t high = size_t (impl->wmask_s);
@@ -110,6 +112,7 @@ __rw_get_mask (__rw_ctype_t    *impl,
                              || (!scan_is && !(next_elm.mask & mask)))
                         return beg;
 
+                    found = true;
                     break;
                 }
 
@@ -121,6 +124,11 @@ __rw_get_mask (__rw_ctype_t    *impl,
                 else
                     high = cur;
             }
+
+            // a character missing from the table is in no class:
+            // a scan for a mismatch stops at it
+            if (!found && !vec && !scan_is)
+                return beg;
 
             if (vec)
                 ++vec;

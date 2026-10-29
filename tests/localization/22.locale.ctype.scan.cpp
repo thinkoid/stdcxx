@@ -740,7 +740,6 @@ void test_libstd (charT, const char *cname)
               "<U0042>;<U0043>;<U1000>;<U1001>\n"
         "digit <U0031>;<U0032>;<U0033>;<U1002>\n"
         "space <U0020>\n"
-        "cntrl <U0000>\n"
         "#     <!>      <\">\n"
         "punct <U0021>; <U0022>\n"
         "graph <U0041>;<U0042>;<U0043>;<U0061>;<U0062>;<U0063>;"
@@ -799,6 +798,28 @@ void test_libstd (charT, const char *cname)
     if (sizeof(charT) > 1) {
         test_libstd_scan_not (charT (), cname, ct, "abc\xa2xyz", ALPHA, 3, 1);
         test_libstd_scan_not (charT (), cname, ct, "123\xa1yz ", DIGIT, 3, 1);
+    }
+
+    // a character below the first entry of the mask table, U+0000
+    // is in no class of this locale, and one above its last: the
+    // search must stop at the table's bounds
+    if (sizeof (charT) > 1) {
+        const charT str [] = { charT ('\0'), charT (0xffff) };
+
+        const charT* const beg = str;
+        const charT* const end = str + sizeof str / sizeof *str;
+
+        const std::ctype_base::mask all =
+              ALPHA | DIGIT | SPACE | PUNCT | CNTRL
+            | UPPER | LOWER | PRINT | GRAPH | XDIGIT;
+
+        rw_assert (end == ct.scan_is (all, beg, end), 0, __LINE__,
+                   "ctype<%s>::scan_is() returned an unexpected value",
+                   cname);
+
+        rw_assert (beg == ct.scan_not (all, beg, end), 0, __LINE__,
+                   "ctype<%s>::scan_not() returned an unexpected value",
+                   cname);
     }
 }
 
