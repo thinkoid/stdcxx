@@ -19,21 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =reorder-sections-after= keeps the sections in opening order
-
-The front end records the sections in the order the source opens
-them and ignores =reorder-sections-after=; the old compiler
-spliced the section list at the named section. The tree's =hy_AM=
-uses the keyword and is among the 113 definitions the reader
-rejects, so the difference has not been seen in a database.
-
-Fix: move the sections in =lcollate.cpp= as glibc's =ld-collate.c=
-does for =reorder-sections-after=.
-
-Check: =--collate= of =hy_AM= lists the sections in the reordered
-order, and its =LC_COLLATE= compares against the reference as the
-others do.
-
 ** TODO =std::string::push_back= leaks a representation under valgrind
 
 Valgrind on =localedef= building =aa_DJ= with =ISO-8859-1= reports
