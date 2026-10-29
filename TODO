@@ -19,19 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =%r= with an empty =t_fmt_ampm= writes nothing
-
-=gd_GB=, =hy_AM=, =sm_WS= and =su_ID= set =t_fmt= or =d_t_fmt= to =%r=
-and =t_fmt_ampm= to "". glibc's =%r= uses =%I:%M:%S %p= when
-=t_fmt_ampm= is empty; the library formats the empty string as
-written, so =%X= in =gd_GB= is "" where glibc writes "09:05:09 f".
-Found by =bin/oracle/scalar.cpp= (class D).
-
-Fix: a decision: the same fallback in the ='r'= case of
-=src/time_put.cpp=, or the literal reading, recorded.
-
-Check: the oracle's class D is empty, or the record names the six.
-
 ** TODO International =money_put= writes two spaces after the currency code
 
 =money_put<char>= with =intl= true and =showbase= writes
@@ -78,6 +65,22 @@ Fix: the two comments.
 
 Check: none; the oracle's copy of the table reads the corrected
 comment.
+
+** TODO The parsing side of =time_put.cpp= keeps the old =%O= table and the bare =%r=
+
+=__rw_get_timepunct= in =src/time_put.cpp=, the function
+=include/loc/_time_get.cc= walks a format with, takes after =O= the
+C99 list only and reads =t_fmt_ampm= for =%r= as it is. Since
+8820446f and the commit after it, =time_put= accepts =%OC= and =%Op=
+and formats an empty =t_fmt_ampm= as =%I:%M:%S %p=; =time_get= still
+does not, so what =time_put= writes for =%x= under =lzh_TW= or =%X=
+under =gd_GB= is not what =time_get= expects to read.
+
+Fix: the same two changes in =__rw_get_timepunct=: =C= and =p= after
+=O=, and the fallback pattern for an empty =t_fmt_ampm=.
+
+Check: a round trip, =time_put= then =time_get=, of =%x=, =%X= and
+=%c= under the eight locales named in the two commits, on 15D.
 
 * Tests
 

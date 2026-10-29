@@ -2227,10 +2227,20 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
         tpd.fmt = ptime->am_pm ((tmb->tm_hour / 12) % 2U, wide);
         break;
 
-    case 'r':
+    case 'r': {
         // %r: the locale's 12-hour clock time. [tm_hour, tm_min, tm_sec]
         tpd.fmt = ptime->t_fmt_ampm (wide);
+
+        // the C library formats an empty t_fmt_ampm as "%I:%M:%S %p"
+        static const void* const fmats[] = { "%I:%M:%S %p", L"%I:%M:%S %p" };
+
+        if (   !tpd.fmt
+            ||  (wide && !*static_cast< const wchar_t* >(tpd.fmt))
+            || (!wide && !*static_cast< const char* >(tpd.fmt)))
+            tpd.fmt = fmats [wide];
+
         break;
+    }
 
     case 'R': {
         // %R: equivalent to "%H:%M". [tm_hour, tm_min]
