@@ -140,10 +140,19 @@ void test_sort (int                line,
                        __LINE__, fname, itname, ppred, funname, nsrc);
         }
 
+        const std::size_t live = T::count_;
+
         if (ppred)
             std::stable_sort (first, last, pred);
         else
             std::stable_sort (first, last);
+
+        // the temporary buffer's copies must all be destroyed
+        rw_assert (T::count_ == live, 0, line,
+                   "line %d: %s<%s%{?}, %s%{;}> (%zu, ...): "
+                   "%zu objects live after the call, expected %zu",
+                   __LINE__, fname, itname, ppred, funname, nsrc,
+                   T::count_, live);
 
         if (alloc && dummy.first)
             std::return_temporary_buffer (dummy.first);

@@ -179,7 +179,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 25.lex.comparison                             0    0    1472      0   100%
 25.libc                                       0    0     100      0   100%
 25.lower.bound                                0    0     264      0   100%
-25.merge                                      0    0   23364      0   100%
+25.merge                                      0    0   23472      0   100%
 25.min.max                                    0    0     528      0   100%
 25.mismatch                                   0    0    5376      0   100%
 25.nth.element                                0    0    1160      0   100%
@@ -197,7 +197,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 25.set.intersection                           0    0   12800      0   100%
 25.set.sym.difference                         0    0   16384      0   100%
 25.set.union                                  0    0   14336      0   100%
-25.sort                                       0    0    5076      0   100%
+25.sort                                       0    0    6204      0   100%
 25.swap                                       0    0     478      0   100%
 25.transform                                  0    0   10272      0   100%
 25.uninitialized.copy.stdcxx-976           NOUT    0                      
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            60
-  Assertions:            12468831
+  Assertions:            12470067
   Failed assertions:            0

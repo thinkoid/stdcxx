@@ -750,8 +750,8 @@ _BidirIter __stable_partition (_BidirIter __first, _BidirIter __last,
                                      __pair.first, __pair.second,
                                      __fill, (_TypeT*)0);
 
-    for (_TypeT *__ptr = __pair.first + __fill; !(__pair.first == __ptr--); )
-        (*__ptr).~_TypeT ();
+    for (_TypeT *__ptr = __pair.first + __fill; __ptr != __pair.first; )
+        (*--__ptr).~_TypeT ();
 
     std::return_temporary_buffer (__pair.first);
 
@@ -1016,8 +1016,8 @@ __stable_sort (_RandomAccessIter __first, _RandomAccessIter __last,
         __stable_sort_adaptive (__first, __last, __p.first, __p.second,
                                 (_TypeT*)0, __comp);
 
-        for (_TypeT *__ptr = __p.first + __len; !(__p.first == --__ptr); )
-            (*__ptr).~_TypeT ();
+        for (_TypeT *__ptr = __p.first + __len; __ptr != __p.first; )
+            (*--__ptr).~_TypeT ();
 
         std::return_temporary_buffer (__p.first);
     }
@@ -1562,9 +1562,8 @@ void __inplace_merge (_BidirIter __first, _BidirIter __middle,
         __merge_adaptive (__first, __middle, __last, __dist1, __dist2,
                           __pair.first, __pair.second, __comp);
 
-        for (_TypeT *__ptr = __pair.first + __dist;
-             !(__pair.first == --__ptr); )
-            (*__ptr).~_TypeT ();
+        for (_TypeT *__ptr = __pair.first + __dist; __ptr != __pair.first; )
+            (*--__ptr).~_TypeT ();
 
         std::return_temporary_buffer (__pair.first);
     }

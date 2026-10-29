@@ -219,7 +219,16 @@ void test_merge (int                line,
     UserClass* xdst_res = 0;
 
     if (inplace) {  // inplace_merge
+        const std::size_t live = UserClass::count_;
+
         alg.inplace_merge (xsrc1, xsrc_mid, xsrc1_end, ppred);
+
+        // the temporary buffer's copies must all be destroyed
+        rw_assert (UserClass::count_ == live, 0, line,
+                   "line %d: %s<%s%{?}, %s%{;}> (\"%s\", %zu, ...): "
+                   "%zu objects live after the call, expected %zu",
+                   __LINE__, algname, it1name, predicate, predname,
+                   src1, midinx, UserClass::count_, live);
     }
     else {
         xdst_res = alg.merge (xsrc1, xsrc1_end,
