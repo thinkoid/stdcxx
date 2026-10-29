@@ -53,14 +53,6 @@ LOCALES :=                                                                 \
                 -e s:"^\([^ .@]*\)\([^ ]*\)  *\([^ ]*\) *":"\1\.\3\2":g    \
                 $(NLSDIR)/SUPPORTED)
 
-# the first locale of each codeset is built alone: localedef writes
-# the codeset's codecvt database and the shared ctype file beside the
-# locale directory when it finds none, and two built at once would
-# both write them; the other locales of the codeset wait on the first
-SEEDS := $(shell echo $(LOCALES) | tr " " "\n" | awk -F "[.@]" "!s[\$$2]++")
-
-$(filter-out $(SEEDS),$(LOCALES)): | $(SEEDS)
-
 ## Filter from RUNTARGET only the scripts
 RUNTARGET := $(filter %.sh,$(RUNTARGET))
 
@@ -114,6 +106,14 @@ gencat: gencat.o
 
 # build all locales with the localedef utility
 locales: localedef $(LOCALES)
+
+# the first locale of each codeset is built alone: localedef writes
+# the codeset's codecvt database and the shared ctype file beside the
+# locale directory when it finds none, and two built at once would
+# both write them; the other locales of the codeset wait on the first
+SEEDS := $(shell echo $(LOCALES) | tr " " "\n" | awk -F "[.@]" "!s[\$$2]++")
+
+$(filter-out $(SEEDS),$(LOCALES)): | $(SEEDS)
 
 # the rule builds the scripts that are run by the runall script
 $(RUNTARGET): $(NLSDIR)/SUPPORTED
