@@ -77,18 +77,6 @@ char_row (const coll_numbering_t &num, long ucs)
 }
 
 
-// The name of a code point, as range_member() spells one.
-static std::string
-ucs_name (long ucs)
-{
-    name_range_t range = name_range_t ();
-
-    range.ucs = true;
-
-    return range_member (range, (unsigned long)ucs);
-}
-
-
 /**************************************************************************/
 // the direction word
 
@@ -291,47 +279,6 @@ fill_row (coll_numbering_t &num, std::size_t row, const coll_entry_t &entry,
 
 
 /**************************************************************************/
-// codepoint_collation
-
-// Every character of the charmap by its code point, one forward
-// level, each character its own weight.  glibc discards the sequence
-// under this keyword and compares code points; this is that order in
-// the library's table, and no shared row, so a character the charmap
-// lacks has no weight.
-static void
-number_by_codepoint (const cmap_t &cmap, coll_numbering_t &num)
-{
-    num.codepoint = true;
-    num.levels    = 1;
-    num.rules.assign (1, int (dir_forward));
-
-    std::vector<long> points;
-
-    cmap_iter_t  iter (cmap);
-    cmap_entry_t entry;
-    cmap_entry_t first;
-
-    while (iter.next (entry))
-        if (   0 <= entry.ucs
-            && cmap.find_ucs (entry.ucs, first) && first.bytes == entry.bytes)
-            points.push_back (entry.ucs);
-
-    std::sort (points.begin (), points.end ());
-
-    for (std::size_t i = 0; i != points.size (); ++i) {
-
-        const unsigned value = num.next_value++;
-
-        const std::size_t row =
-            add_row (num, ucs_name (points [i]), value, 0);
-
-        num.words [row] = value;
-        num.char_rows.push_back (std::make_pair (points [i], unsigned (row)));
-    }
-}
-
-
-/**************************************************************************/
 
 bool
 number_collate (const collate_def_t &def, const cmap_t &cmap,
@@ -341,8 +288,11 @@ number_collate (const collate_def_t &def, const cmap_t &cmap,
 
     num.element_rows.assign (def.elements.size (), -1L);
 
+    // glibc discards the sequence under codepoint_collation and
+    // compares the characters' values; the facets do the same, so
+    // the keyword takes no value, no row and no level
     if (def.codepoint_collation) {
-        number_by_codepoint (cmap, num);
+        num.codepoint = true;
         return true;
     }
 

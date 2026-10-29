@@ -783,8 +783,8 @@ dump_collate (const char *charmap, const char *path, const char *dir,
 // words of its first member; an entry with no value prints "% -".
 // Before the sequence, "elements N" and per line an element's name,
 // its string as <Uxxxx> names and its row, or - when the charmap does
-// not spell it.  Under codepoint_collation the sequence is discarded
-// and the rows are printed in its place, one per line.
+// not spell it.  Under codepoint_collation nothing is numbered, and
+// the dump is that one word.
 
 static void
 print_words (const coll_numbering_t &num, std::size_t row)
@@ -827,6 +827,11 @@ dump_numbers (const char *charmap, const char *path, const char *dir,
 
     number_collate (coll, cmap, num, diag);
 
+    if (num.codepoint) {
+        std::puts ("codepoint_collation");
+        return;
+    }
+
     std::printf ("levels %lu ", (unsigned long)num.levels);
     print_rules (num.rules);
     std::printf ("\nlongest weight %u, largest element %u\n",
@@ -851,20 +856,6 @@ dump_numbers (const char *charmap, const char *path, const char *dir,
             std::puts ("\" row -");
         else
             std::printf ("\" row %ld\n", num.element_rows [i]);
-    }
-
-    if (num.codepoint) {
-
-        std::puts ("codepoint_collation");
-
-        for (std::size_t i = 0; i != num.rows.size (); ++i) {
-            std::printf ("<%s> %% %u row %lu", num.rows [i].name.c_str (),
-                         num.rows [i].value, (unsigned long)i);
-            print_words (num, i);
-            std::putchar ('\n');
-        }
-
-        return;
     }
 
     bool undefined = false;

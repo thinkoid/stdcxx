@@ -705,6 +705,158 @@ check_libstd_test_locale (const char* charTname)
 
 /**************************************************************************/
 
+// A locale whose LC_COLLATE is codepoint_collation, glibc's keyword
+// for C.UTF-8: the characters compare by their values, as strcmp and
+// wcscmp compare them.  The charmap has two Greek letters either side
+// of U+0378 and U+0379 and lacks those two, as glibc's UTF-8 lacks
+// every unassigned code point.
+static const char*
+make_codepoint_locale ()
+{
+    static const char charmap [] = {
+        "<code_set_name> codepoint\n"
+        "<mb_cur_max> 2\n<mb_cur_min> 1\n"
+        "CHARMAP\n"
+        "<U0061> \\x61\n"
+        "<U0062> \\x62\n"
+        "<U0377> \\xcd\\xb7\n"
+        "<U037A> \\xcd\\xba\n"
+        "END CHARMAP\n"
+    };
+
+    static const char lc_collate [] = {
+        "LC_COLLATE\n"
+        "codepoint_collation\n"
+        "END LC_COLLATE\n"
+    };
+
+    // the root make_test_locale() set up
+    const char* const root = std::getenv (LOCALE_ROOT);
+
+    if (0 == root)
+        return 0;
+
+    const std::string cmfname  = std::string (root) + SLASH "codepoint.cm";
+    const std::string srcfname = std::string (root) + SLASH "codepoint.src";
+
+    if (   std::size_t (-1) == rw_fwrite (cmfname.c_str (), charmap)
+        || std::size_t (-1) == rw_fwrite (srcfname.c_str (), lc_collate))
+        return 0;
+
+    return rw_localedef ("-w", srcfname.c_str (), cmfname.c_str (),
+                         "test-codepoint");
+}
+
+
+// The code points of a string, NUL-terminated, in charT: a wchar_t
+// holds each, char its UTF-8 bytes, two at most here.
+static const char*
+encode (char* dst, const unsigned* ucs)
+{
+    char* p = dst;
+
+    for (; *ucs; ++ucs) {
+        if (*ucs < 0x80)
+            *p++ = char (*ucs);
+        else {
+            *p++ = char (0xc0 | *ucs >> 6);
+            *p++ = char (0x80 | (*ucs & 0x3f));
+        }
+    }
+
+    *p = '\0';
+
+    return dst;
+}
+
+static const wchar_t*
+encode (wchar_t* dst, const unsigned* ucs)
+{
+    wchar_t* p = dst;
+
+    for (; *ucs; ++ucs)
+        *p++ = wchar_t (*ucs);
+
+    *p = L'\0';
+
+    return dst;
+}
+
+
+template <class charT>
+void
+check_codepoint (const char* charTname)
+{
+    rw_info (0, __FILE__, __LINE__,
+             "libstd std::collate<%s> under codepoint_collation", charTname);
+
+    const char* const locname = make_codepoint_locale ();
+
+    if (0 == locname) {
+        rw_assert (false, __FILE__, __LINE__,
+                   "unable to create a codepoint_collation locale");
+        return;
+    }
+
+    std::locale loc;
+
+    try {
+        loc = std::locale (locname);
+    }
+    catch (...) {
+        rw_assert (false, __FILE__, __LINE__,
+                   "std::locale(\"%s\") unexpectedly threw an exception",
+                   locname);
+        return;
+    }
+
+    const std::collate<charT> &co =
+        std::use_facet< std::collate<charT> >(loc);
+    co._C_opts |=  co._C_use_libstd;
+    co._C_opts &= ~co._C_use_libc;
+
+    typedef std::basic_string<charT> String;
+
+    static const unsigned a378b [] = { 'a', 0x378, 'b', 0 };
+    static const unsigned ab []    = { 'a', 'b', 0 };
+    static const unsigned u378 []  = { 0x378, 0 };
+    static const unsigned u379 []  = { 0x379, 0 };
+
+    charT buf [4][8];
+
+    const String s_a378b = encode (buf [0], a378b);
+    const String s_ab    = encode (buf [1], ab);
+    const String s_378   = encode (buf [2], u378);
+    const String s_379   = encode (buf [3], u379);
+
+    // a character the charmap lacks still counts: the longer string
+    // collates after
+    int ret = co.compare (s_a378b.data (), s_a378b.data () + s_a378b.size (),
+                          s_ab.data (), s_ab.data () + s_ab.size ());
+
+    rw_assert (0 < ret, __FILE__, __LINE__,
+               "libstd std::collate<%s>::compare(\"a\\u0378b\", \"ab\") "
+               "> 0, got %d", charTname, ret);
+
+    // two characters the charmap lacks in the order of their values
+    ret = co.compare (s_378.data (), s_378.data () + s_378.size (),
+                      s_379.data (), s_379.data () + s_379.size ());
+
+    rw_assert (ret < 0, __FILE__, __LINE__,
+               "libstd std::collate<%s>::compare(\"\\u0378\", \"\\u0379\") "
+               "< 0, got %d", charTname, ret);
+
+    // the transform is the string itself, as in the C locale
+    const String xfrm =
+        co.transform (s_a378b.data (), s_a378b.data () + s_a378b.size ());
+
+    rw_assert (xfrm == s_a378b, __FILE__, __LINE__,
+               "libstd std::collate<%s>::transform(\"a\\u0378b\") is the "
+               "string, got %u elements", charTname, unsigned (xfrm.size ()));
+}
+
+/**************************************************************************/
+
 template <class charT>
 void
 test_hash (const char* charTname, const std::collate<charT>& co,
@@ -1218,6 +1370,7 @@ void
 do_test (const char* charTname)
 {
     check_libstd_test_locale<charT> (charTname);
+    check_codepoint<charT> (charTname);
     check_libstd<charT> (charTname);
     check_libc<charT> (charTname);
     check_NUL<charT> (charTname);

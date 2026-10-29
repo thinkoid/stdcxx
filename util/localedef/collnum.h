@@ -63,8 +63,8 @@
 //   order and the library's rule since the 2005 import, kept over
 //   glibc's, which gives them the lowest row.
 // - codepoint_collation discards the sequence, as glibc does, and
-//   orders every character of the charmap by its code point at one
-//   forward level, each its own weight, with no shared row.
+//   numbers nothing: the image holds no table and the facets compare
+//   the characters' values.
 
 // What one entry of the sequence was given.
 struct coll_number_t {
@@ -94,7 +94,7 @@ struct coll_numbering_t {
     unsigned longest_weight;    // words per level, at least 1
     unsigned largest_element;   // characters of the longest element
                                 // with a row, at least 1
-    bool     codepoint;         // ordered by code point, no shared row
+    bool     codepoint;         // codepoint_collation, nothing numbered
 
     std::vector<coll_number_t> numbers;   // one per entry of the sequence
     std::vector<coll_row_t>    rows;

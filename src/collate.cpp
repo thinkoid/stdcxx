@@ -841,6 +841,10 @@ do_transform (const char* low, const char* high) const
         return __rw::__rw_strnxfrm (low, high - low);
     }
 
+    // codepoint_collation: no table, the bytes as the C locale has them
+    if (impl->codepoint_collation)
+        return collate<char>::do_transform (low, high);
+
     _RWSTD_ASSERT (0 != impl);
 
     // the maximum size that we could need to hold all the weight offsets
@@ -1095,6 +1099,10 @@ do_transform (const wchar_t* low, const wchar_t* high) const
         const __rw::__rw_setlocale clocale (_C_name, _RWSTD_LC_COLLATE);
 
         return __rw::__rw_wcsnxfrm (low, high - low);
+    }
+    else if (impl->codepoint_collation) {
+        // no table, the characters as the C locale has them
+        return collate<wchar_t>::do_transform (low, high);
     }
     else {
         _RWSTD_ASSERT (0 != impl);

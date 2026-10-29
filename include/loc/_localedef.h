@@ -240,6 +240,8 @@ struct __rw_collate_t
 
     _RWSTD_UINT32_T undefined_optimization;
 
+    _RWSTD_UINT32_T codepoint_collation;   // 1 for the keyword: no table
+
     _RWSTD_UINT8_T longest_weight;    // the longest weight value
     _RWSTD_UINT8_T num_weights;       // number of weights
     _RWSTD_UINT8_T largest_ce;

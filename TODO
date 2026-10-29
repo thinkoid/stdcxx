@@ -19,19 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO A character outside a code-point collation is dropped silently
-
-Under =codepoint_collation=, =C.UTF-8=, the table has no shared row
-(=undefined_optimization= 0), and a character the table lacks is
-left out of the transform in =src/collate.cpp= without a word, so two
-strings that differ only in such a character compare equal.
-
-Fix: decide the fallback, the code point itself as the weight as
-glibc's =strcmp= order gives, and write it.
-
-Check: =wcscoll= of two strings differing in a character above the
-charmap under =C.UTF-8= is non-zero.
-
 ** TODO =reorder-sections-after= keeps the sections in opening order
 
 The front end records the sections in the order the source opens
@@ -130,6 +117,25 @@ on the =space= element.
 
 Check: the bytes =money_put= writes for the case above against the
 reading; a pin in =22.locale.money.put= either way.
+
+** TODO The wide collate facet compares through the C library by default
+
+=collate_byname<wchar_t>::do_compare= in =src/collate.cpp= goes to
+=wcscoll= under =setlocale= unless =_C_use_libstd= is set, while
+=collate_byname<char>::do_compare= always transforms through the
+library's own database. The asymmetry dates from the 2005 import. A
+hypothesis, not a finding: =wcscoll= on the C library's table of the
+same name was a shortcut past two transforms, taken when the two
+tables were meant to agree; with the tree's databases built from
+glibc's sources they mostly do, and where they do not the two facets
+of one locale disagree with each other. The collate test and the
+oracle set =_C_use_libstd= to reach the database.
+
+Fix: open; either the wide facet takes the database by default as
+the narrow one does, or the asymmetry is documented as intended.
+
+Check: =git log -S= for the branch's history, then the 15D suite with
+the wide default flipped to the database, against its pin.
 
 ** TODO Two pattern-table comments name the wrong pattern
 

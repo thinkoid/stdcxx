@@ -1043,6 +1043,13 @@ print_lc_collate (const char *section, int)
                       << '\n';
         }
 
+        // the source's keyword, and no table to print
+        if (collate_st->codepoint_collation) {
+            std::cout << "codepoint_collation\n";
+            print_section (section, true);
+            return 0;
+        }
+
         std::map<std::string, unsigned int> ce_map;
         typedef std::map<std::string, unsigned int>::iterator ce_map_iter;
 

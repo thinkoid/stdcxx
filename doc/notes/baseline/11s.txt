@@ -92,7 +92,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 22.locale.codecvt.mt                          0    0     400      0   100%
 22.locale.codecvt                             0    0     638      0   100%
 22.locale.codecvt.stdcxx-435               NOUT    0                      
-22.locale.collate                             0    0  145856      0   100%
+22.locale.collate                             0    0  145862      0   100%
 22.locale.collate.stdcxx-1010              NOUT    0                      
 22.locale.cons.mt                             0    0     400      0   100%
 22.locale.cons.stdcxx-485                     0    0     128      0   100%
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            60
-  Assertions:            12468810
+  Assertions:            12468816
   Failed assertions:            0

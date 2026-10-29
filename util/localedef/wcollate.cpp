@@ -48,6 +48,10 @@
 // in the leaf table of its trie: an entry holds one word, the page or
 // a leaf, never both.  The runtime matches the longest element,
 // falling back to the last page leaf it passed.
+//
+// Under codepoint_collation the image is the header and the two
+// names: every table is empty, and the header's flag tells the facets
+// to compare the characters' values, as glibc's strcmp and wcscmp do.
 
 #include "collnum.h"
 #include "pool.h"
@@ -235,11 +239,40 @@ add_bounds (const std::vector<trie_page_t> &pages, bool to_end, bool last,
 }
 
 
+// The image of codepoint_collation: every table empty at offset 0,
+// so that no lookup is made in one, and the two names after them.
+static void
+write_codepoint (const image_names_t &names, std::vector<char> &image)
+{
+    __rw::__rw_collate_t hdr;
+    std::memset (&hdr, 0, sizeof hdr);
+
+    hdr.codepoint_collation = 1;
+    hdr.largest_ce          = 1;
+    hdr.charmap_off         = unsigned (names.codeset.size ()) + 1;
+
+    pool_t pool;
+
+    pool.add (names.codeset);
+    pool.add (names.charmap);
+
+    image.clear ();
+
+    append (image, &hdr, sizeof hdr);
+    pool.append_to (image);
+}
+
+
 void
 write_collate (const coll_numbering_t &num, const collate_def_t &def,
                const cmap_t &cmap, const image_names_t &names,
                std::vector<char> &image)
 {
+    if (num.codepoint) {
+        write_codepoint (names, image);
+        return;
+    }
+
     // a character ends a walk, an element goes on to the longer
     // elements it is a prefix of, and a prefix whose keys all lack a
     // leaf gets no page
@@ -312,8 +345,7 @@ write_collate (const coll_numbering_t &num, const collate_def_t &def,
     hdr.codeset_off = hdr.w_ce_last_char_off + unsigned (w_ce.size ());
     hdr.charmap_off = hdr.codeset_off + unsigned (names.codeset.size ()) + 1;
 
-    // a shared row for the characters left out, unless the order is
-    // the code points'
+    // a shared row for the characters left out
     hdr.undefined_optimization = num.undefined_row < 0 ? 0 : 1;
     hdr.undefined_weight_idx   =
         num.undefined_row < 0 ? 0 : unsigned (num.undefined_row);
