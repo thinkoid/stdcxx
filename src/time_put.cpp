@@ -2037,9 +2037,12 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
             }
         }
 
-        // take care to handle negative tm_year
-        tpd.val  = ((1900 + tmb->tm_year) / 100) % 100;
-        tpd.prec = 2;
+        // the century is floored so that %C * 100 + %y is the year;
+        // a negative one is not zero-padded, as the C library writes it
+        const int year = 1900 + tmb->tm_year;
+
+        tpd.val  = (year / 100 - (year % 100 < 0)) % 100;
+        tpd.prec = tpd.val < 0 ? 1 : 2;
         break;
     }
 
@@ -2388,10 +2391,11 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
             }
         }
 
+        // floored into [00,99] for a year before 1
         if ('O' == mod)
-            tpd.altval = (1900 + tmb->tm_year) % 100;
+            tpd.altval = ((1900 + tmb->tm_year) % 100 + 100) % 100;
         else
-            tpd.val = (1900 + tmb->tm_year) % 100;
+            tpd.val = ((1900 + tmb->tm_year) % 100 + 100) % 100;
 
         tpd.prec = 2;
         break;

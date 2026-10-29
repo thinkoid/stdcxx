@@ -708,6 +708,14 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0,  8100), "%C", 0, 0, ' ', "00");
     TEST (T (0, 0, 0, 1, 0, -1900), "%C", 0, 0, ' ', "00");
 
+    // a year before 1: the century is floored so that %C * 100 + %y
+    // is the year, and a negative century is not zero-padded
+    TEST (T (0, 0, 0, 1, 0, -1901), "%C", 0, 0, ' ', "-1");
+    TEST (T (0, 0, 0, 1, 0, -2400), "%C", 0, 0, ' ', "-5");
+    TEST (T (0, 0, 0, 1, 0, -2401), "%C", 0, 0, ' ', "-6");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%C", 0, 0, ' ', "-6");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%C", 0, 0, ' ', "%C");
+
     // %EC: the name of the base year (period) in the locale's
     //      alternative representation.
     rw_info (0, 0, __LINE__,
@@ -1249,6 +1257,13 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0,   -1), "%y", 0, 0, ' ', "99");
     TEST (T (0, 0, 0, 1, 0, -101), "%y", 0, 0, ' ', "99");
     TEST (T (0, 0, 0, 1, 0, -201), "%y", 0, 0, ' ', "99");
+
+    // a year before 1: the year modulo 100 is floored into [00,99]
+    TEST (T (0, 0, 0, 1, 0, -1901), "%y", 0, 0, ' ', "99");
+    TEST (T (0, 0, 0, 1, 0, -2400), "%y", 0, 0, ' ', "00");
+    TEST (T (0, 0, 0, 1, 0, -2401), "%y", 0, 0, ' ', "99");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%y", 0, 0, ' ', "57");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%y", 0, 0, ' ', "%y");
 
     // %Y: the year as a decimal number (e.g., 1997). [tm_year]
     rw_info (0, 0, __LINE__, "%%Y: the year");
