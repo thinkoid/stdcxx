@@ -698,11 +698,31 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0,  0), "A ", 1, "p", 0, Fail);
     TEST (T (0, 0,  0), "P ", 1, "p", 0, Fail);
 
+    // %Op Equivalent to %p (an extension of the C library's strftime).
+    STEP ("%Op: equivalent to %p");
+    TEST (T (0, 0,  1), "AM", 2, "Op", 0, Good);
+    TEST (T (0, 0, 13), "PM", 2, "Op", 0, Good);
+    TEST (T (0, 0,  0),  "",  0, "Op", 0, Eof | Fail);
+    TEST (T (0, 0,  0),  "A", 1, "Op", 0, Eof | Fail);
+    TEST (T (0, 0,  0),  "P", 1, "Op", 0, Eof | Fail);
+    TEST (T (0, 0,  0),  "M", 0, "Op", 0, Fail);
+    TEST (T (0, 0,  0), "A ", 1, "Op", 0, Fail);
+    TEST (T (0, 0,  0), "P ", 1, "Op", 0, Fail);
+    TEST (T (0, 0,  0),  "1", 0, "Op", 0, Fail);
+
     // %r 12-hour clock time using the AM/PM notation if t_fmt_ampm is
     //    not an empty string in the LC_TIME portion of the current locale;
     //    in the POSIX locale, this shall be equivalent to %I:%M:%S %p.
     STEP ("%r: 12-hour clock time using the AM/PM notation");
-    rw_warn (0, 0, __LINE__, "%%r not being exercised");
+    TEST (T ( 0,  0,  0), "12:00:00 AM", 11, "r", 0, Good);
+    TEST (T ( 9,  5,  9), "09:05:09 AM", 11, "r", 0, Good);
+    TEST (T (59, 59, 11), "11:59:59 AM", 11, "r", 0, Good);
+    TEST (T ( 0,  0, 12), "12:00:00 PM", 11, "r", 0, Good);
+    TEST (T ( 9,  5, 21), "09:05:09 PM", 11, "r", 0, Good);
+    TEST (T (59, 59, 23), "11:59:59 PM", 11, "r", 0, Good);
+    TEST (T ( 3,  2,  1),    "1:2:3 am",  8, "r", 0, Good);
+    TEST (T ( 0,  0,  0),    "09:05:09",  8, "r", 0, Eof | Fail);
+    TEST (T ( 0,  0,  0), "13:00:00 PM",  2, "r", 0, Fail);
 
 
     // %R The time as %H:%M.
@@ -1606,6 +1626,17 @@ void test_user (charT, const char *cname, const char *locname)
     // %EY: The full alternative year representation.
     STEP ("%EY: the full alternative year representation");
     rw_warn (0, 0, __LINE__, "%%EY not being exercised");
+
+    // %OC: The century using the locale's alternative numeric symbols
+    //      (an extension of the C library's strftime).
+    STEP ("%OC: the century using alternative numeric symbols");
+    TEST (T (0, 0, 0, 0, 0, -1800),  "1st", 3, "%OC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,     0), "19th", 4, "%OC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,   100), "20th", 4, "%OC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,   200), "21st", 4, "%OC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,  1200), "31st", 4, "%OC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,  1300),   "32", 2, "%OC", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0,     0),  "100", 3, "%OC", 0, Eof | Fail);
 
     // %Od: The day of the month using the locale's alternative
     //      numeric symbols; leading zeros are permitted but not required.

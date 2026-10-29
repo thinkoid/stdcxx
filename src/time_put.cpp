@@ -1084,6 +1084,16 @@ __rw_get_timepunct (const __rw_facet *pfacet,
         flags = _AltDigits;
 
         switch (fmt) {
+        case 'C':
+            // %OC: century using alternative numeric symbols
+            //      (an extension of the C library's strftime)
+            *pmem = &tmb->tm_year;
+            adj   = -1900;
+            fac   = 100;
+            lob   = -1900;
+            hib   = 8000;
+            break;
+
         case 'd': case 'e':
             // %Od: day of the month using alternative numeric symbols
             // %Oe: equivalent to %Od
@@ -1116,6 +1126,18 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             *pmem = &tmb->tm_min;
             hib   = 59;
             break;
+
+        case 'p': {
+            // %Op: equivalent to %p (an extension of the C library's
+            //      strftime), handed back as "%p" so that digits are
+            //      not taken for alternative numeric symbols
+            static const void* const pat[] = { "%p", L"%p" };
+            names [0] = pat [wide];
+            sizes [0] = 2;
+            cnt       = 1;
+            flags     = 0;
+            break;
+        }
 
         case 'S':
             // %OS seconds using alternative numeric symbols
@@ -1238,9 +1260,28 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             break;
         }
         
-        case 'r':   // 12-hour clock time using the AM/PM notation
-            flags = _TimeAmPm;
+        case 'r': {   // 12-hour clock time using the AM/PM notation
+            const int ampm = _TimeAmPm | (wide ? __rw_wide : 0);
+
+            const void* const pat = __rw_get_timepunct (pfacet, ampm, 0);
+
+            // time_put formats an empty t_fmt_ampm as "%I:%M:%S %p",
+            // as the C library's strftime does; read it the same way
+            static const void* const fmats[] = {
+                "%I:%M:%S %p", L"%I:%M:%S %p"
+            };
+
+            if (   !pat
+                ||  (wide && !*static_cast< const wchar_t* >(pat))
+                || (!wide && !*static_cast< const char* >(pat))) {
+                names [0] = fmats [wide];
+                sizes [0] = 11;
+                cnt       = 1;
+            }
+            else
+                flags = _TimeAmPm;
             break;
+        }
 
         case 'S':   // seconds [00..60]
             hib   = 60;

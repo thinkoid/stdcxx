@@ -19,6 +19,76 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
+** TODO =__rw_match_name= takes at most 64 names
+
+=include/loc/_punct.cc=, =__rw_match_name=, keeps its match set in
+one =size_t= and asserts =count <= sizeof (size_t) * CHAR_BIT=;
+past 63 the shift =1UL << k= is undefined, so a release build reads
+garbage where a debug build aborts. =my_MM=, =mnw_MM= and =shn_MM=
+define 100 =alt_digits= (=lzh_TW= 32), so every =%O= conversion
+under them aborts on 15D: =%OI= in =%X= did before 8cf34a6f's
+successor, =%OC= in =%x= does since. Found by the time_put/time_get
+round trip of the parsing-side entry.
+
+Fix: a match set that holds any count, a bit vector or a counted
+array of candidates; the 64-name assumption also sizes whatever
+callers pass.
+
+Check: the round trip's 36 aborts under the three locales gone; the
+=22.locale.time.get= =%Od= rows under a test locale with more than
+64 alternative digits.
+
+** TODO =__rw_match_name= drops a complete name a later, longer name begins with
+
+In =lzh_TW= the alternative digit 廿 (20) precedes 廿一..廿九 in
+=alt_digits=. =%OC= on "廿" alone parses (century 20, good) and on
+"十九" parses; on "廿年", and =%Od= on "廿日" (the 20th), the match
+fails: the matcher follows the longer candidates past the complete
+shorter one and does not fall back to it. The =%Od= case predates
+the parsing-side entry. =lzh_TW='s =%x=, "廿廿六年十月廿八日", fails
+on it.
+
+Fix: on a mismatch after a complete candidate, return the longest
+complete match seen (the behaviour =strptime= and most matchers
+have).
+
+Check: =22.locale.time.get= rows for =%Od= on a name list where a
+short name prefixes a longer one; the round trip's =lzh_TW= =%x=
+date.
+
+** TODO =%Oy= carries no century and =%C= never combines with =%y=
+
+The alternative-digit path of =time_get= stores =%Oy='s value as
+read, so "廿六" is =tm_year= 26, the year 1926; the POSIX pivot
+(69..99 -> 19xx, 00..68 -> 20xx) runs only on the ordinary-digit
+=%y= path. A =%C= parsed before or after never combines: =%y=
+overwrites =tm_year=. XSH =strptime= says =%C= with =%y= gives the
+year, =%y= alone pivots. =lzh_TW='s =%x= would read 1926 with the
+matcher fixed.
+
+Fix: apply the pivot on the =%Oy= path too, and combine a parsed
+century with a parsed two-digit year in =include/loc/_time_get.cc=
+where the format carries both.
+
+Check: =22.locale.time.get= rows for =%Oy= alone and for =%C%y= /
+=%OC%Oy= in both orders; the round trip's =lzh_TW= =%x= reading
+2026.
+
+** TODO An empty =am_pm= fails =%p= where glibc reads AM
+
+=hy_AM=, =sm_WS= and =su_ID= define =am_pm= as two empty strings
+and =t_fmt= or =d_t_fmt= with =%r=; =time_put= writes "09:05:09 "
+and =time_get='s =%p= now fails against two empty names (before the
+parsing-side entry it read 00:00:00 and reported good). glibc's
+=strptime= matches the empty AM name and reads 09:05:09; the PM
+half has no bytes to carry and cannot round-trip under any parser.
+
+Fix: a decision: match an empty name as AM, as glibc does, or
+record the limit.
+
+Check: the round trip's =%X= under the three locales at 09:05:09;
+a =22.locale.time.get= =%p= row with empty names either way.
+
 ** TODO The wide collate facet compares through the C library by default
 
 =collate_byname<wchar_t>::do_compare= in =src/collate.cpp= goes to
@@ -48,22 +118,6 @@ Fix: the two comments.
 
 Check: none; the oracle's copy of the table reads the corrected
 comment.
-
-** TODO The parsing side of =time_put.cpp= keeps the old =%O= table and the bare =%r=
-
-=__rw_get_timepunct= in =src/time_put.cpp=, the function
-=include/loc/_time_get.cc= walks a format with, takes after =O= the
-C99 list only and reads =t_fmt_ampm= for =%r= as it is. Since
-8820446f and the commit after it, =time_put= accepts =%OC= and =%Op=
-and formats an empty =t_fmt_ampm= as =%I:%M:%S %p=; =time_get= still
-does not, so what =time_put= writes for =%x= under =lzh_TW= or =%X=
-under =gd_GB= is not what =time_get= expects to read.
-
-Fix: the same two changes in =__rw_get_timepunct=: =C= and =p= after
-=O=, and the fallback pattern for an empty =t_fmt_ampm=.
-
-Check: a round trip, =time_put= then =time_get=, of =%x=, =%X= and
-=%c= under the eight locales named in the two commits, on 15D.
 
 * Tests
 
