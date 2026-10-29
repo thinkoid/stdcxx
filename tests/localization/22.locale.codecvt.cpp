@@ -2439,7 +2439,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
         { "de_DE", "ISO-8859-1", "de_DE.ISO-8859-1",  6826,  6826, 1, 1 },
         { "fr_FR", "ISO-8859-1", "fr_FR.ISO-8859-1",  3920,  3920, 1, 1 },
         // multi-byte encodings (variable width, and max_length > 1)
-        { "ja_JP", "Shift_JIS" , "ja_JP.Shift_JIS", 25115, 13001, 0, 2 },
+        { "ja_JP", "SHIFT_JIS" , "ja_JP.Shift_JIS", 25115, 13001, 0, 2 },
         { "ja_JP", "EUC-JP"    , "ja_JP.EUC-JP",    20801, 14299, 0, 3 },
         { "ja_JP", "UTF-8"     , "ja_JP.UTF-8",     25056, 12000, 0, 6 },
 
