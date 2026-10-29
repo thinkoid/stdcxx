@@ -355,6 +355,83 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         return __it;
     }
 
+    case 'Z': case 'z': {
+        // %Z and %z read as the C library's strptime reads them, after
+        // leading whitespace: %Z a time zone name, a run of non-space
+        // characters that may be empty and is not converted; %z an
+        // offset from UTC, [+-]hh, [+-]hhmm, [+-]hh:mm or Z, stored in
+        // tm_gmtoff where std::tm has it; the minutes are 0..59, the
+        // hours any two digits. With a modifier, both are invalid.
+        if (__modifier) {
+            __dup = 1;
+            break;
+        }
+
+        while (__it != __end && __ctp.is (ctype_base::space, *__it))
+            ++__it;
+
+        _RWSTD_IOSTATE __errtmp = __rw::__rw_goodbit;
+
+        if ('Z' == __fmt) {
+            while (__it != __end && !__ctp.is (ctype_base::space, *__it))
+                ++__it;
+        }
+        else {
+            const char __sign =
+                __it != __end ? __ctp.narrow (*__it, '\0') : '\0';
+
+            bool __colon  = false;   // minutes after a colon
+            int  __ndigs  = 0;       // number of digits read
+            long __offset = 0;       // hhmm
+
+            if ('Z' == __sign) {
+                // UTC, equivalent to +0000
+                __ndigs = 4;
+                ++__it;
+            }
+            else if ('+' == __sign || '-' == __sign) {
+
+                for (++__it; __it != __end && __ndigs < 4; ++__it) {
+
+                    const char __ch = __ctp.narrow (*__it, '\0');
+
+                    if (2 == __ndigs && ':' == __ch && !__colon)
+                        __colon = true;
+                    else if ('0' <= __ch && __ch <= '9') {
+                        __offset = 10 * __offset + __ch - '0';
+                        ++__ndigs;
+                    }
+                    else
+                        break;
+                }
+            }
+
+            if (2 == __ndigs && !__colon)
+                __offset *= 100;
+            else if (4 != __ndigs || 59 < __offset % 100)
+                __errtmp |= __rw::__rw_failbit;
+
+            if (!__errtmp && __tmb) {
+
+#if !defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)
+
+                __offset = (__offset / 100 * 60 + __offset % 100) * 60;
+
+                __tmb->tm_gmtoff = '-' == __sign ? -__offset : __offset;
+
+#endif   // !_RWSTD_NO_TM_GMTOFF && _RWSTD_NO_PURE_C_HEADERS
+
+            }
+        }
+
+        if (__it == __end)
+            __errtmp |= __rw::__rw_eofbit;
+
+        __err |= __errtmp;
+
+        return __it;
+    }
+
     default: __dup = 1;
     }
 

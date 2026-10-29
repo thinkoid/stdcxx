@@ -192,7 +192,8 @@ void do_test (int lineno, charT, const char *cname,
 
 std::tm mktm (int sec = 0, int min = 0, int hour = 0,
               int mday = 0, int mon = 0, int year = 0,
-              int wday = 0, int yday = 0, int isdst = 0)
+              int wday = 0, int yday = 0, int isdst = 0,
+              long gmtoff = 0)
 {
     std::tm tmp = std::tm ();
 
@@ -213,6 +214,17 @@ std::tm mktm (int sec = 0, int min = 0, int hour = 0,
     tmp.tm_wday  = wday;    // days since Sunday        [0, 6]
     tmp.tm_yday  = yday;    // days since January 1     [0, 365]
     tmp.tm_isdst = isdst;   // Daylight Saving Time flag
+
+#if !defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)
+
+    // glibc extension, read by %z
+    tmp.tm_gmtoff = gmtoff;   // offset from UTC in seconds
+
+#else   // _RWSTD_NO_TM_GMTOFF || !_RWSTD_NO_PURE_C_HEADERS
+
+    _RWSTD_UNUSED (gmtoff);
+
+#endif   // !_RWSTD_NO_TM_GMTOFF && _RWSTD_NO_PURE_C_HEADERS
 
     return tmp;
 }
@@ -866,6 +878,44 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0,  0, 0,    26),     "20 1926",  7, "%C %Y",    0, Eof);
     TEST (T (0, 0, 0,  0, 0,    26),  "20 99 1926", 10, "%C %y %Y", 0, Eof);
 
+    // %Z The time zone name, read and not converted, as the C library's
+    //    strptime reads it: leading whitespace, then a run of other
+    //    characters, which may be empty.
+    STEP ("%Z: the time zone name");
+    TEST (T (),         "UTC", 3, "Z",  0, Eof);
+    TEST (T (),     "EST5EDT", 7, "Z",  0, Eof);
+    TEST (T (),        "UTC ", 3, "Z",  0, Good);
+    TEST (T (),            "", 0, "Z",  0, Eof);
+    TEST (T (),        " UTC", 4, "Z",  0, Eof);
+    TEST (T (),         "UTC", 0, "EZ", 0, Fail);
+    TEST (T (),         "UTC", 0, "OZ", 0, Fail);
+    TEST (T (0, 5, 9),     "09:05 UTC",  9, "%H:%M %Z",    0, Eof);
+    TEST (T (0, 5, 9), "09:05 EST5EDT", 13, "%H:%M %Z",    0, Eof);
+    TEST (T (7, 5, 9),  "09:05 UTC 07", 12, "%H:%M %Z %S", 0, Eof);
+
+    // %z The offset from UTC, +hhmm, +hh:mm or +hh, or with a minus sign,
+    //    or Z for +0000, stored in tm_gmtoff where std::tm has it; the
+    //    minutes are 0..59 and the hours any two digits, as in glibc.
+    STEP ("%z: the offset from UTC");
+    TEST (T (0, 0, 0, 0, 0, 0, 0, 0, 0,   5400),  "+0130", 5, "z", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0, 0, 0, -18000),  "-0500", 5, "z", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0, 0, 0,   5400), "+01:30", 6, "z", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0, 0, 0,   3600),    "+01", 3, "z", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0, 0, 0,   5400), "+0130 ", 5, "z", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 0, 0, 0, 0,   3600), " +0100", 6, "z", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0, 0, 0,  89940),  "+2459", 5, "z", 0, Eof);
+    TEST (T (),      "Z", 1, "z",  0, Eof);
+    TEST (T (),     "Z5", 1, "z",  0, Good);
+    TEST (T (),  "+2460", 5, "z",  0, Eof | Fail);
+    TEST (T (),   "+013", 4, "z",  0, Eof | Fail);
+    TEST (T (),   "+01:", 4, "z",  0, Eof | Fail);
+    TEST (T (),   "0130", 0, "z",  0, Fail);
+    TEST (T (),      "z", 0, "z",  0, Fail);
+    TEST (T (),  "+0130", 0, "Ez", 0, Fail);
+    TEST (T (),  "+0130", 0, "Oz", 0, Fail);
+    TEST (T (9, 5, 9, 0, 0, 0, 0, 0, 0, -18000),
+          "09:05:09 -0500", 14, "%T %z", 0, Eof);
+
     STEP ("invalid pattern");
     TEST (T (0), "0", 0, "E", 0, Fail);
     TEST (T (0), "0", 0, "i", 0, Fail);
@@ -875,7 +925,6 @@ void test_posix (charT, const char *cname)
     TEST (T (0), "0", 0, "s", 0, Fail);
     TEST (T (0), "0", 0, "u", 0, Fail);
     TEST (T (0), "0", 0, "z", 0, Fail);
-    TEST (T (0), "0", 0, "Z", 0, Fail);
 
 
     // %Ec The locale's alternative date and time representation. 

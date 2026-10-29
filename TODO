@@ -41,23 +41,6 @@ Check: =22.locale.time.get= rows "%C%y" on "1926" -> 26, "%m%d%y" on
 "041426" -> April 14 2026, "%Y%m%d" on "20261028"; the existing
 "%C" on "100" row (Fail now) re-read.
 
-** TODO =time_get= has no =%Z=
-
-The parsing side of =__rw_get_timepunct= (=src/time_put.cpp=) has
-no case for =Z=, so =do_get= fails it as an unimplemented format and
-any pattern that carries it fails whole: =shn_MM='s =d_t_fmt= ends in
-"%Op %Z", so its =%c= does not round-trip after the hour fix; 59
-imported definitions put =%Z= in =d_t_fmt=. glibc's =strptime= reads
-=%Z= as a run of non-space characters and converts nothing ("Read
-timezone but perform no conversion"); =%z= it parses as an offset.
-
-Fix: =%Z= skips a run of non-space characters and stores nothing;
-=%z=, if absent too, reads =[+-]hhmm= into =tm_gmtoff= where the
-=tm= has it (=_RWSTD_NO_TM_GMTOFF=) and is skipped otherwise.
-
-Check: =22.locale.time.get= rows for "%H:%M %Z" on "09:05 UTC" and
-"09:05 EST5EDT"; the round trip's =shn_MM= =%c= equal.
-
 ** TODO The narrow facet matches multibyte names byte by byte
 
 =__rw_match_name= compares one =char= at a time, so under a UTF-8
