@@ -19,25 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =__rw_match_name= takes at most 64 names
-
-=include/loc/_punct.cc=, =__rw_match_name=, keeps its match set in
-one =size_t= and asserts =count <= sizeof (size_t) * CHAR_BIT=;
-past 63 the shift =1UL << k= is undefined, so a release build reads
-garbage where a debug build aborts. =my_MM=, =mnw_MM= and =shn_MM=
-define 100 =alt_digits= (=lzh_TW= 32), so every =%O= conversion
-under them aborts on 15D: =%OI= in =%X= did before 8cf34a6f's
-successor, =%OC= in =%x= does since. Found by the time_put/time_get
-round trip of the parsing-side entry.
-
-Fix: a match set that holds any count, a bit vector or a counted
-array of candidates; the 64-name assumption also sizes whatever
-callers pass.
-
-Check: the round trip's 36 aborts under the three locales gone; the
-=22.locale.time.get= =%Od= rows under a test locale with more than
-64 alternative digits.
-
 ** TODO =__rw_match_name= drops a complete name a later, longer name begins with
 
 In =lzh_TW= the alternative digit 廿 (20) precedes 廿一..廿九 in
@@ -73,6 +54,27 @@ where the format carries both.
 Check: =22.locale.time.get= rows for =%Oy= alone and for =%C%y= /
 =%OC%Oy= in both orders; the round trip's =lzh_TW= =%x= reading
 2026.
+
+** TODO =%p= after =%OI= or =%OH= sets the hour one too high
+
+=time_get='s =%p= adds =12 * inx + 1= to =tm_hour=, which assumes the
+hour came from =%I= and sits at 0..11 (=%I= stores with =adj -1=,
+=hib 11=). =%OI= stores 1..12 (=adj 0=, =hib 12=, =src/time_put.cpp=
+in =__rw_get_timepunct='s =O= switch), so "09:05:09 AM" read with
+"%OI:%OM:%OS %p" gives 10:05:09, and the PM half 22:05:09. After
+=%OH= (=shn_MM='s =t_fmt= is "%OH:%OM:%OS %p") the hour is also one
+too high, and 12 or more fails outright. Seen in the time_put/time_get
+round trip under =my_MM=, =mnw_MM= and =shn_MM= once the 64-name cap
+was lifted; the abort had hidden it.
+
+Fix: store =%OI= as =%I= does (0..11, =adj -1=, =hib 11=), and let
+=%p= after a 24-hour =%H=/=%OH= set only the half it names, or leave
+the hour as read when it is already 12 or more; read XSH =strptime=
+for the =%p= after =%H= rule before choosing.
+
+Check: =22.locale.time.get= rows for "%OI:%OM:%OS %p" and
+"%OH:%OM:%OS %p" at 09:05:09 AM and PM; the round trip's =%X= under
+the three locales at the right hour.
 
 ** TODO An empty =am_pm= fails =%p= where glibc reads AM
 

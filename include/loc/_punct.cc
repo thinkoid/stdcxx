@@ -45,15 +45,23 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
 {
     const _RWSTD_SIZE_T __badval = _RWSTD_SIZE_MAX;
 
+    // the number of bits in each word of the set below
+    const _RWSTD_SIZE_T __wbits = sizeof (_RWSTD_SIZE_T) * _RWSTD_CHAR_BIT;
+
+    // a bit for each `name', 256 with a 64-bit size_t and 128 with
+    // a 32-bit one; a locale defines at most 100 alt_digits
+    _RWSTD_SIZE_T __bits [4] = {
+        _RWSTD_SIZE_MAX, _RWSTD_SIZE_MAX, _RWSTD_SIZE_MAX, _RWSTD_SIZE_MAX
+    };
+
     // make sure there are enough bits for all `count' `names'
-    _RWSTD_ASSERT (__count <= sizeof (_RWSTD_SIZE_T) * _RWSTD_CHAR_BIT);
+    _RWSTD_ASSERT (__count <= sizeof __bits / sizeof *__bits * __wbits);
 
     // on input, `err' contains the maximum allowed number of matches
     const _RWSTD_SIZE_T __matchmax = (_RWSTD_SIZE_T)__err;
 
     __err = 0;
 
-    _RWSTD_SIZE_T __bits   = ~0UL;      // a bit for each `name'
     _RWSTD_SIZE_T __nmatch = __count;   // total number of positive matches
     _RWSTD_SIZE_T __pos    = 0;         // position within input
     _RWSTD_SIZE_T __num    = __inx;     // input as a number
@@ -65,7 +73,8 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
 
     _CharT __ch;
 
-    for (; (__bits || __num != __badval) && !__err; ++__it, ++__pos) {
+    for (; (   (__bits [0] | __bits [1] | __bits [2] | __bits [3])
+            || __num != __badval) && !__err; ++__it, ++__pos) {
 
         if (__it == __end) {
             __err |= _RWSTD_IOS_EOFBIT;
@@ -86,10 +95,11 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
 
             typedef std::char_traits<_CharT> _Traits;
 
+            const _RWSTD_SIZE_T __word = __k / __wbits;
             const _RWSTD_SIZE_T __mask =
-                static_cast< _RWSTD_SIZE_T >(1UL) << __k;
+                static_cast< _RWSTD_SIZE_T >(1UL) << (__k % __wbits);
 
-            if (__bits & __mask) {
+            if (__bits [__word] & __mask) {
                 // `name' is still in the set, see if the next char matches
                 // (case insensitive comparison done if `ctp' is nonzero)
                 if (   __pos < __sizes [__k]
@@ -110,7 +120,7 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
 
                         // this match is a duplicate of the last best one
                         // remove this match from the set
-                        __bits &= ~__mask;
+                        __bits [__word] &= ~__mask;
                         --__nmatch;
                     }
                     else if (   __sizes [__k] < __sizes [__inx]
@@ -139,7 +149,7 @@ _InputIter __rw_match_name (_InputIter __it, _InputIter __end,
 
                     // clear the bit for the `name' that failed to match
                     // and decrement the numeber of matches
-                    __bits &= ~__mask;
+                    __bits [__word] &= ~__mask;
                     --__nmatch;
                 }
             }

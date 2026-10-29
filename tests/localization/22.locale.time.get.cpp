@@ -1461,6 +1461,10 @@ make_LC_TIME (const time_data *td)
 static const char*
 make_LC_TIME ()
 {
+    // 70 symbols, more than the 64 bits of one size_t that once held
+    // the names, short of the 100 that localedef allows; time_get
+    // reads plain digits only for a value that has no symbol, or for
+    // 0 when its symbol is empty, so %OC on 70..99 reads digits
     const char* const alt_digits[] = {
         "",      "1st",  "2nd",  "3rd",  "4th",
          "5th",  "6th",  "7th",  "8th",  "9th",
@@ -1468,7 +1472,15 @@ make_LC_TIME ()
         "15th", "16th", "17th", "18th", "19th",
         "20th", "21st", "22nd", "23rd", "24th",
         "25th", "26th", "27th", "28th", "29th",
-        "30th", "31st", 0   // sentinel
+        "30th", "31st", "32nd", "33rd", "34th",
+        "35th", "36th", "37th", "38th", "39th",
+        "40th", "41st", "42nd", "43rd", "44th",
+        "45th", "46th", "47th", "48th", "49th",
+        "50th", "51st", "52nd", "53rd", "54th",
+        "55th", "56th", "57th", "58th", "59th",
+        "60th", "61st", "62nd", "63rd", "64th",
+        "65th", "66th", "67th", "68th", "69th",
+        0   // sentinel
     };
 
     const time_data::era_data era[] = {
@@ -1635,7 +1647,15 @@ void test_user (charT, const char *cname, const char *locname)
     TEST (T (0, 0, 0, 0, 0,   100), "20th", 4, "%OC", 0, Good);
     TEST (T (0, 0, 0, 0, 0,   200), "21st", 4, "%OC", 0, Good);
     TEST (T (0, 0, 0, 0, 0,  1200), "31st", 4, "%OC", 0, Good);
-    TEST (T (0, 0, 0, 0, 0,  1300),   "32", 2, "%OC", 0, Eof);
+    // names past the 64th, more than one size_t has bits for
+    TEST (T (0, 0, 0, 0, 0,  4600), "65th", 4, "%OC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,  5000), "69th", 4, "%OC", 0, Good);
+    // digits past the list of names
+    TEST (T (0, 0, 0, 0, 0,  5100), "70th", 2, "%OC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,  6100),   "80", 2, "%OC", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0,  8000),  "099", 3, "%OC", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0,     0), "100th", 3, "%OC", 0, Fail);
+    TEST (T (0, 0, 0, 0, 0,     0),   "32", 2, "%OC", 0, Eof | Fail);
     TEST (T (0, 0, 0, 0, 0,     0),  "100", 3, "%OC", 0, Eof | Fail);
 
     // %Od: The day of the month using the locale's alternative
@@ -1655,7 +1675,7 @@ void test_user (charT, const char *cname, const char *locname)
     TEST (T (0, 0, 0,  4),  "4th", 3, "%Oe", 0, Good);
     TEST (T (0, 0, 0,  9),  "9th", 3, "%Oe", 0, Good);
     TEST (T (0, 0, 0, 10), "10th", 4, "%Oe", 0, Good);
-    TEST (T (0, 0, 0,  0), "32nd", 2, "%Oe", 0, Fail);
+    TEST (T (0, 0, 0,  0), "32nd", 4, "%Oe", 0, Fail);
     TEST (T (0, 0, 0,  0),   "33", 2, "%Oe", 0, Eof | Fail);
 
     // %OH: The hour (24-hour clock) using the locale's alternative
@@ -1710,7 +1730,7 @@ void test_user (charT, const char *cname, const char *locname)
     TEST (T (0, 29), "29th", 4, "%OM", 0, Good);
     TEST (T (0, 30), "30th", 4, "%OM", 0, Good);
     TEST (T (0, 31), "31st", 4, "%OM", 0, Good);
-    TEST (T (0, 32),   "32", 2, "%OM", 0, Eof);
+    TEST (T (0,  0),   "32", 2, "%OM", 0, Eof | Fail);
     TEST (T (0,  0),   "60", 2, "%OM", 0, Eof | Fail);
     TEST (T (0,  0),    "2", 1, "%OM", 0, Eof | Fail);
 
@@ -1724,9 +1744,9 @@ void test_user (charT, const char *cname, const char *locname)
     TEST (T (29), "29th", 4, "%OS", 0, Good);
     TEST (T (30), "30th", 4, "%OS", 0, Good);
     TEST (T (31), "31st", 4, "%OS", 0, Good);
-    TEST (T (32),   "32", 2, "%OS", 0, Eof);
-    TEST (T (59),  "059", 3, "%OS", 0, Eof);
-    TEST (T (60), "0060", 4, "%OS", 0, Eof);
+    TEST (T ( 0),   "32", 2, "%OS", 0, Eof | Fail);
+    TEST (T ( 0),  "059", 3, "%OS", 0, Eof | Fail);
+    TEST (T ( 0), "0060", 4, "%OS", 0, Eof | Fail);
     TEST (T ( 0),   "61", 2, "%OS", 0, Eof | Fail);
     TEST (T ( 0),   "21", 2, "%OS", 0, Eof | Fail);
 
