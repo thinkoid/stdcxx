@@ -574,6 +574,11 @@ void
 test_weight_val (const char*, const std::collate<charT>&,
                  charT, int, int, int, int, bool);
 
+template <class charT>
+void
+test_default_opts (const char*, const std::locale&,
+                   const std::collate<charT>&);
+
 // a character outside the character map has no weights: its
 // transform is empty and it compares before any character
 static void
@@ -697,6 +702,8 @@ check_libstd_test_locale (const char* charTname)
         test_hash (charTname, co, "c", "ic");
 
         test_outside_charmap (charTname, co);
+
+        test_default_opts (charTname, loc, co);
     }
     else
         rw_assert (false, __FILE__, __LINE__,
@@ -966,6 +973,106 @@ test_weight_val (const char* charTname, const std::collate<charT>& co,
                "got %{*.*Ac}", charTname, ch, sizeof (charT),
                expected.size (), expected.c_str (), sizeof (charT), 
                actual.size (), actual.c_str ());
+}
+
+/**************************************************************************/
+
+// with neither _C_use_libc nor _C_use_libstd set the facet takes the
+// database first; the test locale is one the C library does not know
+template <class charT>
+void
+test_default_string (const char* charTname, const std::collate<charT>& co,
+                     const char* str1, const char* str2, int expected_val)
+{
+    charT wstrbuf [256];
+    charT wstrbuf2 [256];
+
+    const charT* const wstr  = widen (wstrbuf, str1);
+    const charT* const wstr2 = widen (wstrbuf2, str2);
+
+    int  ret   = 0;
+    bool threw = false;
+
+    try {
+        ret = co.compare (wstr, wstr + c_strlen (wstr),
+                          wstr2, wstr2 + c_strlen (wstr2));
+    }
+    catch (...) {
+        threw = true;
+    }
+
+    rw_assert (!threw && ret == expected_val, __FILE__, __LINE__,
+               "default std::collate<%s>::compare(\"%s\", \"%s\") "
+               "== %d, got %d%s", charTname, str1, str2, expected_val,
+               ret, threw ? " (threw)" : "");
+}
+
+
+// the narrow and the wide facet of one locale order a pair alike
+static void
+test_default_agree (const std::locale&, char)
+{
+    // run once, from the wide pass
+}
+
+static void
+test_default_agree (const std::locale& loc, wchar_t)
+{
+    const char    s1 []  = "er";
+    const char    s2 []  = "c";
+    const wchar_t ws1 [] = L"er";
+    const wchar_t ws2 [] = L"c";
+
+    const int nret = std::use_facet<std::collate<char> >(loc).compare (
+        s1, s1 + 2, s2, s2 + 1);
+
+    int  wret  = 0;
+    bool threw = false;
+
+    try {
+        wret = std::use_facet<std::collate<wchar_t> >(loc).compare (
+            ws1, ws1 + 2, ws2, ws2 + 1);
+    }
+    catch (...) {
+        threw = true;
+    }
+
+    rw_assert (!threw && nret == wret, __FILE__, __LINE__,
+               "default std::collate<char>::compare(\"er\", \"c\") "
+               "== %d, std::collate<wchar_t>::compare(L\"er\", L\"c\") "
+               "== %d%s", nret, wret, threw ? " (threw)" : "");
+}
+
+
+template <class charT>
+void
+test_default_opts (const char* charTname, const std::locale& loc,
+                   const std::collate<charT>& co)
+{
+    const int opts = co._C_opts;
+
+    co._C_opts &= ~(co._C_use_libc | co._C_use_libstd);
+
+    // pairs whose order in the table is not their order by value
+
+    // "a" is reordered after "b"
+    test_default_string (charTname, co, "a", "b", 1);
+
+    // "0" weighs 16 and "a" 6
+    test_default_string (charTname, co, "0", "a", 1);
+
+    // "e" weighs 139 and "f" 30
+    test_default_string (charTname, co, "e", "f", 1);
+
+    // the collating element "er" sorts before "c"
+    test_default_string (charTname, co, "er", "c", -1);
+
+    // the collating element "ic" is equivalent to "c"
+    test_default_string (charTname, co, "ic", "c", 0);
+
+    test_default_agree (loc, charT ());
+
+    co._C_opts = opts;
 }
 
 /**************************************************************************/

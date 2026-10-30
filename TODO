@@ -19,24 +19,32 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The wide collate facet compares through the C library by default
+** TODO The wide ctype facet reads the option table backwards
 
-=collate_byname<wchar_t>::do_compare= in =src/collate.cpp= goes to
-=wcscoll= under =setlocale= unless =_C_use_libstd= is set, while
-=collate_byname<char>::do_compare= always transforms through the
-library's own database. The asymmetry dates from the 2005 import. A
-hypothesis, not a finding: =wcscoll= on the C library's table of the
-same name was a shortcut past two transforms, taken when the two
-tables were meant to agree; with the tree's databases built from
-glibc's sources they mostly do, and where they do not the two facets
-of one locale disagree with each other. The collate test and the
-oracle set =_C_use_libstd= to reach the database.
+=include/loc/_facet.h= documents =_C_opts=: with neither
+=_C_use_libc= nor =_C_use_libstd= set a facet uses its own
+implementation and falls back on the C library. =ctype_byname<char>=
+(=src/ctype.cpp=, the =impl == 0 || _C_use_libc= test) and the wide
+=do_widen= and =do_narrow= follow it. The eight classifying and
+case-mapping members of =ctype_byname<wchar_t>= in =src/wctype.cpp=
+(=do_is= twice, =scan_is=, =scan_not=, =do_toupper= and =do_tolower=
+twice each) pass =_C_opts & _C_use_libstd= to the =__rw_= helpers,
+which read the database only when that bit is set and otherwise go
+to the C library under =__rw_setlocale=, which throws for a name the
+C library does not know. The same backwards gate the wide collate
+facet had until its fix. The database searches those members reach
+were bounded in fa0fe473 and df2646ee, so the database path is safe
+to take. Consequence to know: the database's wide mask table holds
+the charmap's characters only, so under the default a wide character
+outside the charmap classifies as nothing; a localedef question,
+separate from the gate.
 
-Fix: open; either the wide facet takes the database by default as
-the narrow one does, or the asymmetry is documented as intended.
+Fix: the eight members take the narrow test, C library when there is
+no database or =_C_use_libc= is set, else the database.
 
-Check: =git log -S= for the branch's history, then the 15D suite with
-the wide default flipped to the database, against its pin.
+Check: =22.locale.ctype= rows under neither option bit on a generated
+locale the C library does not know, the pattern of the collate rows;
+red is a throw today. Then the 15D suite against its pin.
 
 ** TODO Two pattern-table comments name the wrong pattern
 

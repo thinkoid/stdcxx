@@ -37,7 +37,7 @@
 #include <string.h>   // for memchr(), memcpy()
 
 #ifndef _RWSTD_NO_WCHAR_H
-#  include <wchar.h>    // for wcscoll(), wcsxfrm(), wmemcmp()
+#  include <wchar.h>    // for wcsxfrm(), wmemcmp()
 #endif   // _RWSTD_NO_WCHAR_H
 
 #include <loc/_collate.h>
@@ -989,98 +989,16 @@ int collate_byname<wchar_t>::
 do_compare (const wchar_t* low1, const wchar_t* high1,
             const wchar_t* low2, const wchar_t* high2) const
 {
-    if (this->_C_opts & this->_C_use_libstd) {
-        const string_type s1 = do_transform (low1, high1);
-        const string_type s2 = do_transform (low2, high2);
+    const string_type s1 = do_transform (low1, high1);
+    const string_type s2 = do_transform (low2, high2);
 
-        // FIXME: optimize
-        const int cmp = s1.compare (s2);
+    // FIXME: optimize: doing a full transformation of the two
+    // strings is not necessary, it might be quicker to only do
+    // a partial transformation
+    const int cmp = s1.compare (s2);
 
-        // adjust return value
-        return cmp < 0 ? -1 : cmp ? 1 : 0;
-    }
-
-    // use the system C library to compare the strings
-    __rw::__rw_setlocale clocale (this->_C_name, _RWSTD_LC_COLLATE);
-    
-    size_t len1 = high1 - low1;
-    size_t len2 = high2 - low2;
-
-    if (0 == len1 || 0 == len2)
-        return len1 ? 1 : len2 ? -1 : 0;
-
-    // attempt to use a small buffer
-    wchar_t wbuf [256], *pwbuf = wbuf;
-    const size_t bufsize = sizeof wbuf / sizeof *wbuf;
-
-    wchar_t* pwbuf1 = high1 [-1] ? wbuf : const_cast< wchar_t* > (low1);
-    wchar_t* pwbuf2 = high2 [-1] ? wbuf : const_cast< wchar_t* > (low2);
-    
-    size_t len = 
-        (pwbuf1 == wbuf ? (len1 + 1) : 0) +
-        (pwbuf2 == wbuf ? (len2 + 1) : 0);
-
-    if (len >= bufsize) 
-        pwbuf = new wchar_t [len];
-    
-    wchar_t* ptmp = pwbuf;
-
-    // only copy non NUL-terminated buffers
-    if (pwbuf1 == wbuf) {
-        pwbuf1 = pwbuf;
-
-        // append and null-terminate first sequence
-        char_traits<wchar_t>::copy (pwbuf1, low1, len1);
-        pwbuf1 [len1] = '\0';
-
-        ptmp = pwbuf + len1 + 1;
-    }
-
-    if (pwbuf2 == wbuf) {
-        pwbuf2 = ptmp;
-
-        // append and null-terminate second sequence
-        char_traits<wchar_t>::copy (pwbuf2, low2, len2);
-        pwbuf2 [len2] = '\0';
-    }
-
-    int cmp = 0;
-
-    for (; len1 && len2;) {
-
-        for (; len1 && len2 && 0 == pwbuf1 [0] && 0 == pwbuf2 [0];
-             ++pwbuf1, ++pwbuf2, --len1, --len2) ;
-
-        // compare sequences using wcscoll, stopping at first NUL
-        cmp = wcscoll (pwbuf1, pwbuf2);
-
-        if (cmp) {
-            if (pwbuf != wbuf)
-                delete [] pwbuf;
-            return cmp > 0 ? 1 : -1;
-        }
-
-        // if they compared equal, they may have embedded NULs
-        size_t n = _RWSTD_WCSLEN (pwbuf1);
-
-        len1   -= n;
-        pwbuf1 += n;
-
-        n = _RWSTD_WCSLEN (pwbuf2);
-
-        len2   -= n;
-        pwbuf2 += n;
-    }    
-
-    // adjust return value
-    if (0 == cmp)
-        cmp = len1 ? 1 : len2 ? -1 : 0;
-
-    if (pwbuf != wbuf)
-        delete [] pwbuf;
-
-    return cmp;
-
+    // normalize
+    return cmp < 0 ? -1 : cmp ? 1 : 0;
 }
 
 
