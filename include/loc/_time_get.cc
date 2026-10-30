@@ -484,24 +484,9 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         __errtmp = _RWSTD_IOSTATE (__interr);
 
         if (__inx == _RWSTD_SIZE_MAX) {
-
-            // if no name matches, and the first name is the empty
-            // (i.e., alt_digits 0 is not defined), try to match
-            // and extract all zeros
-            if (   !__errtmp && 0 == __sizes [0]
-                && __it != __end && '0' == __ctp.narrow (*__it, '\0')) {
-
-                while ('0' == __ctp.narrow (*__it, '\0')) {
-
-                    if (++__it == __end) {
-                        __errtmp |= __rw::__rw_eofbit;
-                        break;
-                    }
-                }
-            }
-            else {
-                __errtmp |= __rw::__rw_failbit;
-            }
+            // no name matches; a value without an alternative symbol
+            // is read as digits by __rw_match_name above
+            __errtmp |= __rw::__rw_failbit;
         }
         else if ('p' == __fmt) {
             if (__pmem) {

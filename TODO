@@ -64,21 +64,6 @@ conversion's members, if the probe confirms glibc's behaviour.
 Check: =%EC= on "19" and =%Ey= on "26" in the C locale, glibc
 against the library.
 
-** TODO The zeros fallback of =do_get= is not limited to =%O=
-
-When no name matches and the first name is empty, =do_get= in
-=include/loc/_time_get.cc= reads a run of "0" characters: the
-fallback for an alternative digit 0 that a locale does not define.
-It is not gated on the =O= modifier, so any name conversion whose
-first name is empty takes it. Before the empty =am_pm= fix =%p= did:
-on "0" it ate the zero, set eofbit and left the hour alone. =%a=,
-=%A=, =%b= and =%B= with an empty first name probably still do; a
-hypothesis, not probed.
-
-Fix: gate the fallback on the =O= modifier, if the probe confirms.
-
-Check: a generated locale with an empty =abday= 0, then =%a= on "0".
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it

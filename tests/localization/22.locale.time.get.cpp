@@ -1674,6 +1674,7 @@ make_LC_TIME (bool empty_ampm)
     if (empty_ampm) {
         td.am_pm [0]  = "";
         td.am_pm [1]  = "";
+        td.day [0]    = "";   // a name directive with an empty first name
         td.t_fmt      = "%r";
         td.t_fmt_ampm = "";
     }
@@ -1970,6 +1971,13 @@ void test_empty_ampm (charT, const char *cname, const char *locname)
     TEST (T (0, 0, 0),   "21:05:09 ", 1, "%I:%M:%S %p", 0, Fail);
     TEST (T (9, 5, 9),   "09:05:09 ", 9, "r",           0, Eof);
     TEST (T (9, 5, 9),   "09:05:09 ", 9, "X",           0, Eof);
+
+    // a value without an alternative symbol is read as digits by the
+    // name matcher; a name directive whose first name is empty fails
+    // on a digit instead of consuming a run of zeros
+    STEP ("a digit under an empty first name");
+    TEST (T (0, 0),                   "0", 1, "OM", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0),    "0", 0, "a",  0, Fail);
 }
 
 /**************************************************************************/
