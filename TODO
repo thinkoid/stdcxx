@@ -19,27 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The narrow facet matches multibyte names byte by byte
-
-=__rw_match_name= compares one =char= at a time, so under a UTF-8
-charmap a name is a byte string. =lzh_TW='s =%OC= on "廿年": 廿 is
-e5 bb bf and complete, 年 is e5 b9 b4, and the second characters of
-廿四, 廿六 and 廿八 begin with e5, so those three survive 年's first
-byte and die on its second. That is the case the matcher cannot
-recover (the consumed byte cannot be put back), so narrow =%OC=
-fails where the wide facet, comparing whole characters, reads the
-20th century. =lzh_TW='s =%x= and =%c= round-trip in the wide facet
-only; "廿日" works narrow because 日 begins with e6.
-
-Fix: a decision between recording the limit (the narrow facet's
-unit is the byte) and matching by character in the narrow facet:
-the names' byte strings grouped into characters by the locale's
-codecvt, a mismatch inside a character attributed to its first byte,
-with the same no-putback bound one level up.
-
-Check: narrow =%OC= on "廿年" and the narrow =%x= of =lzh_TW= in the
-round trip; or the record names them.
-
 ** TODO An empty =am_pm= fails =%p= where glibc reads AM
 
 =hy_AM=, =sm_WS= and =su_ID= define =am_pm= as two empty strings
