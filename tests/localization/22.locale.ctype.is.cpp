@@ -833,6 +833,49 @@ void test_libstd_mask (charT, const char *cname,
         TEST_NOT (charT ('\0'),   all);
         TEST_NOT (charT (0xffff), all);
     }
+
+    // the range form takes the database of a locale the C library
+    // does not know: the classes of U+1000, U+1001 and U+1002 are
+    // the ones loc_1 gives them
+    if (sizeof (charT) > 1) {
+        const charT str [] = {
+            charT (0x1000), charT (0x1001), charT (0x1002)
+        };
+
+        const std::ctype_base::mask expect [] = {
+            ALPHA | LOWER | GRAPH | PRINT,
+            ALPHA | UPPER | GRAPH | PRINT,
+            DIGIT | GRAPH | PRINT
+        };
+
+        const std::size_t n = sizeof str / sizeof *str;
+
+        std::ctype_base::mask vec [n];
+        for (std::size_t i = 0; i != n; ++i)
+            vec [i] = std::ctype_base::mask ();
+
+        const charT* ret   = 0;
+        bool         threw = false;
+
+        try {
+            ret = ct.is (str, str + n, vec);
+        }
+        catch (...) {
+            threw = true;
+        }
+
+        rw_assert (!threw && str + n == ret, 0, __LINE__,
+                   "ctype<%s>::is(const %1$s*, const %1$s*, mask*) "
+                   "returned an unexpected value%s",
+                   cname, threw ? " (threw)" : "");
+
+        for (std::size_t i = 0; i != n; ++i)
+            rw_assert (expect [i] == vec [i], 0, __LINE__,
+                       "ctype<%s>::is(const %1$s*, const %1$s*, mask*): "
+                       "the mask of U+%04X == %#x, got %#x",
+                       cname, unsigned (str [i]),
+                       unsigned (expect [i]), unsigned (vec [i]));
+    }
 }
 
 /**************************************************************************/
@@ -1021,9 +1064,6 @@ void test_libstd (charT, const char *cname)
 
     const std::ctype<charT> &ct =
         std::use_facet< std::ctype<charT> >(loc);
-
-    ct._C_opts |=  ct._C_use_libstd;
-    ct._C_opts &= ~ct._C_use_libc;
 
     test_libstd_mask (charT (), cname, ct, locname);
 }

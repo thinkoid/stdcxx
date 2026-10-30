@@ -317,10 +317,6 @@ int main (int argc, char* argv [])
     const facets_t co (std::use_facet<std::collate<char> >(loc),
                        std::use_facet<std::collate<wchar_t> >(loc));
 
-    // the library's databases only, never the C library behind them
-    co.wco._C_opts |=  co.wco._C_use_libstd;
-    co.wco._C_opts &= ~co.wco._C_use_libc;
-
     // the word list: the files, then the names of the locale
     std::vector<std::wstring> words;
 

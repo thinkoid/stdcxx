@@ -85,8 +85,6 @@ enum {
 
     __rw_strict      = 0x100000,   // do strict UCS validation
 
-    __rw_use_libc    = 0x200000,   // always use libc locale
-
     // mask to retrieve UCS encoding type
     __rw_ucs_mask    =   __rw_ucs_be | __rw_ucs_le | __rw_ucs
                        | __rw_ucs4_be | __rw_ucs4_le
@@ -116,7 +114,7 @@ enum {
 
 // evaluates to 1 if the facet should use the libc locale, 0 otherwise
 #define USE_LIBC(impl, x) \
-    ((!(impl) || ((x) & __rw_use_libc)) && !(UCS_TYPE (x) || UTF_TYPE (x)))
+    (!(impl) && !(UCS_TYPE (x) || UTF_TYPE (x)))
 
 
 // _RWSTD_MBSTATE_T macro might expand to char* (on AIX)
@@ -1142,10 +1140,6 @@ codecvt_byname (const char *name, size_t ref)
             name          = locale_name;
         }
     }
-
-    if (   this->_C_opts & this->_C_use_libc
-        && !UCS_TYPE (_C_flags) && !UTF_TYPE (_C_flags))
-        _C_flags |= __rw_use_libc;
 
     this->_C_set_name (name, _C_namebuf, sizeof _C_namebuf);
 }

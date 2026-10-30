@@ -833,7 +833,7 @@ do_transform (const char* low, const char* high) const
         const_cast< __rw::__rw_collate_t* >(
             static_cast< const __rw::__rw_collate_t* >(_C_data ()));
 
-    if (!impl || (this->_C_opts & this->_C_use_libc)) {
+    if (!impl) {
 
         // set the global libc locale in a thread-safe way
         const __rw::__rw_setlocale clocale (_C_name, _RWSTD_LC_COLLATE);
@@ -1011,7 +1011,7 @@ do_transform (const wchar_t* low, const wchar_t* high) const
     __rw::__rw_collate_t *impl = 
         const_cast< __rw::__rw_collate_t* >(static_cast< const __rw::__rw_collate_t* >(_C_data ()));
 
-    if (!impl || (this->_C_opts & this->_C_use_libc)) {
+    if (!impl) {
 
         // set the global libc locale in a thread-safe way
         const __rw::__rw_setlocale clocale (_C_name, _RWSTD_LC_COLLATE);

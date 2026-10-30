@@ -875,7 +875,7 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
 
     _C_impdata = impl;
 
-    if (impl == 0 || (this->_C_opts & this->_C_use_libc)) {
+    if (impl == 0) {
 
         // try to set locale first for exception safety
         const __rw::__rw_setlocale clocale (name, LC_CTYPE);

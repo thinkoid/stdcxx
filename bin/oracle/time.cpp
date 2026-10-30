@@ -288,12 +288,6 @@ int main (int argc, char* argv [])
 
     const std::locale loc (name);
 
-    // the library's databases only, never the C library behind them
-    const std::time_put<char>& tp = std::use_facet<std::time_put<char> >(loc);
-
-    tp._C_opts |=  tp._C_use_libstd;
-    tp._C_opts &= ~tp._C_use_libc;
-
     static const char* const fmts [] = { "%EC", "%Ey", "%EY" };
 
     unsigned long disagreements = 0;

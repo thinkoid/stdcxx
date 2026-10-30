@@ -29,6 +29,7 @@
 #include <locale>
 
 #include <cassert>
+#include <cctype>    // for isalnum(), tolower()
 #include <climits>
 #include <clocale>
 #include <setjmp.h>  // for sigsetjmp(), siglongjmp(), ...
@@ -396,6 +397,35 @@ rwtest_is_C_locale (const char* s)
 
     std::setlocale (LC_ALL, old);
     return true;
+}
+
+/****************************************************************************/
+
+// the C library's own name for a locale the test builds a database
+// for, or 0; glibc spells the codeset in lower case without the
+// punctuation, de_DE.iso88591 for de_DE.ISO-8859-1, and the locale
+// root lacks that name, so the facets of a locale by it take the C
+// library
+static const char*
+libc_locname (char* buf, const char* locname)
+{
+    const char* const dot = std::strchr (locname, '.');
+    if (0 == dot || 255 < std::strlen (locname))
+        return 0;
+
+    std::size_t n = std::size_t (dot - locname) + 1;
+    std::memcpy (buf, locname, n);
+
+    for (const char* s = dot + 1; *s; ++s) {
+        const unsigned char c = *s;
+
+        if (std::isalnum (c))
+            buf [n++] = char (std::tolower (c));
+    }
+
+    buf [n] = '\0';
+
+    return std::strcmp (buf, locname) && rwtest_is_C_locale (buf) ? buf : 0;
 }
 
 /****************************************************************************/
@@ -2374,8 +2404,6 @@ run_test (int /*unused*/, char* /*unused*/ [])
             const CodecvtBnW cc (locname_mod, 1);                            \
             std::locale loc = std::locale (std::locale::classic (), &cc);    \
                                                                              \
-            cc._C_opts |= cc._C_use_libstd;                                  \
-            cc._C_opts &= ~cc._C_use_libc;                                   \
             test_ucs_modifier (locname_mod, enc, native, cc, f, i, is);      \
                                                                              \
         } catch (...) {                                                      \
@@ -2409,14 +2437,15 @@ run_test (int /*unused*/, char* /*unused*/ [])
         try {                                                           \
             const T &cc = create_##T (loc);                             \
                                                                         \
-            cc._C_opts |=  cc._C_use_libstd;                            \
-            cc._C_opts &= ~cc._C_use_libc;                              \
             TEST_LIBSTD (L,T,C,cc,f,s,i,is,o,os,ur,ar,er,lr,mr);        \
                                                                         \
-            if (C == true && rwtest_is_C_locale (L)) {                  \
-                cc._C_opts &= ~cc._C_use_libstd;                        \
-                cc._C_opts |=  cc._C_use_libc;                          \
-                TEST_LIBSTD(L,T,C,cc,f,s,i,is,o,os,ur,ar,er,lr,mr);     \
+            char libc_buf [256];                                        \
+            const char* const N = libc_locname (libc_buf, L);           \
+                                                                        \
+            if (C == true && N) {                                       \
+                const std::locale libc_loc (N);                         \
+                const T &libc_cc = create_##T (libc_loc);               \
+                TEST_LIBSTD(N,T,C,libc_cc,f,s,i,is,o,os,ur,ar,er,lr,mr);\
             }                                                           \
         } catch (...) {                                                 \
             rw_assert (false, __FILE__, __LINE__,                       \

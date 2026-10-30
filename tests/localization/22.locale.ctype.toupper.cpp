@@ -266,6 +266,69 @@ void test_libstd_toupper (charT, const char *cname,
         TEST ('\xa0', '\xa1');
 
 #undef TEST
+
+    // the wide members take the database of a locale the C library
+    // does not know: U+1000 maps to U+1001, which maps to itself,
+    // as does U+1002, which the table leaves out
+    if (sizeof (charT) > 1) {
+        const charT from [] = {
+            charT (0x1000), charT (0x1001), charT (0x1002), charT ('a')
+        };
+        const charT to [] = {
+            charT (0x1001), charT (0x1001), charT (0x1002), charT ('A')
+        };
+
+        const std::size_t n = sizeof from / sizeof *from;
+
+        for (std::size_t i = 0; i != n; ++i) {
+
+            charT ch    = charT ();
+            bool  threw = false;
+
+            try {
+                ch = ct.toupper (from [i]);
+            }
+            catch (...) {
+                threw = true;
+            }
+
+            rw_assert (!threw && to [i] == ch, 0, __LINE__,
+                       "ctype<%s>::toupper(U+%04X) == U+%04X, got U+%04X%s",
+                       cname, unsigned (from [i]), unsigned (to [i]),
+                       unsigned (ch), threw ? " (threw)" : "");
+        }
+
+        charT buf [n];
+        for (std::size_t i = 0; i != n; ++i)
+            buf [i] = from [i];
+
+        const charT* ret   = 0;
+        bool         threw = false;
+
+        try {
+            ret = ct.toupper (buf, buf + n);
+        }
+        catch (...) {
+            threw = true;
+        }
+
+        bool match = !threw && buf + n == ret;
+        for (std::size_t i = 0; match && i != n; ++i)
+            match = to [i] == buf [i];
+
+        rw_assert (match, 0, __LINE__,
+                   "ctype<%s>::toupper(%1$s*, const %1$s*) on "
+                   "U+%04X U+%04X U+%04X U+%04X == "
+                   "U+%04X U+%04X U+%04X U+%04X, "
+                   "got U+%04X U+%04X U+%04X U+%04X%s", cname,
+                   unsigned (from [0]), unsigned (from [1]),
+                   unsigned (from [2]), unsigned (from [3]),
+                   unsigned (to [0]), unsigned (to [1]),
+                   unsigned (to [2]), unsigned (to [3]),
+                   unsigned (buf [0]), unsigned (buf [1]),
+                   unsigned (buf [2]), unsigned (buf [3]),
+                   threw ? " (threw)" : "");
+    }
 }
 
 /**************************************************************************/
@@ -433,9 +496,6 @@ void test_libstd (charT, const char *cname)
 
     const std::ctype<charT> &ct =
         std::use_facet< std::ctype<charT> >(loc);
-
-    ct._C_opts |=  ct._C_use_libstd;
-    ct._C_opts &= ~ct._C_use_libc;
 
     test_libstd_toupper (charT (), cname, ct, locname);
 }

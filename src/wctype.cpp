@@ -72,12 +72,11 @@ __rw_get_mask (__rw_ctype_t    *impl,
                MaskT            mask,
                MaskT           *vec,
                bool             scan_is,
-               bool             use_libstd,
                const char      *locname)
 {
     _RWSTD_ASSERT (!end || beg <= end);
 
-    if (use_libstd && impl != 0) {
+    if (impl != 0) {
 
         for (; beg != end; ++beg) {
 
@@ -205,10 +204,10 @@ __rw_get_mask (__rw_ctype_t    *impl,
 
 static std::ctype_byname<wchar_t>::char_type
 __rw_toupper (__rw_ctype_t* impl,
-              wchar_t c, bool use_libstd,
+              wchar_t c,
               const char* locname)
 {
-    if (use_libstd && impl != 0) {
+    if (impl != 0) {
 
         size_t low  = 0;
         size_t high = size_t (impl->wtoupper_s ());
@@ -250,10 +249,10 @@ __rw_toupper (__rw_ctype_t* impl,
 
 static std::ctype_byname<wchar_t>::char_type
 __rw_tolower (__rw_ctype_t* impl,
-              wchar_t c, bool use_libstd,
+              wchar_t c,
               const char* locname)
 {
-    if (use_libstd && impl != 0) {
+    if (impl != 0) {
 
         size_t low  = 0;
         size_t high = size_t (impl->wtolower_s ());
@@ -296,14 +295,14 @@ __rw_tolower (__rw_ctype_t* impl,
 #if 0   // FIXME: implement analogously to the above
 
 static void
-__rw_narrow (const __rw_codecvt_t *cvt, bool use_libstd,
+__rw_narrow (const __rw_codecvt_t *cvt,
              const wchar_t *lo, const wchar_t *hi, char dfault, char *dst)
 {
 }
 
 
 static void
-__rw_widen (const __rw_codecvt_t *cvt, bool use_libstd,
+__rw_widen (const __rw_codecvt_t *cvt,
             const char *lo, const char *hi, wchar_t *dst)
 {
 }
@@ -567,7 +566,7 @@ ctype_byname (const char *name, size_t refs)
         _C_cvtimpl = __rw::__rw_get_facet_data (LC_CTYPE, _C_cvtsize, 0, 
                                                impl->codeset_name ());
 
-    if (impl == 0 || (this->_C_opts & this->_C_use_libc)) {
+    if (impl == 0) {
 
         // set locale first to avoid unnecessary allocation
         // if `name' doesn't refer to a valid locale (and
@@ -668,11 +667,9 @@ do_is (mask m, wchar_t c) const
             static_cast< const __rw::__rw_ctype_t* >(
                 _C_data ()));
 
-    const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
-
     mask res = mask ();
 
-    __rw::__rw_get_mask (impl, &c, &c + 1, m, &res, false, libstd, _C_name);
+    __rw::__rw_get_mask (impl, &c, &c + 1, m, &res, false, _C_name);
 
     return res != 0;
 }
@@ -688,10 +685,8 @@ do_is (const char_type *lo, const char_type *hi, mask *mvec) const
             static_cast< const __rw::__rw_ctype_t* >(
                 _C_data ()));
 
-    const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
-
     return __rw::__rw_get_mask (impl, lo, hi, __rw::__rw_all,
-                               mvec, false, libstd, _C_name);
+                               mvec, false, _C_name);
 }
 
 
@@ -704,9 +699,7 @@ do_toupper (char_type c) const
             static_cast< const __rw::__rw_ctype_t* >(
                 _C_data ()));
 
-    const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
-
-    return __rw::__rw_toupper (impl, c, use_libstd, _C_name);
+    return __rw::__rw_toupper (impl, c, _C_name);
 }
 
 
@@ -719,9 +712,7 @@ do_tolower (char_type c) const
             static_cast< const __rw::__rw_ctype_t* >(
                 _C_data ()));
 
-    const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
-
-    return __rw::__rw_tolower (impl, c, use_libstd, _C_name);
+    return __rw::__rw_tolower (impl, c, _C_name);
 }
 
 
@@ -735,11 +726,9 @@ do_toupper (char_type *lo, const char_type *hi) const
             static_cast< const __rw::__rw_ctype_t* >(
                 _C_data ()));
 
-    const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
-
     // FIXME: implement efficiently (__rw_toupper() may call setlocale())
     for ( ; lo < hi; ++lo)
-        *lo = __rw::__rw_toupper (impl, *lo, use_libstd, _C_name);
+        *lo = __rw::__rw_toupper (impl, *lo, _C_name);
     return lo;
 }
 
@@ -754,11 +743,9 @@ do_tolower (char_type *lo, const char_type *hi) const
             static_cast< const __rw::__rw_ctype_t* >(
                 _C_data ()));
 
-    const bool use_libstd = 0 != (this->_C_opts & this->_C_use_libstd);
-
     // FIXME: implement efficiently (__rw_tolower() may call setlocale())
     for ( ; lo < hi; ++lo)
-        *lo = __rw::__rw_tolower (impl, *lo, use_libstd, _C_name);
+        *lo = __rw::__rw_tolower (impl, *lo, _C_name);
     return lo;
 }
 
@@ -773,9 +760,8 @@ do_scan_is (mask m, const char_type* lo, const char_type* hi) const
         const_cast< __rw::__rw_ctype_t* >(
             static_cast< const __rw::__rw_ctype_t* >(
                 _C_data ()));
-    const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
-    return __rw::__rw_get_mask (impl, lo, hi, m, 0, true, libstd, _C_name);
+    return __rw::__rw_get_mask (impl, lo, hi, m, 0, true, _C_name);
 }
 
 
@@ -789,9 +775,8 @@ do_scan_not (mask m, const char_type *lo, const char_type *hi) const
         const_cast< __rw::__rw_ctype_t* >(
             static_cast< const __rw::__rw_ctype_t* >(
                 _C_data ()));
-    const bool libstd = 0 != (this->_C_opts & this->_C_use_libstd);
 
-    return __rw::__rw_get_mask (impl, lo, hi, m, 0, false, libstd, _C_name);
+    return __rw::__rw_get_mask (impl, lo, hi, m, 0, false, _C_name);
 }
 
 
@@ -817,7 +802,7 @@ do_narrow (char_type c, char dfault) const
         static_cast< const __rw::__rw_codecvt_t* >(_C_cvtimpl);
 
     char ch = 0;
-    if (0 == cvt || (this->_C_opts & this->_C_use_libc)) {
+    if (0 == cvt) {
 
         const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
@@ -925,7 +910,7 @@ do_widen (char c) const
 
     char_type ch;
 
-    if (0 == cvt || (this->_C_opts & this->_C_use_libc)) {
+    if (0 == cvt) {
 
         const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 

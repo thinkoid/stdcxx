@@ -766,9 +766,6 @@ void test_libstd (charT, const char *cname)
     const std::ctype<charT> &ct =
         std::use_facet< std::ctype<charT> >(loc);
 
-    ct._C_opts |=  ct._C_use_libstd;
-    ct._C_opts &= ~ct._C_use_libc;
-
     // now check the scan functions
     rw_info (0, 0, __LINE__,
              "std::ctype<%s>::scan_is(const %1$s*, const %1$s, mask*) "
@@ -820,6 +817,53 @@ void test_libstd (charT, const char *cname)
         rw_assert (beg == ct.scan_not (all, beg, end), 0, __LINE__,
                    "ctype<%s>::scan_not() returned an unexpected value",
                    cname);
+    }
+
+    // the wide members take the database of a locale the C library
+    // does not know: U+1000 is a lower case letter, U+1001 an upper
+    // case one and U+1002 a digit, as loc_1 defines them
+    if (sizeof (charT) > 1) {
+        const charT str [] = {
+            charT (0x1000), charT (0x1002), charT (0x1001), charT (0x1000)
+        };
+
+        const charT* const end = str + sizeof str / sizeof *str;
+
+        const struct {
+            bool                  scan_is;
+            std::ctype_base::mask mask;
+            int                   idx;
+        } rows [] = {
+            { true,  UPPER, 2 },
+            { true,  DIGIT, 1 },
+            { true,  PUNCT, 4 },
+            { false, LOWER, 1 },
+            { false, ALPHA, 1 },
+            { false, PRINT, 4 }
+        };
+
+        for (std::size_t i = 0; i != sizeof rows / sizeof *rows; ++i) {
+
+            const charT* ret   = 0;
+            bool         threw = false;
+
+            try {
+                ret = rows [i].scan_is
+                    ? ct.scan_is (rows [i].mask, str, end)
+                    : ct.scan_not (rows [i].mask, str, end);
+            }
+            catch (...) {
+                threw = true;
+            }
+
+            rw_assert (!threw && str + rows [i].idx == ret, 0, __LINE__,
+                       "ctype<%s>::%s(%#x, L\"\\x1000\\x1002\\x1001\\x1000\")"
+                       " == begin + %d, got %d%s", cname,
+                       rows [i].scan_is ? "scan_is" : "scan_not",
+                       unsigned (rows [i].mask), rows [i].idx,
+                       ret ? int (ret - str) : -1,
+                       threw ? " (threw)" : "");
+        }
     }
 }
 

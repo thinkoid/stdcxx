@@ -739,12 +739,6 @@ int main (int argc, char* argv [])
 
     const std::locale loc (name);
 
-    // the library's databases only, never the C library behind them
-    const std::numpunct<char>& np = std::use_facet<std::numpunct<char> >(loc);
-
-    np._C_opts |=  np._C_use_libstd;
-    np._C_opts &= ~np._C_use_libc;
-
     tally_t tally (name, list);
 
     check_numpunct<char> (tally, loc, lc);

@@ -166,18 +166,7 @@ public:
         // (e.g., setlocale ("C") will return "C C C C C C")
         // and doesn't include category names in (combined or others)
         // locale names
-        _C_condensed_name = 0x04,
-
-        // bits to determine whether and when libc locale will be
-        // used as an implementation of C++ locale functionality
-        //
-        // libc libstd effect
-        //   0      0   use own implementation, fall back on libc if that fails
-        //   0      1   use own implementation only, never libc
-        //   1      0   use libc implementation only, never own
-        //   1      1   try libc implementation first, own if that fails
-        _C_use_libc   = 0x08,
-        _C_use_libstd = 0x10
+        _C_condensed_name = 0x04
     };
 
     // global options controlling the behavior of locale and facets

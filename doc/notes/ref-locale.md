@@ -219,8 +219,8 @@ time. The members stay, unused, in the 4.2.x layout until the `TODO`
 entry on the next minor version removes them. **Mapped data and mutable facet caches are different
 layers.**
 
-The C library is another backend, with selection and fallback varying
-by facet and implementation options. Paths that temporarily change
+The C library is another backend, the one a facet falls back on when
+its locale has no database. Paths that temporarily change
 the C locale use `__rw_setlocale` to lock, save, switch and restore it.
 This process-wide state is distinct from the C++ collection of facets;
 the library's lock coordinates its own participating calls.

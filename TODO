@@ -19,49 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The facets choose their data source by two option bits nothing drives
-
-=__rw_facet::_C_opts= in =include/loc/_facet.h= carries
-=_C_use_libc= and =_C_use_libstd=, with a four-row table: neither
-set means the library's own database with the C library as the
-fallback, =_C_use_libstd= alone means the database only, =_C_use_libc=
-alone means the C library only, both mean the C library first. No
-configuration macro sets either bit and the library never does; the
-single-threaded ctype, codecvt and collate tests and the oracles set
-them at run time. Only the first row is implemented. Every fallback
-test in =src/ctype.cpp=, =src/collate.cpp=, =src/wctype.cpp= and
-=src/wcodecvt.cpp= reads =impl == 0 || _C_use_libc=, so a missing
-database goes to the C library whatever =_C_use_libstd= says, and
-the data loader in =src/facet.cpp= reads the bits only to refuse
-every database under the C-library-only row. The eight classifying
-and case-mapping members of =ctype_byname<wchar_t>= in
-=src/wctype.cpp= (=do_is= twice, =scan_is=, =scan_not=, =do_toupper=
-and =do_tolower= twice each) read the table backwards: they pass
-=_C_use_libstd= to the =__rw_= helpers, which take the database only
-when it is set and otherwise go to the C library under
-=__rw_setlocale=, which throws for a name the C library does not
-know. The wide collate facet had the same gate until 8abda9b3. The
-database searches behind the wide ctype members were bounded in
-fa0fe473 and df2646ee, so that path is safe to take. Decided
-2026-10-30: the bits go and the algorithm runs without a driver.
-
-Fix: remove both bits and the table; every member takes the database
-when there is one and the C library otherwise, the wide ctype
-members included; the refusal in the data loader goes. The tests and
-the oracles stop setting the bits. A test section that exercised the
-C-library path through a bit keeps that coverage through a name the
-C library knows and the locale root lacks, which is the only way the
-path is reached now; a section whose subject was the bit itself goes,
-each named in the commit. Consequence to know: the database's wide
-mask table holds the charmap's characters only, so a wide character
-outside the charmap classifies as nothing in every byname locale; a
-localedef question, separate from this entry.
-
-Check: =22.locale.ctype= rows on a generated locale the C library
-does not know, through the wide members (a throw today), the pattern
-of the collate rows of 8abda9b3; then the 15D suite against its pin,
-the touched rows re-pinned.
-
 ** TODO Two pattern-table comments name the wrong pattern
 
 =src/punct.cpp= labels entry 013, ="\4\1\3\2"= {value, space, sign,
@@ -120,6 +77,23 @@ Check: a generated locale with an empty =abday= 0, then =%a= on "0".
 
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
+
+** TODO Two ctype test defects: a wrong character and an unbraced =TEST=
+
+=tests/localization/22.locale.ctype.is.cpp= line 822 tests
+=ct.widen ('\xa0')= for =DIGIT | GRAPH | PRINT= where
+=22.locale.ctype.cpp= tests ='\xa2'=; the row passes only because =is=
+matches any one bit. =22.locale.ctype.tolower.cpp= line 262 and
+=22.locale.ctype.toupper.cpp= line 265 write ~if (sizeof (charT) > 1)
+TEST (...)~ without braces, and =TEST= expands to two statements, so
+the char pass asserts a stale =success=. Seen while adding the wide
+rows beside them.
+
+Fix: ='\xa2'= in the =is= row; braces around the two =TEST= calls.
+
+Check: the =is= row stays green at the same count; =tolower= and
+=toupper= each lose one assertion in the char pass; the six pins take
+the new totals.
 
 ** TODO The suite against other libraries
 

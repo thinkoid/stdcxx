@@ -538,13 +538,6 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
 const void* __rw_get_facet_data (int cat, size_t &impsize, 
                                  const char* name, const char* encoding) 
 {
-    if (__rw_facet::_C_use_libc == (__rw_facet::_C_opts & 
-                                    (__rw_facet::_C_use_libc | 
-                                     __rw_facet::_C_use_libstd))) {
-        // fail but allow further calls to this function
-        return 0;
-    }
-
     __rw_chararray  pathname;
     const char     *path;
 

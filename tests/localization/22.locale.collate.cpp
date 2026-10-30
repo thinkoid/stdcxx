@@ -225,9 +225,6 @@ check_libc_locale (const char* charTname, char const* locname,
     const std::collate<charT> &co =
         std::use_facet< std::collate<charT> >(loc);
 
-    co._C_opts |= co._C_use_libc;
-    co._C_opts &= ~co._C_use_libstd;
-
     for (int nloops = 0; nloops < 10; ++nloops) {
 
         charT str1 [STR_SIZE] = { 0 };
@@ -576,7 +573,7 @@ test_weight_val (const char*, const std::collate<charT>&,
 
 template <class charT>
 void
-test_default_opts (const char*, const std::locale&,
+test_table_order (const char*, const std::locale&,
                    const std::collate<charT>&);
 
 // a character outside the character map has no weights: its
@@ -644,8 +641,6 @@ check_libstd_test_locale (const char* charTname)
 
         const std::collate<charT> &co =
             std::use_facet< std::collate<charT> >(loc);
-        co._C_opts |=  co._C_use_libstd;
-        co._C_opts &= ~co._C_use_libc;
 
 #define IGNORE 0
 
@@ -703,7 +698,7 @@ check_libstd_test_locale (const char* charTname)
 
         test_outside_charmap (charTname, co);
 
-        test_default_opts (charTname, loc, co);
+        test_table_order (charTname, loc, co);
     }
     else
         rw_assert (false, __FILE__, __LINE__,
@@ -819,8 +814,6 @@ check_codepoint (const char* charTname)
 
     const std::collate<charT> &co =
         std::use_facet< std::collate<charT> >(loc);
-    co._C_opts |=  co._C_use_libstd;
-    co._C_opts &= ~co._C_use_libc;
 
     typedef std::basic_string<charT> String;
 
@@ -977,11 +970,11 @@ test_weight_val (const char* charTname, const std::collate<charT>& co,
 
 /**************************************************************************/
 
-// with neither _C_use_libc nor _C_use_libstd set the facet takes the
-// database first; the test locale is one the C library does not know
+// the facet takes the database; the test locale is one the C library
+// does not know
 template <class charT>
 void
-test_default_string (const char* charTname, const std::collate<charT>& co,
+test_table_string (const char* charTname, const std::collate<charT>& co,
                      const char* str1, const char* str2, int expected_val)
 {
     charT wstrbuf [256];
@@ -1002,7 +995,7 @@ test_default_string (const char* charTname, const std::collate<charT>& co,
     }
 
     rw_assert (!threw && ret == expected_val, __FILE__, __LINE__,
-               "default std::collate<%s>::compare(\"%s\", \"%s\") "
+               "std::collate<%s>::compare(\"%s\", \"%s\") "
                "== %d, got %d%s", charTname, str1, str2, expected_val,
                ret, threw ? " (threw)" : "");
 }
@@ -1010,13 +1003,13 @@ test_default_string (const char* charTname, const std::collate<charT>& co,
 
 // the narrow and the wide facet of one locale order a pair alike
 static void
-test_default_agree (const std::locale&, char)
+test_table_agree (const std::locale&, char)
 {
     // run once, from the wide pass
 }
 
 static void
-test_default_agree (const std::locale& loc, wchar_t)
+test_table_agree (const std::locale& loc, wchar_t)
 {
     const char    s1 []  = "er";
     const char    s2 []  = "c";
@@ -1038,7 +1031,7 @@ test_default_agree (const std::locale& loc, wchar_t)
     }
 
     rw_assert (!threw && nret == wret, __FILE__, __LINE__,
-               "default std::collate<char>::compare(\"er\", \"c\") "
+               "std::collate<char>::compare(\"er\", \"c\") "
                "== %d, std::collate<wchar_t>::compare(L\"er\", L\"c\") "
                "== %d%s", nret, wret, threw ? " (threw)" : "");
 }
@@ -1046,33 +1039,27 @@ test_default_agree (const std::locale& loc, wchar_t)
 
 template <class charT>
 void
-test_default_opts (const char* charTname, const std::locale& loc,
+test_table_order (const char* charTname, const std::locale& loc,
                    const std::collate<charT>& co)
 {
-    const int opts = co._C_opts;
-
-    co._C_opts &= ~(co._C_use_libc | co._C_use_libstd);
-
     // pairs whose order in the table is not their order by value
 
     // "a" is reordered after "b"
-    test_default_string (charTname, co, "a", "b", 1);
+    test_table_string (charTname, co, "a", "b", 1);
 
     // "0" weighs 16 and "a" 6
-    test_default_string (charTname, co, "0", "a", 1);
+    test_table_string (charTname, co, "0", "a", 1);
 
     // "e" weighs 139 and "f" 30
-    test_default_string (charTname, co, "e", "f", 1);
+    test_table_string (charTname, co, "e", "f", 1);
 
     // the collating element "er" sorts before "c"
-    test_default_string (charTname, co, "er", "c", -1);
+    test_table_string (charTname, co, "er", "c", -1);
 
     // the collating element "ic" is equivalent to "c"
-    test_default_string (charTname, co, "ic", "c", 0);
+    test_table_string (charTname, co, "ic", "c", 0);
 
-    test_default_agree (loc, charT ());
-
-    co._C_opts = opts;
+    test_table_agree (loc, charT ());
 }
 
 /**************************************************************************/
@@ -1150,15 +1137,9 @@ check_libstd (const char* charTname)
             const std::collate<charT> &co =
                 std::use_facet< std::collate<charT> >(loc);
 
-            co._C_opts |= co._C_use_libstd;
-            co._C_opts &= ~co._C_use_libc;
-
             typedef std::codecvt<charT, char, std::mbstate_t> CodeCvt;
 
             const CodeCvt &cvt = std::use_facet< CodeCvt >(loc);
-
-            cvt._C_opts |= cvt._C_use_libstd;
-            cvt._C_opts &= ~cvt._C_use_libc;
 
             // 'in' holds the strings from the input file and is there
             // sorting will take place.

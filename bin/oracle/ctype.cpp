@@ -157,10 +157,6 @@ int main (int argc, char* argv [])
     const std::ctype<wchar_t>& ct =
         std::use_facet<std::ctype<wchar_t> >(loc);
 
-    // the library's databases only, never the C library behind them
-    ct._C_opts |=  ct._C_use_libstd;
-    ct._C_opts &= ~ct._C_use_libc;
-
     std::wctype_t libc_class [nclasses];
     for (int i = 0; i < nclasses; ++i)
         libc_class [i] = std::wctype (classes [i].name);

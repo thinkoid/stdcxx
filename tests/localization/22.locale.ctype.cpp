@@ -1565,9 +1565,6 @@ void test_libstd (charT, const char *cname)
     const std::ctype<charT> &ct =
         std::use_facet< std::ctype<charT> >(loc);
 
-    ct._C_opts |=  ct._C_use_libstd;
-    ct._C_opts &= ~ct._C_use_libc;
-
     test_libstd_mask (charT (), cname, ct, locname);
     test_libstd_toupper_tolower (charT (), cname, ct, locname);
 
