@@ -570,6 +570,17 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         // that adjacent conversions separate themselves
         const _RWSTD_SIZE_T __dig = static_cast< _RWSTD_SIZE_T >(__data [4]);
 
+        // the upper bound on the value as read, before the adjustment
+        // and the factor apply, 99 for %y, whose bounds are the pivot's;
+        // as in the C library's strptime, a digit that would take the
+        // value past it is left for what follows: %d on "45" reads 4
+        const int __max = 'y' == __fmt ? 99
+            : (__data [3] - __data [0]) / __data [1];
+
+        // white space before the digits is skipped, as in strptime
+        while (__it != __end && __ctp.is (ctype_base::space, *__it))
+            ++__it;
+
         int __mem = 0;
 
         for ( ; ; ++__it, ++__nread) {
@@ -578,7 +589,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
                 break;
             }
 
-            if (__nread == __dig)
+            if (__nread == __dig || __max / 10 < __mem)
                 break;
 
             const char_type __c = *__it;

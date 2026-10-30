@@ -19,33 +19,50 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The numeric conversions of =time_get= read a digit glibc leaves
+** TODO =time_get= fails =%U= and =%W= outright
 
-glibc's =strptime= reads a numeric field only while one more digit
-keeps the value within the field's upper bound (=get_number=,
-~val * 10 <= to~): =%d= on "45" reads 4 and leaves "5", =%m= on "41"
-reads 4 and leaves "1". The library reads the field's digit count
-and fails the bound, so =%d= on "45" fails. XSH says only that
-leading zeros are permitted but not required. Seen in the probe that
-settled the digit counts.
+=__rw_get_timepunct= in =src/time_put.cpp= gives the week-number
+conversions a bound and a digit count but no =tm= member, under a
+=FIXME: implement= from the 2005 import; =do_get= then takes the
+"invalid format" branch and fails them. XSH's =strptime= lists both
+as valid directives; glibc reads the number and, with the year
+known, derives the weekday and the day of the year from it. The =%O=
+forms carry a bound of 52 where the plain ones carry 53. Seen while
+reading =do_get= against C++11's 22.4.5.1.2.
 
-Fix: a decision: follow glibc's early stop, or keep the fixed count
-and record the difference.
+Fix: read the number into a value =get='s walk can combine with the
+year and the weekday, as glibc does, or at least consume it with
+=%U='s and =%W='s bounds; the =%O= bounds made 53.
 
-Check: =22.locale.time.get= rows =%d= on "45" and =%m= on "41",
-either way, against a glibc probe.
+Check: =22.locale.time.get= rows =%U= and =%W= on "00", "53" and
+"54" against a glibc probe; the walk's rows for "%Y %U %w" if the
+derivation is implemented.
 
-** TODO The numeric conversions of =time_get= reject leading whitespace
+** TODO The alternative-digit path of =do_get= may not skip white space
 
-glibc's =strptime= skips white space before a numeric field; the
-digit loop of =do_get= does not, and the =22.locale.time.get= rows
-for =%d= and =%e= pin that. A hypothesis, not probed: XSH's
-=strptime= text decides whether the space belongs to the field.
+The numeric path of =do_get= skips white space before the digits, as
+glibc's =strptime= does. The name path the =%O= conversions take
+does not; whether glibc's =get_alt_number= skips it is not known. A
+hypothesis, not probed.
 
-Fix: open, after reading XSH; either the loop skips white space as
-glibc does, or the rows stand as the record.
+Fix: the name path skips white space under =%O= if the probe says
+glibc does.
 
-Check: a glibc probe of =%d= on " 3" beside the =%d= and =%e= rows.
+Check: =%Od= on " 3" under a locale with alternative digits, glibc
+against the library.
+
+** TODO =%EC= without era names falls to a one-digit number
+
+Under a locale with no eras =%EC= has no names and =do_get= takes
+the numeric path with a bound of 0 and no digit count, so it reads
+one digit and fails. glibc falls back to =%C= where the locale has
+no eras. A hypothesis from reading the table; not probed.
+
+Fix: =%EC=, =%Ey= and =%EY= without era data take the plain
+conversion's members, if the probe confirms glibc's behaviour.
+
+Check: =%EC= on "19" and =%Ey= on "26" in the C locale, glibc
+against the library.
 
 ** TODO The zeros fallback of =do_get= is not limited to =%O=
 

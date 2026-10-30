@@ -553,9 +553,15 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0,  3),  "030", 2, "d", 0, Good);
     TEST (T (0, 0, 0,  0), "0031", 2, "d", 0, Fail);
     TEST (T (0, 0, 0,  0),    "0", 1, "d", 0, Eof | Fail);
-    // leading whitespace not allowed
-    TEST (T (0, 0, 0,  0),   " 3", 0, "d", 0, Fail);
     TEST (T (0, 0, 0,  0),   "32", 2, "d", 0, Eof | Fail);
+    // a digit that would pass the bound is left, as in glibc's strptime
+    TEST (T (0, 0, 0,  4),   "45", 1, "d", 0, Good);
+    // leading whitespace skipped, as in glibc's strptime
+    TEST (T (0, 0, 0,  3),   " 3", 2, "d", 0, Eof);
+    TEST (T (0, 0, 0,  3),  "\t3", 2, "d", 0, Eof);
+    TEST (T (0, 0, 0, 12), "  12", 4, "d", 0, Eof);
+    TEST (T (0, 0, 0,  0),    " ", 1, "d", 0, Eof | Fail);
+    TEST (T (0, 0, 0,  0),   " x", 1, "d", 0, Fail);
 
     // %D The date as %m/%d/%y.
     STEP ("%D: the date as %m/%d/%y");
@@ -572,9 +578,10 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0,  9),   "9", 1, "e", 0, Eof);
     TEST (T (0, 0, 0, 31),  "31", 2, "e", 0, Eof);
     TEST (T (0, 0, 0,  0),   "0", 1, "e", 0, Eof | Fail);
-    // leading whitespace not allowed
-    TEST (T (0, 0, 0,  0),  " 2", 0, "e", 0, Fail);
-    TEST (T (0, 0, 0,  0),  "99", 2, "e", 0, Eof | Fail);
+    // leading whitespace skipped, as in glibc's strptime
+    TEST (T (0, 0, 0,  2),  " 2", 2, "e", 0, Eof);
+    // a digit that would pass the bound is left, as in glibc's strptime
+    TEST (T (0, 0, 0,  9),  "99", 1, "e", 0, Good);
 
     // %h Equivalent to %b.
     STEP ("%h: equivalent to %b");
@@ -607,7 +614,10 @@ void test_posix (charT, const char *cname)
     // at most two digits, as in glibc's strptime
     TEST (T (0, 0,  2), "023", 2, "H", 0, Good);
     TEST (T (0, 0,  2), "024", 2, "H", 0, Good);
-    TEST (T (0, 0,  0), "987", 2, "H", 0, Fail);
+    // one more digit is read only while ten times the value stays
+    // within the bound, as in glibc's strptime: 9 stops, 2 reads on
+    TEST (T (0, 0,  9), "987", 1, "H", 0, Good);
+    TEST (T (0, 0,  0),  "25", 2, "H", 0, Eof | Fail);
 
     // %I The hour (12-hour clock) [01,12]; leading zeros are permitted
     //    but not required.
@@ -657,7 +667,7 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 23),  "23", 2, "k", 0, Eof);
     TEST (T (0, 0,  2), "023", 2, "k", 0, Good);
     TEST (T (0, 0,  2), "024", 2, "k", 0, Good);
-    TEST (T (0, 0,  0), "987", 2, "k", 0, Fail);
+    TEST (T (0, 0,  9), "987", 1, "k", 0, Good);
 
 #endif   // __GLIBC__
 
@@ -680,6 +690,8 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0, 0,  1, 0), "02", 2, "m", 0, Eof);
     TEST (T (0, 0, 0, 0,  0, 0),  "0", 1, "m", 0, Eof | Fail);
     TEST (T (0, 0, 0, 0,  0, 0), "13", 2, "m", 0, Eof | Fail);
+    // a digit that would pass the bound is left, as in glibc's strptime
+    TEST (T (0, 0, 0, 0,  3, 0), "41", 1, "m", 0, Good);
 
     // %M The minute [00,59]; leading zeros are permitted but not required.
     STEP ("%M: the minute");
@@ -691,7 +703,8 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 19),  "19", 2, "M", 0, Eof);
     TEST (T (0, 29),  "29", 2, "M", 0, Eof);
     TEST (T (0, 59),  "59", 2, "M", 0, Eof);
-    TEST (T (0,  0),  "60", 2, "M", 0, Eof | Fail);
+    // a digit that would pass the bound is left, as in glibc's strptime
+    TEST (T (0,  6),  "60", 1, "M", 0, Good);
 
     // %n Any white space.
     STEP ("%n: any whitespace");
@@ -770,7 +783,7 @@ void test_posix (charT, const char *cname)
     TEST (T (0,  4, 23),    "23:04", 5, "R", 0, Eof);
     TEST (T (0,  3, 23), "23:03:00", 5, "R", 0, Good);
     TEST (T (0,  2, 23),  "23:2:01", 4, "R", 0, Good);
-    TEST (T (0,  0,  0),    "23:60", 5, "R", 0, Eof | Fail);
+    TEST (T (0,  6, 23),    "23:60", 4, "R", 0, Good);
     TEST (T (0,  0,  0),    "24:00", 2, "R", 0, Fail);
 
     // %S The seconds [00,60]; leading zeros are permitted but not required.
@@ -808,7 +821,7 @@ void test_posix (charT, const char *cname)
     TEST (T ( 0,  0,  0),  "23:59:61", 8, "T", 0, Eof | Fail);
     TEST (T ( 0,  0,  0),    "0:0:62", 6, "T", 0, Eof | Fail);
     TEST (T ( 0,  0,  0),       "0:0", 3, "T", 0, Eof | Fail);
-    TEST (T ( 0,  0,  0),       "999", 2, "T", 0, Fail);
+    TEST (T ( 0,  0,  0),       "999", 1, "T", 0, Fail);
 
     // %U The week number of the year (Sunday as the first day of the week)
     //    as a decimal number [00,53]; leading zeros are permitted but not
@@ -898,6 +911,10 @@ void test_posix (charT, const char *cname)
     TEST (T (60, 59, 23),               "235960", 6, "%H%M%S", 0, Eof);
     TEST (T ( 0,  0,  0,  0, 0, 126, 0, 300),
           "2026301", 7, "%Y%j", 0, Eof);
+    // and a field reads one more digit only while ten times its value
+    // stays within its bound
+    TEST (T ( 0,  0,  0,  4, 4),          "4512", 2, "%d%m",  0, Good);
+    TEST (T ( 0,  0,  0),                "25:30", 2, "%H:%M", 0, Fail);
 
     // %Z The time zone name, read and not converted, as the C library's
     //    strptime reads it: leading whitespace, then a run of other
@@ -1950,7 +1967,7 @@ void test_empty_ampm (charT, const char *cname, const char *locname)
     TEST (T (0, 0, 1),           "0", 0, "p",           0, Good);
     TEST (T (9, 5, 9),   "09:05:09 ", 9, "%I:%M:%S %p", 0, Eof);
     TEST (T (9, 5, 9), "09:05:09 PM", 9, "%I:%M:%S %p", 0, Good);
-    TEST (T (0, 0, 0),   "21:05:09 ", 2, "%I:%M:%S %p", 0, Fail);
+    TEST (T (0, 0, 0),   "21:05:09 ", 1, "%I:%M:%S %p", 0, Fail);
     TEST (T (9, 5, 9),   "09:05:09 ", 9, "r",           0, Eof);
     TEST (T (9, 5, 9),   "09:05:09 ", 9, "X",           0, Eof);
 }
