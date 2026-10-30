@@ -759,7 +759,7 @@ check_format (const std::lconv &lc)
         /* 014: 1 $- */ { { value, space, symbol, sign } },  // "\4\1\2\3"
 
         /* 020: - 1$ */ { { sign, space, value, symbol } },  // "\3\1\4\2"
-        /* 021: - 1$ */ { { sign, space, value, symbol } },  // "\3\\14\2"
+        /* 021: - 1$ */ { { sign, space, value, symbol } },  // "\3\1\4\2"
         /* 022: 1$ - */ { { value, symbol, space, sign } },  // "\4\2\1\3"
         /* 023: 1- $ */ { { value, sign, space, symbol } },  // "\4\3\1\2"
         /* 024: 1$ - */ { { value, symbol, space, sign } },  // "\4\2\1\3"

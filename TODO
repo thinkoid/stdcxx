@@ -19,17 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO Two pattern-table comments name the wrong pattern
-
-=src/punct.cpp= labels entry 013, ="\4\1\3\2"= {value, space, sign,
-symbol}, as ="\4\3\3\2"=; =tests/localization/22.locale.moneypunct.cpp=
-labels entry 021 as ="\3\\14\2"=. The data is right in both.
-
-Fix: the two comments.
-
-Check: none; the oracle's copy of the table reads the corrected
-comment.
-
 ** TODO The numeric conversions of =time_get= read a digit glibc leaves
 
 glibc's =strptime= reads a numeric field only while one more digit

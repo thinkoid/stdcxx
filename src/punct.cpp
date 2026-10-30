@@ -504,7 +504,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
         /* 010: -1 $ */ { { sign, value, space, symbol } },  // "\3\4\1\2"
         /* 011: -1 $ */ { { sign, value, space, symbol } },  // "\3\4\1\2"
         /* 012: 1 $- */ { { value, space, symbol, sign } },  // "\4\1\2\3"
-        /* 013: 1 -$ */ { { value, space, sign, symbol } },  // "\4\3\3\2"
+        /* 013: 1 -$ */ { { value, space, sign, symbol } },  // "\4\1\3\2"
         /* 014: 1 $- */ { { value, space, symbol, sign } },  // "\4\1\2\3"
 
         /* 020: - 1$ */ { { sign, space, value, symbol } },  // "\3\1\4\2"
