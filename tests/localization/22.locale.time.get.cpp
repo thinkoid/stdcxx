@@ -1378,13 +1378,9 @@ locale_root;
 
 
 static const char*
-make_LC_TIME (const time_data *td)
+make_LC_TIME (const time_data *td, const char *name,
+              char *locnamebuf, std::size_t bufsize)
 {
-    static char locnamebuf [1024];
-
-    if (*locnamebuf)
-        return locnamebuf;
-
     // create a temporary locale definition file
     char srcfname [1024];
     if (rw_snprintf (srcfname, sizeof srcfname, "%s%c%s",
@@ -1544,19 +1540,30 @@ make_LC_TIME (const time_data *td)
     std::fclose (fout);
 
     // process the locale definition file and the character map
+    // rw_localedef() returns its own buffer, which the next call reuses
     const char* const locname =
-        rw_localedef ("-w ", srcfname, cmfname, "test-locale");
+        rw_localedef ("-w ", srcfname, cmfname, name);
 
-    if (locname && (std::strlen(locname) < sizeof locnamebuf))
+    if (locname && (std::strlen(locname) < bufsize)) {
         std::strcpy (locnamebuf, locname);
+        return locnamebuf;
+    }
 
-    return locname;
+    return 0;
 }
 
 
+// with empty_ampm, the twin of the user-defined locale whose am_pm is
+// two empty strings and whose %X is %r with an empty t_fmt_ampm, as
+// in hy_AM, sm_WS and su_ID
 static const char*
-make_LC_TIME ()
+make_LC_TIME (bool empty_ampm)
 {
+    static char locnamebuf [2][1024];
+
+    if (*locnamebuf [empty_ampm])
+        return locnamebuf [empty_ampm];
+
     // 70 symbols, more than the 64 bits of one size_t that once held
     // the names, short of the 100 that localedef allows; time_get
     // reads plain digits only for a value that has no symbol, or for
@@ -1611,7 +1618,7 @@ make_LC_TIME ()
         { INT_MIN /* sentinel entry */, 0, 0, 0, 0, 0, 0, 0, 0 }
     };
 
-    const time_data td = {
+    time_data td = {
         // %a
         { "[Sun]", "[Mon]", "[Tue]", "[Wed]", "[Thu]", "[Fri]", "[Sat]" },
 
@@ -1647,9 +1654,15 @@ make_LC_TIME ()
         alt_digits, era
     };
 
-    const char* const locname = make_LC_TIME (&td);
+    if (empty_ampm) {
+        td.am_pm [0]  = "";
+        td.am_pm [1]  = "";
+        td.t_fmt      = "%r";
+        td.t_fmt_ampm = "";
+    }
 
-    return locname;
+    return make_LC_TIME (&td, empty_ampm ? "test-locale-ampm" : "test-locale",
+                         locnamebuf [empty_ampm], sizeof *locnamebuf);
 }
 
 /**************************************************************************/
@@ -1904,6 +1917,46 @@ void test_user (charT, const char *cname, const char *locname)
 
 /**************************************************************************/
 
+
+template <class charT>
+void test_empty_ampm (charT, const char *cname, const char *locname)
+{
+    rw_info (0, 0, __LINE__,
+             "std::time_get<%s>, in locale(\"%s\") "
+             "created from a generated LC_TIME file with an empty am_pm",
+             cname, locname);
+
+    std::locale loc;
+
+    try {
+        loc = std::locale (loc, locname, std::locale::time);
+    }
+    catch (...) {
+        rw_error (0, 0, __LINE__,
+                  "locale (locale (), \"%s\", locale::time) "
+                  "unexpectedly threw an exception", locname);
+        return;
+    }
+
+    std::locale::global (loc);
+
+    // an empty AM name matches at once, as in the C library's strptime,
+    // which tries the AM name first; the PM name is never reached, so
+    // time_put's "09:05:09 " of 21:05:09 reads back as 09:05:09; nor
+    // does %p read the zeros of an empty alternative digit 0
+    STEP ("%p with an empty am_pm: the empty AM name matches");
+    TEST (T (0, 0, 1),            "", 0, "p",           0, Eof);
+    TEST (T (0, 0, 1),           "x", 0, "p",           0, Good);
+    TEST (T (0, 0, 1),           "0", 0, "p",           0, Good);
+    TEST (T (9, 5, 9),   "09:05:09 ", 9, "%I:%M:%S %p", 0, Eof);
+    TEST (T (9, 5, 9), "09:05:09 PM", 9, "%I:%M:%S %p", 0, Good);
+    TEST (T (0, 0, 0),   "21:05:09 ", 2, "%I:%M:%S %p", 0, Fail);
+    TEST (T (9, 5, 9),   "09:05:09 ", 9, "r",           0, Eof);
+    TEST (T (9, 5, 9),   "09:05:09 ", 9, "X",           0, Eof);
+}
+
+/**************************************************************************/
+
 static int
 run_test (int, char**)
 {
@@ -1949,18 +2002,25 @@ run_test (int, char**)
     std::locale::global (std::locale ("C"));
 
     // create a LC_TIME database based on user-defined data
-    locname = make_LC_TIME ();
+    locname = make_LC_TIME (false);
 
-    if (!locname) {
+    // and its twin with an empty am_pm
+    const char* const ampm_locname = make_LC_TIME (true);
+
+    if (!locname || !ampm_locname) {
         rw_error (0, 0, __LINE__, "failed to generate LC_TIME locale data");
         return 0;
     }
 
     test_user (char (), "char", locname);
 
+    test_empty_ampm (char (), "char", ampm_locname);
+
     test_posix (wchar_t (), "wchar_t");
 
     test_user (wchar_t (), "wchar_t", locname);
+
+    test_empty_ampm (wchar_t (), "wchar_t", ampm_locname);
 
     // reset the gloab locale to free up resources (such as file
     // descriptors used by time_get_byname to map locale databases)

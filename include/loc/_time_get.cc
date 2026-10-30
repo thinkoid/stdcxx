@@ -470,8 +470,16 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         // the `names' array
         int __interr = int (__dup);
 
-        __it = __rw::__rw_match_name (__it, __end, __names, __sizes,
-                                     __cnt, __inx, __interr, &__fl);
+        if ('p' == __fmt && 0 == __sizes [0]) {
+            // an empty AM name matches at once, as in the C library's
+            // strptime, which tries the AM name first; the PM name is
+            // never reached
+            __inx    = 0;
+            __interr = __it == __end ? _RWSTD_IOS_EOFBIT : 0;
+        }
+        else
+            __it = __rw::__rw_match_name (__it, __end, __names, __sizes,
+                                         __cnt, __inx, __interr, &__fl);
 
         __errtmp = _RWSTD_IOSTATE (__interr);
 
