@@ -473,7 +473,7 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0, 0, 0,     1),  "1901", 4, "Y", 0, Eof);
     TEST (T (0, 0, 0, 0, 0,    99),  "1999", 4, "Y", 0, Eof);
     TEST (T (0, 0, 0, 0, 0,   102),  "2002", 4, "Y", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, 98099), "99999", 5, "Y", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0,  8099), "99999", 4, "Y", 0, Good);
 
     FUNCTION ("get");
 
@@ -538,7 +538,9 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0, 0, 0,   200),  "21", 2, "C", 0, Eof);
     TEST (T (0, 0, 0, 0, 0,  1300),  "32", 2, "C", 0, Eof);
     TEST (T (0, 0, 0, 0, 0,  8000),  "99", 2, "C", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0,     0), "100", 3, "C", 0, Eof | Fail);
+    // at most two digits, as in glibc's strptime
+    TEST (T (0, 0, 0, 0, 0,  -900),  "100", 2, "C", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,     0), "1926", 2, "C", 0, Good);
 
     // %d The day of the month [01,31]; leading zeros are permitted but not
     //    required.
@@ -547,8 +549,9 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0,  2),   "02", 2, "d", 0, Eof);
     TEST (T (0, 0, 0, 28),   "28", 2, "d", 0, Eof);
     TEST (T (0, 0, 0, 29),   "29", 2, "d", 0, Eof);
-    TEST (T (0, 0, 0, 30),  "030", 3, "d", 0, Eof);
-    TEST (T (0, 0, 0, 31), "0031", 4, "d", 0, Eof);
+    // at most two digits, as in glibc's strptime
+    TEST (T (0, 0, 0,  3),  "030", 2, "d", 0, Good);
+    TEST (T (0, 0, 0,  0), "0031", 2, "d", 0, Fail);
     TEST (T (0, 0, 0,  0),    "0", 1, "d", 0, Eof | Fail);
     // leading whitespace not allowed
     TEST (T (0, 0, 0,  0),   " 3", 0, "d", 0, Fail);
@@ -558,7 +561,7 @@ void test_posix (charT, const char *cname)
     STEP ("%D: the date as %m/%d/%y");
     TEST (T (0, 0, 0, 14, 3, 102),      "4/14/2",  6, "D", 0, Eof);
     TEST (T (0, 0, 0, 14, 3, 102),    "04/14/02",  8, "D", 0, Eof);
-    TEST (T (0, 0, 0, 14, 3, 102),   "04/14/002",  9, "D", 0, Eof);
+    TEST (T (0, 0, 0, 14, 3, 100),   "04/14/002",  8, "D", 0, Good);
     TEST (T (0, 0, 0,  0, 0,   0),    "0/1/2002",  1, "D", 0, Fail);
     TEST (T (0, 0, 0,  0, 0,   0),    "4/0/2002",  3, "D", 0, Fail);
     TEST (T (0, 0, 0,  0, 0,   0),   "4/32/2002",  4, "D", 0, Fail);
@@ -593,7 +596,7 @@ void test_posix (charT, const char *cname)
     STEP ("%H: the hour (24-hour clock)");
     TEST (T (0, 0,  0),   "0", 1, "H", 0, Eof);
     TEST (T (0, 0,  0),  "00", 2, "H", 0, Eof);
-    TEST (T (0, 0,  0), "000", 3, "H", 0, Eof);
+    TEST (T (0, 0,  0), "000", 2, "H", 0, Good);
     TEST (T (0, 0,  1),   "1", 1, "H", 0, Eof);
     TEST (T (0, 0,  2),   "2", 1, "H", 0, Eof);
     TEST (T (0, 0,  3),   "3", 1, "H", 0, Eof);
@@ -601,9 +604,10 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 12),  "12", 2, "H", 0, Eof);
     TEST (T (0, 0, 13),  "13", 2, "H", 0, Eof);
     TEST (T (0, 0, 23),  "23", 2, "H", 0, Eof);
-    TEST (T (0, 0, 23), "023", 3, "H", 0, Eof);
-    TEST (T (0, 0,  0), "024", 3, "H", 0, Eof | Fail);
-    TEST (T (0, 0,  0), "987", 3, "H", 0, Eof | Fail);
+    // at most two digits, as in glibc's strptime
+    TEST (T (0, 0,  2), "023", 2, "H", 0, Good);
+    TEST (T (0, 0,  2), "024", 2, "H", 0, Good);
+    TEST (T (0, 0,  0), "987", 2, "H", 0, Fail);
 
     // %I The hour (12-hour clock) [01,12]; leading zeros are permitted
     //    but not required.
@@ -621,8 +625,9 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 10),  "11", 2, "I", 0, Eof);
     TEST (T (0, 0, 11),  "12", 2, "I", 0, Eof);
     TEST (T (0, 0,  0),  "13", 2, "I", 0, Eof | Fail);
-    TEST (T (0, 0,  0), "013", 3, "I", 0, Eof | Fail);
-    TEST (T (0, 0,  0), "123", 3, "I", 0, Eof | Fail);
+    // at most two digits, as in glibc's strptime
+    TEST (T (0, 0,  0), "013", 2, "I", 0, Good);
+    TEST (T (0, 0, 11), "123", 2, "I", 0, Good);
     TEST (T (0, 0,  0),   "0", 1, "I", 0, Eof | Fail);
 
     // %j The day number of the year [001,366]; leading zeros are permitted
@@ -633,6 +638,8 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0, 0, 0, 0, 0,   9),  "10", 2, "j", 0, Eof);
     TEST (T (0, 0, 0, 0, 0, 0, 0, 364), "365", 3, "j", 0, Eof);
     TEST (T (0, 0, 0, 0, 0, 0, 0, 365), "366", 3, "j", 0, Eof);
+    // at most three digits, as in glibc's strptime
+    TEST (T (0, 0, 0, 0, 0, 0, 0, 122), "1234", 3, "j", 0, Good);
     TEST (T (0, 0, 0, 0, 0, 0, 0,   0),   "0", 1, "j", 0, Eof | Fail);
     TEST (T (0, 0, 0, 0, 0, 0, 0,   0), "367", 3, "j", 0, Eof | Fail);
 
@@ -648,9 +655,9 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 12),  "12", 2, "k", 0, Eof);
     TEST (T (0, 0, 13),  "13", 2, "k", 0, Eof);
     TEST (T (0, 0, 23),  "23", 2, "k", 0, Eof);
-    TEST (T (0, 0, 23), "023", 3, "k", 0, Eof);
-    TEST (T (0, 0,  0), "024", 3, "k", 0, Eof | Fail);
-    TEST (T (0, 0,  0), "987", 3, "k", 0, Eof | Fail);
+    TEST (T (0, 0,  2), "023", 2, "k", 0, Good);
+    TEST (T (0, 0,  2), "024", 2, "k", 0, Good);
+    TEST (T (0, 0,  0), "987", 2, "k", 0, Fail);
 
 #endif   // __GLIBC__
 
@@ -678,7 +685,7 @@ void test_posix (charT, const char *cname)
     STEP ("%M: the minute");
     TEST (T (0,  0),   "0", 1, "M", 0, Eof);
     TEST (T (0,  0),  "00", 2, "M", 0, Eof);
-    TEST (T (0,  0), "000", 3, "M", 0, Eof);
+    TEST (T (0,  0), "000", 2, "M", 0, Good);
     TEST (T (0,  1),   "1", 1, "M", 0, Eof);
     TEST (T (0,  2),   "2", 1, "M", 0, Eof);
     TEST (T (0, 19),  "19", 2, "M", 0, Eof);
@@ -770,7 +777,7 @@ void test_posix (charT, const char *cname)
     STEP ("%S: the seconds");
     TEST (T ( 0),   "0", 1, "S", 0, Eof);
     TEST (T ( 1),  "01", 2, "S", 0, Eof);
-    TEST (T ( 2), "002", 3, "S", 0, Eof);
+    TEST (T ( 0), "002", 2, "S", 0, Good);
     TEST (T (13),  "13", 2, "S", 0, Eof);
     TEST (T (24),  "24", 2, "S", 0, Eof);
     TEST (T (34),  "34", 2, "S", 0, Eof);
@@ -794,14 +801,14 @@ void test_posix (charT, const char *cname)
     TEST (T ( 3, 59,  0),    "0:59:3", 6, "T", 0, Eof);
     TEST (T ( 4, 48,  1),   "1:48:04", 7, "T", 0, Eof);
     TEST (T ( 5, 37, 11),   "11:37:5", 7, "T", 0, Eof);
-    TEST (T ( 6, 26, 19), "19:26:006", 9, "T", 0, Eof);
-    TEST (T ( 7, 15, 22),  "22:015:7", 8, "T", 0, Eof);
-    TEST (T ( 8,  4, 23), "023:004:8", 9, "T", 0, Eof);
-    TEST (T (60, 59, 23), "023:59:60", 9, "T", 0, Eof);
+    TEST (T ( 0, 26, 19), "19:26:006", 8, "T", 0, Good);
+    TEST (T ( 0,  0,  0),  "22:015:7", 5, "T", 0, Fail);
+    TEST (T ( 0,  0,  0), "023:004:8", 2, "T", 0, Fail);
+    TEST (T ( 0,  0,  0), "023:59:60", 2, "T", 0, Fail);
     TEST (T ( 0,  0,  0),  "23:59:61", 8, "T", 0, Eof | Fail);
     TEST (T ( 0,  0,  0),    "0:0:62", 6, "T", 0, Eof | Fail);
     TEST (T ( 0,  0,  0),       "0:0", 3, "T", 0, Eof | Fail);
-    TEST (T ( 0,  0,  0),       "999", 3, "T", 0, Eof | Fail);
+    TEST (T ( 0,  0,  0),       "999", 2, "T", 0, Fail);
 
     // %U The week number of the year (Sunday as the first day of the week)
     //    as a decimal number [00,53]; leading zeros are permitted but not
@@ -813,15 +820,17 @@ void test_posix (charT, const char *cname)
     //    Sunday; leading zeros are permitted but not required.
     STEP ("%w: the Sunday-based weekday as a decimal number");
     TEST (T (0, 0, 0, 0, 0, 0, 0),  "0", 1, "w", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, 0, 0), "00", 2, "w", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0), "00", 1, "w", 0, Good);
     TEST (T (0, 0, 0, 0, 0, 0, 1),  "1", 1, "w", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, 0, 1), "01", 2, "w", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0), "01", 1, "w", 0, Good);
     TEST (T (0, 0, 0, 0, 0, 0, 2),  "2", 1, "w", 0, Eof);
     TEST (T (0, 0, 0, 0, 0, 0, 3),  "3", 1, "w", 0, Eof);
     TEST (T (0, 0, 0, 0, 0, 0, 4),  "4", 1, "w", 0, Eof);
     TEST (T (0, 0, 0, 0, 0, 0, 5),  "5", 1, "w", 0, Eof);
     TEST (T (0, 0, 0, 0, 0, 0, 6),  "6", 1, "w", 0, Eof);
     TEST (T (0, 0, 0, 0, 0, 0, 0),  "7", 1, "w", 0, Eof | Fail);
+    // one digit, as in glibc's strptime
+    TEST (T (0, 0, 0, 0, 0, 0, 1), "12", 1, "w", 0, Good);
 
     // %W The week number of the year (Monday as the first day of the
     //    week) as a decimal number [00,53]; leading zeros are permitted
@@ -831,7 +840,8 @@ void test_posix (charT, const char *cname)
 
     // %x The date, using the locale's date format.
     STEP ("%x: the date");
-    TEST (T (0, 0, 0, 25, 6, 67), "7/25/1967", 9, "%x", 0, Eof);
+    TEST (T (0, 0, 0, 25, 6, 167),   "7/25/67", 7, "%x", 0, Eof);
+    TEST (T (0, 0, 0, 25, 6, 119), "7/25/1967", 7, "%x", 0, Good);
 
     // %X The time, using the locale's time format.
     STEP ("%X: the time");
@@ -856,8 +866,9 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0, 0, 0,   168),   "68", 2, "%y", 0, Eof);
     TEST (T (0, 0, 0, 0, 0,    69),   "69", 2, "%y", 0, Eof);
     TEST (T (0, 0, 0, 0, 0,    99),   "99", 2, "%y", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0, -1800),  "100", 3, "%y", 0, Eof);
-    TEST (T (0, 0, 0, 0, 0,   102), "2002", 4, "%y", 0, Eof);
+    // at most two digits, as in glibc's strptime
+    TEST (T (0, 0, 0, 0, 0,   110),  "100", 2, "%y", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,   120), "2026", 2, "%y", 0, Good);
 
     // %Y The year, including the century (for example, 1988).
     STEP ("%Y: the year, including the century");
@@ -872,11 +883,21 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0,  0, 0,   126),       "20 26",  5, "%C %y",    0, Eof);
     TEST (T (0, 0, 0,  0, 0, -1801),       "00 99",  5, "%C %y",    0, Eof);
     TEST (T (0, 0, 0,  0, 0,    26),       "19/26",  5, "%C/%y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,    26),        "1926",  4, "%C%y",     0, Eof);
     TEST (T (0, 0, 0,  0, 0,    26),       "26 19",  5, "%y %C",    0, Eof);
     TEST (T (0, 0, 0, 14, 3,    26), "19 04/14/26", 11, "%C %D",    0, Eof);
     TEST (T (0, 0, 0, 14, 3,    26), "04/14/26 19", 11, "%D %C",    0, Eof);
     TEST (T (0, 0, 0,  0, 0,    26),     "20 1926",  7, "%C %Y",    0, Eof);
     TEST (T (0, 0, 0,  0, 0,    26),  "20 99 1926", 10, "%C %y %Y", 0, Eof);
+
+    // each numeric conversion reads at most two digits, %j three and %Y
+    // four, as in glibc's strptime, so that adjacent ones separate
+    STEP ("adjacent numeric conversions");
+    TEST (T ( 0,  0,  0, 14, 3, 126),   "041426", 6, "%m%d%y", 0, Eof);
+    TEST (T ( 0,  0,  0, 28, 9, 126), "20261028", 8, "%Y%m%d", 0, Eof);
+    TEST (T (60, 59, 23),               "235960", 6, "%H%M%S", 0, Eof);
+    TEST (T ( 0,  0,  0,  0, 0, 126, 0, 300),
+          "2026301", 7, "%Y%j", 0, Eof);
 
     // %Z The time zone name, read and not converted, as the C library's
     //    strptime reads it: leading whitespace, then a run of other

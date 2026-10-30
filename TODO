@@ -19,28 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The numeric conversions of =time_get= read every digit
-
-=do_get= in =include/loc/_time_get.cc= reads digits until a
-non-digit, with no field width: =%C= on "1926" reads 1926 and fails
-the century's bound, so "%C%y" on "1926" cannot parse, and =%y= on
-"2026" reads a full year, an extension of the library, which the
-format walk cannot tell from two digits ("%C %y" on "19 2026" gives
-1926: the century wins). glibc's =strptime= reads at most two digits
-for =%C=, =%d=, =%e=, =%H=, =%I=, =%m=, =%M=, =%S=, =%U=, =%W=, =%y=,
-three for =%j= and four for =%Y=, so adjacent conversions separate
-themselves. Seen while pinning =%C= with =%y=: the rows had to take
-separators.
-
-Fix: a digit count per conversion beside the bounds in
-=__rw_get_timepunct='s data (=src/time_put.cpp=), honoured by the
-digit loop of =do_get=; a decision on =%y= above 99, which XSH does
-not allow and the library takes as a full year.
-
-Check: =22.locale.time.get= rows "%C%y" on "1926" -> 26, "%m%d%y" on
-"041426" -> April 14 2026, "%Y%m%d" on "20261028"; the existing
-"%C" on "100" row (Fail now) re-read.
-
 ** TODO The narrow facet matches multibyte names byte by byte
 
 =__rw_match_name= compares one =char= at a time, so under a UTF-8
@@ -106,6 +84,34 @@ Fix: the two comments.
 
 Check: none; the oracle's copy of the table reads the corrected
 comment.
+
+** TODO The numeric conversions of =time_get= read a digit glibc leaves
+
+glibc's =strptime= reads a numeric field only while one more digit
+keeps the value within the field's upper bound (=get_number=,
+~val * 10 <= to~): =%d= on "45" reads 4 and leaves "5", =%m= on "41"
+reads 4 and leaves "1". The library reads the field's digit count
+and fails the bound, so =%d= on "45" fails. XSH says only that
+leading zeros are permitted but not required. Seen in the probe that
+settled the digit counts.
+
+Fix: a decision: follow glibc's early stop, or keep the fixed count
+and record the difference.
+
+Check: =22.locale.time.get= rows =%d= on "45" and =%m= on "41",
+either way, against a glibc probe.
+
+** TODO The numeric conversions of =time_get= reject leading whitespace
+
+glibc's =strptime= skips white space before a numeric field; the
+digit loop of =do_get= does not, and the =22.locale.time.get= rows
+for =%d= and =%e= pin that. A hypothesis, not probed: XSH's
+=strptime= text decides whether the space belongs to the field.
+
+Fix: open, after reading XSH; either the loop skips white space as
+glibc does, or the rows stand as the record.
+
+Check: a glibc probe of =%d= on " 3" beside the =%d= and =%e= rows.
 
 * Tests
 

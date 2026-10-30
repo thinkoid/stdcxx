@@ -37,7 +37,7 @@ namespace __rw {
 
 _RWSTD_EXPORT _RWSTD_SIZE_T
 __rw_get_timepunct (const __rw_facet *pfacet,
-                    int data [4], _RWSTD_C::tm *tmb, int **pmem,
+                    int data [5], _RWSTD_C::tm *tmb, int **pmem,
                     const void *names[], _RWSTD_SIZE_T sizes[]);
 
 }   // namespace __rw
@@ -84,8 +84,8 @@ do_date_order () const
     tm   __tmp  = tm ();
     int *__pmem = 0;
 
-    int __data [4] = {
-        'x', '\0', sizeof (char_type) > sizeof (char), 0
+    int __data [5] = {
+        'x', '\0', sizeof (char_type) > sizeof (char), 0, 0
     };
 
     // the x format, a single string stored in `names [0]'
@@ -435,10 +435,10 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
     default: __dup = 1;
     }
 
-    int __data [4] = {
+    int __data [5] = {
         // array of input data for __rw_get_timepunct will on output
         // contain data needed to interpret values parsed below
-        __fmt, __modifier, sizeof (char_type) > sizeof (char), 0
+        __fmt, __modifier, sizeof (char_type) > sizeof (char), 0, 0
     };
 
     // get the number of punctuator (or format) string(s) and their values
@@ -557,6 +557,11 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
         _RWSTD_SIZE_T __nread = 0;
 
+        // the most digits to read, as in the C library's strptime: 2 for
+        // %y and the other two-digit fields, 3 for %j and 4 for %Y, so
+        // that adjacent conversions separate themselves
+        const _RWSTD_SIZE_T __dig = static_cast< _RWSTD_SIZE_T >(__data [4]);
+
         int __mem = 0;
 
         for ( ; ; ++__it, ++__nread) {
@@ -564,6 +569,9 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
                 __err |= __rw::__rw_eofbit;
                 break;
             }
+
+            if (__nread == __dig)
+                break;
 
             const char_type __c = *__it;
             if (!__ctp.is (ctype_base::digit, __c))
@@ -591,18 +599,11 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
                 // years 1969 to 1999 inclusive, and values in the range
                 // [00,68] shall refer to years 2000 to 2068 inclusive.
 
-                if (__mem > 99) {
-                    __lob  = -1900;
-                    __hib  = _RWSTD_INT_MAX - 1900;
-                    __mem -= 1900;
-                }
-                else {
-                    __lob =  69;
-                    __hib = 168;
+                __lob =  69;
+                __hib = 168;
 
-                    if (__mem < 69)
-                        __mem += 100;
-                }
+                if (__mem < 69)
+                    __mem += 100;
             }
 
             *__pmem = __mem * __fac + __adj;

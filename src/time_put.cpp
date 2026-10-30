@@ -1001,7 +1001,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
 
 _RWSTD_EXPORT size_t
 __rw_get_timepunct (const __rw_facet *pfacet,
-                    int data [4], tm *tmb, int **pmem,
+                    int data [5], tm *tmb, int **pmem,
                     const void *names[], size_t sizes[])
 {
     enum _Fmt {   // for convenience
@@ -1030,11 +1030,13 @@ __rw_get_timepunct (const __rw_facet *pfacet,
     int &fac = data [1];   // value to multiply computed result by
     int &lob = data [2];   // lower bound on valid input value
     int &hib = data [3];   // higher bound on valid input value
+    int &dig = data [4];   // maximum number of digits to read
 
     adj = 0;
     fac = 1;
     lob = 0;
     hib = 0;
+    dig = _RWSTD_INT_MAX;
 
     const void** pv =
         reinterpret_cast< const void** >(names);
@@ -1092,6 +1094,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             fac   = 100;
             lob   = -1900;
             hib   = 8000;
+            dig   = 2;
             break;
 
         case 'd': case 'e':
@@ -1100,12 +1103,14 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             *pmem = &tmb->tm_mday;
             lob   = 1;
             hib   = 31;
+            dig   = 2;
             break;
 
         case 'H':
             // %OH: hour (24-hour clock) using alternative numeric symbols
             *pmem = &tmb->tm_hour;
             hib   = 23;
+            dig   = 2;
             break;
 
         case 'I':
@@ -1114,6 +1119,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             *pmem = &tmb->tm_hour;
             adj   = -1;
             hib   = 11;
+            dig   = 2;
             break;
 
         case 'm':
@@ -1121,12 +1127,14 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             *pmem = &tmb->tm_mon;
             adj   = -1;
             hib   = 11;
+            dig   = 2;
             break;
 
         case 'M':
             // %OM: minutes using alternative numeric symbols
             *pmem = &tmb->tm_min;
             hib   = 59;
+            dig   = 2;
             break;
 
         case 'p': {
@@ -1145,6 +1153,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             // %OS seconds using alternative numeric symbols
             *pmem = &tmb->tm_sec;
             hib   = 60;
+            dig   = 2;
             break;
 
         case 'U':
@@ -1152,6 +1161,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             //      using alternative numeric symbols
             // FIXME: implement
             hib = 52;
+            dig = 2;
             break;
 
         case 'W':
@@ -1159,18 +1169,21 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             //      using alternative numeric symbols
             // FIXME: implement
             hib = 52;
+            dig = 2;
             break;
 
         case 'w':
             // %Ow: Sunday-based weekday using alternative numeric symbols
             *pmem = &tmb->tm_wday;
             hib   = 6;
+            dig   = 1;
             break;
 
         case 'y':
             // %Oy: year (offset from %C) using alternative numeric symbols
             *pmem = &tmb->tm_year;
             hib   = 99;
+            dig   = 2;
             break;
 
         default:
@@ -1198,6 +1211,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             fac   = 100;
             lob   = -1900;
             hib   = 8000;
+            dig   = 2;
             *pmem = &tmb->tm_year;
             break;
 
@@ -1216,12 +1230,14 @@ __rw_get_timepunct (const __rw_facet *pfacet,
         case 'd': case 'e':   // day of month [01..31]
             lob   = 1;
             hib   = 31;
+            dig   = 2;
             *pmem = &tmb->tm_mday;
             break;
 
         case 'k':   // popular extension (AIX, Linux, Solaris)
         case 'H':   // hour [00..23]
             hib   = 23;
+            dig   = 2;
             *pmem = &tmb->tm_hour;
             break;
 
@@ -1229,23 +1245,27 @@ __rw_get_timepunct (const __rw_facet *pfacet,
         case 'I':   // hour [01..12]
             adj   = -1;
             hib   = 11;
+            dig   = 2;
             *pmem = &tmb->tm_hour;
             break;
 
         case 'j':   // day number of the year [001..366]
             adj   = -1;
             hib   = 365;
+            dig   = 3;
             *pmem = &tmb->tm_yday;
             break;
 
         case 'M':   // minutes [00..59]
             hib   = 59;
+            dig   = 2;
             *pmem = &tmb->tm_min;
             break;
 
         case 'm':   // month [00..11]
             adj   = -1;
             hib   = 11;
+            dig   = 2;
             *pmem = &tmb->tm_mon;
             break;
 
@@ -1287,6 +1307,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
 
         case 'S':   // seconds [00..60]
             hib   = 60;
+            dig   = 2;
             *pmem = &tmb->tm_sec;
             break;
 
@@ -1301,16 +1322,19 @@ __rw_get_timepunct (const __rw_facet *pfacet,
         
         case 'U':   // Sunday-based week number [00..53]
             hib = 53;
+            dig = 2;
             // FIXME: implement
             break;
 
         case 'W':   // Monday-based week number [00..53]
             hib = 53;
+            dig = 2;
             // FIXME: implement
             break;
 
         case 'w':   // Sunday-based weekday [0..6]
             hib   = 6;
+            dig   = 1;
             *pmem = &tmb->tm_wday;
             break;
 
@@ -1323,6 +1347,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             break;
 
         case 'y':   // 2-digit year, [00..99]
+            dig   = 2;
             *pmem = &tmb->tm_year;
             break;
         
@@ -1330,6 +1355,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             adj   = -1900;
             lob   = -1900;
             hib   = _RWSTD_INT_MAX - 1900;
+            dig   = 4;
             *pmem = &tmb->tm_year;
             break;
 
