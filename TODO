@@ -86,12 +86,16 @@ round trip of =%C= and =%y= at -543.
 =do_get= for =%C= keeps the two low digits it finds in =tm_year= as
 ~(tm_year + 1900) % 100~, which is negative for a year before 0, so
 "%y %C" with such a =tm= combines wrongly. No row covers it; seen in
-e438cc11's review. XSH's =strftime= defines =%C= as the year divided
-by 100 "and truncated to an integer" and =%y= as the last two digits
-in [00,99]; for a year before 0 the two do not recompose. glibc
-floors the century so that they do, and 11087a6a took that for
-=time_put=: the year within the century is the non-negative offset
-from the century's start.
+e438cc11's review. C11 7.27.3.5 and XSH define =%C= as the year
+divided by 100 "and truncated to an integer, as a decimal number
+(00-99)" and =%y= as "the last 2 digits of the year as a decimal
+number (00-99)"; a year before 0 has no =%C= in that range, so such
+years lie outside the domain either conversion specifies, and the
+literal reading, -5 and 43 for -543, is no reading at all. glibc
+extends both past 0 with the floor, so that the century times 100
+plus the two digits is the year and =strptime= reads what =strftime=
+wrote; 11087a6a took that convention for =time_put=: the year within
+the century is the non-negative offset from the century's start.
 
 Fix: the same floor, the same expression as 11087a6a:
 ~((tm_year + 1900) % 100 + 100) % 100~, so that =%C= times 100 plus
