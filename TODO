@@ -19,31 +19,62 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO The alternative-digit path of =do_get= may not skip white space
+** TODO The =%E= conversions of =time_get= are unimplemented or wrong
 
-The numeric path of =do_get= skips white space before the digits, as
-glibc's =strptime= does. The name path the =%O= conversions take
-does not; whether glibc's =get_alt_number= skips it is not known. A
-hypothesis, not probed.
+Probed on 2026-10-30 against glibc 2.44, narrow and wide alike.
+Without era data, =%EC= takes the numeric path with a bound of 0
+and fails ("19": glibc falls back to =%C=); =%Ey= names no member
+under a 2005 =FIXME= and fails with nothing consumed ("26": glibc's
+own =%Ey= reads four digits first and fails a lone "26" too); =%EY=
+sets only the era formats and fails ("2026": glibc falls back to
+=%Y=). With era data, under =ja_JP=, =%EC= stores the matched era's
+INDEX in =tm_year= ("令和" gives 0; glibc gives the era's year), and
+"平成" fails after consuming the name; =%EC%Ey= on "令和8" and =%EY=
+on "令和8年" fail where glibc reads 2026. =time_put= writes all of
+them and =bin/oracle/time.cpp= checks it against the C library, so
+the parsing side is the gap. C++11 22.4.5.1.2 p13 permits =eofbit=
+and unspecified members where an =E= directive cannot be resolved,
+which bounds what a fix owes. The probe programs are under
+=~/build/stdcxx-build/handover-20261030/probe= (run.sh).
 
-Fix: the name path skips white space under =%O= if the probe says
-glibc does.
+Fix: two halves. Without era data, =%EC=, =%Ey= and =%EY= take the
+plain conversion's members, as glibc does. With it, =%EC= matches an
+era name and sets the year from the era's start and direction, =%Ey=
+reads the year within the era found in the =tm= (the update model of
+p14, as =%C= keeps the digits it finds), =%EY= walks the era's year
+format; an unresolvable era sets =eofbit= per p13.
 
-Check: =%Od= on " 3" under a locale with alternative digits, glibc
-against the library.
+Check: the probe's table, every row; the =time_put=/=time_get= round
+trip of =%Ec= and =%Ex= under =ja_JP= and the other era locales.
 
-** TODO =%EC= without era names falls to a one-digit number
+** TODO =time_get= rejects a plain digit under =%O= where a symbol exists
 
-Under a locale with no eras =%EC= has no names and =do_get= takes
-the numeric path with a bound of 0 and no digit count, so it reads
-one digit and fails. glibc falls back to =%C= where the locale has
-no eras. A hypothesis from reading the table; not probed.
+Under =lzh_TW=, with 32 alternative digits, =%Od= on "3" fails and
+=%OM= on "45" reads 45: =__rw_match_name='s digit fallback returns
+the value, and =do_get= accepts it only for 0 under an empty symbol
+or for a value beyond the table. glibc takes any plain digits under
+=%O= (its =get_alt_number= falls to the plain reader, and latches
+that choice for the rest of the call). =time_put= writes the symbol
+where one exists, so the round trip does not need the leniency.
+Probed 2026-10-30, same programs as the =%E= entry.
 
-Fix: =%EC=, =%Ey= and =%EY= without era data take the plain
-conversion's members, if the probe confirms glibc's behaviour.
+Fix: a decision: keep the strict reading, and record it in the
+conformance record, or take plain digits under =%O= as glibc does.
 
-Check: =%EC= on "19" and =%Ey= on "26" in the C locale, glibc
-against the library.
+Check: =%Od= on "3" and =%OM= on "45" under =lzh_TW= either way.
+
+** TODO =%C= keeps negative digits of a year before 0
+
+=do_get= for =%C= keeps the two low digits it finds in =tm_year= as
+~(tm_year + 1900) % 100~, which is negative for a year before 0, so
+"%y %C" with such a =tm= combines wrongly. No row covers it; seen in
+e438cc11's review.
+
+Fix: a non-negative remainder, or a floor as =time_put= applies to
+=%C= and =%y= of such years since 11087a6a.
+
+Check: a =22.locale.time.get= row with =tm_year= -1950 and "%C" on
+"19", against what =time_put= writes for the same year.
 
 * Tests
 

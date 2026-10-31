@@ -20,9 +20,9 @@ alternatives that were weighed for the week number in October 2026.
 | `%w`, `%a`, `%A` | the weekday, a number or a name | `tm_wday` | fine alone; also an input to the week derivation |
 | `%j` | the day of the year, 001..366 | `tm_yday` | fine alone; an explicit `%j` must win over a derived one |
 | `%m`, `%d`, `%e` | the month and the day of the month | `tm_mon`, `tm_mday` | fine alone; explicit values must win over the week derivation, and together with the year they imply `tm_wday` and `tm_yday`, which nothing names |
-| `%I`, `%l` | the hour on the 12-hour clock, 1..12 | `tm_hour` | the hour of the day only with `%p`; stored less one until then |
-| `%H`, `%k` | the hour on the 24-hour clock | `tm_hour` | fine alone; a `%p` beside it is parsed and ignored |
-| `%p` | the half of the day, the locale's AM or PM names | none | adds twelve hours to a `%I` hour, before or after it |
+| `%I`, `%l` | the hour on the 12-hour clock, 1..12 | `tm_hour` | the hour of the day only with `%p`; stored modulo 12 within the half of the day `tm_hour` already holds |
+| `%H`, `%k` | the hour on the 24-hour clock | `tm_hour` | fine alone; a `%p` after it sets the half of the day, where glibc ignores it |
+| `%p` | the half of the day, the locale's AM or PM names | none | sets the half of the day of the hour it finds, before or after a `%I` |
 | `%Z` | the time zone name | none | consumed, nothing to assign |
 | `%z` | the offset from UTC | `tm_gmtoff` where the C library has it | nothing to assign elsewhere |
 | `%x`, `%X`, `%c`, `%D`, `%r`, `%R`, `%T`, `%F` | a locale's or a fixed format, a whole pattern | several | a nested walk: what it parsed is settled inside it and does not reach the pattern around it |
@@ -364,21 +364,29 @@ follows the remark's update model, in five steps:
    two-digit count, consume and validate, and store nothing. The
    derivation and the handshake go.
 2. The century and the half of the day move into `do_get`'s update
-   of the `tm` it is given. `%y` keeps the century it finds in
-   `tm_year` and updates the two digits; `%C` sets the century and
-   keeps the two digits it finds. `%p` already updates the hour it
-   finds; `%I` keeps the twelve hours it finds in `tm_hour`, so that
-   "%p %I" reads the same as "%I %p".
+   of the `tm` it is given. `%C` sets the century and keeps the two
+   low digits it finds in `tm_year`, so "%y %C" combines. `%y`
+   cannot do the converse: nothing in a `tm` says whether a century
+   was parsed, since a zeroed `tm` reads as 1900, so `%y` keeps XSH's
+   pivot and sets the whole year, and a `%C` before a `%y` holds only
+   inside the pivot's window, 1969 to 2068. `%I`, `%l` and `%OI`
+   store the hour modulo 12, as glibc does, within the half of the
+   day `tm_hour` already holds; `%p` sets the half of the day of the
+   hour it finds. "%p %I" then reads the same as "%I %p". The 2005
+   storage, the hour less one with `%p` adding 1 or 13, could serve a
+   `%p` after `%I` or after `%H` but not both, and went with it.
 3. The walk's locals and its end-of-pattern settle go. `get`
    dispatches, matches literals and skips white space, as p8 says,
    and touches the `tm` for nothing else. An override composes: it
    sees the same `tm` the base would.
 4. The rows whose answer changes are re-pinned against the probe:
-   "%H %p" with PM, where the update adds twelve hours to a 24-hour
-   hour and glibc ignores the `%p`; "%Y %C", where the century
-   overwrites the full year; a caller who did not zero the `tm`,
-   whose stale digits feed the update. The first two are formats no
-   locale source writes; the third is the remark's own warning.
+   "%C %y" on "19 26", 2026 by the pivot where glibc gives 1926;
+   "%H %p" with PM, 21 where glibc ignores the `%p` after a 24-hour
+   hour; "%Y %C" on "2026 19", 1926 since `%C` keeps the digits of
+   the full year, where glibc gives 1900; a caller who did not zero
+   the `tm`, whose stale members feed the update. No locale source
+   writes the first three shapes outside the pivot's window; the
+   fourth is the remark's own warning. Done in e438cc11.
 5. This note's chapter 5 becomes the record of the two days the
    combining lived in `get`, and chapter 7 loses the derivation
    items.
@@ -391,6 +399,13 @@ against p8 line by line.
 
 ## 7. What stays open
 
+- glibc's `%C` with a `%Y`. "%C %Y" on "20 1926" gives 1926 here,
+  `%Y` setting the whole year, and 2000 in glibc, whose end-of-call
+  block takes a century without a two-digit year as the year itself.
+  A quirk of the reference, not followed; recorded.
+- `%C` on a negative `tm_year`. The kept digits come from `(tm_year
+  + 1900) % 100`, negative for a year before 0; no row covers it.
+  Queued.
 - The derivation of a date from a week. Dropped with the way back;
   a program that parses "%Y %U %w" gets the year and the weekday
   and computes the rest, as it would after `strptime` on a C library
