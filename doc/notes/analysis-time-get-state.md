@@ -53,6 +53,14 @@ alternatives that were weighed for the week number in October 2026.
   required to call the virtual and then overrules what the virtual
   stored breaks the virtual's contract; an override of `do_get` is
   clobbered, and the library cannot know one exists.
+- To be clear about how that happened: the revival got carried away.
+  A round trip of `time_put` through `time_get` under glibc's locale
+  sources was the oracle, glibc's `strptime` was the reference for
+  every failing row, and three changes in two days made the rows
+  pass by giving `get` the state `strptime` has. Nobody asked
+  whether the interface allowed it. It does not, and the rows should
+  have been accepted as limits of the design, as the 2005
+  implementation and the standard's own remark had accepted them.
 - The way back is the model the standard's remark allows: `do_get`
   updates the `tm` it is given, so the `tm` carries the century and
   the half of the day between calls; `get` dispatches and nothing
@@ -172,8 +180,19 @@ the `tm` at the end of the format. That is `get` deciding over
 override for `%U` sees a scratch `tm` and has its work discarded, and
 no portable test tells the library that an override exists. The rows
 those changes pinned are right against glibc; the place they were
-made right is wrong. Chapter 5 describes the mechanism as it stands,
-chapter 6 the way back.
+made right is wrong.
+
+This was the revival getting carried away, and it should not have.
+The oracle measured parity with glibc, and parity became the goal:
+each failing row was a bug, each bug got a fix, and the fixes went
+where the rows were easiest to make pass. The question that belonged
+before the first of them, whether the interface the standard
+mandates can carry the state the fix needs, was asked after the
+third. The rule the tree states for itself, that a fix which looks
+like an oversight is presumed design until the history says
+otherwise, applied here to the standard's design as much as to the
+library's, and was not applied. Chapter 5 describes the mechanism as
+it stands, chapter 6 the way back.
 
 ## 3. What glibc does
 
