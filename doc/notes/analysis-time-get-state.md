@@ -368,10 +368,15 @@ follows the remark's update model, in five steps, done in e438cc11:
 2. The century and the half of the day move into `do_get`'s update
    of the `tm` it is given. `%C` sets the century and keeps the two
    low digits it finds in `tm_year`, so "%y %C" combines. `%y`
-   cannot do the converse: nothing in a `tm` says whether a century
-   was parsed, since a zeroed `tm` reads as 1900, so `%y` keeps XSH's
-   pivot and sets the whole year, and a `%C` before a `%y` holds only
-   inside the pivot's window, 1969 to 2068. `%I`, `%l` and `%OI`
+   cannot do the converse. XSH's rule is a property of the whole
+   format: the pivot applies "when format contains neither a C
+   conversion specifier nor a Y conversion specifier", and a
+   `do_get` sees one directive, while nothing in a `tm` says whether
+   a century was parsed, since a zeroed `tm` reads as 1900. So `%y`
+   keeps the pivot and sets the whole year, and a `%C` before a `%y`
+   holds only inside the pivot's window, 1969 to 2068. That is the
+   one place the update model departs from XSH's letter, and it is
+   p14's limit, not a choice. `%I`, `%l` and `%OI`
    store the hour modulo 12, as glibc does, within the half of the
    day `tm_hour` already holds; `%p` sets the half of the day of the
    hour it finds. "%p %I" then reads the same as "%I %p". The 2005
