@@ -70,8 +70,9 @@ Check: =%Od= on "3" and =%OM= on "45" under =lzh_TW= either way.
 "%y %C" with such a =tm= combines wrongly. No row covers it; seen in
 e438cc11's review.
 
-Fix: a non-negative remainder, or a floor as =time_put= applies to
-=%C= and =%y= of such years since 11087a6a.
+Fix: the floor 11087a6a chose for =time_put= as per glibc, the same
+expression: ~((tm_year + 1900) % 100 + 100) % 100~, so that =%C=
+times 100 plus the kept digits is the year on both sides.
 
 Check: a =22.locale.time.get= row with =tm_year= -1950 and "%C" on
 "19", against what =time_put= writes for the same year.
