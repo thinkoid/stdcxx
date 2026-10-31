@@ -61,11 +61,12 @@ alternatives that were weighed for the week number in October 2026.
   whether the interface allowed it. It does not, and the rows should
   have been accepted as limits of the design, as the 2005
   implementation and the standard's own remark had accepted them.
-- The way back is the model the standard's remark allows: `do_get`
-  updates the `tm` it is given, so the `tm` carries the century and
-  the half of the day between calls; `get` dispatches and nothing
-  more; the week number, which nothing carries, is consumed and
-  stored nowhere. Chapter 6 has the steps.
+- The way back, taken in e438cc11 on 2026-10-31, is the model the
+  standard's remark allows: `do_get` updates the `tm` it is given,
+  so the `tm` carries the century and the half of the day between
+  calls; `get` dispatches and nothing more; the week number, which
+  nothing carries, is consumed and stored nowhere. Chapter 6 has the
+  steps and the three limits that came with them.
 - The interface stays. The C++11 members came into the standard
   from this facet, and the 2003 members are specified by what
   `time_put` writes, which needs the same engine.
@@ -277,7 +278,8 @@ interface has no portable channel for the state.
 ## 5. What this library does, as of 2026-10-30
 
 This chapter describes the mechanism that 2.2 names as the defect,
-so that the way back in chapter 6 can be read against it.
+so that the way back in chapter 6, taken in e438cc11, can be read
+against it. `get` is now the code before 59f3a87e.
 
 The walk is the public `get` over a format range in
 `include/loc/_time_get.cc`. It keeps the state in locals: the
@@ -358,7 +360,7 @@ members corresponding to" the directive, an empty set for `%U` and
 and assigns nothing conforms; the derivation is glibc's behavior and
 libstdc++'s choice, not the standard's requirement. With the
 derivation optional, the week needs no channel at all. The rest
-follows the remark's update model, in five steps:
+follows the remark's update model, in five steps, done in e438cc11:
 
 1. `%U` and `%W`, with their `%O` forms, keep the bound of 53 and the
    two-digit count, consume and validate, and store nothing. The
