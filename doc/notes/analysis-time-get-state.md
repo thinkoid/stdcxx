@@ -43,13 +43,21 @@ alternatives that were weighed for the week number in October 2026.
   combines at the end. libstdc++ keeps the same structure in its
   format walk, and bypasses the standard's `do_get` dispatch to keep
   it, by a compiler-specific test that the virtual is not
-  overridden. This library keeps the state in locals of the walk,
-  reads each piece back from the `tm` after the `do_get` that
-  produced it, and settles at the end of the format.
-- The week number is the one piece with no member to read it back
-  from. It crosses the virtual by a convention private to the walk:
-  a scratch `tm` whose `tm_yday` is `INT_MIN` on the way in and the
-  week number on the way out.
+  overridden. The standard's design cannot carry strptime's
+  semantics through the interface it mandates; libstdc++ worked
+  around that defect for the one compiler that lets it.
+- This library has the same defect in its own form, since
+  2026-10-29: `get` keeps the century, the half of the day and the
+  week number in locals, reads them back from the `tm` after each
+  `do_get`, and rewrites the `tm` at the end. A `get` that is
+  required to call the virtual and then overrules what the virtual
+  stored breaks the virtual's contract; an override of `do_get` is
+  clobbered, and the library cannot know one exists.
+- The way back is the model the standard's remark allows: `do_get`
+  updates the `tm` it is given, so the `tm` carries the century and
+  the half of the day between calls; `get` dispatches and nothing
+  more; the week number, which nothing carries, is consumed and
+  stored nowhere. Chapter 6 has the steps.
 - The interface stays. The C++11 members came into the standard
   from this facet, and the 2003 members are specified by what
   `time_put` writes, which needs the same engine.
@@ -132,6 +140,41 @@ same hour, and "%U %w %Y" the same date as "%Y %U %w", so the
 combining cannot happen in the directive that comes last; it has to
 wait for the end of the format.
 
+### 2.1 The design against the intention
+
+N2211's title states the intention, "Enhancing the time_get facet
+for POSIX compatibility": parse what `strptime` parses. `strptime`'s
+semantics are per call, not per directive; the combining above is
+what glibc's state structure and libstdc++'s `__time_get_state`
+exist for. The standardized design has one virtual per directive and
+a `tm` as its only memory. It delivers `strptime`'s directive set
+and cannot deliver `strptime`'s semantics, except by `get` overruling
+the virtual it is required to call, which breaks the one thing a
+virtual is for. libstdc++'s comment, chapter 4, is that contradiction
+written down by people who met it: "without an ABI change for the
+facets we can't keep state across the different do_get calls". The
+design matches the paper's directive list and not its purpose.
+
+What the text does permit is the remark's update model: a `do_get`
+that reads the `tm` it is given and updates it. The `tm` then carries
+between calls whatever has a member, and `get` has nothing to decide.
+
+### 2.2 The same defect in this library
+
+Between 2026-10-29 and 2026-10-30 three changes put the combining
+into `get`: 59f3a87e for the century and the two-digit year,
+2829b153 for the hour and the half of the day, and an uncommitted
+change for the week number with a sentinel handshake across the
+virtual. Each reads a value back from the `tm` after the `do_get`
+that produced it, assuming the base `do_get`'s storage, and rewrites
+the `tm` at the end of the format. That is `get` deciding over
+`do_get`. An override that stores differently is clobbered, an
+override for `%U` sees a scratch `tm` and has its work discarded, and
+no portable test tells the library that an override exists. The rows
+those changes pinned are right against glibc; the place they were
+made right is wrong. Chapter 5 describes the mechanism as it stands,
+chapter 6 the way back.
+
 ## 3. What glibc does
 
 `strptime_l.c` declares a `struct __strptime_state` for the call:
@@ -212,7 +255,10 @@ and the tree builds with Clang too and stays C++98. Its presence in
 the other library is the clearest statement that the standard's
 interface has no portable channel for the state.
 
-## 5. What this library does
+## 5. What this library does, as of 2026-10-30
+
+This chapter describes the mechanism that 2.2 names as the defect,
+so that the way back in chapter 6 can be read against it.
 
 The walk is the public `get` over a format range in
 `include/loc/_time_get.cc`. It keeps the state in locals: the
@@ -250,10 +296,11 @@ nothing from the week and leaves the `tm` as it was, which the test
 pins. The convention lives in the walk and in the `%U` branch of
 `do_get`, twenty lines apart, with a comment on each side.
 
-## 6. The alternatives for the week
+## 6. The alternatives, and the way back
 
-Five were weighed before the handshake. Each fails a rule the tree
-holds, named with it.
+Five channels for the week number were weighed before the handshake,
+on the premise that the derivation was wanted. Each fails a rule the
+tree holds, named with it.
 
 - Store the week number in the caller's `tm_yday` as a raw value
   and let the walk convert it. A direct caller of `do_get('U')`
@@ -279,14 +326,56 @@ The handshake's costs, stated so they are not forgotten: a user
 `tm` whose `tm_yday` already holds `INT_MIN` would receive the week
 number from a direct `do_get('U')`, and a user override of `do_get`
 for `%U` sees the scratch copy rather than the walk's `tm`. Both are
-outside any use the standard describes.
+outside any use the standard describes. They are also beside the
+point once 2.2 is accepted: the handshake is the sixth channel for a
+state `get` should not hold.
+
+### 6.1 The way back
+
+The premise falls first. p8 makes "valid for strptime" a condition
+on the format, and p12 obliges `do_get` to assign "those struct tm
+members corresponding to" the directive, an empty set for `%U` and
+`%W`. A `do_get` that reads the week against its bounds, consumes it
+and assigns nothing conforms; the derivation is glibc's behavior and
+libstdc++'s choice, not the standard's requirement. With the
+derivation optional, the week needs no channel at all. The rest
+follows the remark's update model, in five steps:
+
+1. `%U` and `%W`, with their `%O` forms, keep the bound of 53 and the
+   two-digit count, consume and validate, and store nothing. The
+   derivation and the handshake go.
+2. The century and the half of the day move into `do_get`'s update
+   of the `tm` it is given. `%y` keeps the century it finds in
+   `tm_year` and updates the two digits; `%C` sets the century and
+   keeps the two digits it finds. `%p` already updates the hour it
+   finds; `%I` keeps the twelve hours it finds in `tm_hour`, so that
+   "%p %I" reads the same as "%I %p".
+3. The walk's locals and its end-of-pattern settle go. `get`
+   dispatches, matches literals and skips white space, as p8 says,
+   and touches the `tm` for nothing else. An override composes: it
+   sees the same `tm` the base would.
+4. The rows whose answer changes are re-pinned against the probe:
+   "%H %p" with PM, where the update adds twelve hours to a 24-hour
+   hour and glibc ignores the `%p`; "%Y %C", where the century
+   overwrites the full year; a caller who did not zero the `tm`,
+   whose stale digits feed the update. The first two are formats no
+   locale source writes; the third is the remark's own warning.
+5. This note's chapter 5 becomes the record of the two days the
+   combining lived in `get`, and chapter 7 loses the derivation
+   items.
+
+What the update model gives up is the cases the walk resolved by
+knowing what it had parsed: the two in step 4, and the nesting rule,
+which becomes moot since nothing is combined across levels. What it
+restores is the virtual's contract, and a `get` that can be read
+against p8 line by line.
 
 ## 7. What stays open
 
-- The derivation and explicit fields. glibc keeps an explicit `%m`,
-  `%d` or `%j` over what the week implies; the walk has to do the
-  same, by remembering what it parsed as it does for the century and
-  the hour. Queued.
+- The derivation of a date from a week. Dropped with the way back;
+  a program that parses "%Y %U %w" gets the year and the weekday
+  and computes the rest, as it would after `strptime` on a C library
+  that does not derive. Recorded, not queued.
 - The implied members. "%Y %m %d" leaves `tm_wday` and `tm_yday` as
   the caller had them; glibc completes them. The remark in p14 makes
   either reading conforming. A decision.
@@ -295,10 +384,9 @@ outside any use the standard describes.
   with eras stores the era's index where a year belongs. p13 permits
   `eofbit` and unspecified members where an era directive cannot be
   resolved, which bounds what a fix owes. Queued.
-- The nesting rule. A year or weekday inside a nested `%x` does not
-  reach an outer week. Recorded above as the rule; glibc would
-  derive. A decision if a format in the sources turns out to need
-  it.
+- The nesting rule. Moot under the update model: a nested `%x` is a
+  `do_get` that updates the same `tm`, and nothing is combined
+  across levels except through the members themselves.
 
 ## 8. Where to look
 
