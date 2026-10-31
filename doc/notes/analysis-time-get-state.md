@@ -429,7 +429,147 @@ against p8 line by line.
   `do_get` that updates the same `tm`, and nothing is combined
   across levels except through the members themselves.
 
-## 8. Where to look
+## 8. The year before 0: `%C` and `%y`
+
+A side question of the way back, with a sweep of the standards, their
+defect trackers and the implementations on 2026-10-31. The library
+writes `%C` and `%y` of a year before 0 where an era format falls
+back to them, the day before the Buddhist era of th_TH and lo_LA in
+the era oracle, and reads them back through `time_get`. 11087a6a made
+`time_put` write glibc's pair; the sweep says the current standard
+defines a different one.
+
+### 8.1 The texts
+
+| source | `%C` | `%y` | sign | domain |
+|---|---|---|---|---|
+| C90 7.12.3.5 | none | "the year without century as a decimal number (00-99)" | none | none |
+| C99, C23 7.27.3.5 | "the year divided by 100 and truncated to an integer, as a decimal number (00-99)" | "the last 2 digits of the year as a decimal number (00-99)" | none | "If any of the specified values is outside the normal range, the characters stored are unspecified"; `tm_year` has no range |
+| POSIX.1-2017 strftime | as C | as C, "[00,99]" | the `+` flag | RATIONALE: "Using negative years results in unspecified behavior" |
+| POSIX.1-2024 strftime | C's text, and for the width: "If the year is less than 0 or greater than 9999, the number of characters ... shall be the number of digits and leading sign characters (if any) in the result of dividing the year by 100 and truncating, or two, whichever is greater" | unchanged, "[00,99]" | "a leading <hyphen-minus> character ('-') shall be included if the year is less than zero" under the `+` flag | RATIONALE unchanged from 2017 |
+| POSIX.1-2017 strptime | "All but the last two digits of the year {2}"; "A leading '+' or '-' character shall be permitted before any leading zeros" | "The last two digits of the year"; the pivot "When format contains neither a C conversion specifier nor a Y conversion specifier"; the same sign clause | `%C`, `%y`, `%Y` | none |
+| POSIX.1-2024 strptime | as 2017, then: "The tm_year member ... shall be set to the number formed by appending the last two digits of the year to these digits, minus 1900. If a y conversion is also performed, the last two digits of the year shall be those processed by the y conversion; otherwise, they shall be 00." | the pivot "If a C conversion is not also performed"; "If a C conversion is also performed, the tm_year member ... shall be set as specified for the C conversion; otherwise, the tm_year member shall be set to the calculated year minus 1900." | as 2017 | none |
+| POSIX.1-2024 `date` RATIONALE | "The century number is calculated as the year divided by 100 and truncated to an integer"; "%Ey and %y can then be viewed as the offset from %EC and %C, respectively." | | | |
+| C++20 chrono, [time.format] | "The year divided by 100 using floored division" | "The last two decimal digits of the year" | | signed `year` type |
+| C++26 after LWG 3831 and 4022 | floored, "0 is inserted before the single digit (after the sign, if present)" | "The last two decimal digits of the year, regardless of the sign of the year"; `format("{:%C %y}", -1976y)` is "-20 76" | on `%C` only | parse of "-20 76" with "%3C %y" gives -1976 |
+
+Two readings of the 2024 strftime text coexist: the normative width
+sentence speaks of years below 0 and of truncating, while the
+rationale still calls such years unspecified. The strptime text
+composes by appending digits: "-5" and "43" make "-543"; the floored
+pair "-6" and "57" would make "-657".
+
+### 8.2 The defect reports
+
+- Austin Group 472, "strftime %C does not account for sign character",
+  accepted, applied in Issue 8; its response: "The standard is unclear
+  on this issue, and no conformance distinction can be made between
+  alternative implementations based on this." Its text is the width
+  sentence above. 1184 is a duplicate; 466 is `date`'s `%C` past 9999.
+- Austin Group 1727, "strptime() spec needs updates to deal with other
+  changes", accepted, applied in Issue 8: the source of the `tm_year`
+  sentences. Its discussion confirms years before 0 are in scope:
+  "Doesn't the spec for strftime() allow for years beyond 9999 (and
+  even before 0)?" "Yes it can".
+- Austin Group 1969, "strptime() %y with a 1 digit field", accepted
+  for TC1 on 2026-04-16: `%y` becomes "The last two digits of the
+  year, for years greater than 9, or a value to be added to the year
+  obtained from a C conversion (if any)", with "[-9,68]" added to
+  2000. Additive composition gives -457 for "-5" and "43" where Issue
+  8's appending gives -543. The two texts are not reconciled.
+- WG14: no defect report or paper on `%C`, `%y` or a negative
+  `tm_year`. N715 (1997) brought `%C` into C99 from the POSIX.2 `date`
+  utility with its "(00-99)". The C99 Rationale says the specifiers
+  were "chosen according to existing practice to cover long-standing
+  POSIX practice". DR 326's discussion treats `tm_year = -999 - 1900`
+  as well-defined for the C99 text.
+- WG21 LWG 3831, "Two-digit formatting of negative year is ambiguous"
+  (2022, in the working paper 2026), and 4022 (2023, ready 2026).
+  Before them MSVC printed "76 24" and libc++ "76 76" for -1976. The
+  case for the floor in that discussion: "%C can't be truncated
+  division, otherwise the years [-99, -1] would map to the same
+  century as the years [0, 99]"; against the floored remainder: "24
+  just doesn't cut it"; and "The negative sign need only be in one
+  place, and it has to be in %C to prevent ambiguity." The author
+  called the matter one where "POSIX strftime / strptime doesn't
+  handle negative years in this department, so this is an opportunity
+  for an extension."
+
+### 8.3 The implementations, for -543
+
+| implementation | `%C` | `%y` | reads a signed `%C` | source |
+|---|---|---|---|---|
+| glibc 2.44 strftime | "-6" | "57" | strptime rejects a sign on `%C`, `%y` and `%Y` | `year / 100 - (year % 100 < 0)`; `(tm_year % 100 + 100) % 100` |
+| gnulib nstrftime, coreutils `date` | "-5" | "43" | | ChangeLog 2005-03-09: "Make %Y always equivalent to %C%y, and similarly for %G and %g." |
+| musl | "-5" | "43" | yes, additive: "-6 57" and "-5 -43" give -543, its own "-5 43" gives -457 | `(1900LL+tm->tm_year) / 100`; `val = -val` for `%y` |
+| FreeBSD libc, tzcode | "-5" | "43"; "-0" for `%C` of -1..-99 | no sign | `_yconv` |
+| libstdc++ 16 chrono format | "-06" | "43" | the sign is dropped in parse: "-06 43" gives 643 | `_M_C_y_Y`, "3831" cited |
+| libc++ chrono format | "-6" | "43" | no parse | "floored division" in the source |
+| MSVC STL chrono | "-06" | "43" | composes "-06 43" to -543 | `_Decompose_year`, LWG-3831 cited, 2026-04 |
+| Ruby, Python | "-6" | "57" | | through glibc |
+| Rust chrono | floored | floored | | documented: "100 BCE (year number -99) will print -1 and 99" |
+| Java `uu` | | "43" | | "the rightmost two digits" |
+
+History: glibc's floor dates from 1996, "%C, %y: Handle negative years
+portably", after a 1995 "Use year modulo 100 for %y". On the tz list
+in 2004 the same maintainer argued "it's least surprising if %C is
+consistent with %y, i.e., if %C is (year - (year mod 100)) / 100",
+while a WG14 member replied that a system writing `%C` "-2" and `%y`
+"34" for -234 "would, I think, conform"; tzcode then shipped
+truncation with "-0" for the years -1 to -99, and in 2005 gnulib
+left glibc's convention for truncation with the note above. No glibc
+bug concerns `%C` or `%y` of a negative year.
+
+### 8.4 What follows
+
+- Correct, by the current standard, is Issue 8's pair: `%C` is the
+  truncated century with the sign, `%y` the last two digits without
+  one, and a reader composes them by appending digits. 11087a6a wrote
+  glibc's floored pair for `time_put`; what it replaced, "-05" and
+  "-43", was a signed `%y`, wrong too. b54acca9 makes `time_put`
+  write Issue 8's pair and the era oracle record glibc's as a known
+  difference; 503ae88c makes `time_get` read a sign before `%C`, `%y`
+  and `%Y` and compose by appending, under the update model: `%C`
+  keeps the digits of the year it finds, `%y` keeps a negative
+  century it finds, since a negative year in the `tm` is proof that a
+  century was parsed, and pivots after any other.
+- The `%y` field's "[00,99]" is not inconsistent after all: it is the
+  unsigned half of a pair whose sign rides on `%C`, which is also the
+  human reading, five centuries and forty-three years before 0.
+- Three seams, settled in b54acca9 and 503ae88c. The years -1 to
+  -99 truncate to the century 0, which has no sign: `%C` writes "-0"
+  there, as tzcode does, within Issue 8's widths and readable by its
+  appending sentence, "-043" for -43. Two variants were tried and
+  rejected: the letter's "00", whose "0043" is the year 43 under any
+  reading; and the sign on `%y`, "00-43", whose "-43" is three
+  characters past `%y`'s {2}, so that no conforming reader takes it,
+  and exempting the sign from the width would make the reader
+  disagree with the standard on a defined input, "-43" alone being
+  -4 by the width and by the premise of Austin Group bug 1969, to
+  rescue an undefined one. This library's reader cannot take "-0"
+  either: -0 is 0 in `tm_year`, so the `%y` after it pivots and
+  "%C%y" of -1 to -99 does not read back here; `%Y` carries those
+  years. The years below -999 need a field width the facet has no
+  syntax for. TC1's additive `%y` contradicts Issue 8's appending for
+  a negative century; the published text is followed. A signed `%C`
+  with a signed `%y` is defined by nobody; the reader takes it by the
+  C identity, the writer never emits it.
+- The sign is one of the characters a field scans, Issue 8's "the
+  maximum number of characters scanned" and its application usage on
+  field widths, and the premise of bug 1969: `%C` and `%y` read two,
+  `%Y` four, the sign included. "%C%y" reads "-543" as "-5" and
+  "43"; "+19" under `%C` is the century 1 with the 9 left.
+- glibc's floored pair is unreadable by a conforming reader: "-6"
+  and "57" append to -657. The era oracle counts glibc's pair as a
+  known difference on the day before the Buddhist era.
+- C++26's chrono is a different convention for a different API, the
+  floored century with the literal two digits and its own
+  composition; it is not the model for `time_put`.
+
+The sweep's sources and probe programs are kept with the day's
+handover material outside the tree.
+
+## 9. Where to look
 
 - `include/loc/_time_get.cc`: `get` over a format range is the
   walk; `do_get` is the per-directive virtual; the `%U` branch and
