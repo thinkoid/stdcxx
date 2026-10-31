@@ -34,8 +34,17 @@
  * 2026-10-28. Each is formatted with %EC, %Ey and %EY, narrow and
  * wide. The output lists each disagreement as the date, the
  * conversion, the width and the two results, then one line with
- * the number of dates and the number of disagreements; the exit
- * status is 0 when nothing disagrees. The C library's name for the
+ * the number of dates, the number of disagreements and the number
+ * of known ones; the exit status is 0 when nothing disagrees but
+ * the known ones.
+ *
+ * The known disagreement is a year before 0 where no era matches
+ * and %EC and %Ey fall back to %C and %y. The library writes
+ * POSIX.1-2024's pair, the century truncated with its sign and the
+ * last two digits without one ("-5" and "43" for -543, "-0" for
+ * the century of -1 to -99); glibc writes a floored pair ("-6" and
+ * "57"). A disagreement is known only when both results are those
+ * two pairs. The C library's name for the
  * locale is the library's unless -c gives another (ja_JP.utf8 for
  * ja_JP.UTF-8).
  *
@@ -230,6 +239,44 @@ put (const std::locale& loc, const std::tm& t, const char* fmt)
 }
 
 
+// %C or %y of the year as POSIX.1-2024 writes it (fmt 'C' or 'y'),
+// or as glibc floors it
+static std::string
+year_part (int year, char fmt, bool floored)
+{
+    char buf [32];
+
+    if ('C' == fmt) {
+        if (floored)
+            std::sprintf (buf, year < 0 ? "%d" : "%02d",
+                          year / 100 - (year % 100 < 0));
+        else if (year < 0)
+            std::sprintf (buf, "-%d", -year / 100);
+        else
+            std::sprintf (buf, "%02d", year / 100);
+    }
+    else if (floored)
+        std::sprintf (buf, "%02d", (year % 100 + 100) % 100);
+    else
+        std::sprintf (buf, "%02d", (year < 0 ? -year : year) % 100);
+
+    return buf;
+}
+
+
+// the library writes POSIX.1-2024 and the C library glibc's floor
+static bool
+known (const date_t& d, const char* fmt, const std::string& ours,
+       const std::string& libc)
+{
+    if (0 <= d.year || 'E' != fmt [1] || ('C' != fmt [2] && 'y' != fmt [2]))
+        return false;
+
+    return    ours == year_part (d.year, fmt [2], false)
+           && libc == year_part (d.year, fmt [2], true);
+}
+
+
 static std::string
 narrow (const std::wstring& ws)
 {
@@ -291,6 +338,7 @@ int main (int argc, char* argv [])
     static const char* const fmts [] = { "%EC", "%Ey", "%EY" };
 
     unsigned long disagreements = 0;
+    unsigned long known_ones    = 0;
 
     for (std::size_t i = 0; i != dates.size (); ++i) {
 
@@ -311,9 +359,12 @@ int main (int argc, char* argv [])
 
             if (ours != libc) {
                 ++disagreements;
+                const bool k = known (d, fmts [j], ours, libc);
+                known_ones += k;
                 std::printf ("  %d-%02d-%02d %s narrow: library \"%s\" "
-                             "C library \"%s\"\n", d.year, d.mon, d.mday,
-                             fmts [j], ours.c_str (), libc.c_str ());
+                             "C library \"%s\"%s\n", d.year, d.mon, d.mday,
+                             fmts [j], ours.c_str (), libc.c_str (),
+                             k ? " (known)" : "");
             }
 
             wchar_t wfmt [8];
@@ -328,16 +379,20 @@ int main (int argc, char* argv [])
 
             if (wours != wlibc) {
                 ++disagreements;
+                const bool k =
+                    known (d, fmts [j], narrow (wours), narrow (wlibc));
+                known_ones += k;
                 std::printf ("  %d-%02d-%02d %s wide: library \"%s\" "
-                             "C library \"%s\"\n", d.year, d.mon, d.mday,
+                             "C library \"%s\"%s\n", d.year, d.mon, d.mday,
                              fmts [j], narrow (wours).c_str (),
-                             narrow (wlibc).c_str ());
+                             narrow (wlibc).c_str (), k ? " (known)" : "");
             }
         }
     }
 
-    std::printf ("%s: %lu dates, %lu disagreements\n", name,
-                 static_cast< unsigned long >(dates.size ()), disagreements);
+    std::printf ("%s: %lu dates, %lu disagreements, %lu known\n", name,
+                 static_cast< unsigned long >(dates.size ()), disagreements,
+                 known_ones);
 
-    return disagreements ? 1 : 0;
+    return disagreements != known_ones ? 1 : 0;
 }

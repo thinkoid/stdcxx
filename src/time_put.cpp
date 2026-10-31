@@ -2104,10 +2104,20 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
             }
         }
 
-        // the century is floored so that %C * 100 + %y is the year;
-        // a negative one is not zero-padded, as the C library writes it
+        // POSIX.1-2024: the year divided by 100 and truncated, with
+        // its sign, at least two characters; %y holds the last two
+        // digits without a sign, so that "%C%y" spells the year
         const int year    = 1900 + tmb->tm_year;
-        const int century = (year / 100 - (year % 100 < 0)) % 100;
+        const int century = year < 0 ? -(-year / 100 % 100) : year / 100 % 100;
+
+        if (year < 0 && 0 == century) {
+            // the years -1 to -99 truncate to the century 0: write
+            // "-0" to keep the sign, as tzcode does ("-043" for -43)
+            static const void* const minus_zero[] = { "-0", L"-0" };
+
+            tpd.str = minus_zero [wide];
+            break;
+        }
 
         if ('O' == mod)
             tpd.altval = century;
@@ -2453,7 +2463,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 
         break;
 
-    case 'y':
+    case 'y': {
         // %y:  the last 2 digits of the year as a decimal number (00-99).
         //      [tm_year]
         // %Ey: the offset from %EC (year only) in the locale's alternative
@@ -2474,14 +2484,19 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
             }
         }
 
-        // floored into [00,99] for a year before 1
+        // the last two digits without a sign; the sign of a year
+        // before 0 rides on %C (POSIX.1-2024): 43 for -543
+        const int year   = 1900 + tmb->tm_year;
+        const int digits = (year < 0 ? -year : year) % 100;
+
         if ('O' == mod)
-            tpd.altval = ((1900 + tmb->tm_year) % 100 + 100) % 100;
+            tpd.altval = digits;
         else
-            tpd.val = ((1900 + tmb->tm_year) % 100 + 100) % 100;
+            tpd.val = digits;
 
         tpd.prec = 2;
         break;
+    }
 
     case 'Y':
         // %Y:  the year as a decimal number (e.g., 1997). [tm_year]

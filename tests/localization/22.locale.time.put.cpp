@@ -708,13 +708,29 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0,  8100), "%C", 0, 0, ' ', "00");
     TEST (T (0, 0, 0, 1, 0, -1900), "%C", 0, 0, ' ', "00");
 
-    // a year before 1: the century is floored so that %C * 100 + %y
-    // is the year, and a negative century is not zero-padded
-    TEST (T (0, 0, 0, 1, 0, -1901), "%C", 0, 0, ' ', "-1");
-    TEST (T (0, 0, 0, 1, 0, -2400), "%C", 0, 0, ' ', "-5");
-    TEST (T (0, 0, 0, 1, 0, -2401), "%C", 0, 0, ' ', "-6");
-    TEST (T (0, 0, 0, 1, 0, -2443), "%C", 0, 0, ' ', "-6");
-    TEST (T (0, 0, 0, 1, 0, -2443), "%C", 0, 0, ' ', "%C");
+    // a year before 0 (POSIX.1-2024): the century is truncated and
+    // keeps its sign, at least two characters, "-0" for the years -1
+    // to -99 (as tzcode writes it); not compared against strftime(),
+    // glibc floors the century ("-6" for -543)
+    TEST (T (0, 0, 0, 1, 0, -2443), "%C", 0, 0, ' ', "-5");   // -543
+    TEST (T (0, 0, 0, 1, 0, -1943), "%C", 0, 0, ' ', "-0");   //  -43
+    TEST (T (0, 0, 0, 1, 0, -1901), "%C", 0, 0, ' ', "-0");   //   -1
+    TEST (T (0, 0, 0, 1, 0, -1900), "%C", 0, 0, ' ', "00");   //    0
+    TEST (T (0, 0, 0, 1, 0, -1857), "%C", 0, 0, ' ', "00");   //   43
+    TEST (T (0, 0, 0, 1, 0, -1801), "%C", 0, 0, ' ', "00");   //   99
+    TEST (T (0, 0, 0, 1, 0, -1800), "%C", 0, 0, ' ', "01");   //  100
+    TEST (T (0, 0, 0, 1, 0,    26), "%C", 0, 0, ' ', "19");   // 1926
+    TEST (T (0, 0, 0, 1, 0,   126), "%C", 0, 0, ' ', "20");   // 2026
+    TEST (T (0, 0, 0, 1, 0,  8099), "%C", 0, 0, ' ', "99");   // 9999
+    TEST (T (0, 0, 0, 1, 0, -2400), "%C", 0, 0, ' ', "-5");   // -500
+    TEST (T (0, 0, 0, 1, 0, -2401), "%C", 0, 0, ' ', "-5");   // -501
+    TEST (T (0, 0, 0, 1, 0, -3134), "%C", 0, 0, ' ', "-12");  // -1234
+
+    // "%C%y" spells the year
+    TEST (T (0, 0, 0, 1, 0, -2443), "%C%y", 0, 0, ' ', "-543");
+    TEST (T (0, 0, 0, 1, 0, -1943), "%C%y", 0, 0, ' ', "-043");
+    TEST (T (0, 0, 0, 1, 0, -1901), "%C%y", 0, 0, ' ', "-001");
+    TEST (T (0, 0, 0, 1, 0, -1900), "%C%y", 0, 0, ' ', "0000");
 
     // %OC: the century, using the locale's alternative numeric symbols
     //      (an extension of the C library), the ordinary digits in "C"
@@ -723,8 +739,8 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0,     0), "%OC", 0, 0, ' ', "19");
     TEST (T (0, 0, 0, 1, 0, -1000), "%OC", 0, 0, ' ', "09");
     TEST (T (0, 0, 0, 1, 0,   103), "%OC", 0, 0, ' ', "20");
-    TEST (T (0, 0, 0, 1, 0, -2443), "%OC", 0, 0, ' ', "-6");
-    TEST (T (0, 0, 0, 1, 0, -2443), "%OC", 0, 0, ' ', "%OC");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%OC", 0, 0, ' ', "-5");
+    TEST (T (0, 0, 0, 1, 0, -1943), "%OC", 0, 0, ' ', "-0");
 
     // %EC: the name of the base year (period) in the locale's
     //      alternative representation.
@@ -733,6 +749,14 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0, -1899), "%EC", 0, 0, ' ', "00");
     TEST (T (0, 0, 0, 1, 0,  1234), "%EC", 0, 0, ' ', "31");
     TEST (T (0, 0, 0, 1, 0,  8099), "%EC", 0, 0, ' ', "99");
+
+    // no era in "C": %EC and %Ey fall back to %C and %y, the year
+    // before 0 included
+    TEST (T (0, 0, 0, 1, 0, -2443), "%EC", 0, 0, ' ', "-5");
+    TEST (T (0, 0, 0, 1, 0, -1943), "%EC", 0, 0, ' ', "-0");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%Ey", 0, 0, ' ', "43");
+    TEST (T (0, 0, 0, 1, 0, -1943), "%Ey", 0, 0, ' ', "43");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%EC%Ey", 0, 0, ' ', "-543");
     
 
     // %d: the day of the month as a decimal number (01-31). [tm_mday]
@@ -1274,17 +1298,31 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0, -101), "%y", 0, 0, ' ', "99");
     TEST (T (0, 0, 0, 1, 0, -201), "%y", 0, 0, ' ', "99");
 
-    // a year before 1: the year modulo 100 is floored into [00,99]
-    TEST (T (0, 0, 0, 1, 0, -1901), "%y", 0, 0, ' ', "99");
-    TEST (T (0, 0, 0, 1, 0, -2400), "%y", 0, 0, ' ', "00");
-    TEST (T (0, 0, 0, 1, 0, -2401), "%y", 0, 0, ' ', "99");
-    TEST (T (0, 0, 0, 1, 0, -2443), "%y", 0, 0, ' ', "57");
-    TEST (T (0, 0, 0, 1, 0, -2443), "%y", 0, 0, ' ', "%y");
+    // a year before 0 (POSIX.1-2024): the last two digits without a
+    // sign, the sign is %C's; not compared against strftime(), glibc
+    // floors the year modulo 100 ("57" for -543)
+    TEST (T (0, 0, 0, 1, 0, -2443), "%y", 0, 0, ' ', "43");   // -543
+    TEST (T (0, 0, 0, 1, 0, -1943), "%y", 0, 0, ' ', "43");   //  -43
+    TEST (T (0, 0, 0, 1, 0, -1901), "%y", 0, 0, ' ', "01");   //   -1
+    TEST (T (0, 0, 0, 1, 0, -1900), "%y", 0, 0, ' ', "00");   //    0
+    TEST (T (0, 0, 0, 1, 0, -1857), "%y", 0, 0, ' ', "43");   //   43
+    TEST (T (0, 0, 0, 1, 0, -1801), "%y", 0, 0, ' ', "99");   //   99
+    TEST (T (0, 0, 0, 1, 0, -1800), "%y", 0, 0, ' ', "00");   //  100
+    TEST (T (0, 0, 0, 1, 0,    26), "%y", 0, 0, ' ', "26");   // 1926
+    TEST (T (0, 0, 0, 1, 0,   126), "%y", 0, 0, ' ', "26");   // 2026
+    TEST (T (0, 0, 0, 1, 0,  8099), "%y", 0, 0, ' ', "99");   // 9999
+    TEST (T (0, 0, 0, 1, 0, -2400), "%y", 0, 0, ' ', "00");   // -500
+    TEST (T (0, 0, 0, 1, 0, -2401), "%y", 0, 0, ' ', "01");   // -501
+
+    // %Oy: the same digits, the ordinary ones in "C"
+    TEST (T (0, 0, 0, 1, 0, -2443), "%Oy", 0, 0, ' ', "43");
+    TEST (T (0, 0, 0, 1, 0, -1901), "%Oy", 0, 0, ' ', "01");
 
     // %Y: the year as a decimal number (e.g., 1997). [tm_year]
     rw_info (0, 0, __LINE__, "%%Y: the year");
     TEST (T (), "%Y", 0, 0, ' ', "%Y");
     TEST (T (), "%Y", 0, 0, ' ', "1900");
+    TEST (T (0, 0, 0, 1, 0, -2443), "%Y", 0, 0, ' ', "-543");
     TEST (T (), "1900", 0, 0, ' ', "%Y");
     TEST (T (-1), "%Y", 0, 0, ' ', "%Y");
 
