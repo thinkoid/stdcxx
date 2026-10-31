@@ -622,22 +622,24 @@ void test_posix (charT, const char *cname)
     // %I The hour (12-hour clock) [01,12]; leading zeros are permitted
     //    but not required.
     STEP ("%I: the hour (12-hour clock)");
-    TEST (T (0, 0,  0),   "1", 1, "I", 0, Eof);
-    TEST (T (0, 0,  1),   "2", 1, "I", 0, Eof);
-    TEST (T (0, 0,  2),   "3", 1, "I", 0, Eof);
-    TEST (T (0, 0,  3),   "4", 1, "I", 0, Eof);
-    TEST (T (0, 0,  4),   "5", 1, "I", 0, Eof);
-    TEST (T (0, 0,  5),   "6", 1, "I", 0, Eof);
-    TEST (T (0, 0,  6),   "7", 1, "I", 0, Eof);
-    TEST (T (0, 0,  7),   "8", 1, "I", 0, Eof);
-    TEST (T (0, 0,  8),   "9", 1, "I", 0, Eof);
-    TEST (T (0, 0,  9),  "10", 2, "I", 0, Eof);
-    TEST (T (0, 0, 10),  "11", 2, "I", 0, Eof);
-    TEST (T (0, 0, 11),  "12", 2, "I", 0, Eof);
+    // modulo 12, in the half of the day the tm holds, as in glibc's
+    // strptime: 12 is midnight until a %p says otherwise
+    TEST (T (0, 0,  1),   "1", 1, "I", 0, Eof);
+    TEST (T (0, 0,  2),   "2", 1, "I", 0, Eof);
+    TEST (T (0, 0,  3),   "3", 1, "I", 0, Eof);
+    TEST (T (0, 0,  4),   "4", 1, "I", 0, Eof);
+    TEST (T (0, 0,  5),   "5", 1, "I", 0, Eof);
+    TEST (T (0, 0,  6),   "6", 1, "I", 0, Eof);
+    TEST (T (0, 0,  7),   "7", 1, "I", 0, Eof);
+    TEST (T (0, 0,  8),   "8", 1, "I", 0, Eof);
+    TEST (T (0, 0,  9),   "9", 1, "I", 0, Eof);
+    TEST (T (0, 0, 10),  "10", 2, "I", 0, Eof);
+    TEST (T (0, 0, 11),  "11", 2, "I", 0, Eof);
+    TEST (T (0, 0,  0),  "12", 2, "I", 0, Eof);
     TEST (T (0, 0,  0),  "13", 2, "I", 0, Eof | Fail);
     // at most two digits, as in glibc's strptime
-    TEST (T (0, 0,  0), "013", 2, "I", 0, Good);
-    TEST (T (0, 0, 11), "123", 2, "I", 0, Good);
+    TEST (T (0, 0,  1), "013", 2, "I", 0, Good);
+    TEST (T (0, 0,  0), "123", 2, "I", 0, Good);
     TEST (T (0, 0,  0),   "0", 1, "I", 0, Eof | Fail);
 
     // %j The day number of the year [001,366]; leading zeros are permitted
@@ -721,8 +723,10 @@ void test_posix (charT, const char *cname)
 
     // %p The locale's equivalent of a.m or p.m.
     STEP ("%p: the equivalent of AM/PM");
-    TEST (T (0, 0,  1), "AM", 2, "p", 0, Good);
-    TEST (T (0, 0, 13), "PM", 2, "p", 0, Good);
+    // the half of the day of the hour the tm holds, 0 here; glibc's
+    // strptime applies a PM to a %I only and leaves 0
+    TEST (T (0, 0,  0), "AM", 2, "p", 0, Good);
+    TEST (T (0, 0, 12), "PM", 2, "p", 0, Good);
     TEST (T (0, 0,  0),  "",  0, "p", 0, Eof | Fail);
     TEST (T (0, 0,  0),  "A", 1, "p", 0, Eof | Fail);
     TEST (T (0, 0,  0),  "P", 1, "p", 0, Eof | Fail);
@@ -732,8 +736,8 @@ void test_posix (charT, const char *cname)
 
     // %Op Equivalent to %p (an extension of the C library's strftime).
     STEP ("%Op: equivalent to %p");
-    TEST (T (0, 0,  1), "AM", 2, "Op", 0, Good);
-    TEST (T (0, 0, 13), "PM", 2, "Op", 0, Good);
+    TEST (T (0, 0,  0), "AM", 2, "Op", 0, Good);
+    TEST (T (0, 0, 12), "PM", 2, "Op", 0, Good);
     TEST (T (0, 0,  0),  "",  0, "Op", 0, Eof | Fail);
     TEST (T (0, 0,  0),  "A", 1, "Op", 0, Eof | Fail);
     TEST (T (0, 0,  0),  "P", 1, "Op", 0, Eof | Fail);
@@ -756,12 +760,13 @@ void test_posix (charT, const char *cname)
     TEST (T ( 0,  0,  0),    "09:05:09",  8, "r", 0, Eof | Fail);
     TEST (T ( 0,  0,  0), "13:00:00 PM",  2, "r", 0, Fail);
 
-    // %p settles the hour at the end of the pattern whatever the order,
-    // as in the C library's strptime: it adds the 12 hours to a %I and
-    // is parsed and ignored after a %H
-    STEP ("%p with the hour: the 12 hours of a %I, none of a %H");
+    // %p sets the half of the day of the hour it finds, and %I the
+    // hour within the half it finds, so that the two read the same in
+    // either order; a %p after a %H sets its half too, where glibc's
+    // strptime parses and ignores it: "09:05:09 PM" is 21:05:09
+    STEP ("%p with the hour: the half of the day of the hour it finds");
     TEST (T ( 9,  5,  9), "09:05:09 AM", 11, "%H:%M:%S %p", 0, Good);
-    TEST (T ( 9,  5,  9), "09:05:09 PM", 11, "%H:%M:%S %p", 0, Good);
+    TEST (T ( 9,  5, 21), "09:05:09 PM", 11, "%H:%M:%S %p", 0, Good);
     TEST (T ( 9,  5, 21), "21:05:09 PM", 11, "%H:%M:%S %p", 0, Good);
     TEST (T ( 9,  5, 21), "09:05:09 PM", 11, "%I:%M:%S %p", 0, Good);
     TEST (T ( 0,  0,  0), "12:00:00 AM", 11, "%I:%M:%S %p", 0, Good);
@@ -827,7 +832,47 @@ void test_posix (charT, const char *cname)
     //    as a decimal number [00,53]; leading zeros are permitted but not
     //    required.
     STEP ("%U: the Sunday-based week of the year");
-    rw_warn (0, 0, __LINE__, "%%U not being exercised");
+    // read and validated, at most two digits; std::tm has no member
+    // for it, so alone it stores nothing, as in glibc's strptime
+    TEST (T (0),  "00", 2,  "U", 0, Eof);
+    TEST (T (0),  "43", 2,  "U", 0, Eof);
+    TEST (T (0),  "53", 2,  "U", 0, Eof);
+    TEST (T (0),   "5", 1,  "U", 0, Eof);
+    TEST (T (0), "430", 2,  "U", 0, Good);
+    TEST (T (0),  "54", 2,  "U", 0, Eof | Fail);
+    TEST (T (0),  "43", 2, "%U", 0, Eof);
+    TEST (T (0),  "54", 2, "%U", 0, Eof | Fail);
+
+    // a direct call leaves the caller's tm as it was, whatever its
+    // tm_yday holds
+    for (int i = 0; i != 4; ++i) {
+
+        typedef std::istreambuf_iterator<charT> InIter;
+
+        const std::locale loc;
+
+        const std::time_get<charT, InIter> &tg =
+            std::use_facet<std::time_get<charT, InIter> >(loc);
+
+        const char fmt  = i % 2 ? 'W' : 'U';
+        const int  yday = i < 2 ? 300 : INT_MIN;
+
+        const charT str [] = { charT ('4'), charT ('3'), charT ('\0') };
+
+        std::basic_istringstream<charT> istrm (str);
+        std::ios_base::iostate err = std::ios_base::goodbit;
+
+        const std::tm val = mktm (1, 2, 3, 4, 5, 126, 6, yday);
+        std::tm       x   = val;
+
+        tg.get (InIter (istrm), InIter (), istrm, err, &x, fmt);
+
+        rw_assert (Eof == err && 0 == std::memcmp (&x, &val, sizeof x),
+                   0, __LINE__,
+                   "time_get<%s>::get (..., '%c') on \"43\" with tm_yday "
+                   "%d: rdstate() == %{Is}, got %{Is}; got %{t}, "
+                   "expected %{t}", cname, fmt, yday, Eof, err, &x, &val);
+    }
 
     // %w The weekday as a decimal number [0,6], with 0 representing
     //    Sunday; leading zeros are permitted but not required.
@@ -849,7 +894,11 @@ void test_posix (charT, const char *cname)
     //    week) as a decimal number [00,53]; leading zeros are permitted
     //    but not required.
     STEP ("%W: the Monday-based week of the year");
-    rw_warn (0, 0, __LINE__, "%%W not being exercised");
+    TEST (T (0),  "00", 2,  "W", 0, Eof);
+    TEST (T (0),  "43", 2,  "W", 0, Eof);
+    TEST (T (0),  "53", 2,  "W", 0, Eof);
+    TEST (T (0),  "54", 2,  "W", 0, Eof | Fail);
+    TEST (T (0),  "43", 2, "%W", 0, Eof);
 
     // %x The date, using the locale's date format.
     STEP ("%x: the date");
@@ -889,19 +938,42 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0, 0, 0, -1900),     " 0", 2, " %Y", 0, Eof);
     TEST (T (0, 0, 0, 0, 0,    99), "\t1999", 5, " %Y", 0, Eof);
 
-    // %C and %y combine in either order: the century and the year
-    // within it; a %Y is a full year and keeps its value
+    // %C sets the century and keeps the year within it that the tm
+    // holds, so a %y before it combines; a %y sets the whole year with
+    // its pivot and a %Y the full year, so a %C before either is lost,
+    // where glibc's strptime combines in either order ("%C %y" on
+    // "19 26" is 1926 there) and gives "%C %Y" and "%Y %C" the century
     STEP ("%C with %y: the year within the century");
-    TEST (T (0, 0, 0,  0, 0,    26),       "19 26",  5, "%C %y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,   126),       "19 26",  5, "%C %y",    0, Eof);
     TEST (T (0, 0, 0,  0, 0,   126),       "20 26",  5, "%C %y",    0, Eof);
-    TEST (T (0, 0, 0,  0, 0, -1801),       "00 99",  5, "%C %y",    0, Eof);
-    TEST (T (0, 0, 0,  0, 0,    26),       "19/26",  5, "%C/%y",    0, Eof);
-    TEST (T (0, 0, 0,  0, 0,    26),        "1926",  4, "%C%y",     0, Eof);
+    TEST (T (0, 0, 0,  0, 0,    99),       "00 99",  5, "%C %y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,   126),       "19/26",  5, "%C/%y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,   126),        "1926",  4, "%C%y",     0, Eof);
     TEST (T (0, 0, 0,  0, 0,    26),       "26 19",  5, "%y %C",    0, Eof);
-    TEST (T (0, 0, 0, 14, 3,    26), "19 04/14/26", 11, "%C %D",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0, -1801),       "99 00",  5, "%y %C",    0, Eof);
+    TEST (T (0, 0, 0, 14, 3,   126), "19 04/14/26", 11, "%C %D",    0, Eof);
     TEST (T (0, 0, 0, 14, 3,    26), "04/14/26 19", 11, "%D %C",    0, Eof);
     TEST (T (0, 0, 0,  0, 0,    26),     "20 1926",  7, "%C %Y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0,    26),     "2026 19",  7, "%Y %C",    0, Eof);
     TEST (T (0, 0, 0,  0, 0,    26),  "20 99 1926", 10, "%C %y %Y", 0, Eof);
+
+    // %U and %W with the year and the weekday derive nothing: C++11
+    // 22.4.5.1.2 p12 has do_get assign the members a directive
+    // corresponds to, none for a week; glibc's strptime derives the
+    // day of the year, the month and the day of the month
+    STEP ("%U and %W with %Y and %w: nothing derived");
+    TEST (T (0, 0, 0,  0,  0, 126, 4,   0),
+          "2026 43 4", 9, "%Y %U %w", 0, Eof);
+    TEST (T (0, 0, 0,  0,  0, 126, 4,   0),
+          "4 43 2026", 9, "%w %U %Y", 0, Eof);
+    TEST (T (0, 0, 0,  0,  0, 126, 0,   0),
+          "2026 01 0", 9, "%Y %W %w", 0, Eof);
+    TEST (T (0, 0, 0,  0,  0,   0, 4,   0),
+          "43 4", 4, "%U %w", 0, Eof);
+    TEST (T (0, 0, 0,  0,  0, 126, 0,   0),
+          "2026 43", 7, "%Y %U", 0, Eof);
+    TEST (T (0, 0, 0,  0,  0, 126, 0,   0),
+          "2026 43", 7, "%Y %W", 0, Eof);
 
     // each numeric conversion reads at most two digits, %j three and %Y
     // four, as in glibc's strptime, so that adjacent ones separate
@@ -1830,18 +1902,18 @@ void test_user (charT, const char *cname, const char *locname)
     // %OI: The hour (12-hour clock) using the locale's alternative
     //      numeric symbols.
     STEP ("%OI: the hour (12-hour clock) using alternative numeric symbols");
-    // stored as %I is, the hour less one; there is no hour 0
+    // stored as %I is, modulo 12; there is no hour 0
     TEST (T (0, 0,  0),    "0", 1, "%OI", 0, Eof | Fail);
     TEST (T (0, 0,  0),  "000", 3, "%OI", 0, Eof | Fail);
-    TEST (T (0, 0,  0),  "1st", 3, "%OI", 0, Good);
-    TEST (T (0, 0,  2),  "3rd", 3, "%OI", 0, Good);
-    TEST (T (0, 0,  8),  "9th", 3, "%OI", 0, Good);
-    TEST (T (0, 0, 10), "11th", 4, "%OI", 0, Good);
-    TEST (T (0, 0, 11), "12th", 4, "%OI", 0, Good);
+    TEST (T (0, 0,  1),  "1st", 3, "%OI", 0, Good);
+    TEST (T (0, 0,  3),  "3rd", 3, "%OI", 0, Good);
+    TEST (T (0, 0,  9),  "9th", 3, "%OI", 0, Good);
+    TEST (T (0, 0, 11), "11th", 4, "%OI", 0, Good);
+    TEST (T (0, 0,  0), "12th", 4, "%OI", 0, Good);
     TEST (T (0, 0,  0), "13th", 4, "%OI", 0, Fail);
     TEST (T (0, 0,  0),   "14", 2, "%OI", 0, Eof | Fail);
 
-    // %p after %OI adds the 12 hours, after %OH it is parsed and ignored
+    // %p sets the half of the day of the %OI or %OH hour before it
     STEP ("%p with %OI and %OH");
     TEST (T (9, 5,  9),  "9th:5th:9th [A.M.]", 18, "%OI:%OM:%OS %p", 0, Good);
     TEST (T (9, 5, 21),  "9th:5th:9th [P.M.]", 18, "%OI:%OM:%OS %p", 0, Good);
@@ -1899,7 +1971,12 @@ void test_user (charT, const char *cname, const char *locname)
     // %OU: The week number of the year (Sunday as the first day of the week)
     //      using the locale's alternative numeric symbols.
     STEP ("%OU: the Sunday-based week using alternative numeric symbols");
-    rw_warn (0, 0, __LINE__, "%%OU not being exercised");
+    // read and validated, 0..53; std::tm has no member for it
+    TEST (T (0), "43rd", 4, "%OU", 0, Good);
+    TEST (T (0), "53rd", 4, "%OU", 0, Good);
+    TEST (T (0), "54th", 4, "%OU", 0, Fail);
+    TEST (T (0, 0, 0,  0, 0, 126, 4,   0),
+          "2026 43rd 4th", 13, "%Y %OU %Ow", 0, Good);
 
     // %Ow: The number of the weekday (Sunday=0) using the locale's
     //      alternative numeric symbols.
@@ -1914,7 +1991,11 @@ void test_user (charT, const char *cname, const char *locname)
     // %OW: The week number of the year (Monday as the first day of the week)
     //      using the locale's alternative numeric symbols.
     STEP ("%OW: the Monday-based week using alternative numeric symbols");
-    rw_warn (0, 0, __LINE__, "%%OW not being exercised");
+    TEST (T (0), "43rd", 4, "%OW", 0, Good);
+    TEST (T (0), "53rd", 4, "%OW", 0, Good);
+    TEST (T (0), "54th", 4, "%OW", 0, Fail);
+    TEST (T (0, 0, 0,  0, 0, 126, 0,   0),
+          "2026 1st 0", 10, "%Y %OW %Ow", 0, Eof);
 
     // %Oy: The year (offset from %C ) using the locale's alternative
     //      numeric symbols.
@@ -1927,8 +2008,9 @@ void test_user (charT, const char *cname, const char *locname)
     TEST (T (0, 0, 0, 0, 0,  69),     "69th", 4, "%Oy",    0, Good);
     TEST (T (0, 0, 0, 0, 0,  99),       "99", 2, "%Oy",    0, Eof);
     TEST (T (0, 0, 0, 0, 0,   0),      "100", 3, "%Oy",    0, Eof | Fail);
-    // a century combines with the year in either order
-    TEST (T (0, 0, 0, 0, 0,  26), "19th26th", 8, "%OC%Oy", 0, Good);
+    // a century keeps the year within it parsed before it; a year
+    // after it sets the whole year with its pivot
+    TEST (T (0, 0, 0, 0, 0, 126), "19th26th", 8, "%OC%Oy", 0, Good);
     TEST (T (0, 0, 0, 0, 0, 126), "20th26th", 8, "%OC%Oy", 0, Good);
     TEST (T (0, 0, 0, 0, 0,  26), "26th19th", 8, "%Oy%OC", 0, Good);
 }
@@ -1963,9 +2045,9 @@ void test_empty_ampm (charT, const char *cname, const char *locname)
     // time_put's "09:05:09 " of 21:05:09 reads back as 09:05:09; nor
     // does %p read the zeros of an empty alternative digit 0
     STEP ("%p with an empty am_pm: the empty AM name matches");
-    TEST (T (0, 0, 1),            "", 0, "p",           0, Eof);
-    TEST (T (0, 0, 1),           "x", 0, "p",           0, Good);
-    TEST (T (0, 0, 1),           "0", 0, "p",           0, Good);
+    TEST (T (0, 0, 0),            "", 0, "p",           0, Eof);
+    TEST (T (0, 0, 0),           "x", 0, "p",           0, Good);
+    TEST (T (0, 0, 0),           "0", 0, "p",           0, Good);
     TEST (T (9, 5, 9),   "09:05:09 ", 9, "%I:%M:%S %p", 0, Eof);
     TEST (T (9, 5, 9), "09:05:09 PM", 9, "%I:%M:%S %p", 0, Good);
     TEST (T (0, 0, 0),   "21:05:09 ", 1, "%I:%M:%S %p", 0, Fail);

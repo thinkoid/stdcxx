@@ -1115,10 +1115,10 @@ __rw_get_timepunct (const __rw_facet *pfacet,
 
         case 'I':
             // %OI: hour (12-hour clock) using the alternative numeric symbols
-            //      stored less one, as %I is, so that %p applies to both
+            //      stored as %I is
             *pmem = &tmb->tm_hour;
-            adj   = -1;
-            hib   = 11;
+            lob   = 1;
+            hib   = 12;
             dig   = 2;
             break;
 
@@ -1158,18 +1158,16 @@ __rw_get_timepunct (const __rw_facet *pfacet,
 
         case 'U':
             // %OU: Sunday-based week number of the year
-            //      using alternative numeric symbols
-            // FIXME: implement
-            hib = 52;
-            dig = 2;
+            //      using alternative numeric symbols, read as %U
+            hib   = 53;
+            dig   = 2;
             break;
 
         case 'W':
             // %OW: Monday-based week number of the year
-            //      using alternative numeric symbols
-            // FIXME: implement
-            hib = 52;
-            dig = 2;
+            //      using alternative numeric symbols, read as %W
+            hib   = 53;
+            dig   = 2;
             break;
 
         case 'w':
@@ -1243,8 +1241,10 @@ __rw_get_timepunct (const __rw_facet *pfacet,
 
         case 'l':   // popular extension (Linux, Solaris)
         case 'I':   // hour [01..12]
-            adj   = -1;
-            hib   = 11;
+            // do_get stores the hour modulo 12 in the half of the day
+            // the tm holds, so that %p may come before or after it
+            lob   = 1;
+            hib   = 12;
             dig   = 2;
             *pmem = &tmb->tm_hour;
             break;
@@ -1321,15 +1321,11 @@ __rw_get_timepunct (const __rw_facet *pfacet,
         }
         
         case 'U':   // Sunday-based week number [00..53]
-            hib = 53;
-            dig = 2;
-            // FIXME: implement
-            break;
-
         case 'W':   // Monday-based week number [00..53]
-            hib = 53;
-            dig = 2;
-            // FIXME: implement
+            // std::tm has no member for the week: do_get reads it
+            // into a local of its own and stores nothing
+            hib   = 53;
+            dig   = 2;
             break;
 
         case 'w':   // Sunday-based weekday [0..6]

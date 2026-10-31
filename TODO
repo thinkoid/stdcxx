@@ -19,25 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =time_get= fails =%U= and =%W= outright
-
-=__rw_get_timepunct= in =src/time_put.cpp= gives the week-number
-conversions a bound and a digit count but no =tm= member, under a
-=FIXME: implement= from the 2005 import; =do_get= then takes the
-"invalid format" branch and fails them. XSH's =strptime= lists both
-as valid directives; glibc reads the number and, with the year
-known, derives the weekday and the day of the year from it. The =%O=
-forms carry a bound of 52 where the plain ones carry 53. Seen while
-reading =do_get= against C++11's 22.4.5.1.2.
-
-Fix: read the number into a value =get='s walk can combine with the
-year and the weekday, as glibc does, or at least consume it with
-=%U='s and =%W='s bounds; the =%O= bounds made 53.
-
-Check: =22.locale.time.get= rows =%U= and =%W= on "00", "53" and
-"54" against a glibc probe; the walk's rows for "%Y %U %w" if the
-derivation is implemented.
-
 ** TODO The alternative-digit path of =do_get= may not skip white space
 
 The numeric path of =do_get= skips white space before the digits, as

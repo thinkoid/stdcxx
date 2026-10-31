@@ -182,31 +182,6 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
 
     char __fmt [] = { '\0', '\0' };
 
-    // the century of a %C or %OC and the two digits of a %y, %Oy or
-    // the %y of %D, read back from tm_year as each is parsed, -1 until
-    // then; the two combine at the end of the pattern whatever their
-    // order, as in the C library's strptime. A %Y is a full year: it
-    // drops the two digits parsed before it, and a %C with a %Y and no
-    // %y after it leaves the value of %Y. Each pattern combines only
-    // what it parsed itself: the pattern of a %x or %c combines its own
-    // %OC%Oy, and a %C outside a %x or %c does not reach a %y inside it
-    int __century = -1;
-    int __yy      = -1;
-
-    // the hour of the last %I, %OI, %l, %H, %OH or %k read back from
-    // tm_hour, -1 until then, and whether it was on the 12-hour clock
-    // (stored less one, 0..11); and the half of the day of the last %p
-    // or %Op, 0 for AM and 1 for PM, -1 until then. do_get applies a
-    // %p to the hour it finds, which is right only after a %I; the two
-    // settle at the end of the pattern whatever their order, as in the
-    // C library's strptime: a %p adds the 12 hours to a 12-hour hour
-    // and is parsed and ignored after a 24-hour one. As with the
-    // century, each pattern settles only what it parsed itself: a %p
-    // outside a %X or %r does not reach the %I inside it
-    int  __hour   = -1;
-    bool __hour12 = false;
-    int  __pm     = -1;
-
     for (; __pat != __pat_end; ++__pat) {
 
         if (__errtmp) {
@@ -224,40 +199,8 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
                 // FIXME: handle the "%.[0-9]*" HP-UX extension
             }
             else {
-                // the hour a %p finds; after an hour, which settles at
-                // the end, a %p reads its half against 0, since do_get
-                // fails a 24-hour hour of 12 or more
-                int __hour0 = __tmp.tm_hour;
-
-                if ('p' == __ch && 'E' != __fmt [1] && 0 <= __hour)
-                    __tmp.tm_hour = __hour0 = 0;
-
                 __it = do_get (__it, __end, __fl, __errtmp, &__tmp, __ch,
                                __fmt [1]);
-
-                if (!(__errtmp & ~__rw::__rw_eofbit) && 'E' != __fmt [1]) {
-                    if ('C' == __ch)
-                        __century = (__tmp.tm_year + 1900) / 100;
-                    else if ('y' == __ch || 'D' == __ch)
-                        __yy = (__tmp.tm_year + 1900) % 100;
-                    else if ('Y' == __ch)
-                        __yy = -1;
-                    else if ('I' == __ch || 'l' == __ch) {
-                        __hour   = __tmp.tm_hour;
-                        __hour12 = true;
-                    }
-                    else if ('H' == __ch || 'k' == __ch) {
-                        __hour   = __tmp.tm_hour;
-                        __hour12 = false;
-                    }
-                    else if ('p' == __ch) {
-                        // do_get adds 1 for AM and 13 for PM to an hour
-                        // below 11, and makes 11 into 0 for AM, 12 for PM
-                        __pm = 11 == __hour0 ? 12 == __tmp.tm_hour
-                                             : 13 == __tmp.tm_hour - __hour0;
-                    }
-                }
-
                 __fmt [0] = __fmt [1] = '\0';   // reset
             }
         }
@@ -280,27 +223,9 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
         }
     }
 
-    if (!(__errtmp & ~__rw::__rw_eofbit)) {
-
-        // XSH strptime: %C is the century, %y the year within it
-        if (0 <= __century && 0 <= __yy)
-            __tmp.tm_year = __century * 100 + __yy - 1900;
-
-        // XSH strptime: %p is the locale's a.m. or p.m., %I the hour on
-        // the 12-hour clock; noon and midnight as do_get makes them
-        if (0 <= __hour && 0 <= __pm) {
-            if (!__hour12)
-                __tmp.tm_hour = __hour;
-            else if (11 == __hour)
-                __tmp.tm_hour = __pm ? 12 : 0;
-            else
-                __tmp.tm_hour = __hour + (__pm ? 13 : 1);
-        }
-
-        // store value only on success
-        if (__tmb)
-            *__tmb = __tmp;
-    }
+    // store value only on success
+    if (!(__errtmp & ~__rw::__rw_eofbit) && __tmb)
+        *__tmb = __tmp;
 
     __err |= __errtmp;
 
@@ -446,6 +371,14 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         __rw::__rw_get_timepunct (this, __data, &__tmp,
                                  &__pmem, __pv, __sizes);
 
+    // std::tm has no member for the week number of %U and %W: it is
+    // read into a local, validated and discarded; C++11 22.4.5.1.2,
+    // p12, has do_get assign the members the directive corresponds to
+    int __week = 0;
+
+    if (('U' == __fmt || 'W' == __fmt) && 'E' != __modifier)
+        __pmem = &__week;
+
     if (1 == __cnt) {
         _RWSTD_ASSERT (0 != __names [0]);
 
@@ -490,18 +423,18 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         }
         else if ('p' == __fmt) {
             if (__pmem) {
-                if (!__inx && 11 == *__pmem)
-                    *__pmem = 0;
-                else if (*__pmem < 12) {
-                    if (!__inx || 11 != *__pmem)
-                        *__pmem += int (__inx * 12) + 1;
-                    else
-                        *__pmem += 1;
-                }
-                else {
+                // %p sets the half of the day of the hour it finds, a
+                // %H or a %I parsed before it or the caller's: AM takes
+                // the 12 hours off an hour of 12 or more, PM adds them
+                // to an hour below 12
+                if (*__pmem < 0 || 23 < *__pmem) {
                     // invalid data
                     __errtmp |= __rw::__rw_failbit;
                 }
+                else if (!__inx && 12 <= *__pmem)
+                    *__pmem -= 12;
+                else if (__inx && *__pmem < 12)
+                    *__pmem += 12;
             }
             else {
                 // invalid (or unimplemented) format
@@ -624,6 +557,32 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
     else {
         // invalid (or unimplemented) format
         __errtmp |= __rw::__rw_failbit;
+    }
+
+    if (!(__errtmp & ~__rw::__rw_eofbit) && 'E' != __modifier) {
+
+        // C++11 22.4.5.1.2, p14: do_get updates the tm it is given, so
+        // that a member carries what one directive leaves to another
+
+        if ('C' == __fmt) {
+            // %C sets the century and keeps the year within it found
+            // in tm_year: "%y %C" on "26 19" is 1926; a %y sets the
+            // whole year, pivoted, so "%C %y" on "19 26" is 2026
+            const int __year = __tmb ? __tmb->tm_year : 0;
+
+            __tmp.tm_year += (__year + 1900) % 100;
+        }
+        else if ('I' == __fmt || 'l' == __fmt) {
+            // %I sets the hour within the half of the day found in
+            // tm_hour, as %p sets the half of the hour it finds, so
+            // that "%p %I" reads the same as "%I %p"
+            const int __hour = __tmb ? __tmb->tm_hour : 0;
+
+            __tmp.tm_hour %= 12;
+
+            if (12 <= __hour)
+                __tmp.tm_hour += 12;
+        }
     }
 
     if (!(__errtmp & ~__rw::__rw_eofbit) && __tmb)

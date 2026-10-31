@@ -123,7 +123,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 22.locale.statics.mt                          0    0     200      0   100%
 22.locale.stdcxx-554                       NOUT    0                      
 22.locale.synopsis                            0    0      39      0   100%
-22.locale.time.get                            0   20    2605      0   100%
+22.locale.time.get                            0   12    2729      0   100%
 22.locale.time.put.libc.mt                    0    0     200      0   100%
 22.locale.time.put                            0    0    2304      0   100%
 22.locale.use_facet.mt                        0    0     200      0   100%
@@ -273,6 +273,6 @@ PROGRAM SUMMARY:
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
-  Runtime warnings:            56
-  Assertions:            12470759
+  Runtime warnings:            48
+  Assertions:            12470883
   Failed assertions:            0
