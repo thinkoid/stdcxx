@@ -1092,8 +1092,8 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             *pmem = &tmb->tm_year;
             adj   = -1900;
             fac   = 100;
-            lob   = -1900;
-            hib   = 8000;
+            lob   = -9999 - 1900;
+            hib   =  9999 - 1900;
             dig   = 2;
             break;
 
@@ -1204,11 +1204,11 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             flags = _Mons;
             break;
 
-        case 'C':   // century [00..99]
+        case 'C':   // century [-99..99], the year -9999..9999
             adj   = -1900;
             fac   = 100;
-            lob   = -1900;
-            hib   = 8000;
+            lob   = -9999 - 1900;
+            hib   =  9999 - 1900;
             dig   = 2;
             *pmem = &tmb->tm_year;
             break;
@@ -1347,10 +1347,10 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             *pmem = &tmb->tm_year;
             break;
         
-        case 'Y':   // 4-digit year
+        case 'Y':   // 4-digit year, -9999..9999 with its sign
             adj   = -1900;
-            lob   = -1900;
-            hib   = _RWSTD_INT_MAX - 1900;
+            lob   = -9999 - 1900;
+            hib   =  9999 - 1900;
             dig   = 4;
             *pmem = &tmb->tm_year;
             break;

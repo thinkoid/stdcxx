@@ -957,6 +957,73 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0,  0, 0,    26),     "2026 19",  7, "%Y %C",    0, Eof);
     TEST (T (0, 0, 0,  0, 0,    26),  "20 99 1926", 10, "%C %y %Y", 0, Eof);
 
+    // POSIX.1-2024: a leading '+' or '-' before %C, %y and %Y, one of
+    // "the maximum number of characters scanned", {2}, {2} and {4};
+    // %C and %y compose by appending the digits of %y to those of %C,
+    // so "-5" and "43" are -543
+    STEP ("%C, %y and %Y with a sign");
+    TEST (T (0, 0, 0,  0, 0, -2400),      "-5",  2, "C",        0, Eof);
+    TEST (T (0, 0, 0,  0, 0, -1900),      "-0",  2, "C",        0, Eof);
+    // a wider signed field needs a field width, which time_get has no
+    // syntax for: "+19" is the century 1 and "-12" the century -1
+    TEST (T (0, 0, 0,  0, 0, -1800),     "+19",  2, "C",        0, Good);
+    TEST (T (0, 0, 0,  0, 0, -2000),     "-12",  2, "C",        0, Good);
+    TEST (T (0, 0, 0,  0, 0, -2400),      "-5",  2, "OC",       0, Eof);
+    TEST (T (0, 0, 0,  0, 0,     0),       "-",  1, "C",        0, Eof | Fail);
+    TEST (T (0, 0, 0,  0, 0,   143),      "43",  2, "%y",       0, Eof);
+    // a signed %y with no %C before it is the year itself, one digit
+    // after the sign: "-43" is -4
+    TEST (T (0, 0, 0,  0, 0, -1904),     "-43",  2, "%y",       0, Good);
+    TEST (T (0, 0, 0,  0, 0, -1898),     "+26",  2, "%y",       0, Good);
+    TEST (T (0, 0, 0,  0, 0, -2443),    "-543",  4, "%C%y",     0, Eof);
+    // "-0" is the century of the years -1 to -99, as time_put writes
+    // it; do_get cannot carry its sign through tm_year, which holds
+    // the year 0 after it, so a %y after it pivots: 2043 for "-043".
+    // The digits found before it keep the sign: "43 -0" is -43
+    TEST (T (0, 0, 0,  0, 0,   143),    "-043",  4, "%C%y",     0, Eof);
+    TEST (T (0, 0, 0,  0, 0, -1943),   "43 -0",  5, "%y %C",    0, Eof);
+    // "+1" and "92": the century 1 is not negative, %y pivots, 1992
+    TEST (T (0, 0, 0,  0, 0,    92),   "+1926",  4, "%C%y",     0, Good);
+    TEST (T (0, 0, 0,  0, 0, -2443),   "43 -5",  5, "%y %C",    0, Eof);
+    // a negative year in the tm is a century parsed: %y keeps it
+    TEST (T (0, 0, 0,  0, 0, -2443),   "-5 43",  5, "%C %y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0, -2557),   "-6 57",  5, "%C %y",    0, Eof);
+    TEST (T (0, 0, 0,  0, 0, -2443),    "-543",  4, "%Y",       0, Eof);
+    TEST (T (0, 0, 0,  0, 0, -2443),    "-543",  4, "Y",        0, Eof);
+    // a wider signed year needs a field width: "+202" and "-004"
+    TEST (T (0, 0, 0,  0, 0, -1698),   "+2026",  4, "%Y",       0, Good);
+    TEST (T (0, 0, 0,  0, 0, -1904),   "-0043",  4, "%Y",       0, Good);
+    TEST (T (0, 0, 0,  0, 0, -2443), "-543 -5",  7, "%Y %C",    0, Eof);
+    // a signed %y after a signed %C is defined by no standard: read
+    // as the century times 100 plus the signed digits, one after the
+    // sign: "-5" and "-4" are -504
+    TEST (T (0, 0, 0,  0, 0, -2404),  "-5 -43",  5, "%C %y",    0, Good);
+
+    // a direct call: %C keeps the last two digits of the year the tm
+    // holds, without their sign
+    {
+        typedef std::istreambuf_iterator<charT> InIter;
+
+        const std::locale loc;
+
+        const std::time_get<charT, InIter> &tg =
+            std::use_facet<std::time_get<charT, InIter> >(loc);
+
+        const charT str [] = { charT ('1'), charT ('9'), charT ('\0') };
+
+        std::basic_istringstream<charT> istrm (str);
+        std::ios_base::iostate err = std::ios_base::goodbit;
+
+        std::tm x = mktm (0, 0, 0, 0, 0, -2443);
+
+        tg.get (InIter (istrm), InIter (), istrm, err, &x, 'C');
+
+        rw_assert (Eof == err && 43 == x.tm_year, 0, __LINE__,
+                   "time_get<%s>::get (..., 'C') on \"19\" with tm_year "
+                   "-2443: rdstate() == %{Is}, got %{Is}; tm_year == 43, "
+                   "got %d", cname, Eof, err, x.tm_year);
+    }
+
     // %U and %W with the year and the weekday derive nothing: C++11
     // 22.4.5.1.2 p12 has do_get assign the members a directive
     // corresponds to, none for a week; glibc's strptime derives the

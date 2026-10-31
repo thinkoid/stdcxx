@@ -251,6 +251,8 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
     int *__pmem = 0;   // pointer to std::tm member
 
+    int __sign = 0;    // the sign before %C, %y or %Y: -1, 1 or none
+
     _RWSTD_SIZE_T __dup;   // number of allowed duplicates
 
     const ctype<char_type> &__ctp =
@@ -486,7 +488,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         // the most digits to read, as in the C library's strptime: 2 for
         // %y and the other two-digit fields, 3 for %j and 4 for %Y, so
         // that adjacent conversions separate themselves
-        const _RWSTD_SIZE_T __dig = static_cast< _RWSTD_SIZE_T >(__data [4]);
+        _RWSTD_SIZE_T __dig = static_cast< _RWSTD_SIZE_T >(__data [4]);
 
         // the upper bound on the value as read, before the adjustment
         // and the factor apply, 99 for %y, whose bounds are the pivot's;
@@ -498,6 +500,22 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         // white space before the digits is skipped, as in strptime
         while (__it != __end && __ctp.is (ctype_base::space, *__it))
             ++__it;
+
+        // POSIX.1-2024 strptime: %C, %y and %Y permit a leading '+'
+        // or '-' before any leading zeros, and their {2}, {2} and {4}
+        // are "the maximum number of characters scanned": the sign
+        // takes one of them, so "%C%y" reads "-543" as "-5" and "43"
+        if (   ('C' == __fmt || 'y' == __fmt || 'Y' == __fmt)
+            && 'E' != __modifier && __it != __end) {
+
+            const char __ch = __ctp.narrow (*__it, '\0');
+
+            if ('+' == __ch || '-' == __ch) {
+                __sign = '-' == __ch ? -1 : 1;
+                ++__it;
+                --__dig;
+            }
+        }
 
         int __mem = 0;
 
@@ -531,17 +549,45 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
             if ('y' == __fmt) {
 
-                // IEEE Std 1003.1-2001: When a century is not otherwise
-                // specified, values in the range [69,99] shall refer to
-                // years 1969 to 1999 inclusive, and values in the range
-                // [00,68] shall refer to years 2000 to 2068 inclusive.
+                // do_get cannot see the format, so %y cannot tell a %C
+                // before it from none: a zeroed tm reads as 1900. A
+                // negative year in the tm is proof of a century parsed,
+                // and %y keeps it; any other year it replaces, pivoted
+                const int __found = *__pmem + 1900;
 
-                __lob =  69;
-                __hib = 168;
+                int __year;
 
-                if (__mem < 69)
-                    __mem += 100;
+                if (__found < 0) {
+                    // POSIX.1-2024: appended to the digits of the
+                    // century, so that "-5" and "43" are -543, not
+                    // -457 as the additive %y of Austin Group bug 1969
+                    // has it; a signed %y after a signed %C is defined
+                    // by no standard, and is read as the century times
+                    // 100 plus the signed digits
+                    const int __cent = -__found / 100 * 100;
+
+                    __year = __sign ? __sign * __mem - __cent
+                                    : -(__cent + __mem);
+                }
+                else if (__sign) {
+                    // a signed %y with no century before it is the
+                    // year itself: "-4" is -4 and "+2" is 2
+                    __year = __sign * __mem;
+                }
+                else {
+                    // IEEE Std 1003.1-2001: When a century is not otherwise
+                    // specified, values in the range [69,99] shall refer to
+                    // years 1969 to 1999 inclusive, and values in the range
+                    // [00,68] shall refer to years 2000 to 2068 inclusive.
+                    __year = __mem < 69 ? 2000 + __mem : 1900 + __mem;
+                }
+
+                __mem = __year - 1900;
+                __lob = -9999 - 1900;
+                __hib =  9999 - 1900;
             }
+            else if (__sign < 0)
+                __mem = -__mem;
 
             *__pmem = __mem * __fac + __adj;
 
@@ -565,12 +611,18 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         // that a member carries what one directive leaves to another
 
         if ('C' == __fmt) {
-            // %C sets the century and keeps the year within it found
-            // in tm_year: "%y %C" on "26 19" is 1926; a %y sets the
-            // whole year, pivoted, so "%C %y" on "19 26" is 2026
-            const int __year = __tmb ? __tmb->tm_year : 0;
+            // %C sets the century and keeps the last two digits of the
+            // year found in tm_year, without its sign: "%y %C" on
+            // "26 19" is 1926 and on "43 -5" is -543 (POSIX.1-2024,
+            // appending); "-0" keeps the sign of the years -1 to -99.
+            // A %y after a %C replaces a century not negative, pivoted,
+            // so "%C %y" on "19 26" is 2026
+            const int __found  = __tmb ? __tmb->tm_year + 1900 : 1900;
+            const int __digits = (__found < 0 ? -__found : __found) % 100;
+            const int __cent   = __tmp.tm_year + 1900;
 
-            __tmp.tm_year += (__year + 1900) % 100;
+            __tmp.tm_year = __cent < 0 || __sign < 0 ?
+                __cent - __digits - 1900 : __cent + __digits - 1900;
         }
         else if ('I' == __fmt || 'l' == __fmt) {
             // %I sets the hour within the half of the day found in
