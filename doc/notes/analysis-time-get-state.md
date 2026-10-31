@@ -8,6 +8,27 @@ the conflict, why the interface stays, what the C library and
 libstdc++ do with the same problem, what this library does, and the
 alternatives that were weighed for the week number in October 2026.
 
+## The directives at issue
+
+| directive | what it parses, per `strptime` | `tm` member | the problem |
+|---|---|---|---|
+| `%C` | the century, two digits | none | a year only with `%y`; alone, nothing to assign |
+| `%y` | the year within the century, two digits, pivoted 69..99 to 19xx and 00..68 to 20xx | `tm_year` | the pivot is wrong when a `%C` came or comes later; the two combine at the end |
+| `%Y` | the full year | `tm_year` | fine alone; it drops a `%y` parsed before it |
+| `%U` | the week of the year, Sunday the first day, 00..53 | none | a day of the year only with a year and a weekday; alone, nothing to assign |
+| `%W` | the week of the year, Monday the first day, 00..53 | none | as `%U`; a Sunday is the last day of the previous Monday-week |
+| `%w`, `%a`, `%A` | the weekday, a number or a name | `tm_wday` | fine alone; also an input to the week derivation |
+| `%j` | the day of the year, 001..366 | `tm_yday` | fine alone; an explicit `%j` must win over a derived one |
+| `%m`, `%d`, `%e` | the month and the day of the month | `tm_mon`, `tm_mday` | fine alone; explicit values must win over the week derivation, and together with the year they imply `tm_wday` and `tm_yday`, which nothing names |
+| `%I`, `%l` | the hour on the 12-hour clock, 1..12 | `tm_hour` | the hour of the day only with `%p`; stored less one until then |
+| `%H`, `%k` | the hour on the 24-hour clock | `tm_hour` | fine alone; a `%p` beside it is parsed and ignored |
+| `%p` | the half of the day, the locale's AM or PM names | none | adds twelve hours to a `%I` hour, before or after it |
+| `%Z` | the time zone name | none | consumed, nothing to assign |
+| `%z` | the offset from UTC | `tm_gmtoff` where the C library has it | nothing to assign elsewhere |
+| `%x`, `%X`, `%c`, `%D`, `%r`, `%R`, `%T`, `%F` | a locale's or a fixed format, a whole pattern | several | a nested walk: what it parsed is settled inside it and does not reach the pattern around it |
+| `%E` with `C`, `y`, `Y`, `x`, `X`, `c` | the era forms: an era name, a year within the era, the era's formats | `tm_year` and others | without era data they must fall back to the plain directive; with it, an era name is a start year and an offset, not a member |
+| `%O` with a numeric directive | the locale's alternative digits for the value | the plain directive's | a value with no alternative symbol is read as digits; the first alternative symbol may be empty |
+
 ## 0. The short version
 
 - A `%U` or `%W` week number has no `tm` member. `%C` alone has
