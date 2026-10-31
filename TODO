@@ -63,16 +63,39 @@ conformance record, or take plain digits under =%O= as glibc does.
 
 Check: =%Od= on "3" and =%OM= on "45" under =lzh_TW= either way.
 
+** TODO =time_get= reads no sign before =%C= and =%Y=
+
+XSH's =strptime= has for =%C= "a leading '+' or '-' character shall
+be permitted before any leading zeros but shall not be required",
+and the same for =%Y=; the =time_put= side writes a negative century
+with its sign since 11087a6a. The digit loop of =do_get= reads
+digits only, so "-6" under =%C= and "-543" under =%Y= fail, and what
+=time_put= writes for a year before 0 does not read back. Seen
+2026-10-31 in the XSH text (=strptime(3p)=).
+
+Fix: an optional sign before the digits of =%C= and =%Y=, and of
+=%EC= and =%EY= when they take the plain conversions; the bound
+checks on the signed value.
+
+Check: =22.locale.time.get= rows =%C= on "-6" and "+19", =%Y= on
+"-543" and "+2026", against a glibc probe; the =time_put=/=time_get=
+round trip of =%C= and =%y= at -543.
+
 ** TODO =%C= keeps negative digits of a year before 0
 
 =do_get= for =%C= keeps the two low digits it finds in =tm_year= as
 ~(tm_year + 1900) % 100~, which is negative for a year before 0, so
 "%y %C" with such a =tm= combines wrongly. No row covers it; seen in
-e438cc11's review.
+e438cc11's review. XSH's =strftime= defines =%C= as the year divided
+by 100 "and truncated to an integer" and =%y= as the last two digits
+in [00,99]; for a year before 0 the two do not recompose. glibc
+floors the century so that they do, and 11087a6a took that for
+=time_put=: the year within the century is the non-negative offset
+from the century's start.
 
-Fix: the floor 11087a6a chose for =time_put= as per glibc, the same
-expression: ~((tm_year + 1900) % 100 + 100) % 100~, so that =%C=
-times 100 plus the kept digits is the year on both sides.
+Fix: the same floor, the same expression as 11087a6a:
+~((tm_year + 1900) % 100 + 100) % 100~, so that =%C= times 100 plus
+the kept digits is the year on both sides.
 
 Check: a =22.locale.time.get= row with =tm_year= -1950 and "%C" on
 "19", against what =time_put= writes for the same year.
