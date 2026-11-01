@@ -38,6 +38,7 @@
 
 #include <langinfo.h>    // for nl_langinfo(), D_FMT
 
+#include <rw_char.h>     // for rw_expand()
 #include <rw_driver.h>   // for rw_test()
 #include <rw_file.h>     // for rw_nextfd()
 #include <rw_locale.h>   // for rw_locale_query()
@@ -63,8 +64,9 @@ void do_test (int lineno, charT, const char *cname,
 
     ostrm.flags (std::ios_base::fmtflags (flags));
 
+    // expand (widen) the pattern, <Unnnn> giving one wide character
     charT wpatbuf [256];
-    for (std::size_t j = 0; !!(wpatbuf [j] = pat [j]); ++j);
+    rw_expand (wpatbuf, pat);
 
     const charT *wpat    = wpatbuf;
     const charT *wpatend = wpat + std::char_traits<charT>::length (wpat);
@@ -142,10 +144,10 @@ void do_test (int lineno, charT, const char *cname,
             // extensions to time_get, ala strptime()
 
             charT fmtstr [256];
-            charT *end;
+            rw_expand (fmtstr, fmt);
 
-            const char *pfmt = fmt;
-            for (end = fmtstr; *pfmt; *end++ = *pfmt++);
+            const charT* const end =
+                fmtstr + std::char_traits<charT>::length (fmtstr);
 
             fname = "get";
             iend  = tg.get (ibeg, iend, istrm, err, &x, fmtstr, end);
@@ -1162,6 +1164,14 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0, 0, 2, 0, 2), "Tue%nMar",      7, "%a %b", 0, Eof);
     TEST (T (0, 0, 0, 0, 3, 0, 3), "Wed%t Apr",     8, "%a %b", 0, Eof);
     TEST (T (0, 0, 0, 0, 2, 0, 5), "Friday March", 12, "%a %b", 0, Good);
+
+    // a literal matches the same character, not one that narrows to the
+    // same char: no character beyond ASCII narrows in "C", so for wchar_t
+    // <U5E74> and <U6708> both narrow to '\0'; for char they expand to
+    // their low bytes, 't' and '\b', which differ as well
+    STEP ("a literal that does not narrow");
+    TEST (T (0, 0, 0, 0, 0, 126), "2026<U5E74>", 5, "%Y<U5E74>", 0, Good);
+    TEST (T (),                   "2026<U6708>", 4, "%Y<U5E74>", 0, Fail);
 }
 
 /**************************************************************************/

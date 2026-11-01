@@ -404,6 +404,15 @@ which becomes moot since nothing is combined across levels. What it
 restores is the virtual's contract, and a `get` that can be read
 against p8 line by line.
 
+A literal of the pattern matches the input's character by
+`char_traits<char_type>::eq`, as the walk of an era's format does in
+9.8. The pattern's character is narrowed only to find the `%`, the
+modifier and the conversion. A narrowed literal does not serve under
+`wchar_t`: a character beyond ASCII narrows to `'\0'` in "C", as
+does one with no single byte in a multibyte locale, and any two of
+them compared equal. "%Y年" read "2026月" as 2026. The narrow
+facet compared bytes and was exact.
+
 ## 7. What stays open
 
 - glibc's `%C` with a `%Y`. "%C %Y" on "20 1926" gives 1926 here,

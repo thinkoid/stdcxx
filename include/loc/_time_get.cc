@@ -511,7 +511,7 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
                 ++__it;
         }
         else {
-            if (__it != __end && __ch == __ctp.narrow (*__it, '\0'))
+            if (__it != __end && char_traits<char_type>::eq (*__it, *__pat))
                 ++__it;
             else {
                 // mismatch between pattern and input
