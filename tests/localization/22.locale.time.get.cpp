@@ -1130,7 +1130,30 @@ void test_posix (charT, const char *cname)
     //     week) using the locale's alternative numeric symbols.
     // %Oy The year (offset from %C ) using the locale's alternative numeric
     // symbols.
-    rw_warn (0, 0, __LINE__, "E modifier not being exercised");
+    // XSH strptime: "If the alternative format or specification does
+    // not exist in the current locale, the behavior shall be as if the
+    // unmodified conversion specification were used"; "C" has no era
+    // data, so the E conversions read as the plain ones
+    STEP ("%EC, %Ey, %EY, %Ec, %Ex and %EX without era data");
+    TEST (T (0, 0, 0, 0, 0,   100),    "20",  2, "EC",      0, Eof);
+    TEST (T (0, 0, 0, 0, 0,     0),    "19",  2, "EC",      0, Eof);
+    TEST (T (0, 0, 0, 0, 0,   126),    "26",  2, "Ey",      0, Eof);
+    TEST (T (0, 0, 0, 0, 0,    69),    "69",  2, "Ey",      0, Eof);
+    TEST (T (0, 0, 0, 0, 0,   126),  "2026",  4, "EY",      0, Eof);
+    TEST (T (0, 0, 0, 0, 0, -2443),  "-543",  4, "EY",      0, Eof);
+    TEST (T (0, 0, 0, 0, 0,   126), "20 26",  5, "%EC %Ey", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0,    26), "26 19",  5, "%Ey %EC", 0, Eof);
+    TEST (T (0, 0, 0, 1, 0,   100),    "%x",  8, "Ex",      0, Eof);
+    TEST (T (5, 4, 3),                 "%X",  8, "EX",      0, Eof);
+    TEST (T (0, 0, 0, 1, 0, 0, 0),     "%c", -1, "Ec",      0, Eof);
+
+    // C++11 22.4.5.1.2, p12: E before a conversion it does not modify
+    // is an invalid concatenation, failbit with the tm unchanged
+    STEP ("E before a conversion it does not modify");
+    TEST (T (0),                        "1",  0, "Ed",      0, Fail);
+    TEST (T (0),                        "1",  0, "EM",      0, Fail);
+    TEST (T (0),                        "1",  0, "%Ed",     0, Fail);
+
     rw_warn (0, 0, __LINE__, "O modifier not being exercised");
 
     // exercise pattern strings containing multiple format specifiers
@@ -1871,6 +1894,21 @@ void test_user (charT, const char *cname, const char *locname)
 
     // %EC: The name of the base year (period) in the locale's
     //      alternative representation.
+    STEP ("%EC: the name of the era");
+    // a zeroed tm, 1900, lies in the backward era bar, whose years
+    // count down from 7 in 1926 and are -19 in 1900; a name of another
+    // era moves the year into that era, keeping the number where the
+    // era has it, else at the era's first year: Showa -19 would be
+    // 1906, so 1927; Heisei -19 would be 1969, in Showa, and Heisei's
+    // first year 1989 begins on January 8, after a zeroed tm's January
+    // 0, so Heisei is 1990, the year after it
+    TEST (T (0, 0, 0, 0, 0, 27),  "Showa", 5, "EC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 90), "Heisei", 6, "EC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0,  0),    "bar", 3, "EC", 0, Good);
+    // C++11 22.4.5.1.2, p13: no era of the name, eofbit; with era
+    // data in the locale the plain %C is not the fallback
+    TEST (T (0),                 "Taisho", 0, "EC", 0, Eof);
+    TEST (T (0),                     "19", 0, "EC", 0, Eof);
 
     // %Ex: The locale's alternative date representation.
     STEP ("%Ex: alternative date representation");
@@ -1901,11 +1939,55 @@ void test_user (charT, const char *cname, const char *locname)
     // %Ey: The offset from %EC (year only) in the locale's
     //      alternative representation.
     STEP ("%Ey: offset from %EC in alternative representation.");
-    rw_warn (0, 0, __LINE__, "%%Ey not being exercised");
+    // the year within the era the date in the tm lies in, up to four
+    // digits; a zeroed tm lies in bar, where 3 is 1922 and 0 is 1919
+    TEST (T (0, 0, 0, 0, 0, 22),     "3", 1, "Ey", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 19),     "0", 1, "Ey", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 26),    "07", 2, "Ey", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 26), "00071", 4, "Ey", 0, Good);
+    // C++11 22.4.5.1.2, p13: a year past the era's bounds, or no
+    // digits, eofbit; the year is left as it was
+    TEST (T (0),                     "8", 1, "Ey", 0, Eof);
+    TEST (T (0),                     "X", 0, "Ey", 0, Eof);
+
+    // %EC and %Ey combine through the tm in either order
+    TEST (T (0, 0, 0, 0, 0, 33),  "Showa 8", 7, "%EC %Ey", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 89), "Showa 64", 8, "%EC %Ey", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 30),  "5 Showa", 7, "%Ey %EC", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 26),    "bar 7", 5, "%EC %Ey", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 20),    "bar 1", 5, "%EC %Ey", 0, Eof);
+    TEST (T (0, 0, 0, 1, 5, 96),
+          "06/01 Heisei 8", 14, "%m/%d %EC %Ey", 0, Eof);
+    // an era is every record of its name: Heisei is its Gannen record
+    // of 1989 and its record from 1990, so its year 1 is 1989
+    TEST (T (0, 0, 0, 0, 0, 96), "Heisei 8", 8, "%EC %Ey", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 89), "Heisei 1", 8, "%EC %Ey", 0, Eof);
+    // Showa ends in 1989 (64), bar in 1926 (7): eofbit, the year as
+    // %EC left it
+    TEST (T (0, 0, 0, 0, 0, 27), "Showa 65", 8, "%EC %Ey", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0,  0),    "bar 8", 5, "%EC %Ey", 0, Eof);
 
     // %EY: The full alternative year representation.
     STEP ("%EY: the full alternative year representation");
-    rw_warn (0, 0, __LINE__, "%%EY not being exercised");
+    // the era's format, "%EC %Ey Nen", "%EC Gannen" or "foo%EC %Ey",
+    // matched by its text up to the name; the two Heisei formats are
+    // told apart by the character after the white space
+    TEST (T (0, 0, 0, 0, 0, 96),  "Heisei 8 Nen", 12, "EY", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 89), "Heisei Gannen", 13, "EY", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 33),   "Showa 8 Nen", 11, "EY", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 26),      "foobar 7",  8, "EY", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 19),      "foobar 0",  8, "EY", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 96),           "%EY", 13, "EY", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 26),           "%EY",  9, "EY", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 96),  "Heisei 8 Nen", 12, "%EY", 0, Good);
+    // Heisei 1 lies in Heisei by its Gannen record, so the year
+    // format of the record from 1990 reads it too
+    TEST (T (0, 0, 0, 0, 0, 89),  "Heisei 1 Nen", 12, "EY", 0, Good);
+    // C++11 22.4.5.1.2, p13: eofbit for a format that does not follow,
+    // no era, and digits with era data in the locale
+    TEST (T (0),                    "Heisei Nen",  7, "EY", 0, Eof);
+    TEST (T (0),                  "Taisho 1 Nen",  0, "EY", 0, Eof);
+    TEST (T (0),                          "1996",  0, "EY", 0, Eof);
 
     // %OC: The century using the locale's alternative numeric symbols
     //      (an extension of the C library's strftime).

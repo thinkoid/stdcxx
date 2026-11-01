@@ -40,6 +40,304 @@ __rw_get_timepunct (const __rw_facet *pfacet,
                     int data [5], _RWSTD_C::tm *tmb, int **pmem,
                     const void *names[], _RWSTD_SIZE_T sizes[]);
 
+// the era records of the facet's locale (src/era.cpp), an era being
+// every record of one name: %EC moves the year into the era of record
+// `inx', %Ey sets the year `n' in the era of record `inx', or in the
+// era the tm lies in for SIZE_MAX, or the start year of record `inx'
+// for INT_MIN, and fails outside the years of the era's records
+_RWSTD_EXPORT void
+__rw_set_era (const __rw_facet*, _RWSTD_SIZE_T, _RWSTD_C::tm*);
+
+_RWSTD_EXPORT bool
+__rw_set_era_year (const __rw_facet*, _RWSTD_SIZE_T, int, _RWSTD_C::tm*);
+
+
+// reads the year within an era for %Ey, up to four digits without a
+// sign after white space, 0 to 9999 as in the C library's strptime,
+// and sets it in the era of record `inx' as __rw_set_era_year does;
+// C++11 22.4.5.1.2, p13: no digits, no era or a year outside the era
+// set eofbit, and the tm keeps the year it had
+template <class _CharT, class _InputIter>
+_InputIter
+__rw_read_era_year (_InputIter __it, _InputIter __end,
+                   const std::ctype<_CharT> &__ctp, const __rw_facet *__pf,
+                   _RWSTD_SIZE_T __inx, _RWSTD_C::tm *__tmb,
+                   _RWSTD_IOSTATE &__err)
+{
+    while (__it != __end && __ctp.is (std::ctype_base::space, *__it))
+        ++__it;
+
+    int           __n     = 0;
+    _RWSTD_SIZE_T __nread = 0;
+
+    for ( ; ; ++__it, ++__nread) {
+        if (__it == __end) {
+            __err |= __rw_eofbit;
+            break;
+        }
+
+        const _CharT __c = *__it;
+
+        if (4 == __nread || !__ctp.is (std::ctype_base::digit, __c))
+            break;
+
+        const char __ch = __ctp.narrow (__c, '\0');
+        if (__ch < '0' || __ch > '9')
+            break;
+
+        __n = 10 * __n + __ch - '0';
+    }
+
+    if (0 == __nread || !__rw_set_era_year (__pf, __inx, __n, __tmb))
+        __err |= __rw_eofbit;
+
+    return __it;
+}
+
+
+// reads %EC, %Ey or %EY, given by `fmt', against the `neras' era records
+// whose names are `names'; C++11 22.4.5.1.2, p13: a failure sets eofbit,
+// never failbit, the members are unspecified and keep what they held,
+// and in a locale with era records the plain conversion is not taken
+template <class _CharT, class _InputIter>
+_InputIter
+__rw_read_era (_InputIter __it, _InputIter __end, std::ios_base &__fl,
+               _RWSTD_IOSTATE &__err, _RWSTD_C::tm *__tmb, char __fmt,
+               const __rw_facet *__pf, const _CharT* const *__names,
+               const _RWSTD_SIZE_T *__sizes, _RWSTD_SIZE_T __neras)
+{
+    typedef std::char_traits<_CharT> _Traits;
+
+    const std::ctype<_CharT> &__ctp =
+        std::use_facet< std::ctype<_CharT> >(__fl.getloc ());
+
+    _RWSTD_C::tm __tmp = __tmb ? *__tmb : _RWSTD_C::tm ();
+
+    _RWSTD_IOSTATE __errtmp = __rw_goodbit;
+
+    if ('C' == __fmt) {
+        // %EC: the era of the name matched, every record with that
+        // name; the year moves into it unless it already lies in it
+        _RWSTD_SIZE_T __inx    = _RWSTD_SIZE_MAX;
+        int           __interr = 1;
+
+        __it = __rw_match_name (__it, __end, __names, __sizes, __neras,
+                                __inx, __interr, &__fl);
+
+        __errtmp = _RWSTD_IOSTATE (__interr);
+
+        if (__inx < __neras)
+            __rw_set_era (__pf, __inx, &__tmp);
+        else
+            __errtmp |= __rw_eofbit;
+    }
+    else if ('y' == __fmt) {
+        // %Ey: the year within the era the date in the tm lies in
+        __it = __rw_read_era_year (__it, __end, __ctp, __pf, _RWSTD_SIZE_MAX,
+                                   &__tmp, __errtmp);
+    }
+    else {
+        // %EY: an era's format, whose era is not known until its name
+        // is read and an input iterator cannot back up; each format is
+        // matched by its text up to %EC with the era's name appended,
+        // all in parallel, and the rest of the format of the era found
+        // is walked with that era as the walk's own state
+        const _CharT*  __fmts [100];
+        _RWSTD_SIZE_T  __fsizes [sizeof __fmts / sizeof *__fmts];
+
+        int __fdata [5] = {
+            'Y', 'E', sizeof (_CharT) > sizeof (char), 0, 0
+        };
+
+        int *__pmem = 0;
+
+        const void** __pv = reinterpret_cast< const void** >(__fmts);
+
+        const _RWSTD_SIZE_T __nfmts =
+            __rw_get_timepunct (__pf, __fdata, &__tmp, &__pmem, __pv,
+                                __fsizes);
+
+        _RWSTD_ASSERT (__nfmts == __neras);
+
+        _CharT         __buf [512];   // the formats up to the names
+        const _CharT*  __flat [sizeof __fmts / sizeof *__fmts];
+        _RWSTD_SIZE_T  __flsizes [sizeof __fmts / sizeof *__fmts];
+        _RWSTD_SIZE_T  __rec [sizeof __fmts / sizeof *__fmts];
+        _RWSTD_SIZE_T  __rest [sizeof __fmts / sizeof *__fmts];
+        _RWSTD_SIZE_T  __nflat = 0;
+        _RWSTD_SIZE_T  __used  = 0;
+
+        for (_RWSTD_SIZE_T __i = 0; __i != __nfmts; ++__i) {
+
+            // the position of the format's %EC, past any %%
+            _RWSTD_SIZE_T __pos = _RWSTD_SIZE_MAX;
+
+            for (_RWSTD_SIZE_T __j = 0; __j + 1 < __fsizes [__i]; ++__j) {
+                if ('%' != __ctp.narrow (__fmts [__i][__j], '\0'))
+                    continue;
+
+                const char __c1 = __ctp.narrow (__fmts [__i][__j + 1], '\0');
+
+                if ('%' == __c1)
+                    ++__j;
+                else if (   'E' == __c1 && __j + 2 < __fsizes [__i]
+                         && 'C' == __ctp.narrow (__fmts [__i][__j + 2],
+                                                 '\0')) {
+                    __pos = __j;
+                    break;
+                }
+            }
+
+            // a format without %EC, or one past the buffer, is left out
+            if (   _RWSTD_SIZE_MAX == __pos
+                || sizeof __buf / sizeof *__buf - __used
+                   < __pos + __sizes [__i])
+                continue;
+
+            _Traits::copy (__buf + __used, __fmts [__i], __pos);
+            _Traits::copy (__buf + __used + __pos, __names [__i],
+                           __sizes [__i]);
+
+            __flat [__nflat]    = __buf + __used;
+            __flsizes [__nflat] = __pos + __sizes [__i];
+            __rec [__nflat]     = __i;
+            __rest [__i]        = __pos + 3;
+
+            __used += __flsizes [__nflat++];
+        }
+
+        _RWSTD_SIZE_T __inx    = _RWSTD_SIZE_MAX;
+        int           __interr = 1;
+
+        if (__nflat)
+            __it = __rw_match_name (__it, __end, __flat, __flsizes, __nflat,
+                                    __inx, __interr, &__fl);
+        else
+            __interr = 0;
+
+        __errtmp = _RWSTD_IOSTATE (__interr);
+
+        // the formats whose text up to the name is the one matched, the
+        // pair of records that share a name ("%EC%Ey" and "%EC" with a
+        // literal for the first year) among them
+        _RWSTD_SIZE_T __cand [sizeof __fmts / sizeof *__fmts];
+        _RWSTD_SIZE_T __ncand = 0;
+
+        for (_RWSTD_SIZE_T __k = 0; __inx < __nflat && __k != __nflat; ++__k) {
+            if (   __flsizes [__k] == __flsizes [__inx]
+                && 0 == _Traits::compare (__flat [__k], __flat [__inx],
+                                          __flsizes [__k]))
+                __cand [__ncand++] = __rec [__k];
+        }
+
+        if (1 < __ncand) {
+
+            // where every rest begins with white space, it is skipped
+            // in each and in the input; then one character decides: a
+            // digit takes the rest that begins with %Ey, any other the
+            // rest that begins with that character
+            bool __space = true;
+
+            for (_RWSTD_SIZE_T __k = 0; __space && __k != __ncand; ++__k) {
+                const _RWSTD_SIZE_T __r = __cand [__k];
+
+                __space =    __rest [__r] < __fsizes [__r]
+                          && __ctp.is (std::ctype_base::space,
+                                       __fmts [__r][__rest [__r]]);
+            }
+
+            if (__space) {
+                for (_RWSTD_SIZE_T __k = 0; __k != __ncand; ++__k) {
+                    const _RWSTD_SIZE_T __r = __cand [__k];
+
+                    while (   __rest [__r] < __fsizes [__r]
+                           && __ctp.is (std::ctype_base::space,
+                                        __fmts [__r][__rest [__r]]))
+                        ++__rest [__r];
+                }
+
+                while (   __it != __end
+                       && __ctp.is (std::ctype_base::space, *__it))
+                    ++__it;
+            }
+
+            _RWSTD_SIZE_T __ndec = 0;
+
+            for (_RWSTD_SIZE_T __k = 0; __k != __ncand && __it != __end;
+                 ++__k) {
+                const _RWSTD_SIZE_T __r = __cand [__k];
+                const _CharT* const __p = __fmts [__r] + __rest [__r];
+                const _RWSTD_SIZE_T __n = __fsizes [__r] - __rest [__r];
+
+                const bool __year =
+                       3 <= __n && '%' == __ctp.narrow (__p [0], '\0')
+                    && 'E' == __ctp.narrow (__p [1], '\0')
+                    && 'y' == __ctp.narrow (__p [2], '\0');
+
+                if (  __year ? __ctp.is (std::ctype_base::digit, *__it)
+                    : 0 < __n && '%' != __ctp.narrow (__p [0], '\0')
+                      && _Traits::eq (__p [0], *__it))
+                    __cand [__ndec++] = __r;
+            }
+
+            __ncand = __ndec;
+        }
+
+        if (1 == __ncand) {
+
+            const _RWSTD_SIZE_T __r = __cand [0];
+
+            const _CharT*       __p   = __fmts [__r] + __rest [__r];
+            const _CharT* const __pe  = __fmts [__r] + __fsizes [__r];
+            bool                __year = false;
+
+            for ( ; __p != __pe && !__errtmp; ++__p) {
+
+                if (__ctp.is (std::ctype_base::space, *__p)) {
+                    while (__it != __end
+                           && __ctp.is (std::ctype_base::space, *__it))
+                        ++__it;
+                }
+                else if (   '%' == __ctp.narrow (*__p, '\0')
+                         && 2 < __pe - __p
+                         && 'E' == __ctp.narrow (__p [1], '\0')
+                         && 'y' == __ctp.narrow (__p [2], '\0')) {
+                    // %Ey within the era found, not the tm's
+                    __it = __rw_read_era_year (__it, __end, __ctp, __pf, __r,
+                                               &__tmp, __errtmp);
+                    __year = true;
+                    __p   += 2;
+                }
+                else if ('%' == __ctp.narrow (*__p, '\0')) {
+                    // a directive other than %Ey in an era's format
+                    __errtmp |= __rw_eofbit;
+                }
+                else if (__it != __end && _Traits::eq (*__it, *__p))
+                    ++__it;
+                else
+                    __errtmp |= __rw_eofbit;
+            }
+
+            if (__p != __pe)
+                __errtmp |= __rw_eofbit;
+            else if (!__year && !__rw_set_era_year (__pf, __r, _RWSTD_INT_MIN,
+                                                    &__tmp))
+                __errtmp |= __rw_eofbit;
+        }
+        else {
+            // no era, or one character decides none or more than one
+            __errtmp |= __rw_eofbit;
+        }
+    }
+
+    if (!(__errtmp & ~__rw_eofbit) && __tmb)
+        *__tmb = __tmp;
+
+    __err |= __errtmp;
+
+    return __it;
+}
+
 }   // namespace __rw
 
 
@@ -360,6 +658,29 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
     }
 
     default: __dup = 1;
+    }
+
+    if ('E' == __modifier && ('C' == __fmt || 'y' == __fmt || 'Y' == __fmt)) {
+
+        // the era names, one per era record, in the order of the records
+        int __edata [5] = {
+            'C', 'E', sizeof (char_type) > sizeof (char), 0, 0
+        };
+
+        const _RWSTD_SIZE_T __neras =
+            __rw::__rw_get_timepunct (this, __edata, &__tmp,
+                                     &__pmem, __pv, __sizes);
+
+        if (__neras)
+            return __rw::__rw_read_era (__it, __end, __fl, __err, __tmb,
+                                        __fmt, this, __names, __sizes,
+                                        __neras);
+
+        // XSH strptime: "If the alternative format or specification
+        // does not exist in the current locale, the behavior shall be
+        // as if the unmodified conversion specification were used";
+        // with no era records %EC, %Ey and %EY are %C, %y and %Y
+        __modifier = '\0';
     }
 
     int __data [5] = {

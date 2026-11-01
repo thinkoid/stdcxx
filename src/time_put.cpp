@@ -61,6 +61,7 @@
 
 #include <rw/_traits.h>
 
+#include "era.h"
 #include "setlocale.h"
 #include "strtol.h"
 
@@ -1050,8 +1051,8 @@ __rw_get_timepunct (const __rw_facet *pfacet,
         switch (fmt) {
 
         case 'C':
-            // %EC: the name of the period in alternative representation
-            *pmem = &tmb->tm_year;
+            // %EC: the name of the period in alternative representation,
+            //      one per era record, in the order of the records
             flags = _EraNames;
             break;
 
@@ -1076,9 +1077,25 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             break;
 
         case 'y':
-            // %Ey: offset from %EC (year only) in alternative representation
-            // FIXME: implement
+            // %Ey: offset from %EC (year only) in alternative representation,
+            //      read by time_get against the era records themselves
             break;
+        }
+
+        if (_EraDateTime == flags || _EraDate == flags || _EraTime == flags) {
+            // XSH strptime: "If the alternative format or specification
+            // does not exist in the current locale, the behavior shall be
+            // as if the unmodified conversion specification were used";
+            // an empty era format reads as the plain one, which is also
+            // what time_put writes for it
+            const void* const pat =
+                __rw_get_timepunct (pfacet, flags | (wide ? __rw_wide : 0), 0);
+
+            if (   !pat
+                ||  (wide && !*static_cast< const wchar_t* >(pat))
+                || (!wide && !*static_cast< const char* >(pat)))
+                flags =   _EraDateTime == flags ? _DateTime
+                        : _EraDate     == flags ? _Date : _Time;
         }
     }
     else if ('O' == mod) {
@@ -1689,86 +1706,6 @@ __rw_iso_week (int& year, int yday, int wday)
     }
         
     return isow;
-}
-
-
-// compares the date given by `year', `mon' and `mday' with the
-// bound `k' of the era `pera' (0 for its start date, 1 for its
-// end date), the year first, then the month, then the day, and
-// returns a negative, zero, or positive value as the date comes
-// before, falls on, or comes after the bound; the infinities
-// of a bound at either end of time decide at the year
-static int
-__rw_era_date_cmp (int year, int mon, int mday,
-                   const __rw_time_t::era_t *pera, int k)
-{
-    if (year != pera->year [k])
-        return year < pera->year [k] ? -1 : 1;
-
-    if (mon != pera->month [k])
-        return mon < pera->month [k] ? -1 : 1;
-
-    return mday - pera->day [k];
-}
-
-
-// returns a pointer to the era_t element describing the era
-// corresponding to the date pointed to by `tmb', or 0 if no
-// such era exists
-static const __rw_time_t::era_t*
-__rw_get_era (const __rw_time_t *ptime, const tm *tmb)
-{
-    _RWSTD_ASSERT (0 != tmb);
-
-    const int year = 1900 + tmb->tm_year;
-
-    // get the number of eras in this locale
-    const size_t neras = size_t (ptime->era_count ());
-
-    for (size_t i = 0; i != neras; ++i) {
-        const __rw_time_t::era_t* const pera = ptime->era (i);
-
-        _RWSTD_ASSERT (0 != pera);
-
-        // the start date is the one nearest the era's first year
-        // and may be the later of the two (an era that counts into
-        // the past ends at the beginning of time): the date belongs
-        // to the era when it lies between the bounds in either order,
-        // each bound compared as a whole date so that a day in the
-        // first or last month of an era is tested against the bound
-        // of that month alone
-        const int cs =
-            __rw_era_date_cmp (year, tmb->tm_mon, tmb->tm_mday, pera, 0);
-        const int ce =
-            __rw_era_date_cmp (year, tmb->tm_mon, tmb->tm_mday, pera, 1);
-
-        if ((cs <= 0 && 0 <= ce) || (ce <= 0 && 0 <= cs))
-            return pera;
-    }
-
-    return 0;
-}
-
-
-// returns the number of the year of the date pointed to by `tmb'
-// within the era `pera' that contains it
-static int
-__rw_get_era_year (const __rw_time_t::era_t *pera, const tm *tmb)
-{
-    // the offset numbers the year at the start date and its sign
-    // says whether the numbers grow toward the end date ('+') or
-    // shrink toward it ('-'); the end date may be earlier in time
-    // than the start date, and then the count against the calendar
-    // runs the other way
-    const bool backward =
-        0 < __rw_era_date_cmp (pera->year [0], pera->month [0],
-                               pera->day [0], pera, 1);
-    const bool shrinks = pera->offset < 0;
-
-    const int offset = shrinks ? -pera->offset : pera->offset;
-    const int delta  = 1900 + tmb->tm_year - pera->year [0];
-
-    return backward == shrinks ? offset + delta : offset - delta;
 }
 
 
