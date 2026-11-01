@@ -818,7 +818,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         // and the factor apply, 99 for %y, whose bounds are the pivot's;
         // as in the C library's strptime, a digit that would take the
         // value past it is left for what follows: %d on "45" reads 4
-        const int __max = 'y' == __fmt ? 99
+        const int __bound = 'y' == __fmt ? 99
             : (__data [3] - __data [0]) / __data [1];
 
         // white space before the digits is skipped, as in strptime
@@ -849,7 +849,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
                 break;
             }
 
-            if (__nread == __dig || __max / 10 < __mem)
+            if (__nread == __dig || __bound / 10 < __mem)
                 break;
 
             const char_type __c = *__it;

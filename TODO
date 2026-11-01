@@ -19,21 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =17.names= has not compiled since b910448a
-
-The local ~const int __max~ that b910448a added to =do_get= in
-=include/loc/_time_get.cc= (line 818) clashes with the test's
-~#define __max !ERROR!~, the name MSVC's C library takes in
-=<stdlib.h>=. =make run= does not build tests, so every suite run
-since 2026-10-30 has run a =17.names= binary built before that
-commit, and its pinned row of 0 assertions cannot show the break.
-The pins of 503ae88c, ffea5ffe and the wide-walk change carry it.
-Found 2026-11-01 when =make= in the suite needed =-k=.
-
-Fix: rename the local; =__maxval= or the file's spelling for a bound.
-
-Check: =17.names= compiles in 15D; the suite's table is unchanged.
-
 ** TODO =time_put= writes =%OY= as =%EY=
 
 The ='Y'= case of =__rw_get_time_put_data= in =src/time_put.cpp=
