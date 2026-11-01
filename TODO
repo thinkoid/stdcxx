@@ -67,19 +67,6 @@ empty, on both sides, or keep the pair and record it.
 Check: a record with an empty format in the generated locale of
 =22.locale.time.get=, its =%EY= round trip either way.
 
-** TODO =time_get='s pattern matches a literal case-sensitively
-
-C++11 22.4.5.1.1 p8 matches a literal of =get='s pattern with the
-input "in a case-insensitive comparison", by means p9 leaves
-unspecified. =get= compares the two characters by =char_traits=, as
-the 2005 code compared their narrow values: "%Yt" on "2026T" fails.
-Seen 2026-11-01 while the literal match moved off the narrow value.
-
-Fix: a decision: compare through =ctype::toupper=, or keep the exact
-match and record it in the conformance record.
-
-Check: "%Yt" on "2026T", narrow and wide, either way.
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it

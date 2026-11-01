@@ -1172,6 +1172,13 @@ void test_posix (charT, const char *cname)
     STEP ("a literal that does not narrow");
     TEST (T (0, 0, 0, 0, 0, 126), "2026<U5E74>", 5, "%Y<U5E74>", 0, Good);
     TEST (T (),                   "2026<U6708>", 4, "%Y<U5E74>", 0, Fail);
+
+    // a literal matches in a case-insensitive comparison (C++11
+    // 22.4.5.1.1 p8), by ctype::toupper on both characters
+    STEP ("a literal of the other case");
+    TEST (T (0, 0, 0, 0, 0, 126), "2026T", 5, "%Yt", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 126), "2026t", 5, "%YT", 0, Good);
+    TEST (T (),                   "2026u", 4, "%Yt", 0, Fail);
 }
 
 /**************************************************************************/

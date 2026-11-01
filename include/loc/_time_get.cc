@@ -511,7 +511,10 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
                 ++__it;
         }
         else {
-            if (__it != __end && char_traits<char_type>::eq (*__it, *__pat))
+            // a literal matches in a case-insensitive comparison
+            if (   __it != __end
+                && char_traits<char_type>::eq ((__ctp.toupper)(*__it),
+                                               (__ctp.toupper)(*__pat)))
                 ++__it;
             else {
                 // mismatch between pattern and input

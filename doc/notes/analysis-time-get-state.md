@@ -405,9 +405,13 @@ restores is the virtual's contract, and a `get` that can be read
 against p8 line by line.
 
 A literal of the pattern matches the input's character by
-`char_traits<char_type>::eq`, as the walk of an era's format does in
-9.8. The pattern's character is narrowed only to find the `%`, the
-modifier and the conversion. A narrowed literal does not serve under
+`char_traits<char_type>::eq` of the two characters through the
+facet's `ctype::toupper`: C++11 22.4.5.1.1 p8 has the literal match
+"in a case-insensitive comparison", and p9 leaves the means
+unspecified. The walk of an era's format in 9.8 matches its literals
+exactly; the era format is the locale's text, not a caller's pattern,
+and p8 does not govern it. The pattern's character is narrowed only
+to find the `%`, the modifier and the conversion. A narrowed literal does not serve under
 `wchar_t`: a character beyond ASCII narrows to `'\0'` in "C", as
 does one with no single byte in a multibyte locale, and any two of
 them compared equal. "%Y年" read "2026月" as 2026. The narrow
