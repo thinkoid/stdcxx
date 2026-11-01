@@ -779,6 +779,21 @@ the binary locale data they read. A reader of
 =doc/notes/analysis-locale-mt-race.md= needs this map first. Shape:
 =ref-string-replace.md=.
 
+** TODO A reference for =time_get=
+
+=doc/notes/ref-time-get.md=: the reading model in one place, for a
+reader who has not followed the investigations. =get= over a format dispatches one =do_get= per
+directive and matches the literals; =do_get= updates the =tm= it is
+given; the =tm= is the only carrier between two calls. A pattern, the
+locale's =%x= or an era's year format, is a nested walk whose state
+lives inside the one call. C++11 22.4.5.1.2 has two failure
+contracts: p12's =failbit= with the =tm= unchanged for an invalid
+directive, and p13's =eofbit= with unspecified members where an =E=
+or =O= directive cannot be determined. The base-year rule of =%EC=
+and the era lookup of =%Ey=. Material:
+=doc/notes/analysis-time-get-state.md=, chapters 1, 6 and 9, and
+=ref-conformance.md= chapter 2. Shape: =ref-string-replace.md=.
+
 ** TODO Decision records
 
 One short file per irreversible choice of the revival: the C++03

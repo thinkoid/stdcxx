@@ -26,7 +26,7 @@ alternatives that were weighed for the week number in October 2026.
 | `%Z` | the time zone name | none | consumed, nothing to assign |
 | `%z` | the offset from UTC | `tm_gmtoff` where the C library has it | nothing to assign elsewhere |
 | `%x`, `%X`, `%c`, `%D`, `%r`, `%R`, `%T`, `%F` | a locale's or a fixed format, a whole pattern | several | a nested walk: what it parsed is settled inside it and does not reach the pattern around it |
-| `%E` with `C`, `y`, `Y`, `x`, `X`, `c` | the era forms: an era name, a year within the era, the era's formats | `tm_year` and others | without era data they must fall back to the plain directive; with it, an era name is a start year and an offset, not a member |
+| `%E` with `C`, `y`, `Y`, `x`, `X`, `c` | the era forms: an era name, a year within the era, the era's formats | `tm_year` and others | without era data the plain directive; with it, an era has no member, so `%EC` moves the year into the era and `%Ey` reads in the era of the year, and `%EY`'s era is unknown until its name is read; chapter 9 |
 | `%O` with a numeric directive | the locale's alternative digits for the value | the plain directive's | a value with no alternative symbol is read as digits; the first alternative symbol may be empty |
 
 ## 0. The short version
@@ -420,11 +420,7 @@ against p8 line by line.
 - The implied members. "%Y %m %d" leaves `tm_wday` and `tm_yday` as
   the caller had them; glibc completes them. The remark in p14 makes
   either reading conforming. A decision.
-- The `E` family. `%EC` without era data reads one digit against a
-  bound of zero and fails; `%Ey` and `%EY` are unimplemented; `%EC`
-  with eras stores the era's index where a year belongs. p13 permits
-  `eofbit` and unspecified members where an era directive cannot be
-  resolved, which bounds what a fix owes. Queued.
+- The `E` family. Read since 2026-11-01 by the rules of chapter 9.
 - The nesting rule. Moot under the update model: a nested `%x` is a
   `do_get` that updates the same `tm`, and nothing is combined
   across levels except through the members themselves.
@@ -569,13 +565,259 @@ bug concerns `%C` or `%y` of a negative year.
 The sweep's sources and probe programs are kept with the day's
 handover material outside the tree.
 
-## 9. Where to look
+## 9. The era conversions: `%EC`, `%Ey` and `%EY`
+
+An era record of LC_TIME is a direction, an offset, a start date, an
+end date, a name and a year format. ja_JP's `+:2:2020/01/01:+*:令和:%EC%Ey年`
+numbers 2020 as 令和 2 and runs to the end of time. The offset is
+"the number of the year closest to start_date", and `+` means "the
+years closer to start_date have lower numbers". The end date may
+come before the start: zh_TW's 民前 starts on 1911-12-31 and counts
+up into the past. Two records may share a name: 令和 has one for
+2019 alone, whose format `%EC元年` writes the first year as 元年, and
+one from 2020; the two are one era. Until 2026-11-01 the reader had
+none of this. `%EC`
+stored the matched era's index in `tm_year`, `%Ey` had no reader,
+and `%EY` matched the year formats as if they were names. The rules
+below were decided on 2026-11-01 and are what `do_get` does since.
+
+### 9.1 The texts
+
+- C++11 22.4.5.1.2, p12: an invalid directive "leaves the object
+  pointed to by t unchanged" with `failbit`. `%Ed` and `%EM` are
+  invalid: `E` modifies only `c`, `C`, `x`, `X`, `y` and `Y`.
+- p13: for an `E` directive, "when the function is unable to
+  unambiguously determine some or all struct tm members from the
+  input sequence", it sets `eofbit`, and "the values of those struct
+  tm members are unspecified and may be outside their valid range".
+- p14: whether a call updates the `tm` or overwrites its members is
+  unspecified. The library updates it (chapter 6).
+- XSH strptime: `%EC` is "The name of the base year (period) in the
+  locale's alternative representation", `%Ey` "The offset from %EC
+  (year only)", `%EY` "The full alternative year representation";
+  and "If the alternative format or specification does not exist in
+  the current locale, the behavior shall be as if the unmodified
+  conversion specification were used."
+
+### 9.2 Two failure contracts
+
+p12 and p13 are two contracts. A directive that is not one, `%Ed`,
+fails with `failbit` and leaves the `tm` as it was. A valid `E`
+directive that cannot settle its members sets `eofbit`, never
+`failbit`: an unknown era name, a year outside its era, no digits
+for `%Ey`, an era format the input does not follow. The members are
+unspecified; the library leaves the year as it was. XSH's fallback
+applies where the alternative "does not exist". A locale with era
+records has the alternative, so a mismatch there is not a fallback:
+"19" under `%EC` in ja_JP sets `eofbit` and reads nothing, where
+glibc reads the century.
+
+Under `get` over a format, `eofbit` from a directive before the last
+ends the walk, and the walk adds `failbit`, as it does when the input
+runs out early. A lone `E` directive keeps the `eofbit` alone.
+
+### 9.3 No era data
+
+XSH's sentence decides the locales without eras. "C", en_US and the
+test's other locales read `%EC`, `%Ey` and `%EY` exactly as `%C`,
+`%y` and `%Y`, sign and pivot included. `%Ec`, `%Ex` and `%EX` read
+the plain `%c`, `%x` and `%X` where the locale's `era_d_t_fmt`,
+`era_d_fmt` or `era_t_fmt` is empty or missing: ar_SA defines an
+empty `era_d_fmt`, ja_JP no `era_t_fmt`, zh_TW none of the three.
+That is also what `time_put` writes for them. Before, the empty
+format parsed as nothing: good, no character read, no member set.
+
+### 9.4 State
+
+p8 has `get` evaluate `do_get` once per directive, and chapter 6 made
+the `tm` the only carrier between two calls. The era state obeys the
+same rule. A record found while reading may live only inside the one
+`do_get` that found it, inside the walk of `%EY` over a year format.
+Nothing outlives the call: no latch in `get`, no member of the facet,
+no thread or static storage. `%EC` and `%Ey` written as two
+directives combine through `tm_year` alone.
+
+### 9.5 The era of a date, for the reader
+
+An era is every record with its name. ja_JP's 令和 is its 元年
+record, 2019-05-01 to 2019-12-31 with offset 1, and its record from
+2020-01-01 with offset 2. The two make one span, and their offsets
+agree: both make 2019 year 1 and 2020 year 2. The data must keep
+that agreement, one era and one count, and then any record of the
+name serves for the year arithmetic; the reader takes the first in
+order. The era's span runs from the earliest bound of its records to
+the latest; a bound at either end of time stays infinite. Its first
+year is the start year of the record with the smallest offset: 2019
+for 令和, 1989 for 平成.
+
+`time_put` finds the era of a date by comparing it with each record's
+bounds as a whole date, in the order of the records. The reader uses
+a sibling of that lookup, over eras. A year strictly inside an era's
+span lies in the era whatever `tm_mon` and `tm_mday` hold. Only a
+date in the span's first or last year is compared whole, against the
+bound of the record that holds that end, as the writer does, so that
+2019-06-01 is 令和 and 2019-04-01 平成. A day below 1 is taken for
+the first of the month there. A zeroed `tm` is January 0, which a
+whole-date comparison puts before an era that begins on January 1;
+the reader must not. Eras are tried in the order of their first
+records, forward and backward alike.
+
+### 9.6 `%EC`: the base-year rule
+
+`%EC` names an era and nothing more; `tm` has no member for an era.
+What it can do is move the year into the era it names, so that a
+`%Ey` before or after it finds the era by the year.
+
+- The name is matched against every record's name. The era named is
+  every record with that name, by 9.5.
+- When the year in the `tm` lies in that era, by the lookup of 9.5,
+  the year stays.
+- Otherwise the year keeps its number. Its number n is its year in
+  the era it lies in, or the named era's smallest offset where it
+  lies in none. The year becomes start + (n - offset) times the
+  direction, in the era's first record, where the lookup puts that
+  year in the era.
+- Otherwise the year becomes the era's first year. Where the month
+  and the day in the `tm` put that year outside the era, it becomes
+  the year next to it inside the span: 平成 begins on 1989-01-08, so
+  a zeroed `tm`'s January 0 of 1989 lies in 昭和 64, and 平成 takes
+  1990.
+
+A zeroed `tm` is 1900, 明治 33 in ja_JP. 平成 33 would be 2021, which
+lies in 令和: re-based without the lookup, "%EC %Ey" on "平成 8"
+would read 令和 8, 2026. Left at 1989, it would read 昭和 8, 1933,
+since the `%Ey` after it finds 昭和 in January 1989. The rule reads
+1996.
+
+So "%EC %Ey" on "令和 8" is two calls: 令和 33 is 2051, inside 令和;
+the 8 is then 2026. "%Ey %EC" on "8 令和" reads 明治 8, 1875, and
+令和 keeps the 8: 2026. "%EC" alone on "令和" gives 2051, 令和 33:
+a lone `%EC` names the era and leaves the number to the `tm`.
+
+### 9.7 `%Ey`
+
+`%Ey` reads up to four digits, 0 to 9999, with no sign, after white
+space. glibc reads the same field. Alternative digits under `%OEy`
+are out of scope. The era is the one the date in the `tm` lies in,
+by 9.5, and the year is start + (n - offset) times the direction in
+the era's first record, the inverse of `time_put`'s arithmetic. No
+era sets `eofbit`. A year outside the era's span sets `eofbit`, as
+32 is outside `%d`'s bounds: 平成 40 would be 2028, past the end of
+平成. A bound at either end of time is no bound. The backward eras
+follow from the direction: 民前 2 is 1910 under zh_TW, and the test
+locale's bar, which counts down from 7 in 1926, reads 1 as 1920 and
+8 as past its end.
+
+The span is the era's, not one record's. `time_put` writes "%EC %Ey"
+of 2019-06-01 as "令和 01", the 元年 record's year 1. The record from
+2020 numbers 2019 as 1 too, and 2019 lies in the span of 令和, so the
+reader reads 2019. p13 asks whether the input determines the members
+unambiguously, and 令和 1 names one year. `%EY` reads the same date
+as 令和元年.
+
+### 9.8 `%EY`
+
+`%EY` is a record's year format, and the record is unknown until its
+name is read. glibc tries each record's format in turn and rewinds;
+an input iterator cannot. Each record's format is cut at its `%EC`,
+and its text before the `%EC` with the record's name appended makes
+one string per record: the names in every locale source, "foobar"
+for the test locale's "foo%EC %Ey". The strings are matched in
+parallel by `__rw_match_name`. The rest of the format of the record
+found is then walked inside the call, with that record as the walk's
+state: a `%Ey` there resolves in that record's era, not by the
+`tm`, and the literals must match character for character.
+"Heisei 1 Nen" takes the format of the test locale's record from
+1990 and reads 1989, inside the span of Heisei. A format without a
+`%Ey` sets the record's first year.
+
+Two records with one name leave two rests: "%Ey年" and "元年" in
+ja_JP, " %Ey Nen" and " Gannen" in the test locale. White space that
+begins both is skipped in each and in the input. Then one character
+decides: a digit takes the rest that begins with `%Ey`, any other
+character the rest that begins with it. "令和8年" is 2026 and "令和元年"
+2019. Any other shape sets `eofbit`: a format with no `%EC`, an
+empty format among them, a rest that one character does not decide,
+a directive other than `%Ey` in a rest.
+
+### 9.9 The zeroed `tm`
+
+A zeroed `tm` is 1900. Under ja_JP that is 明治 33, under th_TH พ.ศ.
+2443, under zh_TW 民前 12, and under the test locale bar -19. So a
+lone `%Ey` on a zeroed `tm` is determined, by the letter of 9.7: "8"
+is 明治 8, 1875, under ja_JP, and p13 does not apply. The caller who
+parses "%Ey" alone gets a year in whatever era the `tm` lies in; the
+standard's interface carries no era, and glibc's latch is what
+replaces it there.
+
+### 9.10 The rows
+
+The real locales, read by a probe against the build's locale
+databases, narrow and wide alike, from a zeroed `tm`:
+
+| format | input | locale | year | state |
+|---|---|---|---|---|
+| `%EC %Ey` | 令和 8 | ja_JP | 2026 | eof |
+| `%Ey %EC` | 8 令和 | ja_JP | 2026 | good |
+| `%EC` | 令和 | ja_JP | 2051 | good |
+| `%EC` | 平成 | ja_JP | 1990 | good |
+| `%EC %Ey` | 平成 8 | ja_JP | 1996 | eof |
+| `%EC %Ey` | 令和 01 | ja_JP | 2019 | eof |
+| `%EC%Ey年` | 平成1年 | ja_JP | 1989 | good |
+| `%EC %Ey` | พ.ศ. 2569 | th_TH | 2026 | eof |
+| `%EC %Ey` | 民前 2 | zh_TW | 1910 | eof |
+| `%EY` | 令和8年 | ja_JP | 2026 | good |
+| `%EY` | 令和元年 | ja_JP | 2019 | good |
+| `%EC` | 19 | ja_JP | 1900, nothing read | eof |
+| `%EC %Ey` | 平成 40 | ja_JP | 1990, left by `%EC` | eof |
+| `%EC` | 19 | C, en_US | 1900, as `%C` | eof |
+| `%Ed` | 1 | any | unchanged, nothing read | fail |
+
+The round trip of `time_put` through `time_get` holds for `%Ec`,
+`%Ex` and `%EY` under ja_JP, th_TH, lo_LA and zh_TW on 2026-10-28,
+2019-06-01, 1989-03-01 and 1910-06-01, 96 rows, narrow and wide.
+`22.locale.time.get` pins the same rules in its generated locale:
+Heisei, its Gannen record, Showa and the backward bar, and "C" for
+the locale without eras.
+
+### 9.11 What glibc does differently
+
+glibc 2.44 is the reference for what each directive reads, not for
+these rules. The differences, as differences:
+
+- A mismatch with era data falls back. glibc's `%EC` on "19" reads
+  the century, its `%Ey` falls back to `%y`, its `%EY` to `%Y`. Here
+  that is `eofbit`, by XSH's "does not exist".
+- glibc latches. `decided` and `era_cnt` hold the era and the choice
+  of representation for the rest of the call, and an end-of-call
+  block combines the era with the year. The update model has no
+  latch; the `tm` is the only carrier.
+- glibc's `%EC` alone gives the first year of the first record with
+  the name, 2020 for 令和. Here the year keeps its number where the
+  era has it.
+- glibc's `%Ey` with no era fixed takes the first record whose span
+  holds the number: a lone "26" is 2044 under ja_JP. Here the era is
+  the `tm`'s.
+- glibc's span test multiplies by the calendar's direction and
+  rejects every year past the offset of a backward era: it writes
+  民前12年 and cannot read it. Here the direction is the record's.
+- glibc bounds a year by each record alone. Its `%EC%Ey` cannot
+  read "平成01", which it writes: 平成 1 lies outside the record from
+  1990 that its `%Ey` takes. Its `%EY` reads 平成元年 by trying each
+  format. Here the bounds are the era's span: `%EC %Ey` reads
+  "平成 01" as 1989 and "令和 01" as 2019.
+
+## 10. Where to look
 
 - `include/loc/_time_get.cc`: `get` over a format range is the
   walk; `do_get` is the per-directive virtual; the `%U` branch and
   the walk's week locals are the two ends of the handshake.
 - `src/time_put.cpp`, `__rw_get_timepunct`: the per-directive table,
   members, bounds, digit counts and names.
+- `src/era.cpp`: the era lookups of the writer and the reader, the
+  year arithmetic, and `__rw_set_era` and `__rw_set_era_year` behind
+  `%EC` and `%Ey`; `__rw_read_era` in `include/loc/_time_get.cc` is
+  the reader of the three directives and the walk of `%EY`.
 - `tests/localization/22.locale.time.get.cpp`: the rows for every
   combination named here, against glibc's probed results.
 - `doc/notes/ref-conformance.md` chapter 2 and
