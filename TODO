@@ -22,19 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The classic wide =ctype= admits character 256 into its table
-
-=do_is= and =do_scan_is= of =ctype<wchar_t>= in =src/wctype.cpp=
-(396, 501) test ~c <= _C_tab_size~ where the table has =_C_tab_size=
-entries, so 256 passes and indexes entry 0 through =_UChar=:
-=is (cntrl, 256)= is true and =scan_is (cntrl, ...)= stops at 256.
-Found by probe, 2026-11-02, round 2 of the locale document.
-
-Fix: =<=.
-
-Check: =is (cntrl, 256)= false; =scan_is= over a string holding 256
-returns its end; =22.locale.ctype.is= and =ctype.scan= on their pins.
-
 ** TODO The classic wide vector case maps write 0 above 255
 
 =do_toupper= and =do_tolower= over a range in =src/wctype.cpp=

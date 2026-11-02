@@ -393,7 +393,7 @@ ctype<wchar_t>::~ctype ()
 bool ctype<wchar_t>::
 do_is (mask m, char_type c) const
 {
-    return    static_cast< size_t >(c) <= _C_tab_size
+    return    static_cast< size_t >(c) < _C_tab_size
            && (_C_mask_tab [_UChar (c)] & m);
 }
 
@@ -498,7 +498,7 @@ do_scan_is (mask m, const char_type *lo, const char_type *hi) const
     _RWSTD_ASSERT (lo <= hi);
 
     for ( ; lo != hi; ++lo) {
-        if (   static_cast< size_t >(*lo) <= _C_tab_size
+        if (   static_cast< size_t >(*lo) < _C_tab_size
             && (_C_mask_tab [_UChar (*lo)] & m))
             break;
     }

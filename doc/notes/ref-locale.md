@@ -809,7 +809,7 @@ know, and builds the three tables from `isspace` ... `isgraph`,
 - `do_is`, `do_scan_is`, `do_scan_not`, `do_toupper`, `do_tolower`
   read the 256-entry tables for characters below 256. A character
   at or above 256 is in no class and maps to itself, but for the
-  three defects listed under "Defects found".
+  vector case maps, which write 0 for it (queued in `TODO`).
 - `do_widen` widens a byte to the same value, 0x80-0xff included.
   `do_narrow` narrows 0-127 and returns `dfault` above. So
   `narrow (widen ('\xe9'), '?')` is `'?'` in the classic facet.
