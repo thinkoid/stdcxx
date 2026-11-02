@@ -22,16 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =__rw_libc_do_unshift= copies the NUL of =wcrtomb=
-
-=src/wcodecvt.cpp= 395 copies every byte =wcrtomb (tmp, L'\0')=
-writes, the terminating NUL included. By reading; unreachable on
-glibc, which has no stateful locale encoding. Found 2026-11-02.
-
-Fix: copy the shift sequence only (the count less one).
-
-Check: reading; a stateful encoding is needed to run it.
-
 ** TODO =__rw_iter_failed= has no caller
 
 =include/loc/_num_put.cc= 44-53, uncalled since 69ad31e6. Found

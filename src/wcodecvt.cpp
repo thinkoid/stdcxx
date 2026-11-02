@@ -387,25 +387,32 @@ __rw_libc_do_unshift (_RWSTD_MBSTATE_T& state, char*& to_next, char* to_limit)
     // save current state
     _RWSTD_MBSTATE_T tmp_state = state;
 
-    // use libc locale to obtain the shift sequence
+    // use libc locale to obtain the shift sequence: for the null
+    // wide character wcrtomb stores the sequence that restores the
+    // initial state followed by a null byte, and counts both
     char tmp [_RWSTD_MB_LEN_MAX];
 
     size_t ret;
 
-    ret = wcrtomb (tmp, wchar_t (0), &state);
-
+    ret = wcrtomb (tmp, L'\0', &state);
     if (_RWSTD_SIZE_MAX == ret)
-        return  std::codecvt_base::error;
+        return std::codecvt_base::error;
 
-    if (ret > size_t (to_limit - to_next)) {
+    _RWSTD_ASSERT (0 < ret);
+
+    // the shift sequence alone, without the null byte
+    const size_t len = ret - 1;
+
+    if (len > size_t (to_limit - to_next)) {
         // restore the state and return partial
         state = tmp_state;
         return std::codecvt_base::partial;
     }
 
     // copy the shift sequence
-    memcpy (to_next, tmp, ret);
-    to_next += ret;
+    memcpy (to_next, tmp, len);
+    to_next += len;
+
     return std::codecvt_base::ok;
 }
 
