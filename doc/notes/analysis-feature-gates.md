@@ -89,9 +89,9 @@ could not list: no probe yields it, nothing defines it, and two
 places read it. The bundle left `_TYPENAME`, `_EXPLICIT`, the
 `_RWSTD_*_CAST` and the `_RWSTD_SPECIALIZED_*` macros in `rw/_defs.h`
 with their one definition, as the `NAMESPACE` retirement left
-`_RWSTD_NAMESPACE`, `_STD`, `_RW` and `_USING`. Liviu, 2026-10-17:
-"those have no reason to exist"; five commits after the gates spelled
-every one of them out, keyword by keyword, the casts last.
+`_RWSTD_NAMESPACE`, `_STD`, `_RW` and `_USING`. They have no reason
+to exist; five commits after the gates spelled every one of them out,
+keyword by keyword, the casts last.
 
 ### 2.2 Templates
 
@@ -205,8 +205,8 @@ probes that print values (`LIMITS`, `FLOAT`, `LCONV`, `VA_LIST`,
   others fail by dialect and select the path the dialect needs.
 - **The runtime ABI probes**: `STD_*`, `GLOBAL_*`, the exception
   classes' special members, `TYPE_INFO_*`, `OPERATOR_NEW_*` and
-  `OPERATOR_DELETE_*`, `NEW_THROWS`, `NEW_OFLOW_SAFE`. Liviu,
-  2026-10-17: they stay. GCC and eccp answer them differently today
+  `OPERATOR_DELETE_*`, `NEW_THROWS`, `NEW_OFLOW_SAFE`. They stay.
+  GCC and eccp answer them differently today
   (`_RWSTD_NO_BAD_ALLOC_DEFAULT_CTOR` and kin are defined under GCC,
   `_RWSTD_NO_STD_NOTHROW` and `_RWSTD_NO_STD_TYPE_INFO` under eccp).
 - **Gates eccp defines**: `LONG_LONG`, `EXTERN_TEMPLATE` and its
