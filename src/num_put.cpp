@@ -385,10 +385,10 @@ __rw_itoa (char *buf, long i, unsigned flags)
 
 _RWSTD_EXPORT size_t
 __rw_put_groups (char **pbuf, size_t len, size_t bufsize,
-                 const char *end, const char *grouping)
+                 const char *end, const char *pbeg, const char *pend)
 {
     _RWSTD_ASSERT (0 != *pbuf);
-    _RWSTD_ASSERT (0 != grouping);
+    _RWSTD_ASSERT (pbeg < pend);
 
     _RWSTD_UNUSED (bufsize);
 
@@ -425,21 +425,19 @@ __rw_put_groups (char **pbuf, size_t len, size_t bufsize,
     size_t ngrps  = 0;   // number of complete groups
     size_t grplen = 0;   // length of complete groups
 
-    // compute the amount of buffer space needed for group separators
-    const char *pg = grouping;
+    // compute the amount of buffer space needed for group separators;
+    // 22.2.3.1.2, p3: an element that is 0, negative or CHAR_MAX makes
+    // its group and all those to its left unlimited, and past the end
+    // the last element repeats
+    const char *pg = pbeg;
     for ( ; ; ++ngrps) {
 
-        UChar grp = UChar (*pg);
-
-        if (0 == grp) {
-            // '\0' causes the last grouping to be repeated
-            grp = UChar (pg [-1]);
-        }
-        else if (_RWSTD_CHAR_MAX == grp) {
-            // _RWSTD_CHAR_MAX terminates the grouping algorithm
+        if (*pg <= 0 || _RWSTD_CHAR_MAX == *pg)
             break;
-        }
-        else
+
+        const UChar grp = UChar (*pg);
+
+        if (pend != pg + 1)
             ++pg;
 
         if (grplen + grp >= static_cast< size_t >(end - pd))
@@ -448,11 +446,11 @@ __rw_put_groups (char **pbuf, size_t len, size_t bufsize,
         grplen += grp;
     }
 
-    pg   = grouping;   // reset to point to the first grouping
+    pg   = pbeg;       // reset to point to the first grouping
     end += ngrps;      // adjust the new position of the decimal point
     len += ngrps;      // adjust the length of buffer
 
-    grplen = *pg++;    // length of the first grouping
+    grplen = UChar (*pg);   // length of the first grouping
 
     const bool no_groups = '\0' == **pbuf;
 
@@ -473,11 +471,13 @@ __rw_put_groups (char **pbuf, size_t len, size_t bufsize,
                 *pd = ';';
                 --ngrps;
 
-                if (_RWSTD_CHAR_MAX == *pg)
-                    break;
+                // past the end the last element repeats; after the
+                // last separator this may read an unlimited element,
+                // but `ngrps' is then 0 and the length goes unused
+                if (pend != pg + 1)
+                    ++pg;
 
-                // '\0' forces the repetition of the last grouping
-                grplen += (*pg ? *pg++ : pg [-1]) + 1;
+                grplen += UChar (*pg) + 1;
             }
             else {
                 // copy the integral part
@@ -593,7 +593,7 @@ __rw_fix_flt (char *&end, size_t &len,
 _RWSTD_EXPORT size_t
 __rw_put_num (char **pbuf, size_t bufsize,
               unsigned flags, int type, _RWSTD_STREAMSIZE prec,
-              const void *pval, const char *grouping)
+              const void *pval, const char *pbeg, const char *pend)
 {
     char              fmtbuf [32];   // buffer for stdio format specifier
     const char       *fmt = 0;       // stdio format specifier
@@ -762,7 +762,7 @@ __rw_put_num (char **pbuf, size_t bufsize,
         }
 
         // prevent grouping
-        grouping = "";
+        pend = pbeg;
         break;
 
     default:
@@ -830,8 +830,8 @@ __rw_put_num (char **pbuf, size_t bufsize,
 
     // insert commas as thousands separators if grouping is required
     // integral and floating point types only (i.e., not for pointers)
-    if (len > 1 && *grouping && _RWSTD_CHAR_MAX != *grouping)
-        len = __rw_put_groups (pbuf, len, bufsize, end, grouping);
+    if (len > 1 && pbeg != pend && 0 < *pbeg && _RWSTD_CHAR_MAX != *pbeg)
+        len = __rw_put_groups (pbuf, len, bufsize, end, pbeg, pend);
 
     // verify that the buffer hasn't overrun
     _RWSTD_ASSERT (len <= bufsize);

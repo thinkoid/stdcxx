@@ -135,7 +135,7 @@ struct PunctData
 {
     static       char  decimal_point_;
     static       char  thousands_sep_;
-    static const char* grouping_;
+    static std::string grouping_;
     static const char* falsename_;
     static const char* truename_;
 
@@ -153,7 +153,7 @@ struct PunctData
 
 char        PunctData::decimal_point_    = '.';
 char        PunctData::thousands_sep_    = ',';
-const char* PunctData::grouping_  = "";
+std::string PunctData::grouping_;
 const char* PunctData::falsename_ = 0;
 const char* PunctData::truename_  = 0;
 
@@ -256,7 +256,7 @@ int do_test (int         lineno,          // line number
              int         eat_expect = -1, // number of consumed characters
              int         flags = 0,       // initial set of flags
              int         err_expect = -1, // expected iostate
-             const char *grouping = "")   // optional grouping string
+             const std::string &grouping = "")   // optional grouping string
 {
     typedef std::char_traits<charT> Traits;
 
@@ -267,7 +267,7 @@ int do_test (int         lineno,          // line number
         return 0;
     }
 
-    if (*grouping && '%' != *grouping && rw_opt_no_grouping) {
+    if (!grouping.empty () && '%' != grouping [0] && rw_opt_no_grouping) {
         // if grouping is not empty (and doesn't start with '%')
         // check the state of the --no-grouping command line
         // option before proceeding with the test case
@@ -298,7 +298,8 @@ int do_test (int         lineno,          // line number
     // modify their argument on failure (except when the failure is due
     // to bad grouping)
     nativeT x =
-        err_expect & std::ios::failbit || *grouping ? val : nativeT (!val);
+          err_expect & std::ios::failbit || !grouping.empty ()
+        ? val : nativeT (!val);
 
     // large buffer to widen `str' to
     static charT wstr_buf [32767];
@@ -368,11 +369,12 @@ int do_test (int         lineno,          // line number
     rw_assert (success, 0, lineno,
                "line %d: num_get<%s, %s>::get (%#s, ..., %s&); "
                "fmtflags = %{If}; "
-               "%{?}grouping = %#s; %{;}"
+               "%{?}grouping = %{.*Ac}; %{;}"
                "ate %td, expected %d",
                __LINE__, cname, iname, str, tname,
                flags,
-               *grouping && '%' != *grouping, grouping,
+               !grouping.empty () && '%' != grouping [0],
+               int (grouping.size ()), grouping.data (),
                consumed, eat_expect);
 
     const nativeT val_max = pmax ? *(nativeT*)pmax : val;
@@ -387,13 +389,14 @@ int do_test (int         lineno,          // line number
     rw_assert (success, 0, lineno,
                "line %d: num_get<%s, %s>::get (%{*Ac}, ..., %s&); "
                "fmtflags = %{If}; "
-               "%{?}grouping = %#s; %{;}"
+               "%{?}grouping = %{.*Ac}; %{;}"
                "got %s (%{Is}); "
                "expected %s%{?} <= %s %{;} "
                "(%{Is})",
                __LINE__, cname, iname, int (sizeof *str), str, tname,
                flags,
-               *grouping && '%' != *grouping, grouping,
+               !grouping.empty () && '%' != grouping [0],
+               int (grouping.size ()), grouping.data (),
                TOSTR (x), err,
                TOSTR (val), 0 != pmax, TOSTR (val_max),
                err_expect);
@@ -403,13 +406,13 @@ int do_test (int         lineno,          // line number
         *(nativeT*)pmax = x;
     }
 
-    if (*grouping && '%' == *grouping) {
+    if (!grouping.empty () && '%' == grouping [0]) {
 
         // if the `grouping' string starts with a '%', treat it as
         // a scanf() format specifier and use sscanf() to parse the
         // tested string `str'; then compare for equality the number
         // parsed with sscanf() with that parsed with num_get::get()
-        const char* const scanspec = grouping;
+        const char* const scanspec = grouping.c_str ();
 
         nativeT y = nativeT ();
 
@@ -449,7 +452,7 @@ int do_test (int         lineno,          // line number
              int         eat_expect = -1, // number of consumed characters
              int         flags = 0,       // initial set of flags
              int         err_expect = -1, // expected iostate
-             const char *grouping = "")   // optional grouping string
+             const std::string &grouping = "")   // optional grouping string
 {
     switch (ctype) {
     case narrow_char:
@@ -1002,6 +1005,29 @@ test_long (CharType ctype, const char *cname,
     TEST (T, 2147483628L, "2;1;4;7;4;83;628", 16, dec, Eof, "\3\2\1");
     TEST (T, 2147483627L,    "2;147;483;627", 13, dec, Eof, "\3\3\3");
     TEST (T, 2147483626L,    "+2147;483;626", 13, dec, Eof, "\3\3\4");
+
+    // 22.2.3.1.2, p3: an element that is 0, negative or CHAR_MAX makes
+    // its group and every group to its left unlimited, and past the end
+    // the last element repeats; a literal stops at its first NUL, so a
+    // grouping with an embedded zero is built with its length
+    TEST (T, 1234567L, "1;234;567", 9, dec, Eof, "\3");
+    TEST (T, 1234567L, "12;34;567", 9, dec, Eof, "\3\2");
+
+    TEST (T, 1234567L,  "1234;567", 8, dec, Eof, std::string ("\3\0", 2));
+    TEST (T, 1234567L, "1;234;567", 9, dec, Eof, std::string ("\3\0", 2));
+    TEST (T, 1234567L,   "1234567", 7, dec, Eof, std::string ("\0", 1));
+    TEST (T, 1234567L, "1;234;567", 9, dec, Eof, std::string ("\0", 1));
+
+#if CHAR_MAX == UCHAR_MAX
+#  define GROUPING "\3\xff"
+#else
+#  define GROUPING "\3\x7f"
+#endif
+
+    TEST (T, 1234567L,  "1234;567", 8, dec, Eof, GROUPING);
+    TEST (T, 1234567L, "1;234;567", 9, dec, Eof, GROUPING);
+
+#undef GROUPING
 
     for (int i = 256; i >= 0; i -= 32) {
 

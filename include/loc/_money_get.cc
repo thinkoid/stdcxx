@@ -256,7 +256,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
             __wscredit = 0;
 
             const char_type __ts =
-                __gr.size () && __gr [0] && __gr [0] != _RWSTD_CHAR_MAX ?
+                __gr.size () && 0 < __gr [0] && __gr [0] != _RWSTD_CHAR_MAX ?
                 __pun.thousands_sep () : __ctp.widen ('0');
 
             int __fd = __pun.frac_digits ();

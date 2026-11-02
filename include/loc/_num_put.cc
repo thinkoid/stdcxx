@@ -33,7 +33,7 @@ namespace __rw {
 
 _RWSTD_EXPORT _RWSTD_SIZE_T
 __rw_put_num (char**, _RWSTD_SIZE_T, unsigned, int, _RWSTD_STREAMSIZE,
-              const void*, const char*);
+              const void*, const char*, const char*);
 
 _RWSTD_EXPORT extern const unsigned char
 __rw_digit_map[];
@@ -78,7 +78,7 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
     // format value, ignore C++ decimal_point and thousands_sep
     _RWSTD_SIZE_T __res =
         __rw::__rw_put_num (&__pbuf, sizeof __buf, __f, __type,
-                           __prec, __pval, __grp);
+                           __prec, __pval, __grp, __grp + __grouping.size ());
 
     // for bool values and boolalpha bit set, retrieve the "truth" string
     basic_string<char_type, char_traits<char_type>, allocator<char_type> >

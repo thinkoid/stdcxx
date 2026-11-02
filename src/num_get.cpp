@@ -89,6 +89,10 @@ extern const long double __rw_ldbl_infinity;
 // of `ngrpings' elements
 // returns a non-negative number of success, negative number whose
 // absolute value indicates the bad group on failure
+// 22.2.3.1.2, p3: the group at position i from the right is expected
+// to be grping [i] digits long, past the end of `grping' its last
+// element applies, and an element that is 0, negative or CHAR_MAX
+// leaves its group and all those to its left unchecked
 
 // Examples of valid groups:
 //
@@ -99,6 +103,10 @@ extern const long double __rw_ldbl_infinity;
 //      1,23,456    "\1\2\3"  "\3\2"   1 <= 2 && 2 == 2 && 3 == 3
 //     12,34,567    "\2\2\3"  "\3\2"   2 <= 2 && 2 == 2 && 3 == 3
 //   1,34,56,789  "\1\2\2\3"  "\3\2"   1 <= 2 && 2 == 2 && 2 == 2 && 3 == 3
+//      1234,567      "\4\3"  "\3\0"   3 == 3, then unlimited
+//     1,234,567    "\1\3\3"  "\3\0"   3 == 3, then unlimited
+//     1,234,567    "\1\3\3"  "\3\177" 3 == 3, then unlimited (CHAR_MAX)
+//       1234567        "\7"    "\0"   unlimited
 
 // Examples of invalid groups:
 //
@@ -107,6 +115,7 @@ extern const long double __rw_ldbl_infinity;
 //           123        "\3"  "\1\2"   !(3 <= 1)
 //        1,2,34    "\1\1\2"  "\1\3"   1 <= 1 && 1 == 1 && !(2 == 3)
 //      1,23,456    "\1\2\3"  "\1\2"   1 <= 1 && 2 == 2 && !(3 == 2)
+//       1234,56      "\4\2"  "\3\0"   !(2 == 3)
 
 _RWSTD_EXPORT int
 __rw_check_grouping (const char *grps,   _RWSTD_SIZE_T ngrps,
@@ -118,32 +127,33 @@ __rw_check_grouping (const char *grps,   _RWSTD_SIZE_T ngrps,
     _RWSTD_ASSERT (0 != grps);
     _RWSTD_ASSERT (0 != grping);
 
+    // the index of the last grouping, which repeats for every group past it
+    const _RWSTD_SIZE_T grphi = ngrpings - 1;
+
     // current grouping number
-    _RWSTD_SIZE_T grpn = ngrpings;
-
-    // find the last non-zero grouping if it exists (see below)
-    while (grpn-- != ngrpings && !grping [grpn])
-        /* silence gcc -Wempty-body warning */;
-
-    // the index of the last meaningful grouping (e.g., `grphi' of
-    // "\3\0\0\0" is 2 since the redundant NULs can be safely ignored)
-    const _RWSTD_SIZE_T grphi = (_RWSTD_SIZE_T)(-1) == grpn ? 0 : grpn;
-
-    grpn = 0;
+    _RWSTD_SIZE_T grpn = 0;
 
     typedef const UChar* PCUChar;
 
     // iterate over elements of `groups' starting with the least significant
     // one (at the greatest index), comparing each against the relevant
     // element of `groupings' (at the lowest index)
-    for (PCUChar g = reinterpret_cast< PCUChar >(grps + ngrps - 1),
-                 e = reinterpret_cast< PCUChar >(grping); ; --g) {
+    const char *e = grping;
+
+    for (PCUChar g = reinterpret_cast< PCUChar >(grps + ngrps - 1); ; --g) {
+
+        // an unlimited group admits any length, and so do all the
+        // groups to its left
+        if (*e <= 0 || _RWSTD_CHAR_MAX == *e)
+            break;
+
+        const UChar grplen = UChar (*e);   // the expected length
 
         typedef const void* PVoid;
 
         if (PVoid (g) == PVoid (grps)) {
             // the most significant group may be shorter (but not empty)
-            if (*g > *e || !*g) {
+            if (*g > grplen || !*g) {
                 // subtracting from 0 to avoid warnings about
                 // applying the - operator to an unsigned type
                 grpn = 0U - (grpn + 1U);
@@ -152,7 +162,7 @@ __rw_check_grouping (const char *grps,   _RWSTD_SIZE_T ngrps,
             break;
         }
 
-        if (*g != *e) {
+        if (*g != grplen) {
             // all but the most significant group must be exactly
             // as long as the last expected group length
             grpn = 0U - (grpn + 1U);
@@ -401,7 +411,8 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 #endif
 
             // disable grouping
-            grouping = "";
+            grouping   = "";
+            ngroupings = 0;
             break;
 
         }
@@ -647,9 +658,9 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
     // note that grouping is optional and parsing fails due to bad format
     // only if the positions thousands_sep's do not match those specified
     // by grouping; in such cases, the value is still stored
-    if (   (   *grouping && ngroups > 1
+    if (   (   ngroupings && ngroups > 1
             && 0 > __rw_check_grouping (groups, ngroups, grouping, ngroupings))
-        || (!*grouping && ngroups > 1))
+        || (!ngroupings && ngroups > 1))
         err |= _RWSTD_IOS_FAILBIT;
 
     return err;

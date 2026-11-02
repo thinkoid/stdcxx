@@ -22,18 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =__rw_check_grouping= never skips trailing zeros of a grouping
-
-=src/num_get.cpp= 125: ~while (grpn-- != ngrpings && ...)~ is false on
-its first test, so the loop never runs and the last grouping is the
-last byte whatever it holds. With grouping "\3\0", "1,234,567" and
-"1234,567" both fail where =num_put= writes "1,234,567". Found by
-probe, 2026-11-02.
-
-Fix: start the scan one below =ngrpings=.
-
-Check: "\3\0" reads "1234,567" and "1,234,567".
-
 ** TODO =num_get= of =unsigned int= clamps without =failbit=
 
 =src/num_get.cpp= 321-336, the =_C_uint= case, clamps but never sets
@@ -356,6 +344,22 @@ Fix: widen from the buffer =__rw_put_num= returned, into one sized
 for it, and free it.
 
 Check: AddressSanitizer; a row in =22.locale.money.put= for 1e320L.
+
+** TODO =__rw_put_groups= stores a group size in a =char=
+
+In its =no_groups= mode (=src/num_put.cpp=, called from
+=money_put::do_put= for a string) =__rw_put_groups= writes one byte
+per output group, the group's digit count, for the inline separator
+walk of =include/loc/_money_put.cc= to read. A leftmost group of 256
+or more digits wraps: 256 becomes 0 and ends the walk, 300 becomes 44
+and misplaces a separator. Only an unlimited leftmost group reaches
+it, that is a grouping element of 0, negative or =CHAR_MAX=.
+Hypothesis from reading, 2026-11-02.
+
+Fix: a wider element, or the walk driven by the grouping string.
+
+Check: =money_put= of a 300-digit string under grouping "\3\0",
+counting the separators.
 
 ** TODO Two latent overruns in the time facets
 
@@ -719,6 +723,20 @@ Fix: query the host for the names (=rw_locale_query=) or warn when
 they are absent, as the other host-dependent tests do.
 
 Check: the row on a host without =en_US=: a warning, not 0/0.
+
+** TODO The num.get harness cannot see a missing store on a grouping row
+
+In =tests/localization/22.locale.num.get.cpp= the variable the facet
+stores into starts out equal to the expected value whenever the
+grouping is non-empty, so on every grouping row the value assertion
+holds even when =do_get= stores nothing; only the iostate assertion
+can fail there. Found 2026-11-02 while adding the grouping rows.
+
+Fix: start from the complement, as the rows without grouping do, or
+from a sentinel the facet cannot produce.
+
+Check: a grouping row with the store commented out of the facet goes
+red on the value assertion.
 
 * Certification
 

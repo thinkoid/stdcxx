@@ -117,7 +117,7 @@ struct Punct: std::numpunct<charT>
 
     static char_type        decimal_point_;
     static char_type        thousands_sep_;
-    static const char      *grouping_;
+    static std::string      grouping_;
     static const char_type *truename_;
     static const char_type *falsename_;
 
@@ -156,7 +156,7 @@ struct Punct: std::numpunct<charT>
 };
 
 template <class charT>
-const char* Punct<charT>::grouping_ = "";
+std::string Punct<charT>::grouping_;
 
 template <class charT>
 typename Punct<charT>::char_type Punct<charT>::decimal_point_ = '.';
@@ -285,7 +285,7 @@ void do_test (charT           /* dummy */,
               std::streamsize prec,     // precision
               std::streamsize width,    // field width
               char            fill,     // fill character
-              const char     *grouping, // grouping string
+              const std::string &grouping, // grouping string
               const char     *str,      // expected output
               int             err_expect = -1,   // expected iostate
               T val_expect = T ()       /* expected num_get result */)
@@ -357,11 +357,12 @@ void do_test (charT           /* dummy */,
                    "line %d: num_put<%s>::put (..., %s = %s) "
                    "wrote %{*Ac}, expected %{*Ac}, "
                    "flags = %{If}, precision = %d"
-                   "%{?}, grouping = \"%#s\"%{;}",
+                   "%{?}, grouping = \"%{.*Ac}\"%{;}",
                    __LINE__, cname, tname, TOSTR (val),
                    sizeof *buf, buf, sizeof *str, str,
                    flags, prec,
-                   grouping && *grouping, grouping);
+                   !grouping.empty (),
+                   int (grouping.size ()), grouping.data ());
     }
 
     /******************************************************************/
@@ -444,24 +445,24 @@ void do_test (charT           /* dummy */,
     rw_assert (err == err_expect, 0, lineno,
                "line %d: num_get<%s>::get (%s, ..., %s&) "
                "flags = %{If}, "
-               "%{?}grouping = \"%#s\", %{;}"
+               "%{?}grouping = \"%{.*Ac}\", %{;}"
                "iostate = %{Is}, expected %{Is}",
                __LINE__, cname,
                TOSTR (next), tname,
                flags,
-               grouping && *grouping, grouping,
+               !grouping.empty (), int (grouping.size ()), grouping.data (),
                err, err_expect);
 
     // verify the parsed value
     rw_assert (rw_equal (x, val_expect), 0, lineno,
                "line %d: num_get<%s>::get (%s, ..., %s&) got %s, "
                "expected %s, flags = %{If}, "
-               "%{?}grouping = \"%#s\", %{;}",
+               "%{?}grouping = \"%{.*Ac}\", %{;}",
                __LINE__, cname,
                TOSTR (next), tname,
                TOSTR (x), TOSTR (val_expect),
                flags,
-               grouping && *grouping, grouping);
+               !grouping.empty (), int (grouping.size ()), grouping.data ());
 
 #else
 
@@ -976,6 +977,28 @@ void long_test (charT, const char *cname)
     TEST (T,  -123456789L, dec | left, 0, 0, ' ', GROUPING, "-1234,567,89");
 
     TEST (T,  0x12345678L, hex | showbase, 0, 0, ' ', GROUPING, "0x123,456,78");
+
+#undef GROUPING
+
+    // 22.2.3.1.2, p3: an element that is 0, negative or CHAR_MAX makes
+    // its group and every group to its left unlimited, and past the end
+    // the last element repeats; a literal stops at its first NUL, so a
+    // grouping with an embedded zero is built with its length
+    TEST (T,  1234567L, dec, 0, 0, ' ', "\3",   "1,234,567");
+    TEST (T,  1234567L, dec, 0, 0, ' ', "\3\2", "12,34,567");
+
+    TEST (T,  1234567L, dec, 0, 0, ' ', std::string ("\3\0", 2), "1234,567");
+    TEST (T,  1234567L, dec, 0, 0, ' ', std::string ("\0", 1),   "1234567");
+
+#if CHAR_MAX == UCHAR_MAX
+#  define GROUPING "\3\xff"
+#else
+#  define GROUPING "\3\x7f"
+#endif
+
+    TEST (T,  1234567L, dec, 0, 0, ' ', GROUPING, "1234,567");
+
+#undef GROUPING
 
     //////////////////////////////////////////////////////////////////
     // right justfication

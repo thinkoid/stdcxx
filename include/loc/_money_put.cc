@@ -35,11 +35,11 @@ namespace __rw {
 
 _RWSTD_EXPORT _RWSTD_SIZE_T
 __rw_put_num (char**, _RWSTD_SIZE_T, unsigned, int, _RWSTD_STREAMSIZE,
-              const void*, const char*);
+              const void*, const char*, const char*);
 
 _RWSTD_EXPORT _RWSTD_SIZE_T
 __rw_put_groups (char **, _RWSTD_SIZE_T, _RWSTD_SIZE_T,
-                 const char*, const char*);
+                 const char*, const char*, const char*);
 
 }   // namespace __rw
 
@@ -328,7 +328,8 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
         __rw::__rw_put_num (&__pbuf, sizeof __buf, _RWSTD_IOS_FIXED,
                            _C_ldouble | _C_ptr,
                            static_cast< _RWSTD_STREAMSIZE >(-__fd),
-                           &__val, __grouping.c_str ());
+                           &__val, __grouping.data (),
+                           __grouping.data () + __grouping.size ());
 
     // widen narrow buffer (necessary even if char_type == char)
     const ctype<_CharT> &__ctp =
@@ -409,7 +410,8 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
 
         __ngroups =
             __rw::__rw_put_groups (&__pbuf, __groups - __pbuf, sizeof __buf,
-                                  0, __grouping.c_str ());
+                                  0, __grouping.data (),
+                                  __grouping.data () + __grouping.size ());
         __pbuf [__ngroups] = '\0';
         __groups           = __pbuf;
     }

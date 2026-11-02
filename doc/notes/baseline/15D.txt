@@ -115,8 +115,8 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 22.locale.moneypunct.mt                       0    0    1200      0   100%
 22.locale.moneypunct                          0    0  135020      0   100%
 22.locale.name                                0    0       1      0   100%
-22.locale.num.get                             0    0   51894      0   100%
-22.locale.num.put                             0    2    1485      0   100%
+22.locale.num.get                             0    0   51990      0   100%
+22.locale.num.put                             0    2    1495      0   100%
 22.locale.num.put.stdcxx-2                 NOUT    0                      
 22.locale.numpunct.mt                         0    0    1200      0   100%
 22.locale.numpunct                            0    0    5366      0   100%

@@ -1307,7 +1307,7 @@ type. It walks `neg_format ()`:
   pending;
 - `sign` takes the first character of either sign;
 - `value` reads digits, one decimal point when `frac_digits () > 0`,
-  and separators only when `grouping ()` starts with a nonzero element
+  and separators only when `grouping ()` starts with a positive element
   other than `CHAR_MAX`.
 
 The buffers grow as `num_get`'s do (ffcde29f), with `bad_alloc` on a
@@ -1508,8 +1508,8 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 
 | program | covers | 15D |
 |---|---|---|
-| `22.locale.num.get` | every virtual, both widths, three iterator types: bases, signs, grouping, overflow, underflow, long input, `bad_alloc` on wrap | 51894, 0 failed |
-| `22.locale.num.put` | every virtual but `unsigned long long`, inf and NaN, grouping, widening, the negative precision | 1485, 2 warnings |
+| `22.locale.num.get` | every virtual, both widths, three iterator types: bases, signs, grouping, overflow, underflow, long input, `bad_alloc` on wrap | 51990, 0 failed |
+| `22.locale.num.put` | every virtual but `unsigned long long`, inf and NaN, grouping, widening, the negative precision | 1495, 2 warnings |
 | `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv` | 5366 |
 | `22.locale.numpunct.mt` | first use of a fresh facet from many threads (7c93badb) | 1200 |
 | `22.locale.money.get` | patterns, signs, symbols, white-space credit, long input and separators, `frac_digits` 305 and 4000, wrap | 3952 |
@@ -1561,12 +1561,6 @@ which `num_put`'s classification of floating values is stubbed.
   `1\xE2234\xE2567` (by probe); fr_CA's money separator is 0xC2.
   Decision: what a narrow facet returns for a separator wider than a
   byte. Check: the narrow output of every UTF-8 locale is valid UTF-8.
-- **A zero grouping element.** 22.2.3.1.2 p3 makes group 1 of
-  `"\3\0"` unlimited. `num_put` reads `grouping ()` through `c_str ()`
-  and repeats the 3, writing `1,234,567`; `__rw_check_grouping`, whose
-  loop to skip trailing zeros never runs (`src/num_get.cpp:125`),
-  rejects both `1,234,567` and `1234,567` (by probe). Check: `"\3\0"`
-  writes `1234,567` and reads it back.
 - **C.UTF-8's money data.** Beside the `TODO` entry's four `CHAR_MAX`
   parts, under which `money_put` writes nothing, its `frac_digits` is
   127, and on the C-library path its four `none` make `money_put`

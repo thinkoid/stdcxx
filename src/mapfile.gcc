@@ -49,7 +49,7 @@ global:
     _ZN4__rw12__rw_failureD1Ev;
     _ZN4__rw12__rw_get_numEPvPKciiS2_jS2_j;
     _ZN4__rw12__rw_memattrEPKvji;
-    _ZN4__rw12__rw_put_numEPPcjjiiPKvPKc;
+    _ZN4__rw12__rw_put_numEPPcjjiiPKvPKcS5_;
     _ZN4__rw13__rw_allocateEji;
     _ZN4__rw13__rw_ct_ctypeEjPKc;
     _ZN4__rw13__rw_dbl_qNaNE;
@@ -68,7 +68,7 @@ global:
     _ZN4__rw15__rw_ct_num_getEjPKc;
     _ZN4__rw15__rw_ct_num_putEjPKc;
     _ZN4__rw15__rw_deallocateEPvji;
-    _ZN4__rw15__rw_put_groupsEPPcjjPKcS3_;
+    _ZN4__rw15__rw_put_groupsEPPcjjPKcS3_S3_;
     _ZN4__rw15__rw_throw_procE;
     _ZN4__rw16__rw_assert_failEPKcS1_iS1_;
     _ZN4__rw16__rw_ct_numpunctEjPKc;
