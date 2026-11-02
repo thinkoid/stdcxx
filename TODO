@@ -25,7 +25,7 @@ the locale is last.
 ** TODO The classic wide =ctype= admits character 256 into its table
 
 =do_is= and =do_scan_is= of =ctype<wchar_t>= in =src/wctype.cpp=
-(396, 501) test =c <= _C_tab_size= where the table has =_C_tab_size=
+(396, 501) test ~c <= _C_tab_size~ where the table has =_C_tab_size=
 entries, so 256 passes and indexes entry 0 through =_UChar=:
 =is (cntrl, 256)= is true and =scan_is (cntrl, ...)= stops at 256.
 Found by probe, 2026-11-02, round 2 of the locale document.
@@ -52,7 +52,7 @@ and =tolower= rows for a wide character above 255.
 
 ** TODO An overlong test in the UTF-8 decoder can never match
 
-=src/wcodecvt.cpp= 428 tests =(byte [0] & 0xfe) == 0xfe= for the
+=src/wcodecvt.cpp= 428 tests ~(byte [0] & 0xfe) == 0xfe~ for the
 two-byte overlong form; the value is 0xc0. No behaviour change:
 =__rw_utf8toucs4= rejects C0 and C1 earlier (by probe). Found
 2026-11-02.
@@ -82,7 +82,7 @@ Check: grep; a 15D build.
 
 ** TODO Signed overflow in =__rw_dtoa=
 
-=src/num_put.cpp= 162 and 299 do =i = -i=, undefined for =LONG_MIN= and
+=src/num_put.cpp= 162 and 299 do ~i = -i~, undefined for =LONG_MIN= and
 =LLONG_MIN=; the output is right in practice. Found by reading,
 2026-11-02.
 
@@ -92,7 +92,7 @@ Check: a UBSan build of the library putting =LONG_MIN=.
 
 ** TODO =__rw_check_grouping= never skips trailing zeros of a grouping
 
-=src/num_get.cpp= 125: =while (grpn-- != ngrpings && ...)= is false on
+=src/num_get.cpp= 125: ~while (grpn-- != ngrpings && ...)~ is false on
 its first test, so the loop never runs and the last grouping is the
 last byte whatever it holds. With grouping "\3\0", "1,234,567" and
 "1234,567" both fail where =num_put= writes "1,234,567". Found by
@@ -117,7 +117,7 @@ Check: both inputs set =failbit= through the facet and the extractor.
 
 ** TODO =money_put='s last-field check never fires
 
-=include/loc/_money_put.cc= 183 and 200: =sizeof __fmat != __i - 1=
+=include/loc/_money_put.cc= 183 and 200: ~sizeof __fmat != __i - 1~
 is always true (the pattern has four fields, =__i= at most 3), so a
 =space= in the last field is not diagnosed; the message names
 =num_put=. Found by reading, 2026-11-02.
@@ -196,7 +196,7 @@ sequence of directives. =get= (=include/loc/_time_get.cc=, loop at
 483, =__fmt [0]= set at 506) never checks a pending =%= after the
 loop. Found by probe, 2026-11-02.
 
-Fix: a =%= or =%E=/=%O= left pending at the pattern's end sets
+Fix: a =%= or =%E= or =%O= left pending at the pattern's end sets
 =failbit=.
 
 Check: the two rows, =failbit=, nothing stored.
@@ -205,7 +205,7 @@ Check: the two rows, =failbit=, nothing stored.
 
 =include/loc/_codecvt.h= 82-112: the primary template's =do_in=,
 =do_out= and =do_unshift= return =noconv= or =error= without setting
-=from_next= and =to_next= (22.2.1.5.2 p2 wants =to_next == to= on
+=from_next= and =to_next= (22.2.1.5.2 p2 wants ~to_next == to~ on
 =noconv=), and =do_length= returns =INT_MAX=, beyond what p10 allows.
 By reading, 2026-11-02.
 
@@ -341,7 +341,7 @@ classic one.
 
 =_C_combine (const __rw_locale&, int)= (=src/locale_combine.cpp=
 431-432) takes the managed branch because =_C_is_managed (cat)= reads
-only the standard bitmaps. With =a = locale (locale ("de_DE.UTF-8"), &f)=,
+only the standard bitmaps. With ~a = locale (locale ("de_DE.UTF-8"), &f)~,
 both =locale (a, "en_US.UTF-8", locale::numeric)= and the two-locale
 form come out named and =has_facet<F>= is false on them. 14882:2003
 22.1.1.2 p9, p11, p14, p15. Found by probe, 2026-11-02.
@@ -350,9 +350,9 @@ Fix: a locale holding user facets is not managed for any category.
 
 Check: =has_facet<F>= true and =name ()= "*" on both results.
 
-** TODO =operator=== ignores the standard facets when both locales hold user facets
+** TODO ~operator==~ ignores the standard facets when both locales hold user facets
 
-=src/locale_eq.cpp= 118-160: =locale (de, &f) == locale (locale (de, &g), &f)=
+=src/locale_eq.cpp= 118-160: ~locale (de, &f) == locale (locale (de, &g), &f)~
 is true with =g= a program =ctype<char>=, so two locales with
 different =ctype<char>= facets compare equal. 14882:2003 22.1.1.4 p1.
 Found by probe, 2026-11-02.
@@ -365,7 +365,7 @@ Check: the probe prints 0.
 
 =src/locale_body.h= 131-146: two name-taking =__rw_locale=
 constructors with no callers, whose temporary would trip the
-=0 == _C_ref= assertion of the destructor in a debug build.
+~0 == _C_ref~ assertion of the destructor in a debug build.
 =src/locale_body.cpp= 377-485: an =#if 0= block in =__rw_expand_name=.
 =src/catalog.cpp= and =src/catalog.h= compile to nothing on every
 supported target: =_RWSTD_NO_CATOPEN_CATGETS=, tested at
@@ -392,7 +392,7 @@ Check: AddressSanitizer on the case.
 (=_RWSTD_UNUSED=) and writes the separators in place; =_C_put='s
 stack array is 308 bytes and a grown heap block is exact-size.
 =fixed << 1e300= under =en_US.UTF-8= ends in "malloc(): corrupted top
-size"; a user grouping of "\3" fires the assertion =len <= bufsize=
+size"; a user grouping of "\3" fires the assertion ~len <= bufsize~
 (837) after the overrun. Found by probe, 2026-11-02, round 2 of the
 locale document.
 
@@ -480,7 +480,7 @@ pinning the decision either way.
 
 "%Y-%m" and "%Y " on "2026" both fail: the walk ends with =failbit=
 when a directive sets =eofbit= before the pattern is done. N3242 p8
-lists =err != goodbit= before =s == end=, a reading under which
+lists ~err != goodbit~ before ~s == end~, a reading under which
 =eofbit= is left alone and the year stored. Found by probe,
 2026-11-02.
 
@@ -601,7 +601,7 @@ returns =error= at byte 0; =out= of {a, U+3042} writes ESC $ @, the
 1978 designation; =unshift= writes nothing; =-KR= and =-CN= answer
 =error= and 0 to everything; =do_length= (=src/iso2022.cpp= 1871,
 1876) returns =CODECVT_ERROR= (2) as a length when no state slot is
-free, and a stray =while (*from == ESCAPE_CHAR)= around the escape
+free, and a stray ~while (*from == ESCAPE_CHAR)~ around the escape
 branch reads =*from= at =from_end= after an escape that ends the
 input. No test covers any of it; the ISO-2022 branches also check no
 state (=analysis-codecvt-invalid-state.md= ch. 0 says every path
@@ -1304,7 +1304,7 @@ is dependent and each callee it means has internal linkage.
   function templates. Six lines reproduce it: a dependent call to a
   =static= function template, by template-id or deduced, fails under
   =eccp -A= and compiles under =eccp --c++11 -A=, =-x= and GCC's
-  =-std=c++98=. C++03 14.6.4.2 finds only functions with external
+  ~-std=c++98~. C++03 14.6.4.2 finds only functions with external
   linkage for a dependent call by unqualified-id; C++11 dropped the
   restriction. Whether the C++03 rule covers a template-id is to be
   read in the C++03 text; if it does not, the rejection is an EDG
@@ -1533,8 +1533,8 @@ The =basic_streambuf= buffering contract, the =ios_base= storage, how
 ** TODO A ThreadSanitizer spot-check note
 
 How to run the suite under the sanitizer and read the table. The
-build is a complete 15D with =CXXOPTS=-fsanitize=thread= and
-=LDOPTS=-fsanitize=thread= on every stage after =config=, utilities
+build is a complete 15D with ~CXXOPTS=-fsanitize=thread~ and
+~LDOPTS=-fsanitize=thread~ on every stage after =config=, utilities
 included, and =make runall= in its own =tests=. The harness's
 address-space limit does not stop the sanitizer: it re-executes the
 program without the limit and prints two warning lines, so every
