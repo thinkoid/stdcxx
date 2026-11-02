@@ -260,9 +260,12 @@ with these differences:
   the process's memory, not of the compiler.
 - `18.numeric.special.float` fails 3 assertions in the Clang 32-bit
   build, the 64-bit count, where GCC's 32-bit build fails 6.
-- The locale MT rows of 15D vary from run to run under Clang as they
-  do under GCC; `analysis-locale-mt-race.md` names the cause. They are not a
-  reference under either compiler.
+- The locale MT rows of 15D varied from run to run under Clang as
+  they did under GCC; `analysis-locale-mt-race.md` names the cause.
+  The races were fixed on 2026-09-26 and 27, and the tests sized on
+  2026-10-12. The GCC pins took the sized rows in ec632ce6 and the
+  Clang pins in 6d9c3869; both 15D pins carry every locale MT row at
+  100%.
 
 The summary lines differ accordingly: the 64-bit Clang run counts
 10068122 assertions and 736 failures against GCC's 10067682 and 1177,
@@ -305,9 +308,9 @@ None was acted on here. Three are worth a line each:
   the only support library present. Whether to characterize the
   choice, so that a Clang with `libc++abi` and no GCC beside it builds,
   is a matrix question for a machine that has one.
-- The MT rows under Clang add nothing to the race analysis; the fix
-  named in `analysis-locale-mt-race.md` is the way to a 15D reference under
-  both compilers.
+- The MT rows under Clang add nothing to the race analysis. The fix
+  named in `analysis-locale-mt-race.md` was the way to a 15D
+  reference under both compilers, and both have one (6d9c3869).
 - The GCC-only failures of `0.char`, `0.printf` and the 32-bit
   numerics row are narrowed, not explained: the same source passes
   under a second compiler. The `TODO` entries carry the fact.

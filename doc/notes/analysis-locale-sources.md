@@ -2,6 +2,10 @@
 
 *Apache stdcxx revival notes, October 2026.*
 
+This note describes the tree before cb1f2768, which imported glibc
+2.44's sources. `ref-locale.md` chapter 6 describes the present
+sources; chapter 9 below records the import.
+
 The locale definitions and charmaps under `etc/nls` came with the
 library as copies of GNU libc 2.2's, and nothing has touched their
 data since 2007. This note compares them with the C library's current

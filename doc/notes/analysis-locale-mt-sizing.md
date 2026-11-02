@@ -1,5 +1,18 @@
 # The locale MT tests sized for ThreadSanitizer
 
+The programs this note sizes were retired or rewritten on 2026-10-19.
+Six were retired: `money.get.mt` (5c1368e6), `money.put.mt`
+(a701ec25), `num.get.mt` (72d94f0b), `num.put.mt` (70070c4b),
+`time.get.mt` (7b8aede0) and `time.put.mt` (e6d382f5). `globals.mt`
+became the single-threaded `22.locale.globals` (4a309756). Nine were
+rewritten to race in gated rounds behind `rw_thread_gate` (2056a79f):
+`codecvt.mt` (b833725b), `cons.mt` (708f731d), `ctype.mt` (ecc7633e),
+`messages.mt` (7813a108), `moneypunct.mt` (79709615), `numpunct.mt`
+(7c93badb), `statics.mt` (39aca499), `time.put.libc.mt` (924c7c1e) and
+`use_facet.mt` (ab4729c7). `ref-test-baseline.md` 3.2 holds the
+census of the eleven programs left. The body below stays as the record
+of the sizing.
+
 A plain run of a locale MT test catches a race only when two threads
 arrive in its window. Whether they do is set by the kernel's
 thread-creation stagger, the same for every round. The same binaries

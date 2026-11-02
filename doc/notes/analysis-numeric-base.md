@@ -2,10 +2,12 @@
 
 ## 0. tl;dr
 
-The library keeps a stream's numeric base in the top six bits of its
-format flags, beside `basefield`. Two defects follow from how the
-flags setter reconciles the two. Both are library defects, in every
-configuration, under both compilers.
+The library kept a stream's numeric base in the top six bits of its
+format flags, beside `basefield`, until 8b5d90ae. Two defects followed
+from how the flags setter reconciled the two. Both were library
+defects, in every configuration, under both compilers. Chapters 1 to
+5 describe the tree of c9025601, before the removal, and cite its
+lines; chapter 8.2 records the removal.
 
 - **`setbase (10)` selects autodetection.** After
   `in >> std::setbase (10)` a stream reads `"010"` as 8. The standard
@@ -33,7 +35,8 @@ chapter 8 has both.
 `CharTraits`. Each run applies `setbase (10)` twice: in the block of
 the standard's bases (`tests/iostream/27.std.manip.cpp:570`) and in
 the block of the extended bases (591). Four instantiations times two
-sites give the eight failures.
+sites give the eight failures. 6bb205b4 and 8b5d90ae rewrote the
+test: its `setbase` case is now at line 293, and nothing names `bin`.
 
 The check is in the `setbase` case of `test<>` (line 227). It applies
 the manipulator to one stream and the standard's definition to
@@ -72,10 +75,12 @@ Bits 26 to 31 hold the numeric base, 0 to 63. They serve the
 `setbase` extension: bases 3 to 36, and 1 for Roman numerals, which
 `basefield` cannot express. The facets read the base from these bits,
 not from `basefield` (`include/loc/_num_get.cc:245`,
-`src/num_put.cpp`).
+`src/num_put.cpp`). Since 8b5d90ae both read `basefield` alone
+(`include/loc/_num_get.cc:198-205`, `src/num_put.cpp:240-243`).
 
-`ios_base::flags (fmtflags)` (`src/ios.cpp:96`) reconciles the two.
-It switches on `basefield`:
+`ios_base::flags (fmtflags)` (`src/ios.cpp:96`) reconciles the two;
+since 8b5d90ae it stores what it is given. It switches on
+`basefield`:
 
 | `basefield` | base bits after the call |
 |---|---|
@@ -117,7 +122,9 @@ it goes wrong.
 ## 3. First defect: `setbase (10)`
 
 The manipulator's body is `__rw_setbase` (`include/iomanip:63`). It
-validates the base, replaces the base bits and clears `basefield`:
+validates the base, replaces the base bits and clears `basefield`
+(since 8b5d90ae it is 27.6.3 p5's `f`, a `setf` of `oct`, `dec`,
+`hex` or 0 under `basefield`, `include/iomanip:63-75`):
 
 ```cpp
 const unsigned __ifl =
@@ -306,11 +313,13 @@ assertions fail, each as chapters 3 and 4 predict.
 
 Measured after the removal, 2026-09-30, from full rebuilds of the six
 configurations. `27.std.manip` passes all 48 of its assertions.
-`27.basic.ios` passes in the single-threaded builds. `22.locale.num.get`
+`27.basic.ios` passed in the single-threaded builds; since 1803887b
+it passes in all six. `22.locale.num.get`
 and `22.locale.num.put` lose the cases of the removed bases, and the
 driver's `0.printf` the cases that printed them. No other row moves,
 and the warnings of the tests' own sources are unchanged.
 
-`27.basic.ios` fails on the same bits for another reason: `flags ()`
-returns them, where the standard's postcondition allows
-`skipws | dec` only. `analysis-basic-ios-flags.md` has it.
+`27.basic.ios` failed on the same bits for another reason: `flags ()`
+returned them, where the standard's postcondition allows
+`skipws | dec` only. 1803887b moved the locking bits out of the
+flags; `analysis-basic-ios-flags.md` has it.

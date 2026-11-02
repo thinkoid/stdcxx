@@ -12,20 +12,20 @@ alternatives that were weighed for the week number in October 2026.
 
 | directive | what it parses, per `strptime` | `tm` member | the problem |
 |---|---|---|---|
-| `%C` | the century, two digits | none | a year only with `%y`; alone, nothing to assign |
-| `%y` | the year within the century, two digits, pivoted 69..99 to 19xx and 00..68 to 20xx | `tm_year` | the pivot is wrong when a `%C` came or comes later; the two combine at the end |
+| `%C` | the century, two digits | `tm_year` | in `strptime` a year only with `%y`; the library sets the century in `tm_year` and keeps the two low digits it finds there, so "%y %C" combines (6.1) |
+| `%y` | the year within the century, two digits, pivoted 69..99 to 19xx and 00..68 to 20xx | `tm_year` | the library pivots and sets the whole year, so a `%C` before it holds only inside the pivot's window; a negative year in the `tm` it keeps (8.4) |
 | `%Y` | the full year | `tm_year` | fine alone; it drops a `%y` parsed before it |
 | `%U` | the week of the year, Sunday the first day, 00..53 | none | a day of the year only with a year and a weekday; alone, nothing to assign |
 | `%W` | the week of the year, Monday the first day, 00..53 | none | as `%U`; a Sunday is the last day of the previous Monday-week |
-| `%w`, `%a`, `%A` | the weekday, a number or a name | `tm_wday` | fine alone; also an input to the week derivation |
-| `%j` | the day of the year, 001..366 | `tm_yday` | fine alone; an explicit `%j` must win over a derived one |
-| `%m`, `%d`, `%e` | the month and the day of the month | `tm_mon`, `tm_mday` | fine alone; explicit values must win over the week derivation, and together with the year they imply `tm_wday` and `tm_yday`, which nothing names |
+| `%w`, `%a`, `%A` | the weekday, a number or a name | `tm_wday` | fine alone; in `strptime` also an input to the week derivation, which the library does not do |
+| `%j` | the day of the year, 001..366 | `tm_yday` | fine alone; the library derives no day of the year to compete with it |
+| `%m`, `%d`, `%e` | the month and the day of the month | `tm_mon`, `tm_mday` | fine alone; together with the year they imply `tm_wday` and `tm_yday`, which nothing names and the library leaves as the caller had them (7) |
 | `%I`, `%l` | the hour on the 12-hour clock, 1..12 | `tm_hour` | the hour of the day only with `%p`; stored modulo 12 within the half of the day `tm_hour` already holds |
 | `%H`, `%k` | the hour on the 24-hour clock | `tm_hour` | fine alone; a `%p` after it sets the half of the day, where glibc ignores it |
 | `%p` | the half of the day, the locale's AM or PM names | none | sets the half of the day of the hour it finds, before or after a `%I` |
 | `%Z` | the time zone name | none | consumed, nothing to assign |
 | `%z` | the offset from UTC | `tm_gmtoff` where the C library has it | nothing to assign elsewhere |
-| `%x`, `%X`, `%c`, `%D`, `%r`, `%R`, `%T`, `%F` | a locale's or a fixed format, a whole pattern | several | a nested walk: what it parsed is settled inside it and does not reach the pattern around it |
+| `%x`, `%X`, `%c`, `%D`, `%r`, `%R`, `%T` | a locale's or a fixed format, a whole pattern | several | a nested walk: what it parsed is settled inside it and does not reach the pattern around it; `%F` is written by `time_put` but not read (`TODO`, "`%F` is written and counted but never read") |
 | `%E` with `C`, `y`, `Y`, `x`, `X`, `c` | the era forms: an era name, a year within the era, the era's formats | `tm_year` and others | without era data the plain directive; with it, an era has no member, so `%EC` moves the year into the era and `%Ey` reads in the era of the year, and `%EY`'s era is unknown until its name is read; chapter 9 |
 | `%O` with a numeric directive | the locale's alternative digits for the value | the plain directive's | a value with no alternative symbol is read as digits; the first alternative symbol may be empty |
 
@@ -46,10 +46,11 @@ alternatives that were weighed for the week number in October 2026.
   overridden. The standard's design cannot carry strptime's
   semantics through the interface it mandates; libstdc++ worked
   around that defect for the one compiler that lets it.
-- This library has the same defect in its own form, since
-  2026-10-29: `get` keeps the century, the half of the day and the
-  week number in locals, reads them back from the `tm` after each
-  `do_get`, and rewrites the `tm` at the end. A `get` that is
+- This library had the same defect in its own form, from
+  2026-10-29 to e438cc11 (2026-10-31): `get` kept the century and
+  the half of the day in locals, read them back from the `tm` after
+  each `do_get`, and rewrote the `tm` at the end; an uncommitted
+  change added the week number. A `get` that is
   required to call the virtual and then overrules what the virtual
   stored breaks the virtual's contract; an override of `do_get` is
   clobbered, and the library cannot know one exists.
@@ -66,7 +67,7 @@ alternatives that were weighed for the week number in October 2026.
   so the `tm` carries the century and the half of the day between
   calls; `get` dispatches and nothing more; the week number, which
   nothing carries, is consumed and stored nowhere. Chapter 6 has the
-  steps and the three limits that came with them.
+  steps and the four limits that came with them.
 - The interface stays. The C++11 members came into the standard
   from this facet, and the 2003 members are specified by what
   `time_put` writes, which needs the same engine.
@@ -279,7 +280,11 @@ interface has no portable channel for the state.
 
 This chapter describes the mechanism that 2.2 names as the defect,
 so that the way back in chapter 6, taken in e438cc11, can be read
-against it. `get` is now the code before 59f3a87e.
+against it. `get` is now the code before 59f3a87e but for the
+literal match of 6.1. The century and the half of the day were
+committed in 59f3a87e and 2829b153. The week locals, the derivation
+and the handshake below never were: they describe an uncommitted
+working tree of 2026-10-30, which e438cc11 replaced.
 
 The walk is the public `get` over a format range in
 `include/loc/_time_get.cc`. It keeps the state in locals: the
@@ -313,9 +318,10 @@ hands `%U` and `%W` a copy of its working `tm` with `tm_yday` set to
 `INT_MIN`, `do_get` stores the week number into that field only when
 it finds the sentinel there, and the walk reads it back and restores
 its own `tm_yday`. A direct call of `do_get` on a user's `tm` stores
-nothing from the week and leaves the `tm` as it was, which the test
-pins. The convention lives in the walk and in the `%U` branch of
-`do_get`, twenty lines apart, with a comment on each side.
+nothing from the week and leaves the `tm` as it was, which that
+tree's test pinned. The convention lives in the walk and in the
+`%U` branch of `do_get`, twenty lines apart, with a comment on each
+side.
 
 ## 6. The alternatives, and the way back
 
@@ -373,8 +379,9 @@ follows the remark's update model, in five steps, done in e438cc11:
    conversion specifier nor a Y conversion specifier", and a
    `do_get` sees one directive, while nothing in a `tm` says whether
    a century was parsed, since a zeroed `tm` reads as 1900. So `%y`
-   keeps the pivot and sets the whole year, and a `%C` before a `%y`
-   holds only inside the pivot's window, 1969 to 2068. That is the
+   keeps the pivot and sets the whole year, except a negative
+   century, which `%y` keeps (8.4), and a `%C` before a `%y` holds
+   only inside the pivot's window, 1969 to 2068. That is the
    one place the update model departs from XSH's letter, and it is
    p14's limit, not a choice. `%I`, `%l` and `%OI`
    store the hour modulo 12, as glibc does, within the half of the
@@ -399,7 +406,7 @@ follows the remark's update model, in five steps, done in e438cc11:
    items.
 
 What the update model gives up is the cases the walk resolved by
-knowing what it had parsed: the two in step 4, and the nesting rule,
+knowing what it had parsed: the four in step 4, and the nesting rule,
 which becomes moot since nothing is combined across levels. What it
 restores is the virtual's contract, and a `get` that can be read
 against p8 line by line.
@@ -408,10 +415,12 @@ A literal of the pattern matches the input's character by
 `char_traits<char_type>::eq` of the two characters through the
 facet's `ctype::toupper`: C++11 22.4.5.1.1 p8 has the literal match
 "in a case-insensitive comparison", and p9 leaves the means
-unspecified. The walk of an era's format in 9.8 matches its literals
-exactly; the era format is the locale's text, not a caller's pattern,
-and p8 does not govern it. The pattern's character is narrowed only
-to find the `%`, the modifier and the conversion. A narrowed literal does not serve under
+unspecified. The walk of an era's format in 9.8 matches the literals
+after `%EC` exactly, and the text before `%EC` case-insensitively,
+together with the era name; the era format is the locale's text, not
+a caller's pattern, and p8 does not govern it. The pattern's
+character is narrowed only to find the `%`, the modifier and the
+conversion. A narrowed literal does not serve under
 `wchar_t`: a character beyond ASCII narrows to `'\0'` in "C", as
 does one with no single byte in a multibyte locale, and any two of
 them compared equal. "%Y年" read "2026月" as 2026. The narrow
@@ -423,16 +432,18 @@ facet compared bytes and was exact.
   `%Y` setting the whole year, and 2000 in glibc, whose end-of-call
   block takes a century without a two-digit year as the year itself.
   A quirk of the reference, not followed; recorded.
-- `%C` on a negative `tm_year`. The kept digits come from `(tm_year
-  + 1900) % 100`, negative for a year before 0; no row covers it.
-  Queued.
+- `%C` on a negative `tm_year`. The kept digits came from `(tm_year
+  + 1900) % 100`, negative for a year before 0. Closed in 503ae88c:
+  `%C` keeps the digits without their sign, and a direct
+  `get (..., 'C')` on "19" with `tm_year` -2443 pins 43.
 - The derivation of a date from a week. Dropped with the way back;
   a program that parses "%Y %U %w" gets the year and the weekday
   and computes the rest, as it would after `strptime` on a C library
   that does not derive. Recorded, not queued.
 - The implied members. "%Y %m %d" leaves `tm_wday` and `tm_yday` as
   the caller had them; glibc completes them. The remark in p14 makes
-  either reading conforming. A decision.
+  either reading conforming. A decision, queued in `TODO` as
+  "Implied `tm_wday` and `tm_yday` are left as the caller had them".
 - The `E` family. Read since 2026-11-01 by the rules of chapter 9.
 - The nesting rule. Moot under the update model: a nested `%x` is a
   `do_get` that updates the same `tm`, and nothing is combined
@@ -619,11 +630,13 @@ fails with `failbit` and leaves the `tm` as it was. A valid `E`
 directive that cannot settle its members sets `eofbit`, never
 `failbit`: an unknown era name, a year outside its era, no digits
 for `%Ey`, an era format the input does not follow. The members are
-unspecified; the library leaves the year as it was. XSH's fallback
-applies where the alternative "does not exist". A locale with era
-records has the alternative, so a mismatch there is not a fallback:
-"19" under `%EC` in ja_JP sets `eofbit` and reads nothing, where
-glibc reads the century.
+unspecified. `%EC` and a lone `%Ey` leave the year as it was; a
+`%EY` whose format fails after its `%Ey` keeps the year it read,
+which `TODO` carries as "`%EY` keeps a year its format then fails
+on". XSH's fallback applies where the alternative "does not exist".
+A locale with era records has the alternative, so a mismatch there
+is not a fallback: "19" under `%EC` in ja_JP sets `eofbit` and reads
+nothing, where glibc reads the century.
 
 Under `get` over a format, `eofbit` from a directive before the last
 ends the walk, and the walk adds `failbit`, as it does when the input
@@ -827,8 +840,7 @@ these rules. The differences, as differences:
 ## 10. Where to look
 
 - `include/loc/_time_get.cc`: `get` over a format range is the
-  walk; `do_get` is the per-directive virtual; the `%U` branch and
-  the walk's week locals are the two ends of the handshake.
+  walk; `do_get` is the per-directive virtual.
 - `src/time_put.cpp`, `__rw_get_timepunct`: the per-directive table,
   members, bounds, digit counts and names.
 - `src/era.cpp`: the era lookups of the writer and the reader, the

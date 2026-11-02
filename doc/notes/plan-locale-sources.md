@@ -38,8 +38,9 @@ name. Nothing else reads `gen_list`.
 
 `tests/src/locale.cpp` reads `etc/nls/countries`, `languages` and
 `encodings`, maps between the host's locale names and canonical
-ones. The tests compile a handful of definitions by name: `de_DE`,
-`fr_FR`, `ja_JP`, `sv_SE`, `th_TH`, `hr_HR`, with their charmaps. The
+ones. The tests compile nine definitions by name: `de_DE`, `fr_FR`,
+`ja_JP`, `sv_SE`, `th_TH`, `hr_HR`, and in `22.locale.collate` also
+`cs_CZ`, `da_DK` and `en_US`, with their charmaps. The
 definitions all exist in glibc's set; one charmap does not under its
 name: `22.locale.codecvt` names `Shift_JIS`, glibc's file is
 `SHIFT_JIS`, and the lookup is case sensitive. `etc/nls/posix` is a
@@ -208,12 +209,15 @@ Steps 1 to 4 are in, 2026-10-29.
   - 16 come from an empty `t_fmt_ampm`, which glibc's `%r` replaces
     with `%I:%M:%S %p`.
 
-  The three classes in the library are queue entries, with a fourth
-  for two pattern-table comments the mapping found wrong.
+  The three classes in the library were queue entries, with a fourth
+  for two pattern-table comments the mapping found wrong. All four
+  are closed: cbf75267 (the international formats), 8820446f (`%OC`
+  and `%Op`), decb2382 (`%r`) and 005cde2b (the comments).
 - Step 4, the documentation. `ref-locale.md` describes the sources
   and the refresh. `analysis-locale-sources.md` closes on the
   import. The queue entry on the 2.2 sources leaves. `README.md`
-  names no locale source and is unchanged.
+  names the sources since the same commit, 291c88a0
+  (`README.md:27-29`).
 
 - The serial build against the parallel one. `make locales` in one
   process into a second directory took 59 min 48 s on the 15D build,

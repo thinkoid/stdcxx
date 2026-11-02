@@ -4,8 +4,8 @@ The multithreaded locale tests were the reason for the revival: they
 failed intermittently in 2008 and nobody found out why. On the
 current toolchain they fail on every run, differently each time, and
 a ThreadSanitizer build says why. This note records what the tool
-reports and what it means; the fixes wait until after the platform
-retirement, so that they land on the surviving code. The 2012
+reports and what it means. The fixes landed after the platform
+retirement, on the surviving code (chapter 7). The 2012
 investigation of the same defect, its test programs and why it
 stalled are in `analysis-locale-mt-2012.md`.
 
@@ -25,11 +25,11 @@ stalled are in `analysis-locale-mt-2012.md`.
 - Root cause B, same species: the facet's implementation data and the
   locale body's facet bookkeeping are initialized lazily and read
   without synchronization.
-- A configuration fact that shapes the reports: on Linux/x86-64 the
-  string reference count goes through a mutex per string, not the
-  atomic builtins. A 2007 clause cites 4.1.x; its effect is the
-  string layout of every 4.2.x release. It stays until the next minor
-  version (chapter 5).
+- A configuration fact that shaped the reports: on Linux/x86-64 the
+  string reference count went through a mutex per string, not the
+  atomic builtins. A 2007 clause cited 4.1.x; its effect was the
+  string layout of every 4.2.x release. 58d5f40b removed it
+  (chapter 5).
 - A characterization nobody read: `_RWSTD_NO_THREAD_SAFE_LOCALE`.
   Its consumer never landed, and the test is retired (chapter 5).
 
@@ -63,6 +63,8 @@ blocks through the test driver's replacement `operator new`, whose
 guard check aborts ("trailing guard corruption") against the
 sanitizer's allocator in every build, before and after the fixes, as
 it does under AddressSanitizer; without the sanitizer both pass.
+fb947cc3 replaced the sized `operator delete` of the driver, and both
+have run under ThreadSanitizer since.
 
 ## 2. The reports
 
@@ -140,11 +142,12 @@ locale MT tests with no report from the facet headers.
 
 Fixed otherwise: the cache is gone. The accessors call the virtuals,
 the forwarding of `moneypunct` and the binary-compatible patch of
-2012 (`analysis-locale-mt-2012.md`, chapter 4.3); the members stay, unused,
-until the next minor version. `22.locale.numpunct.mt`, which aborted
-on every run, passes, and so does `22.locale.num.put.mt`, which reads
-`grouping ()` through `num_put`. The cost the cache existed to save
-is one virtual call per accessor; chapter 5 of the primer has the
+2012 (`analysis-locale-mt-2012.md`, chapter 4.3); 3b046e29 removed the
+unused members. `22.locale.numpunct.mt`, which aborted on every run,
+passes, and so did `22.locale.num.put.mt`, which read `grouping ()`
+through `num_put`, until 70070c4b retired it. The cost the cache
+existed to save is one virtual call per accessor; chapter 5 of the
+primer has the
 2012 measurements on both sides.
 
 ## 4. Cause B: the facet's data and the locale body
@@ -168,29 +171,29 @@ chapter 3). With the caches of chapter 3 and the scalar caches of
 under ThreadSanitizer gives 6 reports where it gave 1,490 before the
 ordering fixes of chapter 7: four in the test driver, one in a
 test, and one in the double-checked initialization of the global
-locale (`locale_body.cpp:807`), which the sweep of atomic integer
-flags in `TODO` covers.
+locale (`locale_body.cpp:807`), which 5b68c2a7 replaced with
+`__rw_once` (`analysis-init-flags.md`, 2.1).
 
 ## 5. The configuration facts
 
-`include/rw/_config.h:101-114`: on Linux/x86-64, unless
-`_RWSTD_USE_STRING_ATOMIC_OPS` is defined, `_RWSTD_NO_STRING_ATOMIC_OPS`
-is, "for binary compatibility with stdcxx 4.1.x" (2007-10-18). The
-effect is that `std::string` counts references under a mutex per
-string through `_atomic-mutex.h`, although `_RWSTD_NO_ATOMIC_OPS` is
-not set and the `__sync` builtins are available and used everywhere
-else. It is not a race, but it is why mutexes appear inside string
-representations in the reports, and it costs every string a mutex.
+Until 58d5f40b (2026-10-15), `include/rw/_config.h` said: on
+Linux/x86-64, unless `_RWSTD_USE_STRING_ATOMIC_OPS` is defined,
+`_RWSTD_NO_STRING_ATOMIC_OPS` is, "for binary compatibility with
+stdcxx 4.1.x" (2007-10-18). The effect was that `std::string` counted
+references under a mutex per string through `_atomic-mutex.h`,
+although `_RWSTD_NO_ATOMIC_OPS` was not set and the `__sync` builtins
+were available and used everywhere else. It was not a race, but it was
+why mutexes appear inside string representations in the reports, and
+it cost every string a mutex.
 The fix it disables, STDCXX-162, landed on trunk in 2006. The clause
 went in on the 4.2.0 branch before that release, and in 2008 the
 test's `ABRT` on Linux/x86-64 was marked expected in
 `etc/config/xfail.txt`. Every 4.2.x release has the mutex in the
 string body. The version rule makes the second number the binary
-interface, so removing the mutex waits for the next minor version.
-`TODO` lists it there with the other breaks. Until then
-`21.string.stdcxx-162` aborts in 15D, and
-`_RWSTD_USE_STRING_ATOMIC_OPS` gives the atomics to a program that
-needs no 4.2.x binary compatibility.
+interface, so removing the mutex waited for the next minor version.
+61399d72 dropped the 4.2.x interface and 58d5f40b removed the clause:
+strings count with atomics on every platform, and
+`21.string.stdcxx-162` passes in 15D.
 
 `etc/config/src/THREAD_SAFE_LOCALE.cpp` asked whether each thread has
 its own C locale environment or the process shares one. `config.h`
@@ -208,9 +211,10 @@ loses the one line and nothing else changes.
 
 ## 6. Where this leaves the MT tests
 
-The plain 15D results for `22.locale.*.mt` are symptoms of A and B
-and stay out of the reference until both are fixed. The
-ThreadSanitizer build is the instrument from here: rebuild it after
+The plain 15D results for `22.locale.*.mt` were symptoms of A and B
+and stayed out of the reference until both were fixed. Both are fixed
+(chapter 7), and every `.mt` row is pinned in `baseline/15D.txt`. The
+ThreadSanitizer build was the instrument from here: rebuild it after
 the retirement, run the locale MT tests, and expect the report to
 name exactly the sites in chapters 3 and 4. Weakly ordered hardware
 is still wanted afterwards, for the ordering questions a fix on x86
@@ -222,7 +226,7 @@ cannot answer, but it is no longer needed to see the defect.
 
 | cause | fix | commit | evidence |
 |---|---|---|---|
-| A: `numpunct` caches | call the virtuals; the members stay, unused, until the next minor version | 2e196ebb | `22.locale.numpunct.mt` |
+| A: `numpunct` caches | call the virtuals; the unused members went in 3b046e29 | 2e196ebb | `22.locale.numpunct.mt` |
 | B: wide `codecvt` data | store the data before its size | 8c4282ee | `22.locale.codecvt.mt` |
 | racing first `use_facet` | return the extra references | 2bbdf7c9 | `22.locale.use_facet.mt` |
 | facet data publication | release store of `_C_impsize`, acquire loads | 4e559c9b | memory model; no reordering in an aarch64 litmus |
@@ -233,7 +237,9 @@ cannot answer, but it is no longer needed to see the defect.
 | user-defined facet id | generated once, under a lock | 46aa42c3 | `22.locale.id.mt` |
 | facet reference count | one atomic operation everywhere | dcb5dc92 | `22.locale.facet.mt` |
 
-One round of the locale MT tests under ThreadSanitizer gives one
-report, the global locale's `ginit` flag. The 15D rows of the older
+One round of the locale MT tests under ThreadSanitizer gave one
+report, the global locale's `ginit` flag. 5b68c2a7 removed it;
+`analysis-init-flags.md` chapter 4 reports none from the library at
+74bbd8f9. The 15D rows of the older
 locale MT tests measured the harness only until the tests were sized
 (`ref-test-baseline.md`, chapter 3.2).

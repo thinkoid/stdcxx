@@ -138,8 +138,9 @@ been an accidental cache, and the locale MT tests that construct
 locales in a loop pay for its loss: 5-run means of real time in 15D,
 `22.locale.ctype.mt` 19.5 s to 22.2 s, `22.locale.numpunct.mt` 24.1 s
 to 26.4 s, `22.locale.globals.mt` 2.6 s to 3.6 s, the rest within
-noise. Keeping every instantiated facet until the program ends is
-queued in `TODO` as an exploration.
+noise. Keeping every instantiated facet until the program ends was
+queued as an exploration and dropped in f90fff0f: by decision, a named
+facet dies with the last locale that holds it.
 
 ### 1.5. The test
 
@@ -156,7 +157,9 @@ that, one run in ten raced 200 rounds without a leak. With it, on the
 aarch64 machine, 13 of 13 runs before the fix (12 and 2 threads)
 found a 152-byte block, the facet, outliving the locale in round 0;
 14 of 14 after the fix (12, 2 and 1 threads) found none in 200
-rounds.
+rounds. ab4729c7 rewrote the program: round i races the first
+`use_facet` of standard facet i mod 26, and the threads start
+together through `rw_thread_gate` (2056a79f).
 
 ## 2. The facet data published early
 
@@ -213,7 +216,8 @@ A second, smaller defect sits on the same line: when `open` or `mmap`
 fails after `stat` succeeded, the facet is left with a non-zero size
 and a null pointer for good, and every later call takes the C library
 path. That is the "no database" behaviour, reached by a different
-route; it is recorded here and not measured.
+route; it is recorded here and not measured. `TODO` carries it as "A
+failed codecvt mapping publishes the file's size with no data".
 
 ### 2.2. The evidence
 
@@ -268,7 +272,11 @@ the pool's threads, created anew each round, convert `"abc"` on
 first use. Thread creation staggers the threads' arrival enough that
 some land in the window. On the aarch64 machine, 12 threads: 81, 47,
 75 and 55 failed assertions in four runs before the fix, 0 in four
-runs after. The case runs only in builds with threads.
+runs after. The case runs only in builds with threads. b833725b made
+the case the whole program, its threads started together through
+`rw_thread_gate`; cdd0936f builds the locale as
+`rwtest_de_DE.ISO-8859-1`, so the program no longer skips on a host
+with every C library locale.
 
 ## 3. What these fixes do not cover
 
@@ -285,8 +293,10 @@ reordering in 60 million rounds, so this part has no failing test;
 The second site is done: `_C_impsize` is stored with release and read
 with acquire where no lock is held (`_C_data` and the first check in
 `_C_get_data`), through `_RWSTD_ATOMIC_STORE_RELEASE` and
-`_RWSTD_ATOMIC_LOAD_ACQUIRE`, which `etc/config/src/ATOMIC_BUILTINS.cpp`
-characterizes. On aarch64 GCC spells them `stlr` and `ldar`; on x86-64
+`_RWSTD_ATOMIC_LOAD_ACQUIRE`, which the per-width
+`etc/config/src/*_ATOMIC_OPS.cpp` probes characterize
+(`ATOMIC_BUILTINS.cpp` until f1b71ed1). On aarch64 GCC spells them
+`stlr` and `ldar`; on x86-64
 both are ordinary moves.
 
 The slot is done too: `locale::_C_get_std_facet` fills it under the

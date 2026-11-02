@@ -1,7 +1,6 @@
 # The test-suite baseline
 
-As of 2026-10-13 (bf5fbd46) for GCC and 2026-10-08 (44420f7a) for
-Clang.
+As of 2026-11-01 (50087549), all six configurations.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -57,8 +56,12 @@ passed. Read the rows and the summary.
 
 ### 1.1 Rows that pass without a summary
 
-The 83 regression tests under `tests/regress` are plain programs that
-assert and exit. They print nothing, so a pass is `NOUT`.
+Of the 83 regression tests under `tests/regress`, 79 are plain
+programs that assert and exit. They print nothing, so a pass is
+`NOUT`. Two print without a summary, so a pass is `FORMAT`:
+`27.basic_ios.copyfmt.stdcxx-1058` and
+`27.stringbuf.members.stdcxx-427`. Two report through the driver:
+`22.locale.cons.stdcxx-485` and `22.locale.messages.stdcxx-542`.
 
 Five driver self-tests report on their own. They test the driver's
 support functions, not the harness's output parser, and none calls
@@ -94,9 +97,9 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,468,830 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,468,724 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,472,502 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,471,279 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,471,173 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,474,951 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -104,12 +107,21 @@ The host the tables come from has every locale of glibc's
 `SUPPORTED` list and the Shift_JIS one built by hand. The locale
 tests run the sections gated on the C library knowing a named locale,
 and fourteen rows depend on it: `22.locale.codecvt`, `collate`,
-`cons.stdcxx-485`, the six `ctype` tests, `money.put.mt`,
-`moneypunct`, `name`, `numpunct` and `time.get`. A host with
-`en_US.UTF-8` alone runs fewer assertions in each, `22.locale.codecvt`
-306 for 618, and its tables differ from the pins in those rows and
-the totals. The `run` target of `etc/config/makefile.rules` clears
-`LANG`, `LANGUAGE` and the `LC_` variables before it runs the tests:
+`cons.stdcxx-485`, the six `ctype` tests, `globals`, `moneypunct`,
+`name`, `numpunct` and `time.get`. Each was read in its test: the
+program asks the host for its locales with `rw_locale_query` or
+`rw_locales` and runs sections only for the names it finds, or, in
+`22.locale.name`, constructs locales by their C library names. The
+thirteen other than `globals` also moved when the pins first came
+from such a host (3c882e6a). The other programs that ask the host,
+`22.locale.num.get`, `num.put`, `messages`, `codecvt.do_out`,
+`codecvt.length` and the MT programs, use one name they find or run
+a fixed number of rounds, and count the same on either host. A host
+with `en_US.UTF-8` alone runs fewer assertions in each,
+`22.locale.codecvt` 306 for 618 in 15D, and its tables differ from
+the pins in those rows and the totals. The `run` target of
+`etc/config/makefile.rules` clears `LANG`, `LANGUAGE` and the `LC_`
+variables before it runs the tests:
 `22.locale.moneypunct` exercises the native locale too, and counted
 135020 assertions under none, 135050 under `LC_ALL=C` and 135100
 under `LC_ALL=en_US.UTF-8` before the target cleared them. A table
@@ -153,8 +165,59 @@ configuration; the Clang tables took the locale MT rows of 2026-10-13
 in the same run. All six were measured again on 2026-10-19, at
 d354aafd, on the host with every glibc locale, after the oracles of
 `22.locale.codecvt` were repaired (`analysis-test-fixtures.md`,
-chapter 4.5): the fourteen locale rows above grew, and nothing else
-moved.
+chapter 4.5): thirteen of the locale rows above and `money.put.mt`
+grew, and nothing else moved.
+
+Since then the pins have moved with the commits below. From
+df2646ee on, each commit moved the same rows by the same count in
+all six tables:
+
+- ed33d6d2, 2026-10-19, measured at 708f731d: the locale MT census
+  of chapter 3.2. Seven rows went, `22.locale.globals` came, and the
+  rewritten locale MT rows count; 268 programs.
+- df2646ee, 2026-10-26: `22.locale.ctype.tolower` and `toupper`,
+  19,388 to 19,390.
+- 5bbe3e4b, 2026-10-26: `22.locale.collate`, 145,854 to 145,856.
+- 592e858e, 2026-10-28: `22.locale.time.put`, 2,156 to 2,232; the
+  totals were left 76 short.
+- 5a8c2912, 2026-10-29: no row; the totals brought to their rows'
+  sum.
+- fa0fe473, 2026-10-29: `22.locale.ctype.is`, 25,432 to 25,434.
+- e33e3773, 2026-10-29: `22.locale.ctype.scan`, 17,124 to 17,126.
+- f56f7adb, 2026-10-29: `22.locale.collate`, 145,856 to 145,862.
+- e4dedf65, 2026-10-29: `25.merge`, 23,364 to 23,472, and
+  `25.sort`, 5,076 to 6,204.
+- 11087a6a, 2026-10-29: `22.locale.time.put`, 2,232 to 2,272.
+- 8820446f, 2026-10-29: `22.locale.time.put`, 2,272 to 2,304.
+- 8cf34a6f, 2026-10-29: `22.locale.money.put`, 1,328 to 1,346.
+- 9d3e7b3d, 2026-10-29: `22.locale.time.get`, 2,125 to 2,225, and
+  its runtime warnings, 24 to 22.
+- 967a487d, 2026-10-29: `22.locale.time.get`, 2,225 to 2,249.
+- 4a1b1087, 2026-10-29: `22.locale.time.get`, 2,249 to 2,261.
+- 59f3a87e, 2026-10-29: `22.locale.time.get`, 2,261 to 2,337, and
+  its runtime warnings, 22 to 20.
+- 2829b153, 2026-10-29: `22.locale.time.get`, 2,337 to 2,389.
+- 892e6c86, 2026-10-29: `22.locale.time.get`, 2,389 to 2,493.
+- e39b96fb, 2026-10-30: `22.locale.time.get`, 2,493 to 2,529.
+- d85d3f98, 2026-10-30: `22.locale.time.get`, 2,529 to 2,561.
+- 8abda9b3, 2026-10-30: `22.locale.collate`, 145,862 to 145,873.
+- dd8f4349, 2026-10-30: `22.locale.ctype.is`, 25,434 to 25,438;
+  `ctype.scan`, 17,126 to 17,132; `ctype.tolower` and `toupper`,
+  19,390 to 19,395.
+- b910448a, 2026-10-30: `22.locale.time.get`, 2,561 to 2,597.
+- c964ca59, 2026-10-30: `22.locale.time.get`, 2,597 to 2,605, the
+  rows d15125bb added without a pin.
+- e438cc11, 2026-10-31: `22.locale.time.get`, 2,605 to 2,729, and
+  its runtime warnings, 20 to 12.
+- 503ae88c, 2026-10-31: `22.locale.time.get`, 2,729 to 2,819, and
+  `22.locale.time.put`, 2,304 to 2,402.
+- ffea5ffe, 2026-11-01: `22.locale.time.get`, 2,819 to 3,007, and
+  its runtime warnings, 12 to 6.
+- 90a98455, 2026-11-01: `22.locale.time.get`, 3,007 to 3,015.
+- 50087549, 2026-11-01: `22.locale.time.get`, 3,015 to 3,027.
+
+The runtime warnings of every table fell from 60 to 42 with those of
+`22.locale.time.get`.
 
 ## 3. What fails
 
@@ -216,9 +279,8 @@ and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 | `20.temp.buffer` | 10891 | 10792 | 10891 |
 | `22.locale.num.put` | 1485 | 1481 | 1485 |
 | `22.locale.money.get` | 3952 | 3960 | 3952 |
-| `22.locale.codecvt` | 322 | 322 | 306 |
+| `22.locale.codecvt` | 634 | 638 | 618 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
-| `21.string.stdcxx-162` | `NOUT` | `NOUT` | `ABRT` |
 | `22.locale.codecvt.mt` | 400 | 400 | 1600 |
 | `22.locale.ctype.mt` | 200 | 200 | 800 |
 | `22.locale.numpunct.mt` | 600 | 600 | 1200 |
@@ -240,9 +302,12 @@ Reasons, in order:
   the cases are skipped with a note. The harness counts warnings, not
   notes.
 - 15D skips the two libc-backed facets of `22.locale.codecvt` on a
-  corrupt `mbstate_t`. Their state check sits under the locale lock.
+  corrupt `mbstate_t`, 16 assertions. Their state check sits under
+  the locale lock. The 4 between 11S and 11s have no known reason;
+  they date from the first pins of a host with every locale
+  (3c882e6a). `TODO` holds the entry, "`22.locale.codecvt` counts
+  634 assertions in 11S and 638 in 11s".
 - The atomic operation tests count only in the thread-safe build.
-- `21.string.stdcxx-162`: chapter 3.1.
 - `22.locale.codecvt.mt` counts two checks per thread and round,
   `22.locale.ctype.mt` one, `22.locale.numpunct.mt` and
   `22.locale.moneypunct.mt` one per thread and two per round, and
@@ -250,8 +315,9 @@ Reasons, in order:
   and 400 with the one thread of a single-threaded build; 1,600, 800,
   1,200 and 1,000 with four.
 
-The single-threaded builds run each MT test with one thread. Most
-count nothing there. Seven count the same in every build:
+The single-threaded builds run each MT test with one thread. Two
+count nothing in any build, `19.exceptions.mt` and
+`20.temp.buffer.mt`. Eight count the same in every build:
 `22.locale.use_facet.mt`, `22.locale.time.put.libc.mt` and
 `22.locale.statics.mt` 200 each, `22.locale.messages.mt` 600,
 `22.locale.id.mt` 999, `22.locale.facet.mt` 8, `21.string.cons.mt` 16
@@ -265,9 +331,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,468,830 | 0 | 0 | 0 |
-| 11s-clang | 12,468,739 | 0 | 0 | 0 |
-| 15D-clang | 12,472,502 | 0 | 0 | 0 |
+| 11S-clang | 12,471,279 | 0 | 0 | 0 |
+| 11s-clang | 12,471,188 | 0 | 0 | 0 |
+| 15D-clang | 12,474,951 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134

@@ -72,11 +72,13 @@ as a ruled exception, see 4.4.
 | f402f64c | chapter 2 of the conformance note and the README policy paragraph |
 
 Two members kept a private form for the library's own use, the
-precedent set in c91e001f: `_C_str` and `_C_get`. The entry did not
-touch `src/mapfile.gcc`.
+precedent set in c91e001f: `_C_str` and `_C_get`. `_C_get` kept it
+only until c40c5d16, the same day (4.4). The entry did not touch
+`src/mapfile.gcc`.
 
 Suite table rows moved by the entry, all in
-`doc/notes/baseline/x86_64-15D.txt`: `17.extensions` gone;
+`doc/notes/baseline/x86_64-15D.txt` (`baseline/15D.txt` since
+a1cac3fe; the counts below are that day's): `17.extensions` gone;
 `18.exception` 1097 for 1109; `21.cwchar` 118 for 66; `21.cwctype`
 294 for 260; `22.locale.num.get` 51894 for 63720; `22.locale.time.get`
 726 for 2010; `23.bitset.cons` 1677 for 2347. No failure count moved.
@@ -255,9 +257,12 @@ for the whole tree once the compiler matrix is final.
 
 `22.locale.time.get` lost its POSIX specifier walk and the whole
 generated-locale test with its `LC_TIME` generator, about a thousand
-lines, 726 assertions for 2010. The `strptime` engine is still in the
+lines, 726 assertions for 2010. The `strptime` engine stayed in the
 library as `_C_get`, reachable only through the standard members, and
-the remaining assertions exercise it through them. `22.locale.num.get`
+the remaining assertions exercised it through them. Since c40c5d16
+the engine is the protected virtual `do_get (..., char, char)`
+(`include/loc/_time_get.h:168`), and the format `get` members are
+public. `22.locale.num.get`
 lost the `short` and `int` cases, 51894 for 63720. The rule given for
 this was that an extension is non-standard by definition and the
 orphaned coverage does not matter; the fact stands that the engine's
@@ -282,8 +287,8 @@ rules if the motives are compelling", and nothing is more compelling
 than the standard taking its text from this facet. The test, the MT
 test's format branch, the `time_manip` example and the reference
 pages came back with them, the gate lines did not, and the comments
-cite C++11. The `num_get` coverage stays gone: those members have no
-such lineage.
+cite C++11. 7b8aede0 retired the MT test on 2026-10-19. The
+`num_get` coverage stays gone: those members have no such lineage.
 
 ### 4.5 Pre-existing and untouched
 

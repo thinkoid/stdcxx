@@ -268,3 +268,9 @@ Steps 1 to 4 are in, 2026-10-28.
   was the pinned `Assertions:` total, 76 under the sum of its rows
   in every table since 592e858e re-pinned `22.locale.time.put`
   without it; the totals are corrected with this result.
+
+The functionality scripts of 1.3 were not repaired and are not part
+of this result: the `rm` calls are still at
+`etc/config/run_locale_utils.sh:373`, `:410` and `:447`, and `TODO`
+carries the entry "The functionality scripts exit 4 on an `rm` of a
+directory".

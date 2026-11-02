@@ -40,6 +40,18 @@ tree they belong to. `bin/driver` runs the certification: each
 configuration built and run from an export of one revision, a page
 per build, and each table compared with its pin.
 
+`std::locale` has a document of its own, `doc/notes/ref-locale.md`.
+The short version: the library implements all of clause 22 as
+14882:2003 specifies it, with its own locale databases compiled by
+`util/localedef` from glibc's locale sources, the C library as the
+fallback where a locale has no database, and one place where C++11
+governs, the format members of `time_get`. Its chapters 8 to 12 take
+each facet family against the standard, virtual by virtual; chapter
+13 indexes every departure, extension and open reading with its
+paragraph; the defects those chapters found are entries in `TODO`.
+`doc/notes/ref-conformance.md` carries one row per departure and
+points at the chapter.
+
 The write-ups live under `doc/notes`, one directory, the kind in
 the file name's prefix. `ref-` documents describe the library as it
 is, for a reader rather than for the record, and are kept current;

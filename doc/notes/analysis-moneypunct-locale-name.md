@@ -108,7 +108,7 @@ completion, failure of either allocation, a caught exception before
 allocations. Injected failures produce the expected assertion diagnostics;
 the callback's zero exit status alone is not used as their oracle.
 
-The full suite was not rerun; its pinned tables retain the preceding
-measurement, including the old moneypunct abort.
+The full suite was not rerun with this change. 8f806c38 re-pinned
+the tables after it, and `22.locale.moneypunct` passes in every pin.
 
 OpenAI LeChuck

@@ -68,10 +68,15 @@ primer's three arms.
 | use | functions | where |
 |---|---|---|
 | character traits | `wmemcpy`, `wmemcmp`, `wmemmove`, `wmemset`, `wcslen`, `wmemchr` | `include/rw/_traits.h`; the `__rw_` versions in debug builds |
-| conversion | `mbrtowc`, `wcrtomb`, `mbrlen`, `wcsrtombs`, `mbsinit`, and the restartless `mbtowc`, `wctomb`, `mblen`, `mbstowcs`, `wcstombs` | `src/wcodecvt.cpp`, `src/codecvt.cpp`, `src/punct.cpp`, `src/collate.cpp` |
-| single characters | `btowc`, `wctob`, `wctomb` | `src/wctype.cpp` |
-| collation | `wcscoll`, `wcsxfrm` | `src/collate.cpp` |
+| conversion | `mbrtowc`, `wcrtomb`, `mbrlen`, `wcsrtombs`, `mbsinit`, and the restartless `mbtowc`, `mbstowcs` | `src/wcodecvt.cpp`, `src/codecvt.cpp`, `src/punct.cpp`, `src/time_put.cpp` |
+| single characters | `btowc`, `wctob` | `src/wctype.cpp` |
+| collation | `wcsxfrm` | `src/collate.cpp` |
 | time | `wcsftime` | `src/time_put.cpp` |
+
+8760bf55 removed `wctomb`, `mblen` and the `wcstombs` fallback of
+`src/collate.cpp` after 5569cc60, and 8abda9b3 the call of
+`wcscoll`: the wide `do_compare` transforms and compares, as the
+narrow one does.
 
 Of the five, only `wmemchr` is on this list.
 `char_traits<wchar_t>::find` calls it so:

@@ -12,17 +12,18 @@ wrong. The front end comes first: a line reader, one small function
 per statement of the POSIX grammar, and a model of plain structs.
 The back end, the tables and the seven writers, follows as its own
 plan. The language is C++03 throughout, the tree's own. The old
-compiler stays in the tree until the new one is accepted, and the
-patches that taught it the current sources sit on the branch
-`localedef-patches`, never merged.
+compiler stayed in the tree until the new one was accepted and left
+in ec1b536d. The patches that taught it the current sources were
+never merged; the tag `localedef-old` keeps the patched compiler.
 
 ## 1. Why a rewrite
 
-The old compiler is one class. `Def`, in `util/def.h`, parses the
-definition, computes the collation and conversion tables and writes
-the seven images, with the parse state, the table state and the
-output structs side by side as members. Its ownership is raw
-pointers; its weights are arrays freed by hand in a destructor. It
+The old compiler was one class. `Def`, in `util/def.h` (removed in
+ec1b536d; the tag `localedef-old` keeps it), parsed the definition,
+computed the collation and conversion tables and wrote the seven
+images, with the parse state, the table state and the output structs
+side by side as members. Its ownership was raw pointers; its weights
+were arrays freed by hand in a destructor. It
 had about a year of development, 2001 to 2002, and none after. The
 library it serves is older: its copyright line starts in 1994, and
 the history page of the user's guide calls it a code base shipping
@@ -61,20 +62,27 @@ images the facets map. The new compiler writes the same bytes. A
 better format, smaller ctype tables, a UTF-8 codecvt that is not a
 table of every character, a collation table for `C.UTF-8` that is
 not 7 MB, is a separate step that touches the readers too, and it
-comes after acceptance, not with it.
+comes after acceptance, not with it. Two such changes landed after
+acceptance: 56c7006e added the two element leaf tables
+(`n_ce_leaf_tab_off` and `w_ce_leaf_tab_off`), and f56f7adb added
+`codepoint_collation`, under which the `LC_COLLATE` of `C.UTF-8` fell
+from 7351946 bytes to 376.
 
 The sources. `etc/nls` holds the 2.2-era definitions and charmaps
 until the new compiler reads the current ones. Then the 371
 definitions and 233 charmaps of glibc 2.44 replace them, `SUPPORTED`
 replaces `gen_list`, and the four legacy names map explicitly. The
 import waits for the compiler, since only the parked one reads the
-current sources.
+current sources. cb1f2768 made the import; 52a86884 dropped the four
+legacy names instead of mapping them.
 
 The oracles. `bin/oracle` compares a database with the C library
 under `setlocale` for the same locale: every classification and both
 case maps of every code point, and the collation of a word list, of
 random strings and of each printable character against the next.
-They measured the old compiler and will measure the new one.
+They measured the old compiler and will measure the new one. Two
+oracles joined them later: `scalar.cpp` (b68897f4) and `time.cpp`
+(592e858e).
 
 ## 3. The language
 
@@ -245,8 +253,10 @@ Rules the patches established, which the new compiler keeps:
   a narrow string it is written in the charmap's encoding.
 - An escaped character in a string stands for itself.
 - `codepoint_collation` orders every character by its value.
-- An era's start year is stored as glibc stores it: year -1 is 1 BC,
-  so the Buddhist era of `th_TH` gives 2569 for 2026, not 2570.
+- An era's start year is read as glibc reads it, year -1 for 1 BC,
+  and written as the astronomical year: the record holds -542 for a
+  source's -543 (592e858e). The Buddhist era of `th_TH` gives 2569
+  for 2026, not 2570.
 - A date that does not parse is reported, and no byte of a record is
   left unset.
 
@@ -264,9 +274,11 @@ says last and glibc puts it first; and where the position-level
 - New code follows the tree's style for new files: `snake_case`
   names, `_t` types, a private prefix only on a member that guards an
   invariant.
-- The new sources live in `util/localedef`, built as their own
-  target beside the old `localedef` until acceptance. Byte
-  comparison needs both compilers in one tree.
+- The new sources live in `util/localedef`. They were built as their
+  own target, `localedef2`, beside the old `localedef` until
+  acceptance, since byte comparison needed both compilers in one
+  tree. Since ec1b536d `localedef` links the objects of
+  `util/localedef` (`etc/config/GNUmakefile.bin:87`).
 - Diagnostics: one sink with file, line, column, the error numbering
   the old compiler printed, a count, exit status 4. An error is a
   value up to the statement; a file that cannot be read is an
@@ -283,3 +295,30 @@ except where the parked one is known wrong: the 135 CJK code points,
 the era records, the unset words, the transliteration table. There
 the C library decides, through `bin/oracle`. The locale tests pass
 against their pins, re-pinned where the data moved. Then the import.
+
+## 9. Result
+
+Every step of section 5 landed, and the plans that followed carried
+the rest. `plan-localedef-backend.md` chapter 7 and
+`plan-localedef-removal.md` chapter 6 hold the detail.
+
+- Steps 1 and 2, the reader and the charmap: e2b60c72.
+- Step 3, the scalar categories and `copy`: 8af9ba82.
+- Step 4, `LC_CTYPE`: 8e4e5a39.
+- Step 5, `LC_COLLATE`: e544ecd1.
+- The back end: the seven steps of `plan-localedef-backend.md`,
+  554aed96 to 7f0e4228. Its Result is the acceptance of section 8.
+- The old files: gone wholesale in ec1b536d, after the fixtures
+  (1d00e9d5) and the `locale` program (d535a43b).
+- The import: cb1f2768, by `plan-locale-sources.md`.
+
+Decided and not done, each a `TODO` entry:
+
+- "The transliteration page and its dead reader": the backend plan's
+  2.2 (d).
+- "The wide `LC_CTYPE` table covers the charmap, glibc's rule not
+  revisited": its 3.3.
+- "The vector of hybrid records": its 2.1 (d).
+- "A codecvt oracle": its 3.5 (a).
+- "The functionality scripts exit 4 on an `rm` of a directory": the
+  removal plan's acceptance.

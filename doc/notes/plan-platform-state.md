@@ -455,7 +455,9 @@ the three configurations went through every phase, and their suite
 tables are the pinned baselines row for row, except the rows the
 baseline itself marks as unstable: `23.bitset.cons`, whose count
 varies from run to run, and in 15D the seven locale MT rows that
-end differently on every run until the race is fixed.
+ended differently on every run until the race was fixed. The races
+were fixed on 2026-09-26 and 27 and the tests sized on 2026-10-12;
+the 15D pin carries every locale MT row at 100% (ec632ce6).
 
 Darwin and the BSDs followed the same evening, in the same shape
 and against the same check, from `2ad45a84` to `e342c0f4`:
@@ -475,14 +477,16 @@ the retained probe, not a platform branch. The nightly build scripts
 under `bin` name FreeBSD among the 2008 platforms as data, and are
 records like the rest of that directory.
 
-Not addressed here, on purpose: the GCC builtin atomics are still
-selected by an architecture list that names i486 and x86-64 only,
-so aarch64 falls to the mutex fallback (the `std::locale` entry in
-`TODO` carries the port); the string atomics clause for binary
-compatibility with 4.1.x is a decision of its own; the version
-workarounds for old GCC releases wait for a stated minimum, step 6
-above; `etc/config/xfail.txt` names the 2008 platforms as data and
-is a record, like the original README.
+Not addressed here, on purpose: the GCC builtin atomics were
+selected by an architecture list that named i486 and x86-64 only,
+so aarch64 fell to the mutex fallback. a976e3b9 characterizes the
+built-ins at each width, and `include/rw/_atomic.h` selects them
+whenever the `int` probe passes, on any architecture; 3e351181
+retired the x86 assembly backends. The string atomics clause for
+binary compatibility with 4.1.x was a decision of its own, taken in
+58d5f40b. The version workarounds for old GCC releases wait for a
+stated minimum, step 6 above; `etc/config/xfail.txt` names the 2008
+platforms as data and is a record, like the original README.
 
 [power11]: https://newsroom.ibm.com/2025-07-08-ibm-power11-raises-the-bar-for-enterprise-it
 [t2080]: https://www.nxp.com/products/T2080

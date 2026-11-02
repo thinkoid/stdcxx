@@ -20,8 +20,9 @@ are those of ee454d5a, before the changes.
   Boost's atomic `call_once`: a zero-initialized flag, one mutex and
   one condition variable for every flag, waiters that block, and an
   initializer that throws leaves the flag ready for the next caller.
-  The global locale, the standard iostream objects, the message
-  catalog and the static mutexes initialize through it.
+  The global locale, the standard iostream objects and the message
+  catalog initialize through it. The static mutexes did until
+  92d18f73 removed their fallback branch (2.5).
   `ref-threading.md` chapter 5 describes it.
 - **One site needed no protocol.** The unlocked comparison with the
   classic locale body cannot give a wrong answer; it takes relaxed
@@ -152,6 +153,11 @@ through `__rw_once`: an unbounded recursion. There `__rw_once` has no
 unlocked fast path, and every access to a flag holds its own mutex, a
 POSIX mutex initialized statically.
 
+92d18f73 (2026-10-17) removed the branch with
+`_RWSTD_NO_STATIC_MUTEX_INIT` and its clause in `_config.h`: every
+static mutex is a POD initialized statically, and
+`__rw_get_static_mutex` calls no `__rw_once`.
+
 ### 2.6 The `__rw_once` fallbacks, `src/once.cpp:74` and `:125`
 
 `src/once.h` mapped `__rw_once` to `pthread_once` unless
@@ -202,7 +208,8 @@ before this census:
   `src/exception.cpp:376-416`): thread-local with `_RWSTD_NO_TLS`
   undefined, so their increments are plain and per thread.
 - `__rw_facet::_C_opts` (`src/facet.cpp:89`): written only at static
-  initialization.
+  initialization since dd8f4349; until then the ctype, codecvt and
+  collate tests set its two data-source bits at run time.
 - The facet data, the facet slots, the facet ids and the scalar
   caches: release, acquire and relaxed since the 2026-09-27 repairs
   (`ref-threading.md` chapter 4).
@@ -211,8 +218,8 @@ before this census:
 
 ThreadSanitizer, 15D built with `-fsanitize=thread`, three rounds of
 `once` and the locale MT tests with eight threads (`use_facet.mt` and
-`time.put.libc.mt` abort under the sanitizer's allocator in every
-build and are left out):
+`time.put.libc.mt` aborted under the sanitizer's allocator in every
+build until fb947cc3, and are left out):
 
 | tree | reports from the library | reports from the harness |
 |---|---|---|

@@ -69,15 +69,17 @@ The back end turns that into the seven images:
 
 ### 1.2 The reference
 
-The reference for byte identity is the parked compiler, the tip of
-the branch `localedef-patches`, not `util/` on master. The branch
+The reference for byte identity was the parked compiler, the tip of
+the branch `localedef-patches`, not `util/` on master; since
+ec1b536d the tag `localedef-old` keeps it. The branch
 changed only the parse side: raw characters, escapes, one sequence
 of symbols and definitions, `codepoint_collation`, the skip tables.
 Every writer, the codecvt generators and the collation table
 generators are identical on the two. So the writers on master
 describe the bytes exactly, and the branch's parser decides what
-goes in. Both compilers must build in one tree for the comparison,
-which the plan's section 7 already requires.
+goes in. Both compilers had to build in one tree for the comparison,
+which the plan's section 7 required; since ec1b536d the old one
+builds only from the tag.
 
 The parked compiler writes in a fixed order: `LC_CTYPE`, the codecvt
 database, `LC_MONETARY`, `LC_NUMERIC`, `LC_TIME`, `LC_COLLATE`,
@@ -101,7 +103,8 @@ its NUL. Padding words and the `*_ext_off` fields are zero.
 
 `LC_CTYPE` is a header of 1568 bytes that holds the narrow tables
 inline: `toupper` and `tolower` as 256 bytes each, the mask as 256
-words of ten bits. After it come three flat arrays sorted by
+words of ten bits, eleven as the new writer fills them, with `blank`
+at 0x400 (3.1). After it come three flat arrays sorted by
 character: the (lower, upper) pairs, the (upper, lower) pairs, and
 the (character, mask) elements. A locale that copies another's
 `LC_CTYPE` shares the file: it is written once as
@@ -120,6 +123,10 @@ tries:
   under the `@UCS` modifier;
 - the transliteration trie.
 
+The new writer writes two of them: `utf8_to_ext_tab_off` equals
+`w_to_n_tab_off` (2.1), and the transliteration trie is one empty
+page (2.2).
+
 A trie is a
 sequence of pages of 256 words, one page per byte of a key prefix,
 numbered in depth-first order with page 0 the root. A word is
@@ -128,9 +135,11 @@ continue, or a leaf. After the tries come the (internal, UCS) pairs
 in the order of the external strings, the two names, the multibyte
 strings NUL-terminated, and the transliteration data.
 
-`LC_COLLATE` is a header of 352 bytes: 23 offsets and counts, three
-bytes for the longest weight, the number of levels and the longest
-element, and a byte per level of direction. After it:
+`LC_COLLATE` is a header of 364 bytes: 26 words of offsets, counts
+and flags, three bytes for the longest weight, the number of levels
+and the longest element, and a byte per level of direction. The plan
+read 352 bytes and 23 words; 56c7006e added the two leaf-table
+offsets and f56f7adb `codepoint_collation`. After it:
 
 - the tries of the collating elements, narrow and wide;
 - the weight table, one row per character and element in the order
@@ -139,11 +148,14 @@ element, and a byte per level of direction. After it:
   `UINT_MAX`;
 - the tries of the characters, narrow and wide;
 - four tables of page offsets;
+- the two leaf tables of the element tries, narrow and wide
+  (56c7006e);
 - the first and last byte of each page;
 - the names.
 
 The undefined characters, if the definition leaves any, share one
-row whose index the header gives.
+row whose index the header gives. Under `codepoint_collation` the
+file is the header and the two names.
 
 `LC_NUMERIC` and `LC_MONETARY` each begin with a punctuation struct,
 decimal point, thousands separator and grouping, narrow and wide, and
@@ -179,7 +191,10 @@ string. The runtime for a locale built by `localedef` reads the
 tables and not an algorithm: `do_in` walks `n_to_w`, `do_out`
 encodes the `wchar_t` as UTF-8 and walks `w_to_n`. Only a locale
 with no database, the bare names `UTF-8` and `utf-8`, converts
-algorithmically.
+algorithmically. By probe, two more convert as UTF-8: a
+`codecvt_byname` constructed on its own under a `@UCS` name, not
+through a locale, and the UTF-16 names (`TODO`, "The UTF-16 names
+set flags no converter reads").
 
 On every platform the library builds for, `wchar_t` is UCS-4: the
 targets are Linux, where the library's configuration declares the
@@ -579,6 +594,10 @@ the narrow table and the wide elements. The mask fields are 32 bits,
 no reader's mask value includes the bit, and the readers test
 `mask & m`, so the bit is invisible until a `ctype_base::blank` names
 it. The comparison of section 7 masks the bit out of `LC_CTYPE`.
+That holds for the wide facet only: the narrow vector `is` and
+`table ()` hand out the mask word whole, 0x400 included (`TODO`,
+"The blank bit is visible through `ctype<char>::is` under a
+database").
 
 ### 3.2 Class defaults
 
@@ -710,10 +729,11 @@ infinities. The writer puts the full astronomical year in the
 record, `-542` for the Buddhist era, keeps the sign of the offset as
 the direction, and writes an infinity at either end. The record
 format does not change. The runtime's lookup and `%Ey` take glibc's
-form, in `src/time_put.cpp`: the order in time from the dates, the
-direction from the sign, the day compared against the bound of its
-own month. A date that does not parse is an error and no database is
-written. The runtime change rides with the time writer's step, since
+form, in `src/time_put.cpp` (in `src/era.cpp` since ffea5ffe): the
+order in time from the dates, the direction from the sign, the day
+compared against the bound of its own month. A date that does not
+parse is an error and no database is written. The runtime change
+rides with the time writer's step, since
 the records it reads change meaning in the same commit, and the
 `time_put` test is re-pinned there.
 
@@ -731,10 +751,10 @@ to two digits, the start date accepts the infinities too, and
 source, not a rule. The runtime takes the two-digit padding, the
 one choice the text leaves.
 
-**Still open.** Whether `time_get` should read the era records at
-all: it parses the `E` modifier and drops it, and its test leaves
-`%Ey` and `%EY` unexercised. That is a Library entry, not the
-compiler's.
+**Closed by ffea5ffe.** Whether `time_get` should read the era
+records at all was open: it parsed the `E` modifier and dropped it,
+and its test left `%Ey` and `%EY` unexercised. ffea5ffe reads `%EC`,
+`%Ey`, `%EY`, `%Ec`, `%Ex` and `%EX`, and the test exercises them.
 
 ### 3.5 The codecvt database and the CJK extension blocks
 
@@ -839,7 +859,10 @@ them and the code can say why.
   `hu_HU`, the Sinhala and Malayalam elements of the common table:
   the old element-trie generator reused a page number for the longer
   key and lost the shorter's page, so the shorter element was never
-  reached. The new tries are built by the shared builder.
+  reached. The shared builder did not fix it: it kept the shorter key
+  and dropped the longer. 56c7006e fixed it with a leaf table per
+  page and a longest match in `__rw_get_n_ce_offset` and
+  `__rw_get_w_ce_offset`, a format change.
 - The end of a range the charmap lacks: the old compiler gave it no
   collating value; glibc positions it, and the new numbering gives
   it one, so every later value is one higher, 4889 rows in `ko_KR`
@@ -987,8 +1010,9 @@ two trees, and `cmp` on the file the step writes.
 
 ## 6. Decisions
 
-- The reference is the parked compiler at the tip of
-  `localedef-patches`, built in the same tree.
+- The reference was the parked compiler at the tip of
+  `localedef-patches`, built in the same tree; since ec1b536d the
+  tag `localedef-old` keeps it.
 - The internal `wchar_t` is UCS-4 and the targets are Linux only;
   the platforms with another wide encoding are not provided for.
 - The codecvt database has one mapping each way, external bytes to
@@ -1069,6 +1093,13 @@ The four that moved are two test fixtures written in a syntax only
 the old compiler read, two non-comment lines in the ctype fixture
 and space-separated raw-byte weights in the collate one; glibc's
 `localedef` rejects the same lines. No pin moved. Before the old
-compiler can go: those fixtures rewritten, and a home for the
-`locale` utility's mode, which `util/locale` reaches by executing
-`localedef --locale-mode`.
+compiler could go: those fixtures rewritten, and a home for the
+`locale` utility's mode, which `util/locale` reached by executing
+`localedef --locale-mode`. 1d00e9d5 and d535a43b did both;
+`plan-localedef-removal.md` chapter 6 has the result.
+
+Four decisions of this plan were not carried out, and each is a
+`TODO` entry: "The transliteration page and its dead reader" (2.2
+(d)), "The wide `LC_CTYPE` table covers the charmap, glibc's rule not
+revisited" (3.3), "The vector of hybrid records" (2.1 (d)) and "A
+codecvt oracle" (3.5 (a)).

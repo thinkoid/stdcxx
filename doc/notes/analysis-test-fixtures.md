@@ -14,13 +14,17 @@ in the tree were made, and what running them found.
   in. The files are the assertion.
 - The two ISO-8859-1 codecvt files are prose written for the
   purpose, in German and French, sized to the byte. The three
-  Japanese files list the JIS X 0208 repertoire of the tree's own
+  Japanese files list the JIS X 0208 repertoire of the tree's 2.2
   charmaps, in Shift_JIS, EUC-JP (with JIS X 0212) and UTF-8, laid
-  out to meet the counts exactly.
+  out to meet the counts exactly. Since cb1f2768 the test builds
+  `ja_JP` with glibc's charmaps (`SHIFT_JIS`, 8ebe1461).
 - The six collate lists are words chosen to exercise each locale's
   rules, ordered by glibc's `localedef` and `sort` run over the
   tree's own locale definitions: the same definition, an independent
-  implementation.
+  implementation. Since cb1f2768 the tree's definitions are glibc's
+  own, so the lists compare glibc with the library over glibc's
+  data; 8ebe1461 re-ordered the `sv_SE` list by `sort` under glibc's
+  `sv_SE.UTF-8`.
 - Running them found three defects in the codecvt test, repaired in
   the same change, and one in the library: the narrow collate
   transform could not spell a weight that is a multiple of 127, so
@@ -102,7 +106,9 @@ their provenance self-evident and every character certain to be in
 the table.
 
 The repertoire is JIS X 0208 rows 4 to 8 and 16 to 84 in the order
-of `etc/nls/charmaps/Shift_JIS`: hiragana, katakana, Greek,
+of the 2.2 charmap `etc/nls/charmaps/Shift_JIS`, gone since cb1f2768
+(the first line of `tests/etc/codecvt.ja_JP.Shift_JIS.in` still
+names it): hiragana, katakana, Greek,
 Cyrillic, box drawing and the two kanji levels, 6670 characters.
 Rows 1 to 3 and the vendor rows are left out: the symbol rows are
 where Shift_JIS tables differ (the wave dash, the minus sign, the
@@ -139,7 +145,10 @@ is a multiple of eight.
 
 A list sorted by the library itself would test nothing. The order in
 each file comes from glibc's `localedef` compiling the tree's own
-definition and charmap, and glibc's `sort` under the result:
+definition and charmap, and glibc's `sort` under the result. The
+tree's definitions were the 2.2 ones then; since cb1f2768 they are
+glibc's own, and 8ebe1461 re-ordered the `sv_SE` list by `sort`
+under glibc's `sv_SE.UTF-8`:
 
 ```sh
 I18NPATH=etc/nls/src localedef -c -i etc/nls/src/da_DK \
@@ -150,10 +159,11 @@ LOCPATH=<dir> LC_ALL=da_DK.ISO-8859-1 sort < words > collate.da_DK.in
 Same `LC_COLLATE` source, a second implementation of it; where the
 two disagree, one of them is wrong about the definition.
 
-Two things to know when repeating this. glibc 2.44 refuses the
+Two things to know when repeating this. glibc 2.44 refused the 2.2
 tree's `LC_IDENTIFICATION` sections and one line of the tree's 2005
 `iso14651_t1` (a syntax error at its line 566, in the list of
-ignorable punctuation) and needs `-c` to write the output anyway;
+ignorable punctuation) and needed `-c` to write the output anyway;
+cb1f2768 replaced those files;
 the collation it writes sorts as expected for letters, and the lists
 contain nothing but letters. And the test builds the tree's locales
 with `--no_position`, which turns a `forward,position` level into
@@ -173,15 +183,17 @@ locale, one per line, chosen for the rules the locale states:
   accented loanwords.
 - `hr_HR`, ISO-8859-2: č, ć, đ, š and ž after their base letters,
   and the digraphs dž, lj and nj are letters after d, l and n.
-- `sv_SE`, ISO-8859-1: å, ä and ö follow z, and w sorts with v.
+- `sv_SE`, ISO-8859-1: å, ä and ö follow z, and w is a letter of its
+  own after v (glibc's `sv_SE`; the 2.2 data sorted w with v).
 - `th_TH`, TIS-620: the leading vowels sort after the consonant they
   precede, which the definition spells as collating elements.
 
 ### 3.3 What the library says
 
-Four lists sort under the library exactly as under glibc. Croatian
-and Thai do not, in the narrow facet only, and for one reason,
-chapter 4.4.
+Four lists sorted under the library exactly as under glibc. Croatian
+and Thai did not, in the narrow facet only, and for one reason,
+chapter 4.4. Since its fix `22.locale.collate` has no failure on
+the 15D pin (`baseline/15D.txt`, 145873 assertions).
 
 ## 4. Findings
 
@@ -199,7 +211,7 @@ ones. Repaired: the same guard as the other two helpers.
 
 The table's expectation for `length` on the `codecvt_byname<wchar_t,
 char>` facet was the character count. The standard (22.2.1.5.2 p10,
-the resolution of LWG issue 75 that the library's source cites)
+the resolution of LWG issue 305 that the library's source cites)
 makes it the number of external characters, that is bytes, consumed
 in producing at most `max` internal ones, and with `max` the size of
 the file that is the whole file: 25115 for the Shift_JIS one, which
@@ -214,7 +226,9 @@ C library's "interesting" locale, with a synthetic charmap named
 after that locale's codeset; on this machine the codeset is `UTF-8`.
 `localedef` writes the conversion database under the charmap's
 `<code_set_name>` in the locale root and, finding one there, reuses
-it ("exists, skipping", `util/codecvt.cpp`). The `ja_JP.UTF-8`
+it (the old compiler said "exists, skipping", in `util/codecvt.cpp`;
+since ec1b536d `share_codecvt` in `util/localedef/ldef.cpp` skips
+silently). The `ja_JP.UTF-8`
 locale built later in the same root therefore converted through the
 single-byte stub: `max_length` 1, `encoding` 1, `error` at the first
 multibyte sequence, while the same locale built by hand answers 6, 0

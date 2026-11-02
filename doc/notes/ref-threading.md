@@ -144,7 +144,7 @@ exclusive load and store loop at run time.
 | Supported scalar with `false` | Hardware/compiler overload when available. |
 | Scalar with `false`, without a matching hardware overload | Generic operation under a static mutex associated with the scalar type. |
 | Scalar with an explicit `__rw_mutex_base&` | Ordinary scalar operation under that mutex. |
-| `volatile` scalar with `false` | No hardware overload takes a `volatile` object, so the call takes the mutex template for the `volatile` type. Callers cast `volatile` away first, as the increments of STDCXX-792 do. |
+| `volatile` scalar with `false` | No hardware overload takes a `volatile` object, so the call takes the mutex template for the `volatile` type. |
 | `_RWSTD_THREAD_*`, with TLS available | Ordinary operation on thread-local storage. |
 | `_RWSTD_THREAD_*`, without TLS | Corresponding atomic wrapper on shared storage. |
 | `_RWSTD_ATOMIC_IO_SWAP` | Ordinary exchange on an unlocked stream (`_C_nolock` set, a user's stream); otherwise the selected atomic wrapper with its supplied mutex. |
@@ -189,10 +189,9 @@ of which needs more than acquire and release. The mutex fallback
 supplies ordering through the lock and unlock of the mutex its
 callers share.
 
-The library still exports the x86 and x86-64 assembly routines, for
-32-bit binaries built before the characterizations, which call them.
-No header refers to them; the `TODO` entry on the next minor version
-removes them with their symbols.
+The x86 and x86-64 assembly routines, which the library exported for
+32-bit binaries built before the characterizations, went with their
+symbols in 3b046e29.
 
 **Even a full barrier cannot make an unprotected compound operation
 indivisible.** It also does not convert every ordinary access elsewhere
@@ -215,17 +214,19 @@ one. Two assignments to the same string can interleave outside the
 counter's critical section. One can then attempt to retain storage
 that the other has already released.
 
-There are ordinary count accesses too: `_C_get_ref()` reads `_C_refs`
-directly, and `_C_unref()` writes the unshareable sentinel with an
+There are ordinary count accesses too. `_C_get_ref()` reads `_C_refs`
+with a relaxed atomic load since 3b6391db, but `_C_unref()` writes
+the unshareable sentinel with a plain store and an
 explicit comment that it is not thread-safe. Audit those callers and
 their exclusivity assumptions; the presence of atomic increment and
 decrement elsewhere does not settle their safety.
 
 The Linux/x86-64 compatibility clause in
-[_config.h](../../include/rw/_config.h) can retain per-representation
-mutexes instead of string hardware atomics for pre-5 library versions.
-Changing that policy can remove overhead and alter representation.
-**It cannot repair concurrent assignment to the same string.**
+[_config.h](../../include/rw/_config.h), which kept per-representation
+mutexes instead of string hardware atomics for pre-5 library versions,
+went in 58d5f40b; strings count with atomics on every platform.
+**That change could not repair concurrent assignment to the same
+string.**
 
 ### 4.2 Locale bodies and facets
 
@@ -261,8 +262,8 @@ concurrent lazy initialization of `numpunct` members: accessors in
 obtained a value, assigned the cache and updated the flag. Two threads
 could both enter; for cached strings, both assigned the same string
 object, and the use-after-free and destroyed-mutex reports followed.
-The accessors now call the virtuals every time; the members stay,
-unused, until the `TODO` entry on the next minor version removes them.
+The accessors now call the virtuals every time; 3b046e29 removed the
+unused members.
 
 An atomic flags word alone would still have permitted both
 initializers to write the cache, and an election bit set before
@@ -320,11 +321,11 @@ own flag it deadlocks ([once.cpp](../../src/once.cpp)).
 | Global locale, `__rw_locale::_C_manage` | The global locale, the classic body at first. The initializer runs before the `__rw_locale` guard, because building the body takes that guard. |
 | `ios_base::Init`, [iostream.cpp](../../src/iostream.cpp) | The eight standard iostream objects. Every `Init` is counted, for the destructor's flush, and waits for the first to construct them. |
 | `__rw_vfmtwhat`, [exception.cpp](../../src/exception.cpp) | The message catalog of the library's exceptions. |
-| `__rw_get_static_mutex`, [_mutex.h](../../include/rw/_mutex.h) | Each static mutex, where the configuration cannot initialize mutexes statically. |
 
 The static mutexes bound the protocol from below. Where `int` is not
 lock-free, the ordered accesses to an `int` lock the static mutex of
-`int`, which may be one of the mutexes `__rw_once` constructs. There
+`int`. Every static mutex is initialized statically: 92d18f73 removed
+the fallback that built them through `__rw_once`. There
 `__rw_once` has no unlocked fast path, and every access to a flag
 holds the protocol's own mutex, which is a POSIX mutex initialized
 statically.

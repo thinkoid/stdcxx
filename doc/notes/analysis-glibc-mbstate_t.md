@@ -33,11 +33,13 @@ are nonetheless distinct types, and a typedef name cannot denote both.
 
 ## 2. What stdcxx was doing, and why
 
-`include/rw/_mbstate.h` exists to give `<iosfwd>`, `<codecvt>` and
-`<locale>` the conversion-state type through a single macro,
-`_RWSTD_MBSTATE_T`, without pulling `<wchar.h>` into every
-translation unit that names `streampos`. It dates from January 2006
-and has one branch per platform:
+`include/rw/_mbstate.h` exists to give `<iosfwd>`,
+`include/loc/_codecvt.h` and `<locale>` the conversion-state type
+through a single macro, `_RWSTD_MBSTATE_T`, without pulling
+`<wchar.h>` into every translation unit that names `streampos`. The
+file came with the 2005 import (e6c7726b); the macro and its glibc
+branch date from January 2006 (e01920a8, bb381444). It has one
+branch per platform:
 
 | platform | `_RWSTD_MBSTATE_T` | how obtained |
 |---|---|---|

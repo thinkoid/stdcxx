@@ -772,6 +772,19 @@ Fix: rows for =unsigned long long=.
 
 Check: the rows run and the two warnings are gone; six pins moved.
 
+** TODO =22.locale.name= checks nothing on a host without =en_US=
+
+=tests/localization/22.locale.name.cpp= hard-codes =en_US= and
+=en_US.iso88591= and has no gate on the C library knowing them;
+before 3c882e6a its row counted 0 assertions with status 0 on a host
+with =en_US.UTF-8= alone, a pass that checked nothing. Hypothesis
+from reading, 2026-11-02.
+
+Fix: query the host for the names (=rw_locale_query=) or warn when
+they are absent, as the other host-dependent tests do.
+
+Check: the row on a host without =en_US=: a warning, not 0/0.
+
 * Certification
 
 The scripts under =bin= and the nightly run: building the
@@ -971,7 +984,9 @@ locale to need them: =share_ctype= and =share_codecvt= in
 =util/localedef/ldef.cpp= =stat= the file and write it when absent.
 Two locales that need one file, built at once, both write. The build
 seeds, 52a86884's successor: the first locale of each codeset is
-built alone and the others wait on it, which covers the codecvt
+built alone and every other locale waits on all the seeds
+(=etc/config/GNUmakefile.bin= 116; its comment at 110-113 still says
+each waits on its own codeset's seed), which covers the codecvt
 database and the ctype file the seed writes. A locale whose
 =LC_CTYPE= copies another definition than the seed's, the =am_ET=
 and =tr_TR= groups, still writes its ctype file beside a sibling
@@ -1436,29 +1451,15 @@ Check: none; this is prose.
 
 ** TODO A tour of the locale subsystem
 
-Written: =doc/notes/ref-locale.md=, current as of 2026-09-27. The
-entry leaves after a reading.
+Written: =doc/notes/ref-locale.md=, current as of 2026-11-02:
+chapters 1-7 the mechanics, 8-12 the facets against the standard, 13
+the departures. The entry leaves after a reading.
 
 Facets and their ids, the facet index scheme, =locale_body=, how
 =combine= and the global locale share bodies, the byname facets and
 the binary locale data they read. A reader of
 =doc/notes/analysis-locale-mt-race.md= needs this map first. Shape:
 =ref-string-replace.md=.
-
-** TODO A reference for =time_get=
-
-=doc/notes/ref-time-get.md=: the reading model in one place, for a
-reader who has not followed the investigations. =get= over a format dispatches one =do_get= per
-directive and matches the literals; =do_get= updates the =tm= it is
-given; the =tm= is the only carrier between two calls. A pattern, the
-locale's =%x= or an era's year format, is a nested walk whose state
-lives inside the one call. C++11 22.4.5.1.2 has two failure
-contracts: p12's =failbit= with the =tm= unchanged for an invalid
-directive, and p13's =eofbit= with unspecified members where an =E=
-or =O= directive cannot be determined. The base-year rule of =%EC=
-and the era lookup of =%Ey=. Material:
-=doc/notes/analysis-time-get-state.md=, chapters 1, 6 and 9, and
-=ref-conformance.md= chapter 2. Shape: =ref-string-replace.md=.
 
 ** TODO Decision records
 
@@ -1472,8 +1473,9 @@ notes. Material: the commit messages and
 
 ** TODO A conformance record
 
-Written: =doc/notes/ref-conformance.md=, current as of 2026-09-27.
-The entry leaves after a reading.
+Written: =doc/notes/ref-conformance.md=, current as of 2026-11-02;
+its locale rows point at =ref-locale.md='s chapters. The entry leaves
+after a reading.
 
 What of ISO/IEC 14882:2003 the library implements, where it deviates
 knowingly, which LWG issues it applies (the headers cite them by
@@ -1561,51 +1563,3 @@ thread ties it. Won't fix (2026-10-13): the report is expected. The
 rest of the table matches the plain one but for the reports. First run,
 2026-10-13 on aarch64: 419 seconds, 274 programs, 12 non-zero exits.
 
-** TODO The collate image's element tries and their leaf table
-
-=doc/notes/ref-locale.md= does not describe the leaf table of the
-element tries. It must state these facts:
-
-- A trie page is indexed by byte value and written from its first
-  used byte to its last. An entry holds one word: the leaf of a key
-  that ends at that byte, or the number of the next page with the
-  high bit set, never both.
-- The per-page tables are indexed by page number, one entry per
-  page: the offset table, the first-char and last-char tables, and
-  the leaf table.
-- Why the leaf table exists. A key that is a proper prefix of
-  another, =dz= before =dzs= in =hu_HU=, is fully read on arriving at
-  a page whose entry had to be the pointer. That page's word in the
-  leaf table records the shorter key's leaf; it is =UINT_MAX= for the
-  many pages whose path is no element. One path leads to each page,
-  so no two keys collide, and the root's word is always =UINT_MAX=.
-  The walk: the root's entry for =d= points to page D; page D's entry
-  for =z= points to page DZ, since =dzs= continues; page DZ's word in
-  the leaf table is the leaf of =dz=; page DZ's entry for =s= is the
-  leaf of =dzs=.
-- The lookup, =__rw_get_n_ce_offset= and =__rw_get_w_ce_offset= in
-  =src/collate.cpp=, matches the longest prefix. On entering a page
-  it remembers the page's leaf and the cursor when the leaf is set,
-  and goes on. On a miss it returns the remembered leaf with the
-  cursor rewound. An entry leaf ends the walk as the longest.
-- The character tries and the codecvt tries have no leaf table: a
-  character ends a walk. The alternative, a second word per entry,
-  was rejected: it doubles every element page for 26 keys in the
-  corpus.
-
-=doc/notes/plan-localedef-backend.md= overstates what the shared
-builder did in its bullet on prefix elements: the builder kept the
-shorter key and dropped the longer. The leaf table records the
-shorter key's leaf on the page.
-
-** TODO =ref-characterizations.md= lags the tree by seven probes
-
-The catalogue in chapter 4 has 148 rows against 155 named probes in
-=etc/config/src=. The five =*_ATOMIC_OPS= probes and the two
-=OPERATOR_DELETE_*_SIZED= probes have no row; they arrived after the
-document's 2026-09-27 refresh. The counts in the tl;dr and chapter 2
-followed every retirement since, down to 148 on 2026-10-19; the rows
-were not written.
-
-Fix: the seven rows, in the catalogue's shape, and the support-file
-inventory of chapter 5 checked against the directory.

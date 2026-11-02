@@ -10,8 +10,8 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 148 named C++ probes, five supporting C++
-translation units, one shell driver and 12 other support files. The
+The source census contains 155 named C++ probes, five supporting C++
+translation units, one shell driver and 11 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
 **One probe does not necessarily mean one macro.**
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 148 named probes are discoverable by
+three different things.** All 155 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -184,6 +184,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [BAD_TYPEID_WHAT](../../etc/config/src/BAD_TYPEID_WHAT.cpp) / `NO_BAD_TYPEID_WHAT` | bad_typeid::what() | L; `src/typeinfo.cpp` |
 | [BITS_TYPES___MBSTATE_T_H](../../etc/config/src/BITS_TYPES___MBSTATE_T_H.cpp) / `NO_BITS_TYPES___MBSTATE_T_H` | __mbstate_t in &lt;bits/types/__mbstate_t.h&gt; | L; `include/rw/_mbstate.h` |
 | [C99_MATH](../../etc/config/src/C99_MATH.cpp) / `NO_C99_MATH` | the float and long double functions of C99 in &lt;math.h&gt; | L; `include/ansi/cmath` |
+| [CHAR_ATOMIC_OPS](../../etc/config/src/CHAR_ATOMIC_OPS.cpp) / `NO_CHAR_ATOMIC_OPS` | the five __atomic built-ins on an unsigned char, run without libatomic | L; `include/rw/_atomic-builtins.h`; facet counts since dcb5dc92 |
 | [CORRECT_ISO_CPP_WCHAR_H_PROTO](../../etc/config/src/CORRECT_ISO_CPP_WCHAR_H_PROTO.cpp) / `NO_CORRECT_ISO_CPP_WCHAR_H_PROTO` | glibc's C++ overloads in &lt;wchar.h&gt; compile | L; `include/ansi/cwchar`, `include/ansi/wchar.h` |
 | [CTYPE_BITS](../../etc/config/src/CTYPE_BITS.cpp) / `NO_CTYPE_BITS` + output | ctype constants | none |
 | [DAYLIGHT](../../etc/config/src/DAYLIGHT.cpp) / `NO_DAYLIGHT` | daylight variable in &lt;time.h&gt; | L; `src/time_put.cpp` |
@@ -220,17 +221,20 @@ Token-pasted and script-generated names need family-level inspection.
 | [GLOBAL_TYPE_INFO](../../etc/config/src/GLOBAL_TYPE_INFO.cpp) / `NO_GLOBAL_TYPE_INFO` | class ::type_info | L/P; `src/typeinfo.cpp` |
 | [GLOBAL_UNCAUGHT_EXCEPTION](../../etc/config/src/GLOBAL_UNCAUGHT_EXCEPTION.cpp) / `NO_GLOBAL_UNCAUGHT_EXCEPTION` | ::uncaught_exception() | L/P/T; `include/rw/_defs.h` |
 | [GLOBAL_UNEXPECTED](../../etc/config/src/GLOBAL_UNEXPECTED.cpp) / `NO_GLOBAL_UNEXPECTED` | ::unexpected() | L/P; `src/exception.cpp` |
-| [ICONV](../../etc/config/src/ICONV.cpp) / `NO_ICONV` + output | iconv() in &lt;iconv.h&gt; | V; `util/charmap.cpp` |
-| [ICONV_CONST_CHAR](../../etc/config/src/ICONV_CONST_CHAR.cpp) / `NO_ICONV_CONST_CHAR` | POSIX iconv() | P/T/V; `etc/config/src/ICONV.cpp` |
+| [ICONV](../../etc/config/src/ICONV.cpp) / `NO_ICONV` + output | iconv() in &lt;iconv.h&gt; | V; `util/locale.cpp` |
+| [ICONV_CONST_CHAR](../../etc/config/src/ICONV_CONST_CHAR.cpp) / `NO_ICONV_CONST_CHAR` | POSIX iconv() | P/T; `etc/config/src/ICONV.cpp` |
 | [INFINITY](../../etc/config/src/INFINITY.cpp) / `NO_INFINITY` + output | infinity and NaN's | L/P; `src/limits_bits.cpp` |
+| [INT_ATOMIC_OPS](../../etc/config/src/INT_ATOMIC_OPS.cpp) / `NO_INT_ATOMIC_OPS` | the five __atomic built-ins on an unsigned int, run without libatomic; its pass selects the built-in backend | L; `include/rw/_atomic.h`; facet counts since dcb5dc92 |
 | [LCONV](../../etc/config/src/LCONV.cpp) / `NO_LCONV` + output | struct lconv in &lt;locale.h&gt; | none |
 | [LCONV_INT_FMAT](../../etc/config/src/LCONV_INT_FMAT.cpp) / `NO_LCONV_INT_FMAT` | C99 international lconv members | L/P/T; `src/punct.cpp` |
 | [LDBL_PRINTF_PREFIX](../../etc/config/src/LDBL_PRINTF_PREFIX.cpp) / `NO_LDBL_PRINTF_PREFIX` + output | long double printf format prefix | none |
 | [LIBC_EXCEPTION_SPEC](../../etc/config/src/LIBC_EXCEPTION_SPEC.cpp) / `NO_LIBC_EXCEPTION_SPEC` | exception specification in libc | L/P; `include/rw/_defs.h` |
 | [LIBC_IN_STD](../../etc/config/src/LIBC_IN_STD.cpp) / `NO_LIBC_IN_STD` | C library in namespace std | L/E; `include/rw/_config-gcc.h` |
 | [LIMITS](../../etc/config/src/LIMITS.cpp) / `NO_LIMITS` + output | numerical limits | none |
+| [LLONG_ATOMIC_OPS](../../etc/config/src/LLONG_ATOMIC_OPS.cpp) / `NO_LLONG_ATOMIC_OPS` | the five __atomic built-ins on an unsigned long long, run without libatomic | L; `include/rw/_atomic-builtins.h`; facet counts since dcb5dc92 |
 | [LLONG_PRINTF_PREFIX](../../etc/config/src/LLONG_PRINTF_PREFIX.cpp) / `NO_LLONG_PRINTF_PREFIX` + output | long long printf format prefix | none |
 | [LOCALE_NAME_FMAT](../../etc/config/src/LOCALE_NAME_FMAT.cpp) / `NO_LOCALE_NAME_FMAT` + output | combined locale name format | L; `src/locale_body.cpp` |
+| [LONG_ATOMIC_OPS](../../etc/config/src/LONG_ATOMIC_OPS.cpp) / `NO_LONG_ATOMIC_OPS` | the five __atomic built-ins on an unsigned long, run without libatomic | L; `include/rw/_atomic-builtins.h`; facet counts since dcb5dc92 |
 | [LONG_LONG](../../etc/config/src/LONG_LONG.cpp) / `NO_LONG_LONG` | long long | L/P/T; `include/rw/_config.h` |
 | [MADVISE](../../etc/config/src/MADVISE.cpp) / `NO_MADVISE` | madvise() in &lt;sys/mman.h&gt; | L; `src/memattr.cpp` |
 | [MATH_EXCEPTION](../../etc/config/src/MATH_EXCEPTION.cpp) / `NO_MATH_EXCEPTION` | struct exception in &lt;math.h&gt; | L; `include/ansi/cmath` |
@@ -252,8 +256,10 @@ Token-pasted and script-generated names need family-level inspection.
 | [OPERATOR_DELETE_ARRAY](../../etc/config/src/OPERATOR_DELETE_ARRAY.cpp) / `NO_OPERATOR_DELETE_ARRAY` | operator delete[] (void*) | L/T; `include/new` |
 | [OPERATOR_DELETE_ARRAY_NOTHROW](../../etc/config/src/OPERATOR_DELETE_ARRAY_NOTHROW.cpp) / `NO_OPERATOR_DELETE_ARRAY_NOTHROW` | operator delete[] (void*, nothrow_t) | L/T; `include/new` |
 | [OPERATOR_DELETE_ARRAY_PLACEMENT](../../etc/config/src/OPERATOR_DELETE_ARRAY_PLACEMENT.cpp) / `NO_OPERATOR_DELETE_ARRAY_PLACEMENT` | operator delete[] (void*, void*) | L; `include/new` |
+| [OPERATOR_DELETE_ARRAY_SIZED](../../etc/config/src/OPERATOR_DELETE_ARRAY_SIZED.cpp) / `NO_OPERATOR_DELETE_ARRAY_SIZED` | operator delete[] (void*, size_t) links, whatever the dialect | T; `tests/include/rw_new.h` |
 | [OPERATOR_DELETE_NOTHROW](../../etc/config/src/OPERATOR_DELETE_NOTHROW.cpp) / `NO_OPERATOR_DELETE_NOTHROW` | operator delete (void*, nothrow_t) | L/T; `include/new` |
 | [OPERATOR_DELETE_PLACEMENT](../../etc/config/src/OPERATOR_DELETE_PLACEMENT.cpp) / `NO_OPERATOR_DELETE_PLACEMENT` | operator delete (void*, void*) | L; `include/rw/_new.h` |
+| [OPERATOR_DELETE_SIZED](../../etc/config/src/OPERATOR_DELETE_SIZED.cpp) / `NO_OPERATOR_DELETE_SIZED` | operator delete (void*, size_t) links, whatever the dialect | T; `tests/include/rw_new.h` |
 | [OPERATOR_NEW_ARRAY](../../etc/config/src/OPERATOR_NEW_ARRAY.cpp) / `NO_OPERATOR_NEW_ARRAY` | operator new[] (size_t) | L/T; `include/new` |
 | [OPERATOR_NEW_ARRAY_NOTHROW](../../etc/config/src/OPERATOR_NEW_ARRAY_NOTHROW.cpp) / `NO_OPERATOR_NEW_ARRAY_NOTHROW` | operator new[] (size_t, nothrow_t) | L/T; `include/new` |
 | [OPERATOR_NEW_ARRAY_PLACEMENT](../../etc/config/src/OPERATOR_NEW_ARRAY_PLACEMENT.cpp) / `NO_OPERATOR_NEW_ARRAY_PLACEMENT` | operator new[] (size_t, void*) | L; `include/new` |
@@ -267,6 +273,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [RUNTIME_IN_STD](../../etc/config/src/RUNTIME_IN_STD.cpp) / `NO_RUNTIME_IN_STD` + output | runtime support in namespace std | L/P/T; `include/exception` |
 | [SETLOCALE](../../etc/config/src/SETLOCALE.cpp) / `NO_SETLOCALE` | setlocale() in &lt;locale.h&gt; | none |
 | [SETRLIMIT](../../etc/config/src/SETRLIMIT.cpp) / `NO_SETRLIMIT` | setrlimit() in &lt;sys/resource.h&gt; | P/T; `etc/config/src/GLOBAL_BAD_ALLOC.cpp` |
+| [SHORT_ATOMIC_OPS](../../etc/config/src/SHORT_ATOMIC_OPS.cpp) / `NO_SHORT_ATOMIC_OPS` | the five __atomic built-ins on an unsigned short, run without libatomic | L; `include/rw/_atomic-builtins.h`; facet counts since dcb5dc92 |
 | [SIG_ATOMIC_T](../../etc/config/src/SIG_ATOMIC_T.cpp) / `NO_SIG_ATOMIC_T` + output | signal support in &lt;signal.h&gt; | none |
 | [SIZE_T](../../etc/config/src/SIZE_T.cpp) / `NO_SIZE_T` + output | fpos_t, ptrdiff_t, and size_t | L; `include/ansi/cwchar` |
 | [SNPRINTF](../../etc/config/src/SNPRINTF.cpp) / `NO_SNPRINTF` | snprintf() in &lt;stdio.h&gt; | L; `src/num_put.cpp` |
@@ -316,7 +323,7 @@ libraries. The `.h`, `.c`, `.cc` and `.inc` files support those probes
 and the shell driver; they are not independently counted capabilities.
 The complete support-file inventory is:
 
-`collapse_template_statics.lib.cpp`, `extern_function_template_imp.cpp`, `extern_function_template_imp.h`, `extern_template_before_definition_imp.cpp`, `extern_template_imp.cpp`, `extern_template_imp.h`, `float_defs.h`, `headers.inc`, `instantiation_before_definition.cc`, `instantiation_before_definition.h`, `locale_names.h`, `nodbg.h`, `object_mangling_imp.cpp`, `proclimits.h`, `terminate.h`, `thread.h`, `types.h`.
+`collapse_template_statics.lib.cpp`, `extern_function_template_imp.cpp`, `extern_function_template_imp.h`, `extern_template_before_definition_imp.cpp`, `extern_template_imp.cpp`, `extern_template_imp.h`, `float_defs.h`, `instantiation_before_definition.cc`, `instantiation_before_definition.h`, `locale_names.h`, `nodbg.h`, `object_mangling_imp.cpp`, `proclimits.h`, `terminate.h`, `thread.h`, `types.h`.
 
 Descriptions and exact-token references provide a survey, not a proof
 that every probe still asks the best question. The individually

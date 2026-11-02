@@ -20,10 +20,13 @@ why it reserves two byte values rather than one.
   the next weight merged into it.
 - `collate_byname<char>::do_compare` transforms both operands and
   compares the results whole, so the merge was a wrong answer from
-  `compare`, not only from `transform`. The letter "l" in the tree's
-  `hr_HR` has primary weight 1016, eight times 127, and ko kai in
-  `th_TH` has 127; both sorted after every other letter, 101 lines of
-  the two word lists under `tests/etc`.
+  `compare`, not only from `transform`. The letter "l" in the 2.2
+  `hr_HR` the tree carried until cb1f2768 has primary weight 1016,
+  eight times 127, and ko kai in its `th_TH` has 127; both sorted
+  after every other letter, 101 lines of the two word lists under
+  `tests/etc`. The worked weights in this note are the 2.2 data's;
+  glibc's `hr_HR` gives a 7007, l 7160 and z 7389, and its `th_TH`
+  gives ko kai 10686.
 - The same byte, `CHAR_MAX`, is also the mark the position orderings
   write for an IGNOREd element, so a weight of `CHAR_MAX` or more
   opened exactly like an IGNOREd element and the comparison fell
@@ -62,7 +65,11 @@ pass, appends each element's weight for that pass through
 position orderings (`forward,position` and `backward,position`) an
 IGNOREd element is not skipped but marked, with the largest value of
 the character type, so that the string whose first non-IGNOREd
-element comes after fewer IGNOREd ones sorts first. The wide
+element comes after fewer IGNOREd ones sorts first. The mark
+realizes that rule (XBD 7.3.2.3) only for leading IGNOREd elements:
+a string with a trailing one sorts after the same string without it,
+a runtime defect in `__rw_process_offsets` that `TODO` carries as "A
+character ignored at a level sorts after a weight there". The wide
 overload of `__rw_append_weight` appends the weight as one
 `wchar_t`. The narrow one has to spell a value that does not fit a
 byte across several bytes, and that spelling is this note's subject.
@@ -99,7 +106,7 @@ and this one is not.
 
 ### 2.1 The probe
 
-With the tree's `hr_HR` built from `etc/nls/src`, the letters and
+With the 2.2 `hr_HR` built from `etc/nls/src`, the letters and
 two words transformed to (the first pass only, then the pass
 terminators):
 
@@ -142,11 +149,12 @@ and compare the strings "a" and "xb":
 
 A tie, where "a" must sort first: its first non-IGNOREd element is
 at position 0 and "xb"'s at position 1. With `a` of weight 130 the
-answer comes out the wrong way round. The tree's own definitions do
-not reach this -- their position passes weight a character by its
-ordinal, so the weights just past 127 have tiny final bytes and the
-smallest weight in `hr_HR`'s position pass is 79 -- and no line of
-the six word lists depends on it. It is one definition away.
+answer comes out the wrong way round. The 2.2 definitions did not
+reach this -- their position passes weighted a character by its
+ordinal, so the weights just past 127 had tiny final bytes and the
+smallest weight in `hr_HR`'s position pass was 79 -- and no line of
+the six word lists depends on it. It is one definition away. glibc's
+`hr_HR` has five-digit fourth-level weights (a 63040).
 
 ## 3. A weight spelled both ways
 
@@ -167,7 +175,7 @@ over 125: the final byte can be neither 126, which is what reserves
 
 ### 3.1 A weight that is a multiple of 127
 
-The letter "l" in the tree's `hr_HR` has primary weight **1016**,
+The letter "l" in the 2.2 `hr_HR` has primary weight **1016**,
 which is 8 x 127. Before:
 
     k     = (1016 - 1) / 127 = 1015 / 127 = 7
@@ -265,8 +273,8 @@ more 125s. That is the whole argument of chapter 4, seen once.
 
 ### 3.5 The other letter in the test
 
-Ko kai in `th_TH` has primary weight **127** itself, the smallest
-multiple there is:
+Ko kai in the 2.2 `th_TH` has primary weight **127** itself, the
+smallest multiple there is:
 
     before   k = 126 / 127 = 0   final = 126 % 127 + 1 = 127   ->  7f
     after    k = 126 / 125 = 1   final = 126 % 125 + 1 = 2     ->  7e 02
@@ -335,7 +343,8 @@ either.
 
 Together those make the concatenation of spellings order the same
 way as the sequence of weights, with IGNOREd elements last at their
-position, which is what `do_compare` asks of it.
+position. That is what `do_compare` asks of it for a leading IGNOREd
+element; for a trailing one it is the defect of chapter 1.
 
 **Cost.** A weight `w` is spelled in `floor ((w - 1) / 125) + 1`
 bytes where it was spelled in `floor ((w - 1) / 127) + 1`, so the

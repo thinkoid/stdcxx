@@ -22,8 +22,9 @@ library did in the builds where it was met, and the fixes.
   facet checked the state, asserted, and then discarded the answer.
   The libc-backed wide facet went on to hand the corrupt state to
   glibc's `mbrtowc`, which never returns. Every path now returns the
-  error result when its check fails. The assertion stays in debug
-  builds.
+  error result when its check fails, but the ISO-2022 branches check
+  no state at all (`TODO`, "ISO-2022 conversion does not convert").
+  The assertion stays in debug builds.
 - In a thread-safe debug build the section cannot be run against the
   libc-backed facets at all: they take the process-wide locale lock
   before the check, and the jump out of the assertion leaves it held.
@@ -168,8 +169,11 @@ an optimized build the error return runs the destructor normally and
 the facets are fully exercised there. So under `_RWSTDDEBUG &&
 _RWSTD_REENTRANT` the test skips the two libc-backed facets, prints a
 note saying so, and runs the other four. The 15D row of the suite
-reports 301 assertions where 11S reports 317, the sixteen calls it
-does not make.
+reported 301 assertions where 11S reported 317, the sixteen calls it
+does not make. The pins since 3c882e6a have 618 in 15D and 634 in
+11S, the same sixteen apart; 11s has 638, four more than 11S, a
+difference `TODO` carries as "`22.locale.codecvt` counts 634
+assertions in 11S and 638 in 11s".
 
 ## 5. Assertion 1582
 
@@ -206,13 +210,14 @@ already derives the directory from its own `__FILE__` when the
 variable is unset, in two places; that logic is now one function,
 `rw_topdir ()` in `rw_locale.h`, and the test uses it. Without either
 source the test records the assertion and skips the file conversions
-instead of faulting. `22.locale.collate` reads the variable the same
-way and exits without it; it is left for its own entry.
+instead of faulting. `22.locale.collate` read the variable the same
+way and exited without it; 92546b5c gave it `rw_topdir ()` and an
+assertion too.
 
 ## 7. Verification
 
 Bare runs from the build's `tests` directory, with and without
-`TOPDIR`:
+`TOPDIR`, on 2026-09-16; the counts have grown since (chapter 4):
 
 | build | result |
 |---|---|

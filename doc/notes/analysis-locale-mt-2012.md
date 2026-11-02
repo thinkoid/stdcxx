@@ -22,19 +22,20 @@ prehistory.
   its own, and rejected the parts of the patch that changed the
   locale and facet caches, as unrelated to the race. The exchange
   broke down; the reporter closed the issue as "will not be fixed".
-- Established, and still true in the tree today:
-  1. **The numpunct cache is broken.** The accessors in
-     `include/loc/_numpunct.h` store the result of each virtual in a
+- Established, and true in the tree until 2026-09-27, when 2e196ebb
+  and 4e559c9b fixed both (3b046e29 removed the cache members):
+  1. **The numpunct cache was broken.** The accessors in
+     `include/loc/_numpunct.h` stored the result of each virtual in a
      member of the shared facet and set a flag bit, with no lock and
      no ordering. Reduced to a standalone program that crashed
      on every run on a 16-core x86-64 box unless one call filled the
      cache before the threads started. STDCXX-1071 was opened for
      it, with two patches that remove the cache.
-  2. **The facet data is published by double-checked locking without
-     barriers.** `__rw_facet::_C_get_data` (`src/facet.cpp`) writes
+  2. **The facet data was published by double-checked locking without
+     barriers.** `__rw_facet::_C_get_data` (`src/facet.cpp`) wrote
      `_C_impdata` and then `_C_impsize` under the facet mutex;
-     `_C_data` (`include/loc/_facet.h`) reads `_C_impsize` and then
-     `_C_impdata` with no lock. Nothing orders either pair. Agreed to
+     `_C_data` (`include/loc/_facet.h`) read `_C_impsize` and then
+     `_C_impdata` with no lock. Nothing ordered either pair. Agreed to
      be a defect, never shown to fail: the only hardware at hand was
      x86-64, which does not reorder those stores or those loads.
 - Not settled: whether the cache is worth keeping. One set of
@@ -109,8 +110,10 @@ The list's `mbox` interface returns a month at a time:
 
 ## 2. The code under discussion
 
-Both defects are in the tree unchanged: no line mentioning
-`_C_flags` in `_numpunct.h` has changed since 2005 (`git log -S`).
+Both defects stayed in the tree unchanged until 2e196ebb and
+4e559c9b (2026-09-27): no line mentioning `_C_flags` in `_numpunct.h`
+changed from 2005 until then (`git log -S`). 3b046e29 removed the
+cache members.
 
 ### 2.1. The numpunct cache
 
@@ -310,9 +313,11 @@ load.
 
 ## 7. What has changed since
 
-- The tree reproduces the cache defect without help: the 15D
-  `22.locale.numpunct.mt` fails on every run on x86-64, and a
-  ThreadSanitizer build names the cache (`analysis-locale-mt-race.md`).
+- The tree reproduced the cache defect without help: the 15D
+  `22.locale.numpunct.mt` failed on every run on x86-64, and a
+  ThreadSanitizer build named the cache (`analysis-locale-mt-race.md`).
+  Since 2e196ebb it passes; 7c93badb rewrote it to race the first use
+  of a fresh facet.
 - ThreadSanitizer implements the C++11 memory model rather than a
   lock-set heuristic, so its reports are races in the language's
   sense. Under that model exhibit E is a data race (an unsynchronized
@@ -322,11 +327,11 @@ load.
   hardware and a wrong one about the language; the facet data case,
   which publishes a second variable through the flag, was never
   covered by it, and was conceded as a defect.
-- The revival keeps the 4.2.x binary interface until the next minor
-  version. `TODO` lists the changes that wait for it, the string
-  clause among them.
-- `std::atomic` with acquire and release orderings expresses the
-  facet data publication directly, once the C++17 floor lands; before
-  it, the GCC and Clang `__atomic` builtins do.
+- The revival dropped the 4.2.x binary interface in 61399d72;
+  3b046e29 and 58d5f40b made the changes that waited for it, the
+  string clause among them.
+- The GCC and Clang `__atomic` builtins express the facet data
+  publication with acquire and release orderings. The target is
+  C++03 (61399d72), so `std::atomic` is not a candidate.
 - Weakly ordered hardware is at hand: an aarch64 machine now builds
   and runs the suite.
