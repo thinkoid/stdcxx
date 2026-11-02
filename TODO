@@ -22,16 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO Signed overflow in =__rw_dtoa=
-
-=src/num_put.cpp= 162 and 299 do ~i = -i~, undefined for =LONG_MIN= and
-=LLONG_MIN=; the output is right in practice. Found by reading,
-2026-11-02.
-
-Fix: negate in the unsigned type.
-
-Check: a UBSan build of the library putting =LONG_MIN=.
-
 ** TODO =__rw_check_grouping= never skips trailing zeros of a grouping
 
 =src/num_get.cpp= 125: ~while (grpn-- != ngrpings && ...)~ is false on

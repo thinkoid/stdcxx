@@ -151,23 +151,23 @@ __rw_dtoa (char *buf, _ULLong i, unsigned flags)
 static inline size_t
 __rw_dtoa (char *buf, _LLong i, unsigned flags)
 {
-    size_t n;
+    _ULLong u = static_cast< _ULLong >(i);
+    size_t  n = 0;   // no sign yet
 
     if (i < 0) {
-        // prepend the minus sign and clear the showpos bit in flags
-        // and the sign bit in the number
+        // prepend the minus sign and clear the showpos bit in flags;
+        // the magnitude is taken in the unsigned type, where the most
+        // negative value negates without overflow
         flags  &= ~_RWSTD_IOS_SHOWPOS;
         *buf++  = '-';
 
-        i = -i;
+        u = 0 - u;
 
         // remember to add 1 for the minus sign
         n = 1;
     }
-    else
-        n = 0;   // no sign here
 
-    return n + __rw_dtoa (buf, static_cast< _ULLong >(i), flags);
+    return n + __rw_dtoa (buf, u, flags);
 }
 
 
@@ -288,23 +288,23 @@ __rw_dtoa (char *buf, unsigned long i, unsigned flags)
 static inline size_t
 __rw_dtoa (char *buf, long i, unsigned flags)
 {
-    size_t n;
+    unsigned long u = static_cast< unsigned long >(i);
+    size_t        n = 0;   // no sign yet
 
     if (i < 0) {
-        // prepend the minus sign and clear the showpos bit in flags
-        // and the sign bit in the number
+        // prepend the minus sign and clear the showpos bit in flags;
+        // the magnitude is taken in the unsigned type, where the most
+        // negative value negates without overflow
         flags  &= ~_RWSTD_IOS_SHOWPOS;
         *buf++  = '-';
 
-        i = -i;
+        u = 0 - u;
 
         // remember to add 1 for the minus sign
         n = 1;
     }
-    else
-        n = 0;   // no sign here
 
-    return n + __rw_dtoa (buf, static_cast< unsigned long >(i), flags);
+    return n + __rw_dtoa (buf, u, flags);
 }
 
 
