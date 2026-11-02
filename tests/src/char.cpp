@@ -668,9 +668,6 @@ _rw_expand (void *dst, size_t elemsize,
             // narrow the wide character to char
             memset (pnext, UChar (ch), count);
 
-            pnext   = (char*)pnext + count * elemsize;
-            buflen += count;
-            
 #else   // disabled
 
             // FIXME: enable UCS to UTF-8 conversion
