@@ -97,9 +97,9 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,471,279 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,471,173 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,474,951 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,471,281 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,471,175 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,474,953 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -331,9 +331,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,471,279 | 0 | 0 | 0 |
-| 11s-clang | 12,471,188 | 0 | 0 | 0 |
-| 15D-clang | 12,474,951 | 0 | 0 | 0 |
+| 11S-clang | 12,471,281 | 0 | 0 | 0 |
+| 11s-clang | 12,471,190 | 0 | 0 | 0 |
+| 15D-clang | 12,474,953 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134

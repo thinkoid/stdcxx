@@ -326,6 +326,26 @@ void test_libstd_tolower (charT, const char *cname,
                    unsigned (buf [2]), unsigned (buf [3]),
                    threw ? " (threw)" : "");
     }
+
+    // the classic facet has no entry for a character above 255 and
+    // the range form leaves it alone, as the single-character form
+    // does; the next character shows the mapping still ran
+    if (sizeof (charT) > 1) {
+        const std::ctype<charT> &cct =
+            std::use_facet< std::ctype<charT> >(std::locale::classic ());
+
+        charT buf [] = { charT (0x100), charT ('A') };
+
+        const charT* const ret = cct.tolower (buf, buf + 2);
+
+        rw_assert (   buf + 2 == ret
+                   && charT (0x100) == buf [0] && charT ('a') == buf [1],
+                   0, __LINE__,
+                   "ctype<%s>::tolower(%1$s*, const %1$s*) in locale(\"C\") "
+                   "on U+0100 U+0041 == U+0100 U+0061, "
+                   "got U+%04X U+%04X", cname,
+                   unsigned (buf [0]), unsigned (buf [1]));
+    }
 }
 
 /**************************************************************************/

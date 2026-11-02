@@ -808,8 +808,7 @@ know, and builds the three tables from `isspace` ... `isgraph`,
   `__rw_once`.
 - `do_is`, `do_scan_is`, `do_scan_not`, `do_toupper`, `do_tolower`
   read the 256-entry tables for characters below 256. A character
-  at or above 256 is in no class and maps to itself, but for the
-  vector case maps, which write 0 for it (queued in `TODO`).
+  at or above 256 is in no class and maps to itself.
 - `do_widen` widens a byte to the same value, 0x80-0xff included.
   `do_narrow` narrows 0-127 and returns `dfault` above. So
   `narrow (widen ('\xe9'), '?')` is `'?'` in the classic facet.
@@ -1058,8 +1057,8 @@ b9e33044. Pinned by: no test.
 | `22.locale.ctype` | classification, case, narrow, widen; classic, byname over generated and libc locales | 91098 |
 | `22.locale.ctype.is` | `is`, both forms, both widths | 25438 |
 | `22.locale.ctype.scan` | `scan_is`, `scan_not` | 17132 |
-| `22.locale.ctype.tolower` | `tolower`, both forms | 19395 |
-| `22.locale.ctype.toupper` | `toupper`, both forms | 19395 |
+| `22.locale.ctype.tolower` | `tolower`, both forms | 19396 |
+| `22.locale.ctype.toupper` | `toupper`, both forms | 19396 |
 | `22.locale.ctype.narrow` | `narrow`, `widen` against the C library | 9768, 2 warnings |
 | `22.locale.ctype.mt` | first fill of the narrow and widen caches, gated | 800 |
 | `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state | 618 |
@@ -1082,7 +1081,8 @@ Known gaps and their `TODO` entries:
   the 16 between 15D and 11S are the skipped libc facets; the other
   4 are unexplained.
 - "A codecvt oracle": none exists.
-- Not covered by any row: `ctype<wchar_t>` at or above 256, the
+- Not covered by any row: `ctype<wchar_t>` at or above 256 beyond
+  the classic case maps' one row each, the
   classic wide `out` above 0xff, `max_length` of the UTF names,
   `length` under `@UCS`, the C-library `in` across a split
   character, the ISO-2022 converters.

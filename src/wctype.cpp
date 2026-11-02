@@ -471,7 +471,7 @@ do_toupper (char_type *lo, const char_type *hi) const
 
     for ( ; lo < hi; ++lo)
         *lo = static_cast< size_t >(*lo) < _C_tab_size ?
-            _C_upper_tab [_UChar (*lo)] : 0;
+            _C_upper_tab [_UChar (*lo)] : *lo;
 
     return lo;
 }
@@ -485,7 +485,7 @@ do_tolower (char_type *lo, const char_type *hi) const
 
     for ( ; lo < hi; ++lo)
         *lo = static_cast< size_t >(*lo) < _C_tab_size ?
-            _C_lower_tab [_UChar (*lo)] : 0;
+            _C_lower_tab [_UChar (*lo)] : *lo;
 
     return lo;
 }

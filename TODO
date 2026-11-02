@@ -22,21 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The classic wide vector case maps write 0 above 255
-
-=do_toupper= and =do_tolower= over a range in =src/wctype.cpp=
-(473-474, 487-488) write 0 for a character at or above 256 where the
-single-character forms return the character unchanged: ={0x100, 'a'}=
-becomes ={0, 'A'}=, against 14882:2003 22.2.1.1.2 p7 and p9 ("the
-corresponding character ... if that mapping is defined, otherwise the
-character itself"). Found by probe, 2026-11-02.
-
-Fix: the character itself where the table has no entry, as the single
-forms do.
-
-Check: the range form leaves 0x100 unchanged; =22.locale.ctype.toupper=
-and =tolower= rows for a wide character above 255.
-
 ** TODO An overlong test in the UTF-8 decoder can never match
 
 =src/wcodecvt.cpp= 428 tests ~(byte [0] & 0xfe) == 0xfe~ for the
