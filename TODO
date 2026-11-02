@@ -22,17 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO An overlong test in the UTF-8 decoder can never match
-
-=src/wcodecvt.cpp= 428 tests ~(byte [0] & 0xfe) == 0xfe~ for the
-two-byte overlong form; the value is 0xc0. No behaviour change:
-=__rw_utf8toucs4= rejects C0 and C1 earlier (by probe). Found
-2026-11-02.
-
-Fix: compare with 0xc0, or drop the dead test.
-
-Check: reading; the UTF-8 rows of =22.locale.codecvt= on their pin.
-
 ** TODO =__rw_libc_do_unshift= copies the NUL of =wcrtomb=
 
 =src/wcodecvt.cpp= 395 copies every byte =wcrtomb (tmp, L'\0')=

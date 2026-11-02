@@ -424,8 +424,10 @@ __rw_utf8validate (const char* from, size_t nbytes)
 
     // check for overlong sequences with the bit pattern shown below
 
-    // 2 bytes: 1100 000x (10xx xxxx)
-    if (2 == nbytes && (byte [0] & 0xfeU) == 0xfeU)
+    // 2 bytes: 1100 000x (10xx xxxx); __rw_utf8toucs4 rejects these
+    // lead bytes before the sequence gets here, so this is the
+    // validator's own statement of the rule
+    if (2 == nbytes && (byte [0] & 0xfeU) == 0xc0U)
         return false;
 
     // 3 bytes: 1110 0000 100x xxxx (10xx xxxx)
