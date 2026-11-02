@@ -2439,7 +2439,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
         // %Y:  the year as a decimal number (e.g., 1997). [tm_year]
         // %EY: the locale's full alternative year representation.
 
-        if (mod) {
+        if ('E' == mod) {
             const __rw_time_t::era_t* const pera = __rw_get_era (ptime, tmb);
 
             if (   pera

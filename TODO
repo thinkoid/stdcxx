@@ -19,21 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO =time_put= writes =%OY= as =%EY=
-
-The ='Y'= case of =__rw_get_time_put_data= in =src/time_put.cpp=
-tests ~if (mod)~ where it means the =E= modifier, so =%OY= writes the
-era's year format: "令和08年" for 2026 under =ja_JP=. =%OY= is no
-conversion of =strftime=; glibc's writes it back as the text "%OY",
-and =time_get= fails it as an invalid concatenation. Seen 2026-10-31
-in the era probe, confirmed 2026-11-01.
-
-Fix: test ~'E' == mod~; a decision on what =%OY= writes, the plain
-year or the directive's text as glibc does.
-
-Check: =%OY= under =ja_JP= writes what the decision says, and the
-=%EY= rows of =22.locale.time.put= stay green.
-
 ** TODO An era with an empty year format
 
 =%Ec=, =%Ex= and =%EX= read an empty =era_d_t_fmt=, =era_d_fmt= or
