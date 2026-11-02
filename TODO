@@ -22,15 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =__rw_iter_failed= has no caller
-
-=include/loc/_num_put.cc= 44-53, uncalled since 69ad31e6. Found
-2026-11-02.
-
-Fix: remove.
-
-Check: grep; a 15D build.
-
 ** TODO Signed overflow in =__rw_dtoa=
 
 =src/num_put.cpp= 162 and 299 do ~i = -i~, undefined for =LONG_MIN= and

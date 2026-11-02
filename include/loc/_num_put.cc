@@ -38,20 +38,6 @@ __rw_put_num (char**, _RWSTD_SIZE_T, unsigned, int, _RWSTD_STREAMSIZE,
 _RWSTD_EXPORT extern const unsigned char
 __rw_digit_map[];
 
-
-template <class _OutputIter>
-inline bool
-__rw_iter_failed (const _OutputIter&) { return false; }
-
-// const commented to resolve ambiguity on MSVC 7.0:
-// error C2667: '__rw_iter_failed' : none of 2 overloads have a best conversion
-template <class _CharT, class _Traits>
-inline bool
-__rw_iter_failed (/*const */std::ostreambuf_iterator<_CharT, _Traits> &__it)
-{
-    return __it.failed ();
-}
-
 }   // namespace __rw
 
 
