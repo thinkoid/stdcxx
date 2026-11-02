@@ -17,65 +17,10 @@ longer investigations.
 * Library
 
 The library itself, =include= and =src=: its behaviour, its interface
-and what it carries that it no longer uses.
-
-** TODO A failed codecvt mapping publishes the file's size with no data
-
-=__rw_mmap= in =src/mman.cpp= writes =*size= from =stat= before it
-opens and maps the file, so a mapping that fails after =stat= hands
-back a null pointer and a non-zero size. =__rw_facet::_C_get_data=
-guards the general path: a null result stores the no-database marker,
-=_C_impsize= of =size_t (-1)=, beside the null pointer
-(=src/facet.cpp= 248-254). The wide =codecvt_byname= path does not:
-it stores the size the mapper wrote beside the null pointer
-(=src/facet.cpp= 297-301). Every later call takes the C library path,
-which is the no-database behaviour by another route, and the
-destructor is guarded by the pointer; the seam is a facet whose size
-says it holds data it does not. Recorded in
-=doc/notes/analysis-facet-first-use.md= chapter 2.1 on 2026-09-28,
-never queued.
-
-Fix: =__rw_mmap= writes =*size= only once the mapping exists; the
-codecvt path stores =size_t (-1)= for a null result, as the general
-path does.
-
-Check: a probe that makes the codecvt database of a byname locale
-unreadable (mode 000) under 15D: the facet converts through the C
-library, =_C_impsize= is =size_t (-1)=, and a second call does not
-map again.
-
-** TODO The =__rw_once= comment names a static mutex path that is gone
-
-=src/once.cpp= 95-97 says the static mutex of =int= "is itself
-constructed through =__rw_once= where mutexes cannot be initialized
-statically". 92d18f73 removed that branch with
-=_RWSTD_NO_STATIC_MUTEX_INIT=; =__rw_get_static_mutex= returns the
-statically initialized mutex (=include/rw/_mutex.h= 193-198) and
-calls no =__rw_once=.
-
-Fix: the comment says what the code does.
-
-Check: reading.
-
-** TODO =%EY= keeps a year its format then fails on
-
-=__rw_read_era= stores its local =tm= whenever no bit but =eofbit= is
-set (=include/loc/_time_get.cc= 301-334). Under =%EY= a =%Ey= of the
-era format that succeeds sets the year in the local =tm=; a literal
-that then fails, or the end of input, adds only =eofbit=, so the year
-read is stored: "Heisei 8 Nex" under the test locale stores 1996 with
-=eofbit=. The comment at =include/loc/_time_get.cc= 99-100 and
-=doc/notes/analysis-time-get-state.md= 9.2 say a failed era directive
-leaves the year as it was; =%EC= and a lone =%Ey= do (=src/era.cpp=
-340-373). Found by the documentation sweep of 2026-11-02, by reading.
-
-Fix: a decision: keep the year a =%EY= read before its format failed
-(C++11 22.4.5.1.2 p13 leaves the members unspecified), or store
-nothing unless the whole format matched. The comment at =include/loc/_time_get.cc= 97-100 and
-=analysis-time-get-state.md= 9.2 follow.
-
-Check: a row under the test locale, "Heisei 8 Nex" against =%EY=,
-pinning the decision either way.
+and what it carries that it no longer uses. The locale entries come
+first, the easiest at the top: fixes of a line or two, then fixes that
+take work, then the entries that wait on a decision; what lies outside
+the locale is last.
 
 ** TODO The classic wide =ctype= admits character 256 into its table
 
@@ -105,104 +50,6 @@ forms do.
 Check: the range form leaves 0x100 unchanged; =22.locale.ctype.toupper=
 and =tolower= rows for a wide character above 255.
 
-** TODO =IS_UTF8= and =IS_UTF16*= can never be true
-
-=src/wcodecvt.cpp= 110-113 compare =UCS_TYPE (x)=, which masks with
-=__rw_ucs_mask= (89: the three UCS bits), against =__rw_utf8= and the
-UTF-16 flags (81 ff., outside that mask), so the four tests are
-always false. =do_max_length= (1558) returns 0 for =UTF-8= and
-=utf-8=. Found by probe, 2026-11-02.
-
-Fix: mask with =__rw_utf_mask= (95) in the four tests, then read
-every site that relied on their being false.
-
-Check: =max_length ()= of the UTF-8 facet returns 6; =22.locale.codecvt=
-on its pin, plus a row for =max_length= of the UTF-8 facet.
-
-** TODO =length= under a =@UCS= name walks the wrong trie
-
-=__rw_libstd_do_length= (=src/wcodecvt.cpp= 823) walks
-=utf8_to_ext=, keyed by the UTF-8 of the wide value, under any UCS
-flag, where =do_in= walks =n_to_w=; since e6c7726b. Installed in a
-locale, =de_DE.ISO-8859-1@UCS= gives =length ("a\xe9")= 1 where =in=
-converts 2 bytes, and =ja_JP.EUC-JP@UCS= =length ("a\xa4\xa2")= 1.
-Found by probe, 2026-11-02.
-
-Fix: =length= walks the trie =in= walks.
-
-Check: =length= equals the bytes =in= consumes under both locales
-(rows in =22.locale.codecvt=).
-
-** TODO A split character through the C library loses its state
-
-On =mbrtowc='s -2, =__rw_libc_do_in= (=src/wcodecvt.cpp= 249-250,
-e6a99a20) returns =ok= with nothing consumed, but =mbrtowc= has
-already absorbed the bytes into the state: under =de_DE.utf8=
-=in ("\xc3")= returns =ok=, consumed 0, =mbsinit= false; the next
-call asserts (1201) in a debug build and returns =error= otherwise.
-A C-library-backed wide stream that splits a character across
-buffers breaks here. Found by probe, 2026-11-02.
-
-Fix: return =partial= with the bytes consumed and the state kept, as
-22.2.1.5.2 p3 describes.
-
-Check: =in= of the two halves of U+00E9 across two calls yields U+00E9;
-a =wifstream= row reading a UTF-8 file through a 1-byte buffer.
-
-** TODO =__rw_libc_do_unshift= copies the NUL of =wcrtomb=
-
-=src/wcodecvt.cpp= 395 copies every byte =wcrtomb (tmp, L'\0')=
-writes, the terminating NUL included. By reading; unreachable on
-glibc, which has no stateful locale encoding. Found 2026-11-02.
-
-Fix: copy the shift sequence only (the count less one).
-
-Check: reading; a stateful encoding is needed to run it.
-
-** TODO The UTF-16 names set flags no converter reads
-
-The constructor of =codecvt_byname<wchar_t, char>= (=src/wcodecvt.cpp=
-near 1100) recognizes =UTF-16=, =UTF-16BE= and =UTF-16LE= and sets
-=__rw_utf16*=, but no converter reads the flags: =out= under
-=UTF-16= writes "61 c3 a9", UTF-8. Found by probe, 2026-11-02.
-
-Fix: a decision: implement the three, or stop recognizing the names
-so the C library or =error= answers.
-
-Check: per the decision; a row in =22.locale.codecvt= either way.
-
-** TODO ISO-2022 conversion does not convert
-
-By probe: =in= of "a ESC $ B $ \" ESC ( B" under =ISO-2022-JP=
-returns =error= at byte 0; =out= of {a, U+3042} writes ESC $ @, the
-1978 designation; =unshift= writes nothing; =-KR= and =-CN= answer
-=error= and 0 to everything; =do_length= (=src/iso2022.cpp= 1871,
-1876) returns =CODECVT_ERROR= (2) as a length when no state slot is
-free, and a stray =while (*from == ESCAPE_CHAR)= around the escape
-branch reads =*from= at =from_end= after an escape that ends the
-input. No test covers any of it; the ISO-2022 branches also check no
-state (=analysis-codecvt-invalid-state.md= ch. 0 says every path
-does). Found 2026-11-02.
-
-Fix: a decision first: keep ISO-2022 and make it work against glibc's
-=iconv=, or drop the four names.
-
-Check: a round trip of the test fixtures through =iconv= and the
-facet; ASan on =length= over "\x1b(B".
-
-** TODO The primary =codecvt= returns without setting the next pointers
-
-=include/loc/_codecvt.h= 82-112: the primary template's =do_in=,
-=do_out= and =do_unshift= return =noconv= or =error= without setting
-=from_next= and =to_next= (22.2.1.5.2 p2 wants =to_next == to= on
-=noconv=), and =do_length= returns =INT_MAX=, beyond what p10 allows.
-By reading, 2026-11-02.
-
-Fix: set the next pointers to the from and to arguments; =do_length=
-returns the lesser of =max= and the input length.
-
-Check: a probe on =codecvt<unsigned char, unsigned char, mbstate_t>=.
-
 ** TODO An overlong test in the UTF-8 decoder can never match
 
 =src/wcodecvt.cpp= 428 tests =(byte [0] & 0xfe) == 0xfe= for the
@@ -214,31 +61,105 @@ Fix: compare with 0xc0, or drop the dead test.
 
 Check: reading; the UTF-8 rows of =22.locale.codecvt= on their pin.
 
-** TODO =ctype_byname<wchar_t>= builds three tables nothing reads
+** TODO =__rw_libc_do_unshift= copies the NUL of =wcrtomb=
 
-The C-library fallback of =ctype_byname<wchar_t>= (=src/wctype.cpp=
-569-640) builds three 256-entry tables; every virtual is overridden,
-so nothing reads them. By reading, 2026-11-02.
+=src/wcodecvt.cpp= 395 copies every byte =wcrtomb (tmp, L'\0')=
+writes, the terminating NUL included. By reading; unreachable on
+glibc, which has no stateful locale encoding. Found 2026-11-02.
 
-Fix: drop the tables, or the overrides that make them dead.
+Fix: copy the shift sequence only (the count less one).
 
-Check: reading; =22.locale.ctype*= on their pins.
+Check: reading; a stateful encoding is needed to run it.
 
-** TODO The blank bit is visible through =ctype<char>::is= under a database
+** TODO =__rw_iter_failed= has no caller
 
-=plan-localedef-backend.md= 3.1 says the =blank= bit written as 0x400
-is "invisible until a =ctype_base::blank= names it", and the header
-comment of =util/localedef/wctype.cpp= says it "stays unread". By
-probe, under =de_DE.ISO-8859-1= the vector =ctype<char>::is= returns
-0x403 for a space (the classic facet 0x003) and =table ()= hands out
-the same words; the wide vector form strips it with =__rw_all=. Found
+=include/loc/_num_put.cc= 44-53, uncalled since 69ad31e6. Found
 2026-11-02.
 
-Fix: a decision: strip the bit in the narrow vector form and =table ()=
-as the wide form does, or name it a visible extension and record it.
+Fix: remove.
 
-Check: the vector =is= of a space under a database locale equals the
-classic facet's, or the extension is in the master document.
+Check: grep; a 15D build.
+
+** TODO Signed overflow in =__rw_dtoa=
+
+=src/num_put.cpp= 162 and 299 do =i = -i=, undefined for =LONG_MIN= and
+=LLONG_MIN=; the output is right in practice. Found by reading,
+2026-11-02.
+
+Fix: negate in the unsigned type.
+
+Check: a UBSan build of the library putting =LONG_MIN=.
+
+** TODO =__rw_check_grouping= never skips trailing zeros of a grouping
+
+=src/num_get.cpp= 125: =while (grpn-- != ngrpings && ...)= is false on
+its first test, so the loop never runs and the last grouping is the
+last byte whatever it holds. With grouping "\3\0", "1,234,567" and
+"1234,567" both fail where =num_put= writes "1,234,567". Found by
+probe, 2026-11-02.
+
+Fix: start the scan one below =ngrpings=.
+
+Check: "\3\0" reads "1234,567" and "1,234,567".
+
+** TODO =num_get= of =unsigned int= clamps without =failbit=
+
+=src/num_get.cpp= 321-336, the =_C_uint= case, clamps but never sets
+=err= to =ERANGE=: "4294967296" and "-1" both give 4294967295 with
+=goodbit=, through the facet and through =operator>>=;
+=unsigned short= sets =failbit=. The conformance record's LWG 23 row
+("sets failbit and clamps") is false for this type. Found by probe,
+2026-11-02.
+
+Fix: the =ERANGE= path of the other unsigned cases.
+
+Check: both inputs set =failbit= through the facet and the extractor.
+
+** TODO =money_put='s last-field check never fires
+
+=include/loc/_money_put.cc= 183 and 200: =sizeof __fmat != __i - 1=
+is always true (the pattern has four fields, =__i= at most 3), so a
+=space= in the last field is not diagnosed; the message names
+=num_put=. Found by reading, 2026-11-02.
+
+Fix: compare =__i= with the last index; name =money_put=.
+
+Check: a pattern ending in =space= throws =runtime_error=.
+
+** TODO =money_get= keeps one leading zero in =digits=
+
+=include/loc/_money_get.cc= 445: the loop strips a zero only while
+another zero follows, so "0.07" gives "07" and "007" gives "0700",
+neither the standard's digits as read (22.2.6.1.2 p1) nor the
+comment's intent. The test compares through =sscanf= and cannot see
+it. Found by probe, 2026-11-02.
+
+Fix: strip every leading zero but the last, or none; the comment
+decides which.
+
+Check: a text comparison in =22.locale.money.get= for "0.07" and "007".
+
+** TODO =num_put= leaks its grown buffer on an exception
+
+=include/loc/_num_put.cc= 185: =_C_put= frees a grown =__pbuf= only on
+the normal path; =num_get= and =money_get= have guards. Found by
+reading, 2026-11-02.
+
+Fix: the guard the other two use.
+
+Check: AddressSanitizer's leak report with an output iterator that
+throws.
+
+** TODO A bad category throws with the bad-name message
+
+=src/locale_combine.cpp= 657-660: an invalid category passed to
+=locale (const locale&, const char*, category)= throws =runtime_error=
+with the message for a bad name, naming the locale name. Found by
+reading, 2026-11-02.
+
+Fix: the message names the category.
+
+Check: =what ()= names the category.
 
 ** TODO =%%= in a =time_get= pattern always fails
 
@@ -280,6 +201,19 @@ Fix: a =%= or =%E=/=%O= left pending at the pattern's end sets
 
 Check: the two rows, =failbit=, nothing stored.
 
+** TODO The primary =codecvt= returns without setting the next pointers
+
+=include/loc/_codecvt.h= 82-112: the primary template's =do_in=,
+=do_out= and =do_unshift= return =noconv= or =error= without setting
+=from_next= and =to_next= (22.2.1.5.2 p2 wants =to_next == to= on
+=noconv=), and =do_length= returns =INT_MAX=, beyond what p10 allows.
+By reading, 2026-11-02.
+
+Fix: set the next pointers to the from and to arguments; =do_length=
+returns the lesser of =max= and the input length.
+
+Check: a probe on =codecvt<unsigned char, unsigned char, mbstate_t>=.
+
 ** TODO The caller's =iostate= survives a =time_get= parse
 
 Every exit of the =time_get= members ORs into =err=
@@ -295,67 +229,98 @@ Fix: assign, as =num_get= does, in =time_get= and =money_get=.
 Check: a row passing =failbit= in, returning the parse's own state;
 =22.locale.time.get= and =money.get= on their pins otherwise.
 
-** TODO Two latent overruns in the time facets
+** TODO A failed codecvt mapping publishes the file's size with no data
 
-=include/loc/_time_get.cc= 545 (=__names [100]=) and 145
-(=__fmts [100]=) take every era record, and localedef caps =alt_digits=
-at 100 but not eras (=util/localedef/scalar.cpp= 473-505).
-=__rw_fmt_time= keeps one =bufsize= while it advances
-(=src/time_put.cpp= 1506/1517, wide 1643/1654), so an expansion past
-256 elements overruns =do_put='s =__buf [256]=
-(=include/loc/_time_put.cc= 75). Shipped data reaches neither: 11 eras
-at most (ja_JP), 172 bytes for the longest =%c= (km_KH.UTF-8). Found by
-reading, 2026-11-02.
+=__rw_mmap= in =src/mman.cpp= writes =*size= from =stat= before it
+opens and maps the file, so a mapping that fails after =stat= hands
+back a null pointer and a non-zero size. =__rw_facet::_C_get_data=
+guards the general path: a null result stores the no-database marker,
+=_C_impsize= of =size_t (-1)=, beside the null pointer
+(=src/facet.cpp= 248-254). The wide =codecvt_byname= path does not:
+it stores the size the mapper wrote beside the null pointer
+(=src/facet.cpp= 297-301). Every later call takes the C library path,
+which is the no-database behaviour by another route, and the
+destructor is guarded by the pointer; the seam is a facet whose size
+says it holds data it does not. Recorded in
+=doc/notes/analysis-facet-first-use.md= chapter 2.1 on 2026-09-28,
+never queued.
 
-Fix: bound the era count where the arrays are filled (or size them
-from the record); carry the remaining size through =__rw_fmt_time=.
+Fix: =__rw_mmap= writes =*size= only once the mapping exists; the
+codecvt path stores =size_t (-1)= for a null result, as the general
+path does.
 
-Check: generated locales with 101 era records and a 300-character
-=%c=, under the sanitizer.
+Check: a probe that makes the codecvt database of a byname locale
+unreadable (mode 000) under 15D: the facet converts through the C
+library, =_C_impsize= is =size_t (-1)=, and a second call does not
+map again.
 
-** TODO Implied =tm_wday= and =tm_yday= are left as the caller had them
+** TODO =length= under a =@UCS= name walks the wrong trie
 
-"%Y %m %d" determines the weekday and the day of the year; the
-library stores neither and glibc's =strptime= fills both. Not a
-conformance question (N3242 p12 owes only the directive's members);
-a decision on whether to fill them. Found 2026-11-02.
+=__rw_libstd_do_length= (=src/wcodecvt.cpp= 823) walks
+=utf8_to_ext=, keyed by the UTF-8 of the wide value, under any UCS
+flag, where =do_in= walks =n_to_w=; since e6c7726b. Installed in a
+locale, =de_DE.ISO-8859-1@UCS= gives =length ("a\xe9")= 1 where =in=
+converts 2 bytes, and =ja_JP.EUC-JP@UCS= =length ("a\xa4\xa2")= 1.
+Found by probe, 2026-11-02.
 
-Fix: a decision; if filled, after the walk, from the three fields.
+Fix: =length= walks the trie =in= walks.
 
-Check: a row "%Y %m %d" on "2026-11-02" with =tm_wday= 0, =tm_yday= 305.
+Check: =length= equals the bytes =in= consumes under both locales
+(rows in =22.locale.codecvt=).
 
-** TODO =eofbit= before the pattern ends sets =failbit= and stores nothing
+** TODO A split character through the C library loses its state
 
-"%Y-%m" and "%Y " on "2026" both fail: the walk ends with =failbit=
-when a directive sets =eofbit= before the pattern is done. N3242 p8
-lists =err != goodbit= before =s == end=, a reading under which
-=eofbit= is left alone and the year stored. Found by probe,
-2026-11-02.
+On =mbrtowc='s -2, =__rw_libc_do_in= (=src/wcodecvt.cpp= 249-250,
+e6a99a20) returns =ok= with nothing consumed, but =mbrtowc= has
+already absorbed the bytes into the state: under =de_DE.utf8=
+=in ("\xc3")= returns =ok=, consumed 0, =mbsinit= false; the next
+call asserts (1201) in a debug build and returns =error= otherwise.
+A C-library-backed wide stream that splits a character across
+buffers breaks here. Found by probe, 2026-11-02.
 
-Fix: a decision on how p8's order reads; then the walk.
+Fix: return =partial= with the bytes consumed and the state kept, as
+22.2.1.5.2 p3 describes.
 
-Check: the two rows pinning the reading taken.
+Check: =in= of the two halves of U+00E9 across two calls yields U+00E9;
+a =wifstream= row reading a UTF-8 file through a 1-byte buffer.
 
-** TODO =%C= of a year past 9999 writes the century modulo 100
+** TODO =IS_UTF8= and =IS_UTF16*= can never be true
 
-Year 10000 writes "00", pinned at =tests/localization/22.locale.time.put.cpp=
-708; the POSIX.1-2024 width sentence b54acca9 cites gives "100".
-Found 2026-11-02.
+=src/wcodecvt.cpp= 110-113 compare =UCS_TYPE (x)=, which masks with
+=__rw_ucs_mask= (89: the three UCS bits), against =__rw_utf8= and the
+UTF-16 flags (81 ff., outside that mask), so the four tests are
+always false. =do_max_length= (1558) returns 0 for =UTF-8= and
+=utf-8=. Found by probe, 2026-11-02.
 
-Fix: a decision, then the row.
+Fix: mask with =__rw_utf_mask= (95) in the four tests, then read
+every site that relied on their being false.
 
-Check: the row at 708 says what the decision says.
+Check: =max_length ()= of the UTF-8 facet returns 6; =22.locale.codecvt=
+on its pin, plus a row for =max_length= of the UTF-8 facet.
 
-** TODO =put= over a pattern pads every directive to the width
+** TODO =ctype_byname<wchar_t>= builds three tables nothing reads
 
-The width of the stream is applied to every directive of a pattern
-and never reset: "%H:%M" at width 5 writes "***09:***05". No row has
-a pattern with a width. Found by probe, 2026-11-02.
+The C-library fallback of =ctype_byname<wchar_t>= (=src/wctype.cpp=
+569-640) builds three 256-entry tables; every virtual is overridden,
+so nothing reads them. By reading, 2026-11-02.
 
-Fix: a decision: the width applies once (the first directive, as
-=num_put= consumes it) or to each; then reset or keep.
+Fix: drop the tables, or the overrides that make them dead.
 
-Check: a row with a width and a two-directive pattern.
+Check: reading; =22.locale.ctype*= on their pins.
+
+** TODO =collate::do_transform= leaks a codecvt mapping per call
+
+=src/collate.cpp= 878-884 (narrow) and 1053-1059 (wide): a transform
+that meets a character outside the table maps the codeset's codecvt
+database for its validity check through =__rw_get_facet_data= and
+never releases it. Under =zh_CN.UTF-8=, 100 wide transforms of U+743B
+add 100 mappings (=/proc/self/maps=). Since the 2005 import. Found by
+probe, 2026-11-02.
+
+Fix: release the mapping at the end of the call, or map once per
+facet.
+
+Check: the mapping count stays flat over 100 transforms.
 
 ** TODO Category 0 is read as =LC_CTYPE=
 
@@ -396,20 +361,6 @@ Fix: compare every slot, standard and user.
 
 Check: the probe prints 0.
 
-** TODO =collate::do_transform= leaks a codecvt mapping per call
-
-=src/collate.cpp= 878-884 (narrow) and 1053-1059 (wide): a transform
-that meets a character outside the table maps the codeset's codecvt
-database for its validity check through =__rw_get_facet_data= and
-never releases it. Under =zh_CN.UTF-8=, 100 wide transforms of U+743B
-add 100 mappings (=/proc/self/maps=). Since the 2005 import. Found by
-probe, 2026-11-02.
-
-Fix: release the mapping at the end of the call, or map once per
-facet.
-
-Check: the mapping count stays flat over 100 transforms.
-
 ** TODO Dead code in the locale class and the catalog
 
 =src/locale_body.h= 131-146: two name-taking =__rw_locale=
@@ -425,45 +376,15 @@ Fix: remove, or characterize =catopen= and keep the catalog under it.
 
 Check: grep, then a 15D build with the code removed.
 
-** TODO A bad category throws with the bad-name message
+** TODO =num_put= writes an unbounded run of zeros for a negative precision
 
-=src/locale_combine.cpp= 657-660: an invalid category passed to
-=locale (const locale&, const char*, category)= throws =runtime_error=
-with the message for a bad name, naming the locale name. Found by
-reading, 2026-11-02.
+=src/num_put.cpp= 773-825: =fixed=, =setprecision (-1000)=, 1234
+fires the assertion at 837 after the write. Found by probe,
+2026-11-02.
 
-Fix: the message names the category.
+Fix: bound the run by the buffer, growing it as the digits path does.
 
-Check: =what ()= names the category.
-
-** TODO Racing =locale::global= calls can split the C and C++ locales
-
-=locale::global= (=src/locale_global.cpp= 60-72) calls =setlocale= and
-swaps the body under two different locks, so two racing calls can
-leave the C locale from one and the C++ global from the other.
-Hypothesis, by reading, 2026-11-02.
-
-Fix: one lock around both, or a decision that the race is the
-caller's.
-
-Check: a =22.locale.statics.mt= variant comparing =setlocale (LC_ALL, 0)=
-with =locale ().name ()= after the race.
-
-** TODO A mixed-name global does not reach the C library
-
-=locale::global= calls =setlocale= with the library's composite name,
-which lists its six categories; glibc accepts a composite only when it
-lists all twelve of its own, so =setlocale (LC_ALL, 0)= stays "C"
-after =global= of a mixed-name locale (by probe). The comment at
-=src/locale_global.cpp= 62-63 assumes =setlocale= understands the
-format; =ref-locale.md= ch. 3 says the call takes effect. 14882:2003
-22.1.1.5 p2. Found 2026-11-02.
-
-Fix: a decision: compose glibc's twelve-category name for the call,
-or record that a mixed name does not reach the C library.
-
-Check: =setlocale (LC_ALL, 0)= after =global= of a two-locale mixture
-names both, or the master document records the limit.
+Check: AddressSanitizer on the case.
 
 ** TODO =num_put= overruns its buffer when it groups
 
@@ -481,13 +402,13 @@ the separators before the call.
 Check: both cases under AddressSanitizer; a row in =22.locale.num.put=
 for =fixed= 1e300 grouped.
 
-** TODO =num_put= writes an unbounded run of zeros for a negative precision
+** TODO =money_put= copies a digit string into its buffer without a bound
 
-=src/num_put.cpp= 773-825: =fixed=, =setprecision (-1000)=, 1234
-fires the assertion at 837 after the write. Found by probe,
-2026-11-02.
+=include/loc/_money_put.cc= 391: the digits are copied into the
+304-byte =__buf= unbounded when grouping is non-empty; 1000 digits
+under =en_US.UTF-8= give SIGSEGV. Found by probe, 2026-11-02.
 
-Fix: bound the run by the buffer, growing it as the digits path does.
+Fix: size the buffer for the digits and the separators.
 
 Check: AddressSanitizer on the case.
 
@@ -504,94 +425,116 @@ for it, and free it.
 
 Check: AddressSanitizer; a row in =22.locale.money.put= for 1e320L.
 
-** TODO =money_put= copies a digit string into its buffer without a bound
+** TODO Two latent overruns in the time facets
 
-=include/loc/_money_put.cc= 391: the digits are copied into the
-304-byte =__buf= unbounded when grouping is non-empty; 1000 digits
-under =en_US.UTF-8= give SIGSEGV. Found by probe, 2026-11-02.
-
-Fix: size the buffer for the digits and the separators.
-
-Check: AddressSanitizer on the case.
-
-** TODO =num_get= of =unsigned int= clamps without =failbit=
-
-=src/num_get.cpp= 321-336, the =_C_uint= case, clamps but never sets
-=err= to =ERANGE=: "4294967296" and "-1" both give 4294967295 with
-=goodbit=, through the facet and through =operator>>=;
-=unsigned short= sets =failbit=. The conformance record's LWG 23 row
-("sets failbit and clamps") is false for this type. Found by probe,
-2026-11-02.
-
-Fix: the =ERANGE= path of the other unsigned cases.
-
-Check: both inputs set =failbit= through the facet and the extractor.
-
-** TODO =__rw_check_grouping= never skips trailing zeros of a grouping
-
-=src/num_get.cpp= 125: =while (grpn-- != ngrpings && ...)= is false on
-its first test, so the loop never runs and the last grouping is the
-last byte whatever it holds. With grouping "\3\0", "1,234,567" and
-"1234,567" both fail where =num_put= writes "1,234,567". Found by
-probe, 2026-11-02.
-
-Fix: start the scan one below =ngrpings=.
-
-Check: "\3\0" reads "1234,567" and "1,234,567".
-
-** TODO =money_get= keeps one leading zero in =digits=
-
-=include/loc/_money_get.cc= 445: the loop strips a zero only while
-another zero follows, so "0.07" gives "07" and "007" gives "0700",
-neither the standard's digits as read (22.2.6.1.2 p1) nor the
-comment's intent. The test compares through =sscanf= and cannot see
-it. Found by probe, 2026-11-02.
-
-Fix: strip every leading zero but the last, or none; the comment
-decides which.
-
-Check: a text comparison in =22.locale.money.get= for "0.07" and "007".
-
-** TODO =money_put='s last-field check never fires
-
-=include/loc/_money_put.cc= 183 and 200: =sizeof __fmat != __i - 1=
-is always true (the pattern has four fields, =__i= at most 3), so a
-=space= in the last field is not diagnosed; the message names
-=num_put=. Found by reading, 2026-11-02.
-
-Fix: compare =__i= with the last index; name =money_put=.
-
-Check: a pattern ending in =space= throws =runtime_error=.
-
-** TODO Signed overflow in =__rw_dtoa=
-
-=src/num_put.cpp= 162 and 299 do =i = -i=, undefined for =LONG_MIN= and
-=LLONG_MIN=; the output is right in practice. Found by reading,
-2026-11-02.
-
-Fix: negate in the unsigned type.
-
-Check: a UBSan build of the library putting =LONG_MIN=.
-
-** TODO =num_put= leaks its grown buffer on an exception
-
-=include/loc/_num_put.cc= 185: =_C_put= frees a grown =__pbuf= only on
-the normal path; =num_get= and =money_get= have guards. Found by
+=include/loc/_time_get.cc= 545 (=__names [100]=) and 145
+(=__fmts [100]=) take every era record, and localedef caps =alt_digits=
+at 100 but not eras (=util/localedef/scalar.cpp= 473-505).
+=__rw_fmt_time= keeps one =bufsize= while it advances
+(=src/time_put.cpp= 1506/1517, wide 1643/1654), so an expansion past
+256 elements overruns =do_put='s =__buf [256]=
+(=include/loc/_time_put.cc= 75). Shipped data reaches neither: 11 eras
+at most (ja_JP), 172 bytes for the longest =%c= (km_KH.UTF-8). Found by
 reading, 2026-11-02.
 
-Fix: the guard the other two use.
+Fix: bound the era count where the arrays are filled (or size them
+from the record); carry the remaining size through =__rw_fmt_time=.
 
-Check: AddressSanitizer's leak report with an output iterator that
-throws.
+Check: generated locales with 101 era records and a 300-character
+=%c=, under the sanitizer.
 
-** TODO =__rw_iter_failed= has no caller
+** TODO Racing =locale::global= calls can split the C and C++ locales
 
-=include/loc/_num_put.cc= 44-53, uncalled since 69ad31e6. Found
+=locale::global= (=src/locale_global.cpp= 60-72) calls =setlocale= and
+swaps the body under two different locks, so two racing calls can
+leave the C locale from one and the C++ global from the other.
+Hypothesis, by reading, 2026-11-02.
+
+Fix: one lock around both, or a decision that the race is the
+caller's.
+
+Check: a =22.locale.statics.mt= variant comparing =setlocale (LC_ALL, 0)=
+with =locale ().name ()= after the race.
+
+** TODO =%EY= keeps a year its format then fails on
+
+=__rw_read_era= stores its local =tm= whenever no bit but =eofbit= is
+set (=include/loc/_time_get.cc= 301-334). Under =%EY= a =%Ey= of the
+era format that succeeds sets the year in the local =tm=; a literal
+that then fails, or the end of input, adds only =eofbit=, so the year
+read is stored: "Heisei 8 Nex" under the test locale stores 1996 with
+=eofbit=. The comment at =include/loc/_time_get.cc= 99-100 and
+=doc/notes/analysis-time-get-state.md= 9.2 say a failed era directive
+leaves the year as it was; =%EC= and a lone =%Ey= do (=src/era.cpp=
+340-373). Found by the documentation sweep of 2026-11-02, by reading.
+
+Fix: a decision: keep the year a =%EY= read before its format failed
+(C++11 22.4.5.1.2 p13 leaves the members unspecified), or store
+nothing unless the whole format matched. The comment at =include/loc/_time_get.cc= 97-100 and
+=analysis-time-get-state.md= 9.2 follow.
+
+Check: a row under the test locale, "Heisei 8 Nex" against =%EY=,
+pinning the decision either way.
+
+** TODO =eofbit= before the pattern ends sets =failbit= and stores nothing
+
+"%Y-%m" and "%Y " on "2026" both fail: the walk ends with =failbit=
+when a directive sets =eofbit= before the pattern is done. N3242 p8
+lists =err != goodbit= before =s == end=, a reading under which
+=eofbit= is left alone and the year stored. Found by probe,
 2026-11-02.
 
-Fix: remove.
+Fix: a decision on how p8's order reads; then the walk.
 
-Check: grep; a 15D build.
+Check: the two rows pinning the reading taken.
+
+** TODO Implied =tm_wday= and =tm_yday= are left as the caller had them
+
+"%Y %m %d" determines the weekday and the day of the year; the
+library stores neither and glibc's =strptime= fills both. Not a
+conformance question (N3242 p12 owes only the directive's members);
+a decision on whether to fill them. Found 2026-11-02.
+
+Fix: a decision; if filled, after the walk, from the three fields.
+
+Check: a row "%Y %m %d" on "2026-11-02" with =tm_wday= 0, =tm_yday= 305.
+
+** TODO =%C= of a year past 9999 writes the century modulo 100
+
+Year 10000 writes "00", pinned at =tests/localization/22.locale.time.put.cpp=
+708; the POSIX.1-2024 width sentence b54acca9 cites gives "100".
+Found 2026-11-02.
+
+Fix: a decision, then the row.
+
+Check: the row at 708 says what the decision says.
+
+** TODO =put= over a pattern pads every directive to the width
+
+The width of the stream is applied to every directive of a pattern
+and never reset: "%H:%M" at width 5 writes "***09:***05". No row has
+a pattern with a width. Found by probe, 2026-11-02.
+
+Fix: a decision: the width applies once (the first directive, as
+=num_put= consumes it) or to each; then reset or keep.
+
+Check: a row with a width and a two-directive pattern.
+
+** TODO The blank bit is visible through =ctype<char>::is= under a database
+
+=plan-localedef-backend.md= 3.1 says the =blank= bit written as 0x400
+is "invisible until a =ctype_base::blank= names it", and the header
+comment of =util/localedef/wctype.cpp= says it "stays unread". By
+probe, under =de_DE.ISO-8859-1= the vector =ctype<char>::is= returns
+0x403 for a space (the classic facet 0x003) and =table ()= hands out
+the same words; the wide vector form strips it with =__rw_all=. Found
+2026-11-02.
+
+Fix: a decision: strip the bit in the narrow vector form and =table ()=
+as the wide form does, or name it a visible extension and record it.
+
+Check: the vector =is= of a space under a database locale equals the
+classic facet's, or the extension is in the master document.
 
 ** TODO Database locales have empty =truename= and =falsename=
 
@@ -622,6 +565,66 @@ the limit.
 
 Check: the narrow output of every UTF-8 locale is valid UTF-8, or
 the limit is in the master document.
+
+** TODO A mixed-name global does not reach the C library
+
+=locale::global= calls =setlocale= with the library's composite name,
+which lists its six categories; glibc accepts a composite only when it
+lists all twelve of its own, so =setlocale (LC_ALL, 0)= stays "C"
+after =global= of a mixed-name locale (by probe). The comment at
+=src/locale_global.cpp= 62-63 assumes =setlocale= understands the
+format; =ref-locale.md= ch. 3 says the call takes effect. 14882:2003
+22.1.1.5 p2. Found 2026-11-02.
+
+Fix: a decision: compose glibc's twelve-category name for the call,
+or record that a mixed name does not reach the C library.
+
+Check: =setlocale (LC_ALL, 0)= after =global= of a two-locale mixture
+names both, or the master document records the limit.
+
+** TODO The UTF-16 names set flags no converter reads
+
+The constructor of =codecvt_byname<wchar_t, char>= (=src/wcodecvt.cpp=
+near 1100) recognizes =UTF-16=, =UTF-16BE= and =UTF-16LE= and sets
+=__rw_utf16*=, but no converter reads the flags: =out= under
+=UTF-16= writes "61 c3 a9", UTF-8. Found by probe, 2026-11-02.
+
+Fix: a decision: implement the three, or stop recognizing the names
+so the C library or =error= answers.
+
+Check: per the decision; a row in =22.locale.codecvt= either way.
+
+** TODO ISO-2022 conversion does not convert
+
+By probe: =in= of "a ESC $ B $ \" ESC ( B" under =ISO-2022-JP=
+returns =error= at byte 0; =out= of {a, U+3042} writes ESC $ @, the
+1978 designation; =unshift= writes nothing; =-KR= and =-CN= answer
+=error= and 0 to everything; =do_length= (=src/iso2022.cpp= 1871,
+1876) returns =CODECVT_ERROR= (2) as a length when no state slot is
+free, and a stray =while (*from == ESCAPE_CHAR)= around the escape
+branch reads =*from= at =from_end= after an escape that ends the
+input. No test covers any of it; the ISO-2022 branches also check no
+state (=analysis-codecvt-invalid-state.md= ch. 0 says every path
+does). Found 2026-11-02.
+
+Fix: a decision first: keep ISO-2022 and make it work against glibc's
+=iconv=, or drop the four names.
+
+Check: a round trip of the test fixtures through =iconv= and the
+facet; ASan on =length= over "\x1b(B".
+
+** TODO The =__rw_once= comment names a static mutex path that is gone
+
+=src/once.cpp= 95-97 says the static mutex of =int= "is itself
+constructed through =__rw_once= where mutexes cannot be initialized
+statically". 92d18f73 removed that branch with
+=_RWSTD_NO_STATIC_MUTEX_INIT=; =__rw_get_static_mutex= returns the
+statically initialized mutex (=include/rw/_mutex.h= 193-198) and
+calls no =__rw_once=.
+
+Fix: the comment says what the code does.
+
+Check: reading.
 
 * Tests
 
