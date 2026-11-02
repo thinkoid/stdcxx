@@ -751,7 +751,11 @@ decides: a digit takes the rest that begins with `%Ey`, any other
 character the rest that begins with it. "令和8年" is 2026 and "令和元年"
 2019. Any other shape sets `eofbit`: a format with no `%EC`, an
 empty format among them, a rest that one character does not decide,
-a directive other than `%Ey` in a rest.
+a directive other than `%Ey` in a rest. The empty format is a shape
+no locale can have: `localedef` rejects an era record without a
+format, "missing era format", as glibc's does, so the reader meets
+one only in a hand-built database. `time_put` writes nothing for
+its `%EY`; the two sides agree and the case is not pinned.
 
 ### 9.9 The zeroed `tm`
 

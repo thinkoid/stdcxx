@@ -19,24 +19,6 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses.
 
-** TODO An era with an empty year format
-
-=%Ec=, =%Ex= and =%EX= read an empty =era_d_t_fmt=, =era_d_fmt= or
-=era_t_fmt= as the plain =%c=, =%x= or =%X=, as =time_put= writes
-them; =ar_SA= has an empty =era_d_fmt= and =ja_JP= no =era_t_fmt=. An
-era record whose =era_format= is empty has no such counterpart.
-=time_put= writes nothing for its =%EY=, as glibc's =strftime= does,
-and =time_get='s =%EY= finds no =%EC= in it and sets =eofbit=, so the
-year does not read back. XSH's fallback applies where "the
-alternative format or specification does not exist", which an empty
-format can be read as. No locale source has such a record.
-
-Fix: a decision: write and read =%Y= for an era whose format is
-empty, on both sides, or keep the pair and record it.
-
-Check: a record with an empty format in the generated locale of
-=22.locale.time.get=, its =%EY= round trip either way.
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
