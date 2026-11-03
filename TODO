@@ -22,19 +22,23 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =%F= is written and counted but never read
+** TODO =%G=, =%g=, =%u= and =%V= are written but never read
 
-=time_put= writes =%F= and =do_date_order= counts it, but the parser's
-table has no ='F'=, so =do_get= fails it. =nan_TW.UTF-8@latin= has
-=d_fmt= "%F", so its =get_date= fails on its own =%x= ("2026-11-02"
-gives =failbit=), against 14882:2003 22.2.5.1.2 p4. Found by probe,
-2026-11-02. (=analysis-time-get-state.md='s directives table lists
-=%F= among the fixed formats read; it is not.)
+=time_put= writes the four, but the parser's table has no row for any
+of them, so =do_get= fails each with =failbit= and nothing consumed
+("%u" on "3", "%V" on "45", "%G" on "2026", "%g" on "26", by probe).
+The table was written to the C89 =strftime= set plus the XSH composites
+=%R= and =%T=; the 2005 import's writer already had the C99 additions
+and its reader none of them, =%F= being the first to be added. glibc's
+=strptime= reads =%u= into =tm_wday= (1..7, Monday 1, 7 stored as 0)
+and parses =%G=, =%g= and =%V= to discard them, as =%U= and =%W= are
+read here.
 
-Fix: =%F= in the parser's table as =%Y-%m-%d=, the way =%D= is =%m/%d/%y=.
+Fix: =%u= as a weekday with bounds 1..7 stored modulo 7; =%G= as four
+digits, =%g= as two and =%V= as two with bounds 1..53, each read into
+a local and discarded as =%U= and =%W= are.
 
-Check: the =%x= round trip under =nan_TW.UTF-8@latin=; a row "%F" on
-"2026-11-02".
+Check: rows for each in =22.locale.time.get=, alone and in a pattern.
 
 ** TODO A pattern that ends inside a conversion succeeds
 

@@ -25,7 +25,7 @@ alternatives that were weighed for the week number in October 2026.
 | `%p` | the half of the day, the locale's AM or PM names | none | sets the half of the day of the hour it finds, before or after a `%I` |
 | `%Z` | the time zone name | none | consumed, nothing to assign |
 | `%z` | the offset from UTC | `tm_gmtoff` where the C library has it | nothing to assign elsewhere |
-| `%x`, `%X`, `%c`, `%D`, `%r`, `%R`, `%T` | a locale's or a fixed format, a whole pattern | several | a nested walk: what it parsed is settled inside it and does not reach the pattern around it; `%F` is written by `time_put` but not read (`TODO`, "`%F` is written and counted but never read") |
+| `%x`, `%X`, `%c`, `%D`, `%F`, `%r`, `%R`, `%T` | a locale's or a fixed format, a whole pattern | several | a nested walk: what it parsed is settled inside it and does not reach the pattern around it |
 | `%E` with `C`, `y`, `Y`, `x`, `X`, `c` | the era forms: an era name, a year within the era, the era's formats | `tm_year` and others | without era data the plain directive; with it, an era has no member, so `%EC` moves the year into the era and `%Ey` reads in the era of the year, and `%EY`'s era is unknown until its name is read; chapter 9 |
 | `%O` with a numeric directive | the locale's alternative digits for the value | the plain directive's | a value with no alternative symbol is read as digits; the first alternative symbol may be empty |
 

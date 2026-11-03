@@ -574,6 +574,25 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0,  0, 0,   0),    "4/0/2002",  3, "D", 0, Fail);
     TEST (T (0, 0, 0,  0, 0,   0),   "4/32/2002",  4, "D", 0, Fail);
 
+    // %F The date as %Y-%m-%d; with a modifier it is invalid.
+    STEP ("%F: the date as %Y-%m-%d");
+    TEST (T (0, 0, 0,  2, 10,  126),  "2026-11-02", 10, "F", 0, Eof);
+    TEST (T (0, 0, 0,  2, 10,  126), "2026-11-02x", 10, "F", 0, Good);
+    TEST (T (0, 0, 0,  2, 10,  126),   "2026-11-2",  9, "F", 0, Eof);
+    TEST (T (0, 0, 0,  2, 10, -1874),   "26-11-02",  8, "F", 0, Eof);
+    TEST (T (0, 0, 0,  0,  0,    0),  "2026/11/02",  4, "F", 0, Fail);
+    TEST (T (0, 0, 0,  0,  0,    0),  "2026-13-02",  7, "F", 0, Fail);
+    TEST (T (0, 0, 0,  0,  0,    0),  "2026-11-00", 10, "F", 0, Eof | Fail);
+    TEST (T (0, 0, 0,  0,  0,    0),  "2026-11-32", 10, "F", 0, Eof | Fail);
+    TEST (T (0, 0, 0,  0,  0,    0),    "2026-11-",  8, "F", 0, Eof | Fail);
+    TEST (T (0, 0, 0,  0,  0,    0),            "",  0, "F", 0, Eof | Fail);
+    TEST (T (),                       "2026-11-02",  0, "EF", 0, Fail);
+    TEST (T (),                       "2026-11-02",  0, "OF", 0, Fail);
+
+    TEST (T (0, 0, 7,  2, 10,  126), "2026-11-02 07", 13, "%F %H", 0, Eof);
+    TEST (T (0, 0, 7,  2, 10,  126), "7 2026-11-02",  12, "%H %F", 0, Eof);
+    TEST (T (0, 0, 0,  2, 10,  126), "032026-11-02",  12, "%d%F",  0, Eof);
+
     // %e Equivalent to %d; leading zeros are permitted but not required.
     STEP ("%e: equivalent to %d");
     TEST (T (0, 0, 0,  1),  "01", 2, "e", 0, Eof);

@@ -1242,6 +1242,14 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             break;
         }
 
+        case 'F': {   // equivalent to "%Y-%m-%d" (the ISO 8601 date)
+            static const void* const pat[] = { "%Y-%m-%d", L"%Y-%m-%d" };
+            names [0] = pat [wide];
+            sizes [0] = 8;
+            cnt       = 1;
+            break;
+        }
+
         case 'd': case 'e':   // day of month [01..31]
             lob   = 1;
             hib   = 31;

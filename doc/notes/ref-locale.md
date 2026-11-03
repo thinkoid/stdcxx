@@ -1963,7 +1963,7 @@ count; `pmem` names the member.
 
 - One string is a pattern: the locale's `%c`, `%x`, `%X`; `%r` from
   `t_fmt_ampm`, or `"%I:%M:%S %p"` where that is empty (9d3e7b3d);
-  `%D`, `%R`, `%T`; `%Op` as `"%p"`. It goes to `get` over that range
+  `%D`, `%F`, `%R`, `%T`; `%Op` as `"%p"`. It goes to `get` over that range
   with the caller's `t`, so each nested directive is a virtual call
   again.
 - Several strings are names. `__rw_match_name`
@@ -2211,10 +2211,9 @@ comments of the =time_get= test are swapped", and "A reference for
   `TODO`. Check: that row, after the decision.
 - `"%Y %m %d"` leaves the implied `tm_wday` and `tm_yday`; glibc fills
   them; p14 allows either. Not queued. Check: a decision.
-- `%F` is not read, though `time_put` writes it and `do_date_order`
-  counts it. nan_TW@latin's `d_fmt` is `"%F"`, so its `get_date` fails
-  on its own `%x` (by probe), against 22.2.5.1.2, p4. Check: a round
-  trip of `%x` under nan_TW.UTF-8@latin.
+- `%G`, `%g`, `%u` and `%V` are not read, though `time_put` writes
+  them: the table has no row for any of them (by probe). In `TODO`.
+  Check: a row each, after the fix.
 - A pattern ending inside a conversion succeeds: `"%Y%"` and `"%Y%E"`
   on `"2026x"` store 2026 with `goodbit` (by probe); N3242 p8 asks for
   `failbit`. Check: those rows.
