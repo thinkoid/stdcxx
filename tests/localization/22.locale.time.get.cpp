@@ -1193,6 +1193,19 @@ void test_posix (charT, const char *cname)
     TEST (T (0), "0", 0, "s", 0, Fail);
     TEST (T (0), "0", 0, "z", 0, Fail);
 
+    // a '%' left pending at the end of the pattern, with or without a
+    // modifier, forms no conversion specification: failbit, nothing
+    // stored (C++11 22.4.5.1.1, p8)
+    STEP ("a pattern that ends inside a conversion");
+    TEST (T (), "2026x",  4, "%Y%",  0, Fail);
+    TEST (T (), "2026x",  4, "%Y%E", 0, Fail);
+    TEST (T (), "2026x",  4, "%Y%O", 0, Fail);
+    TEST (T (), "2026 x", 5, "%Y %", 0, Fail);
+    TEST (T (),     "x",  0, "%",    0, Fail);
+    TEST (T (),    "26",  0, "%E",   0, Fail);
+    TEST (T (),    "26",  0, "%O",   0, Fail);
+    TEST (T (), "2026",   4, "%Y%",  0, Eof | Fail);
+
 
     // %Ec The locale's alternative date and time representation. 
     // %EC The name of the base year (period) in the locale's alternative

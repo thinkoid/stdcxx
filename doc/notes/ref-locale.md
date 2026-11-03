@@ -2214,9 +2214,6 @@ comments of the =time_get= test are swapped", and "A reference for
   `TODO`. Check: that row, after the decision.
 - `"%Y %m %d"` leaves the implied `tm_wday` and `tm_yday`; glibc fills
   them; p14 allows either. Not queued. Check: a decision.
-- A pattern ending inside a conversion succeeds: `"%Y%"` and `"%Y%E"`
-  on `"2026x"` store 2026 with `goodbit` (by probe); N3242 p8 asks for
-  `failbit`. Check: those rows.
 - The caller's `iostate` survives: every exit ORs into `err`, since the
   2005 import, so a `failbit` passed in stays after a good parse (by
   probe). 22.2, p2 ignores the value; N3242 p8 and p12 start at

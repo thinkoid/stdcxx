@@ -22,19 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO A pattern that ends inside a conversion succeeds
-
-"%Y%" and "%Y%E" on "2026x" store 2026 with =goodbit=; N3242
-22.4.5.1.1 p8 asks for =failbit= on a pattern that is not a valid
-sequence of directives. =get= (=include/loc/_time_get.cc=, loop at
-483, =__fmt [0]= set at 506) never checks a pending =%= after the
-loop. Found by probe, 2026-11-02.
-
-Fix: a =%= or =%E= or =%O= left pending at the pattern's end sets
-=failbit=.
-
-Check: the two rows, =failbit=, nothing stored.
-
 ** TODO The primary =codecvt= returns without setting the next pointers
 
 =include/loc/_codecvt.h= 82-112: the primary template's =do_in=,

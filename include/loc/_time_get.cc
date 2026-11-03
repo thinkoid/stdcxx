@@ -524,6 +524,12 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
         }
     }
 
+    // a '%' left pending at the end of the pattern, with or without
+    // a modifier, forms no conversion specification: C++11 22.4.5.1.1,
+    // p8, failbit
+    if (__fmt [0])
+        __errtmp |= __rw::__rw_failbit;
+
     // store value only on success
     if (!(__errtmp & ~__rw::__rw_eofbit) && __tmb)
         *__tmb = __tmp;
