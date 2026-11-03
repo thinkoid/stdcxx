@@ -1078,6 +1078,61 @@ void test_posix (charT, const char *cname)
     TEST (T (0, 0, 0,  0,  0, 126, 0,   0),
           "2026 43", 7, "%Y %W", 0, Eof);
 
+    // %u The ISO 8601 weekday as a decimal number [1,7], Monday 1; 7 is
+    //    Sunday, tm_wday 0. With the E modifier it is invalid.
+    STEP ("%u: the ISO 8601 weekday");
+    TEST (T (0, 0, 0, 0, 0, 0, 1),  "1", 1, "u", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 6),  "6", 1, "u", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0),  "7", 1, "u", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0),  "0", 1, "u", 0, Eof | Fail);
+    TEST (T (0, 0, 0, 0, 0, 0, 0),  "8", 1, "u", 0, Eof | Fail);
+    TEST (T (0, 0, 0, 0, 0, 0, 1), "12", 1, "u", 0, Good);
+    TEST (T (0, 0, 0, 0, 0, 0, 0),   "", 0, "u", 0, Eof | Fail);
+    TEST (T (0, 0, 0, 0, 0, 0, 0),  "x", 0, "u", 0, Fail);
+    TEST (T (0, 0, 0, 0, 0, 0, 3),  "3", 1, "Ou", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 0, 0),  "7", 1, "Ou", 0, Eof);
+    TEST (T (),                     "3", 0, "Eu", 0, Fail);
+
+    // %V The ISO 8601 week number of the year as a decimal number [01,53].
+    //    std::tm has no member for it: read, validated and discarded, as
+    //    %U and %W are. With the E modifier it is invalid.
+    STEP ("%V: the ISO 8601 week of the year");
+    TEST (T (0),  "01", 2,  "V", 0, Eof);
+    TEST (T (0),  "43", 2,  "V", 0, Eof);
+    TEST (T (0),  "53", 2,  "V", 0, Eof);
+    TEST (T (0),   "5", 1,  "V", 0, Eof);
+    TEST (T (0), "430", 2,  "V", 0, Good);
+    TEST (T (0),  "00", 2,  "V", 0, Eof | Fail);
+    TEST (T (0),  "54", 2,  "V", 0, Eof | Fail);
+    TEST (T (0),    "", 0,  "V", 0, Eof | Fail);
+    TEST (T (0),  "43", 2, "OV", 0, Eof);
+    TEST (T (),   "43", 0, "EV", 0, Fail);
+
+    // %G The ISO 8601 week-based year as a decimal number, at most four
+    //    digits, and %g its last two. std::tm has no member for either:
+    //    read, validated and discarded. With a modifier they are invalid.
+    STEP ("%G and %g: the week-based year, read and discarded");
+    TEST (T (0),  "2026", 4, "G", 0, Eof);
+    TEST (T (0),  "0000", 4, "G", 0, Eof);
+    TEST (T (0),  "9999", 4, "G", 0, Eof);
+    TEST (T (0),    "26", 2, "G", 0, Eof);
+    TEST (T (0), "20260", 4, "G", 0, Good);
+    TEST (T (0), "-2026", 0, "G", 0, Fail);
+    TEST (T (0),      "", 0, "G", 0, Eof | Fail);
+    TEST (T (),   "2026", 0, "EG", 0, Fail);
+    TEST (T (),   "2026", 0, "OG", 0, Fail);
+    TEST (T (0),    "26", 2, "g", 0, Eof);
+    TEST (T (0),     "6", 1, "g", 0, Eof);
+    TEST (T (0),   "260", 2, "g", 0, Good);
+    TEST (T (0),      "", 0, "g", 0, Eof | Fail);
+    TEST (T (),     "26", 0, "Eg", 0, Fail);
+    TEST (T (),     "26", 0, "Og", 0, Fail);
+
+    // the ISO 8601 week date, and %u with the members it leaves alone
+    TEST (T (0, 0, 0, 0, 0,   0, 2), "2026-W45-2", 10, "%G-W%V-%u", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 126, 0), "7 2026",      6, "%u %Y",     0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 126, 4), "2026 4",      6, "%Y %u",     0, Eof);
+
     // each numeric conversion reads at most two digits, %j three and %Y
     // four, as in glibc's strptime, so that adjacent ones separate
     STEP ("adjacent numeric conversions");
@@ -1136,7 +1191,6 @@ void test_posix (charT, const char *cname)
     TEST (T (0), "0", 0, "N", 0, Fail);
     TEST (T (0), "0", 0, "P", 0, Fail);
     TEST (T (0), "0", 0, "s", 0, Fail);
-    TEST (T (0), "0", 0, "u", 0, Fail);
     TEST (T (0), "0", 0, "z", 0, Fail);
 
 

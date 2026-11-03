@@ -715,13 +715,18 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         __rw::__rw_get_timepunct (this, __data, &__tmp,
                                  &__pmem, __pv, __sizes);
 
-    // std::tm has no member for the week number of %U and %W: it is
-    // read into a local, validated and discarded; C++11 22.4.5.1.2,
-    // p12, has do_get assign the members the directive corresponds to
-    int __week = 0;
+    // std::tm has no member for the week number of %U, %W and %V or
+    // the week-based year of %G and %g: each is read into a local,
+    // validated and discarded; C++11 22.4.5.1.2, p12, has do_get
+    // assign the members the directive corresponds to. %G and %g
+    // take no modifier
+    int __discard = 0;
 
-    if (('U' == __fmt || 'W' == __fmt) && 'E' != __modifier)
-        __pmem = &__week;
+    if (   ('U' == __fmt || 'W' == __fmt || 'V' == __fmt)
+        && 'E' != __modifier)
+        __pmem = &__discard;
+    else if (('G' == __fmt || 'g' == __fmt) && !__modifier)
+        __pmem = &__discard;
 
     if (1 == __cnt) {
         _RWSTD_ASSERT (0 != __names [0]);
@@ -965,6 +970,11 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
             __tmp.tm_year = __cent < 0 || __sign < 0 ?
                 __cent - __digits - 1900 : __cent + __digits - 1900;
+        }
+        else if ('u' == __fmt) {
+            // %u counts the ISO 8601 weekday from Monday as 1 to Sunday
+            // as 7; tm_wday counts from Sunday as 0
+            __tmp.tm_wday %= 7;
         }
         else if ('I' == __fmt || 'l' == __fmt) {
             // %I sets the hour within the half of the day found in

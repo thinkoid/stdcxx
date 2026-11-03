@@ -15,9 +15,11 @@ alternatives that were weighed for the week number in October 2026.
 | `%C` | the century, two digits | `tm_year` | in `strptime` a year only with `%y`; the library sets the century in `tm_year` and keeps the two low digits it finds there, so "%y %C" combines (6.1) |
 | `%y` | the year within the century, two digits, pivoted 69..99 to 19xx and 00..68 to 20xx | `tm_year` | the library pivots and sets the whole year, so a `%C` before it holds only inside the pivot's window; a negative year in the `tm` it keeps (8.4) |
 | `%Y` | the full year | `tm_year` | fine alone; it drops a `%y` parsed before it |
+| `%G`, `%g` | the ISO 8601 week-based year, four digits or its last two | none | read, validated and discarded; `tm` has no week-based year |
 | `%U` | the week of the year, Sunday the first day, 00..53 | none | a day of the year only with a year and a weekday; alone, nothing to assign |
 | `%W` | the week of the year, Monday the first day, 00..53 | none | as `%U`; a Sunday is the last day of the previous Monday-week |
-| `%w`, `%a`, `%A` | the weekday, a number or a name | `tm_wday` | fine alone; in `strptime` also an input to the week derivation, which the library does not do |
+| `%V` | the ISO 8601 week of the year, 01..53 | none | as `%U`: read, validated and discarded |
+| `%w`, `%u`, `%a`, `%A` | the weekday, a number (Sunday 0, or Monday 1 to Sunday 7 for `%u`) or a name | `tm_wday` | fine alone; in `strptime` also an input to the week derivation, which the library does not do |
 | `%j` | the day of the year, 001..366 | `tm_yday` | fine alone; the library derives no day of the year to compete with it |
 | `%m`, `%d`, `%e` | the month and the day of the month | `tm_mon`, `tm_mday` | fine alone; together with the year they imply `tm_wday` and `tm_yday`, which nothing names and the library leaves as the caller had them (7) |
 | `%I`, `%l` | the hour on the 12-hour clock, 1..12 | `tm_hour` | the hour of the day only with `%p`; stored modulo 12 within the half of the day `tm_hour` already holds |
@@ -31,7 +33,8 @@ alternatives that were weighed for the week number in October 2026.
 
 ## 0. The short version
 
-- A `%U` or `%W` week number has no `tm` member. `%C` alone has
+- A `%U`, `%W` or `%V` week number has no `tm` member, nor has the
+  week-based year of `%G` and `%g`. `%C` alone has
   none, nor has `%p`. `%C` with `%y`, `%I` with `%p`, and a week with
   a year and a weekday are each worth a member only in combination.
 - The standard splits `strptime`'s one call into one virtual call
@@ -129,7 +132,8 @@ turned that one call into one virtual call per directive and kept
 the C structure as the only thing a call can hand back. The
 mismatch has four shapes in this facet.
 
-- Directives with no member. `%U` and `%W`, the week numbers; `%C`,
+- Directives with no member. `%U`, `%W` and `%V`, the week numbers;
+  `%G` and `%g`, the week-based year; `%C`,
   the century alone; `%p`, the half of the day; `%Z`, and `%z` where
   the C library's `tm` has no `tm_gmtoff`. A lone `do_get` has
   nothing to assign, and p12's "those struct tm members

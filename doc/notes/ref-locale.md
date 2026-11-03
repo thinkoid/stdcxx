@@ -1990,7 +1990,10 @@ the hour modulo 12 in the half of the day `tm_hour` holds. `%p` moves
 the hour it finds into its half; an hour outside 0 to 23 is `failbit`.
 `%y` pivots 69..99 to 19xx and 00..68 to 20xx, but appends to a
 negative year it finds, the trace of a parsed century. `%U`, `%W`,
-`%OU`, `%OW` check 00 to 53 and store nothing; `std::tm` has no week.
+`%OU`, `%OW` check 00 to 53, `%V` and `%OV` 01 to 53, `%G` four digits
+and `%g` two, and store nothing; `std::tm` has no week and no
+week-based year. `%u` and `%Ou` read 1 to 7, Monday first, and store
+7, Sunday, as 0.
 
 #### `time_get`: the era conversions
 
@@ -2211,9 +2214,6 @@ comments of the =time_get= test are swapped", and "A reference for
   `TODO`. Check: that row, after the decision.
 - `"%Y %m %d"` leaves the implied `tm_wday` and `tm_yday`; glibc fills
   them; p14 allows either. Not queued. Check: a decision.
-- `%G`, `%g`, `%u` and `%V` are not read, though `time_put` writes
-  them: the table has no row for any of them (by probe). In `TODO`.
-  Check: a row each, after the fix.
 - A pattern ending inside a conversion succeeds: `"%Y%"` and `"%Y%E"`
   on `"2026x"` store 2026 with `goodbit` (by probe); N3242 p8 asks for
   `failbit`. Check: those rows.

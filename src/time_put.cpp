@@ -1180,6 +1180,23 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             dig   = 2;
             break;
 
+        case 'u':
+            // %Ou: ISO 8601 weekday using alternative numeric symbols,
+            //      read as %u
+            *pmem = &tmb->tm_wday;
+            lob   = 1;
+            hib   = 7;
+            dig   = 1;
+            break;
+
+        case 'V':
+            // %OV: ISO 8601 week number of the year using alternative
+            //      numeric symbols, read as %V
+            lob   = 1;
+            hib   = 53;
+            dig   = 2;
+            break;
+
         case 'W':
             // %OW: Monday-based week number of the year
             //      using alternative numeric symbols, read as %W
@@ -1249,6 +1266,18 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             cnt       = 1;
             break;
         }
+
+        case 'G':   // ISO 8601 week-based year [0000..9999]
+            // std::tm has no member for it: do_get reads it into
+            // a local of its own and stores nothing
+            hib   = 9999;
+            dig   = 4;
+            break;
+
+        case 'g':   // the last two digits of the week-based year [00..99]
+            hib   = 99;
+            dig   = 2;
+            break;
 
         case 'd': case 'e':   // day of month [01..31]
             lob   = 1;
@@ -1349,6 +1378,20 @@ __rw_get_timepunct (const __rw_facet *pfacet,
         case 'W':   // Monday-based week number [00..53]
             // std::tm has no member for the week: do_get reads it
             // into a local of its own and stores nothing
+            hib   = 53;
+            dig   = 2;
+            break;
+
+        case 'u':   // ISO 8601 weekday [1..7], Monday 1; do_get
+                    // stores 7, Sunday, as 0
+            lob   = 1;
+            hib   = 7;
+            dig   = 1;
+            *pmem = &tmb->tm_wday;
+            break;
+
+        case 'V':   // ISO 8601 week number [01..53], not stored
+            lob   = 1;
             hib   = 53;
             dig   = 2;
             break;

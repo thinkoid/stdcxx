@@ -22,24 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =%G=, =%g=, =%u= and =%V= are written but never read
-
-=time_put= writes the four, but the parser's table has no row for any
-of them, so =do_get= fails each with =failbit= and nothing consumed
-("%u" on "3", "%V" on "45", "%G" on "2026", "%g" on "26", by probe).
-The table was written to the C89 =strftime= set plus the XSH composites
-=%R= and =%T=; the 2005 import's writer already had the C99 additions
-and its reader none of them, =%F= being the first to be added. glibc's
-=strptime= reads =%u= into =tm_wday= (1..7, Monday 1, 7 stored as 0)
-and parses =%G=, =%g= and =%V= to discard them, as =%U= and =%W= are
-read here.
-
-Fix: =%u= as a weekday with bounds 1..7 stored modulo 7; =%G= as four
-digits, =%g= as two and =%V= as two with bounds 1..53, each read into
-a local and discarded as =%U= and =%W= are.
-
-Check: rows for each in =22.locale.time.get=, alone and in a pattern.
-
 ** TODO A pattern that ends inside a conversion succeeds
 
 "%Y%" and "%Y%E" on "2026x" store 2026 with =goodbit=; N3242
