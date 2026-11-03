@@ -646,11 +646,20 @@ locale (const char *locname)
 locale::
 locale (const locale &rhs, const char *locname, category cat)
 {
-    // verify 22.1.1.2, p10: `locname' must not ne null
+    // verify 22.1.1.2, p10: `locname' must not be null
     _RWSTD_REQUIRES (locname,
                      (_RWSTD_ERROR_LOCALE_BAD_NAME,
                       _RWSTD_FUNC ("locale::locale (const locale&, "
-                                   "const char*, category)"), "(null"));
+                                   "const char*, category)"), "(null)"));
+
+    // verify 22.1.1.2, p10 (missing requirement, as p14): `cat' must
+    // be valid; checked here since a bad category and a bad name both
+    // come back as a null body
+    _RWSTD_REQUIRES (__rw::__rw_locale::_C_check_category (
+                         __rw::__rw_locale::_C_LC2category (cat)),
+                     (_RWSTD_ERROR_LOCALE_BAD_CAT,
+                      _RWSTD_FUNC ("locale::locale (const locale&, "
+                                   "const char*, category)"), cat));
 
     _C_body = __rw::__rw_locale::_C_get_body (rhs._C_body, 0, locname, cat, 0);
 

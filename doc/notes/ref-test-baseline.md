@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-11-03 (60c683eb), all six configurations.
+As of 2026-11-03 (f58562cd), all six configurations.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -223,6 +223,8 @@ all six tables:
 - 5438f794, 2026-11-03: `22.locale.money.put`, 1,346 to 1,352.
 - 60c683eb, 2026-11-03: `22.locale.money.get`, 3,952 (3,960 on 32-bit) to
   4,160.
+- f58562cd, 2026-11-03: `22.locale.num.put`, 1,495 to 1,499 (1,491 to
+  1,495 on 32-bit).
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.

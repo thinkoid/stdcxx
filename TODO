@@ -22,17 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO A bad category throws with the bad-name message
-
-=src/locale_combine.cpp= 657-660: an invalid category passed to
-=locale (const locale&, const char*, category)= throws =runtime_error=
-with the message for a bad name, naming the locale name. Found by
-reading, 2026-11-02.
-
-Fix: the message names the category.
-
-Check: =what ()= names the category.
-
 ** TODO =%%= in a =time_get= pattern always fails
 
 The parser's table in =src/time_put.cpp= (=__rw_get_timepunct=, the
@@ -701,6 +690,21 @@ Fix: a =test_ushrt= in the shape of =test_uint=: the limits, "-1",
 =errno=.
 
 Check: the rows run and the six pins move.
+
+** TODO The =locale= constructors' exceptions have no test
+
+No test under =tests/localization= constructs a =locale= from a bad
+name, a null name or a bad category and checks the exception;
+=22.locale.cons.mt= covers the constructors under threads only. The
+messages of =src/locale_combine.cpp= (bad name, bad category, the
+"(null)" placeholder) are pinned by nothing. Found 2026-11-03 while
+fixing the bad-category message.
+
+Fix: a =22.locale.cons= test: each constructor with each bad
+argument, =runtime_error= caught, =what ()= checked for the name or
+the category.
+
+Check: the rows run and the six pins gain a row.
 
 * Certification
 

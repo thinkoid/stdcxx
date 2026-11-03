@@ -592,9 +592,11 @@ extension.
 22.1.1.2, p14 has no Throws clause. `locale (one, other, cat)` with a
 category outside `all` throws `runtime_error`
 (`_RWSTD_ERROR_LOCALE_BAD_CAT`); the comment calls it a "missing
-requirement". The name-and-category constructor throws too, with the
-bad-name message. Why: e6c7726b. Pins: nothing; by probe for the
-two-locale constructor, by reading for the other. An extension.
+requirement". The name-and-category constructor checks the category
+first and throws the same, since a bad category and a malformed
+combined name both come back from `_C_get_body` as a null body; it
+threw the bad-name message for either until 2026-11-03. Why:
+e6c7726b. Pins: nothing; by probe. An extension.
 
 #### `locale::facet` and `locale::id` are the library's classes
 
