@@ -30,6 +30,7 @@
 #include <locale>
 
 #include <cstdio>     // for sscanf()
+#include <cstring>    // for strcmp()
 #include <new>        // for bad_alloc
 
 #include <rw_cmdopt.h>   // for rw_enabled()
@@ -412,7 +413,9 @@ void do_test (bool        intl,    // international?
 
         if (success) {
 
-            char narrow_buf [4096];
+            // the digits come back as they appeared, leading zeros
+            // included, so the string can be as long as the input
+            char* const narrow_buf = new char [bs.size () + 1];
             rw_narrow (narrow_buf, bs.c_str ());
 
             LongDouble x = 0;
@@ -440,100 +443,13 @@ void do_test (bool        intl,    // international?
                        cname, bs.c_str (), val,
                        frac_digits, flags, grouping,
                        fmat, err, err_expect);
+
+            delete[] narrow_buf;
         }
     }
 
     delete[] PunctData<charT>::curr_symbol_ [intl];
     delete[] next;
-}
-
-/**************************************************************************/
-
-// with a 32-bit size_t, a frac_digits of 2^30 wraps the size of the
-// block the facet's buffers move to: expect bad_alloc, not an overrun
-// of the short block the facet would get
-template <class charT>
-void do_test_size_wrap (bool        intl,    // international?
-                        charT       which,   // which overload to exercise
-                        const char *cname,   // the name of the charT type
-                        const char *tname,   // the name of the value type
-                        int         lineno)  // line number
-{
-    if (!rw_enabled (lineno)) {
-        rw_note (0, __FILE__, __LINE__, "test on line %d disabled", lineno);
-        return;
-    }
-
-    // with a wider size_t nothing wraps: the facet would ask for
-    // 8 GiB and pad the fraction with 2^30 zeros
-    if (4 < sizeof (std::size_t)) {
-        rw_note (0, __FILE__, lineno,
-                 "size_t is wider than 32 bits, nothing wraps");
-        return;
-    }
-
-#ifndef _RWSTD_NO_EXCEPTIONS
-
-    const int frac_digits = 1 << 30;
-
-    PunctData<charT>::format_ [intl][0]     = std::money_base::pattern ();
-    PunctData<charT>::format_ [intl][1]     = set_pattern ("$-@1");
-    PunctData<charT>::curr_symbol_ [intl]   = 0;
-    PunctData<charT>::positive_sign_ [intl] = 0;
-    PunctData<charT>::negative_sign_ [intl] = 0;
-    PunctData<charT>::grouping_ [intl]      = "";
-    PunctData<charT>::frac_digits_ [intl]   = frac_digits;
-
-    Ios<charT> io;
-    MoneyGet<charT> mg;
-
-    if (intl)
-        io.imbue (std::locale (io.getloc (), new Punct<charT, true>(0)));
-    else
-        io.imbue (std::locale (io.getloc (), new Punct<charT, false>(0)));
-
-    // one digit is enough for the padding to overrun a short block
-    const charT digit [] = { '1', '\0' };
-
-    std::ios_base::iostate err = std::ios_base::goodbit;
-
-    const char* const expected = "bad_alloc";
-    const char*       caught   = "nothing";
-
-    try {
-        if (0 == which) {
-            LongDouble x = 0;
-            mg.get (digit, digit + 1, intl, io, err, x);
-        }
-        else {
-            typename std::money_get<charT, const charT*>::string_type bs;
-            mg.get (digit, digit + 1, intl, io, err, bs);
-        }
-    }
-    catch (const std::bad_alloc&) {
-        caught = expected;
-    }
-    catch (...) {
-        caught = "another exception";
-    }
-
-    rw_assert (expected == caught, __FILE__, lineno,
-               "money_get<%s>::get (%{*Ac}, ..., %b, ..., %s&), "
-               "frac_digits = %d, threw %s, expected %s",
-               cname, int (sizeof *digit), digit, intl, tname,
-               frac_digits, caught, expected);
-
-#else   // if defined (_RWSTD_NO_EXCEPTIONS)
-
-    rw_note (0, __FILE__, lineno, "exceptions disabled");
-
-    _RWSTD_UNUSED (intl);
-    _RWSTD_UNUSED (which);
-    _RWSTD_UNUSED (cname);
-    _RWSTD_UNUSED (tname);
-
-#endif   // _RWSTD_NO_EXCEPTIONS
-
 }
 
 /**************************************************************************/
@@ -563,6 +479,77 @@ void do_test_size_wrap (bool        intl,    // international?
 #define failbit     std::ios_base::failbit
 #define goodbit     std::ios_base::goodbit
 
+
+// 22.2.6.1.2, p4: the digits are placed in the string in the order
+// they appear, leading zeros included, behind a minus sign if and
+// only if the result is negative
+template <class charT>
+void digits_test (charT, const char *cname, bool intl)
+{
+    rw_info (0, 0, 0,
+             "money_get<%s, istreambuf_iterator<%s> >::get "
+             "(..., basic_string<%s>&) const stores the digits as they "
+             "appear", cname, cname, cname);
+
+    static const charT minus [] = { '-', '\0' };
+
+    PunctData<charT>::format_ [intl][0]     = std::money_base::pattern ();
+    PunctData<charT>::format_ [intl][1]     = set_pattern ("$-@1");
+    PunctData<charT>::curr_symbol_ [intl]   = 0;
+    PunctData<charT>::positive_sign_ [intl] = 0;
+    PunctData<charT>::negative_sign_ [intl] = minus;
+    PunctData<charT>::grouping_ [intl]      = "";
+    PunctData<charT>::frac_digits_ [intl]   = 2;
+
+    static const struct {
+        const char *str;      // input
+        const char *digits;   // expected string
+    } rows [] = {
+        { "0.07",  "007"  },
+        { "007",   "007"  },
+        { "0.00",  "000"  },
+        { "100",   "100"  },
+        { "-0.07", "-007" },
+        { "-100",  "-100" }
+    };
+
+    Ios<charT> io;
+    MoneyGet<charT> mg;
+
+    if (intl)
+        io.imbue (std::locale (io.getloc (), new Punct<charT, true>(0)));
+    else
+        io.imbue (std::locale (io.getloc (), new Punct<charT, false>(0)));
+
+    for (unsigned i = 0; i != sizeof rows / sizeof *rows; ++i) {
+
+        const charT* const next = rw_expand ((charT*)0, rows [i].str);
+        const charT* const last =
+            next + std::char_traits<charT>::length (next);
+
+        std::ios_base::iostate err = goodbit;
+
+        typename std::money_get<charT, const charT*>::string_type bs;
+
+        mg.get (next, last, intl, io, err, bs);
+
+        char narrow_buf [16];
+        rw_narrow (narrow_buf, bs.c_str ());
+
+        rw_assert (   !(err & failbit)
+                   && 0 == std::strcmp (narrow_buf, rows [i].digits),
+                   __FILE__, __LINE__,
+                   "money_get<%s>::get (%#s, ..., %b, ..., "
+                   "basic_string<%s>&), got %s, expected %s, "
+                   "frac_digits = 2, state = %{Is}",
+                   cname, rows [i].str, intl, cname,
+                   narrow_buf, rows [i].digits, err);
+
+        delete[] next;
+    }
+}
+
+/**************************************************************************/
 
 template <class charT>
 void test_get (charT opt, const char *cname, const char *tname, bool intl)
@@ -609,14 +596,24 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     TEST (T, 0.0, "00.0",  2, 0, goodbit);
     TEST (T, 0.0, "000.0", 3, 0, goodbit);
 
-    // parsing zero, non-zero frac_digits
-    TEST (T, 0.0, "0.",    2, 0, eofbit,  1);
-    TEST (T, 0.0, "0. ",   2, 0, goodbit, 2);
-    TEST (T, 0.0, ".0",    2, 0, eofbit,  3);
-    TEST (T, 0.0, "0.0",   3, 0, eofbit,  4);
-    TEST (T, 0.0, "0.00",  4, 0, eofbit,  5);
-    TEST (T, 0.0, "00.0",  4, 0, eofbit,  6);
-    TEST (T, 0.0, "00.00", 5, 0, eofbit,  7);
+    // parsing zero, non-zero frac_digits: exactly frac_digits digits
+    // after the decimal point, if any (22.2.6.3, p3)
+    TEST (T, 0.0, "0.0",      3, 0, eofbit,  1);
+    TEST (T, 0.0, "0.00 ",    4, 0, goodbit, 2);
+    TEST (T, 0.0, ".000",     4, 0, eofbit,  3);
+    TEST (T, 0.0, "0.0000",   6, 0, eofbit,  4);
+    TEST (T, 0.0, "00.00000", 8, 0, eofbit,  5);
+    TEST (T, 0.0, "0",        1, 0, eofbit,  6);
+    TEST (T, 0.0, "00",       2, 0, eofbit,  7);
+
+    // fewer or more digits after the decimal point than frac_digits
+    TEST (T, 0.0, "0.",    2, 0, eofbit | failbit, 1);
+    TEST (T, 0.0, "0. ",   2, 0, failbit,          2);
+    TEST (T, 0.0, ".0",    2, 0, eofbit | failbit, 3);
+    TEST (T, 0.0, "0.0",   3, 0, eofbit | failbit, 4);
+    TEST (T, 0.0, "0.00",  4, 0, eofbit | failbit, 5);
+    TEST (T, 0.0, "00.0",  4, 0, eofbit | failbit, 6);
+    TEST (T, 0.0, "00.00", 5, 0, eofbit | failbit, 1);
 
     // parsing zero, bad format
     TEST (T, 0.0, "$0",   0, 0, failbit);
@@ -638,25 +635,30 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     TEST (T, 845.0, "845.", 3, 0, goodbit);
 
     // parsing non-zero, frac_digits == 1
-    TEST (T, 100.0, "10",   2, 0, eofbit, 1);
-    TEST (T,  90.0, "9",    1, 0, eofbit, 1);
-    TEST (T,  80.0, "8.",   2, 0, eofbit, 1);
+    TEST (T,  10.0, "10",   2, 0, eofbit, 1);
+    TEST (T,   9.0, "9",    1, 0, eofbit, 1);
+    TEST (T,   0.0, "8.",   2, 0, eofbit | failbit, 1);
     TEST (T,   7.0, "0.7",  3, 0, eofbit, 1);
     TEST (T,   6.0, ".6",   2, 0, eofbit, 1);
-    TEST (T,   0.0, ".05",  3, 0, eofbit, 1);
+    TEST (T,   0.0, ".05",  3, 0, eofbit | failbit, 1);
 
     // parsing non-zero, frac_digits > 1
     TEST (T,         4.0, ".04",       3, 0, eofbit, 2);
     TEST (T,        32.0, ".32",       3, 0, eofbit, 2);
     TEST (T,       210.0, "2.10",      4, 0, eofbit, 2);
     TEST (T,      1098.0, "10.98",     5, 0, eofbit, 2);
-    TEST (T,       987.0, "09.876",    6, 0, eofbit, 2);
-    TEST (T,      9876.0, "98.765",    6, 0, eofbit, 2);
-    TEST (T,     87654.0, "876.5432",  8, 0, eofbit, 2);
-    TEST (T,    765432.0, "765.4321",  8, 0, eofbit, 3);
-    TEST (T,   6543210.0, "654.32109", 9, 0, eofbit, 4);
+    TEST (T,      9876.0, "09.876",    6, 0, eofbit, 3);
+    TEST (T,     98765.0, "98.765",    6, 0, eofbit, 3);
+    TEST (T,   8765432.0, "876.5432",  8, 0, eofbit, 4);
+    TEST (T,   7654321.0, "765.4321",  8, 0, eofbit, 4);
+    TEST (T,  65432109.0, "654.32109", 9, 0, eofbit, 5);
     TEST (T,  54321098.0, "5432.1098", 9, 0, eofbit, 4);
-    TEST (T, 432109870.0, "43210.987", 9, 0, eofbit, 4);
+    TEST (T,  43210987.0, "43210.987", 9, 0, eofbit, 3);
+
+    // more digits after the decimal point than frac_digits
+    TEST (T, 0.0, "09.876",   6, 0, eofbit | failbit, 2);
+    TEST (T, 0.0, "876.5432", 8, 0, eofbit | failbit, 2);
+    TEST (T, 0.0, "876.5432", 8, 0, eofbit | failbit, 3);
 
     PunctData<charT>::thousands_sep_ [intl] = ',';
     PunctData<charT>::thousands_sep_ [locl] = ';';
@@ -668,7 +670,7 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     TEST (T,      0.0, "0,0,0",    5, 0, eofbit,  0, 0, "", "\1");
     TEST (T,      1.0, "0,0,1",    5, 0, eofbit,  0, 0, "", "\1");
     TEST (T,      2.0, "0,0,2.",   5, 0, goodbit, 0, 0, "", "\1");
-    TEST (T,     30.0, "0,0,3.",   6, 0, eofbit,  1, 0, "", "\1");
+    TEST (T,     30.0, "0,0,3.0",  7, 0, eofbit,  1, 0, "", "\1");
     TEST (T,      4.0, "0,0.4",    5, 0, eofbit,  1, 0, "", "\1");
     TEST (T,   5670.0, "5,67.0",   6, 0, eofbit,  1, 0, "", "\2");
     TEST (T,   6789.0, "678.9",    5, 0, eofbit,  1, 0, "", "\3");
@@ -677,7 +679,7 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     // 22.2.6.1.2, p1: thousands_sep-arators are optional
     TEST (T, 890123.0, "890.123", 7, 0, eofbit, 3, 0, "", "\1");
     TEST (T, 901234.0, "901.234", 7, 0, eofbit, 3, 0, "", "\2");
-    TEST (T, 123450.0, "0123.45", 7, 0, eofbit, 3, 0, "", "\3");
+    TEST (T,  12345.0, "0123.45", 7, 0, eofbit, 2, 0, "", "\3");
 
     // invalid use of thousands_sep with empty grouping
     // the first thousands_sep terminates parsing in grouping is empty
@@ -713,7 +715,7 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     TEST (T,  10.0, "YEN 10",  6, showbase, eofbit,  0, 0, "YEN");
     TEST (T,  11.0, "$CAN11$", 6, showbase, goodbit, 0, 0, "$CAN");
     TEST (T, 121.0, "kr12.1",  6, showbase, eofbit,  1, 0, "kr");
-    TEST (T, 132.0, "FT13.21", 7, showbase, eofbit,  1, 0, "FT");
+    TEST (T, 1321.0, "FT13.21", 7, showbase, eofbit, 2, 0, "FT");
 
     // invalid input with a required (showbase set) curr_symbol
     TEST (T, 0.0, "FLU",    3, showbase, eofbit | failbit, 0, 0, "FLUX");
@@ -773,20 +775,20 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
 
     TEST (T,  27.0, "+27+",    4, 0, eofbit, 0, 0, "");
     TEST (T,  28.0, "+  28+",  6, 0, eofbit, 0, 0, "");
-    TEST (T, -29.0, "-2.99-",  6, 0, eofbit, 1, 0, "");
-    TEST (T, -30.0, "- 3.09-", 7, 0, eofbit, 1, 0, "");
+    TEST (T, -299.0, "-2.99-",  6, 0, eofbit, 2, 0, "");
+    TEST (T, -309.0, "- 3.09-", 7, 0, eofbit, 2, 0, "");
 
     // with a simple currency symbol
     TEST (T,  31.0, "$+31+",    5, 0, eofbit, 0, 0, "$");
     TEST (T,  32.0, "$+  32+",  7, 0, eofbit, 0, 0, "$");
-    TEST (T, -33.0, "$-3.30-",  7, 0, eofbit, 1, 0, "$");
-    TEST (T, -34.0, "$- 3.41-", 8, 0, eofbit, 1, 0, "$");
+    TEST (T, -330.0, "$-3.30-",  7, 0, eofbit, 2, 0, "$");
+    TEST (T, -341.0, "$- 3.41-", 8, 0, eofbit, 2, 0, "$");
 
     // with a multi-char currency symbol
     TEST (T,  35.0, "USD+35+",     7, 0, eofbit, 0, 0, "USD");
     TEST (T,  36.0, "USD+  36+",   9, 0, eofbit, 0, 0, "USD");
-    TEST (T, -37.0, "USD-3.70-",   9, 0, eofbit, 1, 0, "USD");
-    TEST (T, -38.0, "USD- 3.81-", 10, 0, eofbit, 1, 0, "USD");
+    TEST (T, -370.0, "USD-3.70-",   9, 0, eofbit, 2, 0, "USD");
+    TEST (T, -381.0, "USD- 3.81-", 10, 0, eofbit, 2, 0, "USD");
 
     // invalid input
     TEST (T, 0.0, "+31 +",     3, 0, failbit, 0, 0, "");
@@ -826,37 +828,37 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     PunctData<charT>::negative_sign_ [intl] = minus [0];
     PunctData<charT>::negative_sign_ [locl] = minus [1];
 
-    TEST (T,  -100.0, "$-1",   3, showbase, eofbit,  2, "$-1@", "$");
-    TEST (T,  -200.0, "$-2 ",  3, showbase, goodbit, 2, "$-1@", "$");
+    TEST (T,    -1.0, "$-1",   3, showbase, eofbit,  2, "$-1@", "$");
+    TEST (T,    -2.0, "$-2 ",  3, showbase, goodbit, 2, "$-1@", "$");
     // where none appears in the pattern, whitespace is optional
-    TEST (T,  -300.0, "-3$",   3, showbase, eofbit,  2, "-1@$", "$");
-    TEST (T,  -400.0, "-4 $",  4, showbase, eofbit,  2, "-1@$", "$");
+    TEST (T,    -3.0, "-3$",   3, showbase, eofbit,  2, "-1@$", "$");
+    TEST (T,    -4.0, "-4 $",  4, showbase, eofbit,  2, "-1@$", "$");
     // where space appears in the pattern, a whitespace character is required
     TEST (T,    0.0, "-5$",    2, showbase, failbit, 2, "-1 $", "$");
-    TEST (T,  -600.0, "-6 $",  4, showbase, eofbit,  2, "-1 $", "$");
-    TEST (T,  -700.0, "-7\t$", 4, showbase, eofbit,  2, "-1 $", "$");
+    TEST (T,    -6.0, "-6 $",  4, showbase, eofbit,  2, "-1 $", "$");
+    TEST (T,    -7.0, "-7\t$", 4, showbase, eofbit,  2, "-1 $", "$");
 
     TEST (T,     0.0, "-8$",   1, showbase, failbit, 2, "- 1$", "$");
-    TEST (T,  -900.0, "-\n9$", 4, showbase, eofbit,  2, "- 1$", "$");
-    TEST (T, -1000.0, "- 10$", 5, showbase, eofbit,  2, "- 1$", "$");
+    TEST (T,    -9.0, "-\n9$", 4, showbase, eofbit,  2, "- 1$", "$");
+    TEST (T,   -10.0, "- 10$", 5, showbase, eofbit,  2, "- 1$", "$");
     // white space is required even at the beginning of input
     // (if the optional sign or symbol is missing)
     TEST (T,     0.0, "11$",   0, showbase, failbit, 2, "- 1$", "$");
 
-    TEST (T, -1200.0, "12$-",  4, showbase, eofbit,  2, "1@$-", "$");
-    TEST (T, -1300.0, "13 $-", 5, showbase, eofbit,  2, "1@$-", "$");
+    TEST (T,   -12.0, "12$-",  4, showbase, eofbit,  2, "1@$-", "$");
+    TEST (T,   -13.0, "13 $-", 5, showbase, eofbit,  2, "1@$-", "$");
     TEST (T,     0.0, "14$-",  2, showbase, failbit, 2, "1 $-", "$");
-    TEST (T, -1500.0, "15 $-", 5, showbase, eofbit,  2, "1 $-", "$");
+    TEST (T,   -15.0, "15 $-", 5, showbase, eofbit,  2, "1 $-", "$");
 
     const charT parens[][3] = { { '(', ')', '\0' }, { '\0' } };
     PunctData<charT>::negative_sign_ [intl] = parens [0];
     PunctData<charT>::negative_sign_ [locl] = parens [1];
 
     // { sign, space, value, symbol }, with symbol required
-    TEST (T, -90.0, "( 9$)",    5, showbase, eofbit, 1, "- 1$", "$");
-    TEST (T, -80.0, "( 8SIT)",  7, showbase, eofbit, 1, "- 1$", "SIT");
+    TEST (T,  -9.0, "( 9$)",    5, showbase, eofbit, 1, "- 1$", "$");
+    TEST (T,  -8.0, "( 8SIT)",  7, showbase, eofbit, 1, "- 1$", "SIT");
     TEST (T, -81.0, "( 8.1Fr)", 8, showbase, eofbit, 1, "- 1$", "Fr");
-    TEST (T,  70.0, " 7Ptas",   6, showbase, eofbit, 1, "- 1$", "Ptas");
+    TEST (T,   7.0, " 7Ptas",   6, showbase, eofbit, 1, "- 1$", "Ptas");
     TEST (T,  61.0, " 6.1Lek",  7, showbase, eofbit, 1, "- 1$", "Lek");
 
     // { sign, value, none, symbol }
@@ -990,10 +992,10 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     TEST (T, 0.0, "$-0;0.00",     8, 0, eofbit, 2, 0, "$", "\1");
     TEST (T, 0.0, "$-0;0;0.000", 11, 0, eofbit, 3, 0, "$", "\1");
 
-    TEST (T,     -10.0, "$-1.",           4, 0, eofbit, 1, 0, "$", "\1");
-    TEST (T,   -2000.0, "$-2;0.0000",    10, 0, eofbit, 2, 0, "$", "\1");
-    TEST (T, -300000.0, "$-3;0;0.00000", 13, 0, eofbit, 3, 0, "$", "\1");
-    TEST (T, -300001.0, "$-3;0;0.00123", 13, 0, eofbit, 3, 0, "$", "\1");
+    TEST (T,     -10.0, "$-1.0",          5, 0, eofbit, 1, 0, "$", "\1");
+    TEST (T,   -2000.0, "$-2;0.00",       8, 0, eofbit, 2, 0, "$", "\1");
+    TEST (T, -300000.0, "$-3;0;0.000",   11, 0, eofbit, 3, 0, "$", "\1");
+    TEST (T, -300001.0, "$-3;0;0.001",   11, 0, eofbit, 3, 0, "$", "\1");
 
     // invalid grouping: store value and set failbit
     TEST (T, 0.0, "$0;",   3, 0, eofbit | failbit, 0, 0, "$", "\1");
@@ -1010,10 +1012,10 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     TEST (T, 0.0, "$+0;;0", 6, 0, eofbit | failbit, 0, 0, "$", "\1");
     TEST (T, 0.0, "$+;.0;", 5, 0, failbit,          1, 0, "$", "\1");
 
-    TEST (T,     -40.0, "$-4;. ",           5, 0, failbit, 1, 0, "$", "\1");
-    TEST (T,   -5000.0, "$-;5;0.0000 ",    11, 0, failbit, 2, 0, "$", "\1");
-    TEST (T, -600000.0, "$-6;0;;0.00000 ", 14, 0, failbit, 3, 0, "$", "\1");
-    TEST (T, -700004.0, "$-7;;0;0.00456 ", 14, 0, failbit, 3, 0, "$", "\1");
+    TEST (T,     -40.0, "$-4;.0 ",         6, 0, failbit, 1, 0, "$", "\1");
+    TEST (T,   -5000.0, "$-;5;0.00 ",      9, 0, failbit, 2, 0, "$", "\1");
+    TEST (T, -600000.0, "$-6;0;;0.000 ",  12, 0, failbit, 3, 0, "$", "\1");
+    TEST (T, -700004.0, "$-7;;0;0.004 ",  12, 0, failbit, 3, 0, "$", "\1");
 
 #define LDBL(x)   x ## L
     TEST (T, LDBL (1234567890.0),
@@ -1056,16 +1058,15 @@ void test_get (charT opt, const char *cname, const char *tname, bool intl)
     TEST (T, -LDBL (1234567890.0),
           "$-12;34;56;78;90", 16, 0, eofbit, 0, 0, "$", "\2");
 
-    // input that outgrows the buffers on the facet's stack: digits,
-    // empty groups, and zeros that pad the fraction to frac_digits
+    // input that outgrows the buffers on the facet's stack: digits
+    // and empty groups
     TEST (T, 5.0,          "0@9998.5", 10000, 0, eofbit, 1);
     TEST (T, 1.0,          "1;@4000",   4001, 0, eofbit | failbit,
           0, 0, "", "\1");
-    TEST (T, LDBL (1e305), "1",            1, 0, eofbit, 305);
+    TEST (T, LDBL (1e305), "1.0@305",    307, 0, eofbit, 305);
     TEST (T, 0.0,          "0",            1, 0, eofbit, 4000);
 
-    // a frac_digits that wraps the size of the buffers
-    do_test_size_wrap (T);
+    digits_test (opt, cname, intl);
 
 #undef T
 

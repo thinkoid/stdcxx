@@ -22,19 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =money_get= keeps one leading zero in =digits=
-
-=include/loc/_money_get.cc= 445: the loop strips a zero only while
-another zero follows, so "0.07" gives "07" and "007" gives "0700",
-neither the standard's digits as read (22.2.6.1.2 p1) nor the
-comment's intent. The test compares through =sscanf= and cannot see
-it. Found by probe, 2026-11-02.
-
-Fix: strip every leading zero but the last, or none; the comment
-decides which.
-
-Check: a text comparison in =22.locale.money.get= for "0.07" and "007".
-
 ** TODO =num_put= leaks its grown buffer on an exception
 
 =include/loc/_num_put.cc= 185: =_C_put= frees a grown =__pbuf= only on

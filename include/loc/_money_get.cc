@@ -259,33 +259,33 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                 __gr.size () && 0 < __gr [0] && __gr [0] != _RWSTD_CHAR_MAX ?
                 __pun.thousands_sep () : __ctp.widen ('0');
 
-            int __fd = __pun.frac_digits ();
+            const int __fd = __pun.frac_digits ();
+
+            // digits read after the decimal point; 22.2.6.3, p3
+            // requires exactly frac_digits of them
+            int __nfrac = 0;
 
             for (; ; ++__it) {
 
-                // the digit buffer needs room for the next digit, the
-                // zeros that pad the fraction to frac_digits and the
-                // NUL; the group buffer for the next group, the last
-                // one and the NUL; a group may be empty, so the two
-                // fill at their own pace; when either runs short, both
-                // move to one block on the heap, digits first and group
-                // sizes after, and the pointers into them move along
-                const _SizeT __npad = 0 < __fd ? _SizeT (__fd) : 0;
-
-                if (   _SizeT (__pbuf + __bufsize - __pcur) < __npad + 2
+                // the digit buffer needs room for the next digit and
+                // the NUL; the group buffer for the next group, the
+                // last one and the NUL; a group may be empty, so the
+                // two fill at their own pace; when either runs short,
+                // both move to one block on the heap, digits first and
+                // group sizes after, and the pointers into them move
+                // along
+                if (   __pbuf + __bufsize - __pcur < 2
                     || __pgrpbuf + __bufsize - __pgrp < 3) {
 
-                    // the block is (__bufsize + __npad) * 4 bytes; a
-                    // size that size_t cannot hold wraps to a short
-                    // block the writes overrun, so fail as new fails for
-                    // a block too large; __bufsize alone may exceed
-                    // SIZE_MAX / 4, and the subtraction would wrap too
-                    if (   _RWSTD_SIZE_MAX / 4 < __bufsize
-                        || _RWSTD_SIZE_MAX / 4 - __bufsize < __npad)
+                    // the block is __bufsize * 4 bytes; a size that
+                    // size_t cannot hold wraps to a short block the
+                    // writes overrun, so fail as new fails for a block
+                    // too large
+                    if (_RWSTD_SIZE_MAX / 4 < __bufsize)
                         __rw::__rw_throw (_RWSTD_ERROR_FIRST + 3
                                          /* == bad_alloc */);
 
-                    const _SizeT __newsize = (__bufsize + __npad) * 2;
+                    const _SizeT __newsize = __bufsize * 2;
 
                     char* const __newbuf = new char [__newsize * 2];
 
@@ -321,8 +321,9 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                 const char      __ch = __ctp.narrow (__c, '\0');
 
                 if (__ch >= '0' && __ch <= '9') {
-                    if (!__seendp || __fd-- > 0)
-                        *__pcur++ = __ch;
+                    *__pcur++ = __ch;
+                    if (__seendp)
+                        ++__nfrac;
                 }
                 else if (   !__seendp && __fd > 0
                          && _Traits::eq (__c, __pun.decimal_point ())) {
@@ -350,12 +351,10 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
                     break;
             }
 
-            if (__pcur - __pbuf > 1) {
-                // append zeros to a non-empty string of digits
-                // up to the number of frac_digits
-                while (__fd-- > 0)
-                    *__pcur++ = '0';
-            }
+            // 22.2.6.3, p3: the number of digits after the decimal
+            // point, if any, is exactly frac_digits
+            if (__seendp && __nfrac != __fd)
+                __ebits |= __rw::__rw_failbit;
 
             *__pcur = '\0';
             break;
@@ -440,9 +439,9 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
             }
 
             if (__pstr && !(__ebits & __rw::__rw_failbit)) {
-                // skip over the leading sign and any redundant zeros after it
+                // 22.2.6.1.2, p4: the digits in the order they appear,
+                // leading zeros included; skip over the sign only
                 const char *__start = __pbuf + 1;
-                for (; '0' == *__start && '0' == __start [1]; ++__start);
 
                 // invert the sign if negative
                 __sign = __sign < 0;

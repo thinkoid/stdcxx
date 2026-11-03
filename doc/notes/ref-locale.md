@@ -1313,8 +1313,8 @@ type. It walks `neg_format ()`:
 The buffers grow as `num_get`'s do (ffcde29f), with `bad_alloc` on a
 wrapping size (edca50a1). The rest of a sign is matched with
 `__rw_match_name`. `units` comes from `__rw_get_num`, which checks
-the grouping; `digits` is widened from the buffer with leading zeros
-stripped while another zero follows (10.5).
+the grouping; `digits` is widened from the buffer as it was read,
+leading zeros included (10.3.9).
 
 #### money_put
 
@@ -1461,15 +1461,23 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 - **Pins.** `22.locale.money.get`, the rows from line 598 on, and
   `22.locale.money.get.stdcxx-62`.
 
-#### 10.3.9 Fraction digits are lenient
+#### 10.3.9 Fraction digits are exact
 
-- **Paragraph.** 22.2.6.3 p3, quoted in 10.1.
-- **What.** `money_get` takes fewer fraction digits and pads with
-  zeros, and reads more and drops them: `1.2` is 120, `1.234` is 123
-  with the `4` consumed (by probe).
-- **Why.** The 2005 import.
-- **Pins.** `22.locale.money.get`, lines 641 to 653: `"10"` under one
-  fraction digit is 100, `".05"` is 0 with three characters read.
+- **Paragraph.** 22.2.6.3 p3, quoted in 10.1; 22.2.6.1.2 p4.
+- **What.** A decimal point, if present, is followed by exactly
+  `frac_digits` digits, else `failbit`; without one the value is the
+  bare digit string, so `100` under two fraction digits is 100 units
+  and `007` is 7. `digits` holds every digit as it appeared, leading
+  zeros included: `0.07` gives `"007"`. The 2005 import padded a short
+  fraction with zeros and dropped the digits past `frac_digits`, so
+  `100` read 10000 and `1.2` read 120, and stripped the leading zeros
+  of `digits` down to one.
+- **Why.** The grammar in p3 and the "in the order in which they
+  appear" of p4; the padding had no paragraph behind it and broke the
+  round trip with `money_put`, which writes 100 units as `1.00`.
+- **Pins.** `22.locale.money.get`, the zero and non-zero rows under
+  non-zero `frac_digits`, the short and long fraction rows with
+  `failbit`, `digits_test` for the text.
 
 #### 10.3.10 `money_put` reads `units` as `"%.0Lf"`
 
@@ -1513,7 +1521,7 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 | `22.locale.num.put` | every virtual but `unsigned long long`, inf and NaN, grouping, widening, the negative precision | 1495, 2 warnings |
 | `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv` | 5366 |
 | `22.locale.numpunct.mt` | first use of a fresh facet from many threads (7c93badb) | 1200 |
-| `22.locale.money.get` | patterns, signs, symbols, white-space credit, long input and separators, `frac_digits` 305 and 4000, wrap | 3952 |
+| `22.locale.money.get` | patterns, signs, symbols, white-space credit, long input and separators, `frac_digits` 305 and 4000, the digits as they appear | 4160 |
 | `22.locale.money.put` | `long double` and string, patterns, the two spaces, grouping | 1346 |
 | `22.locale.moneypunct` | every host locale against `localeconv`, all four facets, composite names | 135020 |
 | `22.locale.moneypunct.mt` | first use of a fresh facet (79709615) | 1200 |
@@ -2270,7 +2278,7 @@ is a `TODO` entry rather than a decision.
 | Overflow stores a clamped value | 22.2.2.1.2 p1, p11, LWG 23 | 10.3.6 | design |
 | A grouping mismatch stores the value | 22.2.2.1.2 p1, p12; 22.2.6.1.2 p1 | 10.3.7 | design |
 | `money_get` sets `eofbit` on success | 22.2.6.1.2 p1 | 10.3.8 | design |
-| Fraction digits are lenient | 22.2.6.3 p3 | 10.3.9 | design |
+| Fraction digits are exact | 22.2.6.3 p3, 22.2.6.1.2 p4 | 10.3.9 | conformant since 2026-11-03 |
 | `money_put` reads `units` as `"%.0Lf"` | 22.2.6.2.2 p1 | 10.3.10 | C++11's text |
 | Two spaces after an international symbol; `sign_posn` 0 as `"()"` | 22.2.6.3 p2, p7 | 10.3.11 | reading |
 | `collate<char>` orders bytes as `unsigned char` | 22.2.4.1.2 p1, LWG 467 | 11.3 | design |
