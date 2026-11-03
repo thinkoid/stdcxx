@@ -39,6 +39,7 @@
 
 #include <ios>
 #include <locale>
+#include <stdexcept>   // for runtime_error
 
 #include <cerrno>    // for ERANGE, errno
 #include <cfloat>    // for floating limits macros
@@ -51,6 +52,7 @@
 #include <rw_cmdopt.h>      // for rw_enabled
 #include <rw_driver.h>      // for rw_test
 #include <rw_locale.h>      // for rw_locales
+#include <rw_new.h>         // for rwt_check_leaks
 #include <rw_valcmp.h>      // for rw_equal
 
 /**************************************************************************/
@@ -2167,6 +2169,87 @@ void numput_virtuals_test (charT, const char *cname)
 
 /**************************************************************************/
 
+// an output iterator that throws on the n-th assignment
+template <class charT>
+struct ThrowIter
+{
+    typedef std::output_iterator_tag iterator_category;
+    typedef void                     value_type;
+    typedef void                     difference_type;
+    typedef void                     pointer;
+    typedef void                     reference;
+
+    int left_;   // assignments before the throw
+
+    explicit ThrowIter (int n): left_ (n) { }
+
+    ThrowIter& operator* () { return *this; }
+    ThrowIter& operator++ () { return *this; }
+    ThrowIter  operator++ (int) { return *this; }
+
+    ThrowIter& operator= (charT) {
+        if (0 == --left_)
+            throw std::runtime_error ("ThrowIter");
+        return *this;
+    }
+};
+
+
+// the facet formats into an array on its stack and moves to a heap
+// block when the output outgrows it; the block is freed on every
+// exit, an exception from the output iterator included
+template <class charT>
+void leak_test (charT, const char *cname)
+{
+#ifndef _RWSTD_NO_EXCEPTIONS
+
+    rw_info (0, 0, 0, "std::num_put<%s, ThrowIter<%s> >::put "
+             "(..., double) with a throwing iterator leaks nothing",
+             cname, cname);
+
+    const std::num_put<charT, ThrowIter<charT> > np;
+
+    Ios<charT> ios;
+
+    ios.setf (fixed, floatfield);
+    ios.precision (_RWSTD_DBL_MAX_10_EXP + 100);   // outgrows the array
+
+    const char *caught = "nothing";
+
+    rwt_check_leaks (0, 0);
+
+    try {
+        np.put (ThrowIter<charT> (10), ios, charT (' '), 1.0);
+    }
+    catch (const std::runtime_error&) {
+        caught = "runtime_error";
+    }
+    catch (...) {
+        caught = "another exception";
+    }
+
+    _RWSTD_SIZE_T nbytes = 0;
+    const _RWSTD_SIZE_T nblocks = rwt_check_leaks (&nbytes, 0);
+
+    rw_assert (0 == std::strcmp (caught, "runtime_error"), 0, __LINE__,
+               "num_put<%s, ThrowIter<%s> >::put (..., double) "
+               "threw %s, expected runtime_error", cname, cname, caught);
+
+    rw_assert (0 == nblocks, 0, __LINE__,
+               "num_put<%s, ThrowIter<%s> >::put (..., double) "
+               "leaked %zu block(s), %zu byte(s)",
+               cname, cname, nblocks, nbytes);
+
+#else   // if defined (_RWSTD_NO_EXCEPTIONS)
+
+    rw_note (0, __FILE__, __LINE__, "exceptions test disabled");
+    _RWSTD_UNUSED (cname);
+
+#endif   // _RWSTD_NO_EXCEPTIONS
+}
+
+/**************************************************************************/
+
 template <class charT>
 void run_tests (charT, const char *cname)
 {
@@ -2216,6 +2299,8 @@ void run_tests (charT, const char *cname)
         rw_note (0, __FILE__, __LINE__, "errno test disabled");
     else
         errno_test (charT (), cname);
+
+    leak_test (charT (), cname);
 }
 
 /**************************************************************************/

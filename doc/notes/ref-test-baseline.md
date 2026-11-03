@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-11-03 (5438f794), all six configurations.
+As of 2026-11-03 (60c683eb), all six configurations.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -221,6 +221,8 @@ all six tables:
   1,491 on 32-bit), and `22.locale.num.get`, 51,894 to 51,990.
 - 0a3b2cca, 2026-11-03: `22.locale.num.get`, 51,990 to 55,206.
 - 5438f794, 2026-11-03: `22.locale.money.put`, 1,346 to 1,352.
+- 60c683eb, 2026-11-03: `22.locale.money.get`, 3,952 (3,960 on 32-bit) to
+  4,160.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.
@@ -283,7 +285,7 @@ and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 |---|---|---|---|
 | `18.numeric.special.float` | 134 | 119 | 134 |
 | `20.temp.buffer` | 10891 | 10792 | 10891 |
-| `22.locale.num.put` | 1495 | 1491 | 1495 |
+| `22.locale.num.put` | 1499 | 1495 | 1499 |
 | `22.locale.codecvt` | 634 | 638 | 618 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
 | `22.locale.codecvt.mt` | 400 | 400 | 1600 |

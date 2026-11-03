@@ -38,6 +38,31 @@ __rw_put_num (char**, _RWSTD_SIZE_T, unsigned, int, _RWSTD_STREAMSIZE,
 _RWSTD_EXPORT extern const unsigned char
 __rw_digit_map[];
 
+
+// __rw_put_num formats into an array on the caller's stack and moves
+// to a heap block when the output outgrows it: the heap block is
+// freed when the pointer no longer points at the array, on every
+// exit from the function, an exception from the output iterator or
+// a facet included
+struct __rw_num_put_buffer
+{
+    const char *_C_buf;    // the array on the stack
+    char*      &_C_pbuf;   // the pointer to the buffer in use
+
+    __rw_num_put_buffer (const char *__buf, char *&__pbuf)
+        : _C_buf (__buf), _C_pbuf (__pbuf) { }
+
+    ~__rw_num_put_buffer () {
+        if (_C_buf != _C_pbuf)
+            delete[] _C_pbuf;
+    }
+
+private:
+
+    __rw_num_put_buffer (const __rw_num_put_buffer&);
+    void operator= (const __rw_num_put_buffer&);
+};
+
 }   // namespace __rw
 
 
@@ -66,8 +91,10 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
 
     char __buf [_RWSTD_DBL_MAX_10_EXP];
 
-    // will grow as necessary and may need to be deleted
+    // grows as necessary; the guard frees the heap block on every exit
     char *__pbuf = __buf;
+
+    __rw::__rw_num_put_buffer __guard (__buf, __pbuf);
 
     const string            __grouping = __np.grouping ();
     const char* const       __grp      = __grouping.c_str ();
@@ -166,10 +193,6 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
             }
         }
     }
-
-    // delete if the buffer was dynamically allocated
-    if (__pbuf != __buf)
-        delete[] __pbuf;
 
     // left justify if necessary
     for (; __pad > 0; ++__it, --__pad)

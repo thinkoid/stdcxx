@@ -22,17 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =num_put= leaks its grown buffer on an exception
-
-=include/loc/_num_put.cc= 185: =_C_put= frees a grown =__pbuf= only on
-the normal path; =num_get= and =money_get= have guards. Found by
-reading, 2026-11-02.
-
-Fix: the guard the other two use.
-
-Check: AddressSanitizer's leak report with an output iterator that
-throws.
-
 ** TODO A bad category throws with the bad-name message
 
 =src/locale_combine.cpp= 657-660: an invalid category passed to

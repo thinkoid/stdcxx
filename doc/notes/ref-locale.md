@@ -1253,7 +1253,9 @@ Each of the eight virtuals calls `_C_put` (`include/loc/_num_put.cc`)
 with a tag; `bool` without `boolalpha` goes as `_C_int`, through no
 virtual. `_C_put` formats into a 308-byte stack array
 (`_RWSTD_DBL_MAX_10_EXP`) through `__rw_put_num` (`src/num_put.cpp`),
-resets `width` before output (69ad31e6), pads, and maps the
+a heap block when the output outgrows it, freed on every exit by
+`__rw_num_put_buffer` as `num_get`'s is, resets `width` before output
+(69ad31e6), pads, and maps the
 placeholders `.` and `,` to `decimal_point()` and `;` to
 `thousands_sep()`. `__rw_put_num` writes integers itself
 (`__rw_dtoa`, `__rw_itoa`; no `showbase` prefix for zero), floating
