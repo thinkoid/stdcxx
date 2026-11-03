@@ -902,10 +902,13 @@ takes `_C_data ()`:
   `do_max_length` is the database's `mb_cur_max`, or `MB_CUR_MAX`.
   `do_length` walks the same tries as `do_in` and counts the bytes
   of at most `max` complete characters.
-- Every stateless path checks the state with `mbsinit`, asserts in a
-  debug build and returns `error` (0 for `length`); the C-library
-  paths accept a non-initial state in a stateful encoding
-  (2a4b5c5f).
+- The library-database paths check the state with `mbsinit`, assert
+  in a debug build and return `error` (0 for `length`). The C-library
+  `in` and `length` take the state as it comes: a stateless
+  encoding's state carries the bytes of a character split across
+  calls, which `mbrtowc` processes with a -2 (C99 7.24.6.3.2, p4),
+  and `in` then consumes them and returns `partial`; `out` still
+  checks.
 - `ISO-2022-JP` and `-JP-2` go to `src/iso2022.cpp`. The
   `mbstate_t` holds an index into a static array of 511 states,
   allocated on first use and freed on a return to the initial shift
@@ -1088,8 +1091,7 @@ Known gaps and their `TODO` entries:
 - Not covered by any row: `ctype<wchar_t>` at or above 256 beyond
   the classic case maps' one row each, the
   classic wide `out` above 0xff, `max_length` of the UTF names,
-  the C-library `in` across a split character, the ISO-2022
-  converters.
+  the ISO-2022 converters.
 
 ### 9.5 Open
 

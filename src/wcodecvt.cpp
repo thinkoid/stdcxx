@@ -244,10 +244,18 @@ __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
             break;
         }
  
-        // -2 indicates an ambiguous but valid subsequence
-        // (i.e., ok)
-        if (nbytes == size_t (-2))
+        // -2: the bytes form an incomplete but potentially valid
+        // character; mbrtowc has processed all of them into `state'
+        // (C99 7.24.6.3.2, p4), so they are consumed here, the state
+        // carries them to the next call, and the result is partial
+        // (22.2.1.5.2: more source is needed before another
+        // destination element can be produced)
+        if (nbytes == size_t (-2)) {
+            psrc   += src_len;
+            src_len = 0;
+            res     = std::codecvt_base::partial;
             break;
+        }
 
         // 0 indicates the NUL character (skip over it)
         if (nbytes == 0) 
@@ -1204,14 +1212,10 @@ do_in (state_type&         state,
             // use libc locale
             const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
-            // verify that either the encoding is stateful
-            // or the state is in its initial shift state
-            const bool mbstate_valid =
-               mbtowc (0, 0, 0) || __rw::__rw_mbsinit (&state);
-
-            _RWSTD_ASSERT (mbstate_valid);
-            if (!mbstate_valid)
-                break;
+            // the state is not checked against mbsinit: a stateless
+            // encoding's state carries the bytes of a character split
+            // across calls (22.2.1.5.2, p1: "equal to the result of
+            // converting the preceding characters in the sequence")
 
             res = __rw::__rw_libc_do_in (state, 
                                         from, from_end, from_next,
@@ -1430,14 +1434,9 @@ do_length (state_type&        state,
             // use libc locale
             const __rw::__rw_setlocale clocale (this->_C_name, LC_CTYPE);
 
-            // verify that either the encoding is stateful
-            // or the state is in its initial shift state
-            const bool mbstate_valid =
-                mbtowc (0, 0, 0) || __rw::__rw_mbsinit (&state);
-
-            _RWSTD_ASSERT (mbstate_valid);
-            if (!mbstate_valid)
-                break;
+            // the state is not checked against mbsinit, as in do_in:
+            // it may carry the bytes of a character split across calls
+            // (22.2.1.5.2, p9)
 
             len = __rw::__rw_libc_do_length (state, from, from_end, cmax);
         }

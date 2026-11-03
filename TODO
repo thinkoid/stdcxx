@@ -22,22 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO A split character through the C library loses its state
-
-On =mbrtowc='s -2, =__rw_libc_do_in= (=src/wcodecvt.cpp= 249-250,
-e6a99a20) returns =ok= with nothing consumed, but =mbrtowc= has
-already absorbed the bytes into the state: under =de_DE.utf8=
-=in ("\xc3")= returns =ok=, consumed 0, =mbsinit= false; the next
-call asserts (1201) in a debug build and returns =error= otherwise.
-A C-library-backed wide stream that splits a character across
-buffers breaks here. Found by probe, 2026-11-02.
-
-Fix: return =partial= with the bytes consumed and the state kept, as
-22.2.1.5.2 p3 describes.
-
-Check: =in= of the two halves of U+00E9 across two calls yields U+00E9;
-a =wifstream= row reading a UTF-8 file through a 1-byte buffer.
-
 ** TODO =IS_UTF8= and =IS_UTF16*= can never be true
 
 =src/wcodecvt.cpp= 110-113 compare =UCS_TYPE (x)=, which masks with

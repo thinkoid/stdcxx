@@ -26,7 +26,9 @@
  *
  **************************************************************************/
 
+#include <fstream>   // for wifstream
 #include <locale>
+#include <string>    // for wstring
 
 #include <cassert>
 #include <cctype>    // for isalnum(), tolower()
@@ -2477,6 +2479,128 @@ test_mmap ()
 
 /**************************************************************************/
 
+// a character split across two calls on the C-library path: mbrtowc
+// processes the bytes of an incomplete character into the state and
+// returns -2 (C99 7.24.6.3.2, p4), so in() consumes them and returns
+// partial (22.2.1.5.2: more source is needed before another
+// destination element can be produced), and the next call completes
+// the character from the state; the name must be one the C library
+// knows and the library's database does not, in glibc's spelling
+
+static void
+test_libc_split ()
+{
+    rw_info (0, 0, __LINE__, "codecvt_byname<wchar_t, char, mbstate_t>::in "
+             "through the C library, a character split across two calls");
+
+    // a UTF-8 locale of the C library, spelled with "utf8"
+    const char* locname = 0;
+
+    for (const char *loc = rw_locale_query (); *loc;
+         loc += std::strlen (loc) + 1) {
+        if (std::strstr (loc, "utf8") && std::setlocale (LC_CTYPE, loc)) {
+            std::setlocale (LC_CTYPE, "C");
+            locname = loc;
+            break;
+        }
+    }
+
+    if (!locname) {
+        rw_warn (0, 0, __LINE__, "no UTF-8 locale spelled with \"utf8\" "
+                 "in the C library, test skipped");
+        return;
+    }
+
+    typedef std::codecvt<wchar_t, char, std::mbstate_t> Cvt;
+
+    const std::locale loc (std::locale::classic (),
+                           new std::codecvt_byname<wchar_t, char,
+                                                   std::mbstate_t> (locname));
+    const Cvt &cvt = std::use_facet<Cvt> (loc);
+
+    std::mbstate_t state = std::mbstate_t ();
+
+    const char bytes [] = "\xc3\xa9";   // U+00E9 in UTF-8
+    const char *from_next = 0;
+    wchar_t to [4];
+    wchar_t *to_next = 0;
+
+    // the first byte alone: consumed into the state, partial
+    std::codecvt_base::result res =
+        cvt.in (state, bytes, bytes + 1, from_next, to, to + 4, to_next);
+
+    rw_assert (   std::codecvt_base::partial == res
+               && bytes + 1 == from_next && to == to_next, 0, __LINE__,
+               "(%s) in (\"\\xc3\") == partial with the byte consumed and "
+               "nothing stored: got %d, consumed %d, stored %d",
+               locname, res, int (from_next - bytes), int (to_next - to));
+
+    // the second byte with the state: the character
+    res = cvt.in (state, bytes + 1, bytes + 2, from_next, to, to + 4, to_next);
+
+    rw_assert (   std::codecvt_base::ok == res
+               && bytes + 2 == from_next && to + 1 == to_next
+               && L'\xe9' == to [0] && std::mbsinit (&state), 0, __LINE__,
+               "(%s) in (\"\\xa9\") with the state == ok storing U+00E9 "
+               "and leaving the initial state: got %d, consumed %d, "
+               "stored %d, U+%04X, mbsinit %d",
+               locname, res, int (from_next - bytes - 1), int (to_next - to),
+               to_next > to ? unsigned (to [0]) : 0u,
+               int (0 != std::mbsinit (&state)));
+
+    // length completes the character from the state too
+    state = std::mbstate_t ();
+    cvt.in (state, bytes, bytes + 1, from_next, to, to + 4, to_next);
+
+    const int len = cvt.length (state, bytes + 1, bytes + 2, 1);
+
+    rw_assert (1 == len, 0, __LINE__,
+               "(%s) length (state carrying \"\\xc3\", \"\\xa9\", 1) == 1, "
+               "got %d", locname, len);
+
+    // a wide file stream through a one-element buffer, the split
+    // happening in the stream buffer
+    char fname [1024] = "";
+
+    if (!rw_tmpnam (fname)) {
+        rw_warn (0, 0, __LINE__, "rw_tmpnam () failed, stream check skipped");
+        return;
+    }
+
+    const char text [] = "a\xc3\xa9z\n";
+
+    if (sizeof text - 1 != rw_fwrite (fname, text, sizeof text - 1, "wb")) {
+        rw_warn (0, 0, __LINE__, "rw_fwrite (%#s) failed, stream check "
+                 "skipped", fname);
+        std::remove (fname);
+        return;
+    }
+
+    {
+        std::wifstream in;
+        wchar_t buf [1];
+
+        in.rdbuf ()->pubsetbuf (buf, 1);
+        in.imbue (loc);
+        in.open (fname);
+
+        std::wstring line;
+        std::getline (in, line);
+
+        rw_assert (   !in.fail () && 3 == line.size ()
+                   && L'a' == line [0] && L'\xe9' == line [1]
+                   && L'z' == line [2], 0, __LINE__,
+                   "(%s) wifstream with a one-element buffer reads "
+                   "\"a\\xc3\\xa9z\" as 3 characters a, U+00E9, z: got %s, "
+                   "%u characters", locname,
+                   in.fail () ? "failbit" : "goodbit", unsigned (line.size ()));
+    }
+
+    std::remove (fname);
+}
+
+/**************************************************************************/
+
 // exercises the primary template, 22.2.1.5.2: the conversions set the
 // next pointers whatever they return, do_length counts the complete
 // characters in the range, at most max, and do_max_length is the most
@@ -2811,6 +2935,8 @@ run_test (int /*unused*/, char* /*unused*/ [])
     }
 
     test_mmap ();
+
+    test_libc_split ();
 
     test_primary ((unsigned char)0, (unsigned char)0,
                   "unsigned char, unsigned char, mbstate_t", true);
