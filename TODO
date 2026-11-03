@@ -22,17 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =money_put='s last-field check never fires
-
-=include/loc/_money_put.cc= 183 and 200: ~sizeof __fmat != __i - 1~
-is always true (the pattern has four fields, =__i= at most 3), so a
-=space= in the last field is not diagnosed; the message names
-=num_put=. Found by reading, 2026-11-02.
-
-Fix: compare =__i= with the last index; name =money_put=.
-
-Check: a pattern ending in =space= throws =runtime_error=.
-
 ** TODO =money_get= keeps one leading zero in =digits=
 
 =include/loc/_money_get.cc= 445: the loop strips a zero only while

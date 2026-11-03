@@ -1327,8 +1327,8 @@ with `__rw_put_groups`. Both end in `_C_put`: the pattern and sign by
 the first character, the symbol only under `showbase`, the first
 character of the sign at `sign` and the rest at the end, one
 `widen (' ')` at `space`, the fill at the first `none` or `space`
-under `internal`. A pattern with `none` or `space` first throws
-`runtime_error` through `_RWSTD_REQUIRES`.
+under `internal`. A pattern with `none` first, or `space` first or
+last, throws `runtime_error` through `_RWSTD_REQUIRES`.
 
 #### The data and its writers
 

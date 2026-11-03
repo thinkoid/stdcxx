@@ -180,9 +180,9 @@ _C_put (iter_type __it, int __opts, ios_base &__flags, char_type __fill,
             // 22.2.6.3, p1: the value space, if present,
             //               is neither first nor last.
 
-            _RWSTD_REQUIRES (0 != __i && sizeof __fmat != __i - 1,
+            _RWSTD_REQUIRES (0 != __i && sizeof __fmat - 1 != __i,
                              (_RWSTD_ERROR_RUNTIME_ERROR,
-                              _RWSTD_FUNC ("std::num_put<>::do_put()")));
+                              _RWSTD_FUNC ("std::money_put<>::do_put()")));
 
             // an ordinary space, not `fill', is required here
             // will precede any required padding
@@ -194,10 +194,9 @@ _C_put (iter_type __it, int __opts, ios_base &__flags, char_type __fill,
 
             _RWSTD_REQUIRES (0 != __i,
                              (_RWSTD_ERROR_RUNTIME_ERROR,
-                              _RWSTD_FUNC ("std::num_put<>::do_put()")));
+                              _RWSTD_FUNC ("std::money_put<>::do_put()")));
 
-            if (   (__adj & _RWSTD_IOS_ADJUSTFIELD) == _RWSTD_IOS_INTERNAL
-                && sizeof __fmat != __i - 1)
+            if ((__adj & _RWSTD_IOS_ADJUSTFIELD) == _RWSTD_IOS_INTERNAL)
                 for (; __pad > 0; --__pad, ++__it)
                     *__it = __fill;
 

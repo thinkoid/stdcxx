@@ -28,6 +28,7 @@
 
 #include <ios>
 #include <locale>
+#include <stdexcept>   // for runtime_error
 #include <cstdio>      // for sprintf()
 
 #include <rw_cmdopt.h>    // for rw_enabled()
@@ -855,6 +856,69 @@ void grouping_test ()
 
 /**************************************************************************/
 
+template <class charT>
+void pattern_test (charT)
+{
+#ifndef _RWSTD_NO_EXCEPTIONS
+
+    static const char* const cname = 1 < sizeof (charT) ? "wchar_t" : "char";
+
+    rw_info (0, 0, 0, "std::money_put<%s>::put() with a pattern "
+             "22.2.6.3, p1 does not allow", cname);
+
+    static const charT curr_symbol [] = { '$', '\0' };
+    static const charT sign []        = { '-', '\0' };
+
+    Punct<charT, false>::curr_symbol_   = curr_symbol;
+    Punct<charT, false>::negative_sign_ = sign;
+    Punct<charT, false>::positive_sign_ = sign;
+    Punct<charT, false>::frac_digits_   = 0;
+    Punct<charT, false>::grouping_      = "";
+
+    // 22.2.6.3, p1: the value none, if present, is not first;
+    // the value space, if present, is neither first nor last
+    static const char* const bad [] = { "@$-1", " $-1", "$-1 " };
+
+    for (unsigned i = 0; i != sizeof bad / sizeof *bad; ++i) {
+
+        const Punct<charT, false> pun;
+
+        pun.neg_format_ = set_pattern (bad [i]);
+        pun.pos_format_ = pun.neg_format_;
+
+        Ios<charT> ios;
+        ios.imbue (std::locale (ios.getloc (),
+                                (const std::moneypunct<charT>*)&pun));
+
+        const MoneyPut<charT> mp;
+
+        charT buf [64];
+        bool  thrown = false;
+
+        try {
+            mp.put (buf, false, ios, charT (' '), 1.0L);
+        }
+        catch (const std::runtime_error&) {
+            thrown = true;
+        }
+        catch (...) {
+        }
+
+        rw_assert (thrown, 0, __LINE__,
+                   "money_put<%s>::put (..., long double) with the "
+                   "pattern \"%s\" expected to throw runtime_error",
+                   cname, bad [i]);
+    }
+
+#else   // if defined (_RWSTD_NO_EXCEPTIONS)
+
+    rw_note (0, __FILE__, __LINE__, "exceptions test disabled");
+
+#endif   // _RWSTD_NO_EXCEPTIONS
+}
+
+/**************************************************************************/
+
 static int
 run_test (int, char*[])
 {
@@ -867,13 +931,17 @@ run_test (int, char*[])
     else
         grouping_test ();
 
-    if (rw_enabled ("char"))
+    if (rw_enabled ("char")) {
         ldbl_test (char ());
+        pattern_test (char ());
+    }
     else
         rw_note (0, __FILE__, __LINE__, "char test disabled");
 
-    if (rw_enabled ("wchar_t"))
+    if (rw_enabled ("wchar_t")) {
         ldbl_test (wchar_t ());
+        pattern_test (wchar_t ());
+    }
     else
         rw_note (0, __FILE__, __LINE__, "wchar_t test disabled");
 
