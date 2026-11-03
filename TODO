@@ -22,20 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =collate::do_transform= leaks a codecvt mapping per call
-
-=src/collate.cpp= 878-884 (narrow) and 1053-1059 (wide): a transform
-that meets a character outside the table maps the codeset's codecvt
-database for its validity check through =__rw_get_facet_data= and
-never releases it. Under =zh_CN.UTF-8=, 100 wide transforms of U+743B
-add 100 mappings (=/proc/self/maps=). Since the 2005 import. Found by
-probe, 2026-11-02.
-
-Fix: release the mapping at the end of the call, or map once per
-facet.
-
-Check: the mapping count stays flat over 100 transforms.
-
 ** TODO Category 0 is read as =LC_CTYPE=
 
 =locale::collate & locale::ctype= is 0, and glibc's =LC_CTYPE= is 0, so
@@ -89,6 +75,24 @@ supported target: =_RWSTD_NO_CATOPEN_CATGETS=, tested at
 Fix: remove, or characterize =catopen= and keep the catalog under it.
 
 Check: grep, then a 15D build with the code removed.
+
+** TODO The narrow =transform= is empty for a string with an undefined character
+
+Under =zh_CN.UTF-8=, =collate<char>::transform= of "\xe7\x90\xbb"
+(U+743B, a character the collate table does not list) returns an
+empty key, and so does any string holding it ("a\xe7\x90\xbb",
+"\xe7\x90\xbb" "a"); =collate<wchar_t>::transform= of the same
+strings returns 8 and 12 weights, the =UNDEFINED= row. "a" and U+4E2D
+transform on both sides. The narrow undefined path (=src/collate.cpp=,
+=do_transform=, the =__rw_is_invalid= check against =n_to_w=) rejects
+a valid sequence the wide path accepts. Since the 2005 import. Found
+by probe, 2026-11-03, beside the mapping leak.
+
+Fix: read the narrow check against what =__rw_get_char_offset= leaves
+in =tmp_lo2=; the narrow and wide paths should agree.
+
+Check: the three strings above under =zh_CN.UTF-8=, narrow and wide
+keys both non-empty, ordering consistent between the two.
 
 ** TODO =num_put= writes an unbounded run of zeros for a negative precision
 

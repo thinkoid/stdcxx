@@ -735,6 +735,30 @@ template long __rw_hash (const wchar_t*, const wchar_t*) _THROWS(());
 }    // namespace __rw
 
 
+namespace __rw {
+
+// a codecvt database mapped for one call of do_transform, to tell an
+// undefined character from an invalid sequence; released with the call
+struct __rw_cvt_mapping
+{
+    const __rw_codecvt_t *_C_cvt;
+    size_t                _C_size;
+
+    __rw_cvt_mapping (): _C_cvt (0), _C_size (0) { }
+
+    ~__rw_cvt_mapping () {
+        if (_C_cvt)
+            __rw_release_facet_data (_C_cvt, _C_size);
+    }
+
+private:
+    __rw_cvt_mapping (const __rw_cvt_mapping&);
+    void operator= (const __rw_cvt_mapping&);
+};
+
+}   // namespace __rw
+
+
 namespace std { 
 
 
@@ -857,7 +881,7 @@ do_transform (const char* low, const char* high) const
 
     // lazily initialized in the first iteration of the loop
     // in which the facet data is needed (possibly never)
-    const __rw::__rw_codecvt_t* cvt = 0;
+    __rw::__rw_cvt_mapping cvtmap;
 
     for (; tmp_lo < high; tmp_lo++) {
         const char* tmp_lo2 = tmp_lo;
@@ -875,18 +899,19 @@ do_transform (const char* low, const char* high) const
                 // database to discover this information
                 if (impl->undefined_optimization) {
 
-                    size_t size;
-                    if (0 == cvt) {
-                        cvt = static_cast< const __rw::__rw_codecvt_t* >(
-                            __rw::__rw_get_facet_data (
-                                ccvt_cat, size, _C_name, 
-                                impl->codeset_name ()));
+                    if (0 == cvtmap._C_cvt) {
+                        cvtmap._C_cvt =
+                            static_cast< const __rw::__rw_codecvt_t* >(
+                                __rw::__rw_get_facet_data (
+                                    ccvt_cat, cvtmap._C_size, _C_name,
+                                    impl->codeset_name ()));
 
-                        if (0 == cvt)
+                        if (0 == cvtmap._C_cvt)
                             return string_type ();   // error
                     }
 
-                    if (__rw::__rw_is_invalid (cvt->n_to_w_tab(), tmp_lo2))
+                    if (__rw::__rw_is_invalid (cvtmap._C_cvt->n_to_w_tab (),
+                                               tmp_lo2))
                         return string_type ();   // error
 
                     const unsigned int* const pwt =
@@ -1030,7 +1055,7 @@ do_transform (const wchar_t* low, const wchar_t* high) const
 
         // lazily initialized in the first iteration of the loop
         // in which the facet data is needed (possibly never)
-        const __rw::__rw_codecvt_t* cvt = 0;
+        __rw::__rw_cvt_mapping cvtmap;
 
         // first go through the string getting a weight offset for
         // each character, in the process check for collating elements.
@@ -1048,16 +1073,15 @@ do_transform (const wchar_t* low, const wchar_t* high) const
                     // in the collate database we must use the codecvt 
                     // database to discover this information 
                     if (impl->undefined_optimization) {
-                        size_t size;
 
+                        if (0 == cvtmap._C_cvt) {
+                            cvtmap._C_cvt =
+                                static_cast< const __rw::__rw_codecvt_t* >(
+                                    __rw::__rw_get_facet_data (
+                                        ccvt_cat, cvtmap._C_size, _C_name,
+                                        impl->codeset_name ()));
 
-                        if (0 == cvt) {
-                            cvt = static_cast< const __rw::__rw_codecvt_t* >(
-                                __rw::__rw_get_facet_data (
-                                   ccvt_cat, size, _C_name,
-                                   impl->codeset_name ()));
-
-                            if (0 == cvt)
+                            if (0 == cvtmap._C_cvt)
                                 return string_type ();   // error
                         }
 
@@ -1068,7 +1092,8 @@ do_transform (const wchar_t* low, const wchar_t* high) const
 
                         tmp [nbytes] = '\0';
 
-                        if (__rw::__rw_is_invalid (cvt->w_to_n_tab (), tmp))
+                        if (__rw::__rw_is_invalid (cvtmap._C_cvt->w_to_n_tab (),
+                                                   tmp))
                             return string_type ();   // error
 
                         const unsigned int *pwt =

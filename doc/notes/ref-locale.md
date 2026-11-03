@@ -1664,7 +1664,8 @@ paths:
   `largest_ce > 1`), else the character (`__rw_get_char_offset`,
   `__rw_get_wchar_offset`), else, when `undefined_optimization` is set,
   the shared row `undefined_weight_idx` after a validity check against
-  the codeset's codecvt database. The wide keys are the UTF-8 form of
+  the codeset's codecvt database, mapped once per call and released
+  with it (`__rw_cvt_mapping`). The wide keys are the UTF-8 form of
   the `wchar_t` (`__rw_itoutf8`). A sequence the check rejects makes
   the whole transform empty; so does a wide character outside the
   charmap (5bbe3e4b). The rows go to `__rw_process_offsets`.
