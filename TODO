@@ -22,20 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =IS_UTF8= and =IS_UTF16*= can never be true
-
-=src/wcodecvt.cpp= 110-113 compare =UCS_TYPE (x)=, which masks with
-=__rw_ucs_mask= (89: the three UCS bits), against =__rw_utf8= and the
-UTF-16 flags (81 ff., outside that mask), so the four tests are
-always false. =do_max_length= (1558) returns 0 for =UTF-8= and
-=utf-8=. Found by probe, 2026-11-02.
-
-Fix: mask with =__rw_utf_mask= (95) in the four tests, then read
-every site that relied on their being false.
-
-Check: =max_length ()= of the UTF-8 facet returns 6; =22.locale.codecvt=
-on its pin, plus a row for =max_length= of the UTF-8 facet.
-
 ** TODO =ctype_byname<wchar_t>= builds three tables nothing reads
 
 The C-library fallback of =ctype_byname<wchar_t>= (=src/wctype.cpp=

@@ -107,10 +107,10 @@ enum {
 #define IS_UCS_BE_LE(x)   (UCS_TYPE (x) == __rw_ucs_be_le)
 #define IS_UCS_LE_BE(x)   (UCS_TYPE (x) == __rw_ucs_le_be)
 
-#define IS_UTF8(x)        (UCS_TYPE (x) == __rw_utf8)
-#define IS_UTF16(x)       (UCS_TYPE (x) == __rw_utf16)
-#define IS_UTF16_BE(x)    (UCS_TYPE (x) == __rw_utf16_be)
-#define IS_UTF16_LE(x)    (UCS_TYPE (x) == __rw_utf16_le)
+#define IS_UTF8(x)        (UTF_TYPE (x) == __rw_utf8)
+#define IS_UTF16(x)       (UTF_TYPE (x) == __rw_utf16)
+#define IS_UTF16_BE(x)    (UTF_TYPE (x) == __rw_utf16_be)
+#define IS_UTF16_LE(x)    (UTF_TYPE (x) == __rw_utf16_le)
 
 // evaluates to 1 if the facet should use the libc locale, 0 otherwise
 #define USE_LIBC(impl, x) \

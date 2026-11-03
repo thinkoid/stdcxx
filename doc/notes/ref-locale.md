@@ -899,7 +899,8 @@ takes `_C_data ()`:
   `__rw_setlocale`.
 - `do_unshift` returns `noconv` for a stateless encoding.
   `do_encoding` is 1 for a database whose `mb_cur_max` is 1, else 0.
-  `do_max_length` is the database's `mb_cur_max`, or `MB_CUR_MAX`.
+  `do_max_length` is the database's `mb_cur_max`, or `MB_CUR_MAX`;
+  6 for the UTF-8 names.
   `do_length` walks the same tries as `do_in` and counts the bytes
   of at most `max` complete characters.
 - The library-database paths check the state with `mbsinit`, assert
@@ -1090,8 +1091,7 @@ Known gaps and their `TODO` entries:
 - "A codecvt oracle": none exists.
 - Not covered by any row: `ctype<wchar_t>` at or above 256 beyond
   the classic case maps' one row each, the
-  classic wide `out` above 0xff, `max_length` of the UTF names,
-  the ISO-2022 converters.
+  classic wide `out` above 0xff, the ISO-2022 converters.
 
 ### 9.5 Open
 

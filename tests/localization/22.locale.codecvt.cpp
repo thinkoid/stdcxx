@@ -2231,6 +2231,19 @@ test_inout (const char* tname)
         // strict conformance mode
         const bool strict_mode = 'U' == *locname;
 
+        // 22.2.1.5.2, p11: the most do_length (..., 1) can return,
+        // 6 bytes for the library's UTF-8 conversion
+        {
+            const std::codecvt_byname<wchar_t, char, std::mbstate_t>
+                cc (locname);
+
+            const int maxlen = cc.max_length ();
+
+            rw_assert (6 == maxlen, __FILE__, __LINE__,
+                       "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\")"
+                       "::max_length() == 6, got %d", locname, maxlen);
+        }
+
         TEST_IN_OUT ("",     0, 0, L"",     0, 0, ok);
         TEST_IN_OUT ("\0",   1, 1, L"\0",   1, 1, ok);
         TEST_IN_OUT ("a",    1, 1, L"a",    1, 1, ok);
