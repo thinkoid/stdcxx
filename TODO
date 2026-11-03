@@ -22,19 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =num_get= of =unsigned int= clamps without =failbit=
-
-=src/num_get.cpp= 321-336, the =_C_uint= case, clamps but never sets
-=err= to =ERANGE=: "4294967296" and "-1" both give 4294967295 with
-=goodbit=, through the facet and through =operator>>=;
-=unsigned short= sets =failbit=. The conformance record's LWG 23 row
-("sets failbit and clamps") is false for this type. Found by probe,
-2026-11-02.
-
-Fix: the =ERANGE= path of the other unsigned cases.
-
-Check: both inputs set =failbit= through the facet and the extractor.
-
 ** TODO =money_put='s last-field check never fires
 
 =include/loc/_money_put.cc= 183 and 200: ~sizeof __fmat != __i - 1~
@@ -737,6 +724,18 @@ from a sentinel the facet cannot produce.
 
 Check: a grouping row with the store commented out of the facet goes
 red on the value assertion.
+
+** TODO =22.locale.num.get= has no =unsigned short= rows
+
+=tests/localization/22.locale.num.get.cpp= tests every =get= overload
+but =unsigned short=; its overflow clamp and =failbit= are pinned by
+nothing (the rows of =27.istream.fmat.arith= never compile, above).
+Found 2026-11-03 while adding =test_uint=.
+
+Fix: a =test_ushrt= in the shape of =test_uint=: the limits, "-1",
+=errno=.
+
+Check: the rows run and the six pins move.
 
 * Certification
 

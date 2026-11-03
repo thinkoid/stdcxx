@@ -40,7 +40,7 @@
 #  define NO_GET_BOOL
 // no NO_GET_USHRT
 // no NO_GET_SHRT
-// no NO_GET_UINT
+#  define NO_GET_UINT
 // no NO_GET_INT
 #  define NO_GET_ULONG
 #  define NO_GET_LONG
@@ -1321,6 +1321,67 @@ test_ulong (CharType ctype, const char *cname,
     }
 
 #endif   // NO_GET_ULONG
+}
+
+/**************************************************************************/
+
+static void
+test_uint (CharType ctype, const char *cname,
+           IterType itype, const char *iname)
+{
+#ifndef NO_GET_UINT
+
+    const char* const tname = "unsigned int";
+
+    rw_info (0, 0, 0, "std::num_get<%s, %s>::get (..., %s&)",
+             cname, iname, tname);
+
+    TEST (T,     0U,    "0", 1, 0, Eof);
+    TEST (T,     0U,   "+0", 2, 0, Eof);
+    TEST (T,     0U,   "-0", 2, 0, Eof);
+    TEST (T,     1U,   "+1", 2, 0, Eof);
+    TEST (T,  1078U, "1078", 4, 0, Eof);
+
+    TEST (T, 65535U, "65535", 5, 0, Eof);
+
+    // a negative number is negated modulo ULONG_MAX + 1, as strtoul()
+    // does; the result fits unsigned int only where the two types
+    // have the same width, otherwise it is clamped to UINT_MAX
+    // and failbit is set
+#if UINT_MAX < ULONG_MAX
+    TEST (T, UINT_MAX, "-1", 2, 0, Eof | Fail);
+    TEST (T, UINT_MAX, "-5", 2, 0, Eof | Fail);
+#else   // if UINT_MAX >= ULONG_MAX
+    TEST (T, UINT_MAX,      "-1", 2, 0, Eof);
+    TEST (T, UINT_MAX - 4U, "-5", 2, 0, Eof);
+#endif   // UINT_MAX < ULONG_MAX
+
+    // exercise integer overflow
+#if UINT_MAX == 0xffffffffU
+    const char umax[]        = "4294967295";   // 0xffffffffU
+    const char umax_plus_1[] = "4294967296";   // 0xffffffffU + 1
+    const char umax_plus_2[] = "4294967297";   // 0xffffffffU + 2
+    const char umax_x_f[]    = "0xfffffffff";  // extra 'f' (times 0xf)
+    const char vflow_1[]     = "8589934581";
+
+    TEST (T, UINT_MAX, umax,        INTSIZE (umax) - 1,        0, Eof);
+    TEST (T, UINT_MAX, umax_plus_1, INTSIZE (umax_plus_1) - 1, 0, Eof | Fail);
+    TEST (T, UINT_MAX, umax_plus_2, INTSIZE (umax_plus_2) - 1, 0, Eof | Fail);
+    TEST (T, UINT_MAX, umax_x_f,    INTSIZE (umax_x_f) - 1,    0, Eof | Fail);
+    TEST (T, UINT_MAX, vflow_1,     INTSIZE (vflow_1) - 1,     0, Eof | Fail);
+#else   // if UINT_MAX != 0xffffffffU
+    rw_note (0, 0, 0, "overflow test for unsigned int of %u bits disabled",
+             unsigned (sizeof (unsigned) * CHAR_BIT));
+#endif   // UINT_MAX == 0xffffffffU
+
+    if (rw_opt_no_errno) {
+        rw_note (0, 0, 0, "errno test disabled");
+    }
+    else {
+        test_errno (ctype, cname, itype, iname, (unsigned)0);
+    }
+
+#endif   // NO_GET_UINT
 }
 
 /**************************************************************************/
@@ -2639,6 +2700,7 @@ run_tests (CharType ctype, const char *cname,
         rw_note (0, __FILE__, __LINE__, "%s test disabled", tname)
 
     TEST (bool,   "bool");
+    TEST (uint,   "unsigned int");
 
     TEST (long,   "long");
     TEST (ulong,  "unsigned long");

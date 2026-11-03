@@ -1425,17 +1425,18 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 - **What.** An integer out of range stores the nearest limit and
   `failbit`. A negative input to an unsigned type wraps without
   `failbit` where the wrapped value fits, as C++11's `strtoull` rule
-  does; `"-1"` is `ULONG_MAX` for `unsigned long` and 65535 with
-  `failbit` for `unsigned short`. Floating overflow stores ±infinity
-  and `failbit`; underflow stores ±`FLT_MIN`, `DBL_MIN` or `LDBL_MIN`
-  and `goodbit`, within C99's `strtod` rule that the test quotes.
-  `unsigned int` takes neither rule (10.5).
+  does; `"-1"` is `ULONG_MAX` for `unsigned long`, 65535 with
+  `failbit` for `unsigned short`, and `UINT_MAX` for `unsigned int`,
+  with `failbit` where `long` is wider than `int`. Floating overflow
+  stores ±infinity and `failbit`; underflow stores ±`FLT_MIN`,
+  `DBL_MIN` or `LDBL_MIN` and `goodbit`, within C99's `strtod` rule
+  that the test quotes.
 - **Why.** LWG 23 (comments in `include/loc/_num_get.h`); C++11
   22.4.2.1.2 p3 stores the most positive or negative value. Underflow
   is the 2005 import.
-- **Pins.** `22.locale.num.get` `test_long`, `test_ulong`,
-  `test_llong`, `test_ullong`, the three `_uflow` tests. Row: ch. 3,
-  LWG 23.
+- **Pins.** `22.locale.num.get` `test_uint`, `test_long`,
+  `test_ulong`, `test_llong`, `test_ullong`, the three `_uflow`
+  tests. Row: ch. 3, LWG 23.
 
 #### 10.3.7 A grouping mismatch stores the value
 
@@ -1523,9 +1524,9 @@ The two warnings of `22.locale.num.put` are `ullong_test`, a
 placeholder since 2006. `22.locale.numpunct` never checks the names
 of a named locale ("FIXME", line 223). Its narrow
 separator is compared with the first byte of `localeconv`'s string,
-which pins the first-byte reading. No row checks `unsigned short` or
-`unsigned int` overflow: `test_ushrt` and `test_uint` of
-`27.istream.fmat.arith` gate their rows on `_RWSTD_USHRT_SIZE` and
+which pins the first-byte reading. No row checks `unsigned short`
+overflow (`22.locale.num.get` has `test_uint`): `test_ushrt` and
+`test_uint` of `27.istream.fmat.arith` gate their rows on `_RWSTD_USHRT_SIZE` and
 `_RWSTD_UINT_SIZE`, which nothing defines. The four `get` and `put` MT
 programs were retired on 2026-10-19: the facets hold no state
 (5c1368e6, a701ec25, 72d94f0b, 70070c4b). No row of the family fails
@@ -1548,9 +1549,6 @@ which `num_put`'s classification of floating values is stubbed.
   ("stack smashing detected"); `money_put` of 1000 digits under
   en_US.UTF-8, group sizes past 304 bytes (SIGSEGV). Check: the four
   under AddressSanitizer after a fix, a row each in the two tests.
-- **`unsigned int` overflow.** `__rw_get_num` clamps without
-  `failbit`. Check: `"4294967296"` and `"-1"` into `unsigned int`
-  set `failbit`, as `unsigned short` does.
 - **Names of true and false.** Every database locale has empty
   names, so `boolalpha` writes nothing and reads nothing under them;
   the C-library path gives `"true"` and `"false"`. Decision: what a
@@ -2269,7 +2267,7 @@ is a `TODO` entry rather than a decision.
 | Floating values are grouped | 22.2.2.2.2 p16 | 10.3.3 | C++11's text |
 | A zero precision is specified | 22.2.2.2.2 p11, LWG 231 | 10.3.4 | C++11's text |
 | The `0x` prefix in stage 2 | 22.2.2.1.2 p8 | 10.3.5 | C++11's text |
-| Overflow stores a clamped value | 22.2.2.1.2 p1, p11, LWG 23 | 10.3.6 | design; `unsigned int` a defect |
+| Overflow stores a clamped value | 22.2.2.1.2 p1, p11, LWG 23 | 10.3.6 | design |
 | A grouping mismatch stores the value | 22.2.2.1.2 p1, p12; 22.2.6.1.2 p1 | 10.3.7 | design |
 | `money_get` sets `eofbit` on success | 22.2.6.1.2 p1 | 10.3.8 | design |
 | Fraction digits are lenient | 22.2.6.3 p3 | 10.3.9 | design |

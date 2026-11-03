@@ -304,10 +304,6 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
                 val.ul = _RWSTD_USHRT_MAX;
                 err    = ERANGE;
             }
-            else {
-                if ('-' == *buf)
-                    val.ul = _RWSTD_USHRT_MAX - val.ul + 1;
-            }
 
             *static_cast< unsigned short* >(pval) =
                 static_cast< unsigned short >(val.ul);
@@ -344,10 +340,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
 
             {
                 val.ul = _RWSTD_UINT_MAX;
-            }
-            else {
-                if ('-' == *buf)
-                    val.ul = _RWSTD_UINT_MAX - val.ul + 1;
+                err    = ERANGE;
             }
 
             *static_cast< unsigned* >(pval) = unsigned (val.ul);

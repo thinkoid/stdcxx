@@ -129,7 +129,7 @@ later amendment to the issue.
 
 | LWG issue | implementation evidence | location |
 |---|---|---|
-| 23 | Integer extraction checks the range of the destination, sets `failbit` and clamps overflow in the narrowing helpers. Not for `unsigned int`, which clamps without `failbit` (`TODO`, "`num_get` of `unsigned int` clamps without `failbit`"). (`ref-locale.md` ch. 10) | `include/loc/_num_get.h` |
+| 23 | Integer extraction checks the range of the destination, sets `failbit` and clamps overflow in the narrowing helpers. (`ref-locale.md` ch. 10) | `include/loc/_num_get.h` |
 | 186 | `bitset::set(pos, value)` takes `bool`, defaulting to `true`; the comment calls this the proposed resolution. | `include/bitset` |
 | 214 | `set` and `multiset` supply non-const lookup overloads alongside const ones; comments identify the proposed resolution. | `include/set` |
 | 307 | Container adaptors expose the underlying container's reference typedefs; `queue::front/back` return those types. | `include/queue`, `include/stack` |
