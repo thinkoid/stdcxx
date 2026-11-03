@@ -1846,7 +1846,12 @@ C++11's, the one recorded exception to the 2003 baseline.
 details (22.2.5, p1). 22.2, p1: "Formatting facets use the character
 argument fill to fill out the specified width where necessary." 22.2,
 p2: the `get()` members take an `iostate&` "whose value they ignore,
-but set to ios_base::failbit in case of a parse error."
+but set to ios_base::failbit in case of a parse error." `time_get`
+and `num_get` do: every member starts from `goodbit` and returns the
+parse's own state (C++11 22.4.5.1.1, p8 and 22.4.5.1.2, p12 say so
+outright for the format members). `money_get` ORs, by its own
+22.2.6.1.2, p1: "sets err to (err|str.failbit)", unchanged in every
+edition since 2003 against the clause-wide sentence.
 
 #### `time_get`, `time_get_byname`
 
@@ -2216,10 +2221,6 @@ comments of the =time_get= test are swapped", and "A reference for
   `TODO`. Check: that row, after the decision.
 - `"%Y %m %d"` leaves the implied `tm_wday` and `tm_yday`; glibc fills
   them; p14 allows either. Not queued. Check: a decision.
-- The caller's `iostate` survives: every exit ORs into `err`, since the
-  2005 import, so a `failbit` passed in stays after a good parse (by
-  probe). 22.2, p2 ignores the value; N3242 p8 and p12 start at
-  `goodbit`. Check: a row passing `failbit` in.
 - `eofbit` before the pattern ends: the walk adds `failbit` and stores
   nothing, so `"%Y-%m"` and `"%Y "` on `"2026"` fail. N3242 p8 lists
   `err != goodbit` before `s == end`, which leaves `eofbit` alone and

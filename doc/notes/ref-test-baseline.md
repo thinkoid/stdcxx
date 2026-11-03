@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-11-03 (de46dc9a), all six configurations.
+As of 2026-11-03 (499174d2), all six configurations.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -229,6 +229,8 @@ all six tables:
 - c580b059, 2026-11-03: `22.locale.time.get`, 3,071 to 3,131.
 - 62777111, 2026-11-03: `22.locale.time.get`, 3,131 to 3,283.
 - de46dc9a, 2026-11-03: `22.locale.time.get`, 3,283 to 3,315.
+- 499174d2, 2026-11-03: `22.locale.codecvt`, up 22 in each configuration (618 to
+  640 under 15D).
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.

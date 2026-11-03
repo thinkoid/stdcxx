@@ -1060,6 +1060,82 @@ void test_posix (charT, const char *cname)
                    "got %d", cname, Eof, err, x.tm_year);
     }
 
+    // the value of err passed in is ignored: 22.2 p2, and C++11
+    // 22.4.5.1.1 p8 and 22.4.5.1.2 p12 start from goodbit; the state
+    // on return is the parse's own
+    STEP ("the iostate passed in is ignored");
+    {
+        typedef std::istreambuf_iterator<charT> InIter;
+
+        const std::locale loc;
+
+        const std::time_get<charT, InIter> &tg =
+            std::use_facet<std::time_get<charT, InIter> >(loc);
+
+        const charT year [] = {
+            charT ('2'), charT ('0'), charT ('2'), charT ('6'), charT ('\0')
+        };
+        const charT pat [] = { charT ('%'), charT ('Y'), charT ('\0') };
+
+        // get over a pattern
+        {
+            std::basic_istringstream<charT> istrm (year);
+            std::ios_base::iostate err = std::ios_base::failbit;
+            std::tm x = mktm ();
+
+            tg.get (InIter (istrm), InIter (), istrm, err, &x, pat, pat + 2);
+
+            rw_assert (Eof == err && 126 == x.tm_year, 0, __LINE__,
+                       "time_get<%s>::get (..., \"%%Y\") on \"2026\" with "
+                       "failbit passed in: rdstate() == %{Is}, got %{Is}; "
+                       "tm_year == 126, got %d", cname, Eof, err, x.tm_year);
+        }
+
+        // do_get with a specifier
+        {
+            std::basic_istringstream<charT> istrm (year);
+            std::ios_base::iostate err = std::ios_base::failbit;
+            std::tm x = mktm ();
+
+            tg.get (InIter (istrm), InIter (), istrm, err, &x, 'Y');
+
+            rw_assert (Eof == err && 126 == x.tm_year, 0, __LINE__,
+                       "time_get<%s>::get (..., 'Y') on \"2026\" with "
+                       "failbit passed in: rdstate() == %{Is}, got %{Is}; "
+                       "tm_year == 126, got %d", cname, Eof, err, x.tm_year);
+        }
+
+        // get_year, one of the five 2003 members
+        {
+            std::basic_istringstream<charT> istrm (year);
+            std::ios_base::iostate err = std::ios_base::failbit;
+            std::tm x = mktm ();
+
+            tg.get_year (InIter (istrm), InIter (), istrm, err, &x);
+
+            rw_assert (Eof == err && 126 == x.tm_year, 0, __LINE__,
+                       "time_get<%s>::get_year () on \"2026\" with "
+                       "failbit passed in: rdstate() == %{Is}, got %{Is}; "
+                       "tm_year == 126, got %d", cname, Eof, err, x.tm_year);
+        }
+
+        // a failed parse reports its own failure alone
+        {
+            const charT bad [] = { charT ('x'), charT ('\0') };
+
+            std::basic_istringstream<charT> istrm (bad);
+            std::ios_base::iostate err = std::ios_base::badbit;
+            std::tm x = mktm ();
+
+            tg.get_year (InIter (istrm), InIter (), istrm, err, &x);
+
+            rw_assert (Fail == err && 0 == x.tm_year, 0, __LINE__,
+                       "time_get<%s>::get_year () on \"x\" with badbit "
+                       "passed in: rdstate() == %{Is}, got %{Is}; tm_year "
+                       "== 0, got %d", cname, Fail, err, x.tm_year);
+        }
+    }
+
     // %U and %W with the year and the weekday derive nothing: C++11
     // 22.4.5.1.2 p12 has do_get assign the members a directive
     // corresponds to, none for a week; glibc's strptime derives the

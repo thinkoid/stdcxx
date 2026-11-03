@@ -476,6 +476,10 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
     // extension: `tmb' may be 0
     tm __tmp = __tmb ? *__tmb : tm ();
 
+    // C++11 22.4.5.1.1, p8: the function starts by evaluating
+    // err = ios_base::goodbit; the value passed in is ignored
+    __err = __rw::__rw_goodbit;
+
     _RWSTD_IOSTATE __errtmp = __rw::__rw_goodbit;
 
     char __fmt [] = { '\0', '\0' };
@@ -555,6 +559,10 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         reinterpret_cast< const void** >(__names);
 
     tm __tmp = __tmb ? *__tmb : tm ();
+
+    // C++11 22.4.5.1.2, p12: the function starts by evaluating
+    // err = ios_base::goodbit; the value passed in is ignored
+    __err = __rw::__rw_goodbit;
 
     int *__pmem = 0;   // pointer to std::tm member
 

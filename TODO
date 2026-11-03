@@ -22,21 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The caller's =iostate= survives a =time_get= parse
-
-Every exit of the =time_get= members ORs into =err=
-(=include/loc/_time_get.cc= 75, 92, 336, 531, 575, 658, 848, 967);
-14882:2003 22.2 p2 says the facets ignore the value they are given,
-and N3242 p8 and p12 start from =goodbit=. Passing =failbit= in, "%Y"
-on "2026" returns =eofbit|failbit= and still stores the year. Since
-2005. =num_get= assigns =goodbit= first (=_num_get.cc= 111, 157);
-=money_get= ORs too (=_money_get.cc= 502). Found by probe, 2026-11-02.
-
-Fix: assign, as =num_get= does, in =time_get= and =money_get=.
-
-Check: a row passing =failbit= in, returning the parse's own state;
-=22.locale.time.get= and =money.get= on their pins otherwise.
-
 ** TODO A failed codecvt mapping publishes the file's size with no data
 
 =__rw_mmap= in =src/mman.cpp= writes =*size= from =stat= before it
