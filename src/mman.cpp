@@ -58,9 +58,6 @@ void* __rw_mmap (const char* fname, size_t *size)   // nothrow
     if (stat (fname, &sb) == -1)
         return 0;
 
-    *size = sb.st_size;
-
-
     const int fd = open (fname, O_RDONLY);
    
     if (-1 == fd)
@@ -82,6 +79,10 @@ void* __rw_mmap (const char* fname, size_t *size)   // nothrow
     if (MAP_FAILED == data)   // failure
         return 0;
 
+    // the size is published only with the mapping: a caller that
+    // stores both takes a non-zero size to mean the data is there
+    *size = sb.st_size;
+
 #else   // no mmap() or equivalent
 
 #  ifndef _RWSTD_NO_MUNMAP
@@ -99,6 +100,8 @@ void* __rw_mmap (const char* fname, size_t *size)   // nothrow
             free (data);
             data = 0;
         }
+        else
+            *size = mapsize;
     }
 
 #endif  // !defined (_RWSTD_NO_MMAP)

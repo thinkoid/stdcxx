@@ -212,12 +212,14 @@ not use the C library for UTF encodings and falls back to its own
 algorithmic UTF-8 transformation, with the same result. The defect
 shows on the single-byte and legacy multibyte encodings.
 
-A second, smaller defect sits on the same line: when `open` or `mmap`
-fails after `stat` succeeded, the facet is left with a non-zero size
-and a null pointer for good, and every later call takes the C library
-path. That is the "no database" behaviour, reached by a different
-route; it is recorded here and not measured. `TODO` carries it as "A
-failed codecvt mapping publishes the file's size with no data".
+A second, smaller defect sat on the same line: when `open` or `mmap`
+failed after `stat` succeeded, the facet was left with a non-zero
+size and a null pointer for good, and every later call took the C
+library path, the "no database" behaviour by a different route.
+`__rw_mmap` now writes the size only with a mapping, so a database
+it cannot open leaves the size as a missing one does, and the
+codecvt path stores `size_t (-1)` for a null result, as the general
+path does; `22.locale.codecvt` pins the mapper.
 
 ### 2.2. The evidence
 

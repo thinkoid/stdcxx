@@ -289,16 +289,18 @@ const void* __rw_facet::_C_get_data ()
         codeset = codeset_fname.data ();
     }
 
-    // map the codecvt database into locals: __rw_get_facet_data sets
-    // the size before the mapping exists, and a non-zero _C_impsize
-    // is what _C_data() takes to mean _C_impdata is ready
-    // (doc/notes/analysis-facet-first-use.md, chapter 2)
+    // map the codecvt database into locals: a non-zero _C_impsize is
+    // what _C_data() takes to mean _C_impdata is ready, so the data
+    // is stored before the size (doc/notes/analysis-facet-first-use.md,
+    // chapter 2); a database that cannot be mapped is marked as none,
+    // as the general path above marks it
     size_t cvtsize = 0;
     const void* const cvtdata =
         __rw_get_facet_data (cat, cvtsize, 0, codeset);
 
     _C_impdata = cvtdata;
-    _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, cvtsize, false);
+    _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize,
+                                 cvtdata ? cvtsize : size_t (-1), false);
 
     // unmap the LC_CTYPE database
     __rw_munmap (pdata, sz);

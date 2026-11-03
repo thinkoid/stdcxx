@@ -22,31 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO A failed codecvt mapping publishes the file's size with no data
-
-=__rw_mmap= in =src/mman.cpp= writes =*size= from =stat= before it
-opens and maps the file, so a mapping that fails after =stat= hands
-back a null pointer and a non-zero size. =__rw_facet::_C_get_data=
-guards the general path: a null result stores the no-database marker,
-=_C_impsize= of =size_t (-1)=, beside the null pointer
-(=src/facet.cpp= 248-254). The wide =codecvt_byname= path does not:
-it stores the size the mapper wrote beside the null pointer
-(=src/facet.cpp= 297-301). Every later call takes the C library path,
-which is the no-database behaviour by another route, and the
-destructor is guarded by the pointer; the seam is a facet whose size
-says it holds data it does not. Recorded in
-=doc/notes/analysis-facet-first-use.md= chapter 2.1 on 2026-09-28,
-never queued.
-
-Fix: =__rw_mmap= writes =*size= only once the mapping exists; the
-codecvt path stores =size_t (-1)= for a null result, as the general
-path does.
-
-Check: a probe that makes the codecvt database of a byname locale
-unreadable (mode 000) under 15D: the facet converts through the C
-library, =_C_impsize= is =size_t (-1)=, and a second call does not
-map again.
-
 ** TODO =length= under a =@UCS= name walks the wrong trie
 
 =__rw_libstd_do_length= (=src/wcodecvt.cpp= 823) walks

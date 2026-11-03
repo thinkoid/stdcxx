@@ -2378,6 +2378,91 @@ test_ascii (const char *locname, const char* native_locname)
 // - checks the conversion for each the locales in the locales array
 /**************************************************************************/
 
+// the library's mapper of locale databases (src/mman.cpp): the size
+// it hands back is written only with a mapping, so that a database
+// that cannot be opened or mapped leaves no size beside a null pointer
+
+namespace __rw {
+
+void* __rw_mmap (const char*, std::size_t*);
+void __rw_munmap (const void*, std::size_t);
+
+}
+
+static void
+test_mmap ()
+{
+    rw_info (0, 0, __LINE__, "__rw::__rw_mmap (const char*, size_t*)");
+
+    char fname [1024] = "";   // rw_tmpnam () composes a name into an empty buffer
+
+    if (!rw_tmpnam (fname)) {
+        rw_warn (0, 0, __LINE__, "rw_tmpnam () failed, test skipped");
+        return;
+    }
+
+    const char bytes [] = "0123456789abcdef";
+    const std::size_t nbytes = sizeof bytes - 1;
+
+    std::FILE* const f = std::fopen (fname, "wb");
+
+    if (!f || nbytes != std::fwrite (bytes, 1, nbytes, f)) {
+        rw_warn (0, 0, __LINE__, "fopen (%#s, \"wb\") or fwrite () "
+                 "failed, test skipped", fname);
+        if (f)
+            std::fclose (f);
+        return;
+    }
+
+    std::fclose (f);
+
+    // a readable file maps, and the size is its length
+    std::size_t size = 12345;
+    const void* data = __rw::__rw_mmap (fname, &size);
+
+    rw_assert (0 != data && nbytes == size, 0, __LINE__,
+               "__rw_mmap (%#s, &size) == non-null, got %p; "
+               "size == %zu, got %zu", fname, data, nbytes, size);
+
+    if (data)
+        __rw::__rw_munmap (data, size);
+
+    // a missing file leaves the size alone
+    size = 12345;
+    data = __rw::__rw_mmap ("/nonexistent/directory/database", &size);
+
+    rw_assert (0 == data && 12345 == size, 0, __LINE__,
+               "__rw_mmap (<missing>, &size) == 0, got %p; "
+               "size == 12345, got %zu", data, size);
+
+    // a file that exists but cannot be opened leaves the size alone
+    // too: stat succeeds, open fails (root opens anything: skipped)
+    if (0 == geteuid ()) {
+        rw_warn (0, 0, __LINE__, "running as root, the unreadable "
+                 "file check is skipped");
+    }
+    else if (0 == chmod (fname, 0)) {
+        size = 12345;
+        data = __rw::__rw_mmap (fname, &size);
+
+        rw_assert (0 == data && 12345 == size, 0, __LINE__,
+                   "__rw_mmap (%#s with mode 000, &size) == 0, got %p; "
+                   "size == 12345, got %zu", fname, data, size);
+
+        if (data)
+            __rw::__rw_munmap (data, size);
+
+        chmod (fname, 0644);
+    }
+    else
+        rw_warn (0, 0, __LINE__, "chmod (%#s, 0) failed, check skipped",
+                 fname);
+
+    std::remove (fname);
+}
+
+/**************************************************************************/
+
 // exercises the primary template, 22.2.1.5.2: the conversions set the
 // next pointers whatever they return, do_length counts the complete
 // characters in the range, at most max, and do_max_length is the most
@@ -2710,6 +2795,8 @@ run_test (int /*unused*/, char* /*unused*/ [])
                            std::codecvt_base::ok, locales [i].nchars);
 
     }
+
+    test_mmap ();
 
     test_primary ((unsigned char)0, (unsigned char)0,
                   "unsigned char, unsigned char, mbstate_t", true);
