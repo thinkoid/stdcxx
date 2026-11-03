@@ -920,8 +920,10 @@ takes `_C_data ()`:
 `do_narrow` `dfault`; the scans and range forms loop over the single
 forms (`_ctype.cc`). `codecvt<I, E, S>`: `do_in`, `do_out` and
 `do_unshift` return `noconv` when the two types have one size and
-`error` otherwise, and set no pointer; `do_always_noconv` follows the
-sizes; `do_encoding` -1; `do_length` and `do_max_length` `INT_MAX`.
+`error` otherwise, with the next pointers at `from` and `to` (p2, p5);
+`do_always_noconv` follows the sizes; `do_encoding` -1; `do_length`
+the lesser of `max` and the range for one size, 0 otherwise (p10);
+`do_max_length` 1 or 0 (p11).
 `ctype_byname<charT>` and `codecvt_byname<I, E, S>` only record the
 name.
 

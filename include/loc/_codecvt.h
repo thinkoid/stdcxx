@@ -73,24 +73,37 @@ protected:
     // template is the same as that of codecvt<char, char, mbstate_t> if
     // sizeof (intern_type) == sizeof (extern_type) to allow iostream
     // instantiations on signed char or unsigned char to have somewhat
-    // meaningful behavior
+    // meaningful behavior; otherwise nothing converts and the three
+    // conversions return error
 
     virtual result
     do_out (state_type&,
-            const intern_type*, const intern_type*, const intern_type*&,
-            extern_type*, extern_type*, extern_type*&) const {
+            const intern_type* __from, const intern_type*,
+            const intern_type*& __from_next,
+            extern_type* __to, extern_type*, extern_type*& __to_next) const {
+        // 22.2.1.5.2, p2: the next pointers point one beyond the last
+        // element converted, none here; on noconv to_next is to
+        __from_next = __from;
+        __to_next   = __to;
         return sizeof (intern_type) == sizeof (extern_type) ? noconv : error;
     }
 
     virtual result
     do_in (state_type&,
-           const extern_type*, const extern_type*, const extern_type*&,
-           intern_type*, intern_type*, intern_type*&) const {
+           const extern_type* __from, const extern_type*,
+           const extern_type*& __from_next,
+           intern_type* __to, intern_type*, intern_type*& __to_next) const {
+        __from_next = __from;
+        __to_next   = __to;
         return sizeof (intern_type) == sizeof (extern_type) ? noconv : error;
     }
 
     virtual result
-    do_unshift (state_type&, extern_type*, extern_type*, extern_type*&) const {
+    do_unshift (state_type&, extern_type* __to, extern_type*,
+                extern_type*& __to_next) const {
+        // 22.2.1.5.2, p5: to_next points one beyond the last element
+        // stored, none here
+        __to_next = __to;
         return sizeof (intern_type) == sizeof (extern_type) ? noconv : error;
     }
 
@@ -103,13 +116,23 @@ protected:
     }
 
     virtual int do_max_length () const _THROWS (()) {
-        return _RWSTD_INT_MAX;
+        // 22.2.1.5.2, p11: the most do_length (state, from, from_end, 1)
+        // returns
+        return sizeof (intern_type) == sizeof (extern_type);
     }
 
     virtual int
-    do_length (state_type&, 
-               const extern_type*, const extern_type*, _RWSTD_SIZE_T) const {
-        return _RWSTD_INT_MAX;
+    do_length (state_type&, const extern_type* __from,
+               const extern_type* __from_end, _RWSTD_SIZE_T __max) const {
+        // 22.2.1.5.2, p10: the count of complete characters in the
+        // range, at most max: every element where the two types have
+        // one size, none otherwise
+        if (sizeof (intern_type) != sizeof (extern_type))
+            return 0;
+
+        const _RWSTD_SIZE_T __n = __from_end - __from;
+
+        return int (__n < __max ? __n : __max);
     }
 
 public:

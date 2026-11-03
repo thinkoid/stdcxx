@@ -22,19 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The primary =codecvt= returns without setting the next pointers
-
-=include/loc/_codecvt.h= 82-112: the primary template's =do_in=,
-=do_out= and =do_unshift= return =noconv= or =error= without setting
-=from_next= and =to_next= (22.2.1.5.2 p2 wants ~to_next == to~ on
-=noconv=), and =do_length= returns =INT_MAX=, beyond what p10 allows.
-By reading, 2026-11-02.
-
-Fix: set the next pointers to the from and to arguments; =do_length=
-returns the lesser of =max= and the input length.
-
-Check: a probe on =codecvt<unsigned char, unsigned char, mbstate_t>=.
-
 ** TODO The caller's =iostate= survives a =time_get= parse
 
 Every exit of the =time_get= members ORs into =err=

@@ -2376,6 +2376,105 @@ test_ascii (const char *locname, const char* native_locname)
 /****************************************************************************/
  
 // - checks the conversion for each the locales in the locales array
+/**************************************************************************/
+
+// exercises the primary template, 22.2.1.5.2: the conversions set the
+// next pointers whatever they return, do_length counts the complete
+// characters in the range, at most max, and do_max_length is the most
+// do_length (..., 1) returns; the library's extension gives the types
+// of one size the behavior of codecvt<char, char, mbstate_t> and the
+// others no conversion at all
+
+template <class InternT, class ExternT>
+static void
+test_primary (InternT, ExternT, const char *name, bool same_size)
+{
+    typedef std::codecvt<InternT, ExternT, std::mbstate_t> PrimaryCvt;
+
+    rw_info (0, 0, __LINE__, "std::codecvt<%s>, the primary template", name);
+
+    const PrimaryCvt cvt;
+
+    const std::codecvt_base::result expect =
+        same_size ? std::codecvt_base::noconv : std::codecvt_base::error;
+
+    std::mbstate_t state = std::mbstate_t ();
+
+    ExternT ebuf [8] = { ExternT ('a'), ExternT ('b'), ExternT ('c'), ExternT ('d') };
+    InternT ibuf [8] = { InternT () };
+
+    ExternT* const bad_e = (ExternT*)(void*)-1;
+    InternT* const bad_i = (InternT*)(void*)-1;
+
+    // in
+    const ExternT *efrom_next = bad_e;
+    InternT       *ito_next   = bad_i;
+
+    std::codecvt_base::result res =
+        cvt.in (state, ebuf, ebuf + 4, efrom_next, ibuf, ibuf + 8, ito_next);
+
+    rw_assert (expect == res, 0, __LINE__,
+               "codecvt<%s>::in() == %d, got %d", name, expect, res);
+    rw_assert (efrom_next == ebuf && ito_next == ibuf, 0, __LINE__,
+               "codecvt<%s>::in() sets from_next to from and to_next "
+               "to to: got %s, %s", name,
+               efrom_next == ebuf ? "from" : efrom_next == bad_e ? "unset" : "other",
+               ito_next == ibuf ? "to" : ito_next == bad_i ? "unset" : "other");
+
+    // out
+    const InternT *ifrom_next = bad_i;
+    ExternT       *eto_next   = bad_e;
+
+    res = cvt.out (state, ibuf, ibuf + 4, ifrom_next, ebuf, ebuf + 8, eto_next);
+
+    rw_assert (expect == res, 0, __LINE__,
+               "codecvt<%s>::out() == %d, got %d", name, expect, res);
+    rw_assert (ifrom_next == ibuf && eto_next == ebuf, 0, __LINE__,
+               "codecvt<%s>::out() sets from_next to from and to_next "
+               "to to: got %s, %s", name,
+               ifrom_next == ibuf ? "from" : ifrom_next == bad_i ? "unset" : "other",
+               eto_next == ebuf ? "to" : eto_next == bad_e ? "unset" : "other");
+
+    // unshift
+    eto_next = bad_e;
+
+    res = cvt.unshift (state, ebuf, ebuf + 8, eto_next);
+
+    rw_assert (expect == res, 0, __LINE__,
+               "codecvt<%s>::unshift() == %d, got %d", name, expect, res);
+    rw_assert (eto_next == ebuf, 0, __LINE__,
+               "codecvt<%s>::unshift() sets to_next to to: got %s", name,
+               eto_next == ebuf ? "to" : eto_next == bad_e ? "unset" : "other");
+
+    // length: the lesser of max and the range for one size, 0 otherwise
+    const int len2 = cvt.length (state, ebuf, ebuf + 4, 2);
+    const int len9 = cvt.length (state, ebuf, ebuf + 4, 9);
+    const int len0 = cvt.length (state, ebuf, ebuf, 9);
+
+    rw_assert (len2 == (same_size ? 2 : 0), 0, __LINE__,
+               "codecvt<%s>::length(4 elements, max 2) == %d, got %d",
+               name, same_size ? 2 : 0, len2);
+    rw_assert (len9 == (same_size ? 4 : 0), 0, __LINE__,
+               "codecvt<%s>::length(4 elements, max 9) == %d, got %d",
+               name, same_size ? 4 : 0, len9);
+    rw_assert (0 == len0, 0, __LINE__,
+               "codecvt<%s>::length(0 elements, max 9) == 0, got %d",
+               name, len0);
+
+    // max_length: the most length (..., 1) returns
+    const int maxlen = cvt.max_length ();
+
+    rw_assert (maxlen == (same_size ? 1 : 0), 0, __LINE__,
+               "codecvt<%s>::max_length() == %d, got %d",
+               name, same_size ? 1 : 0, maxlen);
+
+    rw_assert (same_size == cvt.always_noconv (), 0, __LINE__,
+               "codecvt<%s>::always_noconv() == %d, got %d",
+               name, same_size, cvt.always_noconv ());
+}
+
+/**************************************************************************/
+
 static int
 run_test (int /*unused*/, char* /*unused*/ [])
 {
@@ -2611,6 +2710,11 @@ run_test (int /*unused*/, char* /*unused*/ [])
                            std::codecvt_base::ok, locales [i].nchars);
 
     }
+
+    test_primary ((unsigned char)0, (unsigned char)0,
+                  "unsigned char, unsigned char, mbstate_t", true);
+    test_primary (L'\0', (unsigned char)0,
+                  "wchar_t, unsigned char, mbstate_t", false);
 
     // exercise the behavior of the facets when passed
     // an uninitialized or corrupt mbstate_t object
