@@ -723,6 +723,21 @@ void test_posix (charT, const char *cname)
     TEST (T (),   " 1", 1, "n", 0, Good);
     TEST (T (), "\t 2", 2, "n", 0, Good);
 
+    // %% A literal percent sign; with a modifier it is invalid.
+    STEP ("%%: a percent sign");
+    TEST (T (),   "%", 1, "%", 0, Good);
+    TEST (T (),  "%%", 1, "%", 0, Good);
+    TEST (T (),    "", 0, "%", 0, Eof | Fail);
+    TEST (T (),   "x", 0, "%", 0, Fail);
+    TEST (T (),  " %", 0, "%", 0, Fail);
+    TEST (T (),   "%", 0, "E%", 0, Fail);
+    TEST (T (),   "%", 0, "O%", 0, Fail);
+
+    TEST (T (0, 0, 0, 25), "25%",  3, "%d%%",  0, Good);
+    TEST (T (0, 0, 0, 25), "%25",  3, "%%%d",  0, Eof);
+    TEST (T (0, 0, 0, 25), "25 %", 4, "%d %%", 0, Good);
+    TEST (T (),            "25x",  2, "%d%%",  0, Fail);
+
     // %p The locale's equivalent of a.m or p.m.
     STEP ("%p: the equivalent of AM/PM");
     // the half of the day of the hour the tm holds, 0 here; glibc's

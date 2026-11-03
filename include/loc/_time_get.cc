@@ -567,6 +567,24 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
         __dup = 2;
         break;
 
+    case '%': {   // a literal percent sign
+
+        // with a modifier the directive is invalid
+        if (__modifier) {
+            __dup = 1;
+            break;
+        }
+
+        if (__it == __end)
+            __err |= __rw::__rw_eofbit | __rw::__rw_failbit;
+        else if (char_traits<char_type>::eq (*__it, __ctp.widen ('%')))
+            ++__it;
+        else
+            __err |= __rw::__rw_failbit;
+
+        return __it;
+    }
+
     case 'n': case 't': {   // any whitespace
         
         for ( ; ; ++__it) {

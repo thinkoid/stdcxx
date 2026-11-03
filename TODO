@@ -22,19 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =%%= in a =time_get= pattern always fails
-
-The parser's table in =src/time_put.cpp= (=__rw_get_timepunct=, the
-overload at 1003-1385) has =case '%': break;= with no count and no
-member, so =do_get= sets =failbit= at =include/loc/_time_get.cc= 928:
-=get= with "%d%%" on "50%" fails where it should store 50. Since the
-2005 import. Found by probe, 2026-11-02, round 2 of the locale
-document.
-
-Fix: =%%= matches one =%= of the input.
-
-Check: the row "%d%%" on "50%", mday 50, goodbit.
-
 ** TODO =%F= is written and counted but never read
 
 =time_put= writes =%F= and =do_date_order= counts it, but the parser's

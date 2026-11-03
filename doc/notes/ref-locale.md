@@ -2211,9 +2211,6 @@ comments of the =time_get= test are swapped", and "A reference for
   `TODO`. Check: that row, after the decision.
 - `"%Y %m %d"` leaves the implied `tm_wday` and `tm_yday`; glibc fills
   them; p14 allows either. Not queued. Check: a decision.
-- `%%` in a `get` pattern fails: the table has no `'%'` entry
-  (`src/time_put.cpp` 1375), so `do_get` sets `failbit` (`_time_get.cc`
-  928). `"%d%%"` on `"50%"` fails (by probe). Check: that row.
 - `%F` is not read, though `time_put` writes it and `do_date_order`
   counts it. nan_TW@latin's `d_fmt` is `"%F"`, so its `get_date` fails
   on its own `%x` (by probe), against 22.2.5.1.2, p4. Check: a round
