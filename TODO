@@ -22,20 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =length= under a =@UCS= name walks the wrong trie
-
-=__rw_libstd_do_length= (=src/wcodecvt.cpp= 823) walks
-=utf8_to_ext=, keyed by the UTF-8 of the wide value, under any UCS
-flag, where =do_in= walks =n_to_w=; since e6c7726b. Installed in a
-locale, =de_DE.ISO-8859-1@UCS= gives =length ("a\xe9")= 1 where =in=
-converts 2 bytes, and =ja_JP.EUC-JP@UCS= =length ("a\xa4\xa2")= 1.
-Found by probe, 2026-11-02.
-
-Fix: =length= walks the trie =in= walks.
-
-Check: =length= equals the bytes =in= consumes under both locales
-(rows in =22.locale.codecvt=).
-
 ** TODO A split character through the C library loses its state
 
 On =mbrtowc='s -2, =__rw_libc_do_in= (=src/wcodecvt.cpp= 249-250,

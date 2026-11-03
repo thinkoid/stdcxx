@@ -1087,6 +1087,20 @@ test_ucs_modifier (const char*       locale_name,
 
     }
 
+    // length() counts the bytes of the characters in() converts, under
+    // the modifier too: it walks the trie keyed by the external bytes,
+    // and the modifier chooses only the internal value (22.2.1.5.2, p10)
+    {
+        std::mbstate_t lstate = std::mbstate_t ();
+
+        const int len = cc.length (lstate, from, from_limit, ilen);
+
+        rw_assert (len == int (from_next - from), __FILE__, __LINE__,
+                   "(%s) length (state, from, from_end, %u) == %d, "
+                   "the bytes in() converted; got %d",
+                   locale_name, ilen, int (from_next - from), len);
+    }
+
     // test against the libc mbstowcs() or iconv() conversion
     if (!rwtest_convert_to_internal (conv, native_locname, ebuf, elen,
                                      ibuf_native, ilen_native)) {

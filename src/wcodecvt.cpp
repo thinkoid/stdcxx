@@ -819,8 +819,6 @@ __rw_libstd_do_length (const char*                from,
     if (!impl && !UCS_TYPE (flags))
         flags |= __rw_ucs;
 
-    const bool use_ucs = 0 != UCS_TYPE (flags);
-
     if (impl) {
 
         const char* from_next = from;
@@ -828,8 +826,12 @@ __rw_libstd_do_length (const char*                from,
         const unsigned char* const limit =
             reinterpret_cast< const unsigned char* >(from_end);
 
-        const unsigned int* const tbls =
-            use_ucs ? impl->utf8_to_ext_tab () : impl->n_to_w_tab ();
+        // the multibyte characters are counted in the trie do_in walks,
+        // keyed by the external bytes; the UCS flags choose only the
+        // value do_in fetches at the end of the walk, never the trie
+        // (utf8_to_ext is keyed by the UTF-8 of the internal value,
+        // the way do_out walks it)
+        const unsigned int* const tbls = impl->n_to_w_tab ();
 
         _RWSTD_ASSERT (tbls);
 

@@ -1088,8 +1088,8 @@ Known gaps and their `TODO` entries:
 - Not covered by any row: `ctype<wchar_t>` at or above 256 beyond
   the classic case maps' one row each, the
   classic wide `out` above 0xff, `max_length` of the UTF names,
-  `length` under `@UCS`, the C-library `in` across a split
-  character, the ISO-2022 converters.
+  the C-library `in` across a split character, the ISO-2022
+  converters.
 
 ### 9.5 Open
 
