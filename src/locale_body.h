@@ -198,6 +198,14 @@ public:
 
     static bool _C_check_category (int) _THROWS (());
 
+    // converts the category argument of a locale constructor to
+    // a locale::category value: an LC_XXX constant maps to its
+    // category, and 0, the intersection of disjoint categories,
+    // selects nothing (22.1.1.1.1, p1), even where LC_CTYPE is 0
+    static int _C_arg2category (int __cat) _THROWS (()) {
+        return 0 == __cat ? int (__rw_cat_none) : _C_LC2category (__cat);
+    }
+
     // returns the type of the standard facet object or `unknown'
     // if the facet is of a user-defined type
     static __rw_facet::_C_facet_type

@@ -419,8 +419,12 @@ assignment. `src/locale_eq.cpp`, `src/locale_name.cpp`,
 `LC_` constant. `__rw_locale::_C_LC2category` maps `LC_ALL` and the
 six `LC_` constants to categories and takes any other value as a
 category; `_C_check_category` accepts `none` or bits within `all`.
-On glibc `LC_CTYPE` is 0 (`_RWSTD_LC_CTYPE` in `config.h`), so the
-value 0 means `ctype` (8.3).
+On glibc `LC_CTYPE` is 0 (`_RWSTD_LC_CTYPE` in `config.h`). The
+constructors read their argument through `_C_arg2category`: 0, the
+intersection of disjoint categories, selects nothing (22.1.1.1.1,
+p1), so `LC_CTYPE` passed as the extension selects nothing there
+too; the name-combining code maps the `LC_` table through
+`_C_LC2category`, where 0 is still `ctype`.
 
 **Facet and id.** `locale::facet` is a typedef of `__rw::__rw_facet`,
 `locale::id` of `__rw::__rw_facet_id`. `__rw_facet` derives from
@@ -515,18 +519,6 @@ declarations in `include/ansi/_clocale.h` compile only under
 ### 8.3 Departures and extensions
 
 The conformance record's chapter 2 carries one row per departure below, pointing here.
-
-#### The empty intersection of two categories is `ctype`
-
-22.1.1.1.1, p1: "the result of applying operators | and & to any two
-valid values is valid, and results in the setwise union and
-intersection". `collate & ctype` is 0, and `_C_LC2category` reads 0
-as `LC_CTYPE`. `locale (locale::classic (), "de_DE.UTF-8",
-locale::collate & locale::ctype)` takes `LC_CTYPE` from `de_DE.UTF-8`,
-by probe; the two-locale constructor does the same. Why: the 2005
-import (e6c7726b) set `none` to 0x0100 so that no category is an `LC_`
-constant; the intersection of disjoint categories was not covered.
-Pins: nothing. A defect.
 
 #### A composed locale keeps a name when its categories are whole
 
@@ -639,11 +631,10 @@ template instantiation 435 deep, for EDG.
 
 ### 8.5 Open
 
-- The three defects of 8.3, queued in `TODO`: category 0,
-  the user facets the category constructors drop, and equality across
-  user facets. Check: the probes' rows, `"C"` for the first, a
-  `has_facet` of the user facet and `"*"` for the second, `false` for
-  the third.
+- The two defects of 8.3, queued in `TODO`: the user facets the
+  category constructors drop, and equality across user facets. Check:
+  the probes' rows, a `has_facet` of the user facet and `"*"` for the
+  first, `false` for the second.
 - Racing `global` calls can leave the C locale from one call and the
   C++ global from another: `setlocale` and the body swap take two
   locks (`src/locale_global.cpp:60-72`). C++03 says nothing of

@@ -396,8 +396,9 @@ _C_combine (const __rw_facet *pfacet) const
 __rw_locale* __rw_locale::
 _C_combine (const __rw_locale &other, int cat)
 {
-    // convert a possible LC_XXX constant to a locale::category value
-    cat = _C_LC2category (cat);
+    // convert a possible LC_XXX constant to a locale::category value;
+    // 0 selects nothing
+    cat = _C_arg2category (cat);
 
     // verify that the category argument is valid
     if (!_C_check_category (cat))
@@ -656,7 +657,7 @@ locale (const locale &rhs, const char *locname, category cat)
     // be valid; checked here since a bad category and a bad name both
     // come back as a null body
     _RWSTD_REQUIRES (__rw::__rw_locale::_C_check_category (
-                         __rw::__rw_locale::_C_LC2category (cat)),
+                         __rw::__rw_locale::_C_arg2category (cat)),
                      (_RWSTD_ERROR_LOCALE_BAD_CAT,
                       _RWSTD_FUNC ("locale::locale (const locale&, "
                                    "const char*, category)"), cat));

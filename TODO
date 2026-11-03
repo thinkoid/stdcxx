@@ -22,21 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO Category 0 is read as =LC_CTYPE=
-
-=locale::collate & locale::ctype= is 0, and glibc's =LC_CTYPE= is 0, so
-=_C_LC2category= (=src/locale_body.cpp= 589) maps the empty category to
-=ctype=: =locale (classic, "de_DE.UTF-8", collate & ctype)= takes de's
-=LC_CTYPE=, and so does the two-locale constructor. 14882:2003
-22.1.1.1.1 p1. Found by probe, 2026-11-02, round 2 of the locale
-document.
-
-Fix: a category of 0 selects nothing; the LC_ mapping takes only the
-LC_ constants.
-
-Check: that locale's =name ()= is "C" and its =ctype<char>= is the
-classic one.
-
 ** TODO The category constructors drop the first locale's user facets
 
 =_C_combine (const __rw_locale&, int)= (=src/locale_combine.cpp=
@@ -75,6 +60,10 @@ supported target: =_RWSTD_NO_CATOPEN_CATGETS=, tested at
 Fix: remove, or characterize =catopen= and keep the catalog under it.
 
 Check: grep, then a 15D build with the code removed.
+
+Also =src/locale_combine.cpp= 529: a =size_t size= in the name
+normalization is assigned and never read (GCC: set but not used).
+Seen 2026-11-03.
 
 ** TODO The narrow =transform= is empty for a string with an undefined character
 
@@ -559,7 +548,10 @@ fixing the bad-category message.
 
 Fix: a =22.locale.cons= test: each constructor with each bad
 argument, =runtime_error= caught, =what ()= checked for the name or
-the category.
+the category; and the category rows: =locale (classic, "de_DE.UTF-8",
+collate & ctype)= and the two-locale form named "C" with the classic
+=ctype=, the extension's =LC_COLLATE= taking that category (fixed
+2026-11-03, by probe only).
 
 Check: the rows run and the six pins gain a row.
 
