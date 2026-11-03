@@ -839,8 +839,9 @@ destructor). Every virtual is overridden:
   unmapped one.
 - Without a database each member sets the C locale and calls
   `iswspace` ... `towupper`, `wctob` or `btowc`, per call, under the
-  process-wide lock. The constructor's narrow tables are then built
-  and never read.
+  process-wide lock. The constructor only checks the name through
+  `__rw_setlocale` then; the base class's three tables stay the
+  classic ones, which no override reads.
 
 #### codecvt<char, char, mbstate_t> and codecvt_byname<char, char, mbstate_t>
 

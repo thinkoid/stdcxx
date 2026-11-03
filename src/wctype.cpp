@@ -568,75 +568,14 @@ ctype_byname (const char *name, size_t refs)
 
     if (impl == 0) {
 
-        // set locale first to avoid unnecessary allocation
-        // if `name' doesn't refer to a valid locale (and
-        // __rw_setlocale throws an exception)
+        // the name must be one the C library knows: __rw_setlocale
+        // throws for any other; the facet's virtuals, every one of
+        // which this class overrides, then classify and convert
+        // through the C library by name, so the base class's tables
+        // stay the classic ones and are never read
         const __rw::__rw_setlocale clocale (name, LC_CTYPE);
 
-        _C_delete_it = true;
-
-        // casts prevent bogus gcc 2.95.2 warning:
-        //     size in array new must have integral type
-        _C_mask_tab = new mask [size_t (_C_tab_size)];
-
-        try {
-            // avoid doing one extra allocation by allocating
-            // both the upper and lower tables in the same space
-            _C_upper_tab = new _UChar [size_t (_C_tab_size) * 2];
-            _C_lower_tab = _C_upper_tab + _C_tab_size;
-        }
-        catch (...) {
-            delete[] const_cast< mask* >(_C_mask_tab);
-            throw;
-        }
-
-        for (char_type i = 0; i <= char_type (_RWSTD_UCHAR_MAX); i++) {
-
-            int m = 0;
-
-            if ((::iswspace)(i))
-                m |= __rw::__rw_space;
-
-            if ((::iswprint)(i))
-                m |= __rw::__rw_print;
-
-            if ((::iswcntrl)(i))
-                m |= __rw::__rw_cntrl;
-
-            if ((::iswupper)(i))
-                m |= __rw::__rw_upper;
-
-            if ((::iswlower)(i))
-                m |= __rw::__rw_lower;
-
-            if ((::iswalpha)(i))
-                m |= __rw::__rw_alpha;
-
-            if ((::iswdigit)(i))
-                m |= __rw::__rw_digit;
-
-            if ((::iswpunct)(i))
-                m |= __rw::__rw_punct;
-
-            if ((::iswxdigit)(i))
-                m |= __rw::__rw_xdigit;
-
-            if ((::iswgraph)(i))
-                m |= __rw::__rw_graph;
-
-            const_cast< mask* >(_C_mask_tab) [i]  = mask (m);
-
-            const size_t upr = size_t ((::towupper)(i));
-
-            const size_t lwr = size_t ((::towlower)(i));
-
-            // optimize (and avoid warnings) when wint_t is unsigned
-            _C_upper_tab [i] = upr <= size_t (_RWSTD_UCHAR_MAX) ?
-                _UChar (upr) : _UChar (0);
-
-            _C_lower_tab [i] = lwr <= size_t (_RWSTD_UCHAR_MAX) ?
-                _UChar (lwr) : _UChar (0);
-        }
+        _C_delete_it = false;
     }
     else {
 

@@ -22,16 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =ctype_byname<wchar_t>= builds three tables nothing reads
-
-The C-library fallback of =ctype_byname<wchar_t>= (=src/wctype.cpp=
-569-640) builds three 256-entry tables; every virtual is overridden,
-so nothing reads them. By reading, 2026-11-02.
-
-Fix: drop the tables, or the overrides that make them dead.
-
-Check: reading; =22.locale.ctype*= on their pins.
-
 ** TODO =collate::do_transform= leaks a codecvt mapping per call
 
 =src/collate.cpp= 878-884 (narrow) and 1053-1059 (wide): a transform
