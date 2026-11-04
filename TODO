@@ -22,22 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =__rw_put_groups= stores a group size in a =char=
-
-In its =no_groups= mode (=src/num_put.cpp=, called from
-=money_put::do_put= for a string) =__rw_put_groups= writes one byte
-per output group, the group's digit count, for the inline separator
-walk of =include/loc/_money_put.cc= to read. A leftmost group of 256
-or more digits wraps: 256 becomes 0 and ends the walk, 300 becomes 44
-and misplaces a separator. Only an unlimited leftmost group reaches
-it, that is a grouping element of 0, negative or =CHAR_MAX=.
-Hypothesis from reading, 2026-11-02.
-
-Fix: a wider element, or the walk driven by the grouping string.
-
-Check: =money_put= of a 300-digit string under grouping "\3\0",
-counting the separators.
-
 ** TODO Two latent overruns in the time facets
 
 =include/loc/_time_get.cc= 545 (=__names [100]=) and 145

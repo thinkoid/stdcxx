@@ -1328,10 +1328,12 @@ leading zeros included (10.3.9).
 through `__rw_put_num` under `fixed` and the internal `_RWSTD_IOS_SCALED`
 flag at precision `-frac_digits ()` (10.3.2), into a 304-byte stack
 array or the heap block `__rw_put_num` moves to, and widens that into
-a string of its length.  `do_put (..., string_type)` narrows the
+a string of its length. `do_put (..., string_type)` narrows the
 leading digits into a 304-byte array, or a heap block when they do
 not fit, and computes the group sizes
-with `__rw_put_groups`. Both end in `_C_put`: the pattern and sign by
+with `__rw_put_groups`, one byte per group: a group of 256 digits or
+more wraps its count, a limit on record (`ref-conformance.md` ch. 2).
+Both end in `_C_put`: the pattern and sign by
 the first character, the symbol only under `showbase`, the first
 character of the sign at `sign` and the rest at the end, one
 `widen (' ')` at `space`, the fill at the first `none` or `space`
