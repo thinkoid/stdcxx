@@ -1793,14 +1793,53 @@ void test_user (charT, const char *tname)
              "%%c: the locale's appropriate date and time representation");
     TEST (T (INT_MAX), "%c", 0, 0, ' ', td.d_t_fmt);
 
-    // a d_t_fmt longer than do_put's 256-element array: the expansion
-    // stops at the array, the literal characters that fit and no more
+    // formats whose expansions pass do_put's 256-element array, each
+    // through a different way of growing it: d_t_fmt is copied whole
+    // without a time and walked a literal at a time with one, and each
+    // of the others is made of one directive: a name, a number, an
+    // alternative digit, one for strftime, and two formats in one
     {
         static char longfmt [301];
         std::memset (longfmt, 'x', sizeof longfmt - 1);
 
+        static char names [121];     // "%A" 60 times, "[Sunday]" each
+        static char numbers [301];   // "%M" 150 times, "00" each
+        static char altdigs [301];   // "%Od" 100 times, "1st" each
+        static char seconds [61];    // "%s" 30 times, the epoch seconds
+
+        static char longnames [481];
+        static char longnumbers [301];
+        static char longaltdigs [301];
+        static char longboth [781];
+
+        for (i = 0; i != 60; ++i) {
+            std::memcpy (names + 2 * i, "%A", 2);
+            std::memcpy (longnames + 8 * i, "[Sunday]", 8);
+        }
+
+        for (i = 0; i != 150; ++i) {
+            std::memcpy (numbers + 2 * i, "%M", 2);
+            std::memcpy (longnumbers + 2 * i, "00", 2);
+        }
+
+        for (i = 0; i != 100; ++i) {
+            std::memcpy (altdigs + 3 * i, "%Od", 3);
+            std::memcpy (longaltdigs + 3 * i, "1st", 3);
+        }
+
+        for (i = 0; i != 30; ++i)
+            std::memcpy (seconds + 2 * i, "%s", 2);
+
+        std::memcpy (longboth, longnames, 480);
+        std::memcpy (longboth + 480, longnumbers, 300);
+
         time_data tdl = td;
-        tdl.d_t_fmt = longfmt;
+        tdl.d_t_fmt     = longfmt;
+        tdl.d_fmt       = names;
+        tdl.t_fmt       = numbers;
+        tdl.era_d_t_fmt = "%x%X";
+        tdl.era_d_fmt   = altdigs;
+        tdl.era_t_fmt   = seconds;
 
         const char* const longloc = make_LC_TIME (&tdl, "test-locale-long");
 
@@ -1810,10 +1849,13 @@ void test_user (charT, const char *tname)
                 std::locale::global (std::locale (std::locale (), longloc,
                                                   std::locale::time));
 
-            static char expected [257];
-            std::memset (expected, 'x', sizeof expected - 1);
-
-            TEST (T (INT_MAX), "%c", 0, 0, ' ', expected);
+            TEST (T (INT_MAX), "%c", 0, 0, ' ', longfmt);
+            TEST (T (0),       "%c", 0, 0, ' ', longfmt);
+            TEST (T (0),       "%x", 0, 0, ' ', longnames);
+            TEST (T (0),       "%X", 0, 0, ' ', longnumbers);
+            TEST (T (0),      "%Ex", 0, 0, ' ', longaltdigs);
+            TEST (T (0),      "%EX", 0, 0, ' ', seconds);
+            TEST (T (0),      "%Ec", 0, 0, ' ', longboth);
 
             std::locale::global (saved);
         }

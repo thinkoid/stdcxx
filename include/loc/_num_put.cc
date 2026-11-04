@@ -70,7 +70,7 @@ _C_put (iter_type __it, ios_base &__flags, char_type __fill, int __type,
     // grows as necessary; the guard frees the heap block on every exit
     char *__pbuf = __buf;
 
-    __rw::__rw_put_buffer __guard (__buf, __pbuf);
+    __rw::__rw_put_buffer<char> __guard (__buf, __pbuf);
 
     const string            __grouping = __np.grouping ();
     const char* const       __grp      = __grouping.c_str ();

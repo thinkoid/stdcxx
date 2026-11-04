@@ -22,23 +22,35 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =time_put::do_put= cuts a format at its 256-element array
+** TODO The wide =__rw_put_time= without =swprintf= formats into 64 bytes
 
-=__rw_fmt_time= (=src/time_put.cpp=) carries the remaining size of
-=do_put='s array as it walks a format and stops at its end, so a
-=%c= whose expansion passes 256 elements is cut there, silently:
-=22.locale.time.put= pins 256 of a 300-character =d_t_fmt=. The put
-facets of 22.2.2 and 22.2.6 grow their buffers instead
-(=__rw_put_buffer=, =include/loc/_punct.h=). The longest shipped
-=%c= is 172 bytes (km_KH.UTF-8). Since 2026-11-04, in place of the
-overrun before it.
+Where =_RWSTD_NO_SWPRINTF= is defined, the wide =__rw_put_time=
+(=src/time_put.cpp=) formats a number with =sprintf= into a 64-byte
+array, and a width from the locale's format (=%[w]=, the HP-UX
+extension) has no bound: a =%100d= in a =d_t_fmt= overruns the
+array. glibc has =swprintf=, so no build on Linux
+reaches the branch. Found by reading, 2026-11-04.
 
-Fix: =do_put= formats into a stack array or a heap block the guard
-frees, and =__rw_put_time= and =__rw_fmt_time= take the buffer and
-its size by reference and grow it when a directive does not fit
-(=strftime= reports 0, =snprintf= the length), narrow and wide.
+Fix: =snprintf= and the length it reports, into a block of that size
+when the array does not hold it, as the narrow function does.
 
-Check: the 300-character row gives 300; the rows on pin.
+Check: a =%100d= row in =22.locale.time.put=, on a configuration that
+defines the macro.
+
+** TODO The width of a directive in a format overflows an =int=
+
+=__rw_fmt_time= (=src/time_put.cpp=) accumulates the =%[w][.p]=
+digits of a locale's format into an =int= with no bound: the narrow
+walk overflows a signed =int= past ten digits, which is undefined;
+the wide walk computes in =unsigned= and converts back. A width near
+=INT_MAX= asks =snprintf= for that many characters, and =do_put='s
+buffer grows to hold them. Found by reading, 2026-11-04.
+
+Fix: stop accumulating at a bound and ignore the digits past it, or
+take the directive as a literal; a decision.
+
+Check: a format with an eleven-digit width, under
+~-fsanitize=undefined~.
 
 ** TODO Sweep the library for extensions
 
@@ -326,6 +338,21 @@ Check: none beyond the build; no assertion moves.
 The =time_put= test has the same pair at
 =tests/localization/22.locale.time.put.cpp= 316-317 (=era_d_fmt= labelled
 =%EX=, =era_t_fmt= =%Ex=); found 2026-11-02.
+
+** TODO A test that generates a locale ends on a driver warning
+
+A test that builds a locale with =rw_localedef= prints
+~driver.cpp:1397: rw_note(): warning: test finished, cannot call~ as
+it exits. =atexit_rm_locale_root= (=tests/src/locale.cpp=) disables
+notes and calls =rw_system=, whose =_rw_vsystem=
+(=tests/src/process.cpp= 161) calls =rw_note=; =_rw_check_init=
+warns that the driver is done before the disabled note is dropped.
+Seen in =22.locale.time.get= and =22.locale.time.put=, 2026-11-04.
+
+Fix: the removal without =rw_system='s note, or =_rw_check_init=
+silent for a disabled diagnostic; a decision.
+
+Check: both tests end without the line; the pins unchanged.
 
 ** TODO The suite against other libraries
 

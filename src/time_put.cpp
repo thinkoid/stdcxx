@@ -106,16 +106,16 @@ __rw_get_timepunct (const __rw::__rw_facet*, int,
                     const void*[], const size_t [], size_t);
 
 // also declared in _time_put.cc
-_RWSTD_EXPORT char*
-__rw_put_time (const __rw_facet*, char*, size_t,
-               std::ios_base&, char, const tm*,
+_RWSTD_EXPORT size_t
+__rw_put_time (const __rw_facet*, char**, size_t&, size_t,
+               const char*, std::ios_base&, char, const tm*,
                char, char, int, int);
 
 
 // also declared in _time_put.cc
-_RWSTD_EXPORT wchar_t*
-__rw_put_time (const __rw_facet*, wchar_t*, size_t,
-               std::ios_base&, wchar_t, const tm*,
+_RWSTD_EXPORT size_t
+__rw_put_time (const __rw_facet*, wchar_t**, size_t&, size_t,
+               const wchar_t*, std::ios_base&, wchar_t, const tm*,
                char, char, int, int);
 
 
@@ -1443,8 +1443,32 @@ __rw_get_timepunct (const __rw_facet *pfacet,
 }
 
 
-static char*
-__rw_fmt_time (const __rw_facet *pfacet, char *buf, size_t bufsize,
+// __rw_put_time and __rw_fmt_time write at an offset into the buffer
+// of time_put::do_put, its array or a heap block: a directive that
+// does not fit moves the `len' elements written so far to a block of
+// `need' elements or twice the size, the larger; a block grown before
+// is freed, the array is not, and do_put's guard frees the last one
+template <class charT>
+static void
+__rw_grow_time_buf (charT **pbuf, size_t &bufsize, size_t len,
+                    size_t need, const charT *stackbuf)
+{
+    const size_t newsize = need < 2 * bufsize ? 2 * bufsize : need;
+
+    charT* const tmp = new charT [newsize];
+    memcpy (tmp, *pbuf, len * sizeof *tmp);
+
+    if (*pbuf != stackbuf)
+        delete[] *pbuf;
+
+    *pbuf   = tmp;
+    bufsize = newsize;
+}
+
+
+static size_t
+__rw_fmt_time (const __rw_facet *pfacet, char **pbuf, size_t &bufsize,
+               size_t off, const char *stackbuf,
                std::ios_base &flags, char fill, const tm *tmb,
                const char *pat)
 {
@@ -1561,33 +1585,29 @@ __rw_fmt_time (const __rw_facet *pfacet, char *buf, size_t bufsize,
             }
 
             if (char (-1) != fmt) {
-                char *end = __rw_put_time (pfacet, buf, bufsize, flags, fill,
-                                           tmb, fmt, fmtmod, width, prec);
-
-                if (!end)
-                    return 0;
-
-                // the rest of the buffer is what the directive left
-                bufsize -= end - buf;
-                buf      = end;
+                // the directive writes at the offset, growing the
+                // buffer as it needs to, and reports where it ended
+                off = __rw_put_time (pfacet, pbuf, bufsize, off, stackbuf,
+                                     flags, fill, tmb, fmt, fmtmod,
+                                     width, prec);
                 continue;
             }
         }
 
-        // a literal character, while the buffer holds one
-        if (0 == bufsize)
-            return buf;
+        // a literal character: a full buffer grows by one at least
+        if (off == bufsize)
+            __rw_grow_time_buf (pbuf, bufsize, off, off + 1, stackbuf);
 
-        *buf++ = *pat;
-        --bufsize;
+        (*pbuf) [off++] = *pat;
     }
 
-    return buf;
+    return off;
 }
 
 
-static wchar_t*
-__rw_fmt_time (const __rw_facet *pfacet, wchar_t *wbuf, size_t bufsize,
+static size_t
+__rw_fmt_time (const __rw_facet *pfacet, wchar_t **pwbuf, size_t &bufsize,
+               size_t off, const wchar_t *stackbuf,
                std::ios_base &flags, wchar_t fill, const tm *tmb,
                const wchar_t *wpat)
 {
@@ -1704,29 +1724,23 @@ __rw_fmt_time (const __rw_facet *pfacet, wchar_t *wbuf, size_t bufsize,
             }
 
             if (char (-1) != fmt) {
-                wchar_t* const end =
-                    __rw_put_time (pfacet, wbuf, bufsize, flags, fill,
-                                   tmb, fmt, fmtmod, width, prec);
-
-                if (!end)
-                    return 0;
-
-                // the rest of the buffer is what the directive left
-                bufsize -= end - wbuf;
-                wbuf     = end;
+                // the directive writes at the offset, growing the
+                // buffer as it needs to, and reports where it ended
+                off = __rw_put_time (pfacet, pwbuf, bufsize, off, stackbuf,
+                                     flags, fill, tmb, fmt, fmtmod,
+                                     width, prec);
                 continue;
             }
         }
 
-        // a literal character, while the buffer holds one
-        if (0 == bufsize)
-            return wbuf;
+        // a literal character: a full buffer grows by one at least
+        if (off == bufsize)
+            __rw_grow_time_buf (pwbuf, bufsize, off, off + 1, stackbuf);
 
-        *wbuf++ = *wpat;
-        --bufsize;
+        (*pwbuf) [off++] = *wpat;
     }
 
-    return wbuf;
+    return off;
 }
 
 
@@ -2611,14 +2625,16 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 }
 
 
-_RWSTD_EXPORT char*
-__rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
+_RWSTD_EXPORT size_t
+__rw_put_time (const __rw_facet *facet, char **pbuf, size_t &bufsize,
+               size_t off, const char *stackbuf,
                std::ios_base &flags, char fill, const tm *tmb,
                char fmt, char mod, int width, int prec)
 {
     _RWSTD_ASSERT (0 != facet);
+    _RWSTD_ASSERT (off <= bufsize);
 
-    size_t res = 0;   // size of formatted output, -1 on error
+    size_t res = 0;   // size of formatted output
 
     // compute the values and get the format
     __rw_time_put_data tpd;
@@ -2646,12 +2662,13 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
 
             _RWSTD_ASSERT (digit);
 
-            char *pbuf = buf;
+            const size_t len = strlen (digit);
+            if (len > bufsize - off)
+                __rw_grow_time_buf (pbuf, bufsize, off, off + len, stackbuf);
 
-            while (*digit && pbuf != buf + bufsize)
-                *pbuf++ = *digit++;
+            memcpy (*pbuf + off, digit, len);
 
-            return pbuf;
+            return off + len;
         }
 
         // if the value exceeds the range representable by the available
@@ -2663,13 +2680,18 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
 
         const char* const fmtstr = 'z' == fmt ? "%+*.*d" : "%*.*d";
 
-        res = size_t (snprintf (buf, bufsize, fmtstr,
-                               width < 0 ? tpd.width : width,
-                               prec < 0 ? tpd.prec : prec, tpd.val));
+        const int w = width < 0 ? tpd.width : width;
+        const int p = prec < 0 ? tpd.prec : prec;
 
-        // snprintf reports the length the number needed
-        if (res >= bufsize)
-            res = bufsize ? bufsize - 1 : 0;
+        // snprintf reports the length the number needs: a buffer with
+        // no room for it and its NUL grows, and the number goes in again
+        int n = snprintf (*pbuf + off, bufsize - off, fmtstr, w, p, tpd.val);
+        if (0 <= n && size_t (n) >= bufsize - off) {
+            __rw_grow_time_buf (pbuf, bufsize, off, off + n + 1, stackbuf);
+            n = snprintf (*pbuf + off, bufsize - off, fmtstr, w, p, tpd.val);
+        }
+
+        res = n < 0 ? 0 : size_t (n);
     }
     else {
         if (!tmb && tpd.fmt) {
@@ -2682,47 +2704,64 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
             const char* const fmtstr =
                 static_cast< const char* >(tpd.fmt);
 
-            return __rw_fmt_time (facet, buf, bufsize, flags,
-                                  fill, tmb, fmtstr);
+            return __rw_fmt_time (facet, pbuf, bufsize, off, stackbuf,
+                                  flags, fill, tmb, fmtstr);
         }
 
         if (tpd.str) {
             // copy data if available
 
-            const char *src = static_cast< const char* >(tpd.str);
+            const char* const src = static_cast< const char* >(tpd.str);
 
-            for (char *dst = buf; *src && res < bufsize; ++src, ++dst, ++res)
-                *dst = *src;
+            res = strlen (src);
+            if (res > bufsize - off)
+                __rw_grow_time_buf (pbuf, bufsize, off, off + res, stackbuf);
 
-            _RWSTD_ASSERT (bufsize >= res);
+            memcpy (*pbuf + off, src, res);
         }
         else {
-            char fmtstr [4] = { '%', fmt, '\0', '\0' };
+            // the space ahead of the directive makes the expansion
+            // non-empty, so that strftime's 0 means only that it does
+            // not fit; it does not say what would, and the buffer grows
+            // once, to twice its size, after which a 0 is no output
+            char fmtstr [5] = { ' ', '%', fmt, '\0', '\0' };
 
             if (mod) {
-                fmtstr [1] = mod;
-                fmtstr [2] = fmt;
+                fmtstr [2] = mod;
+                fmtstr [3] = fmt;
             }
 
             // use strftime() for locale-independent formatting
-            res = bufsize ? strftime (buf, bufsize, fmtstr, tmb) : 0;
+            res = strftime (*pbuf + off, bufsize - off, fmtstr, tmb);
+            if (0 == res) {
+                __rw_grow_time_buf (pbuf, bufsize, off, 0, stackbuf);
+                res = strftime (*pbuf + off, bufsize - off, fmtstr, tmb);
+            }
 
-            _RWSTD_ASSERT (!bufsize || bufsize > res);
+            _RWSTD_ASSERT (res < bufsize - off);
+
+            // drop the space
+            if (res) {
+                --res;
+                memmove (*pbuf + off, *pbuf + off + 1, res);
+            }
         }
     }
 
-    return buf + res;
+    return off + res;
 }
 
 
-_RWSTD_EXPORT wchar_t*
-__rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
+_RWSTD_EXPORT size_t
+__rw_put_time (const __rw_facet *facet, wchar_t **pwbuf, size_t &bufsize,
+               size_t off, const wchar_t *stackbuf,
                std::ios_base &flags, wchar_t fill, const tm *tmb,
                char fmt, char mod, int width, int prec)
 {
     _RWSTD_ASSERT (0 != facet);
+    _RWSTD_ASSERT (off <= bufsize);
 
-    size_t res = 0;   // size of formatted output, -1 on error
+    size_t res = 0;   // size of formatted output
 
     __rw_time_put_data tpd;
 
@@ -2748,12 +2787,13 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
 
             _RWSTD_ASSERT (digit);
 
-            wchar_t *pbuf = wbuf;
+            const size_t len = wcslen (digit);
+            if (len > bufsize - off)
+                __rw_grow_time_buf (pwbuf, bufsize, off, off + len, stackbuf);
 
-            while (*digit && pbuf != wbuf + bufsize)
-                *pbuf++ = *digit++;
+            memcpy (*pwbuf + off, digit, len * sizeof *digit);
 
-            return pbuf;
+            return off + len;
         }
 
         // format using ordinary digits
@@ -2762,21 +2802,32 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
 
     if (_RWSTD_INT_MIN != tpd.val) {
 
+        const int w = width < 0 ? tpd.width : width;
+        const int p = prec < 0 ? tpd.prec : prec;
+
 #ifndef _RWSTD_NO_SWPRINTF
 
         const wchar_t *fmtstr = 'z' == fmt ? L"%+*.*d" : L"%*.*d";
 
-        res = swprintf (wbuf, 
-                        // MSVC 8.0 changed swprintf() to conform
-                        // to the C standard signature
-                        bufsize,
-                        fmtstr,
-                        width < 0 ? tpd.width : width,
-                        prec < 0 ? tpd.prec : prec, tpd.val);
+        // swprintf reports -1 when the number does not fit, not the
+        // length it needs: the buffer grows once, to hold the width,
+        // the precision, the digits of an int (fewer than three a
+        // byte), its sign and the NUL
+        int n = swprintf (*pwbuf + off,
+                          // MSVC 8.0 changed swprintf() to conform
+                          // to the C standard signature
+                          bufsize - off,
+                          fmtstr, w, p, tpd.val);
+        if (n < 0) {
+            const size_t wlen = w < 0 ? 0 - size_t (w) : size_t (w);
+            const size_t plen = p < 0 ? 0 : size_t (p);
+            const size_t need = wlen + plen + 3 * sizeof (int) + 2;
 
-        // swprintf reports -1 when the number does not fit
-        if (size_t (-1) == res)
-            res = 0;
+            __rw_grow_time_buf (pwbuf, bufsize, off, off + need, stackbuf);
+            n = swprintf (*pwbuf + off, bufsize - off, fmtstr, w, p, tpd.val);
+        }
+
+        res = n < 0 ? 0 : size_t (n);
 
 #else   // if defined (_RWSTD_NO_SWPRINTF)
 
@@ -2784,18 +2835,15 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
 
         char buf [64];
 
-        res = size_t (sprintf (buf, fmtstr,
-                               width < 0 ? tpd.width : width,
-                               prec < 0 ? tpd.prec : prec, tpd.val));
+        res = size_t (sprintf (buf, fmtstr, w, p, tpd.val));
 
         _RWSTD_ASSERT (res < sizeof buf);
 
-        wchar_t *dst = wbuf;
+        if (res > bufsize - off)
+            __rw_grow_time_buf (pwbuf, bufsize, off, off + res, stackbuf);
 
-        for (const char *s = buf; *s && dst != wbuf + bufsize; ++s, ++dst)
-            *dst = static_cast< unsigned char >(*s);
-
-        res = dst - wbuf;
+        for (size_t i = 0; i != res; ++i)
+            (*pwbuf) [off + i] = static_cast< unsigned char >(buf [i]);
 
 #endif   // _RWSTD_NO_SWPRINTF
 
@@ -2811,37 +2859,52 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
             const wchar_t* const wfmt =
                 static_cast< const wchar_t* >(tpd.fmt);
 
-            return __rw_fmt_time (facet, wbuf, bufsize, flags, fill, tmb, wfmt);
+            return __rw_fmt_time (facet, pwbuf, bufsize, off, stackbuf,
+                                  flags, fill, tmb, wfmt);
         }
 
         if (tpd.str) {
             // copy data if available
 
-            const wchar_t *src = static_cast< const wchar_t* >(tpd.str);
+            const wchar_t* const src = static_cast< const wchar_t* >(tpd.str);
 
-            for (wchar_t *dst = wbuf; *src && res < bufsize; ++src, ++dst, ++res)
-                *dst = *src;
+            res = wcslen (src);
+            if (res > bufsize - off)
+                __rw_grow_time_buf (pwbuf, bufsize, off, off + res, stackbuf);
 
-            _RWSTD_ASSERT (bufsize >= res);
+            memcpy (*pwbuf + off, src, res * sizeof *src);
         }
         else {
 
-            wchar_t fmtstr [4] = { L'%', fmt, L'\0', L'\0' };
+            // the space ahead of the directive makes the expansion
+            // non-empty, so that wcsftime's 0 means only that it does
+            // not fit; it does not say what would, and the buffer grows
+            // once, to twice its size, after which a 0 is no output
+            wchar_t fmtstr [5] = { L' ', L'%', fmt, L'\0', L'\0' };
 
             if (mod) {
-                fmtstr [1] = mod;
-                fmtstr [2] = fmt;
+                fmtstr [2] = mod;
+                fmtstr [3] = fmt;
             }
 
             // use wcsftime() for locale-independent formatting
-            res = wcsftime (wbuf, bufsize, fmtstr, tmb);
+            res = wcsftime (*pwbuf + off, bufsize - off, fmtstr, tmb);
+            if (0 == res) {
+                __rw_grow_time_buf (pwbuf, bufsize, off, 0, stackbuf);
+                res = wcsftime (*pwbuf + off, bufsize - off, fmtstr, tmb);
+            }
 
-            _RWSTD_ASSERT (res < bufsize);
+            _RWSTD_ASSERT (res < bufsize - off);
 
+            // drop the space
+            if (res) {
+                --res;
+                memmove (*pwbuf + off, *pwbuf + off + 1, res * sizeof **pwbuf);
+            }
         }
     }
 
-    return wbuf + res;
+    return off + res;
 }
 
 

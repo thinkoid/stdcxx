@@ -321,7 +321,7 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
     char *__pbuf = __buf;
 
     // frees the heap block __rw_put_num moves to, on every exit
-    __rw::__rw_put_buffer __guard (__buf, __pbuf);
+    __rw::__rw_put_buffer<char> __guard (__buf, __pbuf);
 
     // format a floating point number in fixed precision into narrow buffer
     // will insert thousands_sep placeholders (';') accroding to grouping
@@ -397,7 +397,7 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
         __pbuf    = new char [__bufsize];
     }
 
-    __rw::__rw_put_buffer __guard (__buf, __pbuf);
+    __rw::__rw_put_buffer<char> __guard (__buf, __pbuf);
 
     char *__groups = __grouping.size () ? __pbuf : &__nul;
 

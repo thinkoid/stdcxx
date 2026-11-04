@@ -2047,15 +2047,17 @@ components, each once, give the order; else `no_order`.
 `put` over a pattern takes `E` before `c C x X y Y` and `O` before `C d
 e H I m M p S u U V w W y` (8820446f). Another letter after `E` or `O`
 calls `do_put` with a null conversion and is then copied: `"%OY"`,
-`"%Ed"` and `"%Q"` write themselves (by probe). `do_put` formats into
-256 elements with `__rw_put_time`, then pads to `str.width ()` with the
-fill, before the text unless `left`. It does not reset the width, so
-`put` pads each directive: `"%H:%M"` at width 5 is `"***09:***05"` (by
-probe).
+`"%Ed"` and `"%Q"` write themselves (by probe). `do_put` formats with
+`__rw_put_time` into a 256-element array, or a heap block when the
+output outgrows it, freed on every exit by `__rw_put_buffer`
+(`include/loc/_punct.h`) as the put facets' are. It then pads to
+`str.width ()` with the fill, before the text unless `left`. It does
+not reset the width, so `put` pads each directive: `"%H:%M"` at width
+5 is `"***09:***05"` (by probe).
 
 `__rw_get_time_put_data` decides each directive.
 
-- Names from the record; numbers by `sprintf` or `swprintf`; `%g`,
+- Names from the record; numbers by `snprintf` or `swprintf`; `%g`,
   `%G`, `%V` from `__rw_iso_week`; `%C` and `%y` as in 12.3.
 - Patterns (`%c %x %X %r %D %F %R %T`, era formats) through
   `__rw_fmt_time`, which also takes HP-UX `%[-|0][w][.p]` inside a
@@ -2072,6 +2074,15 @@ probe).
   unset.
 - Anything else goes to `strftime` or `wcsftime` under the process's C
   locale: `%s` writes the epoch seconds (by probe).
+
+A directive that does not fit grows the buffer, to twice its size or
+what the directive needs, the larger: a literal of a format, a name or
+an alternative digit by its length, a number by the length `snprintf`
+reports. `swprintf` reports only -1, and the buffer grows once to the
+widest number of the width and precision. `strftime` and `wcsftime`
+format the directive behind a space, so that 0 means only that it does
+not fit; the buffer grows once, to twice its size. A format inside a
+format writes into the same buffer.
 
 ### 12.3 Departures and extensions
 
@@ -2231,15 +2242,11 @@ comments of the =time_get= test are swapped", and "A reference for
   then that row.
 - `put` pads every directive of a pattern and leaves the width set; no
   row has a pattern with a width. Check: a decision.
-- `do_put`'s buffer does not grow. `__rw_fmt_time` carries the
-  remaining size as it walks a format and stops at the end of
-  `do_put`'s 256-element array, so a `%c` longer than that is cut
-  there (the 300-character one of `22.locale.time.put`); the put
-  facets grow their buffers instead. The era arrays of `time_get`,
-  100 records each, take that many and no more from a database with
-  more (`22.locale.time.get`, 101 records); localedef does not cap
-  eras as it caps `alt_digits`. Shipped maxima: 11 eras (ja_JP), 172
-  bytes (`%c`, km_KH.UTF-8). Check: the 300-character row gives 300.
+- The era arrays of `time_get`, 100 records each, take that many and
+  no more from a database with more (`22.locale.time.get`, 101
+  records); localedef does not cap eras as it caps `alt_digits`. In
+  `TODO`. Shipped maximum: 11 eras (ja_JP). Check: the 101-record
+  source rejected by localedef.
 - The comparisons with glibc's `strptime` behind 12.3 ran outside the
   tree. Check: a `strptime` oracle under `bin/oracle`, beside the
   `strftime` one.

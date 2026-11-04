@@ -29,21 +29,22 @@
 #include <streambuf>
 #include <rw/_iosbase.h>
 #include <loc/_ctype.h>
+#include <loc/_punct.h>
 
 
 namespace __rw {
 
 
 // defined in time_put.cpp
-_RWSTD_EXPORT char*
-__rw_put_time (const __rw_facet*, char*, _RWSTD_SIZE_T,
-               std::ios_base&, char, const _RWSTD_C::tm*,
+_RWSTD_EXPORT _RWSTD_SIZE_T
+__rw_put_time (const __rw_facet*, char**, _RWSTD_SIZE_T&, _RWSTD_SIZE_T,
+               const char*, std::ios_base&, char, const _RWSTD_C::tm*,
                char, char, int, int);
 
 // defined in time_put.cpp
-_RWSTD_EXPORT wchar_t*
-__rw_put_time (const __rw_facet*, wchar_t*, _RWSTD_SIZE_T,
-               std::ios_base&, wchar_t, const _RWSTD_C::tm*,
+_RWSTD_EXPORT _RWSTD_SIZE_T
+__rw_put_time (const __rw_facet*, wchar_t**, _RWSTD_SIZE_T&, _RWSTD_SIZE_T,
+               const wchar_t*, std::ios_base&, wchar_t, const _RWSTD_C::tm*,
                char, char, int, int);
 
 }   // namespace __rw
@@ -74,12 +75,20 @@ do_put (iter_type __it, ios_base &__flags, char_type __fill,
 {
     char_type __buf [256];
 
-    const char_type *__end =
-        __rw::__rw_put_time (this, __buf + 0, sizeof __buf / sizeof *__buf,
+    // grows as necessary; the guard frees the heap block on every exit
+    char_type     *__pbuf    = __buf;
+    _RWSTD_SIZE_T  __bufsize = sizeof __buf / sizeof *__buf;
+
+    __rw::__rw_put_buffer<char_type> __guard (__buf, __pbuf);
+
+    const _RWSTD_SIZE_T __len =
+        __rw::__rw_put_time (this, &__pbuf, __bufsize, 0, __buf,
                             __flags, __fill, __tmb, __fmt, __modifier, -1, -1);
 
+    const char_type* const __end = __pbuf + __len;
+
     // number of fill chars to pad with
-    streamsize __pad = __flags.width () - streamsize (__end - __buf);
+    streamsize __pad = __flags.width () - streamsize (__len);
 
     // adjustfield bits (left, internal, or the default right)
     const int __adj = __flags.flags () & _RWSTD_IOS_ADJUSTFIELD;
@@ -91,7 +100,7 @@ do_put (iter_type __it, ios_base &__flags, char_type __fill,
             *__it = __fill;
     }
 
-    for (const char_type *__p = __buf; __p != __end; ++__p, ++__it) {
+    for (const char_type *__p = __pbuf; __p != __end; ++__p, ++__it) {
         *__it = *__p;
     }
 
