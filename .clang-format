@@ -3,7 +3,9 @@
 # For new code only. Format the lines you add (clang-format-region in
 # Emacs, or git clang-format on the hunks); never a whole file. The
 # options were chosen by measuring: the setting that changes the
-# fewest lines of the library's own sources wins. Agreement is about
+# fewest lines of the library's own sources wins, except where a
+# stated preference overrides the measurement (a block opens on its
+# first line, no blank after the brace). Agreement is about
 # 84 percent of lines; the rest is hand layout no option expresses:
 # right-aligned macro values, parameters grouped in pairs, a space in
 # `defined (X)`, `#include` left at the margin inside `#if` blocks.
@@ -30,7 +32,7 @@ PPIndentWidth: 2
 # line length and blank lines
 ColumnLimit: 80
 MaxEmptyLinesToKeep: 2
-KeepEmptyLinesAtTheStartOfBlocks: true
+KeepEmptyLinesAtTheStartOfBlocks: false
 EmptyLineAfterAccessModifier: Always
 EmptyLineBeforeAccessModifier: Always
 
