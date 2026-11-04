@@ -324,7 +324,8 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
     // format a floating point number in fixed precision into narrow buffer
     // will insert thousands_sep placeholders (';') accroding to grouping
     const _RWSTD_SIZE_T __n =
-        __rw::__rw_put_num (&__pbuf, sizeof __buf, _RWSTD_IOS_FIXED,
+        __rw::__rw_put_num (&__pbuf, sizeof __buf,
+                           _RWSTD_IOS_FIXED | _RWSTD_IOS_SCALED,
                            _C_ldouble | _C_ptr,
                            static_cast< _RWSTD_STREAMSIZE >(-__fd),
                            &__val, __grouping.data (),

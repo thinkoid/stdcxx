@@ -651,7 +651,7 @@ __rw_put_num (char **pbuf, size_t bufsize,
                 end = *pbuf + len;
             }
             else {
-                fpr = prec < 0 && flags & _RWSTD_IOS_FIXED ? 0 : prec;
+                fpr = prec < 0 && flags & _RWSTD_IOS_SCALED ? 0 : prec;
                 fmt = __rw_get_stdio_fmat (fmtbuf, type & ~__rw_facet::_C_ptr,
                                            flags, fpr);
                 for (; ;) {
@@ -686,7 +686,7 @@ __rw_put_num (char **pbuf, size_t bufsize,
                 end = *pbuf + len;
             }
             else {
-                fpr = prec < 0 && flags & _RWSTD_IOS_FIXED ? 0 : prec;
+                fpr = prec < 0 && flags & _RWSTD_IOS_SCALED ? 0 : prec;
                 fmt = __rw_get_stdio_fmat (fmtbuf, type & ~__rw_facet::_C_ptr,
                                            flags, fpr);
 
@@ -722,7 +722,7 @@ __rw_put_num (char **pbuf, size_t bufsize,
                 end = *pbuf + len;
             }
             else {
-                fpr = prec < 0 && flags & _RWSTD_IOS_FIXED ? 0 : prec;
+                fpr = prec < 0 && flags & _RWSTD_IOS_SCALED ? 0 : prec;
                 fmt = __rw_get_stdio_fmat (fmtbuf, type & ~__rw_facet::_C_ptr,
                                            flags, fpr);
 
@@ -770,11 +770,13 @@ __rw_put_num (char **pbuf, size_t bufsize,
         len = 0;   // silence used before initialized warnings
     }
 
-    if (prec < 0 && flags & _RWSTD_IOS_FIXED) {
+    if (prec < 0 && flags & _RWSTD_IOS_SCALED) {
 
-        // extension: when ios::fixed is set, negative precision inserts
-        // a decimal_point placeholder `prec' positions before the least
-        // significant digit
+        // money_put's units: the negative precision scales the value
+        // by that power of ten, and a decimal_point placeholder goes
+        // `prec' positions before the least significant digit; the
+        // streams never set the flag, and their negative precision
+        // is omitted from the conversion as C99 7.19.6.1, p5 has it
 
         const bool sign = '-' == **pbuf || '+' == **pbuf;
 

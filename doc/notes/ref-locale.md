@@ -1320,8 +1320,9 @@ leading zeros included (10.3.9).
 #### money_put
 
 `do_put (..., long double)` (`include/loc/_money_put.cc`) formats
-through `__rw_put_num` under `fixed` at precision `-frac_digits ()`,
-the extension of 10.3.2, into a 304-byte stack array, and widens that
+through `__rw_put_num` under `fixed` and the internal `_RWSTD_IOS_SCALED`
+flag at precision `-frac_digits ()` (10.3.2), into a 304-byte stack
+array, and widens that
 array into a 304-element one. `do_put (..., string_type)` narrows the
 leading digits into a 304-byte array and computes the group sizes
 with `__rw_put_groups`. Both end in `_C_put`: the pattern and sign by
@@ -1373,19 +1374,20 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 
 #### 10.3.2 Fixed with a negative precision
 
-- **Paragraph.** 22.2.2.2.2 p11 specifies the precision only for
-  `fixed` or a positive precision; `printf` treats a negative one as
-  absent.
-- **What.** Under `fixed` with `precision () < 0`, `__rw_put_num`
-  places a decimal point `-precision ()` digits from the right, for
-  integers and for floating values rounded to an integer: 1234 at -3
-  is `1.234`, 1234.5678 is `1.235`, 12 is `0.012` (by probe).
-- **Why.** The 2005 import (e6c7726b), documented in
-  `doc/stdlibref/num-put.html`; `money_put` formats `units` through
-  it. No gate ever covered it, and the strict-switch removals of
-  October 2026 left it.
-- **Pins.** `22.locale.num.put` from line 924 (integers) and line 1756
-  (π at -2 and -8).
+- **Paragraph.** 22.2.2.2.2 p11 puts the precision in the conversion
+  specification under `fixed`; C99 7.19.6.1 p5 takes a negative one
+  given by asterisk as if it were omitted, and `__rw_get_stdio_fmat`
+  omits it the same way, so `fixed` with a negative precision prints
+  six digits after the point, and an integer is not affected at all.
+- **What.** The 2005 import (e6c7726b) placed a decimal point
+  `-precision ()` digits from the right instead, for integers and for
+  floating values rounded to an integer, documented in
+  `doc/stdlibref/num-put.html`; that left on 2026-11-04. The
+  mechanism stays in `__rw_put_num` for `money_put`, which formats
+  its `units` through it under the internal `_RWSTD_IOS_SCALED` flag
+  the streams never set (10.3.10).
+- **Pins.** `22.locale.num.put` from line 924 (integers) and the π
+  rows under `fixed` at -2, -8 and -1000.
 
 #### 10.3.3 Floating values are grouped
 
@@ -1519,7 +1521,7 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 | program | covers | 15D |
 |---|---|---|
 | `22.locale.num.get` | every virtual, both widths, three iterator types: bases, signs, grouping, overflow, underflow, long input, `bad_alloc` on wrap | 51990, 0 failed |
-| `22.locale.num.put` | every virtual but `unsigned long long`, inf and NaN, grouping, widening, the negative precision | 1495, 2 warnings |
+| `22.locale.num.put` | every virtual but `unsigned long long`, inf and NaN, grouping, widening, a negative precision | 1465, 2 warnings |
 | `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv` | 5366 |
 | `22.locale.numpunct.mt` | first use of a fresh facet from many threads (7c93badb) | 1200 |
 | `22.locale.money.get` | patterns, signs, symbols, white-space credit, long input and separators, `frac_digits` 305 and 4000, the digits as they appear | 4160 |
@@ -2265,7 +2267,6 @@ is a `TODO` entry rather than a decision.
 | The classic wide facet narrows by truncation | 22.2.1.5.2 p2 | 9.3 | decision pending |
 | The blank bit in the narrow table | 22.2.1.3.2 p4 | 9.3 | decision pending |
 | `long long` virtuals | 22.2.2.1, 22.2.2.2 synopses | 10.3.1 | decision 2026-10-14 |
-| Fixed with a negative precision | 22.2.2.2.2 p11 | 10.3.2 | extension |
 | Floating values are grouped | 22.2.2.2.2 p16 | 10.3.3 | C++11's text |
 | A zero precision is specified | 22.2.2.2.2 p11, LWG 231 | 10.3.4 | C++11's text |
 | The `0x` prefix in stage 2 | 22.2.2.1.2 p8 | 10.3.5 | C++11's text |

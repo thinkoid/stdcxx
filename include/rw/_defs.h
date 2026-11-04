@@ -555,6 +555,11 @@
 #define _RWSTD_IOS_SKIPWS       0x01000
 #define _RWSTD_IOS_UNITBUF      0x02000
 #define _RWSTD_IOS_UPPERCASE    0x04000
+// SCALED is set by money_put for __rw_put_num: the value is scaled by
+// the power of ten the negative precision names, and a decimal point
+// placeholder goes that many digits before the least significant one;
+// not a value of ios_base::fmtflags
+#define _RWSTD_IOS_SCALED       0x08000
 // SYNC_STDIO is set for stream objects that may need to be synchronized
 // with stdio (by default the standard iostream objects such as cout)
 #define _RWSTD_IOS_SYNC_STDIO   0x40000

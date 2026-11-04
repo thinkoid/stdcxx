@@ -374,7 +374,7 @@ void do_test (charT           /* dummy */,
     if (!rw_opt_enable_num_get)
         return;
 
-    // skip negative precision (extension requiring special treatment)
+    // the rows with a negative precision are output-only
     if (prec < 0)
         return;
 
@@ -924,36 +924,18 @@ void long_test (charT, const char *cname)
     TEST (T, 11111111L, oct | dec | hex, 0, 0, ' ', "", "%ld");
 
     //////////////////////////////////////////////////////////////////
-    // extension: fixed and negative precision
+    // fixed and a negative precision: no effect on an integer, the
+    // conversion specification of 22.2.2.2.2, p6 to p8 has no precision
 
-    rw_info (0, 0, __LINE__,
-             "std::ios::fixed with negative precision [extension]");
+    rw_info (0, 0, __LINE__, "std::ios::fixed with negative precision");
 
-    TEST (T,  987654321L, 0,      -1, 0, ' ', "", "987654321");
-    TEST (T,  987654322L, fixed,   0, 0, ' ', "", "987654322");
-    TEST (T,  987654323L, fixed,  -1, 0, ' ', "", "98765432*3");
-    TEST (T, -987654323L, fixed,  -1, 0, ' ', "", "-98765432*3");
-    TEST (T,  987654324L, fixed,  -2, 0, ' ', "", "9876543*24");
-    TEST (T, -987654324L, fixed,  -2, 0, ' ', "", "-9876543*24");
-    TEST (T,  987654325L, fixed,  -3, 0, ' ', "", "987654*325");
-    TEST (T, -987654325L, fixed,  -3, 0, ' ', "", "-987654*325");
-    TEST (T,  987654326L, fixed,  -4, 0, ' ', "", "98765*4326");
-    TEST (T, -987654326L, fixed,  -4, 0, ' ', "", "-98765*4326");
-    TEST (T,  987654327L, fixed,  -5, 0, ' ', "", "9876*54327");
-    TEST (T, -987654327L, fixed,  -5, 0, ' ', "", "-9876*54327");
-    TEST (T,  987654328L, fixed,  -6, 0, ' ', "", "987*654328");
-    TEST (T, -987654328L, fixed,  -6, 0, ' ', "", "-987*654328");
-    TEST (T,  987654329L, fixed,  -7, 0, ' ', "", "98*7654329");
-    TEST (T, -987654329L, fixed,  -7, 0, ' ', "", "-98*7654329");
-    TEST (T,  987654330L, fixed,  -8, 0, ' ', "", "9*87654330");
-    TEST (T, -987654330L, fixed,  -8, 0, ' ', "", "-9*87654330");
-    TEST (T,  987654331L, fixed,  -9, 0, ' ', "", "0*987654331");
-    TEST (T, -987654331L, fixed,  -9, 0, ' ', "", "-0*987654331");
-    TEST (T,  987654332L, fixed, -10, 0, ' ', "", "0*0987654332");
-    TEST (T, -987654332L, fixed, -10, 0, ' ', "", "-0*0987654332");
-    TEST (T,  987654333L, fixed, -11, 0, ' ', "", "0*00987654333");
-    TEST (T, -987654333L, fixed, -11, 0, ' ', "", "-0*00987654333");
-    TEST (T,          0L, fixed, -12, 0, ' ', "", "0*000000000000");
+    TEST (T,  987654321L, 0,      -1, 0, ' ', "", "%ld");
+    TEST (T,  987654322L, fixed,   0, 0, ' ', "", "%ld");
+    TEST (T,  987654323L, fixed,  -1, 0, ' ', "", "%ld");
+    TEST (T, -987654323L, fixed,  -1, 0, ' ', "", "%ld");
+    TEST (T,  987654332L, fixed, -10, 0, ' ', "", "%ld");
+    TEST (T,          0L, fixed, -12, 0, ' ', "", "%ld");
+    TEST (T,       1234L, fixed, -1000, 0, ' ', "", "%ld");
 
     //////////////////////////////////////////////////////////////////
 
@@ -1778,9 +1760,12 @@ void ldbl_test (charT, const char *cname)
     TEST (T, 3.0e+256L, fixed, 0, 0, '-', "", "%.0Lf", Eof);
     TEST (T, 4.0e+300L, fixed, 0, 0, '-', "", "%.0Lf", Eof);
 
-    // extension: fixed format and negative precision
-    TEST (T, Pi, fixed, -2, 0, ' ', "", "0.03");
-    TEST (T, Pi, fixed, -8, 0, ' ', "", "0.00000003");
+    // fixed format and a negative precision: 22.2.2.2.2, p11 puts the
+    // precision in the conversion specification, and C99 7.19.6.1, p5
+    // takes a negative one as if it were omitted
+    TEST (T, Pi, fixed,    -2, 0, ' ', "", "%Lf");
+    TEST (T, Pi, fixed,    -8, 0, ' ', "", "%Lf");
+    TEST (T, Pi, fixed, -1000, 0, ' ', "", "%Lf");
 
 #undef CAT
 #undef CONCAT
