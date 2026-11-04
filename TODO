@@ -22,6 +22,78 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
+** TODO =ifstream= opened with =trunc= empties the file it was asked to read
+
+=basic_filebuf::open= (=include/fstream.cc=) rejects only stray bits
+in the mode, and =src/file.cpp= 63-99 maps eighteen combinations
+Table 92 does not list to real =open(2)= modes: ~std::ifstream f
+(name, std::ios::trunc)~ opens the file =O_RDONLY | O_TRUNC=, reports
+success, and the file is empty afterwards (by probe, 12 bytes to 0).
+14882:2003 27.8.1.3 p2 and Table 92: a mode not in the table fails
+the open. Found by the extension sweep, confirmed by probe,
+2026-11-04.
+
+Fix: =open= fails on a mode the table does not list; the map in
+=file.cpp= keeps the listed ones.
+
+Check: the probe's file keeps its bytes and =is_open ()= is false; a
+row in =27.filebuf.members= per unlisted mode.
+
+** TODO =get ()= adds to =gcount ()= instead of setting it
+
+=include/istream.cc= 240-256: the unformatted =get ()= increments
+=_C_gcount= without zeroing it first, so ~is.read (b, 3); is.get ();~
+leaves =gcount ()= at 4 (by probe). 14882:2003 27.6.1.3 p1: each
+unformatted input function begins by setting the count to zero and
+p6 has =get ()= extract one character. Found by the extension sweep,
+confirmed by probe, 2026-11-04.
+
+Fix: =get ()= zeroes the count as the other unformatted functions do.
+
+Check: the probe prints 1; a row in =27.istream.unformatted=.
+
+** TODO =list= splices and merges by copying the elements
+
+With the node buffer on, the default, =splice= from another list
+copies every element by insert-then-erase (=include/list.cc=
+200-339) and =merge= always copies through =_C_transfer= (129-151):
+by probe, a splice of five elements makes five copies and a merge of
+five and five makes five. 14882:2003 23.2.2.4 p5, p6, p8, p10, p13:
+constant time and "Throws: Nothing"; p25: =merge= has no effect on
+an exception. A copy constructor that throws leaves both lists
+changed. Since the 2005 import; no test counts copies. Found by the
+extension sweep, confirmed by probe, 2026-11-04.
+
+Fix: =splice= and =merge= relink nodes between lists; the node
+buffer's ownership of nodes is the question to settle first.
+
+Check: the probe prints 0 and 0; a row in =23.list.special= (or the
+list test that covers =splice=) with a counting element.
+
+** TODO A facet derived from a standard facet with its own =id= asserts on installation
+
+~struct my_numpunct : std::numpunct<char> { static std::locale::id
+id; }; std::locale (std::locale::classic (), new my_numpunct)~
+fires the assertion ~*pfacet->_C_pid~ in =_C_combine=
+(=src/locale_combine.cpp= 286) in a debug build, under the library
+of 2026-11-02 as under today's: the derived =id= is never
+initialized before the facet is installed, and =has_facet= and
+=use_facet= for the derived type go through the four inline
+overloads of =include/loc/_locale.h= 364-400, which read the
+standard facet's slot and never the derived =id=. =ref-locale.md=
+chapter 2 says the case works. 14882:2003 22.1.1.1.2 p1-2 and
+22.1.1.1.1 p1: a facet type with its own =id= is its own facet.
+Found by the extension sweep's reading, confirmed by probe,
+2026-11-04.
+
+Fix: the template constructor initializes the installed facet's
+=id= as =_C_get_facet= does, and the overloads for the standard
+types apply only to the standard types themselves (the derived type
+takes the general path).
+
+Check: the probe prints 1 and 1; a row in =22.locale.cons= with a
+derived facet type that declares =id=.
+
 ** TODO Sweep the library for extensions
 
 The negative precision under =fixed= left on 2026-11-04 (9a5a402a),
