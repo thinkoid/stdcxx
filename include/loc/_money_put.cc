@@ -383,7 +383,21 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
 
     char        __buf [304];            // buffer for groups
     static char __nul    = '\0';        // `groups' must be non-0
-    char       *__groups = __grouping.size () ? __buf : &__nul;
+
+    // the digits of `str' go into the array, or into a heap block when
+    // they do not fit, freed on every exit by the guard; the grouping
+    // below grows the block again for the separators
+    _RWSTD_SIZE_T __bufsize = sizeof __buf;
+    char         *__pbuf    = __buf;
+
+    if (__grouping.size () && __str.size () >= __bufsize) {
+        __bufsize = __str.size () + 1;
+        __pbuf    = new char [__bufsize];
+    }
+
+    __rw::__rw_put_buffer __guard (__buf, __pbuf);
+
+    char *__groups = __grouping.size () ? __pbuf : &__nul;
 
     const ctype<_CharT> &__ctp =
         std::use_facet< ctype<_CharT> >(__flags.getloc ());
@@ -399,7 +413,7 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
         ++__strdigs;
     }
 
-    if (__groups != &__nul && __fd >= 0 && __fd < __groups - __buf) {
+    if (__groups != &__nul && __fd >= 0 && __fd < __groups - __pbuf) {
         __groups -= __fd;
 
         // compute the size of each group relative to the formatted number
@@ -407,14 +421,7 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
         // `groups' will point at "\1\3\3\2\1" since `str' will be
         // formatted as "9,876,543,21,0" with thousands_sep's inserted
 
-        char *__pbuf = __buf;
-
         *__pbuf = '\0';
-
-        _RWSTD_SIZE_T __bufsize = sizeof __buf;
-
-        // frees the heap block __rw_put_groups moves to, on every exit
-        __rw::__rw_put_buffer __guard (__buf, __pbuf);
 
         __ngroups =
             __rw::__rw_put_groups (&__pbuf, __groups - __pbuf, __bufsize,

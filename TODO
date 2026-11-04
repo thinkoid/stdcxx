@@ -22,16 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =money_put= copies a digit string into its buffer without a bound
-
-=include/loc/_money_put.cc= 391: the digits are copied into the
-304-byte =__buf= unbounded when grouping is non-empty; 1000 digits
-under =en_US.UTF-8= give SIGSEGV. Found by probe, 2026-11-02.
-
-Fix: size the buffer for the digits and the separators.
-
-Check: AddressSanitizer on the case.
-
 ** TODO =money_put= smashes the stack on a long double past its buffer
 
 =include/loc/_money_put.cc= 320-337: after =__rw_put_num= moves the

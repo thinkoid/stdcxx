@@ -852,6 +852,24 @@ void grouping_test ()
     rw_assert (0 != PunctT::n_thousands_sep_, __FILE__, __LINE__,
                "money_put<char, char*>::do_put(..., 123456789.0L) "
                "called moneypunct<char>::do_thousands_sep()");
+
+    // a string of digits longer than the facet's array: the digits
+    // and the separators go to a heap block
+    PunctT::grouping_ = "\3";
+
+    const std::string digits (999, '7');
+
+    std::string expected;
+    for (int i = 0; i != 333; ++i)
+        expected += i ? ";777" : "777";
+
+    char longbuf [2048] = "";
+    *mp.put (longbuf, false, ios, '\0', digits) = '\0';
+
+    rw_assert (0 == rw_strncmp (longbuf, expected.c_str ()), __FILE__, __LINE__,
+               "money_put<char, char*>::do_put(..., string of 999 digits) "
+               "== 333 groups of three, got %u characters",
+               unsigned (std::char_traits<char>::length (longbuf)));
 }
 
 /**************************************************************************/
