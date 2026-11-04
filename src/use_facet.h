@@ -40,12 +40,48 @@
 #include "podarray.h"
 
 
+namespace __rw {
+
+// sets the numeric id of a standard facet type, (type + 1) / 2, and
+// returns a pointer to it; a factory calls it once, from the
+// initializer of a function-local static, before it returns a facet
+inline _RWSTD_SIZE_T*
+__rw_init_std_facet_id (const __rw_facet_id       &id,
+                        __rw_facet::_C_facet_type  type)
+{
+    _RWSTD_SIZE_T* const pid = &__rw_access::_C_get_id (id);
+
+    *pid = static_cast< _RWSTD_SIZE_T >((type + 1) / 2);
+
+    return pid;
+}
+
+// sets the type of a facet the library constructs and its pointer
+// to the id of its type
+inline __rw_facet*
+__rw_init_std_facet (__rw_facet                *pfacet,
+                     __rw_facet::_C_facet_type  type,
+                     _RWSTD_SIZE_T             *pid)
+{
+    __rw_access::_C_get_type (*pfacet) = type;
+    __rw_access::_C_get_pid (*pfacet)  = pid;
+
+    return pfacet;
+}
+
+}   // namespace __rw
+
+
 // helper macro _RWSTD_DEFINE_FACET_FACTORY() defines a facet factory
 // function called to construct, on demand, objects of specializations
 // of facet class templates
 // _byname facets are constructed on the heap while ordinary facets
 // are constructed in static memory for efficiency and to avoid leaks,
 // and are not destroyed during program lifetime
+// the facet's count starts at `ref', and the caller adds the references
+// it holds; the type's id and the ordinary facet are function-local
+// statics, initialized once under the compiler's guard, so a facet
+// shared by several threads is complete before any of them gets it
 
 #ifndef _RWSTD_NO_BYNAME_FACET
 
@@ -57,22 +93,22 @@
            Linkage __rw_facet*                                             \
            __rw_ct_ ## fid (_RWSTD_SIZE_T ref, const char *name)           \
            {                                                               \
-               __rw_facet* pfacet;                                         \
+               static _RWSTD_SIZE_T* const pid =                           \
+                   __rw_init_std_facet_id (__rw_ ## fid ## _facet::id,     \
+                                           __rw_facet::_C_ ## fid);        \
                if (name) {                                                 \
                    /* construct a _byname facet on the heap */             \
-                   pfacet = new std:: Facet ## _byname TArgs (name, ref); \
+                   return __rw_init_std_facet (                            \
+                       new std:: Facet ## _byname TArgs (name, ref),       \
+                       __rw_facet::_C_ ## fid ## _byname, pid);            \
                }                                                           \
-               else {                                                      \
-                   /* construct an ordinary facet in static memory */      \
-                   static __rw_aligned_buffer<__rw_ ## fid ## _facet> f;   \
-                   static __rw_facet* const pf =                           \
-                       new (f._C_store ()) __rw_ ## fid ## _facet (ref);   \
-                   pfacet = pf;                                            \
-               }                                                           \
-               /* set the pointer to the facet id */                       \
-               __rw_access::_C_get_pid (*pfacet) =                         \
-                   &(__rw_access::_C_get_id (__rw_ ## fid ## _facet::id)); \
-               return pfacet;                                              \
+               /* construct an ordinary facet in static memory */          \
+               static __rw_aligned_buffer<__rw_ ## fid ## _facet> f;       \
+               static __rw_facet* const pf =                               \
+                   __rw_init_std_facet (                                   \
+                       new (f._C_store ()) __rw_ ## fid ## _facet (ref),   \
+                       __rw_facet::_C_ ## fid, pid);                       \
+               return pf;                                                  \
            }                                                               \
        } /* namespace __rw */                                              \
        typedef void __rw_unused_type
@@ -90,10 +126,11 @@
                /* construct an ordinary facet in static memory */          \
                static __rw_aligned_buffer<__rw_ ## fid ## _facet> f;       \
                static __rw_facet* const pf =                               \
-                   new (f._C_store ()) __rw_ ## fid ## _facet (ref);       \
-               /* set the pointer to the facet id */                       \
-               __rw_access::_C_get_pid (*pf) =                             \
-                   &(__rw_access::_C_get_id (__rw_ ## fid ## _facet::id)); \
+                   __rw_init_std_facet (                                   \
+                       new (f._C_store ()) __rw_ ## fid ## _facet (ref),   \
+                       __rw_facet::_C_ ## fid,                             \
+                       __rw_init_std_facet_id (__rw_ ## fid ## _facet::id, \
+                                               __rw_facet::_C_ ## fid));   \
                return pf;                                                  \
            }                                                               \
        } /* namespace __rw */                                              \

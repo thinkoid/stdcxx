@@ -4,9 +4,9 @@
 
 A `locale` is a small handle to a **shared collection of facets**.
 The facets supply character classification, conversion, collation,
-formatting, parsing and message lookup. The library shares both the
-collection and its individual facets, and postpones most of their
-data loading until first use.
+formatting, parsing and message lookup. The library shares the
+collection, and the facets of collections built from one another; it
+postpones most of their data loading until first use.
 
 That is the central design: **make copies cheap, reuse common work,
 and keep repeated facet access short**. It also puts mutable machinery
@@ -45,15 +45,22 @@ facets and which contain managed `byname` facets. They let the body
 reason about whole categories without reading every facet.
 
 **Every standard slot is filled when the body is built.** The
-constructor from a name obtains all 26 facets from the facet
-repository, and a body built from others copies their slots. No slot
-changes while the body lives. Most facet data still loads on first
-use, but two constructors map theirs: `ctype_byname<char>` and
+constructor from a name obtains all 26 facets from their factories,
+and a body built from others copies their slots. No slot changes
+while the body lives. The byname facets of a body built from a name
+are its own, and each maps its databases: the body of a combined name
+builds the facets of its categories again, so `locale (de, en,
+locale::numeric)` holds a `collate_byname<char>` of its own, not the
+one of `de`. The ordinary facets are one static per type, shared by
+every body that holds them; the eight `{money,num}_{get,put}` facets
+are always ordinary. Most facet data still loads on first use, but
+two constructors map theirs: `ctype_byname<char>` and
 `ctype_byname<wchar_t>` map the `LC_CTYPE` database, and the wide one
 the codeset's `codecvt` database too.
 
 Each facet has its own reference count. Thus two different bodies can
-share a facet even when they cannot share the whole collection.
+share a facet even when they cannot share the whole collection: a
+body composed from another takes references to its facets.
 `locale::facet` is the internal `__rw_facet` base, which also supplies
 a mutex and the bookkeeping for its name and implementation data.
 
@@ -82,10 +89,10 @@ others take that value.
 `use_facet<T>` resolves the type to a lookup path and returns a
 reference. For a standard facet, the path is an indexed pointer
 read. The body's constructor filled the slot: it selected the
-category's name, asked the facet repository for an instance and
-stored the pointer. The repository shares library-created facets by
-type and name.
-Ordinary standard facets use static storage; named ones are allocated.
+category's name, called the type's factory and stored the pointer.
+Ordinary standard facets use static storage, one per type; named ones
+are allocated for the body. A factory sets the facet's type, its id
+pointer and, once, the type's standard id.
 
 **The locale selects the service; the facet implements it.** For
 example, numeric parsing and output use punctuation supplied by other
@@ -167,10 +174,10 @@ explicitly disabled in `_C_combine`.
 
 ### 4.2 The body manager as a junction
 
-There are **two different `_C_manage` functions**. At the centre of
-the body-management graph is `__rw_locale::_C_manage`, which owns the
-named-body repository and the current global-body pointer. The facet
-manager is a separate repository one level below it.
+At the centre of the body-management graph is
+`__rw_locale::_C_manage`, which owns the named-body repository and
+the current global-body pointer. There is no facet repository below
+it: a body owns the references to its facets.
 
 Default construction and `locale::global` reach the body manager
 directly. Named construction comes through `_C_get_body`; composition
@@ -182,12 +189,14 @@ path when its once initializer constructs the public `"C"` handle.
 Destruction closes the loop. A managed handle returns its reference
 to the body manager, which may remove and destroy the body. An
 unmanaged handle decrements the count and destroys the body directly
-at zero. In either case, the body destructor releases its facets,
-passing library-managed ones to `__rw_facet::_C_manage`. That second
-manager also receives the requests of the body constructor from a
-name, one per standard slot, under the body manager's lock.
-**Ordinary copying branches around both managers**, acquiring only
-another reference to the existing body.
+at zero. In either case, the body destructor drops its reference to
+each facet and deletes one whose count reaches zero, unless it is an
+ordinary standard facet: a library type and no name, a static of its
+factory, which lives on at count zero until the next body takes it.
+A program's facet and a byname facet are deleted. The body
+constructor from a name runs under the body manager's lock and calls
+the 26 factories. **Ordinary copying branches around the manager**,
+acquiring only another reference to the existing body.
 
 The body manager's two arguments encode four requests:
 
@@ -309,7 +318,8 @@ The important boundaries in a reentrant build are:
 | mechanism | purpose and boundary |
 |---|---|
 | Body and facet reference counts | Preserve shared ownership; every update of a facet's count uses the same lock-free operation. They do not synchronize arbitrary writes inside a facet. |
-| Locale and facet repository locks | Serialize repository operations and reuse. |
+| Locale repository lock | Serializes the named-body repository and the global body; the facet factories called from the constructor from a name run under it. |
+| Facet factories | Their ordinary facets and the standard ids are function-local statics, initialized once under the compiler's guard. |
 | Standard facet slots | Filled by the body's constructor before the body is shared, and never changed; lookup, copying, combining and comparison read them with no lock and no atomic access. |
 | Lazy facet data | `_C_get_data` takes the facet mutex and checks again before loading; the size, or the data pointer itself where the data is built from the C library later, is stored with release, and the unlocked reads are acquire loads. |
 | Cached scalars | The `ctype` and `codecvt` caches are filled with relaxed atomic accesses: every thread stores the same value and nothing else is published through them. |
@@ -438,11 +448,14 @@ the data pointer and size, the type, the reference count and the
 pointer to the type's id. The count starts at `refs`; each body that
 holds the facet adds one and `~__rw_locale` deletes the facet at zero,
 so `refs == 0` dies with the last locale and `refs == 1` never does.
-Standard ids are `(type + 1) / 2`, stored when the library constructs
-the facet (`__rw_facet::_C_manage`); a user id is the preincrement
+Standard ids are `(type + 1) / 2`, stored once by the type's factory
+(`src/use_facet.h`); a user id is the preincrement
 of `__rw_id_gen`, which starts at `_C_last_type + 1`, so the first is
-54, taken under a static guard (`__rw_facet_id::_C_init`, chapter 2). A library-made named facet dies
-with the last locale that holds it, as decided in f90fff0f.
+54, taken under a static guard (`__rw_facet_id::_C_init`, chapter 2).
+A library facet follows the same rule: its factory constructs it with
+`refs` 0 and each body adds its reference. A library-made named facet
+dies with the last locale that holds it, as decided in f90fff0f; an
+ordinary one is a static and survives its count.
 
 **Names.** `locale(const char*)` reaches `_C_manage (0, name)`, which
 expands the name with `__rw_expand_name`. `__rw_locale_name`
@@ -503,13 +516,13 @@ A byname facet the program constructs and uses without installing it
 has no id pointer and takes the C library path: `collate_byname<char>
 ("de_DE.UTF-8")` used directly transforms with `strxfrm`, the one in
 `locale ("de_DE.UTF-8")` with the database, by probe. The comment at
-`src/facet.cpp:174-178` states this as the design.
+`src/facet.cpp:173-177` states this as the design.
 
 **Threading.** Chapter 7. `__rw_locale_name` caches the locale root in
 a static buffer with no lock of its own; both of its callers,
 `__rw_expand_name` and the `__rw_locale (const char*)` constructor,
 run only inside `_C_manage` under the `__rw_locale` guard
-(`src/locale_body.cpp:847`, `:864`, `:1017`), so the guard serializes
+(`src/locale_body.cpp:841`, `:858`, `:1011`), so the guard serializes
 it, as `analysis-init-flags.md` 2.7 says.
 
 **`<clocale>`.** `include/rw/_config.h:97-106` defines
@@ -2300,7 +2313,7 @@ is a `TODO` entry rather than a decision.
 | Public handle, `use_facet`, standard lookup | `include/loc/_locale.h`, `src/locale_core.cpp` |
 | Body layout, ids, named-body repository | `src/locale_body.h`, `src/locale_body.cpp` |
 | Composition | `src/locale_combine.cpp` |
-| Facet base, repository, data loading | `include/loc/_facet.h`, `src/facet.cpp` |
+| Facet base, data loading | `include/loc/_facet.h`, `src/facet.cpp` |
 | Factories for standard facets | `src/use_facet.h`, `src/ti_*.cpp` |
 | Lazily built C-library data | `src/punct.cpp` (`__rw_get_numpunct`, `__rw_get_moneypunct`) |
 | Global and classic locales | `src/locale_global.cpp`, `src/locale_classic.cpp` |

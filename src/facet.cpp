@@ -1,7 +1,7 @@
 /***************************************************************************
  *
- * facet.cpp - definition of the __rw_facet class, the standard facet
- *             repository and the facet database mapping
+ * facet.cpp - definition of the __rw_facet class and the facet
+ *             database mapping
  *
  * $Id$
  *
@@ -32,12 +32,11 @@
 #include <rw/_defs.h>
 
 #include <locale.h>   // for LC_XXX constants
-#include <stdlib.h>   // for bsearch(), getenv(), qsort()
+#include <stdlib.h>   // for getenv()
 #include <string.h>   // for memcpy(), strlen()
 
 #include <iosfwd>         // for mbstate_t
 
-#include "access.h"
 #include "mman.h"
 
 #include <loc/_facet.h>
@@ -306,233 +305,6 @@ const void* __rw_facet::_C_get_data ()
     __rw_munmap (pdata, sz);
 
     return _C_impdata;
-}
-
-
-extern "C" {
-
-// compares two facets, returns 0 if equal, -1 if less, +1 otherwise
-static int cmpfacets (const void *pv1, const void *pv2) _THROWS (())
-{
-    _RWSTD_ASSERT (0 != pv1);
-    _RWSTD_ASSERT (0 != pv2);
-
-    const __rw_facet* const pf1 =
-        *static_cast< const __rw_facet* const* >(pv1);
-    const __rw_facet* const pf2 =
-        *static_cast< const __rw_facet* const* >(pv2);
-
-    if (__rw_access::_C_get_type(*pf1) == __rw_access::_C_get_type(*pf2)) {
-        return ::strcmp (__rw_access::_C_get_name(*pf1) ? 
-                         __rw_access::_C_get_name(*pf1) : "C",
-                         __rw_access::_C_get_name(*pf2) ? 
-                         __rw_access::_C_get_name(*pf2) : "C");
-    }
-
-    return __rw_access::_C_get_type(*pf2) - __rw_access::_C_get_type(*pf1);
-}
-
-
-struct __rw_facet_info
-{
-    const char                *_C_name;
-    __rw_facet::_C_facet_type  _C_type;
-};
-
-// compares a key to a facet, returns 0 if equal, -1 if less, +1 otherwise
-static int cmpfacet (const void *pv1, const void *pv2) _THROWS (())
-{
-    _RWSTD_ASSERT (0 != pv1);
-    _RWSTD_ASSERT (0 != pv2);
-
-    const __rw_facet_info* const pinfo =
-        static_cast< const __rw_facet_info* >(pv1);
-
-    const __rw_facet* const pfacet =
-        *static_cast< const __rw_facet* const* >(pv2);
-
-    if (pinfo->_C_type == __rw_access::_C_get_type(*pfacet)) {
-        return ::strcmp (pinfo->_C_name  ? pinfo->_C_name   : "C",
-                         __rw_access::_C_get_name(*pfacet) ? 
-                         __rw_access::_C_get_name(*pfacet) : "C");
-    }
-
-    return __rw_access::_C_get_type(*pfacet) - pinfo->_C_type;
-}
-
-}   // extern "C"
-
-
-/* static */ __rw_facet*
-__rw_facet::_C_manage (__rw_facet            *pfacet,
-                       _C_facet_type          type,
-                       const char            *name,
-                       __rw_facet::_C_ctor_t *ctor)
-{
-    // a per-process array of facet pointers sufficiently large
-    // to hold (pointers to) all standard facets for 8 locales
-    static __rw_facet*  std_facet_buf [__rw_facet::_C_last_type * 8];
-    static __rw_facet** std_facets = std_facet_buf;
-    static size_t n_std_facets = 0;
-    static size_t std_facet_bufsize =
-        sizeof std_facet_buf / sizeof *std_facet_buf;
-
-    // acquire lock
-    _RWSTD_MT_STATIC_GUARD (__rw::__rw_facet);
-
-    if (pfacet) {
-        // remove facet from the facet repository (if it is found) and
-        // destroy it (ordinary unnamed standard facets are never destroyed)
-
-        if (!name) {
-            // find facet by its name
-            name = __rw_locale::_C_get_cat_name (*pfacet);
-        }
-
-        _RWSTD_ASSERT (0 != n_std_facets);
-
-        const void *pf =
-            ::bsearch (&pfacet, std_facets, n_std_facets,
-                       sizeof pfacet, &cmpfacets);
-        if (pf) {
-
-            const size_t inx =
-                  static_cast< const __rw_facet* const* >(pf)
-                - const_cast< const __rw_facet* const* >(std_facets);
-
-            pfacet = std_facets [inx];
-
-            if (0 == __rw_locale::_C_remove_ref (*pfacet)) {
-
-                static const size_t bufsize =
-                    sizeof std_facet_buf / sizeof *std_facet_buf;
-
-                --n_std_facets;
-
-                if (n_std_facets < bufsize / 2 && std_facets != std_facet_buf) {
-
-                    _RWSTD_ASSERT (inx < bufsize);
-
-                    // when the number of facets in the dynamically allocated
-                    // repository drops below half the capacity of the
-                    // statically allocated buffer, copy facets from the
-                    // former into the latter and deallocate the former
-                    ::memcpy (std_facet_buf, std_facets,
-                              inx * sizeof (*std_facets));
-
-                    ::memcpy (std_facet_buf + inx,
-                              std_facets + inx + 1,
-                              (n_std_facets - inx)
-                              * sizeof (*std_facets));
-
-                    delete[] std_facets;
-                    std_facets        = std_facet_buf;
-                    std_facet_bufsize = bufsize;
-                }
-                else {
-
-                    // move facet pointers back
-                    ::memmove (std_facets + inx,
-                               std_facets + inx + 1,
-                               (n_std_facets - inx)
-                               * sizeof (*std_facets));
-                }
-
-                // delete facet unless it's one of the ordinary (unnamed)
-                // standard facets which are statically allocated
-                if (pfacet->_C_name)
-                    delete pfacet;
-            }
-        }
-        else {
-
-            // facet is an ordinary (unnamed) standard facet
-            const size_t ref = __rw_locale::_C_remove_ref (*pfacet);
-            _RWSTD_ASSERT (ref + 1U != 0);
-            _RWSTD_UNUSED (ref);
-        }
-
-        pfacet = 0;
-    }
-    else {
-
-        // find facet in the repository or construct it if not found
-
-        const __rw_facet_info info = { name, type };
-
-        const void *pcf = ::bsearch (&info, std_facets, n_std_facets,
-                                     sizeof pfacet, &cmpfacet);
-
-        if (pcf) {
-            // facet already exists in the repository, bump up its ref count
-
-            void *pf = const_cast< void* >(pcf);
-            pfacet = *static_cast< __rw_facet** >(pf);
-
-            _RWSTD_ASSERT (0 != pfacet);
-
-            __rw_locale::_C_add_ref (*pfacet);
-        }
-        else {
-
-            if (n_std_facets == std_facet_bufsize) {
-
-                // reallocate buffer of facet pointers
-                __rw_facet **tmp = new __rw_facet* [n_std_facets * 2];
-
-                ::memcpy (tmp, std_facets, n_std_facets * sizeof *tmp);
-
-                if (std_facets != std_facet_buf)
-                    delete[] std_facets;
-
-                std_facets         = tmp;
-                std_facet_bufsize *= 2;
-            }
-
-            // no such facet exists yet, construct one with the initial
-            // reference count of 1
-
-            _RWSTD_ASSERT (0 != ctor);
-
-            pfacet = ctor (1, type & 1 ? 0 : name);
-
-            _RWSTD_ASSERT (0 != pfacet);
-
-            // set the facet's numeric id, shared by every facet of the
-            // type; only the first store changes it, and it precedes
-            // the facet's publication, so later ones are skipped rather
-            // than race with readers of other facets of the same type
-            const size_t id = static_cast< size_t >((type + 1) / 2);
-
-            if (*__rw_access::_C_get_pid (*pfacet) != id)
-                *__rw_access::_C_get_pid (*pfacet) = id;
-
-            if (__rw_access::_C_get_type (*pfacet) != type) {
-                // set the type of the facet if not already set
-                __rw_access::_C_get_type (*pfacet) = type;
-            }
-
-            if (__rw_access::_C_get_ref (*pfacet) != 1) {
-                // set the refcount of the facet if 0
-
-                // the refcount is set during construction which occurs
-                // at most once in a program, but may decrease to 0 if
-                // all locales containing that facet are destroyed
-
-                _RWSTD_ASSERT (0 == __rw_access::_C_get_ref (*pfacet));
-
-                __rw_access::_C_get_ref (*pfacet) = 1;
-            }
-
-            // add facet pointer to the end of the repository
-            std_facets [n_std_facets++] = pfacet;
-
-            // sort facet pointers for fast access
-            ::qsort (std_facets, n_std_facets, sizeof pfacet, &cmpfacets);
-        }
-    }
-
-    return pfacet;
 }
 
 

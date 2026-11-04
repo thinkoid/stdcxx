@@ -232,8 +232,9 @@ private:
     _C_get_body (__rw_locale*, __rw_locale*,
                  const char*, int, const __rw_facet*);
 
-    // obtains from the facet repository the standard facet for a slot
-    // of the body of a locale name; called from the ctor from a name
+    // obtains from its factory, with no reference, the standard facet
+    // for a slot of the body of a locale name; called from the ctor
+    // from a name
     static __rw_facet* _C_get_slot_facet (const char*, _RWSTD_SIZE_T);
 
     // called from ctors (only) to fully construct a combined locale

@@ -24,26 +24,31 @@ the locale is last.
 
 ** TODO Locale bodies and standard facets are shared through global repositories
 
-=__rw_locale::_C_manage= (=src/locale_body.cpp= 768 on) keeps one body
+=__rw_locale::_C_manage= (=src/locale_body.cpp= 762 on) keeps one body
 per locale name in a process-wide sorted table under a static guard,
-and =__rw_facet::_C_manage= (=src/facet.cpp= 367 on) one standard
-facet per type and name in a second table. A body is managed when its
-name describes all of its facets (=_C_is_managed=, =locale_body.cpp=
-1041-1191); the constructors, the destructor, =name ()= and
-=operator==~ branch on the answer, and the standard facet slots of a
-body fill on first use (=src/locale_core.cpp= 81-215,
-=analysis-facet-first-use.md=). The sharing saves memory where a
-program constructs the same named locale many times. It costs two
-kinds of body, a name used as identity (the next two entries are
-defects of that proxy), two static guards on construction and
-destruction, and the slot races the sanitizer notes record. libstdc++
-builds a body with all of its facets per constructor call, shares
-bodies and facets by copy only, and compares unnamed locales by
-identity. Decided 2026-11-04. Step 1 is done: the body constructor
-from a name builds every standard facet, and the first-use fill,
-=locale::_C_get_std_facet=, the body's mutex and the atomic loads of
-the slots are gone; the two repositories, =_C_is_managed=, the
-bitmaps, equality and the name remain.
+and =__rw_facet::_C_manage= kept one standard facet per type and name
+in a second table. A body is managed when its name describes all of
+its facets (=_C_is_managed=, =locale_body.cpp= 1035-1185); the
+constructors, the destructor, =name ()= and =operator==~ branch on the
+answer, and the standard facet slots of a body fill on first use
+(=src/locale_core.cpp= 81-215, =analysis-facet-first-use.md=). The
+sharing saves memory where a program constructs the same named locale
+many times. It costs two kinds of body, a name used as identity (the
+next two entries are defects of that proxy), two static guards on
+construction and destruction, and the slot races the sanitizer notes
+record. libstdc++ builds a body with all of its facets per constructor
+call, shares bodies and facets by copy only, and compares unnamed
+locales by identity. Decided 2026-11-04. Step 1 is done: the body
+constructor from a name builds every standard facet, and the first-use
+fill, =locale::_C_get_std_facet=, the body's mutex and the atomic
+loads of the slots are gone. Step 2 is done: the facet repository is
+gone; a body takes each standard facet from its factory, holds one
+reference and deletes the facet at zero unless it is an ordinary
+static, and the factories set up their statics under the compiler's
+guard. A body of a combined name builds its categories' byname facets
+again rather than share those of the named bodies. The body
+repository, =_C_is_managed=, the bitmaps, equality and the name
+remain.
 
 Fix: take that path. One kind of body, built with every standard
 facet in the constructor; the two repositories, =_C_is_managed= and
@@ -91,7 +96,7 @@ program facet it installs in a standard slot and sets the byname bit:
 the facet's =_C_type= is 0, which the test reads as an even, byname
 type. A locale whose facets of one category are all program objects
 then has no standard bit and every byname bit there, and
-=_C_is_managed (cat)= (=src/locale_body.cpp= 1183-1191) calls the
+=_C_is_managed (cat)= (=src/locale_body.cpp= 1177-1185) calls the
 category managed. With ~b = locale (locale (locale::classic (), &c1), &c2)~,
 =c1= a program =collate<char>= and =c2= a program =collate<wchar_t>=,
 =locale (locale::classic (), b, locale::collate)= comes out named "C"
@@ -106,7 +111,7 @@ Check: =use_facet<collate<char> >= of the result is =c1=,
 
 ** TODO =cmplocales= checks the first name twice
 
-=src/locale_body.cpp= 725-726: the comparison of the body repository
+=src/locale_body.cpp= 719-720: the comparison of the body repository
 asserts ~0 != pl1->_C_get_name ()~ twice and never checks =pl2=.
 Found by reading, 2026-11-04.
 
@@ -138,7 +143,7 @@ Check: with ~x = a.combine<numpunct<char> >(b)~, the locale
 ** TODO A combined name ending in "C" sets the byname bits of its last category
 
 The byname loop of =__rw_locale (const char*)=
-(=src/locale_body.cpp= 543) takes a part for "C" only when a
+(=src/locale_body.cpp= 541) takes a part for "C" only when a
 separator follows it. The last part has none, so a name ending in
 "C", ~"de_DE.UTF-8;C;C;C;C;C"~ on glibc, sets the byname bits of
 =LC_MESSAGES= over ordinary facets. No consequence is known: the
@@ -162,12 +167,15 @@ Check: a probe that reads =_C_byname_facet_bits= of that body.
 - =_C_construct (const __rw_locale&, const __rw_facet*)=
   (=src/locale_combine.cpp= 130, 166) sets =_C_name= to 0 and then
   tests it; the name computation between the two is gone.
-- =src/facet.cpp= 57 redeclares the inline =__rw_get_cat= of
+- =src/facet.cpp= 56 redeclares the inline =__rw_get_cat= of
   =src/locale_body.h=.
 - =src/locale_name.cpp= includes =setlocale.h= and uses nothing from
   it.
-- =src/locale_body.cpp= 1201-1204 includes =<loc/_locale.h>= and
+- =src/locale_body.cpp= 1195-1198 includes =<loc/_locale.h>= and
   =<rw/_defs.h>= a second time, before ~locale::operator=~.
+- =__rw_locale::_C_get_cat_name= (=src/locale_body.h= 183-186) and
+  =__rw_access::_C_get_ref= (=src/access.h= 50-53) have no caller;
+  the facet repository was their only one.
 Found by reading, 2026-11-04.
 
 Fix: remove them; the first entry takes most of them with the code
@@ -182,7 +190,7 @@ the facet's factory, a =__rw_facet::_C_ctor_t*=, and ignores it: the
 body constructor builds every standard facet through its own table,
 =__rw_std_facet_ctors= (=src/locale_body.cpp= 405). The argument is
 passed at five sites: =_RWSTD_SPECIALIZE_USE_FACET=
-(=src/use_facet.h= 133), which every =ti_= file expands, and the four
+(=src/use_facet.h= 169), which every =ti_= file expands, and the four
 inline =__rw_get_facet= specializations of =_locale.h= (349-376),
 which are why =__rw_ct_ctype=, =__rw_ct_numpunct=, =__rw_ct_num_get=
 and =__rw_ct_num_put= are declared in the public header and exported.
@@ -1377,6 +1385,18 @@ Facets and their ids, the facet index scheme, =locale_body=, how
 the binary locale data they read. A reader of
 =doc/notes/analysis-locale-mt-race.md= needs this map first. Shape:
 =ref-string-replace.md=.
+
+** TODO =ref-locale.md= 8.3 says the first =has_facet= constructs the facet
+
+The departure "=has_facet= has no exception specification" gives as
+its consequence that the first =has_facet= of a standard facet
+constructs it and may throw =bad_alloc=. The body constructor from a
+name now builds every standard facet, and =has_facet= of a standard
+facet reads a slot. =ref-conformance.md= carries the row. Found while
+removing the facet repository, 2026-11-04.
+
+Fix: prose. Say what can still throw, if anything, or that nothing
+does; the departure from the synopsis stays.
 
 ** TODO Decision records
 

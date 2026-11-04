@@ -232,9 +232,13 @@ string.**
 
 The [locale tour](ref-locale.md) describes the ownership graph around
 `__rw_locale::_C_manage`. Retaining an existing body avoids rebuilding
-its facet collection. Repositories separately coordinate finding,
-inserting and retiring shared bodies and facets. The count and the
-repository lock serve different purposes.
+its facet collection. The named-body repository separately
+coordinates finding, inserting and retiring shared bodies; the count
+and the repository lock serve different purposes. Facets have no
+repository. A body holds one reference to each of its facets, and the
+body that drops a count to zero deletes the facet, unless it is an
+ordinary standard facet, a static of its factory that lives on at
+zero (chapter 5).
 
 The global-locale branch and named-body repository branch in
 [locale_body.cpp](../../src/locale_body.cpp) have distinct static-guard
@@ -336,7 +340,7 @@ an exception thrown through it, and glibc's recovery is an
 implementation detail. Its fallbacks for systems without
 `pthread_once` went with it.
 
-Two related sites need no protocol. `__rw_facet_id::_C_init`
+Three related sites need no protocol. `__rw_facet_id::_C_init`
 ([facet.cpp](../../src/facet.cpp)) generates a facet type's id once,
 under a static lock with a recheck, stored with release and read with
 acquire; `22.locale.id.mt` counts the ids 500 types take.
@@ -344,6 +348,24 @@ acquire; `22.locale.id.mt` counts the ids 500 types take.
 guard, with a relaxed load. Only a thread that holds the classic body
 compares equal, and it got the body through the guard; nothing is
 published through the pointer.
+
+The standard facet factories, `_RWSTD_DEFINE_FACET_FACTORY` in
+[use_facet.h](../../src/use_facet.h) and `__rw_ct_ctype` in
+[ctype.cpp](../../src/ctype.cpp), rely on the compiler instead. Each
+holds the pointer to its type's id and its ordinary facet in
+function-local statics, and their initializers store the type's
+standard id, the facet's type and its id pointer. GCC and Clang guard
+the initialization of a function-local static with
+`__cxa_guard_acquire` and `__cxa_guard_release`: one caller runs the
+initializer, the others wait for it and then see its stores. No
+library lock is involved. The tree has no characterization for a
+compiler that does not guard them, or for GCC's
+`-fno-threadsafe-statics`. A call after the first only reads the
+statics, so an ordinary facet that live bodies hold is never written;
+a byname facet is set up before the factory returns it. The body
+constructor from a name, the factories' only caller, runs under the
+`__rw_locale` guard of the named-body repository, but the statics do
+not depend on it.
 
 ## 6. Other uses and their limits
 

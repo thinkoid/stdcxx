@@ -66,9 +66,9 @@ protected:
 
 public:
 
-    // types of standard facets; only globally managed facets (i.e.,
-    // standard facets created internally) set this member, user-created
-    // facet objects of any types set their type to _C_unknown
+    // types of standard facets; only the standard facets the library
+    // creates (through the factories in src/use_facet.h) set this member,
+    // user-created facet objects of any types set their type to _C_unknown
 
     // NOTE: the values and order of all the enumerators below are important
     //       any changes may affect the binary compatibility of the library
@@ -200,7 +200,7 @@ protected:
 private:
 
     _C_facet_type  _C_type;       // facet type (see above)
-    _RWSTD_SIZE_T  _C_ref;        // reference count (> 0)
+    _RWSTD_SIZE_T  _C_ref;        // reference count
     _RWSTD_SIZE_T *_C_pid;        // pointer to the static Facet::id._C_id
 
     // standard facets' id's are computed as (_C_type + 1) / 2
@@ -210,9 +210,6 @@ private:
     void operator= (const __rw_facet&);   // not defined
 
     const void* _C_get_data ();
-
-    static __rw_facet*
-    _C_manage (__rw_facet*, _C_facet_type, const char*, _C_ctor_t*);
 
     friend struct std::locale;
     friend class __rw_locale;

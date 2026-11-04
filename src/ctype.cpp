@@ -620,23 +620,23 @@ _RWSTD_EXPORT __rw_facet::_C_ctor_t __rw_ct_ctype;
 
 _RWSTD_EXPORT __rw_facet* __rw_ct_ctype (size_t ref, const char *name)
 {
-    __rw_facet* pfacet;
+    // the id and the ordinary facet are set up once, under the
+    // compiler's guard, as in _RWSTD_DEFINE_FACET_FACTORY()
+    static size_t* const pid =
+        __rw_init_std_facet_id (std::ctype<char>::id, __rw_facet::_C_ctype);
 
     if (name) {
-        pfacet = new std::ctype_byname<char>(name, ref);
-    }
-    else {
-        static __rw_aligned_buffer<std::ctype<char> > f;
-        static __rw_facet* const pf = new (f._C_store ()) 
-            std::ctype<char> (__rw_classic_tab, false, ref);
-        pfacet = pf;
+        return __rw_init_std_facet (new std::ctype_byname<char>(name, ref),
+                                    __rw_facet::_C_ctype_byname, pid);
     }
 
-    // set the pointer to the facet id
-    __rw_access::_C_get_pid (*pfacet) =
-        &(__rw_access::_C_get_id (std::ctype<char>::id));
+    static __rw_aligned_buffer<std::ctype<char> > f;
+    static __rw_facet* const pf =
+        __rw_init_std_facet (new (f._C_store ())
+                                 std::ctype<char> (__rw_classic_tab, false, ref),
+                             __rw_facet::_C_ctype, pid);
 
-    return pfacet;
+    return pf;
 }
 
 

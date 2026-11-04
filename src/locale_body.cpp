@@ -432,15 +432,16 @@ __rw_std_facet_ctors [__rw_locale::_C_n_std_facets] = {
 };
 
 
-// obtains from the facet repository, with a reference, the facet for
-// slot `inx' of a body named `name': the category's locale is its part
-// of a combined name or the whole name, and the facet is the byname
-// form unless that locale is C; {money,num}_{get,put} have no byname
-// form and are always the ordinary facet
+// obtains from its factory the facet for slot `inx' of a body named
+// `name', with no reference: the category's locale is its part of a
+// combined name or the whole name, and the facet is the byname form
+// unless that locale is C; {money,num}_{get,put} have no byname form
+// and are always the ordinary facet
 /* static */ __rw_facet* __rw_locale::
 _C_get_slot_facet (const char *name, size_t inx)
 {
-    __rw_facet::_C_facet_type type = __rw_facet::_C_facet_type (2 * inx + 1);
+    const __rw_facet::_C_facet_type type =
+        __rw_facet::_C_facet_type (2 * inx + 1);
 
     __rw_facet::_C_ctor_t* const ctor = __rw_std_facet_ctors [inx];
 
@@ -453,7 +454,7 @@ _C_get_slot_facet (const char *name, size_t inx)
     case __rw_facet::_C_wmoney_put:
     case __rw_facet::_C_wnum_get:
     case __rw_facet::_C_wnum_put:
-        return __rw_facet::_C_manage (0, type, 0, ctor);
+        return ctor (0, 0);
     default:
         break;
     }
@@ -481,10 +482,7 @@ _C_get_slot_facet (const char *name, size_t inx)
         name = catname.data ();
     }
 
-    if (!__rw_is_C (name))
-        type = __rw_facet::_C_facet_type (type + 1);
-
-    return __rw_facet::_C_manage (0, type, name, ctor);
+    return ctor (0, __rw_is_C (name) ? 0 : name);
 }
 
 
@@ -557,19 +555,27 @@ __rw_locale (const char *name)
     }
 
     // every standard facet is built here, and no slot changes while
-    // the body is shared; when one cannot be built, the facets before
-    // it go back to the repository
+    // the body is shared; the factories construct a facet with no
+    // reference, refs 0 in the standard's terms, and the body adds the
+    // one it holds; when one cannot be built, the body drops the
+    // references to the facets before it as its dtor does
     size_t inx = 0;
 
     try {
-        for (; inx != _C_n_std_facets; ++inx)
+        for (; inx != _C_n_std_facets; ++inx) {
             _C_std_facets [inx] = _C_get_slot_facet (_C_name, inx);
+            _C_add_ref (*_C_std_facets [inx]);
+        }
     }
     catch (...) {
-        while (inx--)
-            __rw_facet::_C_manage (_C_std_facets [inx],
-                                   _C_std_facets [inx]->_C_type,
-                                   _C_std_facets [inx]->_C_name, 0);
+        while (inx--) {
+            __rw_facet* const pfacet = _C_std_facets [inx];
+
+            if (   0 == _C_remove_ref (*pfacet)
+                && (__rw_facet::_C_unknown == pfacet->_C_type
+                    || pfacet->_C_name))
+                delete pfacet;
+        }
 
         if (_C_name != _C_namebuf)
             delete[] const_cast< char* >(_C_name);
@@ -653,36 +659,24 @@ __rw_locale::
     if (_C_name != _C_namebuf)
         delete[] const_cast< char* >(_C_name);
 
-    // decrement the reference count of each installed facet
-    // and delete each facet whose refcount drops to zero
+    // decrement the reference count of each installed facet and delete
+    // each facet whose refcount drops to zero, unless it is an ordinary
+    // standard facet (a library type and no name): those are statics of
+    // their factories (src/use_facet.h) and live on at count zero; a
+    // program's facet (type 0) and a byname facet (a name) are heap
     for (size_t i = 0; i != _C_n_std_facets; ++i) {
 
-        _RWSTD_ASSERT (_C_std_facets [i]->_C_type != __rw_facet::_C_invalid);
+        __rw_facet* const pfacet = _C_std_facets [i];
 
-        if (_C_std_facets [i]->_C_type) {
+        _RWSTD_ASSERT (pfacet->_C_type != __rw_facet::_C_invalid);
 
-            // only standard facets (non-zero type) are managed
-            // decrement the facet's reference count and remove
-            // it from the global repository if it is 0
-            const __rw_facet* const pfacet =
-                __rw_facet::_C_manage (_C_std_facets [i],
-                                       _C_std_facets [i]->_C_type,
-                                       _C_std_facets [i]->_C_name,
-                                       0);
+        // decrement ref count (must not drop below 0)
+        const size_t ref = _C_remove_ref (*pfacet);
+        _RWSTD_ASSERT (ref + 1U != 0);
 
-            // verify that facet has been disposed of
-            _RWSTD_ASSERT (0 == pfacet);
-            _RWSTD_UNUSED (pfacet);
-        }
-        else {
-            // decrement ref count (must not drop below 0)
-            const size_t ref = _C_remove_ref (*_C_std_facets [i]);
-
-            _RWSTD_ASSERT (ref + 1U != 0);
-
-            if (0 == ref)
-                delete _C_std_facets [i];
-        }
+        if (   0 == ref
+            && (__rw_facet::_C_unknown == pfacet->_C_type || pfacet->_C_name))
+            delete pfacet;
     }
 
     // verify that either both are 0 or neither is 0
