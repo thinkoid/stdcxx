@@ -97,8 +97,8 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,951 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,837 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,976 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,862 | 0 | 0 | 0 |
 | 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,664 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
@@ -277,6 +277,10 @@ all six tables:
 - 2026-11-04: `22.locale.time.put`, 2,430 to 2,438, a width and a
   precision of eleven digits in a format, bounded at 64; the other
   five tables are to move by the same eight.
+- d69bfa0b, 2026-11-04: the other five tables measured in full by the
+  nightly: the day's rows of `22.locale.collate`, `money.put`,
+  `num.put`, `time.get` and `time.put`, as the lines above say, and
+  the summaries to the sums of their rows.
   of formats that grow `do_put`'s buffer, narrow and wide; the other
   five tables are to move by the same 24.
 
@@ -391,9 +395,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,474,951 | 0 | 0 | 0 |
-| 11s-clang | 12,474,852 | 0 | 0 | 0 |
-| 15D-clang | 12,478,639 | 0 | 0 | 0 |
+| 11S-clang | 12,474,976 | 0 | 0 | 0 |
+| 11s-clang | 12,474,877 | 0 | 0 | 0 |
+| 15D-clang | 12,478,664 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134
