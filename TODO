@@ -95,6 +95,30 @@ from the record); carry the remaining size through =__rw_fmt_time=.
 Check: generated locales with 101 era records and a 300-character
 =%c=, under the sanitizer.
 
+** TODO Sweep the library for extensions
+
+The negative precision under =fixed= left on 2026-11-04 (9a5a402a),
+an addition of the 2005 import that no gate covered and the October
+removal of the gated extensions did not reach. Others of its kind
+are likely: =ref-conformance.md= chapter 2 records the ones found so
+far, the sources carry about twenty comments that say "extension",
+and =doc/stdlibref= documents what the import shipped. One
+extension stays by decision: =time_get='s =get= with a format and
+=do_get= with a specifier, the C++11 interface, which take C++11's
+specification (=ref-conformance.md=, "=time_get= with a format").
+
+Fix: a sweep of =include= and =src=, header by header, for behaviour
+beyond 14882:2003 that is not a defect resolution or a decided
+departure: the "extension" comments, =doc/stdlibref= against the
+standard's synopses, and any member or behaviour the standard does
+not name. Each finding becomes its own entry, in the shape of this
+chapter, with its paragraph, what the library does, where the test
+pins it and what its removal costs; =time_get='s format members are
+left out. The sweep's record goes to =ref-conformance.md= chapter 2.
+
+Check: every "extension" comment in =include= and =src= is either
+gone or names its entry or its row in =ref-conformance.md=.
+
 ** TODO Racing =locale::global= calls can split the C and C++ locales
 
 =locale::global= (=src/locale_global.cpp= 59-72) calls =setlocale= and
