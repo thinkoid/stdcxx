@@ -116,32 +116,6 @@ private:
 
 public:
 
-    enum {
-
-#define _FACET_BIT(name)   (1U << (__rw_facet::_C_##name - 1U) / 2U)
-
-        // bitmaps of standard facet types for each category, the
-        // facet_bits of __rw_cats
-
-        _C_collate  = _FACET_BIT (collate) | _FACET_BIT (wcollate),
-        _C_ctype    =   _FACET_BIT (codecvt) | _FACET_BIT (ctype)
-                      | _FACET_BIT (wcodecvt) | _FACET_BIT (wctype),
-        _C_monetary =   _FACET_BIT (moneypunct) | _FACET_BIT (moneypunct_intl)
-                      | _FACET_BIT (wmoneypunct) | _FACET_BIT (wmoneypunct_intl)
-                      | _FACET_BIT (money_get) | _FACET_BIT (money_put)
-                      | _FACET_BIT (wmoney_get) | _FACET_BIT (wmoney_put),
-        _C_numeric  =   _FACET_BIT (numpunct) | _FACET_BIT (wnumpunct)
-                      | _FACET_BIT (num_get) | _FACET_BIT (num_put)
-                      | _FACET_BIT (wnum_get) | _FACET_BIT (wnum_put),
-        _C_time     =   _FACET_BIT (time_get) | _FACET_BIT (time_put)
-                      | _FACET_BIT (wtime_get) | _FACET_BIT (wtime_put),
-        _C_messages = _FACET_BIT (messages) | _FACET_BIT (wmessages),
-        _C_all      =   _C_collate | _C_ctype | _C_monetary
-                      | _C_numeric | _C_time  | _C_messages
-
-#undef _FACET_BIT
-
-    };
 
     // create a locale body from the name of a locale
     __rw_locale (const char*);
@@ -274,7 +248,6 @@ extern const struct __rw_cats_t
 {
     int         cat;          // LC_XXX category
     const char *name;         // LC_XXX name
-    int         facet_bits;   // bitmap of facet types
 } __rw_cats [6];
 
 static const _RWSTD_SIZE_T __rw_n_cats = 6;

@@ -236,44 +236,43 @@ static struct LC_vars
     int         ord;
     int         cat;
     char        name [64];
-    const char *lower;
 } lc_vars [] = {
-    { -1, LC_COLLATE,  "LC_COLLATE=C",  "collate" },
-    { -1, LC_CTYPE,    "LC_CTYPE=C",    "ctype" },
-    { -1, LC_MONETARY, "LC_MONETARY=C", "monetary" },
-    { -1, LC_NUMERIC,  "LC_NUMERIC=C",  "numeric" },
-    { -1, LC_TIME,     "LC_TIME=C",     "time" },
+    { -1, LC_COLLATE,  "LC_COLLATE=C" },
+    { -1, LC_CTYPE,    "LC_CTYPE=C" },
+    { -1, LC_MONETARY, "LC_MONETARY=C" },
+    { -1, LC_NUMERIC,  "LC_NUMERIC=C" },
+    { -1, LC_TIME,     "LC_TIME=C" },
 
 #if defined (LC_MESSAGES)
-    { -1, LC_MESSAGES, "LC_MESSAGES=C", "messages" },
+    { -1, LC_MESSAGES, "LC_MESSAGES=C" },
 #endif
 
 #if defined (LC_NAME)
-    { -1, LC_NAME, "LC_NAME=C", "name" },
+    { -1, LC_NAME, "LC_NAME=C" },
 #endif
 
 #if defined (LC_PAPER)
-    { -1, LC_PAPER, "LC_PAPER=C", "paper" },
+    { -1, LC_PAPER, "LC_PAPER=C" },
 #endif
 
 #if defined (LC_IDENTIFICATION)
-    { -1, LC_IDENTIFICATION, "LC_IDENTIFICATION=C", "ident" },
+    { -1, LC_IDENTIFICATION, "LC_IDENTIFICATION=C" },
 #endif
 
 #if defined (LC_ADDRESS)
-    { -1, LC_ADDRESS, "LC_ADDRESS=C", "address" },
+    { -1, LC_ADDRESS, "LC_ADDRESS=C" },
 #endif
 
 #if defined (LC_TELEPHONE)
-    { -1, LC_TELEPHONE, "LC_TELEPHONE=C", "telephone" },
+    { -1, LC_TELEPHONE, "LC_TELEPHONE=C" },
 #endif
 
 #if defined (LC_MEASUREMENT)
-    { -1, LC_MEASUREMENT, "LC_MEASUREMENT=C", "measurement" },
+    { -1, LC_MEASUREMENT, "LC_MEASUREMENT=C" },
 #endif
 
-    { -1, LC_ALL, "LC_ALL", 0 },
-    { -1, 0, "", 0 }
+    { -1, LC_ALL, "LC_ALL" },
+    { -1, 0, "" }
 };
 
 
@@ -501,10 +500,9 @@ int print_categories (const char *locname,
         }
 
         if (-1 < inx)
-            printf ("#define _RWSTD_CAT_%d(pfx) "
-                    "{ %d, \"%s\", pfx::_C_%s }%s\n",
+            printf ("#define _RWSTD_CAT_%d { %d, \"%s\" }%s\n",
                     inx, lc_vars [i].cat, lc_vars [i].name,
-                    lc_vars [i].lower, comment ? comment : "");
+                    comment ? comment : "");
     }
 
     return 0;

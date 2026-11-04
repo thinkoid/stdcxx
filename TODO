@@ -22,24 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The facet bits of the categories have no reader
-
-The =_C_collate= to =_C_all= enumerators of =src/locale_body.h=, a
-bitmap of the standard facet types of each category, and the
-=facet_bits= member of =__rw_cats= that holds them, have no reader
-since the body's bitmaps went. The =_RWSTD_CAT_0= to =_RWSTD_CAT_5=
-macros of =config.h= name them: =etc/config/src/LOCALE_NAME_FMAT.cpp=
-writes each as ~{ LC_XXX, "LC_XXX", pfx::_C_xxx }~, and the fallback
-in =src/locale_body.cpp= for =_RWSTD_NO_LOCALE_NAME_FMAT= spells the
-same. Found by reading, 2026-11-04.
-
-Fix: the characterization writes the macros without the =pfx=
-argument and the third member; the fallback follows; the field and
-the enumerators go.
-
-Check: grep; =make config= in a fresh 15D build directory and the
-=_RWSTD_CAT_n= lines of =config.h=; a 15D build.
-
 ** TODO The narrow =transform= is empty for a string with an undefined character
 
 Under =zh_CN.UTF-8=, =collate<char>::transform= of "\xe7\x90\xbb"

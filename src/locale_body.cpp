@@ -47,18 +47,12 @@
 #ifdef _RWSTD_NO_LOCALE_NAME_FMAT
 
 // pick an arbitrary order for categories in locale names
-#  define _RWSTD_CAT_0(pfx) \
-       { _RWSTD_LC_CTYPE, "LC_CTYPE", pfx::_C_ctype }
-#  define _RWSTD_CAT_1(pfx) \
-       { _RWSTD_LC_NUMERIC, "LC_NUMERIC", pfx::_C_numeric }
-#  define _RWSTD_CAT_2(pfx) \
-       { _RWSTD_LC_TIME, "LC_TIME", pfx::_C_time }
-#  define _RWSTD_CAT_3(pfx) \
-       { _RWSTD_LC_COLLATE, "LC_COLLATE", pfx::_C_collate }
-#  define _RWSTD_CAT_4(pfx) \
-       { _RWSTD_LC_MONETARY, "LC_MONETARY", pfx::_C_monetary }
-#  define _RWSTD_CAT_5(pfx) \
-       { _RWSTD_LC_MESSAGES, "LC_MESSAGES", pfx::_C_messages }
+#  define _RWSTD_CAT_0 { _RWSTD_LC_CTYPE, "LC_CTYPE" }
+#  define _RWSTD_CAT_1 { _RWSTD_LC_NUMERIC, "LC_NUMERIC" }
+#  define _RWSTD_CAT_2 { _RWSTD_LC_TIME, "LC_TIME" }
+#  define _RWSTD_CAT_3 { _RWSTD_LC_COLLATE, "LC_COLLATE" }
+#  define _RWSTD_CAT_4 { _RWSTD_LC_MONETARY, "LC_MONETARY" }
+#  define _RWSTD_CAT_5 { _RWSTD_LC_MESSAGES, "LC_MESSAGES" }
 
 #endif   // _RWSTD_NO_LOCALE_NAME_FMAT
 
@@ -71,21 +65,15 @@ namespace __rw {
 extern const __rw_cats_t
 __rw_cats [] = {
 
-    // expands to { LC_XXX, "LC_XXX", __rw::__rw_locale::_C_xxx }
+    // expands to { LC_XXX, "LC_XXX" }
     // the order of these is determined at config time and corresponds to
     // the order mixed/combined locale categories returned by setlocale()
-    _RWSTD_CAT_0 (__rw::__rw_locale),
-    _RWSTD_CAT_1 (__rw::__rw_locale),
-    _RWSTD_CAT_2 (__rw::__rw_locale),
-    _RWSTD_CAT_3 (__rw::__rw_locale),
-    _RWSTD_CAT_4 (__rw::__rw_locale),
-
-#ifdef _RWSTD_CAT_5
-    _RWSTD_CAT_5 (__rw::__rw_locale)
-#else   // if !defined (_RWSTD_CAT_5)
-    // for Windows (no LC_MESSAGES there)
-    _RWSTD_CAT_0 (__rw::__rw_locale)
-#endif   // _RWSTD_CAT_5
+    _RWSTD_CAT_0,
+    _RWSTD_CAT_1,
+    _RWSTD_CAT_2,
+    _RWSTD_CAT_3,
+    _RWSTD_CAT_4,
+    _RWSTD_CAT_5
 
 };
 
