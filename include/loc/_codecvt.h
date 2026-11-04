@@ -123,7 +123,7 @@ protected:
 
     virtual int
     do_length (state_type&, const extern_type* __from,
-               const extern_type* __from_end, _RWSTD_SIZE_T __max) const {
+               const extern_type* __from_end, _RWSTD_SIZE_T __maxlen) const {
         // 22.2.1.5.2, p10: the count of complete characters in the
         // range, at most max: every element where the two types have
         // one size, none otherwise
@@ -132,7 +132,7 @@ protected:
 
         const _RWSTD_SIZE_T __n = __from_end - __from;
 
-        return int (__n < __max ? __n : __max);
+        return int (__n < __maxlen ? __n : __maxlen);
     }
 
 public:
