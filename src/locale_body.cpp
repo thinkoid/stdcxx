@@ -34,7 +34,6 @@
 #include <new>        // for placement new
 #include <locale.h>
 #include <stdio.h>
-#include <stdlib.h>   // for bsearch(), qsort()
 #include <string.h>   // for memxxx() and strxxx() functions
 
 #include <loc/_locale.h>
@@ -488,8 +487,7 @@ _C_get_slot_facet (const char *name, size_t inx)
 
 __rw_locale::
 __rw_locale (const char *name)
-    : _C_usr_facets (0), _C_n_usr_facets (0), _C_ref (1),
-      _C_std_facet_bits (0), _C_byname_facet_bits (0)
+    : _C_usr_facets (0), _C_n_usr_facets (0), _C_ref (1)
 {
     _RWSTD_ASSERT (name);
 
@@ -522,36 +520,6 @@ __rw_locale (const char *name)
         memcpy (tmp, name, namelen);
 
         _C_name = tmp;
-    }
-
-    // all facets are standard
-    _C_std_facet_bits = _C_all;
-
-    // byname facets determined below
-    _C_byname_facet_bits = 0;
-
-    if (strchr (_C_name, *_RWSTD_CAT_SEP)) {
-
-        // name consists of multiple locale names; iterate over them all
-        // setting byname facet bits for each named category
-        size_t inx = 0;
-
-        for (const char *nm = _C_name; *nm && inx != __rw_n_cats; ++nm) {
-
-            if ('C' != nm [0] || *_RWSTD_CAT_SEP != nm [1])
-                _C_byname_facet_bits |= __rw_cats [inx].facet_bits;
-
-            nm = strchr (nm, *_RWSTD_CAT_SEP);
-            if (!nm)
-                break;
-
-            ++inx;
-        }
-    }
-    else {
-        // all facets (except for num_{get,put}) are byname in non-C locales
-        if (!__rw_is_C (_C_name))
-            _C_byname_facet_bits = _C_all;
     }
 
     // every standard facet is built here, and no slot changes while
@@ -608,48 +576,6 @@ _C_LC2category (int cat) _THROWS (())
 }
 
 
-// convert a LC_XXX constant to an internal bitset of facets
-/* static */ int __rw_locale::
-_C_LC2facet_bits (int cat) _THROWS (())
-{
-    int bits;
-
-    switch (cat) {
-    case _RWSTD_LC_ALL:      bits = __rw_locale::_C_all; break;
-    case _RWSTD_LC_COLLATE:  bits = __rw_locale::_C_collate; break;
-    case _RWSTD_LC_CTYPE:    bits = __rw_locale::_C_ctype; break;
-    case _RWSTD_LC_MONETARY: bits = __rw_locale::_C_monetary; break;
-    case _RWSTD_LC_NUMERIC:  bits = __rw_locale::_C_numeric; break;
-    case _RWSTD_LC_TIME:     bits = __rw_locale::_C_time; break;
-#ifdef _RWSTD_LC_MESSAGES
-    case _RWSTD_LC_MESSAGES: bits = __rw_locale::_C_messages; break;
-#endif
-
-    default: {
-
-        // assume `cat' is a locale::category value
-        bits = 0;
-
-        if (cat & __rw_cat_collate)
-            bits |= __rw::__rw_locale::_C_collate;
-        if (cat & __rw_cat_ctype)
-            bits |= __rw::__rw_locale::_C_ctype;
-        if (cat & __rw_cat_monetary)
-            bits |= __rw::__rw_locale::_C_monetary;
-        if (cat & __rw_cat_numeric)
-            bits |= __rw::__rw_locale::_C_numeric;
-        if (cat & __rw_cat_time)
-            bits |= __rw::__rw_locale::_C_time;
-        if (cat & __rw_cat_messages)
-            bits |= __rw::__rw_locale::_C_messages;
-        break;
-    }
-
-    }
-    return bits;
-}
-
-
 __rw_locale::
 ~__rw_locale () _THROWS (())
 {
@@ -702,487 +628,125 @@ __rw_locale::
 }
 
 
-extern "C" {
-
-// compares two locales, returns 0 if equal, -1 if less, +1 otherwise
-static int
-cmplocales (const void *pv1, const void *pv2) _THROWS (())
+/* static */ __rw_locale*
+__rw_locale::
+_C_classic ()
 {
-    _RWSTD_ASSERT (0 != pv1);
-    _RWSTD_ASSERT (0 != pv2);
+    static __rw_aligned_buffer<__rw_locale> classic_body;
+    static __rw_once_t                      classic_once;
 
-    const __rw_locale* const pl1 =
-        *static_cast< const __rw_locale* const* >(pv1);
-    const __rw_locale* const pl2 =
-        *static_cast< const __rw_locale* const* >(pv2);
+    // the body is constructed in place with the count of 1 that it
+    // keeps for itself
+    struct _C_init_classic {
+        static void _C_init () {
+            void* const store = classic_body._C_store ();
+            new (store) __rw_locale (__rw_C_locale_name);
+        }
+    };
 
-    _RWSTD_ASSERT (0 != pl1->_C_get_name ());
-    _RWSTD_ASSERT (0 != pl1->_C_get_name ());
+    __rw_once (&classic_once, _C_init_classic::_C_init);
 
-    return strcmp (pl1->_C_get_name (), pl2->_C_get_name ());
+    __rw_locale* const body = classic_body._C_data ();
+
+    _RWSTD_ATOMIC_PREINCREMENT (body->_C_ref, false);
+
+    return body;
 }
 
 
-// compares a key to a locale, returns 0 if equal, -1 if less, +1 otherwise
-static int
-cmplocale (const void *pv1, const void *pv2) _THROWS (())
+// the body of the global locale, the classic body until the first call
+// to locale::global(), and the flag of its one-time initialization
+static __rw_locale* __rw_global_body;
+static __rw_once_t  __rw_global_once;
+
+// the type whose static mutex guards __rw_global_body: both accessors
+// below take that one mutex, where _RWSTD_MT_STATIC_GUARD would key a
+// mutex of its own on the line of each
+struct __rw_global_guard_t;
+
+// gives the global locale the classic body; runs before the guard is
+// taken, so that the classic body is not built under it
+static void
+__rw_init_global ()
 {
-    _RWSTD_ASSERT (0 != pv1);
-    _RWSTD_ASSERT (0 != pv2);
-
-    const char* const nm1 = static_cast< const char* >(pv1);
-
-    const __rw_locale* const plocale =
-        *static_cast< const __rw_locale* const* >(pv2);
-
-    _RWSTD_ASSERT (0 != nm1);
-    _RWSTD_ASSERT (0 != plocale->_C_get_name ());
-
-    return strcmp (nm1, plocale->_C_get_name ());
+    __rw_global_body = __rw_locale::_C_classic ();
 }
 
-}   // extern "C"
-
-
-// manages a global, per-process repository of locale bodies according
-// to the following table:
-
-//     plocale   locname   algorithm
-//        0         0      retrieve the global locale
-//        0       non-0    find named locale in repository and increment
-//                         its ref count if found, or construct it with
-//                         ref count of 1 and add it otherwise
-//      non-0       0      make `plocale' the new global locale and
-//                         return the previous global locale
-//      non-0     non-0    find locale in repository, decrement its ref
-//                         count, and remove it if the ref count is 0
 
 /* static */ __rw_locale*
 __rw_locale::
-_C_manage (__rw_locale *plocale, const char *locname)
+_C_get_global ()
 {
-    // a per-process array of locale body pointers
-    static __rw_locale*  locale_buf [8];
-    static __rw_locale** locales        = locale_buf;
-    static __rw_locale*  classic        = 0;
-    static size_t        n_locales      = 0;
-    static size_t        locale_bufsize =
-        sizeof locale_buf / sizeof *locale_buf;
+    __rw_once (&__rw_global_once, __rw_init_global);
 
-    if (!locname) {
+    // the reference is taken under the guard so that a concurrent
+    // locale::global() cannot release the body in between
+    _RWSTD_MT_CLASS_GUARD (__rw_global_guard_t);
 
-        // manage the global locale
+    __rw_locale* const body = __rw_global_body;
 
-        static __rw_locale* global = 0;
-        static __rw_once_t  global_once;
+    _RWSTD_ASSERT (0 != body);
 
-        // the global locale starts out as the classic one, built
-        // before the guard below is taken; building it takes the
-        // repository guard further down, a mutex of its own, since
-        // _RWSTD_MT_STATIC_GUARD keys the mutex on its line
-        struct _C_global {
-            static void _C_init () {
-                global = _C_manage (0, "C");
-            }
-        };
+    _RWSTD_ATOMIC_PREINCREMENT (body->_C_ref, false);
 
-        __rw_once (&global_once, _C_global::_C_init);
-
-        // re-entrant
-        _RWSTD_MT_STATIC_GUARD (__rw::__rw_locale);
-
-        __rw_locale* const tmp = global;
-
-        _RWSTD_ASSERT (0 != tmp);
-
-        if (plocale) {
-            // replace the global locale with `plocale'
-
-            // increment the future global locale's ref count first
-            _RWSTD_ATOMIC_PREINCREMENT (plocale->_C_ref, false);
-
-            // and then set the global locale
-            global = plocale;
-        }
-        else {
-
-            // retrieve the global locale
-
-            // always increment a ref count, even if `global' is being set
-            // (and its ref count is > 0), to prevent its ref count from
-            // dropping to 0
-            _RWSTD_ATOMIC_PREINCREMENT (tmp->_C_ref, false);
-        }
-
-        return tmp;
-    }
-
-    // read before the guard is taken, while another thread may store
-    // the pointer under it; only a thread that holds the classic body
-    // compares equal, and it got the body through the guard
-    if (plocale && plocale == _RWSTD_ATOMIC_LOAD_RELAXED (classic, false)) {
-        // optimize the "destruction" of the classic C locale
-        // the object is never destroyed and its reference count
-        // never drops to 0
-        _RWSTD_ASSERT (__rw_is_C (locname));
-        _RWSTD_ASSERT (__rw_is_C (plocale->_C_name));
-
-        const size_t ref =
-            _RWSTD_ATOMIC_PREDECREMENT (plocale->_C_ref, false);
-
-        _RWSTD_ASSERT (ref + 1U != 0);
-        _RWSTD_UNUSED (ref);
-
-        return 0;
-    }
-
-    // re-entrant to protect static local data structures
-    // (not the locales themselves)
-    _RWSTD_MT_STATIC_GUARD (__rw::__rw_locale);
-
-    // determine whether `locname' refers to the classic C locale
-    // (e.g., it could be any of "C", "POSIX", "C C C C C C", etc.)
-    bool is_C_locale = __rw_is_C (locname);
-
-    // substitute the fully expanded libc name for the classic C locale,
-    // i.e., the result of calling std::setlocale ("C")
-    if (is_C_locale)
-        locname = __rw_C_locale_name;
-
-    __rw_chararray fullname;
-
-    if (!plocale && !is_C_locale) {
-        // to avoid unnecessary calls to setlocale() only get cat names
-        // when composing a locale name, otherwise the locale name is
-        // assumed to be correct and complete
-        locname = __rw_expand_name (fullname, locname);
-
-        if (!locname)
-            return 0;   // program error
-
-        is_C_locale = __rw_is_C (locname);
-
-        if (is_C_locale)
-            locname = __rw_C_locale_name;
-    }
-
-    if (plocale) {
-        // remove locale from the locale repository (if it is found) and
-        // destroy it (the classic C locale is never destroyed)
-
-        _RWSTD_ASSERT (0 != n_locales);
-
-        const void* const pl =
-            bsearch (locname, locales, n_locales, sizeof *locales, &cmplocale);
-        if (pl) {
-
-            const size_t inx =
-                  static_cast< const __rw_locale* const* >(pl)
-                - const_cast< const __rw_locale* const* >(locales);
-
-            plocale = locales [inx];
-
-            const size_t ref =
-                _RWSTD_ATOMIC_PREDECREMENT (plocale->_C_ref, false);
-
-            _RWSTD_ASSERT (_RWSTD_SIZE_MAX != ref);
-
-            if (0 == ref) {
-
-                static const size_t bufsize =
-                    sizeof locale_buf / sizeof *locale_buf;
-
-                --n_locales;
-
-                if (n_locales < bufsize / 2 && locales != locale_buf) {
-
-                    _RWSTD_ASSERT (inx < bufsize);
-
-                    // when the number of locales in the dynamically
-                    // allocated repository drops below half the capacity
-                    // of the statically allocated buffer, copy locales
-                    // from the former into the latter and deallocate the
-                    // former
-                    memcpy (locale_buf, locales, inx * sizeof (*locales));
-
-                    memcpy (locale_buf + inx, locales + inx + 1,
-                            (n_locales - inx) * sizeof (*locales));
-
-                    delete[] locales;
-
-                    // point at the statically allocated buffer and reset
-                    // the current capacity to the original capacity
-                    locales        = locale_buf;
-                    locale_bufsize = bufsize;
-                }
-                else {
-                    // move locale pointers back
-                    memmove (locales + inx, locales + inx + 1,
-                             (n_locales - inx) * sizeof (*locales));
-                }
-
-                _RWSTD_ASSERT (0 != plocale->_C_name);
-
-                // only named locales (i.e., other than the C locale) 
-                // are deleted
-                if (!__rw_is_C (plocale->_C_name))
-                    delete plocale;
-            }
-        }
-        else {
-
-            // object is the classic C locale which is never destroyed
-            _RWSTD_ASSERT (plocale->_C_name);
-            _RWSTD_ASSERT (__rw_is_C (plocale->_C_name));
-
-            const size_t ref =
-                _RWSTD_ATOMIC_PREDECREMENT (plocale->_C_ref, false);
-
-            _RWSTD_ASSERT (ref + 1U != 0);
-            _RWSTD_UNUSED (ref);
-         }
-        
-        plocale = 0;
-    }
-    else {
-
-        // find locale in the repository or construct it if not found
-
-        const void* const pcl =
-            bsearch (locname, locales, n_locales, sizeof *locales, &cmplocale);
-
-        if (pcl) {
-            // locale already exists in the repository, bump up its ref count
-
-            void* const pl = const_cast< void* >(pcl);
-
-            plocale  = *static_cast< __rw_locale** >(pl);
-
-            _RWSTD_ASSERT (0 != plocale);
-
-            _RWSTD_ATOMIC_PREINCREMENT (plocale->_C_ref, false);
-        }
-        else {
-
-            if (n_locales == locale_bufsize) {
-
-                // reallocate buffer of locale pointers
-                __rw_locale** const tmp =
-                    new __rw_locale* [n_locales * 2];
-
-                memcpy (tmp, locales, n_locales * sizeof *tmp);
-
-                if (locales != locale_buf)
-                    delete[] locales;
-
-                locales         = tmp;
-                locale_bufsize *= 2;
-            }
-
-            if (__rw_is_C (locname)) {
-
-                if (!classic) {
-
-                    // the classic C locale is statically allocated
-                    // and not destroyed during the lifetime of the process
-                    static __rw_aligned_buffer<__rw_locale> classic_body;
-
-                    // construct a locale body in place
-                    // with the initial reference count of 1
-                    __rw_locale* const body =
-                        new (classic_body._C_store ()) __rw_locale (locname);
-
-                    // relaxed: the comparison above reads the pointer
-                    // without the guard, but nothing is published
-                    // through it
-                    _RWSTD_ATOMIC_STORE_RELAXED (classic, body, false);
-
-                    _RWSTD_ASSERT (1 == classic->_C_ref);
-                }
-                else {
-                    _RWSTD_ASSERT (0 != classic);
-
-                    _RWSTD_ATOMIC_PREINCREMENT (classic->_C_ref, false);
-                }
-
-                plocale = classic;
-            }
-            else {
-                plocale = new __rw_locale (locname);
-
-                _RWSTD_ASSERT (1 == plocale->_C_ref);
-            }
-
-            _RWSTD_ASSERT (plocale);
-
-            // add locale body pointer to the end of the repository
-            locales [n_locales++] = plocale;
-
-            // sort pointers for fast access
-            qsort (locales, n_locales, sizeof *locales, &cmplocales);
-        }
-    }
-
-    return plocale;
+    return body;
 }
 
 
-// returns true iff all the facets in the given locale category
-// installed in `*this' are being globally managed by the library
-// if (cat == locale::none) holds, returns true iff the entire
-// locale body is being managed
-bool __rw_locale::
-_C_is_managed (int cat) const _THROWS (())
+/* static */ __rw_locale*
+__rw_locale::
+_C_set_global (__rw_locale *body)
 {
-    // `cat' must be a valid category
-    _RWSTD_ASSERT (_C_check_category (_C_LC2category (cat)));
+    _RWSTD_ASSERT (0 != body);
 
-    if (cat == __rw_cat_none) {
+    __rw_once (&__rw_global_once, __rw_init_global);
 
-        // locales containing any user-defined facets are not globally managed
-        if (_C_n_usr_facets) {
-            _RWSTD_ASSERT (0 != _C_usr_facets);
-            return false;
-        }
+    // the caller holds `body', so its reference for the global can be
+    // taken before the guard; the previous body's passes to the caller
+    _RWSTD_ATOMIC_PREINCREMENT (body->_C_ref, false);
 
-        _RWSTD_ASSERT (0 == _C_usr_facets);
+    _RWSTD_MT_CLASS_GUARD (__rw_global_guard_t);
 
-        if (_C_all == _C_std_facet_bits && 0 == _C_byname_facet_bits) {
-            // optimized for the C locale
-            _RWSTD_ASSERT (__rw_is_C (_C_name));
+    __rw_locale* const prev = __rw_global_body;
 
-            return true;
-        }
+    __rw_global_body = body;
 
-        // unless all facets in the same category come either from
-        // the C locale or from some named locale the locale object
-        // containing the facets is not managed (this test doesn't
-        // detect categories of all byname facets not all of which
-        // belong to the same named locale)
-        if (   (_C_std_facet_bits & _C_all) != _C_all
-            || (   (_C_byname_facet_bits & _C_collate)
-                && (_C_byname_facet_bits & _C_collate) != _C_collate)
-            || (   (_C_byname_facet_bits & _C_ctype)
-                && (_C_byname_facet_bits & _C_ctype) != _C_ctype)
-            || (   (_C_byname_facet_bits & _C_monetary)
-                && (_C_byname_facet_bits & _C_monetary) != _C_monetary)
-            || (   (_C_byname_facet_bits & _C_numeric)
-                && (_C_byname_facet_bits & _C_numeric) != _C_numeric)
-            || (   (_C_byname_facet_bits & _C_time)
-                && (_C_byname_facet_bits & _C_time) != _C_time)
-            || (   (_C_byname_facet_bits & _C_messages)
-                && (_C_byname_facet_bits & _C_messages) != _C_messages))
-            return false;
+    return prev;
+}
 
-        // check whether all _byname facets in each category belong
-        // to the same named locale; facets without byname forms are
-        // excluded from this test
-        // note that the locale may have a combined name such as
-        // "/de/en/fr/it/ja/ru"
-        const char* locname = _C_name ? _C_name : "C";
 
-        if (*_RWSTD_CAT_SEP == *locname)
-            ++locname;
+/* static */ __rw_locale*
+__rw_locale::
+_C_get_named_body (const char *locname)
+{
+    _RWSTD_ASSERT (0 != locname);
 
-        // find the first category separator (if any) and compute
-        // the length of the name of the first category's locale
-        // (don't bother when combined locales don't exist, i.e.,
-        // when no locale separator is defined)
-        const char* next =
-            *_RWSTD_CAT_SEP ? strchr (locname, *_RWSTD_CAT_SEP) : 0;
+    // "C" gives the classic body, and so does a name that expands to
+    // it (e.g., "POSIX")
+    if (__rw_is_C (locname))
+        return _C_classic ();
 
-        size_t loclen = next ? next - locname : strlen (locname);
+    __rw_chararray fullname;
 
-        // iterate over all standard facets, comparing the name of the
-        // locale each comes from with the name of the category encoded
-        // in the locale name for equality; a mismatch indicates that
-        // the locale is not managed
-        for (size_t i = 0, catinx = 0; i != _C_n_std_facets; ++i) {
+    {
+        // __rw_locale_name(), called from the expansion, keeps the
+        // locale root in a static buffer with no lock of its own
+        _RWSTD_MT_STATIC_GUARD (__rw::__rw_locale);
 
-            const __rw_facet* const pfacet = _C_std_facets [i];
-
-            const __rw_facet::_C_facet_type facet_type =
-                _C_get_facet_type (*pfacet);
-
-            switch (facet_type) {
-            case __rw_facet::_C_money_get:
-            case __rw_facet::_C_money_put:
-            case __rw_facet::_C_num_get:
-            case __rw_facet::_C_num_put:
-            case __rw_facet::_C_wmoney_get:
-            case __rw_facet::_C_wmoney_put:
-            case __rw_facet::_C_wnum_get:
-            case __rw_facet::_C_wnum_put:
-                // skip facets with no _byname forms
-                continue;
-            default:
-                break;
-            }
-
-            // iterate through the names of categories in the combined
-            // locale name looking for one that the facet belongs to
-            while (next && !(__rw_cats [catinx].facet_bits & (1 << i))) {
-
-                if (*next) {
-                    // advance past the category separator to the name
-                    // of the next category in the (potentially combined)
-                    // locale name
-                    _RWSTD_ASSERT (*next == *_RWSTD_CAT_SEP);
-
-                    locname = ++next;
-                    ++catinx;
-                }
-                else {
-                    // reset to the name of the first category
-                    locname = _C_name ? _C_name : "C";
-                    catinx  = 0;
-                }
-
-                // skip over the category separator
-                if (*_RWSTD_CAT_SEP == *locname)
-                    ++locname;
-
-                next = strchr (locname, *_RWSTD_CAT_SEP);
-                if (next)
-                    loclen = next - locname;
-                else {
-                    loclen = strlen (locname);
-                    next   = "";
-                }
-            }
-
-            // get the facet name (or "C" if null)
-            const char* const facet_name = pfacet->_C_get_name ();
-
-            _RWSTD_ASSERT (0 != facet_name);
-            _RWSTD_ASSERT (0 != locname);
-
-            // mismatch indicates a combined category
-            if (   strlen (facet_name) != loclen
-                || memcmp (locname, facet_name, loclen)) {
-                // locales with heterogeneous categories are not managed
-                return false;
-            }
-        }
-
-        // locales with all homogeneous categories are managed
-        return true;
+        locname = __rw_expand_name (fullname, locname);
     }
 
-    // in order for the entire category to be considered globally managed,
-    // all its facets must come from the same (named or unnamed) locale
-    // i.e., if the LC_CTYPE category contains codecvt from "de_DE" and
-    // ctype from "en_US", the category is not considered globally managed
-    // because it doesn't have an unambiguous name
-    const int bits = _C_LC2facet_bits (cat);
+    if (0 == locname)
+        return 0;   // invalid name
 
-    const int std_bits = bits & int (_C_std_facet_bits);
+    if (__rw_is_C (locname))
+        return _C_classic ();
 
-    if (std_bits ? bits == std_bits
-                 : bits == (bits & int (_C_byname_facet_bits)))
-        return true;
+    __rw_locale* const body = new __rw_locale (locname);
 
-    return false;
+    _RWSTD_ASSERT (1 == body->_C_ref);
+
+    return body;
 }
 
 

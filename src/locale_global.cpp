@@ -51,7 +51,6 @@ namespace std {
 /* static */ locale locale::global (const locale &rhs)
 {
     _RWSTD_ASSERT (rhs._C_body);
-    _RWSTD_ASSERT (rhs._C_body->_C_name);
 
     if (!strchr (rhs.name ().c_str (), '*')) {
 
@@ -69,7 +68,8 @@ namespace std {
     }
 
     // set the global locale to the body of `rhs', retrieve the previous value
-    __rw::__rw_locale* const tmp = __rw::__rw_locale::_C_manage (rhs._C_body, 0);
+    __rw::__rw_locale* const tmp =
+        __rw::__rw_locale::_C_set_global (rhs._C_body);
 
     _RWSTD_ASSERT (0 != tmp);
 

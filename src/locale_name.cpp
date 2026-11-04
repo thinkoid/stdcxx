@@ -49,12 +49,9 @@ string locale::name () const
     // the time of the construction of the locale object
 
     _RWSTD_ASSERT (0 != _C_body);
-    _RWSTD_ASSERT (0 != _C_body->_C_name);
 
-    // 22.1.1, p8: unnamed locales return "*"
-
-    // locales that are not managed (i.e., combined locales) are unnamed
-    if (!_C_body->_C_is_managed (none))
+    // 22.1.1.3, p5: unnamed locales return "*"
+    if (0 == _C_body->_C_name)
         return "*";
 
     if (strchr (_C_body->_C_name, *_RWSTD_CAT_SEP)) {

@@ -10,9 +10,9 @@ postpones most of their data loading until first use.
 
 That is the central design: **make copies cheap, reuse common work,
 and keep repeated facet access short**. It also puts mutable machinery
-behind an interface that looks read-only. Reference counting,
-repository locking and lazy initialization are separate parts of the
-threading story.
+behind an interface that looks read-only. Reference counting, the
+locks of the global locale and of name expansion, and lazy
+initialization are separate parts of the threading story.
 
 Chapters 1 to 7 are the mechanics: handle, body, facets, lookup,
 composition, data, sources, threads. Chapters 8 to 12 are the facets
@@ -40,21 +40,26 @@ collections of facet pointers:
   occupy the same slot.
 - A separate array for installed facets with nonstandard ids.
 
-Two bitmaps describe which standard slots contain library-managed
-facets and which contain managed `byname` facets. They let the body
-reason about whole categories without reading every facet.
+The name is the locale's: one name, or six joined by `;` when the
+categories come from different locales. A body has no name, a null
+pointer, when it holds a facet installed by the template constructor
+or was combined from a body with none; `name()` then returns `"*"`
+(22.1.1.2, p13 and p15).
 
 **Every standard slot is filled when the body is built.** The
 constructor from a name obtains all 26 facets from their factories,
-and a body built from others copies their slots. No slot changes
-while the body lives. The byname facets of a body built from a name
-are its own, and each maps its databases: the body of a combined name
-builds the facets of its categories again, so `locale (de, en,
-locale::numeric)` holds a `collate_byname<char>` of its own, not the
-one of `de`. The ordinary facets are one static per type, shared by
-every body that holds them; the eight `{money,num}_{get,put}` facets
-are always ordinary. Most facet data still loads on first use, but
-two constructors map theirs: `ctype_byname<char>` and
+and a body built from others copies their slots. No slot changes while
+the body lives. Every constructor builds a new body unless it copies
+one; there is no repository of bodies or facets. Two locales of one
+name built apart hold two bodies, and the byname facets of each are
+its own and map their databases; a name of the C locale is the one
+exception, and gives the classic body, built once and shared. A body
+built from others shares their facets: `locale (de, en,
+locale::numeric)` holds the `collate_byname<char>` of `de`. The
+ordinary facets are one static per type, shared by every body that
+holds them; the eight `{money,num}_{get,put}` facets are always
+ordinary. Most facet data still loads on first use, but two
+constructors map theirs: `ctype_byname<char>` and
 `ctype_byname<wchar_t>` map the `LC_CTYPE` database, and the wide one
 the codeset's `codecvt` database too.
 
@@ -101,17 +106,17 @@ facets through the stream's locale. `num_get` and `num_put` have no
 
 ## 3. Composition and the global locale
 
-The locale-body repository reuses named collections. Constructing a
-locale by name need not create a new body, and composing locales need
-not copy facet objects.
+Constructing a locale by name builds a new body each time, the
+classic body aside. Composing locales builds a new body too, but it
+does not copy facet objects: it copies their pointers.
 
 The category constructor takes selected categories from another
 locale. `a.combine<T>(b)` takes one facet from `b`, retaining the rest
 of `a`. Installing a user facet follows the same general route:
-`_C_get_body` and `_C_combine` reuse an existing body where possible,
-otherwise build a collection of shared facet pointers. Category
-mixtures can still have a composite name; combinations that cannot
-be represented as a managed named locale report `"*"`.
+`_C_get_body` and `_C_combine` build a collection of shared facet
+pointers, unless the result is a copy. A category mixture of two named
+locales has a composite name; a locale built with a facet, or combined
+from an unnamed one, reports `"*"`.
 
 **Composition produces a new locale value; it does not edit the
 source collection.** Nothing else edits a live body either: its
@@ -127,25 +132,24 @@ name, so a mixed global leaves the C locale as it was (chapter 8.3).
 `locale::classic()` supplies the permanent `"C"` locale through a
 separate once-initialized handle.
 
-## 4. Copying and the graph around `_C_manage`
+## 4. Copying and the graph around the body
 
 ### 4.1 Avoiding work at three levels
 
-**An ordinary copy does not visit the repository.** The copy
-constructor in `locale_core.cpp` copies `_C_body` and atomically
-increments the body's reference count. Its work is independent of
-the number of installed facets: no allocation, facet traversal,
-virtual call or database mapping is needed. The atomic abstraction
-may itself use a lock, depending on the configuration; bypassing the
-repository does not mean the operation is universally lock-free.
+**An ordinary copy shares the body.** The copy constructor in
+`locale_core.cpp` copies `_C_body` and atomically increments the
+body's reference count. Its work is independent of the number of
+installed facets: no allocation, facet traversal, virtual call or
+database mapping is needed. The atomic abstraction may itself use a
+lock, depending on the configuration; the copy takes no lock of the
+library's, but it is not universally lock-free.
 
 Assignment acquires the incoming reference **before releasing the
 old one**, then replaces the pointer. This order also handles
 self-assignment without a special test. Release uses a temporary
 handle whose destructor follows the normal disposal path. Acquiring
-the new body is cheap; disposing of the old one can involve the
-repository and, on its last reference, destruction of the body and
-release of its facets.
+the new body is cheap; disposing of the old one can, on its last
+reference, destroy the body and release its facets.
 
 Composition tries progressively more work only as needed:
 
@@ -153,81 +157,77 @@ Composition tries progressively more work only as needed:
 |---|---|
 | Same source body, or category `none` | Category composition returns the original body with another reference. |
 | Null facet, or the exact facet already installed | The facet constructor reduces to sharing the original body. |
-| Result fully described by category names | `_C_combine` composes a name and asks `_C_manage` for the corresponding body. A repository hit avoids constructing a collection. |
-| A distinct collection is necessary | `_C_construct` copies facet pointers and increments their counts, rather than cloning facet objects. |
+| Anything else | `_C_construct` copies facet pointers and increments their counts, rather than cloning facet objects. |
 
 The last case can allocate a body, a user-facet pointer array and name
 storage. It still shares the expensive services and their data.
 **Body sharing saves the whole collection; facet sharing saves its
 contents when the collection must differ.**
 
-Managed composition depends on the facet bitmaps and category names,
-not just on the spelling returned by `name()`. Replacing one facet
-can make a category a mixture that has no usable name; replacing its
-remaining facets can make the collection managed again. The code's
-example replaces the narrow and wide `messages` facets in succession:
-after the first replacement it needs a private body, after the second
-it can return to the named repository. Conversely, selecting `all`
-categories is not an unconditional copy of the donor: user facets
-outside those categories must be accounted for. That shortcut is
-explicitly disabled in `_C_combine`.
+Composition does not look for an existing body that would do. A
+category taken from a locale of the same name, or two locales of one
+name built apart, give different bodies; they compare equal by name
+(chapter 8.2). Selecting `all` categories is not a copy of the donor:
+the first argument's user facets stay, so `_C_combine` builds a body
+for that case too.
 
-### 4.2 The body manager as a junction
+### 4.2 Construction, the global locale and destruction
 
-At the centre of the body-management graph is
-`__rw_locale::_C_manage`, which owns the named-body repository and
-the current global-body pointer. There is no facet repository below
-it: a body owns the references to its facets.
+There is no repository of bodies or facets. A body holds one
+reference to each of its facets, and a handle holds one reference to
+its body.
 
-Default construction and `locale::global` reach the body manager
-directly. Named construction comes through `_C_get_body`; composition
-comes through `_C_get_body` and `_C_combine`, reaching the manager
-when the result has a managed name. Otherwise composition branches
-off to construct a private body. `classic()` joins the named-construction
-path when its once initializer constructs the public `"C"` handle.
+Named construction comes through `_C_get_body` to
+`_C_get_named_body`. A name of the C locale gives the classic body
+with a reference. Any other name is expanded by `__rw_expand_name`
+under a static guard and gives a new body with a count of 1. That
+guard is the only lock of named construction: `__rw_locale_name`,
+which the expansion calls, keeps the locale root in a static buffer
+with no lock of its own (chapter 8.2). The body constructor runs after
+it, with no lock of the library's, and calls the 26 factories.
+Composition comes through `_C_get_body` and `_C_combine`, and builds
+a body with `_C_construct` unless the result is a copy.
 
-Destruction closes the loop. A managed handle returns its reference
-to the body manager, which may remove and destroy the body. An
-unmanaged handle decrements the count and destroys the body directly
-at zero. In either case, the body destructor drops its reference to
-each facet and deletes one whose count reaches zero, unless it is an
-ordinary standard facet: a library type and no name, a static of its
-factory, which lives on at count zero until the next body takes it.
-A program's facet and a byname facet are deleted. The body
-constructor from a name runs under the body manager's lock and calls
-the 26 factories. **Ordinary copying branches around the manager**,
-acquiring only another reference to the existing body.
+The classic body lives in static storage. `_C_classic` builds it
+once, through `__rw_once`, with a count of 1 that the body keeps for
+itself, and returns it with another reference. Its count never
+reaches zero, so it is never destroyed. `classic()`'s once-initialized
+public handle reaches it through `locale ("C")`.
 
-The body manager's two arguments encode four requests:
+The global locale is a pointer to a body, the classic body until the
+first `locale::global`:
 
 | call | meaning |
 |---|---|
-| `_C_manage (0, 0)` | Acquire a reference to the current global body. |
-| `_C_manage (body, 0)` | Retain `body` as the new global and return the previous global body. Its old global reference passes to the returned locale. |
-| `_C_manage (0, name)` | Find or construct the named body and return an acquired reference. |
-| `_C_manage (body, name)` | Release a managed body; remove and destroy it if its count reaches zero, except for the permanent classic body. |
+| `_C_get_global ()` | Acquire a reference to the current global body. |
+| `_C_set_global (body)` | Retain `body` as the new global and return the previous global body. Its old global reference passes to the returned locale. |
 
-The named repository is a sorted array of pointers, searched with
-`bsearch` and sorted after insertion. It starts with space for eight
-pointers in static storage and grows when necessary. **It reuses live
-bodies; it is not a permanent cache of every locale ever requested.**
-The classic body is special: it lives in static storage, and its
-release path decrements the count without taking the repository lock.
+Both take one mutex, the static mutex of a type of their own;
+`_RWSTD_MT_STATIC_GUARD` would key a mutex on each call site's line.
+The getter adds its reference under the mutex, so that a concurrent
+`global` cannot release the body in between. The pointer's first
+value is set through `__rw_once` (5b68c2a7) before either takes the
+mutex, so the classic body is not built under it.
 
-The repository lock protects lookup, insertion and removal, and the
-global-body branch uses it when acquiring or replacing the global
-reference. Initial global setup runs once through `__rw_once`
-(5b68c2a7); its initializer requests the `"C"` body, `_C_manage (0,
-"C")`, before the guard is taken, since that request takes the same
-guard. This is distinct from `classic()`'s once-initialized public
-handle.
+Destruction closes the loop. A handle decrements its body's count and
+destroys the body at zero. The body destructor drops its reference to
+each facet and deletes one whose count reaches zero, unless it is an
+ordinary standard facet: a library type and no name, a static of its
+factory, which lives on at count zero until the next body takes it.
+A program's facet and a byname facet are deleted. **Copying and
+destruction take no lock of the library's**, and construction takes
+only the guard of the name's expansion.
 
-The graph explains the MT tradeoff: copying an existing handle avoids
-central repository contention, while constructing by name and changing
-the global locale converge on shared machinery. Facet lookup avoids
-that machinery, since the slots are filled before the body is shared,
-but **the repository lock is not a lock around later reads and writes
-in the facet**. Chapter 7 identifies those separate boundaries.
+The price is memory. Two locales of one name built apart hold two
+bodies and two sets of byname facets, and each facet maps its own
+databases, as in libstdc++. A program that builds a named locale once
+and copies it shares one body.
+
+The graph explains the MT tradeoff: only the global locale and name
+expansion converge on shared machinery. Facet lookup reads the slots
+with no lock, since they are filled before the body is shared, but
+**a reference count is not a lock around later reads and writes in
+the facet**. Chapter 7 identifies those separate boundaries.
 
 ## 5. Where the locale data comes from
 
@@ -318,7 +318,8 @@ The important boundaries in a reentrant build are:
 | mechanism | purpose and boundary |
 |---|---|
 | Body and facet reference counts | Preserve shared ownership; every update of a facet's count uses the same lock-free operation. They do not synchronize arbitrary writes inside a facet. |
-| Locale repository lock | Serializes the named-body repository and the global body; the facet factories called from the constructor from a name run under it. |
+| Global locale mutex | Serializes reads and replacements of the global body pointer, the getter's reference included. |
+| Name expansion guard | Serializes `__rw_expand_name` and the locale root buffer of `__rw_locale_name`; the body constructor and its facet factories run after it, under no lock of the library's. |
 | Facet factories | Their ordinary facets and the standard ids are function-local statics, initialized once under the compiler's guard. |
 | Standard facet slots | Filled by the body's constructor before the body is shared, and never changed; lookup, copying, combining and comparison read them with no lock and no atomic access. |
 | Lazy facet data | `_C_get_data` takes the facet mutex and checks again before loading; the size, or the data pointer itself where the data is built from the C library later, is stored with release, and the unlocked reads are acquire loads. |
@@ -411,9 +412,9 @@ and freedoms, by paragraph:
 
 ### 8.2 The implementation
 
-The handle, body, slots, ids, composition, `_C_manage`, data sources
-and threading boundaries are chapters 1-5 and 7. This section maps
-the contract onto them.
+The handle, body, slots, ids, composition, the global locale, data
+sources and threading boundaries are chapters 1-5 and 7. This section
+maps the contract onto them.
 
 **Files.** `include/loc/_locale.h`: the class, `use_facet`,
 `has_facet`, the template constructor, `combine`, `operator()`.
@@ -422,9 +423,9 @@ the contract onto them.
 `src/locale_combine.cpp`: the named, category and facet constructors
 through `_C_get_body`, `_C_combine`, `_C_construct` and
 `__rw_combine_names`, and `_C_get_facet`. `src/locale_body.cpp`: the
-body and the table of its 26 facet factories, `_C_manage`,
-`__rw_expand_name`, `_C_is_managed`, assignment. `src/locale_eq.cpp`,
-`src/locale_name.cpp`, `src/locale_global.cpp`,
+body and the table of its 26 facet factories, the classic body, the
+global locale, `_C_get_named_body`, `__rw_expand_name`, assignment.
+`src/locale_eq.cpp`, `src/locale_name.cpp`, `src/locale_global.cpp`,
 `src/locale_classic.cpp`, `src/locale_bits.cpp` (the category
 constants' definitions). `src/facet.cpp`, `src/setlocale.cpp`,
 `src/mman.cpp`, `src/use_facet.h` and `src/ti_*.cpp` (chapter 2).
@@ -457,7 +458,7 @@ A library facet follows the same rule: its factory constructs it with
 dies with the last locale that holds it, as decided in f90fff0f; an
 ordinary one is a static and survives its count.
 
-**Names.** `locale(const char*)` reaches `_C_manage (0, name)`, which
+**Names.** `locale(const char*)` reaches `_C_get_named_body`, which
 expands the name with `__rw_expand_name`. `__rw_locale_name`
 (`src/setlocale.cpp`) accepts a name when `$RWSTD_LOCALE_ROOT/<name>`
 is a directory, or when `setlocale` accepts it, and then keeps the C
@@ -470,28 +471,34 @@ or rejected name throws `runtime_error` (`_RWSTD_ERROR_LOCALE_BAD_NAME`,
 joined by `;` in the order of `config.h`'s `_RWSTD_CAT_0` to
 `_RWSTD_CAT_5`: `LC_CTYPE`, `LC_NUMERIC`, `LC_TIME`, `LC_COLLATE`,
 `LC_MONETARY`, `LC_MESSAGES` on glibc. `name()` returns `"*"` for a
-body `_C_is_managed (none)` rejects, one name when all six agree, and
-otherwise `LC_CTYPE=...;LC_NUMERIC=...;...`. `locale(x.name().c_str())
-== x` holds for such a name, by probe.
+body with no name, one name when all six agree, and otherwise
+`LC_CTYPE=...;LC_NUMERIC=...;...`. `locale(x.name().c_str()) == x`
+holds for such a name, by probe. A body built from a name is named,
+and so is one a category constructor builds from two named locales;
+one built with a facet, or combined from an unnamed one, is not (p9,
+p11, p13, p15). The category constructors compose the name with
+`__rw_combine_names`, each category from the argument its facets come
+from, and reduce six equal parts to one, the form `__rw_expand_name`
+gives: `locale (de, "de_DE.UTF-8", locale::collate)` is named
+`de_DE.UTF-8` and equals `de`, by probe.
 
 **Composition.** The two category constructors go to `_C_combine
-(other, cat)`: `none` or the same body is a copy. When `*this` is
-managed outside `cat` and `other` inside it, the result is the managed
-body of the combined name; otherwise `_C_construct` builds a private
-body. `_C_is_managed (cat)` for a category other than `none` reads
-only the standard facet bitmaps, not the user facets (8.3). The
-template constructor and `combine` go to `_C_combine (facet)`: a facet
-already installed gives a copy; a library facet that completes its
-category under one name gives the managed body of the combined name;
-anything else gives a private body, named `"*"`. The `all` shortcut,
-which would return `other` itself, is disabled in `_C_combine`
-because user facets outside the categories must stay.
+(other, cat)`: `none` or the same body is a copy. Anything else is a
+new body from `_C_construct`: the standard facets of `cat` from
+`other`, every other facet from `*this`, its user facets included
+(p9, p14). `all` is not a shortcut to `other`, because the user
+facets of `*this` stay. The name-and-category constructor builds the
+locale of the name first and combines with it. The template
+constructor and `combine` go to `_C_combine (facet)`: the template
+constructor passes a null facet for the one the locale already holds
+for the type, and a null facet gives a copy (8.3); any other facet
+gives a new body, named `"*"`.
 
-**Equality.** `src/locale_eq.cpp`: one body is equal. Bodies without
-user facets are equal when their 26 slot pointers, both bitmaps and
-internal names agree. Bodies with user facets are equal when their
-user facet counts, internal names and user facet objects agree; the
-standard slots are not compared (8.3).
+**Equality.** `src/locale_eq.cpp`, as 22.1.1.4, p1 has it: one body
+is equal; two bodies are equal when both are named and the internal
+names are identical, and unequal otherwise. Two locales of one name
+built apart compare equal; two built apart with the same facet do
+not.
 
 **Access.** `__rw_get_facet` resolves the 26 standard specializations
 to `__rw_get_std_facet`: a plain read of the slot, which the body's
@@ -505,10 +512,10 @@ before it constructs.
 
 **Global and classic.** `locale::global` calls `setlocale (LC_ALL,
 name)` under `__rw_setlocale_mutex` unless the name holds `*`, then
-swaps the global body under the `__rw_locale` guard (`_C_manage
-(body, 0)`). The two steps take two locks. `classic()` constructs a
-static `locale ("C")` through `__rw_once`; the classic body is static
-and never destroyed (chapter 4.2).
+swaps the global body under the global locale's mutex
+(`_C_set_global`). The two steps take two locks. `classic()`
+constructs a static `locale ("C")` through `__rw_once`; the classic
+body is static and never destroyed (chapter 4.2).
 
 **Facet data.** A facet maps its data through `_C_get_data` (chapter
 5), which reads the database only when the facet's id pointer is set.
@@ -519,11 +526,12 @@ has no id pointer and takes the C library path: `collate_byname<char>
 `src/facet.cpp:173-177` states this as the design.
 
 **Threading.** Chapter 7. `__rw_locale_name` caches the locale root in
-a static buffer with no lock of its own; both of its callers,
-`__rw_expand_name` and the `__rw_locale (const char*)` constructor,
-run only inside `_C_manage` under the `__rw_locale` guard
-(`src/locale_body.cpp:841`, `:858`, `:1011`), so the guard serializes
-it, as `analysis-init-flags.md` 2.7 says.
+a static buffer with no lock of its own. Its one caller,
+`__rw_expand_name`, runs under the static guard of
+`_C_get_named_body` (`src/locale_body.cpp:734`), which serializes it,
+as the body repository's guard did when `analysis-init-flags.md` 2.7
+was written. The `__rw_locale (const char*)` constructor expands an
+empty name itself, but no caller passes one (`TODO`).
 
 **`<clocale>`.** `include/rw/_config.h:97-106` defines
 `_RWSTD_NO_PURE_C_HEADERS` and `_RWSTD_NO_DEPRECATED_C_HEADERS` unless
@@ -537,47 +545,18 @@ declarations in `include/ansi/_clocale.h` compile only under
 
 The conformance record's chapter 2 carries one row per departure below, pointing here.
 
-#### A composed locale keeps a name when its categories are whole
+#### Installing the facet a locale holds is a copy
 
 22.1.1.2, p13 and 22.1.1.3, p4: "The resulting locale has no name."
-`_C_combine (facet)` returns a managed, named body when the library
-facet installed completes its category under one name. With `de` and
-`en` named locales, `de.combine<messages<char> >(en)` is `"*"` and
-its `combine<messages<wchar_t> >(en)` is named, `LC_MESSAGES=en_US.UTF-8`
-among de's categories, by probe. The template constructor with the
-facet the locale already holds returns a copy, named and equal to the
-source. Why: the original design (e6c7726b); the comment in
-`_C_combine` says managed locales "have names that completely
-describe their facets and from which they can be unambiguously and
-fully constructed". Pins: nothing.
-
-#### The category constructors name the result by its categories
-
-22.1.1.2, p11: "The locale has a name if and only if other has a
-name." p15: "The resulting locale has a name if and only if the first
-two arguments have names." The library names the result whenever
-the categories taken from each side are whole library facets of one
-name, whatever user facets the arguments hold:
-`locale (locale::classic (), a, locale::collate)` with `a` unnamed is
-named, by probe. Why: e6c7726b, `_C_is_managed (cat)` reading the
-standard bitmaps only. Pins: nothing. The same path drops user facets
-of the first argument, against p9 and p14 ("all facets from the first
-argument except those that implement cats"): `locale (a, "en_US.UTF-8",
-locale::numeric)` and `locale (a, en, locale::collate)` lose `a`'s
-user facet, by probe. That half is a defect.
-
-#### Unnamed locales compare by content
-
-22.1.1.4, p1, and 22.1.1, p8: "an unnamed locale is equal only to
-(copies of) itself." `operator==` compares the facets: two locales
-built separately as `locale (src, &f)` compare equal, by probe. Why:
-e6c7726b, `src/locale_eq.cpp`: "different bodies may compare equal if
-they both contain only ordinary or named standard facet objects".
-Pins: nothing. When both hold user facets, the comparison skips the
-standard slots, so `locale (de, &f)` equals `locale (locale (de,
-&g), &f)` with `g` a `ctype<char>` of the program's: two locales with
-different `ctype<char>` facets compare equal, by probe. That half is
-a defect.
+The template constructor compares the facet with the one the locale
+holds for its type and, when they are the same object, passes a null
+facet, so the result is a copy: named, and equal to the source.
+`combine` takes that path whenever both locales hold the same facet,
+as every locale does for the eight ordinary `{money,num}_{get,put}`
+facets: `de.combine<num_get<char> >(en)` is named `de_DE.UTF-8` and
+equals `de`, by probe. Why: e6c7726b; the comment in the constructor
+says it does so "to potentially avoid creating a whole new locale
+body". Pins: nothing.
 
 #### `has_facet` has no exception specification
 
@@ -642,19 +621,19 @@ categories in `setlocale`'s order. Pins: nothing.
 No single-threaded test exercises the constructors' names,
 `combine`, `operator==` of composed locales, the category values or
 `global`'s effect on the C locale; every departure in 8.3 but
-`use_facet`'s is unpinned. No row fails on the 15D pin. `TODO` "Tests
+`use_facet`'s is unpinned. `22.locale.cons.mt` also asserts one body
+per name, which the body repository gave: since every constructor
+from a name builds a new body, it fails in 192 of its 200 rounds, all
+but those of "C" and "POSIX" (`TODO`, "`22.locale.cons.mt` asserts
+one body per name"). No other row fails on the 15D pin. `TODO` "Tests
 that GCC and Clang let through" names `22.locale.id.mt.cpp:98`, a
 template instantiation 435 deep, for EDG.
 
 ### 8.5 Open
 
-- The two defects of 8.3, queued in `TODO`: the user facets the
-  category constructors drop, and equality across user facets. Check:
-  the probes' rows, a `has_facet` of the user facet and `"*"` for the
-  first, `false` for the second.
 - Racing `global` calls can leave the C locale from one call and the
   C++ global from another: `setlocale` and the body swap take two
-  locks (`src/locale_global.cpp:60-72`). C++03 says nothing of
+  locks (`src/locale_global.cpp:59-72`). C++03 says nothing of
   threads. Check: a variant of `22.locale.statics.mt` comparing
   `setlocale (LC_ALL, 0)` with `locale ().name ()` after the race.
 - Whether the mixed name should carry glibc's twelve categories so
@@ -2263,11 +2242,7 @@ is a `TODO` entry rather than a decision.
 | departure | paragraph | chapter | kind |
 |---|---|---|---|
 | The empty intersection of two categories is `ctype` | 22.1.1.1.1 p1 | 8.3 | defect |
-| A composed locale keeps a name when its categories are whole | 22.1.1.2 p13, 22.1.1.3 p4 | 8.3 | design |
-| The category constructors name the result by its categories | 22.1.1.2 p11, p15 | 8.3 | design |
-| The category constructors drop the first argument's user facets | 22.1.1.2 p9, p14 | 8.3 | defect |
-| Unnamed locales compare by content | 22.1.1.4 p1, 22.1.1 p8 | 8.3 | design |
-| Equality skips the standard slots when both hold user facets | 22.1.1.4 p1 | 8.3 | defect |
+| Installing the facet a locale holds is a copy | 22.1.1.2 p13, 22.1.1.3 p4 | 8.3 | design |
 | `has_facet` has no exception specification | 22.1 synopsis, 22.1.2 | 8.3 | design |
 | `use_facet` checks the dynamic type | 22.1.2 p2 | 8.3 | extension |
 | An invalid category throws | 22.1.1.2 p14 | 8.3 | extension |
@@ -2311,7 +2286,7 @@ is a `TODO` entry rather than a decision.
 | subject | source |
 |---|---|
 | Public handle, `use_facet`, standard lookup | `include/loc/_locale.h`, `src/locale_core.cpp` |
-| Body layout, ids, named-body repository | `src/locale_body.h`, `src/locale_body.cpp` |
+| Body layout, ids, the classic and global bodies | `src/locale_body.h`, `src/locale_body.cpp` |
 | Composition | `src/locale_combine.cpp` |
 | Facet base, data loading | `include/loc/_facet.h`, `src/facet.cpp` |
 | Factories for standard facets | `src/use_facet.h`, `src/ti_*.cpp` |

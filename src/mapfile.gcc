@@ -309,7 +309,6 @@ global:
     _ZNKSt5ctypeIwE8do_widenEPKcS2_Pw;
     _ZNKSt5ctypeIwE9do_narrowEPKwS2_cPc;
     _ZNKSt6locale12_C_get_facetERKN4__rw13__rw_facet_idE;
-    _ZNKSt6locale16_C_get_std_facetEN4__rw10__rw_facet13_C_facet_typeEPFPS1_jPKcE;
     _ZNKSt6locale4nameEv;
     _ZNKSt6localeeqERKS_;
     _ZNKSt7codecvtIcc11__mbstate_tE10do_unshiftERS0_PcS3_RS3_;

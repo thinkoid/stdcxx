@@ -231,21 +231,33 @@ string.**
 ### 4.2 Locale bodies and facets
 
 The [locale tour](ref-locale.md) describes the ownership graph around
-`__rw_locale::_C_manage`. Retaining an existing body avoids rebuilding
-its facet collection. The named-body repository separately
-coordinates finding, inserting and retiring shared bodies; the count
-and the repository lock serve different purposes. Facets have no
-repository. A body holds one reference to each of its facets, and the
-body that drops a count to zero deletes the facet, unless it is an
-ordinary standard facet, a static of its factory that lives on at
-zero (chapter 5).
+the body. Retaining an existing body avoids rebuilding its facet
+collection. Neither bodies nor facets have a repository: every
+constructor but the copy builds a new body, the classic body aside,
+and a body is destroyed when the last handle drops its count to zero.
+A body holds one reference to each of its facets, and the body that
+drops a count to zero deletes the facet, unless it is an ordinary
+standard facet, a static of its factory that lives on at zero
+(chapter 5). The classic body holds a reference of its own, so its
+count never reaches zero.
 
-The global-locale branch and named-body repository branch in
-[locale_body.cpp](../../src/locale_body.cpp) have distinct static-guard
-call sites. Their identical type argument does not make them one
-mutex. Global replacement retains the incoming body before handing
-off the previous global reference; ordinary copies retain an already
-owned body. Those ownership transitions must survive any redesign.
+[locale_body.cpp](../../src/locale_body.cpp) has two locks of its
+own:
+
+- The global locale's mutex, the static mutex of a type of its own,
+  which `_C_get_global` and `_C_set_global` both take with
+  `_RWSTD_MT_CLASS_GUARD`. `_RWSTD_MT_STATIC_GUARD` keys its mutex on
+  the line, and its identical type argument at two sites would not
+  make them one mutex. The getter adds its reference under the mutex,
+  so the setter cannot release the body in between.
+- The guard of name expansion in `_C_get_named_body`, a
+  `_RWSTD_MT_STATIC_GUARD`, which serializes the locale root buffer of
+  `__rw_locale_name`. The body constructor runs after it, under no
+  lock of the library's.
+
+Global replacement retains the incoming body before handing off the
+previous global reference; ordinary copies retain an already owned
+body. Those ownership transitions must survive any redesign.
 
 Facet counts had **mixed synchronization**: the two constructors in
 [locale_combine.cpp](../../src/locale_combine.cpp) that build a body
@@ -323,7 +335,8 @@ own flag it deadlocks ([once.cpp](../../src/once.cpp)).
 |---|---|
 | `locale::classic`, [locale_classic.cpp](../../src/locale_classic.cpp) | The classic locale object. |
 | `ctype<wchar_t>`, [wctype.cpp](../../src/wctype.cpp) | The classic wide mask table, where `_RWSTD_NO_EQUAL_CTYPE_MASK` is defined. |
-| Global locale, `__rw_locale::_C_manage` | The global locale, the classic body at first. The initializer runs before the `__rw_locale` guard, because building the body takes that guard. |
+| Classic body, `__rw_locale::_C_classic` | The classic body, with the reference it keeps for itself. |
+| Global locale, `__rw_locale::_C_get_global` and `_C_set_global` | The global locale, the classic body at first. The initializer runs before the global locale's mutex is taken, so that the classic body is not built under it. |
 | `ios_base::Init`, [iostream.cpp](../../src/iostream.cpp) | The eight standard iostream objects. Every `Init` is counted, for the destructor's flush, and waits for the first to construct them. |
 | `__rw_vfmtwhat`, [exception.cpp](../../src/exception.cpp) | The message catalog of the library's exceptions. |
 
@@ -340,14 +353,10 @@ an exception thrown through it, and glibc's recovery is an
 implementation detail. Its fallbacks for systems without
 `pthread_once` went with it.
 
-Three related sites need no protocol. `__rw_facet_id::_C_init`
+Two related sites need no protocol. `__rw_facet_id::_C_init`
 ([facet.cpp](../../src/facet.cpp)) generates a facet type's id once,
 under a static lock with a recheck, stored with release and read with
 acquire; `22.locale.id.mt` counts the ids 500 types take.
-`_C_manage` compares a body with the classic body before it takes the
-guard, with a relaxed load. Only a thread that holds the classic body
-compares equal, and it got the body through the guard; nothing is
-published through the pointer.
 
 The standard facet factories, `_RWSTD_DEFINE_FACET_FACTORY` in
 [use_facet.h](../../src/use_facet.h) and `__rw_ct_ctype` in
@@ -363,9 +372,9 @@ compiler that does not guard them, or for GCC's
 `-fno-threadsafe-statics`. A call after the first only reads the
 statics, so an ordinary facet that live bodies hold is never written;
 a byname facet is set up before the factory returns it. The body
-constructor from a name, the factories' only caller, runs under the
-`__rw_locale` guard of the named-body repository, but the statics do
-not depend on it.
+constructor from a name, the factories' only caller, runs under no
+lock of the library's; several threads can run the factories at
+once.
 
 ## 6. Other uses and their limits
 

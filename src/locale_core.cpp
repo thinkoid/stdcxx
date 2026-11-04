@@ -41,7 +41,7 @@ namespace std {
 
 // outlined to hide implementation details
 locale::locale () _THROWS (())
-    : _C_body (__rw::__rw_locale::_C_manage (0, 0))
+    : _C_body (__rw::__rw_locale::_C_get_global ())
 {
     _RWSTD_ASSERT (0 != _C_body);
 }
@@ -61,16 +61,10 @@ locale::~locale () _THROWS (())
 {
     _RWSTD_ASSERT (0 != _C_body);
 
-    if (_C_body->_C_is_managed (__rw::__rw_cat_none)) {
-        // body is globally managed, let manager dispose of it
-        __rw::__rw_locale::_C_manage (_C_body, _C_body->_C_name);
-    }
-    else {
-        // body is not globally managed, delete it
-        // only when its ref count drops down to 0
-        if (!_RWSTD_ATOMIC_PREDECREMENT (_C_body->_C_ref, false))
-            delete _C_body;
-    }
+    // delete the body when its ref count drops down to 0; the classic
+    // body holds a reference of its own and never gets there
+    if (0 == _RWSTD_ATOMIC_PREDECREMENT (_C_body->_C_ref, false))
+        delete _C_body;
 }
 
 

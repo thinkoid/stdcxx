@@ -1,5 +1,11 @@
 # The locale MT tests sized for ThreadSanitizer
 
+The body repository and the global locale's branch of
+`__rw_locale::_C_manage` that this note names are gone: a locale
+constructor builds a new body unless it copies one, and the global
+locale is a pointer behind `_C_get_global` and `_C_set_global`
+(`ref-locale.md` chapter 4).
+
 The programs this note sizes were retired or rewritten on 2026-10-19.
 Six were retired: `money.get.mt` (5c1368e6), `money.put.mt`
 (a701ec25), `num.get.mt` (72d94f0b), `num.put.mt` (70070c4b),

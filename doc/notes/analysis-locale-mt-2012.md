@@ -1,5 +1,10 @@
 # The 2012 investigation of the numpunct race
 
+The facet and locale caches of `facet.cpp` and `locale_body.cpp` that
+this note describes, the facet and body repositories, are gone: a
+locale constructor builds a new body that owns its facets unless it
+copies one (`ref-locale.md` chapter 4).
+
 In 2012 the project spent two months on the thread safety of
 `numpunct` and `moneypunct`, on the dev list and in two JIRA issues,
 and closed nothing. This note is the primer for picking the work up:

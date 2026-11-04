@@ -1,5 +1,10 @@
 # The std::locale race under ThreadSanitizer
 
+The facet and body repositories this note names,
+`__rw_facet::_C_manage` and `__rw_locale::_C_manage` with
+`_C_is_managed`, are gone: a locale constructor builds a new body that
+owns its facets unless it copies one (`ref-locale.md` chapter 4).
+
 The multithreaded locale tests were the reason for the revival: they
 failed intermittently in 2008 and nobody found out why. On the
 current toolchain they fail on every run, differently each time, and

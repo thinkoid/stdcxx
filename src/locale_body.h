@@ -105,20 +105,8 @@ private:
     // name buffer sufficiently large to accommodate 6 basic 5-character
     // POSIX locale names such as "en_US" (one for each LC_XXX category)
     char           _C_namebuf [_C_namebuf_size];
-    const char    *_C_name;        // name of locale (!= 0)
+    const char    *_C_name;        // name of locale, 0 when unnamed
     _RWSTD_SIZE_T  _C_ref;         // reference count (>= 0)
-
-    // a bit is set for each standard ordinary (unnamed) or byname facet that
-    // is installed in the locale, and clear for each standard facet that has
-    // been replaced with a user-defined (or user-constructed) object (i.e.,
-    // one with the same id) in the locale object
-    _RWSTD_SIZE_T _C_std_facet_bits;
-
-    // a bit is set for each standard byname facet that is installed in
-    // the locale object, and clear for each standard byname facet that
-    // has been replaced with a user-defined (or user-constructed) object
-    // (i.e., one with the same id) in the locale object
-    _RWSTD_SIZE_T _C_byname_facet_bits;
 
     friend struct std::locale;
 
@@ -128,9 +116,8 @@ public:
 
 #define _FACET_BIT(name)   (1U << (__rw_facet::_C_##name - 1U) / 2U)
 
-        // bitmaps of standard facet types for each category
-        // used to set and test the value _C_{std,byname}_facet_bits
-        // to quickly determine the composition of a locale object
+        // bitmaps of standard facet types for each category, the
+        // facet_bits of __rw_cats
 
         _C_collate  = _FACET_BIT (collate) | _FACET_BIT (wcollate),
         _C_ctype    =   _FACET_BIT (codecvt) | _FACET_BIT (ctype)
@@ -168,10 +155,10 @@ public:
 
     ~__rw_locale () _THROWS (());
 
-    // returns the name of the locale
-    const char* _C_get_name () const {
-        return _C_name;
-    }
+    // returns the classic body with a reference; built once, the body
+    // holds one reference of its own forever, so its count never drops
+    // to zero and it is never destroyed
+    static __rw_locale* _C_classic ();
 
     static _RWSTD_SIZE_T _C_add_ref (__rw_facet &__facet) {
         return _RWSTD_ATOMIC_PREINCREMENT (__facet._C_ref, false);
@@ -190,19 +177,8 @@ public:
     // facet's category; will dynamically allocate string if buf is 0
     char* _C_get_cat_names (char*, _RWSTD_SIZE_T) const /* may throw */;
 
-    // returns true iff all categories of facets (given by the bitmap)
-    // in *this are being globally managed, i.e., iff all of *this facets
-    // whose category matches the bitmap are also being globally managed
-    // (when the category is locale::none, the function fails for all
-    // locales that contain any user-defined facets; otherwise only
-    // standard facets are considered)
-    bool _C_is_managed (int) const _THROWS (());
-
     // converts a LC_XXX constant to a locale::category value
     static int _C_LC2category (int) _THROWS (());
-
-    // converts a LC_XXX constant to an internal bitset of facets
-    static int _C_LC2facet_bits (int) _THROWS (());
 
     static bool _C_check_category (int) _THROWS (());
 
@@ -221,13 +197,21 @@ public:
 
 private:
 
-    // globally manages all named locales; implements default locale
-    // ctor, dtor, and locale::global()
-    static __rw_locale* _C_manage (__rw_locale*, const char*);
+    // the global locale, for the default locale ctor and
+    // locale::global(): the first returns its body with a reference;
+    // the second makes `body' the global with a reference and returns
+    // the previous body with the reference the global held
+    static __rw_locale* _C_get_global ();
+    static __rw_locale* _C_set_global (__rw_locale*);
+
+    // implements locale ctor: locale::locale (const char*); returns,
+    // with a reference, the classic body for a name of the C locale
+    // and a new body otherwise, or 0 for an invalid name
+    static __rw_locale* _C_get_named_body (const char*);
 
     // implements all but the default locale ctor; the function
-    // may construct a new object, return one of its first two
-    // arguments, or return a pointer to a cached locale object
+    // may construct a new object or return one of its first two
+    // arguments or the classic body
     static __rw_locale*
     _C_get_body (__rw_locale*, __rw_locale*,
                  const char*, int, const __rw_facet*);

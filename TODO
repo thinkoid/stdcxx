@@ -24,17 +24,16 @@ the locale is last.
 
 ** TODO Locale bodies and standard facets are shared through global repositories
 
-=__rw_locale::_C_manage= (=src/locale_body.cpp= 762 on) keeps one body
-per locale name in a process-wide sorted table under a static guard,
-and =__rw_facet::_C_manage= kept one standard facet per type and name
-in a second table. A body is managed when its name describes all of
-its facets (=_C_is_managed=, =locale_body.cpp= 1035-1185); the
-constructors, the destructor, =name ()= and =operator==~ branch on the
-answer, and the standard facet slots of a body fill on first use
-(=src/locale_core.cpp= 81-215, =analysis-facet-first-use.md=). The
-sharing saves memory where a program constructs the same named locale
-many times. It costs two kinds of body, a name used as identity (the
-next two entries are defects of that proxy), two static guards on
+=__rw_locale::_C_manage= kept one body per locale name in a
+process-wide sorted table under a static guard, and
+=__rw_facet::_C_manage= kept one standard facet per type and name in
+a second table. A body was managed when its name described all of its
+facets (=_C_is_managed=); the constructors, the destructor, =name ()=
+and ~operator==~ branched on the answer, and the standard facet slots
+of a body filled on first use (=analysis-facet-first-use.md=). The
+sharing saved memory where a program constructs the same named locale
+many times. It cost two kinds of body, a name used as identity (three
+defects of that proxy, now closed), two static guards on
 construction and destruction, and the slot races the sanitizer notes
 record. libstdc++ builds a body with all of its facets per constructor
 call, shares bodies and facets by copy only, and compares unnamed
@@ -46,9 +45,15 @@ gone; a body takes each standard facet from its factory, holds one
 reference and deletes the facet at zero unless it is an ordinary
 static, and the factories set up their statics under the compiler's
 guard. A body of a combined name builds its categories' byname facets
-again rather than share those of the named bodies. The body
-repository, =_C_is_managed=, the bitmaps, equality and the name
-remain.
+again rather than share those of the named bodies. Step 3 is done: the
+body repository, =_C_is_managed= and the two bitmaps are gone; every
+constructor builds a new body or copies one, the classic body is a
+static built once that holds a reference of its own, the global locale
+is a pointer behind a get and a set, a body is unnamed when it was
+built with a facet or combined from an unnamed one, and ~operator==~
+is the same body or two equal names. What remains is the test that
+pins one body per name (=22.locale.cons.mt=, in Tests), the
+ThreadSanitizer run and the factory parameter of =__rw_get_std_facet=.
 
 Fix: take that path. One kind of body, built with every standard
 facet in the constructor; the two repositories, =_C_is_managed= and
@@ -61,125 +66,39 @@ stays per facet.
 Check: the locale rows of the suite on their pins (=22.locale.cons.mt=,
 =globals=, =name=, =statics.mt=, =synopsis=, =use_facet.mt=,
 =facet.mt=, =id.mt=) and every facet test; a ThreadSanitizer run of
-the MT locale tests with no report on the slots; the next two entries
-closed by construction.
-
-** TODO The category constructors drop the first locale's user facets
-
-=_C_combine (const __rw_locale&, int)= (=src/locale_combine.cpp=
-397-398) takes the managed branch because =_C_is_managed (cat)= reads
-only the standard bitmaps. With ~a = locale (locale ("de_DE.UTF-8"), &f)~,
-both =locale (a, "en_US.UTF-8", locale::numeric)= and the two-locale
-form come out named and =has_facet<F>= is false on them. 14882:2003
-22.1.1.2 p9, p11, p14, p15. Found by probe, 2026-11-02.
-
-Fix: a locale holding user facets is not managed for any category.
-
-Check: =has_facet<F>= true and =name ()= "*" on both results.
-
-** TODO ~operator==~ ignores the standard facets when both locales hold user facets
-
-=src/locale_eq.cpp= 104-146: ~locale (de, &f) == locale (locale (de, &g), &f)~
-is true with =g= a program =ctype<char>=, so two locales with
-different =ctype<char>= facets compare equal. 14882:2003 22.1.1.4 p1.
-Found by probe, 2026-11-02.
-
-Fix: compare every slot, standard and user.
-
-Check: the probe prints 0.
-
-** TODO The category constructors drop the second locale's program facets of standard types
-
-=_C_construct (const __rw_locale&, const __rw_facet*)=
-(=src/locale_combine.cpp= 149-158) clears the standard bit of a
-program facet it installs in a standard slot and sets the byname bit:
-the facet's =_C_type= is 0, which the test reads as an even, byname
-type. A locale whose facets of one category are all program objects
-then has no standard bit and every byname bit there, and
-=_C_is_managed (cat)= (=src/locale_body.cpp= 1177-1185) calls the
-category managed. With ~b = locale (locale (locale::classic (), &c1), &c2)~,
-=c1= a program =collate<char>= and =c2= a program =collate<wchar_t>=,
-=locale (locale::classic (), b, locale::collate)= comes out named "C"
-and holds neither. 14882:2003 22.1.1.2 p14, p15. Found by probe,
-2026-11-04.
-
-Fix: a program facet clears its byname bit as it clears its standard
-bit. The first entry closes it by construction.
-
-Check: =use_facet<collate<char> >= of the result is =c1=,
-=use_facet<collate<wchar_t> >= is =c2=, and =name ()= is "*".
-
-** TODO =cmplocales= checks the first name twice
-
-=src/locale_body.cpp= 719-720: the comparison of the body repository
-asserts ~0 != pl1->_C_get_name ()~ twice and never checks =pl2=.
-Found by reading, 2026-11-04.
-
-Fix: the second assertion reads =pl2=. The first entry removes the
-repository and the function with it.
-
-Check: reading.
-
-** TODO =_C_combine (const __rw_facet*)= compares the names of the =get= and =put= facets
-
-The managed test of =_C_combine= (=src/locale_combine.cpp= 316-350)
-calls a library facet's category managed when every other facet of
-the category carries the facet's locale name. It does not skip the
-=num_get=, =num_put=, =money_get= and =money_put= slots, always
-ordinary facets named "C", as =_C_is_managed= does. A named
-=numpunct= or =moneypunct= therefore never completes its category,
-and the result is a private body where the named body exists. Before
-the body constructor built every facet, it did while those slots
-were empty. Equality and =name ()= agree either way; the cost is a
-body. Found by reading, 2026-11-04.
-
-Fix: skip the four types per character type as =_C_is_managed= does.
-The first entry removes the branch.
-
-Check: with ~x = a.combine<numpunct<char> >(b)~, the locale
-~x.combine<numpunct<char> >(a)~ holds the body of =a= (a probe on
-=_C_body=).
-
-** TODO A combined name ending in "C" sets the byname bits of its last category
-
-The byname loop of =__rw_locale (const char*)=
-(=src/locale_body.cpp= 541) takes a part for "C" only when a
-separator follows it. The last part has none, so a name ending in
-"C", ~"de_DE.UTF-8;C;C;C;C;C"~ on glibc, sets the byname bits of
-=LC_MESSAGES= over ordinary facets. No consequence is known: the
-bits of bodies of the same name agree. Found by reading, 2026-11-04.
-
-Fix: test for the terminator as for the separator. The first entry
-removes the bitmaps.
-
-Check: a probe that reads =_C_byname_facet_bits= of that body.
+the MT locale tests with no report on the slots.
 
 ** TODO Unused and unreachable code in the locale core
 
-- =__rw_locale::_C_get_cat_names= (=src/locale_body.cpp= 121-242) has
+- =__rw_locale::_C_get_cat_names= (=src/locale_body.cpp= 120-241) has
   no caller. It is exported. With the condensed name it copies
   =common_name= back into the caller's buffer when
   ~savesize >= strlen (common_name)~, one byte short of the
   terminator.
-- =_C_get_body= (=src/locale_combine.cpp= 520-528) has a branch for
-  the default constructor; =locale::locale ()= calls =_C_manage=
-  itself, and no caller passes all null arguments.
-- =_C_construct (const __rw_locale&, const __rw_facet*)=
-  (=src/locale_combine.cpp= 130, 166) sets =_C_name= to 0 and then
-  tests it; the name computation between the two is gone.
 - =src/facet.cpp= 56 redeclares the inline =__rw_get_cat= of
   =src/locale_body.h=.
 - =src/locale_name.cpp= includes =setlocale.h= and uses nothing from
   it.
-- =src/locale_body.cpp= 1195-1198 includes =<loc/_locale.h>= and
+- =src/locale_body.cpp= 759-762 includes =<loc/_locale.h>= and
   =<rw/_defs.h>= a second time, before ~locale::operator=~.
-- =__rw_locale::_C_get_cat_name= (=src/locale_body.h= 183-186) and
+- =__rw_locale::_C_get_cat_name= (=src/locale_body.h= 171-174) and
   =__rw_access::_C_get_ref= (=src/access.h= 50-53) have no caller;
   the facet repository was their only one.
+- =__rw_locale (const char*)= (=src/locale_body.cpp= 497-512)
+  expands an empty name itself, into a =__rw_chararray= it points at
+  the 40-byte =_C_namebuf=: the array assumes a capacity of 256, so
+  an expansion of 40 to 255 characters overruns the member, and a
+  longer one deletes it. Every caller expands the name first, so the branch is
+  never taken.
+- The facet bits of each category, the =_C_collate= to =_C_all=
+  enumerators of =src/locale_body.h= and the =facet_bits= member of
+  =__rw_cats=, have no reader since the bitmaps went. The
+  =_RWSTD_CAT_0= to =_RWSTD_CAT_5= macros of =config.h=, which
+  =etc/config/src/LOCALE_NAME_FMAT.cpp= writes, name them.
 Found by reading, 2026-11-04.
 
-Fix: remove them; the first entry takes most of them with the code
-around them.
+Fix: remove them; for the facet bits, the field and the =pfx=
+argument of the macros the characterization writes.
 
 Check: grep, then a 15D build.
 
@@ -188,7 +107,7 @@ Check: grep, then a 15D build.
 =__rw_get_std_facet= (=include/loc/_locale.h= 283-306) still takes
 the facet's factory, a =__rw_facet::_C_ctor_t*=, and ignores it: the
 body constructor builds every standard facet through its own table,
-=__rw_std_facet_ctors= (=src/locale_body.cpp= 405). The argument is
+=__rw_std_facet_ctors= (=src/locale_body.cpp= 404). The argument is
 passed at five sites: =_RWSTD_SPECIALIZE_USE_FACET=
 (=src/use_facet.h= 169), which every =ti_= file expands, and the four
 inline =__rw_get_facet= specializations of =_locale.h= (349-376),
@@ -306,7 +225,7 @@ Check: generated locales with 101 era records and a 300-character
 
 ** TODO Racing =locale::global= calls can split the C and C++ locales
 
-=locale::global= (=src/locale_global.cpp= 60-72) calls =setlocale= and
+=locale::global= (=src/locale_global.cpp= 59-72) calls =setlocale= and
 swaps the body under two different locks, so two racing calls can
 leave the C locale from one and the C++ global from the other.
 Hypothesis, by reading, 2026-11-02.
@@ -433,7 +352,7 @@ the limit is in the master document.
 which lists its six categories; glibc accepts a composite only when it
 lists all twelve of its own, so =setlocale (LC_ALL, 0)= stays "C"
 after =global= of a mixed-name locale (by probe). The comment at
-=src/locale_global.cpp= 62-63 assumes =setlocale= understands the
+=src/locale_global.cpp= 61-62 assumes =setlocale= understands the
 format; =ref-locale.md= ch. 3 says the call takes effect. 14882:2003
 22.1.1.5 p2. Found 2026-11-02.
 
@@ -540,6 +459,28 @@ its comment and in both tables, or fold the leak check into
 =22.locale.cons.mt=; the repositories' removal decides which.
 
 Check: the row on its pin; the two tables name what it checks.
+
+** TODO =22.locale.cons.mt= asserts one body per name
+
+The program constructs a named locale from four threads at once and
+asserts, with every thread's locale alive, that =use_facet<ctype<char> >=
+returns the same facet through each
+(=tests/localization/22.locale.cons.mt.cpp= 205-220): one body per
+name, the body repository's behaviour. Every constructor from a name
+now builds a new body with its own byname facets, so the assertion
+fails in every round whose name is not the C locale's, 192 of 200 in
+15D; the classic body is shared, and the 8 rounds of "C" and "POSIX"
+pass. The equality and combination checks of the rounds pass. The
+comments of the program, =ref-test-baseline.md= 3.2 and
+=ref-locale.md= 8.4 describe it as the repository's race. Found with
+the removal of the body repository, 2026-11-04.
+
+Fix: the assertion checks what the constructors give now: =first ==
+second= named alike, each thread's =ctype<char>= its own, the classic
+body shared; the comments and both tables describe the race of the
+constructor from a name.
+
+Check: the row back at 1000 assertions and 0 failures on the 15D pin.
 
 ** TODO The suite against other libraries
 
