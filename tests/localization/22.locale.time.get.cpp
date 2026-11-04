@@ -1926,22 +1926,23 @@ make_LC_TIME (const time_data *td, const char *name,
 }
 
 
-// a locale of 101 era records, one more than the arrays of the
-// facet hold: the records are all alike but for their names, "E000"
-// to "E100", and every one spans 1800 onward, so that a zeroed tm
-// lies in each; the facet reads the first 100 names and no more
+// a locale of `neras' era records, alike but for their names, "E000"
+// on, every one spanning 1800 onward so that a zeroed tm lies in
+// each: localedef takes 100, the facet's arrays, and rejects more
 static const char*
-make_LC_TIME_eras ()
+make_LC_TIME_eras (unsigned neras)
 {
-    static char locnamebuf [1024];
+    static char locnamebuf [2][1024];
 
-    if (*locnamebuf)
-        return locnamebuf;
+    char* const buf = locnamebuf [100 == neras];
+
+    if (*buf)
+        return buf;
 
     static char                 names [101][5];
     static time_data::era_data  eras [102];
 
-    for (int i = 0; i != 101; ++i) {
+    for (unsigned i = 0; i != neras; ++i) {
         std::sprintf (names [i], "E%03d", i);
 
         eras [i].offset     = 1;
@@ -1955,7 +1956,7 @@ make_LC_TIME_eras ()
         eras [i].format     = "%EC %Ey";
     }
 
-    eras [101].offset = INT_MIN;   // sentinel
+    eras [neras].offset = INT_MIN;   // sentinel
 
     const char* const no_alt_digits [] = { 0 };
 
@@ -1985,8 +1986,9 @@ make_LC_TIME_eras ()
         no_alt_digits, eras
     };
 
-    return make_LC_TIME (&td, "test-locale-eras",
-                         locnamebuf, sizeof locnamebuf);
+    return make_LC_TIME (&td, 100 == neras ? "test-locale-eras-100"
+                                           : "test-locale-eras-101",
+                         buf, sizeof *locnamebuf);
 }
 
 
@@ -2112,7 +2114,7 @@ void test_many_eras (charT, const char *cname, const char *locname)
 {
     rw_info (0, 0, __LINE__,
              "std::time_get<%s>::get (..., 'C', 'E') under a locale "
-             "of 101 era records", cname);
+             "of 100 era records", cname);
 
     std::locale loc;
 
@@ -2128,8 +2130,8 @@ void test_many_eras (charT, const char *cname, const char *locname)
 
     const std::locale saved = std::locale::global (loc);
 
-    // the 100th name is read; the 101st is beyond the arrays, and the
-    // matcher stops after the "E" every name shares
+    // the 100th name is read; a 101st, which no database has, stops
+    // the matcher after the "E" every name shares
     TEST (T (0), "E099", 4, "EC", 0, Good);
     TEST (T (0), "E100", 1, "EC", 0, Eof);
 
@@ -2566,12 +2568,16 @@ run_test (int, char**)
 
     test_user (wchar_t (), "wchar_t", locname);
 
-    // the facet's era arrays hold 100 records: under a locale of 101
-    // the first 100 names are read and the 101st is unknown
-    const char* const eras_locname = make_LC_TIME_eras ();
+    // the facet's era arrays hold 100 records: localedef rejects a
+    // source of 101, and under one of 100 every name is read
+    rw_assert (0 == make_LC_TIME_eras (101), 0, __LINE__,
+               "localedef accepted a source of 101 era records, "
+               "expected it rejected");
+
+    const char* const eras_locname = make_LC_TIME_eras (100);
 
     if (rw_error (0 != eras_locname, 0, __LINE__,
-                  "failed to generate the LC_TIME locale of 101 eras")) {
+                  "failed to generate the LC_TIME locale of 100 eras")) {
         test_many_eras (char (), "char", eras_locname);
         test_many_eras (wchar_t (), "wchar_t", eras_locname);
     }

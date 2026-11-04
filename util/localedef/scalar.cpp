@@ -470,7 +470,8 @@ string_list (tok_iter &it, tok_iter last, const charset_t &cs,
 
 
 // era "s";"s";...: one era per string, after those of earlier era
-// lines, as glibc appends them.
+// lines, as glibc appends them; at most 100 in all, the facet's
+// arrays holding that many
 static bool
 era (tok_iter &it, tok_iter last, const charset_t &cs,
      std::vector<era_t> &attr, diag_t &diag)
@@ -490,6 +491,11 @@ era (tok_iter &it, tok_iter last, const charset_t &cs,
 
         parse_era (record, where, int (attr.size () + value.size () + 1),
                    diag);
+
+
+        if (100 == attr.size () + value.size ())
+            return diag.error (e_range, where,
+                               "too many era records: at most 100");
 
         value.push_back (record);
 

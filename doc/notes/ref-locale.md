@@ -1936,8 +1936,8 @@ bound's year is astronomical; `INT_MIN` or `INT_MAX`, with `CHAR_MIN`
 or `CHAR_MAX` month and day, is an end of time.
 `util/localedef/wtime.cpp` (`write_time`) writes it, wide strings
 before narrow, a source's era year -543 as -542. The source reader caps
-`alt_digits` at 100 and rejects an era without a format; it does not
-cap the eras (`util/localedef/scalar.cpp`).
+`alt_digits` and the era records at 100 each, the facet's arrays, and
+rejects an era without a format (`util/localedef/scalar.cpp`).
 
 The record is the mapped database where the locale has one (chapter 5).
 Otherwise `__rw_get_timepunct (facet, flags, inx)` builds it from the C
@@ -2242,11 +2242,6 @@ comments of the =time_get= test are swapped", and "A reference for
   then that row.
 - `put` pads every directive of a pattern and leaves the width set; no
   row has a pattern with a width. Check: a decision.
-- The era arrays of `time_get`, 100 records each, take that many and
-  no more from a database with more (`22.locale.time.get`, 101
-  records); localedef does not cap eras as it caps `alt_digits`. In
-  `TODO`. Shipped maximum: 11 eras (ja_JP). Check: the 101-record
-  source rejected by localedef.
 - The comparisons with glibc's `strptime` behind 12.3 ran outside the
   tree. Check: a `strptime` oracle under `bin/oracle`, beside the
   `strftime` one.
