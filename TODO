@@ -22,30 +22,40 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The C-library wide =codecvt_byname::do_length= no longer rejects an invalid state
+** TODO The C-library wide =codecvt_byname= no longer detects a corrupt state
 
 10ad3c6c removed the =mbsinit= check, with its assertion, from the
 C-library branches of the wide byname =do_in= and =do_length=
 (=src/wcodecvt.cpp=), since a state may carry the bytes of a
-character split across calls (22.2.1.5.2 p9). The invalid-state
-contract of =analysis-codecvt-invalid-state.md= (2a4b5c5f) expects
-every member to detect a corrupt state: =error= or 0 in release,
-=abort ()= in debug. =22.locale.codecvt= line 1232 exercises it on
-the C-library wide facet in the four single-threaded configurations
-only (15D skips the C-library facets there, the test's comment at
-1301); the row shows 1 failed since 10ad3c6c, first measured by the
-nightly of 2026-11-04 and pinned so. =do_in= passes the same test.
-The two decisions conflict on =do_length=.
+character split across calls (22.2.1.5.2 p9): under glibc UTF-8
+counts as stateless, so the check rejected a carried character too.
+The invalid-state contract of =analysis-codecvt-invalid-state.md=
+(2a4b5c5f) expects every member to detect a corrupt state: =error=
+or 0 in release, =abort ()= in debug. What a corrupt state (every
+byte 0xff) does now, by probe against the debug 11S library: =in=
+on the =en_US.UTF-8= facet hangs in glibc's =mbrtowc=, the hang of
+2a4b5c5f; =in= on a single-byte locale aborts inside glibc, whose
+=mbrtowc= asserts =mbsinit= itself; =length= returns 0, with no
+abort. =22.locale.codecvt= line 1232 exercises the section on
+=aa_DJ= in the four single-threaded configurations (15D skips the
+C-library facets there, the test's comment at 1301): =in= passes
+by glibc's abort, =length= fails for want of one. One failed in
+those four tables since 10ad3c6c, first measured 2026-11-04.
 
-Fix: a decision. Either the C-library =do_length= rejects what
-=mbrtowc= rejects, 0 on =mbrlen='s -1 at the first character, with
-the assertion kept out; or the contract records that a corrupt state
-on the C-library path is the caller's, the test's =length=
-expectation for that facet leaves, and the note and
-=ref-conformance.md= say so.
+Fix: a decision. Either the =mbsinit= check returns to the two
+C-library branches, which detects the corrupt state and ends the
+hang but makes the next call after a =partial= an =error= on that
+path, undoing 10ad3c6c's carried character; or the contract records
+that on the C-library path a corrupt state is the caller's, as C
+leaves it undefined, the test's C-library section stops passing one
+in every configuration as it already does in 15D, and the note and
+=ref-conformance.md= say so; a check of the state's shape under a
+glibc characterization would detect it without losing the carried
+character, later.
 
 Check: the row at 684 assertions, 0 failed, in 11S, 11s, 11S-clang
-and 11s-clang.
+and 11s-clang; a corrupt state on the UTF-8 C-library facet either
+returns =error= or is documented as undefined.
 
 ** TODO The facet bits of the categories have no reader
 
