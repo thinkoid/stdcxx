@@ -286,9 +286,10 @@ choices.
    The layout is glibc's private business and may move; the
    characterization is what would notice.
 
-Option 2 now and option 3 queued is the recommendation on record.
-Option 1 trades a conforming feature for the detection of an input
-that no standard defines.
+The library takes the second way, since the first trades a
+conforming feature for the detection of an input that no standard
+defines. The third is in `TODO`, "A corrupt `mbstate_t` on the
+C-library path could be told from a carried one".
 
 ## 8. Instruments
 

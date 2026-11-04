@@ -22,44 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The C-library wide =codecvt_byname= no longer detects a corrupt state
-
-10ad3c6c removed the =mbsinit= check, with its assertion, from the
-C-library branches of the wide byname =do_in= and =do_length=
-(=src/wcodecvt.cpp=), since a state may carry the bytes of a
-character split across calls (22.2.1.5.2 p9): under glibc UTF-8
-counts as stateless, so the check rejected a carried character too.
-The invalid-state contract of =analysis-codecvt-invalid-state.md=
-(2a4b5c5f) expects every member to detect a corrupt state: =error=
-or 0 in release, =abort ()= in debug. What a corrupt state (every
-byte 0xff) does now, by probe against the debug 11S library: =in=
-on the =en_US.UTF-8= facet hangs in glibc's =mbrtowc=, the hang of
-2a4b5c5f; =in= on a single-byte locale aborts inside glibc, whose
-=mbrtowc= asserts =mbsinit= itself; =length= returns 0, with no
-abort. =22.locale.codecvt= line 1232 exercises the section on
-=aa_DJ= in the four single-threaded configurations (15D skips the
-C-library facets there, the test's comment at 1301): =in= passes
-by glibc's abort, =length= fails for want of one. One failed in
-those four tables since 10ad3c6c, first measured 2026-11-04.
-
-Fix: a decision. Either the =mbsinit= check returns to the two
-C-library branches, which detects the corrupt state and ends the
-hang but makes the next call after a =partial= an =error= on that
-path, undoing 10ad3c6c's carried character; or the contract records
-that on the C-library path a corrupt state is the caller's, as C
-leaves it undefined, the test's C-library section stops passing one
-in every configuration as it already does in 15D, and the note and
-=ref-conformance.md= say so; a check of the state's shape under a
-glibc characterization would detect it without losing the carried
-character, later.
-
-=analysis-codecvt-corrupt-state.md= records the two changes, the
-probe and the ways out.
-
-Check: the row at 684 assertions, 0 failed, in 11S, 11s, 11S-clang
-and 11s-clang; a corrupt state on the UTF-8 C-library facet either
-returns =error= or is documented as undefined.
-
 ** TODO The facet bits of the categories have no reader
 
 The =_C_collate= to =_C_all= enumerators of =src/locale_body.h=, a
@@ -349,6 +311,31 @@ Fix: a decision first: keep ISO-2022 and make it work against glibc's
 Check: a round trip of the test fixtures through =iconv= and the
 facet; ASan on =length= over "\x1b(B".
 
+** TODO A corrupt =mbstate_t= on the C-library path could be told from a carried one
+
+The C-library =in= and =length= of the wide byname facet take the
+state as the C library takes it, since =mbsinit= is the only
+question the C library answers and a carried half character and a
+corrupt state both answer no (=analysis-codecvt-corrupt-state.md=
+ch. 6). Under glibc the state of a UTF-8 character in progress holds
+its pending bytes with their count in the low eight bits of
+=__count= and the character's total length above them: a carried
+state has a count below its total and a total of two to six, and a
+corrupt state does not. glibc's =mbrtowc= does not return from a
+corrupt state under UTF-8. Decided 2026-11-04 as a possibility,
+after the C-library path was left undefined on a corrupt state.
+
+Fix: a characterization that learns the layout of glibc's
+=mbstate_t= for a character in progress, and a check in the two
+branches that rejects a state outside it, asserting in a debug
+build and returning =error= or 0 otherwise, on glibc only. The
+layout is glibc's private business; the characterization is what
+would notice it moving.
+
+Check: =22.locale.codecvt='s corrupt-state section run against the
+C-library facets again, on pin, with =test_libc_split= still
+passing.
+
 ** TODO The =__rw_once= comment names a static mutex path that is gone
 
 =src/once.cpp= 95-97 says the static mutex of =int= "is itself
@@ -450,16 +437,13 @@ Fix: the =rm= that fails, or the directory it meets.
 
 Check: the =RUNTARGET= scripts pass in a 15D build.
 
-** TODO =22.locale.codecvt= counts 634 assertions in 11S and 638 in 11s
+** TODO =22.locale.codecvt= counts 668 assertions in 11S and 672 in 11s
 
-The pins have =22.locale.codecvt= at 634 in 11S, 638 in 11s and 618
-in 15D (and the same under Clang). The sixteen between 15D and 11S
-are the two libc-backed facets the test skips on a corrupt
-=mbstate_t= in a reentrant debug build
-(=doc/notes/analysis-codecvt-invalid-state.md= ch. 4). The four
-between 11S and 11s are explained nowhere; =ref-test-baseline.md=
-chapter 4 lists no reason for them. Hypothesis: a wide-only or
-narrow-only case counted under one build mode.
+The pins have =22.locale.codecvt= at 668 in 11S and 15D and 672 in
+11s (and the same under Clang). The four between 11S and 11s are
+explained nowhere; =ref-test-baseline.md= chapter 4 lists no reason
+for them. Hypothesis: a wide-only or narrow-only case counted under
+one build mode.
 
 Check: diff the two runs' output; record the reason in
 =ref-test-baseline.md= chapter 4.

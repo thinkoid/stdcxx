@@ -894,7 +894,8 @@ takes `_C_data ()`:
   encoding's state carries the bytes of a character split across
   calls, which `mbrtowc` processes with a -2 (C99 7.24.6.3.2, p4),
   and `in` then consumes them and returns `partial`; `out` still
-  checks.
+  checks. A corrupt state on the C-library path is the caller's, as
+  C leaves it (`analysis-codecvt-corrupt-state.md`).
 - `ISO-2022-JP` and `-JP-2` go to `src/iso2022.cpp`. The
   `mbstate_t` holds an index into a static array of 511 states,
   allocated on first use and freed on a return to the initial shift
@@ -1016,12 +1017,19 @@ narrows the sentence to `codecvt<char, char, mbstate_t>`. Pinned by:
 #### An invalid state is an error
 
 22.2.1.5.2 p1 and p9 make an initialized state a precondition; the
-standard has no invalid `mbstate_t`. Every stateless path asserts
-`mbsinit` in a debug build and returns `error`, or 0 from `length`,
-otherwise. Why: a decision of 2026-09-16 (2a4b5c5f), completing the
-original idiom (`analysis-codecvt-invalid-state.md` ch. 3). Pinned
-by: `test_invalid_args` in `22.locale.codecvt`, which skips the two
-libc-backed facets under `_RWSTDDEBUG && _RWSTD_REENTRANT` (ch. 4).
+standard has no invalid `mbstate_t`. Every path of the library's own
+asserts `mbsinit` in a debug build and returns `error`, or 0 from
+`length`, otherwise. The C-library `in` and `length` of the wide
+byname facet take the state as the C library takes it, since under
+glibc a carried half character and a corrupt state answer `mbsinit`
+alike; a corrupt state there is the caller's, as C99 7.24.6 p3
+leaves it, and under glibc's UTF-8 `mbrtowc` does not return from
+one. Why: a decision of 2026-09-16 (2a4b5c5f), completing the
+original idiom (`analysis-codecvt-invalid-state.md` ch. 3), narrowed
+on 2026-11-04 after 10ad3c6c carried the half character
+(`analysis-codecvt-corrupt-state.md`). Pinned by:
+`test_invalid_args` in `22.locale.codecvt`, which does not run the
+section against the two libc-backed facets.
 
 #### The classic wide facet narrows by truncation
 
@@ -2248,7 +2256,7 @@ is a `TODO` entry rather than a decision.
 | Encodings known to the library (UTF-8, `@UCS`, ISO-2022) | 22.2.1.5 p3 | 9.3 | design |
 | Cached `narrow`, `widen` and `always_noconv` | 22.2.1.3.2 p10-11, 22.2.1.1.1 p6-7, 22.2.1.5.1 p5 | 9.3 | design |
 | `length` counts complete characters | 22.2.1.5.2 p10, LWG 305 | 9.3 | design |
-| An invalid state is an error | 22.2.1.5.2 p1, p9 | 9.3 | decision 2026-09-16 |
+| An invalid state is an error; the C-library path takes it as it comes | 22.2.1.5.2 p1, p9 | 9.3 | decision 2026-09-16, narrowed 2026-11-04 |
 | The classic wide facet narrows by truncation | 22.2.1.5.2 p2 | 9.3 | decision pending |
 | The blank bit in the narrow table | 22.2.1.3.2 p4 | 9.3 | decision pending |
 | `long long` virtuals | 22.2.2.1, 22.2.2.2 synopses | 10.3.1 | decision 2026-10-14 |

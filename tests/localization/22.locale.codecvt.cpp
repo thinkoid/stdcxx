@@ -1285,49 +1285,13 @@ test_invalid_args (const char* locname)
              "Testing %s with invalid arguments", TypeName<CodecvtW>::name);
     test_mbstate_t ((CodecvtW*)0, "C");
 
-    char non_c_locname [256];
-    *non_c_locname = '\0';
-
-    for (const char *loc = rw_locale_query (); *loc;
-         loc += std::strlen (loc) + 1) {
-        if (   std::strcmp ("C", loc) && std::strcmp ("POSIX", loc)
-            && std::setlocale (LC_ALL, loc)) {
-            std::setlocale (LC_ALL, "C");
-            std::strcpy (non_c_locname, loc);
-            break;
-        }
-    }
-
-#if defined (_RWSTDDEBUG) && defined (_RWSTD_REENTRANT)
-
-    // the libc based facets check the state after acquiring the global
-    // locale lock, and the jump out of the assertion's abort() leaves
-    // the lock held; the section is left to the other builds
+    // the C-library facets take the state as the C library takes it:
+    // a corrupt mbstate_t has no meaning there (C99 7.24.6, p3), and
+    // under glibc's UTF-8 mbrtowc does not return from one; the section
+    // is not run against them (analysis-codecvt-corrupt-state.md)
     rw_note (0, __FILE__, __LINE__,
-             "libc based facets with invalid arguments not exercised "
-             "in a thread safe debug build");
-
-    *non_c_locname = '\0';
-
-#endif   // _RWSTDDEBUG && _RWSTD_REENTRANT
-
-    if (*non_c_locname) {
-        // exercise the behavior of the derived facets when using
-        // libc locale names other than "C" or "POSIX"
-
-        rw_info (0, __FILE__, __LINE__,
-                 "Testing libc based %s with invalid arguments "
-                 "in locale(\"%s\")",
-                 TypeName<CodecvtBn>::name, non_c_locname);
-
-        test_mbstate_t ((CodecvtBn*)0, non_c_locname);
-
-        rw_info (0, __FILE__, __LINE__,
-                 "Testing libc based %s with invalid arguments "
-                 "in locale(\"%s\")",
-                 TypeName<CodecvtBnW>::name, non_c_locname);
-        test_mbstate_t ((CodecvtBnW*)0, non_c_locname);
-    }
+             "libc based facets not exercised with a corrupt mbstate_t: "
+             "the C library takes the state as it comes");
 
     if (locname) {
 

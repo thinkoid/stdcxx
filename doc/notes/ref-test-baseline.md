@@ -97,8 +97,8 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,967 | 1 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,853 | 1 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,951 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,837 | 0 | 0 | 0 |
 | 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,639 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
@@ -246,8 +246,14 @@ all six tables:
   the nightly. `22.locale.cons.mt` 400 to 200 in the single-threaded
   ones and 1,000 to 800 in 15D-clang; the summaries brought to the
   sums of their rows; `22.locale.codecvt` one failed in the four
-  single-threaded tables (chapter 3.3), there since 10ad3c6c and
-  unmeasured until this run.
+  single-threaded tables, there since 10ad3c6c and unmeasured until
+  this run: the C-library wide `length` with a corrupt state, which
+  10ad3c6c stopped checking (`analysis-codecvt-corrupt-state.md`).
+- 2026-11-04: `22.locale.codecvt` no longer runs its corrupt-state
+  section against the two C-library facets in any configuration, as
+  the C library takes the state as it comes: 684 to 668 in 11S and
+  11S-clang, 688 to 672 in 11s and 11s-clang, 0 failed; 15D and
+  15D-clang already skipped them.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.
@@ -304,16 +310,6 @@ that takes the machine's memory. In thread-safe builds the limit
 grows by 128 MiB per processor, since each thread maps an 8 MiB stack
 and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 
-### 3.3 `22.locale.codecvt` in the single-threaded tables
-
-One assertion, line 1232: the C-library wide `codecvt_byname`'s
-`length` with an invalid state neither returns 0 nor aborts, since
-10ad3c6c removed the state check of that branch for the sake of a
-character split across calls. 15D and 15D-clang skip the C-library
-facets of that section, since an abort there would hold the
-`setlocale` lock (the test's comment at line 1301). The TODO entry
-names the decision between the two contracts.
-
 ## 4. Differences between configurations
 
 | row | 11S | 11s | 15D |
@@ -338,10 +334,12 @@ Reasons, in order:
   `has_signaling_NaN` against the characterization.
 - `20.temp.buffer` and `22.locale.num.put` run a few more cases in
   64-bit. Both pass everywhere.
-- 15D skips the two libc-backed facets of `22.locale.codecvt` on a
-  corrupt `mbstate_t`, 16 assertions. Their state check sits under
-  the locale lock. The 4 between 11S and 11s have no known reason;
-  they date from the first pins of a host with every locale
+- `22.locale.codecvt` counts the same in 15D and 11S since 2026-11-04,
+  when its corrupt-state section stopped running against the two
+  libc-backed facets everywhere; 15D had skipped them since
+  2a4b5c5f, since their state check sat under the locale lock. The 4
+  between 11S and 11s have no known reason; they date from the first
+  pins of a host with every locale
   (3c882e6a). `TODO` holds the entry, "`22.locale.codecvt` counts
   634 assertions in 11S and 638 in 11s".
 - The atomic operation tests count only in the thread-safe build.
@@ -368,8 +366,8 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,474,967 | 1 | 0 | 0 |
-| 11s-clang | 12,474,868 | 1 | 0 | 0 |
+| 11S-clang | 12,474,951 | 0 | 0 | 0 |
+| 11s-clang | 12,474,852 | 0 | 0 | 0 |
 | 15D-clang | 12,478,639 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
