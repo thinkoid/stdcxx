@@ -97,8 +97,8 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,471,387 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,471,281 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,967 | 1 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,853 | 1 | 0 | 0 |
 | 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,639 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
@@ -241,10 +241,13 @@ all six tables:
 - bc8fa4e7, 2026-11-03: `22.locale.codecvt`, up 6 in each configuration (662 to 668
   under 15D).
 - 71b965fb, 2026-11-04: `22.locale.cons.mt`, 1,000 to 800, in 15D
-  alone, and the 15D summary brought to the sum of its rows. The
-  other five tables keep 400 and 1,000 until the nightly measures
-  them; the row is to move to 200 in the single-threaded ones and to
-  800 in 15D-clang.
+  alone, and the 15D summary brought to the sum of its rows.
+- 9ed9ac31, 2026-11-04: the other five tables measured in full by
+  the nightly. `22.locale.cons.mt` 400 to 200 in the single-threaded
+  ones and 1,000 to 800 in 15D-clang; the summaries brought to the
+  sums of their rows; `22.locale.codecvt` one failed in the four
+  single-threaded tables (chapter 3.3), there since 10ad3c6c and
+  unmeasured until this run.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.
@@ -301,6 +304,16 @@ that takes the machine's memory. In thread-safe builds the limit
 grows by 128 MiB per processor, since each thread maps an 8 MiB stack
 and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 
+### 3.3 `22.locale.codecvt` in the single-threaded tables
+
+One assertion, line 1232: the C-library wide `codecvt_byname`'s
+`length` with an invalid state neither returns 0 nor aborts, since
+10ad3c6c removed the state check of that branch for the sake of a
+character split across calls. 15D and 15D-clang skip the C-library
+facets of that section, since an abort there would hold the
+`setlocale` lock (the test's comment at line 1301). The TODO entry
+names the decision between the two contracts.
+
 ## 4. Differences between configurations
 
 | row | 11S | 11s | 15D |
@@ -355,9 +368,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,471,387 | 0 | 0 | 0 |
-| 11s-clang | 12,471,296 | 0 | 0 | 0 |
-| 15D-clang | 12,475,059 | 0 | 0 | 0 |
+| 11S-clang | 12,474,967 | 1 | 0 | 0 |
+| 11s-clang | 12,474,868 | 1 | 0 | 0 |
+| 15D-clang | 12,478,639 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134

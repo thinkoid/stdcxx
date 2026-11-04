@@ -22,25 +22,30 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO One kind of locale body: five pins
+** TODO The C-library wide =codecvt_byname::do_length= no longer rejects an invalid state
 
-The global repositories of locale bodies and standard facets are
-gone (1e5236a4, e6475f4b, 9bb1ebee). Every constructor builds a body
-with all 26 standard facets, or copies one; bodies are shared by copy
-only; the classic body is a static built once; the global locale is
-a pointer behind one mutex; a body is unnamed when it was built with
-a facet or combined from an unnamed one; ~operator==~ is the same
-body or two equal names. =ref-locale.md= chapters 1 to 4 and 7
-describe it. A ThreadSanitizer build of 9bb1ebee ran the eight
-=22.locale.*.mt= tests at their default sizes, =localedef= plain
-through =BINDIR=, with no report. One check remains. The
-=22.locale.cons.mt= row moved with 71b965fb, and only the 15D pin
-carries it: the other five keep 400 (single-threaded) and 1,000
-(15D-clang) for 200 and 800, and their summaries lag their rows.
+10ad3c6c removed the =mbsinit= check, with its assertion, from the
+C-library branches of the wide byname =do_in= and =do_length=
+(=src/wcodecvt.cpp=), since a state may carry the bytes of a
+character split across calls (22.2.1.5.2 p9). The invalid-state
+contract of =analysis-codecvt-invalid-state.md= (2a4b5c5f) expects
+every member to detect a corrupt state: =error= or 0 in release,
+=abort ()= in debug. =22.locale.codecvt= line 1232 exercises it on
+the C-library wide facet in the four single-threaded configurations
+only (15D skips the C-library facets there, the test's comment at
+1301); the row shows 1 failed since 10ad3c6c, first measured by the
+nightly of 2026-11-04 and pinned so. =do_in= passes the same test.
+The two decisions conflict on =do_length=.
 
-Fix: none in the tree. The nightly's re-pin of the five tables.
+Fix: a decision. Either the C-library =do_length= rejects what
+=mbrtowc= rejects, 0 on =mbrlen='s -1 at the first character, with
+the assertion kept out; or the contract records that a corrupt state
+on the C-library path is the caller's, the test's =length=
+expectation for that facet leaves, and the note and
+=ref-conformance.md= say so.
 
-Check: the six tables of the nightly on their pins.
+Check: the row at 684 assertions, 0 failed, in 11S, 11s, 11S-clang
+and 11s-clang.
 
 ** TODO The facet bits of the categories have no reader
 
