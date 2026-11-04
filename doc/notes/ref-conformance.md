@@ -134,6 +134,7 @@ later amendment to the issue.
 
 | LWG issue | implementation evidence | location |
 |---|---|---|
+| 596 | `app` alone and `in \| app` open as `"a"` and `"a+"`, the two rows the resolution adds to Table 92 (C++11 Table 132); every combination the table and the resolution do not list fails the open | `src/file.cpp`, `__rw_io_modes`, `__rw_stdio_modes` |
 | 23 | Integer extraction checks the range of the destination, sets `failbit` and clamps overflow in the narrowing helpers. (`ref-locale.md` ch. 10) | `include/loc/_num_get.h` |
 | 186 | `bitset::set(pos, value)` takes `bool`, defaulting to `true`; the comment calls this the proposed resolution. | `include/bitset` |
 | 214 | `set` and `multiset` supply non-const lookup overloads alongside const ones; comments identify the proposed resolution. | `include/set` |

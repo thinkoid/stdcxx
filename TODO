@@ -25,23 +25,6 @@ stale comments, then behaviour the library adds or changes, then the
 additions whose removal costs tests or callers. The rest, outside the
 locale, is last.
 
-** TODO =ifstream= opened with =trunc= empties the file it was asked to read
-
-=basic_filebuf::open= (=include/fstream.cc=) rejects only stray bits
-in the mode, and =src/file.cpp= 63-99 maps eighteen combinations
-Table 92 does not list to real =open(2)= modes: ~std::ifstream f
-(name, std::ios::trunc)~ opens the file =O_RDONLY | O_TRUNC=, reports
-success, and the file is empty afterwards (by probe, 12 bytes to 0).
-14882:2003 27.8.1.3 p2 and Table 92: a mode not in the table fails
-the open. Found by the extension sweep, confirmed by probe,
-2026-11-04.
-
-Fix: =open= fails on a mode the table does not list; the map in
-=file.cpp= keeps the listed ones.
-
-Check: the probe's file keeps its bytes and =is_open ()= is false; a
-row in =27.filebuf.members= per unlisted mode.
-
 ** TODO =get ()= adds to =gcount ()= instead of setting it
 
 =include/istream.cc= 240-256: the unformatted =get ()= increments

@@ -564,6 +564,51 @@ test_open (const char* tname)
         }
     }
 
+    //////////////////////////////////////////////////////////////////
+    // exercise open (..., mode) for every combination of the five
+    // mode bits: a row of Table 92, or app and in|app of LWG 596,
+    // opens; any other combination fails and leaves the file as it
+    // was (27.8.1.3, p2), trunc without out among them
+    {
+        static const int listed [] = {
+            1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 24, 26, 28, 30
+        };
+
+        for (int bits = 0; bits != 32; ++bits) {
+
+            bool is_listed = false;
+            for (std::size_t i = 0; i != sizeof listed / sizeof *listed; ++i)
+                if (listed [i] == bits)
+                    is_listed = true;
+
+            mode = std::ios::openmode ();
+            if (bits & 1)  mode |= std::ios::app;
+            if (bits & 2)  mode |= std::ios::binary;
+            if (bits & 4)  mode |= std::ios::in;
+            if (bits & 8)  mode |= std::ios::out;
+            if (bits & 16) mode |= std::ios::trunc;
+
+            rw_fwrite (tmpfname, "foobar");
+
+            Filebuf fb;
+            const bool opened = 0 != fb.open (tmpfname, mode);
+            fb.close ();
+
+            ASSERT_OPEN (opened == is_listed, mode,
+                         is_listed ? "failed to open an existing file"
+                                   : "opened a file under a mode Table 92 "
+                                     "does not list");
+
+            if (!is_listed) {
+                buf = static_cast< char* >(rw_fread (tmpfname, &size));
+                ASSERT_OPEN (buf && 6 == size, mode,
+                             "changed the file under a mode Table 92 does "
+                             "not list");
+            }
+        }
+    }
+
+
     REMOVE_FILE (tmpfname);
 
     //////////////////////////////////////////////////////////////////

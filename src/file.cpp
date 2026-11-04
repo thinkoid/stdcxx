@@ -60,15 +60,20 @@ namespace __rw {
 #define _RWSTD_FILENO(f) fileno (f)
 
 
+// the POSIX open flags of each combination of ios_base::openmode bits
+// (app 1, binary 2, in 4, out 8, trunc 16, ate stripped): a row of
+// Table 92 of 14882:2003, or app and in|app of LWG 596, with or
+// without binary; every other combination is -1 and the open fails
+// (27.8.1.3, p2), trunc without out among them
 static const int __rw_io_modes [] = {
     /*  0 */ -1,
     /*  1 */ _RWSTD_O_CREAT | _RWSTD_O_APPEND | _RWSTD_O_WRONLY,
     /*  2 */ -1,
     /*  3 */ _RWSTD_O_CREAT | _RWSTD_O_APPEND | _RWSTD_O_WRONLY | _BINARY,
     /*  4 */ _RWSTD_O_RDONLY,
-    /*  5 */ _RWSTD_O_RDONLY | _RWSTD_O_APPEND,
+    /*  5 */ _RWSTD_O_CREAT | _RWSTD_O_APPEND | _RWSTD_O_RDWR,
     /*  6 */ _RWSTD_O_RDONLY | _BINARY,
-    /*  7 */ _RWSTD_O_CREAT | _RWSTD_O_APPEND | _RWSTD_O_RDONLY | _BINARY,
+    /*  7 */ _RWSTD_O_CREAT | _RWSTD_O_APPEND | _RWSTD_O_RDWR | _BINARY,
     /*  8 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC  | _RWSTD_O_WRONLY,
     /*  9 */ _RWSTD_O_CREAT | _RWSTD_O_APPEND | _RWSTD_O_WRONLY,
     /* 10 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC | _RWSTD_O_WRONLY | _BINARY,
@@ -77,24 +82,22 @@ static const int __rw_io_modes [] = {
     /* 13 */ _RWSTD_O_CREAT | _RWSTD_O_APPEND | _RWSTD_O_RDWR,
     /* 14 */ _RWSTD_O_RDWR | _BINARY,
     /* 15 */ _RWSTD_O_CREAT | _RWSTD_O_APPEND | _RWSTD_O_RDWR | _BINARY,
-    /* 16 */ _RWSTD_O_TRUNC,
-    /* 17 */ _RWSTD_O_TRUNC | _RWSTD_O_APPEND,
-    /* 18 */ _RWSTD_O_TRUNC | _BINARY,
-    /* 19 */ _RWSTD_O_TRUNC | _RWSTD_O_APPEND | _BINARY,
-    /* 20 */ _RWSTD_O_TRUNC | _RWSTD_O_RDONLY,
-    /* 21 */ _RWSTD_O_TRUNC | _RWSTD_O_APPEND | _RWSTD_O_RDONLY,
-    /* 22 */ _RWSTD_O_TRUNC | _RWSTD_O_RDONLY | _BINARY,
-    /* 23 */ _RWSTD_O_TRUNC | _RWSTD_O_APPEND | _RWSTD_O_RDONLY | _BINARY,
+    /* 16 */ -1,
+    /* 17 */ -1,
+    /* 18 */ -1,
+    /* 19 */ -1,
+    /* 20 */ -1,
+    /* 21 */ -1,
+    /* 22 */ -1,
+    /* 23 */ -1,
     /* 24 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC | _RWSTD_O_WRONLY,
-    /* 25 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC | _RWSTD_O_APPEND
-                            | _RWSTD_O_WRONLY,
+    /* 25 */ -1,
     /* 26 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC | _RWSTD_O_WRONLY | _BINARY,
-    /* 27 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC | _RWSTD_O_APPEND
-                            | _RWSTD_O_WRONLY | _BINARY,
+    /* 27 */ -1,
     /* 28 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC | _RWSTD_O_RDWR,
-    /* 29 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC | _RWSTD_O_APPEND | _RWSTD_O_RDWR,
+    /* 29 */ -1,
     /* 30 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC | _RWSTD_O_RDWR | _BINARY,
-    /* 31 */ _RWSTD_O_CREAT | _RWSTD_O_TRUNC | _RWSTD_O_APPEND | _RWSTD_O_RDWR
+    /* 31 */ -1
                             | _BINARY
 };
 
@@ -105,9 +108,9 @@ static const char __rw_stdio_modes [][4] = {
     /*  2 */ "",      // binary
     /*  3 */ "ab",    // binary|app
     /*  4 */ "r",     // in
-    /*  5 */ "a",     // in|app
+    /*  5 */ "a+",    // in|app
     /*  6 */ "rb",    // in|binary
-    /*  7 */ "ab",    // in|binary|app
+    /*  7 */ "a+b",   // in|binary|app
     /*  8 */ "w",     // out
     /*  9 */ "a",     // out|app
     /* 10 */ "wb",    // out|binary
@@ -116,22 +119,22 @@ static const char __rw_stdio_modes [][4] = {
     /* 13 */ "a+",    // out|in|app
     /* 14 */ "r+b",   // out|in|binary
     /* 15 */ "a+b",   // out|in|binary|app
-    /* 16 */ "w",     // trunc
-    /* 17 */ "w",     // trunc|app
-    /* 18 */ "wb",    // trunc|binary
-    /* 19 */ "wb",    // trunc|binary|app
+    /* 16 */ "",      // trunc
+    /* 17 */ "",      // trunc|app
+    /* 18 */ "",      // trunc|binary
+    /* 19 */ "",      // trunc|binary|app
     /* 20 */ "",      // trunc|in
     /* 21 */ "",      // trunc|in|app
     /* 22 */ "",      // trunc|in|binary
     /* 23 */ "",      // trunc|in|binary|app
     /* 24 */ "w",     // trunc|out
-    /* 25 */ "w",     // trunc|out|app
+    /* 25 */ "",      // trunc|out|app
     /* 26 */ "wb",    // trunc|out|binary
-    /* 27 */ "wb",    // trunc|out|binary|app
+    /* 27 */ "",      // trunc|out|binary|app
     /* 28 */ "w+",    // trunc|out|in
-    /* 29 */ "w+",    // trunc|out|in|app
+    /* 29 */ "",      // trunc|out|in|app
     /* 30 */ "w+b",   // trunc|out|in|binary
-    /* 31 */ "w+b"    // trunc|out|in|binary|app
+    /* 31 */ ""      // trunc|out|in|binary|app
 };
 
 

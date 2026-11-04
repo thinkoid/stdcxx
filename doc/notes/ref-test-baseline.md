@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,976 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,862 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,664 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,756 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -281,6 +281,9 @@ all six tables:
   nightly: the day's rows of `22.locale.collate`, `money.put`,
   `num.put`, `time.get` and `time.put`, as the lines above say, and
   the summaries to the sums of their rows.
+- 2026-11-04: `27.filebuf`, 86 to 178 in 15D: every combination of the
+  five mode bits, the unlisted ones failing; the other five tables are
+  to move by the same 92.
   of formats that grow `do_put`'s buffer, narrow and wide; the other
   five tables are to move by the same 24.
 
