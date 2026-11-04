@@ -48,9 +48,8 @@ bool locale::operator== (const locale &rhs) const
     _RWSTD_ASSERT (rhs._C_body);
     _RWSTD_ASSERT (rhs._C_body->_C_name);
 
-    // same bodies (i.e., *this is a copy of `rhs') which implies that
-    // the locale objects must consist entirely of standard facets,
-    // each of which must come from the same locale
+    // same bodies (i.e., *this is a copy of `rhs'), and hence the same
+    // facets
     if (_C_body == rhs._C_body)
         return true;
 
@@ -104,11 +103,11 @@ bool locale::operator== (const locale &rhs) const
 
         // the names of both objects must be the same if the two objects
         // share the exact same facets (otherwise the names may or may not
-        // be the same
+        // be the same)
         // e.g., locale (locale ("C"), new F)
         // and   locale (locale ("C"), new G)
         // can both be named "C;C;C;C;C;C" and distinct if F and G are
-        // distinct type neither of which defines the static member id,
+        // distinct types neither of which defines the static member id,
         // if both are derived from the same standard facet
         _RWSTD_ASSERT (   !eql
                        || !strcmp (_C_body->_C_name, rhs._C_body->_C_name));
@@ -116,7 +115,8 @@ bool locale::operator== (const locale &rhs) const
         return eql;
     }
 
-    // locales are unequal if *this has a different number of facets than `rhs'
+    // locales are unequal if *this has a different number of
+    // user-defined facets than `rhs'
     if (_C_body->_C_n_usr_facets != rhs._C_body->_C_n_usr_facets)
         return false;
 
@@ -140,7 +140,7 @@ bool locale::operator== (const locale &rhs) const
         _RWSTD_ASSERT (0 != *pf->_C_pid);
 
         // if the facets at the same index aren't the same but their
-        // numeric id's are the locales are not equal; this check short
+        // numeric id's are, the locales are not equal; this check short
         // circuits the linear lookup of the facet in rhs done below
         if (   pf != rhs._C_body->_C_usr_facets [i]
             && pf->_C_pid == rhs._C_body->_C_usr_facets [i]->_C_pid)

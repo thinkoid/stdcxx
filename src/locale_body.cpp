@@ -1,9 +1,7 @@
 /***************************************************************************
  *
- * locale_body.cpp - implementation of the std::locale and __rw_locale class
- *
- * This is an internal header file used to implement the C++ Standard
- * Library. It should never be #included directly by a program.
+ * locale_body.cpp - implementation of the __rw_locale class and of
+ *                   std::locale::operator=()
  *
  * $Id$
  *
@@ -86,14 +84,14 @@ __rw_cats [] = {
 #ifdef _RWSTD_CAT_5
     _RWSTD_CAT_5 (__rw::__rw_locale)
 #else   // if !defined (_RWSTD_CAT_5)
-    // for Windoze (no LC_MESSAGES there)
+    // for Windows (no LC_MESSAGES there)
     _RWSTD_CAT_0 (__rw::__rw_locale)
 #endif   // _RWSTD_CAT_5
 
 };
 
 
-// fills provided buffer (if large anough) with the names of locales
+// fills provided buffer (if large enough) with the names of locales
 // for each of the standard LC_XXX categories; if all categories come
 // from the same locale, copies the name of the common locale into
 // the provided buffer
@@ -110,7 +108,7 @@ __rw_cats [] = {
 //         to the LC_MONETARY category, which all come from "de_DE"
 // 
 //     "C;en_US;*;*;*;*;"
-//         facets the belong to the LC_COLLATE category come from the
+//         facets that belong to the LC_COLLATE category come from the
 //         "C" locale, those belonging to the LC_CTYPE category come
 //         from "en_US", all others are from mixed locales within
 //         their respective categories
@@ -260,7 +258,7 @@ __rw_expand_name (__rw_chararray &namebuf, const char *name)
         sep = strchr (++name, *_RWSTD_CAT_SEP);
     }
 
-    // true if all ctaegories are from the same locale, false otherwise
+    // true if all categories are from the same locale, false otherwise
     bool same_cats = true;
 
     if (sep) {
@@ -285,7 +283,7 @@ __rw_expand_name (__rw_chararray &namebuf, const char *name)
             // convert the (possibly abbreviated) name or a locale alias
             // into the full name uniquely identifying the locale (e.g.,
             // all of "de," "de_DE," and "german" can expand into the
-            // full canonical name "de_DE.ISO-8869-1"; this is necessary
+            // full canonical name "de_DE.ISO-8859-1"; this is necessary
             // to guarantee that the internal locale repository doesn't
             // contain duplicate entries)
             const char* const fullname =
@@ -327,7 +325,7 @@ __rw_expand_name (__rw_chararray &namebuf, const char *name)
         // compose a string of category names separated by CAT_SEP
         for (size_t i = 0; ; ) {
 
-            // retrieve the name of each idividual category
+            // retrieve the name of each individual category
             const char* const fullname = setlocale (__rw_cats [i].cat, 0);
 
             // call to setlocale() must succeed if `loc' succeeded
@@ -372,117 +370,6 @@ __rw_expand_name (__rw_chararray &namebuf, const char *name)
     }
 
     return namebuf.data ();
-
-    
-#if 0
-
-    // points to the next category name
-    const char *next = strchr (name, *_RWSTD_CAT_SEP);
-
-    if (next && *next) {
-
-            // save the end of the first name to detect combined locale
-            // names composed of categories referring to the same locale
-            char *first_end = bufbeg;
-
-            // name is a string of locale category names; compose
-            // an equivalent string obtained by concatenating the
-            // results of calling setlocale() on each
-            // substring
-
-            const char *ps = name;
-
-            size_t __i = 0;
-            do {
-                if (!next)
-                    next = ps + strlen (ps);
-
-                memcpy (pbuf, ps, next - ps);
-                pbuf [next - ps] = '\0';
-
-                if (__i < __rw_n_cats) {
-
-                    const int cat = __rw_cats [__i++].cat;
-
-                    // get the actual locale name for each category
-                    // and append it to the end of the name buffer
-                    if (!__rw_locale_name (cat, pbuf, pbuf, pbuf - bufbeg))
-                        return 0;   // name not recognized
-                }
-
-                const size_t len = strlen (pbuf);
-
-                if (first_end == bufbeg)
-                    first_end = pbuf + len;
-                else if (   first_end
-                         && (   size_t (first_end - bufbeg) != len
-                             || memcmp (bufbeg, pbuf, len))) {
-                    // category name differs from the first (i.e., category
-                    // names will be cobined) no need to check further
-                    first_end = 0;
-                }
-
-                // advance to the next name
-                pbuf    += len;
-                *pbuf++  = *_RWSTD_CAT_SEP;
-
-                // reached the end of the (not `sep'-terminated) list
-                if ('\0' == *next)
-                    break;
-
-                ps    = next + 1;
-                next  = strchr (ps, *_RWSTD_CAT_SEP);
-            } while (*ps);
-
-            *pbuf = '\0';
-
-            // assume the native locale for all missing categories
-            while (__i < __rw_n_cats) {
-
-                const int cat = __rw_cats [__i++].cat;
-
-                const __rw_setlocale loc ("", cat, 1 /* nothrow */);
-
-                if (!loc.name ())
-                    return 0;
-
-                const char* catname = setlocale (cat, 0);
-
-                _RWSTD_ASSERT (0 != catname);
-
-                strcat (pbuf, catname);
-
-                // compare the category name with the first one and remember
-                // if they differ (to detect all the same category names)
-                if (first_end && memcmp (bufbeg, name, first_end - name))
-                    first_end = 0;
-
-                pbuf    += strlen (pbuf);
-                *pbuf++  = *_RWSTD_CAT_SEP;
-            }
-
-            // remove the last separator
-            if (pbuf [-1] == *_RWSTD_CAT_SEP)
-                pbuf [-1] = '\0';
-
-            // if non-0, all categories come from the same locale
-            // keep the first name and chop off the rest
-            if (   __rw_facet::_C_opts & __rw_facet::_C_condensed_name
-                && first_end)
-                bufbeg [first_end - bufbeg] = '\0';
-        }
-        else {
-            // all categories have the same name in named locales
-
-            name = __rw_locale_name (_RWSTD_LC_ALL, name, bufbeg, bufsize);
-            if (!name)
-                return 0;
-        }
-    }
-
-    return bufbeg;
-
-#endif
 }
 
 
@@ -549,38 +436,37 @@ __rw_locale (const char *name)
         _C_name = tmp;
     }
 
-   // all facets are standard
-   _C_std_facet_bits = _C_all;
+    // all facets are standard
+    _C_std_facet_bits = _C_all;
 
-   // byname facets determined below
-   _C_byname_facet_bits = 0;
+    // byname facets determined below
+    _C_byname_facet_bits = 0;
 
-   if (strchr (_C_name, *_RWSTD_CAT_SEP)) {
+    if (strchr (_C_name, *_RWSTD_CAT_SEP)) {
 
-       // name consist of multiple locale names; iterate over them all
-       // setting byname facet bits for each named category
-       size_t inx = 0;
+        // name consists of multiple locale names; iterate over them all
+        // setting byname facet bits for each named category
+        size_t inx = 0;
 
-       for (const char *nm = _C_name; *nm && inx != __rw_n_cats; ++nm) {
+        for (const char *nm = _C_name; *nm && inx != __rw_n_cats; ++nm) {
 
-           if ('C' != nm [0] || *_RWSTD_CAT_SEP != nm [1])
-               _C_byname_facet_bits |= __rw_cats [inx].facet_bits;
+            if ('C' != nm [0] || *_RWSTD_CAT_SEP != nm [1])
+                _C_byname_facet_bits |= __rw_cats [inx].facet_bits;
 
-           nm = strchr (nm, *_RWSTD_CAT_SEP);
-           if (!nm)
-               break;
+            nm = strchr (nm, *_RWSTD_CAT_SEP);
+            if (!nm)
+                break;
 
-           ++inx;
-       }
-   }
-   else {
-       // all facets (except for num_{get,put}) are byname in non-C locales
-       if (!__rw_is_C (_C_name))
-           _C_byname_facet_bits = _C_all;
-   }
+            ++inx;
+        }
+    }
+    else {
+        // all facets (except for num_{get,put}) are byname in non-C locales
+        if (!__rw_is_C (_C_name))
+            _C_byname_facet_bits = _C_all;
+    }
 
-   memset (_C_std_facets, 0, sizeof _C_std_facets);
-
+    memset (_C_std_facets, 0, sizeof _C_std_facets);
 }
 
 
@@ -791,8 +677,9 @@ _C_manage (__rw_locale *plocale, const char *locname)
         static __rw_once_t  global_once;
 
         // the global locale starts out as the classic one, built
-        // before the guard below is taken, because building it
-        // takes the same guard
+        // before the guard below is taken; building it takes the
+        // repository guard further down, a mutex of its own, since
+        // _RWSTD_MT_STATIC_GUARD keys the mutex on its line
         struct _C_global {
             static void _C_init () {
                 global = _C_manage (0, "C");
@@ -929,7 +816,7 @@ _C_manage (__rw_locale *plocale, const char *locname)
                     locale_bufsize = bufsize;
                 }
                 else {
-                    // move facet pointers back
+                    // move locale pointers back
                     memmove (locales + inx, locales + inx + 1,
                              (n_locales - inx) * sizeof (*locales));
                 }
@@ -965,7 +852,7 @@ _C_manage (__rw_locale *plocale, const char *locname)
             bsearch (locname, locales, n_locales, sizeof *locales, &cmplocale);
 
         if (pcl) {
-            // facet already exists in the repository, bump up its ref count
+            // locale already exists in the repository, bump up its ref count
 
             void* const pl = const_cast< void* >(pcl);
 
@@ -979,7 +866,7 @@ _C_manage (__rw_locale *plocale, const char *locname)
 
             if (n_locales == locale_bufsize) {
 
-                // reallocate buffer of facet pointers
+                // reallocate buffer of locale pointers
                 __rw_locale** const tmp =
                     new __rw_locale* [n_locales * 2];
 
@@ -1070,7 +957,7 @@ _C_is_managed (int cat) const _THROWS (())
         // unless all facets in the same category come either from
         // the C locale or from some named locale the locale object
         // containing the facets is not managed (this test doesn't
-        // detect categores of all byname facets not all of which
+        // detect categories of all byname facets not all of which
         // belong to the same named locale)
         if (   (_C_std_facet_bits & _C_all) != _C_all
             || (   (_C_byname_facet_bits & _C_collate)
@@ -1088,7 +975,7 @@ _C_is_managed (int cat) const _THROWS (())
             return false;
 
         // check whether all _byname facets in each category belong
-        // to the same named locale; facets witout byname forms are
+        // to the same named locale; facets without byname forms are
         // excluded from this test
         // note that the locale may have a combined name such as
         // "/de/en/fr/it/ja/ru"
@@ -1150,7 +1037,7 @@ _C_is_managed (int cat) const _THROWS (())
                     // locale name
                     _RWSTD_ASSERT (*next == *_RWSTD_CAT_SEP);
 
-                   locname = ++next;
+                    locname = ++next;
                     ++catinx;
                 }
                 else {
@@ -1186,7 +1073,7 @@ _C_is_managed (int cat) const _THROWS (())
             }
         }
 
-        // locales with all heterogeneous categories are managed
+        // locales with all homogeneous categories are managed
         return true;
     }
 
@@ -1194,7 +1081,7 @@ _C_is_managed (int cat) const _THROWS (())
     // all its facets must come from the same (named or unnamed) locale
     // i.e., if the LC_CTYPE category contains codecvt from "de_DE" and
     // ctype from "en_US", the category is not considered globally managed
-    // because it doesn't have a unambiguous name
+    // because it doesn't have an unambiguous name
     const int bits = _C_LC2facet_bits (cat);
 
     const int std_bits = bits & int (_C_std_facet_bits);

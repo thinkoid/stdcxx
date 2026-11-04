@@ -72,9 +72,8 @@ locale::~locale () _THROWS (())
     else {
         // body is not globally managed, delete it
         // only when its ref count drops down to 0
-        if (!_RWSTD_ATOMIC_PREDECREMENT (_C_body->_C_ref, false)) 
+        if (!_RWSTD_ATOMIC_PREDECREMENT (_C_body->_C_ref, false))
             delete _C_body;
-
     }
 }
 
@@ -88,7 +87,7 @@ locale::_C_get_std_facet (facet::_C_facet_type  type,
     const size_t inx = size_t (type / 2);
 
     // for standard facets, the index also identifies the facet's type
-    // (including its specialization, but excluding whether its an ordinary
+    // (including its specialization, but excluding whether it's an ordinary
     // or byname facet), and the facet's LC_XXX category
 
     _RWSTD_ASSERT (0 != _C_body->_C_name);

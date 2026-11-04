@@ -37,8 +37,7 @@
 #include <loc/_locale.h>
 
 #include "locale_body.h"
-#include "setlocale.h"   // for __rw_cats
-
+#include "setlocale.h"
 
 
 namespace std { 

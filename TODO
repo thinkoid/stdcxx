@@ -24,14 +24,14 @@ the locale is last.
 
 ** TODO Locale bodies and standard facets are shared through global repositories
 
-=__rw_locale::_C_manage= (=src/locale_body.cpp= 776 on) keeps one body
+=__rw_locale::_C_manage= (=src/locale_body.cpp= 662 on) keeps one body
 per locale name in a process-wide sorted table under a static guard,
 and =__rw_facet::_C_manage= (=src/facet.cpp= 367 on) one standard
 facet per type and name in a second table. A body is managed when its
 name describes all of its facets (=_C_is_managed=, =locale_body.cpp=
-1048-1206); the constructors, the destructor, =name ()= and
+935-1093); the constructors, the destructor, =name ()= and
 =operator==~ branch on the answer, and the standard facet slots of a
-body fill on first use (=src/locale_core.cpp= 140-219,
+body fill on first use (=src/locale_core.cpp= 81-215,
 =analysis-facet-first-use.md=). The sharing saves memory where a
 program constructs the same named locale many times. It costs two
 kinds of body, a name used as identity (the next two entries are
@@ -58,7 +58,7 @@ closed by construction.
 ** TODO The category constructors drop the first locale's user facets
 
 =_C_combine (const __rw_locale&, int)= (=src/locale_combine.cpp=
-431-432) takes the managed branch because =_C_is_managed (cat)= reads
+415-416) takes the managed branch because =_C_is_managed (cat)= reads
 only the standard bitmaps. With ~a = locale (locale ("de_DE.UTF-8"), &f)~,
 both =locale (a, "en_US.UTF-8", locale::numeric)= and the two-locale
 form come out named and =has_facet<F>= is false on them. 14882:2003
@@ -79,24 +79,63 @@ Fix: compare every slot, standard and user.
 
 Check: the probe prints 0.
 
-** TODO Dead code in the locale class and the catalog
+** TODO The category constructors drop the second locale's program facets of standard types
 
-=src/locale_body.h= 131-146: two name-taking =__rw_locale=
-constructors with no callers, whose temporary would trip the
-~0 == _C_ref~ assertion of the destructor in a debug build.
-=src/locale_body.cpp= 377-485: an =#if 0= block in =__rw_expand_name=.
-=src/catalog.cpp= and =src/catalog.h= compile to nothing on every
-supported target: =_RWSTD_NO_CATOPEN_CATGETS=, tested at
-=src/messages.cpp= 43, is defined by no probe. Found by reading,
-2026-11-02.
+=_C_construct (const __rw_locale&, const __rw_facet*)=
+(=src/locale_combine.cpp= 153-162) clears the standard bit of a
+program facet it installs in a standard slot and sets the byname bit:
+the facet's =_C_type= is 0, which the test reads as an even, byname
+type. A locale whose facets of one category are all program objects
+then has no standard bit and every byname bit there, and
+=_C_is_managed (cat)= (=src/locale_body.cpp= 1085-1093) calls the
+category managed. With ~b = locale (locale (locale::classic (), &c1), &c2)~,
+=c1= a program =collate<char>= and =c2= a program =collate<wchar_t>=,
+=locale (locale::classic (), b, locale::collate)= comes out named "C"
+and holds neither. 14882:2003 22.1.1.2 p14, p15. Found by probe,
+2026-11-04.
 
-Fix: remove, or characterize =catopen= and keep the catalog under it.
+Fix: a program facet clears its byname bit as it clears its standard
+bit. The first entry closes it by construction.
 
-Check: grep, then a 15D build with the code removed.
+Check: =use_facet<collate<char> >= of the result is =c1=,
+=use_facet<collate<wchar_t> >= is =c2=, and =name ()= is "*".
 
-Also =src/locale_combine.cpp= 529: a =size_t size= in the name
-normalization is assigned and never read (GCC: set but not used).
-Seen 2026-11-03.
+** TODO =cmplocales= checks the first name twice
+
+=src/locale_body.cpp= 619-620: the comparison of the body repository
+asserts ~0 != pl1->_C_get_name ()~ twice and never checks =pl2=.
+Found by reading, 2026-11-04.
+
+Fix: the second assertion reads =pl2=. The first entry removes the
+repository and the function with it.
+
+Check: reading.
+
+** TODO Unused and unreachable code in the locale core
+
+- =__rw_locale::_C_get_cat_names= (=src/locale_body.cpp= 121-242) has
+  no caller. It is exported. With the condensed name it copies
+  =common_name= back into the caller's buffer when
+  ~savesize >= strlen (common_name)~, one byte short of the
+  terminator.
+- =_C_get_body= (=src/locale_combine.cpp= 538-546) has a branch for
+  the default constructor; =locale::locale ()= calls =_C_manage=
+  itself, and no caller passes all null arguments.
+- =_C_construct (const __rw_locale&, const __rw_facet*)=
+  (=src/locale_combine.cpp= 134, 170) sets =_C_name= to 0 and then
+  tests it; the name computation between the two is gone.
+- =src/facet.cpp= 57 redeclares the inline =__rw_get_cat= of
+  =src/locale_body.h=.
+- =src/locale_name.cpp= includes =setlocale.h= and uses nothing from
+  it.
+- =src/locale_body.cpp= 1103-1106 includes =<loc/_locale.h>= and
+  =<rw/_defs.h>= a second time, before ~locale::operator=~.
+Found by reading, 2026-11-04.
+
+Fix: remove them; the first entry takes most of them with the code
+around them.
+
+Check: grep, then a 15D build.
 
 ** TODO The narrow =transform= is empty for a string with an undefined character
 

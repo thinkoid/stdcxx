@@ -29,7 +29,7 @@
 #define _RWSTD_LIB_SRC
 #include <rw/_defs.h>
 
-#include <new>             // for placment new
+#include <new>             // for placement new
 
 #include <loc/_locale.h>   // for locale
 #include <rw/_once.h>      // for __rw_once()

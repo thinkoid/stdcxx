@@ -40,11 +40,7 @@
 
 #include "podarray.h"
 
-#if !defined (_RWSTD_NO_NL_TYPES_H) && !defined (_RWSTD_NO_CATOPEN_CATGETS)
-#  include <nl_types.h>
-#else   // _RWSTD_NO_NL_TYPES_H || _RWSTD_NO_CATOPEN_CATGETS
-#  include "catalog.h"
-#endif   // !_RWSTD_NO_NL_TYPES_H && !_RWSTD_NO_CATOPEN_CATGETS
+#include <nl_types.h>   // for catopen(), catgets(), catclose()
 
 
 #define _RWSTD_BAD_CATD ((nl_catd)-1)

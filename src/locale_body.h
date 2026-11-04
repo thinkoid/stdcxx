@@ -128,24 +128,13 @@ public:
     // create a locale body from the name of a locale
     __rw_locale (const char*);
 
-    // create a locale body from the name of a locale combined with a facet
-    __rw_locale (const char *__name, const __rw_facet *__facet) {
-        __rw_locale __tmp (__name);
-        _C_construct (__tmp, __facet);
-    }
-
     // create a locale body from another locale combined with a facet
     __rw_locale (const __rw_locale &__rhs, const __rw_facet *__facet) {
         _C_construct (__rhs, __facet);
     }
 
-    // create a locale body from two locales taking cats from the named one
-    __rw_locale (const __rw_locale &__rhs, const char *__name, int __cat) {
-        __rw_locale __tmp (__name);
-        _C_construct (__rhs, __tmp, __cat);
-    }
-
-    // create a locale body from two locales taking cats from `l2'
+    // create a locale body from two locales taking the categories
+    // in `cat' from `l2'
     __rw_locale (const __rw_locale &__l1, const __rw_locale &__l2, int __cat) {
         _C_construct (__l1, __l2, __cat);
     }
@@ -300,7 +289,7 @@ inline int __rw_get_cat (int id) _THROWS (())
 
     const LC_type lc_cats[] = {
         _RWSTD_LC_COLLATE,
-        // _C_codecvt, _C_ctype (all derivatives and specialiations)
+        // _C_codecvt, _C_ctype (all derivatives and specializations)
         _RWSTD_LC_CTYPE, _RWSTD_LC_CTYPE,
         // _C_moneypunct, _C_moneypunct_intl, _C_money_get, _C_money_put
         _RWSTD_LC_MONETARY, _RWSTD_LC_MONETARY,

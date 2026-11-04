@@ -247,7 +247,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [NEW_OFLOW_SAFE](../../etc/config/src/NEW_OFLOW_SAFE.cpp) / `NO_NEW_OFLOW_SAFE` | if operator new() checks the argument for overflow | L/P; `src/memory.cpp` |
 | [NEW_THROWS](../../etc/config/src/NEW_THROWS.cpp) / `NO_NEW_THROWS` | if operator new() throws | L/P/T; `src/iostore.cpp` |
 | [NL_LANGINFO](../../etc/config/src/NL_LANGINFO.cpp) / `NO_NL_LANGINFO` | nl_langinfo() in &lt;langinfo.h&gt; | L/T/V; `src/time_put.cpp` |
-| [NL_TYPES_H](../../etc/config/src/NL_TYPES_H.cpp) / `NO_NL_TYPES_H` | catopen() in &lt;nl_types.h&gt; | L; `src/catalog.cpp` |
+| [NL_TYPES_H](../../etc/config/src/NL_TYPES_H.cpp) / `NO_NL_TYPES_H` | catopen() in &lt;nl_types.h&gt; | none |
 | [NO_DBL_TRAPS](../../etc/config/src/NO_DBL_TRAPS.cpp) / `NO_DBL_TRAPS` | if floating point math traps | L/P/T; `include/limits` |
 | [NO_INT_TRAPS](../../etc/config/src/NO_INT_TRAPS.cpp) / `NO_INT_TRAPS` | if integer math traps | L; `include/limits` |
 | [NO_OBJECT_MANGLING](../../etc/config/src/NO_OBJECT_MANGLING.cpp) / `NO_OBJECT_MANGLING` | object name mangling | L; `include/limits` |

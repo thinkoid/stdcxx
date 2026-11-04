@@ -504,9 +504,8 @@ has no id pointer and takes the C library path: `collate_byname<char>
 a static buffer with no lock of its own; both of its callers,
 `__rw_expand_name` and the `__rw_locale (const char*)` constructor,
 run only inside `_C_manage` under the `__rw_locale` guard
-(`src/locale_body.cpp:854`, `:871`, `:1024`), so the guard serializes
-it, as `analysis-init-flags.md` 2.7 says. The calls at `:409` and
-`:477` are inside `#if 0`.
+(`src/locale_body.cpp:741`, `:758`, `:911`), so the guard serializes
+it, as `analysis-init-flags.md` 2.7 says.
 
 **`<clocale>`.** `include/rw/_config.h:97-106` defines
 `_RWSTD_NO_PURE_C_HEADERS` and `_RWSTD_NO_DEPRECATED_C_HEADERS` unless
@@ -1737,12 +1736,10 @@ catalogs.
   copy and frees the slot; an invalid or closed catalog throws
   `invalid_argument` once the guard is released (7443c91e).
 
-`src/catalog.cpp` and `src/catalog.h` hold a `catopen` of the
-library's own, compiled under `_RWSTD_NO_NL_TYPES_H` or
-`_RWSTD_NO_CATOPEN_CATGETS`; 15D has `<nl_types.h>` and no probe
-defines the second, so both compile to nothing. The `LC_MESSAGES`
-image, `__rw_messages_t` (`include/loc/_localedef.h:525`, 28 bytes),
-holds `yesexpr` and `noexpr`, wide and narrow, written by
+`src/messages.cpp` includes `<nl_types.h>` unconditionally; the
+library has no `catopen` of its own. The `LC_MESSAGES` image,
+`__rw_messages_t` (`include/loc/_localedef.h:525`, 28 bytes), holds
+`yesexpr` and `noexpr`, wide and narrow, written by
 `util/localedef/wmessages.cpp`; no facet reads it, and
 `util/locale.cpp` prints it.
 

@@ -1,6 +1,7 @@
 /***************************************************************************
  *
- * facet.cpp
+ * facet.cpp - definition of the __rw_facet class, the standard facet
+ *             repository and the facet database mapping
  *
  * $Id$
  *
@@ -30,7 +31,7 @@
 
 #include <rw/_defs.h>
 
-#include <locale.h>   // for LC_XXX costants
+#include <locale.h>   // for LC_XXX constants
 #include <stdlib.h>   // for bsearch(), getenv(), qsort()
 #include <string.h>   // for memcpy(), strlen()
 
@@ -46,7 +47,7 @@
 #include <rw/_mutex.h>
 
 #include "locale_body.h"
-#include "podarray.h"    // for __rw_chararry
+#include "podarray.h"    // for __rw_chararray
 
 
 namespace __rw { 
@@ -59,7 +60,7 @@ int __rw_get_cat (int) _THROWS (());
 static inline 
 const char* __rw_get_cat_name (int category) _THROWS (())
 {
-    // FIXME: merge this struct and lookup with __rw_cats in rw_locale.cpp
+    // FIXME: merge this struct and lookup with __rw_cats in locale_body.cpp
     // maps LC_XXX category values to their names
     static const struct {
         int         cat;           // LC_XXX category
@@ -103,7 +104,6 @@ int __rw_facet::_C_opts = 0
     | 0;
 
 
-
 __rw_facet::__rw_facet (size_t __ref /* = 0 */) _THROWS (())
     : _C_name (0), _C_buf (0), _C_impdata (0), _C_impsize (0),
     _C_type (_C_unknown), _C_ref (__ref), _C_pid (0 /* invalid */)
@@ -131,10 +131,10 @@ __rw_facet::~__rw_facet () // nothrow
     // mark destroyed
     _C_name = destroyed;
 
-    // unmap only if both `impadata' and `impsize' are valid
+    // unmap only if both `impdata' and `impsize' are valid
     // (derived facets may want to set `impdata' to their own,
     // not necessarily memory mapped, data w/o setting `impsize'
-    // to something meaningful
+    // to something meaningful)
     if (size_t (-1) == _C_impsize)
         ::operator delete (const_cast< void* >(_C_impdata));
     else if (_C_impdata && _C_impsize) 
@@ -198,7 +198,7 @@ const void* __rw_facet::_C_get_data ()
 
     // use facet's id and name to determine whether the type of the facet is
     // codecvt_byname<wchar_t, char, mbstate_t> (_C_type is not sufficiently
-    // reliable since it is set to _C_unknown for all facet objects contructed
+    // reliable since it is set to _C_unknown for all facet objects constructed
     // outside of the library)
     const bool is_wcodecvt_byname =
         _C_wcodecvt_byname == __rw_locale::_C_get_facet_type (*this);
@@ -209,7 +209,7 @@ const void* __rw_facet::_C_get_data ()
     if (!pdata) {
 
         // the mapping failure can be attributed to the use of a
-        // special name, eg <locale>.<codeset>@UCS-4 which calls
+        // special name, e.g., <locale>.<codeset>@UCS-4 which calls
         // for the stripping of the special suffix
         __rw::__rw_chararray strip_name;
 
@@ -218,7 +218,7 @@ const void* __rw_facet::_C_get_data ()
 
         if (pstr && !pstr [4]) {
 
-            // @UCS suffix is recognized irrespective of the size of wchar_t,
+            // @UCS suffix is recognized irrespective of the size of wchar_t
             strip_name.append (locname.data (), plen);
             pdata = __rw_get_facet_data (cat, sz, strip_name.data ());
         }
@@ -439,7 +439,7 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
                 }
 
                 // delete facet unless it's one of the ordinary (unnamed)
-                // standard factes which are statically allocated
+                // standard facets which are statically allocated
                 if (pfacet->_C_name)
                     delete pfacet;
             }
@@ -489,9 +489,8 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
                 std_facet_bufsize *= 2;
             }
 
-            // construct a facet with the initial reference count of 1
-            // if no such facet exists yet or bump up the facet's ref
-            // count by 1 if it does
+            // no such facet exists yet, construct one with the initial
+            // reference count of 1
 
             _RWSTD_ASSERT (0 != ctor);
 
@@ -530,7 +529,6 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
 
             // sort facet pointers for fast access
             ::qsort (std_facets, n_std_facets, sizeof pfacet, &cmpfacets);
-            
         }
     }
 
@@ -595,7 +593,7 @@ const void* __rw_get_facet_data (int cat, size_t &impsize,
     return __rw_mmap (path, &impsize);
 }
 
-// Its counterpart - does the database unmapping
+// the counterpart of __rw_get_facet_data(), unmaps the database
 void __rw_release_facet_data (const void* pv, size_t sz) _THROWS (())
 {
     __rw_munmap (pv, sz);
@@ -603,7 +601,7 @@ void __rw_release_facet_data (const void* pv, size_t sz) _THROWS (())
 
 
 // standard facet id's (i.e., those instantiated and installed
-// by the library are in the range [1, __rw_facet::_C_last_type]
+// by the library) are in the range [1, __rw_facet::_C_last_type]
 // all others (i.e., id's of all user-defined facet types or
 // specializations of standard facets on user-defined types)
 // are in the range (__rw_facet::_C_last_type, ...)

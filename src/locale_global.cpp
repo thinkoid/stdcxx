@@ -68,7 +68,7 @@ namespace std {
         // facets)
     }
 
-    // set the global locale to `body', retrieve the previous value
+    // set the global locale to the body of `rhs', retrieve the previous value
     __rw::__rw_locale* const tmp = __rw::__rw_locale::_C_manage (rhs._C_body, 0);
 
     _RWSTD_ASSERT (0 != tmp);
