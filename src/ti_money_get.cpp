@@ -46,5 +46,5 @@
 #define TARGS_C   <char, _RWSTD_ISTREAMBUF_ITER (char) >
 
 _RWSTD_SPECIALIZE_FACET_ID (money_get, TARGS_C);
-_RWSTD_DEFINE_FACET_FACTORY (static, money_get, TARGS_C, money_get);
+_RWSTD_DEFINE_FACET_FACTORY (extern, money_get, TARGS_C, money_get);
 _RWSTD_SPECIALIZE_USE_FACET (money_get);

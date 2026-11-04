@@ -899,5 +899,5 @@ do_widen (const char *lo, const char *hi, char_type *dest) const
 }   // namespace std
 
 
-_RWSTD_DEFINE_FACET_FACTORY (static, ctype, <wchar_t>, wctype);
+_RWSTD_DEFINE_FACET_FACTORY (extern, ctype, <wchar_t>, wctype);
 _RWSTD_SPECIALIZE_USE_FACET (wctype);

@@ -255,6 +255,6 @@ codecvt_byname (const char *name, size_t ref)
 
 #define TARGS_C   <char, char, _RWSTD_MBSTATE_T>
 
-_RWSTD_DEFINE_FACET_FACTORY (static, codecvt, TARGS_C, codecvt);
+_RWSTD_DEFINE_FACET_FACTORY (extern, codecvt, TARGS_C, codecvt);
 _RWSTD_SPECIALIZE_USE_FACET (codecvt);
 

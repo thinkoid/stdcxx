@@ -1,5 +1,12 @@
 # Two defects in the first use of a facet
 
+This note is history for its first defect. The slot fill it describes
+is gone: the body constructor from a name now builds every standard
+facet, and no slot changes while the body is shared. With it went
+`locale::_C_get_std_facet`, the body's mutex and the acquire loads of
+the slots. The second defect, and the publication of facet data in
+chapter 3, still describe the library.
+
 Two threads that use a freshly constructed named locale at the same
 time can each run into a defect in the library's lazy initialization
 of its facets. One leaks references to the facet, so the facet

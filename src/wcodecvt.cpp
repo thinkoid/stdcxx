@@ -1592,5 +1592,5 @@ do_max_length () const _THROWS (())
 
 #define TARGS_W   <wchar_t, char, _RWSTD_MBSTATE_T>
 
-_RWSTD_DEFINE_FACET_FACTORY (static, codecvt, TARGS_W, wcodecvt);
+_RWSTD_DEFINE_FACET_FACTORY (extern, codecvt, TARGS_W, wcodecvt);
 _RWSTD_SPECIALIZE_USE_FACET (wcodecvt);

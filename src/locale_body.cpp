@@ -398,6 +398,96 @@ _C_get_facet_inx (size_t id) const _THROWS (())
 }
 
 
+// the factories of the standard facets, one per slot, in the order
+// of __rw_facet::_C_facet_type: slot i holds the ordinary facet of
+// type 2 * i + 1 or its byname form, type 2 * i + 2
+static __rw_facet::_C_ctor_t* const
+__rw_std_facet_ctors [__rw_locale::_C_n_std_facets] = {
+    __rw_ct_collate,
+    __rw_ct_codecvt,
+    __rw_ct_ctype,
+    __rw_ct_moneypunct,
+    __rw_ct_moneypunct_intl,
+    __rw_ct_money_get,
+    __rw_ct_money_put,
+    __rw_ct_numpunct,
+    __rw_ct_num_get,
+    __rw_ct_num_put,
+    __rw_ct_time_get,
+    __rw_ct_time_put,
+    __rw_ct_messages,
+    __rw_ct_wcollate,
+    __rw_ct_wcodecvt,
+    __rw_ct_wctype,
+    __rw_ct_wmoneypunct,
+    __rw_ct_wmoneypunct_intl,
+    __rw_ct_wmoney_get,
+    __rw_ct_wmoney_put,
+    __rw_ct_wnumpunct,
+    __rw_ct_wnum_get,
+    __rw_ct_wnum_put,
+    __rw_ct_wtime_get,
+    __rw_ct_wtime_put,
+    __rw_ct_wmessages
+};
+
+
+// obtains from the facet repository, with a reference, the facet for
+// slot `inx' of a body named `name': the category's locale is its part
+// of a combined name or the whole name, and the facet is the byname
+// form unless that locale is C; {money,num}_{get,put} have no byname
+// form and are always the ordinary facet
+/* static */ __rw_facet* __rw_locale::
+_C_get_slot_facet (const char *name, size_t inx)
+{
+    __rw_facet::_C_facet_type type = __rw_facet::_C_facet_type (2 * inx + 1);
+
+    __rw_facet::_C_ctor_t* const ctor = __rw_std_facet_ctors [inx];
+
+    switch (type) {
+    case __rw_facet::_C_money_get:
+    case __rw_facet::_C_money_put:
+    case __rw_facet::_C_num_get:
+    case __rw_facet::_C_num_put:
+    case __rw_facet::_C_wmoney_get:
+    case __rw_facet::_C_wmoney_put:
+    case __rw_facet::_C_wnum_get:
+    case __rw_facet::_C_wnum_put:
+        return __rw_facet::_C_manage (0, type, 0, ctor);
+    default:
+        break;
+    }
+
+    __rw_chararray catname;
+
+    const char *next = strchr (name, *_RWSTD_CAT_SEP);
+
+    if (next) {
+        // the parts of a combined name are in the order of __rw_cats
+        const int cat = __rw_get_cat (int (inx + 1));
+
+        for (size_t i = 0; i != __rw_n_cats; ++i) {
+            if (__rw_cats [i].cat == cat) {
+                catname.assign (name, size_t (next - name));
+                break;
+            }
+
+            name = next + ('\0' != *next);
+            next = strchr (name, *_RWSTD_CAT_SEP);
+            if (0 == next)
+                next = name + strlen (name);
+        }
+
+        name = catname.data ();
+    }
+
+    if (!__rw_is_C (name))
+        type = __rw_facet::_C_facet_type (type + 1);
+
+    return __rw_facet::_C_manage (0, type, name, ctor);
+}
+
+
 __rw_locale::
 __rw_locale (const char *name)
     : _C_usr_facets (0), _C_n_usr_facets (0), _C_ref (1),
@@ -466,7 +556,26 @@ __rw_locale (const char *name)
             _C_byname_facet_bits = _C_all;
     }
 
-    memset (_C_std_facets, 0, sizeof _C_std_facets);
+    // every standard facet is built here, and no slot changes while
+    // the body is shared; when one cannot be built, the facets before
+    // it go back to the repository
+    size_t inx = 0;
+
+    try {
+        for (; inx != _C_n_std_facets; ++inx)
+            _C_std_facets [inx] = _C_get_slot_facet (_C_name, inx);
+    }
+    catch (...) {
+        while (inx--)
+            __rw_facet::_C_manage (_C_std_facets [inx],
+                                   _C_std_facets [inx]->_C_type,
+                                   _C_std_facets [inx]->_C_name, 0);
+
+        if (_C_name != _C_namebuf)
+            delete[] const_cast< char* >(_C_name);
+
+        throw;
+    }
 }
 
 
@@ -547,9 +656,6 @@ __rw_locale::
     // decrement the reference count of each installed facet
     // and delete each facet whose refcount drops to zero
     for (size_t i = 0; i != _C_n_std_facets; ++i) {
-
-        if (!_C_std_facets [i])
-            continue;
 
         _RWSTD_ASSERT (_C_std_facets [i]->_C_type != __rw_facet::_C_invalid);
 
@@ -999,15 +1105,7 @@ _C_is_managed (int cat) const _THROWS (())
         // the locale is not managed
         for (size_t i = 0, catinx = 0; i != _C_n_std_facets; ++i) {
 
-            // another thread may fill the slot at any time, with a
-            // release store (locale::_C_get_std_facet())
-            const __rw_facet* const pfacet =
-                _RWSTD_ATOMIC_LOAD_ACQUIRE (_C_std_facets [i], false);
-
-            if (0 == pfacet) {
-                // skip facets that are not installed
-                continue;
-            }
+            const __rw_facet* const pfacet = _C_std_facets [i];
 
             const __rw_facet::_C_facet_type facet_type =
                 _C_get_facet_type (*pfacet);

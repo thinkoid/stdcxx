@@ -47,5 +47,5 @@
 #define TARGS_W   <wchar_t, _RWSTD_OSTREAMBUF_ITER (wchar_t) >
 
 _RWSTD_SPECIALIZE_FACET_ID (money_put, TARGS_W);
-_RWSTD_DEFINE_FACET_FACTORY (static, money_put, TARGS_W, wmoney_put);
+_RWSTD_DEFINE_FACET_FACTORY (extern, money_put, TARGS_W, wmoney_put);
 _RWSTD_SPECIALIZE_USE_FACET (wmoney_put);

@@ -250,9 +250,9 @@ helpers in [locale_body.h](../../src/locale_body.h) and every other
 site pass `false`. The two do not exclude each other, and a test that
 builds and destroys locales from a shared one in several threads
 (`22.locale.facet.mt`) lost updates in most runs. All facet-count
-updates now go through `_C_add_ref` and `_C_remove_ref`. The body's
-own mutex-taking count helpers have no callers; body counts pass
-`false` everywhere.
+updates now go through `_C_add_ref` and `_C_remove_ref`. Body counts
+pass `false` everywhere; the body has no mutex, and its mutex-taking
+count helpers went with it.
 
 ### 4.3 Lazy caches are writes, including through `const`
 
@@ -283,9 +283,10 @@ published pointer, stored with release under `__rw_setlocale` and
 read with acquire, including under the facet mutex, which does not
 exclude those builders.
 
-The body's standard-facet slots follow the same rule: filled once
-under the body's lock with a release store, read unlocked with
-acquire. The `ctype` `narrow` and `widen` tables and
+The body's standard-facet slots need no such rule: the body's
+constructor fills all of them before the body is shared, and none
+changes after, so they are read with no lock and no atomic access.
+The `ctype` `narrow` and `widen` tables and
 `codecvt<char, char>::always_noconv` stay caches, because every thread
 stores the same value and nothing else is published through them;
 their accesses are relaxed atomics. A reference count keeps a facet

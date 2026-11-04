@@ -45,5 +45,5 @@
 #define TARGS_W   <wchar_t, _RWSTD_ISTREAMBUF_ITER (wchar_t) >
 
 _RWSTD_SPECIALIZE_FACET_ID (time_get, TARGS_W);
-_RWSTD_DEFINE_FACET_FACTORY (static, time_get, TARGS_W, wtime_get);
+_RWSTD_DEFINE_FACET_FACTORY (extern, time_get, TARGS_W, wtime_get);
 _RWSTD_SPECIALIZE_USE_FACET (wtime_get);

@@ -43,5 +43,5 @@
 
 
 _RWSTD_SPECIALIZE_FACET_ID (messages, <char>);
-_RWSTD_DEFINE_FACET_FACTORY (static, messages, <char>, messages);
+_RWSTD_DEFINE_FACET_FACTORY (extern, messages, <char>, messages);
 _RWSTD_SPECIALIZE_USE_FACET (messages);

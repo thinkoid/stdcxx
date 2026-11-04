@@ -46,5 +46,5 @@
 #define TARGS_W   <wchar_t, _RWSTD_OSTREAMBUF_ITER (wchar_t) >
 
 _RWSTD_SPECIALIZE_FACET_ID (num_put, TARGS_W);
-_RWSTD_DEFINE_FACET_FACTORY (static, num_put, TARGS_W, wnum_put);
+_RWSTD_DEFINE_FACET_FACTORY (extern, num_put, TARGS_W, wnum_put);
 _RWSTD_SPECIALIZE_USE_FACET (wnum_put);

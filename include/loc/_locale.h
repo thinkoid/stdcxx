@@ -235,9 +235,6 @@ private:
     _RWSTD_MEMBER_EXPORT const facet*
     _C_get_facet (const id&) const;
 
-    _RWSTD_MEMBER_EXPORT const facet*
-    _C_get_std_facet (facet::_C_facet_type, facet::_C_ctor_t*) const;
-
     friend class  __rw::__rw_locale;
     friend struct __rw::__rw_access;
 
@@ -286,7 +283,7 @@ __rw_get_facet (const std::locale &__loc, const _Facet *__dummy)
 inline const __rw_facet*
 __rw_get_std_facet (const std::locale   &__loc,
                     __rw_facet::_C_facet_type  __type,
-                    __rw_facet::_C_ctor_t     *__ctor)
+                    __rw_facet::_C_ctor_t*     /* unused */)
 {
     // expose an implementation detail of locale body for efficiency
     struct _Facets {
@@ -298,14 +295,9 @@ __rw_get_std_facet (const std::locale   &__loc,
 
     _RWSTD_ASSERT (0 != __pfacets);
 
-    // a slot is filled at most once, with a release store that
-    // publishes the facet to readers that take no lock
-    // (src/locale_core.cpp)
-    const __rw_facet *__facet =
-        _RWSTD_ATOMIC_LOAD_ACQUIRE (__pfacets->__facets [__type >> 1], false);
-
-    if (!__facet)
-        __facet = __loc._C_get_std_facet (__type, __ctor);
+    // the body's constructor fills every slot, and a slot does not
+    // change while the body lives (src/locale_body.cpp)
+    const __rw_facet* const __facet = __pfacets->__facets [__type >> 1];
 
     // working around an HP aCC ICE (PR #28838)
     _RWSTD_ASSERT (0 != __facet);

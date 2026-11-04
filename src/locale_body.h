@@ -52,6 +52,33 @@ struct _RWSTD_CLASS_EXPORT locale;
 namespace __rw { 
 
 
+// the factories of the standard facets (src/use_facet.h) other than
+// the four <loc/_locale.h> declares, for the table the body
+// constructor builds its facets with (src/locale_body.cpp)
+__rw_facet* __rw_ct_collate (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_codecvt (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_moneypunct (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_moneypunct_intl (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_money_get (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_money_put (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_time_get (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_time_put (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_messages (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wcollate (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wcodecvt (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wctype (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wmoneypunct (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wmoneypunct_intl (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wmoney_get (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wmoney_put (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wnumpunct (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wnum_get (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wnum_put (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wtime_get (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wtime_put (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_wmessages (_RWSTD_SIZE_T, const char*);
+
+
 class _RWSTD_EXPORT __rw_locale
 {
 public:
@@ -68,7 +95,9 @@ private:
     // each standard facet is stored at an index, inx, computed from its
     // numeric id, as follows: inx = (Facet::id._C_id - 1) / 2
     // each slot holds either an ordinary (unnamed) or a byname standard
-    // facet (if the latter exists)
+    // facet (if the latter exists); the constructors fill every slot,
+    // and a slot does not change while the body lives, so lookup reads
+    // it with no lock
     __rw_facet     *_C_std_facets [_C_n_std_facets];
     __rw_facet    **_C_usr_facets;     // array of pointers to user facets
     _RWSTD_SIZE_T   _C_n_usr_facets;   // number of user-defined facets
@@ -90,8 +119,6 @@ private:
     // has been replaced with a user-defined (or user-constructed) object
     // (i.e., one with the same id) in the locale object
     _RWSTD_SIZE_T _C_byname_facet_bits;
-
-    __rw_mutex    _C_mutex;
 
     friend struct std::locale;
 
@@ -154,14 +181,6 @@ public:
         return _RWSTD_ATOMIC_PREDECREMENT (__facet._C_ref, false);
     }
 
-    _RWSTD_SIZE_T _C_add_ref () {
-        return _RWSTD_ATOMIC_PREINCREMENT (_C_ref, _C_mutex);
-    }
-
-    _RWSTD_SIZE_T _C_remove_ref () {
-        return _RWSTD_ATOMIC_PREDECREMENT (_C_ref, _C_mutex);
-    }
-
     // access private facet name
     static const char* _C_get_cat_name (const __rw_facet &__facet) {
         return __facet._C_name;
@@ -212,6 +231,10 @@ private:
     static __rw_locale*
     _C_get_body (__rw_locale*, __rw_locale*,
                  const char*, int, const __rw_facet*);
+
+    // obtains from the facet repository the standard facet for a slot
+    // of the body of a locale name; called from the ctor from a name
+    static __rw_facet* _C_get_slot_facet (const char*, _RWSTD_SIZE_T);
 
     // called from ctors (only) to fully construct a combined locale
     void _C_construct (const __rw_locale&, const __rw_facet*);

@@ -47,9 +47,9 @@
 #define TA_W1   <wchar_t, true>
 
 _RWSTD_SPECIALIZE_FACET_ID (moneypunct, TA_W0);
-_RWSTD_DEFINE_FACET_FACTORY (static, moneypunct, TA_W0, wmoneypunct);
+_RWSTD_DEFINE_FACET_FACTORY (extern, moneypunct, TA_W0, wmoneypunct);
 _RWSTD_SPECIALIZE_USE_FACET (wmoneypunct);
 
 _RWSTD_SPECIALIZE_FACET_ID (moneypunct, TA_W1);
-_RWSTD_DEFINE_FACET_FACTORY (static, moneypunct, TA_W1, wmoneypunct_intl);
+_RWSTD_DEFINE_FACET_FACTORY (extern, moneypunct, TA_W1, wmoneypunct_intl);
 _RWSTD_SPECIALIZE_USE_FACET (wmoneypunct_intl);

@@ -45,5 +45,5 @@
 #define TARGS_C   <char, _RWSTD_OSTREAMBUF_ITER (char) >
 
 _RWSTD_SPECIALIZE_FACET_ID (time_put, TARGS_C);
-_RWSTD_DEFINE_FACET_FACTORY (static, time_put, TARGS_C, time_put);
+_RWSTD_DEFINE_FACET_FACTORY (extern, time_put, TARGS_C, time_put);
 _RWSTD_SPECIALIZE_USE_FACET (time_put);

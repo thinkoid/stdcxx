@@ -42,5 +42,5 @@
 #include "use_facet.h"
 
 
-_RWSTD_DEFINE_FACET_FACTORY (static, collate, <wchar_t>, wcollate);
+_RWSTD_DEFINE_FACET_FACTORY (extern, collate, <wchar_t>, wcollate);
 _RWSTD_SPECIALIZE_USE_FACET (wcollate);
