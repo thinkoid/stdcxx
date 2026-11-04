@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,976 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,862 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,756 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,758 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -284,6 +284,8 @@ all six tables:
 - 2026-11-04: `27.filebuf`, 86 to 178 in 15D: every combination of the
   five mode bits, the unlisted ones failing; the other five tables are
   to move by the same 92.
+- 2026-11-04: `27.istream.unformatted.get`, 1,650 to 1,652 in 15D, get ()
+  after read (); the other five tables are to move by the same two.
   of formats that grow `do_put`'s buffer, narrow and wide; the other
   five tables are to move by the same 24.
 

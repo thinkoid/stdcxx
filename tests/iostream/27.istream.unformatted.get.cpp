@@ -267,6 +267,22 @@ void test_get_void (charT, const char *cname)
     TEST (T, "\0", 1, eof, Eof | Fail, Good, 0, -1);
     TEST (T, "\1", 1, eof, Eof | Fail, Good, Underflow, 1);
     TEST (T, "\2", 1, eof, Bad,        Good, Underflow | Throw, 1);
+
+    // the count is the call's own: after a read () of three
+    // characters, get () reports one (27.6.1.3, p1 and p3)
+    {
+        const charT text [] = { 'a', 'b', 'c', 'd', 'e', '\0' };
+        std::basic_istringstream<charT> strm (text);
+
+        charT buf [3];
+        strm.read (buf, 3);
+
+        const typename std::basic_istringstream<charT>::int_type c = strm.get ();
+
+        rw_assert (1 == strm.gcount () && 'd' == c, 0, __LINE__,
+                   "basic_istream<%s>::get () after read (3): gcount () == 1, "
+                   "got %d", cname, int (strm.gcount ()));
+    }
 }
 
 /***********************************************************************/

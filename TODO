@@ -25,19 +25,6 @@ stale comments, then behaviour the library adds or changes, then the
 additions whose removal costs tests or callers. The rest, outside the
 locale, is last.
 
-** TODO =get ()= adds to =gcount ()= instead of setting it
-
-=include/istream.cc= 240-256: the unformatted =get ()= increments
-=_C_gcount= without zeroing it first, so ~is.read (b, 3); is.get ();~
-leaves =gcount ()= at 4 (by probe). 14882:2003 27.6.1.3 p1: each
-unformatted input function begins by setting the count to zero and
-p6 has =get ()= extract one character. Found by the extension sweep,
-confirmed by probe, 2026-11-04.
-
-Fix: =get ()= zeroes the count as the other unformatted functions do.
-
-Check: the probe prints 1; a row in =27.istream.unformatted=.
-
 ** TODO =list= splices and merges by copying the elements
 
 With the node buffer on, the default, =splice= from another list
