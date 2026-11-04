@@ -7,6 +7,12 @@ harness reported `ABRT` for the whole program. This note records what
 the section expects, why the expectation stopped being met, what the
 library did in the builds where it was met, and the fixes.
 
+The C-library branches of the wide byname `do_in` and `do_length`
+lost the check this note added, with 10ad3c6c on 2026-11-03, so that
+a character split across two calls converts through the C library.
+`analysis-codecvt-corrupt-state.md` records what that did to the
+contract below and the decision it opened.
+
 ## 0. tl;dr
 
 - The section is not a mismatch between the test and the library's

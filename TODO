@@ -53,6 +53,9 @@ in every configuration as it already does in 15D, and the note and
 glibc characterization would detect it without losing the carried
 character, later.
 
+=analysis-codecvt-corrupt-state.md= records the two changes, the
+probe and the ways out.
+
 Check: the row at 684 assertions, 0 failed, in 11S, 11s, 11S-clang
 and 11s-clang; a corrupt state on the UTF-8 C-library facet either
 returns =error= or is documented as undefined.
