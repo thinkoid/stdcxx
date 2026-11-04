@@ -22,7 +22,7 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO One kind of locale body: the ThreadSanitizer run and five pins
+** TODO One kind of locale body: five pins
 
 The global repositories of locale bodies and standard facets are
 gone (1e5236a4, e6475f4b, 9bb1ebee). Every constructor builds a body
@@ -31,18 +31,16 @@ only; the classic body is a static built once; the global locale is
 a pointer behind one mutex; a body is unnamed when it was built with
 a facet or combined from an unnamed one; ~operator==~ is the same
 body or two equal names. =ref-locale.md= chapters 1 to 4 and 7
-describe it. Two checks remain. The locale MT tests have not run
-under ThreadSanitizer since the change. The =22.locale.cons.mt= row
-moved with 71b965fb, and only the 15D pin carries it: the other five
-keep 400 (single-threaded) and 1,000 (15D-clang) for 200 and 800,
-and their summaries lag their rows.
+describe it. A ThreadSanitizer build of 9bb1ebee ran the eight
+=22.locale.*.mt= tests at their default sizes, =localedef= plain
+through =BINDIR=, with no report. One check remains. The
+=22.locale.cons.mt= row moved with 71b965fb, and only the 15D pin
+carries it: the other five keep 400 (single-threaded) and 1,000
+(15D-clang) for 200 and 800, and their summaries lag their rows.
 
-Fix: none in the tree. The sanitizer run, and the nightly's re-pin
-of the five tables.
+Fix: none in the tree. The nightly's re-pin of the five tables.
 
-Check: a ThreadSanitizer run of the =22.locale.*.mt= tests, each at
-its full assertion count, with no report on the slots, the bodies or
-the global locale; the six tables of the nightly on their pins.
+Check: the six tables of the nightly on their pins.
 
 ** TODO The facet bits of the categories have no reader
 
