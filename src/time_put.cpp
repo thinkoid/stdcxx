@@ -103,7 +103,7 @@ extern const MaskT __rw_classic_tab [];
 
 size_t
 __rw_get_timepunct (const __rw::__rw_facet*, int,
-                    const void*[], const size_t []);
+                    const void*[], const size_t [], size_t);
 
 // also declared in _time_put.cc
 _RWSTD_EXPORT char*
@@ -888,7 +888,8 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 
 size_t
 __rw_get_timepunct (const __rw_facet *pfacet, int flags,
-                    const void *names[], size_t sizes[])
+                    const void *names[], size_t sizes[],
+                    size_t capacity)
 {
     const bool wide = !!(flags & __rw_wide);
 
@@ -961,6 +962,11 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
         return 0;
     }
 
+    // the arrays hold `capacity' entries: a database with more era
+    // records or alternative digits than that fills them and no more
+    if (count > (flags_2 ? capacity / 2 : capacity))
+        count = flags_2 ? capacity / 2 : capacity;
+
     typedef std::char_traits<char> CTraits;
 
     typedef std::char_traits<wchar_t> WTraits;
@@ -1003,7 +1009,8 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
 _RWSTD_EXPORT size_t
 __rw_get_timepunct (const __rw_facet *pfacet,
                     int data [5], tm *tmb, int **pmem,
-                    const void *names[], size_t sizes[])
+                    const void *names[], size_t sizes[],
+                    size_t capacity)
 {
     enum _Fmt {   // for convenience
         _AmPm        = __rw_ampm,
@@ -1430,7 +1437,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
 
     if (flags)
         cnt = __rw_get_timepunct (pfacet, flags | (wide ? __rw_wide : 0),
-                                  pv, sizes);
+                                  pv, sizes, capacity);
 
     return cnt;
 }
@@ -1560,12 +1567,19 @@ __rw_fmt_time (const __rw_facet *pfacet, char *buf, size_t bufsize,
                 if (!end)
                     return 0;
 
-                buf = end;
+                // the rest of the buffer is what the directive left
+                bufsize -= end - buf;
+                buf      = end;
                 continue;
             }
         }
 
+        // a literal character, while the buffer holds one
+        if (0 == bufsize)
+            return buf;
+
         *buf++ = *pat;
+        --bufsize;
     }
 
     return buf;
@@ -1697,12 +1711,19 @@ __rw_fmt_time (const __rw_facet *pfacet, wchar_t *wbuf, size_t bufsize,
                 if (!end)
                     return 0;
 
-                wbuf = end;
+                // the rest of the buffer is what the directive left
+                bufsize -= end - wbuf;
+                wbuf     = end;
                 continue;
             }
         }
 
+        // a literal character, while the buffer holds one
+        if (0 == bufsize)
+            return wbuf;
+
         *wbuf++ = *wpat;
+        --bufsize;
     }
 
     return wbuf;
@@ -2627,7 +2648,7 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
 
             char *pbuf = buf;
 
-            while (*digit)
+            while (*digit && pbuf != buf + bufsize)
                 *pbuf++ = *digit++;
 
             return pbuf;
@@ -2642,9 +2663,13 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
 
         const char* const fmtstr = 'z' == fmt ? "%+*.*d" : "%*.*d";
 
-        res = size_t (sprintf (buf, fmtstr,
+        res = size_t (snprintf (buf, bufsize, fmtstr,
                                width < 0 ? tpd.width : width,
                                prec < 0 ? tpd.prec : prec, tpd.val));
+
+        // snprintf reports the length the number needed
+        if (res >= bufsize)
+            res = bufsize ? bufsize - 1 : 0;
     }
     else {
         if (!tmb && tpd.fmt) {
@@ -2680,9 +2705,9 @@ __rw_put_time (const __rw_facet *facet, char *buf, size_t bufsize,
             }
 
             // use strftime() for locale-independent formatting
-            res = strftime (buf, bufsize, fmtstr, tmb);
+            res = bufsize ? strftime (buf, bufsize, fmtstr, tmb) : 0;
 
-            _RWSTD_ASSERT (bufsize > res);
+            _RWSTD_ASSERT (!bufsize || bufsize > res);
         }
     }
 
@@ -2725,7 +2750,7 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
 
             wchar_t *pbuf = wbuf;
 
-            while (*digit)
+            while (*digit && pbuf != wbuf + bufsize)
                 *pbuf++ = *digit++;
 
             return pbuf;
@@ -2749,6 +2774,10 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
                         width < 0 ? tpd.width : width,
                         prec < 0 ? tpd.prec : prec, tpd.val);
 
+        // swprintf reports -1 when the number does not fit
+        if (size_t (-1) == res)
+            res = 0;
+
 #else   // if defined (_RWSTD_NO_SWPRINTF)
 
         const char *fmtstr = 'z' == fmt ? "%+*.*d" : "%*.*d";
@@ -2763,7 +2792,7 @@ __rw_put_time (const __rw_facet *facet, wchar_t *wbuf, size_t bufsize,
 
         wchar_t *dst = wbuf;
 
-        for (const char *s = buf; *s; ++s, ++dst)
+        for (const char *s = buf; *s && dst != wbuf + bufsize; ++s, ++dst)
             *dst = static_cast< unsigned char >(*s);
 
         res = dst - wbuf;

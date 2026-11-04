@@ -2231,13 +2231,15 @@ comments of the =time_get= test are swapped", and "A reference for
   then that row.
 - `put` pads every directive of a pattern and leaves the width set; no
   row has a pattern with a width. Check: a decision.
-- Two buffers are bounded by the data alone. Every era name goes into
-  `__names [100]` (`_time_get.cc` 545), every era format into `__fmts
-  [100]` (145), and localedef does not cap eras. `__rw_fmt_time` keeps
-  one `bufsize` as it advances (`src/time_put.cpp` 1506, 1643), so an
-  expansion past 256 elements overruns `do_put`'s buffer. Shipped
-  maxima: 11 eras (ja_JP), 172 bytes (`%c`, km_KH.UTF-8, by probe).
-  Check: locales with 101 eras and a 300-character `%c`, sanitized.
+- `do_put`'s buffer does not grow. `__rw_fmt_time` carries the
+  remaining size as it walks a format and stops at the end of
+  `do_put`'s 256-element array, so a `%c` longer than that is cut
+  there (the 300-character one of `22.locale.time.put`); the put
+  facets grow their buffers instead. The era arrays of `time_get`,
+  100 records each, take that many and no more from a database with
+  more (`22.locale.time.get`, 101 records); localedef does not cap
+  eras as it caps `alt_digits`. Shipped maxima: 11 eras (ja_JP), 172
+  bytes (`%c`, km_KH.UTF-8). Check: the 300-character row gives 300.
 - The comparisons with glibc's `strptime` behind 12.3 ran outside the
   tree. Check: a `strptime` oracle under `bin/oracle`, beside the
   `strftime` one.

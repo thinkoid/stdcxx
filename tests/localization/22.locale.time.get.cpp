@@ -1926,6 +1926,71 @@ make_LC_TIME (const time_data *td, const char *name,
 }
 
 
+// a locale of 101 era records, one more than the arrays of the
+// facet hold: the records are all alike but for their names, "E000"
+// to "E100", and every one spans 1800 onward, so that a zeroed tm
+// lies in each; the facet reads the first 100 names and no more
+static const char*
+make_LC_TIME_eras ()
+{
+    static char locnamebuf [1024];
+
+    if (*locnamebuf)
+        return locnamebuf;
+
+    static char                 names [101][5];
+    static time_data::era_data  eras [102];
+
+    for (int i = 0; i != 101; ++i) {
+        std::sprintf (names [i], "E%03d", i);
+
+        eras [i].offset     = 1;
+        eras [i].start_day  = 1;
+        eras [i].start_mon  = 0;
+        eras [i].start_year = -100;      // 1800
+        eras [i].end_day    = 0;
+        eras [i].end_mon    = 0;
+        eras [i].end_year   = INT_MAX;   // end of time
+        eras [i].name       = names [i];
+        eras [i].format     = "%EC %Ey";
+    }
+
+    eras [101].offset = INT_MIN;   // sentinel
+
+    const char* const no_alt_digits [] = { 0 };
+
+    time_data td = {
+        { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" },
+        {
+            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+            "Friday", "Saturday"
+        },
+        {
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        },
+        {
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November",
+            "December"
+        },
+        { "AM", "PM" },
+        "%a %b %d %H:%M:%S %Y",   // %c
+        "%m/%d/%y",               // %x
+        "%H:%M:%S",               // %X
+        "%I:%M:%S %p",            // %r
+        "%EC %Ey %b %d",          // %Ec
+        "%EC %Ey",                // %Ex
+        "%H:%M",                  // %EX
+        no_alt_digits, eras
+    };
+
+    return make_LC_TIME (&td, "test-locale-eras",
+                         locnamebuf, sizeof locnamebuf);
+}
+
+
+
 // with empty_ampm, the twin of the user-defined locale whose am_pm is
 // two empty strings and whose %X is %r with an empty t_fmt_ampm, as
 // in hy_AM, sm_WS and su_ID
@@ -2040,6 +2105,37 @@ make_LC_TIME (bool empty_ampm)
 }
 
 /**************************************************************************/
+
+
+template <class charT>
+void test_many_eras (charT, const char *cname, const char *locname)
+{
+    rw_info (0, 0, __LINE__,
+             "std::time_get<%s>::get (..., 'C', 'E') under a locale "
+             "of 101 era records", cname);
+
+    std::locale loc;
+
+    try {
+        loc = std::locale (loc, locname, std::locale::time);
+    }
+    catch (...) {
+        rw_error (0, 0, __LINE__,
+                  "locale (locale (), \"%s\", locale::time) "
+                  "unexpectedly threw an exception", locname);
+        return;
+    }
+
+    const std::locale saved = std::locale::global (loc);
+
+    // the 100th name is read; the 101st is beyond the arrays, and the
+    // matcher stops after the "E" every name shares
+    TEST (T (0), "E099", 4, "EC", 0, Good);
+    TEST (T (0), "E100", 1, "EC", 0, Eof);
+
+    std::locale::global (saved);
+}
+
 
 
 template <class charT>
@@ -2469,6 +2565,17 @@ run_test (int, char**)
     test_posix (wchar_t (), "wchar_t");
 
     test_user (wchar_t (), "wchar_t", locname);
+
+    // the facet's era arrays hold 100 records: under a locale of 101
+    // the first 100 names are read and the 101st is unknown
+    const char* const eras_locname = make_LC_TIME_eras ();
+
+    if (rw_error (0 != eras_locname, 0, __LINE__,
+                  "failed to generate the LC_TIME locale of 101 eras")) {
+        test_many_eras (char (), "char", eras_locname);
+        test_many_eras (wchar_t (), "wchar_t", eras_locname);
+    }
+
 
     test_empty_ampm (wchar_t (), "wchar_t", ampm_locname);
 

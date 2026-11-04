@@ -224,7 +224,8 @@ void do_test (int             lineno,  // line number containing tests
 
         result [n] = charT ();
 
-        if (0 == n || !std::memcmp (result, str, n)) {
+        // the output equal to the pattern means strftime did not expand it
+        if (0 == n || (n == std::strlen (str) && !std::memcmp (result, str, n))) {
             // unable to convert pattern using strftime, bail out
             rw_warn (0, 0, __LINE__, "strftime failed");
             return;
@@ -333,13 +334,16 @@ struct time_data
 };
 
 
-const char* make_LC_TIME (const time_data *td)
+const char* make_LC_TIME (const time_data *td, const char *name = "test-locale")
 {
     static char locnamebuf [1024];
 
     // assume `td' points to the same data as the first time
     // the function was called and reuse the same database
-    if (*locnamebuf)
+    // the default name is cached: the data is the same each time
+    const bool cached = 0 == std::strcmp (name, "test-locale");
+
+    if (cached && *locnamebuf)
         return locnamebuf;
 
     // create a temporary locale definition file
@@ -495,12 +499,12 @@ const char* make_LC_TIME (const time_data *td)
     std::fclose (fout);
 
     const char* const locname =
-        rw_localedef ("", srcfname, cmfname, "test-locale");
+        rw_localedef ("", srcfname, cmfname, name);
 
     // avoid copying into buffer if it's not big enough: this
     // this affect the efficiency of the function but not its
     // behavior
-    if (locname && std::strlen (locname) < sizeof locnamebuf)
+    if (cached && locname && std::strlen (locname) < sizeof locnamebuf)
         std::strcpy (locnamebuf, locname);
 
     // remove temporary files
@@ -1788,6 +1792,32 @@ void test_user (charT, const char *tname)
     rw_info (0, 0, __LINE__,
              "%%c: the locale's appropriate date and time representation");
     TEST (T (INT_MAX), "%c", 0, 0, ' ', td.d_t_fmt);
+
+    // a d_t_fmt longer than do_put's 256-element array: the expansion
+    // stops at the array, the literal characters that fit and no more
+    {
+        static char longfmt [301];
+        std::memset (longfmt, 'x', sizeof longfmt - 1);
+
+        time_data tdl = td;
+        tdl.d_t_fmt = longfmt;
+
+        const char* const longloc = make_LC_TIME (&tdl, "test-locale-long");
+
+        if (rw_error (0 != longloc, 0, __LINE__,
+                      "failed to generate the long LC_TIME locale data")) {
+            const std::locale saved =
+                std::locale::global (std::locale (std::locale (), longloc,
+                                                  std::locale::time));
+
+            static char expected [257];
+            std::memset (expected, 'x', sizeof expected - 1);
+
+            TEST (T (INT_MAX), "%c", 0, 0, ' ', expected);
+
+            std::locale::global (saved);
+        }
+    }
 
     rw_info (0, 0, __LINE__,
              "%%r: the locale's time representation in the AM/PM notation");

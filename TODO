@@ -22,23 +22,23 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO Two latent overruns in the time facets
+** TODO =time_put::do_put= cuts a format at its 256-element array
 
-=include/loc/_time_get.cc= 545 (=__names [100]=) and 145
-(=__fmts [100]=) take every era record, and localedef caps =alt_digits=
-at 100 but not eras (=util/localedef/scalar.cpp= 473-505).
-=__rw_fmt_time= keeps one =bufsize= while it advances
-(=src/time_put.cpp= 1506/1517, wide 1643/1654), so an expansion past
-256 elements overruns =do_put='s =__buf [256]=
-(=include/loc/_time_put.cc= 75). Shipped data reaches neither: 11 eras
-at most (ja_JP), 172 bytes for the longest =%c= (km_KH.UTF-8). Found by
-reading, 2026-11-02.
+=__rw_fmt_time= (=src/time_put.cpp=) carries the remaining size of
+=do_put='s array as it walks a format and stops at its end, so a
+=%c= whose expansion passes 256 elements is cut there, silently:
+=22.locale.time.put= pins 256 of a 300-character =d_t_fmt=. The put
+facets of 22.2.2 and 22.2.6 grow their buffers instead
+(=__rw_put_buffer=, =include/loc/_punct.h=). The longest shipped
+=%c= is 172 bytes (km_KH.UTF-8). Since 2026-11-04, in place of the
+overrun before it.
 
-Fix: bound the era count where the arrays are filled (or size them
-from the record); carry the remaining size through =__rw_fmt_time=.
+Fix: =do_put= formats into a stack array or a heap block the guard
+frees, and =__rw_put_time= and =__rw_fmt_time= take the buffer and
+its size by reference and grow it when a directive does not fit
+(=strftime= reports 0, =snprintf= the length), narrow and wide.
 
-Check: generated locales with 101 era records and a 300-character
-=%c=, under the sanitizer.
+Check: the 300-character row gives 300; the rows on pin.
 
 ** TODO Sweep the library for extensions
 
@@ -740,6 +740,20 @@ the empty page go together.
 
 Check: every codecvt database rebuilt; =22.locale.codecvt= on its
 pin; the =sizeof= of =__rw_codecvt_t= in the plan's 1.3 updated.
+
+** TODO =localedef= does not cap era records
+
+=util/localedef/scalar.cpp= caps =alt_digits= at 100 entries
+(=string_list=) and appends era records without a count; the facet
+reads 100 of them and no more (=__rw_get_timepunct=,
+=src/time_put.cpp=, since 2026-11-04). A source with 101 era lines
+compiles, and its last record is unreachable. Found by reading,
+2026-11-02.
+
+Fix: the same cap and diagnostic as =alt_digits=.
+
+Check: =22.locale.time.get='s 101-record source rejected by
+=localedef= with the diagnostic.
 
 ** TODO The wide =LC_CTYPE= table covers the charmap, glibc's rule not revisited
 

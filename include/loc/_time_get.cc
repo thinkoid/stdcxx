@@ -38,7 +38,8 @@ namespace __rw {
 _RWSTD_EXPORT _RWSTD_SIZE_T
 __rw_get_timepunct (const __rw_facet *pfacet,
                     int data [5], _RWSTD_C::tm *tmb, int **pmem,
-                    const void *names[], _RWSTD_SIZE_T sizes[]);
+                    const void *names[], _RWSTD_SIZE_T sizes[],
+                    _RWSTD_SIZE_T capacity);
 
 // the era records of the facet's locale (src/era.cpp), an era being
 // every record of one name: %EC moves the year into the era of record
@@ -155,7 +156,7 @@ __rw_read_era (_InputIter __it, _InputIter __end, std::ios_base &__fl,
 
         const _RWSTD_SIZE_T __nfmts =
             __rw_get_timepunct (__pf, __fdata, &__tmp, &__pmem, __pv,
-                                __fsizes);
+                                __fsizes, sizeof __fmts / sizeof *__fmts);
 
         _RWSTD_ASSERT (__nfmts == __neras);
 
@@ -389,7 +390,8 @@ do_date_order () const
     // the x format, a single string stored in `names [0]'
     const _RWSTD_SIZE_T __cnt =
         __rw::__rw_get_timepunct (this, __data, &__tmp,
-                                 &__pmem, __pv, __sizes);
+                                 &__pmem, __pv, __sizes,
+                                 sizeof __names / sizeof *__names);
 
     if (1 != __cnt)
         return no_order;
@@ -704,7 +706,8 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
 
         const _RWSTD_SIZE_T __neras =
             __rw::__rw_get_timepunct (this, __edata, &__tmp,
-                                     &__pmem, __pv, __sizes);
+                                     &__pmem, __pv, __sizes,
+                                 sizeof __names / sizeof *__names);
 
         if (__neras)
             return __rw::__rw_read_era (__it, __end, __fl, __err, __tmb,
@@ -727,7 +730,8 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
     // get the number of punctuator (or format) string(s) and their values
     const _RWSTD_SIZE_T __cnt =
         __rw::__rw_get_timepunct (this, __data, &__tmp,
-                                 &__pmem, __pv, __sizes);
+                                 &__pmem, __pv, __sizes,
+                                 sizeof __names / sizeof *__names);
 
     // std::tm has no member for the week number of %U, %W and %V or
     // the week-based year of %G and %g: each is read into a local,
