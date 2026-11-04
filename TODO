@@ -22,6 +22,39 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
+** TODO Locale bodies and standard facets are shared through global repositories
+
+=__rw_locale::_C_manage= (=src/locale_body.cpp= 776 on) keeps one body
+per locale name in a process-wide sorted table under a static guard,
+and =__rw_facet::_C_manage= (=src/facet.cpp= 367 on) one standard
+facet per type and name in a second table. A body is managed when its
+name describes all of its facets (=_C_is_managed=, =locale_body.cpp=
+1048-1206); the constructors, the destructor, =name ()= and
+=operator==~ branch on the answer, and the standard facet slots of a
+body fill on first use (=src/locale_core.cpp= 140-219,
+=analysis-facet-first-use.md=). The sharing saves memory where a
+program constructs the same named locale many times. It costs two
+kinds of body, a name used as identity (the next two entries are
+defects of that proxy), two static guards on construction and
+destruction, and the slot races the sanitizer notes record. libstdc++
+builds a body with all of its facets per constructor call, shares
+bodies and facets by copy only, and compares unnamed locales by
+identity. Decided 2026-11-04.
+
+Fix: take that path. One kind of body, built with every standard
+facet in the constructor; the two repositories, =_C_is_managed= and
+the first-use fill go; the classic body stays static; the reference
+counts on bodies and facets stay for the copies; a body is unnamed
+when it holds a user facet or was combined from an unnamed one;
+~operator==~ is identity first, then the names. The database mapping
+stays per facet.
+
+Check: the locale rows of the suite on their pins (=22.locale.cons.mt=,
+=globals=, =name=, =statics.mt=, =synopsis=, =use_facet.mt=,
+=facet.mt=, =id.mt=) and every facet test; a ThreadSanitizer run of
+the MT locale tests with no report on the slots; the next two entries
+closed by construction.
+
 ** TODO The category constructors drop the first locale's user facets
 
 =_C_combine (const __rw_locale&, int)= (=src/locale_combine.cpp=
