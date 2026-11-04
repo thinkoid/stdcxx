@@ -394,7 +394,7 @@ make_test_locale ()
         // The portable character set
         //
         "<code_set_name> \"UTF-8\"\n"
-        "<mb_cur_max> 1\n<mb_cur_min> 1\n"
+        "<mb_cur_max> 2\n<mb_cur_min> 1\n"
         "CHARMAP\n"
         "<NUL> \\x00\n<SOH> \\x01\n<STX> \\x02\n<ETX> \\x03\n<EOT> \\x04\n"
         "<ENQ> \\x05\n<ACK> \\x06\n<BEL> \\x07\n"
@@ -452,6 +452,12 @@ make_test_locale ()
         "<right-brace> \\x7d\n"
         "<tilde> \\x7e\n"
         "<DEL> \\x7f\n"
+        // two characters of two bytes with a common lead byte: <U00E8>
+        // is listed below and gives the collate trie a page for the
+        // lead byte, <U00E9> is not and collates by UNDEFINED; the
+        // narrow transform must decode it from its first byte
+        "<U00E8> \\xc3\\xa8\n"
+        "<U00E9> \\xc3\\xa9\n"
         "END CHARMAP\n\n"
     };
 
@@ -529,6 +535,10 @@ make_test_locale ()
         "<V129>\n<V130>\n<V131>\n<V132>\n<V133>\n<V134>\n<V135>\n<V136>\n"
         "<V137>\n<V138>\n<V139>\n"
 
+        // the listed two-byte character, after every value-named symbol
+        // so that none of them moves, with the weights of <a>
+        "<U00E8> <a>;<LETTER>;IGNORE\n"
+
         "order_end\n"
 
         // define a section in which all of the orders are forward orders
@@ -603,6 +613,72 @@ test_outside_charmap (const char* charTname, const std::collate<wchar_t>& co)
                "libstd std::collate<%s>::compare() of a character "
                "outside the character map with 'a': expected -1, got %d",
                charTname, ret);
+}
+
+// a two-byte character the collate table does not list collates by
+// UNDEFINED, IGNORE at every level in the test locale: its transform
+// is not empty, it compares as the test locale's position level has
+// it, and the narrow and wide facets agree (the narrow walk of the
+// collate trie moves into the sequence before it fails; the character
+// must be decoded from its first byte)
+enum { UNDEF_ALONE = -1, UNDEF_AFTER_A = 1, UNDEF_BEFORE_A = -1 };
+
+template <class charT>
+void
+test_undefined_multibyte (const char* charTname, const std::collate<charT>& co,
+                          const charT* undef,    // the unlisted character
+                          const charT* a_undef,  // 'a' then the character
+                          const charT* undef_a)  // the character then 'a'
+{
+    typedef std::basic_string<charT> String;
+
+    const charT a [] = { charT ('a'), charT () };
+
+    const String xfrm = co.transform (undef, undef + c_strlen (undef));
+    rw_assert (!xfrm.empty (), __FILE__, __LINE__,
+               "libstd std::collate<%s>::transform() of a two-byte "
+               "character the table does not list: expected a "
+               "non-empty string, got an empty one", charTname);
+
+    const String xfrm2 = co.transform (a_undef, a_undef + c_strlen (a_undef));
+    rw_assert (!xfrm2.empty (), __FILE__, __LINE__,
+               "libstd std::collate<%s>::transform() of 'a' and a "
+               "two-byte character the table does not list: expected "
+               "a non-empty string, got an empty one", charTname);
+
+    const struct {
+        const charT* s1;
+        const charT* s2;
+        int          expect;
+        const char*  what;
+    } rows [] = {
+        { undef,   a, UNDEF_ALONE,    "the unlisted character with 'a'" },
+        { a_undef, a, UNDEF_AFTER_A,  "'a' then the unlisted character, with 'a'" },
+        { undef_a, a, UNDEF_BEFORE_A, "the unlisted character then 'a', with 'a'" }
+    };
+
+    for (std::size_t i = 0; i != sizeof rows / sizeof *rows; ++i) {
+        const int ret = co.compare (rows [i].s1, rows [i].s1 + c_strlen (rows [i].s1),
+                                    rows [i].s2, rows [i].s2 + c_strlen (rows [i].s2));
+        rw_assert (ret == rows [i].expect, __FILE__, __LINE__,
+                   "libstd std::collate<%s>::compare() of %s: "
+                   "expected %d, got %d",
+                   charTname, rows [i].what, rows [i].expect, ret);
+    }
+}
+
+static void
+test_undefined_multibyte (const char* charTname, const std::collate<char>& co)
+{
+    test_undefined_multibyte (charTname, co,
+                              "\xc3\xa9", "a\xc3\xa9", "\xc3\xa9" "a");
+}
+
+static void
+test_undefined_multibyte (const char* charTname, const std::collate<wchar_t>& co)
+{
+    test_undefined_multibyte (charTname, co,
+                              L"\xe9", L"a\xe9", L"\xe9" L"a");
 }
 
 /**************************************************************************/
@@ -697,6 +773,8 @@ check_libstd_test_locale (const char* charTname)
         test_hash (charTname, co, "c", "ic");
 
         test_outside_charmap (charTname, co);
+
+        test_undefined_multibyte (charTname, co);
 
         test_table_order (charTname, loc, co);
     }

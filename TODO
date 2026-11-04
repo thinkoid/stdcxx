@@ -22,24 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The narrow =transform= is empty for a string with an undefined character
-
-Under =zh_CN.UTF-8=, =collate<char>::transform= of "\xe7\x90\xbb"
-(U+743B, a character the collate table does not list) returns an
-empty key, and so does any string holding it ("a\xe7\x90\xbb",
-"\xe7\x90\xbb" "a"); =collate<wchar_t>::transform= of the same
-strings returns 8 and 12 weights, the =UNDEFINED= row. "a" and U+4E2D
-transform on both sides. The narrow undefined path (=src/collate.cpp=,
-=do_transform=, the =__rw_is_invalid= check against =n_to_w=) rejects
-a valid sequence the wide path accepts. Since the 2005 import. Found
-by probe, 2026-11-03, beside the mapping leak.
-
-Fix: read the narrow check against what =__rw_get_char_offset= leaves
-in =tmp_lo2=; the narrow and wide paths should agree.
-
-Check: the three strings above under =zh_CN.UTF-8=, narrow and wide
-keys both non-empty, ordering consistent between the two.
-
 ** TODO =num_put= writes an unbounded run of zeros for a negative precision
 
 =src/num_put.cpp= 773-825: =fixed=, =setprecision (-1000)=, 1234
@@ -317,6 +299,24 @@ would notice it moving.
 Check: =22.locale.codecvt='s corrupt-state section run against the
 C-library facets again, on pin, with =test_libc_split= still
 passing.
+
+** TODO A character given the weights of another compares greater than it
+
+In the test locale of =22.locale.collate=, =<U00E8>= is listed last
+in the order with =<a>='s weights, ~<a>;<LETTER>;IGNORE~, and
+=compare ("\xc3\xa8", "a")= returns 1 on both the narrow and the wide
+facet, where identical weights at every level should give 0. The
+third level is ~forward,position~ and both elements are =IGNORE=
+there. Seen while the undefined-character check was written,
+2026-11-04; the check does not pin it. Hypothesis: the position
+level weighs an =IGNORE=d element by its ordinal in the order, or
+the database writes a weight for it that is not =<a>='s.
+
+Fix: establish which with =util/locale= on the database, then
+either the writer or the position level of =__rw_process_offsets=.
+
+Check: the pair compares 0 on both facets, with a row in
+=22.locale.collate=.
 
 ** TODO The =__rw_once= comment names a static mutex path that is gone
 

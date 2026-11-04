@@ -445,12 +445,13 @@ __rw_get_char_offset (const __rw_collate_t *impl,
 }
 
 
-// returns true if the character sequence starting at `from'
-// does not form a valid complete multibyte character
+// returns true if the character sequence starting at `from' and
+// bounded by `end' does not form a valid complete multibyte character
 static inline bool
-__rw_is_invalid (const unsigned int* first_tab, const char *from)
+__rw_is_invalid (const unsigned int* first_tab, const char *from,
+                 const char *end)
 {
-    return 0 != (__rw_mbtowco (first_tab, from, 0) & 0x80000000);
+    return 0 != (__rw_mbtowco (first_tab, from, end) & 0x80000000);
 }
 
 
@@ -905,16 +906,21 @@ do_transform (const char* low, const char* high) const
                             return string_type ();   // error
                     }
 
-                    if (__rw::__rw_is_invalid (cvtmap._C_cvt->n_to_w_tab (),
-                                               tmp_lo2))
-                        return string_type ();   // error
+                    // the walk above has moved `tmp_lo2' into the
+                    // sequence; decode the character from its first
+                    // byte, within the range, and step past it
+                    const char* next = tmp_lo;
+                    const unsigned wc =
+                        __rw::__rw_mbtowco (cvtmap._C_cvt->n_to_w_tab (),
+                                            next, high);
+                    if (wc & 0x80000000)
+                        return string_type ();   // invalid or incomplete
 
                     const unsigned int* const pwt =
                         impl->get_weight (impl->undefined_weight_idx);
 
                     indexes.append (&pwt, 1);
-
-                    tmp_lo = tmp_lo2;
+                    tmp_lo = next - 1;
                 }
             }
             else {
@@ -1088,7 +1094,7 @@ do_transform (const wchar_t* low, const wchar_t* high) const
                         tmp [nbytes] = '\0';
 
                         if (__rw::__rw_is_invalid (cvtmap._C_cvt->w_to_n_tab (),
-                                                   tmp))
+                                                   tmp, tmp + nbytes))
                             return string_type ();   // error
 
                         const unsigned int *pwt =

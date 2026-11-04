@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,951 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,837 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,639 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,649 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -254,6 +254,9 @@ all six tables:
   the C library takes the state as it comes: 684 to 668 in 11S and
   11S-clang, 688 to 672 in 11s and 11s-clang, 0 failed; 15D and
   15D-clang already skipped them.
+- 2026-11-04: `22.locale.collate`, 145,873 to 145,883 in 15D, the
+  undefined two-byte character of the test locale, narrow and wide;
+  the other five tables are to move by the same ten.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.

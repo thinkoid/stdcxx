@@ -1657,10 +1657,15 @@ paths:
   `__rw_get_wchar_offset`), else, when `undefined_optimization` is set,
   the shared row `undefined_weight_idx` after a validity check against
   the codeset's codecvt database, mapped once per call and released
-  with it (`__rw_cvt_mapping`). The wide keys are the UTF-8 form of
-  the `wchar_t` (`__rw_itoutf8`). A sequence the check rejects makes
-  the whole transform empty; so does a wide character outside the
-  charmap (5bbe3e4b). The rows go to `__rw_process_offsets`.
+  with it (`__rw_cvt_mapping`). The narrow walk moves its pointer
+  into the sequence as it descends the trie, so the check decodes
+  the character from its first byte, bounded by the range, and steps
+  past it with the decoder's own advance (`__rw_mbtowco`); the wide
+  walk leaves its pointer on the character. The wide keys are the
+  UTF-8 form of the `wchar_t` (`__rw_itoutf8`). A sequence the check
+  rejects makes the whole transform empty; so does a wide character
+  outside the charmap (5bbe3e4b). The rows go to
+  `__rw_process_offsets`.
 
 `__rw_process_offsets` walks once per level (`num_weights`), grouping
 consecutive rows by the level's two direction bits in each row's
