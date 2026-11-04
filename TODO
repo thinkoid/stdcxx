@@ -52,7 +52,7 @@ static built once that holds a reference of its own, the global locale
 is a pointer behind a get and a set, a body is unnamed when it was
 built with a facet or combined from an unnamed one, and ~operator==~
 is the same body or two equal names. What remains is the
-ThreadSanitizer run and the factory parameter of =__rw_get_std_facet=.
+ThreadSanitizer run.
 
 Fix: take that path. One kind of body, built with every standard
 facet in the constructor; the two repositories, =_C_is_managed= and
@@ -100,26 +100,6 @@ Fix: remove them; for the facet bits, the field and the =pfx=
 argument of the macros the characterization writes.
 
 Check: grep, then a 15D build.
-
-** TODO =__rw_get_std_facet= takes a factory it does not use
-
-=__rw_get_std_facet= (=include/loc/_locale.h= 283-306) still takes
-the facet's factory, a =__rw_facet::_C_ctor_t*=, and ignores it: the
-body constructor builds every standard facet through its own table,
-=__rw_std_facet_ctors= (=src/locale_body.cpp= 404). The argument is
-passed at five sites: =_RWSTD_SPECIALIZE_USE_FACET=
-(=src/use_facet.h= 169), which every =ti_= file expands, and the four
-inline =__rw_get_facet= specializations of =_locale.h= (349-376),
-which are why =__rw_ct_ctype=, =__rw_ct_numpunct=, =__rw_ct_num_get=
-and =__rw_ct_num_put= are declared in the public header and exported.
-Found while removing the first-use fill, 2026-11-04.
-
-Fix: drop the parameter, from the definition, the declaration at
-line 59 and the friend declaration in =std::locale=, and its five
-arguments; move the four declarations to =src/locale_body.h= with
-the other 22.
-
-Check: a 15D build, then the =22.locale= rows on the pin.
 
 ** TODO The narrow =transform= is empty for a string with an undefined character
 

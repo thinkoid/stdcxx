@@ -503,7 +503,7 @@ not.
 **Access.** `__rw_get_facet` resolves the 26 standard specializations
 to `__rw_get_std_facet`: a plain read of the slot, which the body's
 constructor filled through the factories `__rw_ct_*` of
-`src/use_facet.h`; the factory it is still passed goes unused. Every
+`src/use_facet.h` and `src/ctype.cpp`. Every
 other type goes to `_C_get_facet`, which initializes the id first. The
 result is `dynamic_cast` to `Facet`. `use_facet` throws `bad_cast` on
 null; `has_facet` returns the test and has no exception specification.

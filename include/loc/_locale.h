@@ -56,8 +56,7 @@ enum __rw_locale_category {
 class _RWSTD_EXPORT __rw_locale;
 
 inline const __rw_facet*
-__rw_get_std_facet (const std::locale&, __rw_facet::_C_facet_type,
-                    __rw_facet::_C_ctor_t*);
+__rw_get_std_facet (const std::locale&, __rw_facet::_C_facet_type);
 
 inline const __rw_facet*
 __rw_get_facet_by_id (const std::locale&,
@@ -242,8 +241,7 @@ private:
     // a SunPro 5.5 and prior bug (PR #28626)
     friend const facet*
     __rw::__rw_get_std_facet (const std::locale&,
-                             __rw::__rw_facet::_C_facet_type,
-                             __rw::__rw_facet::_C_ctor_t*);
+                             __rw::__rw_facet::_C_facet_type);
 
     friend const __rw::__rw_facet*
     __rw::__rw_get_facet_by_id (const std::locale&,
@@ -281,9 +279,8 @@ __rw_get_facet (const std::locale &__loc, const _Facet *__dummy)
 
 
 inline const __rw_facet*
-__rw_get_std_facet (const std::locale   &__loc,
-                    __rw_facet::_C_facet_type  __type,
-                    __rw_facet::_C_ctor_t*     /* unused */)
+__rw_get_std_facet (const std::locale         &__loc,
+                    __rw_facet::_C_facet_type  __type)
 {
     // expose an implementation detail of locale body for efficiency
     struct _Facets {
@@ -304,16 +301,6 @@ __rw_get_std_facet (const std::locale   &__loc,
 
     return __facet;
 }
-
-
-// functions' type must be __rw_facet::_C_ctor_t
-// i.e., as if they were declared as follows:
-//     __rw_facet::_C_ctor_t __rw_ct_ctype;
-// the declaration above causes a Compaq C++ 6.5 ICE (PR #30188)
-_RWSTD_EXPORT __rw_facet* __rw_ct_ctype (_RWSTD_SIZE_T, const char*);
-_RWSTD_EXPORT __rw_facet* __rw_ct_numpunct (_RWSTD_SIZE_T, const char*);
-_RWSTD_EXPORT __rw_facet* __rw_ct_num_get (_RWSTD_SIZE_T, const char*);
-_RWSTD_EXPORT __rw_facet* __rw_ct_num_put (_RWSTD_SIZE_T, const char*);
 
 
 #define _RWSTD_OVERLOAD_GET_FACET(F)                 \
@@ -345,8 +332,7 @@ template <>
 inline const __rw_facet*
 __rw_get_facet (const std::locale &__loc, const std::ctype<char>*)
 {
-    return __rw_get_std_facet (__loc, __rw_facet::_C_ctype,
-                               __rw_ct_ctype);
+    return __rw_get_std_facet (__loc, __rw_facet::_C_ctype);
 }
 
 
@@ -354,8 +340,7 @@ template <>
 inline const __rw_facet*
 __rw_get_facet (const std::locale &__loc, const std::numpunct<char>*)
 {
-    return __rw_get_std_facet (__loc, __rw_facet::_C_numpunct,
-                               __rw_ct_numpunct);
+    return __rw_get_std_facet (__loc, __rw_facet::_C_numpunct);
 }
 
 
@@ -363,8 +348,7 @@ template <>
 inline const __rw_facet*
 __rw_get_facet (const std::locale &__loc, const __rw_nget_c*)
 {
-    return __rw_get_std_facet (__loc, __rw_facet::_C_num_get,
-                               __rw_ct_num_get);
+    return __rw_get_std_facet (__loc, __rw_facet::_C_num_get);
 }
 
 
@@ -372,8 +356,7 @@ template <>
 inline const __rw_facet*
 __rw_get_facet (const std::locale &__loc, const __rw_nput_c*)
 {
-    return __rw_get_std_facet (__loc, __rw_facet::_C_num_put,
-                               __rw_ct_num_put);
+    return __rw_get_std_facet (__loc, __rw_facet::_C_num_put);
 }
 
 

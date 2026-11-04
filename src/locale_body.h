@@ -52,11 +52,15 @@ struct _RWSTD_CLASS_EXPORT locale;
 namespace __rw { 
 
 
-// the factories of the standard facets (src/use_facet.h) other than
-// the four <loc/_locale.h> declares, for the table the body
-// constructor builds its facets with (src/locale_body.cpp)
+// the factories of the standard facets (src/use_facet.h,
+// src/ctype.cpp), for the table the body constructor builds its
+// facets with (src/locale_body.cpp)
 __rw_facet* __rw_ct_collate (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_ctype (_RWSTD_SIZE_T, const char*);
 __rw_facet* __rw_ct_codecvt (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_numpunct (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_num_get (_RWSTD_SIZE_T, const char*);
+__rw_facet* __rw_ct_num_put (_RWSTD_SIZE_T, const char*);
 __rw_facet* __rw_ct_moneypunct (_RWSTD_SIZE_T, const char*);
 __rw_facet* __rw_ct_moneypunct_intl (_RWSTD_SIZE_T, const char*);
 __rw_facet* __rw_ct_money_get (_RWSTD_SIZE_T, const char*);

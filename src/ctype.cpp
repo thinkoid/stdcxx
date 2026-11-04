@@ -616,9 +616,9 @@ __rw_lower_tab [std::ctype<char>::table_size + 1] = {
 };
 
 
-_RWSTD_EXPORT __rw_facet::_C_ctor_t __rw_ct_ctype;
+__rw_facet::_C_ctor_t __rw_ct_ctype;
 
-_RWSTD_EXPORT __rw_facet* __rw_ct_ctype (size_t ref, const char *name)
+__rw_facet* __rw_ct_ctype (size_t ref, const char *name)
 {
     // the id and the ordinary facet are set up once, under the
     // compiler's guard, as in _RWSTD_DEFINE_FACET_FACTORY()

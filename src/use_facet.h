@@ -166,8 +166,8 @@ __rw_init_std_facet (__rw_facet                *pfacet,
             (const std::locale &__loc,                                \
              const __rw_facet_id&,                                    \
              const __rw_ ## fid ## _facet*) {                         \
-            return __rw_get_std_facet (__loc, __rw_facet::_C_ ## fid, \
-                                       __rw_ct_ ## fid);              \
+            return __rw_get_std_facet (__loc,                         \
+                                       __rw_facet::_C_ ## fid);       \
        }                                                              \
     }                                                                 \
     typedef void __rw_unused_type

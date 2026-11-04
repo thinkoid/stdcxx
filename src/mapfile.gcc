@@ -51,7 +51,6 @@ global:
     _ZN4__rw12__rw_memattrEPKvji;
     _ZN4__rw12__rw_put_numEPPcjjiiPKvPKcS5_;
     _ZN4__rw13__rw_allocateEji;
-    _ZN4__rw13__rw_ct_ctypeEjPKc;
     _ZN4__rw13__rw_dbl_qNaNE;
     _ZN4__rw13__rw_dbl_sNaNE;
     _ZN4__rw13__rw_flt_qNaNE;
@@ -65,13 +64,10 @@ global:
     _ZN4__rw14__rw_exceptionaSERKS0_;
     _ZN4__rw14__rw_ldbl_qNaNE;
     _ZN4__rw14__rw_ldbl_sNaNE;
-    _ZN4__rw15__rw_ct_num_getEjPKc;
-    _ZN4__rw15__rw_ct_num_putEjPKc;
     _ZN4__rw15__rw_deallocateEPvji;
     _ZN4__rw15__rw_put_groupsEPPcjjPKcS3_S3_;
     _ZN4__rw15__rw_throw_procE;
     _ZN4__rw16__rw_assert_failEPKcS1_iS1_;
-    _ZN4__rw16__rw_ct_numpunctEjPKc;
     _ZN4__rw17__rw_dbl_infinityE;
     _ZN4__rw17__rw_flt_infinityE;
     _ZN4__rw18__rw_ldbl_infinityE;
