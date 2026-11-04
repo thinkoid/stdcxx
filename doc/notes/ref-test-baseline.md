@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,471,387 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,471,281 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,475,059 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,639 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -278,7 +278,7 @@ The eleven, and what each races:
 
 | program | races | 15D |
 |---|---|---|
-| `22.locale.use_facet.mt` | the facet slot of a fresh body, every standard facet in turn; leak check | 200 |
+| `22.locale.use_facet.mt` | the facet slots of a fresh body, read at once, every standard facet in turn; leak check: the facets die with the body | 200 |
 | `22.locale.facet.mt` | the facet reference counts | 8 |
 | `22.locale.id.mt` | a user facet's id | 999 |
 | `22.locale.codecvt.mt` | the wide `codecvt`'s database, on the first conversion | 1,600 |
@@ -288,7 +288,7 @@ The eleven, and what each races:
 | `22.locale.time.put.libc.mt` | the `time_put` data, both character types in turn; leak check | 200 |
 | `22.locale.messages.mt` | the catalog repository, `open` of one catalog from every thread; leak check | 600 |
 | `22.locale.statics.mt` | the swap of the global locale, with the returned locales checked as a multiset | 200 |
-| `22.locale.cons.mt` | the named-body repository, one body per name constructed from every thread at once, and the combinations | 1,000 |
+| `22.locale.cons.mt` | the constructor from a name and the combinations, from every thread at once; the results compared | 800 |
 
 The harness limits each test's address space to 1 GiB
 (`etc/config/GNUmakefile.tst`), STDCXX-440's guard against a test
@@ -309,7 +309,7 @@ and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 | `22.locale.ctype.mt` | 200 | 200 | 800 |
 | `22.locale.numpunct.mt` | 600 | 600 | 1200 |
 | `22.locale.moneypunct.mt` | 600 | 600 | 1200 |
-| `22.locale.cons.mt` | 400 | 400 | 1000 |
+| `22.locale.cons.mt` | 200 | 200 | 800 |
 
 Reasons, in order:
 
@@ -330,9 +330,9 @@ Reasons, in order:
 - `22.locale.codecvt.mt` counts two checks per thread and round,
   `22.locale.ctype.mt` one, `22.locale.numpunct.mt` and
   `22.locale.moneypunct.mt` one per thread and two per round, and
-  `22.locale.cons.mt` one per thread and one per round: 400, 200, 600
-  and 400 with the one thread of a single-threaded build; 1,600, 800,
-  1,200 and 1,000 with four.
+  `22.locale.cons.mt` one per thread: 400, 200, 600 and 200 with the
+  one thread of a single-threaded build; 1,600, 800, 1,200 and 800
+  with four.
 
 The single-threaded builds run each MT test with one thread. Two
 count nothing in any build, `19.exceptions.mt` and

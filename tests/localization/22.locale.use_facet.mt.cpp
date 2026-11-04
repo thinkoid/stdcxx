@@ -2,8 +2,9 @@
  *
  * 22.locale.use_facet.mt.cpp
  *
- * test exercising the thread safety of the first use_facet call,
- * racing it for each standard facet in turn
+ * test exercising use_facet from several threads at once on a new
+ * named locale, for each standard facet in turn, and the lifetime
+ * of the facets: they die with the locale
  *
  * $Id$
  *
@@ -126,10 +127,10 @@ static const struct {
 
 static const std::size_t nfacets = sizeof facets / sizeof *facets;
 
-// the locale whose facet slot the threads race to fill
+// the locale whose facet the threads read
 static const std::locale* race_locale;
 
-// the facet whose slot is raced in the current round
+// the facet the threads read in the current round
 static std::size_t race_facet;
 
 // the number of threads that have started in the current round
@@ -137,14 +138,14 @@ static int nstarted;
 
 extern "C" {
 
-// the replacement operator new of rw_new.h keeps no lock: the only
-// allocations the threads make are the facet's and the facet
-// repository's, both under the repository's lock
+// the replacement operator new of rw_new.h keeps no lock: the
+// threads read a slot the locale's constructor filled and allocate
+// nothing
 static void*
 race_func (void*)
 {
-    // start with the other threads so that they find
-    // the slot empty at the same time
+    // start with the other threads so that they read
+    // the slot at the same time
     rw_thread_gate (&nstarted, opt_nthreads);
 
     facets [race_facet].use (*race_locale);
@@ -194,8 +195,8 @@ run_test (int, char**)
         rwt_check_leaks (0, 0);
 
         {
-            // each round a new locale, whose facet slots are empty,
-            // and the next facet
+            // each round a new locale, whose constructor builds every
+            // facet, and the next facet
             const std::locale loc (namebuf);
 
             race_locale = &loc;
@@ -213,8 +214,8 @@ run_test (int, char**)
             race_locale = 0;
         }
 
-        // the facet dies with the only locale that holds it: every
-        // reference the racing threads took has been returned
+        // the facets die with the only locale that holds them:
+        // nothing the round allocated outlives it
         std::size_t nbytes;
         const std::size_t nblocks = rwt_check_leaks (&nbytes, 0);
 

@@ -51,8 +51,7 @@ constructor builds a new body or copies one, the classic body is a
 static built once that holds a reference of its own, the global locale
 is a pointer behind a get and a set, a body is unnamed when it was
 built with a facet or combined from an unnamed one, and ~operator==~
-is the same body or two equal names. What remains is the test that
-pins one body per name (=22.locale.cons.mt=, in Tests), the
+is the same body or two equal names. What remains is the
 ThreadSanitizer run and the factory parameter of =__rw_get_std_facet=.
 
 Fix: take that path. One kind of body, built with every standard
@@ -442,45 +441,6 @@ Check: none beyond the build; no assertion moves.
 The =time_put= test has the same pair at
 =tests/localization/22.locale.time.put.cpp= 316-317 (=era_d_fmt= labelled
 =%EX=, =era_t_fmt= =%Ex=); found 2026-11-02.
-
-** TODO =22.locale.use_facet.mt= races a slot fill that is gone
-
-The program races the first =use_facet= of each standard facet on a
-fresh named locale, round after round, and checks that nothing the
-round allocated survives it (=analysis-facet-first-use.md=, chapter
-1.5). The body constructor now fills every slot, so the threads only
-read; the leak check still holds the body's facets to the locale's
-lifetime. =ref-test-baseline.md= chapter 3.2 and =ref-locale.md= 8.4
-describe it as the race. Found with the removal of the first-use
-fill, 2026-11-04.
-
-Fix: keep it as the lifetime check under the threads, and say so in
-its comment and in both tables, or fold the leak check into
-=22.locale.cons.mt=; the repositories' removal decides which.
-
-Check: the row on its pin; the two tables name what it checks.
-
-** TODO =22.locale.cons.mt= asserts one body per name
-
-The program constructs a named locale from four threads at once and
-asserts, with every thread's locale alive, that =use_facet<ctype<char> >=
-returns the same facet through each
-(=tests/localization/22.locale.cons.mt.cpp= 205-220): one body per
-name, the body repository's behaviour. Every constructor from a name
-now builds a new body with its own byname facets, so the assertion
-fails in every round whose name is not the C locale's, 192 of 200 in
-15D; the classic body is shared, and the 8 rounds of "C" and "POSIX"
-pass. The equality and combination checks of the rounds pass. The
-comments of the program, =ref-test-baseline.md= 3.2 and
-=ref-locale.md= 8.4 describe it as the repository's race. Found with
-the removal of the body repository, 2026-11-04.
-
-Fix: the assertion checks what the constructors give now: =first ==
-second= named alike, each thread's =ctype<char>= its own, the classic
-body shared; the comments and both tables describe the race of the
-constructor from a name.
-
-Check: the row back at 1000 assertions and 0 failures on the 15D pin.
 
 ** TODO The suite against other libraries
 

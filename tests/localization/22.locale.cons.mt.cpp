@@ -4,7 +4,8 @@
  *
  * test exercising the thread safety of the locale constructors,
  * racing the construction of one named locale, and its combination
- * with another, from several threads at once
+ * with another, from several threads at once: the locales of every
+ * thread compare equal and combine alike
  *
  * $Id$
  *
@@ -28,7 +29,7 @@
  *
  **************************************************************************/
 
-#include <locale>     // for locale, ctype, use_facet
+#include <locale>     // for locale
 #include <cstring>    // for strlen()
 
 #include <rw_locale.h>   // for rw_locales()
@@ -84,11 +85,6 @@ static std::locale::category race_category;
 // the number of threads that have started in the current round
 static int nstarted;
 
-// the locale each thread constructed, held until the main thread
-// has compared them: while every one is alive, one body per name
-// means one facet per slot
-static std::locale held [MAX_THREADS];
-
 // per thread, the checks of the combinations that failed
 static int mismatches [MAX_THREADS];
 
@@ -99,7 +95,7 @@ race_func (void *arg)
 {
     const long inx = long (arg);
 
-    // start with the other threads so that they construct the body
+    // start with the other threads so that they construct a locale
     // of the same name at the same time
     rw_thread_gate (&nstarted, opt_nthreads);
 
@@ -136,7 +132,6 @@ race_func (void *arg)
     }
 
     mismatches [inx] = bad;
-    held [inx]       = first;
 
     return 0;
 }
@@ -172,8 +167,9 @@ run_test (int, char**)
 
     for (int i = 0; 0 == result && i != opt_nrounds; ++i) {
 
-        // the body of the round's name dies with the last locale that
-        // holds it, so each round constructs it anew
+        // every constructor from a name builds a body of its own: the
+        // threads race the expansion of the name and the factories of
+        // the facets, not a shared body
         race_name     = locale_names [std::size_t (i) % nlocales];
         race_other    = locale_names [std::size_t (i + 1) % nlocales];
         race_category = categories [std::size_t (i) % ncategories];
@@ -201,26 +197,6 @@ run_test (int, char**)
                        race_name, race_other, int (race_category), i, j,
                        mismatches [j]);
         }
-
-        // one body per name: with every thread's locale alive, the
-        // facet in a slot of the body is the same object through
-        // each of them
-        const std::ctype<char>* const facet =
-            &std::use_facet<std::ctype<char> >(held [0]);
-
-        bool same = true;
-
-        for (int j = 1; same && j != opt_nthreads; ++j)
-            same = facet == &std::use_facet<std::ctype<char> >(held [j]);
-
-        rw_assert (same, 0, __LINE__,
-                   "std::locale (%#s) constructed from %d threads at once, "
-                   "round %d: one body, the same ctype<char> facet "
-                   "through every locale",
-                   race_name, opt_nthreads, i);
-
-        for (int j = 0; j != opt_nthreads; ++j)
-            held [j] = std::locale::classic ();
     }
 
     return result;

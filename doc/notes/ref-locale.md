@@ -611,21 +611,17 @@ categories in `setlocale`'s order. Pins: nothing.
 | program | covers | 15D |
 |---|---|---|
 | `22.locale.globals` | `has_facet` and `use_facet` of every standard facet, narrow and wide, in the classic and every named locale; byname facets present in named locales, `bad_cast` in the classic one | 78320 |
-| `22.locale.cons.mt` | one named locale constructed by four threads at once; the name and two-locale combinations and their equalities | 1000 |
+| `22.locale.cons.mt` | one named locale constructed by four threads at once; the name and two-locale combinations and their equalities | 800 |
 | `22.locale.facet.mt` | facet reference counts | 8 |
 | `22.locale.id.mt` | the first use of a user facet id | 999 |
 | `22.locale.statics.mt` | racing `locale::global`, a multiset check of the globals | 200 |
-| `22.locale.use_facet.mt` | the first `use_facet` of each of the 26 standard facets, raced | 200 |
+| `22.locale.use_facet.mt` | `use_facet` of each of the 26 standard facets by four threads at once on a new named locale; the facets die with it | 200 |
 | `22.locale.cons.stdcxx-485` (regress) | constructors from several threads, `has_facet<collate<char> >` | 128 |
 
 No single-threaded test exercises the constructors' names,
 `combine`, `operator==` of composed locales, the category values or
 `global`'s effect on the C locale; every departure in 8.3 but
-`use_facet`'s is unpinned. `22.locale.cons.mt` also asserts one body
-per name, which the body repository gave: since every constructor
-from a name builds a new body, it fails in 192 of its 200 rounds, all
-but those of "C" and "POSIX" (`TODO`, "`22.locale.cons.mt` asserts
-one body per name"). No other row fails on the 15D pin. `TODO` "Tests
+`use_facet`'s is unpinned. No row fails on the 15D pin. `TODO` "Tests
 that GCC and Clang let through" names `22.locale.id.mt.cpp:98`, a
 template instantiation 435 deep, for EDG.
 
