@@ -45,7 +45,9 @@ The short version: the library implements all of clause 22 as
 14882:2003 specifies it, with its own locale databases compiled by
 `util/localedef` from glibc's locale sources, the C library as the
 fallback where a locale has no database, and one place where C++11
-governs, the format members of `time_get`. Its chapters 8 to 12 take
+governs, the format members of `time_get`. A locale constructor
+builds a body with every standard facet, or copies one; bodies are
+shared by copy only. The document's chapters 8 to 12 take
 each facet family against the standard, virtual by virtual; chapter
 13 indexes every departure, extension and open reading with its
 paragraph; the defects those chapters found are entries in `TODO`.

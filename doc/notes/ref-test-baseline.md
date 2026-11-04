@@ -240,6 +240,11 @@ all six tables:
   under 15D).
 - bc8fa4e7, 2026-11-03: `22.locale.codecvt`, up 6 in each configuration (662 to 668
   under 15D).
+- 71b965fb, 2026-11-04: `22.locale.cons.mt`, 1,000 to 800, in 15D
+  alone, and the 15D summary brought to the sum of its rows. The
+  other five tables keep 400 and 1,000 until the nightly measures
+  them; the row is to move to 200 in the single-threaded ones and to
+  800 in 15D-clang.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.

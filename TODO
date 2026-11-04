@@ -22,50 +22,27 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO Locale bodies and standard facets are shared through global repositories
+** TODO One kind of locale body: the ThreadSanitizer run and five pins
 
-=__rw_locale::_C_manage= kept one body per locale name in a
-process-wide sorted table under a static guard, and
-=__rw_facet::_C_manage= kept one standard facet per type and name in
-a second table. A body was managed when its name described all of its
-facets (=_C_is_managed=); the constructors, the destructor, =name ()=
-and ~operator==~ branched on the answer, and the standard facet slots
-of a body filled on first use (=analysis-facet-first-use.md=). The
-sharing saved memory where a program constructs the same named locale
-many times. It cost two kinds of body, a name used as identity (three
-defects of that proxy, now closed), two static guards on
-construction and destruction, and the slot races the sanitizer notes
-record. libstdc++ builds a body with all of its facets per constructor
-call, shares bodies and facets by copy only, and compares unnamed
-locales by identity. Decided 2026-11-04. Step 1 is done: the body
-constructor from a name builds every standard facet, and the first-use
-fill, =locale::_C_get_std_facet=, the body's mutex and the atomic
-loads of the slots are gone. Step 2 is done: the facet repository is
-gone; a body takes each standard facet from its factory, holds one
-reference and deletes the facet at zero unless it is an ordinary
-static, and the factories set up their statics under the compiler's
-guard. A body of a combined name builds its categories' byname facets
-again rather than share those of the named bodies. Step 3 is done: the
-body repository, =_C_is_managed= and the two bitmaps are gone; every
-constructor builds a new body or copies one, the classic body is a
-static built once that holds a reference of its own, the global locale
-is a pointer behind a get and a set, a body is unnamed when it was
-built with a facet or combined from an unnamed one, and ~operator==~
-is the same body or two equal names. What remains is the
-ThreadSanitizer run.
+The global repositories of locale bodies and standard facets are
+gone (1e5236a4, e6475f4b, 9bb1ebee). Every constructor builds a body
+with all 26 standard facets, or copies one; bodies are shared by copy
+only; the classic body is a static built once; the global locale is
+a pointer behind one mutex; a body is unnamed when it was built with
+a facet or combined from an unnamed one; ~operator==~ is the same
+body or two equal names. =ref-locale.md= chapters 1 to 4 and 7
+describe it. Two checks remain. The locale MT tests have not run
+under ThreadSanitizer since the change. The =22.locale.cons.mt= row
+moved with 71b965fb, and only the 15D pin carries it: the other five
+keep 400 (single-threaded) and 1,000 (15D-clang) for 200 and 800,
+and their summaries lag their rows.
 
-Fix: take that path. One kind of body, built with every standard
-facet in the constructor; the two repositories, =_C_is_managed= and
-the first-use fill go; the classic body stays static; the reference
-counts on bodies and facets stay for the copies; a body is unnamed
-when it holds a user facet or was combined from an unnamed one;
-~operator==~ is identity first, then the names. The database mapping
-stays per facet.
+Fix: none in the tree. The sanitizer run, and the nightly's re-pin
+of the five tables.
 
-Check: the locale rows of the suite on their pins (=22.locale.cons.mt=,
-=globals=, =name=, =statics.mt=, =synopsis=, =use_facet.mt=,
-=facet.mt=, =id.mt=) and every facet test; a ThreadSanitizer run of
-the MT locale tests with no report on the slots.
+Check: a ThreadSanitizer run of the =22.locale.*.mt= tests, each at
+its full assertion count, with no report on the slots, the bodies or
+the global locale; the six tables of the nightly on their pins.
 
 ** TODO The facet bits of the categories have no reader
 
@@ -1224,6 +1201,26 @@ entry names the document, what it must answer and where the material
 is. They are prose: no check beyond a reading. Roughly in order of
 payback.
 
+** TODO The sanitizer recipe of =analysis-locale-mt-race.md= instruments =localedef=
+
+Chapter 1 of =doc/notes/analysis-locale-mt-race.md= builds =util=
+with ~CXXOPTS=-fsanitize=thread~ and runs the tests with no =BINDIR=.
+A =localedef= in that build directory, instrumented or not, loads the
+instrumented =libstd15D.so= and segfaults on every run. Then
+=22.locale.use_facet.mt= and =22.locale.codecvt.mt= cannot build
+their =de_DE.ISO-8859-1= locale, skip their racing work and still exit
+0: a sanitizer run that reports nothing proves nothing.
+=analysis-locale-mt-sizing.md= already keeps the utilities
+uninstrumented and points =BINDIR= at a plain 15D build's =bin=.
+Found on a run from a worktree, 2026-11-04.
+
+Fix: chapter 1's recipe leaves =util= out of the sanitizer build and
+runs each test with ~BINDIR=<plain 15D build>/bin~, as the sizing
+note does, with one sentence on why.
+
+Check: under the sanitizer the two tests report their full counts,
+=22.locale.use_facet.mt= 200 and =22.locale.codecvt.mt= 1,600.
+
 ** TODO README section 5 and the configuration
 
 The original README says to set =CPPOPTS= and =CXXOPTS= on the make
@@ -1241,7 +1238,7 @@ Check: none; this is prose.
 
 ** TODO A tour of the locale subsystem
 
-Written: =doc/notes/ref-locale.md=, current as of 2026-11-02:
+Written: =doc/notes/ref-locale.md=, current as of 2026-11-04:
 chapters 1-7 the mechanics, 8-12 the facets against the standard, 13
 the departures. The entry leaves after a reading.
 
@@ -1250,18 +1247,6 @@ Facets and their ids, the facet index scheme, =locale_body=, how
 the binary locale data they read. A reader of
 =doc/notes/analysis-locale-mt-race.md= needs this map first. Shape:
 =ref-string-replace.md=.
-
-** TODO =ref-locale.md= 8.3 says the first =has_facet= constructs the facet
-
-The departure "=has_facet= has no exception specification" gives as
-its consequence that the first =has_facet= of a standard facet
-constructs it and may throw =bad_alloc=. The body constructor from a
-name now builds every standard facet, and =has_facet= of a standard
-facet reads a slot. =ref-conformance.md= carries the row. Found while
-removing the facet repository, 2026-11-04.
-
-Fix: prose. Say what can still throw, if anything, or that nothing
-does; the departure from the synopsis stays.
 
 ** TODO Decision records
 

@@ -24,7 +24,7 @@ the departures in one row each; this document is the normative text.
 C++11 governs one place only, the format members of `time_get`
 (chapter 12).
 
-The tree as of 2026-11-02.
+The tree as of 2026-11-04.
 
 ## 1. The handle, the body and the facets
 
@@ -560,9 +560,11 @@ body". Pins: nothing.
 #### `has_facet` has no exception specification
 
 The 22.1 synopsis and 22.1.2 declare `has_facet(const locale& loc)
-throw()`. The library declares none: the first `has_facet` of a
-standard facet constructs it and may throw `bad_alloc`. Why:
-e6c7726b. Pins: nothing.
+throw()`. The library declares none. `has_facet` of a standard facet
+reads a slot the body's constructor filled and throws nothing. The
+first `has_facet` of a program's facet type initializes the type's id
+under a static guard, and a lock that fails throws `runtime_error`
+(`include/rw/_mutex.h`). Why: e6c7726b. Pins: nothing.
 
 #### `use_facet` checks the dynamic type
 
@@ -2236,7 +2238,6 @@ is a `TODO` entry rather than a decision.
 
 | departure | paragraph | chapter | kind |
 |---|---|---|---|
-| The empty intersection of two categories is `ctype` | 22.1.1.1.1 p1 | 8.3 | defect |
 | Installing the facet a locale holds is a copy | 22.1.1.2 p13, 22.1.1.3 p4 | 8.3 | design |
 | `has_facet` has no exception specification | 22.1 synopsis, 22.1.2 | 8.3 | design |
 | `use_facet` checks the dynamic type | 22.1.2 p2 | 8.3 | extension |
@@ -2284,7 +2285,7 @@ is a `TODO` entry rather than a decision.
 | Body layout, ids, the classic and global bodies | `src/locale_body.h`, `src/locale_body.cpp` |
 | Composition | `src/locale_combine.cpp` |
 | Facet base, data loading | `include/loc/_facet.h`, `src/facet.cpp` |
-| Factories for standard facets | `src/use_facet.h`, `src/ti_*.cpp` |
+| Factories for standard facets | `src/use_facet.h`, `src/ti_*.cpp`, `src/ctype.cpp` |
 | Lazily built C-library data | `src/punct.cpp` (`__rw_get_numpunct`, `__rw_get_moneypunct`) |
 | Global and classic locales | `src/locale_global.cpp`, `src/locale_classic.cpp` |
 | C locale coordination and file mapping | `src/setlocale.h`, `src/setlocale.cpp`, `src/mman.cpp` |
@@ -2295,5 +2296,5 @@ is a `TODO` entry rather than a decision.
 | The departures | chapter 13, `ref-conformance.md` chapter 2 |
 
 Written by OpenAI LeChuck. Brought up to date with the tree of
-2026-11-02; chapters 8 to 12 written against ISO/IEC 14882:2003 the
-same day.
+2026-11-04; chapters 8 to 12 written against ISO/IEC 14882:2003 on
+2026-11-02.
