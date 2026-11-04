@@ -2037,7 +2037,8 @@ empty or missing.
 #### `time_get`: `do_date_order`
 
 It walks the facet's `%x` format (6aecb262, 08295a74), past the flags
-`- _ 0 ^ #`, a width and a modifier. `%d %e` are the day, `%b %B %h %m`
+`- _ 0 ^ #`, a width and a modifier (a width or precision in a format
+is bounded at 64, `ref-conformance.md` ch. 2). `%d %e` are the day, `%b %B %h %m`
 the month, `%C %y %Y` the year (`%y` right after `%C` completes it),
 `%D` and `%F` their sequences; `%a %A %n %t %%` are skipped. Three
 components, each once, give the order; else `no_order`.

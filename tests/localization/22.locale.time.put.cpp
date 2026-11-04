@@ -1861,6 +1861,37 @@ void test_user (charT, const char *tname)
         }
     }
 
+    // a width or precision in a format is bounded at 64: the digits
+    // past it are dropped, the field is 64 wide, the number 64 digits
+    {
+        time_data tdw = td;
+        tdw.d_fmt = "%99999999999d";
+        tdw.t_fmt = "%.99999999999d";
+
+        const char* const wloc = make_LC_TIME (&tdw, "test-locale-width");
+
+        if (rw_error (0 != wloc, 0, __LINE__,
+                      "failed to generate the LC_TIME locale of a wide "
+                      "directive")) {
+            const std::locale saved =
+                std::locale::global (std::locale (std::locale (), wloc,
+                                                  std::locale::time));
+
+            static char wide [65];
+            static char precise [65];
+
+            std::memset (wide, ' ', 62);
+            std::memcpy (wide + 62, "15", 3);
+            std::memset (precise, '0', 62);
+            std::memcpy (precise + 62, "15", 3);
+
+            TEST (T (0, 0, 0, 15), "%x", 0, 0, ' ', wide);
+            TEST (T (0, 0, 0, 15), "%X", 0, 0, ' ', precise);
+
+            std::locale::global (saved);
+        }
+    }
+
     rw_info (0, 0, __LINE__,
              "%%r: the locale's time representation in the AM/PM notation");
     TEST (T (INT_MAX), "%r", 0, 0, ' ', td.t_fmt_ampm);

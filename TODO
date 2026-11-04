@@ -22,21 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The width of a directive in a format overflows an =int=
-
-=__rw_fmt_time= (=src/time_put.cpp=) accumulates the =%[w][.p]=
-digits of a locale's format into an =int= with no bound: the narrow
-walk overflows a signed =int= past ten digits, which is undefined;
-the wide walk computes in =unsigned= and converts back. A width near
-=INT_MAX= asks =snprintf= for that many characters, and =do_put='s
-buffer grows to hold them. Found by reading, 2026-11-04.
-
-Fix: stop accumulating at a bound and ignore the digits past it, or
-take the directive as a literal; a decision.
-
-Check: a format with an eleven-digit width, under
-~-fsanitize=undefined~.
-
 ** TODO Sweep the library for extensions
 
 The negative precision under =fixed= left on 2026-11-04 (9a5a402a),

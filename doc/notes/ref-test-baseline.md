@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,951 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,837 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,656 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,664 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -274,6 +274,9 @@ all six tables:
 - 2026-11-04: `22.locale.time.put`, 2,406 to 2,430 in 15D, six rows
 - 2026-11-04: `22.locale.time.get`, 3,331 to 3,332: localedef rejects a
   source of 101 era records; the other five tables are to move by one.
+- 2026-11-04: `22.locale.time.put`, 2,430 to 2,438, a width and a
+  precision of eleven digits in a format, bounded at 64; the other
+  five tables are to move by the same eight.
   of formats that grow `do_put`'s buffer, narrow and wide; the other
   five tables are to move by the same 24.
 

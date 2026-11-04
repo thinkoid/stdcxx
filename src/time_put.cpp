@@ -1466,6 +1466,13 @@ __rw_grow_time_buf (charT **pbuf, size_t &bufsize, size_t len,
 }
 
 
+// the bound on a width or precision a format gives a directive:
+// no directive produces more than five characters, so a larger
+// one sizes nothing but the buffer; the digits past it are read
+// and dropped
+enum { __rw_fmt_max_width = 64 };
+
+
 static size_t
 __rw_fmt_time (const __rw_facet *pfacet, char **pbuf, size_t &bufsize,
                size_t off, const char *stackbuf,
@@ -1511,7 +1518,6 @@ __rw_fmt_time (const __rw_facet *pfacet, char **pbuf, size_t &bufsize,
             }
 
             if (*pat >= '0' && *pat <= '9') {
-
                 // if width is given, set precision to 0 to prevent
                 // it from being overridden later by __rw_put_time()
                 width = 0;
@@ -1519,8 +1525,12 @@ __rw_fmt_time (const __rw_facet *pfacet, char **pbuf, size_t &bufsize,
 
                 for (; *pat >= '0' && *pat <= '9'; ++pat) {
                     // set the width of the current specifier
-                    width = width * 10 + *pat - '0';
+                    if (width <= __rw_fmt_max_width)
+                        width = width * 10 + *pat - '0';
                 }
+
+                if (width > __rw_fmt_max_width)
+                    width = __rw_fmt_max_width;
             }
 
             if ('.' == *pat) {
@@ -1537,8 +1547,12 @@ __rw_fmt_time (const __rw_facet *pfacet, char **pbuf, size_t &bufsize,
 
                     for (; *pat >= '0' && *pat <= '9'; ++pat) {
                         // set the precision of the current specifier
-                        prec = prec * 10 + *pat - '0';
+                        if (prec <= __rw_fmt_max_width)
+                            prec = prec * 10 + *pat - '0';
                     }
+
+                    if (prec > __rw_fmt_max_width)
+                        prec = __rw_fmt_max_width;
                 }
             }
 
@@ -1650,7 +1664,6 @@ __rw_fmt_time (const __rw_facet *pfacet, wchar_t **pwbuf, size_t &bufsize,
             }
 
             if (*wpat >= L'0' && *wpat <= L'9') {
-
                 // if width is given, set precision to 0 to prevent
                 // it from being overridden later by __rw_put_time()
                 width = 0;
@@ -1658,8 +1671,12 @@ __rw_fmt_time (const __rw_facet *pfacet, wchar_t **pwbuf, size_t &bufsize,
 
                 for (; *wpat >= L'0' && *wpat <= L'9'; ++wpat) {
                     // set the width of the current specifier
-                    width = width * 10U + *wpat - L'0';
+                    if (width <= __rw_fmt_max_width)
+                        width = width * 10U + *wpat - L'0';
                 }
+
+                if (width > __rw_fmt_max_width)
+                    width = __rw_fmt_max_width;
             }
 
             if (L'.' == *wpat) {
@@ -1676,8 +1693,12 @@ __rw_fmt_time (const __rw_facet *pfacet, wchar_t **pwbuf, size_t &bufsize,
 
                     for (; *wpat >= L'0' && *wpat <= L'9'; ++wpat) {
                         // set the precision of the current specifier
-                        prec = prec * 10 + *wpat - L'0';
+                        if (prec <= __rw_fmt_max_width)
+                            prec = prec * 10 + *wpat - L'0';
                     }
+
+                    if (prec > __rw_fmt_max_width)
+                        prec = __rw_fmt_max_width;
                 }
             }
 
