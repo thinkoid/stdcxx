@@ -1327,8 +1327,8 @@ leading zeros included (10.3.9).
 `do_put (..., long double)` (`include/loc/_money_put.cc`) formats
 through `__rw_put_num` under `fixed` and the internal `_RWSTD_IOS_SCALED`
 flag at precision `-frac_digits ()` (10.3.2), into a 304-byte stack
-array, and widens that
-array into a 304-element one. `do_put (..., string_type)` narrows the
+array or the heap block `__rw_put_num` moves to, and widens that into
+a string of its length.  `do_put (..., string_type)` narrows the
 leading digits into a 304-byte array, or a heap block when they do
 not fit, and computes the group sizes
 with `__rw_put_groups`. Both end in `_C_put`: the pattern and sign by
@@ -1556,13 +1556,6 @@ which `num_put`'s classification of floating values is stubbed.
 
 ### 10.5 Open
 
-- **The overrun of `money_put`.** One input overruns it in 15D (by
-  probe): `money_put` of `1e320L`, widened from the stack array after
-  `__rw_put_num` moved the digits to the heap ("stack smashing
-  detected"). The others are gone: the grouping of `fixed << 1e300`
-  grows the buffer and the string overload sizes its digit buffer
-  since 2026-11-04, and the negative precision left with the
-  extension (10.3.2). Check: AddressSanitizer after a fix, a row.
 - **Names of true and false.** Every database locale has empty
   names, so `boolalpha` writes nothing and reads nothing under them;
   the C-library path gives `"true"` and `"false"`. Decision: what a

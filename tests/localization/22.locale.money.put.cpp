@@ -870,6 +870,19 @@ void grouping_test ()
                "money_put<char, char*>::do_put(..., string of 999 digits) "
                "== 333 groups of three, got %u characters",
                unsigned (std::char_traits<char>::length (longbuf)));
+
+    // a long double whose digits outgrow the facet's array: widened
+    // from the block __rw_put_num moved them to
+    PunctT::grouping_ = "";
+
+    char bigdigits [512];
+    std::sprintf (bigdigits, "%.0Lf", 1e320L);
+
+    *mp.put (longbuf, false, ios, '\0', 1e320L) = '\0';
+
+    rw_assert (0 == rw_strncmp (longbuf, bigdigits), __FILE__, __LINE__,
+               "money_put<char, char*>::do_put(..., 1e320L) == %#s, got %#s",
+               bigdigits, longbuf);
 }
 
 /**************************************************************************/

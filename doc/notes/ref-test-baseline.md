@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,951 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,837 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,618 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,619 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -266,6 +266,8 @@ all six tables:
   the same two.
 - 2026-11-04: `22.locale.money.put`, 1,352 to 1,353 in 15D, a string
   of 999 digits grouped; the other five tables are to move by one.
+- 2026-11-04: `22.locale.money.put`, 1,353 to 1,354 in 15D, `1e320L`;
+  the other five tables are to move by one.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.

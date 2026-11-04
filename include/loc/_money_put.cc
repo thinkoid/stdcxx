@@ -317,7 +317,6 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
     }
 
     char       __buf [304];
-    char_type __wbuf [sizeof __buf];
 
     char *__pbuf = __buf;
 
@@ -334,16 +333,19 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
                            &__val, __grouping.data (),
                            __grouping.data () + __grouping.size ());
 
-    // widen narrow buffer (necessary even if char_type == char)
+    // widen the narrow buffer, wherever __rw_put_num left it, into
+    // a string of its length (necessary even if char_type == char)
     const ctype<_CharT> &__ctp =
         std::use_facet< ctype<_CharT> >(__flags.getloc ());
 
-    __ctp.widen (__buf, __buf + __n, __wbuf);
+    string_type __wstr (__n, char_type ());
+
+    __ctp.widen (__pbuf, __pbuf + __n, &__wstr [0]);
 
     // write the widened buffer out, replacing any commas
     // with the actual thousands_sep punct character
     return _C_put (__i, (__intl ? _C_intl : 0) | _C_ldbl,
-                   __flags, __fill, __wbuf, __n, 0, "", 1);
+                   __flags, __fill, __wstr.data (), __n, 0, "", 1);
 }
 
 

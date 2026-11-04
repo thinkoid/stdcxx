@@ -22,20 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =money_put= smashes the stack on a long double past its buffer
-
-=include/loc/_money_put.cc= 320-337: after =__rw_put_num= moves the
-digits to the heap, =do_put= still widens =__n= characters from the
-304-byte stack =__buf= into the 304-element =__wbuf=. =put (...,
-1e320L)= gives "stack smashing detected". Found by probe,
-2026-11-02; the heap block is freed since 2026-11-04 by the guard
-the grouping fix added, the widening is not fixed.
-
-Fix: widen from the buffer =__rw_put_num= returned, into one sized
-for it.
-
-Check: AddressSanitizer; a row in =22.locale.money.put= for 1e320L.
-
 ** TODO =__rw_put_groups= stores a group size in a =char=
 
 In its =no_groups= mode (=src/num_put.cpp=, called from
