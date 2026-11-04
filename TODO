@@ -22,21 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO The wide =__rw_put_time= without =swprintf= formats into 64 bytes
-
-Where =_RWSTD_NO_SWPRINTF= is defined, the wide =__rw_put_time=
-(=src/time_put.cpp=) formats a number with =sprintf= into a 64-byte
-array, and a width from the locale's format (=%[w]=, the HP-UX
-extension) has no bound: a =%100d= in a =d_t_fmt= overruns the
-array. glibc has =swprintf=, so no build on Linux
-reaches the branch. Found by reading, 2026-11-04.
-
-Fix: =snprintf= and the length it reports, into a block of that size
-when the array does not hold it, as the narrow function does.
-
-Check: a =%100d= row in =22.locale.time.put=, on a configuration that
-defines the macro.
-
 ** TODO The width of a directive in a format overflows an =int=
 
 =__rw_fmt_time= (=src/time_put.cpp=) accumulates the =%[w][.p]=

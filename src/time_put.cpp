@@ -2805,8 +2805,6 @@ __rw_put_time (const __rw_facet *facet, wchar_t **pwbuf, size_t &bufsize,
         const int w = width < 0 ? tpd.width : width;
         const int p = prec < 0 ? tpd.prec : prec;
 
-#ifndef _RWSTD_NO_SWPRINTF
-
         const wchar_t *fmtstr = 'z' == fmt ? L"%+*.*d" : L"%*.*d";
 
         // swprintf reports -1 when the number does not fit, not the
@@ -2828,24 +2826,6 @@ __rw_put_time (const __rw_facet *facet, wchar_t **pwbuf, size_t &bufsize,
         }
 
         res = n < 0 ? 0 : size_t (n);
-
-#else   // if defined (_RWSTD_NO_SWPRINTF)
-
-        const char *fmtstr = 'z' == fmt ? "%+*.*d" : "%*.*d";
-
-        char buf [64];
-
-        res = size_t (sprintf (buf, fmtstr, w, p, tpd.val));
-
-        _RWSTD_ASSERT (res < sizeof buf);
-
-        if (res > bufsize - off)
-            __rw_grow_time_buf (pwbuf, bufsize, off, off + res, stackbuf);
-
-        for (size_t i = 0; i != res; ++i)
-            (*pwbuf) [off + i] = static_cast< unsigned char >(buf [i]);
-
-#endif   // _RWSTD_NO_SWPRINTF
 
     }
     else {

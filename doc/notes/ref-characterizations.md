@@ -297,7 +297,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [STRTOLD](../../etc/config/src/STRTOLD.cpp) / `NO_STRTOLD` | strtold() in &lt;stdlib.h&gt; | L; `src/num_get.cpp` |
 | [STRUCT_TM](../../etc/config/src/STRUCT_TM.cpp) / `NO_STRUCT_TM` + output | struct tm in &lt;time.h&gt; | L; `include/ansi/cwchar` |
 | [STRUCT_TM_IN_WCHAR_H](../../etc/config/src/STRUCT_TM_IN_WCHAR_H.cpp) / `NO_STRUCT_TM_IN_WCHAR_H` | struct tm declaration in &lt;wchar.h&gt; | L; `include/ansi/cwchar` |
-| [SWPRINTF](../../etc/config/src/SWPRINTF.cpp) / `NO_SWPRINTF` | swprintf() in &lt;wchar.h&gt; | L; `src/time_put.cpp` |
+| [SWPRINTF](../../etc/config/src/SWPRINTF.cpp) / `NO_SWPRINTF` | swprintf() in &lt;wchar.h&gt; | none |
 | [THREAD_SAFE_EXCEPTIONS](../../etc/config/src/THREAD_SAFE_EXCEPTIONS.cpp) / `NO_THREAD_SAFE_EXCEPTIONS` | if exceptions are thread safe | none |
 | [TIMEZONE](../../etc/config/src/TIMEZONE.cpp) / `NO_TIMEZONE` | int timezone in &lt;time.h&gt; | L; `src/time_put.cpp` |
 | [TLS](../../etc/config/src/TLS.cpp) / `NO_TLS` + output | thread-local storage | L; `include/rw/_defs.h` |
