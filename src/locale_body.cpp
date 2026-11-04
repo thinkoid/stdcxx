@@ -90,157 +90,6 @@ __rw_cats [] = {
 };
 
 
-// fills provided buffer (if large enough) with the names of locales
-// for each of the standard LC_XXX categories; if all categories come
-// from the same locale, copies the name of the common locale into
-// the provided buffer
-//
-// names of categories are in the following order:
-//     LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, LC_TIME, LC_MESSAGES
-//
-// examples of output (assuming ';' as a separator):
-//     "C"
-//         all facets of all categories come from the "C" locale
-//
-//     "C;C;de_DE;C;C;C;"
-//         all facets come from the "C" locale except those that belong
-//         to the LC_MONETARY category, which all come from "de_DE"
-// 
-//     "C;en_US;*;*;*;*;"
-//         facets that belong to the LC_COLLATE category come from the
-//         "C" locale, those belonging to the LC_CTYPE category come
-//         from "en_US", all others are from mixed locales within
-//         their respective categories
-//
-//     "*"
-//         facets belonging to each category come from all different
-//         locales (e.g., ctype<char> might come from the "C" locale,
-//         and ctype<wchar_t> from "ja_JP", etc.)
-
-char* __rw_locale::
-_C_get_cat_names (char *buf, size_t bufsize) const
-{
-    const size_t  savesize = bufsize;
-    char         *savebuf  = buf;
-
-    if (!buf)
-        buf = new char [bufsize ? bufsize : (bufsize = 256)];
-
-    *buf = '\0';
-
-    // will point at the locale name common across all categories
-    // if one such name exists; otherwise at "*" (mixed locale)
-    const char *common_name = 0;
-
-    // iterate over all categories, searching for all facets that belong
-    // to that category and comparing their names. if all such facets come
-    // from the same locale, the name of the category is the name of the
-    // locale; otherwise "*"
-    for (size_t i = 0; i != __rw_n_cats; ++i) {
-
-        const char *cat_name = 0;
-
-        for (size_t j = 0; j != _C_n_std_facets; ++j) {
-
-            // verify that all facet pointers are set
-            _RWSTD_ASSERT (_C_std_facets [j]);
-
-            // ignore the non-localized {money,num}_{get,put} facets
-            // and consider only moneypunct and numpunct for the
-            // monetary category
-            switch (_C_std_facets [j]->_C_type) {
-            case __rw_facet::_C_num_get:
-            case __rw_facet::_C_wnum_get:
-            case __rw_facet::_C_num_put:
-            case __rw_facet::_C_wnum_put:
-            case __rw_facet::_C_money_get:
-            case __rw_facet::_C_wmoney_get:
-            case __rw_facet::_C_money_put:
-            case __rw_facet::_C_wmoney_put:
-                continue;
-            default:
-                break;
-            }
-
-            _RWSTD_ASSERT (0 != _C_std_facets [j]->_C_pid);
-
-            // one category at a time
-            if (   __rw_cats [i].cat
-                != __rw_get_cat (int (*_C_std_facets [j]->_C_pid)))
-                continue;
-
-            // default facet name (if 0) is "C"
-            const char *facet_name = _C_std_facets [j]->_C_name
-                ? _C_std_facets [j]->_C_name : "C";
-
-            if (cat_name && strcmp (cat_name, facet_name))
-                cat_name = "*";
-            else
-                cat_name = facet_name;
-
-            if (common_name) {
-                // if the name of the locale for this category doesn't
-                // match the common locale name so far, assign "*"
-                if (strcmp (common_name, cat_name))
-                    common_name = "*";
-            }
-            else
-                common_name = cat_name;
-        }
-
-        // will be 0 iff all facets in a category are 0
-        // (i.e., an internal logic error)
-        _RWSTD_ASSERT (cat_name);
-
-        if (   strlen (buf) + strlen (cat_name) + 2
-            >= bufsize) {
-            // reallocate buffer if necessary
-            char *tmp = 0;
-
-            try {
-                tmp = new char [bufsize *= 2];
-            }
-            catch (...) {
-                if (buf != savebuf)
-                    delete[] buf;
-                throw;
-            }
-
-            strcpy (tmp, buf);
-            if (buf != savebuf)
-                delete[] buf;
-            buf = tmp;
-        }
-
-        strcat (buf, cat_name);
-        strcat (buf, _RWSTD_CAT_SEP);
-    }
-
-    _RWSTD_ASSERT (common_name);
-
-    if (__rw_facet::_C_opts & __rw_facet::_C_condensed_name) {
-        // if all categories come from the same locale, copy the name
-        // of that locale into the buffer
-        if ('*' != common_name [0] || '\0' != common_name [1]) {
-            if (   savebuf && buf != savebuf
-                && savesize >= strlen (common_name)) {
-                // delete allocated memory and repoint at original buffer
-                delete[] buf;
-                buf = savebuf;
-            }
-            strcpy (buf, common_name);
-        }
-    }
-
-    // remove trailing separator
-    const size_t len = strlen (buf);
-    if (len && *_RWSTD_CAT_SEP == buf [len - 1])
-        buf [len - 1] = '\0';
-
-    return buf;
-}
-
-
 // returns a pointer to a character array containing locale names separated
 // by _RWSTD_CAT_SEP corresponding to the named locale (typically all the
 // names will be the same except possibly for the native locale which can
@@ -494,33 +343,18 @@ __rw_locale (const char *name)
     // verify that name doesn't refer to an unnamed (combined) locale
     _RWSTD_ASSERT (!strchr (name, '*'));
 
-    if ('\0' == *name) {
+    // the caller expands the name first, so it is never empty
+    _RWSTD_ASSERT ('\0' != *name);
 
-        __rw_chararray fullname;
-        fullname.acquire (_C_namebuf, 0);
+    const size_t namelen = strlen (name) + 1;
 
-        // get the names of locales for all standard categories
-        // avoiding dynamic memory allocation if possible
-        _C_name = __rw_expand_name (fullname, name);
+    // assume name is well-formed and valid (checked by caller)
+    char* const tmp = namelen < sizeof _C_namebuf
+        ? _C_namebuf : new char [namelen];
 
-        fullname.release ();
+    memcpy (tmp, name, namelen);
 
-        // caller must guarantee that `name' is valid
-        _RWSTD_ASSERT (0 != _C_name);
-
-        // note that `name' may not be the same as `_C_name' at this point
-    }
-    else {
-        const size_t namelen = strlen (name) + 1;
-
-        // assume name is well-formed and valid (checked by caller)
-        char* const tmp = namelen < sizeof _C_namebuf
-            ? _C_namebuf : new char [namelen];
-
-        memcpy (tmp, name, namelen);
-
-        _C_name = tmp;
-    }
+    _C_name = tmp;
 
     // every standard facet is built here, and no slot changes while
     // the body is shared; the factories construct a facet with no
@@ -754,12 +588,6 @@ _C_get_named_body (const char *locname)
 
 
 /***************************************************************************/
-
-
-#include <memory>
-#include <loc/_locale.h>
-
-#include <rw/_defs.h>
 
 
 namespace std { 

@@ -51,10 +51,6 @@
 
 namespace __rw { 
 
-// computes LC_XXX category from a numeric facet id, returns the
-// LC_XXX category for standard facets, LC_ALL for all others
-int __rw_get_cat (int) _THROWS (());
-
 // retrieves the literal name for a given category value
 static inline 
 const char* __rw_get_cat_name (int category) _THROWS (())

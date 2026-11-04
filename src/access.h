@@ -48,11 +48,6 @@ struct __rw_access {
     }    
     
     static _RWSTD_SIZE_T&
-    _C_get_ref (__rw_facet &__f) {
-        return __f._C_ref;
-    }    
-
-    static _RWSTD_SIZE_T&
     _C_get_id (const __rw_facet_id& __id) {
         return __id._C_id;
     }

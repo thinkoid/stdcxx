@@ -37,7 +37,6 @@
 #include <loc/_locale.h>
 
 #include "locale_body.h"
-#include "setlocale.h"
 
 
 namespace std { 

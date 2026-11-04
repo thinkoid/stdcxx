@@ -523,15 +523,14 @@ A byname facet the program constructs and uses without installing it
 has no id pointer and takes the C library path: `collate_byname<char>
 ("de_DE.UTF-8")` used directly transforms with `strxfrm`, the one in
 `locale ("de_DE.UTF-8")` with the database, by probe. The comment at
-`src/facet.cpp:173-177` states this as the design.
+`src/facet.cpp:169-173` states this as the design.
 
 **Threading.** Chapter 7. `__rw_locale_name` caches the locale root in
 a static buffer with no lock of its own. Its one caller,
 `__rw_expand_name`, runs under the static guard of
-`_C_get_named_body` (`src/locale_body.cpp:734`), which serializes it,
+`_C_get_named_body` (`src/locale_body.cpp:568`), which serializes it,
 as the body repository's guard did when `analysis-init-flags.md` 2.7
-was written. The `__rw_locale (const char*)` constructor expands an
-empty name itself, but no caller passes one (`TODO`).
+was written.
 
 **`<clocale>`.** `include/rw/_config.h:97-106` defines
 `_RWSTD_NO_PURE_C_HEADERS` and `_RWSTD_NO_DEPRECATED_C_HEADERS` unless

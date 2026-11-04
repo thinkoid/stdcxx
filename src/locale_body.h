@@ -172,15 +172,6 @@ public:
         return _RWSTD_ATOMIC_PREDECREMENT (__facet._C_ref, false);
     }
 
-    // access private facet name
-    static const char* _C_get_cat_name (const __rw_facet &__facet) {
-        return __facet._C_name;
-    }
-
-    // get a string of locale names, one for each installed standard
-    // facet's category; will dynamically allocate string if buf is 0
-    char* _C_get_cat_names (char*, _RWSTD_SIZE_T) const /* may throw */;
-
     // converts a LC_XXX constant to a locale::category value
     static int _C_LC2category (int) _THROWS (());
 

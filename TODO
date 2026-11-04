@@ -67,39 +67,23 @@ Check: the locale rows of the suite on their pins (=22.locale.cons.mt=,
 =facet.mt=, =id.mt=) and every facet test; a ThreadSanitizer run of
 the MT locale tests with no report on the slots.
 
-** TODO Unused and unreachable code in the locale core
+** TODO The facet bits of the categories have no reader
 
-- =__rw_locale::_C_get_cat_names= (=src/locale_body.cpp= 120-241) has
-  no caller. It is exported. With the condensed name it copies
-  =common_name= back into the caller's buffer when
-  ~savesize >= strlen (common_name)~, one byte short of the
-  terminator.
-- =src/facet.cpp= 56 redeclares the inline =__rw_get_cat= of
-  =src/locale_body.h=.
-- =src/locale_name.cpp= includes =setlocale.h= and uses nothing from
-  it.
-- =src/locale_body.cpp= 759-762 includes =<loc/_locale.h>= and
-  =<rw/_defs.h>= a second time, before ~locale::operator=~.
-- =__rw_locale::_C_get_cat_name= (=src/locale_body.h= 171-174) and
-  =__rw_access::_C_get_ref= (=src/access.h= 50-53) have no caller;
-  the facet repository was their only one.
-- =__rw_locale (const char*)= (=src/locale_body.cpp= 497-512)
-  expands an empty name itself, into a =__rw_chararray= it points at
-  the 40-byte =_C_namebuf=: the array assumes a capacity of 256, so
-  an expansion of 40 to 255 characters overruns the member, and a
-  longer one deletes it. Every caller expands the name first, so the branch is
-  never taken.
-- The facet bits of each category, the =_C_collate= to =_C_all=
-  enumerators of =src/locale_body.h= and the =facet_bits= member of
-  =__rw_cats=, have no reader since the bitmaps went. The
-  =_RWSTD_CAT_0= to =_RWSTD_CAT_5= macros of =config.h=, which
-  =etc/config/src/LOCALE_NAME_FMAT.cpp= writes, name them.
-Found by reading, 2026-11-04.
+The =_C_collate= to =_C_all= enumerators of =src/locale_body.h=, a
+bitmap of the standard facet types of each category, and the
+=facet_bits= member of =__rw_cats= that holds them, have no reader
+since the body's bitmaps went. The =_RWSTD_CAT_0= to =_RWSTD_CAT_5=
+macros of =config.h= name them: =etc/config/src/LOCALE_NAME_FMAT.cpp=
+writes each as ~{ LC_XXX, "LC_XXX", pfx::_C_xxx }~, and the fallback
+in =src/locale_body.cpp= for =_RWSTD_NO_LOCALE_NAME_FMAT= spells the
+same. Found by reading, 2026-11-04.
 
-Fix: remove them; for the facet bits, the field and the =pfx=
-argument of the macros the characterization writes.
+Fix: the characterization writes the macros without the =pfx=
+argument and the third member; the fallback follows; the field and
+the enumerators go.
 
-Check: grep, then a 15D build.
+Check: grep; =make config= in a fresh 15D build directory and the
+=_RWSTD_CAT_n= lines of =config.h=; a 15D build.
 
 ** TODO The narrow =transform= is empty for a string with an undefined character
 

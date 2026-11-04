@@ -71,11 +71,6 @@ namespace __rw {
 #undef max
 
 
-// computes LC_XXX category from a numeric facet id, returns the
-// LC_XXX category for standard facets, LC_ALL for all others
-int __rw_get_cat (int) _THROWS (());
-
-
 _RWSTD_INTERNAL void 
 __rw_append_weight (const __rw::__rw_collate_t *impl,
                     const unsigned            *weights,
