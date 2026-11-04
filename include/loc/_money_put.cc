@@ -38,8 +38,8 @@ __rw_put_num (char**, _RWSTD_SIZE_T, unsigned, int, _RWSTD_STREAMSIZE,
               const void*, const char*, const char*);
 
 _RWSTD_EXPORT _RWSTD_SIZE_T
-__rw_put_groups (char **, _RWSTD_SIZE_T, _RWSTD_SIZE_T,
-                 const char*, const char*, const char*);
+__rw_put_groups (char **, _RWSTD_SIZE_T, _RWSTD_SIZE_T&,
+                 const char*, const char*, const char*, const char*);
 
 }   // namespace __rw
 
@@ -321,6 +321,9 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
 
     char *__pbuf = __buf;
 
+    // frees the heap block __rw_put_num moves to, on every exit
+    __rw::__rw_put_buffer __guard (__buf, __pbuf);
+
     // format a floating point number in fixed precision into narrow buffer
     // will insert thousands_sep placeholders (';') accroding to grouping
     const _RWSTD_SIZE_T __n =
@@ -408,10 +411,16 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
 
         *__pbuf = '\0';
 
+        _RWSTD_SIZE_T __bufsize = sizeof __buf;
+
+        // frees the heap block __rw_put_groups moves to, on every exit
+        __rw::__rw_put_buffer __guard (__buf, __pbuf);
+
         __ngroups =
-            __rw::__rw_put_groups (&__pbuf, __groups - __pbuf, sizeof __buf,
+            __rw::__rw_put_groups (&__pbuf, __groups - __pbuf, __bufsize,
                                   0, __grouping.data (),
-                                  __grouping.data () + __grouping.size ());
+                                  __grouping.data () + __grouping.size (),
+                                  __buf);
         __pbuf [__ngroups] = '\0';
         __groups           = __pbuf;
     }

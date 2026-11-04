@@ -384,13 +384,12 @@ __rw_itoa (char *buf, long i, unsigned flags)
 
 
 _RWSTD_EXPORT size_t
-__rw_put_groups (char **pbuf, size_t len, size_t bufsize,
-                 const char *end, const char *pbeg, const char *pend)
+__rw_put_groups (char **pbuf, size_t len, size_t &bufsize,
+                 const char *end, const char *pbeg, const char *pend,
+                 const char *stackbuf)
 {
     _RWSTD_ASSERT (0 != *pbuf);
     _RWSTD_ASSERT (pbeg < pend);
-
-    _RWSTD_UNUSED (bufsize);
 
     if (end) {
         // for floats, find the decimal point or one of { 'e', 'E' }
@@ -447,8 +446,28 @@ __rw_put_groups (char **pbuf, size_t len, size_t bufsize,
     }
 
     pg   = pbeg;       // reset to point to the first grouping
-    end += ngrps;      // adjust the new position of the decimal point
     len += ngrps;      // adjust the length of buffer
+
+    if (len >= bufsize) {
+        // the separators do not fit: move to a heap block, which the
+        // caller frees once its pointer no longer points at its array;
+        // a block grown before is freed here
+        const size_t have = len - ngrps < bufsize ? len - ngrps + 1 : bufsize;
+
+        char* const tmp = new char [len + 1];
+        memcpy (tmp, *pbuf, have);
+        tmp [len] = '\0';
+
+        end = tmp + (end - *pbuf);
+
+        if (*pbuf != stackbuf)
+            delete[] *pbuf;
+
+        *pbuf   = tmp;
+        bufsize = len + 1;
+    }
+
+    end += ngrps;      // adjust the new position of the decimal point
 
     grplen = UChar (*pg);   // length of the first grouping
 
@@ -833,7 +852,7 @@ __rw_put_num (char **pbuf, size_t bufsize,
     // insert commas as thousands separators if grouping is required
     // integral and floating point types only (i.e., not for pointers)
     if (len > 1 && pbeg != pend && 0 < *pbeg && _RWSTD_CHAR_MAX != *pbeg)
-        len = __rw_put_groups (pbuf, len, bufsize, end, pbeg, pend);
+        len = __rw_put_groups (pbuf, len, bufsize, end, pbeg, pend, buf);
 
     // verify that the buffer hasn't overrun
     _RWSTD_ASSERT (len <= bufsize);

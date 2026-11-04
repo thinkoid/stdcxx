@@ -149,6 +149,31 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT __rw::__rw_wistreambuf_iterator
 
 #undef _RWSTD_ARG_LIST
 
+
+// __rw_put_num and __rw_put_groups format into an array on the
+// caller's stack and move to a heap block when the output outgrows
+// it: the heap block is freed when the pointer no longer points at
+// the array, on every exit from the caller, an exception from the
+// output iterator or a facet included
+struct __rw_put_buffer
+{
+    const char *_C_buf;    // the array on the stack
+    char*      &_C_pbuf;   // the pointer to the buffer in use
+
+    __rw_put_buffer (const char *__buf, char *&__pbuf)
+        : _C_buf (__buf), _C_pbuf (__pbuf) { }
+
+    ~__rw_put_buffer () {
+        if (_C_buf != _C_pbuf)
+            delete[] _C_pbuf;
+    }
+
+private:
+
+    __rw_put_buffer (const __rw_put_buffer&);
+    void operator= (const __rw_put_buffer&);
+};
+
 }   // namespace __rw
 
 

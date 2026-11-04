@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,951 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,837 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,615 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,617 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -261,6 +261,9 @@ all six tables:
   the negative-precision extension leave with it, seven and three
   standard rows in their place; the other five tables are to move
   by the same 34.
+- 2026-11-04: `22.locale.num.put`, 1,465 to 1,467 in 15D, a grouped
+  long double of 301 digits; the other five tables are to move by
+  the same two.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.

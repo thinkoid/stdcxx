@@ -1760,6 +1760,27 @@ void ldbl_test (charT, const char *cname)
     TEST (T, 3.0e+256L, fixed, 0, 0, '-', "", "%.0Lf", Eof);
     TEST (T, 4.0e+300L, fixed, 0, 0, '-', "", "%.0Lf", Eof);
 
+    // grouping of a long integral part: the separators take the
+    // buffer past the formatter's array
+    {
+        char digits [512];
+        std::sprintf (digits, "%.0Lf", 1.0e+300L);
+
+        const std::size_t ndigits = std::strlen (digits);
+
+        char  grouped [1024];
+        char *pg = grouped;
+
+        for (std::size_t i = 0; i != ndigits; ++i) {
+            if (i && 0 == (ndigits - i) % 3)
+                *pg++ = char (Punct<charT>::thousands_sep_);
+            *pg++ = digits [i];
+        }
+        *pg = '\0';
+
+        TEST (T, 1.0e+300L, fixed, 0, 0, '-', "\3", grouped);
+    }
+
     // fixed format and a negative precision: 22.2.2.2.2, p11 puts the
     // precision in the conversion specification, and C99 7.19.6.1, p5
     // takes a negative one as if it were omitted

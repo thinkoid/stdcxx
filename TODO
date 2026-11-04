@@ -22,22 +22,6 @@ first, the easiest at the top: fixes of a line or two, then fixes that
 take work, then the entries that wait on a decision; what lies outside
 the locale is last.
 
-** TODO =num_put= overruns its buffer when it groups
-
-=__rw_put_groups= (=src/num_put.cpp= 387-393) ignores =bufsize=
-(=_RWSTD_UNUSED=) and writes the separators in place; =_C_put='s
-stack array is 308 bytes and a grown heap block is exact-size.
-=fixed << 1e300= under =en_US.UTF-8= ends in "malloc(): corrupted top
-size"; a user grouping of "\3" fires the assertion ~len <= bufsize~
-(837) after the overrun. Found by probe, 2026-11-02, round 2 of the
-locale document.
-
-Fix: =__rw_put_groups= grows the buffer, or the caller sizes it for
-the separators before the call.
-
-Check: both cases under AddressSanitizer; a row in =22.locale.num.put=
-for =fixed= 1e300 grouped.
-
 ** TODO =money_put= copies a digit string into its buffer without a bound
 
 =include/loc/_money_put.cc= 391: the digits are copied into the
@@ -52,12 +36,13 @@ Check: AddressSanitizer on the case.
 
 =include/loc/_money_put.cc= 320-337: after =__rw_put_num= moves the
 digits to the heap, =do_put= still widens =__n= characters from the
-304-byte stack =__buf= into the 304-element =__wbuf=; the heap block
-leaks too. =put (..., 1e320L)= gives "stack smashing detected". Found
-by probe, 2026-11-02.
+304-byte stack =__buf= into the 304-element =__wbuf=. =put (...,
+1e320L)= gives "stack smashing detected". Found by probe,
+2026-11-02; the heap block is freed since 2026-11-04 by the guard
+the grouping fix added, the widening is not fixed.
 
 Fix: widen from the buffer =__rw_put_num= returned, into one sized
-for it, and free it.
+for it.
 
 Check: AddressSanitizer; a row in =22.locale.money.put= for 1e320L.
 

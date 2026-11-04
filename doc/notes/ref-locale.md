@@ -1253,7 +1253,8 @@ with a tag; `bool` without `boolalpha` goes as `_C_int`, through no
 virtual. `_C_put` formats into a 308-byte stack array
 (`_RWSTD_DBL_MAX_10_EXP`) through `__rw_put_num` (`src/num_put.cpp`),
 a heap block when the output outgrows it, freed on every exit by
-`__rw_num_put_buffer` as `num_get`'s is, resets `width` before output
+`__rw_put_buffer` (`include/loc/_punct.h`) as `num_get`'s is, resets
+`width` before output
 (69ad31e6), pads, and maps the
 placeholders `.` and `,` to `decimal_point()` and `;` to
 `thousands_sep()`. `__rw_put_num` writes integers itself
@@ -1263,7 +1264,11 @@ values through `snprintf` with the specifier of
 exactly the needed size, and infinity and NaN through
 `__rw_fmat_infinite`. A null `void*` is `0`, not glibc's `(nil)`; a
 pointer is not grouped. `__rw_put_groups` inserts the `;`
-placeholders in place, in the integral part of every arithmetic type.
+placeholders in place, in the integral part of every arithmetic type,
+and moves to a heap block of its own when the separators do not fit,
+freeing one it grew before; it reports the new size back through its
+size argument, and `money_put`'s string path, which calls it for the
+group sizes, guards its buffer the same way.
 
 #### numpunct and moneypunct
 
@@ -1550,16 +1555,14 @@ which `num_put`'s classification of floating values is stubbed.
 
 ### 10.5 Open
 
-- **The overruns of the put facets.** `num_put` and `money_put` never
-  grew their buffers as the get facets did. Four inputs overrun them
-  in 15D (by probe): `fixed << 1e300` under en_US.UTF-8, separators
-  past `_C_put`'s 308 bytes (`malloc` aborts); `fixed` at precision
-  -1000, zeros past them (the assertion at `src/num_put.cpp:837`
-  fires after the write); `money_put` of `1e320L`, widened from the
-  stack array after `__rw_put_num` moved the digits to the heap
-  ("stack smashing detected"); `money_put` of 1000 digits under
-  en_US.UTF-8, group sizes past 304 bytes (SIGSEGV). Check: the four
-  under AddressSanitizer after a fix, a row each in the two tests.
+- **The overruns of `money_put`.** Two inputs overrun it in 15D (by
+  probe): `money_put` of `1e320L`, widened from the stack array after
+  `__rw_put_num` moved the digits to the heap ("stack smashing
+  detected"); `money_put` of 1000 digits under en_US.UTF-8, group
+  sizes past 304 bytes (SIGSEGV). The two of `num_put` are gone: the
+  grouping of `fixed << 1e300` grows the buffer since 2026-11-04,
+  and the negative precision left with the extension (10.3.2).
+  Check: the two under AddressSanitizer after a fix, a row each.
 - **Names of true and false.** Every database locale has empty
   names, so `boolalpha` writes nothing and reads nothing under them;
   the C-library path gives `"true"` and `"false"`. Decision: what a
