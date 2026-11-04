@@ -426,7 +426,8 @@ __rw_facet::_C_manage (__rw_facet            *pfacet,
                               * sizeof (*std_facets));
 
                     delete[] std_facets;
-                    std_facets = std_facet_buf;
+                    std_facets        = std_facet_buf;
+                    std_facet_bufsize = bufsize;
                 }
                 else {
 
