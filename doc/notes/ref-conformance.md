@@ -57,15 +57,19 @@ source revision.
 The strict switch is gone. `_RWSTD_NO_EXTENSIONS` used to select
 `_RWSTD_STRICT_ANSI`, and a block in `include/rw/_config.h` defined
 the `_RWSTD_NO_EXT_*` macros under it. The additions behind those
-macros left the tree in October 2026, one subsystem per commit: the
-`ios_base::failure` subclasses, the `stringbuf` character pointer
-constructors and `str` overloads, the deep-copy `basic_string::copy`,
-the `num_get` and `num_put` members beyond the standard's,
-the `void` forms of `count`, `count_if` and `distance`, the comparison
-operators of `vector<bool>::reference`, the allocator of const
-elements, and the `bitset` constructors from character pointers and
-from `string` and `wstring`. Nothing reads an `_RWSTD_NO_EXT_*` macro
-now.
+macros left the tree on 2026-09-30 and in October 2026, one subsystem
+per commit: the file stream interface of classic iostreams
+(descriptors and `FILE*`s, `attach`, `detach`, the permissions
+argument, `nocreate` and `noreplace` among it), `setbase`'s bases
+other than 8, 10 and 16 with `bin`, the `nolock` and `nolockbuf`
+format flags, the `ios_base::failure` subclasses, the `stringbuf`
+character pointer constructors and `str` overloads, the deep-copy
+`basic_string::copy`, the `num_get` and `num_put` members beyond the
+standard's, the `void` forms of `count`, `count_if` and `distance`,
+the comparison operators of `vector<bool>::reference`, the allocator
+of const elements, and the `bitset` constructors from character
+pointers and from `string` and `wstring`. Nothing reads an
+`_RWSTD_NO_EXT_*` macro now.
 
 What the gates also covered keeps its code with the macro gone:
 choices the standard permits, defect resolutions the block disabled
@@ -77,7 +81,7 @@ the row is its summary.
 | choice in the tree | effect and source |
 |---|---|
 | Stream truth conversion | `basic_ios` converts to a private pointer-to-member type where 14882:2003's 27.4.4.3 writes `operator void*`. That is LWG 468's resolution, adopted into the first C++0x draft: a conversion to an unspecified type that converts only to `bool`, pointer-to-member the suggested shape, so a stream cannot be deleted, compared to a pointer or passed as an integer by accident, and `void* p = cin;` does not compile. C++11 then replaced it with `explicit operator bool` (LWG 1094), the same contract with language support; the tree keeps the 468 form (`include/rw/_basic_ios.h`). |
-| In-place assign | `deque` and `vector` assign over their existing elements where 23.1.1's table writes an erase and an insert; the element count and the result are the standard's, the copy and assignment counts are not (`include/deque.cc`, `include/vector.cc`). |
+| In-place assign | `deque` and `vector` assign over their existing elements where 23.2.1.1, p7-8 and 23.2.4.1, p2-3 write an erase and an insert; the element count and the result are the standard's, the copy and assignment counts are not (`include/deque.cc`, `include/vector.cc`). |
 | Retained deque buffers and staged sources | `deque` keeps every buffer it allocates until it is destroyed or swapped away; pops and `clear` empty it without freeing, as `vector`'s capacity survives `clear`. A range insert from any source other than a pointer or the deque's own iterator is consumed into a temporary first, so an exception from the source leaves the deque unchanged, which 23.2.1.3, p2 asks of every exception but `T`'s; other libraries trust the source and do not pay the second copy (`include/deque.cc`, `doc/notes/analysis-deque-redesign.md`). |
 | Primary template definitions | `char_traits`, `ctype`, `collate`, `codecvt`, `numpunct` and `moneypunct` have primary templates beyond the required specializations (`include/rw/_traits.h`, `include/loc/`). The templates exist; not all of them are usable. `ctype` and `codecvt` define degenerate members for any type, so streams on `signed char` and `unsigned char` instantiate. `collate`'s defines the class and none of its three virtuals: `collate<unsigned char>` compiles and fails to link. Every virtual of `numpunct` and `moneypunct` reaches a stub that asserts in a debug build and returns a null pointer the virtual dereferences in a release build (`include/loc/_punct.h`, `__rw_get_punct`). (`ref-locale.md` ch. 9, 10 and 11) |
 | Portable random sequence | The `random_shuffle` generator works in 32-bit words, so the sequence is the same on every target (`src/random.cpp`). |
@@ -110,8 +114,8 @@ the row is its summary.
 | `%Ey` reads four digits | `%Ey` reads up to four digits, 0 to 9999, without a sign, as glibc's `strptime` does: an era's year runs to 2569 under th_TH and 1872 under ja_JP's 西暦. A year outside its era sets `eofbit`, as 平成 40 does (`include/loc/_time_get.cc`, `__rw_read_era_year`). (`ref-locale.md` ch. 12) |
 | An era is every record of its name | ja_JP writes each era after 明治 as two records with one name: a first-year record whose format writes 元年, and a record from the next January. Their offsets agree on one count. The era of the reader's lookup and of `%Ey`'s bounds is the union of the records of the name, from the earliest bound to the latest. C++11 22.4.5.1.2, p13 sets `eofbit` where the input does not "unambiguously determine" the members, and 令和 1 names one year: "%EC %Ey" reads "令和 01", which `time_put` writes for 2019-06-01, as 2019. glibc bounds the year by each record alone and cannot read it (`src/era.cpp`, `__rw_get_era_span`). (`ref-locale.md` ch. 12) |
 | A plain digit under `%O` only where no symbol exists | `time_get` reads an `%O`-modified value as the locale's alternative symbol where the table defines one, and as ordinary digits only for a value beyond the table. The table is a list of whole numerals, not a digit set: lzh_TW's 32 entries run 〇 to 卅一, and 45 has no spelling in them. That is the inverse of `time_put`, which writes the symbol below the table and ordinary digits from its end, as glibc's `strftime` does, so the reader takes the one text the writer produces for each value: "三" under `%Od` reads 3 and "3" fails; "45" under `%OM` reads 45. glibc's `strptime` takes ordinary digits for any value and latches that choice for the rest of the call. The one text the reader takes that the writer does not produce is "0" for value 0 where the first symbol is empty, a table no shipped locale has. XSH's `strptime` says only that `%O` uses the alternative numeric symbols; the strict reading is kept (`include/loc/_punct.cc`, `__rw_match_name`; `include/loc/_time_get.cc`, `do_get`). (`ref-locale.md` ch. 12) |
-| Compiler types beyond 2003 | `long long` and `unsigned long long` are supported wherever the compiler has them: `numeric_limits`, the `num_get` and `num_put` virtuals and their public callers, the stream inserters and extractors, `abs` and `div`. 14882:2003 does not name the type; the library follows the compiler's type set, and the `LONG_LONG` characterization decides, not a policy switch. The extra virtuals widen two facet vtables; a program that overrides the 2003 virtuals is unaffected (`include/rw/_config.h`, `etc/config/src/LONG_LONG.cpp`). (`ref-locale.md` ch. 10) |
-| Later defect corrections | LWG 559's cv-qualified `numeric_limits` and LWG 434's `bitset::to_string` overloads are unconditional (chapter 3). |
+| Compiler types beyond 2003 | `long long` and `unsigned long long` are supported wherever the compiler has them: `numeric_limits`, the `num_get` and `num_put` virtuals and their public callers, the stream inserters and extractors, and `abs`. 14882:2003 does not name the type; the library follows the compiler's type set, and the `LONG_LONG` characterization decides, not a policy switch. The extra virtuals widen two facet vtables; a program that overrides the 2003 virtuals is unaffected (`include/rw/_config.h`, `etc/config/src/LONG_LONG.cpp`). (`ref-locale.md` ch. 10) |
+| Later defect corrections | LWG 559's cv-qualified `numeric_limits` (chapter 3) and LWG 434's `bitset::to_string` overloads (`include/bitset`) are unconditional. |
 
 Copy-on-write strings and the compatibility mutex in their bodies are
 implementation choices within the historical design, not automatically

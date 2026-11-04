@@ -19,8 +19,11 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses. The locale entries come
 first, the easiest at the top: fixes of a line or two, then fixes that
-take work, then the entries that wait on a decision; what lies outside
-the locale is last.
+take work, then the entries that wait on a decision. The extension
+sweep's findings follow, the smallest decision first: dead code and
+stale comments, then behaviour the library adds or changes, then the
+additions whose removal costs tests or callers. The rest, outside the
+locale, is last.
 
 ** TODO =ifstream= opened with =trunc= empties the file it was asked to read
 
@@ -96,27 +99,29 @@ derived facet type that declares =id=.
 
 ** TODO Sweep the library for extensions
 
-The negative precision under =fixed= left on 2026-11-04 (9a5a402a),
-an addition of the 2005 import that no gate covered and the October
-removal of the gated extensions did not reach. Others of its kind
-are likely: =ref-conformance.md= chapter 2 records the ones found so
-far, the sources carry about twenty comments that say "extension",
-and =doc/stdlibref= documents what the import shipped. One
-extension stays by decision: =time_get='s =get= with a format and
-=do_get= with a specifier, the C++11 interface, which take C++11's
-specification (=ref-conformance.md=, "=time_get= with a format").
+Done 2026-11-04 by four readings of =include= and =src= against
+14882:2003, one per area: the containers, iterators, algorithms,
+utilities and numerics, with =include/tr1=; the strings and streams;
+the locale; and clauses 17 to 19 with the C headers and Annex D. The
+negative precision under =fixed= had left the same day (9a5a402a).
+Four defects the readings found were queued the same day, confirmed by
+probe (845a7d93). The findings follow the locale entries: 43 entries,
+the smallest decision first, then 17 defects and hypotheses seen in
+passing among the entries outside the locale; Documentation has 5
+more, on the reference pages and the record, and Tests 1. The sources
+carry 67 comments that say "extension": 56 mark an addition of the
+library (the containers' area 14, the streams' 12, the locale's 21,
+the support clauses' 9), and 11 name a compiler's or the C library's
+extension, a sign extension or a reserved field. One extension stays
+by decision: =time_get='s =get= with a format and =do_get= with a
+specifier, the C++11 interface, which take C++11's specification
+(=ref-conformance.md=, "=time_get= with a format").
 
-Fix: a sweep of =include= and =src=, header by header, for behaviour
-beyond 14882:2003 that is not a defect resolution or a decided
-departure: the "extension" comments, =doc/stdlibref= against the
-standard's synopses, and any member or behaviour the standard does
-not name. Each finding becomes its own entry, in the shape of this
-chapter, with its paragraph, what the library does, where the test
-pins it and what its removal costs; =time_get='s format members are
-left out. The sweep's record goes to =ref-conformance.md= chapter 2.
+Fix: each entry's decision; a decision to keep writes its row in
+=ref-conformance.md= chapter 2, and the comments then name it.
 
-Check: every "extension" comment in =include= and =src= is either
-gone or names its entry or its row in =ref-conformance.md=.
+Check: every "extension" comment in =include= and =src= is either gone
+or names its entry or its row in =ref-conformance.md=.
 
 ** TODO Racing =locale::global= calls can split the C and C++ locales
 
@@ -331,6 +336,1024 @@ either the writer or the position level of =__rw_process_offsets=.
 Check: the pair compares 0 on both facets, with a row in
 =22.locale.collate=.
 
+** TODO The comments on eight =__rw= helpers of =valarray= call them additions
+
+=include/functional= 669-767 defines =identity=, =unary_plus=,
+=bitwise_complement=, =bitwise_or=, =bitwise_and=, =exclusive_or=,
+=shift_left= and =shift_right= in =namespace __rw=, each under a
+comment "extension: ...". The namespace is reserved (14882:2003
+17.4.3.1.2, p1) and no reference page documents them: they are helpers
+of =include/valarray= (325-858, 1314-1358, 1534-1577 and 1643-1693),
+not additions a program can name.
+=tests/utilities/20.function.objects.cpp= 230-247 tests them under
+"exercise extensions". Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: the eight comments and the test's label call them helpers of
+=valarray=; the code stays.
+
+Check: =git grep -n extension include/functional= is empty.
+
+** TODO Two stream comments describe code that is gone
+
+=include/istream.cc= 77-79 says =_C_ipfx= zeroes =gcount ()=
+"irrespective of state"; 7492b7d1 removed that reset in 2007, and
+=_C_ipfx= no longer touches the count. =src/iostream.cpp= 39-41 says
+=<stdio.h>= comes first "so that the FILE* basic_filebuf ctor
+extensions get declared"; since 3ef7f10d that constructor is private,
+for =ios_base::Init= alone. Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: both comments say what the code does.
+
+Check: =grep -n extension= over the two files finds neither.
+
+** TODO =bitset='s digit characters cite no defect resolution
+
+14882:2003 23.3.5.1, p3-6 compare the characters of the string with
+=0= and =1=, and 23.3.5.2, p33 declares =to_string ()= without
+parameters. =include/bitset= 162-168 adds ~charT b0 = '0', charT b1 =
+'1'~ to the constructor from =basic_string=, and 262-285 give every
+=to_string= the same pair, read by =__rw_bitset= in =src/bitset.cpp=.
+That is C++11's 20.5.1 and 20.5.2. 997b23cb kept the constructor's
+pair as LWG 396's resolution (=analysis-post-strict-ansi.md= 2.1), but
+no comment cites 396 and =ref-conformance.md= chapter 3 does not list
+it; the =to_string= pair has no note. =doc/stdlibref/bitset.html=
+shows neither. =tests/containers/23.bitset.cons.cpp= 179-181 and
+=23.bitset.cpp= 1036-1066 pass the digits. Found by the extension
+sweep's reading, 2026-11-04.
+
+Fix: the pair stays, as 997b23cb decided; both declarations cite LWG
+396 and chapter 3 takes a 396 row.
+
+Check: chapter 3 has a 396 row naming =include/bitset=, and both
+declarations carry the citation.
+
+** TODO =<cstdlib>= keeps =abs= for unsigned types behind macros nothing defines
+
+14882:2003 26.5, p4 adds =long abs (long)= and =ldiv_t div (long,
+long)=; no edition adds =abs= for an unsigned type.
+=include/ansi/cstdlib= 93-100, 111-118 and 130-137 define =abs
+(unsigned)=, =abs (unsigned long)= and =abs (unsigned long long)=
+under =_RWSTD_NO_ABS_UINT=, =_RWSTD_NO_ABS_ULONG= and
+=_RWSTD_NO_ABS_ULLONG=. Until 55ceb9b6 (2026-10-18)
+=ABS_OVERLOADS.cpp= emitted the three, defined under glibc, whose
+=abs= takes =int= only: GCC and Clang builds had the overloads, and
+=std::abs (5u)=, ambiguous by the standard, compiled. 55ceb9b6 cut the
+probe to =LONG= and =LLONG=, saying =<cstdlib>= reads only those; it
+reads the three unsigned macros too. The overloads left unrecorded,
+and their code is dead. 17.4.4.3, p2 and footnote 171 permit such
+additions. No test calls =abs= on an unsigned type. Found by the
+extension sweep's reading, 2026-11-04.
+
+Fix: the three blocks go, and the commit records that the overloads
+left the build with 55ceb9b6.
+
+Check: =git grep -n ABS_U include etc= is empty.
+
+** TODO =__iterator_category=, =__value_type= and =__distance_type= have no caller
+
+The 24.2 synopsis has no such functions, and their names are reserved
+(17.4.3.1.2, p1), but =doc/stdlibref/--iterator-category.html= and
+=--distance-type.html= document them as public functions of
+=<iterator>=, "obsolete" and "retained to support compilers that do
+not include partial specialization", and =iterator-traits.html= 119
+lists all three. =include/rw/_iterbase.h= 113-131 and 183-196 define
+them in =namespace std=. Since e9980bcd retired the partial
+specialization gates nothing in =include=, =src= or =tests= calls
+them; the library dispatches through =_RWSTD_ITERATOR_CATEGORY= and
+=_RWSTD_VALUE_TYPE= (=include/rw/_defs.h= 644-649), over
+=iterator_traits=. The pages describe forms that are gone:
+=__distance_type= takes the iterator by value. The =__is_*_iterator=
+helpers beside them stay; =include/string.cc= 490 calls one. Found by
+the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: remove the three and the two pages, or record them;
+for removal, their documented reason is gone and nothing calls them.
+
+Check: ~git grep -n
+'__iterator_category\|__value_type\b\|__distance_type'~ is empty under
+=include=, =src=, =tests= and =doc/stdlibref=.
+
+** TODO =raw_storage_iterator= has an =iterator_type= typedef
+
+20.4.2's synopsis has no member types beyond those of the base.
+=include/rw/_rawiter.h= 70-71 add ~typedef OutputIterator
+iterator_type~ "for completeness and genericity", and 74 spells the
+constructor's parameter with it.
+=doc/stdlibref/raw-storage-iterator.html= 79 documents it. Nothing in
+=include= or =tests= names it. Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: a decision: remove, or record; for removal, nothing uses it and
+the synopsis has none.
+
+Check: =20.specialized= equals its pin with the typedef gone.
+
+** TODO An example teaches the library's internal mutex and atomic macros
+
+14882:2003 has no threading interface; 17.4.4.5, p1 leaves reentrancy
+implementation-defined. =examples/manual/mutex.cpp= includes
+=<rw/_mutex.h>= (38), declares an =__rw::__rw_mutex= (49), calls
+=_C_acquire= and =_C_release= (54-56), and uses =_RWSTD_MT_GUARD= (63)
+and =_RWSTD_ATOMIC_SWAP= (76). The header says it "should never be
+#included directly by a program", and =ref-threading.md= chapter 3
+describes these macros as the library's mechanism, one whose semantics
+moved this year. No test pins the example. Removing it costs nothing
+in the library. Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: remove the example, or keep it as a view of the
+internals; for removal, an example is a promise to programs, and this
+one promises an interface the headers disown.
+
+Check: =git grep -l rw/_mutex.h examples= is empty.
+
+** TODO =off_type= of =basic_ios= and =basic_stringstream= is =int_type=
+
+14882:2003 27.4.4's and 27.7.4's synopses declare ~typedef typename
+traits::off_type off_type~. =include/rw/_basic_ios.h= 77 and
+=include/sstream= 335 write =traits_type::int_type=, since the 2005
+import: =std::ios::off_type= and =std::stringstream::off_type= are
+=int=, and an offset past =INT_MAX= held in either truncates on LP64.
+A defect, not an addition; =basic_ostream= has it right
+(=include/ostream= 67). Nothing in the library names either typedef,
+and no test checks them. Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: =traits_type::off_type= in both.
+
+Check: a compile-time assertion in =27.basic.ios= that ~sizeof
+(std::ios::off_type) == sizeof (std::streamoff)~, and the same for
+=std::stringstream=.
+
+** TODO =ostrstream= and =strstream= take =ate= for =app=
+
+D.7.3.1, p2 and D.7.4.1, p2 choose ~strstreambuf (s, n, s + strlen
+(s))~ when ~(mode & app) != 0~ and ~strstreambuf (s, n, s)~ otherwise.
+Both constructors test ~app | ate~ (=include/strstream= 214, 254).
+With =ate= alone the stream writes after the first null character, and
+the array must hold one, or =strlen= reads past its end.
+=doc/stdlibref= does not mention it. No test opens a =strstream= with
+=ate=; the two regressions that use =<strstream>=,
+=tests/regress/21.string.io.stdcxx-206.cpp= and
+=27.streambuf.buffer.stdcxx-808.cpp=, do not. Found by the extension
+sweep's reading, 2026-11-04.
+
+Fix: =ate= leaves both tests.
+
+Check: an =ostrstream= over ~char buf [8] = "ab"~ with =ate=: after
+inserting ='x'=, =buf [0]= is ='x'=.
+
+** TODO =freeze= stops writes into a caller's array
+
+D.7.1.2, p1 alters the freeze status only "If strmode & dynamic is
+non-zero"; p2 has =str ()= call =freeze ()=. =strstreambuf::freeze=
+sets and clears =_C_frozen= whatever the mode (=include/strstream=
+112-117), and =_C_is_out= takes a frozen buffer for one without a put
+area (=include/streambuf= 293-296). After =str ()= on an =ostrstream=
+over a caller's array, =sputc= and =xsputn= fail and the next
+insertion sets =badbit=; the standard leaves the array writable. A
+departure, not an addition. =doc/stdlibref/strstreambuf.html= 255
+describes the standard's behaviour. No test. Found by the extension
+sweep's reading, 2026-11-04.
+
+Fix: =freeze= alters the status of a dynamic buffer only.
+
+Check: an =ostrstream= over a =char [8]=: insert "ab", call =str ()=,
+insert "cd"; the stream is =good ()= and the array begins "abcd".
+
+** TODO =allocator= has a template assignment from =allocator<U>=
+
+14882:2003 20.4.1's synopsis gives =allocator= a copy constructor and
+a converting constructor template, and no assignment operator.
+=include/rw/_allocator.h= 115-119 adds ~template <class U> allocator&
+operator= (const allocator<U>&) throw ()~, so an =allocator<int>=
+takes ~a = std::allocator<long> ()~. =doc/stdlibref/allocator.html=
+115 documents it. No container assigns one allocator type to another,
+and no test names it. The allocator of const elements left in
+aebf2e2a; this member was outside that gate. Found by the extension
+sweep's reading, 2026-11-04.
+
+Fix: a decision: remove it and its line in the reference page, or
+record it; for removal, nothing in the tree uses it and 20.4.1 has the
+implicit copy assignment only.
+
+Check: the 15D suite table equals its pin with the member gone.
+
+** TODO A =list= iterator subtracts to 0
+
+Tables 75 and 76 (24.1.4, 24.1.5) give =a - b= to random access
+iterators only. =include/list= 134-136 give =__rw_list_iter= a
+~difference_type operator- (const __rw_list_iter&) const~ that returns
+0: ~it2 - it1~ on two =list<T>::iterator= compiles and is 0, and so is
+the difference of two reverse iterators over them; in a debug build
+~__rw_debug_iter::operator-~ (=include/rw/_iterbase.h= 453-459)
+forwards to it. The iterator type is implementation-defined, so the
+member is permitted, but it answers a question wrongly instead of
+failing to compile. From the 2005 import. Nothing in =include= or
+=src= subtracts list iterators, since =std::distance= dispatches on
+the category; no test or reference page names it. Found by the
+extension sweep's reading, 2026-11-04.
+
+Fix: a decision: remove, or record; for removal, a wrong answer is
+worse than a compile error and nothing uses it.
+
+Check: the library and the =23.list.*= tests build in 15D and 11S and
+equal their pins without it.
+
+** TODO =vector<bool>= goes past its synopsis in four places
+
+14882:2003 23.2.5's synopsis: =reference= has a private default
+constructor; ~explicit vector (const Allocator& = Allocator ())~;
+~void assign (size_type n, const T& t)~; ~iterator insert (iterator
+position, const bool& x)~. =include/vector= 645 makes =reference ()=
+public; 957 drops =explicit= from the allocator constructor, so
+~std::vector<bool> v = std::allocator<bool> ();~ compiles; 1011 and
+1137 give =assign= and =insert= a default argument =bool ()=, so
+=v.assign (3)= and =v.insert (v.begin ())= compile. All four are from
+the 2005 import; 15c7d99e removed the proxy's comparisons and left
+these. Nothing in the tree uses the four forms and
+=doc/stdlibref/vector.html= documents none;
+=tests/utilities/20.operators.cpp= 422 instantiates the class. Found
+by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: remove all four, or record them; for removal, none
+has a user and each accepts a program the synopsis rejects.
+
+Check: the 15D suite table equals its pin with the four changes.
+
+** TODO =put= and =write= reset the width
+
+14882:2003 27.6.2.6, p1, p2 and p5 make =put= and =write= unformatted
+output functions; nothing in them touches =width ()=. Both call
+=__rw_insert= with a width of 0 (=include/ostream= 193-200), and
+=__rw_insert= calls =width (0)= once its sentry is good
+(=include/rw/_ioinsert.cc= 166), so ~os << std::setw (5); os.put
+('x'); os << 1;~ writes "x1" where the standard writes "x    1".
+=endl= and =ends= go through =put= (=include/ostream= 416-428) and
+drop a pending width too. No test covers it (Tests, "=27.ostream=
+never runs its unformatted tests"). The fix costs a parameter or a
+second path in =__rw_insert=, or the reset moves into the formatted
+callers. Found by the extension sweep's reading, 2026-11-04.
+
+Fix: the unformatted path leaves the width alone.
+
+Check: a =27.ostream= case that sets =width (5)=, calls =put=, =write=
+and =endl= in turn, and finds =width ()= at 5 after each.
+
+** TODO The standard objects carry a stdio bit in their format flags
+
+14882:2003 27.3.1, p2 and p5 and 27.3.2, p2 and p5 give the eight
+objects the state =basic_ios::init= leaves, but for =tie= and
+=unitbuf=; Table 89 (27.4.4.1, p3) has ~flags () == skipws | dec~.
+=ios_base::Init= sets =_RWSTD_IOS_SYNC_STDIO=, 0x40000
+(=include/rw/_defs.h= 563-565), in the flags of all eight
+(=src/iostream.cpp= 233-236, 265-268), and =flags ()= returns the word
+whole: =std::cout.flags ()= is ~skipws | dec | 0x40000~. The bit
+drives the stdio synchronization of 27.4.2.4: =_C_is_sync=
+(=include/ostream= 221-224) has the sentry's destructor sync the
+buffer after every output (88-90), and =_C_opfx= flush =stdout= or
+=stderr= first (290-291). The state moves with the flags. =flags
+(fmtflags)= stores its argument as given (=src/ios.cpp= 96-102), so
+~std::cout.flags (std::ios::hex)~ clears the bit and =cout= stops
+synchronizing though =sync_with_stdio (false)= was never called, while
+27.4.2.4, p1 still has the objects synchronized. =copyfmt= copies the
+word whole (=src/iostore.cpp= 293, 371), so a file stream that copies
+=cout='s format syncs after every insertion. 1803887b took =nolock=
+and =nolockbuf= out of the flags for the same reason;
+=analysis-basic-ios-flags.md= does not name this bit. =27.objects=
+tests only =unitbuf= (=tests/iostream/27.objects.cpp= 148-159). The
+fix costs an =ios_base= member of its own, as =_C_nolock=
+(=include/rw/_iosbase.h= 292), set by =Init= and read by =_C_is_sync=:
+three files, and no test moves. Found by the extension sweep's
+reading, 2026-11-04.
+
+Fix: the state leaves the format flags, as locking did in 1803887b.
+
+Check: =27.objects= finds =flags ()= of each object at ~skipws | dec~,
+with =unitbuf= for =cerr= and =wcerr=.
+
+** TODO Extracting into a =bitset<0>= does not set =failbit=
+
+14882:2003 23.3.5.3, p6: "If no characters are stored in str, calls
+is.setstate(ios::failbit)". For =N= 0 none can be, so the 2003 text
+fails every extraction into a =bitset<0>=, as C++11 does; C++20 (N4849
+20.9.4, p6) reads "If N > 0 and no characters are stored".
+=include/bitset.cc= 174 sets =failbit= only ~if (_Size && _Size ==
+__bit)~, C++20's behaviour, since the 2005 import. No comment, test or
+reference page names it. Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: a decision: record as a departure that takes C++20's text, or
+fail as 2003 does; for the record, failing every =bitset<0>=
+extraction helps no program.
+
+Check: a chapter 2 row names =include/bitset.cc= and 23.3.5.3, p6, or
+a =23.bitset= row pins =failbit=.
+
+** TODO A const =valarray='s subscript returns a reference
+
+14882:2003 26.3.2.3 declares ~T operator[] (size_t) const~, and p1 has
+it return "the value of the corresponding element". =include/valarray=
+111-114 return =const value_type&=, C++11's 26.6.2.4, the resolution
+of an LWG issue no comment cites. =&cv[0]= on a const =valarray=
+compiles and points into the array. =doc/stdlibref/valarray.html= 182
+shows the 2003 form, so page and header disagree. No test pins either;
+the library's callers take the element by value. Found by the
+extension sweep's reading, 2026-11-04.
+
+Fix: a decision: record as a later text, citing the issue and
+correcting the page, or return by value; for the record, a reference
+costs no program anything the value gives.
+
+Check: a row in chapter 2 or 3 names =include/valarray= and 26.3.2.3,
+and the page shows the header's form.
+
+** TODO The =valarray= helpers' copy constructors are public and their fill is const
+
+14882:2003 26.3.5, 26.3.7, 26.3.8 and 26.3.9 declare the copy
+constructor private, and 26.3.5.1, p1, 26.3.7.1, p1, 26.3.8.1, p1 and
+26.3.9.1 say each class has no public constructor; each declares ~void
+operator= (const T&)~ without =const=. =include/valarray= 1290, 1456,
+1509 and 1616 make the copy constructors public, and 1310, 1477, 1531
+and 1639 declare the fill =const=; copy assignment stays private. That
+is C++11's form (26.6.5.1), from an LWG issue the tree does not cite.
+The case for it is 8.5.3, p5: binding the rvalue =v[s]= to the =const
+slice_array&= of the converting =valarray= constructor needs an
+accessible copy constructor, so ~valarray<int> w (v[s]);~ is
+ill-formed in a program under the 2003 declarations.
+=doc/stdlibref/slice-array.html= and its three siblings show the copy
+constructor private. No test names it; =26.valarray.cons= and
+=26.gslice.array.cassign= construct from the helpers. Found by the
+extension sweep's reading, 2026-11-04.
+
+Fix: a decision: keep, cite the issue in chapter 3 and correct the
+four pages, or restore the 2003 access; for keeping, the 2003
+declarations make the converting constructors unusable.
+
+Check: chapter 3 names =include/valarray= and the issue, and the four
+pages show the copy constructor public.
+
+** TODO =ios_base::failure= constructs from a character pointer and from nothing
+
+14882:2003 27.4.2.1.1 declares one constructor, ~explicit failure
+(const string&)~. =__rw_failure=, which =ios_base::failure= names
+(=include/rw/_iosbase.h= 57), adds ~explicit __rw_failure (const char*
+= 0)~ (=include/rw/_iosfailure.h= 51-53, "extension"): a default
+constructor and one from a pointer. 17.4.4.4, p2 permits both, and p3
+holds: a call with a =string= behaves as before. The library throws
+through the default constructor (=src/exception.cpp= 629-630).
+=doc/stdlibref/ios-base--failure.html= shows the standard's
+constructor only. No test. The =<stdexcept>= classes have the same
+shape (below). Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: record as an addition 17.4.4.4 permits, or remove;
+for the record, the library's throw path uses it. The decision on the
+=<stdexcept>= default argument applies here too.
+
+Check: the chapter 2 row exists and the comment at
+=include/rw/_iosfailure.h= 51 names it.
+
+** TODO =basic_streambuf='s constructor takes an open mode
+
+14882:2003 27.5.2.1 declares the protected ~basic_streambuf ()~.
+=include/streambuf= 156-158 declares ~basic_streambuf
+(ios_base::openmode = ios_base::in | ios_base::out)~, "a convenience
+extension". The mode lands in =_C_state= and gates the get and put
+paths (=include/streambuf= 288-296, 402, 434), so a derived class can
+build an input-only base whose =sputc= never writes. 17.4.4.4, p2's
+first bullet permits the default argument, and the default call
+behaves as the standard's. =basic_filebuf= (=include/fstream= 127) and
+=basic_stringbuf= (=include/sstream= 104, =include/sstream.cc= 36)
+pass their modes through it. Not in
+=doc/stdlibref/basic-streambuf.html=; no test names it. Found by the
+extension sweep's reading, 2026-11-04.
+
+Fix: a decision: record as an addition, or remove; for the record, the
+mode is how the library's buffers know their direction. The comment
+then names the row.
+
+Check: the row exists and the comment at =include/streambuf= 156 names
+it.
+
+** TODO =fpos= takes a state in its constructor and names its state type
+
+14882:2003 27.4.3's synopsis gives =fpos= the two =state= members;
+Table 88 (27.4.3.2, p1) requires construction from a =streamoff=.
+=include/rw/_traits.h= 132-138 add a public =typedef state_type= and
+~fpos (streamoff = 0, const state_type& = state_type ())~, a default
+constructor and one with a state. 17.4.4.4, p2 permits the arguments;
+the type name is not reserved. =doc/stdlibref/fpos.html= documents
+both. No library caller passes a state, and no test names them. Found
+by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: record as an addition, or remove; for the record, it
+is documented, permitted and harmless.
+
+Check: the row exists.
+
+** TODO =basic_filebuf= and =basic_stringbuf= override virtuals the standard does not list
+
+14882:2003 27.8.1.1's synopsis lists the virtuals =basic_filebuf=
+overrides, and 27.7.1's those of =basic_stringbuf=; neither lists
+=xsputn=, and =basic_stringbuf='s lacks =showmanyc=. 17.4.4.4, p2's
+latitude "does not extend to the implementation of virtual" functions.
+The library overrides =xsputn= in both (=include/fstream= 199-201,
+=include/sstream= 122) and =showmanyc= in =basic_stringbuf=
+(=include/sstream= 124), "for efficiency". The difference shows in a
+derived class: =basic_filebuf::xsputn= (=include/fstream.cc= 422)
+writes to the file itself and never calls =overflow=, so a derived
+=overflow= does not see =sputn='s characters.
+=doc/stdlibref/basic-filebuf.html= and =basic-stringbuf.html= document
+the =xsputn= overrides. No test pins the bypass. Removal costs bulk
+output speed. The -1 the override returns on an error is its own
+entry, below. Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: record as a departure, or remove the overrides; for
+the record, the speed is the point and the derived =overflow= case is
+narrow.
+
+Check: the row exists.
+
+** TODO The =short= and =int= extractors take the unsigned range in octal and hexadecimal
+
+14882:2003 27.6.1.2.2 converts =operator>> (short&)= and =operator>>
+(int&)= "as if" through a =num_get::get= on the type, a member the
+2003 =num_get= lacks (22.2.2.1). N3242's 27.7.2.2.2, p2-3 settles it:
+read a =long=, and set =failbit= and clamp outside the range of
+=short= or =int=. The library reads a =long= and range-checks in
+=__rw_check_overflow_short= and =__rw_check_overflow_int=
+(=include/loc/_num_get.h= 240-322), called from =__rw_extract=
+(=include/istream= 59-88). Under =oct=, =hex= or an empty =basefield=
+a non-negative value is checked against =USHRT_MAX= and =UINT_MAX=:
+"ffff" under =hex= stores ~short (-1)~ with =goodbit=, and on LP64
+"ffffffff" stores ~int (-1)~. The decimal path and negative values
+follow p2-3. The comments at 257 and 299 call the range "unreliable if
+basefield is 0 and the sequence is decimal": by reading, "40000" under
+an empty =basefield= stores ~short (-25536)~ with =goodbit=, which no
+inserter writes. The helpers came from ~num_get::get (short&)~ and
+~get (int&)~ (7c51b249); those members left in 444888d6 and the
+helpers stayed for the extractors.
+
+The case for the unsigned range is the inserter. =include/ostream=
+234-260 formats a =short= or =int= under =oct= or =hex= through its
+unsigned type, LWG 117's resolution (=ref-conformance.md= chapter 3),
+so ~short (-1)~ goes out as "ffff" and the widening reads it back.
+N3242's p2 does not, nor does libstdc++. =doc/stdlibref= does not
+document it. No test pins it:
+=tests/iostream/27.istream.fmat.arith.cpp= declares =HEX= and =OCT= at
+430-431 and uses neither. Clamping as N3242 does breaks the round trip
+of a negative =short= or =int= through =hex=; no caller in the library
+depends on it. Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: record as a departure beside "Bump by =streamsize=",
+the inverse of the LWG 117 inserter, or clamp as N3242 does; for the
+record, clamping breaks a round trip the library's own output makes.
+The decimal text under an empty =basefield= takes the signed range
+either way.
+
+Check: =27.istream.fmat.arith= rows: "ffff" under =hex= into =short=
+as the decision says; "10000" under =hex= sets =failbit= and stores
+=SHRT_MAX=; "40000" under an empty =basefield= sets =failbit=.
+
+** TODO A temporary buffer is a per-thread static block, larger than asked, returned on its own thread
+
+14882:2003 20.4.3, p1 obtains storage "sufficient to store up to n
+adjacent T objects", p2 returns its address and capacity, and p3-4
+deallocate any buffer =get_temporary_buffer= gave.
+=src/tmpbuf.cpp= 45-50 keeps one 4096-byte buffer per thread
+(=_RWSTD_THREAD=, =__thread= in the thread-safe builds), and
+103-111 hand it out for any request up to that size with its whole
+capacity: the first ~get_temporary_buffer<int> (2)~ on a thread
+returns a capacity of 1024. A buffer returned on another thread
+does not match that thread's block, and 89-92 pass it to
+=__rw_deallocate=, =operator delete= on storage it never
+allocated. =doc/stdlibref/get-temporary-buffer.html= 55-58
+documents both: "at least n", and the return "from the same
+thread". =tests/utilities/20.temp.buffer.cpp= 115 and 128 accept a
+capacity of at least the request, and =20.temp.buffer.mt= returns
+each buffer on its own thread. Without the block =stable_sort=,
+=stable_partition= and =inplace_merge= allocate on every call.
+Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: record as a departure, or allocate every buffer; for
+the record, the per-thread block is the design and the reference
+documents its limit. The row says that a return on another thread is
+undefined here and defined by 20.4.3.
+
+Check: a row in chapter 2 names =src/tmpbuf.cpp= and the same-thread
+rule.
+
+** TODO An environment variable selects a catalog for the library's exception texts
+
+14882:2003 18.6.1, p8 makes =what ()= "an implementation-defined
+NTBS", so the texts are the library's to choose. The library chooses
+them at run time: the first library throw that formats a message opens
+a catalog through =messages<char>= under the classic locale, named by
+the environment variable =RWSTDERR= when set and =rwstderr:1=
+otherwise, with an optional =:set= suffix (=include/rw/_error.h=
+63-74, =src/exception.cpp= 490-550). A message found there formats the
+=what ()= string; otherwise the built-in =_RWSTD_ERROR_STRINGS= do.
+The original =README= (690) lists =etc/rwstderr.cat= among the
+installed files. =doc/stdlibref= does not name the variable.
+=18.exception= pins the built-in strings
+(=tests/support/18.exception.cpp= 464); no test sets =RWSTDERR=.
+Removing the catalog costs =src/rwstderr.msg=, its install line and
+about sixty lines of =src/exception.cpp=; the built-in strings stay.
+The reader writes into =getenv='s string, its own entry below. Found
+by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: record the catalog as the library's documentation of
+an implementation-defined text, or remove it; for the record, 18.6.1,
+p8 leaves the choice to the library.
+
+Check: a chapter 2 row names =RWSTDERR=.
+
+** TODO The standard headers bring =<pthread.h>= into a reentrant program
+
+14882:2003 17.4.4.1, p1: "A C++ header may include other C++ headers."
+=<pthread.h>= is not one. In a reentrant build (=_RWSTD_REENTRANT=,
+which =-pthread='s =_REENTRANT= sets, =include/rw/_config.h= 81-88),
+=<rw/_mutex.h>= includes =<rw/_mutex-pthread.h>= (51, 65), which
+includes =<pthread.h>= (43) for the type of the mutex member of
+=__rw_mutex_base=. =<string>= (through =<rw/_strref.h>= 40),
+=<streambuf>= (40), =<istream>= (45) and every locale header (through
+=<loc/_facet.h>= 36) reach it, so a program that includes =<string>=
+sees =pthread_create=, =sched_yield= and the rest at global scope, and
+one that declares such a name itself collides. =doc/stdlibref= says
+nothing, and no test pins it. Hiding the header needs opaque storage
+for the mutex and out-of-line lock calls: a layout and ABI change to
+every class that holds a mutex. Found by the extension sweep's
+reading, 2026-11-04.
+
+Fix: a decision: record as a departure, or hide the header behind
+opaque storage; for the record, the mutex is a member of standard
+classes by value, and other libraries on the platform make the same
+trade.
+
+Check: a chapter 2 row names =<pthread.h>= and the reentrant
+condition.
+
+** TODO =type_info= declares a protected constructor
+
+14882:2003 18.5.1's synopsis gives =type_info= no constructor but the
+private copy constructor. =include/typeinfo= 66-69 declare ~protected:
+explicit type_info (const char*)~, "to prevent g++ warnings about
+private ctor and no friends". A class derived from =type_info= can
+name it. The library defines it nowhere (=src/typeinfo.cpp= defines
+the destructor, =before=, =name= and the comparisons), so a call fails
+to link unless the support library exports a definition.
+=doc/stdlibref/typeinfo-h.html= shows the header synopsis only, and no
+test names it. Removing it changes no layout and brings back the
+warning it silences. Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: a decision: record as a departure, or remove; for the record, it
+is a declaration with no reachable effect, kept for a compiler
+warning.
+
+Check: =nm -D= of the 15D library and of =libstdc++= for
+=_ZNSt9type_infoC2EPKc=, which settles whether a call can link.
+
+** TODO =pair='s template assignment cites LWG 353, whose resolution is unchecked
+
+=include/rw/_pair.h= 77-81 give =pair= a ~template <class U, class V>
+pair& operator= (const pair<U, V>&)~ under the comment "lwg issue
+353"; 14882:2003 20.2.2's synopsis has no assignment, and
+=ref-conformance.md= chapter 3 lists 353 among the cited issues.
+Hypothesis, by reading: if 353 closed without a change to the
+standard, the member is an addition, permitted by 17.4.4.4, p2 but not
+a resolution. Found by the extension sweep's reading, 2026-11-04.
+
+Fix: the issue's status first; then the comment and chapter 3 follow
+it, or the member takes a decision as an addition.
+
+Check: the status of LWG 353 in the issues list.
+
+** TODO =basic_ios= and =basic_ostream= declare type names the standard does not
+
+14882:2003 27.4.4's synopsis gives =basic_ios= five member types, and
+27.6.2.1 gives =basic_ostream= the same five. =basic_ios= adds
+protected =streambuf_type= and =ostream_type=
+(=include/rw/_basic_ios.h= 79-82), =basic_ostream= a public =ios_type=
+(=include/ostream= 69). The names are not reserved, and 17.4.4.4
+covers member functions, not types: a class derived from a stream that
+uses one of these names unqualified, meaning a type of its own
+namespace, finds the member first. The library uses them in
+=basic_ios= and at =include/ostream= 126. =doc/stdlibref= documents
+none of them on these pages. No test names them. The rename touches
+two files. Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: rename to reserved names, or record; for the rename,
+it costs two files and nothing outside them.
+
+Check: no =ios_type=, =streambuf_type= or =ostream_type= in
+=include/rw/_basic_ios.h= and =include/ostream=; a sanity build.
+
+** TODO =basic_istream= has a public four-argument =read=
+
+14882:2003 27.6.1.1's synopsis and 27.6.1.3 declare ~read (char_type*,
+streamsize)~. =include/istream= 282-283 adds a public ~read
+(char_type*, streamsize, int_type, int)~, defined at
+=include/istream.cc= 278-357, whose last argument takes the flags of
+=include/istream= 317-327: a program can call ~is.read (p, n, '\n',
+0)~. 17.4.4.4, p2 permits the signature and p3 holds. The library
+calls it from =ignore= (279) and from the =charT&= and =charT*=
+extractors (490-510), non-members that need it accessible. Not in
+=doc/stdlibref/basic-istream.html=; no test names it. The rename to a
+reserved name touches four sites. Found by the extension sweep's
+reading, 2026-11-04.
+
+Fix: a decision: rename to a reserved name, or record; for the rename,
+it is an internal helper under a standard member's name.
+
+Check: no four-argument =read= call outside =include/istream= and
+=include/istream.cc=; a sanity build.
+
+** TODO =auto_ptr<void>= is usable
+
+14882:2003 20.4.5's synopsis declares ~X& operator* () const throw
+()~, ill-formed for =X= =void= once instantiated, and 17.4.3.6, p2
+makes instantiating a library template on an incomplete type
+undefined. =include/rw/_autoptr.h= 43-77 define =__rw_nonvoid_ref= so
+that ~operator*~ returns =void= for =void= (161), and =auto_ptr<void>=
+compiles. Its destructor then deletes through a =void*=, which 5.3.5,
+p3 and its footnote make undefined. The test calls it an extension:
+=tests/utilities/20.auto.ptr.cpp= 221-262, run unless =void= is
+disabled (374-377). =doc/stdlibref/auto-ptr.html= does not document
+it. Nothing in the library instantiates =auto_ptr<void>=; the helper
+also serves =tr1::shared_ptr<void>= (=include/tr1/_smartptr.h= 317).
+Removal costs the test function. Found by the extension sweep's
+reading, 2026-11-04.
+
+Fix: a decision: remove, ~operator*~ returning =element_type&= again,
+or record; for removal, its purpose was =shared_ptr<void>= and the
+class then deletes a =void*=.
+
+Check: =20.auto.ptr= loses its =auto_ptr<void>= section and passes.
+
+** TODO =uninitialized_copy= and =uninitialized_fill_n= take an allocator
+
+14882:2003 20.4.4.1 and 20.4.4.3 declare ~uninitialized_copy (first,
+last, result)~ and ~uninitialized_fill_n (first, n, x)~.
+=include/rw/_specialized.h= 154-173 and 213-230, each under
+"extension", add four-argument overloads in =namespace std= that
+construct and destroy through an allocator. 17.4.4.3, p2 and footnote
+171 permit additional non-member signatures. Callers:
+=include/vector.cc= 268, 286 and 294. =doc/stdlibref= does not
+document them, and no test calls them. Found by the extension sweep's
+reading, 2026-11-04.
+
+Fix: a decision: move both into =namespace __rw= under reserved names,
+or record; for the move, they are the vector's helpers and nothing
+else names them.
+
+Check: the two "extension" comments are gone, the three calls name
+=__rw= functions, and the =23.vector.*= tests equal their pins.
+
+** TODO =get_temporary_buffer= takes any distance type and a type tag
+
+14882:2003 20.4.3 declares one ~get_temporary_buffer<T> (ptrdiff_t)~.
+=include/rw/_rawiter.h= 123-154 add ~template <class T, class
+Distance> pair<T*, Distance> get_temporary_buffer (Distance, T*)~ in
+=namespace std=. Its comment gives two reasons: algorithms over
+iterators whose difference type is not =ptrdiff_t=, and compilers
+without partial specialization, a gate e9980bcd retired. Callers:
+=include/algorithm.cc= 738-741, 1003-1006 and 1548-1551, each
+commented "call an extension of get_temporary_buffer" for the second
+reason. =doc/stdlibref/get-temporary-buffer.html= shows only the
+standard form, and no test calls the overload. The three calls can
+take ~get_temporary_buffer<T> (ptrdiff_t (n))~ or a =__rw= helper.
+Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: move it into =namespace __rw=, or record; for the
+move, only the algorithms call it, and the reason their comments give
+is gone.
+
+Check: the three "extension" comments in =algorithm.cc= are gone and
+=25.sort=, =25.merge= and =25.partitions= equal their pins.
+
+** TODO A null pointer with a count gives a string of uninitialized characters
+
+14882:2003 21.3.1, p6: "Requires: s shall not be a null pointer and n
+< npos." ~basic_string (const_pointer, size_type, const
+allocator_type&)~ skips the copy for a null pointer and leaves =n=
+characters uninitialized (=include/string.cc= 144-157, "extension").
+The standard makes the call undefined, so no conforming program sees
+it. One caller in the library relies on it: =bitset::to_string=
+(=include/bitset= 438-439, "extension: allocate but do not
+initialize"). No test; =doc/stdlibref= does not document it. The
+neighbouring constructor asserts its pointer (=include/string.cc=
+167). Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: remove the branch and assert as the neighbour does,
+with =to_string= building its string another way, or record; for
+removal, a program that relies on it reads indeterminate values.
+
+Check: both comments are gone and =23.bitset= equals its pin.
+
+** TODO =basic_string='s dispatch overloads and pointer-pair constructor are public
+
+14882:2003 21.3's synopsis has =append=, =assign=, =insert= and
+=replace= without extra arguments, and the template range constructor
+only. The class declares, public, the targets of its
+integral-or-iterator dispatch under the standard names: =append= with
+a =void*= or an =int= last argument (=include/string= 288-298),
+=assign= (328-339), =insert= (369-379) and the five-argument =replace=
+overloads (491-553). It also declares a non-template ~basic_string
+(const_pointer, const_pointer, const allocator_type&)~
+(=include/string= 163-164, =include/string.cc= 179-192). 17.4.4.4, p2
+permits added signatures and p3 holds for the standard's calls, but a
+program can write ~s.append (3, 'x', 0)~, or construct from a =char*=
+and a =const char*=, which the standard's template rejects for the
+conflicting deduction. =doc/stdlibref/basic-string.html= lists none of
+them, and no test names them. The dispatch targets are all called
+through =_RWSTD_DISPATCH= inside the class; the template could replace
+the pointer-pair constructor's direct copy with a =replace= call.
+Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision in two parts: the dispatch targets take reserved
+names, which costs nothing; the pointer-pair constructor stays as a
+recorded addition, for the direct copy, or goes.
+
+Check: the =21.string.*= rows are unchanged after the rename.
+
+** TODO The =<stdexcept>= classes take a =const char*= that defaults to null
+
+14882:2003 19.1.1 to 19.1.9 give each class one constructor, ~explicit
+logic_error (const string& what_arg)~ and its kin, with the
+postcondition ~strcmp (what (), what_arg.c_str ()) == 0~ (19.1.1, p3).
+Each of the nine adds ~explicit X (const char *__s = 0)~, marked
+"extension" (=include/stdexcept= 51-52, 65-66, 79-80, 93-94, 107-108,
+121-122, 135-136, 149-150, 163-164): two additions. The =const char*=
+constructor is C++11's 19.2.1, p4-5. The default argument gives every
+class a default constructor, which no edition has: ~std::logic_error
+e;~ compiles. 17.4.4.4, p2 lets an implementation add non-virtual
+member signatures; whether that reaches a constructor, which has no
+name (12.1, p1), is arguable.
+
+The =const char*= constructor carries the header's design:
+=<stdexcept>= declares =std::string= incomplete
+(=include/rw/_exception.h= 48-57) and never defines it, so ~throw
+std::runtime_error ("x")~ with no =<string>= in the translation unit
+compiles only through it. The default argument carries the library's
+own throws: =src/exception.cpp= 598-639 build ten exceptions as
+~std::logic_error ()._C_assign (what, 0)~ and the like.
+=doc/stdlibref/logic-error.html= and its eight siblings show the
+=string= constructor only. No test default-constructs one;
+=19.exceptions.mt= and =19.std.exceptions= construct from =const
+char*=, which compiles through =string= once =<string>= is in, as it
+is in both. Removing the default costs the ten sites and any program
+that default-constructs; removing the =const char*= constructor breaks
+every program that throws from a literal after =<stdexcept>= alone,
+unless =<stdexcept>= includes =<string>=. Found by the extension
+sweep's reading, 2026-11-04.
+
+Fix: a decision: keep the =const char*= constructor as a recorded
+departure, C++11's text that the header leans on, and remove the
+default argument, which is in no edition; or record both.
+=ios_base::failure='s default argument (above) follows the same
+decision.
+
+Check: ~git grep -n "const char \*__s = 0" include~ is empty and the
+library builds, =src/exception.cpp= passing an explicit null.
+
+** TODO The =valarray= helpers have public constructors from the storage and a public =get_ref_mem_array=
+
+14882:2003 26.3.5.1, p1, 26.3.7.1, p1, 26.3.8.1, p1 and 26.3.9.1 give
+the four helpers no public constructors, and the synopses list no
+accessor. =include/valarray= 1296, 1461, 1514 and 1621 declare public
+constructors from an =__rw::__rw_array<T>*= and the selector, which a
+program can call with a null pointer: ~std::slice_array<int> sa (0,
+std::slice ());~ compiles. 1301, 1468, 1519 and 1627 declare a public
+=get_ref_mem_array ()=, an unreserved name, that returns the
+referenced storage. The name occurs 34 times in the header:
+=valarray='s members (2081-2314) and the =__rw_unary_function= and
+=__rw_binary_function= templates (1726-1819) call it. No reference
+page and no test names them. The change costs a rename in those uses
+and friend declarations for the constructors. Found by the extension
+sweep's reading, 2026-11-04.
+
+Fix: a decision: the accessor takes a =_C_= name and the constructors
+go private with =valarray<T>= a friend, or record; for the change,
+both are plumbing.
+
+Check: =git grep -n get_ref_mem_array include= is empty and the =26.*=
+tests equal their pins.
+
+** TODO =gslice= carries iteration state with three public members
+
+14882:2003 26.3.6's synopsis: two constructors, =start ()=, =size ()=,
+=stride ()=. =include/valarray= 1427-1434 add public =next_ind ()=,
+=is_reseted ()= and =ind_numb ()=, "convenience functions", over two
+state members (1442-1443); =next_ind= is defined in =src/valarray.cpp=
+40-77 and exported (=src/mapfile.gcc= 937, =_ZNSt6gslice8next_indEv=).
+A =gslice_array= steps its own copy through a =const_cast= in its
+=const= members (=include/valarray= 1846 onward), and the copy
+constructor resets the state. ~valarray<T>::operator[] (const gslice&)
+const~ (2117-2135) steps the caller's =gslice= itself, through a
+=const_cast=: a program's ~g.next_ind ()~ shifts what ~cv[g]~ reads,
+and a =gslice= defined =const= is modified, which 7.1.5.1, p4 makes
+undefined. No reference page documents them;
+=tests/numerics/26.class.gslice.cpp= computes indices with its own
+=next_index=. The rename changes the exported symbol, and
+=mapfile.gcc= with it. Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: a decision: the three take =_C_= names, or record; for the
+rename, they are the iteration engine of =gslice_array= and no program
+should step it. The read through the caller's =gslice= has its own
+entry, below.
+
+Check: =nm -D= of the library shows no =gslice8next_ind=, and
+=26.class.gslice= and =26.gslice.array.cassign= equal their pins.
+
+** TODO A string buffer in input mode writes after its initial string
+
+14882:2003 27.7.1.1, p3 and 27.7.1.2, p2 initialize "the output
+sequence with the underlying sequence" and say nothing of where =pptr
+()= starts. =_C_str= (=include/sstream.cc= 139-151) sets it to the end
+when the mode has =in=, =app= or =ate=, and to the beginning
+otherwise: ~std::stringstream ss ("abc"); ss << 'x';~ gives "abcx",
+and an =ostringstream= on "abc" gives "xbc". a0d396e5 set the rule in
+2006, citing LWG 562. N3242's 27.8.2.3, p3, 562 as the C++11 draft
+printed it, reads "if mode & ios_base::in is true, pptr() == pbase() +
+s.data()": the library's rule, with a typo. N3797's 27.8.2.3, p3
+replaces =in= with =ate=. No edition positions on =app=. So the code
+follows the first print of a resolution that was then corrected, and
+adds =app=. =27.stringbuf.virtuals= pins the =in= rule: at
+=tests/iostream/27.stringbuf.virtuals.cpp= 484, "abc" with ~in | out~
+and "def" written leaves 6 read positions. =ref-conformance.md=
+chapter 3 lists 562 among the cited issues without its effect. The
+change moves that row and any that assume the end; a program that
+appends to a =stringstream= built from a string would overwrite
+instead. Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a decision: record the C++11 draft's reading, or follow N3797's
+=ate= rule and drop =app=; for N3797, it is the reading every edition
+since has kept.
+
+Check: a =27.stringbuf.virtuals= row: "abc" in ~in | out~, ~sputc
+('x')~, and =str ()= as the decision says, "xbc" or "abcx".
+
+** TODO A program can replace or switch off every throw the library makes
+
+14882:2003 17.4.4.8, p1: a library function reports a failure "by
+throwing an exception of the type(s) described in their Throws:
+paragraph"; 21.3.4, p3, for one, has =at= throw =out_of_range=. Every
+throw the library makes goes through =__rw::__rw_throw=, from about 86
+sites in =include= and =src=, most through =_RWSTD_REQUIRES=
+(=include/rw/_defs.h= 702). =__rw_throw= calls through an exported
+function pointer, =__rw::__rw_throw_proc= (=include/rw/_error.h= 57,
+=src/exception.cpp= 646-648, =src/mapfile.gcc= 69), whose comment
+invites a "user-defined handler (e.g., to prevent the library from
+throwing exceptions or to implement logging)". A null pointer makes
+=__rw_throw= return at once (=src/exception.cpp= 653-654), and a
+handler that returns does the same. Either way the caller goes on past
+the failed check: =basic_string::at= returns ~_C_data [__pos]~ for a
+=__pos= past the end (=include/string= 945-951). A handler that throws
+something else makes the library throw a type no Throws paragraph
+names.
+
+The names are reserved (17.4.3.1.2, p1) and =<rw/_error.h>= says it
+"should never be #included directly by a program", but
+=examples/manual/rwexcept.cpp= (35, 92) includes it and installs a
+handler that prints and exits. =doc/stdlibref= says nothing. Three
+tests use the hook: =18.exception= installs a returning handler and
+checks the ids (=tests/support/18.exception.cpp= 438-629),
+=18.support.dynamic= wraps the default one (378), and
+=21.string.exceptions= installs one that throws the id as an =int=
+(=tests/strings/21.string.exceptions.cpp= 66-72, 166). Removing the
+hook costs those three test sections, the example and the map line;
+the sites keep calling =__rw_throw=. Found by the extension sweep's
+reading, 2026-11-04.
+
+Fix: a decision: record the hook as a departure, the suite's seam for
+observing the library's throws, reached only through a reserved name
+in a header marked internal, and retire
+=examples/manual/rwexcept.cpp=, which teaches programs to use it; or
+remove the hook.
+
+Check: a chapter 2 row names =__rw_throw_proc= and its null and
+returning cases, or the hook is gone; either way
+=examples/manual/rwexcept.cpp= is gone.
+
+** TODO =getloc= on a non-const stream or buffer returns the object's own locale
+
+14882:2003 27.4.2.3, p4 declares ~locale getloc () const~, which
+returns the imbued locale, and 27.5.2.2.1, p4 does the same for
+=basic_streambuf=. The library adds ~locale& getloc ()~ to both
+(=include/rw/_iosbase.h= 225-230, =include/streambuf= 78-83), each
+under an "extension" comment: it saves a reference count on every
+formatted operation. 17.4.4.4, p2 permits an added member signature,
+but p3 requires a call to a described signature to behave as if none
+were added, and on a non-const object ~s.getloc ()~ now selects the
+new overload. Two calls then behave differently. After ~const
+std::locale &r = s.getloc (); s.imbue (l);~ the reference names =l=
+where the standard's copy keeps the old locale. ~s.getloc () = l~
+compiles in both, but the standard's assigns to a temporary and the
+library's replaces the stream's locale without =imbue=: no
+=imbue_event= callbacks (27.4.2.3, p1), no =pubimbue= of the buffer,
+and on a buffer no call of the =imbue= virtual. =doc/stdlibref= does
+not document the overload, and no test relies on it. 44 lines in 16
+files under =include= and =src= call =getloc ()=; with the overload
+gone those on non-const objects copy the locale, an atomic increment
+and decrement in the thread-safe builds. Found by the extension
+sweep's reading, 2026-11-04.
+
+Fix: a decision: remove both overloads and give the library's callers
+a reserved accessor that returns the reference, or record; for
+removal, the overload changes what a standard call does, and the
+accessor keeps the saving.
+
+Check: a =27.basic.ios= case that binds a ~const std::locale&~ to
+~strm.getloc ()~, imbues another locale, and finds the reference still
+equal to the first.
+
+** TODO Every standard facet but =ctype= has a public destructor
+
+The synopses of 14882:2003 22.2.1.1 through 22.2.7.2 declare every
+facet's destructor protected, and 22.1.1.1.2 declares
+=locale::facet='s protected too, its footnote 221 saying a facet need
+not have a public destructor. The library declares it public in
+=include/loc/=: =_codecvt.h= 142, 210, 359, 426, 440, 457;
+=_collate.h= 65, 112, 158, 217, 241; =_messages.h= 86, 137;
+=_moneypunct.h= 70, 213; =_money_put.h= 65; =_numpunct.h= 62, 174;
+=_num_put.h= 61; =_time_get.h= 77, 197; =_time_put.h= 63, 108.
+=num_get=, =money_get=, =ctype_byname<char>= and the primary =ctype=
+and =ctype_byname= declare none, so theirs is implicit and public.
+Only =ctype<char>=, =ctype<wchar_t>= and =ctype_byname<wchar_t>=
+follow the standard (=_ctype.h= 290, 491, 623). A program can define a
+facet as an automatic or static object, ~std::num_put<char> np;~, or
+=delete= one through its own type; under the standard's access both
+are ill-formed. From the 2005 import (e6c7726b).
+
+=doc/stdlibref= shows the standard's access where it shows a
+destructor (=collate.html= 107, =codecvt.html= 131). No test pins the
+access, but tests use it: =22.locale.num.put.cpp= 495 and 2216,
+=22.locale.codecvt.cpp= 330, 341, 2596 and 2703,
+=22.locale.codecvt.do_out.cpp= 480, 551 and 554, and
+=22.locale.codecvt.length.cpp= 196, 250 and 253 define facets as
+objects. The library does not: its ordinary facets are
+placement-constructed in static buffers and never destroyed
+(=src/use_facet.h= 105-110, 126-131), and =__rw_locale= deletes the
+others through =__rw_facet*= as its friend (=src/locale_body.cpp= 366,
+426, 445). The Itanium ABI does not mangle access, so the change costs
+GCC and Clang builds no symbol. A program that defines a standard
+facet as an object breaks. Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: a decision: the destructors protected as =ctype='s are, or
+record; for the change, the access is the standard's interface, it
+costs the library nothing, and the programs it breaks would not
+compile against libstdc++ either.
+
+Check: the library and the localization tests compile with every facet
+destructor protected, once the twelve test sites derive from the facet
+or install it in a locale.
+
+** TODO =include/tr1= ships part of TR1 as installable headers
+
+14882:2003 17.4.1.2, p2 and Table 11 list the 33 C++ headers; none is
+under =tr1/=, and the target is the C++03 library
+(=ref-conformance.md= chapter 0). =include/tr1= holds four headers,
+1435 lines, in =std::tr1=:
+
+- =<tr1/cstdint>=: C99's integer types and limit macros, with
+  =int_least128_t= and its kin where the configuration finds the type
+  (312-317).
+- =<tr1/stdint.h>=: the same types brought to global scope (34-97).
+- =<tr1/array>=: =array=, its comparisons and =swap=. =tuple_size= and
+  =tuple_element= are declared "defined in <tr1/tuple>", a header the
+  tree does not have, and the two =get= overloads have no body
+  (341-358): ~get<0> (a)~ compiles and fails to link.
+- =<tr1/_smartptr.h>=: =shared_ptr=, =weak_ptr=, =bad_weak_ptr= and
+  the casts. No =<tr1/memory>= includes it, so a program reaches it
+  only by a reserved-looking file name. ~shared_ptr (auto_ptr<U>&)~
+  (232-234) and =enable_shared_from_this= (602-603) are declared
+  without a definition, and the stream inserter is under ~#if 0~
+  (429-436).
+
+No other header in =include= and no file in =src= includes them. Three
+tests do, pinned in all six baseline tables:
+=tests/tr1.util/2.smartptr.shared= (121 assertions in 15D),
+=2.smartptr.weak= (45) and =tests/tr1.c99/8.cstdint= (157); none
+covers =array=. =make install= copies them with the rest of =include=
+(=GNUmakefile= 634). =doc/stdlibref= and =ref-conformance.md= do not
+mention TR1. =_smartptr.h= is the one user of =__rw_nonvoid_ref=
+besides =auto_ptr= (above). The =_RWSTD_INT*_T= characterizations stay
+either way: =src/random.cpp= and others read them. Removal costs four
+headers, two test directories, three rows in each baseline table and
+any installed program that includes a =tr1/= header. Found by two of
+the extension sweep's readings, 2026-11-04.
+
+Fix: a decision: remove =include/tr1= and its two test directories, or
+record TR1 as a partial addition; for removal, it is a later library's
+interface, unfinished, with declarations that link to nothing.
+
+Check: =include/tr1=, =tests/tr1.util= and =tests/tr1.c99= are gone,
+and the six pins lose exactly those three rows.
+
 ** TODO The =__rw_once= comment names a static mutex path that is gone
 
 =src/once.cpp= 95-97 says the static mutex of =int= "is itself
@@ -343,6 +1366,269 @@ calls no =__rw_once=.
 Fix: the comment says what the code does.
 
 Check: reading.
+
+** TODO A width comment in =_ioinsert.cc= predates 69ad31e6
+
+=include/rw/_ioinsert.cc= 128-130 says =__rw_insert= "calls width(0)
+if and only if the write has been successful"; 69ad31e6 made the reset
+unconditional once the sentry is good, and the comment at 164-165 says
+so. Seen in passing by the extension sweep, 2026-11-04.
+
+Fix: the comment says what the code does.
+
+Check: reading.
+
+** TODO An unformatted input function whose sentry fails leaves =gcount ()= as it was
+
+14882:2003 27.6.1.3, p1: an unformatted input function counts the
+characters it extracts and, if no exception has been thrown, "ends by
+storing the count in a member object"; p2 has =gcount ()= return the
+number the last one extracted. The functions that zero the count do so
+inside ~if (__ipfx)~ (=include/istream.cc= 215, 304, 375, 410, 570,
+674), so one whose sentry fails stores nothing: by reading, ~is.read
+(b, 3); is.setstate (std::ios::failbit); is.read (b, 1);~ leaves
+=gcount ()= at 3 where p1 stores 0. Seen in passing by the extension
+sweep, 2026-11-04.
+
+Fix: each unformatted function zeroes the count before its sentry.
+
+Check: that sequence in =27.istream.unformatted.get= prints 0.
+
+** TODO =include/rw/_typetraits.h= is included by nothing
+
+The header defines type-trait helper templates, and no file in the
+tree includes it: =git grep _typetraits= finds only the header itself.
+=make install= copies it with the rest of =include=. Seen in passing
+by the extension sweep, 2026-11-04.
+
+Fix: a decision: remove the header, or keep it for a later use; for
+removal, nothing reads it.
+
+Check: =git grep -n _typetraits= is empty; a sanity build.
+
+** TODO =DIV_OVERLOADS= emits two macros nothing reads
+
+=etc/config/src/DIV_OVERLOADS.cpp= checks =div= on =int=, =long= and
+=long long= and emits =_RWSTD_NO_DIV_INT=, =_RWSTD_NO_DIV_LONG= and
+=_RWSTD_NO_DIV_LLONG= (=config.h= 123-125 of a 15D build under GCC).
+=include/ansi/cstdlib= reads only =_RWSTD_NO_DIV_LONG= (61, 140);
+nothing reads the other two, and no ~div (long long)~ or =lldiv_t=
+appears in =include=. They are the kind 55ceb9b6 trimmed from
+=ABS_OVERLOADS=. Seen in passing by the extension sweep, 2026-11-04.
+
+Fix: the probe checks =long= alone, as 55ceb9b6 did for =abs=; or a
+decision to add ~div (long long)~, which chapter 2's "Compiler types
+beyond 2003" row then names.
+
+Check: the =config.h= of a 15D build has no =_RWSTD_NO_DIV_INT= or
+=_RWSTD_NO_DIV_LLONG= line.
+
+** TODO The =RWSTDERR= reader writes into =getenv='s string
+
+=src/exception.cpp= 511 and 521-523 split the set number off the
+catalog name by writing a null into the string =getenv= returned. C99
+7.20.4.5, p4: "The string pointed to shall not be modified by the
+program". With ~RWSTDERR=foo:2~ the process's environment reads =foo=
+after the first library throw that formats a message. The default name
+is copied into a static buffer first (514-516); the environment's is
+not. Seen in passing by the extension sweep, 2026-11-04.
+
+Fix: the reader copies the variable's value before splitting it.
+
+Check: after a library throw under ~RWSTDERR=foo:2~, ~getenv
+("RWSTDERR")~ still reads "foo:2".
+
+** TODO =basic_filebuf::xsputn= returns -1 on an error
+
+14882:2003 27.5.2.4.5, p2: =xsputn= returns "The number of characters
+written". =basic_filebuf::xsputn= returns -1 when the buffer is not
+open or not in output mode (=include/fstream.cc= 430-431), and on the
+write errors after it (464, 496). A caller that adds the result to a
+count goes back by one. Seen in passing by the extension sweep,
+2026-11-04.
+
+Fix: the override returns the number of characters it wrote, 0 when it
+wrote none.
+
+Check: a =27.filebuf= row: =sputn= on a buffer opened for input only
+returns 0.
+
+** TODO =allocator::allocate= does not check its count against =max_size ()=
+
+=include/rw/_allocator.h= 134 passes ~__n * sizeof (value_type)~ to
+=__rw_allocate= unchecked. For =n= past =max_size ()= the product
+wraps and a short block comes back, where 14882:2003 20.4.1.1, p5
+returns storage of size ~n * sizeof(T)~ and p7 throws =bad_alloc= when
+it cannot be obtained. The containers check =max_size= first; a direct
+caller does not. =__rw_tmpbuf= checks its product (=src/tmpbuf.cpp=
+64-70). Seen in passing by the extension sweep, 2026-11-04.
+
+Fix: =allocate= throws =bad_alloc= for a count past =max_size ()=.
+
+Check: ~std::allocator<int> ().allocate (std::allocator<int>
+().max_size () + 1)~ throws =bad_alloc=.
+
+** TODO =vector<bool>='s range constructor takes no allocator and no integers
+
+14882:2003 23.2.5's synopsis declares the range constructor with
+~const Allocator& = Allocator ()~, and 23.1.1, p9 has a range
+constructor on an integral type behave as the count-and-value one.
+=include/vector= 978-985 declare ~vector (InputIter first, InputIter
+last)~ alone, with no integral dispatch: by reading,
+~std::vector<bool> v (5, 1);~ picks the template and fails in
+~std::distance (int, int)~. Seen in passing by the extension sweep,
+2026-11-04.
+
+Fix: the allocator parameter, and the integral dispatch the primary
+=vector= has.
+
+Check: ~std::vector<bool> v (5, 1)~ compiles and holds five =true=
+elements, and the range constructor takes an allocator.
+
+** TODO =vector<bool>='s range =insert= reads an input range twice
+
+=include/vector.cc= 562 takes ~std::distance (first, last)~ over the
+range and then copies it (565 or 574), so an input iterator range is
+spent on the count and the copy reads nothing. 14882:2003 24.1.1, p3:
+"Algorithms on input iterators should never attempt to pass through
+the same iterator twice." Seen in passing by the extension sweep,
+2026-11-04.
+
+Fix: the range =insert= reads an input range once, into a temporary or
+element by element.
+
+Check: =insert= at =begin ()= from an =istream_iterator<bool>= over "1
+0 1" inserts three elements.
+
+** TODO =valarray::sum= adds with ~operator+~ from =T ()=
+
+14882:2003 26.3.2.7, p2 computes =sum= "by applying ~operator+=~ to a
+copy of an element of the array and all other elements".
+=include/valarray= 167-169 return ~accumulate (begin, end, value_type
+())~, which starts from =T ()= and applies ~operator+~: a =T= with
+~+=~ and no ~+~ does not compile, and one whose =T ()= is not an
+additive identity gives another sum. Seen in passing by the extension
+sweep, 2026-11-04.
+
+Fix: =sum= copies the first element and applies ~+=~ for the rest.
+
+Check: =sum= of a =valarray= over a type with ~+=~ alone compiles, and
+over one whose =T ()= is 1 gives the elements' sum.
+
+** TODO A second =cv[g]= with one =gslice= may read its start twice
+
+=next_ind= at the end of its walk wraps, sets =_C_reset= and returns
+=start=, and the next call clears the flag and returns =start= again
+(=src/valarray.cpp= 40-77). ~valarray<T>::operator[] (const gslice&)
+const~ (=include/valarray= 2117-2135) calls it =ind_numb ()= times on
+the caller's =gslice= and never takes the wrapping call, so the state
+stays at the last index. Hypothesis, by reading and a hand trace over
+a 2-by-3 =gslice=: a second ~cv[g]~ with the same =g= reads =start=
+twice and drops the last element. The =gslice_array= paths take the
+wrap in their loop condition and start clean. Seen in passing by the
+extension sweep, 2026-11-04.
+
+Fix: the const subscript steps a copy of the =gslice=, as
+=gslice_array= does.
+
+Check: ~a = cv[g]; b = cv[g];~ for a 2-by-3 =gslice=, with =a= and =b=
+equal element by element.
+
+** TODO The =random_shuffle= generator's warm-up may run four table entries
+
+=src/random.cpp= 87-91: the warm-up loop indexes ~__rw_table [i]~
+inside the loop over =ii=, so it runs entries 0 to 3 fifty-five times
+each where the subtractive generator it follows runs all fifty-five
+four times. The line is unchanged since the 2005 import. Hypothesis,
+by reading: the inner index is meant to be =ii=. A fix moves every
+result and =25.random.shuffle='s expected array. Seen in passing by
+the extension sweep, 2026-11-04.
+
+Fix: the inner loop runs over ~__rw_table [ii]~, then the test's
+expected array.
+
+Check: the loop read against Knuth's subtractive generator or
+Numerical Recipes' =ran3=.
+
+** TODO The standard objects are references, which a template argument can tell
+
+=include/iostream= 55-62 declare the eight objects through
+=_RWSTD_IOSTREAM_OBJECT= as references, and =src/iostream.cpp= 74-78
+call the departure from 27.3 undetectable. 14882:2003 14.3.2, p1 takes
+as a template argument the address of an object with external linkage.
+Hypothesis, by reading: ~template <std::ostream&> struct S;~ cannot be
+instantiated on =std::cout=, since a reference is not an object. Seen
+in passing by the extension sweep, 2026-11-04.
+
+Fix: a decision: record the departure in chapter 2, or define the
+objects as objects.
+
+Check: compile ~S<std::cout>~.
+
+** TODO =_C_opfx= skips the tie's flush on a loop of distinct buffers
+
+=include/ostream= 270-284 skip ~tie ()->flush ()~ when the tie chain
+loops or a stream in it shares the buffer. Footnote 292 of 14882:2003
+27.6.2.3 allows the skip where no synchronization is necessary, which
+holds for a shared buffer but not for a loop over distinct buffers.
+The loop exists because =flush= builds a sentry (LWG 581); 2003's
+27.6.2.6, p7 says =flush= does not behave as an unformatted output
+function. Hypothesis, by reading: two streams on distinct buffers tied
+to each other do not flush each other. Seen in passing by the
+extension sweep, 2026-11-04.
+
+Fix: a decision: flush each distinct buffer of the loop once, or
+record the skip.
+
+Check: two streams on distinct buffers, tied to each other: an
+insertion into one flushes the other.
+
+** TODO =<stdlib.h>= and =<math.h>= leave the C++ overloads out of the global namespace
+
+14882:2003 D.5, p2 has each =name.h= place the =cname= header's names
+in the global namespace. =include/rw/_config.h= 97-106 defines
+=_RWSTD_NO_DEPRECATED_C_HEADERS= unless a program asks for the pure
+headers, and under it =include/ansi/stdlib.h= and =math.h= include the
+C library's header and nothing more (=stdlib.h= 73-74). Hypothesis, by
+reading: under glibc =<stdlib.h>= then gives no ~::abs (long)~ and
+=<math.h>= no ~::sin (float)~, so ~abs (-1L)~ after =<stdlib.h>= calls
+~abs (int)~. Seen in passing by the extension sweep, 2026-11-04.
+
+Fix: a decision: the =name.h= headers bring the =cname= overloads to
+global scope, or record the C library's set.
+
+Check: ~sizeof (abs (0L))~ after =<stdlib.h>= alone.
+
+** TODO An installed =config.h= shares its name with the programs'
+
+=include/rw/_config.h= 36 includes =<config.h>=, a name many programs'
+build systems use, and =make install= copies the library's to the top
+of =$(PREFIX)/include= (=GNUmakefile= 633). Hypothesis, by reading: a
+program whose own =config.h= is earlier on the search path configures
+the library with it, and one whose own is later gets the library's.
+Seen in passing by the extension sweep, 2026-11-04.
+
+Fix: a decision: a name of the library's own, under =rw/=, or record.
+
+Check: ~#include <string>~ with =-I= of a directory holding an empty
+=config.h= ahead of the library's.
+
+** TODO =type_info= compares by name where GCC marks a name to compare by address
+
+In 15D under GCC =_RWSTD_NO_TYPE_INFO_BEFORE=, =_EQUALITY= and =_NAME=
+are defined (=config.h= 484-487), so =src/typeinfo.cpp= 87-130
+compiles =before=, =name= and the comparisons. =name= returns the raw
+mangled name and equality compares names with =strcmp=; GCC's support
+library skips a leading =*=, its mark for a name to compare by
+address. Hypothesis, by reading: =typeid= of an anonymous-namespace
+type gives a =name ()= that starts with =*=, and two such types of one
+name in two translation units compare equal. Seen in passing by the
+extension sweep, 2026-11-04.
+
+Fix: per the check: =name= skips the mark and a marked name compares
+by address, as the support library does.
+
+Check: those two calls in a two-file program.
 
 * Tests
 
@@ -561,6 +1847,20 @@ collate & ctype)= and the two-locale form named "C" with the classic
 2026-11-03, by probe only).
 
 Check: the rows run and the six pins gain a row.
+
+** TODO =27.ostream= never runs its unformatted tests
+
+=tests/iostream/27.ostream.cpp= 1426-1431 leave the call of
+=test_unformatted= commented out under "FIXME: implement this", so
+=put= and =write= have no row there, and the width reset of both
+(Library, "=put= and =write= reset the width") is unpinned. Found by
+the extension sweep's reading, 2026-11-04.
+
+Fix: =test_unformatted=: each function's output, its =badbit= on a
+failing buffer, and its effect on =width ()=.
+
+Check: the rows run, the width rows red before the Library fix and
+green after; the six pins move.
 
 * Certification
 
@@ -1230,6 +2530,139 @@ note does, with one sentence on why.
 
 Check: under the sanitizer the two tests report their full counts,
 =22.locale.use_facet.mt= 200 and =22.locale.codecvt.mt= 1,600.
+
+** TODO =doc/stdlibref= documents the file stream additions that left
+
+3ef7f10d removed the descriptor and =FILE*= constructors and opens,
+=fd ()=, =attach ()=, =detach ()=, the permissions argument, the null
+file name and the modes =nocreate= and =noreplace=, and left the
+reference alone. =doc/stdlibref/B.html=, whose Table 39 is the
+reference's list of extensions, lists these and nothing else, so the
+whole appendix describes code that is gone. The same text stands in
+=basic-filebuf.html=, =basic-fstream.html=, =basic-ifstream.html=,
+=basic-ofstream.html= and =ios-base.html= (330, =nocreate= and
+=noreplace=). =basic-filebuf.html= 327-329 lists ~out|in|app~ ("a+")
+and its binary form beside Table 92's twelve modes; neither is one of
+them. =basic-stringbuf.html= and =strstreambuf.html= list an
+=ios_type= those classes do not have. None of the stream additions the
+sweep queued is in the reference. ff4a97ba and af1b3a88 edited the
+reference with their removals. Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: the five pages and Appendix B follow the code: the removed
+additions go, and the appendix lists what the sweep's decisions keep.
+
+Check: =grep= over =doc/stdlibref= for =attach=, =detach=, =fd()=,
+=nocreate= and =protection= finds nothing.
+
+** TODO =doc/stdlibref= describes locale behaviour the library does not have
+
+The import's reference pages still document additions that left the
+tree, and one that never was:
+
+- =num-get.html= 232: "Input in base 1 through 36 is accepted. Base of
+  1 accepts Roman numerals", and =ios_base::bin=. 14882:2003
+  22.2.2.1.2, p4 (Table 55) has =oct=, =hex=, an empty =basefield= and
+  decimal; 8b5d90ae removed the other bases and =bin= and did not
+  touch the page.
+- =num-put.html= 295 (the =other(*)= row), 307 ("Output in base 1
+  (roman numerals ...) and base 2 through 36"), 392 (the binary digit
+  legend) and 441. 22.2.2.2.2, p7 (Table 57); the same commit.
+  9a5a402a edited this page for the negative precision and left these.
+- =collate.html= 194, 203 and 211: "As an extension of this
+  implementation, the =collate<char>= and =collate_byname<char>=
+  facets recognize and correctly interpret sequences of multi-byte
+  characters." =collate<char>= compares with =memcmp=
+  (=src/collate.cpp= 771-787), the lexicographical comparison of
+  22.2.4.1.2, p1; for =collate_byname<char>= a multibyte collation is
+  the named locale's semantics (22.1.1.1.2, p4), so no extension
+  either way.
+- =time-get.html= 326: =do_get_year= takes [69,99] as 1969-1999 and
+  [0,68] as 2000-2068. The library's =do_get_year= is =%Y=
+  (=include/loc/_time_get.h= 160-164): "26" is the year 26
+  (=ref-locale.md= 12.3, "Two-digit years in =do_get_year=").
+  22.2.5.1.2, p8 makes the choice implementation-defined; the page
+  states the other one, the pivot of =%y=.
+- =time-put.html= 284-286 and 454: a =%i=, "Hour of the 12-hour day
+  [1,12]. Single digits preceded by a blank", marked an extension to
+  POSIX. =src/time_put.cpp= has no =i= case; it writes that hour for
+  =%l= (1303, 2274), which the page does not list.
+- =money-get.html= 178: after the decimal point "optionally, by
+  additional digits", the value "multiplied by 10 to the power of" and
+  truncated. 22.2.6.3, p3: "The number of digits required after the
+  decimal point (if any) is exactly the value returned by
+  frac_digits()". 60c683eb made the facet exact (=ref-locale.md=
+  10.3.9) and did not touch the page.
+
+No test reads the pages. Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: the passages go and =time-put.html='s table gains =%l=; 9a5a402a
+set the rule that a removal edits its page.
+
+Check: each passage above is gone from its page, and each page's
+description of these members matches the code it names.
+
+** TODO =ref-locale.md= and =ref-conformance.md= disagree on which departures are recorded
+
+=ref-locale.md= 8.3 opens "The conformance record's chapter 2 carries
+one row per departure below", but "=locale::facet= and =locale::id=
+are the library's classes" has no row there. Chapter 13 of
+=ref-locale.md= has rows chapter 2 lacks:
+
+- two of kind "extension": "An invalid catalog is diagnosed" (11.3)
+  and "Extensions of the =time_get= and =time_put= interface" (12.3: a
+  null =t= to =get=, a null =pat_end= to =put=, =do_put= with a null
+  =t=, directives beyond C90);
+- "Encodings known to the library" (9.3), "=money_put= reads =units=
+  as ~"%.0Lf"~" (10.3.10), "Two spaces after an international symbol;
+  =sign_posn= 0 as ~"()"~" (10.3.11), and "Each =do_get= updates the
+  =tm=", "Years before 0" and "Two-digit years in =do_get_year="
+  (12.3).
+
+Chapter 13 says it lists "Every place the library departs", but two
+rows of chapter 2 are not in it: "=money_get= keeps the caller's
+=err=" (12.1) and "A monetary group of more than 255 digits" (10.2).
+The "extension" comments of the 12.3 interface row
+(=include/loc/_time_put.cc= 123, =include/loc/_time_get.cc= 478,
+=src/time_put.cpp= 1115, 1165, 1296, 1303, 2073, 2139, 2253, 2277
+and 2345) have no chapter 2 row to name. Found by the extension
+sweep's reading, 2026-11-04.
+
+Fix: chapter 2 takes a row for each extension of chapter 13 when the
+sweep's decisions are made, chapter 13 takes the two rows it lacks,
+and 8.3's sentence says what chapter 2 carries.
+
+** TODO Two chapter 2 rows of =ref-conformance.md= leave out an effect their source states
+
+- "Replaceable allocation functions": =src/memory.cpp= 94-99 says that
+  where a probe fires, the library's definition makes that function
+  "no longer replaceable", against 14882:2003 17.4.3.4, p2; the row
+  does not say it. Under GCC in 15D no =_RWSTD_NO_OPERATOR_*= probe
+  fires.
+- "Portable random sequence": the state is per thread
+  (=src/random.cpp= 61-65, =__thread= in 15D), so every thread starts
+  the same sequence, and the 32-bit result is reduced ~% limit~ (117),
+  which biases small ranges and never reaches an index past 2^32 - 1
+  in a longer one, against 25.2.11, p1's "uniform distribution".
+
+Found by the extension sweep's reading, 2026-11-04.
+
+Fix: a clause for the first row and two for the second; whether the
+bias is a defect to fix is a decision for the Library chapter.
+
+** TODO =analysis-post-strict-ansi.md= 4.1 names a =div= for =long long=, and 4.3 a gate that is gone
+
+4.1 lists "=abs= and =div=" among what depends on =_RWSTD_LONG_LONG=;
+=<cstdlib>= defines no ~div (long long)~ (Library, "=DIV_OVERLOADS=
+emits two macros nothing reads"). 4.3 calls
+=_RWSTD_NO_CLASS_PARTIAL_SPEC= the sole condition on the cv-qualified
+=numeric_limits=; since e9980bcd they are unconditional
+(=include/limits= 501-510). Found by the extension sweep's reading,
+2026-11-04.
+
+Fix: a decision: a dated note under each, or the note left as the
+record of 2026-10-14 it is.
 
 ** TODO README section 5 and the configuration
 
