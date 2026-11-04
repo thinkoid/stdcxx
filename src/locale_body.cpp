@@ -131,9 +131,8 @@ __rw_expand_name (__rw_chararray &namebuf, const char *name)
             // convert the (possibly abbreviated) name or a locale alias
             // into the full name uniquely identifying the locale (e.g.,
             // all of "de," "de_DE," and "german" can expand into the
-            // full canonical name "de_DE.ISO-8859-1"; this is necessary
-            // to guarantee that the internal locale repository doesn't
-            // contain duplicate entries)
+            // full canonical name "de_DE.ISO-8859-1"; this is what
+            // gives two spellings of one locale equal names)
             const char* const fullname =
                 __rw_locale_name (__rw_cats [i].cat, shortname.data (),
                                   longname);
