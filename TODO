@@ -71,28 +71,6 @@ for the record, the library's throw path uses it. The decision on the
 Check: the chapter 2 row exists and the comment at
 =include/rw/_iosfailure.h= 51 names it.
 
-** TODO =basic_streambuf='s constructor takes an open mode
-
-14882:2003 27.5.2.1 declares the protected ~basic_streambuf ()~.
-=include/streambuf= 156-158 declares ~basic_streambuf
-(ios_base::openmode = ios_base::in | ios_base::out)~, "a convenience
-extension". The mode lands in =_C_state= and gates the get and put
-paths (=include/streambuf= 288-296, 402, 434), so a derived class can
-build an input-only base whose =sputc= never writes. 17.4.4.4, p2's
-first bullet permits the default argument, and the default call
-behaves as the standard's. =basic_filebuf= (=include/fstream= 127) and
-=basic_stringbuf= (=include/sstream= 104, =include/sstream.cc= 36)
-pass their modes through it. Not in
-=doc/stdlibref/basic-streambuf.html=; no test names it. Found by the
-extension sweep's reading, 2026-11-04.
-
-Fix: a decision: record as an addition, or remove; for the record, the
-mode is how the library's buffers know their direction. The comment
-then names the row.
-
-Check: the row exists and the comment at =include/streambuf= 156 names
-it.
-
 ** TODO =fpos= takes a state in its constructor and names its state type
 
 14882:2003 27.4.3's synopsis gives =fpos= the two =state= members;

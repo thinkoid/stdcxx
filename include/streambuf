@@ -153,7 +153,7 @@ public:
 
 protected:
 
-    // 27.5.2.1, p1: default mode argument is a convenience extension
+    // addition: ref-conformance.md, "basic_streambuf takes an open mode"
     basic_streambuf (ios_base::openmode = ios_base::in | ios_base::out)
         _THROWS (());
 
