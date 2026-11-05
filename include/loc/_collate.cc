@@ -43,4 +43,12 @@ template <class _CharT>
     // no-op
 }
 
+
+template <class _CharT>
+/* virtual */ collate_byname<_CharT>::
+~collate_byname () /* nothrow */
+{
+    // no-op
+}
+
 }   // namespace std

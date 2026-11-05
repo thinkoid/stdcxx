@@ -78,6 +78,13 @@ __rw::__rw_facet_id money_get<_CharT, _InputIter>::id;
 
 
 template <class _CharT, class _InputIter>
+/* virtual */ money_get<_CharT, _InputIter>::~money_get ()
+{
+    // no-op
+}
+
+
+template <class _CharT, class _InputIter>
 typename money_get<_CharT, _InputIter>::iter_type
 money_get<_CharT, _InputIter>::
 _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,

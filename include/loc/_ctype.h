@@ -167,6 +167,8 @@ public:
 
 protected:
 
+    virtual ~ctype () _RWSTD_ATTRIBUTE_NOTHROW;
+
     // 22.2.1.1.2, p1
     virtual bool do_is (mask, char_type) const {
         return false;
@@ -400,6 +402,10 @@ public:
         : ctype<_CharT>(__ref) {
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
+
+protected:
+
+    virtual ~ctype_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 };
 
 
@@ -411,6 +417,10 @@ class _RWSTD_EXPORT ctype_byname<char>: public ctype<char>
 public:
 
     explicit ctype_byname (const char*, _RWSTD_SIZE_T = 0);
+
+protected:
+
+    virtual ~ctype_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 };
 
 

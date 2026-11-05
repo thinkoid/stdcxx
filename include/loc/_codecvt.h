@@ -69,6 +69,8 @@ public:
 
 protected:
 
+    virtual ~codecvt () _RWSTD_ATTRIBUTE_NOTHROW;
+
     // extension: where reasonable, the default behavior of the primary
     // template is the same as that of codecvt<char, char, mbstate_t> if
     // sizeof (intern_type) == sizeof (extern_type) to allow iostream
@@ -139,8 +141,6 @@ public:
 
     explicit codecvt (_RWSTD_SIZE_T __ref = 0): __rw::__rw_facet (__ref) { }
 
-    virtual ~codecvt () _RWSTD_ATTRIBUTE_NOTHROW;
-
     // 22,2,1,5,1, p1
     result out (state_type& __state,
                 const intern_type* __from, const intern_type* __from_end,
@@ -207,8 +207,6 @@ public:
 
     explicit codecvt (_RWSTD_SIZE_T = 0) _THROWS (());
 
-    virtual ~codecvt () _RWSTD_ATTRIBUTE_NOTHROW;
-
     result out (state_type &__state,
                 const intern_type *__from, const intern_type* __from_end,
                 const intern_type *&__from_next,
@@ -252,6 +250,8 @@ public:
     static __rw::__rw_facet_id id;
 
 protected:
+
+    virtual ~codecvt () _RWSTD_ATTRIBUTE_NOTHROW;
 
     virtual result
     do_out (state_type&,
@@ -327,6 +327,8 @@ public:
 
 protected:
 
+    virtual ~codecvt () _RWSTD_ATTRIBUTE_NOTHROW;
+
     virtual result
     do_out (state_type&, const intern_type*, const intern_type*,
             const intern_type*&,
@@ -355,8 +357,6 @@ protected:
 public:
 
     explicit codecvt (_RWSTD_SIZE_T = 0) _THROWS (());
-
-    virtual ~codecvt () _RWSTD_ATTRIBUTE_NOTHROW;
 
     result out (state_type& __state,
                 const intern_type *__from, const intern_type *__from_end,
@@ -423,6 +423,8 @@ public:
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
 
+protected:
+
     virtual ~codecvt_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 };
 
@@ -436,6 +438,8 @@ class _RWSTD_EXPORT codecvt_byname<char, char, _RWSTD_MBSTATE_T>
 public:
 
     explicit codecvt_byname (const char*, _RWSTD_SIZE_T = 0);
+
+protected:
 
     virtual ~codecvt_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 };
@@ -454,9 +458,9 @@ public:
 
     explicit codecvt_byname (const char*, _RWSTD_SIZE_T = 0);
 
-    virtual ~codecvt_byname () _RWSTD_ATTRIBUTE_NOTHROW;
-
 protected:
+
+    virtual ~codecvt_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 
     virtual codecvt_base::result
     do_out (state_type&,

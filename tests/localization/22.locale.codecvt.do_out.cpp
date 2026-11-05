@@ -477,7 +477,10 @@ test_codecvt_byname ()
              "const intern_type*, "
              "extern_type*, extern_type*, exterm_type*&)");
 
-    const CodecvtByname cvt ("");
+    // a standard facet's destructor is protected; the object is derived
+    struct Cvt: CodecvtByname { Cvt (const char *s): CodecvtByname (s) { } };
+
+    const Cvt cvt ("");
 
     test_codecvt (&cvt);
 }
@@ -548,10 +551,13 @@ test_wcodecvt_byname_algorithmic ()
 
     // lowercase utf ==> relaxed checking (i.e., some, but not all,
     // invalid UTF-8 sequence are accepted)
-    const WCodecvtByname cvt_relaxd ("utf-8@UCS");
+    // a standard facet's destructor is protected; the object is derived
+    struct Cvt: WCodecvtByname { Cvt (const char *s): WCodecvtByname (s) { } };
+
+    const Cvt cvt_relaxd ("utf-8@UCS");
 
     // capital UTF ==> strict checking
-    const WCodecvtByname cvt_strict ("UTF-8@UCS");
+    const Cvt cvt_strict ("UTF-8@UCS");
 
 #undef STRICT
 #define STRICT(from, from_end_off, from_next_off,    \

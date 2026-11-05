@@ -83,8 +83,6 @@ public:
     explicit messages (_RWSTD_SIZE_T __refs = 0)
         : __rw::__rw_facet (__refs) { }
 
-    virtual ~messages () _RWSTD_ATTRIBUTE_NOTHROW;
-
     catalog open (const string& __fun, const locale& __loc) const {
         return do_open (__fun, __loc);
     }
@@ -101,6 +99,8 @@ public:
     static __rw::__rw_facet_id id;
 
 protected:
+
+    virtual ~messages () _RWSTD_ATTRIBUTE_NOTHROW;
 
     virtual catalog do_open (const string&, const locale&) const;
 
@@ -133,6 +133,8 @@ public:
         : messages<_CharT>(__refs) {
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
+
+protected:
 
     virtual ~messages_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 };

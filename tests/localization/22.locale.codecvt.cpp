@@ -145,6 +145,15 @@ typedef std::codecvt_byname<char,char,std::mbstate_t>     CodecvtBn;
 typedef std::codecvt<wchar_t,char,std::mbstate_t>         CodecvtW;
 typedef std::codecvt_byname<wchar_t,char,std::mbstate_t>  CodecvtBnW;
 
+// a standard facet's destructor is protected; a test that defines a
+// codecvt_byname object, or deletes one it made, derives this class
+template <class internT>
+struct CodecvtBynameObject: std::codecvt_byname<internT, char, std::mbstate_t>
+{
+    CodecvtBynameObject (const char *name, std::size_t refs = 0)
+        : std::codecvt_byname<internT, char, std::mbstate_t>(name, refs) { }
+};
+
 
 // Type names used in assertion messages
 template <class T>
@@ -327,7 +336,10 @@ test_virtuals (const char* locale_name)
 
 const Codecvt& create_Codecvt (const std::locale&)
 {
-    static Codecvt cc;
+    // a standard facet's destructor is protected; the object is derived
+    struct Cvt: Codecvt { };
+
+    static Cvt cc;
     return cc;
 }
 
@@ -338,7 +350,10 @@ const CodecvtBn& create_CodecvtBn (const std::locale& loc)
 
 const CodecvtW& create_CodecvtW (const std::locale&)
 {
-    static CodecvtW cc;
+    // a standard facet's destructor is protected; the object is derived
+    struct Cvt: CodecvtW { };
+
+    static Cvt cc;
     return cc;
 }
 
@@ -1356,8 +1371,8 @@ test_inout (int which, int line, const char* name,
     else
         locale_name = namebuf;
 
-    typedef std::codecvt<internT, char, std::mbstate_t>        Cvt;
-    typedef std::codecvt_byname<internT, char, std::mbstate_t> CvtByname;
+    typedef std::codecvt<internT, char, std::mbstate_t> Cvt;
+    typedef CodecvtBynameObject<internT>                CvtByname;
 
     std::locale loc;
 
@@ -1383,7 +1398,7 @@ test_inout (int which, int line, const char* name,
     // constructed above
     if (codecvt_name) {
 
-        const Cvt* pcvt = 0;
+        const CvtByname* pcvt = 0;
 
         try {
             // first try to construct the facet
@@ -2198,8 +2213,7 @@ test_inout (const char* tname)
         // 22.2.1.5.2, p11: the most do_length (..., 1) can return,
         // 6 bytes for the library's UTF-8 conversion
         {
-            const std::codecvt_byname<wchar_t, char, std::mbstate_t>
-                cc (locname);
+            const CodecvtBynameObject<wchar_t> cc (locname);
 
             const int maxlen = cc.max_length ();
 
@@ -2593,7 +2607,10 @@ test_primary (InternT, ExternT, const char *name, bool same_size)
 
     rw_info (0, 0, __LINE__, "std::codecvt<%s>, the primary template", name);
 
-    const PrimaryCvt cvt;
+    // a standard facet's destructor is protected; the object is derived
+    struct Cvt: PrimaryCvt { Cvt () { } };
+
+    const Cvt cvt;
 
     const std::codecvt_base::result expect =
         same_size ? std::codecvt_base::noconv : std::codecvt_base::error;
@@ -2700,7 +2717,7 @@ run_test (int /*unused*/, char* /*unused*/ [])
             std::sprintf (locname_mod, "%s", locname);                       \
                                                                              \
         try {                                                                \
-            const CodecvtBnW cc (locname_mod, 1);                            \
+            const CodecvtBynameObject<wchar_t> cc (locname_mod, 1);          \
             std::locale loc = std::locale (std::locale::classic (), &cc);    \
                                                                              \
             test_ucs_modifier (locname_mod, enc, native, cc, f, i, is);      \

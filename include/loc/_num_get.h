@@ -140,6 +140,8 @@ struct num_get: __rw::__rw_facet
 
 protected:
 
+    virtual ~num_get () _RWSTD_ATTRIBUTE_NOTHROW;
+
 #ifndef _RWSTD_NO_NATIVE_BOOL
 
     virtual iter_type

@@ -492,7 +492,10 @@ void direct_use_test (charT, const char *cname)
 
     Ios<charT> ios;
 
-    const std::num_put<charT> np;
+    // a standard facet's destructor is protected; the object is derived
+    struct NumPut: std::num_put<charT> { NumPut () { } };
+
+    const NumPut np;
 
     Streambuf<charT> sb;
 
@@ -2213,7 +2216,10 @@ void leak_test (charT, const char *cname)
              "(..., double) with a throwing iterator leaks nothing",
              cname, cname);
 
-    const std::num_put<charT, ThrowIter<charT> > np;
+    // a standard facet's destructor is protected; the object is derived
+    struct NumPut: std::num_put<charT, ThrowIter<charT> > { NumPut () { } };
+
+    const NumPut np;
 
     Ios<charT> ios;
 

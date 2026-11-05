@@ -58,8 +58,6 @@ struct num_put: __rw::__rw_facet
     explicit num_put (_RWSTD_SIZE_T __refs = 0)
         : __rw::__rw_facet (__refs) { }
 
-    virtual ~num_put () _RWSTD_ATTRIBUTE_NOTHROW;
-
     iter_type put (iter_type __it, ios_base& __flags, char_type __fill,
                    bool __val) const {
         return do_put (__it, __flags, __fill, __val);
@@ -112,6 +110,8 @@ struct num_put: __rw::__rw_facet
     static __rw::__rw_facet_id id;
 
 protected:
+
+    virtual ~num_put () _RWSTD_ATTRIBUTE_NOTHROW;
 
     virtual iter_type
     do_put (iter_type __it, ios_base &__flags, char_type __fill,

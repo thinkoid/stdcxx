@@ -34,7 +34,8 @@ enum { fill = '\xdc' };
 template <class charT>
 void test_moneypunct (charT)
 {
-    typedef std::moneypunct <charT> PunctT;
+    // a standard facet's destructor is protected; the object is derived
+    struct PunctT: std::moneypunct <charT> { };
 
     // Use a pointer to properly align buffer for placment new.
     union {
@@ -54,7 +55,8 @@ void test_moneypunct (charT)
 template <class charT>
 void test_messages (charT)
 {
-    typedef std::messages <charT> MessagesT;
+    // a standard facet's destructor is protected; the object is derived
+    struct MessagesT: std::messages <charT> { };
 
     union {
         void* ptr;

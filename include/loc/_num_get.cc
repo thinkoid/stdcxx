@@ -80,6 +80,13 @@ template <class _CharT, class _InputIter>
 __rw::__rw_facet_id num_get<_CharT, _InputIter>::id;
 
 
+template <class _CharT, class _InputIter /* = istreambuf_iterator<_CharT> */>
+/* virtual */ num_get<_CharT, _InputIter>::~num_get ()
+{
+    // no-op
+}
+
+
 #ifndef _RWSTD_NO_NATIVE_BOOL
 
 template <class _CharT, class _InputIter /* = istreambuf_iterator<_CharT> */>

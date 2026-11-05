@@ -59,8 +59,6 @@ struct numpunct: __rw::__rw_facet
     explicit numpunct (_RWSTD_SIZE_T __ref = 0)
         : __rw::__rw_facet (__ref) { }
 
-    virtual ~numpunct () _RWSTD_ATTRIBUTE_NOTHROW;
-
     // 22.2.3.1.1, p1
     char_type decimal_point () const;
 
@@ -79,6 +77,8 @@ struct numpunct: __rw::__rw_facet
     static __rw::__rw_facet_id id;
 
 protected:
+
+    virtual ~numpunct () _RWSTD_ATTRIBUTE_NOTHROW;
 
     // 22.2.3.1.2, p1
     virtual char_type do_decimal_point () const {
@@ -170,6 +170,8 @@ public:
         : numpunct<_CharT>(__refs) {
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
+
+protected:
 
     virtual ~numpunct_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 };

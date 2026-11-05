@@ -952,4 +952,10 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
 }
 
 
+ctype_byname<char>::~ctype_byname () // nothrow
+{
+    // no-op
+}
+
+
 }   // namespace std

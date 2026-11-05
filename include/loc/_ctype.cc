@@ -34,6 +34,13 @@ template <class _CharT>
 __rw::__rw_facet_id ctype<_CharT>::id;
 
 
+template <class _CharT>
+/* virtual */ ctype<_CharT>::~ctype ()
+{
+    // no-op
+}
+
+
 template <class _CharT> 
 /* virtual */ const typename ctype<_CharT>::char_type*
 ctype<_CharT>::
@@ -138,6 +145,13 @@ do_narrow (const char_type *__lo, const char_type *__hi,
         *__dest = narrow (*__lo, __dfault);
 
     return __hi;
+}
+
+
+template <class _CharT>
+/* virtual */ ctype_byname<_CharT>::~ctype_byname ()
+{
+    // no-op
 }
 
 

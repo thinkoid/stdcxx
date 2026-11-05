@@ -67,8 +67,6 @@ struct moneypunct: __rw::__rw_facet, public money_base
     explicit moneypunct (_RWSTD_SIZE_T __refs = 0)
         : __rw::__rw_facet (__refs) { }
 
-    virtual ~moneypunct () _RWSTD_ATTRIBUTE_NOTHROW;
-
     char_type decimal_point () const {
         return do_decimal_point ();
     }
@@ -110,6 +108,8 @@ struct moneypunct: __rw::__rw_facet, public money_base
     static const bool intl = _Intl;
 
 protected:
+
+    virtual ~moneypunct () _RWSTD_ATTRIBUTE_NOTHROW;
 
     // 22.2.6.3.1, p1
     virtual char_type do_decimal_point () const {
@@ -209,6 +209,8 @@ public:
         : moneypunct<_CharT, _Intl>(__ref) {
             this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
         }
+
+protected:
 
     virtual ~moneypunct_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 };

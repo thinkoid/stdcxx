@@ -62,8 +62,6 @@ public:
     explicit collate (_RWSTD_SIZE_T __refs = 0)
         : __rw::__rw_facet (__refs) { }
 
-    virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
-
     int
     compare (const char_type* __low1, const char_type* __high1,
              const char_type* __low2, const char_type* __high2) const {
@@ -83,6 +81,8 @@ public:
     static __rw::__rw_facet_id id;
 
 protected:
+
+    virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
 
     // protected virtual members are not defined
     virtual int
@@ -109,8 +109,6 @@ public:
     explicit collate (_RWSTD_SIZE_T __refs = 0)
         : __rw::__rw_facet (__refs) { }
 
-    virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
-
     int
     compare (const char_type* __low1, const char_type* __high1,
              const char_type* __low2, const char_type* __high2) const {
@@ -130,6 +128,8 @@ public:
     static __rw::__rw_facet_id id;
 
 protected:
+
+    virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
 
     virtual int
     do_compare (const char_type*, const char_type*,
@@ -155,8 +155,6 @@ public:
     explicit collate (_RWSTD_SIZE_T __refs = 0) _THROWS (())
         : __rw::__rw_facet (__refs) { }
 
-    virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
-
     int
     compare (const char_type* __low1, const char_type* __high1,
              const char_type* __low2, const char_type* __high2) const {
@@ -176,6 +174,8 @@ public:
     static __rw::__rw_facet_id id;
 
 protected:
+
+    virtual ~collate () _RWSTD_ATTRIBUTE_NOTHROW;
 
     virtual int
     do_compare (const char_type*, const char_type*,
@@ -200,6 +200,10 @@ public:
         : collate<_CharT>(__ref) {
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
+
+protected:
+
+    virtual ~collate_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 };
 
 
@@ -214,9 +218,9 @@ public:
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
 
-    virtual ~collate_byname () _RWSTD_ATTRIBUTE_NOTHROW;
-
 protected:
+
+    virtual ~collate_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 
     virtual int
     do_compare (const char_type*, const char_type*,
@@ -238,9 +242,9 @@ public:
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
 
-    virtual ~collate_byname () _RWSTD_ATTRIBUTE_NOTHROW;
-
 protected:
+
+    virtual ~collate_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 
     virtual int
     do_compare (const char_type*, const char_type*,

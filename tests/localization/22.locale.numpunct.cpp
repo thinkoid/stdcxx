@@ -233,6 +233,12 @@ bool check_numpunct (charT,
 
 /**************************************************************************/
 
+// a standard facet's destructor is protected; a temporary is derived
+template <class charT>
+struct PunctObject: std::numpunct<charT> { };
+
+/**************************************************************************/
+
 template <class charT>
 void check_decimal_point (charT              expect,
                           const char        *tname,
@@ -243,7 +249,7 @@ void check_decimal_point (charT              expect,
 
     const charT c = loc ?
           std::use_facet< Punct >(*loc).decimal_point ()
-        : Punct ().decimal_point ();
+        : PunctObject<charT> ().decimal_point ();
 
 
     rw_assert (Traits::eq (c, expect), 0, __LINE__,
@@ -263,7 +269,7 @@ void check_thousands_sep (charT              expect,
 
     const charT c = loc ?
           std::use_facet< Punct >(*loc).thousands_sep ()
-        : Punct ().thousands_sep ();
+        : PunctObject<charT> ().thousands_sep ();
 
     rw_assert (Traits::eq (c, expect), 0, __LINE__,
                "numpunct<%s>::thousands_sep() == %{#lc}, got %{#lc}",
@@ -282,7 +288,7 @@ void check_grouping (charT,
 
     const std::string s = loc ?
           std::use_facet< Punct >(*loc).grouping ()
-        : Punct ().grouping ();
+        : PunctObject<charT> ().grouping ();
 
     if (   s != expect
         && s.size () != expect.size () && s.size () && expect.size ()) {
@@ -321,7 +327,7 @@ void check_falsename (const std::basic_string<charT> &expect,
 
     const std::basic_string<charT> s = loc ?
           std::use_facet< Punct >(*loc).falsename ()
-        : Punct ().falsename ();
+        : PunctObject<charT> ().falsename ();
 
     const int char_size = int (sizeof (charT));
 
@@ -341,7 +347,7 @@ void check_truename (const std::basic_string<charT> &expect,
 
     const std::basic_string<charT> s = loc ?
           std::use_facet< Punct >(*loc).truename ()
-        : Punct ().truename ();
+        : PunctObject<charT> ().truename ();
 
     const int char_size = int (sizeof (charT));
 

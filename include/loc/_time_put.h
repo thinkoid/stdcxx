@@ -60,8 +60,6 @@ struct time_put: __rw::__rw_facet
     explicit time_put (_RWSTD_SIZE_T __refs = 0)
         : __rw::__rw_facet (__refs) { }
 
-    virtual ~time_put () _RWSTD_ATTRIBUTE_NOTHROW;
-
     // 22.2.5.3.1, p1
     iter_type put (iter_type, ios_base&, char_type, const tm*,
                    const char_type*, const char_type*) const;
@@ -74,6 +72,8 @@ struct time_put: __rw::__rw_facet
     static __rw::__rw_facet_id id;
 
 protected:
+
+    virtual ~time_put () _RWSTD_ATTRIBUTE_NOTHROW;
 
     // 22.2.5.3.2, p1
     virtual iter_type
@@ -104,6 +104,8 @@ public:
         : time_put<_CharT, _OutputIter>(__ref) {
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
+
+protected:
 
     virtual ~time_put_byname () _RWSTD_ATTRIBUTE_NOTHROW;
 };

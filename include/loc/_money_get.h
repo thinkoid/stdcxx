@@ -76,6 +76,8 @@ struct money_get: __rw::__rw_facet
 
 protected:
 
+    virtual ~money_get () _RWSTD_ATTRIBUTE_NOTHROW;
+
     virtual iter_type
     do_get (iter_type __it, iter_type __end, bool __intl, ios_base &__fl,
             _RWSTD_IOSTATE &__err, long double &__val) const {
