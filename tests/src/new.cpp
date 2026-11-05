@@ -115,6 +115,52 @@ static const char Guard [8] = {
 static void
 _rw_print_heap ();
 
+// check the guards and the stored address of an allocated block;
+// the call will abort if the block has been corrupted
+static void
+_rw_check_block (const Header *hdr)
+{
+    // check the lead guard
+    if (hdr->self_ != hdr) {
+        rw_error (0, 0, __LINE__,
+                  "%s:%d: header guard corruption at %#p: "
+                  "expected %#p, got %#p",
+                  hdr->ptr_, (const void*)hdr, hdr->self_);
+        abort ();
+    }
+
+    // check that the stored pointer has the expected value
+    if (hdr->ptr_ != hdr + 1) {
+        rw_error (0, 0, __LINE__,
+                  "%s:%d: block address mismatch: "
+                  "expected %#p, got %#p",
+                  __FILE__, __LINE__,
+                  (const void*)(hdr + 1), hdr->ptr_);
+
+        abort ();
+    }
+
+    // check the trailing guard
+    const char* const grd = (char*)hdr->ptr_ + hdr->size_;
+
+    if (memcmp (grd, Guard, sizeof Guard)) {
+        size_t off = 0;
+        while (grd [off] == Guard [off])
+            ++off;
+
+        typedef unsigned char UChar;
+
+        rw_error (0, 0, __LINE__,
+                  "%s:%d: trailing guard corruption at %#p "
+                  "+ %zu of a %zu byte block: '0x%02x' != '0x%x'",
+                  __FILE__, __LINE__, hdr->ptr_,
+                  hdr->size_ + off + 1, hdr->size_,
+                  UChar (grd [off]), UChar (Guard [off]));
+
+        abort ();
+    }
+}
+
 // find a block by the user pointer in the list of allocated blocks
 static Header*
 _rw_find_block (void *ptr, bool check_heap, const char *caller)
@@ -129,48 +175,8 @@ _rw_find_block (void *ptr, bool check_heap, const char *caller)
         nblocks += 1;
         nbytes  += hdr->size_;
 
-        if (check_heap) {
-            // check the lead guard
-            if (hdr->self_ != hdr) {
-                rw_error (0, 0, __LINE__,
-                          "%s:%d: header guard corruption at %#p: "
-                          "expected %#p, got %#p",
-                          hdr->ptr_, (const void*)hdr, hdr->self_);
-                abort ();
-            }
-
-            // check that the stored pointer has the expected value
-            if (hdr->ptr_ != hdr + 1) {
-                rw_error (0, 0, __LINE__,
-                          "%s:%d: block address mismatch: "
-                          "expected %#p, got %#p",
-                          __FILE__, __LINE__,
-                          (const void*)(hdr + 1), hdr->ptr_);
-
-                abort ();
-            }
-
-            // check the trailing guard
-            const char* const grd = (char*)hdr->ptr_ + hdr->size_;
-
-            if (memcmp (grd, Guard, sizeof Guard)) {
-
-                size_t off = 0;
-                while (grd [off] == Guard [off])
-                    ++off;
-
-                typedef unsigned char UChar;
-
-                rw_error (0, 0, __LINE__,
-                          "%s:%d: trailing guard corruption at %#p "
-                          "+ %zu of a %zu byte block: '0x%02x' != '0x%x'",
-                          __FILE__, __LINE__, hdr->ptr_,
-                          hdr->size_ + off + 1, hdr->size_,
-                          UChar (grd [off]), UChar (Guard [off]));
-
-                abort ();
-            }
-        }
+        if (check_heap)
+            _rw_check_block (hdr);
 
         if (ptr == hdr->ptr_) {
             res = hdr;
@@ -422,8 +428,6 @@ operator_new (size_t nbytes, bool array)
 
     ++seq_gen;
 
-    _rw_find_block (hdr->ptr_, true, 0);
-
     return hdr->ptr_;
 }
 
@@ -440,20 +444,18 @@ operator_delete (void *ptr, bool array)
 
     if (ptr) {
 
-        // find the block of memory that `ptr' was allocated from
-        // and check the whole heap in the process; the call will
-        // abort if any block has been corrupted
-        Header* const hdr = _rw_find_block (ptr, true, name [array]);
+        Header* const hdr = (Header*)ptr - 1;
 
-        if (!hdr) {
-            // hdr should never be 0 except under special circumstances
-            // such as when the compiler's runtime library itself passes
-            // the wrong argument to operator delete (such as libcxx
-            // on True64 with Compaq C++ -- see bug #359)
-            free (ptr);
+        // a pointer not allocated by operator new, or one already
+        // deallocated (the block is invalidated when freed), fails
+        // the lead guard check; walk the heap to diagnose it, the
+        // call will abort
+        if (hdr->self_ != hdr)
+            _rw_find_block (ptr, true, name [array]);
 
-            return;
-        }
+        // check the block being deallocated; the call will abort
+        // if the block has been corrupted
+        _rw_check_block (hdr);
 
         const size_t nbytes = hdr->size_;
         
