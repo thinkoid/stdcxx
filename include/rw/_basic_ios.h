@@ -78,14 +78,14 @@ public:
 
 protected:
 
-    typedef basic_streambuf<char_type, traits_type> streambuf_type; 
-    typedef basic_ostream<char_type, traits_type>   ostream_type;
+    typedef basic_streambuf<char_type, traits_type> _C_streambuf_type; 
+    typedef basic_ostream<char_type, traits_type>   _C_ostream_type;
 
 public:
 
     // 27.4.4.1, p1 - NOTE: `sb' may point to a yet uninitialized
     //  object; it is unsafe to reference any of its members
-    explicit basic_ios (streambuf_type *__sb) {
+    explicit basic_ios (_C_streambuf_type *__sb) {
         init (__sb);
     }
 
@@ -155,24 +155,25 @@ public:
     }
 
     // 27.4.4.2, p1
-    ostream_type* tie () const {
-        return _C_usr ? static_cast< ostream_type* >(_C_tie ()) : 0;
+    _C_ostream_type* tie () const {
+        return _C_usr ? static_cast< _C_ostream_type* >(_C_tie ()) : 0;
     }
 
     // 27.4.4.2, p2
-    ostream_type* tie (ostream_type *__strm) {
-        return static_cast< ostream_type* >(_C_tie (__strm));
+    _C_ostream_type* tie (_C_ostream_type *__strm) {
+        return static_cast< _C_ostream_type* >(_C_tie (__strm));
     }
 
     // 27.4.4.2, p4 - NOTE: the pointer returned from rdbuf() in derived
-    // classes may be different from the one passed to rdbuf (streambuf_type*)
-    streambuf_type* rdbuf () const {
-        return static_cast< streambuf_type* >(_C_rdbuf);
+    // classes may be different from the one passed to
+    // rdbuf (_C_streambuf_type*)
+    _C_streambuf_type* rdbuf () const {
+        return static_cast< _C_streambuf_type* >(_C_rdbuf);
     }
 
     // 27.4.4.2, p5
-    streambuf_type* rdbuf (streambuf_type *__rdbuf) {
-        return static_cast< streambuf_type* >(
+    _C_streambuf_type* rdbuf (_C_streambuf_type *__rdbuf) {
+        return static_cast< _C_streambuf_type* >(
             _C_set (goodbit, _C_except, __rdbuf));
     }
 
@@ -207,7 +208,7 @@ protected:
     basic_ios () { /* no-op as per 27.4.4.1, p2 */ }
 
     // 27.4.4.1, p3
-    void init (streambuf_type*);
+    void init (_C_streambuf_type*);
 
     // (conditionally) returns a pointer to a mutex in the associated
     // basic_streambuf object
@@ -272,7 +273,7 @@ basic_ios<_CharT, _Traits>::imbue (const locale& __loc)
 
 template<class _CharT, class _Traits>
 inline void
-basic_ios<_CharT, _Traits>::init (streambuf_type *__sb)
+basic_ios<_CharT, _Traits>::init (_C_streambuf_type *__sb)
 {
     // invalidate the fill character
     // the character will be initialized the first time fill() is called

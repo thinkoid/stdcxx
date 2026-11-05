@@ -66,7 +66,7 @@ public:
     typedef typename traits_type::pos_type     pos_type;
     typedef typename traits_type::off_type     off_type;
       
-    typedef basic_ios<char_type, traits_type>  ios_type;
+    typedef basic_ios<char_type, traits_type>  _C_ios_type;
 
     // 27.6.2.2, p1
     explicit basic_ostream (basic_streambuf<char_type, traits_type> *__sb) {
@@ -123,7 +123,7 @@ public:
     }
 
     // 27.6.2.5.3, p4
-    basic_ostream& operator<< (ios_type& (*__pf)(ios_type&)) {
+    basic_ostream& operator<< (_C_ios_type& (*__pf)(_C_ios_type&)) {
         return (*__pf)(*this), *this;
     }
 

@@ -117,26 +117,6 @@ warning.
 Check: =nm -D= of the 15D library and of =libstdc++= for
 =_ZNSt9type_infoC2EPKc=, which settles whether a call can link.
 
-** TODO =basic_ios= and =basic_ostream= declare type names the standard does not
-
-14882:2003 27.4.4's synopsis gives =basic_ios= five member types, and
-27.6.2.1 gives =basic_ostream= the same five. =basic_ios= adds
-protected =streambuf_type= and =ostream_type=
-(=include/rw/_basic_ios.h= 79-82), =basic_ostream= a public =ios_type=
-(=include/ostream= 69). The names are not reserved, and 17.4.4.4
-covers member functions, not types: a class derived from a stream that
-uses one of these names unqualified, meaning a type of its own
-namespace, finds the member first. The library uses them in
-=basic_ios= and at =include/ostream= 126. =doc/stdlibref= documents
-none of them on these pages. No test names them. The rename touches
-two files. Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: rename to reserved names, or record; for the rename,
-it costs two files and nothing outside them.
-
-Check: no =ios_type=, =streambuf_type= or =ostream_type= in
-=include/rw/_basic_ios.h= and =include/ostream=; a sanity build.
-
 ** TODO =basic_istream= has a public four-argument =read=
 
 14882:2003 27.6.1.1's synopsis and 27.6.1.3 declare ~read (char_type*,
