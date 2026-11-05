@@ -295,24 +295,6 @@ Fix: the state leaves the format flags, as locking did in 1803887b.
 Check: =27.objects= finds =flags ()= of each object at ~skipws | dec~,
 with =unitbuf= for =cerr= and =wcerr=.
 
-** TODO Extracting into a =bitset<0>= does not set =failbit=
-
-14882:2003 23.3.5.3, p6: "If no characters are stored in str, calls
-is.setstate(ios::failbit)". For =N= 0 none can be, so the 2003 text
-fails every extraction into a =bitset<0>=, as C++11 does; C++20 (N4849
-20.9.4, p6) reads "If N > 0 and no characters are stored".
-=include/bitset.cc= 174 sets =failbit= only ~if (_Size && _Size ==
-__bit)~, C++20's behaviour, since the 2005 import. No comment, test or
-reference page names it. Found by the extension sweep's reading,
-2026-11-04.
-
-Fix: a decision: record as a departure that takes C++20's text, or
-fail as 2003 does; for the record, failing every =bitset<0>=
-extraction helps no program.
-
-Check: a chapter 2 row names =include/bitset.cc= and 23.3.5.3, p6, or
-a =23.bitset= row pins =failbit=.
-
 ** TODO A const =valarray='s subscript returns a reference
 
 14882:2003 26.3.2.3 declares ~T operator[] (size_t) const~, and p1 has

@@ -171,6 +171,7 @@ __rw_extract_bitset (std::basic_istream<_CharT, _Traits> &__strm,
         __strm.setstate (__strm.badbit | __rw::__rw_rethrow);
     }
 
+    // 23.3.5.3, p6, with C++20's "If N > 0" (N4849 20.9.4, p6)
     if (_Size && _Size == __bit)
         __err |= __strm.failbit;
     else
