@@ -51,24 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO =freeze= stops writes into a caller's array
-
-D.7.1.2, p1 alters the freeze status only "If strmode & dynamic is
-non-zero"; p2 has =str ()= call =freeze ()=. =strstreambuf::freeze=
-sets and clears =_C_frozen= whatever the mode (=include/strstream=
-112-117), and =_C_is_out= takes a frozen buffer for one without a put
-area (=include/streambuf= 293-296). After =str ()= on an =ostrstream=
-over a caller's array, =sputc= and =xsputn= fail and the next
-insertion sets =badbit=; the standard leaves the array writable. A
-departure, not an addition. =doc/stdlibref/strstreambuf.html= 255
-describes the standard's behaviour. No test. Found by the extension
-sweep's reading, 2026-11-04.
-
-Fix: =freeze= alters the status of a dynamic buffer only.
-
-Check: an =ostrstream= over a =char [8]=: insert "ab", call =str ()=,
-insert "cd"; the stream is =good ()= and the array begins "abcd".
-
 ** TODO =put= and =write= reset the width
 
 14882:2003 27.6.2.6, p1, p2 and p5 make =put= and =write= unformatted

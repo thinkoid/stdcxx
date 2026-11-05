@@ -264,7 +264,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 27.stringbuf.virtuals                         0    0   86124      0   100%
 27.stringbuf.xsputn.stdcxx-515             NOUT    0                      
 27.stringbuf.xsputn.stdcxx-576             NOUT    0                      
-27.strstream                                  0    0       8      0   100%
+27.strstream                                  0    0      12      0   100%
 8.cstdint                                     0    0     157      0   100%
 atomic_add                                    0    0      66      0   100%
 atomic_xchg                                   0    0      22      0   100%
@@ -276,5 +276,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            42
-  Assertions:            12538250
+  Assertions:            12538254
   Failed assertions:            0

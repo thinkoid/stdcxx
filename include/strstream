@@ -108,8 +108,11 @@ public:
     // D.7.1.1, p8
     virtual ~strstreambuf ();
 
-    // D.7.1.2, p1
+    // D.7.1.2, p1: alters the freeze status of a dynamic buffer only
     void freeze (bool __f = true) {
+        if (!(_C_state & _C_dynamic))
+            return;
+
         if (__f)
             _C_state |= _C_frozen;
         else

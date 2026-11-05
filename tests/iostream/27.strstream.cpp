@@ -25,6 +25,7 @@
  **************************************************************************/
 
 #include <strstream>    // for ostrstream, strstream
+#include <cstring>      // for memcmp
 
 #include <rw_driver.h>  // for rw_test(), rw_assert()
 
@@ -73,10 +74,53 @@ test_open_modes ()
 
 /**************************************************************************/
 
+// D.7.1.2, p1: freeze alters the freeze status of a dynamic buffer
+// only; p2: str () calls freeze ()
+static void
+test_freeze ()
+{
+    rw_info (0, 0, __LINE__, "D.7.1.2 strstreambuf::freeze");
+
+    char buf [8] = "";
+
+    std::ostrstream strm (buf, int (sizeof buf));
+
+    strm << "ab";
+
+    rw_assert (buf == strm.str (), 0, __LINE__,
+               "ostrstream (buf, 8).str () == buf");
+
+    strm << "cd";
+
+    rw_assert (strm.good (), 0, __LINE__,
+               "ostrstream (buf, 8) << \"ab\", str (), << \"cd\": "
+               "good ()");
+
+    rw_assert (0 == std::memcmp (buf, "abcd", 4), 0, __LINE__,
+               "ostrstream (buf, 8) << \"ab\", str (), << \"cd\": "
+               "buf == \"abcd\", got %{#*s}", 4, buf);
+
+    std::ostrstream dyn;
+
+    dyn << "ab";
+    dyn.str ();
+    dyn << "cd";
+
+    rw_assert (2 == dyn.pcount (), 0, __LINE__,
+               "ostrstream () << \"ab\", str (), << \"cd\": "
+               "pcount () == 2, got %d", dyn.pcount ());
+
+    // let the destructor free the dynamic array
+    dyn.freeze (false);
+}
+
+/**************************************************************************/
+
 static int
 run_test (int, char**)
 {
     test_open_modes ();
+    test_freeze ();
 
     return 0;
 }
