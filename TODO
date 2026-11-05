@@ -198,29 +198,6 @@ decision.
 Check: ~git grep -n "const char \*__s = 0" include~ is empty and the
 library builds, =src/exception.cpp= passing an explicit null.
 
-** TODO The =valarray= helpers have public constructors from the storage and a public =get_ref_mem_array=
-
-14882:2003 26.3.5.1, p1, 26.3.7.1, p1, 26.3.8.1, p1 and 26.3.9.1 give
-the four helpers no public constructors, and the synopses list no
-accessor. =include/valarray= 1296, 1461, 1514 and 1621 declare public
-constructors from an =__rw::__rw_array<T>*= and the selector, which a
-program can call with a null pointer: ~std::slice_array<int> sa (0,
-std::slice ());~ compiles. 1301, 1468, 1519 and 1627 declare a public
-=get_ref_mem_array ()=, an unreserved name, that returns the
-referenced storage. The name occurs 34 times in the header:
-=valarray='s members (2081-2314) and the =__rw_unary_function= and
-=__rw_binary_function= templates (1726-1819) call it. No reference
-page and no test names them. The change costs a rename in those uses
-and friend declarations for the constructors. Found by the extension
-sweep's reading, 2026-11-04.
-
-Fix: a decision: the accessor takes a =_C_= name and the constructors
-go private with =valarray<T>= a friend, or record; for the change,
-both are plumbing.
-
-Check: =git grep -n get_ref_mem_array include= is empty and the =26.*=
-tests equal their pins.
-
 ** TODO =gslice= carries iteration state with three public members
 
 14882:2003 26.3.6's synopsis: two constructors, =start ()=, =size ()=,

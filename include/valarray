@@ -1290,17 +1290,11 @@ public:
 
     // lwg issues 253 and 123: a public copy constructor, a const fill
     slice_array (const slice_array &__rhs)
-        : _C_array(__rhs.get_ref_mem_array()),
+        : _C_array(__rhs._C_get_storage()),
           _C_slice(__rhs._C_get_slice())
         { }
-          
-    // implementation
-    slice_array (__rw::__rw_array<value_type>* __a, const slice &__s) 
-        : _C_array (__a),
-          _C_slice (__s)
-        { }
 
-    __rw::__rw_array<value_type>* get_ref_mem_array () const {
+    __rw::__rw_array<value_type>* _C_get_storage () const {
         return _C_array;
     }
 
@@ -1361,6 +1355,12 @@ public:
     }
 
 private:
+    // valarray::operator[] constructs it over the valarray's storage
+    slice_array (__rw::__rw_array<value_type>* __a, const slice &__s) 
+        : _C_array (__a),
+          _C_slice (__s)
+        { }
+
     slice_array (); 
     slice_array& operator= (const slice_array&);
 
@@ -1457,18 +1457,11 @@ public:
 
     // lwg issues 253 and 123: a public copy constructor, a const fill
     gslice_array (const gslice_array<value_type>& __rhs)
-        : _C_array (__rhs.get_ref_mem_array ()),
+        : _C_array (__rhs._C_get_storage ()),
           _C_slice (__rhs._C_get_slice ())
         { }
 
-    gslice_array (__rw::__rw_array<value_type>* __a, const gslice & __s)
-        : _C_array (__a),
-          _C_slice (__s)
-        { }
-
-
-
-    __rw::__rw_array<value_type>* get_ref_mem_array () const {
+    __rw::__rw_array<value_type>* _C_get_storage () const {
         return _C_array;
     }
 
@@ -1491,6 +1484,12 @@ public:
     void operator>>= (const valarray<value_type> &__rhs) const;
 
 private:
+    // valarray::operator[] constructs it over the valarray's storage
+    gslice_array (__rw::__rw_array<value_type>* __a, const gslice & __s)
+        : _C_array (__a),
+          _C_slice (__s)
+        { }
+
     gslice_array ();
     gslice_array<value_type>& operator= (const gslice_array<value_type>&);
 
@@ -1511,16 +1510,11 @@ public:
 
     // lwg issues 253 and 123: a public copy constructor, a const fill
     mask_array (const mask_array<value_type> &__rhs)
-        : _C_array (__rhs.get_ref_mem_array ()),
+        : _C_array (__rhs._C_get_storage ()),
           _C_valarray (__rhs._C_get_array ())
         { }
 
-    mask_array (__rw::__rw_array<value_type> *__a, const valarray<bool>& __val)
-      : _C_array (__a),
-        _C_valarray (__val)
-        { }
-
-    __rw::__rw_array<value_type>* get_ref_mem_array () const {
+    __rw::__rw_array<value_type>* _C_get_storage () const {
         return _C_array;
     }
 
@@ -1582,6 +1576,12 @@ public:
     }
 
 private:
+    // valarray::operator[] constructs it over the valarray's storage
+    mask_array (__rw::__rw_array<value_type> *__a, const valarray<bool>& __val)
+      : _C_array (__a),
+        _C_valarray (__val)
+        { }
+
     mask_array ();
     mask_array<value_type>& operator= (const mask_array<value_type>&); 
 
@@ -1593,9 +1593,9 @@ private:
 template <class _TypeT>
 void mask_array<_TypeT>::operator= (const value_type &__rhs) const
 {
-    _RWSTD_ASSERT (0 != get_ref_mem_array ());
+    _RWSTD_ASSERT (0 != _C_get_storage ());
 
-    __rw::__rw_array<_TypeT> &__a = *get_ref_mem_array ();
+    __rw::__rw_array<_TypeT> &__a = *_C_get_storage ();
 
     for (_RWSTD_SIZE_T __i = 0; __i != _C_valarray.size (); ++__i) {
         if (_C_valarray [__i])
@@ -1619,17 +1619,11 @@ public:
 
     // lwg issues 253 and 123: a public copy constructor, a const fill
     indirect_array (const indirect_array<value_type>& __sl)
-      :_C_array (__sl.get_ref_mem_array ()),
+      :_C_array (__sl._C_get_storage ()),
        _C_valarray (__sl._C_get_array ())
         { }
 
-    indirect_array (__rw::__rw_array<value_type>  *__a,
-                    const valarray<_RWSTD_SIZE_T> &__v) 
-        :_C_array (__a),
-         _C_valarray (__v)
-        { }
-
-    __rw::__rw_array<value_type>* get_ref_mem_array () const {
+    __rw::__rw_array<value_type>* _C_get_storage () const {
         return _C_array;
     }
 
@@ -1699,6 +1693,13 @@ public:
     }
 
 private:
+    // valarray::operator[] constructs it over the valarray's storage
+    indirect_array (__rw::__rw_array<value_type>  *__a,
+                    const valarray<_RWSTD_SIZE_T> &__v) 
+        :_C_array (__a),
+         _C_valarray (__v)
+        { }
+
     indirect_array ();
     indirect_array& operator= (const indirect_array&); 
 
@@ -1728,10 +1729,10 @@ __rw_unary_function (const std::slice_array<_TypeT> &__lhs,
                      const std::valarray<_TypeT>     &__rhs,
                            _UnaryFunction             __fun)
 {
-    _RWSTD_ASSERT (0 != __lhs.get_ref_mem_array ());
+    _RWSTD_ASSERT (0 != __lhs._C_get_storage ());
 
     std::slice __slice            = __lhs._C_get_slice ();
-    __rw::__rw_array<_TypeT> &__ar = *__lhs.get_ref_mem_array ();
+    __rw::__rw_array<_TypeT> &__ar = *__lhs._C_get_storage ();
 
     for (_RWSTD_SIZE_T __i = __slice.start (), __j = 0;
          __j != __slice.size (); ++__j) {
@@ -1748,10 +1749,10 @@ __rw_binary_function (const std::slice_array<_TypeT> &__lhs,
                       const std::valarray<_TypeT>     &__rhs,
                             _BinaryFunction            __fun)
 {
-    _RWSTD_ASSERT (0 != __lhs.get_ref_mem_array ());
+    _RWSTD_ASSERT (0 != __lhs._C_get_storage ());
 
     std::slice __slice            = __lhs._C_get_slice ();
-    __rw::__rw_array<_TypeT> &__ar = *__lhs.get_ref_mem_array ();
+    __rw::__rw_array<_TypeT> &__ar = *__lhs._C_get_storage ();
 
     for (_RWSTD_SIZE_T __i = __slice.start (), __j = 0;
          __j != __slice.size (); ++__j) {
@@ -1768,9 +1769,9 @@ __rw_unary_function (const std::mask_array<_TypeT> &__lhs,
                      const std::valarray<_TypeT>    &__rhs,
                            _UnaryFunction            __fun)
 {
-    _RWSTD_ASSERT (0 != __lhs.get_ref_mem_array ());
+    _RWSTD_ASSERT (0 != __lhs._C_get_storage ());
 
-    __rw::__rw_array<_TypeT>   &__ar    = *__lhs.get_ref_mem_array ();
+    __rw::__rw_array<_TypeT>   &__ar    = *__lhs._C_get_storage ();
     const std::valarray<bool> &__vlray = *__lhs._C_get_array_ptr ();
 
     for (_RWSTD_SIZE_T __i = 0, __j = 0; __i != __vlray.size (); ++__i)
@@ -1785,9 +1786,9 @@ __rw_binary_function (const std::mask_array<_TypeT> &__lhs,
                       const std::valarray<_TypeT>    &__rhs,
                             _BinaryFunction           __fun)
 {
-    _RWSTD_ASSERT (0 != __lhs.get_ref_mem_array ());
+    _RWSTD_ASSERT (0 != __lhs._C_get_storage ());
 
-    __rw::__rw_array<_TypeT>   &__ar    = *__lhs.get_ref_mem_array ();
+    __rw::__rw_array<_TypeT>   &__ar    = *__lhs._C_get_storage ();
     const std::valarray<bool> &__vlray = *__lhs._C_get_array_ptr ();
 
     for (_RWSTD_SIZE_T __i = 0, __j = 0; __i != __vlray.size (); ++__i)
@@ -1802,9 +1803,9 @@ __rw_unary_function (const std::indirect_array<_TypeT> &__lhs,
                      const std::valarray<_TypeT>        &__rhs,
                      _UnaryFunction                      __fun)
 {
-    _RWSTD_ASSERT (0 != __lhs.get_ref_mem_array ());
+    _RWSTD_ASSERT (0 != __lhs._C_get_storage ());
 
-    __rw::__rw_array<_TypeT>            &__ar    = *__lhs.get_ref_mem_array ();
+    __rw::__rw_array<_TypeT>            &__ar    = *__lhs._C_get_storage ();
     const std::valarray<_RWSTD_SIZE_T> &__vlray = *__lhs._C_get_array_ptr ();
 
     for (_RWSTD_SIZE_T __i = 0; __i != __vlray.size (); ++__i)
@@ -1819,9 +1820,9 @@ __rw_binary_function (const std::indirect_array<_TypeT> &__lhs,
                       _BinaryFunction                     __fun)
 
 {
-    _RWSTD_ASSERT (0 != __lhs.get_ref_mem_array ());
+    _RWSTD_ASSERT (0 != __lhs._C_get_storage ());
 
-    __rw::__rw_array<_TypeT>            &__ar    = *__lhs.get_ref_mem_array ();
+    __rw::__rw_array<_TypeT>            &__ar    = *__lhs._C_get_storage ();
     const std::valarray<_RWSTD_SIZE_T> &__vlray = *__lhs._C_get_array_ptr ();
 
     for (_RWSTD_SIZE_T __i = 0; __i != __vlray.size (); ++__i)
@@ -2083,7 +2084,7 @@ inline valarray<_TypeT>::valarray (const slice_array<_TypeT>& sl_ar)
 
     while( __cpt < sl_ar._C_get_slice().size() )
     {
-        __tmp[__cpt] = (*(sl_ar.get_ref_mem_array()))[__i];
+        __tmp[__cpt] = (*(sl_ar._C_get_storage()))[__i];
         __i+= sl_ar._C_get_slice().stride();
         __cpt++;
     }
@@ -2104,12 +2105,12 @@ valarray<_TypeT>::operator= (const slice_array<_TypeT>& sl_ar)
 
     while( __cpt < sl_ar._C_get_slice().size() )
     {
-      __tmp[__cpt] = (*(sl_ar.get_ref_mem_array()))[__i];
+      __tmp[__cpt] = (*(sl_ar._C_get_storage()))[__i];
       __i+= sl_ar._C_get_slice().stride();
       __cpt++;
     }
 
-    if ( &_C_array == sl_ar.get_ref_mem_array() )
+    if ( &_C_array == sl_ar._C_get_storage() )
       _C_array.resize(0); 
 
     _C_array.swap (__tmp);
@@ -2154,7 +2155,7 @@ inline valarray<_TypeT>::valarray(const gslice_array<_TypeT>& sl_ar)
     _RWSTD_SIZE_T __cpt = 0;
 
     while (!__sl.is_reseted () || (!__cpt && __maxinx)) {
-      __tmp[__cpt] = (*(sl_ar.get_ref_mem_array()))[__i];
+      __tmp[__cpt] = (*(sl_ar._C_get_storage()))[__i];
       __i= __sl.next_ind();
       __cpt++;
     }
@@ -2179,12 +2180,12 @@ valarray<_TypeT>::operator= (const gslice_array<_TypeT>& sl_ar)
 
     while( !__sl.is_reseted() || !__cpt && __maxinx )
     {
-      __tmp[__cpt] = (*(sl_ar.get_ref_mem_array()))[__i];
+      __tmp[__cpt] = (*(sl_ar._C_get_storage()))[__i];
       __i= __sl.next_ind();
       __cpt++;
     }
 
-    if ( &_C_array == sl_ar.get_ref_mem_array() )
+    if ( &_C_array == sl_ar._C_get_storage() )
       _C_array.resize(0); 
 
     _C_array.swap (__tmp);
@@ -2230,7 +2231,7 @@ inline valarray<_TypeT>::valarray(const mask_array<_TypeT>& __rhs)
     _RWSTD_SIZE_T __cpt = 0; 
 
     for( __i=0; __i < __sec->size(); __i++ )
-      if ( (*__sec)[__i]) __tmp[__cpt++] = (*(__rhs.get_ref_mem_array()))[__i];
+      if ( (*__sec)[__i]) __tmp[__cpt++] = (*(__rhs._C_get_storage()))[__i];
 
     _C_array.swap (__tmp);
 }
@@ -2254,9 +2255,9 @@ valarray<_TypeT>::operator= (const mask_array<_TypeT>& __rhs)
     _RWSTD_SIZE_T __cpt = 0; 
 
     for( __i=0; __i < __sec->size(); __i++ )
-      if ( (*__sec)[__i]) __tmp[__cpt++] = (*(__rhs.get_ref_mem_array()))[__i];
+      if ( (*__sec)[__i]) __tmp[__cpt++] = (*(__rhs._C_get_storage()))[__i];
 
-    if ( &_C_array == __rhs.get_ref_mem_array() )
+    if ( &_C_array == __rhs._C_get_storage() )
       _C_array.resize(0); 
 
     _C_array.swap (__tmp);
@@ -2293,7 +2294,7 @@ inline valarray<_TypeT>::valarray (const indirect_array<_TypeT>& __rhs)
     _RWSTD_SIZE_T __cpt = 0; 
 
     for(_RWSTD_SIZE_T __i=0; __i < __sec->size(); __i++ )
-      __tmp[__cpt++] = (*(__rhs.get_ref_mem_array()))[(*__sec)[__i]];
+      __tmp[__cpt++] = (*(__rhs._C_get_storage()))[(*__sec)[__i]];
 
     _C_array.swap (__tmp);
 }
@@ -2314,9 +2315,9 @@ valarray<_TypeT>::operator= (const indirect_array<_TypeT>& __rhs)
     _RWSTD_SIZE_T __cpt = 0; 
 
     for(_RWSTD_SIZE_T __i=0; __i < __sec->size(); __i++ )
-      __tmp[__cpt++] = (*(__rhs.get_ref_mem_array()))[(*__sec)[__i]];
+      __tmp[__cpt++] = (*(__rhs._C_get_storage()))[(*__sec)[__i]];
 
-    if (&_C_array == __rhs.get_ref_mem_array() )
+    if (&_C_array == __rhs._C_get_storage() )
       _C_array.resize(0); 
 
     _C_array.swap (__tmp);
