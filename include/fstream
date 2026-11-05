@@ -196,7 +196,7 @@ protected:
     // 27.8.1.4, p16 - in input mode, repopulates buffer from file
     virtual int sync ();
 
-    // overridden for efficiency
+    // departure: ref-conformance.md, "Overrides of xsputn and showmanyc"
     virtual _RWSTD_STREAMSIZE
     xsputn (const char_type*, _RWSTD_STREAMSIZE);
 

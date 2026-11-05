@@ -71,29 +71,6 @@ for the record, the library's throw path uses it. The decision on the
 Check: the chapter 2 row exists and the comment at
 =include/rw/_iosfailure.h= 51 names it.
 
-** TODO =basic_filebuf= and =basic_stringbuf= override virtuals the standard does not list
-
-14882:2003 27.8.1.1's synopsis lists the virtuals =basic_filebuf=
-overrides, and 27.7.1's those of =basic_stringbuf=; neither lists
-=xsputn=, and =basic_stringbuf='s lacks =showmanyc=. 17.4.4.4, p2's
-latitude "does not extend to the implementation of virtual" functions.
-The library overrides =xsputn= in both (=include/fstream= 199-201,
-=include/sstream= 122) and =showmanyc= in =basic_stringbuf=
-(=include/sstream= 124), "for efficiency". The difference shows in a
-derived class: =basic_filebuf::xsputn= (=include/fstream.cc= 422)
-writes to the file itself and never calls =overflow=, so a derived
-=overflow= does not see =sputn='s characters.
-=doc/stdlibref/basic-filebuf.html= and =basic-stringbuf.html= document
-the =xsputn= overrides. No test pins the bypass. Removal costs bulk
-output speed. The -1 the override returns on an error is its own
-entry, below. Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: record as a departure, or remove the overrides; for
-the record, the speed is the point and the derived =overflow= case is
-narrow.
-
-Check: the row exists.
-
 ** TODO The =short= and =int= extractors take the unsigned range in octal and hexadecimal
 
 14882:2003 27.6.1.2.2 converts =operator>> (short&)= and =operator>>
