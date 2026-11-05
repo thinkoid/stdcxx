@@ -25,24 +25,6 @@ stale comments, then behaviour the library adds or changes, then the
 additions whose removal costs tests or callers. The rest, outside the
 locale, is last.
 
-** TODO =list= splices and merges by copying the elements
-
-With the node buffer on, the default, =splice= from another list
-copies every element by insert-then-erase (=include/list.cc=
-200-339) and =merge= always copies through =_C_transfer= (129-151):
-by probe, a splice of five elements makes five copies and a merge of
-five and five makes five. 14882:2003 23.2.2.4 p5, p6, p8, p10, p13:
-constant time and "Throws: Nothing"; p25: =merge= has no effect on
-an exception. A copy constructor that throws leaves both lists
-changed. Since the 2005 import; no test counts copies. Found by the
-extension sweep, confirmed by probe, 2026-11-04.
-
-Fix: =splice= and =merge= relink nodes between lists; the node
-buffer's ownership of nodes is the question to settle first.
-
-Check: the probe prints 0 and 0; a row in =23.list.special= (or the
-list test that covers =splice=) with a counting element.
-
 ** TODO A facet derived from a standard facet with its own =id= asserts on installation
 
 ~struct my_numpunct : std::numpunct<char> { static std::locale::id
@@ -1599,6 +1581,24 @@ Fix: per the check: =name= skips the mark and a marked name compares
 by address, as the support library does.
 
 Check: those two calls in a two-file program.
+
+** TODO The range =splice= checks 23.2.2.4 p12 with the wrong iterators
+
+The range =splice= (=include/list.cc=) asserts
+~__i != __j && __i != __k~ when the source is the list itself, and in
+a debug build walks ~[__j, __k)~ asserting ~__i != __j~ at every
+step, an invariant of the loop. 14882:2003 23.2.2.4 p12 leaves the
+result undefined only for a position in ~[first, last)~: a position
+inside the range past =first= is never caught, and a position equal
+to =last=, which the paragraph allows and which changes nothing,
+fails the assertion; a release build returns at once. From the 2005
+import. Seen in passing while retiring the node buffer, 2026-11-04.
+
+Fix: the loop asserts ~__i != __it~, and the first assertion drops
+~__i != __k~.
+
+Check: ~l.splice (l.end (), l, l.begin (), l.end ())~ runs in 15D; a
+position inside the range fails the assertion.
 
 * Tests
 

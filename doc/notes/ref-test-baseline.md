@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,976 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,862 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 268 | 12,478,758 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 269 | 12,538,257 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -272,6 +272,8 @@ all six tables:
   records; `22.locale.time.put`, 2,402 to 2,406, a 300-character
   `%c`; the other five tables are to move by the same twelve.
 - 2026-11-04: `22.locale.time.put`, 2,406 to 2,430 in 15D, six rows
+  of formats that grow `do_put`'s buffer, narrow and wide; the other
+  five tables are to move by the same 24.
 - 2026-11-04: `22.locale.time.get`, 3,331 to 3,332: localedef rejects a
   source of 101 era records; the other five tables are to move by one.
 - 2026-11-04: `22.locale.time.put`, 2,430 to 2,438, a width and a
@@ -286,8 +288,16 @@ all six tables:
   to move by the same 92.
 - 2026-11-04: `27.istream.unformatted.get`, 1,650 to 1,652 in 15D, get ()
   after read (); the other five tables are to move by the same two.
-  of formats that grow `do_put`'s buffer, narrow and wide; the other
-  five tables are to move by the same 24.
+- 2026-11-04: `23.list.splice` is new, 29 assertions in 15D, 269
+  programs: `splice` and `merge` relink nodes; the other five tables
+  are to gain the same row.
+- 2026-11-05: `23.list.assign`, 20,542 to 50,000, `23.list.capacity`,
+  2,416 to 7,742, `23.list.cons`, 13,164 to 12,434, and
+  `23.list.insert`, 35,892 to 61,308, in 15D: with a node per
+  element the exception-safety loops run one pass per node, so the
+  cases of 331 nodes and more are gone and two shapes they alone
+  covered return at 128; the other five tables are to move the same
+  way.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.

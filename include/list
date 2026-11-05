@@ -240,93 +240,16 @@ public:
 
 protected:
 
-#ifndef _RWSTD_NO_LIST_NODE_BUFFER
-
-    // Node buffer data structure
-    struct _C_nodebuf {
-        typedef typename allocator_type::template rebind<_C_nodebuf>::other
-                _C_alloc_type;
-        typedef typename _C_alloc_type::pointer            _C_pointer;
-
-        _C_pointer   _C_next_buf;
-        size_type    _C_bufsize;
-        _C_link_type _C_buffer;
-    };
-
-    typedef typename _C_nodebuf::_C_alloc_type _C_buf_alloc_type;
-    typedef typename _C_nodebuf::_C_pointer     _C_buf_pointer;
-
-    void _C_add_buffer (bool);
-    void _C_free_buffers ();
-
-    _C_buf_pointer _C_buflist;
-    _C_link_type   _C_free_list;
-
-#endif   // _RWSTD_USE_LIST_NODE_BUFFER
-
-
-    _C_link_type        _C_next_avail;
-    _C_link_type        _C_last;
     _C_link_type        _C_node;
     size_type           _C_length;
 
-
-
-// Macros used later in node buffer management
-#if !defined (_RWSTD_NO_LIST_NODE_BUFFER)
-
-#  define _RWSTD_NODE_BUFFER_INIT(blist,flist)                   \
-        _C_buflist (blist), _C_free_list (flist),
-
-#  define _RWSTD_NODE_LIST_FREE()                                \
-        _C_free_buffers ()
-
-#  define _RWSTD_NODE_LIST_SWAP(other)                           \
-        std::swap (_C_buflist, other._C_buflist);                \
-        std::swap (_C_free_list, other._C_free_list)               
-
-#  define _RWSTD_LIST_INSERT_RANGE(b,e,v)                        \
-        try {                                                    \
-            insert (b, e, v);                                    \
-        } catch (...) {                                          \
-            _RWSTD_NODE_LIST_FREE();                             \
-            throw;                                               \
-        } typedef void __dummy_t
-
-    _C_link_type _C_get_node (bool __empty_list = false) {
-        if (_C_free_list) {
-            _C_link_type __tmp = _C_free_list;
-            _C_free_list = _C_free_list->_C_next;
-            return __tmp;
-        }
-        if (_C_next_avail == _C_last)
-            _C_add_buffer (__empty_list);
-        return _C_next_avail++;
-    }
-
-    void _C_put_node (_C_link_type __link) {
-        __link->_C_next = _C_free_list;
-        _C_free_list = __link;
-    }
-
-#else // defined (_RWSTD_NO_LIST_NODE_BUFFER)
-
-#  define _RWSTD_NODE_BUFFER_INIT(ignore0,ignore1)
-#  define _RWSTD_NODE_LIST_FREE()
-#  define _RWSTD_NODE_LIST_SWAP(ignore)
-
-#  define _RWSTD_LIST_INSERT_RANGE(b,e,v)                             \
-        insert (b,e,v)
-
-    _C_link_type _C_get_node (bool = false) {
-        return _C_node_alloc_type (*this).allocate (1, (void*)_C_last);
+    _C_link_type _C_get_node () {
+        return _C_node_alloc_type (*this).allocate (1);
     }
 
     void _C_put_node (_C_link_type __link) {
         _C_node_alloc_type (*this).deallocate (__link, 1);
     }
-
-#endif // _RWSTD_NO_LIST_NODE_BUFFER
 
 #  define _RWSTD_LIST_SAFE_INSERT_RANGE(__it, __first, __last)  \
     _RWSTD_ASSERT_RANGE (begin (), __it);                       \
@@ -348,41 +271,55 @@ protected:
 
 
     // here and only here is _C_node initialized
-    void _C_init (bool __empty_list = false) {
-        _C_node = _C_get_node (__empty_list);
+    void _C_init () {
+        _C_node = _C_get_node ();
 
         (*_C_node)._C_next = _C_node;
         (*_C_node)._C_prev = _C_node; 
     }
     
+    // a constructor that throws runs no destructor: the inserts roll back
+    // their own nodes, and the catch returns the sentinel
     void _C_init (size_type __n, const value_type& __val) {
-        _C_init();
-        _RWSTD_LIST_INSERT_RANGE (begin (), __n, __val);
+        _C_init ();
+
+        try {
+            insert (begin (), __n, __val);
+        }
+        catch (...) {
+            _C_put_node (_C_node);
+            throw;
+        }
     }
 
 public:
 
     explicit
     list (const allocator_type& __alloc = allocator_type ())
-        : allocator_type (__alloc), _RWSTD_NODE_BUFFER_INIT(0,0)
-          _C_next_avail (0), _C_last (0), _C_node (0), _C_length (0) {
-        _C_init (true);
+        : allocator_type (__alloc), _C_node (0), _C_length (0) {
+        _C_init ();
     }
     
     explicit
     list (size_type             __n, 
           const_reference       __x     = value_type (),
           const allocator_type &__alloc = allocator_type ())
-        : allocator_type (__alloc), _RWSTD_NODE_BUFFER_INIT(0,0)
-          _C_next_avail (0), _C_last (0), _C_node (0), _C_length (0) {
+        : allocator_type (__alloc), _C_node (0), _C_length (0) {
         _C_init (__n, __x);
     }
 
     template<class _InputIterator>
     void _C_init (_InputIterator __first, _InputIterator __last, void*) {
         _RWSTD_ASSERT_RANGE (__first, __last);
-        _C_init();
-        _RWSTD_LIST_INSERT_RANGE (begin (), __first, __last);
+        _C_init ();
+
+        try {
+            insert (begin (), __first, __last);
+        }
+        catch (...) {
+            _C_put_node (_C_node);
+            throw;
+        }
     }
 
     template<class _InputIterator>
@@ -394,17 +331,22 @@ public:
     template<class _InputIterator>
     list (_InputIterator __first, _InputIterator __last, 
           const allocator_type& __alloc = allocator_type ())
-        : allocator_type (__alloc), _RWSTD_NODE_BUFFER_INIT(0,0)
-          _C_next_avail (0), _C_last (0), _C_node (0), _C_length (0) {
+        : allocator_type (__alloc), _C_node (0), _C_length (0) {
         _RWSTD_ASSERT_RANGE (__first, __last);
         _C_init (__first, __last, _RWSTD_DISPATCH (_InputIterator));
     }
 
     list (const list &__rhs)
-        : allocator_type(__rhs.get_allocator()), _RWSTD_NODE_BUFFER_INIT(0,0) 
-          _C_next_avail (0), _C_last (0), _C_node (0), _C_length (0) {
-        _C_init();
-        _RWSTD_LIST_INSERT_RANGE (begin (), __rhs.begin (), __rhs.end ());
+        : allocator_type(__rhs.get_allocator()), _C_node (0), _C_length (0) {
+        _C_init ();
+
+        try {
+            insert (begin (), __rhs.begin (), __rhs.end ());
+        }
+        catch (...) {
+            _C_put_node (_C_node);
+            throw;
+        }
     }
 
     ~list ();
@@ -569,8 +511,6 @@ public:
     }
 
 protected:
-    
-    void _C_transfer (iterator, iterator, iterator, list&);
 
     void _C_advance (iterator &__it, difference_type __n,
                      const iterator &__end) {
@@ -578,10 +518,10 @@ protected:
             ++__it;
     }
       
-    // uses transfer_node to merge in list by transfering nodes to list
+    // merges two adjacent sorted runs by splicing their nodes
     void _C_adjacent_merge (iterator, iterator, iterator);
 
-    // uses transfer_node to merge in list by transfering nodes to list
+    // merges two adjacent sorted runs by splicing their nodes
     template<class _Compare>
     void _C_adjacent_merge (iterator, iterator, iterator, _Compare);
       
@@ -709,7 +649,7 @@ list<_TypeT, _Allocator>::insert (iterator __it, const_reference __x)
 {
     _RWSTD_ASSERT_RANGE (begin (), __it);
 
-    _C_link_type __tmp = _C_get_node (false);
+    _C_link_type __tmp = _C_get_node ();
 
     try {
         allocator_type::construct (allocator_type::address ((*__tmp)._C_data),
@@ -767,11 +707,6 @@ list<_TypeT, _Allocator>::swap (list &__x)
     if (get_allocator () == __x.get_allocator ()) {
         std::swap (_C_node, __x._C_node); 
         std::swap (_C_length, __x._C_length);
-
-        _RWSTD_NODE_LIST_SWAP(__x);
-
-        std::swap (_C_next_avail, __x._C_next_avail);
-        std::swap (_C_last, __x._C_last);
     }
     else {
         list __tmp (*this);

@@ -1035,11 +1035,6 @@
      library  cannot  be caught  in  a  program  that links  with  the
      library.
 
-  o  _RWSTD_NO_LIST_NODE_BUFFER [abi, over]
-
-     #defined to disable node buffer management of the class template
-     std::list.
-
   o  _RWSTD_NO_LONG_LONG [abi, auto]
 
      #defined if the C99 type  long long is not supported or disabled,

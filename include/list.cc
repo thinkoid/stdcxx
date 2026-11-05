@@ -49,7 +49,6 @@ list<_TypeT, _Allocator>::
     if (_C_node) {
         clear ();
         _C_put_node (_C_node);
-        _RWSTD_NODE_LIST_FREE ();
     }
 }
 
@@ -66,90 +65,6 @@ list<_TypeT, _Allocator>::erase (iterator __first, iterator __last)
     }
       
     return __first;
-}
-
-
-#if !defined (_RWSTD_NO_LIST_NODE_BUFFER)
-
-template <class _TypeT, class _Allocator>
-void list<_TypeT, _Allocator>::_C_add_buffer (bool __is_list_empty)
-{
-    // empty list gets one node
-    _RWSTD_SIZE_T __next_buffer_size = 1;
-    if(!__is_list_empty) {
-        if ((void*)_C_buflist) {
-            __next_buffer_size = 
-                _RWSTD_NEW_CAPACITY (list, this, _C_buflist->_C_bufsize);
-        }
-        else {
-            __next_buffer_size = _RWSTD_NEW_CAPACITY (list, this, 0);
-        }          
-     }
-    _C_buf_pointer __tmp = 
-        _C_buf_alloc_type (*this).allocate (1, (void*)_C_buflist);
-
-    try {
-        __tmp->_C_buffer = 
-           _C_node_alloc_type (*this).allocate (__next_buffer_size,
-                                                (void*)_C_last);
-    }
-    catch (...) {
-        _C_buf_alloc_type (*this).deallocate (__tmp, 1);
-        throw;
-    }
-
-    __tmp->_C_next_buf = _C_buflist;
-    __tmp->_C_bufsize  = __next_buffer_size;
-
-    _C_buflist    = __tmp;
-    _C_next_avail = _C_buflist->_C_buffer; 
-    _C_last       = _C_next_avail + __next_buffer_size;
-}
-
-
-template <class _TypeT, class _Allocator>
-void list<_TypeT, _Allocator>::_C_free_buffers ()
-{
-    while ((void*)_C_buflist) {
-        _C_buf_pointer __tmp = _C_buflist;
-        _C_buflist = _C_buflist->_C_next_buf;
-        _C_node_alloc_type (*this).deallocate (__tmp->_C_buffer, 
-                                               __tmp->_C_bufsize);
-        _C_buf_alloc_type (*this).deallocate (__tmp, 1);
-    }
-    _C_free_list  = 0;
-    _C_next_avail = 0;
-    _C_last       = 0;
-}
-
-#endif // defined (_RWSTD_NO_LIST_NODE_BUFFER)
-
-
-template <class _TypeT, class _Allocator>
-void list<_TypeT, _Allocator>::_C_transfer (iterator __it, iterator __first, 
-                                           iterator __last, list& __x)
-{
-    _RWSTD_ASSERT_RANGE (begin (), __it);
-    _RWSTD_ASSERT_RANGE (__first, __last);
-
-    if (this == &__x) {
-        (*(_C_link_type ((*_ITER_NODE (__last))._C_prev)))._C_next =
-            _ITER_NODE (__it);
-        (*(_C_link_type ((*_ITER_NODE (__first))._C_prev)))._C_next =
-            _ITER_NODE (__last);
-        (*(_C_link_type ((*_ITER_NODE (__it))._C_prev)))._C_next =
-            _ITER_NODE (__first);
-        
-        _C_link_type __tmp = _C_link_type ((*_ITER_NODE (__it))._C_prev);
-        
-        (*_ITER_NODE (__it))._C_prev    = (*_ITER_NODE (__last))._C_prev;
-        (*_ITER_NODE (__last))._C_prev  = (*_ITER_NODE (__first))._C_prev; 
-        (*_ITER_NODE (__first))._C_prev = __tmp;
-    }
-    else {
-        insert (__it, __first, __last);
-        __x.erase (__first, __last);
-    }
 }
 
 
@@ -196,14 +111,7 @@ void list<_TypeT, _Allocator>::splice (iterator __it, list &__x)
     _RWSTD_ASSERT (&__x != this);
     _RWSTD_ASSERT_RANGE (begin (), __it);
 
-
-#if !defined (_RWSTD_NO_LIST_NODE_BUFFER)
-    // linear complexity
-    insert (__it, __x.begin (), __x.end ());
-    __x.clear ();
-#else
     if (get_allocator () == __x.get_allocator ()) {
-
         // constant complexity
 
         // relink `it' and the head of `x'
@@ -227,7 +135,6 @@ void list<_TypeT, _Allocator>::splice (iterator __it, list &__x)
         insert (__it, __x.begin (), __x.end ());
         __x.clear ();
     }
-#endif // _RWSTD_NO_LIST_NODE_BUFFER
 }
 
 
@@ -239,14 +146,7 @@ void list<_TypeT, _Allocator>::splice (iterator __i, list &__x, iterator __j)
     
     if (   !(__x.end () == __j)
         && !(__i == __j) && !(__i == ++iterator (__j))) {
-
-#if !defined (_RWSTD_NO_LIST_NODE_BUFFER)
-        // linear complexity
-        insert (__i, *__j);
-        __x.erase (__j);
-#else
         if (get_allocator () == __x.get_allocator ()) {
-
             // constant complexity
 
             // relink `i' and `j'
@@ -272,7 +172,6 @@ void list<_TypeT, _Allocator>::splice (iterator __i, list &__x, iterator __j)
             insert (__i, *__j);
             __x.erase (__j);
         }
-#endif  //  _RWSTD_NO_LIST_NODE_BUFFER
     }
 }
 
@@ -288,16 +187,13 @@ splice (iterator __i, list &__x, iterator __j, iterator __k)
     // 23.2.2.4, p12 - check undefined behavior
     _RWSTD_ASSERT (&__x != this || (__i != __j && __i != __k));
 
-    if (__j == __k)
+    // a splice before last within one list changes nothing, and the
+    // relinking below would cut [j, k) out of the list as a cycle
+    if (__j == __k || __i == __k)
         return;
 
-#if !defined (_RWSTD_NO_LIST_NODE_BUFFER)
-        insert (__i, __j, __k);
-        __x.erase (__j, __k);
-#else
     if (get_allocator () == __x.get_allocator ()) {
-
-# ifdef _RWSTDDEBUG
+#ifdef _RWSTDDEBUG
 
         for (iterator __it = __j; __it != __k; ++__it) {
             // 23.2.2.4, p12 - check undefined behavior (linear time)
@@ -307,7 +203,7 @@ splice (iterator __i, list &__x, iterator __j, iterator __k)
             --__x._C_length;
         }
 
-# else   // if !defined (_RWSTDDEBUG)
+#else   // if !defined (_RWSTDDEBUG)
 
         if (&__x != this) {
             // adjust sizes first
@@ -317,7 +213,7 @@ splice (iterator __i, list &__x, iterator __j, iterator __k)
             }
         }
 
-# endif   // _RWSTDDEBUG
+#endif   // _RWSTDDEBUG
 
         (*(_C_link_type ((*_ITER_NODE (__k))._C_prev)))._C_next =
             _ITER_NODE (__i);
@@ -336,7 +232,6 @@ splice (iterator __i, list &__x, iterator __j, iterator __k)
         insert (__i, __j, __k);
         __x.erase (__j, __k);
     }
-#endif  //  _RWSTD_NO_LIST_NODE_BUFFER
 }
 
 template <class _TypeT, class _Allocator>
@@ -386,7 +281,7 @@ void list<_TypeT, _Allocator>::merge (list<_TypeT, _Allocator>& __x)
     while (!(__first1 == __last1) && !(__first2 == __last2)) {
       if (*__first2 < *__first1) {
           iterator __next = __first2;
-          _C_transfer (__first1, __first2, ++__next, __x);
+          splice (__first1, __x, __first2, ++__next);
           __first2 = __next;
       }
       else
@@ -394,7 +289,7 @@ void list<_TypeT, _Allocator>::merge (list<_TypeT, _Allocator>& __x)
     }
 
     if (!(__first2 == __last2))
-        _C_transfer (__last1, __first2, __last2, __x);
+        splice (__last1, __x, __first2, __last2);
 }
 
 
@@ -406,7 +301,7 @@ void list<_TypeT, _Allocator>::reverse ()
 
     for (iterator __first = ++begin (); !(__first == end ()); ) {
         iterator __tmp = __first;
-        _C_transfer (begin (), __tmp, ++__first, *this);
+        splice (begin (), *this, __tmp, ++__first);
     }
 }
 
@@ -446,7 +341,7 @@ _C_adjacent_merge (iterator __first1, iterator __last1, iterator __last2)
     for (iterator __first2 = __last1; __n >= 0 && !(__first2 == __last2); ) {
         if (*__first2 < *__first1) {
             iterator __next = __first2;
-            _C_transfer (__first1, __first2, ++__next, *this);
+            splice (__first1, *this, __first2, ++__next);
             __first2 = __next;
         }
         else {
@@ -468,7 +363,7 @@ _C_adjacent_merge (iterator __first1, iterator __last1, iterator __last2,
     for (iterator __first2 = __last1; __n >= 0 && !(__first2 == __last2); ) {
         if (__cmp (*__first2, *__first1)) {
             iterator __next = __first2;
-            _C_transfer (__first1, __first2, ++__next, *this);
+            splice (__first1, *this, __first2, ++__next);
             __first2 = __next;
         }
         else {
@@ -531,7 +426,7 @@ merge (list<_TypeT, _Allocator>& __x, _Compare __cmp)
     while (!(__first1 == __last1) && !(__first2 == __last2)) {
       if (__cmp (*__first2, *__first1)) {
           iterator __next = __first2;
-          _C_transfer (__first1, __first2, ++__next, __x);
+          splice (__first1, __x, __first2, ++__next);
           __first2 = __next;
       }
       else
@@ -539,7 +434,7 @@ merge (list<_TypeT, _Allocator>& __x, _Compare __cmp)
     }
 
     if (!(__first2 == __last2))
-        _C_transfer (__last1, __first2, __last2, __x);
+        splice (__last1, __x, __first2, __last2);
 }
 
 

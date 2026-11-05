@@ -137,16 +137,17 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 23.deque.special                              0    0   61465      0   100%
 23.deque.special.stdcxx-127                NOUT    0                      
 23.deque.storage                              0    0 1311766      0   100%
-23.list.assign                                0    0   20542      0   100%
-23.list.capacity                              0    0    2416      0   100%
-23.list.cons                                  0    0   13164      0   100%
+23.list.assign                                0    0   50000      0   100%
+23.list.capacity                              0    0    7742      0   100%
+23.list.cons                                  0    0   12434      0   100%
 23.list.cons.stdcxx-268                    NOUT    0                      
 23.list.erase                                 0    0    2152      0   100%
-23.list.insert                                0    0   35892      0   100%
+23.list.insert                                0    0   61308      0   100%
 23.list.insert.stdcxx-331                  NOUT    0                      
 23.list.iterators                             0    0    2042      0   100%
 23.list.special                               0    0    1327      0   100%
 23.list.special.stdcxx-334                 NOUT    0                      
+23.list.splice                                0    0      29      0   100%
 23.set.stdcxx-216                          NOUT    0                      
 23.vector.allocator                           0    1       3      0   100%
 23.vector.bool.stdcxx-1062                 NOUT    0                      
@@ -234,7 +235,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 27.filebuf.close.stdcxx-969                NOUT    0                      
 27.filebuf.codecvt                            0    0  205514      0   100%
 27.filebuf.members.stdcxx-308              NOUT    0                      
-27.filebuf                                    0    0      178      0   100%
+27.filebuf                                    0    0     178      0   100%
 27.filebuf.sgetn.stdcxx-161                NOUT    0                      
 27.filebuf.virtuals.stdcxx-522             NOUT    0                      
 27.forward                                    0    0      42      0   100%
@@ -268,11 +269,11 @@ atomic_add                                    0    0      66      0   100%
 atomic_xchg                                   0    0      22      0   100%
 once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   268
+  Programs:                   269
   Non-zero exit status:         0
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            42
-  Assertions:            12478758
+  Assertions:            12538257
   Failed assertions:            0
