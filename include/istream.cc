@@ -74,9 +74,8 @@ basic_istream<_CharT, _Traits>&
 basic_istream<_CharT, _Traits>::
 _C_ipfx (bool __noskipws, ios_base::iostate __errbits)
 {
-    // extension - zero out irrespective of state so that gcount()
-    // called after any failed extraction (even formatted) reports 0
-    // and always count _all_ extracted characters
+    // 27.6.1.1.2: fail a stream not good, flush the tie, skip leading
+    // whitespace; the unformatted input functions reset gcount ()
 
     if (ios_base::goodbit != this->rdstate ()) {
         this->setstate (ios_base::failbit);

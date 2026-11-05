@@ -31,13 +31,10 @@
 #include <rw/_defs.h>
 
 #ifndef _RWSTD_NO_NATIVE_IO
-     // <unistd.h> must preceed other headers to avoid a namespace
-     // issue ("time_t" vrs "std::time_t") on SunPro 5.3/SunOS 5.8
 #  include <unistd.h>
 #else   // if defined _RWSTD_NO_NATIVE_IO
-   // <stdio.h> must be included before <fstream> so that the FILE*
-   // basic_filebuf ctor extensions get declared (they depend on the
-   // stdin macro being declared)
+   // <stdio.h> precedes <fstream>: the private FILE* basic_filebuf ctor
+   // that ios_base::Init uses is declared only where stdin is defined
 #  include <stdio.h>
 #endif   // _RWSTD_NO_NATIVE_IO
 
