@@ -71,34 +71,6 @@ for the record, the library's throw path uses it. The decision on the
 Check: the chapter 2 row exists and the comment at
 =include/rw/_iosfailure.h= 51 names it.
 
-** TODO A temporary buffer is a per-thread static block, larger than asked, returned on its own thread
-
-14882:2003 20.4.3, p1 obtains storage "sufficient to store up to n
-adjacent T objects", p2 returns its address and capacity, and p3-4
-deallocate any buffer =get_temporary_buffer= gave.
-=src/tmpbuf.cpp= 45-50 keeps one 4096-byte buffer per thread
-(=_RWSTD_THREAD=, =__thread= in the thread-safe builds), and
-103-111 hand it out for any request up to that size with its whole
-capacity: the first ~get_temporary_buffer<int> (2)~ on a thread
-returns a capacity of 1024. A buffer returned on another thread
-does not match that thread's block, and 89-92 pass it to
-=__rw_deallocate=, =operator delete= on storage it never
-allocated. =doc/stdlibref/get-temporary-buffer.html= 55-58
-documents both: "at least n", and the return "from the same
-thread". =tests/utilities/20.temp.buffer.cpp= 115 and 128 accept a
-capacity of at least the request, and =20.temp.buffer.mt= returns
-each buffer on its own thread. Without the block =stable_sort=,
-=stable_partition= and =inplace_merge= allocate on every call.
-Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: record as a departure, or allocate every buffer; for
-the record, the per-thread block is the design and the reference
-documents its limit. The row says that a return on another thread is
-undefined here and defined by 20.4.3.
-
-Check: a row in chapter 2 names =src/tmpbuf.cpp= and the same-thread
-rule.
-
 ** TODO An environment variable selects a catalog for the library's exception texts
 
 14882:2003 18.6.1, p8 makes =what ()= "an implementation-defined

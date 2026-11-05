@@ -43,6 +43,7 @@ namespace __rw {
 typedef char _CharBuf [_RWSTD_TMPBUF_SIZE + !_RWSTD_TMPBUF_SIZE];
 
 // use `aligned_buffer' to guarantee proper buffer alignment
+// departure: ref-conformance.md, "A per-thread temporary buffer"
 static _RWSTD_THREAD __rw_aligned_buffer<_CharBuf>
 __rw_buffer;
 
