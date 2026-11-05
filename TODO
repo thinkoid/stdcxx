@@ -105,24 +105,6 @@ Fix: =freeze= alters the status of a dynamic buffer only.
 Check: an =ostrstream= over a =char [8]=: insert "ab", call =str ()=,
 insert "cd"; the stream is =good ()= and the array begins "abcd".
 
-** TODO =allocator= has a template assignment from =allocator<U>=
-
-14882:2003 20.4.1's synopsis gives =allocator= a copy constructor and
-a converting constructor template, and no assignment operator.
-=include/rw/_allocator.h= 115-119 adds ~template <class U> allocator&
-operator= (const allocator<U>&) throw ()~, so an =allocator<int>=
-takes ~a = std::allocator<long> ()~. =doc/stdlibref/allocator.html=
-115 documents it. No container assigns one allocator type to another,
-and no test names it. The allocator of const elements left in
-aebf2e2a; this member was outside that gate. Found by the extension
-sweep's reading, 2026-11-04.
-
-Fix: a decision: remove it and its line in the reference page, or
-record it; for removal, nothing in the tree uses it and 20.4.1 has the
-implicit copy assignment only.
-
-Check: the 15D suite table equals its pin with the member gone.
-
 ** TODO A =list= iterator subtracts to 0
 
 Tables 75 and 76 (24.1.4, 24.1.5) give =a - b= to random access

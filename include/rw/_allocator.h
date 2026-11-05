@@ -112,12 +112,6 @@ public:
     template <class _TypeU>
     allocator (const allocator<_TypeU>&) _THROWS (()) { }
 
-    template <class _TypeU>
-    allocator&
-    operator= (const allocator<_TypeU>&) _THROWS (()) { 
-        return *this; 
-    }
-
     pointer address (reference __x) const {
         // lwg issue 350
         return reinterpret_cast< pointer >(&reinterpret_cast< char& >(__x));
