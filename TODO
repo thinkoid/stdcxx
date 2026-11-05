@@ -51,24 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO =ostrstream= and =strstream= take =ate= for =app=
-
-D.7.3.1, p2 and D.7.4.1, p2 choose ~strstreambuf (s, n, s + strlen
-(s))~ when ~(mode & app) != 0~ and ~strstreambuf (s, n, s)~ otherwise.
-Both constructors test ~app | ate~ (=include/strstream= 214, 254).
-With =ate= alone the stream writes after the first null character, and
-the array must hold one, or =strlen= reads past its end.
-=doc/stdlibref= does not mention it. No test opens a =strstream= with
-=ate=; the two regressions that use =<strstream>=,
-=tests/regress/21.string.io.stdcxx-206.cpp= and
-=27.streambuf.buffer.stdcxx-808.cpp=, do not. Found by the extension
-sweep's reading, 2026-11-04.
-
-Fix: =ate= leaves both tests.
-
-Check: an =ostrstream= over ~char buf [8] = "ab"~ with =ate=: after
-inserting ='x'=, =buf [0]= is ='x'=.
-
 ** TODO =freeze= stops writes into a caller's array
 
 D.7.1.2, p1 alters the freeze status only "If strmode & dynamic is

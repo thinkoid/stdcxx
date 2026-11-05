@@ -211,7 +211,7 @@ public:
                 ios_base::openmode __mode = ios_base::out)
         : _Base (rdbuf ()),
           _C_sb (__s, streamsize (__n),
-                __mode & (ios_base::app | ios_base::ate) ?
+                __mode & ios_base::app ?
                  __s + traits_type::length (__s) : __s)
         { }
 
@@ -251,7 +251,7 @@ public:
                ios_base::openmode __mode = ios_base::out | ios_base::in)
         : _Base (rdbuf ()),
         _C_sb (__s, streamsize (__n),
-               __mode & (ios_base::app | ios_base::ate) ?
+               __mode & ios_base::app ?
                __s + traits_type::length (__s) : __s)
           { }
 
