@@ -290,6 +290,7 @@ protected:
     unsigned char      _C_state;    // stream state
     unsigned char      _C_except;   // active exceptions
     unsigned char      _C_nolock;   // non-zero: stream and buffer unlocked
+    unsigned char      _C_sync;     // non-zero: synchronized with stdio
     
     static bool _C_sync_with_stdio;
 

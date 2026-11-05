@@ -161,6 +161,28 @@ void do_test (charT)
     rw_assert (0 == new_calls - new_0, 0, __LINE__,
                "unexpected dynamic memory allocation");
 
+    rw_info (0, 0, __LINE__, "checking the format flags of the objects");
+
+    // exercise 27.3.1, p2 and p5, 27.3.2, p2 and p5: the state
+    // basic_ios::init leaves (Table 89), and unitbuf for cerr and wcerr
+    const std::ios::fmtflags init = std::ios::skipws | std::ios::dec;
+    const std::ios::fmtflags unit = init | std::ios::unitbuf;
+
+#define TEST_FLAGS(obj, expect)                                 \
+    rw_assert (expect == std::obj.flags (), 0, __LINE__,        \
+               "std::" #obj ".flags () == %{If}, got %{If}",   \
+               expect, std::obj.flags ())
+
+    TEST_FLAGS (cin, init);
+    TEST_FLAGS (cout, init);
+    TEST_FLAGS (cerr, unit);
+    TEST_FLAGS (clog, init);
+
+    TEST_FLAGS (wcin, init);
+    TEST_FLAGS (wcout, init);
+    TEST_FLAGS (wcerr, unit);
+    TEST_FLAGS (wclog, init);
+
     rw_assert (   0 != &std::wcin  && 0 != &std::wcout
                && 0 != &std::wcerr && 0 != &std::wclog,
                0, __LINE__, "std::wcin, wcout, wcerr, or wclog address 0");

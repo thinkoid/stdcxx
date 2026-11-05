@@ -51,38 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO The standard objects carry a stdio bit in their format flags
-
-14882:2003 27.3.1, p2 and p5 and 27.3.2, p2 and p5 give the eight
-objects the state =basic_ios::init= leaves, but for =tie= and
-=unitbuf=; Table 89 (27.4.4.1, p3) has ~flags () == skipws | dec~.
-=ios_base::Init= sets =_RWSTD_IOS_SYNC_STDIO=, 0x40000
-(=include/rw/_defs.h= 563-565), in the flags of all eight
-(=src/iostream.cpp= 233-236, 265-268), and =flags ()= returns the word
-whole: =std::cout.flags ()= is ~skipws | dec | 0x40000~. The bit
-drives the stdio synchronization of 27.4.2.4: =_C_is_sync=
-(=include/ostream= 221-224) has the sentry's destructor sync the
-buffer after every output (88-90), and =_C_opfx= flush =stdout= or
-=stderr= first (290-291). The state moves with the flags. =flags
-(fmtflags)= stores its argument as given (=src/ios.cpp= 96-102), so
-~std::cout.flags (std::ios::hex)~ clears the bit and =cout= stops
-synchronizing though =sync_with_stdio (false)= was never called, while
-27.4.2.4, p1 still has the objects synchronized. =copyfmt= copies the
-word whole (=src/iostore.cpp= 293, 371), so a file stream that copies
-=cout='s format syncs after every insertion. 1803887b took =nolock=
-and =nolockbuf= out of the flags for the same reason;
-=analysis-basic-ios-flags.md= does not name this bit. =27.objects=
-tests only =unitbuf= (=tests/iostream/27.objects.cpp= 148-159). The
-fix costs an =ios_base= member of its own, as =_C_nolock=
-(=include/rw/_iosbase.h= 292), set by =Init= and read by =_C_is_sync=:
-three files, and no test moves. Found by the extension sweep's
-reading, 2026-11-04.
-
-Fix: the state leaves the format flags, as locking did in 1803887b.
-
-Check: =27.objects= finds =flags ()= of each object at ~skipws | dec~,
-with =unitbuf= for =cerr= and =wcerr=.
-
 ** TODO The =valarray= helpers' copy constructors are public and their fill is const
 
 14882:2003 26.3.5, 26.3.7, 26.3.8 and 26.3.9 declare the copy

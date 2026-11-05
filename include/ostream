@@ -219,8 +219,7 @@ public:
 
     // synchronize *this with stdio (stdout and stderr)?
     bool _C_is_sync () const {
-        return    this->_C_sync_with_stdio
-               && this->flags () & _RWSTD_IOS_SYNC_STDIO;
+        return this->_C_sync_with_stdio && this->_C_sync;
     }
     
     // pad output with fill chars, return number of chars written

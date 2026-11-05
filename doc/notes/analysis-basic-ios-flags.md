@@ -236,6 +236,12 @@ into it take no lock. The same 1000 insertions into `std::cout` take
 2001. As a control, the user stream with its lock state set to locked
 takes 2000: the probe sees locking where there is some.
 
+The eight standard objects carried one bit more: `ios_base::Init` set
+`sync_stdio`, `0x40000`, in their flags, so `std::cout.flags ()` was
+`skipws | dec | 0x40000`. That state left the flags the same way, for
+a member of `ios_base` of its own, `_C_sync`, which `Init` sets and
+`_C_is_sync` reads; `27.objects` checks `flags ()` of the eight.
+
 Check, when the locking slice lands: the row at 100% in the six
 configurations, and a copy of the test that sets a bit outside the
 standard's after construction fails it.

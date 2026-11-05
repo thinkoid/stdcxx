@@ -227,10 +227,10 @@ ios_base::Init::_C_init ()
     // 27.3.1, p5
     pcerr->_C_fmtfl |= __rw::__rw_unitbuf;
 
-    pcin->_C_fmtfl  |= __rw::__rw_sync_stdio;
-    pcout->_C_fmtfl |= __rw::__rw_sync_stdio;
-    pcerr->_C_fmtfl |= __rw::__rw_sync_stdio;
-    pclog->_C_fmtfl |= __rw::__rw_sync_stdio;
+    pcin->_C_sync  = 1;
+    pcout->_C_sync = 1;
+    pcerr->_C_sync = 1;
+    pclog->_C_sync = 1;
 
     // the standard objects are locked ([iostream.objects]), unlike the
     // streams basic_ios<>::init() leaves unlocked
@@ -259,10 +259,10 @@ ios_base::Init::_C_init ()
     // 27.3.2, p5
     pwcerr->_C_fmtfl |= __rw::__rw_unitbuf;
 
-    pwcin->_C_fmtfl  |= __rw::__rw_sync_stdio;
-    pwcout->_C_fmtfl |= __rw::__rw_sync_stdio;
-    pwcerr->_C_fmtfl |= __rw::__rw_sync_stdio;
-    pwclog->_C_fmtfl |= __rw::__rw_sync_stdio;
+    pwcin->_C_sync  = 1;
+    pwcout->_C_sync = 1;
+    pwcerr->_C_sync = 1;
+    pwclog->_C_sync = 1;
 
     // the standard objects are locked ([iostream.objects])
     pwcin->_C_nolock  = 0;

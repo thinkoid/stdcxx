@@ -144,6 +144,10 @@ void ios_base::_C_init (void *sb)
     // ios_base::Init::Init() locks the standard objects, which may
     // not ([iostream.objects])
     _C_nolock = 1;
+
+    // a stream is not synchronized with stdio; ios_base::Init::Init()
+    // synchronizes the standard objects (27.4.2.4, p1)
+    _C_sync = 0;
 }
 
 

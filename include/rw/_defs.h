@@ -560,9 +560,6 @@
 // placeholder goes that many digits before the least significant one;
 // not a value of ios_base::fmtflags
 #define _RWSTD_IOS_SCALED       0x08000
-// SYNC_STDIO is set for stream objects that may need to be synchronized
-// with stdio (by default the standard iostream objects such as cout)
-#define _RWSTD_IOS_SYNC_STDIO   0x40000
 
 #define _RWSTD_IOS_FLOATFIELD   (_RWSTD_IOS_FIXED | _RWSTD_IOS_SCIENTIFIC)
 

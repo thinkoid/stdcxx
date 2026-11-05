@@ -248,7 +248,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 27.istream.readsome                           0    0   30720      0   100%
 27.istream.sentry                             0    0     832      0   100%
 27.istream.unformatted.get                    0    0    1652      0   100%
-27.objects                                    0    0      22      0   100%
+27.objects                                    0    0      30      0   100%
 27.ostream.inserters.stdcxx-51             NOUT    0                      
 27.ostream                                    0    0    5798      0   100%
 27.ostream.unformatted.stdcxx-626          NOUT    0                      
@@ -276,5 +276,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            42
-  Assertions:            12538264
+  Assertions:            12538272
   Failed assertions:            0

@@ -111,8 +111,7 @@ enum __rw_fmtflags {
     __rw_uppercase   = _RWSTD_IOS_UPPERCASE,
     __rw_basefield   = _RWSTD_IOS_BASEFIELD,
     __rw_adjustfield = _RWSTD_IOS_ADJUSTFIELD,
-    __rw_floatfield  = _RWSTD_IOS_FLOATFIELD,
-    __rw_sync_stdio  = _RWSTD_IOS_SYNC_STDIO
+    __rw_floatfield  = _RWSTD_IOS_FLOATFIELD
 };
 
 _RWSTD_DEFINE_BITMASK_OPERATORS (__rw_fmtflags);

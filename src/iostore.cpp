@@ -367,7 +367,8 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
         _C_usr = 0;
     }
 
-    // copy the flags; the lock state is not a format flag and stays
+    // copy the flags; the lock and stdio states are not format flags
+    // and stay
     _C_fmtfl = fmtfl;
     _C_prec  = prec;
     _C_wide  = wide;
