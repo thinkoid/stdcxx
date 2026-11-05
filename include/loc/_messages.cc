@@ -99,7 +99,7 @@ messages<_CharT>::do_get (messages_base::catalog __cat,
         // allocate a [wide] string large enough to hold at least
         // as many internal characters as there are bytes in the
         // multibyte characater message
-        string_type __result_str ((const _CharT*)0, __src_len);
+        string_type __result_str (__src_len, _CharT ());
 
         _CharT* const __dst_first = &__result_str [0];
         _CharT* const __dst_last  = __dst_first + __src_len;
@@ -107,9 +107,7 @@ messages<_CharT>::do_get (messages_base::catalog __cat,
 
         state_type __state = state_type ();
 
-        // avoid using const codecvt_base::result here
-        // to prevent HP aCC 3.27 errors
-        const int __res =
+        const codecvt_base::result __res =
             __codecvt.in (__state, __src_first, __src_last, __src_next,
                           __dst_first, __dst_last, __dst_next);
 

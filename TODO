@@ -96,25 +96,6 @@ p8 leaves the choice to the library.
 
 Check: a chapter 2 row names =RWSTDERR=.
 
-** TODO A null pointer with a count gives a string of uninitialized characters
-
-14882:2003 21.3.1, p6: "Requires: s shall not be a null pointer and n
-< npos." ~basic_string (const_pointer, size_type, const
-allocator_type&)~ skips the copy for a null pointer and leaves =n=
-characters uninitialized (=include/string.cc= 144-157, "extension").
-The standard makes the call undefined, so no conforming program sees
-it. One caller in the library relies on it: =bitset::to_string=
-(=include/bitset= 438-439, "extension: allocate but do not
-initialize"). No test; =doc/stdlibref= does not document it. The
-neighbouring constructor asserts its pointer (=include/string.cc=
-167). Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: remove the branch and assert as the neighbour does,
-with =to_string= building its string another way, or record; for
-removal, a program that relies on it reads indeterminate values.
-
-Check: both comments are gone and =23.bitset= equals its pin.
-
 ** TODO The =<stdexcept>= classes take a =const char*= that defaults to null
 
 14882:2003 19.1.1 to 19.1.9 give each class one constructor, ~explicit

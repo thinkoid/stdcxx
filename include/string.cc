@@ -141,7 +141,7 @@ basic_string (const_pointer __s, size_type __n,
               const allocator_type &__alloc /* = allocator_type () */)
     : allocator_type (__alloc)
 {
-    // extension: if `s' is 0 then `n' uninitialized elements are allocated
+    _RWSTD_ASSERT (__s != 0);
 
     _RWSTD_REQUIRES (__n <= max_size (),
                      (_RWSTD_ERROR_LENGTH_ERROR,
@@ -153,8 +153,7 @@ basic_string (const_pointer __s, size_type __n,
         _C_get_rep (_C_grow (size_type (), __n), __n)->data ()
       : _C_nullref ()->data ();
 
-    if (__s)
-        traits_type::copy (_C_data, __s, __n);
+    traits_type::copy (_C_data, __s, __n);
 }
 
 

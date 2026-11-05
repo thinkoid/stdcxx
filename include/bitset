@@ -437,11 +437,11 @@ inline basic_string<_CharT, _Traits, _Allocator>
 bitset<_Size>::
 to_string (_CharT __b0 /* = '0' */, _CharT __b1 /* = '1' */) const
 {
-    // extension: allocate but do not initialize
-    basic_string<_CharT, _Traits, _Allocator> __s ((_CharT*)0, _Size);
+    basic_string<_CharT, _Traits, _Allocator> __s (_Size, __b0);
 
     for (_RWSTD_SIZE_T __i = 0; __i != _Size; ++__i)
-        _Traits::assign (__s [_Size - 1 - __i], (*this)[__i] ? __b1 : __b0);
+        if ((*this)[__i])
+            _Traits::assign (__s [_Size - 1 - __i], __b1);
 
     return __s;
 }

@@ -318,8 +318,7 @@ convert (const char *locname, const char *s, const wchar_t*)
         return std::wstring ();
     }
 
-    // use an extension: allocate but do not initialize
-    std::wstring res ((wchar_t*)0, 64);
+    std::wstring res (64, L'\0');
 
     for ( ; ; ) {
         // try to convert, resizing buffer if necessary
