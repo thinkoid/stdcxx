@@ -295,24 +295,6 @@ Fix: the state leaves the format flags, as locking did in 1803887b.
 Check: =27.objects= finds =flags ()= of each object at ~skipws | dec~,
 with =unitbuf= for =cerr= and =wcerr=.
 
-** TODO A const =valarray='s subscript returns a reference
-
-14882:2003 26.3.2.3 declares ~T operator[] (size_t) const~, and p1 has
-it return "the value of the corresponding element". =include/valarray=
-111-114 return =const value_type&=, C++11's 26.6.2.4, the resolution
-of an LWG issue no comment cites. =&cv[0]= on a const =valarray=
-compiles and points into the array. =doc/stdlibref/valarray.html= 182
-shows the 2003 form, so page and header disagree. No test pins either;
-the library's callers take the element by value. Found by the
-extension sweep's reading, 2026-11-04.
-
-Fix: a decision: record as a later text, citing the issue and
-correcting the page, or return by value; for the record, a reference
-costs no program anything the value gives.
-
-Check: a row in chapter 2 or 3 names =include/valarray= and 26.3.2.3,
-and the page shows the header's form.
-
 ** TODO The =valarray= helpers' copy constructors are public and their fill is const
 
 14882:2003 26.3.5, 26.3.7, 26.3.8 and 26.3.9 declare the copy

@@ -141,6 +141,7 @@ later amendment to the issue.
 | 214 | `set` and `multiset` supply non-const lookup overloads alongside const ones; comments identify the proposed resolution. | `include/set` |
 | 307 | Container adaptors expose the underlying container's reference typedefs; `queue::front/back` return those types. | `include/queue`, `include/stack` |
 | 350 | `allocator::address` obtains the address through casts to character references, bypassing an overloaded address-of operator. | `include/rw/_allocator.h` |
+| 389 | The const `valarray::operator[] (size_t)` returns `const T&` where 14882:2003 26.3.2.3 returns `T`, "the value of the corresponding element"; N3242 26.6.2.4 has the resolution's `const T&`. `&cv[0]` on a const `valarray` points into the array. | `include/valarray` |
 | 396 | The constructor from `basic_string` takes the two digit characters, `'0'` and `'1'` by default, and compares the string's characters with them; `to_string` takes the same pair, and the three overloads of LWG 434 pass it on. The text is N3242 20.5.1 and 20.5.2. | `include/bitset`, `src/bitset.cpp` |
 | 453 | String-buffer seeking rejects a nonzero offset when the relevant buffer pointer is null. | `include/sstream.cc` |
 | 467 | `char_traits<char>::lt` compares after conversion to `unsigned char`, matching bytewise ordering. | `include/rw/_traits.h` |

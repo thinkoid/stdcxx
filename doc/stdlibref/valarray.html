@@ -179,7 +179,7 @@ namespace std {
   valarray&lt;T&gt;&amp; operator=(const T&amp;);
 
   // operator[]
-  T operator[](size_t) const;
+  const T&amp; operator[](size_t) const;
   T&amp; operator[](size_t);
   valarray&lt;T&gt; operator[](slice) const;
   slice_array&lt;T&gt; operator[](slice);
@@ -498,9 +498,9 @@ NOTE -- Before calling these functions, portable code should guarantee that both
 </UL>
 
 
-<A NAME="idx1271"></A><PRE>T <B>operator[]</B>(size_type n) const;</PRE>
+<A NAME="idx1271"></A><PRE>const T&amp; <B>operator[]</B>(size_type n) const;</PRE>
 <UL>
-<P>Returns the value at element <SAMP>n</SAMP> of self. The index <SAMP>n</SAMP> must be between <SAMP>0</SAMP> and <SAMP>size</SAMP> less one.</P>
+<P>Returns a <SAMP>const</SAMP> reference to element <SAMP>n</SAMP> of self. The index <SAMP>n</SAMP> must be between <SAMP>0</SAMP> and <SAMP>size</SAMP> less one.</P>
 </UL>
 
 <A NAME="sec10"><H3>Subset Operators</H3></A>
