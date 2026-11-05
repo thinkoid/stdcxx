@@ -76,7 +76,7 @@ namespace std {
 }
 </PRE>
 <A NAME="sec4"><H3>Description</H3></A>
-<P>The <B><I><A HREF="valarray.html">valarray</A></I></B> helper class <B><I>slice_array</I></B> gives a slice view into a <B><I>valarray</I></B>. A&nbsp;<B><I>slice_array</I></B> is only produced by applying the slice subscript operator to a&nbsp;<B><I>valarray</I></B>. The elements in a <B><I>slice_array</I></B> are references to selected elements in the <B><I>valarray</I></B> (so changing an element in the <B><I>slice_array</I></B> really changes the corresponding element in the <B><I>valarray</I></B>). A <B><I>slice_array</I></B> does not itself hold any distinct elements. The template cannot be instantiated directly since all its constructors are private. However, you can easily copy a <B><I>slice_array</I></B> to a <B><I>valarray</I></B> using either the <B><I>valarray</I></B> copy constructor or the assignment operator. Reference semantics are lost at that point. </P>
+<P>The <B><I><A HREF="valarray.html">valarray</A></I></B> helper class <B><I>slice_array</I></B> gives a slice view into a <B><I>valarray</I></B>. A&nbsp;<B><I>slice_array</I></B> is only produced by applying the slice subscript operator to a&nbsp;<B><I>valarray</I></B>. The elements in a <B><I>slice_array</I></B> are references to selected elements in the <B><I>valarray</I></B> (so changing an element in the <B><I>slice_array</I></B> really changes the corresponding element in the <B><I>valarray</I></B>). A <B><I>slice_array</I></B> does not itself hold any distinct elements. The template cannot be instantiated directly, since its default constructor is private. However, you can easily copy a <B><I>slice_array</I></B> to a <B><I>valarray</I></B> using either the <B><I>valarray</I></B> copy constructor or the assignment operator. Reference semantics are lost at that point. </P>
 <A NAME="sec5"><H3>Interface</H3></A>
 
 <UL><PRE>namespace std {
@@ -86,6 +86,9 @@ namespace std {
 
     // types
     typedef T value_type;
+
+    // copy constructor
+    slice_array(const slice_array&lt;T&gt;&amp;);
 
     // destructor
     ~slice_array();
@@ -106,12 +109,11 @@ namespace std {
     void operator&gt;&gt;=(const valarray&lt;T&gt;&amp; array) const;
  
     // other
-    void operator=(const T&amp;);  
+    void operator=(const T&amp;) const;
 
     private:
     // constructors
     slice_array();
-    slice_array(const slice_array&lt;T&gt;&amp;);
     // operator=
     slice_array&lt;T&gt;&amp; operator=(const slice_array&lt;T&gt;&amp; array);
   };
@@ -122,7 +124,7 @@ namespace std {
 <A NAME="idx1176"></A><PRE><B>slice_array</B>();
 <B>slice_array</B>(const slice_array&amp;);</PRE>
 <UL>
-<P>All <B><I>slice_array</I></B> constructors are private and cannot be called directly. This prevents copy construction of <B><I>slice_array</I></B>s.</P>
+<P>The default constructor is private and cannot be called directly. The copy constructor is public: the copy refers to the same elements of the same <B><I><A HREF="valarray.html">valarray</A></I></B>. It lets the result of a subscript operator bind to the <SAMP>const</SAMP> reference parameter of the <B><I>valarray</I></B> constructor.</P>
 </UL>
 
 <A NAME="sec7"><H3>Assignment Operators</H3></A>
@@ -140,7 +142,7 @@ namespace std {
 </UL>
 
 
-<A NAME="idx1179"></A><PRE>void <B>operator=</B>(const T&amp; x);</PRE>
+<A NAME="idx1179"></A><PRE>void <B>operator=</B>(const T&amp; x) const;</PRE>
 <UL>
 <P>Assigns <SAMP>x</SAMP> to the selected elements of the <B><I><A HREF="valarray.html">valarray</A></I></B> that self refers to. </P>
 </UL>

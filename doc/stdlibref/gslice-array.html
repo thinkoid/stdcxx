@@ -76,7 +76,7 @@ namespace std {
 }
 </PRE>
 <A NAME="sec4"><H3>Description</H3></A>
-<P><B><I>gslice_array</I></B> creates a <B><I><A HREF="gslice.html">gslice</A></I></B> view into a <B><I><A HREF="valarray.html">valarray</A></I></B>.  A <B><I>gslice_array</I></B> can only be produced by applying the <B><I>gslice</I></B> subscript operator to a <B><I>valarray</I></B>. The elements in a <B><I>gslice_array</I></B> are references to selected elements in the <B><I>valarray</I></B> (so changing an element in the <B><I>gslice_array</I></B> really changes the corresponding element in the <B><I>valarray</I></B>). A <B><I>gslice_array</I></B> does not itself hold any distinct elements. The template cannot be instantiated directly since all its constructors are private. However, you can copy a <B><I>gslice_array</I></B> to a <B><I>valarray</I></B> using either the <B><I>valarray</I></B> copy constructor or the assignment operator. Reference semantics are lost at that point. </P>
+<P><B><I>gslice_array</I></B> creates a <B><I><A HREF="gslice.html">gslice</A></I></B> view into a <B><I><A HREF="valarray.html">valarray</A></I></B>.  A <B><I>gslice_array</I></B> can only be produced by applying the <B><I>gslice</I></B> subscript operator to a <B><I>valarray</I></B>. The elements in a <B><I>gslice_array</I></B> are references to selected elements in the <B><I>valarray</I></B> (so changing an element in the <B><I>gslice_array</I></B> really changes the corresponding element in the <B><I>valarray</I></B>). A <B><I>gslice_array</I></B> does not itself hold any distinct elements. The template cannot be instantiated directly, since its default constructor is private. However, you can copy a <B><I>gslice_array</I></B> to a <B><I>valarray</I></B> using either the <B><I>valarray</I></B> copy constructor or the assignment operator. Reference semantics are lost at that point. </P>
 <A NAME="sec5"><H3>Interface</H3></A>
 
 <UL><PRE>namespace std{ 
@@ -86,6 +86,9 @@ namespace std {
 
     // types
     typedef T value_type;
+
+    // copy constructor
+    gslice_array(const gslice_array&lt;T&gt;&amp;);
 
     // destructor
     ~gslice_array();
@@ -106,13 +109,12 @@ namespace std {
     void operator&gt;&gt;=(const valarray&lt;T&gt;&amp; array) const;
  
     // fill function
-    void operator=(const T&amp;);  
+    void operator=(const T&amp;) const;
 
   private:
     
     // constructors
     gslice_array();
-    gslice_array(const gslice_array&lt;T&gt;&amp;);
     
     // operator =
     gslice_array&lt;T&gt;&amp; operator= (const gslice_array&lt;T&gt;&amp; array);
@@ -124,7 +126,7 @@ namespace std {
 <A NAME="idx653"></A><PRE><B>gslice_array</B>();
 <B>gslice_array</B>(const gslice_array&amp;);</PRE>
 <UL>
-<P>All <B><I>gslice_array</I></B> constructors are private and cannot be called directly. This prevents copy construction of <B><I>gslice_arrays</I></B>.</P>
+<P>The default constructor is private and cannot be called directly. The copy constructor is public: the copy refers to the same elements of the same <B><I><A HREF="valarray.html">valarray</A></I></B>. It lets the result of a subscript operator bind to the <SAMP>const</SAMP> reference parameter of the <B><I>valarray</I></B> constructor.</P>
 </UL>
 
 <A NAME="sec7"><H3>Assignment Operators</H3></A>

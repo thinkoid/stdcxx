@@ -51,31 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO The =valarray= helpers' copy constructors are public and their fill is const
-
-14882:2003 26.3.5, 26.3.7, 26.3.8 and 26.3.9 declare the copy
-constructor private, and 26.3.5.1, p1, 26.3.7.1, p1, 26.3.8.1, p1 and
-26.3.9.1 say each class has no public constructor; each declares ~void
-operator= (const T&)~ without =const=. =include/valarray= 1290, 1456,
-1509 and 1616 make the copy constructors public, and 1310, 1477, 1531
-and 1639 declare the fill =const=; copy assignment stays private. That
-is C++11's form (26.6.5.1), from an LWG issue the tree does not cite.
-The case for it is 8.5.3, p5: binding the rvalue =v[s]= to the =const
-slice_array&= of the converting =valarray= constructor needs an
-accessible copy constructor, so ~valarray<int> w (v[s]);~ is
-ill-formed in a program under the 2003 declarations.
-=doc/stdlibref/slice-array.html= and its three siblings show the copy
-constructor private. No test names it; =26.valarray.cons= and
-=26.gslice.array.cassign= construct from the helpers. Found by the
-extension sweep's reading, 2026-11-04.
-
-Fix: a decision: keep, cite the issue in chapter 3 and correct the
-four pages, or restore the 2003 access; for keeping, the 2003
-declarations make the converting constructors unusable.
-
-Check: chapter 3 names =include/valarray= and the issue, and the four
-pages show the copy constructor public.
-
 ** TODO =ios_base::failure= constructs from a character pointer and from nothing
 
 14882:2003 27.4.2.1.1 declares one constructor, ~explicit failure

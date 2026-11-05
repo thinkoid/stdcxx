@@ -76,7 +76,7 @@ namespace std {
 }
 </PRE>
 <A NAME="sec4"><H3>Description</H3></A>
-<P><B><I>indirect_array</I></B> creates a selective view into a <B><I><A HREF="valarray.html">valarray</A></I></B>. An <B><I>indirect_array</I></B> is produced by applying the indirect subscript operator to a <B><I>valarray</I></B>. The indirect array produced by this subscript contains only the elements of the <B><I>valarray</I></B> whose indices appear as values in the argument. The elements in an <B><I>indirect_array</I></B> are references to selected elements in the <B><I>valarray</I></B>. For this reason, changing an element in the <B><I>indirect_array</I></B> really changes the corresponding element in the <B><I>valarray</I></B>. An <B><I>indirect_array</I></B> does not itself hold any distinct elements. The template cannot be instantiated directly since all its constructors are private. However, you can copy an <B><I>indirect_array</I></B> to a <B><I>valarray</I></B> using either the <B><I>valarray</I></B> copy constructor or the assignment operator. Reference semantics are lost at that point. </P>
+<P><B><I>indirect_array</I></B> creates a selective view into a <B><I><A HREF="valarray.html">valarray</A></I></B>. An <B><I>indirect_array</I></B> is produced by applying the indirect subscript operator to a <B><I>valarray</I></B>. The indirect array produced by this subscript contains only the elements of the <B><I>valarray</I></B> whose indices appear as values in the argument. The elements in an <B><I>indirect_array</I></B> are references to selected elements in the <B><I>valarray</I></B>. For this reason, changing an element in the <B><I>indirect_array</I></B> really changes the corresponding element in the <B><I>valarray</I></B>. An <B><I>indirect_array</I></B> does not itself hold any distinct elements. The template cannot be instantiated directly, since its default constructor is private. However, you can copy an <B><I>indirect_array</I></B> to a <B><I>valarray</I></B> using either the <B><I>valarray</I></B> copy constructor or the assignment operator. Reference semantics are lost at that point. </P>
 <A NAME="sec5"><H3>Interface</H3></A>
 
 <UL><PRE>namespace std{ 
@@ -86,6 +86,9 @@ namespace std {
 
     // types
     typedef T value_type;
+
+    // copy constructor
+    indirect_array(const indirect_array&lt;T&gt;&amp;);
 
     // destructor
     ~indirect_array();
@@ -106,12 +109,11 @@ namespace std {
     void operator&gt;&gt;=(const valarray&lt;T&gt;&amp; array) const;
  
     // fill function
-    void operator=(const T&amp;);  
+    void operator=(const T&amp;) const;
 
   private:
     // constructors
     indirect_array();
-    indirect_array(const indirect_array&lt;T&gt;&amp;);
   
     // operator = 
     indirect_array&lt;T&gt;&amp; 
@@ -124,7 +126,7 @@ namespace std {
 <A NAME="idx658"></A><PRE><B>indirect_array</B>();
 <B>indirect_array</B>(const indirect_array&amp;);</PRE>
 <UL>
-<P>All <B><I>indirect_array</I></B> constructors are private and cannot be called directly. This prevents copy construction of <B><I>indirect_arrays</I></B>.</P>
+<P>The default constructor is private and cannot be called directly. The copy constructor is public: the copy refers to the same elements of the same <B><I><A HREF="valarray.html">valarray</A></I></B>. It lets the result of a subscript operator bind to the <SAMP>const</SAMP> reference parameter of the <B><I>valarray</I></B> constructor.</P>
 </UL>
 
 <A NAME="sec7"><H3>Assignment Operators</H3></A>
@@ -142,7 +144,7 @@ namespace std {
 </UL>
 
 
-<A NAME="idx661"></A><PRE>void <B>operator=</B>(const T&amp; x);</PRE>
+<A NAME="idx661"></A><PRE>void <B>operator=</B>(const T&amp; x) const;</PRE>
 <UL>
 <P>Assigns <SAMP>x</SAMP> to the selected elements of the <B><I><A HREF="valarray.html">valarray</A></I></B> that self refers to. </P>
 </UL>

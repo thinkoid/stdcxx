@@ -1288,6 +1288,7 @@ public:
 
     typedef _TypeT value_type;
 
+    // lwg issues 253 and 123: a public copy constructor, a const fill
     slice_array (const slice_array &__rhs)
         : _C_array(__rhs.get_ref_mem_array()),
           _C_slice(__rhs._C_get_slice())
@@ -1454,6 +1455,7 @@ public:
 
     typedef _TypeT value_type;
 
+    // lwg issues 253 and 123: a public copy constructor, a const fill
     gslice_array (const gslice_array<value_type>& __rhs)
         : _C_array (__rhs.get_ref_mem_array ()),
           _C_slice (__rhs._C_get_slice ())
@@ -1507,6 +1509,7 @@ public:
     typedef _TypeT value_type;
 
 
+    // lwg issues 253 and 123: a public copy constructor, a const fill
     mask_array (const mask_array<value_type> &__rhs)
         : _C_array (__rhs.get_ref_mem_array ()),
           _C_valarray (__rhs._C_get_array ())
@@ -1614,6 +1617,7 @@ public:
 
     typedef _TypeT value_type;
 
+    // lwg issues 253 and 123: a public copy constructor, a const fill
     indirect_array (const indirect_array<value_type>& __sl)
       :_C_array (__sl.get_ref_mem_array ()),
        _C_valarray (__sl._C_get_array ())
