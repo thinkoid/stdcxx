@@ -51,26 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO =ios_base::failure= constructs from a character pointer and from nothing
-
-14882:2003 27.4.2.1.1 declares one constructor, ~explicit failure
-(const string&)~. =__rw_failure=, which =ios_base::failure= names
-(=include/rw/_iosbase.h= 57), adds ~explicit __rw_failure (const char*
-= 0)~ (=include/rw/_iosfailure.h= 51-53, "extension"): a default
-constructor and one from a pointer. 17.4.4.4, p2 permits both, and p3
-holds: a call with a =string= behaves as before. The library throws
-through the default constructor (=src/exception.cpp= 629-630).
-=doc/stdlibref/ios-base--failure.html= shows the standard's
-constructor only. No test. The =<stdexcept>= classes have the same
-shape (below). Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: record as an addition 17.4.4.4 permits, or remove;
-for the record, the library's throw path uses it. The decision on the
-=<stdexcept>= default argument applies here too.
-
-Check: the chapter 2 row exists and the comment at
-=include/rw/_iosfailure.h= 51 names it.
-
 ** TODO An environment variable selects a catalog for the library's exception texts
 
 14882:2003 18.6.1, p8 makes =what ()= "an implementation-defined
@@ -95,46 +75,6 @@ an implementation-defined text, or remove it; for the record, 18.6.1,
 p8 leaves the choice to the library.
 
 Check: a chapter 2 row names =RWSTDERR=.
-
-** TODO The =<stdexcept>= classes take a =const char*= that defaults to null
-
-14882:2003 19.1.1 to 19.1.9 give each class one constructor, ~explicit
-logic_error (const string& what_arg)~ and its kin, with the
-postcondition ~strcmp (what (), what_arg.c_str ()) == 0~ (19.1.1, p3).
-Each of the nine adds ~explicit X (const char *__s = 0)~, marked
-"extension" (=include/stdexcept= 51-52, 65-66, 79-80, 93-94, 107-108,
-121-122, 135-136, 149-150, 163-164): two additions. The =const char*=
-constructor is C++11's 19.2.1, p4-5. The default argument gives every
-class a default constructor, which no edition has: ~std::logic_error
-e;~ compiles. 17.4.4.4, p2 lets an implementation add non-virtual
-member signatures; whether that reaches a constructor, which has no
-name (12.1, p1), is arguable.
-
-The =const char*= constructor carries the header's design:
-=<stdexcept>= declares =std::string= incomplete
-(=include/rw/_exception.h= 48-57) and never defines it, so ~throw
-std::runtime_error ("x")~ with no =<string>= in the translation unit
-compiles only through it. The default argument carries the library's
-own throws: =src/exception.cpp= 598-639 build ten exceptions as
-~std::logic_error ()._C_assign (what, 0)~ and the like.
-=doc/stdlibref/logic-error.html= and its eight siblings show the
-=string= constructor only. No test default-constructs one;
-=19.exceptions.mt= and =19.std.exceptions= construct from =const
-char*=, which compiles through =string= once =<string>= is in, as it
-is in both. Removing the default costs the ten sites and any program
-that default-constructs; removing the =const char*= constructor breaks
-every program that throws from a literal after =<stdexcept>= alone,
-unless =<stdexcept>= includes =<string>=. Found by the extension
-sweep's reading, 2026-11-04.
-
-Fix: a decision: keep the =const char*= constructor as a recorded
-departure, C++11's text that the header leans on, and remove the
-default argument, which is in no edition; or record both.
-=ios_base::failure='s default argument (above) follows the same
-decision.
-
-Check: ~git grep -n "const char \*__s = 0" include~ is empty and the
-library builds, =src/exception.cpp= passing an explicit null.
 
 ** TODO Every standard facet but =ctype= has a public destructor
 

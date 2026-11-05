@@ -48,8 +48,8 @@ struct _RWSTD_EXPORT logic_error: __rw::__rw_exception
     explicit logic_error (const string& __str)
         : __rw::__rw_exception (__str) { }
 
-    // extension
-    explicit logic_error (const char *__s = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit logic_error (const char *__s)
         : __rw::__rw_exception (__s) { }
 
     virtual ~logic_error () _THROWS (());
@@ -62,8 +62,8 @@ struct _RWSTD_EXPORT domain_error: logic_error
     explicit domain_error (const string &__str)
         : logic_error (__str) { }
 
-    // extension
-    explicit domain_error (const char *__s = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit domain_error (const char *__s)
         : logic_error (__s) { }
 
     virtual ~domain_error () _THROWS (());
@@ -76,8 +76,8 @@ struct _RWSTD_EXPORT invalid_argument: logic_error
     explicit invalid_argument (const string &__str)
         : logic_error (__str) { }
 
-    // extension
-    explicit invalid_argument (const char *__s = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit invalid_argument (const char *__s)
         : logic_error (__s) { }
 
     virtual ~invalid_argument () _THROWS (());
@@ -90,8 +90,8 @@ struct _RWSTD_EXPORT length_error: logic_error
     explicit length_error (const string &__str)
         : logic_error (__str) { }
 
-    // extension
-    explicit length_error (const char *__s = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit length_error (const char *__s)
         : logic_error (__s) { }
 
     virtual ~length_error () _THROWS (());
@@ -104,8 +104,8 @@ struct _RWSTD_EXPORT out_of_range: logic_error
     explicit out_of_range (const string &__str)
         : logic_error (__str) { }
 
-    // extension
-    explicit out_of_range (const char *__s = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit out_of_range (const char *__s)
         : logic_error (__s) { }
 
     virtual ~out_of_range () _THROWS (());
@@ -118,8 +118,8 @@ struct _RWSTD_EXPORT runtime_error: __rw::__rw_exception
     explicit runtime_error (const string &__str)
         : __rw::__rw_exception (__str) { }
 
-    // extension
-    explicit runtime_error (const char *__s = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit runtime_error (const char *__s)
         : __rw::__rw_exception (__s) { }
 
     virtual ~runtime_error () _THROWS (());
@@ -132,8 +132,8 @@ struct _RWSTD_EXPORT range_error: runtime_error
     explicit range_error (const string &__str)
         : runtime_error (__str) { }
 
-    // extension
-    explicit range_error (const char *__s = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit range_error (const char *__s)
         : runtime_error (__s) { }
 
     virtual ~range_error () _THROWS (());
@@ -146,8 +146,8 @@ struct _RWSTD_EXPORT overflow_error: runtime_error
     explicit overflow_error (const string &__str)
         : runtime_error (__str) { }
 
-    // extension
-    explicit overflow_error (const char *__s = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit overflow_error (const char *__s)
         : runtime_error (__s) { }
 
     virtual ~overflow_error () _THROWS (());
@@ -160,8 +160,8 @@ struct _RWSTD_EXPORT underflow_error: runtime_error
     explicit underflow_error (const string &__str)
         : runtime_error (__str) { }
 
-    // extension
-    explicit underflow_error (const char *__s = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit underflow_error (const char *__s)
         : runtime_error (__s) { }
 
     virtual ~underflow_error () _THROWS (());

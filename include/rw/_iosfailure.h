@@ -48,8 +48,8 @@ struct _RWSTD_EXPORT __rw_failure: __rw_exception
     explicit __rw_failure (const std::string &__what)
         : __rw_exception (__what) { }
 
-    // extension
-    explicit __rw_failure (const char *__what = 0)
+    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    explicit __rw_failure (const char *__what)
         : __rw_exception (__what) { }
 
     virtual ~__rw_failure () _THROWS (());

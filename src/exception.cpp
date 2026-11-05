@@ -595,39 +595,39 @@ static void __rw_throw_exception (int id, char *what)
         throw bad_cast ();
 
     case _RWSTD_ERROR_LOGIC_ERROR:
-        throw (std::logic_error&)std::logic_error ()._C_assign (what, 0);
+        throw (std::logic_error&)std::logic_error (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_DOMAIN_ERROR:
-        throw (std::domain_error&)std::domain_error ()._C_assign (what, 0);
+        throw (std::domain_error&)std::domain_error (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_INVALID_ARGUMENT:
         throw (std::invalid_argument&)
-            std::invalid_argument ()._C_assign (what, 0);
+            std::invalid_argument (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_LENGTH_ERROR:
-        throw (std::length_error&)std::length_error ()._C_assign (what, 0);
+        throw (std::length_error&)std::length_error (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_OUT_OF_RANGE:
-        throw (std::out_of_range&)std::out_of_range ()._C_assign (what, 0);
+        throw (std::out_of_range&)std::out_of_range (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_RUNTIME_ERROR:
         throw (std::runtime_error&)
-            std::runtime_error ()._C_assign (what, 0);
+            std::runtime_error (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_RANGE_ERROR:
-        throw (std::range_error&)std::range_error ()._C_assign (what, 0);
+        throw (std::range_error&)std::range_error (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_OVERFLOW_ERROR:
         throw (std::overflow_error&)
-            std::overflow_error ()._C_assign (what, 0);
+            std::overflow_error (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_UNDERFLOW_ERROR:
         throw (std::underflow_error&)
-            std::underflow_error ()._C_assign (what, 0);
+            std::underflow_error (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_IOSTATE_BIT_SET:
         throw (__rw_failure&)
-            __rw_failure ()._C_assign (what, 0);
+            __rw_failure (0)._C_assign (what, 0);
 
     case _RWSTD_ERROR_FACET_NOT_FOUND:
     case _RWSTD_ERROR_LOCALE_BAD_CAT:
@@ -636,7 +636,7 @@ static void __rw_throw_exception (int id, char *what)
     case _RWSTD_ERROR_CODECVT:
     case _RWSTD_ERROR_BAD_POINTER:
         throw (std::runtime_error&)
-            std::runtime_error ()._C_assign (what, 0);
+            std::runtime_error (0)._C_assign (what, 0);
     }
 
     __rw_free_what_buf (what);
