@@ -51,30 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO =__iterator_category=, =__value_type= and =__distance_type= have no caller
-
-The 24.2 synopsis has no such functions, and their names are reserved
-(17.4.3.1.2, p1), but =doc/stdlibref/--iterator-category.html= and
-=--distance-type.html= document them as public functions of
-=<iterator>=, "obsolete" and "retained to support compilers that do
-not include partial specialization", and =iterator-traits.html= 119
-lists all three. =include/rw/_iterbase.h= 113-131 and 183-196 define
-them in =namespace std=. Since e9980bcd retired the partial
-specialization gates nothing in =include=, =src= or =tests= calls
-them; the library dispatches through =_RWSTD_ITERATOR_CATEGORY= and
-=_RWSTD_VALUE_TYPE= (=include/rw/_defs.h= 644-649), over
-=iterator_traits=. The pages describe forms that are gone:
-=__distance_type= takes the iterator by value. The =__is_*_iterator=
-helpers beside them stay; =include/string.cc= 490 calls one. Found by
-the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: remove the three and the two pages, or record them;
-for removal, their documented reason is gone and nothing calls them.
-
-Check: ~git grep -n
-'__iterator_category\|__value_type\b\|__distance_type'~ is empty under
-=include=, =src=, =tests= and =doc/stdlibref=.
-
 ** TODO =raw_storage_iterator= has an =iterator_type= typedef
 
 20.4.2's synopsis has no member types beyond those of the base.
@@ -2478,6 +2454,25 @@ set the rule that a removal edits its page.
 
 Check: each passage above is gone from its page, and each page's
 description of these members matches the code it names.
+
+** TODO Part III of =doc/stdlibref= lists no page
+
+Part III, "Obsolete Classes Reference", held two pages,
+=--distance-type.html= and =--iterator-category.html=. Both left with
+=__distance_type= and =__iterator_category=. =III.html= now lists
+nothing, and =booktoc.html= and =frames-classes-alpha.html= keep its
+heading over an empty list. =noframes.html= 44 and
+=frames-intro-contents.html= 40 link it. =A-3.html= 28 says the
+double-underscore names "are documented in Part III"; none is. Found
+when the two pages left, 2026-11-05.
+
+Fix: a decision: Part III goes, with its heading in the two contents
+pages, the two links and the sentence of =A-3.html=, and =wstring.html=
+and =IV.html= link each other; or it stays, and =A-3.html= stops
+pointing to it.
+
+Check: no contents page in =doc/stdlibref= shows an empty part, and
+=A-3.html= names no page that is gone.
 
 ** TODO =ref-locale.md= and =ref-conformance.md= disagree on which departures are recorded
 

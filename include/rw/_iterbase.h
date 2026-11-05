@@ -110,27 +110,6 @@ struct iterator
 };
 
 
-// returns the category of an iterator
-template <class _TypeT>
-inline random_access_iterator_tag __iterator_category (const _TypeT*)
-{
-    return random_access_iterator_tag ();
-}
-
-
-template <class _Category, class _TypeT, class _Distance, 
-          class _Pointer, class _Reference> 
-inline _Category
-__iterator_category (const iterator<_Category, _TypeT,
-                                    _Distance, _Pointer, _Reference>&)
-{
-    typedef typename iterator<_Category, _TypeT, _Distance, _TypeT*,
-                               _TypeT&>::iterator_category _IterCategory;
-
-    return _IterCategory ();
-}
-
-
 template <class _Tag>
 inline bool __is_input_iterator (_Tag)
 {
@@ -177,22 +156,6 @@ template <>
 inline bool __is_random_access_iterator (random_access_iterator_tag)
 {
     return true;
-}
-
-
-template <class _Iterator>
-inline typename iterator_traits<_Iterator>::value_type*
-__value_type (const _Iterator*)
-{ 
-    return 0;
-}
-
-
-template <class _Iterator>
-inline typename iterator_traits<_Iterator>::difference_type*
-__distance_type (_Iterator)
-{ 
-    return 0;
 }
 
 
