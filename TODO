@@ -51,28 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO =<cstdlib>= keeps =abs= for unsigned types behind macros nothing defines
-
-14882:2003 26.5, p4 adds =long abs (long)= and =ldiv_t div (long,
-long)=; no edition adds =abs= for an unsigned type.
-=include/ansi/cstdlib= 93-100, 111-118 and 130-137 define =abs
-(unsigned)=, =abs (unsigned long)= and =abs (unsigned long long)=
-under =_RWSTD_NO_ABS_UINT=, =_RWSTD_NO_ABS_ULONG= and
-=_RWSTD_NO_ABS_ULLONG=. Until 55ceb9b6 (2026-10-18)
-=ABS_OVERLOADS.cpp= emitted the three, defined under glibc, whose
-=abs= takes =int= only: GCC and Clang builds had the overloads, and
-=std::abs (5u)=, ambiguous by the standard, compiled. 55ceb9b6 cut the
-probe to =LONG= and =LLONG=, saying =<cstdlib>= reads only those; it
-reads the three unsigned macros too. The overloads left unrecorded,
-and their code is dead. 17.4.4.3, p2 and footnote 171 permit such
-additions. No test calls =abs= on an unsigned type. Found by the
-extension sweep's reading, 2026-11-04.
-
-Fix: the three blocks go, and the commit records that the overloads
-left the build with 55ceb9b6.
-
-Check: =git grep -n ABS_U include etc= is empty.
-
 ** TODO =__iterator_category=, =__value_type= and =__distance_type= have no caller
 
 The 24.2 synopsis has no such functions, and their names are reserved

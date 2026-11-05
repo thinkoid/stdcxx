@@ -90,15 +90,6 @@ inline ldiv_t div (long __x, long __y)
 namespace std {
 
 
-#ifdef _RWSTD_NO_ABS_UINT
-
-inline unsigned abs (unsigned __x)
-{
-    return __x;
-}
-
-#endif   // _RWSTD_NO_ABS_UINT
-
 #ifdef _RWSTD_NO_ABS_LONG
 
 inline long abs (long __x)
@@ -107,15 +98,6 @@ inline long abs (long __x)
 }
 
 #endif   // _RWSTD_NO_ABS_LONG
-
-#ifdef _RWSTD_NO_ABS_ULONG
-
-inline unsigned long abs (unsigned long __x)
-{
-    return __x;
-}
-
-#endif   // _RWSTD_NO_ABS_ULONG
 
 #ifdef _RWSTD_LONG_LONG
 #ifdef _RWSTD_NO_ABS_LLONG
@@ -126,15 +108,6 @@ inline _RWSTD_LONG_LONG abs (_RWSTD_LONG_LONG __x)
 }
 
 #endif   // _RWSTD_NO_ABS_LLONG
-
-#ifdef _RWSTD_NO_ABS_ULLONG
-
-inline unsigned _RWSTD_LONG_LONG abs (unsigned _RWSTD_LONG_LONG __x)
-{
-    return __x;
-}
-
-#endif   // _RWSTD_NO_ABS_ULLONG
 #endif   // _RWSTD_LONG_LONG
 
 #ifdef _RWSTD_NO_DIV_LONG
