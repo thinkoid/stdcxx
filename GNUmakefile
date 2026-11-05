@@ -107,8 +107,6 @@
 #               *  wide uses wide (typically 64-bit) memory model
 #               the default value is debug (same as 11s)
 #
-#   CATFILE   - name of library catalog file to be generated - see gencat(1)
-#
 #   CCVER     - compiler version (must contain no spaces)
 #
 #   DEPENDFLAGS - preprocessor flags used to generate dependencies
@@ -564,7 +562,6 @@ $(MAKEFILE_IN): $(configpath)
           && echo "ARFLAGS    = $(ARFLAGS)"              >> $(MAKEFILE_IN)  \
           && echo "CCVER      = $(CCVER)"                >> $(MAKEFILE_IN)  \
           && echo "SHARED     = $(SHARED)"               >> $(MAKEFILE_IN)  \
-          && echo "CATFILE    = $(CATFILE)"              >> $(MAKEFILE_IN)  \
           && echo "OMIT_EXM_SRCS = $(OMIT_EXM_SRCS)"     >> $(MAKEFILE_IN)  \
           && echo "OMIT_TST_SRCS = $(OMIT_TST_SRCS)"     >> $(MAKEFILE_IN)  \
           && echo "BUILDTAG   = $(BUILDTAG)"             >> $(MAKEFILE_IN)  \

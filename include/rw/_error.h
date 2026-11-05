@@ -60,19 +60,6 @@ _RWSTD_EXPORT extern void (*__rw_throw_proc)(int, char*);
 
 #endif
 
-#ifndef _RWSTD_ERROR_CATALOG
-   // name of catalog optionally followed by a colon and a set number
-   // catalog looked up according to rules of catopen(3)
-   // may be customized at lib build time (pathname okay)
-#  define _RWSTD_ERROR_CATALOG "rwstderr:1"
-#endif   // _RWSTD_ERROR_CATALOG
-
-#ifndef _RWSTD_ERROR_ENVVAR
-   // environment variable name - overrides _RWSTD_ERROR_CATALOG
-   // may be customized at lib build time
-#  define _RWSTD_ERROR_ENVVAR "RWSTDERR"
-#endif   // _RWSTD_ERROR_ENVVAR
-
 #ifndef _RWSTD_ERROR_FIRST
    // id of first message - 1, may be customized at lib build time
 #  define _RWSTD_ERROR_FIRST 0

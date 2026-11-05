@@ -687,7 +687,6 @@
        |
        +- bin/locale             utility programs
        |     /localedef
-       +- etc/rwstderr.cat       message catalog
        +- include/*{,.cc}        library headers
        |         /config.h       generated configuration header
        +- lib/libstd*.[a|so]     archive or .so symbolic link

@@ -36,9 +36,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <loc/_locale.h>
-#include <loc/_messages.h>
-
 #include <new>
 #include <stdexcept>
 #include <string>
@@ -47,9 +44,6 @@
 #include <rw/_error.h>
 #include <rw/_iosfailure.h>
 #include <rw/_mutex.h>
-#include <rw/_once.h>
-
-#include "podarray.h"   // for __rw_aligned_buffer
 
 
 #ifndef _RWSTD_NO_VSNPRINTF
@@ -487,68 +481,6 @@ __rw_vfmtwhat (char          *buf,      // (allocate if 0)
 }
 
 
-static
-char* __rw_vfmtwhat (char          *buf,      // buffer (allocate if 0)
-                     _RWSTD_SIZE_T  bufsize,  // size of buffer or 0
-                     int            id,       // catalog id of fmt string
-                     va_list        va)       // variable arguments
-{
-    typedef std::messages<char> _Msgs;
-
-    static int             __catset =  1;   // catalog set
-    static _Msgs::catalog  __cat    = -1;   // catalog id
-
-    // facet must never be destroyed
-    static __rw_aligned_buffer<_Msgs> msgs;
-
-    // the catalog is opened once
-    static __rw_once_t     __once;
-
-    struct _C_catalog {
-        static void _C_open () {
-
-            // get catalog name (absolute or relative) from the environment
-            char *__fn = getenv (_RWSTD_ERROR_ENVVAR);
-
-            // use default hardcoded name if variable doesn't exist
-            if (!__fn) {
-                // copy literal into static buffer (will be modified)
-                static char buffer[] = _RWSTD_ERROR_CATALOG;
-                __fn = buffer;
-            }
-
-            // catalog name may optionally be followed by a `:' and a set number
-            char *__set = strrchr (__fn, ':');
-            if (__set) {
-                *__set++ = '\0';
-                if (   1 != sscanf (__set, "%d", &__catset)
-                    || __catset <= 0)
-                    __catset = 1;
-            }
-
-            new (msgs._C_store ()) _Msgs;
-
-            // always use the classic locale, not the current snapshot
-            __cat = msgs._C_data ()->open (__fn, std::locale::classic ());
-        }
-    };
-
-    __rw_once (&__once, _C_catalog::_C_open);
-
-    if (-1 == __cat)
-        return 0;   // indicate a falure to open catalog
-
-    _RWSTD_MT_STATIC_GUARD (void);
-
-    // retrieve error message from catalog and use it to format args
-    std::string fmat = msgs._C_data ()->get (__cat, __catset, id, "");
-
-    if (fmat.empty ())
-        return 0;   // failure to retrieve message
-
-    return __rw_vfmtwhat (buf, bufsize, fmat.data (), va);
-}
-
 #ifdef _RWSTD_REENTRANT
 
 extern const char* const __rw_mutex_exception =
@@ -662,41 +594,17 @@ _RWSTD_EXPORT void __rw_throw (int id, ...)
         va_list va;
         va_start (va, id);
 
-#ifdef va_copy
+        // obtain an index into table of error strings
+        id -= _RWSTD_ERROR_FIRST;
 
-        // copy va to a temporary and use it in the first call
-        // to __rw_vfmtwhat() since it may be modified by the
-        // call and rendered invalid for subsequent use (e.g.,
-        // on PowerPC/Linux)
+        static const char* const errors[] = { _RWSTD_ERROR_STRINGS };
 
-        va_list tmp_va;
-        va_copy (tmp_va, va);
+        // make sure index is valid
+        if (id < 0 || id >= int (sizeof errors / sizeof *errors))
+            id = 0;
 
-        // try to format a string (look up format in a catalog)...
-        char *what = __rw::__rw_vfmtwhat (0, 0, id, tmp_va);
-
-        va_end (tmp_va);
-
-#else   // if !defined (va_copy)
-
-        char *what = __rw::__rw_vfmtwhat (0, 0, id, va);
-
-#endif   // va_copy
-
-
-        if (!what) {
-            // obtain an index into table of error strings
-            id -= _RWSTD_ERROR_FIRST;
-
-            static const char* const errors[] = { _RWSTD_ERROR_STRINGS };
-
-            // make sure index is valid
-            if (id < 0 || id >= int (sizeof errors / sizeof *errors))
-                id = 0;
-
-            // use error string to format
-            what = __rw::__rw_vfmtwhat (0, 0, errors [id], va);
-        }
+        // use error string to format
+        char *what = __rw::__rw_vfmtwhat (0, 0, errors [id], va);
 
         // end va list before throwing
         va_end (va);

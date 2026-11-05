@@ -51,31 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO An environment variable selects a catalog for the library's exception texts
-
-14882:2003 18.6.1, p8 makes =what ()= "an implementation-defined
-NTBS", so the texts are the library's to choose. The library chooses
-them at run time: the first library throw that formats a message opens
-a catalog through =messages<char>= under the classic locale, named by
-the environment variable =RWSTDERR= when set and =rwstderr:1=
-otherwise, with an optional =:set= suffix (=include/rw/_error.h=
-63-74, =src/exception.cpp= 490-550). A message found there formats the
-=what ()= string; otherwise the built-in =_RWSTD_ERROR_STRINGS= do.
-The original =README= (690) lists =etc/rwstderr.cat= among the
-installed files. =doc/stdlibref= does not name the variable.
-=18.exception= pins the built-in strings
-(=tests/support/18.exception.cpp= 464); no test sets =RWSTDERR=.
-Removing the catalog costs =src/rwstderr.msg=, its install line and
-about sixty lines of =src/exception.cpp=; the built-in strings stay.
-The reader writes into =getenv='s string, its own entry below. Found
-by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: record the catalog as the library's documentation of
-an implementation-defined text, or remove it; for the record, 18.6.1,
-p8 leaves the choice to the library.
-
-Check: a chapter 2 row names =RWSTDERR=.
-
 ** TODO Racing =locale::global= calls can split the C and C++ locales
 
 =locale::global= (=src/locale_global.cpp= 59-72) calls =setlocale= and
@@ -357,21 +332,6 @@ beyond 2003" row then names.
 
 Check: the =config.h= of a 15D build has no =_RWSTD_NO_DIV_INT= or
 =_RWSTD_NO_DIV_LLONG= line.
-
-** TODO The =RWSTDERR= reader writes into =getenv='s string
-
-=src/exception.cpp= 511 and 521-523 split the set number off the
-catalog name by writing a null into the string =getenv= returned. C99
-7.20.4.5, p4: "The string pointed to shall not be modified by the
-program". With ~RWSTDERR=foo:2~ the process's environment reads =foo=
-after the first library throw that formats a message. The default name
-is copied into a static buffer first (514-516); the environment's is
-not. Seen in passing by the extension sweep, 2026-11-04.
-
-Fix: the reader copies the variable's value before splitting it.
-
-Check: after a library throw under ~RWSTDERR=foo:2~, ~getenv
-("RWSTDERR")~ still reads "foo:2".
 
 ** TODO =basic_filebuf::xsputn= returns -1 on an error
 

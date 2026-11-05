@@ -29,10 +29,6 @@
 include ../makefile.in
 
 
-# catalog to build and source files to build it from
-CATFILE  := rwstderr.cat
-MSGFILES := rwstderr.msg
-
 # the name of the library to build (and in shared builds,
 # the name of the symbolic link pointing to it, for library
 # versioning)
@@ -46,13 +42,8 @@ else
   TARGET := $(LIB)
 endif
 
-TARGET += $(CATFILE)
-
 
 SRCDIRS      = $(TOPDIR)/src
-
-# do not compile these sources...
-OMIT_SRCS   += rwstderr.cpp
 
 # include common variables setting for all makefiles
 include ../makefile.common
@@ -105,8 +96,7 @@ endif   # ($(findstring shared,$(BUILDMODE)),shared)
 # Common rules used by all Makefiles
 include ../makefile.rules
 
-# create the $(PREFIX)/etc/ and $(PREFIX)/lib/ directories
-# and install the library binary and the message catalog(s)
+# create the $(PREFIX)/lib/ directory and install the library binary
 install: $(TARGET)
 	mkdir -p $(PREFIX)/lib
 	cp $(LIB) $(PREFIX)/lib
@@ -114,5 +104,3 @@ install: $(TARGET)
             rm $(PREFIX)/lib/$(LIBLINK);           \
             ln -s $(LIB) $(PREFIX)/lib/$(LIBLINK); \
         fi
-	mkdir -p $(PREFIX)/etc
-	cp $(CATFILE) $(PREFIX)/etc
