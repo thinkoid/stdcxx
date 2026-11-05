@@ -240,7 +240,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 27.filebuf.virtuals.stdcxx-522             NOUT    0                      
 27.forward                                    0    0      42      0   100%
 27.ios.members.static                         0    0       3      0   100%
-27.istream.fmat.arith                         0   12   26648      0   100%
+27.istream.fmat.arith                         0   12   26808      0   100%
 27.istream.get                                0    0     528      0   100%
 27.istream.get.stdcxx-60                   NOUT    0                      
 27.istream.getline.stdcxx-59               NOUT    0                      
@@ -276,5 +276,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            42
-  Assertions:            12538296
+  Assertions:            12538456
   Failed assertions:            0

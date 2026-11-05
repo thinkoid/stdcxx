@@ -243,18 +243,22 @@ __rw_check_overflow_short (long __lval, _RWSTD_FMTFLAGS __flags,
 {
 #if _RWSTD_SHRT_MAX < _RWSTD_LONG_MAX
 
+    const _RWSTD_FMTFLAGS __base = __flags & __rw::__rw_basefield;
+
     long __shrt_min;
     long __shrt_max;
 
     if (   __lval < 0
-        || (__flags & __rw::__rw_basefield) == __rw::__rw_dec) {
-        // decimal parsing overflows outside the range below
+        || (__rw::__rw_hex != __base && __rw::__rw_oct != __base)) {
+        // a negative value, and any value under dec or an empty
+        // basefield, overflows outside the signed range
         __shrt_max = long (_RWSTD_SHRT_MAX);
         __shrt_min = long (_RWSTD_SHRT_MIN);
     }
     else {
-        // other than decimal parsing overflows outside the range below
-        // (unreliable if basefield is 0 and the sequence is decimal)
+        // a non-negative value under hex or oct overflows outside the
+        // unsigned range, the inverse of the inserter (lwg issue 117);
+        // ref-conformance.md, "Unsigned range under hex and oct"
         __shrt_max = long (_RWSTD_USHRT_MAX);
         __shrt_min = long (_RWSTD_USHRT_MIN);
     }
@@ -285,18 +289,22 @@ __rw_check_overflow_int (long __lval, _RWSTD_FMTFLAGS __flags,
 {
 #if _RWSTD_INT_MAX < _RWSTD_LONG_MAX
 
+    const _RWSTD_FMTFLAGS __base = __flags & __rw::__rw_basefield;
+
     long __int_min;
     long __int_max;
 
     if (   __lval < 0
-        || (__flags & __rw::__rw_basefield) == __rw::__rw_dec) {
-        // decimal parsing overflows outside the range below
+        || (__rw::__rw_hex != __base && __rw::__rw_oct != __base)) {
+        // a negative value, and any value under dec or an empty
+        // basefield, overflows outside the signed range
         __int_max = long (_RWSTD_INT_MAX);
         __int_min = long (_RWSTD_INT_MIN);
     }
     else {
-        // other than decimal parsing overflows outside the range below
-        // (unreliable if basefield is 0 and the sequence is decimal)
+        // a non-negative value under hex or oct overflows outside the
+        // unsigned range, the inverse of the inserter (lwg issue 117);
+        // ref-conformance.md, "Unsigned range under hex and oct"
         __int_max = long (_RWSTD_UINT_MAX);
         __int_min = long (_RWSTD_UINT_MIN);
     }

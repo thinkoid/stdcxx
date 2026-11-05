@@ -71,47 +71,6 @@ for the record, the library's throw path uses it. The decision on the
 Check: the chapter 2 row exists and the comment at
 =include/rw/_iosfailure.h= 51 names it.
 
-** TODO The =short= and =int= extractors take the unsigned range in octal and hexadecimal
-
-14882:2003 27.6.1.2.2 converts =operator>> (short&)= and =operator>>
-(int&)= "as if" through a =num_get::get= on the type, a member the
-2003 =num_get= lacks (22.2.2.1). N3242's 27.7.2.2.2, p2-3 settles it:
-read a =long=, and set =failbit= and clamp outside the range of
-=short= or =int=. The library reads a =long= and range-checks in
-=__rw_check_overflow_short= and =__rw_check_overflow_int=
-(=include/loc/_num_get.h= 240-322), called from =__rw_extract=
-(=include/istream= 59-88). Under =oct=, =hex= or an empty =basefield=
-a non-negative value is checked against =USHRT_MAX= and =UINT_MAX=:
-"ffff" under =hex= stores ~short (-1)~ with =goodbit=, and on LP64
-"ffffffff" stores ~int (-1)~. The decimal path and negative values
-follow p2-3. The comments at 257 and 299 call the range "unreliable if
-basefield is 0 and the sequence is decimal": by reading, "40000" under
-an empty =basefield= stores ~short (-25536)~ with =goodbit=, which no
-inserter writes. The helpers came from ~num_get::get (short&)~ and
-~get (int&)~ (7c51b249); those members left in 444888d6 and the
-helpers stayed for the extractors.
-
-The case for the unsigned range is the inserter. =include/ostream=
-234-260 formats a =short= or =int= under =oct= or =hex= through its
-unsigned type, LWG 117's resolution (=ref-conformance.md= chapter 3),
-so ~short (-1)~ goes out as "ffff" and the widening reads it back.
-N3242's p2 does not, nor does libstdc++. =doc/stdlibref= does not
-document it. No test pins it:
-=tests/iostream/27.istream.fmat.arith.cpp= declares =HEX= and =OCT= at
-430-431 and uses neither. Clamping as N3242 does breaks the round trip
-of a negative =short= or =int= through =hex=; no caller in the library
-depends on it. Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: record as a departure beside "Bump by =streamsize=",
-the inverse of the LWG 117 inserter, or clamp as N3242 does; for the
-record, clamping breaks a round trip the library's own output makes.
-The decimal text under an empty =basefield= takes the signed range
-either way.
-
-Check: =27.istream.fmat.arith= rows: "ffff" under =hex= into =short=
-as the decision says; "10000" under =hex= sets =failbit= and stores
-=SHRT_MAX=; "40000" under an empty =basefield= sets =failbit=.
-
 ** TODO A temporary buffer is a per-thread static block, larger than asked, returned on its own thread
 
 14882:2003 20.4.3, p1 obtains storage "sufficient to store up to n
@@ -1156,6 +1115,27 @@ Fix: the loop asserts ~__i != __it~, and the first assertion drops
 
 Check: ~l.splice (l.end (), l, l.begin (), l.end ())~ runs in 15D; a
 position inside the range fails the assertion.
+
+** TODO The =short= and =int= inserters widen under combined =basefield= bits
+
+=include/ostream= 233-257 format a =short= or =int= through its
+unsigned type unless =basefield= is empty or exactly =dec=. C++11
+27.7.3.6.2, p1, LWG 117's resolution, widens only when =basefield= is
+exactly =oct= or =hex=; 14882:2003 27.6.2.5.2, p1 passes the value as
+it is. Under a combination of bits =num_put= writes decimal, so ~short
+(-1)~ goes out as "65535" and =-1= as "4294967295" where both texts
+write "-1". Probed in 15D under ~hex | dec~, ~hex | oct~ and
+=basefield=. The extractors take the unsigned range only under exactly
+=hex= or =oct= (=ref-conformance.md=, "Unsigned range under hex and
+oct"), so "65535" reads back into a =short= with =failbit= and
+=SHRT_MAX=. Seen in passing while fixing the extractors' range,
+2026-11-05.
+
+Fix: widen only when =basefield= is exactly =oct= or =hex=, as
+N3242's fragment does.
+
+Check: =27.ostream= writes ~short (-1)~ and =-1= under ~hex | dec~ as
+"-1".
 
 * Tests
 

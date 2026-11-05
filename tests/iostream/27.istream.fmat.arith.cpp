@@ -758,6 +758,14 @@ test_shrt (CharT*, Traits*,
     TEST_SHRT ("+99999", -1, -1, -1, 0, _ef, 6, 0, -1, smax);
     TEST_SHRT ("999999", -1, -1, -1, 0, _ef, 6, 0, -1, smax);
 
+    // the unsigned range under hex and oct, the inverse of the
+    // inserter (lwg issue 117); the signed range under an empty
+    // basefield
+    TEST_SHRT ("ffff",   HEX, -1, -1, 0, _e_, 4, 0,  0,   -1);
+    TEST_SHRT ("10000",  HEX, -1, -1, 0, _ef, 5, 0,  0, smax);
+    TEST_SHRT ("177777", OCT, -1, -1, 0, _e_, 6, 0,  0,   -1);
+    TEST_SHRT ("40000",    0, -1, -1, 0, _ef, 5, 0,  0, smax);
+
 #elif 4 == _RWSTD_SHRT_SIZE
     const short smax = +2147483647;
     const short smin = -smax - 1;
@@ -850,6 +858,16 @@ test_int (CharT*, Traits*,
     TEST_INT ("+2147483647", -1, -1, -1, 0, _e_, 11, 0, -1, imax);
     TEST_INT ("+2147483648", -1, -1, -1, 0, _ef, 11, 0, -1, imax);
     TEST_INT ("99999999999", -1, -1, -1, 0, _ef, 11, 0, -1, imax);
+
+#  if _RWSTD_INT_MAX < _RWSTD_LONG_MAX
+    // the unsigned range under hex and oct, the inverse of the
+    // inserter (lwg issue 117); the signed range under an empty
+    // basefield
+    TEST_INT ("ffffffff",    HEX, -1, -1, 0, _e_,  8, 0, 0,   -1);
+    TEST_INT ("100000000",   HEX, -1, -1, 0, _ef,  9, 0, 0, imax);
+    TEST_INT ("37777777777", OCT, -1, -1, 0, _e_, 11, 0, 0,   -1);
+    TEST_INT ("3000000000",    0, -1, -1, 0, _ef, 10, 0, 0, imax);
+#  endif   // _RWSTD_INT_MAX < _RWSTD_LONG_MAX
 #elif 8 == _RWSTD_INT_SIZE
     const int imax = +9223372036854775807;
     const int imin = -imax - 1;
