@@ -143,10 +143,10 @@ _C_str (const char_type *__s, _RWSTD_SIZE_T __slen)
             // restore the pptr
             this->pbump (__off);
         }
-        else if (   this->_C_state & ios_base::in
-                 || this->_C_state & (ios_base::app | ios_base::ate)) {
-            // in input or append/ate modes seek to end
-            // (see also lwg issue 562 for clarification)
+        else if (this->_C_state & (ios_base::app | ios_base::ate)) {
+            // in ate mode seek to end (lwg issue 562, N3797 27.8.2.3,
+            // p3); in app mode too, since overflow does not seek to
+            // the end before each write
             this->pbump (__slen);
         }
     }

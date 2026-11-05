@@ -438,6 +438,7 @@ void test_virtual (VFun         *pfid,
 const int in  = std::ios::in;
 const int out = std::ios::out;
 const int ate = std::ios::ate;
+const int app = std::ios::app;
 
 const int cur = std::ios::cur;
 const int end = std::ios::end;
@@ -481,16 +482,17 @@ test_xsputn (VFun *pfid)
     TEST (0,     in | out,       0, "abc", 3, 0, 3, MAYBE_1);
     TEST (0,     in | out | ate, 0, "abc", 3, 0, 3, MAYBE_1);
 
-    TEST ("abc", in | out,       0, "def", 3, 0, 6, MAYBE_1);
+    TEST ("abc", in | out,       0, "def", 3, 0, 3, MAYBE_1);
     TEST ("abc", in | out | ate, 0, "def", 3, 0, 6, MAYBE_1);
+    TEST ("abc", in | out | app, 0, "def", 3, 0, 6, MAYBE_1);
 
     TEST (       0, in | out,       0, "a@1000", 1000,    0, 1000, MAYBE_1);
     TEST (       0, in | out,       0, "a@1000", 1000,    0, 1000, MAYBE_1);
 
     TEST (       0, in | out,       0, "a@1001", 1001,    0, 1001, MAYBE_1);
-    TEST (   "a@1", in | out,       0, "a@1002", 1002,    0, 1003, MAYBE_1);
-    TEST (   "a@2", in | out,       0, "a@1003", 1003,    0, 1005, MAYBE_1);
-    TEST (   "a@3", in | out,       0, "a@1004", 1004,    0, 1007, MAYBE_1);
+    TEST (   "a@1", in | out,       0, "a@1002", 1002,    0, 1002, MAYBE_1);
+    TEST (   "a@2", in | out,       0, "a@1003", 1003,    0, 1003, MAYBE_1);
+    TEST (   "a@3", in | out,       0, "a@1004", 1004,    0, 1004, MAYBE_1);
 
     TEST (       0, in | out | ate, 0, "a@1000", 1000,    0, 1000, MAYBE_1);
     TEST (       0, in | out | ate, 0, "a@1001", 1001,    0, 1001, MAYBE_1);
@@ -542,6 +544,10 @@ test_xsputn (VFun *pfid)
 // for convenience
 #define CAP stringbuf_capacity
 
+// read positions after n characters written over a sequence of len
+// in in | out mode: pptr () starts at pbase (), so the larger of two
+#define MAX(len, n)   ((n) < (len) ? (len) : (n))
+
     // compute the minimum buffer capacity
     stringbuf_capacity = -1;
     TEST (   0, in | out,       0,    0,    0,    0,    0, -1);
@@ -558,13 +564,13 @@ test_xsputn (VFun *pfid)
     //    |    |               |     |     |     |  |  +--------+
     //    |    |               |     |     |     |  |           |
     //    V    V               V     V     V     V  V           V
-    TEST (CAP, in | out,       0,    1,    1,    0, CAP +    1, MAYBE_1);
-    TEST (CAP, in | out,       0,    2,    2,    0, CAP +    2, MAYBE_1);
-    TEST (CAP, in | out,       0,    3,    3,    0, CAP +    3, MAYBE_1);
-    TEST (CAP, in | out,       0,  127,  127,    0, CAP +  127, MAYBE_1);
-    TEST (CAP, in | out,       0, 1023, 1023,    0, CAP + 1023, MAYBE_1);
-    TEST (CAP, in | out,       0, 1024, 1024,    0, CAP + 1024, MAYBE_1);
-    TEST (CAP, in | out,       0,  CAP,  CAP,    0, CAP +  CAP, MAYBE_1);
+    TEST (CAP, in | out,       0,    1,    1,    0, MAX (CAP,    1), MAYBE_1);
+    TEST (CAP, in | out,       0,    2,    2,    0, MAX (CAP,    2), MAYBE_1);
+    TEST (CAP, in | out,       0,    3,    3,    0, MAX (CAP,    3), MAYBE_1);
+    TEST (CAP, in | out,       0,  127,  127,    0, MAX (CAP,  127), MAYBE_1);
+    TEST (CAP, in | out,       0, 1023, 1023,    0, MAX (CAP, 1023), MAYBE_1);
+    TEST (CAP, in | out,       0, 1024, 1024,    0, MAX (CAP, 1024), MAYBE_1);
+    TEST (CAP, in | out,       0,  CAP,  CAP,    0, MAX (CAP,  CAP), MAYBE_1);
 
     TEST (CAP, in | out | ate, 0,    1,    1,    0, CAP +    1, MAYBE_1);
     TEST (CAP, in | out | ate, 0,    2,    2,    0, CAP +    2, MAYBE_1);
@@ -576,11 +582,11 @@ test_xsputn (VFun *pfid)
     TEST (CAP, in | out | ate, 0, 1025, 1025,    0, CAP + 1025, MAYBE_1);
 
     for (int i = 0; i != rw_opt_max_size; ++i) {
-        TEST (  0, in | out, 0, i, i, 0, i +   0, MAYBE_1);
-        TEST (  1, in | out, 0, i, i, 0, i +   1, MAYBE_1);
-        TEST ( 32, in | out, 0, i, i, 0, i +  32, MAYBE_1);
-        TEST (127, in | out, 0, i, i, 0, i + 127, MAYBE_1);
-        TEST (CAP, in | out, 0, i, i, 0, i + CAP, MAYBE_1);
+        TEST (  0, in | out, 0, i, i, 0, MAX (  0, i), MAYBE_1);
+        TEST (  1, in | out, 0, i, i, 0, MAX (  1, i), MAYBE_1);
+        TEST ( 32, in | out, 0, i, i, 0, MAX ( 32, i), MAYBE_1);
+        TEST (127, in | out, 0, i, i, 0, MAX (127, i), MAYBE_1);
+        TEST (CAP, in | out, 0, i, i, 0, MAX (CAP, i), MAYBE_1);
     }
 }
 
@@ -726,7 +732,7 @@ test_overflow (VFun *pfid)
     TEST ("a", 0,               0, 'c', EOF, 0, 0, -1);
     TEST ("a", in,              0, 'c', EOF, 0, 1, -1);
     TEST ("a", out,             0, 'c', 'c', 0, 0, AT_LEAST_1);
-    TEST ("a", in | out,        0, 'c', 'c', 0, 2, AT_LEAST_1);
+    TEST ("a", in | out,        0, 'c', 'c', 0, 1, AT_LEAST_1);
 
     TEST ("a", in | ate,        0, 'c', EOF, 0, 1, -1);
     TEST ("a", out | ate,       0, 'c', 'c', 0, 0, MAYBE_1);
@@ -735,7 +741,7 @@ test_overflow (VFun *pfid)
     TEST ("ab", 0,              0, 'c', EOF, 0, 0, -1);
     TEST ("ab", in,             0, 'c', EOF, 0, 2, -1);
     TEST ("ab", out,            0, 'c', 'c', 0, 0, AT_LEAST_1);
-    TEST ("ab", in | out,       0, 'c', 'c', 0, 3, AT_LEAST_1);
+    TEST ("ab", in | out,       0, 'c', 'c', 0, 2, AT_LEAST_1);
 
     TEST ("ab", in | ate,       0, 'c', EOF, 0, 2, -1);
     TEST ("ab", out | ate,      0, 'c', 'c', 0, 0, AT_LEAST_1);

@@ -38,7 +38,9 @@ int main ()
     // 512 is the default buffer size of the basic_stringbuf
     std::string s (512, 'a');
 
-    std::stringbuf sbuf (s);
+    // ate starts the put area at the end, so the write below appends
+    // from the buffer's own characters and reallocates it
+    std::stringbuf sbuf (s, std::ios::in | std::ios::out | std::ios::ate);
     PubBuf& buf = (PubBuf&)sbuf;
 
     std::streamsize res = buf.sputn (buf.Pbase (), 128);

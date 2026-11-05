@@ -198,34 +198,6 @@ decision.
 Check: ~git grep -n "const char \*__s = 0" include~ is empty and the
 library builds, =src/exception.cpp= passing an explicit null.
 
-** TODO A string buffer in input mode writes after its initial string
-
-14882:2003 27.7.1.1, p3 and 27.7.1.2, p2 initialize "the output
-sequence with the underlying sequence" and say nothing of where =pptr
-()= starts. =_C_str= (=include/sstream.cc= 139-151) sets it to the end
-when the mode has =in=, =app= or =ate=, and to the beginning
-otherwise: ~std::stringstream ss ("abc"); ss << 'x';~ gives "abcx",
-and an =ostringstream= on "abc" gives "xbc". a0d396e5 set the rule in
-2006, citing LWG 562. N3242's 27.8.2.3, p3, 562 as the C++11 draft
-printed it, reads "if mode & ios_base::in is true, pptr() == pbase() +
-s.data()": the library's rule, with a typo. N3797's 27.8.2.3, p3
-replaces =in= with =ate=. No edition positions on =app=. So the code
-follows the first print of a resolution that was then corrected, and
-adds =app=. =27.stringbuf.virtuals= pins the =in= rule: at
-=tests/iostream/27.stringbuf.virtuals.cpp= 484, "abc" with ~in | out~
-and "def" written leaves 6 read positions. =ref-conformance.md=
-chapter 3 lists 562 among the cited issues without its effect. The
-change moves that row and any that assume the end; a program that
-appends to a =stringstream= built from a string would overwrite
-instead. Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: record the C++11 draft's reading, or follow N3797's
-=ate= rule and drop =app=; for N3797, it is the reading every edition
-since has kept.
-
-Check: a =27.stringbuf.virtuals= row: "abc" in ~in | out~, ~sputc
-('x')~, and =str ()= as the decision says, "xbc" or "abcx".
-
 ** TODO =getloc= on a non-const stream or buffer returns the object's own locale
 
 14882:2003 27.4.2.3, p4 declares ~locale getloc () const~, which

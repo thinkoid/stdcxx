@@ -156,11 +156,12 @@ later amendment to the issue.
 | 453 | String-buffer seeking rejects a nonzero offset when the relevant buffer pointer is null. | `include/sstream.cc` |
 | 467 | `char_traits<char>::lt` compares after conversion to `unsigned char`, matching bytewise ordering. | `include/rw/_traits.h` |
 | 559 | cv-qualified `numeric_limits` specializations inherit the unqualified specialization. | `include/limits` |
+| 562 | A string buffer's put position starts at the end of its initial string when the mode has `ate`, and at the beginning otherwise: N3797 27.8.2.3, p3, "if mode & ios_base::ate is true, pptr() == pbase() + s.size() holds, otherwise pptr() == pbase() is true", which the constructor reaches through `str (s)` (27.8.2.1, p3). N3242 printed the resolution's first text, with `in` in place of `ate`. `stringstream ss ("abc"); ss << 'x';` gives "xbc". The buffer starts at the end under `app` too, where p3 says the beginning: `overflow` does not seek to the end before each write, the effect 14882:2003 Table 86 gives `app`, so without the initial position `out \| app` would overwrite. | `include/sstream.cc`, `basic_stringbuf::_C_str` |
 | 622 | `basic_filebuf` destruction catches exceptions from `close`. | `include/fstream` |
 
 Further cited issues include string construction and search (5, 7,
 42), locale conversion (19, 74, 75, 305, 382), stream input and output
-(60, 117, 129, 136, 243, 581), string-buffer positioning (432, 562),
+(60, 117, 129, 136, 243, 581), string-buffer positioning (432),
 and utility/iterator behavior (110, 111, 112, 127, 181, 265, 348).
 These are pointers for expanding the record, **not additional
 audited resolutions**. Core Working Group citations in the same files
