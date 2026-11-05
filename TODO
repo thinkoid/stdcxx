@@ -96,31 +96,6 @@ p8 leaves the choice to the library.
 
 Check: a chapter 2 row names =RWSTDERR=.
 
-** TODO The standard headers bring =<pthread.h>= into a reentrant program
-
-14882:2003 17.4.4.1, p1: "A C++ header may include other C++ headers."
-=<pthread.h>= is not one. In a reentrant build (=_RWSTD_REENTRANT=,
-which =-pthread='s =_REENTRANT= sets, =include/rw/_config.h= 81-88),
-=<rw/_mutex.h>= includes =<rw/_mutex-pthread.h>= (51, 65), which
-includes =<pthread.h>= (43) for the type of the mutex member of
-=__rw_mutex_base=. =<string>= (through =<rw/_strref.h>= 40),
-=<streambuf>= (40), =<istream>= (45) and every locale header (through
-=<loc/_facet.h>= 36) reach it, so a program that includes =<string>=
-sees =pthread_create=, =sched_yield= and the rest at global scope, and
-one that declares such a name itself collides. =doc/stdlibref= says
-nothing, and no test pins it. Hiding the header needs opaque storage
-for the mutex and out-of-line lock calls: a layout and ABI change to
-every class that holds a mutex. Found by the extension sweep's
-reading, 2026-11-04.
-
-Fix: a decision: record as a departure, or hide the header behind
-opaque storage; for the record, the mutex is a member of standard
-classes by value, and other libraries on the platform make the same
-trade.
-
-Check: a chapter 2 row names =<pthread.h>= and the reentrant
-condition.
-
 ** TODO =type_info= declares a protected constructor
 
 14882:2003 18.5.1's synopsis gives =type_info= no constructor but the

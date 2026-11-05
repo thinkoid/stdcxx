@@ -40,6 +40,7 @@
 //    "Attempting to initialize an already initialized mutex results
 //    in undefined behavior."
 
+// departure: ref-conformance.md, "<pthread.h> in a reentrant program"
 #include <pthread.h>
 
 #define _RWSTD_MUTEX_INIT(mutex)      pthread_mutex_init (&mutex, 0)
