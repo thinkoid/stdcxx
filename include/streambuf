@@ -151,7 +151,7 @@ public:
 
 protected:
 
-    // addition: ref-conformance.md, "basic_streambuf takes an open mode"
+    // 27.5.2.1, p1; the mode argument: an addition
     basic_streambuf (ios_base::openmode = ios_base::in | ios_base::out)
         _THROWS (());
 

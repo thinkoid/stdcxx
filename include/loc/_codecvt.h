@@ -71,8 +71,7 @@ protected:
 
     virtual ~codecvt () _RWSTD_ATTRIBUTE_NOTHROW;
 
-    // addition: ref-conformance.md, "Primary template definitions"
-    // where reasonable, the default behavior of the primary
+    // addition: where reasonable, the default behavior of the primary
     // template is the same as that of codecvt<char, char, mbstate_t> if
     // sizeof (intern_type) == sizeof (extern_type) to allow iostream
     // instantiations on signed char or unsigned char to have somewhat

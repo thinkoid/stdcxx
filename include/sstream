@@ -119,7 +119,8 @@ public:
 
 protected:
     
-    // departure: ref-conformance.md, "Overrides of xsputn and showmanyc"
+    // departure: xsputn overridden for speed, and showmanyc to count
+    // the characters written past the end of the get area
     virtual streamsize xsputn (const char_type*, streamsize);
 
     virtual streamsize showmanyc ();

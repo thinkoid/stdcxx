@@ -52,8 +52,7 @@ _RWSTD_EXPORT void __rw_free_what_buf (char*);
 // throws an exception identified by first argument with the second
 // argument containing the exception object's what() string, which
 // if non-0, must be freed using __rw_free_what_buf(); the test
-// suite's seam for observing throws (ref-conformance.md, "A
-// replaceable throw handler")
+// suite's seam for observing throws; a departure
 _RWSTD_EXPORT extern void (*__rw_throw_proc)(int, char*);
 
 }   // namespace __rw

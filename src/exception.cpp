@@ -575,8 +575,7 @@ static void __rw_throw_exception (int id, char *what)
 
 }
 
-// the test suite's seam for observing throws; departure:
-// ref-conformance.md, "A replaceable throw handler"
+// the test suite's seam for observing throws; a departure
 _RWSTD_EXPORT void (*__rw_throw_proc)(int, char*) = __rw_throw_exception;
 
 

@@ -94,7 +94,7 @@ struct num_put: __rw::__rw_facet
 
 #ifdef _RWSTD_LONG_LONG
 
-    // addition: ref-conformance.md, "Compiler types beyond 2003"
+    // addition: long long and unsigned long long
     iter_type put (iter_type __it, ios_base &__flags, char_type __fill,
                    _RWSTD_LONG_LONG __val) const {
         return do_put (__it, __flags, __fill, __val);
@@ -153,7 +153,7 @@ protected:
 
 #ifdef _RWSTD_LONG_LONG
 
-    // addition: ref-conformance.md, "Compiler types beyond 2003"
+    // addition: long long and unsigned long long
     virtual iter_type
     do_put (iter_type __it, ios_base &__flags, char_type __fill,
             _RWSTD_LONG_LONG __val) const {

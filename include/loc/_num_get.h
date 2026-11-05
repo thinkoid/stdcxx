@@ -121,14 +121,14 @@ struct num_get: __rw::__rw_facet
 
 #ifdef _RWSTD_LONG_LONG
 
-    // addition: ref-conformance.md, "Compiler types beyond 2003"
+    // addition: long long
     iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, _RWSTD_LONG_LONG &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-    // addition: ref-conformance.md, "Compiler types beyond 2003"
+    // addition: unsigned long long
     iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err,
                    unsigned _RWSTD_LONG_LONG &__val) const {
@@ -199,14 +199,14 @@ protected:
 
 #ifdef _RWSTD_LONG_LONG
 
-    // addition: ref-conformance.md, "Compiler types beyond 2003"
+    // addition: long long
     virtual iter_type
     do_get (iter_type __begin, iter_type __end, ios_base &__flags,
             _RWSTD_IOSTATE &__err, _RWSTD_LONG_LONG &__val) const {
         return _C_get (__begin, __end, __flags, __err, _C_llong, &__val);
     }
 
-    // addition: ref-conformance.md, "Compiler types beyond 2003"
+    // addition: unsigned long long
     virtual iter_type
     do_get (iter_type __begin, iter_type __end, ios_base &__flags,
             _RWSTD_IOSTATE &__err, unsigned _RWSTD_LONG_LONG &__val) const {
@@ -258,9 +258,8 @@ __rw_check_overflow_short (long __lval, _RWSTD_FMTFLAGS __flags,
         __shrt_min = long (_RWSTD_SHRT_MIN);
     }
     else {
-        // a non-negative value under hex or oct overflows outside the
-        // unsigned range, the inverse of the inserter (lwg issue 117);
-        // ref-conformance.md, "Unsigned range under hex and oct"
+        // departure: a non-negative value under hex or oct overflows outside
+        // the unsigned range, the inverse of the inserter (lwg issue 117)
         __shrt_max = long (_RWSTD_USHRT_MAX);
         __shrt_min = long (_RWSTD_USHRT_MIN);
     }
@@ -304,9 +303,8 @@ __rw_check_overflow_int (long __lval, _RWSTD_FMTFLAGS __flags,
         __int_min = long (_RWSTD_INT_MIN);
     }
     else {
-        // a non-negative value under hex or oct overflows outside the
-        // unsigned range, the inverse of the inserter (lwg issue 117);
-        // ref-conformance.md, "Unsigned range under hex and oct"
+        // departure: a non-negative value under hex or oct overflows outside
+        // the unsigned range, the inverse of the inserter (lwg issue 117)
         __int_max = long (_RWSTD_UINT_MAX);
         __int_min = long (_RWSTD_UINT_MIN);
     }

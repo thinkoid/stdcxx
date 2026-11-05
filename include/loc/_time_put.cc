@@ -120,9 +120,7 @@ put (iter_type __it, ios_base &__flags, char_type __fill, const tm *__tmb,
 {
     _RWSTD_ASSERT (0 != __pat);
 
-    // addition: a null `__end' ends the pattern at its null (TODO,
-    // "ref-locale.md and ref-conformance.md disagree on which
-    // departures are recorded")
+    // addition: a null `__end' ends the pattern at its null
     if (!__end)
         __end = __pat + char_traits<char_type>::length (__pat);
 

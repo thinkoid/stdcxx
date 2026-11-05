@@ -48,7 +48,7 @@ struct _RWSTD_EXPORT logic_error: __rw::__rw_exception
     explicit logic_error (const string& __str)
         : __rw::__rw_exception (__str) { }
 
-    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    // addition: the character pointer constructor
     explicit logic_error (const char *__s)
         : __rw::__rw_exception (__s) { }
 
@@ -62,7 +62,7 @@ struct _RWSTD_EXPORT domain_error: logic_error
     explicit domain_error (const string &__str)
         : logic_error (__str) { }
 
-    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    // addition: the character pointer constructor
     explicit domain_error (const char *__s)
         : logic_error (__s) { }
 
@@ -76,7 +76,7 @@ struct _RWSTD_EXPORT invalid_argument: logic_error
     explicit invalid_argument (const string &__str)
         : logic_error (__str) { }
 
-    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    // addition: the character pointer constructor
     explicit invalid_argument (const char *__s)
         : logic_error (__s) { }
 
@@ -90,7 +90,7 @@ struct _RWSTD_EXPORT length_error: logic_error
     explicit length_error (const string &__str)
         : logic_error (__str) { }
 
-    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    // addition: the character pointer constructor
     explicit length_error (const char *__s)
         : logic_error (__s) { }
 
@@ -104,7 +104,7 @@ struct _RWSTD_EXPORT out_of_range: logic_error
     explicit out_of_range (const string &__str)
         : logic_error (__str) { }
 
-    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    // addition: the character pointer constructor
     explicit out_of_range (const char *__s)
         : logic_error (__s) { }
 
@@ -118,7 +118,7 @@ struct _RWSTD_EXPORT runtime_error: __rw::__rw_exception
     explicit runtime_error (const string &__str)
         : __rw::__rw_exception (__str) { }
 
-    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    // addition: the character pointer constructor
     explicit runtime_error (const char *__s)
         : __rw::__rw_exception (__s) { }
 
@@ -132,7 +132,7 @@ struct _RWSTD_EXPORT range_error: runtime_error
     explicit range_error (const string &__str)
         : runtime_error (__str) { }
 
-    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    // addition: the character pointer constructor
     explicit range_error (const char *__s)
         : runtime_error (__s) { }
 
@@ -146,7 +146,7 @@ struct _RWSTD_EXPORT overflow_error: runtime_error
     explicit overflow_error (const string &__str)
         : runtime_error (__str) { }
 
-    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    // addition: the character pointer constructor
     explicit overflow_error (const char *__s)
         : runtime_error (__s) { }
 
@@ -160,7 +160,7 @@ struct _RWSTD_EXPORT underflow_error: runtime_error
     explicit underflow_error (const string &__str)
         : runtime_error (__str) { }
 
-    // addition: ref-conformance.md, "Exceptions take a character pointer"
+    // addition: the character pointer constructor
     explicit underflow_error (const char *__s)
         : runtime_error (__s) { }
 

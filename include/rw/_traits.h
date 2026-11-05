@@ -129,7 +129,7 @@ class fpos
 {
 public:
 
-    // addition: ref-conformance.md, "fpos takes a state and names its type"
+    // addition: state_type, and a state argument to the constructor
     typedef _StateT state_type;
       
     fpos (_RWSTD_STREAMOFF __off = 0,

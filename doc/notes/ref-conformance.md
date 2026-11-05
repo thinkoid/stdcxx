@@ -82,13 +82,16 @@ Four readings of `include` and `src` against 14882:2003, one per
 area (the containers, iterators, algorithms, utilities and numerics;
 the strings and streams; the locale; clauses 17 to 19 with the C
 headers and Annex D), found 67 comments that said "extension", 56
-of them on an addition of the library. Each addition now names its
-row in a comment, `// addition: ref-conformance.md, "<row>"` or
-`// departure: ...`, or the `TODO` entry that holds it; the word is
-left where it names a compiler's or the C library's extension, a
-sign extension or a reserved field. One extension stays by
-decision: `time_get`'s format members, C++11's ("`time_get` with a
-format").
+of them on an addition of the library. The code marks each addition
+or departure with one word, `addition` or `departure`, beside its
+paragraph citation where it has one and alone where it has none:
+`// 27.5.2.1, p1; the mode argument: an addition`,
+`// addition: long long`. A comment names no document; the locations
+each row names are the index from this document to the code. The
+word "extension" is left where it names a compiler's or the C
+library's extension, a sign extension or a reserved field. One
+extension stays by decision: `time_get`'s format members, C++11's
+("`time_get` with a format").
 
 | choice in the tree | effect and source |
 |---|---|

@@ -1491,8 +1491,7 @@ __rw_fmt_time (const __rw_facet *pfacet, char **pbuf, size_t &bufsize,
 
             ++pat;
 
-            // addition: ref-conformance.md,
-            // "Width and precision in a locale's time format"
+            // addition: width and precision in a directive
             // Reference: strftime() on HP-UX 11.00
             // Format: %[[-|0]w][.p]
 
@@ -1638,8 +1637,7 @@ __rw_fmt_time (const __rw_facet *pfacet, wchar_t **pwbuf, size_t &bufsize,
 
             ++wpat;
 
-            // addition: ref-conformance.md,
-            // "Width and precision in a locale's time format"
+            // addition: width and precision in a directive
             // Reference: strftime() on HP-UX 11.00
             // Format: %[[-|0]w][.p]
 
@@ -2073,8 +2071,6 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
     _RWSTD_ASSERT (0 != facet);
 
     // addition: if `tmb' is 0, output the locale-specific format string
-    // (TODO, "ref-locale.md and ref-conformance.md disagree on which
-    // departures are recorded")
     _RWSTD_ASSERT (   0 != tmb
                    || 'c' == fmt || 'r' == fmt || 'x' == fmt || 'X' == fmt);
 
