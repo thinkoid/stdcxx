@@ -96,27 +96,6 @@ p8 leaves the choice to the library.
 
 Check: a chapter 2 row names =RWSTDERR=.
 
-** TODO =type_info= declares a protected constructor
-
-14882:2003 18.5.1's synopsis gives =type_info= no constructor but the
-private copy constructor. =include/typeinfo= 66-69 declare ~protected:
-explicit type_info (const char*)~, "to prevent g++ warnings about
-private ctor and no friends". A class derived from =type_info= can
-name it. The library defines it nowhere (=src/typeinfo.cpp= defines
-the destructor, =before=, =name= and the comparisons), so a call fails
-to link unless the support library exports a definition.
-=doc/stdlibref/typeinfo-h.html= shows the header synopsis only, and no
-test names it. Removing it changes no layout and brings back the
-warning it silences. Found by the extension sweep's reading,
-2026-11-04.
-
-Fix: a decision: record as a departure, or remove; for the record, it
-is a declaration with no reachable effect, kept for a compiler
-warning.
-
-Check: =nm -D= of the 15D library and of =libstdc++= for
-=_ZNSt9type_infoC2EPKc=, which settles whether a call can link.
-
 ** TODO A null pointer with a count gives a string of uninitialized characters
 
 14882:2003 21.3.1, p6: "Requires: s shall not be a null pointer and n

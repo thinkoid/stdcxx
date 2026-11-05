@@ -64,11 +64,6 @@ public:
 
     _RWSTD_EXPORT bool operator!= (const type_info&) const;
 
-protected:
-
-    // prevent g++ warnings about private ctor and no friends
-    explicit type_info (const char*);
-
 private:
 
 #if defined (__GNUG__)
