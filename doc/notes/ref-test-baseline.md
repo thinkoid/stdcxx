@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 265 | 12,474,653 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 265 | 12,474,539 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 267 | 12,538,151 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 267 | 12,538,163 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -336,6 +336,9 @@ all six tables:
 - 2026-11-05: `27.basic.ios`, 9 to 11 in 15D: `getloc` on a non-const
   object returns a copy; the other five tables are to move by the
   same two.
+- 2026-11-05: `27.stringbuf.virtuals`, 86,140 to 86,152 in 15D: `app`
+  keeps the put pointer at the end, a put-side seek reports it; the
+  other five tables are to move by the same 12.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, and to 33 when `2.smartptr.shared` and
