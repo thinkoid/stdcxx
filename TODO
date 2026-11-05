@@ -128,10 +128,9 @@ compiles. Its destructor then deletes through a =void*=, which 5.3.5,
 p3 and its footnote make undefined. The test calls it an extension:
 =tests/utilities/20.auto.ptr.cpp= 221-262, run unless =void= is
 disabled (374-377). =doc/stdlibref/auto-ptr.html= does not document
-it. Nothing in the library instantiates =auto_ptr<void>=; the helper
-also serves =tr1::shared_ptr<void>= (=include/tr1/_smartptr.h= 317).
-Removal costs the test function. Found by the extension sweep's
-reading, 2026-11-04.
+it. Nothing in the library instantiates =auto_ptr<void>=. Removal
+costs the test function. Found by the extension sweep's reading,
+2026-11-04.
 
 Fix: a decision: remove, ~operator*~ returning =element_type&= again,
 or record; for removal, its purpose was =shared_ptr<void>= and the
@@ -271,48 +270,6 @@ compile against libstdc++ either.
 Check: the library and the localization tests compile with every facet
 destructor protected, once the twelve test sites derive from the facet
 or install it in a locale.
-
-** TODO =include/tr1= ships part of TR1 as installable headers
-
-14882:2003 17.4.1.2, p2 and Table 11 list the 33 C++ headers; none is
-under =tr1/=, and the target is the C++03 library
-(=ref-conformance.md= chapter 0). =include/tr1= holds four headers,
-1435 lines, in =std::tr1=:
-
-- =<tr1/cstdint>=: C99's integer types and limit macros, with
-  =int_least128_t= and its kin where the configuration finds the type
-  (312-317).
-- =<tr1/stdint.h>=: the same types brought to global scope (34-97).
-- =<tr1/array>=: =array=, its comparisons and =swap=. =tuple_size= and
-  =tuple_element= are declared "defined in <tr1/tuple>", a header the
-  tree does not have, and the two =get= overloads have no body
-  (341-358): ~get<0> (a)~ compiles and fails to link.
-- =<tr1/_smartptr.h>=: =shared_ptr=, =weak_ptr=, =bad_weak_ptr= and
-  the casts. No =<tr1/memory>= includes it, so a program reaches it
-  only by a reserved-looking file name. ~shared_ptr (auto_ptr<U>&)~
-  (232-234) and =enable_shared_from_this= (602-603) are declared
-  without a definition, and the stream inserter is under ~#if 0~
-  (429-436).
-
-No other header in =include= and no file in =src= includes them. Three
-tests do, pinned in all six baseline tables:
-=tests/tr1.util/2.smartptr.shared= (121 assertions in 15D),
-=2.smartptr.weak= (45) and =tests/tr1.c99/8.cstdint= (157); none
-covers =array=. =make install= copies them with the rest of =include=
-(=GNUmakefile= 634). =doc/stdlibref= and =ref-conformance.md= do not
-mention TR1. =_smartptr.h= is the one user of =__rw_nonvoid_ref=
-besides =auto_ptr= (above). The =_RWSTD_INT*_T= characterizations stay
-either way: =src/random.cpp= and others read them. Removal costs four
-headers, two test directories, three rows in each baseline table and
-any installed program that includes a =tr1/= header. Found by two of
-the extension sweep's readings, 2026-11-04.
-
-Fix: a decision: remove =include/tr1= and its two test directories, or
-record TR1 as a partial addition; for removal, it is a later library's
-interface, unfinished, with declarations that link to nothing.
-
-Check: =include/tr1=, =tests/tr1.util= and =tests/tr1.c99= are gone,
-and the six pins lose exactly those three rows.
 
 ** TODO Racing =locale::global= calls can split the C and C++ locales
 

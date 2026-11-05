@@ -197,9 +197,8 @@ before this census:
 
 - Reference counts: facets (`src/locale_body.h:161-173`), locale bodies
   (`src/locale_core.cpp`, `src/locale_combine.cpp`,
-  `src/locale_body.cpp`), strings (`include/rw/_strref.h:187`, `:201`),
-  the TR1 `shared_ptr` (`include/tr1/_smartptr.h`). The increments and
-  decrements are sequentially consistent.
+  `src/locale_body.cpp`), strings (`include/rw/_strref.h:187`, `:201`).
+  The increments and decrements are sequentially consistent.
 - `ios_base::xalloc` (`src/iostore.cpp:151`): the count is the
   result.
 - `precision`, `flags` and `sync_with_stdio` (`src/ios.cpp:92`,

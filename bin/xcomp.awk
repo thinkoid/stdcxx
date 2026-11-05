@@ -48,7 +48,7 @@ BEGIN {
     # the directories under tests/ that hold the sources of tests
     split("self regress intro support diagnostics utilities strings "  \
           "localization containers iterators algorithms numerics "     \
-          "iostream tr1.c99 tr1.util", testdirs, " ")
+          "iostream", testdirs, " ")
 
     # names of build stages
     buildstages [1] = "config"

@@ -10,7 +10,7 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 268 programs per configuration.
+- Every test builds. The harness runs 265 programs per configuration.
 - No assertion fails, no program exits non-zero or dies of a signal,
   in any configuration, under either compiler.
 - The tables come from a host with every glibc locale installed. A
@@ -97,8 +97,8 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,976 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,862 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 265 | 12,474,653 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 265 | 12,474,539 | 0 | 0 | 0 |
 | 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 269 | 12,538,264 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
@@ -304,7 +304,8 @@ all six tables:
   seven.
 
 The runtime warnings of every table fell from 60 to 42 with those of
-`22.locale.time.get`.
+`22.locale.time.get`, and to 33 when `2.smartptr.shared` and
+`2.smartptr.weak` left with `include/tr1`.
 
 ## 3. What fails
 
@@ -414,9 +415,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,474,976 | 0 | 0 | 0 |
-| 11s-clang | 12,474,877 | 0 | 0 | 0 |
-| 15D-clang | 12,478,664 | 0 | 0 | 0 |
+| 11S-clang | 12,474,653 | 0 | 0 | 0 |
+| 11s-clang | 12,474,554 | 0 | 0 | 0 |
+| 15D-clang | 12,478,341 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134
