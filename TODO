@@ -51,6 +51,30 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
+** TODO A string buffer in =app= mode writes at the end only until the first seek
+
+14882:2003 27.4.2.1.4, Table 86 gives =app= the meaning "seek to end
+before each write". =basic_stringbuf= honours it once: =_C_str=
+(=include/sstream.cc= 146-150) starts the put pointer at the end of
+the initial string when the mode has =app= or =ate=, and =overflow=
+(250) and =xsputn= (161) write at the put pointer wherever it is. A
+=stringbuf= in ~out | app~ on "abc" appends "x" to "abcx", then after
+~pubseekpos (0)~ writes "y" over the "a". N3797 27.8.2.3, p3 positions
+the put pointer at the end under =ate= only, and the library keeps
+=app= in that test for want of the seek on write (2723badc,
+=ref-conformance.md= chapter 3, 562). =27.stringbuf.virtuals= pins
+the construction, nothing pins a write after a seek.
+
+Fix: =overflow= and =xsputn= move the put pointer to the end of the
+sequence before writing when =_C_state= has =app=; =_C_str= then
+positions at the end under =ate= alone, N3797's text, and the 562 row
+loses its =app= sentence.
+
+Check: =27.stringbuf.virtuals= rows: ~out | app~ on "abc", =sputc
+('x')=, =str ()= is "abcx"; then ~pubseekpos (0)~ and =sputc ('y')=,
+=str ()= is "abcxy"; and ~in | out | app~ on "abc" starts with
+~pptr () == pbase ()~.
+
 ** TODO Racing =locale::global= calls can split the C and C++ locales
 
 =locale::global= (=src/locale_global.cpp= 59-72) calls =setlocale= and
