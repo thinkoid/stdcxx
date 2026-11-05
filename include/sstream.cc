@@ -144,9 +144,12 @@ _C_str (const char_type *__s, _RWSTD_SIZE_T __slen)
             this->pbump (__off);
         }
         else if (this->_C_state & (ios_base::app | ios_base::ate)) {
-            // in ate mode seek to end (lwg issue 562, N3797 27.8.2.3,
-            // p3); in app mode too, since overflow does not seek to
-            // the end before each write
+            // ate and app start the put pointer at the end (lwg issue
+            // 562, N3797 27.8.2.3, p3); for app, p3's "otherwise
+            // pptr() == pbase()" cannot hold: sputc stores in place
+            // (27.5.2.2.5, p1) and cannot seek to the end before each
+            // write (27.4.2.1.4, Table 86), so app keeps the put
+            // pointer at the end, here and in seekoff
             this->pbump (__slen);
         }
     }
@@ -439,8 +442,14 @@ seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode __which)
         if (__newoff < 0 || __high < __newoff)
             return pos_type (off_type (-1));
 
-        // bump pptr up (or down) to the new position
-        this->pbump (__newoff - __cur);
+        if (this->_C_state & ios_base::app) {
+            // app keeps the put pointer at the end (see _C_str)
+            __newoff = __cur;
+        }
+        else {
+            // bump pptr up (or down) to the new position
+            this->pbump (__newoff - __cur);
+        }
     }
 
     _RWSTD_ASSERT (this->_C_is_valid ());

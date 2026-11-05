@@ -1100,6 +1100,86 @@ test_seekpos (VFun *pfid)
 
 /**************************************************************************/
 
+// 27.4.2.1.4, Table 86: app means "seek to end before each write";
+// the buffer keeps the put pointer at the end of the sequence
+template <class charT, class Traits>
+void test_app (charT, Traits, const VFun *pfid)
+{
+    typedef std::allocator<charT>                          Allocator;
+    typedef std::basic_stringbuf<charT, Traits, Allocator> Stringbuf;
+    typedef std::basic_string<charT, Traits, Allocator>    String;
+    typedef typename Stringbuf::off_type                   off_type;
+
+    const charT abc [] = { charT ('a'), charT ('b'), charT ('c'), charT () };
+
+    // the put position starts at the end under app
+    Stringbuf sb_io (String (abc), std::ios::openmode (in | out | app));
+
+    const PubBuf<charT, Traits>* const pio =
+        (const PubBuf<charT, Traits>*)&sb_io;
+
+    rw_assert (pio->Pptr () == pio->Pbase () + 3, 0, __LINE__,
+               "basic_stringbuf<%s%{?}, %s%{;}>(\"abc\", in | out | app)"
+               ": pptr () == pbase () + 3, got pbase () + %td",
+               pfid->cname_, 0 != pfid->tname_, pfid->tname_,
+               pio->Pptr () - pio->Pbase ());
+
+    Stringbuf sb (String (abc), std::ios::openmode (out | app));
+
+    off_type pos = off_type (sb.pubseekpos (0, std::ios::out));
+
+    sb.sputc (charT ('x'));
+
+    String res = sb.str ();
+
+    rw_assert (   3 == pos
+               && 4 == res.size () && 4 == rw_match ("abcx", res.c_str (), 4),
+               0, __LINE__,
+               "basic_stringbuf<%s%{?}, %s%{;}>(\"abc\", out | app)"
+               ".pubseekpos (0, out) == 3, got %d; "
+               "sputc ('x'); str () == \"abcx\", got %{*Ac}",
+               pfid->cname_, 0 != pfid->tname_, pfid->tname_,
+               int (pos), int (sizeof (charT)), res.c_str ());
+
+    pos = off_type (sb.pubseekpos (0, std::ios::out));
+
+    sb.sputc (charT ('y'));
+
+    res = sb.str ();
+
+    rw_assert (   4 == pos
+               && 5 == res.size () && 5 == rw_match ("abcxy", res.c_str (), 5),
+               0, __LINE__,
+               "basic_stringbuf<%s%{?}, %s%{;}>(\"abc\", out | app)"
+               ".sputc ('x'); pubseekpos (0, out) == 4, got %d; "
+               "sputc ('y'); str () == \"abcxy\", got %{*Ac}",
+               pfid->cname_, 0 != pfid->tname_, pfid->tname_,
+               int (pos), int (sizeof (charT)), res.c_str ());
+}
+
+
+static void
+test_app (const VFun *pfid)
+{
+    rw_info (0, 0, 0, "basic_stringbuf<%s%{?}, %s%{;}> in app mode",
+             pfid->cname_, 0 != pfid->tname_, pfid->tname_);
+
+    if (VFun::DefaultTraits == pfid->tid_) {
+        if (VFun::Char == pfid->cid_)
+            test_app (char (), std::char_traits<char> (), pfid);
+        else
+            test_app (wchar_t (), std::char_traits<wchar_t> (), pfid);
+    }
+    else {
+        if (VFun::Char == pfid->cid_)
+            test_app (char (), CharTraits<char> (), pfid);
+        else
+            test_app (wchar_t (), CharTraits<wchar_t> (), pfid);
+    }
+}
+
+/**************************************************************************/
+
 static int rw_opt_no_xsputn;        // for --no-xsputn
 static int rw_opt_no_pbackfail;     // for --no-pbackfail
 static int rw_opt_no_overflow;      // for --no-overflow
@@ -1136,6 +1216,8 @@ run_test (VFun *pfid)
         TEST (underflow);
         TEST (seekoff);
         TEST (seekpos);
+
+        test_app (pfid);
     }
 }
 
