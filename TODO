@@ -51,27 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO =bitset='s digit characters cite no defect resolution
-
-14882:2003 23.3.5.1, p3-6 compare the characters of the string with
-=0= and =1=, and 23.3.5.2, p33 declares =to_string ()= without
-parameters. =include/bitset= 162-168 adds ~charT b0 = '0', charT b1 =
-'1'~ to the constructor from =basic_string=, and 262-285 give every
-=to_string= the same pair, read by =__rw_bitset= in =src/bitset.cpp=.
-That is C++11's 20.5.1 and 20.5.2. 997b23cb kept the constructor's
-pair as LWG 396's resolution (=analysis-post-strict-ansi.md= 2.1), but
-no comment cites 396 and =ref-conformance.md= chapter 3 does not list
-it; the =to_string= pair has no note. =doc/stdlibref/bitset.html=
-shows neither. =tests/containers/23.bitset.cons.cpp= 179-181 and
-=23.bitset.cpp= 1036-1066 pass the digits. Found by the extension
-sweep's reading, 2026-11-04.
-
-Fix: the pair stays, as 997b23cb decided; both declarations cite LWG
-396 and chapter 3 takes a 396 row.
-
-Check: chapter 3 has a 396 row naming =include/bitset=, and both
-declarations carry the citation.
-
 ** TODO =<cstdlib>= keeps =abs= for unsigned types behind macros nothing defines
 
 14882:2003 26.5, p4 adds =long abs (long)= and =ldiv_t div (long,

@@ -157,6 +157,7 @@ public:
     }
 
     // 23.3.5.1, p3
+    // lwg issue 396: the digit characters __b0 and __b1, N3242 20.5.1
     template <class _CharT, class _Traits, class _Allocator>
     explicit
     bitset (const basic_string<_CharT, _Traits, _Allocator> &__str,
@@ -257,6 +258,7 @@ public:
     unsigned long to_ulong () const;
 
     // 23.3.5.2, p33
+    // lwg issue 396: the constructor's digit characters, N3242 20.5.2
     template <class _CharT, class _Traits, class _Allocator>
     basic_string<_CharT, _Traits, _Allocator>
     to_string (_CharT = '0', _CharT = '1') const;

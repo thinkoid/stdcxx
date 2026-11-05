@@ -140,6 +140,7 @@ later amendment to the issue.
 | 214 | `set` and `multiset` supply non-const lookup overloads alongside const ones; comments identify the proposed resolution. | `include/set` |
 | 307 | Container adaptors expose the underlying container's reference typedefs; `queue::front/back` return those types. | `include/queue`, `include/stack` |
 | 350 | `allocator::address` obtains the address through casts to character references, bypassing an overloaded address-of operator. | `include/rw/_allocator.h` |
+| 396 | The constructor from `basic_string` takes the two digit characters, `'0'` and `'1'` by default, and compares the string's characters with them; `to_string` takes the same pair, and the three overloads of LWG 434 pass it on. The text is N3242 20.5.1 and 20.5.2. | `include/bitset`, `src/bitset.cpp` |
 | 453 | String-buffer seeking rejects a nonzero offset when the relevant buffer pointer is null. | `include/sstream.cc` |
 | 467 | `char_traits<char>::lt` compares after conversion to `unsigned char`, matching bytewise ordering. | `include/rw/_traits.h` |
 | 559 | cv-qualified `numeric_limits` specializations inherit the unqualified specialization. | `include/limits` |
