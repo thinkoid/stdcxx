@@ -735,10 +735,8 @@ _BidirIter __stable_partition (_BidirIter __first, _BidirIter __last,
     if (!__dist)
         return __last;
     
-    // call an extension of get_temporary_buffer<>() in case partial class
-    // specialization (and iterator_traits<>) isn't supported by compiler
     pair<_TypeT*, _Dist> __pair =
-        std::get_temporary_buffer (__dist, (_TypeT*)0);
+        std::get_temporary_buffer<_TypeT> (_RWSTD_PTRDIFF_T (__dist));
 
     if (__pair.first == 0)
         return __inplace_stable_partition (__first, __last, __pred, __dist);
@@ -1000,10 +998,9 @@ void
 __stable_sort (_RandomAccessIter __first, _RandomAccessIter __last,
                _TypeT*, _Dist*, _Compare __comp)
 {
-    // call an extension of get_temporary_buffer<>() in case partial class
-    // specialization (and iterator_traits<>) isn't supported by compiler
     pair<_TypeT*, _Dist> __p =
-        std::get_temporary_buffer (_Dist (__last - __first), (_TypeT*)0);
+        std::get_temporary_buffer<_TypeT> (
+            _RWSTD_PTRDIFF_T (__last - __first));
 
     if (__p.first == 0)
         __inplace_stable_sort (__first, __last, __comp);
@@ -1545,10 +1542,9 @@ void __inplace_merge (_BidirIter __first, _BidirIter __middle,
     _Dist __dist1 = std::distance (__first, __middle);
     _Dist __dist2 = std::distance (__middle, __last);
  
-    // call an extension of get_temporary_buffer<>() in case partial class
-    // specialization (and iterator_traits<>) isn't supported by compiler
     pair<_TypeT*, _Dist> __pair =
-        std::get_temporary_buffer (__dist1 + __dist2, (_TypeT*)0);
+        std::get_temporary_buffer<_TypeT> (
+            _RWSTD_PTRDIFF_T (__dist1 + __dist2));
 
     if (__pair.first == 0) {
         __merge_without_buffer (__first, __middle, __last, __dist1, __dist2,

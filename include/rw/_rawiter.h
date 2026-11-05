@@ -117,20 +117,12 @@ __rw_tmpbuf (void**, _RWSTD_PTRDIFF_T, _RWSTD_SIZE_T);
 namespace std {
 
 
-// 20.4.3 only specifies a get_temporary_buffer<>() that takes a ptrdiff_t.
-// We overload on all types so that signed integral types other than ptrdiff_t
-// can be used. This is important in getting algorithms to compile with
-// user-defined iterators (not derived from iterator<...>) whose difference
-// type is something other than ptrdiff_t.
-
-// having this overload is important in some cases for compilers that
-// do not support partial class specialization (and where as a consequence
-// iterator_traits<> isn't available)
-template <class _TypeT, class _Distance>
-inline pair<_TypeT*, _Distance>
-get_temporary_buffer (_Distance __nelems, _TypeT*)
+// 20.4.3, p1
+template <class _TypeT>
+inline pair<_TypeT*, _RWSTD_PTRDIFF_T>
+get_temporary_buffer (_RWSTD_PTRDIFF_T __n)
 {
-    pair<_TypeT*, _Distance> __res (0, 0);
+    pair<_TypeT*, _RWSTD_PTRDIFF_T> __res (0, 0);
 
 #ifdef __GNUG__
 
@@ -145,18 +137,9 @@ get_temporary_buffer (_Distance __nelems, _TypeT*)
 
     __res.second =
         __rw::__rw_tmpbuf (reinterpret_cast< _VoidPtrT* >(&__res.first),
-                          __nelems < 0 ? 0 : __nelems, sizeof (_TypeT));
+                          __n < 0 ? 0 : __n, sizeof (_TypeT));
 
     return __res;
-}
-
-
-// 20.4.3, p1
-template <class _TypeT>
-inline pair<_TypeT*, _RWSTD_PTRDIFF_T>
-get_temporary_buffer (_RWSTD_PTRDIFF_T __n)
-{
-    return get_temporary_buffer (__n, (_TypeT*)0);
 }
 
 

@@ -139,28 +139,6 @@ class then deletes a =void*=.
 
 Check: =20.auto.ptr= loses its =auto_ptr<void>= section and passes.
 
-** TODO =get_temporary_buffer= takes any distance type and a type tag
-
-14882:2003 20.4.3 declares one ~get_temporary_buffer<T> (ptrdiff_t)~.
-=include/rw/_rawiter.h= 123-154 add ~template <class T, class
-Distance> pair<T*, Distance> get_temporary_buffer (Distance, T*)~ in
-=namespace std=. Its comment gives two reasons: algorithms over
-iterators whose difference type is not =ptrdiff_t=, and compilers
-without partial specialization, a gate e9980bcd retired. Callers:
-=include/algorithm.cc= 738-741, 1003-1006 and 1548-1551, each
-commented "call an extension of get_temporary_buffer" for the second
-reason. =doc/stdlibref/get-temporary-buffer.html= shows only the
-standard form, and no test calls the overload. The three calls can
-take ~get_temporary_buffer<T> (ptrdiff_t (n))~ or a =__rw= helper.
-Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: move it into =namespace __rw=, or record; for the
-move, only the algorithms call it, and the reason their comments give
-is gone.
-
-Check: the three "extension" comments in =algorithm.cc= are gone and
-=25.sort=, =25.merge= and =25.partitions= equal their pins.
-
 ** TODO A null pointer with a count gives a string of uninitialized characters
 
 14882:2003 21.3.1, p6: "Requires: s shall not be a null pointer and n
