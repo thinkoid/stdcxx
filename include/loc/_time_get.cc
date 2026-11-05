@@ -475,7 +475,8 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
     const ctype<char_type> &__ctp =
         std::use_facet< ctype<char_type> >(__fl._C_getloc ());
 
-    // extension: `tmb' may be 0
+    // addition: `tmb' may be 0 (TODO, "ref-locale.md and
+    // ref-conformance.md disagree on which departures are recorded")
     tm __tmp = __tmb ? *__tmb : tm ();
 
     // C++11 22.4.5.1.1, p8: the function starts by evaluating

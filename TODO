@@ -25,32 +25,6 @@ stale comments, then behaviour the library adds or changes, then the
 additions whose removal costs tests or callers. The rest, outside the
 locale, is last.
 
-** TODO Sweep the library for extensions
-
-Done 2026-11-04 by four readings of =include= and =src= against
-14882:2003, one per area: the containers, iterators, algorithms,
-utilities and numerics, with =include/tr1=; the strings and streams;
-the locale; and clauses 17 to 19 with the C headers and Annex D. The
-negative precision under =fixed= had left the same day (9a5a402a).
-Four defects the readings found were queued the same day, confirmed by
-probe (845a7d93). The findings follow this entry: 43 entries, the
-smallest decision first; the 17 defects and hypotheses seen in passing
-among the entries outside the locale follow the locale entries.
-Documentation has 5 more, on the reference pages and the record, and
-Tests 1. The sources carry 67 comments that say "extension": 56 mark an
-addition of the library (the containers' area 14, the streams' 12, the
-locale's 21, the support clauses' 9), and 11 name a compiler's or the C
-library's extension, a sign extension or a reserved field. One extension
-stays by decision: =time_get='s =get= with a format and =do_get= with a
-specifier, the C++11 interface, which take C++11's specification
-(=ref-conformance.md=, "=time_get= with a format").
-
-Fix: each entry's decision; a decision to keep writes its row in
-=ref-conformance.md= chapter 2, and the comments then name it.
-
-Check: every "extension" comment in =include= and =src= is either gone
-or names its entry or its row in =ref-conformance.md=.
-
 ** TODO Racing =locale::global= calls can split the C and C++ locales
 
 =locale::global= (=src/locale_global.cpp= 59-72) calls =setlocale= and

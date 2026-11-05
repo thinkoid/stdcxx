@@ -78,6 +78,18 @@ The table also records the departures no gate covered, the locale's
 among them. For a locale row, `ref-locale.md` holds the argument and
 the row is its summary.
 
+Four readings of `include` and `src` against 14882:2003, one per
+area (the containers, iterators, algorithms, utilities and numerics;
+the strings and streams; the locale; clauses 17 to 19 with the C
+headers and Annex D), found 67 comments that said "extension", 56
+of them on an addition of the library. Each addition now names its
+row in a comment, `// addition: ref-conformance.md, "<row>"` or
+`// departure: ...`, or the `TODO` entry that holds it; the word is
+left where it names a compiler's or the C library's extension, a
+sign extension or a reserved field. One extension stays by
+decision: `time_get`'s format members, C++11's ("`time_get` with a
+format").
+
 | choice in the tree | effect and source |
 |---|---|
 | Stream truth conversion | `basic_ios` converts to a private pointer-to-member type where 14882:2003's 27.4.4.3 writes `operator void*`. That is LWG 468's resolution, adopted into the first C++0x draft: a conversion to an unspecified type that converts only to `bool`, pointer-to-member the suggested shape, so a stream cannot be deleted, compared to a pointer or passed as an integer by accident, and `void* p = cin;` does not compile. C++11 then replaced it with `explicit operator bool` (LWG 1094), the same contract with language support; the tree keeps the 468 form (`include/rw/_basic_ios.h`). |
@@ -124,7 +136,7 @@ the row is its summary.
 | `%Ey` reads four digits | `%Ey` reads up to four digits, 0 to 9999, without a sign, as glibc's `strptime` does: an era's year runs to 2569 under th_TH and 1872 under ja_JP's 西暦. A year outside its era sets `eofbit`, as 平成 40 does (`include/loc/_time_get.cc`, `__rw_read_era_year`). (`ref-locale.md` ch. 12) |
 | An era is every record of its name | ja_JP writes each era after 明治 as two records with one name: a first-year record whose format writes 元年, and a record from the next January. Their offsets agree on one count. The era of the reader's lookup and of `%Ey`'s bounds is the union of the records of the name, from the earliest bound to the latest. C++11 22.4.5.1.2, p13 sets `eofbit` where the input does not "unambiguously determine" the members, and 令和 1 names one year: "%EC %Ey" reads "令和 01", which `time_put` writes for 2019-06-01, as 2019. glibc bounds the year by each record alone and cannot read it (`src/era.cpp`, `__rw_get_era_span`). (`ref-locale.md` ch. 12) |
 | A plain digit under `%O` only where no symbol exists | `time_get` reads an `%O`-modified value as the locale's alternative symbol where the table defines one, and as ordinary digits only for a value beyond the table. The table is a list of whole numerals, not a digit set: lzh_TW's 32 entries run 〇 to 卅一, and 45 has no spelling in them. That is the inverse of `time_put`, which writes the symbol below the table and ordinary digits from its end, as glibc's `strftime` does, so the reader takes the one text the writer produces for each value: "三" under `%Od` reads 3 and "3" fails; "45" under `%OM` reads 45. glibc's `strptime` takes ordinary digits for any value and latches that choice for the rest of the call. The one text the reader takes that the writer does not produce is "0" for value 0 where the first symbol is empty, a table no shipped locale has. XSH's `strptime` says only that `%O` uses the alternative numeric symbols; the strict reading is kept (`include/loc/_punct.cc`, `__rw_match_name`; `include/loc/_time_get.cc`, `do_get`). (`ref-locale.md` ch. 12) |
-| Compiler types beyond 2003 | `long long` and `unsigned long long` are supported wherever the compiler has them: `numeric_limits`, the `num_get` and `num_put` virtuals and their public callers, the stream inserters and extractors, and `abs`. 14882:2003 does not name the type; the library follows the compiler's type set, and the `LONG_LONG` characterization decides, not a policy switch. The extra virtuals widen two facet vtables; a program that overrides the 2003 virtuals is unaffected (`include/rw/_config.h`, `etc/config/src/LONG_LONG.cpp`). (`ref-locale.md` ch. 10) |
+| Compiler types beyond 2003 | `long long` and `unsigned long long` are supported wherever the compiler has them: `numeric_limits`, the `num_get` and `num_put` virtuals and their public callers, the stream inserters and extractors, and `abs`. 14882:2003 does not name the type; the library follows the compiler's type set, and the `LONG_LONG` characterization decides, not a policy switch. The extra virtuals widen two facet vtables; a program that overrides the 2003 virtuals is unaffected (`include/rw/_config.h`, `etc/config/src/LONG_LONG.cpp`, `include/loc/_num_get.h`, `include/loc/_num_put.h`, `include/istream`, `include/ostream`). (`ref-locale.md` ch. 10) |
 | Later defect corrections | LWG 559's cv-qualified `numeric_limits` (chapter 3) and LWG 434's `bitset::to_string` overloads (`include/bitset`) are unconditional. |
 
 Copy-on-write strings and the compatibility mutex in their bodies are

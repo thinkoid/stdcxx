@@ -171,12 +171,12 @@ public:
 
 #ifdef _RWSTD_LONG_LONG
 
-    // extension
+    // addition: ref-conformance.md, "Compiler types beyond 2003"
     basic_ostream& operator<< (unsigned _RWSTD_LONG_LONG __val) {
         return __rw::__rw_insert (*this, __val);
     }
 
-    // extension
+    // addition: ref-conformance.md, "Compiler types beyond 2003"
     basic_ostream& operator<< (_RWSTD_LONG_LONG __val) {
         return __rw::__rw_insert (*this, __val);
     }

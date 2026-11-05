@@ -121,14 +121,14 @@ struct num_get: __rw::__rw_facet
 
 #ifdef _RWSTD_LONG_LONG
 
-    // extension
+    // addition: ref-conformance.md, "Compiler types beyond 2003"
     iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, _RWSTD_LONG_LONG &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-    // extension
+    // addition: ref-conformance.md, "Compiler types beyond 2003"
     iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err,
                    unsigned _RWSTD_LONG_LONG &__val) const {
@@ -199,14 +199,14 @@ protected:
 
 #ifdef _RWSTD_LONG_LONG
 
-    // extension
+    // addition: ref-conformance.md, "Compiler types beyond 2003"
     virtual iter_type
     do_get (iter_type __begin, iter_type __end, ios_base &__flags,
             _RWSTD_IOSTATE &__err, _RWSTD_LONG_LONG &__val) const {
         return _C_get (__begin, __end, __flags, __err, _C_llong, &__val);
     }
 
-    // extension
+    // addition: ref-conformance.md, "Compiler types beyond 2003"
     virtual iter_type
     do_get (iter_type __begin, iter_type __end, ios_base &__flags,
             _RWSTD_IOSTATE &__err, unsigned _RWSTD_LONG_LONG &__val) const {
