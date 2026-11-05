@@ -74,7 +74,7 @@ public:
     typedef _Traits                         traits_type;
     typedef typename traits_type::int_type int_type;
     typedef typename traits_type::pos_type pos_type;
-    typedef typename traits_type::int_type off_type;
+    typedef typename traits_type::off_type off_type;
 
 protected:
 

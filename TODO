@@ -51,24 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO =off_type= of =basic_ios= and =basic_stringstream= is =int_type=
-
-14882:2003 27.4.4's and 27.7.4's synopses declare ~typedef typename
-traits::off_type off_type~. =include/rw/_basic_ios.h= 77 and
-=include/sstream= 335 write =traits_type::int_type=, since the 2005
-import: =std::ios::off_type= and =std::stringstream::off_type= are
-=int=, and an offset past =INT_MAX= held in either truncates on LP64.
-A defect, not an addition; =basic_ostream= has it right
-(=include/ostream= 67). Nothing in the library names either typedef,
-and no test checks them. Found by the extension sweep's reading,
-2026-11-04.
-
-Fix: =traits_type::off_type= in both.
-
-Check: a compile-time assertion in =27.basic.ios= that ~sizeof
-(std::ios::off_type) == sizeof (std::streamoff)~, and the same for
-=std::stringstream=.
-
 ** TODO =ostrstream= and =strstream= take =ate= for =app=
 
 D.7.3.1, p2 and D.7.4.1, p2 choose ~strstreambuf (s, n, s + strlen

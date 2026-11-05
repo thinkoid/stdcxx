@@ -148,6 +148,10 @@ typedef std::wstreampos     X_wstreampos;
 
 // additional compilation tests
 
+#include <ostream>   // the bases of basic_stringstream
+#include <istream>
+#include <sstream>
+
 #include <rw_driver.h>
 
 static void
@@ -206,6 +210,24 @@ test_synopsis ()
     TEST_MANIP (std::oct);
     TEST_MANIP (std::fixed);
     TEST_MANIP (std::scientific);
+
+    // 27.4.4 and 27.7.4: off_type is traits::off_type, std::streamoff
+    // for char; each pointer converts only from a pointer to that type
+    std::streamoff *ios_off = (std::ios::off_type*)0;
+    std::streamoff *sstream_off = (std::stringstream::off_type*)0;
+
+    _RWSTD_UNUSED (ios_off);
+    _RWSTD_UNUSED (sstream_off);
+
+    rw_assert (sizeof (std::ios::off_type) == sizeof (std::streamoff),
+               __FILE__, __LINE__,
+               "sizeof (ios::off_type) == sizeof (streamoff), got %zu",
+               sizeof (std::ios::off_type));
+
+    rw_assert (sizeof (std::stringstream::off_type)
+               == sizeof (std::streamoff), __FILE__, __LINE__,
+               "sizeof (stringstream::off_type) == sizeof (streamoff), "
+               "got %zu", sizeof (std::stringstream::off_type));
 }
 
 /**************************************************************************/
