@@ -564,6 +564,35 @@ N3242's fragment does.
 Check: =27.ostream= writes ~short (-1)~ and =-1= under ~hex | dec~ as
 "-1".
 
+** TODO =bitset= sizes its array with an enumerator in a boolean context
+
+=include/bitset= 92 declares ~unsigned long _C_bits [_C_nelems ?
+_C_nelems : 1]~, where =_C_nelems= is an enumerator. GCC 16 under
+=-Wall= warns "enum constant in boolean context"
+(=-Wint-in-bool-context=) once for each instantiation: building
+=23.bitset= prints it ten times, and so does any program that
+instantiates =bitset= under =-Wall=. From the 2005 import (e6c7726b).
+Seen in passing while building =23.bitset=, 2026-11-05.
+
+Fix: the condition compares, ~_C_nelems != 0~.
+
+Check: =23.bitset= builds in 15D without the warning.
+
+** TODO =ios_base::width= asserts that =this= is not null
+
+=include/rw/_iosbase.h= 319, the setter =width (streamsize)=, opens
+with ~_RWSTD_ASSERT (0 != this)~, the one such assertion under
+=include= and =src=. =this= is never null in a valid call. GCC 16
+warns "'nonnull' argument 'this' compared to NULL"
+(=-Wnonnull-compare=) in a debug build, once in each of the ten
+=src/ti_*.cpp= units that inline the setter, and may fold the
+comparison away. From the 2005 import (e6c7726b). Seen in passing in
+the 15D library build, 2026-11-05.
+
+Fix: remove the assertion.
+
+Check: the 15D library builds without =-Wnonnull-compare=.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it

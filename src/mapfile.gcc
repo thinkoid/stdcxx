@@ -554,8 +554,6 @@ global:
     _ZNSbIwSt11char_traitsIwESaIwEE7replaceEjjRKS2_jj;
     _ZNSbIwSt11char_traitsIwESaIwEE7replaceEjjjw;
     _ZNSbIwSt11char_traitsIwESaIwEE7reserveEj;
-    _ZNSbIwSt11char_traitsIwESaIwEE9_C_insertEN4__rw15__rw_debug_iterIS2_PwS5_EEPKwS8_Pv;
-    _ZNSbIwSt11char_traitsIwESaIwEE9_C_insertEN4__rw15__rw_debug_iterIS2_PwS5_EES6_S6_Pv;
     _ZNSbIwSt11char_traitsIwESaIwEE9_C_unlinkEPw;
     _ZNSbIwSt11char_traitsIwESaIwEE9push_backEw;
     _ZNSbIwSt11char_traitsIwESaIwEEC1EPKwRKS1_;
@@ -671,8 +669,6 @@ global:
     _ZNSs7replaceEjjRKSsjj;
     _ZNSs7replaceEjjjc;
     _ZNSs7reserveEj;
-    _ZNSs9_C_insertEN4__rw15__rw_debug_iterISsPcS1_EEPKcS4_Pv;
-    _ZNSs9_C_insertEN4__rw15__rw_debug_iterISsPcS1_EES2_S2_Pv;
     _ZNSs9_C_unlinkEPc;
     _ZNSs9push_backEc;
     _ZNSsC1EPKcRKSaIcE;

@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 265 | 12,474,653 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 265 | 12,474,539 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 269 | 12,538,264 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 267 | 12,538,151 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -302,6 +302,40 @@ all six tables:
   rows for a type derived from a standard facet, with its own `id`
   and with its base's; the other five tables are to gain the same
   seven.
+- 2026-11-05: `20.function.objects`, 221 to 197 in 15D: the eight
+  `__rw` function objects became helpers of `valarray` (68912090); the
+  summary followed in 8352eb38.
+- 2026-11-05: `27.basic.ios`, 7 to 9 in 15D: `off_type` of `basic_ios`
+  and `basic_stringstream` is `traits::off_type`; the other five
+  tables are to move by the same two.
+- 2026-11-05: `27.strstream` is new, 8 assertions in 15D, 270
+  programs: `ostrstream` and `strstream` no longer take `ate` for
+  `app`; the other five tables are to gain the same row.
+- 2026-11-05: `27.strstream`, 8 to 12 in 15D: `freeze` no longer stops
+  writes into a caller's array; the other five tables are to move by
+  the same four.
+- 2026-11-05: `27.ostream`, 5,788 to 5,798 in 15D: `put` and `write`
+  leave the width alone; the other five tables are to move by the
+  same ten.
+- 2026-11-05: `27.objects`, 22 to 30 in 15D: the standard objects'
+  stdio state leaves their format flags; the other five tables are to
+  move by the same eight.
+- 2026-11-05: `20.function.objects`, 197 to 221 in 15D: the test
+  exercises the `valarray` helpers again; with the line above, the
+  other five tables do not move.
+- 2026-11-05: `27.istream.fmat.arith`, 26,648 to 26,808 in 15D: the
+  `short` and `int` extractors take the signed range under an empty
+  `basefield`; the other five tables are to move by the same 160.
+- 2026-11-05: `27.stringbuf.virtuals`, 86,124 to 86,140 in 15D: a
+  string buffer starts writing at its end only under `ate` or `app`;
+  the other five tables are to move by the same 16.
+- 2026-11-05: `2.smartptr.shared` (121), `2.smartptr.weak` (45) and
+  `8.cstdint` (157) leave all six tables with `include/tr1`: 267
+  programs in 15D and 265 in the other five, nine runtime warnings
+  fewer.
+- 2026-11-05: `27.basic.ios`, 9 to 11 in 15D: `getloc` on a non-const
+  object returns a copy; the other five tables are to move by the
+  same two.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, and to 33 when `2.smartptr.shared` and
