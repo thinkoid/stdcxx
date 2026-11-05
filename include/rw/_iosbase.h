@@ -222,15 +222,13 @@ struct _RWSTD_EXPORT ios_base: __rw::__rw_synchronized
     // 27.4.2.3, p1
     locale imbue (const locale&);
 
-    // extension: avoids reference counting in MT builds (may result in
-    // a speedup of up to 50%); this is an alternative to caching a reference
-    // (pointer) to a facet in each stream and stream buffer object
-    locale& getloc () {
+    // 27.4.2.3, p4
+    locale getloc () const {
         return _C_loc;
     }
 
-    // 27.4.2.3, p4
-    locale getloc () const {
+    // the imbued locale without the copy, for the library's own reads
+    const locale& _C_getloc () const {
         return _C_loc;
     }
 

@@ -75,10 +75,8 @@ public:
         return _C_locale;
     }
 
-    // extension: avoids reference counting in MT builds (may result in
-    // a speedup of up to 50%); this is an alternative to caching a reference
-    // (pointer) to a facet in each stream and stream buffer object
-    locale& getloc () {
+    // the imbued locale without the copy, for the library's own reads
+    const locale& _C_getloc () const {
         return _C_locale;
     }
 

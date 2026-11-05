@@ -839,7 +839,7 @@ global:
     _ZNSt15basic_streambufIcSt11char_traitsIcEE5sputcEc;
     _ZNSt15basic_streambufIcSt11char_traitsIcEE5sputnEPKci;
     _ZNSt15basic_streambufIcSt11char_traitsIcEE5uflowEv;
-    _ZNSt15basic_streambufIcSt11char_traitsIcEE6getlocEv;
+    _ZNKSt15basic_streambufIcSt11char_traitsIcEE9_C_getlocEv;
     _ZNSt15basic_streambufIcSt11char_traitsIcEE6sbumpcEv;
     _ZNSt15basic_streambufIcSt11char_traitsIcEE6setbufEPci;
     _ZNSt15basic_streambufIcSt11char_traitsIcEE6snextcEv;
@@ -872,7 +872,7 @@ global:
     _ZNSt15basic_streambufIwSt11char_traitsIwEE5sputcEw;
     _ZNSt15basic_streambufIwSt11char_traitsIwEE5sputnEPKwi;
     _ZNSt15basic_streambufIwSt11char_traitsIwEE5uflowEv;
-    _ZNSt15basic_streambufIwSt11char_traitsIwEE6getlocEv;
+    _ZNKSt15basic_streambufIwSt11char_traitsIwEE9_C_getlocEv;
     _ZNSt15basic_streambufIwSt11char_traitsIwEE6sbumpcEv;
     _ZNSt15basic_streambufIwSt11char_traitsIwEE6setbufEPwi;
     _ZNSt15basic_streambufIwSt11char_traitsIwEE6snextcEv;

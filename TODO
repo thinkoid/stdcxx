@@ -136,38 +136,6 @@ decision.
 Check: ~git grep -n "const char \*__s = 0" include~ is empty and the
 library builds, =src/exception.cpp= passing an explicit null.
 
-** TODO =getloc= on a non-const stream or buffer returns the object's own locale
-
-14882:2003 27.4.2.3, p4 declares ~locale getloc () const~, which
-returns the imbued locale, and 27.5.2.2.1, p4 does the same for
-=basic_streambuf=. The library adds ~locale& getloc ()~ to both
-(=include/rw/_iosbase.h= 225-230, =include/streambuf= 78-83), each
-under an "extension" comment: it saves a reference count on every
-formatted operation. 17.4.4.4, p2 permits an added member signature,
-but p3 requires a call to a described signature to behave as if none
-were added, and on a non-const object ~s.getloc ()~ now selects the
-new overload. Two calls then behave differently. After ~const
-std::locale &r = s.getloc (); s.imbue (l);~ the reference names =l=
-where the standard's copy keeps the old locale. ~s.getloc () = l~
-compiles in both, but the standard's assigns to a temporary and the
-library's replaces the stream's locale without =imbue=: no
-=imbue_event= callbacks (27.4.2.3, p1), no =pubimbue= of the buffer,
-and on a buffer no call of the =imbue= virtual. =doc/stdlibref= does
-not document the overload, and no test relies on it. 44 lines in 16
-files under =include= and =src= call =getloc ()=; with the overload
-gone those on non-const objects copy the locale, an atomic increment
-and decrement in the thread-safe builds. Found by the extension
-sweep's reading, 2026-11-04.
-
-Fix: a decision: remove both overloads and give the library's callers
-a reserved accessor that returns the reference, or record; for
-removal, the overload changes what a standard call does, and the
-accessor keeps the saving.
-
-Check: a =27.basic.ios= case that binds a ~const std::locale&~ to
-~strm.getloc ()~, imbues another locale, and finds the reference still
-equal to the first.
-
 ** TODO Every standard facet but =ctype= has a public destructor
 
 The synopses of 14882:2003 22.2.1.1 through 22.2.7.2 declare every

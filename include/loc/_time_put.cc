@@ -124,7 +124,7 @@ put (iter_type __it, ios_base &__flags, char_type __fill, const tm *__tmb,
         __end = __pat + char_traits<char_type>::length (__pat);
 
     const ctype<char_type> &__ctp = 
-      std::use_facet< ctype<char_type> >(__flags.getloc ());
+      std::use_facet< ctype<char_type> >(__flags._C_getloc ());
     
     for (; __pat != __end; ++__pat) {
 

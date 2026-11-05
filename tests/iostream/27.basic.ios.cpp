@@ -272,6 +272,32 @@ test_ctors (charT /* unused */, const char* cname)
 
 /**************************************************************************/
 
+static void
+test_getloc ()
+{
+    rw_info (0, 0, __LINE__,
+             "27.4.2.3, p4 ios_base::getloc () on a non-const object");
+
+    std::basic_ios<char, std::char_traits<char> > io (0);
+
+    // getloc () returns a copy, not the stream's own locale
+    const std::locale &loc = io.getloc ();
+    const std::locale first (loc);
+
+    // an unnamed locale, unequal to every other (22.1.1.4, p1)
+    io.imbue (std::locale (std::locale::classic (), new std::ctype<char>));
+
+    rw_assert (loc == first, __FILE__, __LINE__,
+               "const locale &r = ios_base::getloc (); imbue (l); "
+               "r == the locale before imbue");
+
+    rw_assert (!(loc == io.getloc ()), __FILE__, __LINE__,
+               "const locale &r = ios_base::getloc (); imbue (l); "
+               "r != l");
+}
+
+/**************************************************************************/
+
 // command-line options
 static int opt_no_basic_ios_ctors = 0;
 
@@ -286,6 +312,8 @@ run_test (int /* unused */, char* /* unused */ [])
     else {
         test_ctors (char (), "char");
     }
+
+    test_getloc ();
 
     return 0;
 }

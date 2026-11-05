@@ -110,7 +110,7 @@ __rw_read_era (_InputIter __it, _InputIter __end, std::ios_base &__fl,
     typedef std::char_traits<_CharT> _Traits;
 
     const std::ctype<_CharT> &__ctp =
-        std::use_facet< std::ctype<_CharT> >(__fl.getloc ());
+        std::use_facet< std::ctype<_CharT> >(__fl._C_getloc ());
 
     _RWSTD_C::tm __tmp = __tmb ? *__tmb : _RWSTD_C::tm ();
 
@@ -473,7 +473,7 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
     _RWSTD_ASSERT (__pat <= __pat_end);
 
     const ctype<char_type> &__ctp =
-        std::use_facet< ctype<char_type> >(__fl.getloc ());
+        std::use_facet< ctype<char_type> >(__fl._C_getloc ());
 
     // extension: `tmb' may be 0
     tm __tmp = __tmb ? *__tmb : tm ();
@@ -573,7 +573,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
     _RWSTD_SIZE_T __dup;   // number of allowed duplicates
 
     const ctype<char_type> &__ctp =
-        std::use_facet< ctype<char_type> >(__fl.getloc ());
+        std::use_facet< ctype<char_type> >(__fl._C_getloc ());
 
     switch (__fmt) {
 
