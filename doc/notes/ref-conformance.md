@@ -149,6 +149,7 @@ later amendment to the issue.
 | 253 | The copy constructors of `slice_array`, `gslice_array`, `mask_array` and `indirect_array` are public, where 14882:2003 26.3.5.1, 26.3.7.1, 26.3.8.1 and 26.3.9.1 give each "no public constructors". Under 8.5.3, p5 the copy constructor "shall be callable whether or not the copy is actually done" when the rvalue `v[s]` binds to the `const slice_array&` of the converting `valarray` constructor, so `valarray<int> w (v[s]);` is ill-formed under the 2003 declarations. N3242 26.6.5.1 and its three siblings declare `slice_array(const slice_array&);` under `public:`. The resolution's public copy assignment is not taken: it stays private, as in 2003. | `include/valarray` |
 | 307 | Container adaptors expose the underlying container's reference typedefs; `queue::front/back` return those types. | `include/queue`, `include/stack` |
 | 350 | `allocator::address` obtains the address through casts to character references, bypassing an overloaded address-of operator. | `include/rw/_allocator.h` |
+| 353 | `pair` has the template assignment `template <class U, class V> pair& operator= (const pair<U, V>&)`, which 14882:2003 20.2.2's synopsis lacks. The issue closed as NAD Editorial, resolved by N1856; N3242 20.3.2, p23-25 has the member: "Effects: Assigns p.first to first and p.second to second." | `include/rw/_pair.h` |
 | 389 | The const `valarray::operator[] (size_t)` returns `const T&` where 14882:2003 26.3.2.3 returns `T`, "the value of the corresponding element"; N3242 26.6.2.4 has the resolution's `const T&`. `&cv[0]` on a const `valarray` points into the array. | `include/valarray` |
 | 396 | The constructor from `basic_string` takes the two digit characters, `'0'` and `'1'` by default, and compares the string's characters with them; `to_string` takes the same pair, and the three overloads of LWG 434 pass it on. The text is N3242 20.5.1 and 20.5.2. | `include/bitset`, `src/bitset.cpp` |
 | 453 | String-buffer seeking rejects a nonzero offset when the relevant buffer pointer is null. | `include/sstream.cc` |
@@ -159,8 +160,8 @@ later amendment to the issue.
 Further cited issues include string construction and search (5, 7,
 42), locale conversion (19, 74, 75, 305, 382), stream input and output
 (60, 117, 129, 136, 243, 581), string-buffer positioning (432, 562),
-and utility/iterator behavior (110, 111, 112, 127, 181, 265, 348,
-353). These are pointers for expanding the record, **not additional
+and utility/iterator behavior (110, 111, 112, 127, 181, 265, 348).
+These are pointers for expanding the record, **not additional
 audited resolutions**. Core Working Group citations in the same files
 concern compiler language behavior and should not be counted as library
 resolutions.

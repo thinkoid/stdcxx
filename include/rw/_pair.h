@@ -74,7 +74,7 @@ struct pair
     pair (const pair <_TypeX, _TypeY> &__rhs) 
         : first (__rhs.first), second (__rhs.second) { }
 
-    // lwg issue 353
+    // lwg issue 353, resolved in C++11: N3242 20.3.2, p23-25
     template <class _TypeX, class _TypeY>
     pair<_TypeT, _TypeU>& operator= (const pair <_TypeX, _TypeY> &__rhs) {
         return first = __rhs.first, second = __rhs.second, *this;

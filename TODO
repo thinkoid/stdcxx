@@ -117,21 +117,6 @@ warning.
 Check: =nm -D= of the 15D library and of =libstdc++= for
 =_ZNSt9type_infoC2EPKc=, which settles whether a call can link.
 
-** TODO =pair='s template assignment cites LWG 353, whose resolution is unchecked
-
-=include/rw/_pair.h= 77-81 give =pair= a ~template <class U, class V>
-pair& operator= (const pair<U, V>&)~ under the comment "lwg issue
-353"; 14882:2003 20.2.2's synopsis has no assignment, and
-=ref-conformance.md= chapter 3 lists 353 among the cited issues.
-Hypothesis, by reading: if 353 closed without a change to the
-standard, the member is an addition, permitted by 17.4.4.4, p2 but not
-a resolution. Found by the extension sweep's reading, 2026-11-04.
-
-Fix: the issue's status first; then the comment and chapter 3 follow
-it, or the member takes a decision as an addition.
-
-Check: the status of LWG 353 in the issues list.
-
 ** TODO =basic_ios= and =basic_ostream= declare type names the standard does not
 
 14882:2003 27.4.4's synopsis gives =basic_ios= five member types, and
