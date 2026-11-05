@@ -51,24 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO An example teaches the library's internal mutex and atomic macros
-
-14882:2003 has no threading interface; 17.4.4.5, p1 leaves reentrancy
-implementation-defined. =examples/manual/mutex.cpp= includes
-=<rw/_mutex.h>= (38), declares an =__rw::__rw_mutex= (49), calls
-=_C_acquire= and =_C_release= (54-56), and uses =_RWSTD_MT_GUARD= (63)
-and =_RWSTD_ATOMIC_SWAP= (76). The header says it "should never be
-#included directly by a program", and =ref-threading.md= chapter 3
-describes these macros as the library's mechanism, one whose semantics
-moved this year. No test pins the example. Removing it costs nothing
-in the library. Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: remove the example, or keep it as a view of the
-internals; for removal, an example is a promise to programs, and this
-one promises an interface the headers disown.
-
-Check: =git grep -l rw/_mutex.h examples= is empty.
-
 ** TODO =off_type= of =basic_ios= and =basic_stringstream= is =int_type=
 
 14882:2003 27.4.4's and 27.7.4's synopses declare ~typedef typename
