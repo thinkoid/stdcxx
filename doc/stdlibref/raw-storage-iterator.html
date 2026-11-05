@@ -76,8 +76,6 @@ namespace std {
                        void,void,void,void&gt; {
 
     public:
-      typedef OutputIterator iterator_type;
-
       explicit raw_storage_iterator(OutputIterator);
       raw_storage_iterator&lt;OutputIterator, T&gt;&amp; 
       operator*();
@@ -92,7 +90,7 @@ namespace std {
 </PRE></UL>
 <A NAME="sec6"><H3>Constructor</H3></A>
 
-<A NAME="idx1126"></A><PRE><B>raw_storage_iterator</B> (iterator_type x);</PRE>
+<A NAME="idx1126"></A><PRE><B>raw_storage_iterator</B> (OutputIterator x);</PRE>
 <UL>
 <P>Initializes the iterator to point to the same value as <SAMP>x</SAMP>.</P>
 </UL>

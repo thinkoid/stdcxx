@@ -51,21 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO =raw_storage_iterator= has an =iterator_type= typedef
-
-20.4.2's synopsis has no member types beyond those of the base.
-=include/rw/_rawiter.h= 70-71 add ~typedef OutputIterator
-iterator_type~ "for completeness and genericity", and 74 spells the
-constructor's parameter with it.
-=doc/stdlibref/raw-storage-iterator.html= 79 documents it. Nothing in
-=include= or =tests= names it. Found by the extension sweep's reading,
-2026-11-04.
-
-Fix: a decision: remove, or record; for removal, nothing uses it and
-the synopsis has none.
-
-Check: =20.specialized= equals its pin with the typedef gone.
-
 ** TODO An example teaches the library's internal mutex and atomic macros
 
 14882:2003 has no threading interface; 17.4.4.5, p1 leaves reentrancy
