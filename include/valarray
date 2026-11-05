@@ -1426,14 +1426,14 @@ public:
         return _C_stride;
     }
 
-    // convenience functions
-    _RWSTD_SIZE_T next_ind ();
+    // step through the indices, for gslice_array and valarray::operator[]
+    _RWSTD_SIZE_T _C_next_ind ();
 
-    bool is_reseted () const {
+    bool _C_is_reset () const {
         return _C_reset;
     }
 
-    _RWSTD_SIZE_T ind_numb () const;
+    _RWSTD_SIZE_T _C_ind_numb () const;
 
 private:
 
@@ -1850,13 +1850,13 @@ inline void
 gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted () || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset () || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] = __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
 }
@@ -1865,12 +1865,12 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator= (const _TypeT& value) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (!gsl->is_reseted () || (!__cpt && gsl->ind_numb ())) {
+    while (!gsl->_C_is_reset () || (!__cpt && gsl->_C_ind_numb ())) {
       (*_C_array)[__i] = value;
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -1882,13 +1882,13 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator*= (const valarray<_TypeT>& __rhs) const
   {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted () || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset () || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] *= __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -1897,13 +1897,13 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator/= (const valarray<_TypeT>& __rhs) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted () || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset () || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] /= __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -1912,13 +1912,13 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator+= (const valarray<_TypeT>& __rhs) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (  (!gsl->is_reseted () || (!__cpt && gsl->ind_numb ()))
+    while (  (!gsl->_C_is_reset () || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] += __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -1927,13 +1927,13 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator-= (const valarray<_TypeT>& __rhs) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted() || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset() || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] -= __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -1943,13 +1943,13 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator%= (const valarray<_TypeT>& __rhs) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted () || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset () || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] %= __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -1958,13 +1958,13 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator^= (const valarray<_TypeT>& __rhs) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted () || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset () || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] ^= __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -1973,13 +1973,13 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator&= (const valarray<_TypeT>& __rhs) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted() || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset() || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] &= __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -1988,13 +1988,13 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator|= (const valarray<_TypeT>& __rhs) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted() || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset() || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] |= __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -2003,13 +2003,13 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator<<= (const valarray<_TypeT>& __rhs) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted () || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset () || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] <<= __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
@@ -2018,19 +2018,19 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
   inline void gslice_array<_TypeT>::operator>>= (const valarray<_TypeT>& __rhs) const
   { 
     gslice *gsl = const_cast< gslice* >(&_C_slice);
-    _RWSTD_SIZE_T __i = gsl->next_ind();
+    _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (   (!gsl->is_reseted () || (!__cpt && gsl->ind_numb ()))
+    while (   (!gsl->_C_is_reset () || (!__cpt && gsl->_C_ind_numb ()))
            && __cpt < __rhs.size ()) {
       (*_C_array)[__i] >>= __rhs[__cpt];
-      __i= gsl->next_ind();
+      __i= gsl->_C_next_ind();
       __cpt++;
     }
   }
 
 
-inline _RWSTD_SIZE_T gslice::ind_numb() const
+inline _RWSTD_SIZE_T gslice::_C_ind_numb() const
 {
     if (_C_length.size () == 0)
         return 0;
@@ -2123,7 +2123,7 @@ template <class _TypeT>
 inline valarray<_TypeT>
 valarray<_TypeT>::operator[](const gslice& __sl) const
 {
-    const _RWSTD_SIZE_T __maxinx = __sl.ind_numb ();
+    const _RWSTD_SIZE_T __maxinx = __sl._C_ind_numb ();
 
     __rw::__rw_array<_TypeT> __tmp =
         __rw::__rw_array<_TypeT>(_TypeT (), __maxinx);
@@ -2132,7 +2132,7 @@ valarray<_TypeT>::operator[](const gslice& __sl) const
 
     for (_RWSTD_SIZE_T __i = 0; __i != __maxinx; ++__i) {
 
-        const _RWSTD_SIZE_T __inx = __gsl->next_ind ();
+        const _RWSTD_SIZE_T __inx = __gsl->_C_next_ind ();
 
         __tmp [__i] = _C_array [__inx];
     }
@@ -2146,17 +2146,17 @@ inline valarray<_TypeT>::valarray(const gslice_array<_TypeT>& sl_ar)
 {
     gslice __sl(sl_ar._C_get_slice());
 
-    const _RWSTD_SIZE_T __maxinx = __sl.ind_numb ();
+    const _RWSTD_SIZE_T __maxinx = __sl._C_ind_numb ();
 
     __rw::__rw_array <_TypeT> __tmp =
         __rw::__rw_array <_TypeT>(_TypeT (), __maxinx);
 
-    _RWSTD_SIZE_T __i = __sl.next_ind();
+    _RWSTD_SIZE_T __i = __sl._C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while (!__sl.is_reseted () || (!__cpt && __maxinx)) {
+    while (!__sl._C_is_reset () || (!__cpt && __maxinx)) {
       __tmp[__cpt] = (*(sl_ar._C_get_storage()))[__i];
-      __i= __sl.next_ind();
+      __i= __sl._C_next_ind();
       __cpt++;
     }
 
@@ -2170,18 +2170,18 @@ valarray<_TypeT>::operator= (const gslice_array<_TypeT>& sl_ar)
 { 
     gslice __sl(sl_ar._C_get_slice());
 
-    const _RWSTD_SIZE_T __maxinx = __sl.ind_numb ();
+    const _RWSTD_SIZE_T __maxinx = __sl._C_ind_numb ();
 
     __rw::__rw_array <_TypeT> __tmp =
         __rw::__rw_array <_TypeT>(_TypeT (), __maxinx);
 
-    _RWSTD_SIZE_T __i = __sl.next_ind();
+    _RWSTD_SIZE_T __i = __sl._C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
 
-    while( !__sl.is_reseted() || !__cpt && __maxinx )
+    while( !__sl._C_is_reset() || !__cpt && __maxinx )
     {
       __tmp[__cpt] = (*(sl_ar._C_get_storage()))[__i];
-      __i= __sl.next_ind();
+      __i= __sl._C_next_ind();
       __cpt++;
     }
 

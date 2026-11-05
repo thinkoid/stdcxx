@@ -37,7 +37,7 @@
 namespace std { 
 
 
-size_t gslice::next_ind ()
+size_t gslice::_C_next_ind ()
 {
     size_t __n = _C_length.size ();
 

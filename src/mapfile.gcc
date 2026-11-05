@@ -928,7 +928,7 @@ global:
     _ZNSt5ctypeIwEC1Ej;
     _ZNSt5ctypeIwEC2Ej;
     _ZNSt5ctypeIwED2Ev;
-    _ZNSt6gslice8next_indEv;
+    _ZNSt6gslice11_C_next_indEv;
     _ZNSt6locale3allE;
     _ZNSt6locale4noneE;
     _ZNSt6locale4timeE;

@@ -198,33 +198,6 @@ decision.
 Check: ~git grep -n "const char \*__s = 0" include~ is empty and the
 library builds, =src/exception.cpp= passing an explicit null.
 
-** TODO =gslice= carries iteration state with three public members
-
-14882:2003 26.3.6's synopsis: two constructors, =start ()=, =size ()=,
-=stride ()=. =include/valarray= 1427-1434 add public =next_ind ()=,
-=is_reseted ()= and =ind_numb ()=, "convenience functions", over two
-state members (1442-1443); =next_ind= is defined in =src/valarray.cpp=
-40-77 and exported (=src/mapfile.gcc= 937, =_ZNSt6gslice8next_indEv=).
-A =gslice_array= steps its own copy through a =const_cast= in its
-=const= members (=include/valarray= 1846 onward), and the copy
-constructor resets the state. ~valarray<T>::operator[] (const gslice&)
-const~ (2117-2135) steps the caller's =gslice= itself, through a
-=const_cast=: a program's ~g.next_ind ()~ shifts what ~cv[g]~ reads,
-and a =gslice= defined =const= is modified, which 7.1.5.1, p4 makes
-undefined. No reference page documents them;
-=tests/numerics/26.class.gslice.cpp= computes indices with its own
-=next_index=. The rename changes the exported symbol, and
-=mapfile.gcc= with it. Found by the extension sweep's reading,
-2026-11-04.
-
-Fix: a decision: the three take =_C_= names, or record; for the
-rename, they are the iteration engine of =gslice_array= and no program
-should step it. The read through the caller's =gslice= has its own
-entry, below.
-
-Check: =nm -D= of the library shows no =gslice8next_ind=, and
-=26.class.gslice= and =26.gslice.array.cassign= equal their pins.
-
 ** TODO A string buffer in input mode writes after its initial string
 
 14882:2003 27.7.1.1, p3 and 27.7.1.2, p2 initialize "the output
@@ -745,10 +718,10 @@ over one whose =T ()= is 1 gives the elements' sum.
 
 ** TODO A second =cv[g]= with one =gslice= may read its start twice
 
-=next_ind= at the end of its walk wraps, sets =_C_reset= and returns
+=_C_next_ind= at the end of its walk wraps, sets =_C_reset= and returns
 =start=, and the next call clears the flag and returns =start= again
 (=src/valarray.cpp= 40-77). ~valarray<T>::operator[] (const gslice&)
-const~ (=include/valarray= 2117-2135) calls it =ind_numb ()= times on
+const~ (=include/valarray= 2117-2135) calls it =_C_ind_numb ()= times on
 the caller's =gslice= and never takes the wrapping call, so the state
 stays at the last index. Hypothesis, by reading and a hand trace over
 a 2-by-3 =gslice=: a second ~cv[g]~ with the same =g= reads =start=
