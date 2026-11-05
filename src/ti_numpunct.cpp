@@ -48,4 +48,3 @@
 
 _RWSTD_SPECIALIZE_FACET_ID (numpunct, <char>);
 _RWSTD_DEFINE_FACET_FACTORY (extern, numpunct, <char>, numpunct);
-_RWSTD_SPECIALIZE_USE_FACET (numpunct);

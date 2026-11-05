@@ -170,6 +170,73 @@ test_locale (const std::locale &loc, const char *locname, bool byname,
     test_base<NumPut>(loc, locname, "num_put", cname);
 }
 
+
+// a type derived from a standard facet that declares its own id is
+// a facet distinct from its base (22.1.2, p1-2)
+struct NumpunctOwnId: std::numpunct<char>
+{
+    static std::locale::id id;
+};
+
+std::locale::id NumpunctOwnId::id;
+
+
+// a type derived from a standard facet that inherits its base's id
+// replaces the base facet
+struct NumpunctBaseId: std::numpunct<char>
+{
+    char do_decimal_point () const {
+        return ',';
+    }
+};
+
+
+static void
+test_derived (const std::locale &classic)
+{
+    rw_info (0, 0, 0, "a type derived from std::numpunct<char>");
+
+    rw_assert (!std::has_facet<NumpunctOwnId>(classic), 0, __LINE__,
+               "std::has_facet<NumpunctOwnId>(std::locale (\"C\")) == 0");
+
+    NumpunctOwnId* const pown = new NumpunctOwnId;
+    const std::locale own (classic, pown);
+
+    rw_assert (std::has_facet<NumpunctOwnId>(own), 0, __LINE__,
+               "std::has_facet<NumpunctOwnId>(std::locale (std::locale "
+               "(\"C\"), new NumpunctOwnId))");
+
+    rw_assert (std::has_facet<std::numpunct<char> >(own), 0, __LINE__,
+               "std::has_facet<std::numpunct<char> >(std::locale "
+               "(std::locale (\"C\"), new NumpunctOwnId))");
+
+    rw_assert (pown == &std::use_facet<NumpunctOwnId>(own), 0, __LINE__,
+               "std::use_facet<NumpunctOwnId>(std::locale (std::locale "
+               "(\"C\"), new NumpunctOwnId)) is the installed facet");
+
+    const std::numpunct<char>* const pbase =
+        &std::use_facet<std::numpunct<char> >(own);
+
+    rw_assert (pown != pbase, 0, __LINE__,
+               "std::use_facet<std::numpunct<char> >(std::locale "
+               "(std::locale (\"C\"), new NumpunctOwnId)) is not "
+               "the installed facet");
+
+    const std::locale inherit (classic, new NumpunctBaseId);
+
+    rw_assert (std::has_facet<NumpunctBaseId>(inherit), 0, __LINE__,
+               "std::has_facet<NumpunctBaseId>(std::locale (std::locale "
+               "(\"C\"), new NumpunctBaseId))");
+
+    const char dp = std::use_facet<std::numpunct<char> >(inherit)
+        .decimal_point ();
+
+    rw_assert (',' == dp, 0, __LINE__,
+               "std::use_facet<std::numpunct<char> >(std::locale "
+               "(std::locale (\"C\"), new NumpunctBaseId))"
+               ".decimal_point () == %{#c}, got %{#c}", ',', dp);
+}
+
 /**************************************************************************/
 
 static int
@@ -181,6 +248,8 @@ run_test (int, char**)
 
     test_locale<char>(classic, "C", false, "char");
     test_locale<wchar_t>(classic, "C", false, "wchar_t");
+
+    test_derived (classic);
 
     // the installed locales, or those named on the command line
     const char* const locale_list =

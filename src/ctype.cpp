@@ -643,11 +643,6 @@ __rw_facet* __rw_ct_ctype (size_t ref, const char *name)
 }   // namespace __rw
 
 
-typedef std::ctype<char> __rw_ctype_facet;
-
-_RWSTD_SPECIALIZE_USE_FACET (ctype);
-
-
 namespace std {
 
 

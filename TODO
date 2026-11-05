@@ -25,30 +25,6 @@ stale comments, then behaviour the library adds or changes, then the
 additions whose removal costs tests or callers. The rest, outside the
 locale, is last.
 
-** TODO A facet derived from a standard facet with its own =id= asserts on installation
-
-~struct my_numpunct : std::numpunct<char> { static std::locale::id
-id; }; std::locale (std::locale::classic (), new my_numpunct)~
-fires the assertion ~*pfacet->_C_pid~ in =_C_combine=
-(=src/locale_combine.cpp= 286) in a debug build, under the library
-of 2026-11-02 as under today's: the derived =id= is never
-initialized before the facet is installed, and =has_facet= and
-=use_facet= for the derived type go through the four inline
-overloads of =include/loc/_locale.h= 364-400, which read the
-standard facet's slot and never the derived =id=. =ref-locale.md=
-chapter 2 says the case works. 14882:2003 22.1.1.1.2 p1-2 and
-22.1.1.1.1 p1: a facet type with its own =id= is its own facet.
-Found by the extension sweep's reading, confirmed by probe,
-2026-11-04.
-
-Fix: the template constructor initializes the installed facet's
-=id= as =_C_get_facet= does, and the overloads for the standard
-types apply only to the standard types themselves (the derived type
-takes the general path).
-
-Check: the probe prints 1 and 1; a row in =22.locale.cons= with a
-derived facet type that declares =id=.
-
 ** TODO Sweep the library for extensions
 
 Done 2026-11-04 by four readings of =include= and =src= against
@@ -1604,6 +1580,47 @@ position inside the range fails the assertion.
 
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
+
+** TODO The header-guard message in =tests/src/new.cpp= reads past its arguments
+
+The lead-guard check's =rw_error= has the format ~"%s:%d: header
+guard corruption at %#p: expected %#p, got %#p"~ and the arguments
+=hdr->ptr_, (const void*)hdr, hdr->self_=: =__FILE__= and
+=__LINE__= are missing, so =%s= reads the user block as a string and
+the last two =%#p= read arguments that are not there. The check
+moved from =_rw_find_block= into =_rw_check_block= as it was. Seen
+2026-11-05.
+
+Fix: =__FILE__, __LINE__,= before =hdr->ptr_=.
+
+Check: a =0.new= case that corrupts =self_= of a live block and then
+calls =rwt_check_leaks (0, 0)= prints the file and line.
+
+** TODO =_rw_find_block='s =check_heap= parameter is always true
+
+Since =operator_delete= checks the block in hand, every caller of
+=_rw_find_block= (=tests/src/new.cpp=) passes =true=; the =false=
+path, which returned the block on the first match, has no caller.
+Seen 2026-11-05.
+
+Fix: drop the parameter and the branch, or keep them as interface.
+
+Check: a sanity build of the test driver.
+
+** TODO =operator_delete= reads the header before any pointer it is given
+
+The in-hand check reads 48 bytes before the pointer before it knows
+the pointer is a live block. On a freed block that is a read of
+freed memory: harmless under glibc for =0.new='s double delete
+(=self_= reads as the fill), a fault for an =mmap=-served block that
+=malloc= has unmapped (none in the suite), and a heap-use-after-free
+report under AddressSanitizer, where the old walk never touched freed
+memory. Hypothesis, 2026-11-05.
+
+Fix: a decision after the next sanitizer run of =0.new=: accept the
+report in the self-test, or keep a side table of live pointers.
+
+Check: =0.new= under 15D-asan.
 
 ** TODO Two ctype test defects: a wrong character and an unbraced =TEST=
 

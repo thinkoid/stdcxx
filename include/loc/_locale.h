@@ -59,9 +59,7 @@ inline const __rw_facet*
 __rw_get_std_facet (const std::locale&, __rw_facet::_C_facet_type);
 
 inline const __rw_facet*
-__rw_get_facet_by_id (const std::locale&,
-                      const __rw_facet_id&,
-                      const __rw_facet*);
+__rw_get_facet_by_id (const std::locale&, const __rw_facet_id&);
 
 // called from has_facet and use_facet to strips top level
 // const-qualifier from the type of Facet
@@ -245,8 +243,7 @@ private:
 
     friend const __rw::__rw_facet*
     __rw::__rw_get_facet_by_id (const std::locale&,
-                               const __rw::__rw_facet_id&,
-                               const __rw::__rw_facet*);
+                               const __rw::__rw_facet_id&);
 };
 
 }   // namespace std
@@ -255,9 +252,7 @@ private:
 namespace __rw {
 
 inline const __rw_facet*
-__rw_get_facet_by_id (const std::locale &__loc,
-                      const __rw_facet_id      &__id,
-                      const __rw_facet*)
+__rw_get_facet_by_id (const std::locale &__loc, const __rw_facet_id &__id)
 {
     // initialize Facet::id and retrieve facet if it's installed
     return __loc._C_get_facet (__id);
@@ -266,13 +261,10 @@ __rw_get_facet_by_id (const std::locale &__loc,
 
 template <class _Facet>
 inline const __rw_facet*
-__rw_get_facet (const std::locale &__loc, const _Facet *__dummy)
+__rw_get_facet (const std::locale &__loc, const _Facet*)
 {
-    // resolves either to one of the overloads of __rw_get_facet_by_id
-    // defined for the set of standard facets or the overload for the base
-    // locale::facet* if _Facet is not derived from any of the former
     const __rw_facet* const __pfacet =
-        __rw_get_facet_by_id (__loc, _Facet::id, __dummy);
+        __rw_get_facet_by_id (__loc, _Facet::id);
 
     return dynamic_cast< const _Facet* >(__pfacet);
 }
@@ -303,10 +295,10 @@ __rw_get_std_facet (const std::locale         &__loc,
 }
 
 
-#define _RWSTD_OVERLOAD_GET_FACET(F)                 \
+#define _RWSTD_SPECIALIZE_GET_FACET(F)               \
+    template <>                                      \
     _RWSTD_EXPORT const __rw_facet*                  \
-    __rw_get_facet_by_id (const std::locale&,        \
-                          const __rw_facet_id&, const F*)
+    __rw_get_facet (const std::locale&, const F*)
 
 #define _Facet(name, T, U)   std::name<T, U >
 
@@ -360,20 +352,16 @@ __rw_get_facet (const std::locale &__loc, const __rw_nput_c*)
 }
 
 
-// declarations of __rw_get_facet_by_id overloads
-_RWSTD_OVERLOAD_GET_FACET (std::ctype<char>);
-_RWSTD_OVERLOAD_GET_FACET (__rw_codecvt_c);
-_RWSTD_OVERLOAD_GET_FACET (std::collate<char>);
-_RWSTD_OVERLOAD_GET_FACET (__rw_mget_c);
-_RWSTD_OVERLOAD_GET_FACET (__rw_mput_c);
-_RWSTD_OVERLOAD_GET_FACET (__rw_mpunct_c_0);
-_RWSTD_OVERLOAD_GET_FACET (__rw_mpunct_c_1);
-_RWSTD_OVERLOAD_GET_FACET (__rw_nget_c);
-_RWSTD_OVERLOAD_GET_FACET (__rw_nput_c);
-_RWSTD_OVERLOAD_GET_FACET (std::numpunct<char>);
-_RWSTD_OVERLOAD_GET_FACET (__rw_tget_c);
-_RWSTD_OVERLOAD_GET_FACET (__rw_tput_c);
-_RWSTD_OVERLOAD_GET_FACET (std::messages<char>);
+// declarations of the __rw_get_facet specializations defined in the library
+_RWSTD_SPECIALIZE_GET_FACET (__rw_codecvt_c);
+_RWSTD_SPECIALIZE_GET_FACET (std::collate<char>);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_mget_c);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_mput_c);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_mpunct_c_0);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_mpunct_c_1);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_tget_c);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_tput_c);
+_RWSTD_SPECIALIZE_GET_FACET (std::messages<char>);
 
 typedef std::codecvt<wchar_t, char, _RWSTD_MBSTATE_T>     __rw_codecvt_w;
 typedef _Facet (moneypunct, wchar_t, false)               __rw_mpunct_w_0;
@@ -385,22 +373,22 @@ typedef _Facet (num_put, wchar_t, _OutIter (wchar_t))     __rw_nput_w;
 typedef _Facet (time_get, wchar_t, _InIter (wchar_t))     __rw_tget_w;
 typedef _Facet (time_put, wchar_t, _OutIter (wchar_t))    __rw_tput_w;
 
-_RWSTD_OVERLOAD_GET_FACET (std::ctype<wchar_t>);
-_RWSTD_OVERLOAD_GET_FACET (__rw_codecvt_w);
-_RWSTD_OVERLOAD_GET_FACET (std::collate<wchar_t>);
-_RWSTD_OVERLOAD_GET_FACET (__rw_mget_w);
-_RWSTD_OVERLOAD_GET_FACET (__rw_mput_w);
-_RWSTD_OVERLOAD_GET_FACET (__rw_mpunct_w_0);
-_RWSTD_OVERLOAD_GET_FACET (__rw_mpunct_w_1);
-_RWSTD_OVERLOAD_GET_FACET (__rw_nget_w);
-_RWSTD_OVERLOAD_GET_FACET (__rw_nput_w);
-_RWSTD_OVERLOAD_GET_FACET (std::numpunct<wchar_t>);
-_RWSTD_OVERLOAD_GET_FACET (__rw_tget_w);
-_RWSTD_OVERLOAD_GET_FACET (__rw_tput_w);
-_RWSTD_OVERLOAD_GET_FACET (std::messages<wchar_t>);
+_RWSTD_SPECIALIZE_GET_FACET (std::ctype<wchar_t>);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_codecvt_w);
+_RWSTD_SPECIALIZE_GET_FACET (std::collate<wchar_t>);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_mget_w);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_mput_w);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_mpunct_w_0);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_mpunct_w_1);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_nget_w);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_nput_w);
+_RWSTD_SPECIALIZE_GET_FACET (std::numpunct<wchar_t>);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_tget_w);
+_RWSTD_SPECIALIZE_GET_FACET (__rw_tput_w);
+_RWSTD_SPECIALIZE_GET_FACET (std::messages<wchar_t>);
 
 // clean up
-#undef _RWSTD_OVERLOAD_GET_FACET
+#undef _RWSTD_SPECIALIZE_GET_FACET
 #undef _Facet
 #undef _InIter
 #undef _OutIter
@@ -418,10 +406,7 @@ inline locale::locale (const locale &__rhs, _Facet *__facet)
 {
     // initialize facet's member id to point to Facet::id
     if (__facet && !__facet->_C_pid) {
-        // unusual cast (to size_t** rather than size_t*&)
-        // done to work around an HP aCC 3.3x bug
-        *const_cast< _RWSTD_SIZE_T** >(&__facet->_C_pid) =
-            &_Facet::id._C_id;
+        const_cast< _RWSTD_SIZE_T*& >(__facet->_C_pid) = &_Facet::id._C_id;
     }
 
     // uninitialized Facet::id will be initialized by has_facet<>()

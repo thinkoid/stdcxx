@@ -99,7 +99,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 268 | 12,474,976 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 268 | 12,474,862 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 269 | 12,538,257 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 269 | 12,538,264 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -298,6 +298,10 @@ all six tables:
   cases of 331 nodes and more are gone and two shapes they alone
   covered return at 128; the other five tables are to move the same
   way.
+- 2026-11-05: `22.locale.globals`, 78,320 to 78,327, in 15D: seven
+  rows for a type derived from a standard facet, with its own `id`
+  and with its base's; the other five tables are to gain the same
+  seven.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`.

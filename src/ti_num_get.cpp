@@ -51,4 +51,3 @@
 
 _RWSTD_SPECIALIZE_FACET_ID (num_get, TARGS_C);
 _RWSTD_DEFINE_FACET_FACTORY (extern, num_get, TARGS_C, num_get);
-_RWSTD_SPECIALIZE_USE_FACET (num_get);

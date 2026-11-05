@@ -49,4 +49,3 @@
 
 _RWSTD_SPECIALIZE_FACET_ID (num_put, TARGS_C);
 _RWSTD_DEFINE_FACET_FACTORY (extern, num_put, TARGS_C, num_put);
-_RWSTD_SPECIALIZE_USE_FACET (num_put);

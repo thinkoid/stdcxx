@@ -160,11 +160,11 @@ __rw_init_std_facet (__rw_facet                *pfacet,
 
 #define _RWSTD_SPECIALIZE_USE_FACET(fid)                              \
     namespace __rw {                                         \
+        template <>                                                   \
         _RWSTD_EXPORT                                                 \
         const __rw_facet*                                             \
-        __rw_get_facet_by_id                                          \
+        __rw_get_facet                                                \
             (const std::locale &__loc,                                \
-             const __rw_facet_id&,                                    \
              const __rw_ ## fid ## _facet*) {                         \
             return __rw_get_std_facet (__loc,                         \
                                        __rw_facet::_C_ ## fid);       \
