@@ -218,53 +218,6 @@ void test_auto_ptr (T*, const char *tname)
 
 /**************************************************************************/
 
-static void
-test_auto_ptr_void ()
-{
-    // note that specializing auto_ptr on void is undefined
-    // due to 17.4.3.6, p2; this is an extension of this
-    // implementation
-    rw_info (0, 0, 0, "std::auto_ptr<void> [extension]");
-
-    std::auto_ptr<void> ap1;
-    std::auto_ptr<void> ap2 ((void*)0);
-    std::auto_ptr<void> ap3 (ap2);
-
-    ap1 = ap1;
-    ap1.operator= (ap1);
-
-    // working around an HP aCC 3 and 5 bug (STDCXX-655)
-
-    ap1.operator=<void>(ap1);
-
-    std::auto_ptr<int> ap4;
-    ap1 = ap4;
-    ap1.operator= (ap4);
-    ap1.operator=<int>(ap4);
-
-    // operator*() cannot be instantiated
-
-    void* pv;
-
-    pv = ap1.operator->();
-    pv = ap1.get ();
-    pv = ap1.release ();
-
-    ap1.reset ();
-    ap1.reset (pv);
-
-    // working around an HP aCC 3 and 5 bug (STDCXX-656)
-
-    const std::auto_ptr_ref<void> ar = ap1.operator std::auto_ptr_ref<void>();
-    const std::auto_ptr<void> ap5 = ap1.operator std::auto_ptr<void>();
-
-    _RWSTD_UNUSED (ar);
-    _RWSTD_UNUSED (ap5);
-
-}
-
-/**************************************************************************/
-
 // exercise 20.4.5.4
 static std::auto_ptr<Derived>
 test_auto_ptr_conversions ()
@@ -370,11 +323,6 @@ run_test (int, char**)
     // verify that no objects leaked
     rw_assert (count == Base::cnt_, 0, __LINE__,
                "autoptr leaked %d objects", Base::cnt_ - count);
-
-    if (!rw_enabled ("void"))
-        rw_note (0, 0, 0, "auto_ptr<void> test disabled");
-    else
-        test_auto_ptr_void ();
 
     return 0;
 }

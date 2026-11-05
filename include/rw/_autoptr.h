@@ -38,46 +38,6 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-namespace __rw { 
-
-
-template <class _TypeT>
-struct __rw_nonvoid_ref
-{
-    typedef _TypeT& _C_ref;
-};
-
-
-template <>
-struct __rw_nonvoid_ref<void>
-{
-    // makes the declaration of auto_ptr<void>::operator*() well-formed
-    // (the function definition itself may still be ill-formed and must
-    // not be instantiated)
-    typedef void _C_ref;
-};
-
-template <>
-struct __rw_nonvoid_ref<const void>
-{
-    typedef void _C_ref;
-};
-
-template <>
-struct __rw_nonvoid_ref<volatile void>
-{
-    typedef void _C_ref;
-};
-
-template <>
-struct __rw_nonvoid_ref<const volatile void>
-{
-    typedef void _C_ref;
-};
-
-}   // namespace __rw
-
-
 namespace std { 
 
 
@@ -158,8 +118,7 @@ public:
     }
 
     // 20.4.5.2, p1
-    typename __rw::__rw_nonvoid_ref<element_type>::_C_ref
-    operator* () const _THROWS (()) {
+    element_type& operator* () const _THROWS (()) {
         _RWSTD_ASSERT (0 != get ());
         return *get (); 
     }

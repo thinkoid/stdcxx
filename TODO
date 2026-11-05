@@ -117,27 +117,6 @@ warning.
 Check: =nm -D= of the 15D library and of =libstdc++= for
 =_ZNSt9type_infoC2EPKc=, which settles whether a call can link.
 
-** TODO =auto_ptr<void>= is usable
-
-14882:2003 20.4.5's synopsis declares ~X& operator* () const throw
-()~, ill-formed for =X= =void= once instantiated, and 17.4.3.6, p2
-makes instantiating a library template on an incomplete type
-undefined. =include/rw/_autoptr.h= 43-77 define =__rw_nonvoid_ref= so
-that ~operator*~ returns =void= for =void= (161), and =auto_ptr<void>=
-compiles. Its destructor then deletes through a =void*=, which 5.3.5,
-p3 and its footnote make undefined. The test calls it an extension:
-=tests/utilities/20.auto.ptr.cpp= 221-262, run unless =void= is
-disabled (374-377). =doc/stdlibref/auto-ptr.html= does not document
-it. Nothing in the library instantiates =auto_ptr<void>=. Removal
-costs the test function. Found by the extension sweep's reading,
-2026-11-04.
-
-Fix: a decision: remove, ~operator*~ returning =element_type&= again,
-or record; for removal, its purpose was =shared_ptr<void>= and the
-class then deletes a =void*=.
-
-Check: =20.auto.ptr= loses its =auto_ptr<void>= section and passes.
-
 ** TODO A null pointer with a count gives a string of uninitialized characters
 
 14882:2003 21.3.1, p6: "Requires: s shall not be a null pointer and n
