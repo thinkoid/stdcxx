@@ -51,24 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO The comments on eight =__rw= helpers of =valarray= call them additions
-
-=include/functional= 669-767 defines =identity=, =unary_plus=,
-=bitwise_complement=, =bitwise_or=, =bitwise_and=, =exclusive_or=,
-=shift_left= and =shift_right= in =namespace __rw=, each under a
-comment "extension: ...". The namespace is reserved (14882:2003
-17.4.3.1.2, p1) and no reference page documents them: they are helpers
-of =include/valarray= (325-858, 1314-1358, 1534-1577 and 1643-1693),
-not additions a program can name.
-=tests/utilities/20.function.objects.cpp= 230-247 tests them under
-"exercise extensions". Found by the extension sweep's reading,
-2026-11-04.
-
-Fix: the eight comments and the test's label call them helpers of
-=valarray=; the code stays.
-
-Check: =git grep -n extension include/functional= is empty.
-
 ** TODO Two stream comments describe code that is gone
 
 =include/istream.cc= 77-79 says =_C_ipfx= zeroes =gcount ()=

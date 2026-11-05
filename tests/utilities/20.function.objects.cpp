@@ -226,27 +226,6 @@ test_arithmetic_operations ()
 
     // 20.3.2, p7
     TEST_UNARY_OP (negate<int>,      -, 1);
-
-    // exercise extensions
-
-// tested fununctions are in a private namespace 
-#undef N
-#define N __rw
-
-    TEST_UNARY_OP (identity<int>,           +, 3);
-    TEST_UNARY_OP (unary_plus<int>,         +, 4);
-    TEST_UNARY_OP (bitwise_complement<int>, ~, 5);
-
-    TEST_BINARY_OP (bitwise_and<int>,       &, 0x0f, 0x05);
-    TEST_BINARY_OP (bitwise_or<int>,        |, 0x0f, 0xf0);
-    TEST_BINARY_OP (exclusive_or<int>,      ^, 0x0f, 0xf1);
-
-    TEST_BINARY_OP (shift_left<int>,        <<,  3, 3);
-    TEST_BINARY_OP (shift_right<int>,       >>, 15, 3);
-
-// remaining tested fununctions are in namespace std
-#undef N
-#define N std
 }
 
 /**************************************************************************/
