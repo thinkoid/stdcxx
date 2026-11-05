@@ -71,22 +71,6 @@ for the record, the library's throw path uses it. The decision on the
 Check: the chapter 2 row exists and the comment at
 =include/rw/_iosfailure.h= 51 names it.
 
-** TODO =fpos= takes a state in its constructor and names its state type
-
-14882:2003 27.4.3's synopsis gives =fpos= the two =state= members;
-Table 88 (27.4.3.2, p1) requires construction from a =streamoff=.
-=include/rw/_traits.h= 132-138 add a public =typedef state_type= and
-~fpos (streamoff = 0, const state_type& = state_type ())~, a default
-constructor and one with a state. 17.4.4.4, p2 permits the arguments;
-the type name is not reserved. =doc/stdlibref/fpos.html= documents
-both. No library caller passes a state, and no test names them. Found
-by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: record as an addition, or remove; for the record, it
-is documented, permitted and harmless.
-
-Check: the row exists.
-
 ** TODO =basic_filebuf= and =basic_stringbuf= override virtuals the standard does not list
 
 14882:2003 27.8.1.1's synopsis lists the virtuals =basic_filebuf=
