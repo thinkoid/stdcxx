@@ -51,25 +51,6 @@ Fix: each entry's decision; a decision to keep writes its row in
 Check: every "extension" comment in =include= and =src= is either gone
 or names its entry or its row in =ref-conformance.md=.
 
-** TODO =put= and =write= reset the width
-
-14882:2003 27.6.2.6, p1, p2 and p5 make =put= and =write= unformatted
-output functions; nothing in them touches =width ()=. Both call
-=__rw_insert= with a width of 0 (=include/ostream= 193-200), and
-=__rw_insert= calls =width (0)= once its sentry is good
-(=include/rw/_ioinsert.cc= 166), so ~os << std::setw (5); os.put
-('x'); os << 1;~ writes "x1" where the standard writes "x    1".
-=endl= and =ends= go through =put= (=include/ostream= 416-428) and
-drop a pending width too. No test covers it (Tests, "=27.ostream=
-never runs its unformatted tests"). The fix costs a parameter or a
-second path in =__rw_insert=, or the reset moves into the formatted
-callers. Found by the extension sweep's reading, 2026-11-04.
-
-Fix: the unformatted path leaves the width alone.
-
-Check: a =27.ostream= case that sets =width (5)=, calls =put=, =write=
-and =endl= in turn, and finds =width ()= at 5 after each.
-
 ** TODO The standard objects carry a stdio bit in their format flags
 
 14882:2003 27.3.1, p2 and p5 and 27.3.2, p2 and p5 give the eight
@@ -1555,17 +1536,16 @@ Check: the rows run and the six pins gain a row.
 
 ** TODO =27.ostream= never runs its unformatted tests
 
-=tests/iostream/27.ostream.cpp= 1426-1431 leave the call of
-=test_unformatted= commented out under "FIXME: implement this", so
-=put= and =write= have no row there, and the width reset of both
-(Library, "=put= and =write= reset the width") is unpinned. Found by
-the extension sweep's reading, 2026-11-04.
+=tests/iostream/27.ostream.cpp= leaves the call of =test_unformatted=
+commented out under "FIXME: implement this" in =run_test=, so =put=
+and =write= have no row there but =test_unformatted_width='s, which
+checks that both leave =width ()= alone. Found by the extension
+sweep's reading, 2026-11-04.
 
-Fix: =test_unformatted=: each function's output, its =badbit= on a
-failing buffer, and its effect on =width ()=.
+Fix: =test_unformatted=: each function's output and its =badbit= on a
+failing buffer.
 
-Check: the rows run, the width rows red before the Library fix and
-green after; the six pins move.
+Check: the rows run; the six pins move.
 
 * Certification
 

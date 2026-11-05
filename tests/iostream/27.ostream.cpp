@@ -1407,6 +1407,72 @@ void test_flush (charT)
 
 /***************************************************************************/
 
+// 27.6.2.6, p1, p2 and p5: put() and write() are unformatted and leave
+// width() alone, and so does endl, which calls put(); 27.6.2.5.4, p4:
+// the next formatted inserter pads to the width and calls width(0)
+template <class charT>
+void test_unformatted_width (charT)
+{
+    static const char* const cname = rw_any_t (charT ()).type_name ();
+
+    rw_info (0, 0, __LINE__,
+             "std::basic_ostream<%s>::put(), write() and endl "
+             "leave width() alone", cname);
+
+    typedef std::basic_ostream<charT, std::char_traits<charT> > Ostream;
+
+    charT buf [16] = { charT () };
+
+    const std::streamsize bufsize = sizeof buf / sizeof *buf;
+
+    test_streambuf<charT> tsb (buf, bufsize);
+    tsb.pstrm_ = 0;
+
+    Ostream strm (&tsb);
+
+    const charT bc [] = { strm.widen ('b'), strm.widen ('c') };
+
+    strm.width (5);
+
+    strm.put (strm.widen ('a'));
+
+    rw_assert (5 == strm.width (), 0, __LINE__,
+               "std::basic_ostream<%s>::put('a') with width() == 5: "
+               "width() == 5, got %d", cname, int (strm.width ()));
+
+    strm.write (bc, 2);
+
+    rw_assert (5 == strm.width (), 0, __LINE__,
+               "std::basic_ostream<%s>::write(\"bc\", 2) with width() "
+               "== 5: width() == 5, got %d", cname, int (strm.width ()));
+
+    strm << std::endl;
+
+    rw_assert (5 == strm.width (), 0, __LINE__,
+               "std::endl (std::basic_ostream<%s>&) with width() == 5: "
+               "width() == 5, got %d", cname, int (strm.width ()));
+
+    strm << "x";
+
+    rw_assert (0 == strm.width (), 0, __LINE__,
+               "std::basic_ostream<%s> << \"x\" with width() == 5: "
+               "width() == 0, got %d", cname, int (strm.width ()));
+
+    const char expect [] = "abc\n    x";
+
+    bool same = strm.good ();
+
+    for (std::size_t i = 0; same && i != sizeof expect; ++i)
+        same = strm.widen (expect [i]) == buf [i];
+
+    rw_assert (same, 0, __LINE__,
+               "std::basic_ostream<%s>: put('a'), write(\"bc\", 2), endl "
+               "and << \"x\" with width() == 5 write \"abc\\n    x\"",
+               cname);
+}
+
+/***************************************************************************/
+
 template <class charT>
 void run_test (charT)
 {
@@ -1426,6 +1492,8 @@ void run_test (charT)
     if (rw_opt_unformatted < 0)
         rw_note (0, 0, __LINE__, "tests of unformatted functions disabled");
     else {
+        test_unformatted_width (charT ());
+
         // FIXME: implement this
         // test_unformatted (charT ());
     }

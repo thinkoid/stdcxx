@@ -125,9 +125,7 @@ __rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
 
     // writes out max(len, width) characters, padding appropriately
     // with the fill character if (len < width);
-    // calls width(0) if and only if the write has been successful
-    // (i.e., will leave it unchanged if sputn fails or throws an
-    // exception)
+    // calls width(0) if width is nonzero and no exception is thrown
 
     try {
   
@@ -161,9 +159,13 @@ __rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
                 __err = std::ios_base::badbit;
             }
 
-            // 21.3.7.9, p4: the inserter calls width(0) after the
-            // characters are inserted, whether or not sputn failed
-            __strm.width (0);
+            // 21.3.7.9, p4 and 27.6.2.5.4, p1 and p4: the inserters call
+            // width(0) after the characters are inserted, whether or not
+            // sputn failed; a width of 0 is either a formatted call with
+            // no width to reset or an unformatted one, which leaves the
+            // width alone (27.6.2.6, p1)
+            if (__width)
+                __strm.width (0);
         }
     }
     catch (...) {
