@@ -105,27 +105,6 @@ Fix: =freeze= alters the status of a dynamic buffer only.
 Check: an =ostrstream= over a =char [8]=: insert "ab", call =str ()=,
 insert "cd"; the stream is =good ()= and the array begins "abcd".
 
-** TODO A =list= iterator subtracts to 0
-
-Tables 75 and 76 (24.1.4, 24.1.5) give =a - b= to random access
-iterators only. =include/list= 134-136 give =__rw_list_iter= a
-~difference_type operator- (const __rw_list_iter&) const~ that returns
-0: ~it2 - it1~ on two =list<T>::iterator= compiles and is 0, and so is
-the difference of two reverse iterators over them; in a debug build
-~__rw_debug_iter::operator-~ (=include/rw/_iterbase.h= 453-459)
-forwards to it. The iterator type is implementation-defined, so the
-member is permitted, but it answers a question wrongly instead of
-failing to compile. From the 2005 import. Nothing in =include= or
-=src= subtracts list iterators, since =std::distance= dispatches on
-the category; no test or reference page names it. Found by the
-extension sweep's reading, 2026-11-04.
-
-Fix: a decision: remove, or record; for removal, a wrong answer is
-worse than a compile error and nothing uses it.
-
-Check: the library and the =23.list.*= tests build in 15D and 11S and
-equal their pins without it.
-
 ** TODO =vector<bool>= goes past its synopsis in four places
 
 14882:2003 23.2.5's synopsis: =reference= has a private default

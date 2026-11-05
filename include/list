@@ -131,10 +131,6 @@ public:
 
     pointer operator-> () const { return &**this; };
     
-    difference_type operator- (const __rw_list_iter&) const {
-        return 0;
-    }
-
     bool operator== (const __rw_list_iter& __iter) const {
         return _C_node == __iter._C_node;
     }
