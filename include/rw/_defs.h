@@ -383,10 +383,6 @@
 #define _RWSTD_MEMBER_EXPORT   /* empty */
 
 
-// Work around a bug in MSVC (see PR# 28547); used in basic_string
-#define _RWSTD_REDECLARED_DEFAULT(arg)   = arg
-
-
 #define _RWSTD_MB_CUR_MAX 16  // FIXME: must be determined dynamically
 
 // helper macros for token pasting

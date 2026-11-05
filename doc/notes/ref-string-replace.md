@@ -158,13 +158,13 @@ Five `replace` overloads have a body of their own:
    `string`, which range-checks and forwards to the workhorse with
    `str.data () + pos2`. When `str` is `*this`, that is a pointer into
    the buffer, and the workhorse handles it.
-4. **`replace (iterator, iterator, InputIter, InputIter, void*)`**, the
-   member template, `string.cc`. Chapter 5.
+4. **`_C_replace (iterator, iterator, InputIter, InputIter, void*)`**,
+   the member template, `string.cc`. Chapter 5.
 5. **`__replace_aux (iterator, iterator, InputIter, InputIter)`**, the
    private helper the template uses once it holds a multi-pass source
    known not to alias the buffer. Chapter 7.
 
-The dispatch in chapter 5 adds four non-template `replace` overloads
+The dispatch in chapter 5 adds four non-template `_C_replace` overloads
 that have one-line bodies forwarding to the workhorse. They are the
 subject of chapter 6.
 
@@ -225,15 +225,17 @@ The public two-iterator template does nothing but append that value:
     template <class _InputIter>
     basic_string& replace (iterator first1, iterator last1,
                            _InputIter first2, _InputIter last2) {
-        return replace (first1, last1, first2, last2, _RWSTD_DISPATCH (_InputIter));
+        return _C_replace (first1, last1, first2, last2, _RWSTD_DISPATCH (_InputIter));
     }
 
 and the two targets differ in their last parameter:
 
-    replace (iterator, iterator, size_type n, value_type c, int);    // the count form
-    replace (iterator, iterator, InputIter, InputIter, void*);       // the range form
+    _C_replace (iterator, iterator, size_type n, value_type c, int);    // the count form
+    _C_replace (iterator, iterator, InputIter, InputIter, void*);       // the range form
 
-`assign`, `insert` and `append` carry the same pair. The trailing
+The targets take reserved names, so a program cannot call them.
+`assign`, `insert` and `append` carry the same pair, as `_C_assign`,
+`_C_insert` and `_C_append`. The trailing
 `int` or `void*` is never used inside; the comment "unnamed arg is
 used for overload resolution" marks each one. The non-template
 overloads of chapter 6 carry the trailing `void*` too, so that they
@@ -242,7 +244,7 @@ compete in the same overload set as the range template.
 ### 5.2 Single pass or multi-pass
 
 Inside the range template (`string.cc`, the function is defined
-either as the member `replace (…, void*)` or, for a compiler whose
+either as the member `_C_replace (…, void*)` or, for a compiler whose
 member templates cannot be declared `extern`, which the
 characterization `_RWSTD_NO_EXTERN_MEMBER_TEMPLATE` detects and
 neither GCC nor Clang triggers, as the free function `__rw_replace`;
@@ -315,10 +317,10 @@ That somewhere is overload resolution. Four non-template members sit
 beside the range template, each with the same trailing `void*` so
 that the dispatcher of 5.1 finds them in the same set:
 
-    replace (iterator, iterator, const_pointer, const_pointer, void*);
-    replace (iterator, iterator, pointer,       pointer,       void*);
-    replace (iterator, iterator, const_iterator, const_iterator, void*);   // debug builds
-    replace (iterator, iterator, iterator,       iterator,       void*);   // debug builds
+    _C_replace (iterator, iterator, const_pointer, const_pointer, void*);
+    _C_replace (iterator, iterator, pointer,       pointer,       void*);
+    _C_replace (iterator, iterator, const_iterator, const_iterator, void*);   // debug builds
+    _C_replace (iterator, iterator, iterator,       iterator,       void*);   // debug builds
 
 The **`const_pointer`** overload computes the offsets and calls the
 workhorse with `s` and `last - first`. The workhorse's own address

@@ -160,9 +160,6 @@ public:
                  __first, __last);
     }
 
-    basic_string (const_pointer, const_pointer, const allocator_type&
-                  _RWSTD_REDECLARED_DEFAULT (allocator_type ()));
-
     ~basic_string () {
         _C_unlink (0);
     }
@@ -282,17 +279,17 @@ public:
         // resolves to append (size_type, value_type) if _InputIter
         // is any integral type (even not an exact match, such as char)
         // the cast to int is necessary to prevent an exact match
-        return append (__first, __last, _RWSTD_DISPATCH (_InputIter));
+        return _C_append (__first, __last, _RWSTD_DISPATCH (_InputIter));
     }
 
     template<class _InputIter>
-    basic_string& append (_InputIter __first, _InputIter __last, void*) {
+    basic_string& _C_append (_InputIter __first, _InputIter __last, void*) {
         return replace (_C_make_iter (_C_data + size ()),
                         _C_make_iter (_C_data + size ()),
                         __first, __last), *this;
     }
 
-    basic_string& append (size_type __n, value_type __c, int) {
+    basic_string& _C_append (size_type __n, value_type __c, int) {
         // unnamed arg is used for overload resolution
         return append (__n, __c);
     }
@@ -322,18 +319,18 @@ public:
         // resolves to assign (size_type, value_type) if _InputIter
         // is any integral type (even not an exact match, such as char)
         // the cast to int is necessary to prevent an exact match
-        return assign (__first, __last, _RWSTD_DISPATCH (_InputIter));
+        return _C_assign (__first, __last, _RWSTD_DISPATCH (_InputIter));
     }
 
     template<class _InputIter>
-    basic_string& assign (_InputIter __first, _InputIter __last, void*) {
+    basic_string& _C_assign (_InputIter __first, _InputIter __last, void*) {
         // unnamed arg is used for overload resolution
         // _RWSTD_COMPILE_ASSERT (sizeof (*__first));
         return replace (_C_make_iter (_C_data),
                         _C_make_iter (_C_data + size ()), __first, __last);
     }
 
-    basic_string& assign (size_type __n, value_type __c, int) {
+    basic_string& _C_assign (size_type __n, value_type __c, int) {
         // unnamed arg is used for overload resolution
         return replace (size_type (), size (), __n, __c);
     }
@@ -363,17 +360,18 @@ public:
 
     template<class _InputIter>
     void insert (iterator __p, _InputIter __first, _InputIter __last) {
-        insert (__p, __first, __last, _RWSTD_DISPATCH (_InputIter));
+        _C_insert (__p, __first, __last, _RWSTD_DISPATCH (_InputIter));
     }
 
     template <class _InputIter>
-    void insert (iterator __p, _InputIter __first, _InputIter __last, void*) {
+    void _C_insert (iterator __p, _InputIter __first, _InputIter __last,
+                    void*) {
         // unnamed arg is used for overload resolution
         // _RWSTD_COMPILE_ASSERT (sizeof (*__first));
         replace (__p, __p, __first, __last);
     }
 
-    void insert (iterator __p, size_type __n, value_type __c, int) {
+    void _C_insert (iterator __p, size_type __n, value_type __c, int) {
         // unnamed arg is used for overload resolution
         replace (_C_off (__p), size_type (), __n, __c);
     }
@@ -490,15 +488,15 @@ public:
 
     template<class _InputIter>
     basic_string&
-    replace (iterator __first1, iterator __last1, 
-             _InputIter __first2, _InputIter __last2, void*);
+    _C_replace (iterator __first1, iterator __last1, 
+                _InputIter __first2, _InputIter __last2, void*);
 
 #else   // if defined (_RWSTD_NO_STRING_OUTLINED_MEMBER_TEMPLATES)
 
     template<class _InputIter>
     basic_string&
-    replace (iterator __first1, iterator __last1, 
-             _InputIter __first2, _InputIter __last2, void*) {
+    _C_replace (iterator __first1, iterator __last1, 
+                _InputIter __first2, _InputIter __last2, void*) {
         return __rw_replace (*this, __first1, __last1, __first2, __last2);
     }
 
@@ -508,47 +506,47 @@ public:
     // overload, which handles a source within the buffer by allocating
     // a new representation; every other type copies the source first
     basic_string&
-    replace (iterator __first1, iterator __last1,
-             const_pointer __first2, const_pointer __last2, void*) {
+    _C_replace (iterator __first1, iterator __last1,
+                const_pointer __first2, const_pointer __last2, void*) {
         // unnamed arg is used for overload resolution
         return replace (_C_off (__first1), _C_off (__first1, __last1),
                         __first2, size_type (__last2 - __first2));
     }
 
     basic_string&
-    replace (iterator __first1, iterator __last1,
-             pointer __first2, pointer __last2, void*) {
+    _C_replace (iterator __first1, iterator __last1,
+                pointer __first2, pointer __last2, void*) {
         // unnamed arg is used for overload resolution; a pointer is
         // an exact match for the member template and would bypass
         // the const_pointer overload above
-        return replace (__first1, __last1,
-                        const_pointer (__first2), const_pointer (__last2),
-                        (void*)0);
+        return _C_replace (__first1, __last1,
+                           const_pointer (__first2), const_pointer (__last2),
+                           (void*)0);
     }
 
 #ifndef _RWSTD_NO_DEBUG_ITER
 
     basic_string&
-    replace (iterator __first1, iterator __last1,
-             const_iterator __first2, const_iterator __last2, void*) {
+    _C_replace (iterator __first1, iterator __last1,
+                const_iterator __first2, const_iterator __last2, void*) {
         // unnamed arg is used for overload resolution
-        return replace (__first1, __last1,
-                        __first2.base (), __last2.base (), (void*)0);
+        return _C_replace (__first1, __last1,
+                           __first2.base (), __last2.base (), (void*)0);
     }
 
     basic_string&
-    replace (iterator __first1, iterator __last1,
-             iterator __first2, iterator __last2, void*) {
+    _C_replace (iterator __first1, iterator __last1,
+                iterator __first2, iterator __last2, void*) {
         // unnamed arg is used for overload resolution
-        return replace (__first1, __last1,
-                        __first2.base (), __last2.base (), (void*)0);
+        return _C_replace (__first1, __last1,
+                           __first2.base (), __last2.base (), (void*)0);
     }
 
 #endif   // _RWSTD_NO_DEBUG_ITER
 
     basic_string&
-    replace (iterator __first, iterator __last,
-             size_type __n, value_type __c, int) {
+    _C_replace (iterator __first, iterator __last,
+                size_type __n, value_type __c, int) {
         return replace (_C_off (__first), _C_off (__first, __last), __n, __c);
     }
 
@@ -557,8 +555,8 @@ public:
     basic_string&
     replace (iterator __first1, iterator __last1,
              _InputIter __first2, _InputIter __last2) {
-        return replace (__first1, __last1, __first2, __last2,
-                        _RWSTD_DISPATCH (_InputIter));
+        return _C_replace (__first1, __last1, __first2, __last2,
+                           _RWSTD_DISPATCH (_InputIter));
     }
 
 

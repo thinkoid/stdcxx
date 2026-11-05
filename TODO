@@ -158,32 +158,6 @@ removal, a program that relies on it reads indeterminate values.
 
 Check: both comments are gone and =23.bitset= equals its pin.
 
-** TODO =basic_string='s dispatch overloads and pointer-pair constructor are public
-
-14882:2003 21.3's synopsis has =append=, =assign=, =insert= and
-=replace= without extra arguments, and the template range constructor
-only. The class declares, public, the targets of its
-integral-or-iterator dispatch under the standard names: =append= with
-a =void*= or an =int= last argument (=include/string= 288-298),
-=assign= (328-339), =insert= (369-379) and the five-argument =replace=
-overloads (491-553). It also declares a non-template ~basic_string
-(const_pointer, const_pointer, const allocator_type&)~
-(=include/string= 163-164, =include/string.cc= 179-192). 17.4.4.4, p2
-permits added signatures and p3 holds for the standard's calls, but a
-program can write ~s.append (3, 'x', 0)~, or construct from a =char*=
-and a =const char*=, which the standard's template rejects for the
-conflicting deduction. =doc/stdlibref/basic-string.html= lists none of
-them, and no test names them. The dispatch targets are all called
-through =_RWSTD_DISPATCH= inside the class; the template could replace
-the pointer-pair constructor's direct copy with a =replace= call.
-Found by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision in two parts: the dispatch targets take reserved
-names, which costs nothing; the pointer-pair constructor stays as a
-recorded addition, for the direct copy, or goes.
-
-Check: the =21.string.*= rows are unchanged after the rename.
-
 ** TODO The =<stdexcept>= classes take a =const char*= that defaults to null
 
 14882:2003 19.1.1 to 19.1.9 give each class one constructor, ~explicit

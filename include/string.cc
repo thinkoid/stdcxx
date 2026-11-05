@@ -177,22 +177,6 @@ basic_string (const_pointer __s,
 
 
 template <class _CharT, class _Traits, class _Allocator>
-basic_string<_CharT, _Traits, _Allocator>::
-basic_string (const_pointer __first, const_pointer __last, 
-              const allocator_type &__alloc /* = allocator_type () */)
-    : allocator_type (__alloc)
-{
-    const size_type __n = size_type (__last - __first);
-
-    _C_data = __n ?
-        _C_get_rep (_C_grow (size_type (), __n), __n)->data ()
-      : _C_nullref ()->data ();
-
-    traits_type::copy (_C_data, __first, __n);
-}
-
-
-template <class _CharT, class _Traits, class _Allocator>
 basic_string<_CharT, _Traits, _Allocator>&
 basic_string<_CharT, _Traits, _Allocator>::
 operator= (const basic_string &__rhs)
@@ -460,8 +444,8 @@ template<class _CharT, class _Traits, class _Allocator>
 template<class _InputIter>
 basic_string<_CharT, _Traits, _Allocator>& 
 basic_string<_CharT, _Traits, _Allocator>::
-replace (iterator __first1, iterator __last1,
-         _InputIter __first2, _InputIter __last2, void*)
+_C_replace (iterator __first1, iterator __last1,
+            _InputIter __first2, _InputIter __last2, void*)
 {
     typedef basic_string _C_string_type;
 
