@@ -643,8 +643,8 @@ static void __rw_throw_exception (int id, char *what)
 
 }
 
-// may be assigned to a user-defined handler (e.g., to prevent
-// the library from throwing exceptions or to implement logging)
+// the test suite's seam for observing throws; departure:
+// ref-conformance.md, "A replaceable throw handler"
 _RWSTD_EXPORT void (*__rw_throw_proc)(int, char*) = __rw_throw_exception;
 
 

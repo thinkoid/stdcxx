@@ -383,48 +383,6 @@ since has kept.
 Check: a =27.stringbuf.virtuals= row: "abc" in ~in | out~, ~sputc
 ('x')~, and =str ()= as the decision says, "xbc" or "abcx".
 
-** TODO A program can replace or switch off every throw the library makes
-
-14882:2003 17.4.4.8, p1: a library function reports a failure "by
-throwing an exception of the type(s) described in their Throws:
-paragraph"; 21.3.4, p3, for one, has =at= throw =out_of_range=. Every
-throw the library makes goes through =__rw::__rw_throw=, from about 86
-sites in =include= and =src=, most through =_RWSTD_REQUIRES=
-(=include/rw/_defs.h= 702). =__rw_throw= calls through an exported
-function pointer, =__rw::__rw_throw_proc= (=include/rw/_error.h= 57,
-=src/exception.cpp= 646-648, =src/mapfile.gcc= 69), whose comment
-invites a "user-defined handler (e.g., to prevent the library from
-throwing exceptions or to implement logging)". A null pointer makes
-=__rw_throw= return at once (=src/exception.cpp= 653-654), and a
-handler that returns does the same. Either way the caller goes on past
-the failed check: =basic_string::at= returns ~_C_data [__pos]~ for a
-=__pos= past the end (=include/string= 945-951). A handler that throws
-something else makes the library throw a type no Throws paragraph
-names.
-
-The names are reserved (17.4.3.1.2, p1) and =<rw/_error.h>= says it
-"should never be #included directly by a program", but
-=examples/manual/rwexcept.cpp= (35, 92) includes it and installs a
-handler that prints and exits. =doc/stdlibref= says nothing. Three
-tests use the hook: =18.exception= installs a returning handler and
-checks the ids (=tests/support/18.exception.cpp= 438-629),
-=18.support.dynamic= wraps the default one (378), and
-=21.string.exceptions= installs one that throws the id as an =int=
-(=tests/strings/21.string.exceptions.cpp= 66-72, 166). Removing the
-hook costs those three test sections, the example and the map line;
-the sites keep calling =__rw_throw=. Found by the extension sweep's
-reading, 2026-11-04.
-
-Fix: a decision: record the hook as a departure, the suite's seam for
-observing the library's throws, reached only through a reserved name
-in a header marked internal, and retire
-=examples/manual/rwexcept.cpp=, which teaches programs to use it; or
-remove the hook.
-
-Check: a chapter 2 row names =__rw_throw_proc= and its null and
-returning cases, or the hook is gone; either way
-=examples/manual/rwexcept.cpp= is gone.
-
 ** TODO =getloc= on a non-const stream or buffer returns the object's own locale
 
 14882:2003 27.4.2.3, p4 declares ~locale getloc () const~, which
