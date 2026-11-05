@@ -117,26 +117,6 @@ warning.
 Check: =nm -D= of the 15D library and of =libstdc++= for
 =_ZNSt9type_infoC2EPKc=, which settles whether a call can link.
 
-** TODO =basic_istream= has a public four-argument =read=
-
-14882:2003 27.6.1.1's synopsis and 27.6.1.3 declare ~read (char_type*,
-streamsize)~. =include/istream= 282-283 adds a public ~read
-(char_type*, streamsize, int_type, int)~, defined at
-=include/istream.cc= 278-357, whose last argument takes the flags of
-=include/istream= 317-327: a program can call ~is.read (p, n, '\n',
-0)~. 17.4.4.4, p2 permits the signature and p3 holds. The library
-calls it from =ignore= (279) and from the =charT&= and =charT*=
-extractors (490-510), non-members that need it accessible. Not in
-=doc/stdlibref/basic-istream.html=; no test names it. The rename to a
-reserved name touches four sites. Found by the extension sweep's
-reading, 2026-11-04.
-
-Fix: a decision: rename to a reserved name, or record; for the rename,
-it is an internal helper under a standard member's name.
-
-Check: no four-argument =read= call outside =include/istream= and
-=include/istream.cc=; a sanity build.
-
 ** TODO =auto_ptr<void>= is usable
 
 14882:2003 20.4.5's synopsis declares ~X& operator* () const throw

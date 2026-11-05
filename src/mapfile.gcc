@@ -581,7 +581,6 @@ global:
     _ZNSi3getEv;
     _ZNSi4peekEv;
     _ZNSi4readEPci;
-    _ZNSi4readEPciii;
     _ZNSi5seekgESt4fposI11__mbstate_tE;
     _ZNSi5seekgEiN4__rw12__rw_seekdirE;
     _ZNSi5tellgEv;
@@ -589,6 +588,7 @@ global:
     _ZNSi6ignoreEii;
     _ZNSi6sentryC1ERSib;
     _ZNSi7_C_ipfxEbN4__rw12__rw_iostateE;
+    _ZNSi7_C_readEPciii;
     _ZNSi7getlineEPci;
     _ZNSi7getlineEPcic;
     _ZNSi7putbackEc;
@@ -774,7 +774,6 @@ global:
     _ZNSt13basic_istreamIwSt11char_traitsIwEE3getERw;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE3getEv;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE4peekEv;
-    _ZNSt13basic_istreamIwSt11char_traitsIwEE4readEPwili;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE5seekgESt4fposI11__mbstate_tE;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE5seekgEiN4__rw12__rw_seekdirE;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE5tellgEv;
@@ -782,6 +781,7 @@ global:
     _ZNSt13basic_istreamIwSt11char_traitsIwEE6ignoreEil;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE6sentryC1ERS2_b;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE7_C_ipfxEbN4__rw12__rw_iostateE;
+    _ZNSt13basic_istreamIwSt11char_traitsIwEE7_C_readEPwili;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE7getlineEPwi;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE7getlineEPwiw;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE7putbackEw;

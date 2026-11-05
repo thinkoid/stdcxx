@@ -277,7 +277,7 @@ _C_get (basic_streambuf<char_type, traits_type> &__sb, int_type __delim)
 template<class _CharT, class _Traits>
 basic_istream<_CharT, _Traits>&
 basic_istream<_CharT, _Traits>::
-read (char_type *__s, streamsize __n, int_type __delim, int __flags)
+_C_read (char_type *__s, streamsize __n, int_type __delim, int __flags)
 {
     // if __s is 0 function doesn't store characters (used by ignore)
 
