@@ -265,8 +265,8 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
 
         // construct copies of elements that will be moved beyond
         // the current end of the sequence controlled by *this
-        std::uninitialized_copy (__ucpbeg, _C_alloc._C_end,
-                                  _C_alloc._C_end, _C_alloc);
+        __rw::__rw_uninitialized_copy (__ucpbeg, _C_alloc._C_end,
+                                       _C_alloc._C_end, _C_alloc);
 
         // advance end to maintain consistent state
         _C_alloc._C_end += __n;
@@ -283,7 +283,8 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
         const size_type __n1 = size () - __size1;
         const size_type __n2 = __n - __n1;
 
-        std::uninitialized_fill_n (_C_alloc._C_end, __n2, __x, _C_alloc);
+        __rw::__rw_uninitialized_fill_n (_C_alloc._C_end, __n2, __x,
+                                         _C_alloc);
 
         const pointer __end = _C_alloc._C_end;
 
@@ -291,7 +292,8 @@ _C_insert_n (const iterator &__it, size_type __n, const_reference __x)
 
         // construct copies of the range of elements [pos, end)
         // past the end of the range of elements inserted above
-        std::uninitialized_copy (__movbeg, __end, _C_alloc._C_end, _C_alloc);
+        __rw::__rw_uninitialized_copy (__movbeg, __end, _C_alloc._C_end,
+                                       _C_alloc);
 
         _C_alloc._C_end += __end - __movbeg;
 

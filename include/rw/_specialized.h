@@ -116,6 +116,50 @@ inline void __rw_destroy (_TypeT**, _TypeT**)
 { }
 
 
+// copies [first, last) into raw storage at res through the allocator;
+// the vector's helper
+template <class _InputIterator, class _ForwardIterator, class _Allocator>
+inline _ForwardIterator
+__rw_uninitialized_copy (_InputIterator __first, _InputIterator __last,
+                         _ForwardIterator __res, _Allocator &__alloc)
+{
+    _ForwardIterator __start = __res;
+
+    try {
+        for (; __first != __last; ++__first, ++__res)
+            __alloc.construct (__alloc.address (*__res), *__first);
+    }
+    catch (...) {
+        for (; __start != __res; ++__start)
+            __alloc.destroy (__alloc.address (*__start));
+        throw;
+    }
+
+    return __res;
+}
+
+
+// fills n elements of raw storage at first through the allocator;
+// the vector's helper
+template <class _ForwardIter, class _Size, class _TypeT, class _Allocator>
+inline void
+__rw_uninitialized_fill_n (_ForwardIter __first, _Size __n,
+                           const _TypeT& __x, _Allocator& __alloc)
+{
+    _ForwardIter __start = __first;
+
+    try {
+        for (; __n; --__n, ++__first)
+            __alloc.construct (__alloc.address (*__first), __x);
+    }
+    catch (...) {
+        for (; __start != __first; ++__start)
+            __alloc.destroy (__alloc.address (*__start));
+        throw;
+    }
+}
+
+
 }   // namespace __rw
 
 
@@ -144,28 +188,6 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
     }
     catch (...) {
         __rw::__rw_destroy (__start, __res);
-        throw;
-    }
-
-    return __res;
-}
-
-
-// extension
-template <class _InputIterator, class _ForwardIterator, class _Allocator>
-inline _ForwardIterator
-uninitialized_copy (_InputIterator __first, _InputIterator __last,
-                    _ForwardIterator __res, _Allocator &__alloc)
-{
-    _ForwardIterator __start = __res;
-
-    try {
-        for (; __first != __last; ++__first, ++__res)
-            __alloc.construct (__alloc.address (*__res), *__first);
-    }
-    catch (...) {
-        for (; __start != __res; ++__start)
-            __alloc.destroy (__alloc.address (*__start));
         throw;
     }
 
@@ -205,26 +227,6 @@ uninitialized_fill_n (_ForwardIterator __first, _Size __n, const _TypeT& __x)
     }
     catch (...) {
         __rw::__rw_destroy (__start, __first);
-        throw;
-    }
-}
-
-
-// extension
-template <class _ForwardIter, class _Size, class _TypeT, class _Allocator>
-inline void
-uninitialized_fill_n (_ForwardIter __first, _Size __n,
-                      const _TypeT& __x, _Allocator& __alloc)
-{
-    _ForwardIter __start = __first;
-
-    try {
-        for (; __n; --__n, ++__first)
-            __alloc.construct (__alloc.address (*__first), __x);
-    }
-    catch (...) {
-        for (; __start != __first; ++__start)
-            __alloc.destroy (__alloc.address (*__start));
         throw;
     }
 }

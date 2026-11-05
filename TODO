@@ -139,25 +139,6 @@ class then deletes a =void*=.
 
 Check: =20.auto.ptr= loses its =auto_ptr<void>= section and passes.
 
-** TODO =uninitialized_copy= and =uninitialized_fill_n= take an allocator
-
-14882:2003 20.4.4.1 and 20.4.4.3 declare ~uninitialized_copy (first,
-last, result)~ and ~uninitialized_fill_n (first, n, x)~.
-=include/rw/_specialized.h= 154-173 and 213-230, each under
-"extension", add four-argument overloads in =namespace std= that
-construct and destroy through an allocator. 17.4.4.3, p2 and footnote
-171 permit additional non-member signatures. Callers:
-=include/vector.cc= 268, 286 and 294. =doc/stdlibref= does not
-document them, and no test calls them. Found by the extension sweep's
-reading, 2026-11-04.
-
-Fix: a decision: move both into =namespace __rw= under reserved names,
-or record; for the move, they are the vector's helpers and nothing
-else names them.
-
-Check: the two "extension" comments are gone, the three calls name
-=__rw= functions, and the =23.vector.*= tests equal their pins.
-
 ** TODO =get_temporary_buffer= takes any distance type and a type tag
 
 14882:2003 20.4.3 declares one ~get_temporary_buffer<T> (ptrdiff_t)~.
