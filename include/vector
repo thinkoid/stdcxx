@@ -629,7 +629,6 @@ public:
 
     class reference {
 
-        // avoid MSVC 6.0 bug 576
         friend class iterator;
 
         friend class const_iterator;
@@ -640,9 +639,9 @@ public:
         unsigned int _C_mask;
         reference (unsigned int* __x, unsigned int __y)
             : _C_p (__x), _C_mask (__y) { }
-    public:
 
         reference () : _C_p (), _C_mask () {}
+    public:
 
         operator bool () const {
             return !!(*_C_p & _C_mask);
@@ -954,11 +953,11 @@ private:
 
 public:
 
+    explicit
     vector (const _Allocator&  __alloc = allocator_type ())
         : allocator_type (__alloc), _C_begin(iterator()), _C_end(iterator()), 
         _C_bufend () { }
 
-    // working around a SunPro 5.3 bug (see PR #25962)
     explicit
     vector (size_type __n, bool __val = bool (), 
        const _Allocator&  __alloc = allocator_type ())
@@ -1008,7 +1007,7 @@ public:
         insert (begin (), __first, __last);
     }
 
-    void assign (size_type __n, const bool& __x = bool()) { 
+    void assign (size_type __n, const bool& __x) { 
         clear ();
         insert (begin (), __n, __x);
     }
@@ -1134,7 +1133,7 @@ public:
     }
     void pop_back () { --_C_end; }
 
-    iterator insert (iterator __it, const bool& __x = bool())
+    iterator insert (iterator __it, const bool& __x)
     {
       size_type __n = __it - begin();
       if (_C_end._C_p != _C_bufend && __it == end()) {

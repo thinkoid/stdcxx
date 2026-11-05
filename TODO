@@ -105,27 +105,6 @@ Fix: =freeze= alters the status of a dynamic buffer only.
 Check: an =ostrstream= over a =char [8]=: insert "ab", call =str ()=,
 insert "cd"; the stream is =good ()= and the array begins "abcd".
 
-** TODO =vector<bool>= goes past its synopsis in four places
-
-14882:2003 23.2.5's synopsis: =reference= has a private default
-constructor; ~explicit vector (const Allocator& = Allocator ())~;
-~void assign (size_type n, const T& t)~; ~iterator insert (iterator
-position, const bool& x)~. =include/vector= 645 makes =reference ()=
-public; 957 drops =explicit= from the allocator constructor, so
-~std::vector<bool> v = std::allocator<bool> ();~ compiles; 1011 and
-1137 give =assign= and =insert= a default argument =bool ()=, so
-=v.assign (3)= and =v.insert (v.begin ())= compile. All four are from
-the 2005 import; 15c7d99e removed the proxy's comparisons and left
-these. Nothing in the tree uses the four forms and
-=doc/stdlibref/vector.html= documents none;
-=tests/utilities/20.operators.cpp= 422 instantiates the class. Found
-by the extension sweep's reading, 2026-11-04.
-
-Fix: a decision: remove all four, or record them; for removal, none
-has a user and each accepts a program the synopsis rejects.
-
-Check: the 15D suite table equals its pin with the four changes.
-
 ** TODO =put= and =write= reset the width
 
 14882:2003 27.6.2.6, p1, p2 and p5 make =put= and =write= unformatted
