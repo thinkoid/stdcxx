@@ -1426,6 +1426,11 @@ public:
         return _C_stride;
     }
 
+private:
+
+    template <class _TypeT> friend class gslice_array;
+    template <class _TypeT> friend class valarray;
+
     // step through the indices, for gslice_array and valarray::operator[]
     _RWSTD_SIZE_T _C_next_ind ();
 
@@ -1434,8 +1439,6 @@ public:
     }
 
     _RWSTD_SIZE_T _C_ind_numb () const;
-
-private:
 
     _RWSTD_SIZE_T           _C_start;    // starting offset
     valarray<_RWSTD_SIZE_T> _C_length;   // set of lengths (sizes equal)
