@@ -128,10 +128,6 @@ public:
         this->init (__sb);
     }
 
-    // called from sentry's ctor to prepare stream before input
-    basic_istream&
-    _C_ipfx (bool, ios_base::iostate = ios_base::eofbit | ios_base::failbit);
-
     // 27.6.1.1.2
     struct sentry: __rw::__rw_guard {
 
@@ -279,9 +275,6 @@ public:
         return _C_read (0, __n, __delim, _C_eatdelim | _C_eatnull);
     }
 
-    // does the work of ignore() and of the charT& and charT* extractors
-    basic_istream& _C_read (char_type*, streamsize, int_type, int);
-
     // 27.6.1.3, p28: extract at most n, fail on eof
     basic_istream& read (char_type*, streamsize);
 
@@ -314,6 +307,15 @@ public:
         return _C_gcount;
     }
 
+protected:
+
+    // called from sentry's ctor to prepare stream before input
+    basic_istream&
+    _C_ipfx (bool, ios_base::iostate = ios_base::eofbit | ios_base::failbit);
+
+    // does the work of ignore() and of the charT& and charT* extractors
+    basic_istream& _C_read (char_type*, streamsize, int_type, int);
+
     // flags used by _C_read(), _C_ipfx(), and _C_unsafe_get()
     enum {
         _C_nullterm = 0x01,   // null-terminate input
@@ -337,6 +339,18 @@ private:
     basic_istream& _C_get (basic_streambuf<char_type, traits_type>&, int_type);
 
     streamsize _C_gcount;   // number of chars extracted
+
+    template <class _Char2, class _Traits2>
+    friend basic_istream<_Char2, _Traits2>&
+    operator>> (basic_istream<_Char2, _Traits2>&, _Char2&);
+
+    template <class _Char2, class _Traits2>
+    friend basic_istream<_Char2, _Traits2>&
+    operator>> (basic_istream<_Char2, _Traits2>&, _Char2*);
+
+    template <class _Char2, class _Traits2>
+    friend basic_istream<_Char2, _Traits2>&
+    ws (basic_istream<_Char2, _Traits2>&);
 };
 
 

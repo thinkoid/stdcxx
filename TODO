@@ -517,28 +517,6 @@ Fix: the loop asserts ~__i != __it~, and the first assertion drops
 Check: ~l.splice (l.end (), l, l.begin (), l.end ())~ runs in 15D; a
 position inside the range fails the assertion.
 
-** TODO =basic_istream='s helpers are public members
-
-=include/istream= 133 declares =_C_ipfx=, 283 =_C_read=, 317-328 the
-flags enumerators and 331 =_C_unsafe_get= under the =public:= of line
-117, so a program can call ~is._C_read (p, n, '\n', 0)~ or test
-=is._C_skipws=. 14882:2003 27.6.1.1's synopsis gives =basic_istream=
-no such members, and 17.4.4.4, p2 lets an implementation add members
-to a standard class as long as a program cannot tell; a public member
-it can name is one it can tell. The users outside the class are the
-sentry, a nested class with member access (11.8, p1), and three
-non-member templates: the =charT&= extractor (496), the =charT*=
-extractor (514) and =ws= (538). =include/streambuf= 376-389 settles
-the same case for =getline= and the string extractor with friend
-templates.
-
-Fix: the four go under a =protected:= section, and the three
-templates are declared friends in =streambuf='s form. Decided
-2026-11-06 on the review of 4c5bebfd.
-
-Check: the library builds and =27.istream.unformatted.get= and
-=27.istream.fmat.arith= hold at pin.
-
 ** TODO =return_temporary_buffer= on another thread frees a static block
 
 =src/tmpbuf.cpp= keeps one static block of =_RWSTD_TMPBUF_SIZE= bytes
