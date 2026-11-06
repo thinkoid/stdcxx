@@ -2057,10 +2057,10 @@ calls `do_put` with a null conversion and is then copied: `"%OY"`,
 `"%Ed"` and `"%Q"` write themselves (by probe). `do_put` formats with
 `__rw_put_time` into a 256-element array, or a heap block when the
 output outgrows it, freed on every exit by `__rw_put_buffer`
-(`include/loc/_punct.h`) as the put facets' are. It then pads to
-`str.width ()` with the fill, before the text unless `left`. It does
-not reset the width, so `put` pads each directive: `"%H:%M"` at width
-5 is `"***09:***05"` (by probe).
+(`include/loc/_punct.h`) as the put facets' are. It writes those
+characters and nothing else: 22.2.5.3.2, p1 has it format as
+`strftime` does, which has no field width, so `str.width ()` pads
+nothing and stays as it is. `"%H:%M"` at width 5 is `"09:05"`.
 
 `__rw_get_time_put_data` decides each directive.
 
@@ -2219,8 +2219,8 @@ format writes into the same buffer.
 
 | program | covers | 15D row |
 |---|---|---|
-| `22.locale.time.get` | "C", both widths: every directive, the walk, signs, the update model, invalid patterns, `E` without eras. A generated locale with eras (Heisei, its Gannen record, Showa, the backward bar) and 70 alternative digits, both widths, and its twin with an empty `am_pm`. `date_order` and names in the host's English, German and Danish locales, `char` only | status 0, 6 warnings, 3027 assertions |
-| `22.locale.time.put` | "C", both widths, against `strftime` where the expected text is a format; years before 0; width, fill, adjustment; a generated locale with eras and alternative digits | status 0, 2402 assertions |
+| `22.locale.time.get` | "C", both widths: every directive, the walk, signs, the update model, invalid patterns, `E` without eras. A generated locale with eras (Heisei, its Gannen record, Showa, the backward bar) and 70 alternative digits, both widths, and its twin with an empty `am_pm`. `date_order` and names in the host's English, German and Danish locales, `char` only | status 0, 6 warnings, 3352 assertions |
+| `22.locale.time.put` | "C", both widths, against `strftime` where the expected text is a format; years before 0 and past 9999; a stream width that pads nothing; a generated locale with eras and alternative digits | status 0, 2450 assertions |
 | `22.locale.time.put.libc.mt` | the first `put` of a facet built from the C library, four threads, `char` and `wchar_t` alternating, 200 rounds | status 0, 200 assertions |
 
 No row fails. The six warnings are three "not exercised" notes per
@@ -2229,15 +2229,12 @@ The named-locale sections follow the host; 08295a74 kept the pin to a
 host with `en_US.UTF-8` alone. The `get` and `put` MT tests were
 retired (7b8aede0, e6d382f5): the facets hold no state.
 
-`TODO`: "The era format comments of the =time_get= test are swapped"
-and "A reference for =time_get=", which this chapter answers. Outside
-the suite, `bin/oracle/time.cpp` (eras) and `bin/oracle/scalar.cpp`
+`TODO`: "The era format comments of the =time_get= test are swapped".
+Outside the suite, `bin/oracle/time.cpp` (eras) and `bin/oracle/scalar.cpp`
 (names, `%p`, `%x`, `%X`, `%c`) compare `time_put` with glibc.
 
 ### 12.5 Open
 
-- `put` pads every directive of a pattern and leaves the width set; no
-  row has a pattern with a width. Check: a decision.
 - The comparisons with glibc's `strptime` behind 12.3 ran outside the
   tree. Check: a `strptime` oracle under `bin/oracle`, beside the
   `strftime` one.

@@ -1602,24 +1602,29 @@ void test_POSIX (charT, const char *tname)
     TEST (T (), "%C%y", 0, 0, ' ', "1900");
     TEST (T (-1), "%Y", 0, 0, ' ', "%Y");
 
-    // exercise padding
-    TEST (T (), "%w", 0, 10, ' ', "         0");
-    TEST (T (), "%w", 0, 10, '0', "0000000000");
-    TEST (T (0, 0, 0, 1, 0, 0, 1), "%w", 0, 10, '0', "0000000001");
+    // the stream's width pads nothing: 14882:2003 22.2.5.3.2, p1 has
+    // do_put format "identically as the format specifiers in the
+    // string argument to the standard library function strftime()",
+    // which has no field width, and 22.2.5.3.1, p1 has put write each
+    // other character "immediately"; neither names width ()
+    TEST (T (), "%w", 0, 10, ' ', "0");
+    TEST (T (), "%w", 0, 10, '0', "0");
+    TEST (T (0, 0, 0, 1, 0, 0, 1), "%w", 0, 10, '0', "1");
 
-    TEST (T (1), "%S", std::ios::left,     10, '*', "01********");
-    TEST (T (2), "%S", std::ios::right,    10, '*', "********02");
-    TEST (T (3), "%S", std::ios::internal, 10, '*', "********03");
+    TEST (T (1), "%S", std::ios::left,     10, '*', "01");
+    TEST (T (2), "%S", std::ios::right,    10, '*', "02");
+    TEST (T (3), "%S", std::ios::internal, 10, '*', "03");
 
-    TEST (T (13), "%S", std::ios::left | std::ios::right, 11, '_',
-          "_________13");
+    TEST (T (13), "%S", std::ios::left | std::ios::right, 11, '_', "13");
 
-    TEST (T (24), "%S", std::ios::left | std::ios::internal, 12, '_',
-          "__________24");
+    TEST (T (24), "%S", std::ios::left | std::ios::internal, 12, '_', "24");
 
     TEST (T (35), "%S",
           std::ios::left | std::ios::right | std::ios::internal, 13, '_',
-          "___________35");
+          "35");
+
+    // a pattern of two directives: neither is padded
+    TEST (T (0, 5, 9), "%H:%M", 0, 5, '*', "09:05");
 
     // 7.23.3.5, p5 of C99:
     // %g, %G, and %V give values according to the ISO 8601 week-based

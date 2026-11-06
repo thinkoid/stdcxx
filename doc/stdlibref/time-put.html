@@ -150,8 +150,6 @@ template &lt;&gt; class time_put&lt;wchar_t&gt;;
     const char_type* pattern, const char_type* pat_end) const; </PRE>
 <UL>
 <P>Formats the contents of the object pointed to by <SAMP>tmb</SAMP> into the output sequence beginning with <SAMP>s</SAMP>. The format of the output sequence is determined by the string of format specifiers and modifiers contained in the range <SAMP>[pattern,pat_end)</SAMP>. These specifiers and modifiers are from the same set as those used by the <SAMP>strftime</SAMP> function and are applied in exactly the same way. See <A HREF="time-put.html#Table&nbsp;36">Table&nbsp;36</A> for a description of <SAMP>strftime</SAMP> formatting characters.</P>
-<P>The <SAMP>f</SAMP> argument is used to determine the justification and the width of the output sequence.</P>
-<P>The <SAMP>fill</SAMP> argument is used for any padding.</P>
 <P>Returns an iterator pointing one past the last character written.</P>
 </UL>
 
@@ -170,8 +168,6 @@ template &lt;&gt; class time_put&lt;wchar_t&gt;;
     const tm* tmb, char format, char modifier = 0) const; </PRE>
 <UL>
 <P>Formats the contents of the object pointed to by the <SAMP>tmb</SAMP> into the output sequence beginning with <SAMP>s</SAMP>. The output sequence is formatted according the specifier <SAMP>format</SAMP> and modifier <SAMP>modifier</SAMP>. These values are interpreted in the same way as the <SAMP>strftime</SAMP> function interprets its format specifiers and modifiers flags. See the table below for a description of recognized formatting characters.</P>
-<P>The <SAMP>f</SAMP> argument is used to determine the justification and the width of the output sequence.</P>
-<P>The <SAMP>fill</SAMP> argument is used for any padding.</P>
 <P>Returns an iterator pointing one past the last character written.</P>
 <P><A HREF="time-put.html#Table&nbsp;36">Table&nbsp;36</A> illustrates the recognized formatting characters of <SAMP>strftime</SAMP>. The values in the table are for February 29, 1984 at 14:34:56 (MST).</P>
 <H4><A NAME="Table&nbsp;36">Table&nbsp;36: Recognized formatting characters. Struct tm members used to produce the format are noted [in brackets].&nbsp;</A></H4>

@@ -87,26 +87,12 @@ do_put (iter_type __it, ios_base &__flags, char_type __fill,
 
     const char_type* const __end = __pbuf + __len;
 
-    // number of fill chars to pad with
-    streamsize __pad = __flags.width () - streamsize (__len);
-
-    // adjustfield bits (left, internal, or the default right)
-    const int __adj = __flags.flags () & _RWSTD_IOS_ADJUSTFIELD;
-
-    if (__pad > 0 && _RWSTD_IOS_LEFT != __adj) {
-
-        // right justify unless left justification requested
-        for (; __pad--; ++__it)
-            *__it = __fill;
-    }
-
+    // 14882:2003 22.2.5.3.2, p1: the characters strftime() would
+    // produce and nothing else; the stream's width is not a field
+    // width here, so it pads nothing and stays as it is
     for (const char_type *__p = __pbuf; __p != __end; ++__p, ++__it) {
         *__it = *__p;
     }
-
-    // left justify if necessary
-    for (; __pad-- > 0; ++__it)
-        *__it = __fill;
 
     return __it;
 }

@@ -24,19 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Localization: =time_get= and =time_put=
-
-*** TODO =put= over a pattern pads every directive to the width
-
-The width of the stream is applied to every directive of a pattern
-and never reset: "%H:%M" at width 5 writes "***09:***05". No row has
-a pattern with a width. Found by probe, 2026-11-02.
-
-Fix: a decision: the width applies once (the first directive, as
-=num_put= consumes it) or to each; then reset or keep.
-
-Check: a row with a width and a two-directive pattern.
-
 ** Localization: =ctype=, =numpunct= and the database locales
 
 *** TODO The blank bit is visible through =ctype<char>::is= under a database
