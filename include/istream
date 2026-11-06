@@ -340,6 +340,10 @@ private:
 
     streamsize _C_gcount;   // number of chars extracted
 
+    // 14882:2003 11.8, p1 gives a nested class no access to the
+    // enclosing class's protected members; the sentry calls _C_ipfx
+    friend struct sentry;
+
     template <class _Char2, class _Traits2>
     friend basic_istream<_Char2, _Traits2>&
     operator>> (basic_istream<_Char2, _Traits2>&, _Char2&);
