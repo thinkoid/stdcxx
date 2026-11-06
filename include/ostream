@@ -232,13 +232,15 @@ template<class _CharT, class _Traits>
 inline basic_ostream<_CharT, _Traits>&
 basic_ostream<_CharT, _Traits>::operator<< (short __val)
 {
-    const int __bf = this->flags () & this->basefield;
+    const ios_base::fmtflags __base = this->flags () & this->basefield;
 
-    // make sure negative values format properly in non-decimal bases
-    // i.e., -1 must format as hex "ffff" when (sizeof (short) == 2),
-    // and not, for example, "ffffffff" in ILP32 (see lwg issue 117)
-    const long __lval = !__bf || this->dec == __bf ?
-        long (__val) : long (static_cast< unsigned short >(__val));
+    // N3242 27.7.3.6.2, p1 (lwg issue 117): the value widens through
+    // unsigned short when basefield is exactly oct or hex, and as a
+    // signed long otherwise; 14882:2003 27.6.2.5.2, p1 hands val to
+    // num_put::put, which has no short overload, so the 2003 text has
+    // no well-formed rule and the C++11 fragment is the one followed
+    const long __lval = this->oct == __base || this->hex == __base ?
+        long (static_cast< unsigned short >(__val)) : long (__val);
 
     return __rw::__rw_insert (*this, __lval);
 }
@@ -248,13 +250,15 @@ template<class _CharT, class _Traits>
 inline basic_ostream<_CharT, _Traits>&
 basic_ostream<_CharT, _Traits>::operator<< (int __val)
 {
-    const int __bf = this->flags () & this->basefield;
+    const ios_base::fmtflags __base = this->flags () & this->basefield;
 
-    // make sure negative values format properly in non-decimal bases
-    // i.e., -1 must format as hex "ffffffff" when (sizeof (int) == 4),
-    // and not, for example "ffffffffffffffff" in LP64 (lwg issue 117)
-    const long __lval = !__bf || this->dec == __bf ?
-        long (__val) : long (static_cast< unsigned int >(__val));
+    // N3242 27.7.3.6.2, p1 (lwg issue 117): the value widens through
+    // unsigned int when basefield is exactly oct or hex, and as a
+    // signed long otherwise; 14882:2003 27.6.2.5.2, p1 hands val to
+    // num_put::put, which has no int overload, so the 2003 text has
+    // no well-formed rule and the C++11 fragment is the one followed
+    const long __lval = this->oct == __base || this->hex == __base ?
+        long (static_cast< unsigned int >(__val)) : long (__val);
 
     return __rw::__rw_insert (*this, __lval);
 }

@@ -1003,6 +1003,11 @@ void test_formatted (charT)
     TEST (T (short ( 1)), 0, 0,  "1");
     TEST (T (short (-1)), 0, 0, "-1");
 
+    // only exactly oct or hex widens through unsigned short
+    TEST (T (short (-1)), Hex | Dec, 0, "-1");
+    TEST (T (short (-1)), Hex | Oct, 0, "-1");
+    TEST (T (short (-1)), Basefield, 0, "-1");
+
 #if SHRT_MAX == 32767
 
     TEST (T (short (SHRT_MAX)), 0, 0,  "32767");
@@ -1010,6 +1015,9 @@ void test_formatted (charT)
 
     TEST (T (short (SHRT_MAX)), Hex, 0, "7fff");
     TEST (T (short (SHRT_MIN)), Hex, 0, "8000");
+
+    TEST (T (short (-1)), Hex, 0, "ffff");
+    TEST (T (short (-1)), Oct, 0, "177777");
 
 #elif SHRT_MAX == 2147483647
 
@@ -1047,6 +1055,11 @@ void test_formatted (charT)
     TEST (T ( 1), 0, 0,  "1");
     TEST (T (-1), 0, 0, "-1");
 
+    // only exactly oct or hex widens through unsigned int
+    TEST (T (-1), Hex | Dec, 0, "-1");
+    TEST (T (-1), Hex | Oct, 0, "-1");
+    TEST (T (-1), Basefield, 0, "-1");
+
 #if INT_MAX == 32767
 
     TEST (T (INT_MAX), 0, 0,  "32767");
@@ -1062,6 +1075,9 @@ void test_formatted (charT)
 
     TEST (T (INT_MAX), Hex, 0, "7fffffff");
     TEST (T (INT_MIN), Hex, 0, "80000000");
+
+    TEST (T (-1), Hex, 0, "ffffffff");
+    TEST (T (-1), Oct, 0, "37777777777");
 
 #elif INT_MAX == 9223372036854775807
 
