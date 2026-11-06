@@ -26,18 +26,6 @@ at the top.
 
 ** Localization: =time_get= and =time_put=
 
-*** TODO =eofbit= before the pattern ends sets =failbit= and stores nothing
-
-"%Y-%m" and "%Y " on "2026" both fail: the walk ends with =failbit=
-when a directive sets =eofbit= before the pattern is done. N3242 p8
-lists ~err != goodbit~ before ~s == end~, a reading under which
-=eofbit= is left alone and the year stored. Found by probe,
-2026-11-02.
-
-Fix: a decision on how p8's order reads; then the walk.
-
-Check: the two rows pinning the reading taken.
-
 *** TODO Implied =tm_wday= and =tm_yday= are left as the caller had them
 
 "%Y %m %d" determines the weekday and the day of the year; the

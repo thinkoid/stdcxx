@@ -793,7 +793,10 @@ void test_posix (charT, const char *cname)
     TEST (T ( 9,  5, 21), "09:05:09 PM", 11, "r", 0, Good);
     TEST (T (59, 59, 23), "11:59:59 PM", 11, "r", 0, Good);
     TEST (T ( 3,  2,  1),    "1:2:3 am",  8, "r", 0, Good);
-    TEST (T ( 0,  0,  0),    "09:05:09",  8, "r", 0, Eof | Fail);
+    // C++11 22.4.5.1.1, p8: %S sets eofbit, which ends the walk over
+    // the format of %r before %p; the walk adds no failbit, and the
+    // members read are stored (p13 leaves them unspecified)
+    TEST (T ( 9,  5,  9),    "09:05:09",  8, "r", 0, Eof);
     TEST (T ( 0,  0,  0), "13:00:00 PM",  2, "r", 0, Fail);
 
     // %p sets the half of the day of the hour it finds, and %I the
@@ -861,7 +864,9 @@ void test_posix (charT, const char *cname)
     TEST (T ( 0,  0,  0), "023:59:60", 2, "T", 0, Fail);
     TEST (T ( 0,  0,  0),  "23:59:61", 8, "T", 0, Eof | Fail);
     TEST (T ( 0,  0,  0),    "0:0:62", 6, "T", 0, Eof | Fail);
-    TEST (T ( 0,  0,  0),       "0:0", 3, "T", 0, Eof | Fail);
+    // C++11 22.4.5.1.1, p8: %M sets eofbit, which ends the walk over
+    // "%H:%M:%S" before the second colon; the walk adds no failbit
+    TEST (T ( 0,  0,  0),       "0:0", 3, "T", 0, Eof);
     TEST (T ( 0,  0,  0),       "999", 1, "T", 0, Fail);
 
     // %U The week number of the year (Sunday as the first day of the week)
@@ -1280,7 +1285,19 @@ void test_posix (charT, const char *cname)
     TEST (T (),     "x",  0, "%",    0, Fail);
     TEST (T (),    "26",  0, "%E",   0, Fail);
     TEST (T (),    "26",  0, "%O",   0, Fail);
-    TEST (T (), "2026",   4, "%Y%",  0, Eof | Fail);
+
+    // C++11 22.4.5.1.1, p8: err other than goodbit ends the loop
+    // before the end of the input does, so a directive that sets
+    // eofbit ends the walk with eofbit alone, before the pending '%'
+    // is read, and the year read is stored
+    STEP ("a directive that reaches the end of the input");
+    TEST (T (0, 0, 0, 0, 0, 126), "2026", 4, "%Y%",   0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 126), "2026", 4, "%Y-%m", 0, Eof);
+    TEST (T (0, 0, 0, 0, 0, 126), "2026", 4, "%Y ",   0, Eof);
+
+    // p8: the input ends where a literal needs a character, so the
+    // walk ends with eofbit | failbit and nothing is stored
+    TEST (T (), "2026 ", 5, "%Y x", 0, Eof | Fail);
 
 
     // %Ec The locale's alternative date and time representation. 

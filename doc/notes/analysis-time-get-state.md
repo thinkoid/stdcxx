@@ -644,8 +644,12 @@ is not a fallback: "19" under `%EC` in ja_JP sets `eofbit` and reads
 nothing, where glibc reads the century.
 
 Under `get` over a format, `eofbit` from a directive before the last
-ends the walk, and the walk adds `failbit`, as it does when the input
-runs out early. A lone `E` directive keeps the `eofbit` alone.
+ends the walk with `eofbit` alone. C++11 22.4.5.1.1, p8 ends the loop
+at the first of its conditions, and `err != goodbit` comes before
+`s == end`, so the walk adds no `failbit` and stores the members read
+so far: "%Y-%m" and "%Y " on "2026" store the year with `eofbit`.
+The walk sets `eofbit | failbit` itself only where the input ends
+before a literal of the pattern.
 
 ### 9.3 No era data
 

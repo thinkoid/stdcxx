@@ -1958,10 +1958,12 @@ modifier and the conversion; digits and `'.'` between them are skipped,
 so `"%4Y"` is `%Y` (by probe). A conversion calls the virtual `do_get`
 on the copy. White space skips white space. A literal matches by
 `char_traits::eq` through the stream's `ctype::toupper` (90a98455,
-50087549), or sets `failbit`. A call that leaves any bit set before the
-pattern ends makes the walk add `failbit` and stop. The copy is stored
-only when no bit but `eofbit` is set. The walk keeps no state
-(e438cc11).
+50087549), or sets `failbit`; the input ending where a literal needs a
+character sets `eofbit | failbit`. A call that leaves any bit set ends
+the walk, which adds nothing (p8 tests `err` before `s == end`), so a
+directive that reaches the end of the input before the pattern ends
+leaves `eofbit` alone. The copy is stored only when no bit but
+`eofbit` is set. The walk keeps no state (e438cc11).
 
 #### `time_get`: `do_get`
 
@@ -2232,11 +2234,6 @@ the suite, `bin/oracle/time.cpp` (eras) and `bin/oracle/scalar.cpp`
 
 - `"%Y %m %d"` leaves the implied `tm_wday` and `tm_yday`; glibc fills
   them; p14 allows either. Not queued. Check: a decision.
-- `eofbit` before the pattern ends: the walk adds `failbit` and stores
-  nothing, so `"%Y-%m"` and `"%Y "` on `"2026"` fail. N3242 p8 lists
-  `err != goodbit` before `s == end`, which leaves `eofbit` alone and
-  the year in `*t`. A literal at the end of input sets `failbit` alone.
-  Check: a reading of p8's order.
 - `%C` past 9999 is the century modulo 100: 10000 writes `"00"`, pinned
   at `22.locale.time.put.cpp` 708. POSIX.1-2024's width sentence, which
   b54acca9 cites for years before 0, gives `"100"`. Check: a decision,

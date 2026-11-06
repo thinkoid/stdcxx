@@ -501,13 +501,15 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
 
     char __fmt [] = { '\0', '\0' };
 
+    // C++11 22.4.5.1.1, p8: the loop ends at the first of the end of
+    // the pattern, err other than goodbit, and the end of the input,
+    // the last with eofbit | failbit; a directive that reaches the
+    // end of the input sets eofbit, so the loop ends with eofbit
+    // alone and the members read so far are stored
     for (; __pat != __pat_end; ++__pat) {
 
-        if (__errtmp) {
-            // failed to match the whole pattern
-            __errtmp |= __rw::__rw_failbit;
+        if (__errtmp)
             break;
-        }
 
         const char __ch = __ctp.narrow (*__pat, '\0');
 
@@ -533,9 +535,14 @@ get (iter_type __it, iter_type __end, ios_base &__fl, _RWSTD_IOSTATE &__err,
         }
         else {
             // a literal matches in a case-insensitive comparison
-            if (   __it != __end
-                && char_traits<char_type>::eq ((__ctp.toupper)(*__it),
-                                               (__ctp.toupper)(*__pat)))
+            if (__it == __end) {
+                // the input ends where the literal needs a character
+                __errtmp |= __rw::__rw_eofbit | __rw::__rw_failbit;
+                break;
+            }
+
+            if (char_traits<char_type>::eq ((__ctp.toupper)(*__it),
+                                            (__ctp.toupper)(*__pat)))
                 ++__it;
             else {
                 // mismatch between pattern and input
