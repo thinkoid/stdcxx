@@ -840,10 +840,6 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #define _RWSTD_USING_SNI(ignore)    typedef void __rw_unused_type
 
 
-#ifndef _RWSTD_TMPBUF_SIZE
-#  define _RWSTD_TMPBUF_SIZE 4096
-#endif
-
 #ifdef _RWSTD_LIB_SRC
 #  define _RWSTD_TI_EXPORT    /* empty */
 #else    // #ifndef _RWSTD_LIB_SRC

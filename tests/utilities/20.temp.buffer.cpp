@@ -112,8 +112,8 @@ void test_success (T*, const char *tname)
 
     std::memset (pa [2].first, ~2U, pa [2].second * sizeof (T));
 
-    rw_assert (2 <= pa [2].second, 0, __LINE__,
-               "get_temporary_buffer<%s>(2).second >= 2, got %td",
+    rw_assert (2 == pa [2].second, 0, __LINE__,
+               "get_temporary_buffer<%s>(2).second == 2, got %td",
                tname, pa [2].second);
     
     pa [3] = std::get_temporary_buffer<T>(3);
@@ -125,8 +125,8 @@ void test_success (T*, const char *tname)
     if (!pa [3].first)
         return;
 
-    rw_assert (3 <= pa [3].second, 0, __LINE__,
-               "get_temporary_buffer<%s>(3).second >= 3, got %td",
+    rw_assert (3 == pa [3].second, 0, __LINE__,
+               "get_temporary_buffer<%s>(3).second == 3, got %td",
                tname, pa [3].second);
 
     // verify correct alignment (if the storage isn't properly aligned,
@@ -137,12 +137,12 @@ void test_success (T*, const char *tname)
 
     std::memset (pa [3].first, ~3U, pa [3].second * sizeof (T));
 
-    // get the remaining temporary buffers and verify that they
-    // are each distinct from one another
+    // get the remaining temporary buffers, alternating small
+    // and large requests, and verify that they are each distinct
+    // from one another
     for (unsigned i = 4; i != pa_size; ++i) {
 
-        const std::ptrdiff_t size =
-            std::ptrdiff_t (i % 2 ? i : _RWSTD_TMPBUF_SIZE + i);
+        const std::ptrdiff_t size = std::ptrdiff_t (i % 2 ? i : 4096 + i);
 
         pa [i] = std::get_temporary_buffer<T>(size);
 
@@ -265,10 +265,13 @@ void test_failure (T*, const char *tname)
         return;
     }
 
-    // set the soft limit to 0, leaving the hard limit unchanged
+    // set the soft limit to 1, leaving the hard limit unchanged;
+    // Linux exempts a soft limit of 0 from its check of mmap, so a
+    // large request would be granted there and the halving of the
+    // request would reach a size that succeeds
     struct rlimit rlim_new = rlim_old;
 
-    rlim_new.rlim_cur = 0;
+    rlim_new.rlim_cur = 1;
 
     errno = 0;
 
@@ -286,18 +289,6 @@ void test_failure (T*, const char *tname)
     }
 
     std::size_t nbytes = rlim_old.rlim_max;
-
-#if 0 < _RWSTD_TMPBUF_SIZE
-
-    // make sure the size is larger than the size of the temp buff
-    if (nbytes <= _RWSTD_TMPBUF_SIZE)
-        nbytes = _RWSTD_TMPBUF_SIZE + 1;
-
-#else   // if _RWSTD_TMPBUF_SIZE <= 0
-
-    nbytes = 65536;
-
-#endif   // _RWSTD_TMPBUF_SIZE
 
     if (nbytes < _RWSTD_SIZE_MAX)
         ++nbytes;
@@ -318,7 +309,8 @@ void test_failure (T*, const char *tname)
              ": { .rlim_max = %zu, .rlim_cur = %zu }",
              tname, nelems, rlim_new.rlim_max, rlim_new.rlim_cur);
 
-    // expect the function to fail
+    // expect the function to fail, or to grant less than the request
+    // once halving it brings it within what memory remains
     pa = std::get_temporary_buffer<T>(nelems);
 
     // reset the soft limit to the original value (do it before any
@@ -331,10 +323,14 @@ void test_failure (T*, const char *tname)
                  rlim_old.rlim_max, rlim_old.rlim_cur);
     }
 
-    rw_assert (0 == pa.first && 0 == pa.second, 0, __LINE__,
-               "get_temporary_buffer<%s>(%td) == { 0, 0 } "
-               "in low memory conditions, got { %#p, %td }",
-               tname, nbytes, pa.first, pa.second);
+    rw_assert (   (0 == pa.first) == (0 == pa.second)
+               && pa.second < nelems, 0, __LINE__,
+               "get_temporary_buffer<%s>(%td) == { 0, 0 } or a capacity "
+               "below the request in low memory conditions, got { %#p, %td }",
+               tname, nelems, pa.first, pa.second);
+
+    if (pa.first)
+        std::return_temporary_buffer (pa.first);
 
 #endif   // _RWSTD_NO_SETRLIMIT
 

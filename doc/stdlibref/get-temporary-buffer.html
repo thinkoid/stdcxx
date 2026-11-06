@@ -52,10 +52,10 @@ namespace std {
 }
 </PRE>
 <A NAME="sec4"><H3>Description</H3></A>
-<P>Specializations of the <SAMP>get_temporary_buffer()</SAMP> function template attempt to allocate a region of storage sufficiently large to store at least <SAMP>n</SAMP> adjacent objects of type<SAMP> T.</SAMP></P>
+<P>Specializations of the <SAMP>get_temporary_buffer()</SAMP> function template attempt to allocate a region of storage sufficiently large to store <SAMP>n</SAMP> adjacent objects of type<SAMP> T.</SAMP> When memory is short, the function attempts a smaller region, so the size returned can be less than <SAMP>n</SAMP>.</P>
 <P>On success, the function returns a pair containing the beginning address of the allocated but uninitialized region of storage and its size in units of <SAMP>sizeof(T))</SAMP>. On failure, the function returns a pair of <SAMP>0</SAMP> values.</P>
 <P>It is not specified how the storage is allocated, however, it can be assumed that the function is at least as efficient as allocating the storage dynamically, for example, by calling operator <SAMP>new</SAMP>.</P>
-<P>The function is thread-safe but the allocated storage must be returned by a call to <SAMP>return_temporary_buffer()</SAMP> made from the same thread as the one that obtained it.</P>
+<P>The function is thread-safe, and the allocated storage may be returned by a call to <SAMP>return_temporary_buffer()</SAMP> made from any thread.</P>
 <A NAME="sec5"><H3>See Also</H3></A>
 <P><B><I><A HREF="allocator.html">allocator</A></I></B>, <B><I><A HREF="pair.html">pair</A></I></B>, <SAMP><A HREF="return-temporary-buffer.html">return_temporary_buffer()</A></SAMP></P>
 <A NAME="sec6"><H3>Standards Conformance</H3></A>

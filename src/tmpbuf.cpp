@@ -28,9 +28,7 @@
 
 #define _RWSTD_LIB_SRC
 
-#include "podarray.h"        // for __rw_aligned_buffer
 #include <rw/_allocator.h>   // for __rw_allocate(), ...
-#include <rw/_mutex.h>       // for _RWSTD_THREAD_XXX()
 
 #include <stddef.h>          // for size_t
 
@@ -38,17 +36,6 @@
 
 
 namespace __rw {
-
-// make sure buffer size is greater than zero
-typedef char _CharBuf [_RWSTD_TMPBUF_SIZE + !_RWSTD_TMPBUF_SIZE];
-
-// use `aligned_buffer' to guarantee proper buffer alignment
-// departure: one static block per thread, returned on that thread
-static _RWSTD_THREAD __rw_aligned_buffer<_CharBuf>
-__rw_buffer;
-
-static _RWSTD_THREAD unsigned long
-__rw_buffer_busy /* = 0 */;   // > 0 when buffer in use
 
 
 // extern "C" to avoid binary incompatibility due to changes
@@ -73,22 +60,8 @@ __rw_tmpbuf (void **pptr, _RWSTD_PTRDIFF_T nelems, size_t size)
         return 0;
     }
 
-    // implicit initialization used to prevent a g++ 2.95.2 warning on Tru64
-    // sorry: semantics of inline function static data are wrong (you'll wind
-    // up with multiple copies)
-
-    void* const buffer = __rw_buffer._C_data ();
-
-    if (*pptr == buffer) {
-
-        // static buffer being returned, decrement its usage counter
-        _RWSTD_THREAD_PREDECREMENT (__rw_buffer_busy, false);
-
-        return 0;
-    }
-
     if (*pptr) {
-        // dynamically allocated buffer being returned
+        // a buffer being returned, on any thread
         __rw_deallocate (*pptr, 0);
         return 0;
     }
@@ -101,29 +74,24 @@ __rw_tmpbuf (void **pptr, _RWSTD_PTRDIFF_T nelems, size_t size)
         return 0;
     }
 
-    if (nbytes <= _RWSTD_TMPBUF_SIZE) {
-
-        if (1 == _RWSTD_THREAD_PREINCREMENT (__rw_buffer_busy, false)) {
-
-            *pptr = buffer;
-
-            // static buffer used, its usage counter stays non-zero
-            return _RWSTD_TMPBUF_SIZE / size;
+    for ( ; ; ) {
+        try {
+            *pptr = __rw_allocate (nbytes, 0);
+            return nbytes / size;
+        }
+        catch (...) {
+            *pptr = 0;
         }
 
-        // static buffer not used, decrement its usage counter
-        _RWSTD_THREAD_PREDECREMENT (__rw_buffer_busy, false);
-    }
+        if (1 == nelems)
+            return 0;
 
-    try {
-        *pptr = __rw_allocate (nbytes, 0);
+        // 20.4.3, p1-2: the capacity may be less than the request,
+        // so a request memory cannot satisfy is halved, rounding up;
+        // nelems + 1 would overflow at PTRDIFF_MAX
+        nelems = nelems / 2 + nelems % 2;
+        nbytes = nelems * size;
     }
-    catch (...) {
-        *pptr  = 0;
-        nbytes = 0;
-    }
-
-    return nbytes / size;
 }
 
 }   // extern "C"

@@ -102,9 +102,7 @@ namespace __rw {
 extern "C" {
 
 // [de]allocates a previously allocated temporary buffer
-// the constant _RWSTD_TMPBUF_SIZE controls the size of a static buffer
-// if request for area larger than _RWSTD_TMPBUF_SIZE comes in, space
-// is allocated dynamically, otherwise the static buffer is used
+// a request is allocated dynamically, halved while allocation fails
 // return value meaningful only when allocating
 _RWSTD_EXPORT _RWSTD_SIZE_T
 __rw_tmpbuf (void**, _RWSTD_PTRDIFF_T, _RWSTD_SIZE_T);

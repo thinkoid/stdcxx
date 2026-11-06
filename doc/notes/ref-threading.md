@@ -385,7 +385,6 @@ These callers keep the survey wider than locale and string:
 | [iostore.cpp](../../src/iostore.cpp), `xalloc()` | Allocates an index by incrementing a shared counter. | The counter's result is the resource; this is a direct scalar use, not protection for every stream's indexed storage. |
 | [ios.cpp](../../src/ios.cpp), `precision()` and `flags()` | Exchanges a scalar under the stream mutex when locking is enabled. | Coordinate readers and larger stream operations with that same locking policy. |
 | `sync_with_stdio()` in the same file | Exchanges the shared mode flag through the `false` overload. | An atomic flag change alone does not serialize all ongoing buffer operations or their transitions. |
-| [tmpbuf.cpp](../../src/tmpbuf.cpp) | Increment returning one reserves the reusable buffer; losers decrement and allocate elsewhere; return releases it. | Here a counter can mediate access to larger storage because losers do not use that storage. Verify every use follows the reservation and release protocol. TLS makes the reservation local to a thread. |
 | [exception.cpp](../../src/exception.cpp) | Reserves and retains the reusable exception-message buffer, using TLS when available. | Audit ownership transfer, release and thread affinity; a count does not make simultaneous formatting safe. |
 
 The buffer reservation is an important counterexample to a blanket
