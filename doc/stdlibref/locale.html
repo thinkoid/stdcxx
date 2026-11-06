@@ -379,6 +379,7 @@ locale <B>combine</B>(const locale&amp; other) const;
 <P>Assigns <SAMP>loc</SAMP> to the global locale object. This causes future uses of the default constructor for <B><I>locale</I></B> to return a copy of <SAMP>loc</SAMP>. If <SAMP>loc</SAMP> has a name, this function has the further effect of calling:</P>
 <P> <SAMP>setlocale(LC_ALL,loc.name().c_str());</SAMP></P>
 <P>Returns the previous value of <SAMP>locale()</SAMP>.</P>
+<P>The function is thread-safe with respect to the global locale object. Calls to it from different threads that overlap are serialized by the caller, as calls to <SAMP>setlocale()</SAMP> are: the C locale and the global locale object are each set under a lock, but not as one step, so two overlapping calls can leave the C locale from one and the global locale object from the other.</P>
 </UL>
 
 <A NAME="sec12"><H3>Included Locales</H3></A>

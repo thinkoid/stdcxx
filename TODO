@@ -26,19 +26,6 @@ at the top.
 
 ** Localization: the locale object
 
-*** TODO Racing =locale::global= calls can split the C and C++ locales
-
-=locale::global= (=src/locale_global.cpp= 59-72) calls =setlocale= and
-swaps the body under two different locks, so two racing calls can
-leave the C locale from one and the C++ global from the other.
-Hypothesis, by reading, 2026-11-02.
-
-Fix: one lock around both, or a decision that the race is the
-caller's.
-
-Check: a =22.locale.statics.mt= variant comparing =setlocale (LC_ALL, 0)=
-with =locale ().name ()= after the race.
-
 *** TODO A mixed-name global does not reach the C library
 
 =locale::global= calls =setlocale= with the library's composite name,

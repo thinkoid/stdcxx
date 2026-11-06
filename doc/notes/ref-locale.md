@@ -513,7 +513,15 @@ before it constructs.
 **Global and classic.** `locale::global` calls `setlocale (LC_ALL,
 name)` under `__rw_setlocale_mutex` unless the name holds `*`, then
 swaps the global body under the global locale's mutex
-(`_C_set_global`). The two steps take two locks. `classic()`
+(`_C_set_global`). The two steps take two locks, so two `global`
+calls that overlap can leave the C locale from one and the C++
+global from the other. That is the caller's to serialize, as calls
+to `setlocale` are: 14882:2003 22.1.1.5, p2 describes the calls that
+follow one `global`, and the C locale is set for the program's own C
+calls, which the C library leaves unsynchronized against `setlocale`
+anyway; the library's facets that reach the C library set it for
+the duration of their call under the same mutex and never read the
+global setting. `classic()`
 constructs a static `locale ("C")` through `__rw_once`; the classic
 body is static and never destroyed (chapter 4.2).
 
@@ -628,11 +636,6 @@ template instantiation 435 deep, for EDG.
 
 ### 8.5 Open
 
-- Racing `global` calls can leave the C locale from one call and the
-  C++ global from another: `setlocale` and the body swap take two
-  locks (`src/locale_global.cpp:59-72`). C++03 says nothing of
-  threads. Check: a variant of `22.locale.statics.mt` comparing
-  `setlocale (LC_ALL, 0)` with `locale ().name ()` after the race.
 - Whether the mixed name should carry glibc's twelve categories so
   that `global` reaches the C library. A decision.
 
