@@ -528,10 +528,12 @@ and EDG is on the matrix. =basic_streambuf= and =ios_base= derive
 publicly from =__rw::__rw_synchronized=, so =_C_mutex=, =_C_lock=,
 =_C_unlock= and =_C_guard= (=include/rw/_mutex.h=) are public members
 of both, and =basic_ios::_C_bufmutex= reads ~rdbuf ()->_C_mutex~.
-17.4.4.4, p2 permits added member function signatures a program cannot
-tell from the standard ones, and a public reserved name a program can
-call is one it can tell; 17.4.4.6, p1 leaves friendship unspecified,
-so friends are within the latitude. Found on the review of 04c3bb3e,
+17.4.4.4, p2 permits added non-virtual member function signatures in
+three forms, each a reshaping of a standard member, and p3 has a call
+to a standard signature behave as if none were added; a public
+reserved member is a signature of its own, and a type or object is
+not a signature. 17.4.4.6, p1 leaves friendship unspecified, so
+friends are within the latitude. Found on the review of 04c3bb3e,
 2026-11-06.
 
 Fix: three decisions. =ios_base::_C_getloc=: the facets reach it
