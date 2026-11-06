@@ -306,9 +306,6 @@ private:
 
     friend const locale& __rw::__rw_getloc (const ios_base&);
 
-    // working around an EDG eccp 2.3x bug (also derivatives,
-    // such as MIPSpro, see PR #28631)
-public:
     struct _C_usr_data;
 
 protected:
