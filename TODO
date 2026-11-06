@@ -517,6 +517,44 @@ Fix: the loop asserts ~__i != __it~, and the first assertion drops
 Check: ~l.splice (l.end (), l, l.begin (), l.end ())~ runs in 15D; a
 position inside the range fails the assertion.
 
+** TODO The stream classes keep =_C_= members public
+
+A census after =basic_istream='s helpers went protected (04c3bb3e):
+=include/ostream= 69 =_C_ios_type=, 77 =_C_opfx=, 221 =_C_is_sync=
+and 226 =_C_pad= are public; the first three have no user outside
+=basic_ostream= and its sentry, and =_C_pad= is used by
+=__rw::__rw_insert= (=include/rw/_ioinsert.cc= 150, 155).
+=include/streambuf= 79 =_C_getloc= is public and used only by
+=basic_filebuf= (=include/fstream.cc=), a derived class; 148 =_C_mode=
+is public and used by ~basic_ostream::operator<< (basic_streambuf*)~
+(=include/ostream.cc= 149), and =basic_ostream= is already a friend.
+=include/rw/_iosbase.h= 231 =_C_getloc= is public and used by every
+facet's =do_get= and =do_put= (=include/loc/_*.cc=), =complex.cc=,
+=_ioinsert.cc= and =_stringio.cc= through an =ios_base&=; 303
+=_C_usr_data= is public under a comment naming an EDG eccp 2.3x bug,
+and EDG is on the matrix. =basic_streambuf= and =ios_base= derive
+publicly from =__rw::__rw_synchronized=, so =_C_mutex=, =_C_lock=,
+=_C_unlock= and =_C_guard= (=include/rw/_mutex.h=) are public members
+of both, and =basic_ios::_C_bufmutex= reads ~rdbuf ()->_C_mutex~.
+17.4.4.4, p2 permits added member function signatures a program cannot
+tell from the standard ones, and a public reserved name a program can
+call is one it can tell; 17.4.4.6, p1 leaves friendship unspecified,
+so friends are within the latitude. Found on the review of 04c3bb3e,
+2026-11-06.
+
+Fix: in parts. =_C_ios_type=, =_C_opfx= and =_C_is_sync= go private;
+=_C_pad= private with =__rw_insert= a friend; =streambuf='s =_C_getloc=
+protected and =_C_mode= private. =ios_base::_C_getloc= is the wide
+one: the facets reach it through =ios_base&=, so it is either a
+friend per facet or a =__rw= accessor that is itself a friend, a
+decision. =_C_usr_data= waits on whether EDG 6 still needs it, a
+check in the EDG build. The =__rw_synchronized= base is a decision:
+private inheritance with the stream classes' users made friends, or
+the members protected in the base.
+
+Check: the library builds; =27.ostream=, =27.basic.ios=, =27.objects=
+and the 22 locale rows hold at pin.
+
 ** TODO =bitset= sizes its array with an enumerator in a boolean context
 
 =include/bitset= 92 declares ~unsigned long _C_bits [_C_nelems ?
