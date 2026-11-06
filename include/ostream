@@ -66,15 +66,16 @@ public:
     typedef typename traits_type::pos_type     pos_type;
     typedef typename traits_type::off_type     off_type;
       
+private:
+
     typedef basic_ios<char_type, traits_type>  _C_ios_type;
+
+public:
 
     // 27.6.2.2, p1
     explicit basic_ostream (basic_streambuf<char_type, traits_type> *__sb) {
         this->init (__sb);
     }
-
-    // implements sentry ctor
-    basic_ostream& _C_opfx ();
 
     // 27.6.2.3
     struct sentry: __rw::__rw_guard {
@@ -217,6 +218,11 @@ public:
     // 27.6.2.4, p4
     basic_ostream& seekp (off_type, ios_base::seekdir);
 
+private:
+
+    // implements sentry ctor
+    basic_ostream& _C_opfx ();
+
     // synchronize *this with stdio (stdout and stderr)?
     bool _C_is_sync () const {
         return this->_C_sync_with_stdio && this->_C_sync;
@@ -224,6 +230,15 @@ public:
     
     // pad output with fill chars, return number of chars written
     streamsize _C_pad (streamsize);
+
+    // 14882:2003 11.8, p1 gives a nested class no access to the enclosing
+    // class's private members; the sentry calls _C_opfx and _C_is_sync
+    friend struct sentry;
+
+    template <class _Char2, class _Traits2, class _StringT>
+    friend basic_ostream<_Char2, _Traits2>&
+    __rw::__rw_insert (basic_ostream<_Char2, _Traits2>&, const _StringT*,
+                       _RWSTD_STREAMSIZE, _RWSTD_STREAMSIZE);
 };
 
 
