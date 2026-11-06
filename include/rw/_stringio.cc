@@ -60,7 +60,7 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
             basic_streambuf<_CharT, _Traits>* const __rdbuf = __is.rdbuf ();
 
             const ctype<_CharT> &__ctp =
-                use_facet< ctype<_CharT> >(__is._C_getloc ());
+                use_facet< ctype<_CharT> >(__rw::__rw_getloc (__is));
 
             while (__n != 0) {
 

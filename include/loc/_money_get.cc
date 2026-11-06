@@ -95,8 +95,8 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
 
     const _Punct0 &__pun = __intl ? 
           reinterpret_cast< const _Punct0& >(
-              std::use_facet< _Punct1 >(__flags._C_getloc ()))
-        : std::use_facet< _Punct0 >(__flags._C_getloc ());
+              std::use_facet< _Punct1 >(__rw::__rw_getloc (__flags)))
+        : std::use_facet< _Punct0 >(__rw::__rw_getloc (__flags));
 
     // retrieve positive and negative sign, currency symbol,
     // the grouping string and the pattern format
@@ -119,7 +119,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
     _RWSTD_SIZE_T __wscredit = 0;
 
     const ctype<_CharT> &__ctp = 
-        std::use_facet< ctype<_CharT> >(__flags._C_getloc ());
+        std::use_facet< ctype<_CharT> >(__rw::__rw_getloc (__flags));
 
     char __buf [304];
     char *__pbuf            = __buf;          // pointer to allocated buffer

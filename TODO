@@ -520,14 +520,12 @@ position inside the range fails the assertion.
 ** TODO The stream classes keep =_C_= members public
 
 A census after =basic_istream='s helpers went protected (04c3bb3e):
-=include/rw/_iosbase.h= 231 =_C_getloc= is public and used by every
-facet's =do_get= and =do_put= (=include/loc/_*.cc=), =complex.cc=,
-=_ioinsert.cc= and =_stringio.cc= through an =ios_base&=; 303
-=_C_usr_data= is public under a comment naming an EDG eccp 2.3x bug,
-and EDG is on the matrix. =basic_streambuf= and =ios_base= derive
-publicly from =__rw::__rw_synchronized=, so =_C_mutex=, =_C_lock=,
-=_C_unlock= and =_C_guard= (=include/rw/_mutex.h=) are public members
-of both, and =basic_ios::_C_bufmutex= reads ~rdbuf ()->_C_mutex~.
+=include/rw/_iosbase.h= 312 =_C_usr_data= is public under a comment
+naming an EDG eccp 2.3x bug, and EDG is on the matrix.
+=basic_streambuf= and =ios_base= derive publicly from
+=__rw::__rw_synchronized=, so =_C_mutex=, =_C_lock=, =_C_unlock= and
+=_C_guard= (=include/rw/_mutex.h=) are public members of both, and
+=basic_ios::_C_bufmutex= reads ~rdbuf ()->_C_mutex~.
 17.4.4.4, p2 permits added non-virtual member function signatures in
 three forms, each a reshaping of a standard member, and p3 has a call
 to a standard signature behave as if none were added; a public
@@ -536,12 +534,10 @@ not a signature. 17.4.4.6, p1 leaves friendship unspecified, so
 friends are within the latitude. Found on the review of 04c3bb3e,
 2026-11-06.
 
-Fix: three decisions. =ios_base::_C_getloc=: the facets reach it
-through =ios_base&=, so it is either a friend per facet or a =__rw=
-accessor that is itself a friend. =_C_usr_data= waits on whether EDG
-6 still needs it, a check in the EDG build. The =__rw_synchronized=
-base: private inheritance with the stream classes' users made
-friends, or the members protected in the base.
+Fix: two decisions. =_C_usr_data= waits on whether EDG 6 still needs
+it, a check in the EDG build. The =__rw_synchronized= base: private
+inheritance with the stream classes' users made friends, or the
+members protected in the base.
 
 Check: the library builds; =27.ostream=, =27.basic.ios=, =27.objects=
 and the 22 locale rows hold at pin.

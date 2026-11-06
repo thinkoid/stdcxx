@@ -164,7 +164,7 @@ operator<< (basic_ostream<_CharT, _Traits >& __strm,
 {
     basic_ostringstream<_CharT, _Traits, allocator<_CharT> > __ss;
     __ss.flags (__strm.flags ());
-    __ss.imbue (__strm._C_getloc ());
+    __ss.imbue (__rw::__rw_getloc (__strm));
     __ss.precision (__strm.precision ());
     __ss << '(' << __val.real () << ',' << __val.imag () << ')';
     return __strm << __ss.str ();

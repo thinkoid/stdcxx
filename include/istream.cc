@@ -48,7 +48,7 @@ __rw_extract (std::basic_istream<_CharT, _Traits> &__strm,
 
     if (__ipfx) {
         try {
-            std::use_facet< _NumGet >(__strm._C_getloc ())
+            std::use_facet< _NumGet >(__rw_getloc (__strm))
                 .get (_Iter (__strm), _Iter (), __strm, __err, __val);
         }
         catch (...) {
@@ -99,7 +99,7 @@ _C_ipfx (bool __noskipws, ios_base::iostate __errbits)
             _RWSTD_ASSERT (0 != __rdbuf);
 
             const ctype<char_type> &__ctp =
-                use_facet< ctype<char_type> >(this->_C_getloc ());
+                use_facet< ctype<char_type> >(__rw::__rw_getloc (*this));
 
             for ( ; ; ) {
 
@@ -177,7 +177,8 @@ _C_unsafe_get (streamsize *__cnt   /* = 0     */,
                      || !traits_type::eq (traits_type::to_char_type (__c),
                                           char_type ()))
                  && (   !(_C_wsterm & __flags)
-                     || !use_facet< ctype<char_type> >(this->_C_getloc ())
+                     || !use_facet< ctype<char_type> >(
+                             __rw::__rw_getloc (*this))
                             .is (ctype_base::space,
                                  traits_type::to_char_type (__c)))) {
             if (traits_type::eq_int_type (this->rdbuf ()->sbumpc (),
@@ -334,7 +335,7 @@ _C_read (char_type *__s, streamsize __n, int_type __delim, int __flags)
             // space or eos char may terminate input
             if (   !(_C_eatnull & __flags) && traits_type::eq (__ch, __eos)
                 || _C_wsterm & __flags
-                && use_facet< ctype<char_type> >(this->_C_getloc ())
+                && use_facet< ctype<char_type> >(__rw::__rw_getloc (*this))
                        .is (ctype_base::space, __ch))
                 break;
 

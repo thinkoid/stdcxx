@@ -90,14 +90,14 @@ _C_put (iter_type __it, int __opts, ios_base &__flags, char_type __fill,
 #endif   // gcc
 
     if (__intl) {
-        __pun1 = &std::use_facet< _Punct1 >(__flags._C_getloc ());
+        __pun1 = &std::use_facet< _Punct1 >(__rw::__rw_getloc (__flags));
     }
     else {
-        __pun0 = &std::use_facet< _Punct0 >(__flags._C_getloc ());
+        __pun0 = &std::use_facet< _Punct0 >(__rw::__rw_getloc (__flags));
     }
 
     const ctype<_CharT> &__ctp =
-        std::use_facet< ctype<_CharT> >(__flags._C_getloc ());
+        std::use_facet< ctype<_CharT> >(__rw::__rw_getloc (__flags));
 
     const char __signchar = __ctp.narrow (*__s, '\0');
 
@@ -303,14 +303,16 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
 
     if (__intl) {
         typedef moneypunct<_CharT, true> _Punct;
-        const _Punct &__pun = std::use_facet< _Punct >(__flags._C_getloc ());
+        const _Punct &__pun =
+            std::use_facet< _Punct >(__rw::__rw_getloc (__flags));
 
         __fd       = __pun.frac_digits ();
         __grouping = __pun.grouping ();
     }
     else {
         typedef moneypunct<_CharT, false> _Punct;
-        const _Punct &__pun = std::use_facet< _Punct >(__flags._C_getloc ());
+        const _Punct &__pun =
+            std::use_facet< _Punct >(__rw::__rw_getloc (__flags));
 
         __fd       = __pun.frac_digits ();
         __grouping = __pun.grouping ();
@@ -336,7 +338,7 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
     // widen the narrow buffer, wherever __rw_put_num left it, into
     // a string of its length (necessary even if char_type == char)
     const ctype<_CharT> &__ctp =
-        std::use_facet< ctype<_CharT> >(__flags._C_getloc ());
+        std::use_facet< ctype<_CharT> >(__rw::__rw_getloc (__flags));
 
     string_type __wstr (__n, char_type ());
 
@@ -363,7 +365,8 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
     if (__intl) {
         typedef moneypunct<_CharT, true> _Punct;
 
-        const _Punct &__pun = std::use_facet< _Punct >(__flags._C_getloc ());
+        const _Punct &__pun =
+            std::use_facet< _Punct >(__rw::__rw_getloc (__flags));
 
         __fd       = __pun.frac_digits ();
         __grouping = __pun.grouping ();
@@ -371,7 +374,8 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
     else {
         typedef moneypunct<_CharT, false> _Punct;
 
-        const _Punct &__pun = std::use_facet< _Punct >(__flags._C_getloc ());
+        const _Punct &__pun =
+            std::use_facet< _Punct >(__rw::__rw_getloc (__flags));
 
         __fd       = __pun.frac_digits ();
         __grouping = __pun.grouping ();
@@ -402,7 +406,7 @@ do_put (iter_type __i, bool __intl, ios_base &__flags, char_type __fill,
     char *__groups = __grouping.size () ? __pbuf : &__nul;
 
     const ctype<_CharT> &__ctp =
-        std::use_facet< ctype<_CharT> >(__flags._C_getloc ());
+        std::use_facet< ctype<_CharT> >(__rw::__rw_getloc (__flags));
 
     // narrow digits into a temporary buffer to determine grouping
     for (_StringIter __it = __str.begin (); __it != __str.end (); ++__it) {

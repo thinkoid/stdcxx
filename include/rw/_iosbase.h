@@ -48,6 +48,13 @@
 #endif   // _RWSTD_RW_TRAITS_H_INCLUDED
 
 
+namespace __rw {
+
+inline const std::locale& __rw_getloc (const std::ios_base&);
+
+}   // namespace __rw
+
+
 namespace std {
 
 
@@ -227,11 +234,6 @@ struct _RWSTD_EXPORT ios_base: __rw::__rw_synchronized
         return _C_loc;
     }
 
-    // the imbued locale without the copy, for the library's own reads
-    const locale& _C_getloc () const {
-        return _C_loc;
-    }
-
     // 27.4.2.5, p1
     static int xalloc ();
 
@@ -297,6 +299,13 @@ private:
     ios_base (const ios_base&);               // not defined
     ios_base& operator= (const ios_base&);    // not defined
 
+    // the imbued locale without the copy, for the library's own reads
+    const locale& _C_getloc () const {
+        return _C_loc;
+    }
+
+    friend const locale& __rw::__rw_getloc (const ios_base&);
+
     // working around an EDG eccp 2.3x bug (also derivatives,
     // such as MIPSpro, see PR #28631)
 public:
@@ -330,6 +339,19 @@ width (_RWSTD_STREAMSIZE __width)
 
 
 }   // namespace std
+
+
+namespace __rw {
+
+// the imbued locale of a stream without the copy that getloc () makes,
+// for the library's own reads
+inline const std::locale&
+__rw_getloc (const std::ios_base &__flags)
+{
+    return __flags._C_getloc ();
+}
+
+}   // namespace __rw
 
 
 #endif   // _RWSTD_RW_IOSBASE_H_INCLUDED

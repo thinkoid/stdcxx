@@ -118,7 +118,7 @@ do_get (iter_type __begin, iter_type __end, ios_base &__flags,
     __err = __rw::__rw_goodbit;
 
     const numpunct<char_type> &__pun = 
-        std::use_facet< numpunct<char_type> >(__flags._C_getloc ());
+        std::use_facet< numpunct<char_type> >(__rw::__rw_getloc (__flags));
 
     // lwg issue 17
     typedef basic_string<char_type> string_type;
@@ -168,7 +168,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
     // boolalpha parsing not handled here
     _RWSTD_ASSERT (__type != _C_bool || !(__fl & _RWSTD_IOS_BOOLALPHA));
 
-    const locale &__loc = __flags._C_getloc ();
+    const locale &__loc = __rw::__rw_getloc (__flags);
 
     const numpunct<char_type> &__pun = 
         std::use_facet< numpunct<char_type> >(__loc);
