@@ -17,15 +17,16 @@ longer investigations.
 * Library
 
 The library itself, =include= and =src=: its behaviour, its interface
-and what it carries that it no longer uses. The locale entries come
-first, the easiest at the top: fixes of a line or two, then fixes that
-take work, then the entries that wait on a decision. The extension
-sweep's findings follow, the smallest decision first: dead code and
-stale comments, then behaviour the library adds or changes, then the
-additions whose removal costs tests or callers. The rest, outside the
-locale, is last.
+and what it carries that it no longer uses. The entries are binned by
+the clause of the standard they fall under, localization first since
+it holds the most, then the streams and the rest of the library in
+clause order; the configuration and the C library headers, and the
+tree's own housekeeping, come last. Within a bin the easiest entry is
+at the top.
 
-** TODO Racing =locale::global= calls can split the C and C++ locales
+** Localization: the locale object
+
+*** TODO Racing =locale::global= calls can split the C and C++ locales
 
 =locale::global= (=src/locale_global.cpp= 59-72) calls =setlocale= and
 swaps the body under two different locks, so two racing calls can
@@ -38,7 +39,25 @@ caller's.
 Check: a =22.locale.statics.mt= variant comparing =setlocale (LC_ALL, 0)=
 with =locale ().name ()= after the race.
 
-** TODO =%EY= keeps a year its format then fails on
+*** TODO A mixed-name global does not reach the C library
+
+=locale::global= calls =setlocale= with the library's composite name,
+which lists its six categories; glibc accepts a composite only when it
+lists all twelve of its own, so =setlocale (LC_ALL, 0)= stays "C"
+after =global= of a mixed-name locale (by probe). The comment at
+=src/locale_global.cpp= 61-62 assumes =setlocale= understands the
+format; =ref-locale.md= ch. 3 says the call takes effect. 14882:2003
+22.1.1.5 p2. Found 2026-11-02.
+
+Fix: a decision: compose glibc's twelve-category name for the call,
+or record that a mixed name does not reach the C library.
+
+Check: =setlocale (LC_ALL, 0)= after =global= of a two-locale mixture
+names both, or the master document records the limit.
+
+** Localization: =time_get= and =time_put=
+
+*** TODO =%EY= keeps a year its format then fails on
 
 =__rw_read_era= stores its local =tm= whenever no bit but =eofbit= is
 set (=include/loc/_time_get.cc= 301-334). Under =%EY= a =%Ey= of the
@@ -58,7 +77,7 @@ nothing unless the whole format matched. The comment at =include/loc/_time_get.c
 Check: a row under the test locale, "Heisei 8 Nex" against =%EY=,
 pinning the decision either way.
 
-** TODO =eofbit= before the pattern ends sets =failbit= and stores nothing
+*** TODO =eofbit= before the pattern ends sets =failbit= and stores nothing
 
 "%Y-%m" and "%Y " on "2026" both fail: the walk ends with =failbit=
 when a directive sets =eofbit= before the pattern is done. N3242 p8
@@ -70,7 +89,7 @@ Fix: a decision on how p8's order reads; then the walk.
 
 Check: the two rows pinning the reading taken.
 
-** TODO Implied =tm_wday= and =tm_yday= are left as the caller had them
+*** TODO Implied =tm_wday= and =tm_yday= are left as the caller had them
 
 "%Y %m %d" determines the weekday and the day of the year; the
 library stores neither and glibc's =strptime= fills both. Not a
@@ -81,7 +100,7 @@ Fix: a decision; if filled, after the walk, from the three fields.
 
 Check: a row "%Y %m %d" on "2026-11-02" with =tm_wday= 0, =tm_yday= 305.
 
-** TODO =%C= of a year past 9999 writes the century modulo 100
+*** TODO =%C= of a year past 9999 writes the century modulo 100
 
 Year 10000 writes "00", pinned at =tests/localization/22.locale.time.put.cpp=
 708; the POSIX.1-2024 width sentence b54acca9 cites gives "100".
@@ -91,7 +110,7 @@ Fix: a decision, then the row.
 
 Check: the row at 708 says what the decision says.
 
-** TODO =put= over a pattern pads every directive to the width
+*** TODO =put= over a pattern pads every directive to the width
 
 The width of the stream is applied to every directive of a pattern
 and never reset: "%H:%M" at width 5 writes "***09:***05". No row has
@@ -102,7 +121,9 @@ Fix: a decision: the width applies once (the first directive, as
 
 Check: a row with a width and a two-directive pattern.
 
-** TODO The blank bit is visible through =ctype<char>::is= under a database
+** Localization: =ctype=, =numpunct= and the database locales
+
+*** TODO The blank bit is visible through =ctype<char>::is= under a database
 
 =plan-localedef-backend.md= 3.1 says the =blank= bit written as 0x400
 is "invisible until a =ctype_base::blank= names it", and the header
@@ -118,7 +139,7 @@ as the wide form does, or name it a visible extension and record it.
 Check: the vector =is= of a space under a database locale equals the
 classic facet's, or the extension is in the master document.
 
-** TODO Database locales have empty =truename= and =falsename=
+*** TODO Database locales have empty =truename= and =falsename=
 
 =util/localedef/wnumeric.cpp= 94-97 writes both names empty, so under
 every database locale =boolalpha= writes nothing and reads nothing
@@ -133,7 +154,7 @@ follow.
 
 Check: a =boolalpha= round trip under =en_US.UTF-8= from the database.
 
-** TODO A multibyte separator in a narrow facet comes back as its first byte
+*** TODO A multibyte separator in a narrow facet comes back as its first byte
 
 A narrow =numpunct= or =moneypunct= separator wider than one byte is
 returned as its first byte: under =fr_FR.UTF-8= =num_put<char>= writes
@@ -148,23 +169,9 @@ the limit.
 Check: the narrow output of every UTF-8 locale is valid UTF-8, or
 the limit is in the master document.
 
-** TODO A mixed-name global does not reach the C library
+** Localization: =codecvt=
 
-=locale::global= calls =setlocale= with the library's composite name,
-which lists its six categories; glibc accepts a composite only when it
-lists all twelve of its own, so =setlocale (LC_ALL, 0)= stays "C"
-after =global= of a mixed-name locale (by probe). The comment at
-=src/locale_global.cpp= 61-62 assumes =setlocale= understands the
-format; =ref-locale.md= ch. 3 says the call takes effect. 14882:2003
-22.1.1.5 p2. Found 2026-11-02.
-
-Fix: a decision: compose glibc's twelve-category name for the call,
-or record that a mixed name does not reach the C library.
-
-Check: =setlocale (LC_ALL, 0)= after =global= of a two-locale mixture
-names both, or the master document records the limit.
-
-** TODO The UTF-16 names set flags no converter reads
+*** TODO The UTF-16 names set flags no converter reads
 
 The constructor of =codecvt_byname<wchar_t, char>= (=src/wcodecvt.cpp=
 near 1100) recognizes =UTF-16=, =UTF-16BE= and =UTF-16LE= and sets
@@ -176,7 +183,7 @@ so the C library or =error= answers.
 
 Check: per the decision; a row in =22.locale.codecvt= either way.
 
-** TODO ISO-2022 conversion does not convert
+*** TODO ISO-2022 conversion does not convert
 
 By probe: =in= of "a ESC $ B $ \" ESC ( B" under =ISO-2022-JP=
 returns =error= at byte 0; =out= of {a, U+3042} writes ESC $ @, the
@@ -195,7 +202,7 @@ Fix: a decision first: keep ISO-2022 and make it work against glibc's
 Check: a round trip of the test fixtures through =iconv= and the
 facet; ASan on =length= over "\x1b(B".
 
-** TODO A corrupt =mbstate_t= on the C-library path could be told from a carried one
+*** TODO A corrupt =mbstate_t= on the C-library path could be told from a carried one
 
 The C-library =in= and =length= of the wide byname facet take the
 state as the C library takes it, since =mbsinit= is the only
@@ -220,7 +227,9 @@ Check: =22.locale.codecvt='s corrupt-state section run against the
 C-library facets again, on pin, with =test_libc_split= still
 passing.
 
-** TODO A character given the weights of another compares greater than it
+** Localization: =collate=
+
+*** TODO A character given the weights of another compares greater than it
 
 In the test locale of =22.locale.collate=, =<U00E8>= is listed last
 in the order with =<a>='s weights, ~<a>;<LETTER>;IGNORE~, and
@@ -238,20 +247,9 @@ either the writer or the position level of =__rw_process_offsets=.
 Check: the pair compares 0 on both facets, with a row in
 =22.locale.collate=.
 
-** TODO The =__rw_once= comment names a static mutex path that is gone
+** Streams
 
-=src/once.cpp= 95-97 says the static mutex of =int= "is itself
-constructed through =__rw_once= where mutexes cannot be initialized
-statically". 92d18f73 removed that branch with
-=_RWSTD_NO_STATIC_MUTEX_INIT=; =__rw_get_static_mutex= returns the
-statically initialized mutex (=include/rw/_mutex.h= 193-198) and
-calls no =__rw_once=.
-
-Fix: the comment says what the code does.
-
-Check: reading.
-
-** TODO A width comment in =_ioinsert.cc= predates 69ad31e6
+*** TODO A width comment in =_ioinsert.cc= predates 69ad31e6
 
 =include/rw/_ioinsert.cc= 128-130 says =__rw_insert= "calls width(0)
 if and only if the write has been successful"; 69ad31e6 made the reset
@@ -262,7 +260,7 @@ Fix: the comment says what the code does.
 
 Check: reading.
 
-** TODO An unformatted input function whose sentry fails leaves =gcount ()= as it was
+*** TODO An unformatted input function whose sentry fails leaves =gcount ()= as it was
 
 14882:2003 27.6.1.3, p1: an unformatted input function counts the
 characters it extracts and, if no exception has been thrown, "ends by
@@ -278,36 +276,7 @@ Fix: each unformatted function zeroes the count before its sentry.
 
 Check: that sequence in =27.istream.unformatted.get= prints 0.
 
-** TODO =include/rw/_typetraits.h= is included by nothing
-
-The header defines type-trait helper templates, and no file in the
-tree includes it: =git grep _typetraits= finds only the header itself.
-=make install= copies it with the rest of =include=. Seen in passing
-by the extension sweep, 2026-11-04.
-
-Fix: a decision: remove the header, or keep it for a later use; for
-removal, nothing reads it.
-
-Check: =git grep -n _typetraits= is empty; a sanity build.
-
-** TODO =DIV_OVERLOADS= emits two macros nothing reads
-
-=etc/config/src/DIV_OVERLOADS.cpp= checks =div= on =int=, =long= and
-=long long= and emits =_RWSTD_NO_DIV_INT=, =_RWSTD_NO_DIV_LONG= and
-=_RWSTD_NO_DIV_LLONG= (=config.h= 123-125 of a 15D build under GCC).
-=include/ansi/cstdlib= reads only =_RWSTD_NO_DIV_LONG= (61, 140);
-nothing reads the other two, and no ~div (long long)~ or =lldiv_t=
-appears in =include=. They are the kind 55ceb9b6 trimmed from
-=ABS_OVERLOADS=. Seen in passing by the extension sweep, 2026-11-04.
-
-Fix: the probe checks =long= alone, as 55ceb9b6 did for =abs=; or a
-decision to add ~div (long long)~, which chapter 2's "Compiler types
-beyond 2003" row then names.
-
-Check: the =config.h= of a 15D build has no =_RWSTD_NO_DIV_INT= or
-=_RWSTD_NO_DIV_LLONG= line.
-
-** TODO =basic_filebuf::xsputn= returns -1 on an error
+*** TODO =basic_filebuf::xsputn= returns -1 on an error
 
 14882:2003 27.5.2.4.5, p2: =xsputn= returns "The number of characters
 written". =basic_filebuf::xsputn= returns -1 when the buffer is not
@@ -322,22 +291,72 @@ wrote none.
 Check: a =27.filebuf= row: =sputn= on a buffer opened for input only
 returns 0.
 
-** TODO =allocator::allocate= does not check its count against =max_size ()=
+*** TODO The standard objects are references, which a template argument can tell
 
-=include/rw/_allocator.h= 134 passes ~__n * sizeof (value_type)~ to
-=__rw_allocate= unchecked. For =n= past =max_size ()= the product
-wraps and a short block comes back, where 14882:2003 20.4.1.1, p5
-returns storage of size ~n * sizeof(T)~ and p7 throws =bad_alloc= when
-it cannot be obtained. The containers check =max_size= first; a direct
-caller does not. =__rw_tmpbuf= checks its product (=src/tmpbuf.cpp=
-64-70). Seen in passing by the extension sweep, 2026-11-04.
+=include/iostream= 55-62 declare the eight objects through
+=_RWSTD_IOSTREAM_OBJECT= as references, and =src/iostream.cpp= 74-78
+call the departure from 27.3 undetectable. 14882:2003 14.3.2, p1 takes
+as a template argument the address of an object with external linkage.
+Hypothesis, by reading: ~template <std::ostream&> struct S;~ cannot be
+instantiated on =std::cout=, since a reference is not an object. Seen
+in passing by the extension sweep, 2026-11-04.
 
-Fix: =allocate= throws =bad_alloc= for a count past =max_size ()=.
+Fix: a decision: record the departure in chapter 2, or define the
+objects as objects.
 
-Check: ~std::allocator<int> ().allocate (std::allocator<int>
-().max_size () + 1)~ throws =bad_alloc=.
+Check: compile ~S<std::cout>~.
 
-** TODO =vector<bool>='s range constructor takes no allocator and no integers
+*** TODO =_C_opfx= skips the tie's flush on a loop of distinct buffers
+
+=include/ostream= 270-284 skip ~tie ()->flush ()~ when the tie chain
+loops or a stream in it shares the buffer. Footnote 292 of 14882:2003
+27.6.2.3 allows the skip where no synchronization is necessary, which
+holds for a shared buffer but not for a loop over distinct buffers.
+The loop exists because =flush= builds a sentry (LWG 581); 2003's
+27.6.2.6, p7 says =flush= does not behave as an unformatted output
+function. Hypothesis, by reading: two streams on distinct buffers tied
+to each other do not flush each other. Seen in passing by the
+extension sweep, 2026-11-04.
+
+Fix: a decision: flush each distinct buffer of the loop once, or
+record the skip.
+
+Check: two streams on distinct buffers, tied to each other: an
+insertion into one flushes the other.
+
+*** TODO =ios_base::width= asserts that =this= is not null
+
+=include/rw/_iosbase.h= 319, the setter =width (streamsize)=, opens
+with ~_RWSTD_ASSERT (0 != this)~, the one such assertion under
+=include= and =src=. =this= is never null in a valid call. GCC 16
+warns "'nonnull' argument 'this' compared to NULL"
+(=-Wnonnull-compare=) in a debug build, once in each of the ten
+=src/ti_*.cpp= units that inline the setter, and may fold the
+comparison away. From the 2005 import (e6c7726b). Seen in passing in
+the 15D library build, 2026-11-05.
+
+Fix: remove the assertion.
+
+Check: the 15D library builds without =-Wnonnull-compare=.
+
+*** TODO =xsputn= loses its argument when it lies inside the buffer past =pbase ()=
+
+=basic_stringbuf::xsputn= (=include/sstream.cc= 181-200) saves the
+offset of an argument inside the put area before growing the buffer,
+as ~__off = this->pbase () - __s~, and corrects =__s= after the growth
+only when ~0 <= __off~. The offset is negative for every =__s= past
+=pbase ()=, so such a call copies from the freed buffer. Only =__s ==
+pbase ()= is corrected, the case STDCXX-576's program exercises. From
+17d5eb29. Hypothesis, by reading, 2026-11-05.
+
+Fix: ~__off = __s - this->pbase ()~.
+
+Check: a =27.stringbuf.virtuals= row that grows the buffer with
+~sputn (pbase () + 1, n)~ and compares the sequence.
+
+** Containers
+
+*** TODO =vector<bool>='s range constructor takes no allocator and no integers
 
 14882:2003 23.2.5's synopsis declares the range constructor with
 ~const Allocator& = Allocator ()~, and 23.1.1, p9 has a range
@@ -354,7 +373,7 @@ Fix: the allocator parameter, and the integral dispatch the primary
 Check: ~std::vector<bool> v (5, 1)~ compiles and holds five =true=
 elements, and the range constructor takes an allocator.
 
-** TODO =vector<bool>='s range =insert= reads an input range twice
+*** TODO =vector<bool>='s range =insert= reads an input range twice
 
 =include/vector.cc= 562 takes ~std::distance (first, last)~ over the
 range and then copies it (565 or 574), so an input iterator range is
@@ -369,7 +388,41 @@ element by element.
 Check: =insert= at =begin ()= from an =istream_iterator<bool>= over "1
 0 1" inserts three elements.
 
-** TODO =valarray::sum= adds with ~operator+~ from =T ()=
+*** TODO The range =splice= checks 23.2.2.4 p12 with the wrong iterators
+
+The range =splice= (=include/list.cc=) asserts
+~__i != __j && __i != __k~ when the source is the list itself, and in
+a debug build walks ~[__j, __k)~ asserting ~__i != __j~ at every
+step, an invariant of the loop. 14882:2003 23.2.2.4 p12 leaves the
+result undefined only for a position in ~[first, last)~: a position
+inside the range past =first= is never caught, and a position equal
+to =last=, which the paragraph allows and which changes nothing,
+fails the assertion; a release build returns at once. From the 2005
+import. Seen in passing while retiring the node buffer, 2026-11-04.
+
+Fix: the loop asserts ~__i != __it~, and the first assertion drops
+~__i != __k~.
+
+Check: ~l.splice (l.end (), l, l.begin (), l.end ())~ runs in 15D; a
+position inside the range fails the assertion.
+
+*** TODO =bitset= sizes its array with an enumerator in a boolean context
+
+=include/bitset= 92 declares ~unsigned long _C_bits [_C_nelems ?
+_C_nelems : 1]~, where =_C_nelems= is an enumerator. GCC 16 under
+=-Wall= warns "enum constant in boolean context"
+(=-Wint-in-bool-context=) once for each instantiation: building
+=23.bitset= prints it ten times, and so does any program that
+instantiates =bitset= under =-Wall=. From the 2005 import (e6c7726b).
+Seen in passing while building =23.bitset=, 2026-11-05.
+
+Fix: the condition compares, ~_C_nelems != 0~.
+
+Check: =23.bitset= builds in 15D without the warning.
+
+** Numerics
+
+*** TODO =valarray::sum= adds with ~operator+~ from =T ()=
 
 14882:2003 26.3.2.7, p2 computes =sum= "by applying ~operator+=~ to a
 copy of an element of the array and all other elements".
@@ -384,7 +437,7 @@ Fix: =sum= copies the first element and applies ~+=~ for the rest.
 Check: =sum= of a =valarray= over a type with ~+=~ alone compiles, and
 over one whose =T ()= is 1 gives the elements' sum.
 
-** TODO A second =cv[g]= with one =gslice= may read its start twice
+*** TODO A second =cv[g]= with one =gslice= may read its start twice
 
 =_C_next_ind= at the end of its walk wraps, sets =_C_reset= and returns
 =start=, and the next call clears the flag and returns =start= again
@@ -403,7 +456,9 @@ Fix: the const subscript steps a copy of the =gslice=, as
 Check: ~a = cv[g]; b = cv[g];~ for a 2-by-3 =gslice=, with =a= and =b=
 equal element by element.
 
-** TODO The =random_shuffle= generator's warm-up may run four table entries
+** Algorithms
+
+*** TODO The =random_shuffle= generator's warm-up may run four table entries
 
 =src/random.cpp= 87-91: the warm-up loop indexes ~__rw_table [i]~
 inside the loop over =ii=, so it runs entries 0 to 3 fifty-five times
@@ -419,70 +474,26 @@ expected array.
 Check: the loop read against Knuth's subtractive generator or
 Numerical Recipes' =ran3=.
 
-** TODO The standard objects are references, which a template argument can tell
+** Utilities
 
-=include/iostream= 55-62 declare the eight objects through
-=_RWSTD_IOSTREAM_OBJECT= as references, and =src/iostream.cpp= 74-78
-call the departure from 27.3 undetectable. 14882:2003 14.3.2, p1 takes
-as a template argument the address of an object with external linkage.
-Hypothesis, by reading: ~template <std::ostream&> struct S;~ cannot be
-instantiated on =std::cout=, since a reference is not an object. Seen
-in passing by the extension sweep, 2026-11-04.
+*** TODO =allocator::allocate= does not check its count against =max_size ()=
 
-Fix: a decision: record the departure in chapter 2, or define the
-objects as objects.
+=include/rw/_allocator.h= 134 passes ~__n * sizeof (value_type)~ to
+=__rw_allocate= unchecked. For =n= past =max_size ()= the product
+wraps and a short block comes back, where 14882:2003 20.4.1.1, p5
+returns storage of size ~n * sizeof(T)~ and p7 throws =bad_alloc= when
+it cannot be obtained. The containers check =max_size= first; a direct
+caller does not. =__rw_tmpbuf= checks its product (=src/tmpbuf.cpp=
+64-70). Seen in passing by the extension sweep, 2026-11-04.
 
-Check: compile ~S<std::cout>~.
+Fix: =allocate= throws =bad_alloc= for a count past =max_size ()=.
 
-** TODO =_C_opfx= skips the tie's flush on a loop of distinct buffers
+Check: ~std::allocator<int> ().allocate (std::allocator<int>
+().max_size () + 1)~ throws =bad_alloc=.
 
-=include/ostream= 270-284 skip ~tie ()->flush ()~ when the tie chain
-loops or a stream in it shares the buffer. Footnote 292 of 14882:2003
-27.6.2.3 allows the skip where no synchronization is necessary, which
-holds for a shared buffer but not for a loop over distinct buffers.
-The loop exists because =flush= builds a sentry (LWG 581); 2003's
-27.6.2.6, p7 says =flush= does not behave as an unformatted output
-function. Hypothesis, by reading: two streams on distinct buffers tied
-to each other do not flush each other. Seen in passing by the
-extension sweep, 2026-11-04.
+** Language support
 
-Fix: a decision: flush each distinct buffer of the loop once, or
-record the skip.
-
-Check: two streams on distinct buffers, tied to each other: an
-insertion into one flushes the other.
-
-** TODO =<stdlib.h>= and =<math.h>= leave the C++ overloads out of the global namespace
-
-14882:2003 D.5, p2 has each =name.h= place the =cname= header's names
-in the global namespace. =include/rw/_config.h= 97-106 defines
-=_RWSTD_NO_DEPRECATED_C_HEADERS= unless a program asks for the pure
-headers, and under it =include/ansi/stdlib.h= and =math.h= include the
-C library's header and nothing more (=stdlib.h= 73-74). Hypothesis, by
-reading: under glibc =<stdlib.h>= then gives no ~::abs (long)~ and
-=<math.h>= no ~::sin (float)~, so ~abs (-1L)~ after =<stdlib.h>= calls
-~abs (int)~. Seen in passing by the extension sweep, 2026-11-04.
-
-Fix: a decision: the =name.h= headers bring the =cname= overloads to
-global scope, or record the C library's set.
-
-Check: ~sizeof (abs (0L))~ after =<stdlib.h>= alone.
-
-** TODO An installed =config.h= shares its name with the programs'
-
-=include/rw/_config.h= 36 includes =<config.h>=, a name many programs'
-build systems use, and =make install= copies the library's to the top
-of =$(PREFIX)/include= (=GNUmakefile= 633). Hypothesis, by reading: a
-program whose own =config.h= is earlier on the search path configures
-the library with it, and one whose own is later gets the library's.
-Seen in passing by the extension sweep, 2026-11-04.
-
-Fix: a decision: a name of the library's own, under =rw/=, or record.
-
-Check: ~#include <string>~ with =-I= of a directory holding an empty
-=config.h= ahead of the library's.
-
-** TODO =type_info= compares by name where GCC marks a name to compare by address
+*** TODO =type_info= compares by name where GCC marks a name to compare by address
 
 In 15D under GCC =_RWSTD_NO_TYPE_INFO_BEFORE=, =_EQUALITY= and =_NAME=
 are defined (=config.h= 484-487), so =src/typeinfo.cpp= 87-130
@@ -499,67 +510,81 @@ by address, as the support library does.
 
 Check: those two calls in a two-file program.
 
-** TODO The range =splice= checks 23.2.2.4 p12 with the wrong iterators
+** Configuration and the C library
 
-The range =splice= (=include/list.cc=) asserts
-~__i != __j && __i != __k~ when the source is the list itself, and in
-a debug build walks ~[__j, __k)~ asserting ~__i != __j~ at every
-step, an invariant of the loop. 14882:2003 23.2.2.4 p12 leaves the
-result undefined only for a position in ~[first, last)~: a position
-inside the range past =first= is never caught, and a position equal
-to =last=, which the paragraph allows and which changes nothing,
-fails the assertion; a release build returns at once. From the 2005
-import. Seen in passing while retiring the node buffer, 2026-11-04.
+*** TODO =DIV_OVERLOADS= emits two macros nothing reads
 
-Fix: the loop asserts ~__i != __it~, and the first assertion drops
-~__i != __k~.
+=etc/config/src/DIV_OVERLOADS.cpp= checks =div= on =int=, =long= and
+=long long= and emits =_RWSTD_NO_DIV_INT=, =_RWSTD_NO_DIV_LONG= and
+=_RWSTD_NO_DIV_LLONG= (=config.h= 123-125 of a 15D build under GCC).
+=include/ansi/cstdlib= reads only =_RWSTD_NO_DIV_LONG= (61, 140);
+nothing reads the other two, and no ~div (long long)~ or =lldiv_t=
+appears in =include=. They are the kind 55ceb9b6 trimmed from
+=ABS_OVERLOADS=. Seen in passing by the extension sweep, 2026-11-04.
 
-Check: ~l.splice (l.end (), l, l.begin (), l.end ())~ runs in 15D; a
-position inside the range fails the assertion.
+Fix: the probe checks =long= alone, as 55ceb9b6 did for =abs=; or a
+decision to add ~div (long long)~, which chapter 2's "Compiler types
+beyond 2003" row then names.
 
-** TODO =bitset= sizes its array with an enumerator in a boolean context
+Check: the =config.h= of a 15D build has no =_RWSTD_NO_DIV_INT= or
+=_RWSTD_NO_DIV_LLONG= line.
 
-=include/bitset= 92 declares ~unsigned long _C_bits [_C_nelems ?
-_C_nelems : 1]~, where =_C_nelems= is an enumerator. GCC 16 under
-=-Wall= warns "enum constant in boolean context"
-(=-Wint-in-bool-context=) once for each instantiation: building
-=23.bitset= prints it ten times, and so does any program that
-instantiates =bitset= under =-Wall=. From the 2005 import (e6c7726b).
-Seen in passing while building =23.bitset=, 2026-11-05.
+*** TODO =<stdlib.h>= and =<math.h>= leave the C++ overloads out of the global namespace
 
-Fix: the condition compares, ~_C_nelems != 0~.
+14882:2003 D.5, p2 has each =name.h= place the =cname= header's names
+in the global namespace. =include/rw/_config.h= 97-106 defines
+=_RWSTD_NO_DEPRECATED_C_HEADERS= unless a program asks for the pure
+headers, and under it =include/ansi/stdlib.h= and =math.h= include the
+C library's header and nothing more (=stdlib.h= 73-74). Hypothesis, by
+reading: under glibc =<stdlib.h>= then gives no ~::abs (long)~ and
+=<math.h>= no ~::sin (float)~, so ~abs (-1L)~ after =<stdlib.h>= calls
+~abs (int)~. Seen in passing by the extension sweep, 2026-11-04.
 
-Check: =23.bitset= builds in 15D without the warning.
+Fix: a decision: the =name.h= headers bring the =cname= overloads to
+global scope, or record the C library's set.
 
-** TODO =ios_base::width= asserts that =this= is not null
+Check: ~sizeof (abs (0L))~ after =<stdlib.h>= alone.
 
-=include/rw/_iosbase.h= 319, the setter =width (streamsize)=, opens
-with ~_RWSTD_ASSERT (0 != this)~, the one such assertion under
-=include= and =src=. =this= is never null in a valid call. GCC 16
-warns "'nonnull' argument 'this' compared to NULL"
-(=-Wnonnull-compare=) in a debug build, once in each of the ten
-=src/ti_*.cpp= units that inline the setter, and may fold the
-comparison away. From the 2005 import (e6c7726b). Seen in passing in
-the 15D library build, 2026-11-05.
+*** TODO An installed =config.h= shares its name with the programs'
 
-Fix: remove the assertion.
+=include/rw/_config.h= 36 includes =<config.h>=, a name many programs'
+build systems use, and =make install= copies the library's to the top
+of =$(PREFIX)/include= (=GNUmakefile= 633). Hypothesis, by reading: a
+program whose own =config.h= is earlier on the search path configures
+the library with it, and one whose own is later gets the library's.
+Seen in passing by the extension sweep, 2026-11-04.
 
-Check: the 15D library builds without =-Wnonnull-compare=.
+Fix: a decision: a name of the library's own, under =rw/=, or record.
 
-** TODO =xsputn= loses its argument when it lies inside the buffer past =pbase ()=
+Check: ~#include <string>~ with =-I= of a directory holding an empty
+=config.h= ahead of the library's.
 
-=basic_stringbuf::xsputn= (=include/sstream.cc= 181-200) saves the
-offset of an argument inside the put area before growing the buffer,
-as ~__off = this->pbase () - __s~, and corrects =__s= after the growth
-only when ~0 <= __off~. The offset is negative for every =__s= past
-=pbase ()=, so such a call copies from the freed buffer. Only =__s ==
-pbase ()= is corrected, the case STDCXX-576's program exercises. From
-17d5eb29. Hypothesis, by reading, 2026-11-05.
+** Tree hygiene
 
-Fix: ~__off = __s - this->pbase ()~.
+*** TODO The =__rw_once= comment names a static mutex path that is gone
 
-Check: a =27.stringbuf.virtuals= row that grows the buffer with
-~sputn (pbase () + 1, n)~ and compares the sequence.
+=src/once.cpp= 95-97 says the static mutex of =int= "is itself
+constructed through =__rw_once= where mutexes cannot be initialized
+statically". 92d18f73 removed that branch with
+=_RWSTD_NO_STATIC_MUTEX_INIT=; =__rw_get_static_mutex= returns the
+statically initialized mutex (=include/rw/_mutex.h= 193-198) and
+calls no =__rw_once=.
+
+Fix: the comment says what the code does.
+
+Check: reading.
+
+*** TODO =include/rw/_typetraits.h= is included by nothing
+
+The header defines type-trait helper templates, and no file in the
+tree includes it: =git grep _typetraits= finds only the header itself.
+=make install= copies it with the rest of =include=. Seen in passing
+by the extension sweep, 2026-11-04.
+
+Fix: a decision: remove the header, or keep it for a later use; for
+removal, nothing reads it.
+
+Check: =git grep -n _typetraits= is empty; a sanity build.
 
 * Tests
 
