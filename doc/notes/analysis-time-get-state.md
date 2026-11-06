@@ -445,9 +445,12 @@ facet compared bytes and was exact.
   and computes the rest, as it would after `strptime` on a C library
   that does not derive. Recorded, not queued.
 - The implied members. "%Y %m %d" leaves `tm_wday` and `tm_yday` as
-  the caller had them; glibc completes them. The remark in p14 makes
-  either reading conforming. A decision, queued in `TODO` as
-  "Implied `tm_wday` and `tm_yday` are left as the caller had them".
+  the caller had them, where glibc completes them. C++11 22.4.5.1.2,
+  p12 has `do_get` assign the members "corresponding to a conversion
+  directive", and a weekday or day of the year that a date implies
+  corresponds to no directive of the pattern. So `get` sets only the
+  members its directives name, and the library does not fill the two.
+  Decided; the reference page of `get` says so.
 - The `E` family. Read since 2026-11-01 by the rules of chapter 9.
 - The nesting rule. Moot under the update model: a nested `%x` is a
   `do_get` that updates the same `tm`, and nothing is combined

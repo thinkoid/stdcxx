@@ -2232,8 +2232,6 @@ the suite, `bin/oracle/time.cpp` (eras) and `bin/oracle/scalar.cpp`
 
 ### 12.5 Open
 
-- `"%Y %m %d"` leaves the implied `tm_wday` and `tm_yday`; glibc fills
-  them; p14 allows either. Not queued. Check: a decision.
 - `%C` past 9999 is the century modulo 100: 10000 writes `"00"`, pinned
   at `22.locale.time.put.cpp` 708. POSIX.1-2024's width sentence, which
   b54acca9 cites for years before 0, gives `"100"`. Check: a decision,

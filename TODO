@@ -26,17 +26,6 @@ at the top.
 
 ** Localization: =time_get= and =time_put=
 
-*** TODO Implied =tm_wday= and =tm_yday= are left as the caller had them
-
-"%Y %m %d" determines the weekday and the day of the year; the
-library stores neither and glibc's =strptime= fills both. Not a
-conformance question (N3242 p12 owes only the directive's members);
-a decision on whether to fill them. Found 2026-11-02.
-
-Fix: a decision; if filled, after the walk, from the three fields.
-
-Check: a row "%Y %m %d" on "2026-11-02" with =tm_wday= 0, =tm_yday= 305.
-
 *** TODO =%C= of a year past 9999 writes the century modulo 100
 
 Year 10000 writes "00", pinned at =tests/localization/22.locale.time.put.cpp=
@@ -1566,12 +1555,19 @@ tree, and one that never was:
   decimal point (if any) is exactly the value returned by
   frac_digits()". 60c683eb made the facet exact (=ref-locale.md=
   10.3.9) and did not touch the page.
+- =time-get.html= 257-258, =get= over a pattern: a literal at the end
+  of the input "sets =ios_base::eofbit= in =err= and the algorithm
+  terminates", and white space that reaches the end sets =eofbit= too.
+  The walk sets =eofbit | failbit= for the literal, C++11
+  22.4.5.1.1, p8's third condition, and nothing for the white space:
+  "2026 " under "%Y " is =goodbit= (by probe, 2026-11-06).
 
 No test reads the pages. Found by the extension sweep's reading,
 2026-11-04.
 
-Fix: the passages go and =time-put.html='s table gains =%l=; 9a5a402a
-set the rule that a removal edits its page.
+Fix: the passages go and =time-put.html='s table gains =%l=;
+=time-get.html='s two sentences on the end of the input follow the
+walk. 9a5a402a set the rule that a removal edits its page.
 
 Check: each passage above is gone from its page, and each page's
 description of these members matches the code it names.
