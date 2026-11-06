@@ -1147,6 +1147,26 @@ assertions, 16 failed. A second build on 2026-10-08, at 48d6dac1 after
 the retirement of =export=, with the same hand changes and the same
 front end, gave the same table.
 
+** TODO =time_put= calls =snprintf= and =swprintf=, which strict C++03 does not declare
+
+=src/time_put.cpp= 2709 and 2835 call =snprintf= and =swprintf=,
+since e197b804 and a0eb3805 (2026-11-04) format a number through
+them. Under =eccp -A= glibc declares neither: =snprintf= is C99, and
+=swprintf= enters =<wchar.h>= under =__USE_ISOC95= only, so the 11S
+library stops at =time_put.o= with error #20, "identifier "snprintf"
+is undefined", and the other 97 sources compile. The rest of the
+library takes a C90 fallback behind a characterization for every C99
+function it calls (the entry "The pure C headers"). Seen in the EDG
+build of 2026-11-06.
+
+Fix: the same fallback: a characterization of the two (=NO_SNPRINTF=,
+=NO_SWPRINTF= or the existing kin), and behind it a bounded =sprintf=
+and =swprintf= into a buffer sized from the width and precision bound
+of d69bfa0b.
+
+Check: =make -j16 lib= in an =eccp -A= 11S build compiles 98 of 98;
+=22.locale.time.put= holds at pin in 15D.
+
 ** TODO The =eccp= configuration
 
 =etc/config/eccp.config= is back, restored from before the platform
@@ -1179,8 +1199,9 @@ fails. The file leaves when EDG enters the keyword.
 With no feature macro on the command line, =make config= under
 =eccp -A= (11S) configures (what differs from gcc's =config.h= is the
 entry "The configuration under =eccp= against GCC's"), and
-=make lib= then compiles all 98 sources: the
-C99 functions the library calls fall back on C90 behind their
+=make lib= then compiles 97 of the 98 sources (=src/time_put.cpp=
+calls =snprintf= and =swprintf= since 2026-11-04; the entry below):
+the C99 functions the library calls fall back on C90 behind their
 characterizations, and the library's own C header facts moved from
 =_config-gcc.h= to =_config.h= so that every compiler takes the
 wrapper model (the entry "The pure C headers"). The test driver, the

@@ -317,7 +317,9 @@ protected:
     template <class _CharT, class _Traits>
     friend class basic_ios;
 
-    // working around an EDG eccp 3.2 and prior bug (see PR #29526)
+    // 14882:2003 11.8, p1 gives a nested class no access to the
+    // enclosing class's private members, and the definitions of
+    // _C_usr_data's members in src name ios_base::_C_usr_data
     friend struct _C_usr_data;
 };
 
