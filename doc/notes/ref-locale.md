@@ -128,7 +128,8 @@ Default construction takes a reference to the current C++ global
 body. `locale::global` replaces that body and returns the old locale;
 existing handles retain their bodies. For a named locale it also
 calls C `setlocale`; glibc refuses the library's six-category mixed
-name, so a mixed global leaves the C locale as it was (chapter 8.3).
+name, so a mixed global leaves the C locale as it was; the library
+keeps its own name rather than compose one C library's (chapter 8.3).
 `locale::classic()` supplies the permanent `"C"` locale through a
 separate once-initialized handle.
 
@@ -636,8 +637,7 @@ template instantiation 435 deep, for EDG.
 
 ### 8.5 Open
 
-- Whether the mixed name should carry glibc's twelve categories so
-  that `global` reaches the C library. A decision.
+Nothing open.
 
 ## 9. ctype and codecvt
 

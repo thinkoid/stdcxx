@@ -24,24 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Localization: the locale object
-
-*** TODO A mixed-name global does not reach the C library
-
-=locale::global= calls =setlocale= with the library's composite name,
-which lists its six categories; glibc accepts a composite only when it
-lists all twelve of its own, so =setlocale (LC_ALL, 0)= stays "C"
-after =global= of a mixed-name locale (by probe). The comment at
-=src/locale_global.cpp= 61-62 assumes =setlocale= understands the
-format; =ref-locale.md= ch. 3 says the call takes effect. 14882:2003
-22.1.1.5 p2. Found 2026-11-02.
-
-Fix: a decision: compose glibc's twelve-category name for the call,
-or record that a mixed name does not reach the C library.
-
-Check: =setlocale (LC_ALL, 0)= after =global= of a two-locale mixture
-names both, or the master document records the limit.
-
 ** Localization: =time_get= and =time_put=
 
 *** TODO =%EY= keeps a year its format then fails on

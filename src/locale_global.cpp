@@ -58,8 +58,9 @@ namespace std {
 
         _RWSTD_MT_GUARD (__rw::__rw_setlocale_mutex);
 
-        // assumes all locale names (i.e., including those of combined
-        // locales) are in a format understandable by setlocale()
+        // 22.1.1.5, p2; departure: a mixed name lists the library's
+        // six categories, which glibc's setlocale does not take, so
+        // the C locale stays as it was after a mixed global
         setlocale (_RWSTD_LC_ALL, rhs.name ().c_str ());
 
         // FIXME:
