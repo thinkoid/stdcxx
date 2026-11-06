@@ -56,7 +56,7 @@ typedef basic_streambuf<wchar_t> wstreambuf;
 
 
 template<class _CharT, class _Traits>
-class basic_streambuf: public __rw::__rw_synchronized
+class basic_streambuf: private __rw::__rw_synchronized
 {
 public:
     typedef _CharT                          char_type;
@@ -373,6 +373,7 @@ private:
 
     locale     _C_locale;  // locale imbued in this object
 
+    friend class basic_ios<char_type, traits_type>;
     friend class basic_istream<char_type, traits_type>;
     friend class basic_ostream<char_type, traits_type>;
 

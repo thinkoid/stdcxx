@@ -58,7 +58,7 @@ inline const std::locale& __rw_getloc (const std::ios_base&);
 namespace std {
 
 
-struct _RWSTD_EXPORT ios_base: __rw::__rw_synchronized
+struct _RWSTD_EXPORT ios_base: private __rw::__rw_synchronized
 {
     // 27.4.2.1.1
     typedef __rw::__rw_failure failure;
@@ -313,6 +313,9 @@ protected:
     locale       _C_loc;      // locale associated with stream
 
     friend struct _RWSTD_EXPORT Init;
+
+    template <class _CharT, class _Traits>
+    friend class basic_ios;
 
     // working around an EDG eccp 3.2 and prior bug (see PR #29526)
     friend struct _C_usr_data;
