@@ -2007,9 +2007,10 @@ week-based year. `%u` and `%Ou` read 1 to 7, Monday first, and store
 #### `time_get`: the era conversions
 
 `%EC`, `%Ey`, `%EY` ask for the era names. With none, the modifier is
-dropped (ffea5ffe). With some, `__rw_read_era` works on a copy, stored
-when no bit but `eofbit` is set; a valid `E` directive that fails sets
-`eofbit`, never `failbit`.
+dropped (ffea5ffe). With some, `__rw_read_era` works on a copy,
+stored only when the directive's whole format matched; a valid `E`
+directive that fails sets `eofbit`, never `failbit`, and leaves the
+`tm` as it was.
 
 - An era is every record of its name (`__rw_get_era_span`). Its span
   runs from the earliest bound to the latest, its first year is the
@@ -2222,17 +2223,13 @@ The named-locale sections follow the host; 08295a74 kept the pin to a
 host with `en_US.UTF-8` alone. The `get` and `put` MT tests were
 retired (7b8aede0, e6d382f5): the facets hold no state.
 
-`TODO`: "=%EY= keeps a year its format then fails on", "The era format
-comments of the =time_get= test are swapped", and "A reference for
-=time_get=", which this chapter answers. Outside the suite,
-`bin/oracle/time.cpp` (eras) and `bin/oracle/scalar.cpp` (names, `%p`,
-`%x`, `%X`, `%c`) compare `time_put` with glibc.
+`TODO`: "The era format comments of the =time_get= test are swapped"
+and "A reference for =time_get=", which this chapter answers. Outside
+the suite, `bin/oracle/time.cpp` (eras) and `bin/oracle/scalar.cpp`
+(names, `%p`, `%x`, `%X`, `%c`) compare `time_put` with glibc.
 
 ### 12.5 Open
 
-- `%EY` keeps the year of a format that fails after its `%Ey` ("Heisei
-  8 Nex" stores 1996), against the comment at `_time_get.cc` 99-100. In
-  `TODO`. Check: that row, after the decision.
 - `"%Y %m %d"` leaves the implied `tm_wday` and `tm_yday`; glibc fills
   them; p14 allows either. Not queued. Check: a decision.
 - `eofbit` before the pattern ends: the walk adds `failbit` and stores

@@ -2278,6 +2278,9 @@ void test_user (charT, const char *cname, const char *locname)
     // C++11 22.4.5.1.2, p13: eofbit for a format that does not follow,
     // no era, and digits with era data in the locale
     TEST (T (0),                    "Heisei Nen",  7, "EY", 0, Eof);
+    // a format that fails after its %Ey stores nothing
+    TEST (T (0), "Heisei 8 Nex", 11, "EY", 0, Eof);
+    TEST (T (0),     "Heisei 8",  8, "EY", 0, Eof);
     TEST (T (0),                  "Taisho 1 Nen",  0, "EY", 0, Eof);
     TEST (T (0),                          "1996",  0, "EY", 0, Eof);
 

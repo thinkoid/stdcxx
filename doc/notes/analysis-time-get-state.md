@@ -634,10 +634,11 @@ fails with `failbit` and leaves the `tm` as it was. A valid `E`
 directive that cannot settle its members sets `eofbit`, never
 `failbit`: an unknown era name, a year outside its era, no digits
 for `%Ey`, an era format the input does not follow. The members are
-unspecified. `%EC` and a lone `%Ey` leave the year as it was; a
-`%EY` whose format fails after its `%Ey` keeps the year it read,
-which `TODO` carries as "`%EY` keeps a year its format then fails
-on". XSH's fallback applies where the alternative "does not exist".
+unspecified. `%EC`, a lone `%Ey` and `%EY` leave the `tm` as it was
+on failure: the library stores what an era directive read only when
+its whole format matched, so a `%EY` whose format fails after its
+`%Ey` stores nothing. XSH's fallback applies where the alternative
+"does not exist".
 A locale with era records has the alternative, so a mismatch there
 is not a fallback: "19" under `%EC` in ja_JP sets `eofbit` and reads
 nothing, where glibc reads the century.

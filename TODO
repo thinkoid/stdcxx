@@ -26,26 +26,6 @@ at the top.
 
 ** Localization: =time_get= and =time_put=
 
-*** TODO =%EY= keeps a year its format then fails on
-
-=__rw_read_era= stores its local =tm= whenever no bit but =eofbit= is
-set (=include/loc/_time_get.cc= 301-334). Under =%EY= a =%Ey= of the
-era format that succeeds sets the year in the local =tm=; a literal
-that then fails, or the end of input, adds only =eofbit=, so the year
-read is stored: "Heisei 8 Nex" under the test locale stores 1996 with
-=eofbit=. The comment at =include/loc/_time_get.cc= 99-100 and
-=doc/notes/analysis-time-get-state.md= 9.2 say a failed era directive
-leaves the year as it was; =%EC= and a lone =%Ey= do (=src/era.cpp=
-340-373). Found by the documentation sweep of 2026-11-02, by reading.
-
-Fix: a decision: keep the year a =%EY= read before its format failed
-(C++11 22.4.5.1.2 p13 leaves the members unspecified), or store
-nothing unless the whole format matched. The comment at =include/loc/_time_get.cc= 97-100 and
-=analysis-time-get-state.md= 9.2 follow.
-
-Check: a row under the test locale, "Heisei 8 Nex" against =%EY=,
-pinning the decision either way.
-
 *** TODO =eofbit= before the pattern ends sets =failbit= and stores nothing
 
 "%Y-%m" and "%Y " on "2026" both fail: the walk ends with =failbit=

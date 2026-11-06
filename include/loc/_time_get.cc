@@ -57,10 +57,12 @@ __rw_set_era_year (const __rw_facet*, _RWSTD_SIZE_T, int, _RWSTD_C::tm*);
 // sign after white space, 0 to 9999 as in the C library's strptime,
 // and sets it in the era of record `inx' as __rw_set_era_year does;
 // C++11 22.4.5.1.2, p13: no digits, no era or a year outside the era
-// set eofbit, and the tm keeps the year it had
+// set eofbit, and the tm keeps the year it had; the input running out
+// after the digits sets eofbit too, so the return value, true when the
+// year was set, tells a success from a failure
 template <class _CharT, class _InputIter>
-_InputIter
-__rw_read_era_year (_InputIter __it, _InputIter __end,
+bool
+__rw_read_era_year (_InputIter &__it, _InputIter __end,
                    const std::ctype<_CharT> &__ctp, const __rw_facet *__pf,
                    _RWSTD_SIZE_T __inx, _RWSTD_C::tm *__tmb,
                    _RWSTD_IOSTATE &__err)
@@ -89,10 +91,12 @@ __rw_read_era_year (_InputIter __it, _InputIter __end,
         __n = 10 * __n + __ch - '0';
     }
 
-    if (0 == __nread || !__rw_set_era_year (__pf, __inx, __n, __tmb))
+    if (0 == __nread || !__rw_set_era_year (__pf, __inx, __n, __tmb)) {
         __err |= __rw_eofbit;
+        return false;
+    }
 
-    return __it;
+    return true;
 }
 
 
@@ -115,6 +119,7 @@ __rw_read_era (_InputIter __it, _InputIter __end, std::ios_base &__fl,
     _RWSTD_C::tm __tmp = __tmb ? *__tmb : _RWSTD_C::tm ();
 
     _RWSTD_IOSTATE __errtmp = __rw_goodbit;
+    bool           __fail   = false;
 
     if ('C' == __fmt) {
         // %EC: the era of the name matched, every record with that
@@ -129,13 +134,15 @@ __rw_read_era (_InputIter __it, _InputIter __end, std::ios_base &__fl,
 
         if (__inx < __neras)
             __rw_set_era (__pf, __inx, &__tmp);
-        else
+        else {
             __errtmp |= __rw_eofbit;
+            __fail    = true;
+        }
     }
     else if ('y' == __fmt) {
         // %Ey: the year within the era the date in the tm lies in
-        __it = __rw_read_era_year (__it, __end, __ctp, __pf, _RWSTD_SIZE_MAX,
-                                   &__tmp, __errtmp);
+        __fail = !__rw_read_era_year (__it, __end, __ctp, __pf,
+                                      _RWSTD_SIZE_MAX, &__tmp, __errtmp);
     }
     else {
         // %EY: an era's format, whose era is not known until its name
@@ -304,34 +311,42 @@ __rw_read_era (_InputIter __it, _InputIter __end, std::ios_base &__fl,
                          && 'E' == __ctp.narrow (__p [1], '\0')
                          && 'y' == __ctp.narrow (__p [2], '\0')) {
                     // %Ey within the era found, not the tm's
-                    __it = __rw_read_era_year (__it, __end, __ctp, __pf, __r,
-                                               &__tmp, __errtmp);
+                    __fail = !__rw_read_era_year (__it, __end, __ctp, __pf,
+                                                  __r, &__tmp, __errtmp);
                     __year = true;
                     __p   += 2;
                 }
                 else if ('%' == __ctp.narrow (*__p, '\0')) {
                     // a directive other than %Ey in an era's format
                     __errtmp |= __rw_eofbit;
+                    __fail    = true;
                 }
                 else if (__it != __end && _Traits::eq (*__it, *__p))
                     ++__it;
-                else
+                else {
                     __errtmp |= __rw_eofbit;
+                    __fail    = true;
+                }
             }
 
-            if (__p != __pe)
+            if (__p != __pe) {
                 __errtmp |= __rw_eofbit;
+                __fail    = true;
+            }
             else if (!__year && !__rw_set_era_year (__pf, __r, _RWSTD_INT_MIN,
-                                                    &__tmp))
+                                                    &__tmp)) {
                 __errtmp |= __rw_eofbit;
+                __fail    = true;
+            }
         }
         else {
             // no era, or one character decides none or more than one
             __errtmp |= __rw_eofbit;
+            __fail    = true;
         }
     }
 
-    if (!(__errtmp & ~__rw_eofbit) && __tmb)
+    if (!__fail && __tmb)
         *__tmb = __tmp;
 
     __err |= __errtmp;
