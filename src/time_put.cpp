@@ -2132,7 +2132,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 
     case 'C': {
         // %C:  the year divided by 100 and truncated to an integer,
-        //      as a decimal number (00-99). [tm_year]
+        //      as a decimal number, at least two digits. [tm_year]
         // %EC: the name of the base year (period) in the locale's
         //      alternative representation.
         // %OC: the century, using the locale's alternative numeric
@@ -2149,10 +2149,12 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
         }
 
         // POSIX.1-2024: the year divided by 100 and truncated, with
-        // its sign, at least two characters; %y holds the last two
-        // digits without a sign, so that "%C%y" spells the year
+        // its sign, at least two characters, so that 10000 writes
+        // "100"; %y holds the last two digits without a sign, so that
+        // "%C%y" spells the year; %OC takes the same value, which
+        // "C" writes in ordinary digits as it writes %C
         const int year    = 1900 + tmb->tm_year;
-        const int century = year < 0 ? -(-year / 100 % 100) : year / 100 % 100;
+        const int century = year < 0 ? -(-year / 100) : year / 100;
 
         if (year < 0 && 0 == century) {
             // the years -1 to -99 truncate to the century 0: write

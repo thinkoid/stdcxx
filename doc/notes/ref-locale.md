@@ -2129,9 +2129,13 @@ format writes into the same buffer.
   `%Y`, counted in the width, and appends: `"%C%y"` on `"-543"` and
   `"%y %C"` on `"43 -5"` are -543. `"%C%y"` of -1 to -99 does not read
   back: `"-043"` reads 2043 (by probe). glibc writes `"-6"` and `"57"`.
+- The same width sentence covers a year past 9999, so `time_put`
+  does not take the century modulo 100: `"100"` for 10000, `"-100"`
+  for -10000, and `%OC` the same value, in ordinary digits in "C".
 - Why: b54acca9 and 503ae88c, replacing 11087a6a's glibc pair. Pins:
-  22.locale.time.put's rows before 0; 22.locale.time.get, "%C, %y and
-  %Y with a sign"; `bin/oracle/time.cpp`'s one known difference.
+  22.locale.time.put's rows before 0 and past 9999;
+  22.locale.time.get, "%C, %y and %Y with a sign";
+  `bin/oracle/time.cpp`'s one known difference.
 
 #### Narrow names matched by element
 
@@ -2232,10 +2236,6 @@ the suite, `bin/oracle/time.cpp` (eras) and `bin/oracle/scalar.cpp`
 
 ### 12.5 Open
 
-- `%C` past 9999 is the century modulo 100: 10000 writes `"00"`, pinned
-  at `22.locale.time.put.cpp` 708. POSIX.1-2024's width sentence, which
-  b54acca9 cites for years before 0, gives `"100"`. Check: a decision,
-  then that row.
 - `put` pads every directive of a pattern and leaves the width set; no
   row has a pattern with a width. Check: a decision.
 - The comparisons with glibc's `strptime` behind 12.3 ran outside the

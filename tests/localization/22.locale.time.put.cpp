@@ -690,7 +690,7 @@ void test_POSIX (charT, const char *tname)
     TEST (T (INT_MAX), "%c", 0, 0, ' ', "%a %b %e %H:%M:%S %Y");
 
     // %C: the year divided by 100 and truncated to an integer,
-    //     as a decimal number (00-99). [tm_year]
+    //     as a decimal number, at least two digits. [tm_year]
     rw_info (0, 0, __LINE__,
              "%%C: the year divided by 100 and truncated to an integer");
 
@@ -709,8 +709,15 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0,   200), "%C", 0, 0, ' ', "21");
     TEST (T (0, 0, 0, 1, 0,  1000), "%C", 0, 0, ' ', "29");
     TEST (T (0, 0, 0, 1, 0, -1000), "%C", 0, 0, ' ', "09");
-    TEST (T (0, 0, 0, 1, 0,  8100), "%C", 0, 0, ' ', "00");
     TEST (T (0, 0, 0, 1, 0, -1900), "%C", 0, 0, ' ', "00");
+
+    // a year past 9999 (POSIX.1-2024): "If the year is less than 0 or
+    // greater than 9999, the number of characters" of %C "shall be the
+    // number of digits and leading sign characters (if any) in the
+    // result of dividing the year by 100 and truncating, or two,
+    // whichever is greater", so the century is not taken modulo 100
+    TEST (T (0, 0, 0, 1, 0,   8100), "%C", 0, 0, ' ', "100");    //  10000
+    TEST (T (0, 0, 0, 1, 0, -11900), "%C", 0, 0, ' ', "-100");   // -10000
 
     // a year before 0 (POSIX.1-2024): the century is truncated and
     // keeps its sign, at least two characters, "-0" for the years -1
@@ -735,6 +742,7 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0, -1943), "%C%y", 0, 0, ' ', "-043");
     TEST (T (0, 0, 0, 1, 0, -1901), "%C%y", 0, 0, ' ', "-001");
     TEST (T (0, 0, 0, 1, 0, -1900), "%C%y", 0, 0, ' ', "0000");
+    TEST (T (0, 0, 0, 1, 0,  8100), "%C%y", 0, 0, ' ', "10000");
 
     // %OC: the century, using the locale's alternative numeric symbols
     //      (an extension of the C library), the ordinary digits in "C"
@@ -745,6 +753,7 @@ void test_POSIX (charT, const char *tname)
     TEST (T (0, 0, 0, 1, 0,   103), "%OC", 0, 0, ' ', "20");
     TEST (T (0, 0, 0, 1, 0, -2443), "%OC", 0, 0, ' ', "-5");
     TEST (T (0, 0, 0, 1, 0, -1943), "%OC", 0, 0, ' ', "-0");
+    TEST (T (0, 0, 0, 1, 0,  8100), "%OC", 0, 0, ' ', "100");
 
     // %EC: the name of the base year (period) in the locale's
     //      alternative representation.
