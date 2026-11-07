@@ -87,14 +87,15 @@ write_numeric (const locale_def_t &def, const cmap_t &cmap,
 
     pool_t pool;
 
-    // no source sets the names of true and false; the old compiler
-    // wrote them empty, the wide ones first
-    const ucs_string_t none;
+    // no source names true and false, so the names are the classic
+    // facet's (22.2.3.1.2, p4), the wide ones first
+    const char tn [] = "true";
+    const char fn [] = "false";
 
-    hdr.truename_off [1]  = pool.add (none);
-    hdr.falsename_off [1] = pool.add (none);
-    hdr.truename_off [0]  = pool.add (std::string ());
-    hdr.falsename_off [0] = pool.add (std::string ());
+    hdr.truename_off [1]  = pool.add (ucs_string_t (tn, tn + sizeof tn - 1));
+    hdr.falsename_off [1] = pool.add (ucs_string_t (fn, fn + sizeof fn - 1));
+    hdr.truename_off [0]  = pool.add (std::string (tn));
+    hdr.falsename_off [0] = pool.add (std::string (fn));
     hdr.codeset_off       = pool.add (names.codeset);
     hdr.charmap_off       = pool.add (names.charmap);
 

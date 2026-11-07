@@ -1055,6 +1055,8 @@ database is byte-identical to the parked compiler's except:
   extension blocks judged by the structural check of 3.5, and the
   transliteration section empty;
 - the era records, where `strftime` under the C library decides;
+- the true and false names of `LC_NUMERIC`, the classic facet's
+  where the old compiler wrote them empty;
 - `LC_COLLATE` wherever one of the old compiler's defects listed in
   3.7 applies, which is most definitions: the file is read
   structurally, header, rows and tries, and every difference is

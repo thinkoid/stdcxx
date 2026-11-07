@@ -1343,9 +1343,10 @@ per format).
 
 `util/localedef/wnumeric.cpp` writes the narrow strings through
 `narrow` (`util/localedef/pool.cpp`: the charmap, then
-transliteration), an unset grouping as `CHAR_MAX`, and both bool
-names empty: no glibc source sets them, the old compiler wrote them
-empty, and the 2005 sources set none. `util/localedef/wmonetary.cpp`
+transliteration), an unset grouping as `CHAR_MAX`, and the bool
+names as the classic facet's, `"true"` and `"false"` (22.2.3.1.2 p4):
+no glibc source sets them and the 2005 sources set none, so the
+database agrees with the C-library path. `util/localedef/wmonetary.cpp`
 stores an unset or -1 small integer as `CHAR_MAX`, gives an unset
 international one its domestic value (cbf75267), builds the patterns
 in `format_of`, the old compiler's `create_format`, and makes a sign
@@ -1521,7 +1522,7 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 |---|---|---|
 | `22.locale.num.get` | every virtual, both widths, three iterator types: bases, signs, grouping, overflow, underflow, long input, `bad_alloc` on wrap | 51990, 0 failed |
 | `22.locale.num.put` | every virtual but `unsigned long long`, inf and NaN, grouping, widening, a negative precision | 1465, 2 warnings |
-| `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv` | 5366 |
+| `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv`, the bool names and a `boolalpha` round trip under a database locale it builds | 8938 |
 | `22.locale.numpunct.mt` | first use of a fresh facet from many threads (7c93badb) | 1200 |
 | `22.locale.money.get` | patterns, signs, symbols, white-space credit, long input and separators, `frac_digits` 305 and 4000, the digits as they appear | 4160 |
 | `22.locale.money.put` | `long double` and string, patterns, the two spaces, grouping | 1346 |
@@ -1531,8 +1532,7 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 | `22.locale.money.get.stdcxx-62` | empty input sets `eofbit | failbit` | NOUT |
 
 The two warnings of `22.locale.num.put` are `ullong_test`, a
-placeholder since 2006. `22.locale.numpunct` never checks the names
-of a named locale ("FIXME", line 223). Its narrow
+placeholder since 2006. `22.locale.numpunct`'s narrow
 separator is compared with the first byte of `localeconv`'s string,
 which pins the first-byte reading. No row checks `unsigned short`
 overflow (`22.locale.num.get` has `test_uint`): `test_ushrt` and
@@ -1549,11 +1549,6 @@ which `num_put`'s classification of floating values is stubbed.
 
 ### 10.5 Open
 
-- **Names of true and false.** Every database locale has empty
-  names, so `boolalpha` writes nothing and reads nothing under them;
-  the C-library path gives `"true"` and `"false"`. Decision: what a
-  named locale's names are. Check: `boolalpha` round trip under
-  en_US.UTF-8 from the database.
 - **Multibyte separators.** fr_FR.UTF-8's narrow `thousands_sep` is
   0xE2, the lead byte of U+202F, and `num_put<char>` writes
   `1\xE2234\xE2567` (by probe); fr_CA's money separator is 0xC2.

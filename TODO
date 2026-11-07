@@ -26,21 +26,6 @@ at the top.
 
 ** Localization: =ctype=, =numpunct= and the database locales
 
-*** TODO Database locales have empty =truename= and =falsename=
-
-=util/localedef/wnumeric.cpp= 94-97 writes both names empty, so under
-every database locale =boolalpha= writes nothing and reads nothing
-(en_US, de_DE, fr_FR by probe); the C-library path gives "true" and
-"false". =tests/localization/22.locale.numpunct.cpp= 223 carries
-"FIXME: exercise falsename() and truename() in named locales". Found
-2026-11-02.
-
-Fix: a decision on a named locale's names (the C facet's, as the
-C-library path does, is the natural one); the writer and a test row
-follow.
-
-Check: a =boolalpha= round trip under =en_US.UTF-8= from the database.
-
 *** TODO A multibyte separator in a narrow facet comes back as its first byte
 
 A narrow =numpunct= or =moneypunct= separator wider than one byte is
@@ -477,6 +462,21 @@ Check: =git grep -n _typetraits= is empty; a sanity build.
 
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
+
+** TODO Three tests guard their =wchar_t= run with a macro nothing defines
+
+=tests/localization/22.locale.numpunct.cpp= 424,
+=tests/iostream/27.ios.members.static.cpp= 235 and 274, and
+=tests/include/rw_char.h= 484 wrap their =wchar_t= code in
+~#ifndef _RWSTD_WCHAR_T~ (222c045b, 2008). Nothing in the tree
+defines =_RWSTD_WCHAR_T=, and no =_RWSTD_NO_WCHAR_T= exists either, so
+the guards are always true: dead conditionals around code that always
+compiles. Found 2026-11-07.
+
+Fix: the three guards go, the code they wrap stays.
+
+Check: =grep -rn _RWSTD_WCHAR_T tests= finds nothing; the three tests
+hold at pin.
 
 ** TODO The header-guard message in =tests/src/new.cpp= reads past its arguments
 

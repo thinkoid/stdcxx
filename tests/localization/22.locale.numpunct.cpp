@@ -33,7 +33,9 @@
 #include <cstdio>    // for sprintf()
 #include <cstdlib>   // for getenv()
 #include <cstring>   // for strcmp()
+#include <ios>       // for boolalpha
 #include <locale>
+#include <sstream>   // for basic_istringstream, basic_ostringstream
 
 #include <rw_driver.h>
 #include <rw_environ.h>
@@ -220,7 +222,12 @@ bool check_numpunct (charT,
             check_grouping (charT (), tname, grouping.c_str (), loc);
         }
 
-        // FIXME: exercise falsename() and truename() in named locales
+        const charT fn[] = { 'f', 'a', 'l', 's', 'e', '\0' };
+        const charT tn[] = { 't', 'r', 'u', 'e', '\0' };
+
+        // 22.2.3.1.2, p4
+        check_falsename (std::basic_string<charT>(fn), tname, loc);
+        check_truename (std::basic_string<charT>(tn), tname, loc);
 
         delete loc;
         loc = 0;
@@ -358,6 +365,57 @@ void check_truename (const std::basic_string<charT> &expect,
 
 /**************************************************************************/
 
+// a named locale the test builds, so the facet comes from the
+// database, not from the C library
+template <class charT>
+void check_database (charT, const char *tname, const char *locname)
+{
+    rw_info (0, 0, __LINE__,
+             "numpunct<%s> and boolalpha in locale(%#s) from the database",
+             tname, locname);
+
+    const std::locale loc (locname);
+
+    const charT fn[] = { 'f', 'a', 'l', 's', 'e', '\0' };
+    const charT tn[] = { 't', 'r', 'u', 'e', '\0' };
+
+    const std::basic_string<charT> falsename (fn);
+    const std::basic_string<charT> truename (tn);
+
+    // 22.2.3.1.2, p4
+    check_falsename (falsename, tname, &loc);
+    check_truename (truename, tname, &loc);
+
+    // 22.2.2.2.2, p23
+    std::basic_ostringstream<charT> out;
+    out.imbue (loc);
+    out << std::boolalpha << true << false;
+
+    const std::basic_string<charT> expect = truename + falsename;
+    const std::basic_string<charT> got    = out.str ();
+
+    const int char_size = int (sizeof (charT));
+
+    rw_assert (got == expect, 0, __LINE__,
+               "basic_ostream<%s> << boolalpha << true << false == %{#*S}, "
+               "got %{#*S}", tname, char_size, &expect, char_size, &got);
+
+    // 22.2.2.1.2, p15
+    std::basic_istringstream<charT> in (expect);
+    in.imbue (loc);
+
+    bool t = false;
+    bool f = true;
+    in >> std::boolalpha >> t >> f;
+
+    rw_assert (!in.fail () && t && !f, 0, __LINE__,
+               "basic_istream<%s> >> boolalpha of %{#*S} == (true, false), "
+               "got (%b, %b), rdstate () == %{Is}",
+               tname, char_size, &expect, t, f, in.rdstate ());
+}
+
+/**************************************************************************/
+
 static int
 run_test (int, char**)
 {
@@ -368,6 +426,32 @@ run_test (int, char**)
     run_test (wchar_t (), "wchar_t");
 
 #endif   // _RWSTD_WCHAR_T
+
+    const char charmap[] = {
+        "<code_set_name> \"ANSI_X3.4-1968\"\n"
+        "<mb_cur_max> 1\n"
+        "<mb_cur_min> 1\n"
+        "CHARMAP\n"
+        "<U0000>..<U007F> \\x00\n"
+        "END CHARMAP\n"
+    };
+
+    const char locdef[] = {
+        "LC_NUMERIC\n"
+        "decimal_point \"<U002E>\"\n"
+        "thousands_sep \"<U002C>\"\n"
+        "grouping 3\n"
+        "END LC_NUMERIC\n"
+    };
+
+    // last, since the locale it builds sets RWSTD_LOCALE_ROOT
+    const char* const locname = rw_create_locale (charmap, locdef);
+
+    if (!rw_error (0 != locname, 0, __LINE__, "failed to create a locale"))
+        return 0;
+
+    check_database (char (), "char", locname);
+    check_database (wchar_t (), "wchar_t", locname);
 
     return 0;
 }
