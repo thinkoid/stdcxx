@@ -288,8 +288,10 @@ choices.
 
 The library takes the second way, since the first trades a
 conforming feature for the detection of an input that no standard
-defines. The third is in `TODO`, "A corrupt `mbstate_t` on the
-C-library path could be told from a carried one".
+defines. The third was queued and then declined: the check would
+read a layout glibc may move, hold for UTF-8 alone, and turn an
+input no standard defines into `error` for the caller who passed
+it.
 
 ## 8. Instruments
 

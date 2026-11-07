@@ -76,31 +76,6 @@ Fix: a decision first: keep ISO-2022 and make it work against glibc's
 Check: a round trip of the test fixtures through =iconv= and the
 facet; ASan on =length= over "\x1b(B".
 
-*** TODO A corrupt =mbstate_t= on the C-library path could be told from a carried one
-
-The C-library =in= and =length= of the wide byname facet take the
-state as the C library takes it, since =mbsinit= is the only
-question the C library answers and a carried half character and a
-corrupt state both answer no (=analysis-codecvt-corrupt-state.md=
-ch. 6). Under glibc the state of a UTF-8 character in progress holds
-its pending bytes with their count in the low eight bits of
-=__count= and the character's total length above them: a carried
-state has a count below its total and a total of two to six, and a
-corrupt state does not. glibc's =mbrtowc= does not return from a
-corrupt state under UTF-8. Decided 2026-11-04 as a possibility,
-after the C-library path was left undefined on a corrupt state.
-
-Fix: a characterization that learns the layout of glibc's
-=mbstate_t= for a character in progress, and a check in the two
-branches that rejects a state outside it, asserting in a debug
-build and returning =error= or 0 otherwise, on glibc only. The
-layout is glibc's private business; the characterization is what
-would notice it moving.
-
-Check: =22.locale.codecvt='s corrupt-state section run against the
-C-library facets again, on pin, with =test_libc_split= still
-passing.
-
 ** Localization: =collate=
 
 *** TODO A character given the weights of another compares greater than it
