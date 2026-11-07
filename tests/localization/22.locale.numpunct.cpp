@@ -33,6 +33,7 @@
 #include <cstdio>    // for sprintf()
 #include <cstdlib>   // for getenv()
 #include <cstring>   // for strcmp()
+#include <cwctype>   // for iswspace()
 #include <ios>       // for boolalpha
 #include <locale>
 #include <sstream>   // for basic_istringstream, basic_ostringstream
@@ -139,9 +140,23 @@ void run_test (charT, const char *tname)
 
 /**************************************************************************/
 
-char widen (char, const char *s)
+// a narrow separator the C library spells in more than one byte is a
+// space in the facet when the character is white space in the locale,
+// the no-break spaces U+00A0, U+2007 and U+202F included, and the
+// classic separator otherwise
+char widen (char classic, const char *s)
 {
-    return *s;
+    if ('\0' == s [0] || '\0' == s [1])
+        return s [0];
+
+    wchar_t wc = L'\0';
+
+    if (   0 < std::mbtowc (&wc, s, std::strlen (s))
+        && (   std::iswspace (wc)
+            || 0x00a0 == wc || 0x2007 == wc || 0x202f == wc))
+        return ' ';
+
+    return classic;
 }
 
 wchar_t widen (wchar_t, const char *s)
@@ -192,8 +207,8 @@ bool check_numpunct (charT,
         // note that decimal_point at al may be multbyte character
         // strings that need to be widened according to the rules
         // of the same locale
-        const charT decimal_point = widen (charT (), plconv->decimal_point);
-        const charT thousands_sep = widen (charT (), plconv->thousands_sep);
+        const charT decimal_point = widen (charT ('.'), plconv->decimal_point);
+        const charT thousands_sep = widen (charT (','), plconv->thousands_sep);
 
         const std::string grouping =
             plconv->grouping ? plconv->grouping : "";
@@ -416,10 +431,74 @@ void check_database (charT, const char *tname, const char *locname)
 
 /**************************************************************************/
 
+// the narrow thousands separator of a UTF-8 locale whose C library
+// separator is more than one byte, and the digits num_put<char> writes
+// with it, a white-space separator preferred over another
+static void
+test_multibyte_sep ()
+{
+    const char *name   = 0;
+    char        expect = '\0';
+
+    for (const char* s = rw_locales (); *s; s += std::strlen (s) + 1) {
+        if (!std::strstr (s, "UTF-8") && !std::strstr (s, "utf8"))
+            continue;
+
+        if (!std::setlocale (LC_ALL, s))
+            continue;
+
+        const char* const ts = std::localeconv ()->thousands_sep;
+
+        if ('\0' == ts [0] || '\0' == ts [1])
+            continue;
+
+        if (!name || ' ' == widen (',', ts)) {
+            name   = s;
+            expect = widen (',', ts);
+        }
+
+        if (' ' == expect)
+            break;
+    }
+
+    std::setlocale (LC_ALL, "");
+
+    if (!rw_note (0 != name, 0, __LINE__,
+                  "no UTF-8 locale with a multibyte thousands_sep; "
+                  "the fallback is not exercised"))
+        return;
+
+    const std::locale loc (name);
+
+    const char ts = std::use_facet<std::numpunct<char> >(loc).thousands_sep ();
+
+    rw_assert (expect == ts, 0, __LINE__,
+               "numpunct<char>::thousands_sep() == %{#c} in %s, got %{#c}",
+               expect, name, ts);
+
+    std::ostringstream strm;
+    strm.imbue (loc);
+    strm << 1234567L;
+
+    const std::string digits = strm.str ();
+
+    std::size_t i = 0;
+    while (i != digits.size () && 0x80 > (unsigned char)digits [i])
+        ++i;
+
+    rw_assert (i == digits.size (), 0, __LINE__,
+               "num_put<char> of 1234567 in %s writes one byte per "
+               "character, got %{#S}", name, &digits);
+}
+
+/**************************************************************************/
+
 static int
 run_test (int, char**)
 {
     run_test (char (), "char");
+
+    test_multibyte_sep ();
 
 #ifndef _RWSTD_WCHAR_T
 

@@ -31,8 +31,9 @@
 #include <cassert>
 #include <clocale>       // for LC_ALL, setlocale()
 #include <cstdio>        // for fprintf(), stderr
-#include <cstdlib>       // for free(), getenv(), malloc()
+#include <cstdlib>       // for free(), getenv(), malloc(), mbtowc()
 #include <cstring>       // for memcmp(), strerror()
+#include <cwctype>       // for iswspace()
 
 #include <rw_driver.h>   // for rw_test()
 #include <rw_environ.h>  // for rw_putenv()
@@ -357,6 +358,44 @@ convert (const char *locname, const char *s, const wchar_t*)
 
 /**************************************************************************/
 
+// a narrow separator the C library spells in more than one byte is a
+// space in the facet when the character is white space in the locale,
+// the no-break spaces U+00A0, U+2007 and U+202F included, and the
+// classic separator otherwise
+char separator (const char *locname, const char *s, char classic, const char*)
+{
+    if ('\0' == s [0] || '\0' == s [1])
+        return s [0];
+
+    std::string saved_loc;
+
+    if (const char *savename = std::setlocale (LC_ALL, 0))
+        saved_loc = savename;
+
+    std::setlocale (LC_ALL, locname);
+
+    wchar_t wc = L'\0';
+
+    const bool white =
+           0 < std::mbtowc (&wc, s, std::strlen (s))
+        && (   std::iswspace (wc)
+            || 0x00a0 == wc || 0x2007 == wc || 0x202f == wc);
+
+    std::setlocale (LC_ALL, saved_loc.c_str ());
+
+    return white ? ' ' : classic;
+}
+
+
+wchar_t separator (const char *locname, const char *s, char, const wchar_t*)
+{
+    const std::wstring res = convert (locname, s, (const wchar_t*)0);
+
+    return res.size () ? res [0] : L'\0';
+}
+
+/**************************************************************************/
+
 template <class charT>
 bool Test<charT>::
 check_moneypunct (const char *locname)
@@ -429,11 +468,13 @@ check_moneypunct (const char *locname)
             && std::strcmp ("C", loc)) {
 
             // named locale other than "C" or "POISX"
-            s = ::convert (locname, plconv->mon_decimal_point, (charT*)0);
-            check_decimal_point (s.size () ? s [0] : charT ());
+            check_decimal_point (::separator (locname,
+                                              plconv->mon_decimal_point,
+                                              '.', (charT*)0));
 
-            s = ::convert (locname, plconv->mon_thousands_sep, (charT*)0);
-            check_thousands_sep (s.size () ? s [0] : charT ());
+            check_thousands_sep (::separator (locname,
+                                              plconv->mon_thousands_sep,
+                                              ',', (charT*)0));
 
             check_frac_digits (plconv->int_frac_digits);
         }

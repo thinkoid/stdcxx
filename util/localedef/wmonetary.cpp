@@ -166,7 +166,7 @@ write_monetary (const locale_def_t &def, const cmap_t &cmap,
     image.clear ();
 
     write_punct (mon.mon_decimal_point, mon.mon_thousands_sep,
-                 mon.mon_grouping, cmap, translit, image);
+                 mon.mon_grouping, cmap, def.ctype, image);
 
     __rw::__rw_mon_t hdr;
     std::memset (&hdr, 0, sizeof hdr);

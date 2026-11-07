@@ -1286,7 +1286,8 @@ virtuals read the data of the name the facet carries.
   patterns come from a 30-entry table indexed `cs_precedes * 15 +
   sep_by_space * 5 + sign_posn`; an index past it gives four `none`.
 
-A narrow separator is the first byte of the stored string. A
+A narrow separator is the first byte of the stored string, and both
+sources store at most one (10.3.13). A
 `frac_digits` is the unsigned value of the stored `char`, so
 `CHAR_MAX` reads as 127.
 
@@ -1516,13 +1517,42 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 - **Pins.** Nothing. Row: "Primary template definitions", which this
   qualifies; `moneypunct` is not in the row.
 
+#### 10.3.13 A separator wider than a byte
+
+- **Paragraph.** 22.2.3.1.2, p1-2 and 22.2.6.3.2, p1-2 make each
+  separator one `char_type`.
+- **What.** A narrow separator the locale spells in more than one
+  byte is a space when the character is white space in the locale,
+  the no-break spaces U+00A0, U+2007 and U+202F included, and the
+  classic facet's character otherwise: `.` for a decimal point, `,`
+  for a thousands separator, numeric and monetary. The C-library path
+  decides it in `src/punct.cpp` (`__rw_narrow_sep`) with `mbrtowc` and
+  `iswspace` under the locale; the database path decides it in
+  `util/localedef/wnumeric.cpp` (`narrow_sep`) from the `space` and
+  `blank` classes of the definition's `LC_CTYPE`. Under fr_FR.UTF-8
+  the thousands separator U+202F is `' '` and `num_put<char>` writes
+  `1 234 567,89`; de_CH's U+2019 is `','`. The wide facet keeps the
+  locale's character, and the grouping is unchanged.
+- **Why.** Decided 2026-11-07. The narrow facet took the first byte
+  of the string, and `num_put<char>` wrote `1\xE2234\xE2567,89`,
+  invalid UTF-8. A space is what the European separators U+00A0,
+  U+2009 and U+202F stand for, and libstdc++ under GCC 16 gives `' '`
+  for the same locale. glibc and the tree's `i18n_ctype` class the
+  three no-break spaces as punctuation, not `space`, so the rule
+  names them.
+- **Pins.** `22.locale.numpunct` and `22.locale.moneypunct` derive the
+  expected narrow separator by the rule (`widen`, `separator`), and
+  `22.locale.numpunct`'s `test_multibyte_sep` pins it under the first
+  UTF-8 host locale with a multibyte thousands separator. Row: "A
+  separator wider than a byte".
+
 ### 10.4 What the tests pin
 
 | program | covers | 15D |
 |---|---|---|
 | `22.locale.num.get` | every virtual, both widths, three iterator types: bases, signs, grouping, overflow, underflow, long input, `bad_alloc` on wrap | 51990, 0 failed |
 | `22.locale.num.put` | every virtual but `unsigned long long`, inf and NaN, grouping, widening, a negative precision | 1465, 2 warnings |
-| `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv`, the bool names and a `boolalpha` round trip under a database locale it builds | 8938 |
+| `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv`, a multibyte separator, the bool names and a `boolalpha` round trip under a database locale it builds | 8940 |
 | `22.locale.numpunct.mt` | first use of a fresh facet from many threads (7c93badb) | 1200 |
 | `22.locale.money.get` | patterns, signs, symbols, white-space credit, long input and separators, `frac_digits` 305 and 4000, the digits as they appear | 4160 |
 | `22.locale.money.put` | `long double` and string, patterns, the two spaces, grouping | 1346 |
@@ -1533,8 +1563,8 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 
 The two warnings of `22.locale.num.put` are `ullong_test`, a
 placeholder since 2006. `22.locale.numpunct`'s narrow
-separator is compared with the first byte of `localeconv`'s string,
-which pins the first-byte reading. No row checks `unsigned short`
+separator is compared with `localeconv`'s string under the rule of
+10.3.13. No row checks `unsigned short`
 overflow (`22.locale.num.get` has `test_uint`): `test_ushrt` and
 `test_uint` of `27.istream.fmat.arith` gate their rows on `_RWSTD_USHRT_SIZE` and
 `_RWSTD_UINT_SIZE`, which nothing defines. The four `get` and `put` MT
@@ -1549,11 +1579,6 @@ which `num_put`'s classification of floating values is stubbed.
 
 ### 10.5 Open
 
-- **Multibyte separators.** fr_FR.UTF-8's narrow `thousands_sep` is
-  0xE2, the lead byte of U+202F, and `num_put<char>` writes
-  `1\xE2234\xE2567` (by probe); fr_CA's money separator is 0xC2.
-  Decision: what a narrow facet returns for a separator wider than a
-  byte. Check: the narrow output of every UTF-8 locale is valid UTF-8.
 - **C.UTF-8's money data.** Beside the `TODO` entry's four `CHAR_MAX`
   parts, under which `money_put` writes nothing, its `frac_digits` is
   127, and on the C-library path its four `none` make `money_put`

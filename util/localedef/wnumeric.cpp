@@ -36,11 +36,36 @@
 #include <cstring>   // for memset()
 
 
+// 22.2.3.1.2, p1 and p2; departure: one char cannot hold a separator
+// the charmap writes in more than one byte, so the narrow facet gets a
+// space when the character is white space in the definition's
+// LC_CTYPE, the no-break spaces U+00A0, U+2007 and U+202F included,
+// and the classic separator otherwise.  blank is in space, as the
+// LC_CTYPE writer completes the class.
+static std::string
+narrow_sep (const ucs_string_t &sep, char classic, const cmap_t &cmap,
+            const ctype_def_t &ctype)
+{
+    const std::string bytes = narrow (sep, cmap, ctype.translit);
+
+    if (bytes.size () < 2)
+        return bytes;
+
+    const long ucs = sep [0];
+
+    if (   holds (ctype.space.value, ucs) || holds (ctype.blank.value, ucs)
+        || 0x00a0 == ucs || 0x2007 == ucs || 0x202f == ucs)
+        return std::string (1, ' ');
+
+    return std::string (1, classic);
+}
+
+
 void
 write_punct (const field_t<ucs_string_t> &decimal_point,
              const field_t<ucs_string_t> &thousands_sep,
              const field_t<std::vector<int> > &grouping,
-             const cmap_t &cmap, const translit_t &translit,
+             const cmap_t &cmap, const ctype_def_t &ctype,
              std::vector<char> &image)
 {
     __rw::__rw_punct_t punct;
@@ -53,9 +78,9 @@ write_punct (const field_t<ucs_string_t> &decimal_point,
     punct.decimal_point_off [1] = pool.add (decimal_point.value);
     punct.thousands_sep_off [1] = pool.add (thousands_sep.value);
     punct.decimal_point_off [0] =
-        pool.add (narrow (decimal_point.value, cmap, translit));
+        pool.add (narrow_sep (decimal_point.value, '.', cmap, ctype));
     punct.thousands_sep_off [0] =
-        pool.add (narrow (thousands_sep.value, cmap, translit));
+        pool.add (narrow_sep (thousands_sep.value, ',', cmap, ctype));
     punct.grouping_off          = pool.add (grouping_bytes (grouping));
 
     // the header that follows is read in place, so it starts on a
@@ -74,13 +99,12 @@ void
 write_numeric (const locale_def_t &def, const cmap_t &cmap,
                const image_names_t &names, std::vector<char> &image)
 {
-    const numeric_def_t &num      = def.numeric;
-    const translit_t    &translit = def.ctype.translit;
+    const numeric_def_t &num = def.numeric;
 
     image.clear ();
 
     write_punct (num.decimal_point, num.thousands_sep, num.grouping,
-                 cmap, translit, image);
+                 cmap, def.ctype, image);
 
     __rw::__rw_num_t hdr;
     std::memset (&hdr, 0, sizeof hdr);

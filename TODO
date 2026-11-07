@@ -26,20 +26,22 @@ at the top.
 
 ** Localization: =ctype=, =numpunct= and the database locales
 
-*** TODO A multibyte separator in a narrow facet comes back as its first byte
+*** TODO An empty separator with a grouping writes null characters
 
-A narrow =numpunct= or =moneypunct= separator wider than one byte is
-returned as its first byte: under =fr_FR.UTF-8= =num_put<char>= writes
-"1\xE2234\xE2567", invalid UTF-8; =fr_CA='s money separator is 0xC2.
-=22.locale.numpunct= pins the first-byte reading. 14882:2003 makes the
-separator one =char=. Found by probe, 2026-11-02.
+Under =bg_BG=, =kab_DZ=, =ln_CD=, =rif_MA= and =zgh_MA= (UTF-8) the
+C library's =thousands_sep= is empty and its =grouping= is not, so
+=numpunct<char>::thousands_sep ()= is ~'\0'~ and =num_put<char>=
+writes 1234567.89 as "1\x00234\x00567,89", on the C-library and the
+database path alike; =kab_DZ= and =rif_MA= do the same through
+=money_put= with =mon_thousands_sep=. =printf='s ='= flag inserts
+nothing for the same data. Found by probe, 2026-11-07.
 
-Fix: a decision: an ASCII fallback for a narrow separator that does
-not fit (what glibc's =localeconv= returns is the datum), or record
-the limit.
+Fix: a decision: an empty separator turns the grouping off, narrow
+and wide (=grouping ()= empty), or =num_put= and =money_put= skip a
+null separator.
 
-Check: the narrow output of every UTF-8 locale is valid UTF-8, or
-the limit is in the master document.
+Check: =num_put= of 1234567 and =money_put= of 1234567 under every
+host locale write no null character, narrow and wide.
 
 ** Localization: =codecvt=
 

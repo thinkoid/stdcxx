@@ -32,7 +32,9 @@
 #include <locale.h>   // for lconv, localeconv(), setlocale()
 #include <stdio.h>    // for sprintf()
 #include <stdlib.h>   // for mbstowcs()
-#include <string.h>   // for memcpy()
+#include <string.h>   // for memcpy(), memset()
+#include <wchar.h>    // for mbrtowc()
+#include <wctype.h>   // for iswspace()
 
 #include <ios>        // for ios_base, needed by <rw/_punct.h>
 #include <memory>     // for operator new() and delete()
@@ -64,6 +66,34 @@ __rw_widen (void *dst, const void *src, size_t n)
 {
     mbstowcs (static_cast< wchar_t* >(dst),
               static_cast< const char* >(src), n);
+}
+
+
+// 22.2.3.1.2, p1 and p2; departure: one char cannot hold a separator
+// the C library spells in more than one byte, so the narrow facet gets
+// a space when the character is white space in the locale the caller
+// set, the no-break spaces U+00A0, U+2007 and U+202F included, and the
+// classic separator otherwise
+static const char*
+__rw_narrow_sep (const char *sep, const char *classic)
+{
+    if ('\0' == sep [0] || '\0' == sep [1])
+        return sep;
+
+    mbstate_t state;
+    memset (&state, 0, sizeof state);
+
+    wchar_t wc = L'\0';
+    const size_t n = mbrtowc (&wc, sep, strlen (sep), &state);
+
+    if (size_t (-1) == n || size_t (-2) == n)
+        return classic;
+
+    if (   iswspace (wc)
+        || 0x00a0 == wc || 0x2007 == wc || 0x202f == wc)
+        return " ";
+
+    return classic;
 }
 
 
@@ -144,8 +174,13 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
     // be prepared to handle (non-conforming) null pointers
     // (e.g., AIX -- see bug #558)
     const char* const grp = pconv->grouping ? pconv->grouping : "";
-    const char* const dp  = pconv->decimal_point ? pconv->decimal_point : "";
-    const char* const ts  = pconv->thousands_sep ? pconv->thousands_sep : "";
+    const char*       dp  = pconv->decimal_point ? pconv->decimal_point : "";
+    const char*       ts  = pconv->thousands_sep ? pconv->thousands_sep : "";
+
+    if (!winx) {
+        dp = __rw_narrow_sep (dp, ".");
+        ts = __rw_narrow_sep (ts, ",");
+    }
 
     // the size of the narrow grouping string in bytes
     const size_t grsz = strlen (grp) + 1;
@@ -332,12 +367,20 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
     _RWSTD_ASSERT (pconv->mon_decimal_point);
     _RWSTD_ASSERT (pconv->mon_thousands_sep);
 
+    const char* dp = pconv->mon_decimal_point;
+    const char* ts = pconv->mon_thousands_sep;
+
+    if (!winx) {
+        dp = __rw_narrow_sep (dp, ".");
+        ts = __rw_narrow_sep (ts, ",");
+    }
+
     // the size of the narrow grouping string in bytes
     const size_t grsz = strlen (pconv->mon_grouping) + 1;
 
     // compute the sizes of all members in bytes
-    size_t dpsz = strlen (pconv->mon_decimal_point) + 1;
-    size_t tssz = strlen (pconv->mon_thousands_sep) + 1;
+    size_t dpsz = strlen (dp) + 1;
+    size_t tssz = strlen (ts) + 1;
     size_t pssz = strlen (pconv->positive_sign) + 1;
     size_t nssz = strlen (pconv->negative_sign) + 1;
 
@@ -377,8 +420,8 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
     // copy strings from lconv data members to the varaiable size structure
     char* s = reinterpret_cast< char* >(pun + 1);
 
-    widen (s + pun->decimal_point_off [winx], pconv->mon_decimal_point, dpsz);
-    widen (s + pun->thousands_sep_off [winx], pconv->mon_thousands_sep, tssz);
+    widen (s + pun->decimal_point_off [winx], dp, dpsz);
+    widen (s + pun->thousands_sep_off [winx], ts, tssz);
 
     // set the offset of the extended punctuation data
     pun->punct_ext_off = pun->thousands_sep_off [winx] + int (tssz);

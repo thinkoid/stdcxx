@@ -59,6 +59,10 @@ struct ctype_census_t {
 
 const char* ctype_class_name (std::size_t index);
 
+// Whether a class of LC_CTYPE, as the model holds it, holds the code
+// point.
+bool holds (const ucs_class_t &cls, long ucs);
+
 void write_ctype (const locale_def_t &def, const cmap_t &cmap,
                   const image_names_t &names, std::vector<char> &image,
                   ctype_census_t &census);
@@ -96,7 +100,7 @@ void write_collate (const coll_numbering_t &num, const collate_def_t &def,
 void write_punct (const field_t<ucs_string_t> &decimal_point,
                   const field_t<ucs_string_t> &thousands_sep,
                   const field_t<std::vector<int> > &grouping,
-                  const cmap_t &cmap, const translit_t &translit,
+                  const cmap_t &cmap, const ctype_def_t &ctype,
                   std::vector<char> &image);
 
 #endif   // RWSTD_UTIL_LOCALEDEF_WRITER_H_INCLUDED

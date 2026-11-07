@@ -112,7 +112,7 @@ same_char (const elem_t &a, const elem_t &b)
 
 // Whether a class holds the code point.  The runs are in ascending
 // order and disjoint, as the reader keeps them.
-static bool
+bool
 holds (const ucs_class_t &cls, long ucs)
 {
     // the first run that ends at or after ucs
