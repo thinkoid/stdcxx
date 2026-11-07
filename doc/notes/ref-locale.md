@@ -942,8 +942,8 @@ The writers are `write_ctype` (`util/localedef/wctype.cpp`) and
 `util/localedef/wcodecvt.cpp`:
 
 - `LC_CTYPE` (b9e33044) takes POSIX's automatic inclusions (XBD
-  7.3.1, `plan-localedef-backend.md` 3.2) and writes `blank` as bit
-  0x400 (3.1).
+  7.3.1, `plan-localedef-backend.md` 3.2) and does not write `blank`
+  (3.1).
 - The wide arrays cover the characters of the charmap, not every
   code point the source names (decided in
   `plan-localedef-backend.md` 3.3; `TODO`, "The wide `LC_CTYPE`
@@ -1042,23 +1042,11 @@ eight bits of every `wchar_t` and returns `ok`: L'\x100' becomes
 `'\0'` and U+20AC becomes `'\xac'`, by probe. Why: the original
 design (e6c7726b); no recorded decision. Pinned by: no test.
 
-#### The blank bit in the narrow table
-
-22.2.1.3.2 p4: the vector `is` "assigns into vec[p-low] the value
-table()[(unsigned char)*p]". For a byname `ctype<char>` over a
-database the table is the record's `mask_tab`, which carries bit
-0x400 for `blank`, a bit no enumerator of `ctype_base::mask` names:
-under `de_DE.ISO-8859-1` the vector `is` gives 0x403 for `' '`, and
-the classic facet 0x003, by probe. `table()` hands out the same
-words. The wide vector `is` masks with `__rw_all` and gives no such
-bit. Why: the decision of `plan-localedef-backend.md` 3.1 (b),
-b9e33044. Pinned by: no test.
-
 ### 9.4 What the tests pin
 
 | test | covers | 15D |
 |---|---|---|
-| `22.locale.ctype` | classification, case, narrow, widen; classic, byname over generated and libc locales | 91098 |
+| `22.locale.ctype` | classification, case, narrow, widen; classic, byname over generated and libc locales | 91101 |
 | `22.locale.ctype.is` | `is`, both forms, both widths | 25438 |
 | `22.locale.ctype.scan` | `scan_is`, `scan_not` | 17132 |
 | `22.locale.ctype.tolower` | `tolower`, both forms | 19396 |
@@ -2260,7 +2248,6 @@ is a `TODO` entry rather than a decision.
 | `length` counts complete characters | 22.2.1.5.2 p10, LWG 305 | 9.3 | design |
 | An invalid state is an error; the C-library path takes it as it comes | 22.2.1.5.2 p1, p9 | 9.3 | decision 2026-09-16, narrowed 2026-11-04 |
 | The classic wide facet narrows by truncation | 22.2.1.5.2 p2 | 9.3 | decision pending |
-| The blank bit in the narrow table | 22.2.1.3.2 p4 | 9.3 | decision pending |
 | `long long` virtuals | 22.2.2.1, 22.2.2.2 synopses | 10.3.1 | decision 2026-10-14 |
 | Floating values are grouped | 22.2.2.2.2 p16 | 10.3.3 | C++11's text |
 | A zero precision is specified | 22.2.2.2.2 p11, LWG 231 | 10.3.4 | C++11's text |

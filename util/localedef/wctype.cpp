@@ -41,9 +41,8 @@
 // alpha, digit, xdigit and punct into graph, and graph with the one
 // <space> into print.  The old compiler's defaults were a part of
 // that list; the census counts what the whole of it adds.  alnum has
-// no bit: the facets read it as alpha and digit.  blank has no bit
-// in ctype_base before C++11 and takes the free bit 0x400, which no
-// facet's mask names, so it stays unread until one does.
+// no bit: the facets read it as alpha and digit.  blank has no bit in
+// ctype_base and is not written.
 
 #include "pool.h"
 #include "writer.h"
@@ -58,11 +57,10 @@
 
 typedef std::ctype_base ctype_base;
 
-enum { mask_blank = 0x400 };
-
 
 // The eleven classes, their bits and their fields of the model, in
-// the order of ctype_census_t.
+// the order of ctype_census_t.  blank's bit is 0: its members go into
+// space and the census counts nothing for it.
 struct class_bit_t {
     const char                        *name;
     unsigned                           bit;
@@ -78,7 +76,7 @@ static const class_bit_t class_bits [ctype_class_count] = {
     { "space",  ctype_base::space,  &ctype_def_t::space  },
     { "print",  ctype_base::print,  &ctype_def_t::print  },
     { "graph",  ctype_base::graph,  &ctype_def_t::graph  },
-    { "blank",  mask_blank,         &ctype_def_t::blank  },
+    { "blank",  0,                  &ctype_def_t::blank  },
     { "cntrl",  ctype_base::cntrl,  &ctype_def_t::cntrl  },
     { "punct",  ctype_base::punct,  &ctype_def_t::punct  }
 };
@@ -91,10 +89,12 @@ ctype_class_name (std::size_t index)
 }
 
 
-// One character of the wide table while it is built.
+// One character of the wide table while it is built, and whether
+// the source puts it in blank, which has no bit in the mask.
 struct elem_t {
     long     ch;
     unsigned mask;
+    bool     blank;
 };
 
 static bool
@@ -136,9 +136,9 @@ holds (const ucs_class_t &cls, long ucs)
 // The bits POSIX gives a character of the portable character set in
 // every locale, whatever the source says: the letters, digits and
 // hexadecimal digits their classes, the six white-space characters
-// space, <space> and <tab> blank, and the one <space> print.  The
-// portable characters are named by their code points, which the
-// character literals are on every target the compiler is built for.
+// space and the one <space> print.  The portable characters are
+// named by their code points, which the character literals are on
+// every target the compiler is built for.
 static unsigned
 portable_bits (long ucs)
 {
@@ -159,13 +159,8 @@ portable_bits (long ucs)
     switch (ucs) {
     case ' ':
         bits |= ctype_base::space | ctype_base::print;
-        bits |= mask_blank;
         break;
-    case '\t':
-        bits |= ctype_base::space;
-        bits |= mask_blank;
-        break;
-    case '\f': case '\n': case '\r': case '\v':
+    case '\t': case '\f': case '\n': case '\r': case '\v':
         bits |= ctype_base::space;
         break;
     }
@@ -198,13 +193,15 @@ collect (const ctype_def_t &ctype, const cmap_t &cmap,
         if (entry.ucs < 0)
             continue;
 
-        elem_t elem = { entry.ucs, 0 };
+        elem_t elem = {
+            entry.ucs, 0, holds (ctype.blank.value, entry.ucs)
+        };
 
         for (std::size_t i = 0; i != ctype_class_count; ++i)
             if (holds ((ctype.*class_bits [i].member).value, entry.ucs))
                 elem.mask |= class_bits [i].bit;
 
-        if (0 == elem.mask && 0 == portable_bits (entry.ucs))
+        if (0 == elem.mask && !elem.blank && 0 == portable_bits (entry.ucs))
             continue;
 
         elems.push_back (elem);
@@ -224,13 +221,14 @@ collect (const ctype_def_t &ctype, const cmap_t &cmap,
 // POSIX's automatic inclusions on one character's mask, each class
 // after the ones it takes from, and the census of the bits they add.
 static void
-include_defaults (long ucs, unsigned &mask, ctype_census_t &census)
+include_defaults (long ucs, bool blank, unsigned &mask,
+                  ctype_census_t &census)
 {
     const unsigned before = mask;
 
     mask |= portable_bits (ucs);
 
-    if (mask & mask_blank)
+    if (blank)
         mask |= ctype_base::space;
 
     if (mask & (ctype_base::upper | ctype_base::lower))
@@ -255,7 +253,7 @@ include_defaults (long ucs, unsigned &mask, ctype_census_t &census)
 static unsigned
 mask_of (const std::vector<elem_t> &elems, long ucs)
 {
-    const elem_t key = { ucs, 0 };
+    const elem_t key = { ucs, 0, false };
 
     const std::vector<elem_t>::const_iterator it =
         std::lower_bound (elems.begin (), elems.end (), key, by_char);
@@ -326,7 +324,8 @@ write_ctype (const locale_def_t &def, const cmap_t &cmap,
     collect (ctype, cmap, elems, narrow);
 
     for (std::size_t i = 0; i != elems.size (); ++i)
-        include_defaults (elems [i].ch, elems [i].mask, census);
+        include_defaults (elems [i].ch, elems [i].blank, elems [i].mask,
+                          census);
 
     __rw::__rw_ctype_t hdr;
     std::memset (&hdr, 0, sizeof hdr);

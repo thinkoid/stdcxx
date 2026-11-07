@@ -103,13 +103,12 @@ its NUL. Padding words and the `*_ext_off` fields are zero.
 
 `LC_CTYPE` is a header of 1568 bytes that holds the narrow tables
 inline: `toupper` and `tolower` as 256 bytes each, the mask as 256
-words of ten bits, eleven as the new writer fills them, with `blank`
-at 0x400 (3.1). After it come three flat arrays sorted by
-character: the (lower, upper) pairs, the (upper, lower) pairs, and
-the (character, mask) elements. A locale that copies another's
-`LC_CTYPE` shares the file: it is written once as
-`<name>.ctype.<charmap>` in the output directory and each locale's
-`LC_CTYPE` is a symbolic link to it.
+words of ten bits, none of them `blank` (3.1). After it come three
+flat arrays sorted by character: the (lower, upper) pairs, the
+(upper, lower) pairs, and the (character, mask) elements. A locale
+that copies another's `LC_CTYPE` shares the file: it is written once
+as `<name>.ctype.<charmap>` in the output directory and each
+locale's `LC_CTYPE` is a symbolic link to it.
 
 The codecvt database is one file per codeset, named after it, next
 to the locale directories. After a header of eight offsets come four
@@ -589,15 +588,13 @@ bit?
 **Recommendation.** (a). The bit is a one-line change the day it is
 wanted, and the model already has the class.
 
-**Decided.** (b): `blank` is kept, as bit 0x400 of the mask word, in
-the narrow table and the wide elements. The mask fields are 32 bits,
-no reader's mask value includes the bit, and the readers test
-`mask & m`, so the bit is invisible until a `ctype_base::blank` names
-it. The comparison of section 7 masks the bit out of `LC_CTYPE`.
-That holds for the wide facet only: the narrow vector `is` and
-`table ()` hand out the mask word whole, 0x400 included (`TODO`,
-"The blank bit is visible through `ctype<char>::is` under a
-database").
+**Decided.** (a): the writer does not carry `blank`. The model keeps
+the class, and its members go into `space` (3.2). The narrow facet
+hands the mask word out whole: 22.2.1.3.2 p4 has the vector `is`
+assign "table()[(unsigned char)*p]", and `table ()` returns the words
+themselves, so a spare bit in the word would be visible through
+`ctype<char>::is` and `table ()`. A C++11 `blank` is a one-line
+addition to the writer when the facet grows the name.
 
 ### 3.2 Class defaults
 
@@ -1034,10 +1031,9 @@ two trees, and `cmp` on the file the step writes.
 - The position-level mark is the runtime's defect: POSIX 7.3.2.3
   fixes the order, glibc's count realizes it, the mark does not; a
   runtime entry, not the writer's.
-- `blank` is written as bit 0x400 of the mask, unread until the
-  library names it; the class defaults are POSIX's, XBD 7.3.1, with
-  the census of 3.2 as the measure of where they part from the
-  reference.
+- `blank` is not written; the class defaults are POSIX's, XBD
+  7.3.1, with the census of 3.2 as the measure of where they part
+  from the reference.
 - The wide `LC_CTYPE` table covers the charmap's characters;
   glibc's rule is revisited at the import.
 - Eras take POSIX's and glibc's meaning, in the compiler and the
@@ -1052,9 +1048,8 @@ The new compiler builds every definition of `etc/nls` and of glibc's
 database is byte-identical to the parked compiler's except:
 
 - `LC_CTYPE` at the 135 CJK code points, where the ctype oracle
-  decides, in bit 0x400 of every mask, which the comparison masks
-  out, and in the bits the census of 3.2 names, where POSIX's rule
-  decides;
+  decides, and in the bits the census of 3.2 names, where POSIX's
+  rule decides;
 - the codecvt database, compared structurally as 2.1 says, the
   `utf8_to_ext` trie aliased and absent, the pages of the five CJK
   extension blocks judged by the structural check of 3.5, and the

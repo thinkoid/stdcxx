@@ -1375,6 +1375,58 @@ void test_libstd_mask (charT, const char *cname,
 
 /**************************************************************************/
 
+// the protected table () of ctype<char>, reached through a member
+// pointer the derived class may form
+struct ctype_table: std::ctype<char>
+{
+    static const mask* of (const std::ctype<char> &ct) {
+        return (ct.*&ctype_table::table)();
+    }
+};
+
+
+static void
+test_libstd_table (const std::ctype<char> &ct, const char *locname)
+{
+    const std::ctype_base::mask m = ctype_table::of (ct)[' '];
+
+    rw_assert ((SPACE | GRAPH | PRINT) == m, 0, __LINE__,
+               "ctype<char>::table()[' '] == %#x in locale(%#s), got %#x",
+               SPACE | GRAPH | PRINT, locname, m);
+}
+
+
+static void
+test_libstd_table (const std::ctype<wchar_t>&, const char*)
+{
+    // ctype<wchar_t> has no table ()
+}
+
+
+template <class charT>
+void test_libstd_mask_word (charT, const char *cname,
+                            const std::ctype<charT> &ct, const char *locname)
+{
+    rw_info (0, 0, __LINE__,
+             "std::ctype<%s>::is(const %1$s*, const %1$s*, mask*) "
+             "in locale(%#s)", cname, locname);
+
+    // the definition gives ' ' space, graph and print, and the
+    // word holds no bit ctype_base::mask does not name
+    const charT sp [] = { charT (' ') };
+
+    std::ctype_base::mask m [1] = { std::ctype_base::mask () };
+
+    ct.is (sp, sp + 1, m);
+    rw_assert ((SPACE | GRAPH | PRINT) == m [0], 0, __LINE__,
+               "ctype<%s>::is(\" \", ...) == %#x in locale(%#s), got %#x",
+               cname, SPACE | GRAPH | PRINT, locname, m [0]);
+
+    test_libstd_table (ct, locname);
+}
+
+/**************************************************************************/
+
 template <class charT>
 void test_libstd (charT, const char *cname)
 {
@@ -1566,6 +1618,7 @@ void test_libstd (charT, const char *cname)
         std::use_facet< std::ctype<charT> >(loc);
 
     test_libstd_mask (charT (), cname, ct, locname);
+    test_libstd_mask_word (charT (), cname, ct, locname);
     test_libstd_toupper_tolower (charT (), cname, ct, locname);
 
     // now check the scan functions

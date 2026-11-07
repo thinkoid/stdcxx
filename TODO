@@ -26,22 +26,6 @@ at the top.
 
 ** Localization: =ctype=, =numpunct= and the database locales
 
-*** TODO The blank bit is visible through =ctype<char>::is= under a database
-
-=plan-localedef-backend.md= 3.1 says the =blank= bit written as 0x400
-is "invisible until a =ctype_base::blank= names it", and the header
-comment of =util/localedef/wctype.cpp= says it "stays unread". By
-probe, under =de_DE.ISO-8859-1= the vector =ctype<char>::is= returns
-0x403 for a space (the classic facet 0x003) and =table ()= hands out
-the same words; the wide vector form strips it with =__rw_all=. Found
-2026-11-02.
-
-Fix: a decision: strip the bit in the narrow vector form and =table ()=
-as the wide form does, or name it a visible extension and record it.
-
-Check: the vector =is= of a space under a database locale equals the
-classic facet's, or the extension is in the master document.
-
 *** TODO Database locales have empty =truename= and =falsename=
 
 =util/localedef/wnumeric.cpp= 94-97 writes both names empty, so under
