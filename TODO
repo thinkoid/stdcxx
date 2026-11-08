@@ -721,22 +721,6 @@ its type.
 Check: a row made to fail prints the value, the inserted string and
 the expected one.
 
-** TODO =22.locale.codecvt.mt= races no first use
-
-The wide =codecvt_byname= maps its database in its constructor, and
-=22.locale.codecvt.mt= constructs each round's locale on the main
-thread, so the pool's threads find the data mapped and race nothing
-on their first conversion. The program passes, 1600 assertions in
-15D. Its head comment and =race_func='s, =ref-test-baseline.md=
-chapter 3 and =analysis-facet-first-use.md= 2.4 still describe the
-race of the first use. Seen when the constructor took the mapping
-over, 2026-11-08.
-
-Fix: a decision: retire the program, or point it at a facet whose
-data still loads on first use; the comments and the two notes follow.
-
-Check: the decision, and the notes and comments match it.
-
 * Certification
 
 The scripts under =bin= and the nightly run: building the
@@ -759,6 +743,21 @@ run.
 
 Check: the summary of each pin under =doc/notes/baseline= equals the
 sum of its =ASSERTS= column.
+
+** TODO The configuration table of =ref-test-baseline.md= lags the pins
+
+=doc/notes/ref-test-baseline.md= chapter 4 gives =22.locale.codecvt=
+634 assertions in 11S, 638 in 11s and 618 in 15D; the pins have 668,
+672 and 676. The commits that moved the row since 499174d2 added
+their lines to the list of chapter 3 and left the table, so it gives
+the counts of 2026-11-03. Seen while re-pinning =22.locale.codecvt.mt=,
+2026-11-08.
+
+Fix: the row takes the pins' counts, and a re-pin of a row the table
+holds updates it in the same commit.
+
+Check: every row of the chapter 4 table equals the row of each pin
+it names.
 
 * Locales
 
@@ -1464,9 +1463,10 @@ Chapter 1 of =doc/notes/analysis-locale-mt-race.md= builds =util=
 with ~CXXOPTS=-fsanitize=thread~ and runs the tests with no =BINDIR=.
 A =localedef= in that build directory, instrumented or not, loads the
 instrumented =libstd15D.so= and segfaults on every run. Then
-=22.locale.use_facet.mt= and =22.locale.codecvt.mt= cannot build
-their =de_DE.ISO-8859-1= locale, skip their racing work and still exit
-0: a sanitizer run that reports nothing proves nothing.
+=22.locale.use_facet.mt= cannot build its =de_DE.ISO-8859-1= locale
+and =22.locale.codecvt.mt= its ISO-2022 component databases; both
+skip their racing work and still exit 0: a sanitizer run that reports
+nothing proves nothing.
 =analysis-locale-mt-sizing.md= already keeps the utilities
 uninstrumented and points =BINDIR= at a plain 15D build's =bin=.
 Found on a run from a worktree, 2026-11-04.
@@ -1476,7 +1476,7 @@ runs each test with ~BINDIR=<plain 15D build>/bin~, as the sizing
 note does, with one sentence on why.
 
 Check: under the sanitizer the two tests report their full counts,
-=22.locale.use_facet.mt= 200 and =22.locale.codecvt.mt= 1,600.
+=22.locale.use_facet.mt= 200 and =22.locale.codecvt.mt= 48.
 
 ** TODO =doc/stdlibref= documents the file stream additions that left
 

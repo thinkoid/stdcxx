@@ -585,21 +585,37 @@ unsigned char __rw_get_encoding_dbindex (__rw_codeset_type_t t,
 static inline
 const void* __rw_get_encoding_database (unsigned char n)
 {
-    // if already mapped return it
-    if (__rw_db_map [n].pv)
-        return __rw_db_map [n].pv;
+    // the mapping is shared by every ISO-2022 facet in the process;
+    // the acquire load pairs with the release store below, which
+    // publishes the mapping and its size through `pv'
+    const void* pv = _RWSTD_ATOMIC_LOAD_ACQUIRE (__rw_db_map [n].pv, false);
+    if (pv)
+        return pv;
 
     // a wrong index would point to a struct bearing no name
     if (__rw_db_map [n].name [0] == 0)
         return 0;
 
-    // if not, obtain it from __rw_get_facet_data
-    int cat = __rw_get_cat ((__rw_facet::_C_wcodecvt_byname + 1) / 2);
-    __rw_db_map [n].pv =
-        __rw_get_facet_data (cat, __rw_db_map[n].size, 0, 
-                             __rw_db_map [n].name);
+    // threads that race the first use of a database map it once:
+    // without the lock each mapped it and the last store leaked the
+    // other mappings
+    _RWSTD_MT_STATIC_GUARD (__rw_db_map_t);
 
-    return __rw_db_map [n].pv;
+    pv = _RWSTD_ATOMIC_LOAD_ACQUIRE (__rw_db_map [n].pv, false);
+    if (pv)
+        return pv;
+
+    // map into locals, the size stored before the pointer; a database
+    // that cannot be mapped leaves `pv' 0 and is tried again
+    size_t size = 0;
+    const int cat = __rw_get_cat ((__rw_facet::_C_wcodecvt_byname + 1) / 2);
+    pv = __rw_get_facet_data (cat, size, 0, __rw_db_map [n].name);
+    if (pv) {
+        __rw_db_map [n].size = size;
+        _RWSTD_ATOMIC_STORE_RELEASE (__rw_db_map [n].pv, pv, false);
+    }
+
+    return pv;
 }
 
 

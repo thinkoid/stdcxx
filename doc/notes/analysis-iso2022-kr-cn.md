@@ -242,7 +242,8 @@ itself, provided the reset of 2.5 keeps it.
   0208-1978, GB 2312, JIS X 0208-1983, KS C 5601 and JIS X 0212.
 - `__rw_db_map` (342-359) names 12 databases in 32 slots; slot 13 is
   free. `__rw_get_encoding_database` (591-609) maps one from the
-  locale root on first use.
+  locale root on first use, under a static lock, and publishes its
+  pointer with a release store.
 
 KS C 5601 and GB 2312 thus have registrations, rows and databases.
 CNS 11643 has none. Its registrations are ISO-IR 171 and 172 for

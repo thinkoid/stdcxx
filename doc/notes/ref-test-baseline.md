@@ -156,8 +156,9 @@ GCC tables were measured again in full on
 2026-10-13, at bf5fbd46, after the locale MT tests took sizes of
 their own (`analysis-locale-mt-sizing.md`). Only their rows moved:
 the seven timeouts of 15D pass, `22.locale.codecvt.mt` counts 1,600
-assertions in 15D, not 12,800, and `22.locale.facet.mt` counts 8, not
-40, in every configuration. All six were measured again on
+assertions in 15D, not 12,800 (48 since it races the ISO-2022
+database cache), and `22.locale.facet.mt` counts 8, not 40, in every
+configuration. All six were measured again on
 2026-10-14, at c40c5d16, after the strict ANSI removals: `17.extensions`
 is gone, `18.exception` counts 1,097, `21.cwchar` 118, `21.cwctype`
 294, `22.locale.num.get` 51,894 and `23.bitset.cons` 1,677, in every
@@ -371,9 +372,11 @@ own), turned `globals.mt` into the single-threaded
 Every locale MT program now provokes the race it covers: four
 threads, whatever the processor count, wait on a gate and start
 together at the first use of a fresh object, round after round, 200
-rounds, and a check judges each round. Each runs in about a second
-or less in 15D, and each counts in every configuration; with one
-thread, the single-threaded builds run the rounds without the race.
+rounds, and a check judges each round. `22.locale.codecvt.mt` runs
+six, one per component database of a cache the process keeps. Each
+runs in about a second or less in 15D, and each counts in every
+configuration; with one thread, the single-threaded builds run the
+rounds without the race.
 The eleven, and what each races:
 
 | program | races | 15D |
@@ -381,7 +384,7 @@ The eleven, and what each races:
 | `22.locale.use_facet.mt` | the facet slots of a fresh body, read at once, every standard facet in turn; leak check: the facets die with the body | 200 |
 | `22.locale.facet.mt` | the facet reference counts | 8 |
 | `22.locale.id.mt` | a user facet's id | 999 |
-| `22.locale.codecvt.mt` | the wide `codecvt`'s database, on the first conversion | 1,600 |
+| `22.locale.codecvt.mt` | the ISO-2022 converters' database cache, the first conversion through each of the six component databases of `ISO-2022-JP-2` | 48 |
 | `22.locale.ctype.mt` | the `widen` and `narrow` caches of a fresh `ctype` facet | 800 |
 | `22.locale.numpunct.mt` | the `numpunct` data built from the C library; leak check | 1,200 |
 | `22.locale.moneypunct.mt` | the `moneypunct` data, the four facets in turn; leak check | 1,200 |
@@ -405,7 +408,7 @@ and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 | `22.locale.num.put` | 1499 | 1495 | 1499 |
 | `22.locale.codecvt` | 634 | 638 | 618 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
-| `22.locale.codecvt.mt` | 400 | 400 | 1600 |
+| `22.locale.codecvt.mt` | 12 | 12 | 48 |
 | `22.locale.ctype.mt` | 200 | 200 | 800 |
 | `22.locale.numpunct.mt` | 600 | 600 | 1200 |
 | `22.locale.moneypunct.mt` | 600 | 600 | 1200 |
@@ -432,8 +435,8 @@ Reasons, in order:
 - `22.locale.codecvt.mt` counts two checks per thread and round,
   `22.locale.ctype.mt` one, `22.locale.numpunct.mt` and
   `22.locale.moneypunct.mt` one per thread and two per round, and
-  `22.locale.cons.mt` one per thread: 400, 200, 600 and 200 with the
-  one thread of a single-threaded build; 1,600, 800, 1,200 and 800
+  `22.locale.cons.mt` one per thread: 12, 200, 600 and 200 with the
+  one thread of a single-threaded build; 48, 800, 1,200 and 800
   with four.
 
 The single-threaded builds run each MT test with one thread. Two

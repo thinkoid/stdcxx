@@ -935,7 +935,11 @@ takes `_C_data ()`:
   `GB2312`, `EUC-KR`, `ISO-8859-1`, `ISO-8859-7`) are mapped once
   from the locale root; each is produced when a locale of its
   encoding is built, and a member that needs a missing one returns
-  `error`.
+  `error`. The cache is the process's, shared by every ISO-2022
+  facet, so a database is mapped at the first conversion that needs
+  it, under a lock, and published with a release store that an
+  acquire load pairs with; a database that cannot be mapped is tried
+  again at the next conversion.
 - `out` designates JIS X 0208 as 1983 (`ESC $ B`), as glibc's `iconv`
   does; `in` takes the 1978 designation (`ESC $ @`) too. A character
   whose set the encoding lacks (JIS X 0212 under `-JP`) stops `out`
@@ -1107,7 +1111,7 @@ design (e6c7726b); no recorded decision. Pinned by: no test.
 | `22.locale.codecvt.do_out` | `out` over algorithmic, table and libc encodings | 1494 |
 | `22.locale.codecvt.iso2022` | `ISO-2022-JP` and `-JP-2`: `in`, `out`, `unshift` and `length` in one call and across calls, against glibc's `iconv` | 1500 |
 | `22.locale.codecvt.length` | `length` over the same three, and the byname narrow facet | 484 |
-| `22.locale.codecvt.mt` | first conversion through the wide facet of `rwtest_de_DE.ISO-8859-1`, gated | 1600 |
+| `22.locale.codecvt.mt` | first mapping of each component database of `ISO-2022-JP-2`, one per round, gated | 48 |
 | `22.locale.codecvt.stdcxx-435` | `in` of one character in a multibyte locale | NOUT |
 | `27.filebuf.codecvt` | a derived `codecvt<char, char, mbstate_t>` under `basic_filebuf` | 205514 |
 

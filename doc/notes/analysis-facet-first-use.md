@@ -51,10 +51,12 @@ Each hides the other, which is why the second one looked rare.
   round, 2000 rounds: with the slot filled by one thread first, 2685,
   2674 and 2698 of 24000 first conversions threw (about 11%); with
   the data stored before the size, none did. The data is now stored
-  first, and `22.locale.codecvt.mt` carries the case. Before the slot
-  fix, left to race, the leak kept the facet alive after the first
-  round, the data was never mapped again, and the second defect
-  showed only in the first round of a process.
+  first. `22.locale.codecvt.mt` carried the case until the constructor
+  took the mapping over; it now races the ISO-2022 converters'
+  database cache (chapter 2.4). Before the slot fix, left to race,
+  the leak kept the facet alive after the first round, the data was
+  never mapped again, and the second defect showed only in the first
+  round of a process.
 - Both sites date from the initial import of the library (2005). The
   second defect was pointed out on the dev list in 2012
   (`analysis-locale-mt-2012.md`, chapter 2.2, item 3) and could not be shown
@@ -279,7 +281,7 @@ chapter 3 is about that.
 
 ### 2.4. The test
 
-`22.locale.codecvt.mt` ends with a case that builds
+`22.locale.codecvt.mt` ended with a case that builds
 `de_DE.ISO-8859-1` from the tree's sources into a locale root of its
 own, skips when the C library knows the name, and then, 200 times,
 constructs the locale, fills its slot from the main thread and has
@@ -287,11 +289,16 @@ the pool's threads, created anew each round, convert `"abc"` on
 first use. Thread creation staggers the threads' arrival enough that
 some land in the window. On the aarch64 machine, 12 threads: 81, 47,
 75 and 55 failed assertions in four runs before the fix, 0 in four
-runs after. The case runs only in builds with threads. b833725b made
+runs after. The case ran only in builds with threads. b833725b made
 the case the whole program, its threads started together through
 `rw_thread_gate`; cdd0936f builds the locale as
-`rwtest_de_DE.ISO-8859-1`, so the program no longer skips on a host
-with every C library locale.
+`rwtest_de_DE.ISO-8859-1`, so the program no longer skipped on a host
+with every C library locale. Since cbeb1852 the constructor maps the
+database on the main thread, so the threads raced nothing. The
+program now races the first conversions through an `ISO-2022-JP-2`
+facet, one component database per round: the converters cache the
+databases for the process and map each at the first conversion that
+needs it (chapter 3).
 
 ## 3. What these fixes do not cover
 
@@ -331,6 +338,11 @@ re-check under the facet's own lock, which does not exclude the
 builders. ThreadSanitizer paired their stores with those reads until
 then, and with the reads of the data they build.
 
+The ISO-2022 converters publish their component databases the same
+way: `__rw_get_encoding_database` (`src/iso2022.cpp`) maps one under
+a static lock and stores its pointer with release, and the unlocked
+first check loads it with acquire.
+
 ## 4. The reproducer
 
 One process, N worker threads parked on a barrier. Each round the
@@ -343,5 +355,5 @@ other than `ok`, and wrong characters. The locale database is the
 build directory's `nls`, named through `RWSTD_LOCALE_ROOT`; the C
 library must not know the locale's name.
 
-The test in the suite follows this shape (chapter 2.4); the
-reproducer itself is not part of the tree.
+The test in the suite followed this shape until cbeb1852 (chapter
+2.4); the reproducer itself is not part of the tree.
