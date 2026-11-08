@@ -45,6 +45,33 @@ host locale write no null character, narrow and wide.
 
 ** Localization: =codecvt=
 
+*** TODO The ISO-2022 state lives in a static array of 511 slots
+
+=src/iso2022.cpp= keeps each conversion's state, the struct
+=__rw_iso2022_state_t= (G0 to G3, the invoked elements, the shift
+width, two single shifts), in a static array of 511 slots under the
+class mutex, and stores the slot's index plus one in the first two
+bytes of the caller's =mbstate_t=; a zero =mbstate_t= is the initial
+state and allocates. The design served a platform whose =mbstate_t=
+was one byte. Since adc23505 =in= keeps a G2 designation across calls,
+as glibc's =iconv= does, so an input state that has seen ESC . A is
+never freed by =in= and only =unshift= releases it, which input
+streams never call: such a stream holds a slot for its life, and the
+512th conversion in flight answers =error=, 0 from =length=. Every
+allocation scans the array under the lock. glibc's =mbstate_t= is 8
+bytes and the struct is 8 with its =used= bit, 6 without.
+
+Fix: store the struct in the =mbstate_t= itself and retire the array,
+=__rw_allocate_state=, the pool half of =__rw_deallocate_state= and
+the mutex; encode the fields so that an all-zero object is the initial
+shift state, G0 = ASCII in GL; where =_RWSTD_MBSTATE_T_SIZE= is below
+the struct's size the encodings are =stateless=.
+
+Check: =22.locale.codecvt.iso2022= at 1494 with its =unshift= calls
+removed from the 2048-conversion case, and a 600-stream case, each
+after ESC . A and never unshifted, converting to the end;
+=22.locale.codecvt.mt= at 1600.
+
 *** TODO =ISO-2022-KR= and =ISO-2022-CN= are names without converters
 
 =__rw_encoding_from_name= (=src/iso2022.cpp=) recognizes both names,
@@ -733,6 +760,23 @@ the expected one.
 The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
+
+** TODO The summary of =15D.txt= is below the sum of its rows
+
+The =PROGRAM SUMMARY= of =doc/notes/baseline/15D.txt= says 12540297
+assertions; the =ASSERTS= column of its 181 rows sums to 12543909,
+3612 more. A run's summary equals its sum (the harness adds the
+column), so the pin was re-pinned row by row without the summary at
+least once. The nightly diffs the whole table against the pin, so a
+clean run shows the gap as a summary difference. Seen at the codecvt
+landing, 2026-11-07.
+
+Fix: the summary line; the re-pin of a row adds its difference to
+the summary in the same edit, or the pin is replaced whole from a
+run.
+
+Check: the summary of each pin under =doc/notes/baseline= equals the
+sum of its =ASSERTS= column.
 
 * Locales
 
@@ -1545,6 +1589,22 @@ sweep's reading, 2026-11-04.
 Fix: chapter 2 takes a row for each extension of chapter 13 when the
 sweep's decisions are made, chapter 13 takes the two rows it lacks,
 and 8.3's sentence says what chapter 2 carries.
+
+** TODO The pin counts in =ref-locale.md= 9.4 and 10.4 lag the baseline
+
+The "What the tests pin" tables carry the 15D assertion count of each
+test. Three rows lag =doc/notes/baseline/15D.txt=: 9.4
+=22.locale.codecvt= says 618, the pin is 671 (499174d2, 86fbc909);
+10.4 =22.locale.num.put= says 1465, the pin is 1467, and
+=22.locale.money.put= says 1346, the pin is 1354 (f9fbbcff). The
+commits changed the pin and not the table. Seen at the codecvt
+landing, 2026-11-07.
+
+Fix: the three counts; the commit that re-pins a row edits its table
+row in the same commit.
+
+Check: every count in the two tables equals the row's =ASSERTS= in
+=15D.txt=.
 
 ** TODO Two chapter 2 rows of =ref-conformance.md= leave out an effect their source states
 
