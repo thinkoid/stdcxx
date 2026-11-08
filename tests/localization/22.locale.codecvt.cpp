@@ -28,6 +28,7 @@
 
 #include <fstream>   // for wifstream
 #include <locale>
+#include <stdexcept> // for runtime_error
 #include <string>    // for wstring
 
 #include <cassert>
@@ -2315,6 +2316,44 @@ test_inout (const char* tname)
         TEST_IN_OUT ("\xfc\x84\x80\x80\x80\x80", 6, 6, L"\x4000000", 1, 1, ok);
 
 #endif   // _RWSTD_WCHAR_T_MAX > 0xffffU
+    }
+
+    // 22.1.1.1.2, p4: a byname facet has the semantics of the locale
+    // of its name; the UTF-16 names have no locale and no meaning in
+    // the library, so the first conversion throws as for any unknown
+    // name
+    const char* const unknown[] = { "no-such-encoding", "UTF-16", "utf-16" };
+
+    for (std::size_t i = 0; i != sizeof unknown / sizeof *unknown; ++i) {
+        locname = unknown [i];
+
+        rw_info (0, __FILE__, __LINE__,
+                 "codecvt_byname<wchar_t, char, mbstate_t>"
+                 "(\"%s\")", locname);
+
+        bool threw = false;
+
+        try {
+            const CodecvtBynameObject<wchar_t> cc (locname);
+
+            std::mbstate_t state = std::mbstate_t ();
+
+            const wchar_t  src [] = L"a";
+            const wchar_t* src_next = 0;
+
+            char  dst [8];
+            char* dst_next = 0;
+
+            cc.out (state, src, src + 1, src_next,
+                    dst, dst + sizeof dst, dst_next);
+        }
+        catch (std::runtime_error&) {
+            threw = true;
+        }
+
+        rw_assert (threw, __FILE__, __LINE__,
+                   "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\")"
+                   ".out() threw runtime_error", locname);
     }
 }
 

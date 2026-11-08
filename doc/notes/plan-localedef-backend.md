@@ -190,10 +190,9 @@ string. The runtime for a locale built by `localedef` reads the
 tables and not an algorithm: `do_in` walks `n_to_w`, `do_out`
 encodes the `wchar_t` as UTF-8 and walks `w_to_n`. Only a locale
 with no database, the bare names `UTF-8` and `utf-8`, converts
-algorithmically. By probe, two more convert as UTF-8: a
+algorithmically. By probe, one more converts as UTF-8: a
 `codecvt_byname` constructed on its own under a `@UCS` name, not
-through a locale, and the UTF-16 names (`TODO`, "The UTF-16 names
-set flags no converter reads").
+through a locale.
 
 On every platform the library builds for, `wchar_t` is UCS-4: the
 targets are Linux, where the library's configuration declares the

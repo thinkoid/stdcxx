@@ -861,9 +861,8 @@ The constructor reads the name into `_C_flags`:
   and `-CN`.
 - `@UCS`, `@UCS-4`, `@UCS-2` and the byte-order forms set a UCS
   internal encoding and are stripped from the name.
-- `UTF-8`, `UTF-16`, `UTF-16-BE`, `UTF-16-LE` and their lower-case
-  spellings set a UTF type and empty the name; the upper-case
-  spelling adds `__rw_strict`.
+- `UTF-8` and its lower-case spelling set a UTF type and empty the
+  name; the upper-case spelling adds `__rw_strict`.
 
 Each virtual switches on the ISO-2022 type. For a stateless name it
 takes `_C_data ()`:
@@ -986,7 +985,7 @@ test. Conformance record: "Primary template definitions".
 encodings known to the library implementor." Beyond the locale
 names, `codecvt_byname<wchar_t, char, mbstate_t>` takes `UTF-8`
 (strict) and `utf-8` (relaxed), the `@UCS` modifiers, and
-`ISO-2022-JP` and `-JP-2`. The UTF-16 names and `ISO-2022-KR` and
+`ISO-2022-JP` and `-JP-2`. `ISO-2022-KR` and
 `-CN` are recognized but not implemented. Why: the original design
 (e6c7726b). Pinned by: `22.locale.codecvt` (the UTF-8 rows, the
 `@UCS` `in` rows) and `22.locale.codecvt.length` (`UTF-8@UCS`); the

@@ -45,18 +45,6 @@ host locale write no null character, narrow and wide.
 
 ** Localization: =codecvt=
 
-*** TODO The UTF-16 names set flags no converter reads
-
-The constructor of =codecvt_byname<wchar_t, char>= (=src/wcodecvt.cpp=
-near 1100) recognizes =UTF-16=, =UTF-16BE= and =UTF-16LE= and sets
-=__rw_utf16*=, but no converter reads the flags: =out= under
-=UTF-16= writes "61 c3 a9", UTF-8. Found by probe, 2026-11-02.
-
-Fix: a decision: implement the three, or stop recognizing the names
-so the C library or =error= answers.
-
-Check: per the decision; a row in =22.locale.codecvt= either way.
-
 *** TODO ISO-2022 conversion does not convert
 
 By probe: =in= of "a ESC $ B $ \" ESC ( B" under =ISO-2022-JP=

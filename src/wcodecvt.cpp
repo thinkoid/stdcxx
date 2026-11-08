@@ -79,9 +79,6 @@ enum {
 
     // UTF encoding type
     __rw_utf8        = 0x010000,   // UTF-8
-    __rw_utf16_be    = 0x020000,   // UTF-16, big-endian byte order
-    __rw_utf16_le    = 0x040000,   // UTF-16, little-endian byte order
-    __rw_utf16       = 0x060000,   // UTF-16, platform endianness
 
     __rw_strict      = 0x100000,   // do strict UCS validation
 
@@ -92,7 +89,7 @@ enum {
                        | __rw_ucs2_be | __rw_ucs2_le | __rw_ucs2,
 
     // mask to retrieve UTF encoding type
-    __rw_utf_mask    =   __rw_utf8 | __rw_utf16_be | __rw_utf16_le
+    __rw_utf_mask    =   __rw_utf8
 };
 
 #define ISO2022_TYPE(x)   ((x) & __rw_2022_mask)
@@ -108,9 +105,6 @@ enum {
 #define IS_UCS_LE_BE(x)   (UCS_TYPE (x) == __rw_ucs_le_be)
 
 #define IS_UTF8(x)        (UTF_TYPE (x) == __rw_utf8)
-#define IS_UTF16(x)       (UTF_TYPE (x) == __rw_utf16)
-#define IS_UTF16_BE(x)    (UTF_TYPE (x) == __rw_utf16_be)
-#define IS_UTF16_LE(x)    (UTF_TYPE (x) == __rw_utf16_le)
 
 // evaluates to 1 if the facet should use the libc locale, 0 otherwise
 #define USE_LIBC(impl, x) \
@@ -1115,49 +1109,20 @@ codecvt_byname (const char *name, size_t ref)
         name = locale_name;
     }
 
-    // handle the special names: UTF-8, UTF-16, UTF-16-BE, UTF-16-LE,
-    // denoting an external UTF encoding with strict validation rules
-    // but slower processing, and their relaxed but faster equivalents,
-    // utf-8, utf-16, utf-16-be, utf-16-le
-    const size_t name_len = strlen (name);
+    // handle the special name UTF-8, denoting an external UTF-8
+    // encoding with strict validation rules but slower processing,
+    // and its relaxed but faster equivalent, utf-8
+    const bool utf8_low = !strcmp (name, "utf-8");
+    const bool utf8_cap = !utf8_low && !strcmp (name, "UTF-8");
 
-    if (4 < name_len) {
+    if (utf8_low || utf8_cap) {
+        _C_flags |= __rw_utf8;
 
-        // check whether the UTF- prefix is in lowercase or capital letters
-        const bool pfx_low = !memcmp (name, "utf-", 4);
-        const bool pfx_cap = !pfx_low && !memcmp (name, "UTF-", 4);
+        if (utf8_cap)
+            _C_flags |= __rw_strict;
 
-        int flags = 0;
-
-        if (pfx_low || pfx_cap) {
-
-            if (5 == name_len && '8' == name [4])
-                flags = __rw_utf8;
-            else if (!strcmp (name + 4, "16"))
-                flags = __rw_utf16;
-            else if (pfx_low) {
-                if (!strcmp (name + 4, "16-BE"))
-                    flags = __rw_utf16_be;
-                else if (!strcmp (name + 4, "16-LE"))
-                    flags = __rw_utf16_le;
-            }
-            else if (pfx_cap) {
-                if (!strcmp (name + 4, "16-BE"))
-                    flags = __rw_utf16_be;
-                else if (!strcmp (name + 4, "16-LE"))
-                    flags = __rw_utf16_le;
-            }
-        }
-
-        if (flags) {
-            _C_flags |= flags;
-
-            if (pfx_cap)
-                _C_flags |= __rw_strict ;
-
-            *locale_name  = '\0';
-            name          = locale_name;
-        }
+        *locale_name  = '\0';
+        name          = locale_name;
     }
 
     this->_C_set_name (name, _C_namebuf, sizeof _C_namebuf);
