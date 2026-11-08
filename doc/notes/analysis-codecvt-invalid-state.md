@@ -28,8 +28,9 @@ contract below and the decision it opened.
   facet checked the state, asserted, and then discarded the answer.
   The libc-backed wide facet went on to hand the corrupt state to
   glibc's `mbrtowc`, which never returns. Every path now returns the
-  error result when its check fails, but the ISO-2022 branches check
-  no state at all (`TODO`, "ISO-2022 conversion does not convert").
+  error result when its check fails. The ISO-2022 branches, whose
+  state is an index into the library's array of states, check that
+  the index is in range, asserted, and names a slot in use.
   The assertion stays in debug builds.
 - In a thread-safe debug build the section cannot be run against the
   libc-backed facets at all: they take the process-wide locale lock

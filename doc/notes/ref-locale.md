@@ -899,11 +899,37 @@ takes `_C_data ()`:
   checks. A corrupt state on the C-library path is the caller's, as
   C leaves it (`analysis-codecvt-corrupt-state.md`).
 - `ISO-2022-JP` and `-JP-2` go to `src/iso2022.cpp`. The
-  `mbstate_t` holds an index into a static array of 511 states,
-  allocated on first use and freed on a return to the initial shift
-  state; the component codesets' databases (`EUC-JP`, `GB2312`,
-  `EUC-KR`, `ISO-8859-1`, `ISO-8859-7`) are mapped once. `-KR` and
-  `-CN` return `error` and 0 from every member.
+  `mbstate_t` holds an index into a static array of 511 states. A
+  state is allocated on first use and initialized then, to ASCII in
+  G0, so a conversion resumes where the previous call left it. An
+  index past the array, asserted in a debug build, or one naming a
+  slot not in use is no state, and the member returns `error` (0
+  for `length`).
+- A state is freed on a return to the initial shift state: ASCII in
+  G0, no single shift and nothing in G2. `in` keeps a G2
+  designation, which a later `ESC N` still needs, so an input state
+  that saw one stays allocated until `unshift`. `out` drops its G2
+  designation at the end of each call and designates it anew when
+  needed. `unshift` frees the state whatever G2 holds.
+- The component codesets' databases (`ANSI_X3.4-1968`, `EUC-JP`,
+  `GB2312`, `EUC-KR`, `ISO-8859-1`, `ISO-8859-7`) are mapped once
+  from the locale root; each is produced when a locale of its
+  encoding is built, and a member that needs a missing one returns
+  `error`.
+- `out` designates JIS X 0208 as 1983 (`ESC $ B`), as glibc's `iconv`
+  does; `in` takes the 1978 designation (`ESC $ @`) too. A character
+  whose set the encoding lacks (JIS X 0212 under `-JP`) stops `out`
+  with `error`; one that does not fit stops it with `partial`, its
+  designation unwritten. Either way the state stays that of the
+  characters before it. `in` and `out` return `partial` when the
+  destination fills before the source ends, and `in` at an
+  incomplete character or escape sequence.
+- `length` calls `in` with a destination of `max` characters and
+  returns the bytes it consumes, escape sequences included.
+  `max_length` is a designation and the longest character after it:
+  5 for `-JP` (`ESC $ B` and two bytes) and 6 for `-JP-2` (`ESC $ ( C`
+  or `ESC $ ( D` and two bytes, or `ESC . A`, `ESC N` and one byte).
+- `-KR` and `-CN` return `error` and 0 from every member.
 
 #### The primary templates
 
@@ -989,7 +1015,7 @@ names, `codecvt_byname<wchar_t, char, mbstate_t>` takes `UTF-8`
 `-CN` are recognized but not implemented. Why: the original design
 (e6c7726b). Pinned by: `22.locale.codecvt` (the UTF-8 rows, the
 `@UCS` `in` rows) and `22.locale.codecvt.length` (`UTF-8@UCS`); the
-ISO-2022 converters by no test.
+ISO-2022-JP converters by `22.locale.codecvt.iso2022`.
 
 #### Cached narrow, widen and always_noconv
 
@@ -1054,6 +1080,7 @@ design (e6c7726b); no recorded decision. Pinned by: no test.
 | `22.locale.ctype.mt` | first fill of the narrow and widen caches, gated | 800 |
 | `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state | 618 |
 | `22.locale.codecvt.do_out` | `out` over algorithmic, table and libc encodings | 1494 |
+| `22.locale.codecvt.iso2022` | `ISO-2022-JP` and `-JP-2`: `in`, `out`, `unshift` and `length` in one call and across calls, against glibc's `iconv` | 1494 |
 | `22.locale.codecvt.length` | `length` over the same three, and the byname narrow facet | 484 |
 | `22.locale.codecvt.mt` | first conversion through the wide facet of `rwtest_de_DE.ISO-8859-1`, gated | 1600 |
 | `22.locale.codecvt.stdcxx-435` | `in` of one character in a multibyte locale | NOUT |
@@ -1073,8 +1100,8 @@ Known gaps and their `TODO` entries:
   4 are unexplained.
 - "A codecvt oracle": none exists.
 - Not covered by any row: `ctype<wchar_t>` at or above 256 beyond
-  the classic case maps' one row each, the
-  classic wide `out` above 0xff, the ISO-2022 converters.
+  the classic case maps' one row each, and the
+  classic wide `out` above 0xff.
 
 ### 9.5 Open
 

@@ -447,11 +447,13 @@ __rw_deallocate_state (__rw_iso2022_state_t &iso_state,
         _RWSTD_ASSERT (i >= 0 && i < 4);
 
         if (   iso_state.g_map [i] != CHSET_ANSI_X_3_4_1968
+            || iso_state.g_map [2]
             || iso_state.sshift2
             || iso_state.sshift3)
             return;
         
-        // proceed only if `iostate' is in an initial shift state
+        // proceed only if `iostate' is in an initial shift state,
+        // with no set designated to G2
     }
 
     // zero out both structures
@@ -473,20 +475,26 @@ __rw_get_iso2022_state (_RWSTD_MBSTATE_T& state, int enc)
 
     _RWSTD_ASSERT(n >= 0 && n <= ISO_2022_ARRAY_SIZE);
 
+    // an index past the array, or one of a slot not in use, is no state
+    if (n > ISO_2022_ARRAY_SIZE)
+        return pstate;
+
+    if (n) {
+        pstate = &__rw_iso2022_states [n - 1];
+
+        return pstate->used ? pstate : 0;
+    }
+
     // a value of zero in std::mbstate_t indicates conversion anew,
     // calling for a state allocation
-    if (n == 0) {
-        n = __rw_allocate_state ();
+    n = __rw_allocate_state ();
 
-        // the case when the allocation was not possible
-        if (n == -1)
-            return pstate;
+    // the case when the allocation was not possible
+    if (n == -1)
+        return pstate;
 
-        // store the state index
-        *pc = static_cast< ISO_2022_STATE_INDEX_T >(n + 1);
-    }
-    else
-        n--;
+    // store the state index
+    *pc = static_cast< ISO_2022_STATE_INDEX_T >(n + 1);
 
     // store the pointer to the state object
     pstate = &__rw_iso2022_states [n];
@@ -725,6 +733,11 @@ __rw_iso2022jp_designate (__rw_iso2022_state_t& state,
         return CODECVT_ERROR;
     }
 
+    // 22.2.1.5.2, p2: a set the encoding does not carry stops the
+    // conversion at the character
+    if (0 == esc)
+        return CODECVT_ERROR;
+
     if (g2) {
         if (state.sshift2 == 1) {
             // there is already a correct designation and a single
@@ -908,7 +921,7 @@ __rw_ascii_to_iso2022 (__rw_iso2022_state_t& state,
         to = pd;
 
         if (to == to_end)
-            return ret;
+            return CODECVT_PARTIAL;
     }
 
     // FIXME - check the validity of this test
@@ -963,7 +976,7 @@ __rw_ksc5601_to_iso2022 (__rw_iso2022_state_t& state,
         to = pd;
 
         if (to == to_end)
-            return ret;
+            return CODECVT_PARTIAL;
     }
 
     // FIXME - check the validity of this test
@@ -1018,7 +1031,7 @@ __rw_gb2312_to_iso2022 (__rw_iso2022_state_t& state,
         to = pd;
 
         if (to == to_end)
-            return ret;
+            return CODECVT_PARTIAL;
     }
 
     // FIXME - check the validity of this test
@@ -1163,8 +1176,8 @@ __rw_eucjp_to_iso2022 (__rw_iso2022_state_t& state,
 
     default:
         if (c > 0x80) {
-            // JIS X 0208-1978
-            reg   = CHSET_JIS_X_0208_1978;
+            // JIS X 0208, designated as 1983 (ESC $ B)
+            reg   = CHSET_JIS_X_0208_1983;
         } else {
             // JIS X 0201 Roman/ANSI_X3.4-1968
             reg   = CHSET_ANSI_X_3_4_1968;
@@ -1192,15 +1205,14 @@ __rw_eucjp_to_iso2022 (__rw_iso2022_state_t& state,
         state.shift_state = __rw_chset_map [reg].width;
 
         if (to == to_end)
-            return ret;
+            return CODECVT_PARTIAL;
     }
 
     // insert the character in the destination buffer
     if (width > from_end - from)
         return CODECVT_OK;
 
-    // FIXME - check the validity of this test
-    if (to_end - to < __rw_chset_map[reg].width)
+    if (to_end - to < width)
         return CODECVT_PARTIAL;
 
     *to++ = char (*from++ & 0x7f);
@@ -1403,7 +1415,7 @@ __rw_iso2022_to_interm (__rw_iso2022_state_t& state,
     std::codecvt_base::result res = CODECVT_OK;
 
     bool first = true;
-    for (; *from == ESCAPE_CHAR; first = false) {
+    for (; from != from_end && *from == ESCAPE_CHAR; first = false) {
         // clear up the single shift functions set before
         if (first == false)
             state.sshift2 = state.sshift3 = 0;
@@ -1416,6 +1428,11 @@ __rw_iso2022_to_interm (__rw_iso2022_state_t& state,
         if (res != CODECVT_OK || tmp == from)
             return res;
     }
+
+    // the source ends in escape sequences; a single shift among them
+    // stays set for the character in the next call
+    if (from == from_end)
+        return res;
 
     if (*from <= 0x20) {
         ;// FIXME - process control characters
@@ -1459,12 +1476,17 @@ __rw_iso2022_to_interm (__rw_iso2022_state_t& state,
     case CHSET_ISO_8859_7:
         res = __rw_iso2022_to_iso88597 (from, from_end, to, reg, enc);
         break;
+
+    default:
+        // a single shift with no set designated to G2
+        res = CODECVT_ERROR;
+        break;
     }
 
     // clear any single shift functions, if any
     state.sshift2 = state.sshift3 = 0;
 
-    return CODECVT_OK;
+    return res;
 }
 
 
@@ -1617,7 +1639,9 @@ __rw_iso2022_to_ucs4 (_RWSTD_MBSTATE_T&     state,
 
     // the registration code of the character set
     unsigned char reg   = iso_state->g_map [0];
-    int           width = iso_state->shift_state + 1;
+
+    // a single shift invokes G2 for one single-byte character
+    int           width = iso_state->sshift2 ? 1 : iso_state->shift_state + 1;
 
     // test input width
     if (from_end - from < width) {
@@ -1733,10 +1757,10 @@ __rw_iso2022jp_do_in (_RWSTD_MBSTATE_T& state,
         if (res != CODECVT_OK)
             return res;
 
-        // an ok result with no conversion
-        if (res == CODECVT_OK &&
-            from_next == from && to_next == to)
-            return res;
+        // an ok result with no conversion: the source ends in an
+        // incomplete character or escape sequence
+        if (from_next == from && to_next == to)
+            return CODECVT_PARTIAL;
 
         from = from_next;
         to   = to_next;
@@ -1745,7 +1769,7 @@ __rw_iso2022jp_do_in (_RWSTD_MBSTATE_T& state,
     // deallocate state if the conversion has gone back to initial state
     __rw_deallocate_state (*iso_state, state, true);
 
-    return CODECVT_OK;
+    return from == from_end ? CODECVT_OK : CODECVT_PARTIAL;
 }
 
 
@@ -1790,16 +1814,22 @@ __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T& state,
         char* euc   = euc_buffer;
         char* euce  = euc_buffer + 8;
 
+        // a character the encoding lacks leaves the state that of the
+        // characters before it
         res = __rw_ucs4_to_eucjp (ps, pse, euc, euce, pimpl);
         if (res != CODECVT_OK ||
             (ps == from && euc == euc_buffer)) {
 
-            __rw_deallocate_state (*iso_state, state, CODECVT_ERROR != res);
+            __rw_deallocate_state (*iso_state, state, true);
 
             return res;
         }
 
         char* pd = to;
+
+        // the state before the character, restored when the character
+        // does not fit or cannot be designated
+        const __rw_iso2022_state_t save = *iso_state;
 
         // convert the EUC-JP value to ISO-2022
         euce = euc;
@@ -1809,7 +1839,9 @@ __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T& state,
         if (res != CODECVT_OK ||
             (ceuc == euc_buffer && pd == to)) {
 
-            __rw_deallocate_state (*iso_state, state, CODECVT_ERROR != res);
+            *iso_state = save;
+
+            __rw_deallocate_state (*iso_state, state, true);
 
             return res;
         }
@@ -1823,7 +1855,7 @@ __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T& state,
     // initial state
     __rw_deallocate_state (*iso_state, state, true);
 
-    return CODECVT_OK;
+    return from == from_end ? CODECVT_OK : CODECVT_PARTIAL;
 }
 
 
@@ -1847,12 +1879,52 @@ __rw_iso2022jp_do_unshift (_RWSTD_MBSTATE_T& state,
     else
         res = CODECVT_OK;
 
-    // deallocate a state if the conversion has gone back to
-    // initial shift state and operation succeeded, OR, if
-    // the result is error
-    __rw_deallocate_state (*iso_state, state, CODECVT_ERROR != res);
+    // the sequence terminated, the state is deallocated whatever G2
+    // holds (footnote 226: "return the state to stateT()"), unless the
+    // designation did not fit
+    if (CODECVT_PARTIAL != res)
+        __rw_deallocate_state (*iso_state, state, false);
 
     return res;
+}
+
+
+// 22.2.1.5.2, p9a and p10: the number of bytes do_in consumes when it
+// converts at most max characters, escape sequences included; the
+// effect on the state is that of do_in, which the function calls
+static size_t
+__rw_iso2022_length (_RWSTD_MBSTATE_T& state,
+                     const char* from, const char* from_end,
+                     size_t max,
+                     std::codecvt_base::result (*do_in)(_RWSTD_MBSTATE_T&,
+                                                        const char*&,
+                                                        const char*,
+                                                        wchar_t*&,
+                                                        wchar_t*))
+{
+    _RWSTD_ASSERT(from <= from_end);
+
+    const char* const start = from;
+
+    wchar_t buf [64];
+    const size_t bufsize = sizeof buf / sizeof *buf;
+
+    while (max) {
+        const size_t n = max < bufsize ? max : bufsize;
+
+        wchar_t* to = buf;
+        const std::codecvt_base::result res =
+            do_in (state, from, from_end, to, buf + n);
+
+        max -= size_t (to - buf);
+
+        // do_in stops short of a full destination only at the end of
+        // the source, at an incomplete character, or at an error
+        if (CODECVT_PARTIAL != res || to != buf + n)
+            break;
+    }
+
+    return size_t (from - start);
 }
 
 
@@ -1861,50 +1933,17 @@ __rw_iso2022jp_do_length (_RWSTD_MBSTATE_T& state,
                           const char* from, const char* from_end,
                           size_t max)
 {
-    _RWSTD_ASSERT(from <= from_end);
-
-    // the iso2022 state
-    __rw_iso2022_state_t* iso_state =
-        __rw_get_iso2022_state (state, iso2022_jp);
-
-    if (iso_state == 0)
-        return CODECVT_ERROR;
-
-    int ret = 0;
-    std::codecvt_base::result res = CODECVT_OK;
-    while (max && from_end - from) {
-        while (*from == ESCAPE_CHAR)
-
-
-        if (*from == ESCAPE_CHAR) {
-            const char* tmp = from;
-            res = __rw_iso2022_escape (*iso_state, from, from_end, iso2022_jp);
-
-            if (res != CODECVT_OK || from == tmp)
-                break;
-
-            continue;
-        }
-
-        if (from_end - from < int(iso_state->shift_state) + 1)
-            break;
-
-        ret++, max--;
-        from += iso_state->shift_state + 1;
-    }
-
-    // deallocate a state if the conversion has gone back to initial shift
-    // state
-    __rw_deallocate_state (*iso_state, state, CODECVT_ERROR != res);
-
-    return ret;
+    return __rw_iso2022_length (state, from, from_end, max,
+                                __rw_iso2022jp_do_in);
 }
 
 
+// 22.2.1.5.2, p11: the longest character is a designation followed
+// by the character, ESC $ B and two bytes of JIS X 0208, 5 bytes
 size_t
 __rw_iso2022jp_do_max_length ()
 {
-    return 2;
+    return sizeof ISO_2022_JP_SET_JIS208_83 - 1U + EUCJP_JISX0208_CHAR_LEN;
 }
 
 
@@ -1950,10 +1989,10 @@ __rw_iso2022jp2_do_in (_RWSTD_MBSTATE_T& state,
         if (res != CODECVT_OK)
             return res;
 
-        // an ok result with no conversion
-        if (res == CODECVT_OK &&
-            from_next == from && to_next == to)
-            return res;
+        // an ok result with no conversion: the source ends in an
+        // incomplete character or escape sequence
+        if (from_next == from && to_next == to)
+            return CODECVT_PARTIAL;
 
         from = from_next;
         to   = to_next;
@@ -1962,7 +2001,7 @@ __rw_iso2022jp2_do_in (_RWSTD_MBSTATE_T& state,
     // deallocate state if the conversion has gone back to initial state
     __rw_deallocate_state (*iso_state, state, true);
 
-    return CODECVT_OK;
+    return from == from_end ? CODECVT_OK : CODECVT_PARTIAL;
 }
 
 
@@ -1998,8 +2037,10 @@ __rw_iso2022jp2_do_out (_RWSTD_MBSTATE_T& state,
         unsigned char reg =
             __rw_ucs4_to_interm (ps, tmps);
         if (reg == 0) {
-            // deallocate state
-            __rw_deallocate_state (*iso_state, state, false);
+            // the state stays that of the characters before this one,
+            // less G2, as at the end of the call
+            iso_state->g_map [2] = 0;
+            __rw_deallocate_state (*iso_state, state, true);
 
             // error condition - none of the databases contained a mapping
             // of the character
@@ -2007,6 +2048,10 @@ __rw_iso2022jp2_do_out (_RWSTD_MBSTATE_T& state,
         }
 
         char* pd = to;
+
+        // the state before the character, restored when the character
+        // does not fit
+        const __rw_iso2022_state_t save = *iso_state;
 
         // convert the intermediary value to ISO-2022
         tmpe = tmps;
@@ -2045,7 +2090,10 @@ __rw_iso2022jp2_do_out (_RWSTD_MBSTATE_T& state,
 
         if (res != CODECVT_OK || (ctmps==tmp && pd==to)) {
 
-            __rw_deallocate_state (*iso_state, state, CODECVT_ERROR != res);
+            *iso_state = save;
+
+            iso_state->g_map [2] = 0;
+            __rw_deallocate_state (*iso_state, state, true);
 
             return res;
         }
@@ -2060,11 +2108,12 @@ __rw_iso2022jp2_do_out (_RWSTD_MBSTATE_T& state,
 
     }
 
-    // deallocate state if the conversion has gone back to
-    // initial state
+    // the next call designates G2 anew when it needs to, so an output
+    // state keeps G0 alone and is deallocated back in ASCII
+    iso_state->g_map [2] = 0;
     __rw_deallocate_state (*iso_state, state, true);
 
-    return CODECVT_OK;
+    return from == from_end ? CODECVT_OK : CODECVT_PARTIAL;
 }
 
 
@@ -2081,73 +2130,19 @@ __rw_iso2022jp2_do_length (_RWSTD_MBSTATE_T& state,
                            const char* from, const char* from_end,
                            size_t max)
 {
-    _RWSTD_ASSERT(from <= from_end);
-
-    // the iso2022 state
-    __rw_iso2022_state_t* iso_state =
-        __rw_get_iso2022_state (state, iso2022_jp);
-
-    if (iso_state == 0)
-        return CODECVT_ERROR;
-
-    int ret = 0;
-    std::codecvt_base::result res = CODECVT_OK;
-
-    while (max && from_end - from) {
-
-        bool first = true;
-        for (; *from == ESCAPE_CHAR; first = false) {
-            // clear up the single shift functions set before
-            if (first == false)
-                iso_state->sshift2 = iso_state->sshift3 = 0;
-
-            const char* tmp = from;
-            res = __rw_iso2022_escape (*iso_state, from, from_end,
-                                       iso2022_jp2);
-
-            // the detected escape sequence has not been consumed because it
-            // was incomplete
-            if (res != CODECVT_OK || tmp == from)
-                return ret;
-        }
-
-        if (*from <= 0x20) {
-            ;// FIXME - process control characters
-        }
-
-        // the registration for all character sets other than the ISO's
-        // is stored in the first register, G0.
-        unsigned char reg = iso_state->g_map [0];
-        unsigned int  width;
-        if (iso_state->sshift2 == 1) {
-            width = 1;
-        } else {
-            width = __rw_chset_map [reg].width + 1;
-        }
-
-        if (from_end - from < int (width))
-            break;
-
-        ret++, max--;
-        from += width;
-
-        // clean up the single shift function
-        iso_state->sshift2 = iso_state->sshift3 = 0;
-
-    }
-
-    // deallocate a state if the conversion has gone back to initial shift
-    // state
-    __rw_deallocate_state (*iso_state, state, CODECVT_ERROR != res);
-
-    return ret;
+    return __rw_iso2022_length (state, from, from_end, max,
+                                __rw_iso2022jp2_do_in);
 }
 
 
+// 22.2.1.5.2, p11: the longest character is a designation followed
+// by the character, 6 bytes: ESC $ ( C and two bytes of KSC 5601
+// (ESC $ ( D and JIS X 0212 alike), or ESC . A, the single shift ESC N
+// and one byte of ISO-8859-1 (ESC . F and ISO-8859-7 alike)
 size_t
 __rw_iso2022jp2_do_max_length ()
 {
-    return 2;
+    return sizeof ISO_2022_JP_SET_KSC5601_87 - 1U + KSC5601_CHAR_LEN;
 }
 
 

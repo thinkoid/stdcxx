@@ -45,24 +45,23 @@ host locale write no null character, narrow and wide.
 
 ** Localization: =codecvt=
 
-*** TODO ISO-2022 conversion does not convert
+*** TODO =ISO-2022-KR= and =ISO-2022-CN= are names without converters
 
-By probe: =in= of "a ESC $ B $ \" ESC ( B" under =ISO-2022-JP=
-returns =error= at byte 0; =out= of {a, U+3042} writes ESC $ @, the
-1978 designation; =unshift= writes nothing; =-KR= and =-CN= answer
-=error= and 0 to everything; =do_length= (=src/iso2022.cpp= 1871,
-1876) returns =CODECVT_ERROR= (2) as a length when no state slot is
-free, and a stray ~while (*from == ESCAPE_CHAR)~ around the escape
-branch reads =*from= at =from_end= after an escape that ends the
-input. No test covers any of it; the ISO-2022 branches also check no
-state (=analysis-codecvt-invalid-state.md= ch. 0 says every path
-does). Found 2026-11-02.
+=__rw_encoding_from_name= (=src/iso2022.cpp=) recognizes both names,
+so the facet looks for neither a database nor a C library locale, but
+the switches in =src/wcodecvt.cpp= carry no converter for them and
+fall through: =in=, =out= and =unshift= return =error=, =length=,
+=encoding= and =max_length= 0. The shipped reference
+(=doc/stdlibref/codecvt-byname.html=) documents neither name. Found
+2026-11-02.
 
-Fix: a decision first: keep ISO-2022 and make it work against glibc's
-=iconv=, or drop the four names.
+Fix: a decision: implement the two against glibc's =iconv=, or stop
+recognizing the names.
 
-Check: a round trip of the test fixtures through =iconv= and the
-facet; ASan on =length= over "\x1b(B".
+Check: for converters, the round trip and the =iconv= oracle of
+=22.locale.codecvt.iso2022= over Korean and Chinese fixtures; for the
+names dropped, =codecvt_byname= of either answers as for any name the
+library does not know.
 
 ** Localization: =collate=
 

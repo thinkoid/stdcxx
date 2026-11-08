@@ -128,11 +128,12 @@ by member and path after 10ad3c6c:
 | `codecvt<wchar_t, char>` | yes | yes | yes | yes |
 | `codecvt_byname<wchar_t, char>`, library database | yes | yes | yes | yes |
 | `codecvt_byname<wchar_t, char>`, C library | none | qualified | yes | none |
-| `codecvt_byname<wchar_t, char>`, ISO-2022 | none | none | none | none |
+| `codecvt_byname<wchar_t, char>`, ISO-2022 | index | index | index | index |
 
 "Qualified" is the September form, stateful or initial. The
-ISO-2022 branches never checked; `TODO` carries them under
-"ISO-2022 conversion does not convert". The narrow byname facet is
+ISO-2022 state is an index into the library's array of states, so
+the branches have no `mbsinit` to call; "index" is their check: in
+range, asserted, and naming a slot in use. The narrow byname facet is
 the narrow base facet's code under another name and checks as the
 base does.
 
