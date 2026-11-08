@@ -46,26 +46,6 @@ Check: with a "C" locale built into the locale root of
 =22.locale.codecvt=, a =UTF-8= facet installed in a locale converts
 "\xc3\xa9" to U+00E9 and =encoding ()= is 0, with a row.
 
-** Localization: =collate=
-
-*** TODO A character given the weights of another compares greater than it
-
-In the test locale of =22.locale.collate=, =<U00E8>= is listed last
-in the order with =<a>='s weights, ~<a>;<LETTER>;IGNORE~, and
-=compare ("\xc3\xa8", "a")= returns 1 on both the narrow and the wide
-facet, where identical weights at every level should give 0. The
-third level is ~forward,position~ and both elements are =IGNORE=
-there. Seen while the undefined-character check was written,
-2026-11-04; the check does not pin it. Hypothesis: the position
-level weighs an =IGNORE=d element by its ordinal in the order, or
-the database writes a weight for it that is not =<a>='s.
-
-Fix: establish which with =util/locale= on the database, then
-either the writer or the position level of =__rw_process_offsets=.
-
-Check: the pair compares 0 on both facets, with a row in
-=22.locale.collate=.
-
 ** Streams
 
 *** TODO A width comment in =_ioinsert.cc= predates 69ad31e6
@@ -421,6 +401,19 @@ Fix: a decision: remove the header, or keep it for a later use; for
 removal, nothing reads it.
 
 Check: =git grep -n _typetraits= is empty; a sanity build.
+
+*** TODO The =ctype_byname<char>= constructor's comment gives a reason that does not hold
+
+=src/ctype.cpp= 865 reads "delayed initialization not used for
+efficiency" over the constructor's lookup of the database and the C
+locale. Nothing in the constructor is faster for being eager; what the
+eager lookup decides is where a bad name throws.
+
+Fix: the comment states that: the constructor resolves the name so
+that a bad one throws from the constructor, where 22.1.1.2, p7 places
+the throw for a locale.
+
+Check: none; a comment.
 
 * Tests
 
@@ -867,6 +860,17 @@ puts a string with a trailing ignored element after the same string
 without it, which the standard forbids. Agreement with glibc on
 other strings is no evidence either way.
 
+The same mark decides a pair of the test locale of =22.locale.collate=:
+=<U00E8>= takes =<a>='s weights under ~forward;backward;forward,position~,
+while the definition re-enters =<a>= under =reorder-after <b>= in the
+all-forward section, so =<a>= carries forward directions at every
+level. At the third level =<a>='s =IGNORE= writes nothing and
+=<U00E8>='s writes the mark, and =compare ("\xc3\xa8", "a")= returns 1
+on both facets, where 7.3.2.3 ties two strings exhausted of weighted
+elements; with the count spelling both write nothing and the pair
+compares 0. Measured on 15D, 2026-11-08; the pair compares 0 when the
+definition does not reorder =<a>=.
+
 Fix: a runtime change in =src/collate.cpp=, the count spelling of
 =__rw_process_offsets= with the prefix-free rule the weights got in
 2026; the standard is the specification and glibc, whose spelling
@@ -878,7 +882,8 @@ direction bits.
 
 Check: the collation oracle finds no disagreement over strings of
 letters and characters subject to =IGNORE= at the first three
-levels in =en_US=, =sv_SE=, =fa_IR= and =ml_IN=.
+levels in =en_US=, =sv_SE=, =fa_IR= and =ml_IN=, and the pair
+compares 0 on both facets, with a row in =22.locale.collate=.
 
 ** TODO =number_value= accepts any integer for the monetary small ints
 
@@ -923,6 +928,28 @@ does.
 
 Check: =locale --help= lists each option =main= parses, and the
 sanity test still finds its first line.
+
+** TODO The collate dump of =locale= shows neither directions nor multibyte keys
+
+=locale -ck LC_COLLATE= prints one =order_start= line for a database,
+from the header's =weight_type= (=util/locale.cpp= 1060-1075), which
+holds one section's directions, and prints the weights of each element
+without the direction word stored in front of them (=print_weight=,
+the FIXME at 861 skips the word); for the =22.locale.collate= locale,
+whose first section is ~forward;backward;forward,position~ and whose
+last is all forward, the dump says ~forward;forward;forward~. It also
+prints a key of more than one byte by its first byte: =<U00E8>= comes
+out as ~\d195~. The dump thus cannot show whether an element is
+=forward= or =forward,position=, which decided a pair of that test
+locale on 2026-11-08.
+
+Fix: print each section's directions from the words the elements
+carry, and decode a key of more than one byte through the charmap
+before printing it (=write_coll_info= builds the key byte by byte).
+
+Check: the dump of the =22.locale.collate= locale shows
+=forward;backward;forward,position= for its first section and
+=<U00E8>= by name.
 
 ** TODO The =localedef= objects have no header dependencies
 
