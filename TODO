@@ -26,27 +26,25 @@ at the top.
 
 ** Localization: =codecvt=
 
-*** TODO =do_encoding= and =do_max_length= throw under an unknown name
+*** TODO A UTF-8 wide =codecvt_byname= in a locale maps the C locale's database
 
-=codecvt_byname<wchar_t, char, mbstate_t>::do_encoding= and
-=do_max_length= (=src/wcodecvt.cpp= 1430, 1501) reach =_C_data ()=
-for a name the library does not know, and that throws
-=runtime_error=, as it does from =in= and =out= (86fbc909). Both
-virtuals are declared =throw ()= (22.2.1.5, the class synopsis;
-22.2.1.5.2, p7 and p11), and the facet declares them with
-~_THROWS (())~. The 15D configuration defines
-=_RWSTD_NO_EXCEPTION_SPECIFICATION=, so the specification is empty
-and the exception escapes to the caller; with specifications on it
-would reach =std::unexpected=. By probe with =ISO-2022-KR= and
-=no-such-encoding=, 2026-11-08.
+=codecvt_byname<wchar_t, char, mbstate_t>= empties its name for
+=UTF-8= and =utf-8= and resolves no database in its constructor, so
+its virtuals reach =_C_get_data= at first use. Installed in a locale,
+the facet has a =_C_pid=, and =_C_get_data= maps the =LC_CTYPE=
+database of "C" at the locale root (the current directory when
+=RWSTD_LOCALE_ROOT= is unset) and the codecvt database it names. When
+one exists, =__rw_libstd_do_in= and =__rw_libstd_do_out=
+(=src/wcodecvt.cpp=) walk its tables in place of the UTF-8 algorithm,
+and =do_encoding= answers from its =mb_cur_max=. By reading,
+2026-11-08.
 
-Fix: a decision: the two return a value for an unknown name (0 and 1
-are the stateless defaults; =basic_filebuf= reads =encoding= to
-decide whether to seek), or the constructor resolves the name and
-throws there, where 22.1.1.1.2, p4 allows it.
+Fix: the constructor marks the UTF-8 names as having no database,
+~_C_impsize = size_t (-1)~, as it marks a stateless name without one.
 
-Check: a row in =22.locale.codecvt=: =encoding= and =max_length= of
-the unknown names throw nothing, with the values chosen.
+Check: with a "C" locale built into the locale root of
+=22.locale.codecvt=, a =UTF-8= facet installed in a locale converts
+"\xc3\xa9" to U+00E9 and =encoding ()= is 0, with a row.
 
 ** Localization: =collate=
 
@@ -729,6 +727,22 @@ its type.
 
 Check: a row made to fail prints the value, the inserted string and
 the expected one.
+
+** TODO =22.locale.codecvt.mt= races no first use
+
+The wide =codecvt_byname= maps its database in its constructor, and
+=22.locale.codecvt.mt= constructs each round's locale on the main
+thread, so the pool's threads find the data mapped and race nothing
+on their first conversion. The program passes, 1600 assertions in
+15D. Its head comment and =race_func='s, =ref-test-baseline.md=
+chapter 3 and =analysis-facet-first-use.md= 2.4 still describe the
+race of the first use. Seen when the constructor took the mapping
+over, 2026-11-08.
+
+Fix: a decision: retire the program, or point it at a facet whose
+data still loads on first use; the comments and the two notes follow.
+
+Check: the decision, and the notes and comments match it.
 
 * Certification
 

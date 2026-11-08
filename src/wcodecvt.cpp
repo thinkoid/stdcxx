@@ -1126,6 +1126,27 @@ codecvt_byname (const char *name, size_t ref)
     }
 
     this->_C_set_name (name, _C_namebuf, sizeof _C_namebuf);
+
+    // the name is resolved here, not at first use, since do_encoding
+    // and do_max_length are declared throw () (22.2.1.5): first the
+    // database, then the C library, whose locale __rw_setlocale sets
+    // once, throwing runtime_error for a name the C library does not
+    // know; the UTF-8 and ISO-2022 converters are the library's own
+    if (__rw::stateless == ISO2022_TYPE (_C_flags) && !IS_UTF8 (_C_flags)) {
+        size_t size = 0;
+        const void* const data =
+            __rw::__rw_lookup_facet_data (LC_CTYPE, size,
+                                          *_C_name ? _C_name : "C", true);
+
+        // a non-zero size, size_t (-1) for no database as _C_get_data
+        // marks it, keeps the virtuals from _C_get_data
+        _C_impdata = data;
+        _C_impsize = data ? size : size_t (-1);
+
+        if (USE_LIBC (data, _C_flags)) {
+            const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
+        }
+    }
 }
 
 

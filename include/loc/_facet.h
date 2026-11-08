@@ -263,6 +263,12 @@ private:
 const void*
 __rw_get_facet_data (int, _RWSTD_SIZE_T&, const char*, const char* = 0);
 
+// maps the database of a facet by the spellings of its locale name,
+// the codecvt database for codecvt_byname<wchar_t, char, mbstate_t>
+// when the last argument is true; returns 0 when there is none
+const void*
+__rw_lookup_facet_data (int, _RWSTD_SIZE_T&, const char*, bool);
+
 // its counterpart - does the database unmapping
 void __rw_release_facet_data (const void*, _RWSTD_SIZE_T) _THROWS (());
 

@@ -51,8 +51,8 @@ serves neither.
   shared functions the JP paths also run, the glibc departure, and
   the KR designator after `unshift`.
 - **Dropping the names** removes two enumerators, two string tests
-  and twelve case labels. The facet then throws `runtime_error` at
-  first use, as it does for `ISO-2022-CN-EXT` today. Nothing that
+  and twelve case labels. The facet's constructor then throws
+  `runtime_error`, as it does for `ISO-2022-CN-EXT`. Nothing that
   works today is lost; the C library cannot serve either name, since
   glibc has no locale and no charmap for any ISO-2022 encoding.
 
@@ -625,14 +625,12 @@ and SI.
 86fbc909 did this for the UTF-16 names. 22.1.1.1.2 p4 gives a byname
 facet "the virtual function semantics equivalent to that facet of
 the locale constructed by locale(const char*) with the same name",
-and no locale has either name. The facet thus takes each "as it
-takes any name the library does not know: the first call that needs
-the encoding asks the C library for the name and throws
-runtime_error" (the message of 86fbc909). The path is the stateless
-branch of `ref-locale.md` 9.2: `_C_data ()` finds no database of the
-name at the locale root, so `USE_LIBC` holds and `__rw_setlocale`
-throws. `ISO-2022-CN-EXT` and `no-such-encoding` take that path
-today (2.6).
+and no locale has either name. The facet thus takes each as it
+takes any name the library does not know (86fbc909). The path is the
+stateless branch of `ref-locale.md` 9.2: the constructor finds no
+database of the name at the locale root, so `USE_LIBC` holds and its
+`__rw_setlocale` throws `runtime_error`. `ISO-2022-CN-EXT` and
+`no-such-encoding` take that path (2.6).
 
 ### 6.2 What the change is
 
@@ -646,8 +644,8 @@ today (2.6).
 - `ref-locale.md` 9.2 and 9.3 lose the two names, and the `TODO`
   entry leaves.
 
-The facet then throws at first use instead of answering `error` and
-0.
+The facet's constructor then throws instead of the members answering
+`error` and 0.
 
 ### 6.3 What a user loses
 
@@ -697,8 +695,8 @@ implementation fixes. `ISO-2022-CN-EXT` stays unknown unless it is
 taken up as well, and its ISO-IR-165 has no table.
 
 **Drop.** The two names leave the constructor's name test, the enum
-and the switches, as the UTF-16 names left in 86fbc909. The facet
-then throws at first use, as it does for any name the library does
+and the switches, as the UTF-16 names left in 86fbc909. The facet's
+constructor then throws, as it does for any name the library does
 not know. No working conversion is lost, and the C library offers
 none. ISO-2022-JP and -JP-2 remain the only ISO-2022 encodings the
 library converts.

@@ -58,10 +58,11 @@ built from others shares their facets: `locale (de, en,
 locale::numeric)` holds the `collate_byname<char>` of `de`. The
 ordinary facets are one static per type, shared by every body that
 holds them; the eight `{money,num}_{get,put}` facets are always
-ordinary. Most facet data still loads on first use, but two
+ordinary. Most facet data still loads on first use, but three
 constructors map theirs: `ctype_byname<char>` and
-`ctype_byname<wchar_t>` map the `LC_CTYPE` database, and the wide one
-the codeset's `codecvt` database too.
+`ctype_byname<wchar_t>` map the `LC_CTYPE` database, the wide one the
+codeset's `codecvt` database too, and `codecvt_byname<wchar_t, char,
+mbstate_t>` maps the `codecvt` database of its name.
 
 Each facet has its own reference count. Thus two different bodies can
 share a facet even when they cannot share the whole collection: a
@@ -532,7 +533,9 @@ A byname facet the program constructs and uses without installing it
 has no id pointer and takes the C library path: `collate_byname<char>
 ("de_DE.UTF-8")` used directly transforms with `strxfrm`, the one in
 `locale ("de_DE.UTF-8")` with the database, by probe. The comment at
-`src/facet.cpp:169-173` states this as the design.
+`src/facet.cpp:169-173` states this as the design. The three
+constructors that map their own data (chapter 1) are the exception:
+their facets read the database installed or not.
 
 **Threading.** Chapter 7. `__rw_locale_name` caches the locale root in
 a static buffer with no lock of its own. Its one caller,
@@ -863,14 +866,28 @@ The constructor reads the name into `_C_flags`:
 - `UTF-8` and its lower-case spelling set a UTF type and empty the
   name; the upper-case spelling adds `__rw_strict`.
 
+For a stateless name other than the UTF-8 ones the constructor then
+resolves the name, since `do_encoding` and `do_max_length` are
+declared `throw ()` (22.2.1.5):
+
+- `__rw_lookup_facet_data` (`src/facet.cpp`) maps the locale's
+  `LC_CTYPE` record, takes its `codeset_name ()` and maps the codecvt
+  database of that name at the locale root; a name that is itself a
+  codeset maps directly. `_C_get_data` calls the same function for
+  the facets it maps at first use.
+- Without a database the constructor stores `_C_impsize` as
+  `size_t (-1)`, as `_C_get_data` marks a facet without one, and sets
+  the C locale once through `__rw_setlocale`, which throws
+  `runtime_error` for a name the C library does not know.
+- The facet thus finds its database whether it is constructed in a
+  locale or directly, and its virtuals never reach `_C_get_data`.
+  The UTF-8 names resolve nothing here: their virtuals reach
+  `_C_get_data` at first use (`TODO`, "A UTF-8 wide
+  `codecvt_byname` in a locale maps the C locale's database").
+
 Each virtual switches on the ISO-2022 type. For a stateless name it
 takes `_C_data ()`:
 
-- `__rw_facet::_C_get_data` maps the locale's `LC_CTYPE` record,
-  takes its `codeset_name ()` and maps the codecvt database of that
-  name at the locale root; a name that is itself a codeset maps
-  directly. A facet constructed without a locale has no `_C_pid` and
-  gets no data.
 - With data, or with a UTF or UCS flag, the converters are the
   library's (`USE_LIBC` false). `__rw_libstd_do_in` walks `n_to_w`
   with `__rw_mbtowco` and takes the pair table's internal or UCS
@@ -934,8 +951,8 @@ takes `_C_data ()`:
   or `ESC $ ( D` and two bytes, or `ESC . A`, `ESC N` and one byte).
 - Every other `ISO-2022-` name, `-KR` and `-CN` among them, takes
   the stateless path. No database and no C library locale has the
-  name, so the first call that needs the encoding asks the C library
-  for it and throws `runtime_error`.
+  name, so the constructor asks the C library for it and throws
+  `runtime_error`.
 
 #### The primary templates
 
@@ -1086,7 +1103,7 @@ design (e6c7726b); no recorded decision. Pinned by: no test.
 | `22.locale.ctype.toupper` | `toupper`, both forms | 19396 |
 | `22.locale.ctype.narrow` | `narrow`, `widen` against the C library | 9768, 2 warnings |
 | `22.locale.ctype.mt` | first fill of the narrow and widen caches, gated | 800 |
-| `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state, unknown names | 673 |
+| `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state, unknown names, a facet constructed directly | 676 |
 | `22.locale.codecvt.do_out` | `out` over algorithmic, table and libc encodings | 1494 |
 | `22.locale.codecvt.iso2022` | `ISO-2022-JP` and `-JP-2`: `in`, `out`, `unshift` and `length` in one call and across calls, against glibc's `iconv` | 1500 |
 | `22.locale.codecvt.length` | `length` over the same three, and the byname narrow facet | 484 |
@@ -1116,16 +1133,6 @@ Known gaps and their `TODO` entries:
 - The wide table covers the charmap, glibc's every named code point
   (`TODO`, "The wide `LC_CTYPE` table covers the charmap"). Check:
   the decision recorded.
-- A `codecvt_byname<wchar_t, char, mbstate_t>` constructed and used
-  outside a locale has no `_C_pid`, so `_C_get_data` gives it no
-  database (the comment in `src/facet.cpp`): it converts through the
-  C library, and for a name only the database knows it throws
-  `runtime_error` from `__rw_setlocale` on the first call, by probe.
-  `ctype_byname<wchar_t>` maps its database in the constructor and
-  has no such limit. Under `@UCS` the same facet converts as UTF-8.
-  Check: a decision whether a byname facet's data depends on its
-  installation; the probe is a facet on a database-only name used
-  directly and through `locale (classic (), &f)`.
 - `ctype_byname<wchar_t> ("C")` takes the C library's answers where
   `ctype<wchar_t>` takes the tables: `widen ('\x80')` is `WEOF` in
   the first and U+0080 in the second, by probe. Check: whether the

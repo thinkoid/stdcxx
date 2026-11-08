@@ -2117,6 +2117,37 @@ test_inout (const char* tname)
     TEST_IN_OUT ("0123456", 7, 6, L"AC", 2, 2, partial /* or error */);
     TEST_IN_OUT ("0123456", 7, 6, L"AC", 3, 2, error);
 
+    // 22.1.1.1.2, p4: a facet constructed directly from the name of a
+    // database has the semantics of the facet of the locale of the
+    // name, so it converts through the same database
+    {
+        rw_info (0, __FILE__, __LINE__,
+                 "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\") "
+                 "outside a locale", locname);
+
+        typedef std::codecvt<wchar_t, char, std::mbstate_t> CvtW;
+
+        bool threw = false;
+        int  direct    = -1;
+        int  installed = -1;
+
+        try {
+            const CodecvtBynameObject<wchar_t> cc (locname);
+            direct = cc.max_length ();
+
+            const std::locale loc (locname);
+            installed = std::use_facet<CvtW>(loc).max_length ();
+        }
+        catch (std::runtime_error&) {
+            threw = true;
+        }
+
+        rw_assert (!threw && installed == direct, __FILE__, __LINE__,
+                   "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\")"
+                   ".max_length() == %d, got %d%{?}, threw%{;}",
+                   locname, installed, direct, threw);
+    }
+
 #ifndef _RWSTD_NO_NL_LANGINFO
 
     char chars [256];
@@ -2319,9 +2350,10 @@ test_inout (const char* tname)
     }
 
     // 22.1.1.1.2, p4: a byname facet has the semantics of the locale
-    // of its name; the UTF-16 names have no locale and no meaning in
-    // the library, nor do ISO-2022-KR and ISO-2022-CN, so the first
-    // conversion throws as for any unknown name
+    // of its name, and 22.1.1.2, p7 has locale (const char*) throw
+    // runtime_error for a name that is not valid; the UTF-16 names
+    // have no locale and no meaning in the library, nor do ISO-2022-KR
+    // and ISO-2022-CN, so the constructor throws as for any unknown name
     const char* const unknown[] = {
         "no-such-encoding", "UTF-16", "utf-16", "ISO-2022-KR", "ISO-2022-CN"
     };
@@ -2337,17 +2369,6 @@ test_inout (const char* tname)
 
         try {
             const CodecvtBynameObject<wchar_t> cc (locname);
-
-            std::mbstate_t state = std::mbstate_t ();
-
-            const wchar_t  src [] = L"a";
-            const wchar_t* src_next = 0;
-
-            char  dst [8];
-            char* dst_next = 0;
-
-            cc.out (state, src, src + 1, src_next,
-                    dst, dst + sizeof dst, dst_next);
         }
         catch (std::runtime_error&) {
             threw = true;
@@ -2355,8 +2376,74 @@ test_inout (const char* tname)
 
         rw_assert (threw, __FILE__, __LINE__,
                    "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\")"
-                   ".out() threw runtime_error", locname);
+                   " threw runtime_error", locname);
     }
+
+    // a name the C library knows and the database does not: the facet
+    // converts through the C library, and encoding() and max_length()
+    // return without a throw
+    locname = 0;
+
+    for (const char* s = rw_locales (LC_CTYPE); *s; s += std::strlen (s) + 1) {
+        if (!std::strcmp (s, "C") || !std::strcmp (s, "POSIX"))
+            continue;
+
+        // a locale or a codeset of the name at the locale root
+        char path [PATH_MAX];
+        std::sprintf (path, "%s" SLASH "%s", locale_root, s);
+
+        struct stat sb;
+        if (-1 == stat (path, &sb)) {
+            locname = s;
+            break;
+        }
+    }
+
+    if (!locname) {
+        rw_warn (0, __FILE__, __LINE__,
+                 "no C library locale without a database, test skipped");
+        return;
+    }
+
+    rw_info (0, __FILE__, __LINE__,
+             "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\") "
+             "through the C library", locname);
+
+    bool threw = false;
+
+    std::codecvt_base::result res = error;
+
+    char  dst [8] = "";
+    char* dst_next = 0;
+
+    try {
+        const CodecvtBynameObject<wchar_t> cc (locname);
+
+        cc.encoding ();
+        cc.max_length ();
+
+        std::mbstate_t state = std::mbstate_t ();
+
+        const wchar_t  src [] = L"a";
+        const wchar_t* src_next = 0;
+
+        res = cc.out (state, src, src + 1, src_next,
+                      dst, dst + sizeof dst, dst_next);
+    }
+    catch (std::runtime_error&) {
+        threw = true;
+    }
+
+    rw_assert (!threw, __FILE__, __LINE__,
+               "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\") "
+               "threw nothing", locname);
+
+    rw_assert (ok == res && 1 == dst_next - dst && 'a' == *dst,
+               __FILE__, __LINE__,
+               "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\")"
+               ".out(L\"a\") == ok, \"a\", got %s, %{#*s}",
+               locname, rwtest_codecvt_result (res),
+               dst_next ? int (dst_next - dst) : 0, dst);
 }
 
 /****************************************************************************/

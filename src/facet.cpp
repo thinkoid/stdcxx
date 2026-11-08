@@ -184,10 +184,6 @@ const void* __rw_facet::_C_get_data ()
 
     __rw_chararray locname (_C_name && _C_name [0] ? _C_name : "C");
 
-    // implementation database mapping data
-    const void* pdata = 0;
-    size_t sz = 0;
-
     _RWSTD_ASSERT (0 != _C_pid);
     const int cat = __rw_get_cat (int (*_C_pid));
 
@@ -198,41 +194,66 @@ const void* __rw_facet::_C_get_data ()
     const bool is_wcodecvt_byname =
         _C_wcodecvt_byname == __rw_locale::_C_get_facet_type (*this);
 
+    // map the database into locals: a non-zero _C_impsize is what
+    // _C_data() takes to mean _C_impdata is ready, so the data is
+    // stored before the size
+    size_t sz = 0;
+    const void* const pdata =
+        __rw_lookup_facet_data (cat, sz, locname.data (), is_wcodecvt_byname);
+    if (!pdata) {
+        _RWSTD_ASSERT (0 == _C_impdata);
+
+        // set `impsize' to non-zero value to avoid subsequent
+        // attempts at reinitialization
+        _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, size_t (-1), false);
+        return 0;
+    }
+
+    _C_impdata = pdata;
+    _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, sz, false);
+
+    return _C_impdata;
+}
+
+
+const void* __rw_lookup_facet_data (int cat, size_t &impsize,
+                                    const char* name, bool wcodecvt)
+{
+    _RWSTD_ASSERT (0 != name);
+
+    size_t sz = 0;
+
     // map the database; first try with the full name (including
     // any modifiers) since such a database may actually exist
-    pdata = __rw_get_facet_data (cat, sz, locname.data ());
+    const void* pdata = __rw_get_facet_data (cat, sz, name);
     if (!pdata) {
-
         // the mapping failure can be attributed to the use of a
         // special name, e.g., <locale>.<codeset>@UCS-4 which calls
         // for the stripping of the special suffix
         __rw::__rw_chararray strip_name;
 
-        const char*  pstr = strstr (locname.data (), "@UCS");
-        const size_t plen = size_t (pstr - locname.data ());
+        const char*  pstr = strstr (name, "@UCS");
+        const size_t plen = size_t (pstr - name);
 
         if (pstr && !pstr [4]) {
-
             // @UCS suffix is recognized irrespective of the size of wchar_t
-            strip_name.append (locname.data (), plen);
+            strip_name.append (name, plen);
             pdata = __rw_get_facet_data (cat, sz, strip_name.data ());
         }
         else if (   pstr && pstr [4] == '-' && !pstr [6]
                  && (   ('4' == pstr [5] && sizeof (wchar_t) == 4)
                      || ('2' == pstr [5] && sizeof (wchar_t) == 2))) {
-
             // @UCS-4 is only recognized where sizeof (wchar_t) == 4
             // @UCS-2 is only recognized where sizeof (wchar_t) == 2
             // no other modifier is recognized
-            strip_name.append (locname.data (), plen);
+            strip_name.append (name, plen);
             pdata = __rw_get_facet_data (cat, sz, strip_name.data ());
         }
 
         // if the type of the facet is codecvt_byname<wchar_t,char,mbstate_t>
         // then the name is possibly in the format codeset | codeset@modifier
-        if (!pdata && is_wcodecvt_byname) {
-
-            pstr = pstr ? strip_name.data () : locname.data ();
+        if (!pdata && wcodecvt) {
+            pstr = pstr ? strip_name.data () : name;
             pdata = __rw_get_facet_data (cat, sz, 0, pstr /* codeset */);
         }
         else
@@ -240,25 +261,17 @@ const void* __rw_facet::_C_get_data ()
 
         // this is the definitive result for facets other than 
         // codecvt_byname<wchar_t, char, mbstate_t>
-        if (!pdata) {
-            _RWSTD_ASSERT (0 == _C_impdata);
-
-            // set `impsize' to non-zero value to avoid subsequent
-            // attempts at reinitialization
-            _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, size_t (-1), false);
+        if (!pdata)
             return 0;
-        }
 
-        if (!is_wcodecvt_byname || (pstr && pdata)) {
-            _C_impdata = pdata; 
-            _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, sz, false);
-            return _C_impdata;
+        if (!wcodecvt || (pstr && pdata)) {
+            impsize = sz;
+            return pdata;
         }
     }
-    else if (!is_wcodecvt_byname) {
-        _C_impdata = pdata;
-        _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize, sz, false);
-        return _C_impdata;
+    else if (!wcodecvt) {
+        impsize = sz;
+        return pdata;
     }
 
     // for codecvt_byname facet map the database indicated by 
@@ -275,32 +288,26 @@ const void* __rw_facet::_C_get_data ()
     __rw_chararray codeset_fname;
     const char* codeset = pctype->codeset_name ();
 
-    const char* const slash = strrchr (locname.data (), _RWSTD_PATH_SEP);
+    const char* const slash = strrchr (name, _RWSTD_PATH_SEP);
     if (slash) {
-        const size_t dirlen = size_t (slash - locname.data ()) + 1;
+        const size_t dirlen = size_t (slash - name) + 1;
 
-        codeset_fname.assign (locname.data (), dirlen);
+        codeset_fname.assign (name, dirlen);
         codeset_fname.append (codeset);
         codeset = codeset_fname.data ();
     }
 
-    // map the codecvt database into locals: a non-zero _C_impsize is
-    // what _C_data() takes to mean _C_impdata is ready, so the data
-    // is stored before the size (doc/notes/analysis-facet-first-use.md,
-    // chapter 2); a database that cannot be mapped is marked as none,
-    // as the general path above marks it
+    // map the codecvt database; one that cannot be mapped is none
     size_t cvtsize = 0;
     const void* const cvtdata =
         __rw_get_facet_data (cat, cvtsize, 0, codeset);
 
-    _C_impdata = cvtdata;
-    _RWSTD_ATOMIC_STORE_RELEASE (_C_impsize,
-                                 cvtdata ? cvtsize : size_t (-1), false);
-
     // unmap the LC_CTYPE database
     __rw_munmap (pdata, sz);
 
-    return _C_impdata;
+    impsize = cvtsize;
+
+    return cvtdata;
 }
 
 
