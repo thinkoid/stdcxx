@@ -44,21 +44,6 @@ record the skip.
 Check: two streams on distinct buffers, tied to each other: an
 insertion into one flushes the other.
 
-*** TODO =xsputn= loses its argument when it lies inside the buffer past =pbase ()=
-
-=basic_stringbuf::xsputn= (=include/sstream.cc= 181-200) saves the
-offset of an argument inside the put area before growing the buffer,
-as ~__off = this->pbase () - __s~, and corrects =__s= after the growth
-only when ~0 <= __off~. The offset is negative for every =__s= past
-=pbase ()=, so such a call copies from the freed buffer. Only =__s ==
-pbase ()= is corrected, the case STDCXX-576's program exercises. From
-17d5eb29. Hypothesis, by reading, 2026-11-05.
-
-Fix: ~__off = __s - this->pbase ()~.
-
-Check: a =27.stringbuf.virtuals= row that grows the buffer with
-~sputn (pbase () + 1, n)~ and compares the sequence.
-
 *** TODO =basic_filebuf::xsputn= writes the internal characters on a conversion error
 
 When =codecvt::out= returns =error=, =basic_filebuf::xsputn=
@@ -77,6 +62,30 @@ Fix: the case writes =__xbuf= to =__to_next= and returns
 Check: a =27.filebuf.codecvt= row: a facet whose =out= converts two
 characters and fails on the third; the file holds the two converted
 characters and =sputn= returns 2.
+
+*** TODO =basic_stringbuf::xsputn= copies an argument that overlaps the put position with =memcpy=
+
+=basic_stringbuf::xsputn= (=include/sstream.cc= 200) copies its
+argument to =pptr ()= with =traits_type::copy=. The argument may lie
+inside the buffer and run past =pptr ()=, since the assertion at 182
+bounds it by =epptr ()=. =char_traits<char>::copy= and
+=char_traits<wchar_t>::copy= call =memcpy= and =wmemcpy=
+(=include/rw/_traits.h= 331, 406), and C99 7.21.2.1, p2 leaves an
+overlapping =memcpy= undefined. 14882:2003 21.1.1, Table 37 asks of
+=copy= only "p not in [s,s+n)", which an argument that starts before
+=pptr ()= meets, and defines the result as "for each i in [0,n),
+performs X::assign(s[i],p[i])", the order of 27.5.2.4.5, p1's
+repeated =sputc=. A probe on glibc 2.44, with an argument 5 before
+=pptr ()= and 10 long, and one 10 before and 20 long that grows the
+buffer, gets the =sputc= sequence, under ASan too: the defect is by
+the letter, not measured. Hypothesis, by reading, 2026-11-08.
+
+Fix: a decision: =copy= assigns forward where the ranges overlap as
+Table 37 allows, or =xsputn= copies an overlapping argument in the
+=sputc= order itself.
+
+Check: the probe's two calls as =27.stringbuf.virtuals= rows,
+comparing =str ()= to the =sputc= sequence.
 
 ** Containers
 
@@ -663,6 +672,20 @@ its type.
 
 Check: a row made to fail prints the value, the inserted string and
 the expected one.
+
+** TODO Two messages of =27.stringbuf.virtuals= name the wrong thing
+
+=tests/iostream/27.stringbuf.virtuals.cpp= 578 heads the =xsputn= rows
+that pass no string "exercise calling sputn() with pptr() as the first
+argument", and =CALLFMT= (298) prints =pptr()= for them, but
+=test_virtual= calls ~sputn (Pbase (), n)~ for those rows (245-246).
+The =else= of the =wchar_t= block (1343) notes "char tests disabled".
+Seen in passing by the =xsputn= offset change, 2026-11-08.
+
+Fix: the comment and the format say =pbase()=; the note says
+"wchar_t tests disabled".
+
+Check: reading; the test at its pin.
 
 * Certification
 

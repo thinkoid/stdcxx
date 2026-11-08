@@ -181,7 +181,7 @@ xsputn (const char_type* __s, streamsize __n)
             // __s is a part of the buffer
             _RWSTD_ASSERT (this->epptr () >= __s + __n);
             // save the offset from pbase()
-            __off = this->pbase () - __s;
+            __off = __s - this->pbase ();
         }
 
         // grow the buffer if necessary to accommodate the whole

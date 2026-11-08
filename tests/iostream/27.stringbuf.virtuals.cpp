@@ -447,6 +447,75 @@ static int rw_opt_max_size = 1024;
 
 /**************************************************************************/
 
+// an argument inside the put area past pbase () survives the growth
+// of the buffer that its own length forces
+template <class charT, class Traits>
+void test_xsputn_inside (charT, Traits, const VFun *pfid)
+{
+    typedef std::allocator<charT>                          Allocator;
+    typedef std::basic_stringbuf<charT, Traits, Allocator> Stringbuf;
+    typedef std::basic_string<charT, Traits, Allocator>    String;
+
+    Stringbuf sb (std::ios::openmode (in | out));
+
+    const PubBuf<charT, Traits>* const pbuf =
+        (const PubBuf<charT, Traits>*)&sb;
+
+    // fill the buffer to its capacity with a pattern that tells
+    // each position from its neighbors
+    String seq;
+
+    do {
+        const charT c = charT ('a' + seq.size () % 26);
+
+        sb.sputc (c);
+        seq += c;
+    } while (pbuf->Pptr () < pbuf->Epptr ());
+
+    // the argument runs from pbase () + 1 to epptr (), so the write
+    // grows the buffer and reads its argument from the new one
+    const std::streamsize n = pbuf->Epptr () - pbuf->Pbase () - 1;
+
+    const String expect = seq + seq.substr (1);
+
+    const std::streamsize ret = sb.sputn (pbuf->Pbase () + 1, n);
+
+    const String res = sb.str ();
+
+    std::size_t i = 0;
+    while (i < res.size () && i < expect.size () && res [i] == expect [i])
+        ++i;
+
+    rw_assert (n == ret && res == expect, 0, __LINE__,
+               "basic_stringbuf<%s%{?}, %s%{;}>: sputn (pbase () + 1, %d) "
+               "on a full buffer of %d == %d, got %d; str () of %zu "
+               "characters matches the expected %zu up to %zu",
+               pfid->cname_, 0 != pfid->tname_, pfid->tname_,
+               int (n), int (n + 1), int (n), int (ret),
+               res.size (), expect.size (), i);
+}
+
+
+static void
+test_xsputn_inside (const VFun *pfid)
+{
+    if (VFun::DefaultTraits == pfid->tid_) {
+        if (VFun::Char == pfid->cid_)
+            test_xsputn_inside (char (), std::char_traits<char> (), pfid);
+        else
+            test_xsputn_inside (wchar_t (), std::char_traits<wchar_t> (),
+                                pfid);
+    }
+    else {
+        if (VFun::Char == pfid->cid_)
+            test_xsputn_inside (char (), CharTraits<char> (), pfid);
+        else
+            test_xsputn_inside (wchar_t (), CharTraits<wchar_t> (), pfid);
+    }
+}
+
+/**************************************************************************/
+
 static void
 test_xsputn (VFun *pfid)
 {
@@ -588,6 +657,9 @@ test_xsputn (VFun *pfid)
         TEST (127, in | out, 0, i, i, 0, MAX (127, i), MAYBE_1);
         TEST (CAP, in | out, 0, i, i, 0, MAX (CAP, i), MAYBE_1);
     }
+
+    // sputn() with an argument inside the put area past pbase ()
+    test_xsputn_inside (pfid);
 }
 
 /**************************************************************************/
