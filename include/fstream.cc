@@ -427,8 +427,9 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
     if (0 == __nchars)
         return 0;   // not an error
 
+    // 27.5.2.4.5, p2: the error returns count the characters written
     if (__nchars < 0 || !this->_C_is_out () || !is_open ())
-        return -1;   // error
+        return 0;
 
     if (0 == this->pptr () && !this->_C_is_unbuffered ())
         // put area not valid yet - just need to initialize it
@@ -456,12 +457,9 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
         // call self recursively to flush the controlled sequence first
         const _RWSTD_STREAMSIZE __nwrite = this->pptr () - this->pbase ();
 
-        // typedef helps HP aCC 3.27
-        typedef basic_filebuf _FileBuf;
-
-        // return -1 on error to flush the controlled sequence
-        if (__nwrite != _FileBuf::xsputn (__special, __nwrite))
-            return -1;
+        // a short flush of the controlled sequence writes none of __buf
+        if (__nwrite != basic_filebuf::xsputn (__special, __nwrite))
+            return 0;
     }
 
     //  flush buffer to file, performing code conversion if necessary
@@ -491,9 +489,12 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
 
         const _RWSTD_STREAMSIZE __nbytes = sizeof (char_type) * __nwrote;
 
-        if (__nbytes != __rw::__rw_fwrite (_C_file, this->_C_state,
-                                          __buf, __nbytes))
-            return -1;  // error while writing
+        const _RWSTD_STREAMSIZE __nout =
+            __rw::__rw_fwrite (_C_file, this->_C_state, __buf, __nbytes);
+
+        // a short write counts the whole characters it got out
+        if (__nbytes != __nout)
+            return __nout < 0 ? 0 : __nout / _RWSTD_STREAMSIZE (sizeof *__buf);
     }
     else {
 
@@ -508,9 +509,7 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
         for (const char_type* __base = __buf; __from_next != __end;
              __base = __from_next) {
 
-            // avoid using const codecvt_base::result here
-            // to prevent HP aCC 3.27 errors
-            const int __res =
+            const codecvt_base::result __res =
                 __cvt.out (__state, __base, __end, __from_next,
                            __xbuf, __xbuf_end, __to_next);
 
@@ -523,13 +522,13 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
                 // to the point of the error in the internal sequence
                 // and fail
                 __rw::__rw_fwrite (_C_file, this->_C_state, __base, __nbytes);
-                    return traits_type::eof ();
+                return __base - __buf;
 
             case codecvt_base::noconv:
                 // write the entire sequence
                 if (__nbytes != __rw::__rw_fwrite (_C_file, this->_C_state,
                                                   __base, __nbytes))
-                    return traits_type::eof ();
+                    return __base - __buf;
 
                 __nwrote += __end - __base
                     + _C_crlf_intern_count (__base, __end);
@@ -551,7 +550,7 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
 
                 if (__nbytes != __rw::__rw_fwrite (_C_file, this->_C_state,
                                                   __xbuf, __nbytes))
-                    return -1;
+                    return __base - __buf;
 
                 __nwrote += __nbytes
                     + _C_crlf_extern_count (__xbuf, __to_next);

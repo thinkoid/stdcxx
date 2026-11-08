@@ -26,21 +26,6 @@ at the top.
 
 ** Streams
 
-*** TODO =basic_filebuf::xsputn= returns -1 on an error
-
-14882:2003 27.5.2.4.5, p2: =xsputn= returns "The number of characters
-written". =basic_filebuf::xsputn= returns -1 when the buffer is not
-open or not in output mode (=include/fstream.cc= 430-431), and on the
-write errors after it (464, 496). A caller that adds the result to a
-count goes back by one. Seen in passing by the extension sweep,
-2026-11-04.
-
-Fix: the override returns the number of characters it wrote, 0 when it
-wrote none.
-
-Check: a =27.filebuf= row: =sputn= on a buffer opened for input only
-returns 0.
-
 *** TODO =_C_opfx= skips the tie's flush on a loop of distinct buffers
 
 =include/ostream= 270-284 skip ~tie ()->flush ()~ when the tie chain
@@ -88,6 +73,25 @@ Fix: ~__off = __s - this->pbase ()~.
 
 Check: a =27.stringbuf.virtuals= row that grows the buffer with
 ~sputn (pbase () + 1, n)~ and compares the sequence.
+
+*** TODO =basic_filebuf::xsputn= writes the internal characters on a conversion error
+
+When =codecvt::out= returns =error=, =basic_filebuf::xsputn=
+(=include/fstream.cc= 520-525) writes ~sizeof (char_type) * (__end -
+__base)~ bytes from =__base=: the unconverted internal characters,
+from the start of the failed chunk to the end of the argument. Its
+comment says it writes "the sequence successfully converted up to the
+point of the error", which is the bytes from =__xbuf= to =__to_next=.
+A wide stream thus puts the object representation of its characters
+into the file. 0ffd071c moved the code from =overflow=, which had it
+from the 2005 import. Hypothesis, by reading, 2026-11-08.
+
+Fix: the case writes =__xbuf= to =__to_next= and returns
+~__from_next - __buf~ when that write is whole.
+
+Check: a =27.filebuf.codecvt= row: a facet whose =out= converts two
+characters and fails on the third; the file holds the two converted
+characters and =sputn= returns 2.
 
 ** Containers
 

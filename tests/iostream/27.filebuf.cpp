@@ -2054,6 +2054,60 @@ test_codecvt_with_seek ()
 /***************************************************************************/
 
 
+// 27.5.2.4.5, p2: xsputn returns the number of characters written,
+// so a buffer that cannot write returns 0
+template <class charT>
+static void
+test_sputn_no_output (const char* tname)
+{
+    rw_info (0, __FILE__, __LINE__,
+             "std::basic_filebuf<%s>::sputn() without output", tname);
+
+    typedef std::basic_filebuf<charT, std::char_traits<charT> > Filebuf;
+
+    static const charT abc [] = { 'a', 'b', 'c' };
+
+    {
+        Filebuf fb;
+
+        const std::streamsize n = fb.sputn (abc, 3);
+
+        rw_assert (0 == n, __FILE__, __LINE__,
+                   "basic_filebuf<%s>::sputn (\"abc\", 3) == 0 on a "
+                   "buffer never opened, got %d", tname, int (n));
+    }
+
+    const char* const tmpfname = rw_tmpnam (0);
+    if (!tmpfname) {
+        return;
+    }
+
+    rw_fwrite (tmpfname, "xyz");
+
+    {
+        Filebuf fb;
+
+        if (!fb.open (tmpfname, std::ios::in)) {
+            rw_assert (false, __FILE__, __LINE__,
+                       "basic_filebuf<%s>::open (\"%s\", ios_base::in) "
+                       "failed", tname, tmpfname);
+            REMOVE_FILE (tmpfname);
+            return;
+        }
+
+        const std::streamsize n = fb.sputn (abc, 3);
+
+        rw_assert (0 == n, __FILE__, __LINE__,
+                   "basic_filebuf<%s>::sputn (\"abc\", 3) == 0 on a "
+                   "buffer opened in ios_base::in, got %d", tname, int (n));
+    }
+
+    REMOVE_FILE (tmpfname);
+}
+
+/***************************************************************************/
+
+
 template <class charT>
 static void
 do_test (const char* tname)
@@ -2068,6 +2122,9 @@ do_test (const char* tname)
 
     // exercise basic_filebuf::sync()
     test_sync<charT> (tname);
+
+    // exercise basic_filebuf::sputn() on a buffer that cannot write
+    test_sputn_no_output<charT> (tname);
 
     // exercise basic_filebuf functionality with a non-trivial
     // codecvt facet that implements stateful conversion
