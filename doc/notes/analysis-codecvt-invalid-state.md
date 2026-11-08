@@ -29,8 +29,9 @@ contract below and the decision it opened.
   The libc-backed wide facet went on to hand the corrupt state to
   glibc's `mbrtowc`, which never returns. Every path now returns the
   error result when its check fails. The ISO-2022 branches, whose
-  state is an index into the library's array of states, check that
-  the index is in range, asserted, and names a slot in use.
+  state is the library's own struct stored in the `mbstate_t`, take
+  the zero object as the initial state and check that any other
+  invokes elements in range, asserted.
   The assertion stays in debug builds.
 - In a thread-safe debug build the section cannot be run against the
   libc-backed facets at all: they take the process-wide locale lock

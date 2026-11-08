@@ -45,33 +45,6 @@ host locale write no null character, narrow and wide.
 
 ** Localization: =codecvt=
 
-*** TODO The ISO-2022 state lives in a static array of 511 slots
-
-=src/iso2022.cpp= keeps each conversion's state, the struct
-=__rw_iso2022_state_t= (G0 to G3, the invoked elements, the shift
-width, two single shifts), in a static array of 511 slots under the
-class mutex, and stores the slot's index plus one in the first two
-bytes of the caller's =mbstate_t=; a zero =mbstate_t= is the initial
-state and allocates. The design served a platform whose =mbstate_t=
-was one byte. Since adc23505 =in= keeps a G2 designation across calls,
-as glibc's =iconv= does, so an input state that has seen ESC . A is
-never freed by =in= and only =unshift= releases it, which input
-streams never call: such a stream holds a slot for its life, and the
-512th conversion in flight answers =error=, 0 from =length=. Every
-allocation scans the array under the lock. glibc's =mbstate_t= is 8
-bytes and the struct is 8 with its =used= bit, 6 without.
-
-Fix: store the struct in the =mbstate_t= itself and retire the array,
-=__rw_allocate_state=, the pool half of =__rw_deallocate_state= and
-the mutex; encode the fields so that an all-zero object is the initial
-shift state, G0 = ASCII in GL; where =_RWSTD_MBSTATE_T_SIZE= is below
-the struct's size the encodings are =stateless=.
-
-Check: =22.locale.codecvt.iso2022= at 1494 with its =unshift= calls
-removed from the 2048-conversion case, and a 600-stream case, each
-after ESC . A and never unshifted, converting to the end;
-=22.locale.codecvt.mt= at 1600.
-
 *** TODO =ISO-2022-KR= and =ISO-2022-CN= are names without converters
 
 =__rw_encoding_from_name= (=src/iso2022.cpp=) recognizes both names,

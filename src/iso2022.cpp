@@ -133,21 +133,20 @@ enum __rw_codeset_type_t {
     sb94 = 0, sb96, mb94, mb96
 };
 
-// State of the ISO-2022 conversions
+// State of the ISO-2022 conversions, stored in the caller's mbstate_t;
+// the zero object is the initial conversion state; the members are
+// unsigned char, so the struct takes six bytes at any address
 struct __rw_iso2022_state_t {
-    // 0 - unused, 1 - used, default 0
-    unsigned used:1;
-
     // invoked code elements: valid values 1-4, invalid 0, default 0
-    unsigned gl_map:3;
-    unsigned gr_map:3;
+    unsigned char gl_map:3;
+    unsigned char gr_map:3;
 
     // shift state: 0 - one character, 1 - two characters, default 0
-    unsigned shift_state:1;
+    unsigned char shift_state:1;
 
     // single-shift 2 and 3 functions
-    unsigned sshift2:1;
-    unsigned sshift3:1;
+    unsigned char sshift2:1;
+    unsigned char sshift3:1;
 
     // equivalent of G0-G3 code elements
     unsigned char g_map [4];    // default 0
@@ -388,60 +387,15 @@ int __rw_encoding_from_name (const char* name)
 }
 
 
-//  Array of ISO-2022 encoding states; the array has a default size of 256
-//  entries; the declaration of the array is guarded for size
-//
-//  The usage of the structs in the array:
-//  - the struct "allocated" are marked as  used;
-//  - the index of the struct in the array is stored in the std::mbstate_t
-//  struct  used in  codecvt facet;
-//  - the  std::mbstate_t  values are shifted from  the real iso2022_state
-//  struct index  by one  so  that a  value of  zero in  an std::mbstate_t
-//  variable indicates a new conversion for which a state has to be
-//  allocated
-#if _RWSTD_MBSTATE_T_SIZE == 1
-#  define ISO_2022_ARRAY_SIZE     255
-#  define ISO_2022_STATE_INDEX_T  unsigned char
-#else
-#  define ISO_2022_ARRAY_SIZE     511
-#  define ISO_2022_STATE_INDEX_T  unsigned short
-#endif
-
-
-// array of available states (limits the number of distinct mbstate_t
-// objects with unique value that may be simultaneously valid)
-static __rw_iso2022_state_t __rw_iso2022_states [ISO_2022_ARRAY_SIZE];
-
-
-// returns an index in the array of state structures or -1 if none
-// is available; ISO-2022-JP and ISO-2022-JP-2 assume different
-// initializations
-static inline int
-__rw_allocate_state ()
-{
-    _RWSTD_MT_CLASS_GUARD (__rw_iso2022_state_t);
-
-    for (int i = 0; i < ISO_2022_ARRAY_SIZE; i++)
-        if (__rw_iso2022_states [i].used == 0) {
-            __rw_iso2022_states [i].used = 1;
-            return i;
-        }
-
-    return -1;
-}
-
-
-// deallocates state and makes it available for future conversions
-// if `initial_only' is non-zero suceeds only if the `iso_state'
-// argument represents an initial shift state
+// resets the state to the initial conversion state, the zero object;
+// if `initial_only' is true, only a state in the initial shift state
 static void
-__rw_deallocate_state (__rw_iso2022_state_t &iso_state,
-                            _RWSTD_MBSTATE_T     &state,
-                            bool                  initial_only)
+__rw_reset_iso2022_state (_RWSTD_MBSTATE_T& state, bool initial_only)
 {
-    _RWSTD_MT_CLASS_GUARD (__rw_iso2022_state_t);
-
     if (initial_only) {
+        const __rw_iso2022_state_t& iso_state =
+            *reinterpret_cast< const __rw_iso2022_state_t* >(&state);
+
         // test the state object for return to initial shift state
         const int i = iso_state.gl_map - 1;
         _RWSTD_ASSERT (i >= 0 && i < 4);
@@ -451,55 +405,47 @@ __rw_deallocate_state (__rw_iso2022_state_t &iso_state,
             || iso_state.sshift2
             || iso_state.sshift3)
             return;
-        
+
         // proceed only if `iostate' is in an initial shift state,
         // with no set designated to G2
     }
 
-    // zero out both structures
     memset (&state, 0, sizeof state);
-    memset (&iso_state, 0, sizeof iso_state);
 }
 
 
+// returns the state stored in `state', initialized in place when
+// `state' is the zero object, or 0 when `state' is corrupt
 static __rw_iso2022_state_t*
 __rw_get_iso2022_state (_RWSTD_MBSTATE_T& state, int enc)
 {
-    __rw_iso2022_state_t* pstate = 0;
+    _RWSTD_COMPILE_ASSERT (
+        sizeof (__rw_iso2022_state_t) <= sizeof (_RWSTD_MBSTATE_T));
 
-    // retrieve the array index
-    ISO_2022_STATE_INDEX_T* pc =
-        reinterpret_cast< ISO_2022_STATE_INDEX_T* >(&state);
+    __rw_iso2022_state_t* const pstate =
+        reinterpret_cast< __rw_iso2022_state_t* >(&state);
 
-    int n = *pc;
+    const unsigned char* const pc =
+        reinterpret_cast< const unsigned char* >(&state);
 
-    _RWSTD_ASSERT(n >= 0 && n <= ISO_2022_ARRAY_SIZE);
+    size_t n = 0;
+    while (n != sizeof state && 0 == pc [n])
+        ++n;
 
-    // an index past the array, or one of a slot not in use, is no state
-    if (n > ISO_2022_ARRAY_SIZE)
+    if (n != sizeof state) {
+        // a state the converters wrote invokes one of G0-G3 in GL and
+        // at most one in GR
+        _RWSTD_ASSERT (   1 <= pstate->gl_map && pstate->gl_map <= 4
+                       && pstate->gr_map <= 4);
+
+        if (pstate->gl_map < 1 || 4 < pstate->gl_map || 4 < pstate->gr_map)
+            return 0;
+
         return pstate;
-
-    if (n) {
-        pstate = &__rw_iso2022_states [n - 1];
-
-        return pstate->used ? pstate : 0;
     }
 
-    // a value of zero in std::mbstate_t indicates conversion anew,
-    // calling for a state allocation
-    n = __rw_allocate_state ();
-
-    // the case when the allocation was not possible
-    if (n == -1)
-        return pstate;
-
-    // store the state index
-    *pc = static_cast< ISO_2022_STATE_INDEX_T >(n + 1);
-
-    // store the pointer to the state object
-    pstate = &__rw_iso2022_states [n];
-
-    // initialize the state according to the encoding type
+    // a zero object is the initial conversion state; initialize it
+    // according to the encoding type
     switch (enc) {
     case iso2022_jp:
     case iso2022_jp2:
@@ -1645,9 +1591,9 @@ __rw_iso2022_to_ucs4 (_RWSTD_MBSTATE_T&     state,
 
     // test input width
     if (from_end - from < width) {
-        // test and deallocate state
+        // test and reset state
         if (iso_state->g_map [0] == CHSET_ANSI_X_3_4_1968)
-            __rw_deallocate_state (*iso_state, state, false);
+            __rw_reset_iso2022_state (state, false);
 
         return CODECVT_OK;
     }
@@ -1667,7 +1613,7 @@ __rw_iso2022_to_ucs4 (_RWSTD_MBSTATE_T&     state,
     if (res != CODECVT_OK ||
         (from_next == from && tmp_to == tmp_buffer)) {
 
-        __rw_deallocate_state (*iso_state, state, CODECVT_ERROR != res);
+        __rw_reset_iso2022_state (state, CODECVT_ERROR != res);
 
         return res;
     }
@@ -1684,7 +1630,7 @@ __rw_iso2022_to_ucs4 (_RWSTD_MBSTATE_T&     state,
     // get the proper database for decoding input
     const void* pdb = __rw_get_encoding_database (__rw_chset_map [reg].index);
     if (pdb == 0) {
-        __rw_deallocate_state (*iso_state, state, false);
+        __rw_reset_iso2022_state (state, false);
         return CODECVT_ERROR;
     }
     const __rw::__rw_codecvt_t* pimpl =
@@ -1700,7 +1646,7 @@ __rw_iso2022_to_ucs4 (_RWSTD_MBSTATE_T&     state,
     unsigned int wc = tbl [*(unsigned char*)tmp_to];
     while (wc & 0x80000000) {
         if (wc == _RWSTD_UINT_MAX) {
-            __rw_deallocate_state (*iso_state, state, false);
+            __rw_reset_iso2022_state (state, false);
             return CODECVT_ERROR;
         }
 
@@ -1712,7 +1658,7 @@ __rw_iso2022_to_ucs4 (_RWSTD_MBSTATE_T&     state,
         // here an incomplete sequence; the incomplete sequence here
         // is an error
         if (tmp_to == tmp_to_end) {
-            __rw_deallocate_state (*iso_state, state, false);
+            __rw_reset_iso2022_state (state, false);
             return CODECVT_ERROR;
         }
 
@@ -1766,8 +1712,8 @@ __rw_iso2022jp_do_in (_RWSTD_MBSTATE_T& state,
         to   = to_next;
     }
 
-    // deallocate state if the conversion has gone back to initial state
-    __rw_deallocate_state (*iso_state, state, true);
+    // reset state if the conversion has gone back to initial state
+    __rw_reset_iso2022_state (state, true);
 
     return from == from_end ? CODECVT_OK : CODECVT_PARTIAL;
 }
@@ -1794,7 +1740,7 @@ __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T& state,
     // use the EUC-JP database for a full lookup
     const void* pdb = __rw_get_encoding_database (DBIDX_EUC_JP);
     if (pdb == 0){
-        __rw_deallocate_state (*iso_state, state, false);
+        __rw_reset_iso2022_state (state, false);
         return CODECVT_ERROR;
     }
 
@@ -1820,7 +1766,7 @@ __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T& state,
         if (res != CODECVT_OK ||
             (ps == from && euc == euc_buffer)) {
 
-            __rw_deallocate_state (*iso_state, state, true);
+            __rw_reset_iso2022_state (state, true);
 
             return res;
         }
@@ -1841,7 +1787,7 @@ __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T& state,
 
             *iso_state = save;
 
-            __rw_deallocate_state (*iso_state, state, true);
+            __rw_reset_iso2022_state (state, true);
 
             return res;
         }
@@ -1851,9 +1797,9 @@ __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T& state,
         to   = pd;
     }
 
-    // deallocate state if the conversion has gone back to
+    // reset state if the conversion has gone back to
     // initial state
-    __rw_deallocate_state (*iso_state, state, true);
+    __rw_reset_iso2022_state (state, true);
 
     return from == from_end ? CODECVT_OK : CODECVT_PARTIAL;
 }
@@ -1879,11 +1825,11 @@ __rw_iso2022jp_do_unshift (_RWSTD_MBSTATE_T& state,
     else
         res = CODECVT_OK;
 
-    // the sequence terminated, the state is deallocated whatever G2
+    // the sequence terminated, the state is reset whatever G2
     // holds (footnote 226: "return the state to stateT()"), unless the
     // designation did not fit
     if (CODECVT_PARTIAL != res)
-        __rw_deallocate_state (*iso_state, state, false);
+        __rw_reset_iso2022_state (state, false);
 
     return res;
 }
@@ -1998,8 +1944,8 @@ __rw_iso2022jp2_do_in (_RWSTD_MBSTATE_T& state,
         to   = to_next;
     }
 
-    // deallocate state if the conversion has gone back to initial state
-    __rw_deallocate_state (*iso_state, state, true);
+    // reset state if the conversion has gone back to initial state
+    __rw_reset_iso2022_state (state, true);
 
     return from == from_end ? CODECVT_OK : CODECVT_PARTIAL;
 }
@@ -2040,7 +1986,7 @@ __rw_iso2022jp2_do_out (_RWSTD_MBSTATE_T& state,
             // the state stays that of the characters before this one,
             // less G2, as at the end of the call
             iso_state->g_map [2] = 0;
-            __rw_deallocate_state (*iso_state, state, true);
+            __rw_reset_iso2022_state (state, true);
 
             // error condition - none of the databases contained a mapping
             // of the character
@@ -2093,7 +2039,7 @@ __rw_iso2022jp2_do_out (_RWSTD_MBSTATE_T& state,
             *iso_state = save;
 
             iso_state->g_map [2] = 0;
-            __rw_deallocate_state (*iso_state, state, true);
+            __rw_reset_iso2022_state (state, true);
 
             return res;
         }
@@ -2109,9 +2055,9 @@ __rw_iso2022jp2_do_out (_RWSTD_MBSTATE_T& state,
     }
 
     // the next call designates G2 anew when it needs to, so an output
-    // state keeps G0 alone and is deallocated back in ASCII
+    // state keeps G0 alone and is reset back in ASCII
     iso_state->g_map [2] = 0;
-    __rw_deallocate_state (*iso_state, state, true);
+    __rw_reset_iso2022_state (state, true);
 
     return from == from_end ? CODECVT_OK : CODECVT_PARTIAL;
 }

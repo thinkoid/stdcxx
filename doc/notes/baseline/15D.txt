@@ -86,7 +86,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 21.string.substr                              0    0    1660      0   100%
 21.string.swap                                0    0    4134      0   100%
 22.locale.codecvt.do_out                      0    0    1494      0   100%
-22.locale.codecvt.iso2022                     0    0    1494      0   100%
+22.locale.codecvt.iso2022                     0    0    1500      0   100%
 22.locale.codecvt.length                      0    0     484      0   100%
 22.locale.codecvt.mt                          0    0    1600      0   100%
 22.locale.codecvt                             0    0     671      0   100%
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            33
-  Assertions:            12540297
+  Assertions:            12540303
   Failed assertions:            0

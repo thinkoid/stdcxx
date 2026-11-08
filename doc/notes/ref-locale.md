@@ -898,19 +898,23 @@ takes `_C_data ()`:
   and `in` then consumes them and returns `partial`; `out` still
   checks. A corrupt state on the C-library path is the caller's, as
   C leaves it (`analysis-codecvt-corrupt-state.md`).
-- `ISO-2022-JP` and `-JP-2` go to `src/iso2022.cpp`. The
-  `mbstate_t` holds an index into a static array of 511 states. A
-  state is allocated on first use and initialized then, to ASCII in
-  G0, so a conversion resumes where the previous call left it. An
-  index past the array, asserted in a debug build, or one naming a
-  slot not in use is no state, and the member returns `error` (0
-  for `length`).
-- A state is freed on a return to the initial shift state: ASCII in
-  G0, no single shift and nothing in G2. `in` keeps a G2
-  designation, which a later `ESC N` still needs, so an input state
-  that saw one stays allocated until `unshift`. `out` drops its G2
-  designation at the end of each call and designates it anew when
-  needed. `unshift` frees the state whatever G2 holds.
+- `ISO-2022-JP` and `-JP-2` go to `src/iso2022.cpp`. The state
+  lives in the caller's `mbstate_t`: `__rw_iso2022_state_t`, six
+  bytes of `unsigned char`, which a compile-time assertion keeps
+  within the `mbstate_t`. The zero object is the initial conversion
+  state (C99 7.24.6 p3), and a member initializes it in place to
+  ASCII in G0, invoked in GL. A conversion thus resumes where the
+  previous call left it, and a copy of the state resumes it as well.
+- A non-zero state whose GL element is not one of G0 to G3, or whose
+  GR element is past G3, is corrupt: the member asserts in a debug
+  build and returns `error` (0 for `length`).
+- A state is reset to the zero object on a return to the initial
+  shift state: ASCII in G0, no single shift and nothing in G2. `in`
+  keeps a G2 designation, which a later `ESC N` still needs, so an
+  input state that saw one stays non-zero until `unshift`; it holds
+  nothing outside the object. `out` drops its G2 designation at the
+  end of each call and designates it anew when needed. `unshift`
+  resets the state whatever G2 holds.
 - The component codesets' databases (`ANSI_X3.4-1968`, `EUC-JP`,
   `GB2312`, `EUC-KR`, `ISO-8859-1`, `ISO-8859-7`) are mapped once
   from the locale root; each is produced when a locale of its
@@ -1080,7 +1084,7 @@ design (e6c7726b); no recorded decision. Pinned by: no test.
 | `22.locale.ctype.mt` | first fill of the narrow and widen caches, gated | 800 |
 | `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state | 618 |
 | `22.locale.codecvt.do_out` | `out` over algorithmic, table and libc encodings | 1494 |
-| `22.locale.codecvt.iso2022` | `ISO-2022-JP` and `-JP-2`: `in`, `out`, `unshift` and `length` in one call and across calls, against glibc's `iconv` | 1494 |
+| `22.locale.codecvt.iso2022` | `ISO-2022-JP` and `-JP-2`: `in`, `out`, `unshift` and `length` in one call and across calls, against glibc's `iconv` | 1500 |
 | `22.locale.codecvt.length` | `length` over the same three, and the byname narrow facet | 484 |
 | `22.locale.codecvt.mt` | first conversion through the wide facet of `rwtest_de_DE.ISO-8859-1`, gated | 1600 |
 | `22.locale.codecvt.stdcxx-435` | `in` of one character in a multibyte locale | NOUT |

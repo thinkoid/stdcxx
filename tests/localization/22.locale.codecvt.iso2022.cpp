@@ -171,19 +171,6 @@ iconv_reads (const char* enc, const char* bytes, std::size_t nbytes,
 }
 
 
-// releases the state of an input sequence: unshift deallocates the
-// state the converters keep, as the program must before it disposes
-// of the state object
-static void
-release (const Cvt& cvt, std::mbstate_t& state)
-{
-    char  buf [8];
-    char* next = 0;
-
-    cvt.unshift (state, buf, buf + sizeof buf, next);
-}
-
-
 // converts all of [from, from_end) with in, in one call
 static Base::result
 in_all (const Cvt& cvt, const char* from, const char* from_end,
@@ -200,8 +187,6 @@ in_all (const Cvt& cvt, const char* from, const char* from_end,
 
     *nw = std::size_t (to_next - wbuf);
     *nb = std::size_t (from_next - from);
-
-    release (cvt, state);
 
     return res;
 }
@@ -250,8 +235,6 @@ test_in (const Cvt& cvt, const char* enc, int line,
         const Base::result res2 =
             cvt.in (state, next1, end, next2, to1, wbuf + BUFSIZE, to2);
 
-        release (cvt, state);
-
         const Base::result res1_expect =
             next1 == bytes + k ? Base::ok : Base::partial;
 
@@ -269,8 +252,6 @@ test_in (const Cvt& cvt, const char* enc, int line,
 
         const int len1 = cvt.length (lstate, bytes, bytes + k, length_max);
         const int len2 = cvt.length (lstate, bytes + len1, end, length_max);
-
-        release (cvt, lstate);
 
         rw_assert (len1 == next1 - bytes && len1 + len2 == int (nbytes),
                    0, line,
@@ -298,8 +279,6 @@ test_in (const Cvt& cvt, const char* enc, int line,
             from = from_next;
             to   = to_next;
         }
-
-        release (cvt, state);
 
         rw_assert (   Base::ok == res1 && end == from
                    && same (wbuf, std::size_t (to - wbuf), str, nstr),
@@ -329,8 +308,6 @@ test_in (const Cvt& cvt, const char* enc, int line,
 
             from += len;
         }
-
-        release (cvt, state);
 
         rw_assert (0 < maxlen && maxlen <= max_length, 0, line,
                    "%s: length (%{#*s}, 1) <= max_length () == %d; got %d",
@@ -590,8 +567,8 @@ test_out_error (const Cvt& cvt, const char* enc, wchar_t lacking,
 }
 
 
-// unshift after a two-byte set and of an input state, and length at
-// the end of the source
+// unshift after a two-byte set, length at the end of the source, and
+// input states never unshifted
 static void
 test_unshift_length (const Cvt& cvt, const char* enc, bool jp2)
 {
@@ -644,17 +621,14 @@ test_unshift_length (const Cvt& cvt, const char* enc, bool jp2)
 
         const int len = cvt.length (state, esc, esc + 3, length_max);
 
-        release (cvt, state);
-
         rw_assert (3 == len, 0, __LINE__,
                    "%s: length (\"\\x1b(B\") == 3, got %d", enc, len);
 
         delete[] esc;
     }
 
-    // unshift deallocates the state an input sequence leaves, in JIS X
-    // 0208 or, under -JP-2, with ISO-8859-1 in G2, so more conversions
-    // than the converters have states all succeed
+    // input sequences left in JIS X 0208 or, under -JP-2, with
+    // ISO-8859-1 in G2, and never unshifted, each convert to the end
     {
         static const char jp_src [] = "\x1b$B$\"";
         static const char jp2_src [] = "\x1b.A\x1bN5";
@@ -675,17 +649,224 @@ test_unshift_length (const Cvt& cvt, const char* enc, bool jp2)
                 cvt.in (state, src, src + nsrc, from_next,
                         wbuf, wbuf + BUFSIZE, to_next);
 
-            release (cvt, state);
-
-            if (Base::ok != res)
+            if (Base::ok != res || src + nsrc != from_next)
                 break;
         }
 
         rw_assert (2048 == i, 0, __LINE__,
-                   "%s: in (%{#*s}) and unshift 2048 times == ok; "
+                   "%s: in (%{#*s}) 2048 times, never unshifted, == ok; "
                    "failed at %zu",
                    enc, int (nsrc), src, i);
     }
+}
+
+
+// a state copied by value mid-sequence, as fpos<mbstate_t> copies it
+// (27.4.3), resumes the conversion after the original has finished and
+// been reused for another
+static void
+test_copied_state (const Cvt& cvt, const char* enc)
+{
+    // a fresh conversion that leaves JIS X 0201 Roman in G0
+    static const char fresh [] = "\x1b(Ja";
+
+    const char* const fresh_end = fresh + sizeof fresh - 1;
+
+    // in, split inside the two-byte character
+    {
+        static const char src [] = "a\x1b$B$\"\x1b(B";
+
+        const char* const end = src + sizeof src - 1;
+
+        std::mbstate_t state = std::mbstate_t ();
+
+        wchar_t wbuf [BUFSIZE];
+
+        const char* next1 = 0;
+        wchar_t*    to1   = 0;
+
+        const Base::result res1 =
+            cvt.in (state, src, src + 5, next1, wbuf, wbuf + BUFSIZE, to1);
+
+        const std::mbstate_t copy = state;
+
+        // the original converts the rest and is reused
+        const char* next2 = 0;
+        wchar_t*    to2   = 0;
+
+        const Base::result res2 =
+            cvt.in (state, next1, end, next2, wbuf, wbuf + BUFSIZE, to2);
+
+        state = std::mbstate_t ();
+
+        const char* next3 = 0;
+        wchar_t*    to3   = 0;
+
+        const Base::result res3 =
+            cvt.in (state, fresh, fresh_end, next3,
+                    wbuf, wbuf + BUFSIZE, to3);
+
+        const bool fresh_ok =
+               Base::ok == res3 && fresh_end == next3
+            && same (wbuf, std::size_t (to3 - wbuf), L"a", 1);
+
+        // the copy converts the rest
+        std::mbstate_t resumed = copy;
+
+        const char* next4 = 0;
+        wchar_t*    to4   = 0;
+
+        const Base::result res4 =
+            cvt.in (resumed, next1, end, next4, wbuf, wbuf + BUFSIZE, to4);
+
+        rw_assert (   Base::partial == res1 && src + 4 == next1
+                   && Base::ok == res2 && end == next2 && fresh_ok
+                   && Base::ok == res4 && end == next4
+                   && same (wbuf, std::size_t (to4 - wbuf), L"\x3042", 1),
+                   0, __LINE__,
+                   "%s: in (%{#*s}) split at 5, the state copied, the "
+                   "original finished and reused: the copy converts the "
+                   "rest to L\"\\x3042\"; got %d, %d, %d, then %d, "
+                   "consuming %td, giving %{#*ls}",
+                   enc, int (sizeof src - 1), src, res1, res2, res3, res4,
+                   next4 - next1, int (to4 - wbuf), wbuf);
+    }
+
+    // out, split after the first character of JIS X 0208
+    {
+        static const wchar_t src [] = L"a\x3042\x3044";
+
+        const wchar_t* const end = src + 3;
+
+        std::mbstate_t state = std::mbstate_t ();
+
+        char bytes [BUFSIZE];
+        char rest [BUFSIZE];
+
+        const wchar_t* next1 = 0;
+        char*          to1   = 0;
+
+        const Base::result res1 =
+            cvt.out (state, src, src + 2, next1,
+                     bytes, bytes + BUFSIZE, to1);
+
+        const std::mbstate_t copy = state;
+
+        // the original converts the rest and is reused
+        const wchar_t* next2 = 0;
+        char*          to2   = 0;
+
+        const Base::result res2 =
+            cvt.out (state, next1, end, next2, rest, rest + BUFSIZE, to2);
+
+        char* to3 = 0;
+
+        const Base::result res3 =
+            cvt.unshift (state, to2, rest + BUFSIZE, to3);
+
+        const std::size_t nrest = std::size_t (to3 - rest);
+
+        state = std::mbstate_t ();
+
+        wchar_t wbuf [BUFSIZE];
+
+        const char* next4 = 0;
+        wchar_t*    to4   = 0;
+
+        const Base::result res4 =
+            cvt.in (state, fresh, fresh_end, next4,
+                    wbuf, wbuf + BUFSIZE, to4);
+
+        const bool fresh_ok =
+               Base::ok == res4 && fresh_end == next4
+            && same (wbuf, std::size_t (to4 - wbuf), L"a", 1);
+
+        // the copy writes the rest as the original did
+        std::mbstate_t resumed = copy;
+
+        const wchar_t* next5 = 0;
+        char*          to5   = 0;
+
+        const Base::result res5 =
+            cvt.out (resumed, next1, end, next5, to1, bytes + BUFSIZE, to5);
+
+        char* to6 = 0;
+
+        const Base::result res6 =
+            cvt.unshift (resumed, to5, bytes + BUFSIZE, to6);
+
+        rw_assert (   Base::ok == res1 && src + 2 == next1
+                   && Base::ok == res2 && end == next2 && Base::ok == res3
+                   && fresh_ok
+                   && Base::ok == res5 && end == next5 && Base::ok == res6
+                   && nrest == std::size_t (to6 - to1)
+                   && 0 == std::memcmp (to1, rest, nrest),
+                   0, __LINE__,
+                   "%s: out (%{#*ls}) split at 2, the state copied, the "
+                   "original finished and reused: the copy writes the "
+                   "rest as %{#*s}; got %d, %d, %d, %d, then %d, %d, "
+                   "giving %{#*s}",
+                   enc, 3, src, int (nrest), rest, res1, res2, res3, res4,
+                   res5, res6, int (to6 - to1), to1);
+    }
+}
+
+
+// more states than the converters ever kept at once, each holding a
+// designation to G2, all valid together
+static void
+test_held_states (const Cvt& cvt, const char* enc)
+{
+    static const char src [] = "\x1b.A\x1bNi";
+
+    const char* const end = src + sizeof src - 1;
+
+    static std::mbstate_t states [600];
+
+    std::size_t i = 0;
+
+    for (; i != sizeof states / sizeof *states; ++i) {
+        states [i] = std::mbstate_t ();
+
+        wchar_t     wbuf [BUFSIZE];
+        const char* from_next = 0;
+        wchar_t*    to_next   = 0;
+
+        const Base::result res =
+            cvt.in (states [i], src, end, from_next,
+                    wbuf, wbuf + BUFSIZE, to_next);
+
+        if (Base::ok != res || end != from_next)
+            break;
+    }
+
+    rw_assert (sizeof states / sizeof *states == i, 0, __LINE__,
+               "%s: in (%{#*s}) into 600 states held at once == ok; "
+               "failed at %zu",
+               enc, int (sizeof src - 1), src, i);
+
+    // one more state converts a whole fixture
+    const ByteFixture& fix = byte_fixtures [2];
+
+    std::mbstate_t state = std::mbstate_t ();
+
+    wchar_t     wbuf [BUFSIZE];
+    const char* from_next = 0;
+    wchar_t*    to_next   = 0;
+
+    const Base::result res =
+        cvt.in (state, fix.bytes, fix.bytes + fix.nbytes, from_next,
+                wbuf, wbuf + BUFSIZE, to_next);
+
+    rw_assert (   Base::ok == res && fix.bytes + fix.nbytes == from_next
+               && same (wbuf, std::size_t (to_next - wbuf),
+                        fix.str, wlen (fix.str)),
+               0, fix.line,
+               "%s: in (%{#*s}) with 600 states held == ok, giving "
+               "%{#*ls}; got %d, consuming %td, giving %{#*ls}",
+               enc, int (fix.nbytes), fix.bytes,
+               int (wlen (fix.str)), fix.str, res,
+               from_next - fix.bytes, int (to_next - wbuf), wbuf);
 }
 
 
@@ -733,6 +914,12 @@ test_encoding (const char* enc, bool jp2, bool use_iconv)
     test_out_error (cvt, enc, jp2 ? 0x0e01 : 0xe9, use_iconv);
 
     test_unshift_length (cvt, enc, jp2);
+
+    test_copied_state (cvt, enc);
+
+    // ESC . A designates to G2, which ISO-2022-JP does not carry
+    if (jp2)
+        test_held_states (cvt, enc);
 }
 
 /**************************************************************************/
