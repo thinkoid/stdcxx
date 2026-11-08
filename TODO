@@ -26,17 +26,6 @@ at the top.
 
 ** Streams
 
-*** TODO A width comment in =_ioinsert.cc= predates 69ad31e6
-
-=include/rw/_ioinsert.cc= 128-130 says =__rw_insert= "calls width(0)
-if and only if the write has been successful"; 69ad31e6 made the reset
-unconditional once the sentry is good, and the comment at 164-165 says
-so. Seen in passing by the extension sweep, 2026-11-04.
-
-Fix: the comment says what the code does.
-
-Check: reading.
-
 *** TODO An unformatted input function whose sentry fails leaves =gcount ()= as it was
 
 14882:2003 27.6.1.3, p1: an unformatted input function counts the
