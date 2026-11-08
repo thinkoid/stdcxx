@@ -30,7 +30,7 @@
 
 
 #include <clocale>   // for struct lconv, setlocale()
-#include <cstdio>    // for sprintf()
+#include <cstdio>    // for fopen(), fputs(), sprintf()
 #include <cstdlib>   // for getenv()
 #include <cstring>   // for strcmp()
 #include <cwctype>   // for iswspace()
@@ -210,8 +210,9 @@ bool check_numpunct (charT,
         const charT decimal_point = widen (charT ('.'), plconv->decimal_point);
         const charT thousands_sep = widen (charT (','), plconv->thousands_sep);
 
+        // an empty separator turns the grouping off
         const std::string grouping =
-            plconv->grouping ? plconv->grouping : "";
+            plconv->grouping && *plconv->thousands_sep ? plconv->grouping : "";
 
         // reset to default locale given by LC_LANG
         std::setlocale (LC_ALL, "");
@@ -493,12 +494,165 @@ test_multibyte_sep ()
 
 /**************************************************************************/
 
+// the grouping of the facets of a locale whose thousands separator is
+// empty, and the digits num_put writes there: an empty separator turns
+// the grouping off, so no null character goes between the groups
+template <class charT>
+static void
+check_empty_sep (charT, const char *tname, const char *name)
+{
+    const std::locale loc (name);
+
+    const std::string grouping =
+        std::use_facet<std::numpunct<charT> >(loc).grouping ();
+
+    rw_assert (grouping.empty (), 0, __LINE__,
+               "numpunct<%s>::grouping() == \"\" in %s, got %{#S}",
+               tname, name, &grouping);
+
+    std::basic_ostringstream<charT> strm;
+    strm.imbue (loc);
+    strm << 1234567L;
+
+    const std::basic_string<charT> digits = strm.str ();
+
+    const int char_size = int (sizeof (charT));
+
+    rw_assert (digits.npos == digits.find (charT ()), 0, __LINE__,
+               "num_put<%s> of 1234567 in %s writes no null character, "
+               "got %{#*S}", tname, name, char_size, &digits);
+}
+
+
+// the first host locale whose C library thousands separator is empty
+// and whose grouping is not
+static void
+test_empty_sep ()
+{
+    const char *name = 0;
+
+    for (const char* s = rw_locales (); *s; s += std::strlen (s) + 1) {
+        if (!std::setlocale (LC_ALL, s))
+            continue;
+
+        const std::lconv* const pconv = std::localeconv ();
+        if ('\0' == *pconv->thousands_sep && '\0' != *pconv->grouping) {
+            name = s;
+            break;
+        }
+    }
+
+    std::setlocale (LC_ALL, "");
+
+    if (!rw_warn (0 != name, 0, __LINE__,
+                  "no locale with an empty thousands_sep and a grouping; "
+                  "the rule is not exercised"))
+        return;
+
+    check_empty_sep (char (), "char", name);
+    check_empty_sep (wchar_t (), "wchar_t", name);
+}
+
+/**************************************************************************/
+
+// the grouping of a moneypunct facet from the database
+template <class charT, bool Intl>
+static void
+check_empty_mon_grouping (charT, const char *tname, const std::locale &loc)
+{
+    const std::string grouping =
+        std::use_facet<std::moneypunct<charT, Intl> >(loc).grouping ();
+
+    rw_assert (grouping.empty (), 0, __LINE__,
+               "moneypunct<%s, %b>::grouping() == \"\" from the database, "
+               "got %{#S}", tname, Intl, &grouping);
+}
+
+
+// a database whose LC_NUMERIC and LC_MONETARY have an empty thousands
+// separator and a grouping of 3 holds an empty grouping
+static void
+test_empty_sep_database (const char *charmap)
+{
+    const char locdef[] = {
+        "LC_NUMERIC\n"
+        "decimal_point \"<U002E>\"\n"
+        "thousands_sep \"\"\n"
+        "grouping 3\n"
+        "END LC_NUMERIC\n"
+        "LC_MONETARY\n"
+        "mon_decimal_point \"<U002E>\"\n"
+        "mon_thousands_sep \"\"\n"
+        "mon_grouping 3\n"
+        "END LC_MONETARY\n"
+    };
+
+    const char* const root = std::getenv (LOCALE_ROOT_ENVAR);
+    if (!rw_error (0 != root, 0, __LINE__,
+                   "%s is not set", LOCALE_ROOT_ENVAR))
+        return;
+
+    const std::string src = std::string (root) + "/empty-sep.src";
+    const std::string cm  = std::string (root) + "/empty-sep.cm";
+
+    std::FILE* fout = std::fopen (src.c_str (), "w");
+    if (!rw_error (0 != fout, 0, __LINE__,
+                   "fopen(%#s, \"w\") failed: %m", src.c_str ()))
+        return;
+
+    std::fputs (locdef, fout);
+    std::fclose (fout);
+
+    fout = std::fopen (cm.c_str (), "w");
+    if (!rw_error (0 != fout, 0, __LINE__,
+                   "fopen(%#s, \"w\") failed: %m", cm.c_str ()))
+        return;
+
+    std::fputs (charmap, fout);
+    std::fclose (fout);
+
+    const char* const locname =
+        rw_localedef ("-w", src.c_str (), cm.c_str (), "empty-sep");
+    if (!rw_error (0 != locname, 0, __LINE__,
+                   "failed to create a locale with an empty separator"))
+        return;
+
+    rw_info (0, 0, __LINE__,
+             "numpunct and moneypunct in locale(%#s) from the database, "
+             "an empty separator with a grouping", locname);
+
+    const std::locale loc (locname);
+
+    const std::string grouping =
+        std::use_facet<std::numpunct<char> >(loc).grouping ();
+
+    rw_assert (grouping.empty (), 0, __LINE__,
+               "numpunct<char>::grouping() == \"\" from the database, "
+               "got %{#S}", &grouping);
+
+    const std::string wgrouping =
+        std::use_facet<std::numpunct<wchar_t> >(loc).grouping ();
+
+    rw_assert (wgrouping.empty (), 0, __LINE__,
+               "numpunct<wchar_t>::grouping() == \"\" from the database, "
+               "got %{#S}", &wgrouping);
+
+    check_empty_mon_grouping<char, false>(char (), "char", loc);
+    check_empty_mon_grouping<char, true>(char (), "char", loc);
+    check_empty_mon_grouping<wchar_t, false>(wchar_t (), "wchar_t", loc);
+    check_empty_mon_grouping<wchar_t, true>(wchar_t (), "wchar_t", loc);
+}
+
+/**************************************************************************/
+
 static int
 run_test (int, char**)
 {
     run_test (char (), "char");
 
     test_multibyte_sep ();
+
+    test_empty_sep ();
 
 #ifndef _RWSTD_WCHAR_T
 
@@ -531,6 +685,8 @@ run_test (int, char**)
 
     check_database (char (), "char", locname);
     check_database (wchar_t (), "wchar_t", locname);
+
+    test_empty_sep_database (charmap);
 
     return 0;
 }

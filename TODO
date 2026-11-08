@@ -24,25 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Localization: =ctype=, =numpunct= and the database locales
-
-*** TODO An empty separator with a grouping writes null characters
-
-Under =bg_BG=, =kab_DZ=, =ln_CD=, =rif_MA= and =zgh_MA= (UTF-8) the
-C library's =thousands_sep= is empty and its =grouping= is not, so
-=numpunct<char>::thousands_sep ()= is ~'\0'~ and =num_put<char>=
-writes 1234567.89 as "1\x00234\x00567,89", on the C-library and the
-database path alike; =kab_DZ= and =rif_MA= do the same through
-=money_put= with =mon_thousands_sep=. =printf='s ='= flag inserts
-nothing for the same data. Found by probe, 2026-11-07.
-
-Fix: a decision: an empty separator turns the grouping off, narrow
-and wide (=grouping ()= empty), or =num_put= and =money_put= skip a
-null separator.
-
-Check: =num_put= of 1234567 and =money_put= of 1234567 under every
-host locale write no null character, narrow and wide.
-
 ** Localization: =codecvt=
 
 *** TODO =do_encoding= and =do_max_length= throw under an unknown name
@@ -1580,9 +1561,11 @@ are the library's classes" has no row there. Chapter 13 of
   =tm=", "Years before 0" and "Two-digit years in =do_get_year="
   (12.3).
 
-Chapter 13 says it lists "Every place the library departs", but two
+Chapter 13 says it lists "Every place the library departs", but four
 rows of chapter 2 are not in it: "=money_get= keeps the caller's
-=err=" (12.1) and "A monetary group of more than 255 digits" (10.2).
+=err=" (12.1), "A monetary group of more than 255 digits" (10.2), "A
+separator wider than a byte" (10.3.13) and "An empty separator turns
+the grouping off" (10.3.14).
 The "extension" comments of the 12.3 interface row
 (=include/loc/_time_put.cc= 123, =include/loc/_time_get.cc= 478,
 =src/time_put.cpp= 1115, 1165, 1296, 1303, 2073, 2139, 2253, 2277
@@ -1590,18 +1573,19 @@ and 2345) have no chapter 2 row to name. Found by the extension
 sweep's reading, 2026-11-04.
 
 Fix: chapter 2 takes a row for each extension of chapter 13 when the
-sweep's decisions are made, chapter 13 takes the two rows it lacks,
+sweep's decisions are made, chapter 13 takes the four rows it lacks,
 and 8.3's sentence says what chapter 2 carries.
 
-** TODO The pin counts in =ref-locale.md= 9.4 and 10.4 lag the baseline
+** TODO The pin counts in =ref-locale.md= 10.4 lag the baseline
 
 The "What the tests pin" tables carry the 15D assertion count of each
-test. Three rows lag =doc/notes/baseline/15D.txt=: 9.4
-=22.locale.codecvt= says 618, the pin is 671 (499174d2, 86fbc909);
-10.4 =22.locale.num.put= says 1465, the pin is 1467, and
-=22.locale.money.put= says 1346, the pin is 1354 (f9fbbcff). The
-commits changed the pin and not the table. Seen at the codecvt
-landing, 2026-11-07.
+test. Three rows of 10.4 lag =doc/notes/baseline/15D.txt=:
+=22.locale.num.get= says 51990, the pin is 55206 (0a3b2cca);
+=22.locale.num.put= says 1465, the pin is 1467 (c3db8028); and
+=22.locale.money.put= says 1346, the pin is 1354 (5438f794, d5572cb8,
+2ec94642). The commits changed the pin and not the table. Seen at the
+codecvt landing, 2026-11-07, and the =num.get= row at the
+empty-separator change, 2026-11-08.
 
 Fix: the three counts; the commit that re-pins a row edits its table
 row in the same commit.

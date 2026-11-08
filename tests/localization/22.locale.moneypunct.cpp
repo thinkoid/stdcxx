@@ -34,6 +34,8 @@
 #include <cstdlib>       // for free(), getenv(), malloc(), mbtowc()
 #include <cstring>       // for memcmp(), strerror()
 #include <cwctype>       // for iswspace()
+#include <iterator>      // for ostreambuf_iterator
+#include <sstream>       // for basic_ostringstream
 
 #include <rw_driver.h>   // for rw_test()
 #include <rw_environ.h>  // for rw_putenv()
@@ -492,7 +494,11 @@ check_moneypunct (const char *locname)
             check_frac_digits (0);
         }
 
-        check_grouping (plconv->mon_grouping);
+        // an empty separator turns the grouping off
+        const char* const grouping =
+            *plconv->mon_thousands_sep ? plconv->mon_grouping : "";
+
+        check_grouping (grouping);
 
         // convert a (possibly) multibyte string in external
         // representation to one in internal representation
@@ -511,7 +517,6 @@ check_moneypunct (const char *locname)
 
         check_format (*plconv);
 
-        // cast away constness to work around compiler bugs (e.g., MSVC 6)
         operator delete (const_cast< std::lconv* >(plconv));
     }
     catch (...) {
@@ -910,6 +915,75 @@ check_format (bool pos, std::money_base::pattern result, const UChar cpat [3])
 
 /****************************************************************************/
 
+// the grouping of the moneypunct facets of a locale whose monetary
+// thousands separator is empty, and the digits money_put writes there:
+// an empty separator turns the grouping off, so no null character goes
+// between the groups
+template <class charT, bool Intl>
+static void
+check_empty_sep (charT, const char *tname, const char *name)
+{
+    const std::locale loc (name);
+
+    const std::string grouping =
+        std::use_facet<std::moneypunct<charT, Intl> >(loc).grouping ();
+
+    rw_assert (grouping.empty (), 0, __LINE__,
+               "moneypunct<%s, %b>::grouping() == \"\" in %s, got %#s",
+               tname, Intl, name, grouping.c_str ());
+
+    std::basic_ostringstream<charT> strm;
+    strm.imbue (loc);
+
+    std::use_facet<std::money_put<charT> >(loc).put (
+        std::ostreambuf_iterator<charT>(strm), Intl, strm, charT (' '),
+        1234567.0L);
+
+    const std::basic_string<charT> digits = strm.str ();
+
+    const int char_size = int (sizeof (charT));
+
+    rw_assert (digits.npos == digits.find (charT ()), 0, __LINE__,
+               "money_put<%s>::put (..., %b, ..., 1234567) in %s writes "
+               "no null character, got %{#*S}",
+               tname, Intl, name, char_size, &digits);
+}
+
+
+// the first host locale whose C library monetary thousands separator
+// is empty and whose monetary grouping is not
+static void
+test_empty_sep ()
+{
+    const char *name = 0;
+
+    for (const char* s = rw_locales (); s && *s; s += std::strlen (s) + 1) {
+        if (!std::setlocale (LC_ALL, s))
+            continue;
+
+        const std::lconv* const pconv = std::localeconv ();
+        if (   '\0' == *pconv->mon_thousands_sep
+            && '\0' != *pconv->mon_grouping) {
+            name = s;
+            break;
+        }
+    }
+
+    std::setlocale (LC_ALL, "");
+
+    if (!rw_warn (0 != name, 0, __LINE__,
+                  "no locale with an empty mon_thousands_sep and a "
+                  "mon_grouping; the rule is not exercised"))
+        return;
+
+    check_empty_sep<char, false>(char (), "char", name);
+    check_empty_sep<char, true>(char (), "char", name);
+    check_empty_sep<wchar_t, false>(wchar_t (), "wchar_t", name);
+    check_empty_sep<wchar_t, true>(wchar_t (), "wchar_t", name);
+}
+
+/****************************************************************************/
+
 static int
 run_test (int, char**)
 {
@@ -932,6 +1006,8 @@ run_test (int, char**)
         Test<wchar_t> t ("wchar_t", true);
         t.runTest ();
     }
+
+    test_empty_sep ();
 
     return 0;
 }

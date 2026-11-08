@@ -81,7 +81,14 @@ write_punct (const field_t<ucs_string_t> &decimal_point,
         pool.add (narrow_sep (decimal_point.value, '.', cmap, ctype));
     punct.thousands_sep_off [0] =
         pool.add (narrow_sep (thousands_sep.value, ',', cmap, ctype));
-    punct.grouping_off          = pool.add (grouping_bytes (grouping));
+
+    // 22.2.3.1.2, p2 and p3; departure: a grouping needs a separator
+    // character, so an empty separator writes an empty grouping; an
+    // unset one keeps the CHAR_MAX that grouping_bytes writes for it
+    const std::string grp = thousands_sep.value.empty () && grouping.set ?
+        std::string () : grouping_bytes (grouping);
+
+    punct.grouping_off          = pool.add (grp);
 
     // the header that follows is read in place, so it starts on a
     // word boundary

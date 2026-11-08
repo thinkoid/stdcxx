@@ -1316,7 +1316,9 @@ virtuals read the data of the name the facet carries.
 - for a named facet without a database, `localeconv ()` under
   `__rw_setlocale` for `LC_ALL`, copied into a heap record of the
   database's layout (wide strings by `mbstowcs`, names `"true"` and
-  `"false"`) and published with release stores (chapter 7). The money
+  `"false"`) and published with release stores (chapter 7). Where the
+  thousands separator is empty, the record holds an empty grouping in
+  place of the C library's, numeric and monetary (10.3.14). The money
   patterns come from a 30-entry table indexed `cs_precedes * 15 +
   sep_by_space * 5 + sign_posn`; an index past it gives four `none`.
 
@@ -1378,7 +1380,8 @@ per format).
 
 `util/localedef/wnumeric.cpp` writes the narrow strings through
 `narrow` (`util/localedef/pool.cpp`: the charmap, then
-transliteration), an unset grouping as `CHAR_MAX`, and the bool
+transliteration), an unset grouping as `CHAR_MAX`, a grouping under
+an empty thousands separator as empty (10.3.14), and the bool
 names as the classic facet's, `"true"` and `"false"` (22.2.3.1.2 p4):
 no glibc source sets them and the 2005 sources set none, so the
 database agrees with the C-library path. `util/localedef/wmonetary.cpp`
@@ -1580,17 +1583,53 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
   UTF-8 host locale with a multibyte thousands separator. Row: "A
   separator wider than a byte".
 
+#### 10.3.14 An empty separator turns the grouping off
+
+- **Paragraph.** 22.2.3.1.2, p2 has `do_thousands_sep` return "A
+  character for use as the digit group separator", and p3 has the
+  empty grouping indicate "no grouping"; 22.2.2.2.2, p16 inserts the
+  `thousands_sep ()` characters "as determined by the value returned
+  by punct.do_grouping()". C99 7.11.2.1, p3 lets the separator be
+  empty: a `char*` member of `lconv` "can point to "", to indicate
+  that the value is not available in the current locale or is of zero
+  length".
+- **What.** Where the locale's thousands separator is empty and its
+  grouping is not, the facet's grouping is empty, narrow and wide,
+  numeric and monetary. The separator stays what the locale gives,
+  `'\0'` narrow and `L'\0'` wide. The C-library path decides it in
+  `src/punct.cpp` (`__rw_get_numpunct`, `__rw_get_moneypunct`) on
+  `localeconv ()`'s string, before the narrowing of 10.3.13; the
+  database path decides it in `util/localedef/wnumeric.cpp`
+  (`write_punct`) on the definition's value, for `LC_NUMERIC` and
+  `LC_MONETARY` alike, and an unset grouping stays `CHAR_MAX`. Under
+  bg_BG, kab_DZ, ln_CD, rif_MA and zgh_MA `num_put` writes 1234567 as
+  `1234567`; kab_DZ and rif_MA do the same through `money_put`.
+- **Why.** Decided 2026-11-08. A grouping needs a separator character
+  to be realized; an empty separator is none, so the data carries no
+  grouping. The facet held `'\0'` with the grouping `"\3"`, and
+  `num_put` wrote `1\0234\0567`. glibc's `printf ("%'d", 1234567)`
+  writes the seven digits under the same data, and libstdc++ under
+  GCC 16 gives an empty `grouping ()` for bg_BG.UTF-8 and an empty
+  monetary one for kab_DZ.UTF-8.
+- **Pins.** `22.locale.numpunct` and `22.locale.moneypunct` derive the
+  expected grouping by the rule (`check_numpunct`,
+  `check_moneypunct`); `test_empty_sep` in each pins it under the
+  first host locale with an empty separator and a grouping, the
+  output of `num_put` or `money_put` included, and
+  `22.locale.numpunct`'s `test_empty_sep_database` under a database
+  it builds. Row: "An empty separator turns the grouping off".
+
 ### 10.4 What the tests pin
 
 | program | covers | 15D |
 |---|---|---|
 | `22.locale.num.get` | every virtual, both widths, three iterator types: bases, signs, grouping, overflow, underflow, long input, `bad_alloc` on wrap | 51990, 0 failed |
 | `22.locale.num.put` | every virtual but `unsigned long long`, inf and NaN, grouping, widening, a negative precision | 1465, 2 warnings |
-| `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv`, a multibyte separator, the bool names and a `boolalpha` round trip under a database locale it builds | 8940 |
+| `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv`, a multibyte separator, an empty separator on both paths, the bool names and a `boolalpha` round trip under a database locale it builds | 8950 |
 | `22.locale.numpunct.mt` | first use of a fresh facet from many threads (7c93badb) | 1200 |
 | `22.locale.money.get` | patterns, signs, symbols, white-space credit, long input and separators, `frac_digits` 305 and 4000, the digits as they appear | 4160 |
 | `22.locale.money.put` | `long double` and string, patterns, the two spaces, grouping | 1346 |
-| `22.locale.moneypunct` | every host locale against `localeconv`, all four facets, composite names | 135020 |
+| `22.locale.moneypunct` | every host locale against `localeconv`, all four facets, composite names, an empty separator | 135028 |
 | `22.locale.moneypunct.mt` | first use of a fresh facet (79709615) | 1200 |
 | `22.locale.num.put.stdcxx-2` | `showpoint` with a zero value | NOUT |
 | `22.locale.money.get.stdcxx-62` | empty input sets `eofbit | failbit` | NOUT |
@@ -1598,7 +1637,8 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 The two warnings of `22.locale.num.put` are `ullong_test`, a
 placeholder since 2006. `22.locale.numpunct`'s narrow
 separator is compared with `localeconv`'s string under the rule of
-10.3.13. No row checks `unsigned short`
+10.3.13, and the expected grouping of both punctuation programs
+follows 10.3.14. No row checks `unsigned short`
 overflow (`22.locale.num.get` has `test_uint`): `test_ushrt` and
 `test_uint` of `27.istream.fmat.arith` gate their rows on `_RWSTD_USHRT_SIZE` and
 `_RWSTD_UINT_SIZE`, which nothing defines. The four `get` and `put` MT

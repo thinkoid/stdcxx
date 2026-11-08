@@ -173,9 +173,14 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
 
     // be prepared to handle (non-conforming) null pointers
     // (e.g., AIX -- see bug #558)
-    const char* const grp = pconv->grouping ? pconv->grouping : "";
+    const char*       grp = pconv->grouping ? pconv->grouping : "";
     const char*       dp  = pconv->decimal_point ? pconv->decimal_point : "";
     const char*       ts  = pconv->thousands_sep ? pconv->thousands_sep : "";
+
+    // 22.2.3.1.2, p2 and p3; departure: a grouping needs a separator
+    // character, so an empty separator carries no grouping
+    if ('\0' == ts [0])
+        grp = "";
 
     if (!winx) {
         dp = __rw_narrow_sep (dp, ".");
@@ -370,13 +375,17 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
     const char* dp = pconv->mon_decimal_point;
     const char* ts = pconv->mon_thousands_sep;
 
+    // 22.2.3.1.2, p2 and p3; departure: a grouping needs a separator
+    // character, so an empty separator carries no grouping
+    const char* const grp = '\0' == ts [0] ? "" : pconv->mon_grouping;
+
     if (!winx) {
         dp = __rw_narrow_sep (dp, ".");
         ts = __rw_narrow_sep (ts, ",");
     }
 
     // the size of the narrow grouping string in bytes
-    const size_t grsz = strlen (pconv->mon_grouping) + 1;
+    const size_t grsz = strlen (grp) + 1;
 
     // compute the sizes of all members in bytes
     size_t dpsz = strlen (dp) + 1;
@@ -457,8 +466,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
           + mon->curr_symbol_off [intl][winx] + cssz);
 
     // place narrow grouping string last to avoid alignment issues
-    memcpy (s + mon->curr_symbol_off [intl][winx] + cssz,
-            pconv->mon_grouping, grsz);
+    memcpy (s + mon->curr_symbol_off [intl][winx] + cssz, grp, grsz);
 
     mon->frac_digits [0]    = pconv->frac_digits;
     mon->frac_digits [1]    = pconv->int_frac_digits;
