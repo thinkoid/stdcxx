@@ -327,8 +327,6 @@ protected:
 inline _RWSTD_STREAMSIZE ios_base::
 width (_RWSTD_STREAMSIZE __width)
 {
-    _RWSTD_ASSERT (0 != this);
-
     const _RWSTD_STREAMSIZE __tmp = _C_wide;
 
     // not thread-safe for efficiency since width(0) is called

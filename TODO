@@ -44,21 +44,6 @@ record the skip.
 Check: two streams on distinct buffers, tied to each other: an
 insertion into one flushes the other.
 
-*** TODO =ios_base::width= asserts that =this= is not null
-
-=include/rw/_iosbase.h= 319, the setter =width (streamsize)=, opens
-with ~_RWSTD_ASSERT (0 != this)~, the one such assertion under
-=include= and =src=. =this= is never null in a valid call. GCC 16
-warns "'nonnull' argument 'this' compared to NULL"
-(=-Wnonnull-compare=) in a debug build, once in each of the ten
-=src/ti_*.cpp= units that inline the setter, and may fold the
-comparison away. From the 2005 import (e6c7726b). Seen in passing in
-the 15D library build, 2026-11-05.
-
-Fix: remove the assertion.
-
-Check: the 15D library builds without =-Wnonnull-compare=.
-
 *** TODO =xsputn= loses its argument when it lies inside the buffer past =pbase ()=
 
 =basic_stringbuf::xsputn= (=include/sstream.cc= 181-200) saves the
