@@ -364,15 +364,13 @@ inline typename basic_istream<_CharT, _Traits>::int_type
 basic_istream<_CharT, _Traits>::
 get ()
 {
+    // the count is this call's alone (27.6.1.3, p1)
+    _C_gcount = 0;
     const sentry __ipfx (*this, true /* noskipws */);
 
-    if (__ipfx) {
-        // the count is this call's alone (27.6.1.3, p1)
-        _C_gcount = 0;
-
+    if (__ipfx)
         return _C_unsafe_get (&_C_gcount, traits_type::eof (),
                               _C_faileof | _C_eatnull);
-    }
 
     return traits_type::eof ();
 }
@@ -452,6 +450,8 @@ basic_istream<_CharT, _Traits>::peek ()
 {
     _RWSTD_ASSERT (0 != this->rdbuf ());
 
+    // 27.6.1.3, p26a: extracts nothing, so gcount () is 0
+    _C_gcount = 0;
     const sentry __ipfx (*this, true /* noskipws */);
 
     int_type __c = traits_type::eof ();

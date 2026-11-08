@@ -208,12 +208,10 @@ _C_get (basic_streambuf<char_type, traits_type> &__sb, int_type __delim)
 
     ios_base::iostate __err = ios_base::goodbit;   
 
+    _C_gcount = 0;
     const sentry __ipfx (*this, true /* noskipws */);
 
     if (__ipfx) {
-
-        _C_gcount = 0;
-
         try {
             for ( ; ; ) {
                 int_type __c (this->rdbuf ()->sgetc ());
@@ -295,14 +293,13 @@ _C_read (char_type *__s, streamsize __n, int_type __delim, int __flags)
     if (__getline)
         traits_type::assign (*__s, __eos);
 
+    _C_gcount = 0;
+
     // read and getline are unformatted (noskipws), others are formatted
     const sentry __ipfx (*this, !(_C_skipws & __flags));
 
     // 27.6.1.2.1, p1 and 27.6.1.3, p1: proceed iff sentry is okay
     if (__ipfx) {
-
-        _C_gcount = 0;
-
         // read at most n - 1 characters when null-terminating
         while (__n) {
 
@@ -366,14 +363,13 @@ read (char_type *__s, streamsize __n)
     _RWSTD_ASSERT (0 <= __n);
     _RWSTD_ASSERT (0 != this->rdbuf ());
 
+    _C_gcount = 0;
+
     // 27.6.1.3, p28: sets ios_base::failbit if !this->good()
     const sentry __ipfx (*this, true /* noskipws */);
 
     // 27.6.1.2.1, p1 and 27.6.1.3, p1: proceed iff sentry is okay
     if (__ipfx) {
-
-        _C_gcount = 0;
-
         streamsize __nread = 0;
 
         try {
@@ -403,12 +399,10 @@ readsome (char_type *__s, streamsize __n)
     _RWSTD_ASSERT (0 <= __n);
     _RWSTD_ASSERT (0 != this->rdbuf());
 
+    _C_gcount = 0;
     const sentry __ipfx (*this, true /* noskipws */);
 
     if (__ipfx) {
-
-        _C_gcount = 0;
-
         streamsize __nread = 0;
 
         try {
@@ -473,6 +467,8 @@ basic_istream<_CharT, _Traits>&
 basic_istream<_CharT, _Traits>::
 putback (char_type __c)
 {
+    // 27.6.1.3, p32: extracts nothing, so gcount () is 0
+    _C_gcount = 0;
     const sentry __ipfx (*this, true /* noskipws */);
 
     if (__ipfx) {
@@ -500,6 +496,8 @@ basic_istream<_CharT, _Traits>&
 basic_istream<_CharT, _Traits>::
 unget ()
 {
+    // 27.6.1.3, p34: extracts nothing, so gcount () is 0
+    _C_gcount = 0;
     const sentry __ipfx (*this, true /* noskipws */);
 
     if (__ipfx) {
@@ -561,14 +559,12 @@ get (char_type *__s, streamsize __n, char_type __delim)
         traits_type::assign (__s [0], char_type ());
     }
 
+    _C_gcount = 0;
     const sentry __ipfx (*this, true /* noskipws */);
 
     ios_base::iostate __err = ios_base::goodbit;
 
     if (__ipfx) {
-
-        _C_gcount = 0;
-
         try {
 
             basic_streambuf<char_type, traits_type>* const __rdbuf =
@@ -665,14 +661,12 @@ getline (char_type *__line, streamsize __size, char_type __delim)
         __size = 0;
     }
 
+    _C_gcount = 0;
     const sentry __ipfx (*this, true /* noskipws */);
 
     ios_base::iostate __err = ios_base::goodbit;
 
     if (__ipfx) {
-
-        _C_gcount = 0;
-
         basic_streambuf<char_type, traits_type>* const __rdbuf =
             this->rdbuf ();
 

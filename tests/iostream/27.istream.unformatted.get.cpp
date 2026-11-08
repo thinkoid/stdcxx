@@ -763,6 +763,54 @@ void test_get_streambuf (charT, const char *cname)
 
 /***********************************************************************/
 
+// 27.6.1.3, p1: a function whose sentry fails extracts nothing, so the
+// count it stores is 0; p32 and p34: putback and unget extract nothing
+template <class charT>
+void test_failed_sentry (charT, const char *cname)
+{
+    rw_info (0, 0, 0, "27.6.1.3, p1 - std::basic_istream<%s>: gcount () "
+             "after a failed sentry", cname);
+
+    static const char* const funs [] = {
+        "get ()", "get (c)", "get (s, 2, delim)", "get (sb, delim)",
+        "getline (s, 2)", "ignore (1)", "read (s, 1)", "readsome (s, 1)",
+        "peek ()", "putback (c)", "unget ()"
+    };
+
+    for (std::size_t i = 0; i != sizeof funs / sizeof *funs; ++i) {
+        const charT text [] = { 'a', 'b', 'c', 'd', 'e', '\0' };
+        std::basic_istringstream<charT> strm (text);
+        std::basic_stringbuf<charT>     sb;
+
+        charT buf [3];
+        strm.read (buf, 3);
+        strm.setstate (std::ios_base::failbit);
+
+        const charT delim = charT ('\n');
+
+        switch (i) {
+        case 0: strm.get (); break;
+        case 1: strm.get (buf [0]); break;
+        case 2: strm.get (buf, 2, delim); break;
+        case 3: strm.get (sb, delim); break;
+        case 4: strm.getline (buf, 2); break;
+        case 5: strm.ignore (1); break;
+        case 6: strm.read (buf, 1); break;
+        case 7: strm.readsome (buf, 1); break;
+        case 8: strm.peek (); break;
+        case 9: strm.putback (charT ('c')); break;
+        case 10: strm.unget (); break;
+        }
+
+        rw_assert (0 == strm.gcount (), 0, __LINE__,
+                   "basic_istream<%s>::%s after read (s, 3) and "
+                   "setstate (failbit): gcount () == 0, got %d",
+                   cname, funs [i], int (strm.gcount ()));
+    }
+}
+
+/***********************************************************************/
+
 static int rw_opt_no_get_void;
 static int rw_opt_no_get_char;
 static int rw_opt_no_get_char_array;
@@ -786,10 +834,14 @@ run_test (int, char**)
     TEST (char, char_array);
     TEST (char, streambuf);
 
+    test_failed_sentry (char (), "char");
+
     TEST (wchar_t, void);
     TEST (wchar_t, char);
     TEST (wchar_t, char_array);
     TEST (wchar_t, streambuf);
+
+    test_failed_sentry (wchar_t (), "wchar_t");
 
     return 0;
 }
