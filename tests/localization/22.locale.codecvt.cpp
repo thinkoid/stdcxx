@@ -2320,9 +2320,11 @@ test_inout (const char* tname)
 
     // 22.1.1.1.2, p4: a byname facet has the semantics of the locale
     // of its name; the UTF-16 names have no locale and no meaning in
-    // the library, so the first conversion throws as for any unknown
-    // name
-    const char* const unknown[] = { "no-such-encoding", "UTF-16", "utf-16" };
+    // the library, nor do ISO-2022-KR and ISO-2022-CN, so the first
+    // conversion throws as for any unknown name
+    const char* const unknown[] = {
+        "no-such-encoding", "UTF-16", "utf-16", "ISO-2022-KR", "ISO-2022-CN"
+    };
 
     for (std::size_t i = 0; i != sizeof unknown / sizeof *unknown; ++i) {
         locname = unknown [i];

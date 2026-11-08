@@ -45,23 +45,27 @@ host locale write no null character, narrow and wide.
 
 ** Localization: =codecvt=
 
-*** TODO =ISO-2022-KR= and =ISO-2022-CN= are names without converters
+*** TODO =do_encoding= and =do_max_length= throw under an unknown name
 
-=__rw_encoding_from_name= (=src/iso2022.cpp=) recognizes both names,
-so the facet looks for neither a database nor a C library locale, but
-the switches in =src/wcodecvt.cpp= carry no converter for them and
-fall through: =in=, =out= and =unshift= return =error=, =length=,
-=encoding= and =max_length= 0. The shipped reference
-(=doc/stdlibref/codecvt-byname.html=) documents neither name. Found
-2026-11-02.
+=codecvt_byname<wchar_t, char, mbstate_t>::do_encoding= and
+=do_max_length= (=src/wcodecvt.cpp= 1430, 1501) reach =_C_data ()=
+for a name the library does not know, and that throws
+=runtime_error=, as it does from =in= and =out= (86fbc909). Both
+virtuals are declared =throw ()= (22.2.1.5, the class synopsis;
+22.2.1.5.2, p7 and p11), and the facet declares them with
+~_THROWS (())~. The 15D configuration defines
+=_RWSTD_NO_EXCEPTION_SPECIFICATION=, so the specification is empty
+and the exception escapes to the caller; with specifications on it
+would reach =std::unexpected=. By probe with =ISO-2022-KR= and
+=no-such-encoding=, 2026-11-08.
 
-Fix: a decision: implement the two against glibc's =iconv=, or stop
-recognizing the names.
+Fix: a decision: the two return a value for an unknown name (0 and 1
+are the stateless defaults; =basic_filebuf= reads =encoding= to
+decide whether to seek), or the constructor resolves the name and
+throws there, where 22.1.1.1.2, p4 allows it.
 
-Check: for converters, the round trip and the =iconv= oracle of
-=22.locale.codecvt.iso2022= over Korean and Chinese fixtures; for the
-names dropped, =codecvt_byname= of either answers as for any name the
-library does not know.
+Check: a row in =22.locale.codecvt=: =encoding= and =max_length= of
+the unknown names throw nothing, with the values chosen.
 
 ** Localization: =collate=
 
@@ -396,6 +400,23 @@ Check: ~#include <string>~ with =-I= of a directory holding an empty
 =config.h= ahead of the library's.
 
 ** Tree hygiene
+
+*** TODO Four =always_noconv= helpers of the ISO-2022 converters are dead
+
+=src/iso2022.h= 75 and 99 declare =__rw_iso2022_do_always_noconv=
+and =__rw_iso2022jp2_do2_always_noconv=, which nothing defines;
+=src/iso2022.cpp= 1895 and 2095 define
+=__rw_iso2022jp_do_always_noconv= and
+=__rw_iso2022jp2_do_always_noconv=, which nothing declares or calls.
+=codecvt<wchar_t, char, mbstate_t>::do_always_noconv=
+(=src/wcodecvt.cpp= 900), which the byname facet inherits, answers
+for every encoding without them.
+Dead since the 2005 import (e6c7726b). Seen while the ISO-2022-KR
+and -CN converters were surveyed, 2026-11-08.
+
+Fix: the two declarations and the two definitions leave.
+
+Check: the library builds; =22.locale.codecvt= at pin.
 
 *** TODO The =__rw_once= comment names a static mutex path that is gone
 
@@ -1503,6 +1524,15 @@ tree, and one that never was:
   The walk sets =eofbit | failbit= for the literal, C++11
   22.4.5.1.1, p8's third condition, and nothing for the white space:
   "2026 " under "%Y " is =goodbit= (by probe, 2026-11-06).
+- =codecvt-byname.html= 283, the =state= paragraph: a stateful
+  conversion "may allocate resources such as file descriptors and/or
+  storage", the program "must call =do_unshift()=" before disposing
+  of the state object, and "The size of the =mbstate_t= type on a
+  particular platform determines the maximum possible number of
+  simultaneous conversions". That described the ISO-2022 slot array
+  68dc8ce5 removed: the state lives in the =mbstate_t=, nothing is
+  allocated and nothing bounds the conversions in flight. The
+  sentence on initializing the state to all bits 0 stays true.
 
 No test reads the pages. Found by the extension sweep's reading,
 2026-11-04.

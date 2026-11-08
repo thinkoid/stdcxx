@@ -857,8 +857,7 @@ range. Every member checks the state with `mbsinit`.
 
 The constructor reads the name into `_C_flags`:
 
-- `__rw_encoding_from_name` recognizes `ISO-2022-JP`, `-JP-2`, `-KR`
-  and `-CN`.
+- `__rw_encoding_from_name` recognizes `ISO-2022-JP` and `-JP-2`.
 - `@UCS`, `@UCS-4`, `@UCS-2` and the byte-order forms set a UCS
   internal encoding and are stripped from the name.
 - `UTF-8` and its lower-case spelling set a UTF type and empty the
@@ -933,7 +932,10 @@ takes `_C_data ()`:
   `max_length` is a designation and the longest character after it:
   5 for `-JP` (`ESC $ B` and two bytes) and 6 for `-JP-2` (`ESC $ ( C`
   or `ESC $ ( D` and two bytes, or `ESC . A`, `ESC N` and one byte).
-- `-KR` and `-CN` return `error` and 0 from every member.
+- Every other `ISO-2022-` name, `-KR` and `-CN` among them, takes
+  the stateless path. No database and no C library locale has the
+  name, so the first call that needs the encoding asks the C library
+  for it and throws `runtime_error`.
 
 #### The primary templates
 
@@ -1015,10 +1017,12 @@ test. Conformance record: "Primary template definitions".
 encodings known to the library implementor." Beyond the locale
 names, `codecvt_byname<wchar_t, char, mbstate_t>` takes `UTF-8`
 (strict) and `utf-8` (relaxed), the `@UCS` modifiers, and
-`ISO-2022-JP` and `-JP-2`. `ISO-2022-KR` and
-`-CN` are recognized but not implemented. Why: the original design
-(e6c7726b). Pinned by: `22.locale.codecvt` (the UTF-8 rows, the
-`@UCS` `in` rows) and `22.locale.codecvt.length` (`UTF-8@UCS`); the
+`ISO-2022-JP` and `-JP-2`. It takes `ISO-2022-KR` and `-CN` as it
+takes any name the library does not know. Why: the original design
+(e6c7726b); the two names were dropped after a survey of what their
+converters would take (`analysis-iso2022-kr-cn.md`). Pinned by:
+`22.locale.codecvt` (the UTF-8 rows, the `@UCS` `in` rows, the
+unknown names) and `22.locale.codecvt.length` (`UTF-8@UCS`); the
 ISO-2022-JP converters by `22.locale.codecvt.iso2022`.
 
 #### Cached narrow, widen and always_noconv
@@ -1082,7 +1086,7 @@ design (e6c7726b); no recorded decision. Pinned by: no test.
 | `22.locale.ctype.toupper` | `toupper`, both forms | 19396 |
 | `22.locale.ctype.narrow` | `narrow`, `widen` against the C library | 9768, 2 warnings |
 | `22.locale.ctype.mt` | first fill of the narrow and widen caches, gated | 800 |
-| `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state | 618 |
+| `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state, unknown names | 673 |
 | `22.locale.codecvt.do_out` | `out` over algorithmic, table and libc encodings | 1494 |
 | `22.locale.codecvt.iso2022` | `ISO-2022-JP` and `-JP-2`: `in`, `out`, `unshift` and `length` in one call and across calls, against glibc's `iconv` | 1500 |
 | `22.locale.codecvt.length` | `length` over the same three, and the byname narrow facet | 484 |

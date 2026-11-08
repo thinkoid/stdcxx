@@ -1211,8 +1211,6 @@ do_in (state_type&         state,
                                            to_next, to_limit);
         break;
 
-    case __rw::iso2022_kr:
-    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1293,8 +1291,6 @@ do_out (state_type         &state,
         res = __rw::__rw_iso2022jp2_do_out (state, from_next, from_end, 
                                            to_next, to_limit);
         break;
-    case __rw::iso2022_kr:
-    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1361,8 +1357,6 @@ do_unshift (state_type&   state,
     case __rw::iso2022_jp2:
         res = __rw::__rw_iso2022jp2_do_unshift (state, to_next, to_limit);
         break;
-    case __rw::iso2022_kr:
-    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1423,8 +1417,6 @@ do_length (state_type&        state,
     case __rw::iso2022_jp2:
         len = __rw::__rw_iso2022jp2_do_length (state, from, from_end, cmax);
         break;
-    case __rw::iso2022_kr:
-    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1496,8 +1488,6 @@ do_encoding () const _THROWS (())
     case __rw::iso2022_jp2:
         enc = __rw::__rw_iso2022jp2_do_encoding ();
         break;
-    case __rw::iso2022_kr:
-    case __rw::iso2022_cn:
     default:
         break;
     };
@@ -1543,8 +1533,6 @@ do_max_length () const _THROWS (())
     case __rw::iso2022_jp2:
         max_len = __rw::__rw_iso2022jp2_do_max_length ();
         break;
-    case __rw::iso2022_kr:
-    case __rw::iso2022_cn:
     default:
         break;
     };

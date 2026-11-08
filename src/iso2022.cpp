@@ -377,12 +377,6 @@ int __rw_encoding_from_name (const char* name)
     if (0 == strcmp (name, "JP")) {
         return iso2022_jp;
     }
-    if (0 == strcmp (name, "KR")) {
-        return iso2022_kr;
-    }
-    if (0 == strcmp (name, "CN")) {
-        return iso2022_cn;
-    }
     return stateless;
 }
 
