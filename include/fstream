@@ -106,18 +106,13 @@ public:
         basic_filebuf::setbuf (0, _RWSTD_DEFAULT_BUFSIZE);
     }
 
-#ifndef _RWSTD_NO_STATIC_IOSTREAM_INIT
-
 private:
 
     friend struct ios_base::Init;
 
-#endif   // _RWSTD_NO_STATIC_IOSTREAM_INIT
-
     // ios_base::Init builds the standard objects' buffers on their
     // file descriptors, or on their FILE pointers where file streams
-    // use stdio; with _RWSTD_NO_STATIC_IOSTREAM_INIT the buffers are
-    // objects at namespace scope, and the constructors stay public
+    // use stdio
     // NOTE: the passed in buffer will NOT be deallocated
 
 #ifndef _RWSTD_NO_NATIVE_IO

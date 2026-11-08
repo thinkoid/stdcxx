@@ -36,8 +36,6 @@
 #include <rw/_defs.h>
 
 
-#ifndef _RWSTD_NO_STATIC_IOSTREAM_INIT
-
 namespace __rw { 
 
 // static stream initializer object defined in every translation unit
@@ -47,20 +45,18 @@ static std::ios_base::Init __rw_stream_initializer;
 
 }   // namespace __rw
 
-#endif   // _RWSTD_NO_STATIC_IOSTREAM_INIT
-
 
 namespace std { 
 
-_RWSTD_EXPORT extern istream _RWSTD_IOSTREAM_OBJECT (cin);
-_RWSTD_EXPORT extern ostream _RWSTD_IOSTREAM_OBJECT (cout);
-_RWSTD_EXPORT extern ostream _RWSTD_IOSTREAM_OBJECT (cerr);
-_RWSTD_EXPORT extern ostream _RWSTD_IOSTREAM_OBJECT (clog);
+_RWSTD_EXPORT extern istream cin;
+_RWSTD_EXPORT extern ostream cout;
+_RWSTD_EXPORT extern ostream cerr;
+_RWSTD_EXPORT extern ostream clog;
 
-_RWSTD_EXPORT extern wistream _RWSTD_IOSTREAM_OBJECT (wcin);
-_RWSTD_EXPORT extern wostream _RWSTD_IOSTREAM_OBJECT (wcout);
-_RWSTD_EXPORT extern wostream _RWSTD_IOSTREAM_OBJECT (wcerr);
-_RWSTD_EXPORT extern wostream _RWSTD_IOSTREAM_OBJECT (wclog);
+_RWSTD_EXPORT extern wistream wcin;
+_RWSTD_EXPORT extern wostream wcout;
+_RWSTD_EXPORT extern wostream wcerr;
+_RWSTD_EXPORT extern wostream wclog;
 
 }   // namespace std
 

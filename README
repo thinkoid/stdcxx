@@ -1346,17 +1346,6 @@
   8.3.6  Macros Controlling Iostreams
   -----------------------------------
 
-  o  _RWSTD_NO_IOSTREAM_OBJECT_REFS [abi, auto, lib, over]
-
-     When   #defined  while   _RWSTD_NO_STATIC_IOSTREAM_INIT   is  not
-     #defined, the  eight standard  iostream objects (cout,  etc.) are
-     declared  in  <iostream> to  be  of  their  respective types  but
-     defined in the  library binary to be of an  unrelated POD type to
-     prevent their destruction  during program lifetime.  Since object
-     type isn't typically encoded in  its name and the declaration and
-     definition  isn't   ever  seen  by  the  compiler   in  the  same
-     translation unit this doesn't cause problems.
-
   o  _RWSTD_NO_NATIVE_IO [lib, over]
 
      #defined  to force  file streams  to use  the facilities  of libc
@@ -1380,13 +1369,6 @@
 
      #defined  when  the  standard  iostream  objects  should  not  be
      thread-safe by default.
-
-  o  _RWSTD_NO_STATIC_IOSTREAM_INIT [abi, auto, lib, over]
-
-     When  #defined, the  eight standard  iostream  objects (std::cin,
-     std::cout,  etc.)  are   ordinary  objects  with  static  storage
-     duration  and  are   destroyed  during  program  lifetime  (which
-     violates 27.3, p2).
 
 
   8.3.7  Macros Controlling Locale

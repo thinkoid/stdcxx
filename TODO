@@ -68,21 +68,6 @@ wrote none.
 Check: a =27.filebuf= row: =sputn= on a buffer opened for input only
 returns 0.
 
-*** TODO The standard objects are references, which a template argument can tell
-
-=include/iostream= 55-62 declare the eight objects through
-=_RWSTD_IOSTREAM_OBJECT= as references, and =src/iostream.cpp= 74-78
-call the departure from 27.3 undetectable. 14882:2003 14.3.2, p1 takes
-as a template argument the address of an object with external linkage.
-Hypothesis, by reading: ~template <std::ostream&> struct S;~ cannot be
-instantiated on =std::cout=, since a reference is not an object. Seen
-in passing by the extension sweep, 2026-11-04.
-
-Fix: a decision: record the departure in chapter 2, or define the
-objects as objects.
-
-Check: compile ~S<std::cout>~.
-
 *** TODO =_C_opfx= skips the tie's flush on a loop of distinct buffers
 
 =include/ostream= 270-284 skip ~tie ()->flush ()~ when the tie chain

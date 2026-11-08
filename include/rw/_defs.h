@@ -587,17 +587,6 @@
    | _RWSTD_IOS_IN       | _RWSTD_IOS_OUT        \
    | _RWSTD_IOS_TRUNC    | _RWSTD_IOS_ATE)
 
-#ifndef _RWSTD_NO_STATIC_IOSTREAM_INIT
-   // standard iostream objects are references
-#  define _RWSTD_IOSTREAM_OBJECT(name)   &name
-#else
-   // standard iostream objects are declared to be real objects
-   // they may be implemented as real objects of the same type
-   // that get destroyed during program lifetime or as objects
-   // of some POD type that do not get destroyed at all
-#  define _RWSTD_IOSTREAM_OBJECT(name)   name
-#endif   // _RWSTD_NO_STATIC_IOSTREAM_INIT
-
 
 // to prevent warnings about unused arguments
 #define _RWSTD_UNUSED(arg)   ((void)&arg)

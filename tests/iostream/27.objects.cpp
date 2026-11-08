@@ -115,15 +115,40 @@ LifetimeChecker::~LifetimeChecker ()
 
 /**************************************************************************/
 
+// a reference template parameter binds to an object with external
+// linkage, not to a reference (14.3.2, p1)
+template <class Stream, Stream &obj>
+struct Bound
+{
+    static Stream& get () {
+        return obj;
+    }
+};
+
+/**************************************************************************/
+
 template <class charT>
 void do_test (charT)
 {
-    rw_info (0, 0, 0, "checking whether objects are initialized");
+    rw_info (0, 0, 0, "checking that the objects are objects");
 
-    // objects must exist
-    rw_assert (   0 != &std::cin  && 0 != &std::cout
-               && 0 != &std::cerr && 0 != &std::clog,
-               0, __LINE__, "std::cin, cout, cerr, or clog address 0");
+    // exercise 27.3: the eight are objects, so each is a template
+    // argument for a reference parameter of its type (14.3.2, p1)
+#define TEST_BOUND(Stream, obj)                                         \
+    rw_assert (&std::obj == &Bound<std::Stream, std::obj>::get (),      \
+               0, __LINE__,                                             \
+               "&std::" #obj " == &Bound<std::" #Stream ", std::"       \
+               #obj ">::get ()")
+
+    TEST_BOUND (istream, cin);
+    TEST_BOUND (ostream, cout);
+    TEST_BOUND (ostream, cerr);
+    TEST_BOUND (ostream, clog);
+
+    TEST_BOUND (wistream, wcin);
+    TEST_BOUND (wostream, wcout);
+    TEST_BOUND (wostream, wcerr);
+    TEST_BOUND (wostream, wclog);
 
     rw_info (0, 0, __LINE__, "checking tied stream objects");
 
@@ -182,10 +207,6 @@ void do_test (charT)
     TEST_FLAGS (wcout, init);
     TEST_FLAGS (wcerr, unit);
     TEST_FLAGS (wclog, init);
-
-    rw_assert (   0 != &std::wcin  && 0 != &std::wcout
-               && 0 != &std::wcerr && 0 != &std::wclog,
-               0, __LINE__, "std::wcin, wcout, wcerr, or wclog address 0");
 
     new_0 = new_calls;
 
