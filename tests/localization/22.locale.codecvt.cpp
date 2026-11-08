@@ -1919,6 +1919,45 @@ find_interesting_locale (char* buf, std::size_t bufsize)
 }
 
 
+// checks a UTF-8 facet, `how' saying how the caller obtained it
+static void
+test_utf8_facet (int line, const char* name, const char* how,
+                 const CodecvtW& cvt)
+{
+    std::mbstate_t state = std::mbstate_t ();
+
+    const char  src [] = "\xc3\xa9";   // U+00E9 in UTF-8
+    const char* src_next = 0;
+
+    wchar_t  dst [4] = L"";
+    wchar_t* dst_next = 0;
+
+    const std::codecvt_base::result res =
+        cvt.in (state, src, src + 2, src_next, dst, dst + 4, dst_next);
+
+    rw_assert (   std::codecvt_base::ok == res && src + 2 == src_next
+               && 1 == dst_next - dst && L'\xe9' == *dst,
+               __FILE__, line,
+               "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\") %s: "
+               "in (\"\\xc3\\xa9\") == ok, L\"\\xe9\"; got %s, "
+               "consuming %td, giving %{#*ls}",
+               name, how, rwtest_codecvt_result (res), src_next - src,
+               int (dst_next - dst), dst);
+
+    const int enc = cvt.encoding ();
+
+    rw_assert (0 == enc, __FILE__, line,
+               "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\") %s: "
+               "encoding () == 0, got %d", name, how, enc);
+
+    const int maxlen = cvt.max_length ();
+
+    rw_assert (6 == maxlen, __FILE__, line,
+               "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\") %s: "
+               "max_length () == 6, got %d", name, how, maxlen);
+}
+
+
 template <class internT>
 static void
 test_inout (const char* tname)
@@ -2348,6 +2387,35 @@ test_inout (const char* tname)
 
 #endif   // _RWSTD_WCHAR_T_MAX > 0xffffU
     }
+
+    // the UTF-8 converters are the library's own, so a UTF-8 facet
+    // installed in a locale converts as one constructed directly,
+    // whatever database the locale root holds for "C"
+    if (rw_localedef ("-w", "C", "ANSI_X3.4-1968", "C")) {
+        const char* const utf8[] = { "UTF-8", "utf-8" };
+
+        for (std::size_t i = 0; i != sizeof utf8 / sizeof *utf8; ++i) {
+            locname = utf8 [i];
+
+            rw_info (0, __FILE__, __LINE__,
+                     "codecvt_byname<wchar_t, char, mbstate_t>(\"%s\") "
+                     "beside a \"C\" database", locname);
+
+            const CodecvtBynameObject<wchar_t> direct (locname);
+
+            test_utf8_facet (__LINE__, locname, "constructed directly",
+                             direct);
+
+            const std::locale loc (std::locale::classic (),
+                                   new CodecvtBnW (locname));
+
+            test_utf8_facet (__LINE__, locname, "installed in a locale",
+                             std::use_facet<CodecvtW>(loc));
+        }
+    }
+    else
+        rw_warn (0, __FILE__, __LINE__,
+                 "failed to build the \"C\" database, test skipped");
 
     // 22.1.1.1.2, p4: a byname facet has the semantics of the locale
     // of its name, and 22.1.1.2, p7 has locale (const char*) throw

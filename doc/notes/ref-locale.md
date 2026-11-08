@@ -863,27 +863,28 @@ The constructor reads the name into `_C_flags`:
 - `__rw_encoding_from_name` recognizes `ISO-2022-JP` and `-JP-2`.
 - `@UCS`, `@UCS-4`, `@UCS-2` and the byte-order forms set a UCS
   internal encoding and are stripped from the name.
-- `UTF-8` and its lower-case spelling set a UTF type and empty the
-  name; the upper-case spelling adds `__rw_strict`.
+- `UTF-8` and its lower-case spelling set a UTF type and stay the
+  facet's name; the upper-case spelling adds `__rw_strict`.
 
-For a stateless name other than the UTF-8 ones the constructor then
-resolves the name, since `do_encoding` and `do_max_length` are
-declared `throw ()` (22.2.1.5):
+For a stateless name the constructor then resolves the name, since
+`do_encoding` and `do_max_length` are declared `throw ()` (22.2.1.5):
 
-- `__rw_lookup_facet_data` (`src/facet.cpp`) maps the locale's
-  `LC_CTYPE` record, takes its `codeset_name ()` and maps the codecvt
-  database of that name at the locale root; a name that is itself a
-  codeset maps directly. `_C_get_data` calls the same function for
-  the facets it maps at first use.
+- A UTF-8 name maps no database, since its converters are the
+  library's own: the constructor stores `_C_impsize` as
+  `size_t (-1)`. The facet thus reads no database named `UTF-8`,
+  which the recipe of the shipped reference
+  (`doc/stdlibref/codecvt-byname.html`) builds and calls optional.
+- For any other name, `__rw_lookup_facet_data` (`src/facet.cpp`)
+  maps the locale's `LC_CTYPE` record, takes its `codeset_name ()`
+  and maps the codecvt database of that name at the locale root; a
+  name that is itself a codeset maps directly. `_C_get_data` calls
+  the same function for the facets it maps at first use.
 - Without a database the constructor stores `_C_impsize` as
   `size_t (-1)`, as `_C_get_data` marks a facet without one, and sets
   the C locale once through `__rw_setlocale`, which throws
   `runtime_error` for a name the C library does not know.
 - The facet thus finds its database whether it is constructed in a
   locale or directly, and its virtuals never reach `_C_get_data`.
-  The UTF-8 names resolve nothing here: their virtuals reach
-  `_C_get_data` at first use (`TODO`, "A UTF-8 wide
-  `codecvt_byname` in a locale maps the C locale's database").
 
 Each virtual switches on the ISO-2022 type. For a stateless name it
 takes `_C_data ()`:
@@ -1039,12 +1040,24 @@ encodings known to the library implementor." Beyond the locale
 names, `codecvt_byname<wchar_t, char, mbstate_t>` takes `UTF-8`
 (strict) and `utf-8` (relaxed), the `@UCS` modifiers, and
 `ISO-2022-JP` and `-JP-2`. It takes `ISO-2022-KR` and `-CN` as it
-takes any name the library does not know. Why: the original design
+takes any name the library does not know. The four encoding names
+are not locales: glibc has a locale of none of them, so
+`locale ("UTF-8")` and `locale ("ISO-2022-JP")` throw
+`runtime_error`, as 22.1.1.2, p7 requires "if the argument is not
+valid". 22.1.1.1.2, p4 gives a byname facet "the virtual function
+semantics equivalent to that facet of the locale constructed by
+locale(const char*) with the same name", so the equivalent of a
+facet of these names is to throw; the facet converts instead. This
+is a departure from 22.1.1.1.2, p4, kept by decision; the shipped
+reference has documented the names since 2005
+(`doc/stdlibref/codecvt-byname.html`). Why: the original design
 (e6c7726b); the two names were dropped after a survey of what their
 converters would take (`analysis-iso2022-kr-cn.md`). Pinned by:
-`22.locale.codecvt` (the UTF-8 rows, the `@UCS` `in` rows, the
-unknown names) and `22.locale.codecvt.length` (`UTF-8@UCS`); the
-ISO-2022-JP converters by `22.locale.codecvt.iso2022`.
+`22.locale.codecvt` (the UTF-8 rows, a UTF-8 facet in a locale
+beside a "C" database, the `@UCS` `in` rows, the unknown names) and
+`22.locale.codecvt.length` (`UTF-8@UCS`); the ISO-2022-JP
+converters by `22.locale.codecvt.iso2022`. Conformance record:
+"Encodings known to the library".
 
 #### Cached narrow, widen and always_noconv
 
@@ -1107,7 +1120,7 @@ design (e6c7726b); no recorded decision. Pinned by: no test.
 | `22.locale.ctype.toupper` | `toupper`, both forms | 19396 |
 | `22.locale.ctype.narrow` | `narrow`, `widen` against the C library | 9768, 2 warnings |
 | `22.locale.ctype.mt` | first fill of the narrow and widen caches, gated | 800 |
-| `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state, unknown names, a facet constructed directly | 676 |
+| `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, also in a locale beside a "C" database, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state, unknown names, a facet constructed directly | 688 |
 | `22.locale.codecvt.do_out` | `out` over algorithmic, table and libc encodings | 1494 |
 | `22.locale.codecvt.iso2022` | `ISO-2022-JP` and `-JP-2`: `in`, `out`, `unshift` and `length` in one call and across calls, against glibc's `iconv` | 1500 |
 | `22.locale.codecvt.length` | `length` over the same three, and the byname narrow facet | 484 |
@@ -2348,7 +2361,7 @@ is a `TODO` entry rather than a decision.
 | `locale::facet` and `locale::id` are the library's classes | 22.1.1 synopsis | 8.3 | design |
 | A mixed name does not reach the C library | 22.1.1.5 p2 | 8.3 | decision pending |
 | Primary template definitions (`ctype`, `codecvt`, `numpunct`, `moneypunct`; `collate` declares only) | 22.1.1.1.1 p4 | 9.3, 10.3.12, 11.3 | design |
-| Encodings known to the library (UTF-8, `@UCS`, ISO-2022) | 22.2.1.5 p3 | 9.3 | design |
+| Encodings known to the library (UTF-8, `@UCS`, ISO-2022) | 22.1.1.1.2 p4 | 9.3 | departure |
 | Cached `narrow`, `widen` and `always_noconv` | 22.2.1.3.2 p10-11, 22.2.1.1.1 p6-7, 22.2.1.5.1 p5 | 9.3 | design |
 | `length` counts complete characters | 22.2.1.5.2 p10, LWG 305 | 9.3 | design |
 | An invalid state is an error; the C-library path takes it as it comes | 22.2.1.5.2 p1, p9 | 9.3 | decision 2026-09-16, narrowed 2026-11-04 |

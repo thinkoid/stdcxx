@@ -24,28 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Localization: =codecvt=
-
-*** TODO A UTF-8 wide =codecvt_byname= in a locale maps the C locale's database
-
-=codecvt_byname<wchar_t, char, mbstate_t>= empties its name for
-=UTF-8= and =utf-8= and resolves no database in its constructor, so
-its virtuals reach =_C_get_data= at first use. Installed in a locale,
-the facet has a =_C_pid=, and =_C_get_data= maps the =LC_CTYPE=
-database of "C" at the locale root (the current directory when
-=RWSTD_LOCALE_ROOT= is unset) and the codecvt database it names. When
-one exists, =__rw_libstd_do_in= and =__rw_libstd_do_out=
-(=src/wcodecvt.cpp=) walk its tables in place of the UTF-8 algorithm,
-and =do_encoding= answers from its =mb_cur_max=. By reading,
-2026-11-08.
-
-Fix: the constructor marks the UTF-8 names as having no database,
-~_C_impsize = size_t (-1)~, as it marks a stateless name without one.
-
-Check: with a "C" locale built into the locale root of
-=22.locale.codecvt=, a =UTF-8= facet installed in a locale converts
-"\xc3\xa9" to U+00E9 and =encoding ()= is 0, with a row.
-
 ** Streams
 
 *** TODO A width comment in =_ioinsert.cc= predates 69ad31e6
@@ -1555,13 +1533,20 @@ tree, and one that never was:
   68dc8ce5 removed: the state lives in the =mbstate_t=, nothing is
   allocated and nothing bounds the conversions in flight. The
   sentence on initializing the state to all bits 0 stays true.
+- =codecvt-byname.html= 311, the example: =new Cvt ("UTF")= names no
+  encoding the library knows, so the constructor throws
+  =runtime_error= (by probe, 2026-11-08); the library's names are
+  =UTF-8= and =utf-8=. The optional step at 305 builds a database
+  named =UTF-8=, which the UTF-8 facet does not read.
 
 No test reads the pages. Found by the extension sweep's reading,
 2026-11-04.
 
 Fix: the passages go and =time-put.html='s table gains =%l=;
 =time-get.html='s two sentences on the end of the input follow the
-walk. 9a5a402a set the rule that a removal edits its page.
+walk; the example of =codecvt-byname.html= names =UTF-8= and drops
+the optional step. 9a5a402a set the rule that a removal edits its
+page.
 
 Check: each passage above is gone from its page, and each page's
 description of these members matches the code it names.
@@ -1596,11 +1581,10 @@ are the library's classes" has no row there. Chapter 13 of
   and "Extensions of the =time_get= and =time_put= interface" (12.3: a
   null =t= to =get=, a null =pat_end= to =put=, =do_put= with a null
   =t=, directives beyond C90);
-- "Encodings known to the library" (9.3), "=money_put= reads =units=
-  as ~"%.0Lf"~" (10.3.10), "Two spaces after an international symbol;
-  =sign_posn= 0 as ~"()"~" (10.3.11), and "Each =do_get= updates the
-  =tm=", "Years before 0" and "Two-digit years in =do_get_year="
-  (12.3).
+- "=money_put= reads =units= as ~"%.0Lf"~" (10.3.10), "Two spaces
+  after an international symbol; =sign_posn= 0 as ~"()"~" (10.3.11),
+  and "Each =do_get= updates the =tm=", "Years before 0" and
+  "Two-digit years in =do_get_year=" (12.3).
 
 Chapter 13 says it lists "Every place the library departs", but four
 rows of chapter 2 are not in it: "=money_get= keeps the caller's
@@ -1633,6 +1617,22 @@ row in the same commit.
 
 Check: every count in the two tables equals the row's =ASSERTS= in
 =15D.txt=.
+
+** TODO =ref-locale.md= 9.4 quotes a =22.locale.codecvt= entry by its old counts
+
+The known gaps of =ref-locale.md= 9.4 name the =TODO= entry
+"=22.locale.codecvt= counts 634 assertions in 11S and 638 in 11s" and
+say "the 16 between 15D and 11S are the skipped libc facets; the
+other 4 are unexplained". fd8f964d renamed the entry to 668 and 672
+and left the list, so the quote names no entry and its arithmetic
+fits no pins: the 15D pin is now 688, 20 above 11S's 668. Seen at the
+UTF-8 codecvt change, 2026-11-08.
+
+Fix: the bullet quotes the entry's heading as it stands and gives the
+difference from the pins of one nightly, or no number.
+
+Check: the bullet's quote equals the =TODO= heading, and its numbers
+equal the =ASSERTS= of the baseline tables.
 
 ** TODO Two chapter 2 rows of =ref-conformance.md= leave out an effect their source states
 

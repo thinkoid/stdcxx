@@ -7,11 +7,8 @@ facet, and no slot changes while the body is shared. With it went
 the slots. The second defect is history too: the wide
 `codecvt_byname` maps its databases in its constructor, before the
 facet is shared, so the lazy path of `_C_get_data` that chapter 2
-describes serves the other facets only. The UTF-8 names, which the
-constructor does not resolve, are the exception (`TODO`, "A UTF-8
-wide `codecvt_byname` in a locale maps the C locale's database").
-The publication of facet data in chapter 3 still describes the
-library.
+describes serves the other facets only. The publication of facet
+data in chapter 3 still describes the library.
 
 Two threads that use a freshly constructed named locale at the same
 time can each run into a defect in the library's lazy initialization

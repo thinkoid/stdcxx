@@ -1111,7 +1111,8 @@ codecvt_byname (const char *name, size_t ref)
 
     // handle the special name UTF-8, denoting an external UTF-8
     // encoding with strict validation rules but slower processing,
-    // and its relaxed but faster equivalent, utf-8
+    // and its relaxed but faster equivalent, utf-8; the name is an
+    // encoding's, not a locale's (22.1.1.1.2, p4; departure)
     const bool utf8_low = !strcmp (name, "utf-8");
     const bool utf8_cap = !utf8_low && !strcmp (name, "UTF-8");
 
@@ -1120,9 +1121,6 @@ codecvt_byname (const char *name, size_t ref)
 
         if (utf8_cap)
             _C_flags |= __rw_strict;
-
-        *locale_name  = '\0';
-        name          = locale_name;
     }
 
     this->_C_set_name (name, _C_namebuf, sizeof _C_namebuf);
@@ -1131,10 +1129,11 @@ codecvt_byname (const char *name, size_t ref)
     // and do_max_length are declared throw () (22.2.1.5): first the
     // database, then the C library, whose locale __rw_setlocale sets
     // once, throwing runtime_error for a name the C library does not
-    // know; the UTF-8 and ISO-2022 converters are the library's own
-    if (__rw::stateless == ISO2022_TYPE (_C_flags) && !IS_UTF8 (_C_flags)) {
+    // know; the UTF-8 and ISO-2022 converters are the library's own,
+    // so a UTF-8 name maps no database
+    if (__rw::stateless == ISO2022_TYPE (_C_flags)) {
         size_t size = 0;
-        const void* const data =
+        const void* const data = IS_UTF8 (_C_flags) ? 0 :
             __rw::__rw_lookup_facet_data (LC_CTYPE, size,
                                           *_C_name ? _C_name : "C", true);
 
