@@ -70,30 +70,12 @@ namespace std {
 
 
 template<class _CharT, class _Traits>
-__rw::__rw_mutex*
-basic_istream<_CharT, _Traits>::_C_sync_tie ()
-{
-    if (this->good () && this->tie ()) {
-        try {
-            this->tie ()->_C_sync_chain (this->rdbuf ());
-        }
-        catch (...) {
-            this->setstate (ios_base::badbit | __rw::__rw_rethrow);
-        }
-    }
-
-    return this->_C_bufmutex ();
-}
-
-
-template<class _CharT, class _Traits>
 basic_istream<_CharT, _Traits>&
 basic_istream<_CharT, _Traits>::
 _C_ipfx (bool __noskipws, ios_base::iostate __errbits)
 {
-    // 27.6.1.1.2: fail a stream not good, skip leading whitespace; the
-    // sentry synchronizes the tie before it locks; the unformatted
-    // input functions reset gcount ()
+    // 27.6.1.1.2: fail a stream not good, flush the tie, skip leading
+    // whitespace; the unformatted input functions reset gcount ()
 
     if (ios_base::goodbit != this->rdstate ()) {
         this->setstate (ios_base::failbit);
@@ -103,6 +85,9 @@ _C_ipfx (bool __noskipws, ios_base::iostate __errbits)
     ios_base::iostate __state = ios_base::goodbit;
 
     try {
+        if (this->tie ())
+            this->tie ()->flush ();
+
         if (   ios_base::eofbit == __errbits // passed by std::ws
             || !__noskipws && this->flags () & ios_base::skipws) {
 

@@ -446,10 +446,9 @@ void test_sentry (charT)
     }
 
     {
-        // verify 27.6.2.3, p2 and footnote 292 on two streams on
-        // distinct buffers tied to each other: the sentry on one
-        // synchronizes the other's buffer, and its own is left to
-        // the operation
+        // verify that two streams on distinct buffers tied to each
+        // other form a ring the sentry detects and leaves alone
+        // (N3242 27.5.5.3, p2): neither buffer is synchronized
         test_streambuf<charT> tsb_a (0);
         test_streambuf<charT> tsb_b (0);
 
@@ -463,11 +462,11 @@ void test_sentry (charT)
 
         _RWSTD_UNUSED (guard);
 
-        rw_assert (1 == tsb_b.ncalls_ [Sync] && 0 == tsb_a.ncalls_ [Sync],
+        rw_assert (0 == tsb_b.ncalls_ [Sync] && 0 == tsb_a.ncalls_ [Sync],
                    0, __LINE__,
                    "std::basic_ostream<%s>::sentry::sentry (basic_ostream &a) "
                    "with a.tie () == &b, b.tie () == &a on distinct buffers: "
-                   "expected 1 call to b.rdbuf ()->sync () and 0 to "
+                   "expected 0 calls to b.rdbuf ()->sync () and 0 to "
                    "a.rdbuf ()->sync (), got %d and %d",
                    cname, tsb_b.ncalls_ [Sync], tsb_a.ncalls_ [Sync]);
     }
@@ -534,9 +533,9 @@ void test_sentry (charT)
     }
 
     {
-        // verify 27.6.2.3, p2 on a chain that enters a ring of ties,
-        // strm -> b -> c -> b: the sentry on strm synchronizes b and
-        // c once each and returns
+        // verify that a chain that enters a ring of ties,
+        // strm -> b -> c -> b, is detected and left alone: the sentry
+        // on strm synchronizes neither b nor c and returns
         test_streambuf<charT> tsb_strm (0);
         test_streambuf<charT> tsb_b (0);
         test_streambuf<charT> tsb_c (0);
@@ -553,11 +552,11 @@ void test_sentry (charT)
 
         _RWSTD_UNUSED (guard);
 
-        rw_assert (1 == tsb_b.ncalls_ [Sync] && 1 == tsb_c.ncalls_ [Sync],
+        rw_assert (0 == tsb_b.ncalls_ [Sync] && 0 == tsb_c.ncalls_ [Sync],
                    0, __LINE__,
                    "std::basic_ostream<%s>::sentry::sentry (basic_ostream "
                    "&strm) with strm.tie () == &b, b.tie () == &c, c.tie () "
-                   "== &b: expected 1 call to sync () on b and 1 on c, got "
+                   "== &b: expected 0 calls to sync () on b and 0 on c, got "
                    "%d and %d",
                    cname, tsb_b.ncalls_ [Sync], tsb_c.ncalls_ [Sync]);
     }

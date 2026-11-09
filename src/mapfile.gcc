@@ -570,7 +570,6 @@ global:
     _ZNSbIwSt11char_traitsIwESaIwEEpLEPKw;
     _ZNSbIwSt11char_traitsIwESaIwEEpLERKS2_;
     _ZNSbIwSt11char_traitsIwESaIwEEpLEw;
-    _ZNSi11_C_sync_tieEv;
     _ZNSi13_C_unsafe_getEPiii;
     _ZNSi3getEPci;
     _ZNSi3getEPcic;
@@ -608,9 +607,6 @@ global:
     _ZNSirsERt;
     _ZNSirsERx;
     _ZNSirsERy;
-    _ZNSo12_C_sync_tailEjPKSt15basic_streambufIcSt11char_traitsIcEE;
-    _ZNSo13_C_sync_chainEPKSt15basic_streambufIcSt11char_traitsIcEE;
-    _ZNSo13_C_sync_rdbufEv;
     _ZNSo3putEc;
     _ZNSo5flushEv;
     _ZNSo5seekpESt4fposI11__mbstate_tE;
@@ -771,7 +767,6 @@ global:
     _ZNSt13basic_filebufIwSt11char_traitsIwEEC2Ev;
     _ZNSt13basic_filebufIwSt11char_traitsIwEED1Ev;
     _ZNSt13basic_filebufIwSt11char_traitsIwEED2Ev;
-    _ZNSt13basic_istreamIwSt11char_traitsIwEE11_C_sync_tieEv;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE13_C_unsafe_getEPili;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE3getEPwi;
     _ZNSt13basic_istreamIwSt11char_traitsIwEE3getEPwiw;
@@ -807,9 +802,6 @@ global:
     _ZNSt13basic_istreamIwSt11char_traitsIwEErsERt;
     _ZNSt13basic_istreamIwSt11char_traitsIwEErsERx;
     _ZNSt13basic_istreamIwSt11char_traitsIwEErsERy;
-    _ZNSt13basic_ostreamIwSt11char_traitsIwEE12_C_sync_tailEjPKSt15basic_streambufIwS1_E;
-    _ZNSt13basic_ostreamIwSt11char_traitsIwEE13_C_sync_chainEPKSt15basic_streambufIwS1_E;
-    _ZNSt13basic_ostreamIwSt11char_traitsIwEE13_C_sync_rdbufEv;
     _ZNSt13basic_ostreamIwSt11char_traitsIwEE3putEw;
     _ZNSt13basic_ostreamIwSt11char_traitsIwEE5flushEv;
     _ZNSt13basic_ostreamIwSt11char_traitsIwEE5seekpESt4fposI11__mbstate_tE;

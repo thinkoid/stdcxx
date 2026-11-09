@@ -132,10 +132,8 @@ public:
     struct sentry: __rw::__rw_guard {
 
         // 27.6.1.1.2, p2 - assumes 0 != __strm.rdbuf ()
-        // the tie is synchronized before the guard takes this stream's
-        // buffer mutex, so the sentry holds one buffer's mutex at a time
         explicit sentry (basic_istream &__strm, bool __noskipws = false)
-            : __rw::__rw_guard (__strm._C_sync_tie ()),
+            : __rw::__rw_guard (__strm._C_bufmutex ()),
               _C_ok (__strm._C_ipfx (__noskipws).good ()) { /* no-op */ }
 
         // 27.6.1.1.2, p8
@@ -337,10 +335,6 @@ protected:
                             int         = 0);
 
 private:
-
-    // 27.6.1.1.2, p2: synchronizes the tie's chain for the sentry,
-    // returns the mutex the sentry holds
-    __rw::__rw_mutex* _C_sync_tie ();
 
     basic_istream& _C_get (basic_streambuf<char_type, traits_type>&, int_type);
 

@@ -294,7 +294,8 @@ void test_ctor (const charT*, const Traits*,
     //     -  is.good() is true
     //     -  is.tie() is o1, o1.tie() is o2, o2.tie() is o1, each
     //        stream on its own buffer
-    //     =  the function synchronizes o1 and o2 once each and returns
+    //     =  the function flushes o1, whose sentry detects the ring
+    //        and leaves o2 alone
 
     {
         typedef std::basic_ostream<charT, Traits> Ostream;
@@ -315,12 +316,12 @@ void test_ctor (const charT*, const Traits*,
 
         _RWSTD_UNUSED (guard);
 
-        rw_assert (1 == sb1.nsyncs_ && 1 == sb2.nsyncs_ && 0 == sb.nsyncs_,
+        rw_assert (1 == sb1.nsyncs_ && 0 == sb2.nsyncs_ && 0 == sb.nsyncs_,
                    0, __LINE__,
                    "basic_istream<%s, %s>::sentry::sentry"
                    "(basic_istream &is, bool noskipws = true) with "
                    "is.tie () == &o1, o1.tie () == &o2, o2.tie () == &o1: "
-                   "expected 1 call to sync () on o1 and 1 on o2, "
+                   "expected 1 call to sync () on o1 and 0 on o2, "
                    "got %d and %d",
                    cname, tname, sb1.nsyncs_, sb2.nsyncs_);
     }

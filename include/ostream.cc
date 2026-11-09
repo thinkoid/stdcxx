@@ -40,110 +40,23 @@ basic_ostream<_CharT, _Traits>::flush ()
 
         const sentry __opfx (*this);
 
-        if (__opfx)
-            _C_sync_rdbuf ();
+        if (__opfx) {
+
+            int __res = 0;
+
+            try {
+                __res = this->rdbuf ()->pubsync ();
+            }
+            catch (...) {
+                this->setstate (ios_base::badbit | __rw::__rw_rethrow);
+            }
+
+            if (-1 == __res)
+                this->setstate (ios_base::badbit);
+        }
     }
 
     return *this;
-}
-
-
-template<class _CharT, class _Traits>
-void
-basic_ostream<_CharT, _Traits>::
-_C_sync_chain (const basic_streambuf<char_type, traits_type> *__buf)
-{
-    // count the streams on the chain, each once: the hare, two steps
-    // to the tortoise's one, falls off a chain that ends in a null
-    // and meets the tortoise on a ring
-    const basic_ostream *__p0 = this;
-    const basic_ostream *__p1 = this;
-
-    bool __ring = false;
-
-    while (__p1->tie () && __p1->tie ()->tie ()) {
-        __p0 = __p0->tie ();
-        __p1 = __p1->tie ()->tie ();
-
-        if (__p0 == __p1) {
-            __ring = true;
-            break;
-        }
-    }
-
-    _RWSTD_SIZE_T __n = 1;
-
-    if (__ring) {
-        // the tortoise restarted at *this and the hare, both one step
-        // at a time, meet at the first stream of the ring
-        for (__p0 = this; __p0 != __p1; ++__n) {
-            __p0 = __p0->tie ();
-            __p1 = __p1->tie ();
-        }
-
-        // one lap from there is the length of the ring; __n counts
-        // the streams before it plus one, and the lap the rest
-        for (__p1 = __p0->tie (); __p1 != __p0; ++__n)
-            __p1 = __p1->tie ();
-    }
-    else {
-        for (__p0 = this; __p0->tie (); ++__n)
-            __p0 = __p0->tie ();
-    }
-
-    // the chain ends before the first stream that is not good (),
-    // whose own sentry would flush neither its buffer nor its tie
-    // (27.6.2.3, p2)
-    _RWSTD_SIZE_T __ngood = 0;
-
-    for (__p0 = this; __ngood < __n && __p0->good (); ++__ngood)
-        __p0 = __p0->tie ();
-
-    if (__ngood)
-        _C_sync_tail (__ngood, __buf);
-}
-
-
-template<class _CharT, class _Traits>
-void
-basic_ostream<_CharT, _Traits>::
-_C_sync_tail (_RWSTD_SIZE_T                                   __n,
-              const basic_streambuf<char_type, traits_type> *__buf)
-{
-    // the farthest stream first, as its sentry is the innermost of
-    // the nested flushes of 27.6.2.3, p2
-    if (1 < __n)
-        this->tie ()->_C_sync_tail (__n - 1, __buf);
-
-    // what flush () does inside its sentry, under the same gate
-    if (this->rdbuf () && this->rdbuf () != __buf) {
-        _RWSTD_MT_GUARD (this->_C_bufmutex ());
-
-        if (this->good ()) {
-            if (_C_is_sync ())
-                __rw::__rw_fflush (static_cast< ios_base* >(this), 0);
-
-            _C_sync_rdbuf ();
-        }
-    }
-}
-
-
-template<class _CharT, class _Traits>
-void
-basic_ostream<_CharT, _Traits>::_C_sync_rdbuf ()
-{
-    int __res = 0;
-
-    try {
-        __res = this->rdbuf ()->pubsync ();
-    }
-    catch (...) {
-        this->setstate (ios_base::badbit | __rw::__rw_rethrow);
-    }
-
-    if (-1 == __res)
-        this->setstate (ios_base::badbit);
 }
   
 
