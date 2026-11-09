@@ -197,6 +197,27 @@ test_streambuf<charT>::overflow (int_type c /* = traits_type::eof () */)
 
 
 
+// records the order of the calls to sync () across its objects
+template <class charT>
+struct seq_streambuf: test_streambuf<charT>
+{
+    seq_streambuf (): test_streambuf<charT> (0), seq_ (0) { }
+
+    virtual int sync () {
+        seq_ = ++next_;
+        return test_streambuf<charT>::sync ();
+    }
+
+    int seq_;           // value of next_ at the last call to sync ()
+
+    static int next_;   // number of calls to sync () on all objects
+};
+
+
+template <class charT>
+int seq_streambuf<charT>::next_;
+
+
 enum num_put_overload {
     Bool = Sync + 1, Long, ULong, Dbl, LDbl, PVoid, LLong, ULLong
 };
@@ -422,6 +443,217 @@ void test_sentry (charT)
         rw_assert (bool (guard), 0, __LINE__,
                    "std::basic_ostream<%s>::sentry::operator bool() == true "
                    "after a successful construction", cname);
+    }
+
+    {
+        // verify 27.6.2.3, p2 and footnote 292 on two streams on
+        // distinct buffers tied to each other: the sentry on one
+        // synchronizes the other's buffer, and its own is left to
+        // the operation
+        test_streambuf<charT> tsb_a (0);
+        test_streambuf<charT> tsb_b (0);
+
+        Ostream a (&tsb_a);
+        Ostream b (&tsb_b);
+
+        a.tie (&b);
+        b.tie (&a);
+
+        const Sentry guard (a);
+
+        _RWSTD_UNUSED (guard);
+
+        rw_assert (1 == tsb_b.ncalls_ [Sync] && 0 == tsb_a.ncalls_ [Sync],
+                   0, __LINE__,
+                   "std::basic_ostream<%s>::sentry::sentry (basic_ostream &a) "
+                   "with a.tie () == &b, b.tie () == &a on distinct buffers: "
+                   "expected 1 call to b.rdbuf ()->sync () and 0 to "
+                   "a.rdbuf ()->sync (), got %d and %d",
+                   cname, tsb_b.ncalls_ [Sync], tsb_a.ncalls_ [Sync]);
+    }
+
+    {
+        // verify footnote 292 on two streams on one buffer tied to each
+        // other: the sentry on either leaves the buffer to the operation
+        test_streambuf<charT> tsb (0);
+
+        Ostream a (&tsb);
+        Ostream b (&tsb);
+
+        a.tie (&b);
+        b.tie (&a);
+
+        {
+            const Sentry guard (a);
+
+            _RWSTD_UNUSED (guard);
+        }
+
+        {
+            const Sentry guard (b);
+
+            _RWSTD_UNUSED (guard);
+        }
+
+        rw_assert (0 == tsb.ncalls_ [Sync], 0, __LINE__,
+                   "std::basic_ostream<%s>::sentry::sentry (basic_ostream&) "
+                   "on a and on b with a.tie () == &b, b.tie () == &a on "
+                   "one buffer: expected 0 calls to sync (), got %d",
+                   cname, tsb.ncalls_ [Sync]);
+    }
+
+    {
+        // verify 27.6.2.3, p2 on a chain of three streams on distinct
+        // buffers, strm -> b -> c: the sentry on strm synchronizes c
+        // and b once each, c first, as the nested flushes would
+        seq_streambuf<charT> tsb_strm;
+        seq_streambuf<charT> tsb_b;
+        seq_streambuf<charT> tsb_c;
+
+        Ostream strm (&tsb_strm);
+        Ostream b (&tsb_b);
+        Ostream c (&tsb_c);
+
+        strm.tie (&b);
+        b.tie (&c);
+
+        const Sentry guard (strm);
+
+        _RWSTD_UNUSED (guard);
+
+        rw_assert (   1 == tsb_c.ncalls_ [Sync] && 1 == tsb_b.ncalls_ [Sync]
+                   && 0 == tsb_strm.ncalls_ [Sync]
+                   && tsb_c.seq_ < tsb_b.seq_, 0, __LINE__,
+                   "std::basic_ostream<%s>::sentry::sentry (basic_ostream "
+                   "&strm) with strm.tie () == &b, b.tie () == &c: expected "
+                   "1 call to sync () on c, then 1 on b, and 0 on strm; got "
+                   "%d on c (%d), %d on b (%d), %d on strm",
+                   cname, tsb_c.ncalls_ [Sync], tsb_c.seq_,
+                   tsb_b.ncalls_ [Sync], tsb_b.seq_,
+                   tsb_strm.ncalls_ [Sync]);
+    }
+
+    {
+        // verify 27.6.2.3, p2 on a chain that enters a ring of ties,
+        // strm -> b -> c -> b: the sentry on strm synchronizes b and
+        // c once each and returns
+        test_streambuf<charT> tsb_strm (0);
+        test_streambuf<charT> tsb_b (0);
+        test_streambuf<charT> tsb_c (0);
+
+        Ostream strm (&tsb_strm);
+        Ostream b (&tsb_b);
+        Ostream c (&tsb_c);
+
+        strm.tie (&b);
+        b.tie (&c);
+        c.tie (&b);
+
+        const Sentry guard (strm);
+
+        _RWSTD_UNUSED (guard);
+
+        rw_assert (1 == tsb_b.ncalls_ [Sync] && 1 == tsb_c.ncalls_ [Sync],
+                   0, __LINE__,
+                   "std::basic_ostream<%s>::sentry::sentry (basic_ostream "
+                   "&strm) with strm.tie () == &b, b.tie () == &c, c.tie () "
+                   "== &b: expected 1 call to sync () on b and 1 on c, got "
+                   "%d and %d",
+                   cname, tsb_b.ncalls_ [Sync], tsb_c.ncalls_ [Sync]);
+    }
+
+    {
+        // verify that the chain of ties ends at a stream that is not
+        // good: on strm -> b -> c with b failed, b's own sentry would
+        // flush neither its buffer nor its tie (27.6.2.3, p2)
+        test_streambuf<charT> tsb_strm (0);
+        test_streambuf<charT> tsb_b (0);
+        test_streambuf<charT> tsb_c (0);
+
+        Ostream strm (&tsb_strm);
+        Ostream b (&tsb_b);
+        Ostream c (&tsb_c);
+
+        strm.tie (&b);
+        b.tie (&c);
+
+        b.setstate (std::ios_base::failbit);
+
+        const Sentry guard (strm);
+
+        _RWSTD_UNUSED (guard);
+
+        rw_assert (0 == tsb_b.ncalls_ [Sync] && 0 == tsb_c.ncalls_ [Sync],
+                   0, __LINE__,
+                   "std::basic_ostream<%s>::sentry::sentry (basic_ostream "
+                   "&strm) with strm.tie () == &b, b.tie () == &c and "
+                   "b.rdstate () == %{Is}: expected 0 calls to sync () on "
+                   "b and 0 on c, got %d and %d",
+                   cname, b.rdstate (), tsb_b.ncalls_ [Sync],
+                   tsb_c.ncalls_ [Sync]);
+    }
+
+    {
+        // verify that a tied stream whose buffer's sync () returns -1
+        // gets badbit, and that the stream and its sentry are not
+        // affected (27.6.2.6, p7 as amended by LWG 581)
+        test_streambuf<charT> tsb_strm (0);
+        test_streambuf<charT> tsb_tied (0);
+
+        Ostream strm (&tsb_strm);
+        Ostream tied (&tsb_tied);
+
+        strm.tie (&tied);
+
+        tsb_tied.fails_ = Sync;
+
+        const Sentry guard (strm);
+
+        rw_assert (tied.bad () && strm.good () && bool (guard), 0, __LINE__,
+                   "std::basic_ostream<%s>::sentry::sentry (basic_ostream "
+                   "&s) with s.tie ()->rdbuf ()->sync () == -1: expected "
+                   "s.tie ()->bad (), s.good () and a true sentry; got "
+                   "s.tie ()->rdstate () == %{Is}, s.rdstate () == %{Is}, "
+                   "sentry %b",
+                   cname, tied.rdstate (), strm.rdstate (), bool (guard));
+    }
+
+    if (0 <= rw_opt_exceptions) {
+        // verify that an exception from the tied stream's buffer
+        // escapes the sentry's construction when the tied stream's
+        // exceptions () has badbit (27.6.2.6, p1 and p7 as amended
+        // by LWG 581)
+        test_streambuf<charT> tsb_strm (0);
+        test_streambuf<charT> tsb_tied (0);
+
+        Ostream strm (&tsb_strm);
+        Ostream tied (&tsb_tied);
+
+        strm.tie (&tied);
+
+        tsb_tied.throws_ = Sync;
+
+        tied.exceptions (std::ios_base::badbit);
+
+        bool escaped = false;
+
+        try {
+            const Sentry guard (strm);
+
+            _RWSTD_UNUSED (guard);
+        }
+        catch (...) {
+            escaped = true;
+        }
+
+        rw_assert (escaped && tied.bad (), 0, __LINE__,
+                   "std::basic_ostream<%s>::sentry::sentry (basic_ostream "
+                   "&s) with s.tie ()->exceptions () == badbit and a "
+                   "throwing s.tie ()->rdbuf ()->sync (): expected the "
+                   "exception to escape and s.tie ()->bad (); got %s, "
+                   "s.tie ()->rdstate () == %{Is}",
+                   cname, escaped ? "escaped" : "not escaped",
+                   tied.rdstate ());
     }
 
     {

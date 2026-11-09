@@ -290,6 +290,42 @@ void test_ctor (const charT*, const Traits*,
     }
 
     //////////////////////////////////////////////////////////////
+    // exercise 27.6.1.1.2, p2:
+    //     -  is.good() is true
+    //     -  is.tie() is o1, o1.tie() is o2, o2.tie() is o1, each
+    //        stream on its own buffer
+    //     =  the function synchronizes o1 and o2 once each and returns
+
+    {
+        typedef std::basic_ostream<charT, Traits> Ostream;
+
+        Streambuf<charT, Traits> sb (cbuf, cbuf + sizeof cbuf / sizeof *cbuf);
+        Streambuf<charT, Traits> sb1 (cbuf, cbuf);
+        Streambuf<charT, Traits> sb2 (cbuf, cbuf);
+
+        Istream is (&sb);
+        Ostream o1 (&sb1);
+        Ostream o2 (&sb2);
+
+        is.tie (&o1);
+        o1.tie (&o2);
+        o2.tie (&o1);
+
+        const Sentry guard (is, true);
+
+        _RWSTD_UNUSED (guard);
+
+        rw_assert (1 == sb1.nsyncs_ && 1 == sb2.nsyncs_ && 0 == sb.nsyncs_,
+                   0, __LINE__,
+                   "basic_istream<%s, %s>::sentry::sentry"
+                   "(basic_istream &is, bool noskipws = true) with "
+                   "is.tie () == &o1, o1.tie () == &o2, o2.tie () == &o1: "
+                   "expected 1 call to sync () on o1 and 1 on o2, "
+                   "got %d and %d",
+                   cname, tname, sb1.nsyncs_, sb2.nsyncs_);
+    }
+
+    //////////////////////////////////////////////////////////////
     // exercise 27.6.1.1.2, p1:
     //     -  is.good() is true
     //     -  noskipws is zero

@@ -1,8 +1,9 @@
 # `flush` as a protocol primitive: how the tie and `unitbuf` re-enter the sentry
 
 As of 2026-11-09 (3a930842). Every quotation was checked against
-ISO/IEC 14882:2003 and N3242; every claim about the code against the
-tree at the commit above, built as 15D with GCC 16.2.1.
+ISO/IEC 14882:2003 and N3242; every claim about the code before the
+change against the tree at the commit above, and chapter 8 against
+the change, built as 15D with GCC 16.2.1.
 
 Output streams have two synchronization points of their own: the tie
 before an operation and `unitbuf` after one. Both need a buffer
@@ -29,8 +30,8 @@ what each one left, and states the rule none of them states.
   ce319daa), met the tie cycle, and in March 2008 made `_C_opfx`
   detect a cycle in the tie chain and skip the flush (STDCXX-804,
   222c045b).
-- **What the skip costs.** Two streams on distinct buffers tied to
-  each other synchronize neither, measured in chapter 6. The
+- **What the skip cost.** Two streams on distinct buffers tied to
+  each other synchronized neither, measured in chapter 6. The
   standard footnote covers a shared buffer, where the sync would be
   redundant; it does not cover distinct buffers, where it is owed. By
   comparison libstdc++ has no guard and recurses until the stack is
@@ -38,11 +39,12 @@ what each one left, and states the rule none of them states.
 - **The rule.** Synchronization the protocol does on its own behalf
   is a buffer operation, never a stream operation. N3242 applied it to
   `unitbuf`. The tie is the one internal synchronization point that
-  still goes through `flush`, in the standard and in this library.
-- **The resolution** (chapter 8) applies the rule to the tie: walk the
-  chain once, `pubsync` each distinct buffer under the gate the tied
-  stream's own sentry would have applied. It is the open entry under
-  Streams in `TODO`.
+  still goes through `flush` in the standard.
+- **The resolution** (chapter 8) applies the rule to the tie: the
+  sentry walks the chain of ties once, the farthest stream first, and
+  calls `pubsync` on each stream's buffer under the gate that
+  stream's own `flush` applies. Only the caller's buffer is skipped.
+  The sentry takes its own buffer's mutex after the walk.
 
 ## 1. Terms
 
@@ -58,7 +60,7 @@ what each one left, and states the rule none of them states.
   flush the tie, check the state. Its destructor is the suffix: the
   `unitbuf` flush. In this library it is also the lock: `sentry`
   derives from `__rw::__rw_guard` and takes the buffer's mutex in its
-  constructor (`include/ostream` 75-80).
+  constructor, after the prefix (`include/ostream` 75-84).
 - **the gate.** This note's name for what the sentry does for every
   operation: refuse to touch the buffer when the stream is not
   `good ()`, turn an exception from the buffer into `badbit` and
@@ -225,10 +227,12 @@ The library implemented the proposed resolution of 581 in January
 2008, before C++11 adopted it (STDCXX-626; ce319daa, whose ChangeLog
 entry reads "Implemented proposed resolution of LWG issue 581 and
 reverted the resolution of issue 60 wrt ostream::flush()").
-`include/ostream.cc` 35-55 is that code: `flush` constructs a sentry,
-calls `pubsync` inside a `try`, sets `badbit` on -1, and on an
-exception sets `badbit` with the flag that rethrows when the mask
-asks. The comment at line 39 points at the issue.
+`flush` in `include/ostream.cc` is that code: it constructs a sentry
+and, when the sentry is true, calls `pubsync` inside a `try`, sets
+`badbit` on -1, and on an exception sets `badbit` with the flag that
+rethrows when the mask asks. The comment at line 39 points at the
+issue. Since chapter 8 the body after the sentry is
+`_C_sync_rdbuf`, which the tie's walk calls too.
 
 Until then `_C_opfx`, the sentry constructor's body, read:
 
@@ -251,9 +255,9 @@ asserts that every stream is still `good ()`. It checks termination.
 It does not check that any buffer other than the stream's own was
 synchronized, so the skip it pins is invisible to it.
 
-## 5. The code today
+## 5. The code before the change
 
-`include/ostream` 279-306, `_C_opfx`:
+`include/ostream` 279-306 at 3a930842, `_C_opfx`:
 
 ```cpp
 template<class _CharT, class _Traits>
@@ -289,16 +293,18 @@ basic_ostream<_CharT, _Traits>::_C_opfx ()
 }
 ```
 
-The walk is a tortoise and a hare over the tie chain. `__p0` advances
-one stream per step and `__p1` two. On a chain that ends in a null
-the hare falls off and the loop exits with `__tie` intact. On a chain
-that loops the two meet, or two streams on one buffer are compared,
-and `__tie` is zeroed. The flush is then either the whole chain,
-through `__tie->flush ()` and its own sentry and its own tie, or
-nothing.
+The walk was a tortoise and a hare over the tie chain. `__p0`
+advanced one stream per step and `__p1` two. On a chain that ended in
+a null the hare fell off and the loop exited with `__tie` intact. On a
+chain that looped the two met, or two streams on one buffer were
+compared, and `__tie` was zeroed. The flush was then either the whole
+chain, through `__tie->flush ()` and its own sentry and its own tie,
+or nothing. The sentry's guard took this stream's buffer mutex before
+`_C_opfx` ran, so the whole prefix ran under it.
 
-The destructor, `include/ostream` 83-93, already follows the N3242
-form: `pubsync` directly, `badbit` without an exception on -1.
+The destructor, then at `include/ostream` 83-93 and unchanged by
+chapter 8, already followed the N3242 form: `pubsync` directly,
+`badbit` without an exception on -1.
 
 ## 6. The probe
 
@@ -352,7 +358,7 @@ int main ()
 Against the 15D build, linked the tree's way (`gcc`, `-lstd15D
 -lsupc++`), and against libstdc++ 6.0.36 with `g++`:
 
-| case | owed by 27.6.2.3, p2 | this library | libstdc++ |
+| case | owed by 27.6.2.3, p2 | this library at 3a930842 | libstdc++ |
 |---|---|---|---|
 | `a << 'x'`, `a` and `b` tied to each other, distinct buffers | `b` synchronized | `a.syncs 0 b.syncs 0` | SIGSEGV |
 | `c << 'z'`, `c` and `d` tied to each other, one buffer | nothing, footnote 292 | `syncs 0` | SIGSEGV |
@@ -360,9 +366,10 @@ Against the 15D build, linked the tree's way (`gcc`, `-lstd15D
 
 libstdc++ implements 581 with no guard. The recursion is sentry,
 `flush`, sentry, and never reaches `sync`, so the probe's depth check
-never fires and the process dies on the stack. This library survives
-every ring, as STDCXX-804 intended, and synchronizes nothing in one.
-The owed sync on the first row is the departure.
+never fires and the process dies on the stack. The library at
+3a930842 survived every ring, as STDCXX-804 intended, and synchronized
+nothing in one. The owed sync on the first row was the departure;
+chapter 8 has the probe against the change.
 
 ## 7. A second defect: the tie has no invariant
 
@@ -376,44 +383,203 @@ program may expect instead. STDCXX-804 is the same notice in code.
 
 Nothing cures this but a sentence in the standard. An implementation
 does the next thing: it defines the behavior of a ring, and the only
-definition that satisfies p2 for every member is that every buffer in
+definition that satisfies p2 for every member is that every stream in
 the ring is synchronized once.
 
 ## 8. The resolution
 
 The rule, stated once: synchronization the protocol performs on its
-own behalf is a buffer operation. N3242 applied it to `unitbuf`; the
-tie is the remaining case. Applied to `_C_opfx`:
+own behalf is a buffer operation. N3242 applied it to `unitbuf`; this
+change applies it to the tie. The sentry no longer calls `flush` on
+the tied stream. `basic_ostream::_C_sync_chain` walks the chain of
+ties once and synchronizes each stream's buffer itself
+(`include/ostream.cc` 51-129):
 
-- walk the chain from `tie ()` until a null or a stream already
-  visited, so the walk terminates on a ring by construction;
-- for each stream on the walk whose buffer has not been synchronized
-  yet, do what that stream's own `flush` would do inside its sentry:
-  skip it if it is not `good ()`, take its buffer's lock, call
-  `pubsync`, set `badbit` on that stream on -1, and on an exception
-  set `badbit` on that stream and rethrow only when its mask asks;
-- synchronize a buffer once however many streams share it, which is
-  the shared-buffer skip of footnote 292 kept.
+```cpp
+template<class _CharT, class _Traits>
+void
+basic_ostream<_CharT, _Traits>::
+_C_sync_chain (const basic_streambuf<char_type, traits_type> *__buf)
+{
+    // count the streams on the chain, each once: the hare, two steps
+    // to the tortoise's one, falls off a chain that ends in a null
+    // and meets the tortoise on a ring
+    const basic_ostream *__p0 = this;
+    const basic_ostream *__p1 = this;
 
-The walk replaces the chain of nested sentries with one pass over the
-same streams, and it synchronizes the same buffers the chain would
-have, with the same per-stream gate. The observable difference from
-`tie ()->flush ()` is the one footnote 292 licenses: a buffer reached
-twice is synchronized once. The 2008 regression test keeps passing,
-since it asks only that every stream in the ring stays `good ()`.
+    bool __ring = false;
 
-Two things the walk must not lose, because the chain had them:
+    while (__p1->tie () && __p1->tie ()->tie ()) {
+        __p0 = __p0->tie ();
+        __p1 = __p1->tie ()->tie ();
 
-- the per-stream gate, above. Dropping to a bare `pubsync` on each
-  buffer would synchronize a failed stream and let a derived buffer's
-  exception escape, the two defects 581 was filed over;
-- the lock. The tied stream's sentry takes its buffer's mutex; the
-  walk takes the same mutex around the same call.
+        if (__p0 == __p1) {
+            __ring = true;
+            break;
+        }
+    }
 
-The alternative is to leave the code and record the first row of the
-table in chapter 2 of `ref-conformance.md` as a departure from
-27.6.2.3, p2: a ring of distinct buffers is not synchronized. The
-choice is the open entry under Streams in `TODO`.
+    _RWSTD_SIZE_T __n = 1;
+
+    if (__ring) {
+        // the tortoise restarted at *this and the hare, both one step
+        // at a time, meet at the first stream of the ring
+        for (__p0 = this; __p0 != __p1; ++__n) {
+            __p0 = __p0->tie ();
+            __p1 = __p1->tie ();
+        }
+
+        // one lap from there is the length of the ring; __n counts
+        // the streams before it plus one, and the lap the rest
+        for (__p1 = __p0->tie (); __p1 != __p0; ++__n)
+            __p1 = __p1->tie ();
+    }
+    else {
+        for (__p0 = this; __p0->tie (); ++__n)
+            __p0 = __p0->tie ();
+    }
+
+    // the chain ends before the first stream that is not good (),
+    // whose own sentry would flush neither its buffer nor its tie
+    // (27.6.2.3, p2)
+    _RWSTD_SIZE_T __ngood = 0;
+
+    for (__p0 = this; __ngood < __n && __p0->good (); ++__ngood)
+        __p0 = __p0->tie ();
+
+    if (__ngood)
+        _C_sync_tail (__ngood, __buf);
+}
+
+
+template<class _CharT, class _Traits>
+void
+basic_ostream<_CharT, _Traits>::
+_C_sync_tail (_RWSTD_SIZE_T                                   __n,
+              const basic_streambuf<char_type, traits_type> *__buf)
+{
+    // the farthest stream first, as its sentry is the innermost of
+    // the nested flushes of 27.6.2.3, p2
+    if (1 < __n)
+        this->tie ()->_C_sync_tail (__n - 1, __buf);
+
+    // what flush () does inside its sentry, under the same gate
+    if (this->rdbuf () && this->rdbuf () != __buf) {
+        _RWSTD_MT_GUARD (this->_C_bufmutex ());
+
+        if (this->good ()) {
+            if (_C_is_sync ())
+                __rw::__rw_fflush (static_cast< ios_base* >(this), 0);
+
+            _C_sync_rdbuf ();
+        }
+    }
+}
+```
+
+The walk has six parts:
+
+- **The count.** The walk counts the distinct streams reachable from
+  the tie, the tie included. The tortoise and hare find a ring, as
+  the 2008 code did. The tortoise restarted at the tie and the hare,
+  both advanced one stream at a time, then meet at the ring's first
+  stream, and one lap from there is the ring's length. Two streams
+  tied to each other count 2, a stream tied to itself 1, and `a -> b
+  -> c -> b` counts 3 from `a`. The walk allocates nothing and marks
+  no stream, so the streams it reads stay unchanged.
+- **The order.** `_C_sync_tail` recurses to the count's depth and
+  synchronizes on the way back, so the farthest stream goes first.
+  The nested flushes of p2 did the same, since the farthest stream's
+  sentry was the innermost. They recursed to the same depth, so the
+  walk adds no limit.
+- **The cut.** The walk ends before the first stream that is not
+  `good ()`, and nothing beyond it is synchronized. 27.6.2.3, p2 makes
+  the tie flush part of the preparation that happens "If os.good() is
+  nonzero", so that stream's own sentry would have flushed neither its
+  buffer nor its tie: the cut is the letter of p2. A stream without a
+  buffer is not `good ()`, so the chain ends there too. Footnote 292
+  licenses fewer synchronizations, never more.
+- **The gate.** For each stream the walk does what that stream's
+  `flush` does inside its sentry, and nothing else. It skips a stream
+  whose buffer is the caller's, takes the buffer's mutex, and checks
+  `good ()` again under it, since the state of a locked stream can
+  change under the walk. It then calls `__rw_fflush` for a standard
+  stream synchronized with stdio, as `_C_opfx` does, and calls
+  `_C_sync_rdbuf` (132-147): `pubsync` in a `try`, `badbit` on -1,
+  and on an exception `badbit` with the flag that rethrows when the
+  stream's mask asks. `_C_sync_rdbuf` is the body `flush` had after
+  its sentry, and `flush` calls it there, so the protocol has one
+  copy. A failed stream is thus left alone, and a throwing buffer
+  reaches the program only when its stream asks: the two defects 581
+  was filed over stay fixed. The destructor of the tie's own sentry
+  has no counterpart: it called `pubsync` a second time on a standard
+  stream synchronized with stdio, so `cin`'s tie to `cout` now
+  synchronizes `cout`'s buffer once where it did twice.
+- **The caller's buffer.** A good stream whose buffer is the caller's
+  is stepped over: the walk goes on past it, but its buffer is not
+  synchronized. The operation about to run writes that buffer, so no
+  synchronization is necessary and footnote 292 lets the call not
+  occur. It is the case the pre-2008 code skipped.
+- **A shared buffer.** Any other buffer that two streams of the chain
+  share is synchronized once per good stream that holds it. Each
+  nested flush of p2 calls `pubsync`, so that is the letter of p2,
+  and the walk does not deduplicate.
+
+The lock moved. The sentry's guard took this stream's buffer mutex
+before the prefix ran; it now takes it after. `_C_opfx` walks the
+chain from the tie, flushes stdio for a synchronized standard stream,
+and returns the mutex, which the guard then takes
+(`include/ostream` 75-84). The walk takes one buffer's mutex at a
+time, each after the recursion beneath it has returned, and the
+sentry holds none of its own across the walk. Two threads inserting
+into two standard streams tied to each other, `cout` and `cerr`, thus
+cannot deadlock. With the caller's mutex held across the walk they
+would: each thread would hold its own buffer's mutex and wait for the
+other's. Nothing in `_C_opfx` needs this stream's buffer mutex, since
+it reads this stream's state and touches other buffers only under
+their own mutexes.
+
+The input sentry follows the same order. 27.6.1.1.2, p2:
+
+> If is.good() is true, prepares for formatted or unformatted input.
+> First, if is.tie() is not a null pointer, the function calls
+> is.tie()->flush() to synchronize the output sequence with any
+> associated external C stream.
+
+`basic_istream::_C_sync_tie` (`include/istream.cc` 72-86) calls
+`tie ()->_C_sync_chain (rdbuf ())` when the stream is `good ()` and
+has a tie, inside a `try` whose handler sets `badbit` with the
+rethrow flag, as the `try` of `_C_ipfx` did around the whole prefix.
+It returns the mutex the sentry's guard takes. `_C_ipfx` no longer
+synchronizes the tie; its state check and its whitespace skip run
+under the lock as before. Two consequences show:
+
+- `ws`, which calls `_C_ipfx` again after its sentry, synchronizes
+  the tie once where it did twice.
+- A tie whose exception reaches the input stream, because the tie's
+  mask asks and the input stream's does not, leaves the input stream
+  with `badbit`, and `_C_ipfx` then adds `failbit` for a stream not
+  `good ()`. 27.6.1.1.2, p5 permits that: "During preparation, the
+  constructor may call setstate(failbit)".
+
+The probe of chapter 6, against the change:
+
+| case | this library |
+|---|---|
+| `a << 'x'`, `a` and `b` tied to each other, distinct buffers | `a.syncs 0 b.syncs 1` |
+| `b << 'y'`, after the row above | `a.syncs 1 b.syncs 1` |
+| `c << 'z'`, `c` and `d` tied to each other, one buffer | `syncs 0` |
+| `f << 'w'`, `f` tied to `e`, `e` untied | `e.syncs 1` |
+
+Two threads inserting ten thousand characters each into `cout` and
+`cerr`, tied to each other, finish in 0.025 s. `27.ostream`'s
+`test_sentry` pins the walk: two streams tied to each other on
+distinct buffers and on one, a chain of three and its order, a chain
+that enters a ring, a chain cut at a failed stream, a tied buffer whose
+`sync` returns -1, and one that throws under the tied stream's
+`exceptions (badbit)`. `27.istream.sentry` pins an input stream tied
+to a ring of two. The 2008 regression test keeps passing, since it
+asks only that every stream in the ring stays `good ()`.
 
 ## 9. The lesson
 

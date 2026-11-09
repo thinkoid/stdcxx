@@ -26,26 +26,6 @@ at the top.
 
 ** Streams
 
-*** TODO =_C_opfx= skips the tie's flush on a loop of distinct buffers
-
-=include/ostream= 279-306 skip ~tie ()->flush ()~ when the tie chain
-loops or a stream in it shares the buffer. Footnote 292 of 14882:2003
-27.6.2.3 allows the skip where no synchronization is necessary, which
-holds for a shared buffer but not for a loop over distinct buffers.
-The loop exists because =flush= builds a sentry (LWG 581); the
-tortoise and hare of STDCXX-804 stop the recursion by skipping the
-flush. Measured: two =ostream=s on distinct buffers tied to each
-other synchronize neither (=analysis-flush-reentry.md=, ch. 6).
-
-Fix: a decision, =analysis-flush-reentry.md= ch. 8: walk the chain
-once and =pubsync= each distinct buffer under the tied stream's own
-gate (state, lock, exceptions), or record the skip in chapter 2 of
-=ref-conformance.md=.
-
-Check: two streams on distinct buffers, tied to each other: an
-insertion into one synchronizes the other's buffer once, and the
-STDCXX-804 regression test still passes.
-
 *** TODO =basic_filebuf::xsputn= writes the internal characters on a conversion error
 
 When =codecvt::out= returns =error=, =basic_filebuf::xsputn=
@@ -688,6 +668,37 @@ Fix: the comment and the format say =pbase()=; the note says
 "wchar_t tests disabled".
 
 Check: reading; the test at its pin.
+
+** TODO =27.ostream='s =test_streambuf= leaves =pstrm_= unset in its buffer constructor
+
+=tests/iostream/27.ostream.cpp= 73-77: the constructor that takes a
+buffer and its size initializes every member but =pstrm_=, and =sync=
+(138) calls =setstate= through =pstrm_= when it is not null. A row that
+reaches =sync= on such a buffer thus reads an indeterminate pointer.
+None does today: =test_num_put::test= (347) and =test_formatted= (913)
+never call =sync=, and the third user (1670) sets =pstrm_= to 0 itself.
+=fail_when_= (154) is static, so =test_formatted= (930) also leaves it
+changed for every later =test_streambuf= of the character type; the
+=test_sentry= rows that fail or throw on the first =sync= hold only
+because =test_sentry= runs first. Seen while adding the tie rows of
+=test_sentry=, 2026-11-09.
+
+Fix: the constructor sets =pstrm_= to 0; =fail_when_= becomes a member
+that each constructor sets to 1.
+
+Check: reading; the test at its pin.
+
+** TODO =27.istream.sentry= heads two of its p2 blocks p1
+
+=tests/iostream/27.istream.sentry.cpp= 257 and 329 head the tie block
+and the whitespace block "exercise 27.6.1.1.2, p1". Both exercise the
+constructor's effects, which 14882:2003 numbers p2, as the quotation
+at the top of the file does (60-70); p1 is the class's one-sentence
+description. Seen while adding the tie ring row, 2026-11-09.
+
+Fix: both headings read p2.
+
+Check: reading.
 
 * Certification
 

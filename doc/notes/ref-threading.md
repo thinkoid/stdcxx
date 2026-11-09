@@ -58,7 +58,10 @@ to one stream object may race, as C++11 permits
 `ios_base::Init` clears it on the eight standard objects, whose
 sentries and state changes then take the stream's and the buffer's
 mutex. C++11 asks that of a standard object synchronized with stdio
-([iostream.objects]). See [ios.cpp](../../src/ios.cpp),
+([iostream.objects]). A sentry synchronizes the tie before it takes
+its own buffer's mutex, and holds one buffer's mutex at a time while
+it does, so two threads writing to `cout` and `cerr` tied to each
+other do not deadlock. See [ios.cpp](../../src/ios.cpp),
 [iostream.cpp](../../src/iostream.cpp) and
 [_basic_ios.h](../../include/rw/_basic_ios.h).
 

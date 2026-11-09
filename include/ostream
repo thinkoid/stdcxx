@@ -74,10 +74,14 @@ public:
     // 27.6.2.3
     struct sentry: __rw::__rw_guard {
 
+        // the prefix synchronizes the tie before the guard takes this
+        // stream's buffer mutex, so two threads writing to two streams
+        // tied to each other do not each hold one mutex and wait for
+        // the other
         explicit
         sentry (basic_ostream<char_type, traits_type> &__strm)
-            : __rw::__rw_guard (__strm.rdbuf () ? __strm._C_bufmutex () : 0),
-              _C_strm (__strm), _C_ok (_C_strm._C_opfx ().good ()) { }
+            : __rw::__rw_guard (__strm._C_opfx ()),
+              _C_strm (__strm), _C_ok (__strm.good ()) { }
 
         // 27.6.2.3, p4
         ~sentry () {
@@ -213,10 +217,28 @@ public:
     // 27.6.2.4, p4
     basic_ostream& seekp (off_type, ios_base::seekdir);
 
+    // 27.6.2.3, p2: synchronizes the output sequence of *this and
+    // of each stream tied beyond it, the farthest first, calling
+    // pubsync () on each buffer under its lock in place of the nested
+    // flush () calls of p2, which recurse without end on a ring of
+    // ties; a stream whose buffer is __buf, the caller's, is left to
+    // the caller's own operation (footnote 292; departure)
+    void _C_sync_chain (const basic_streambuf<char_type, traits_type>*);
+
 private:
 
-    // implements sentry ctor
-    basic_ostream& _C_opfx ();
+    // implements sentry ctor, returns the mutex the sentry holds
+    __rw::__rw_mutex* _C_opfx ();
+
+    // synchronizes the __n streams that start at *this, the farthest
+    // first, for _C_sync_chain; __n is at least 1
+    void _C_sync_tail (_RWSTD_SIZE_T,
+                       const basic_streambuf<char_type, traits_type>*);
+
+    // calls rdbuf ()->pubsync () and sets badbit when it returns -1 or
+    // throws, rethrowing as exceptions () asks; for flush () and
+    // _C_sync_tail
+    void _C_sync_rdbuf ();
 
     // synchronize *this with stdio (stdout and stderr)?
     bool _C_is_sync () const {
@@ -275,35 +297,16 @@ basic_ostream<_CharT, _Traits>::operator<< (int __val)
 
 
 template<class _CharT, class _Traits>
-inline basic_ostream<_CharT, _Traits>&
+inline __rw::__rw_mutex*
 basic_ostream<_CharT, _Traits>::_C_opfx ()
 {
-    basic_ostream* __tie = this->tie ();
-
-    if (__tie && this->good ()) {
-
-        // detect and avoid flushing streams that are tied together
-        // or that share the same buffer to prevent deadlock or
-        // infinite recursion
-        const basic_ostream *__p0, *__p1;
-
-        // traverse the list of tied streams looking for a cycle
-        for (__p0 = this, __p1 = this->tie (); __p0 && __p1;
-             __p0 = __p0->tie (),
-                 __p1 = __p1->tie () ? __p1->tie ()->tie () : 0)
-            if (__p0 == __p1 || __p0->rdbuf () == __p1->rdbuf ()) {
-                __tie = 0;
-                break;
-            }
-
-        if (__tie)
-            __tie->flush ();
-    }
+    if (this->tie () && this->good ())
+        this->tie ()->_C_sync_chain (this->rdbuf ());
 
     if (_C_is_sync ())
         __rw::__rw_fflush (static_cast< ios_base* >(this), 0);
 
-    return *this;
+    return this->rdbuf () ? this->_C_bufmutex () : 0;
 }
 
 
