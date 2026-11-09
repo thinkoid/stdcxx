@@ -23,8 +23,10 @@ what each one left, and states the rule none of them states.
   With a sentry inside `flush`, the first is a cycle through two tied
   streams and the second a cycle through one.
 - **The patches.** LWG 60 stripped `flush` of its sentry. LWG 581 put
-  it back and had the sentry destructor call `pubsync` directly
-  (N3242 27.7.3.4, p4). Footnote 292 lets the tie flush not happen
+  it back, and with it opened both cycles. LWG 835 closed them for
+  C++11: the sentry destructor calls `pubsync` directly (N3242
+  27.7.3.4, p4), and a ring of ties is a precondition violation of
+  `tie` (N3242 27.5.5.3, p2). Footnote 292 lets the tie flush not happen
   "if the function can determine that no synchronization is
   necessary". The library adopted 581 in January 2008 (STDCXX-626,
   ce319daa), met the tie cycle, and in March 2008 made `_C_opfx`
@@ -37,9 +39,10 @@ what each one left, and states the rule none of them states.
   comparison libstdc++ has no guard and recurses until the stack is
   gone.
 - **The rule.** Synchronization the protocol does on its own behalf
-  is a buffer operation, never a stream operation. N3242 applied it to
-  `unitbuf`. The tie is the one internal synchronization point that
-  still goes through `flush` in the standard.
+  is a buffer operation, never a stream operation. LWG 835 applied it
+  to `unitbuf`, and for the tie chose a precondition instead. The tie
+  is the one internal synchronization point that still goes through
+  `flush` in the standard.
 - **The resolution** (chapter 8) applies the rule to the tie: the
   sentry walks the chain of ties once, the farthest stream first, and
   calls `pubsync` on each stream's buffer under the gate that
@@ -51,8 +54,8 @@ what each one left, and states the rule none of them states.
 - **tie.** `basic_ios::tie ()` is a pointer to an output stream that
   is flushed before every operation on this stream. `cin` is tied to
   `cout` so a prompt shows before a read. Any stream may be tied to
-  any stream; nothing in the standard restricts the shape of the
-  chain.
+  any stream; nothing in 14882:2003 restricts the shape of the chain,
+  and C++11 forbids a ring (chapter 4.3).
 - **`unitbuf`.** A format flag: the stream flushes after every output
   operation.
 - **sentry.** The object every formatted and unformatted operation
@@ -162,7 +165,7 @@ may call it. The cost is in the last sentence of 27.6.2.6, p7:
 `flush` "does not behave as an unformatted output function". It is
 the one output operation outside the gate.
 
-### 4.2 LWG 581: restore `flush`, move the destructor
+### 4.2 LWG 581: restore `flush`
 
 LWG 581 objected to that cost. Its text:
 
@@ -198,8 +201,7 @@ The third duty, the lock, the issue does not mention; a library whose
 sentry locks feels it as a second copy of the protocol to keep in
 step with the first.
 
-The resolution put `flush` inside the gate and broke the `unitbuf`
-cycle at the other end. N3242 27.7.3.7, p7:
+The resolution put `flush` inside the gate. N3242 27.7.3.7, p7:
 
 > Effects: Behaves as an unformatted output function (as described in
 > 27.7.3.6.1, paragraph 1). If rdbuf() is not a null pointer,
@@ -209,19 +211,47 @@ cycle at the other end. N3242 27.7.3.7, p7:
 > setstate(badbit) (which may throw ios_base::failure (27.5.5.4)).
 > Otherwise, if the sentry object returns false, does nothing.
 
-N3242 27.7.3.4, p4, the sentry destructor:
+With a sentry in `flush`, both cycles of chapter 3 were open: the
+destructor of 2003 still called `os.flush()` under `unitbuf`, and the
+tie sentence still called `os.tie()->flush()`.
+
+### 4.3 LWG 835: close one cycle, forbid the other
+
+LWG 835, "Tying two streams together (correction to DR 581)", opened
+2008-05-17, names both. Its text observes that two streams tied to
+each other, directly or through a third, now flush each other without
+end, with `cout` and `cerr` tied to each other as the example, and
+that a stream with `unitbuf`, `cerr`, recurses on `cerr << flush`
+because the sentry destructor calls `flush` again. The wording took
+until 2010 and went into C++11 in two parts.
+
+The destructor, N3242 27.7.3.4, p4:
 
 > If ((os.flags() & ios_base::unitbuf) && !uncaught_exception() &&
 > os.good()) is true, calls os.rdbuf()->pubsync(). If that function
 > returns -1, sets badbit in os.rdstate() without propagating an
 > exception.
 
-The destructor now calls the buffer, not the stream, and carries its
-own gate: `os.good()` and "without propagating an exception". That is
-the rule of this note, applied once. The tie sentence, N3242
-27.7.3.4, p2, still reads "calls os.tie()->flush()".
+It calls the buffer, not the stream, and carries its own gate:
+`os.good()` and "without propagating an exception". That is the rule
+of this note, applied once: the `unitbuf` cycle is closed at the
+destructor.
 
-### 4.3 The library adopts 581 and meets the tie cycle
+The tie, N3242 27.5.5.3, p2, a new precondition:
+
+> Requires: If tiestr is not null, tiestr must not be reachable by
+> traversing the linked list of tied stream objects starting from
+> tiestr->tie().
+
+The tie cycle is not closed; it is forbidden. The tie sentence, N3242
+27.7.3.4, p2, still reads "calls os.tie()->flush()", and a program
+that builds a ring has broken a precondition, so its behavior is
+undefined and no implementation has to detect it. For the tie the
+committee chose the invariant over the primitive. 14882:2003, which
+this library targets, has neither the precondition nor the
+destructor's form: there a ring is well-formed and the text recurses.
+
+### 4.4 The library adopts 581 and meets the tie cycle
 
 The library implemented the proposed resolution of 581 in January
 2008, before C++11 adopted it (STDCXX-626; ce319daa, whose ChangeLog
@@ -248,7 +278,8 @@ One skip, for a shared buffer, inside footnote 292. With a sentry in
 library closed it (STDCXX-804; 222c045b, ChangeLog entry of
 2008-03-31: "Detect and avoid flushing streams that are tied together
 or that share the same buffer to prevent deadlock or infinite
-recursion"). The regression test it added,
+recursion"). LWG 835 (4.3) followed seven weeks later. The regression
+test the library added,
 `tests/regress/27.basic.ios.tie.stdcxx-804.cpp`, ties up to 32
 `ostringstream`s in a ring, inserts into each and flushes each, and
 asserts that every stream is still `good ()`. It checks termination.
@@ -375,13 +406,17 @@ chapter 8 has the probe against the change.
 
 `tie` is a pointer with no rule about where it may point. The text was
 written for a tree: input streams pointing at the stream that shows
-their prompt, one edge from `cin` to `cout`. It permits a graph. A
-ring is representable, an implementation has to survive one, and no
-paragraph says what a ring means. Footnote 292 is where the committee
-noticed, and it says only that the flush may be omitted, not what a
-program may expect instead. STDCXX-804 is the same notice in code.
+their prompt, one edge from `cin` to `cout`. It permits a graph. In
+14882:2003 a ring is representable, an implementation has to survive
+one, and no paragraph says what a ring means. Footnote 292 is where
+the committee first noticed, and it says only that the flush may be
+omitted, not what a program may expect instead. STDCXX-804 is the
+same notice in code.
 
-Nothing cures this but a sentence in the standard. An implementation
+The cure is a sentence in the standard, and C++11 has it: the
+precondition of N3242 27.5.5.3, p2 (chapter 4.3) makes a ring the
+program's fault and its behavior undefined. An implementation that
+targets 14882:2003 has no such sentence, and under either text it
 does the next thing: it defines the behavior of a ring, and the only
 definition that satisfies p2 for every member is that every stream in
 the ring is synchronized once.
@@ -588,9 +623,11 @@ correct about the flush that existed when it was written, and nobody
 re-read it when 581 changed what `flush` does. A sentence about the
 effect, "the tied stream's pending output is written before the
 operation", would have survived 581 untouched. Each patch since,
-issue 60, issue 581's destructor, footnote 292, STDCXX-804, moves one
+issue 60, issue 835's destructor, footnote 292, STDCXX-804, moves one
 internal use off `flush` or excuses it, and none names the rule,
-because the text has no place for a rule that is not a call.
+because the text has no place for a rule that is not a call. For the
+tie, issue 835 left the call as written and forbade the program the
+shape that exposes it.
 
 The reading that falls out, and the one this tree applies: cite the
 paragraph, then ask what a program can observe. If the difference
