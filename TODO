@@ -28,21 +28,23 @@ at the top.
 
 *** TODO =_C_opfx= skips the tie's flush on a loop of distinct buffers
 
-=include/ostream= 270-284 skip ~tie ()->flush ()~ when the tie chain
+=include/ostream= 279-306 skip ~tie ()->flush ()~ when the tie chain
 loops or a stream in it shares the buffer. Footnote 292 of 14882:2003
 27.6.2.3 allows the skip where no synchronization is necessary, which
 holds for a shared buffer but not for a loop over distinct buffers.
-The loop exists because =flush= builds a sentry (LWG 581); 2003's
-27.6.2.6, p7 says =flush= does not behave as an unformatted output
-function. Hypothesis, by reading: two streams on distinct buffers tied
-to each other do not flush each other. Seen in passing by the
-extension sweep, 2026-11-04.
+The loop exists because =flush= builds a sentry (LWG 581); the
+tortoise and hare of STDCXX-804 stop the recursion by skipping the
+flush. Measured: two =ostream=s on distinct buffers tied to each
+other synchronize neither (=analysis-flush-reentry.md=, ch. 6).
 
-Fix: a decision: flush each distinct buffer of the loop once, or
-record the skip.
+Fix: a decision, =analysis-flush-reentry.md= ch. 8: walk the chain
+once and =pubsync= each distinct buffer under the tied stream's own
+gate (state, lock, exceptions), or record the skip in chapter 2 of
+=ref-conformance.md=.
 
 Check: two streams on distinct buffers, tied to each other: an
-insertion into one flushes the other.
+insertion into one synchronizes the other's buffer once, and the
+STDCXX-804 regression test still passes.
 
 *** TODO =basic_filebuf::xsputn= writes the internal characters on a conversion error
 
