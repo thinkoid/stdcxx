@@ -492,28 +492,49 @@ _C_write (const char_type* __first, const char_type* __last)
 
     _C_beg_pos = _C_cur_pos;
 
-    if (__cvt.always_noconv ()) {
-        // no conversion: the characters go out as they are
-        const _RWSTD_STREAMSIZE __nbytes =
-            sizeof (char_type) * (__last - __first);
+    if (__cvt.always_noconv ())
+        return _C_write_noconv (__first, __last);
 
-        const _RWSTD_STREAMSIZE __nout =
-            __rw::__rw_fwrite (_C_file, this->_C_state, __first, __nbytes);
+    return _C_write_conv (__cvt, __first, __last);
+}
 
-        // a short write counts the whole characters it got out
-        const _RWSTD_STREAMSIZE __nchars =
-            __nout < 0 ? 0 : __nout / _RWSTD_STREAMSIZE (sizeof *__first);
 
-        if (0 == __nchars)
-            return __first;
+// no conversion: the characters go out as they are
+template <class _CharT, class _Traits>
+const _CharT*
+basic_filebuf<_CharT, _Traits>::
+_C_write_noconv (const char_type* __first, const char_type* __last)
+{
+    const _RWSTD_STREAMSIZE __nbytes =
+        sizeof (char_type) * (__last - __first);
 
-        _C_cur_pos += __nchars;
-        this->_C_out_last (true);   // needed by close ()
+    const _RWSTD_STREAMSIZE __nout =
+        __rw::__rw_fwrite (_C_file, this->_C_state, __first, __nbytes);
 
-        return __first + __nchars;
-    }
+    // a short write counts the whole characters it got out
+    const _RWSTD_STREAMSIZE __nchars =
+        __nout < 0 ? 0 : __nout / _RWSTD_STREAMSIZE (sizeof *__first);
 
-    // conversion in chunks, to avoid dynamic memory allocation
+    if (0 == __nchars)
+        return __first;
+
+    _C_cur_pos += __nchars;
+    this->_C_out_last (true);   // needed by close ()
+
+    return __first + __nchars;
+}
+
+
+// conversion in chunks, to avoid dynamic memory allocation
+template <class _CharT, class _Traits>
+const _CharT*
+basic_filebuf<_CharT, _Traits>::
+_C_write_conv (const codecvt<char_type, char,
+                             typename traits_type::state_type> &__cvt,
+               const char_type* __first, const char_type* __last)
+{
+    typedef typename traits_type::state_type _StateT;
+
     char        __xbuf [_RWSTD_DEFAULT_BUFSIZE];
     char* const __xbuf_end = __xbuf + sizeof __xbuf;
 

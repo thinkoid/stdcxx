@@ -213,9 +213,17 @@ private:
     // write the put area to the file; false if any of it is left
     bool _C_flush ();
 
-    // write a sequence to the file through the codecvt facet;
-    // returns one past the last character written
+    // write a sequence to the file, as it is or converted by the
+    // codecvt facet; returns one past the last character written
     const char_type* _C_write (const char_type*, const char_type*);
+
+    // the two forms of _C_write, chosen by the facet's always_noconv ()
+    const char_type* _C_write_noconv (const char_type*, const char_type*);
+
+    const char_type*
+    _C_write_conv (const codecvt<char_type, char,
+                                 typename traits_type::state_type>&,
+                   const char_type*, const char_type*);
 
     void      *_C_file;               // underlying FILE ptr or file descriptor
     pos_type   _C_cur_pos;            // offset/state in file corresponding to
