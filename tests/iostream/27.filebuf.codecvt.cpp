@@ -53,10 +53,13 @@
 #include <sstream>
 
 #include <climits>   // for UCHAR_MAX
+#include <csignal>   // for SIGXFSZ, SIG_IGN, signal()
 #include <cstdio>    // for fclose(), fopen(), fseek(), size_t
 #include <cstdlib>   // for abort()
-#include <cstring>   // for memset(), strcmp(), strlen()
+#include <cstring>   // for memcmp(), memset(), strcmp(), strlen()
 #include <cwchar>    // for mbstate_t
+
+#include <sys/resource.h>   // for getrlimit(), setrlimit()
 
 #include <rw_driver.h>
 #include <rw_file.h>
@@ -907,6 +910,335 @@ test_error (const char *fname)
 
 /***********************************************************************/
 
+// code conversion facet that fails on '!'
+// ucformat::do_out() converts each internal character into `nbytes'
+// external chars: the character, upper-cased if it is one of 'a'
+// through 'z', followed by `nbytes' - 1 dots; it returns error at '!'
+template <class charT>
+class ucformat: public std::codecvt<charT, char, std::mbstate_t>
+{
+    typedef std::codecvt<charT, char, std::mbstate_t> Base;
+
+    const int nbytes;   // external chars per internal char
+
+public:
+    typedef std::codecvt_base::result result;
+
+    ucformat (std::size_t ref, int n)
+        : Base (ref), nbytes (n) { /* empty */ }
+
+protected:
+
+    virtual result
+    do_out (std::mbstate_t&,
+            const charT *from, const charT *from_end,
+            const charT *&from_next,
+            char *to, char *to_end, char *&to_next) const {
+        for (from_next = from, to_next = to; from_next != from_end;
+             ++from_next) {
+            if (charT ('!') == *from_next)
+                return std::codecvt_base::error;
+
+            if (to_end - to_next < nbytes)
+                return std::codecvt_base::partial;
+
+            char ch = char (*from_next);
+            if ('a' <= ch && ch <= 'z')
+                ch = char (ch - 'a' + 'A');
+
+            *to_next++ = ch;
+            for (int i = 1; i != nbytes; ++i)
+                *to_next++ = '.';
+        }
+
+        return std::codecvt_base::ok;
+    }
+
+    virtual result
+    do_unshift (std::mbstate_t&, char *to, char*, char *&to_next) const {
+        // stateless encoding, no conversion necessary
+        to_next = to;
+        return std::codecvt_base::noconv;
+    }
+
+    virtual bool
+    do_always_noconv () const _THROWS (()) {
+        return false;   // conversion always necessary
+    }
+
+    virtual int
+    do_encoding () const _THROWS (()) {
+        return nbytes;
+    }
+
+    virtual int
+    do_max_length () const _THROWS (()) {
+        return nbytes;
+    }
+};
+
+
+// gain public access to the put area of a file buffer
+template <class charT>
+struct pubfilebuf: std::basic_filebuf<charT>
+{
+    typedef std::basic_filebuf<charT> Base;
+
+    charT* pubpbase () const {
+        return Base::pbase ();
+    }
+    charT* pubpptr () const {
+        return Base::pptr ();
+    }
+};
+
+
+// asserts that the file holds exactly the `n' bytes at `expect'
+static void
+assert_file (int line, const char *fname, const char *expect, std::size_t n)
+{
+    std::size_t size = 0;
+    const char* buf = static_cast< const char* >(rw_fread (fname, &size));
+    if (!buf)
+        buf = "";
+
+    rw_assert (n == size && 0 == std::memcmp (buf, expect, n), 0, line,
+               "file holds %zu bytes %{#*s}, expected %zu bytes %{#*s}",
+               size, int (size), buf, n, int (n), expect);
+}
+
+
+// 27.8.1.4, p8: a conversion error on output fails the flush; the file
+// holds the characters converted before the error (22.2.1.5.2, p2) and
+// no internal character
+template <class charT>
+static void
+test_error_out (const char *fname, const char *cname)
+{
+    rw_info (0, 0, __LINE__,
+             "basic_filebuf<%s> output with a conversion error", cname);
+
+    // user-defined code conversion facets, 1 and 2 external chars
+    // per internal char
+    const ucformat<charT> fmt1 (1 /* prevent locale from deleting */, 1);
+    const ucformat<charT> fmt2 (1 /* prevent locale from deleting */, 2);
+
+    const std::locale l1 (std::locale::classic (), &fmt1);
+    const std::locale l2 (std::locale::classic (), &fmt2);
+
+    const std::ios::openmode mode = std::ios::out | std::ios::binary;
+
+    charT str [700];   // internal sequence
+    char  ext [1200];  // external sequence expected in the file
+
+    // the sequence fits the put area and the flush fails at '!'
+    {
+        pubfilebuf<charT> fb;
+        fb.pubimbue (l1);
+        fb.open (fname, mode);
+
+        const charT abc [] = { 'a', 'b', '!', 'c', 'd' };
+
+        const std::streamsize n = fb.sputn (abc, 5);
+        rw_assert (5 == n, 0, __LINE__,
+                   "basic_filebuf<%s>::sputn (\"ab!cd\", 5) == 5, got %ld",
+                   cname, long (n));
+
+        const int res = fb.pubsync ();
+        rw_assert (-1 == res, 0, __LINE__,
+                   "basic_filebuf<%s>::pubsync () == -1, got %d",
+                   cname, res);
+
+        // 27.5.2.4.5, p5: the characters not written stay at pbase ()
+        const long nleft = long (fb.pubpptr () - fb.pubpbase ());
+        rw_assert (3 == nleft && charT ('!') == *fb.pubpbase (),
+                   0, __LINE__,
+                   "basic_filebuf<%s>: pptr () - pbase () == 3 and "
+                   "*pbase () == '!' after pubsync (), got %ld",
+                   cname, nleft);
+
+        assert_file (__LINE__, fname, "AB", 2);
+
+        const bool closed = 0 != fb.close ();
+        rw_assert (!closed, 0, __LINE__,
+                   "basic_filebuf<%s>::close () == 0", cname);
+
+        // the flush in close () writes no character twice
+        assert_file (__LINE__, fname, "AB", 2);
+    }
+
+    std::char_traits<charT>::assign (str, sizeof str / sizeof *str,
+                                     charT ('x'));
+    std::memset (ext, 'X', sizeof ext);
+
+    // the argument is longer than the put area and goes to the file
+    // directly; the error is in the first chunk of the conversion
+    {
+        std::basic_filebuf<charT> fb;
+        fb.pubimbue (l1);
+        fb.open (fname, mode);
+
+        str [2] = charT ('!');
+
+        const std::streamsize n = fb.sputn (str, 600);
+        rw_assert (2 == n, 0, __LINE__,
+                   "basic_filebuf<%s>::sputn (s, 600) == 2 with '!' "
+                   "at 2, got %ld", cname, long (n));
+
+        assert_file (__LINE__, fname, ext, 2);
+
+        str [2] = charT ('x');
+    }
+
+    // the error is past the first chunk of the conversion (512 bytes)
+    {
+        std::basic_filebuf<charT> fb;
+        fb.pubimbue (l1);
+        fb.open (fname, mode);
+
+        str [600] = charT ('!');
+
+        const std::streamsize n = fb.sputn (str, 700);
+        rw_assert (600 == n, 0, __LINE__,
+                   "basic_filebuf<%s>::sputn (s, 700) == 600 with '!' "
+                   "at 600, got %ld", cname, long (n));
+
+        assert_file (__LINE__, fname, ext, 600);
+
+        str [600] = charT ('x');
+    }
+
+    for (std::size_t i = 0; i != sizeof ext; i += 2) {
+        ext [i]     = 'X';
+        ext [i + 1] = '.';
+    }
+
+    // the count returned is in internal characters, half the external
+    // chars in the file
+    {
+        std::basic_filebuf<charT> fb;
+        fb.pubimbue (l2);
+        fb.open (fname, mode);
+
+        str [600] = charT ('!');
+
+        const std::streamsize n = fb.sputn (str, 700);
+        rw_assert (600 == n, 0, __LINE__,
+                   "basic_filebuf<%s>::sputn (s, 700) == 600 with '!' "
+                   "at 600 and 2 external chars each, got %ld",
+                   cname, long (n));
+
+        assert_file (__LINE__, fname, ext, 1200);
+
+        str [600] = charT ('x');
+    }
+
+    // the put area converts in two chunks and the flush fails at '!'
+    // in the second
+    {
+        pubfilebuf<charT> fb;
+        fb.pubimbue (l2);
+        fb.open (fname, mode);
+
+        str [300] = charT ('!');
+
+        const std::streamsize n = fb.sputn (str, 400);
+        rw_assert (400 == n, 0, __LINE__,
+                   "basic_filebuf<%s>::sputn (s, 400) == 400, got %ld",
+                   cname, long (n));
+
+        const int res = fb.pubsync ();
+        rw_assert (-1 == res, 0, __LINE__,
+                   "basic_filebuf<%s>::pubsync () == -1 with '!' at 300, "
+                   "got %d", cname, res);
+
+        // 27.5.2.4.5, p5: the characters not written stay at pbase ()
+        const long nleft = long (fb.pubpptr () - fb.pubpbase ());
+        rw_assert (100 == nleft && charT ('!') == *fb.pubpbase (),
+                   0, __LINE__,
+                   "basic_filebuf<%s>: pptr () - pbase () == 100 and "
+                   "*pbase () == '!' after pubsync (), got %ld",
+                   cname, nleft);
+
+        assert_file (__LINE__, fname, ext, 600);
+
+        const bool closed = 0 != fb.close ();
+        rw_assert (!closed, 0, __LINE__,
+                   "basic_filebuf<%s>::close () == 0", cname);
+
+        // the flush in close () writes no character twice
+        assert_file (__LINE__, fname, ext, 600);
+    }
+}
+
+/***********************************************************************/
+
+// 27.5.2.4.5, p5: a flush the file takes in part leaves the characters
+// not written at pbase (), so the next flush writes each character once
+static void
+test_short_write (const char *fname)
+{
+    rw_info (0, 0, __LINE__,
+             "filebuf::pubsync () after a short write without conversion");
+
+    rlimit rl;
+
+    if (getrlimit (RLIMIT_FSIZE, &rl) || rl.rlim_max < 3) {
+        rw_warn (0, 0, __LINE__,
+                 "cannot limit RLIMIT_FSIZE to 3 bytes, test skipped");
+        return;
+    }
+
+    const rlim_t rlim_cur = rl.rlim_cur;
+
+    // a write past the limit fails with EFBIG instead of a signal
+    void (* const handler)(int) = std::signal (SIGXFSZ, SIG_IGN);
+
+    std::filebuf fb;
+    fb.open (fname, std::ios::out | std::ios::binary);
+
+    const std::streamsize n = fb.sputn ("abcde", 5);
+
+    // the limit applies to every file the process writes, its own
+    // output included, so nothing is reported until it is restored
+    rl.rlim_cur = 3;
+    const bool limited = 0 == setrlimit (RLIMIT_FSIZE, &rl);
+
+    const int res0 = limited ? fb.pubsync () : 0;
+
+    rl.rlim_cur = rlim_cur;
+    const bool restored = 0 == setrlimit (RLIMIT_FSIZE, &rl);
+
+    const int res1 = fb.pubsync ();
+
+    fb.close ();
+    std::signal (SIGXFSZ, handler);
+
+    rw_fatal (restored, 0, __LINE__,
+              "setrlimit (RLIMIT_FSIZE, ...) failed to restore the limit");
+
+    if (!limited) {
+        rw_warn (0, 0, __LINE__,
+                 "cannot limit RLIMIT_FSIZE to 3 bytes, test skipped");
+        return;
+    }
+
+    rw_assert (5 == n, 0, __LINE__,
+               "filebuf::sputn (\"abcde\", 5) == 5, got %ld", long (n));
+
+    rw_assert (-1 == res0, 0, __LINE__,
+               "filebuf::pubsync () == -1 with RLIMIT_FSIZE at 3, got %d",
+               res0);
+
+    rw_assert (0 == res1, 0, __LINE__,
+               "filebuf::pubsync () == 0 with RLIMIT_FSIZE restored, "
+               "got %d", res1);
+
+    assert_file (__LINE__, fname, "abcde", 5);
+}
+
+/***********************************************************************/
+
 static void
 test_seek (const char *fname,
            std::size_t bufsize = std::size_t (-1))
@@ -1151,6 +1483,13 @@ run_test (int, char*[])
 
     // test with errors during conversion
     test_error (fname);
+
+    // test with errors during conversion on output
+    test_error_out<char> (fname, "char");
+    test_error_out<wchar_t> (fname, "wchar_t");
+
+    // test a flush the file takes in part
+    test_short_write (fname);
 
     // remove a temporary file
     std::remove (fname);

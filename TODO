@@ -26,24 +26,25 @@ at the top.
 
 ** Streams
 
-*** TODO =basic_filebuf::xsputn= writes the internal characters on a conversion error
+*** TODO A =partial= result that consumes nothing spins the flush of =basic_filebuf=
 
-When =codecvt::out= returns =error=, =basic_filebuf::xsputn=
-(=include/fstream.cc= 520-525) writes ~sizeof (char_type) * (__end -
-__base)~ bytes from =__base=: the unconverted internal characters,
-from the start of the failed chunk to the end of the argument. Its
-comment says it writes "the sequence successfully converted up to the
-point of the error", which is the bytes from =__xbuf= to =__to_next=.
-A wide stream thus puts the object representation of its characters
-into the file. 0ffd071c moved the code from =overflow=, which had it
-from the 2005 import. Hypothesis, by reading, 2026-11-08.
+The conversion loop of =basic_filebuf::xsputn= (=include/fstream.cc=
+516-577) ends when =__from_next= reaches =__end= or a write fails. A
+facet whose =out= returns =partial= with =from_next= equal to =from=
+and nothing stored gets the same call again without end. 14882:2003
+22.2.1.5.2, Table 53's note allows the result where "additional
+source elements are needed before another destination element can be
+produced", and 27.8.1.4, p8 reads as the loop does: "repeat using
+characters from end to p". Measured, 2026-11-09: =pubsync= over
+="ab?"= under a facet that returns =partial= at ='?'= does not
+return; libstdc++ of GCC 16 repeats once and reports success with the
+character unwritten.
 
-Fix: the case writes =__xbuf= to =__to_next= and returns
-~__from_next - __buf~ when that write is whole.
+Fix: a decision: the loop fails when a call consumes nothing and
+stores nothing, a departure from the letter of p8; or the loop stays
+and the note records the limit.
 
-Check: a =27.filebuf.codecvt= row: a facet whose =out= converts two
-characters and fails on the third; the file holds the two converted
-characters and =sputn= returns 2.
+Check: the measurement as a =27.filebuf.codecvt= row that returns.
 
 *** TODO =basic_stringbuf::xsputn= copies an argument that overlaps the put position with =memcpy=
 
@@ -699,6 +700,17 @@ description. Seen while adding the tie ring row, 2026-11-09.
 Fix: both headings read p2.
 
 Check: reading.
+
+** TODO =27.filebuf.codecvt= compares a =size_t= index with a =long= length
+
+=run_test= in =tests/iostream/27.filebuf.codecvt.cpp= (1462-1463)
+defines ~const long len~ from two =size_t= values and runs a =size_t=
+index up to it, so GCC 16 warns of a comparison between signed and
+unsigned on the loop's condition. Seen 2026-11-10.
+
+Fix: =len= is a =std::size_t=.
+
+Check: the test compiles without the warning and holds at pin.
 
 * Certification
 
@@ -1601,6 +1613,20 @@ sweep's reading, 2026-11-04.
 Fix: chapter 2 takes a row for each extension of chapter 13 when the
 sweep's decisions are made, chapter 13 takes the four rows it lacks,
 and 8.3's sentence says what chapter 2 carries.
+
+** TODO =analysis-codecvt-corrupt-state.md= cites two paths outside the tree
+
+Chapter 8 of =doc/notes/analysis-codecvt-corrupt-state.md= (300-304)
+names its probe and its failing run by paths under a build directory
+of one machine, =probe-codecvt-state.cpp= in a handover directory and
+=11S/tests/22.locale.codecvt.out= of the nightly of 2026-11-04. A
+reader of the repository has neither, and a cleanup of the build
+directory removes both. Seen at such a cleanup, 2026-11-09.
+
+Fix: the probe becomes a listing in the note, and the run is cited by
+the table row it produced.
+
+Check: =git grep stdcxx-build -- doc= finds the build recipes alone.
 
 ** TODO The pin counts in =ref-locale.md= 10.4 lag the baseline
 
