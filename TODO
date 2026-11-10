@@ -28,8 +28,8 @@ at the top.
 
 *** TODO A =partial= result that consumes nothing spins the flush of =basic_filebuf=
 
-The conversion loop of =basic_filebuf::xsputn= (=include/fstream.cc=
-516-577) ends when =__from_next= reaches =__end= or a write fails. A
+The conversion loop of =basic_filebuf::_C_write= (=include/fstream.cc=
+520-572) ends when =__first= reaches =__last= or a write fails. A
 facet whose =out= returns =partial= with =from_next= equal to =from=
 and nothing stored gets the same call again without end. 14882:2003
 22.2.1.5.2, Table 53's note allows the result where "additional

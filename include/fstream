@@ -210,6 +210,13 @@ private:
     // write unshift sequence to file (multibyte, state-dependent encondings)
     bool _C_unshift ();
 
+    // write the put area to the file; false if any of it is left
+    bool _C_flush ();
+
+    // write a sequence to the file through the codecvt facet;
+    // returns one past the last character written
+    const char_type* _C_write (const char_type*, const char_type*);
+
     void      *_C_file;               // underlying FILE ptr or file descriptor
     pos_type   _C_cur_pos;            // offset/state in file corresponding to
                                       //  end of buffer, and actual pos in file 
