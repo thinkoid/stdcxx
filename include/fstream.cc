@@ -518,7 +518,9 @@ _C_write_noconv (const char_type* __first, const char_type* __last)
     if (0 == __nchars)
         return __first;
 
-    _C_cur_pos += __nchars;
+    _C_cur_pos += __nchars + _C_crlf_intern_count (
+        __first, __first + __nchars);
+
     this->_C_out_last (true);   // needed by close ()
 
     return __first + __nchars;
@@ -548,22 +550,10 @@ _C_write_conv (const codecvt<char_type, char,
             __cvt.out (__state, __first, __last, __from_next,
                        __xbuf, __xbuf_end, __to_next);
 
-        if (codecvt_base::noconv == __res) {
-            // the rest of the sequence goes out as it is
-            const _RWSTD_STREAMSIZE __nbytes =
-                sizeof (char_type) * (__last - __first);
-
-            if (__nbytes != __rw::__rw_fwrite (_C_file, this->_C_state,
-                                              __first, __nbytes))
-                return __first;
-
-            _C_cur_pos += __last - __first
-                + _C_crlf_intern_count (__first, __last);
-            _C_cur_pos.state (__state);
-            this->_C_out_last (true);   // needed by close ()
-
-            return __last;
-        }
+        // the rest of the sequence goes out as it is; the result leaves
+        // the state unchanged (22.2.1.5.2, p2), so none is stored
+        if (codecvt_base::noconv == __res)
+            return _C_write_noconv (__first, __last);
 
         _RWSTD_ASSERT (   codecvt_base::ok == __res
                        || codecvt_base::partial == __res

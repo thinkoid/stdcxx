@@ -29,7 +29,7 @@ at the top.
 *** TODO A =partial= result that consumes nothing spins the flush of =basic_filebuf=
 
 The loop of =basic_filebuf::_C_write_conv= (=include/fstream.cc=
-541-593) ends when =__first= reaches =__last= or a write fails. A
+543-583) ends when =__first= reaches =__last= or a write fails. A
 facet whose =out= returns =partial= with =from_next= equal to =from=
 and nothing stored gets the same call again without end. 14882:2003
 22.2.1.5.2, Table 53's note allows the result where "additional
@@ -701,9 +701,39 @@ Fix: both headings read p2.
 
 Check: reading.
 
+** TODO =cformat::do_out= stores characters and returns =noconv=
+
+The test facet =cformat= in =tests/iostream/27.filebuf.codecvt.cpp=
+copies each character that needs no escape to the destination (357).
+When no character of the sequence needed one it returns =noconv= with
+the next pointers reset (361-365), and the copies stay stored.
+14882:2003 22.2.1.5.2, p2 asks of a =noconv= result that "there are
+no changes to the values in [to, to_limit)". =basic_filebuf= writes
+the source sequence on =noconv=, so no row sees the stored
+characters. By reading, 2026-11-13.
+
+Fix: =do_out= looks for a character to escape before it stores any.
+
+Check: a =self_test= row calls =out= on a sequence without escapes
+over a destination filled with a sentinel; the =noconv= result leaves
+the sentinel in place.
+
+** TODO =cformat::do_unshift= leaves =to_next= unset
+
+=cformat::do_unshift= in =tests/iostream/27.filebuf.codecvt.cpp=
+(113-118) returns =noconv= and assigns nothing to =to_next=.
+14882:2003 22.2.1.5.2, p5: "It always leaves the to_next pointer
+pointing one beyond the last element successfully stored", which is
+=to= where nothing is stored. By reading, 2026-11-13.
+
+Fix: the function sets =to_next= to =to=.
+
+Check: a =self_test= row calls =unshift= with =to_next= null and
+finds it equal to =to=.
+
 ** TODO =27.filebuf.codecvt= compares a =size_t= index with a =long= length
 
-=run_test= in =tests/iostream/27.filebuf.codecvt.cpp= (1462-1463)
+=run_test= in =tests/iostream/27.filebuf.codecvt.cpp= (1589-1590)
 defines ~const long len~ from two =size_t= values and runs a =size_t=
 index up to it, so GCC 16 warns of a comparison between signed and
 unsigned on the loop's condition. Seen 2026-11-10.

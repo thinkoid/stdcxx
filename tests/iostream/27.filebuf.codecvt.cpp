@@ -1173,51 +1173,130 @@ test_error_out (const char *fname, const char *cname)
 
 /***********************************************************************/
 
-// 27.5.2.4.5, p5: a flush the file takes in part leaves the characters
-// not written at pbase (), so the next flush writes each character once
-static void
-test_short_write (const char *fname)
+// exchanges 'x' and 'y' in both directions and leaves every other
+// character as it is; for a sequence with neither, the conversion
+// stores nothing and returns noconv (22.2.1.5.2, p2), though
+// always_noconv () is false
+class xycvt_t: public std::codecvt<char, char, std::mbstate_t>
 {
-    rw_info (0, 0, __LINE__,
-             "filebuf::pubsync () after a short write without conversion");
+    static result
+    exchange (const char *from, const char *from_end, const char *&from_next,
+              char *to, char *to_end, char *&to_next) {
+        from_next = from;
+        to_next   = to;
 
+        const char *p = from;
+
+        while (p != from_end && 'x' != *p && 'y' != *p)
+            ++p;
+
+        if (p == from_end)
+            return noconv;
+
+        for (; from_next != from_end && to_next != to_end;
+             ++from_next, ++to_next)
+            *to_next =   'x' == *from_next ? 'y'
+                       : 'y' == *from_next ? 'x' : *from_next;
+
+        return from_next == from_end ? ok : partial;
+    }
+
+public:
+    explicit
+    xycvt_t (std::size_t ref = 0)
+        : std::codecvt<char, char, std::mbstate_t> (ref) { /* empty */ }
+
+protected:
+
+    virtual result
+    do_out (state_type&,
+            const intern_type *from, const intern_type *from_end,
+            const intern_type *&from_next,
+            extern_type *to, extern_type *to_end,
+            extern_type *&to_next) const {
+        return exchange (from, from_end, from_next, to, to_end, to_next);
+    }
+
+    virtual result
+    do_in (state_type&,
+           const extern_type *from, const extern_type *from_end,
+           const extern_type *&from_next,
+           intern_type *to, intern_type *to_end,
+           intern_type *&to_next) const {
+        return exchange (from, from_end, from_next, to, to_end, to_next);
+    }
+
+    virtual bool
+    do_always_noconv () const _THROWS (()) {
+        return false;   // 'x' and 'y' convert
+    }
+};
+
+
+// calls fb.sputn (s, n) and fb.pubsync () while no file may grow past
+// 3 bytes, and stores what the two return; false if RLIMIT_FSIZE
+// cannot be set
+static bool
+short_write (std::filebuf &fb, const char *s, std::streamsize n,
+             std::streamsize *nput, int *sync)
+{
     rlimit rl;
 
-    if (getrlimit (RLIMIT_FSIZE, &rl) || rl.rlim_max < 3) {
-        rw_warn (0, 0, __LINE__,
-                 "cannot limit RLIMIT_FSIZE to 3 bytes, test skipped");
-        return;
-    }
+    if (getrlimit (RLIMIT_FSIZE, &rl) || rl.rlim_max < 3)
+        return false;
 
     const rlim_t rlim_cur = rl.rlim_cur;
 
     // a write past the limit fails with EFBIG instead of a signal
     void (* const handler)(int) = std::signal (SIGXFSZ, SIG_IGN);
 
-    std::filebuf fb;
-    fb.open (fname, std::ios::out | std::ios::binary);
-
-    const std::streamsize n = fb.sputn ("abcde", 5);
-
     // the limit applies to every file the process writes, its own
     // output included, so nothing is reported until it is restored
     rl.rlim_cur = 3;
     const bool limited = 0 == setrlimit (RLIMIT_FSIZE, &rl);
 
-    const int res0 = limited ? fb.pubsync () : 0;
+    if (limited) {
+        *nput = fb.sputn (s, n);
+        *sync = fb.pubsync ();
+    }
 
     rl.rlim_cur = rlim_cur;
     const bool restored = 0 == setrlimit (RLIMIT_FSIZE, &rl);
 
-    const int res1 = fb.pubsync ();
-
-    fb.close ();
     std::signal (SIGXFSZ, handler);
 
     rw_fatal (restored, 0, __LINE__,
               "setrlimit (RLIMIT_FSIZE, ...) failed to restore the limit");
 
-    if (!limited) {
+    return limited;
+}
+
+
+// a write without conversion that the file takes in part, under the
+// codecvt facet of `loc', which converts none of "abcde"
+// 27.5.2.4.5, p5: the flush leaves the characters not written at
+// pbase (), so the next flush writes each character once
+// 27.5.2.4.5, p2: a sequence that goes to the file directly counts
+// the characters written
+static void
+test_short_write (const char *fname, const std::locale &loc,
+                  const char *what)
+{
+    rw_info (0, 0, __LINE__,
+             "filebuf output after a short write without conversion, %s",
+             what);
+
+    const std::ios::openmode mode = std::ios::out | std::ios::binary;
+
+    std::streamsize n   = 0;
+    int             res = 0;
+
+    // the sequence fits the put area and the flush writes 3 of the 5
+    pubfilebuf<char> fb;
+    fb.pubimbue (loc);
+    fb.open (fname, mode);
+
+    if (!short_write (fb, "abcde", 5, &n, &res)) {
         rw_warn (0, 0, __LINE__,
                  "cannot limit RLIMIT_FSIZE to 3 bytes, test skipped");
         return;
@@ -1226,15 +1305,63 @@ test_short_write (const char *fname)
     rw_assert (5 == n, 0, __LINE__,
                "filebuf::sputn (\"abcde\", 5) == 5, got %ld", long (n));
 
-    rw_assert (-1 == res0, 0, __LINE__,
+    rw_assert (-1 == res, 0, __LINE__,
                "filebuf::pubsync () == -1 with RLIMIT_FSIZE at 3, got %d",
-               res0);
+               res);
 
-    rw_assert (0 == res1, 0, __LINE__,
+    const long nleft = long (fb.pubpptr () - fb.pubpbase ());
+    const char left  = nleft ? *fb.pubpbase () : '\0';
+
+    rw_assert (2 == nleft && 'd' == left, 0, __LINE__,
+               "filebuf: pptr () - pbase () == 2 and *pbase () == 'd' "
+               "after pubsync (), got %ld and %{#c}", nleft, left);
+
+    res = fb.pubsync ();
+    rw_assert (0 == res, 0, __LINE__,
                "filebuf::pubsync () == 0 with RLIMIT_FSIZE restored, "
-               "got %d", res1);
+               "got %d", res);
+
+    fb.close ();
 
     assert_file (__LINE__, fname, "abcde", 5);
+
+    // the buffer has no put area and the sequence goes to the file
+    // directly: 3 of the 5 under the limit, the rest after it
+    std::filebuf ub;
+    ub.pubimbue (loc);
+    ub.open (fname, mode);
+    ub.pubsetbuf (0, 0);
+
+    short_write (ub, "abcde", 5, &n, &res);
+
+    rw_assert (3 == n, 0, __LINE__,
+               "filebuf::sputn (\"abcde\", 5) == 3 with RLIMIT_FSIZE at 3 "
+               "and no put area, got %ld", long (n));
+
+    rw_assert (0 == res, 0, __LINE__,
+               "filebuf::pubsync () == 0 with no put area, got %d", res);
+
+    const std::streamsize nrest = ub.sputn ("abcde" + n, 5 - n);
+    rw_assert (2 == nrest, 0, __LINE__,
+               "filebuf::sputn (\"abcde\" + %ld, %ld) == 2 with RLIMIT_FSIZE "
+               "restored, got %ld", long (n), long (5 - n), long (nrest));
+
+    ub.close ();
+
+    assert_file (__LINE__, fname, "abcde", 5);
+}
+
+
+// the short writes under a facet that never converts, and under one
+// that converts none of the test's characters
+static void
+test_short_writes (const char *fname)
+{
+    const xycvt_t xycvt (1 /* prevent locale from deleting */);
+    const std::locale xyloc (std::locale::classic (), &xycvt);
+
+    test_short_write (fname, std::locale::classic (), "always_noconv ()");
+    test_short_write (fname, xyloc, "a noconv result");
 }
 
 /***********************************************************************/
@@ -1488,8 +1615,8 @@ run_test (int, char*[])
     test_error_out<char> (fname, "char");
     test_error_out<wchar_t> (fname, "wchar_t");
 
-    // test a flush the file takes in part
-    test_short_write (fname);
+    // test writes the file takes in part
+    test_short_writes (fname);
 
     // remove a temporary file
     std::remove (fname);
