@@ -74,6 +74,254 @@ open (const char *__name, ios_base::openmode __mode)
 }
 
 
+// no conversion: the characters go out as they are
+template <class _CharT, class _Traits>
+const _CharT*
+basic_filebuf<_CharT, _Traits>::
+_C_write_noconv (const char_type* __first, const char_type* __last)
+{
+    const _RWSTD_STREAMSIZE __nbytes =
+        sizeof (char_type) * (__last - __first);
+
+    const _RWSTD_STREAMSIZE __nout =
+        __rw::__rw_fwrite (_C_file, this->_C_state, __first, __nbytes);
+
+    // a short write counts the whole characters it got out
+    const _RWSTD_STREAMSIZE __nchars =
+        __nout < 0 ? 0 : __nout / _RWSTD_STREAMSIZE (sizeof *__first);
+
+    if (0 == __nchars)
+        return __first;
+
+    _C_cur_pos += __nchars + _C_crlf_intern_count (
+        __first, __first + __nchars);
+
+    this->_C_out_last (true);   // needed by close ()
+
+    return __first + __nchars;
+}
+
+
+// conversion in chunks, to avoid dynamic memory allocation
+template <class _CharT, class _Traits>
+const _CharT*
+basic_filebuf<_CharT, _Traits>::
+_C_write_conv (const codecvt<char_type, char,
+                             typename traits_type::state_type> &__cvt,
+               const char_type* __first, const char_type* __last)
+{
+    typedef typename traits_type::state_type _StateT;
+
+    char        __xbuf [_RWSTD_DEFAULT_BUFSIZE];
+    char* const __xbuf_end = __xbuf + sizeof __xbuf;
+
+    while (__first != __last) {
+        // the state is stored when the chunk it belongs to is written
+        _StateT          __state     = _C_cur_pos.state ();
+        const char_type* __from_next = 0;
+        char*            __to_next   = 0;
+
+        const codecvt_base::result __res =
+            __cvt.out (__state, __first, __last, __from_next,
+                       __xbuf, __xbuf_end, __to_next);
+
+        // the rest of the sequence goes out as it is; the result leaves
+        // the state unchanged (22.2.1.5.2, p2), so none is stored
+        if (codecvt_base::noconv == __res)
+            return _C_write_noconv (__first, __last);
+
+        _RWSTD_ASSERT (   codecvt_base::ok == __res
+                       || codecvt_base::partial == __res
+                       || codecvt_base::error == __res);
+
+        // __xbuf to __to_next converts the characters __first to
+        // __from_next: all of them, or those that fit __xbuf (partial),
+        // or those before one that does not convert (error; 22.2.1.5.2,
+        // p2)
+        const _RWSTD_STREAMSIZE __nbytes = __to_next - __xbuf;
+
+        // the bytes of a short write map to no whole character, so
+        // the chunk counts as not written and a retry writes it again
+        if (__nbytes != __rw::__rw_fwrite (_C_file, this->_C_state,
+                                          __xbuf, __nbytes))
+            return __first;
+
+        _C_cur_pos += __nbytes + _C_crlf_extern_count (__xbuf, __to_next);
+        _C_cur_pos.state (__state);
+
+        this->_C_out_last (true);   // needed by close ()
+
+        // 27.8.1.4, p8: "If r == codecvt_base::error then fail."
+        if (codecvt_base::error == __res)
+            return __from_next;
+
+        __first = __from_next;
+    }
+
+    return __last;
+}
+
+
+// the file position and the conversion state follow each chunk as it
+// is written, so they agree with the file at every return
+template <class _CharT, class _Traits>
+const _CharT*
+basic_filebuf<_CharT, _Traits>::
+_C_write (const char_type* __first, const char_type* __last)
+{
+    _RWSTD_ASSERT (this->_C_is_valid ());
+    _RWSTD_ASSERT (this->_C_is_out ());
+    _RWSTD_ASSERT (is_open ());
+    _RWSTD_ASSERT (__first < __last);
+
+    typedef typename traits_type::state_type _StateT;
+    typedef codecvt<char_type, char, _StateT> _Codecvt;
+
+    const _Codecvt &__cvt = use_facet< _Codecvt >(this->_C_getloc ());
+
+    _C_beg_pos = _C_cur_pos;
+
+    if (__cvt.always_noconv ())
+        return _C_write_noconv (__first, __last);
+
+    return _C_write_conv (__cvt, __first, __last);
+}
+
+
+template <class _CharT, class _Traits>
+bool
+basic_filebuf<_CharT, _Traits>::
+_C_flush ()
+{
+    const char_type* const __end = this->pptr ();
+
+    if (__end == this->pbase ())
+        return true;   // nothing to write
+
+    const char_type* const __done = _C_write (this->pbase (), __end);
+
+    if (__done == __end) {
+        // reset the put area
+        if (!this->_C_is_unbuffered ())
+            this->setp (this->_C_buffer, this->_C_buf_end ());
+
+        return true;
+    }
+
+    if (__done != this->pbase ()) {
+        // 27.5.2.4.5, p5: "pptr() - pbase() == r and the r characters
+        // starting at pbase() are the associated output stream"
+        const _RWSTD_STREAMSIZE __nleft = __end - __done;
+
+        traits_type::move (this->pbase (), __done, __nleft);
+        this->setp (this->pbase (), this->epptr ());
+        this->pbump (__nleft);
+    }
+
+    return false;
+}
+
+
+template<class _CharT, class _Traits>
+typename basic_filebuf<_CharT, _Traits>::int_type
+basic_filebuf<_CharT, _Traits>::
+overflow (int_type __c /* = eof () */)
+{
+    _RWSTD_ASSERT (this->_C_is_valid ());
+
+    if (!this->_C_is_out () || !is_open ())
+        return traits_type::eof ();
+
+    this->setg (0, 0, 0);            // invalidate the get area
+
+    const bool __unbuf = this->_C_is_unbuffered ();
+
+    const char_type __c_to_char = traits_type::to_char_type (__c);
+
+    if (this->pptr () == 0 && !__unbuf) {
+        // put area not valid yet - just need to initialize it
+        this->setp (this->_C_buffer, this->_C_buf_end ());
+    }
+    else if (   this->pptr () == this->epptr ()
+             || this->_C_is_eof (__c)
+             || __unbuf) {
+        if (__unbuf) {
+            // the character, if there is one, goes straight to the file
+            const char_type* const __end = &__c_to_char + 1;
+
+            if (   !this->_C_is_eof (__c)
+                && __end != _C_write (&__c_to_char, __end))
+                return traits_type::eof ();  // error while writing
+        }
+        else if (!_C_flush ())
+            return traits_type::eof ();  // error while writing
+    }
+
+    // now that there's room in the buffer, call sputc() recursively
+    // to actually place the character in the buffer (unless we're
+    // in unbuffered mode because we just wrote it out)
+    if (!this->_C_is_eof (__c) && !__unbuf)
+        this->sputc (__c_to_char);
+
+    this->_C_out_last (true);   // needed by close ()
+
+    return traits_type::not_eof (__c);
+}
+
+
+//  write out an unshift sequence if not in initial shift state
+template<class _CharT, class _Traits>
+bool
+basic_filebuf<_CharT, _Traits>::
+_C_unshift ()
+{
+    typedef typename traits_type::state_type _StateT;
+    typedef codecvt<char_type, char, _StateT> _Codecvt;
+
+    const _Codecvt &__cvt = use_facet< _Codecvt >(this->_C_getloc ());
+
+    // unshifting isn't necessary if encoding isn't state dependent
+    // or if the state is equivalent to initial state (determined
+    // by codecvt::unshift())
+    if (__cvt.encoding () >= 0)
+        return true;
+
+    // buf to hold unshift sequence - assumes that the shift
+    // sequence will be less than 64 chars (we can't safely
+    // use dynamic allocation because this function could be
+    // called as a result of memory allocation exception)
+
+    char  __useq [64];
+    char* __useq_end = 0;
+
+    _StateT __state = _C_cur_pos.state ();
+
+    const int __res =
+        __cvt.unshift (__state, __useq, __useq + sizeof __useq, __useq_end);
+
+    const _RWSTD_STREAMSIZE __nbytes = __useq_end - __useq;
+
+    // in the unlikely event that the buffer isn't big enough, assert
+    _RWSTD_ASSERT (__res != codecvt_base::partial);
+
+    if (__res == codecvt_base::error)
+        return false;
+
+    if (__res == codecvt_base::noconv)
+        return true;
+
+    const off_type __nwrote =
+        __rw::__rw_fwrite (_C_file, this->_C_state, __useq, __nbytes);
+
+    if (__nwrote < 0)
+        return false;
+
+    _C_cur_pos += __nwrote;     // CR/LF conversion not an issue here
+
+    return __nwrote == __nbytes;
+}
+
+
 template<class _CharT, class _Traits>
 basic_filebuf<_CharT, _Traits>*
 basic_filebuf<_CharT, _Traits>::
@@ -353,53 +601,6 @@ underflow ()
 }
 
 
-template<class _CharT, class _Traits>
-typename basic_filebuf<_CharT, _Traits>::int_type
-basic_filebuf<_CharT, _Traits>::
-overflow (int_type __c /* = eof () */)
-{
-    _RWSTD_ASSERT (this->_C_is_valid ());
-
-    if (!this->_C_is_out () || !is_open ())
-        return traits_type::eof ();
-
-    this->setg (0, 0, 0);            // invalidate the get area
-
-    const bool __unbuf = this->_C_is_unbuffered ();
-
-    const char_type __c_to_char = traits_type::to_char_type (__c);
-
-    if (this->pptr () == 0 && !__unbuf) {
-        // put area not valid yet - just need to initialize it
-        this->setp (this->_C_buffer, this->_C_buf_end ());
-    }
-    else if (   this->pptr () == this->epptr ()
-             || this->_C_is_eof (__c)
-             || __unbuf) {
-        if (__unbuf) {
-            // the character, if there is one, goes straight to the file
-            const char_type* const __end = &__c_to_char + 1;
-
-            if (   !this->_C_is_eof (__c)
-                && __end != _C_write (&__c_to_char, __end))
-                return traits_type::eof ();  // error while writing
-        }
-        else if (!_C_flush ())
-            return traits_type::eof ();  // error while writing
-    }
-
-    // now that there's room in the buffer, call sputc() recursively
-    // to actually place the character in the buffer (unless we're
-    // in unbuffered mode because we just wrote it out)
-    if (!this->_C_is_eof (__c) && !__unbuf)
-        this->sputc (__c_to_char);
-
-    this->_C_out_last (true);   // needed by close ()
-
-    return traits_type::not_eof (__c);
-}
-
-
 template <class _CharT, class _Traits>
 _RWSTD_STREAMSIZE
 basic_filebuf<_CharT, _Traits>::
@@ -436,360 +637,6 @@ xsputn (const char_type* __buf, _RWSTD_STREAMSIZE __nchars)
         return 0;
 
     return _C_write (__buf, __buf + __nchars) - __buf;
-}
-
-
-template <class _CharT, class _Traits>
-bool
-basic_filebuf<_CharT, _Traits>::
-_C_flush ()
-{
-    const char_type* const __end = this->pptr ();
-
-    if (__end == this->pbase ())
-        return true;   // nothing to write
-
-    const char_type* const __done = _C_write (this->pbase (), __end);
-
-    if (__done == __end) {
-        // reset the put area
-        if (!this->_C_is_unbuffered ())
-            this->setp (this->_C_buffer, this->_C_buf_end ());
-
-        return true;
-    }
-
-    if (__done != this->pbase ()) {
-        // 27.5.2.4.5, p5: "pptr() - pbase() == r and the r characters
-        // starting at pbase() are the associated output stream"
-        const _RWSTD_STREAMSIZE __nleft = __end - __done;
-
-        traits_type::move (this->pbase (), __done, __nleft);
-        this->setp (this->pbase (), this->epptr ());
-        this->pbump (__nleft);
-    }
-
-    return false;
-}
-
-
-// the file position and the conversion state follow each chunk as it
-// is written, so they agree with the file at every return
-template <class _CharT, class _Traits>
-const _CharT*
-basic_filebuf<_CharT, _Traits>::
-_C_write (const char_type* __first, const char_type* __last)
-{
-    _RWSTD_ASSERT (this->_C_is_valid ());
-    _RWSTD_ASSERT (this->_C_is_out ());
-    _RWSTD_ASSERT (is_open ());
-    _RWSTD_ASSERT (__first < __last);
-
-    typedef typename traits_type::state_type _StateT;
-    typedef codecvt<char_type, char, _StateT> _Codecvt;
-
-    const _Codecvt &__cvt = use_facet< _Codecvt >(this->_C_getloc ());
-
-    _C_beg_pos = _C_cur_pos;
-
-    if (__cvt.always_noconv ())
-        return _C_write_noconv (__first, __last);
-
-    return _C_write_conv (__cvt, __first, __last);
-}
-
-
-// no conversion: the characters go out as they are
-template <class _CharT, class _Traits>
-const _CharT*
-basic_filebuf<_CharT, _Traits>::
-_C_write_noconv (const char_type* __first, const char_type* __last)
-{
-    const _RWSTD_STREAMSIZE __nbytes =
-        sizeof (char_type) * (__last - __first);
-
-    const _RWSTD_STREAMSIZE __nout =
-        __rw::__rw_fwrite (_C_file, this->_C_state, __first, __nbytes);
-
-    // a short write counts the whole characters it got out
-    const _RWSTD_STREAMSIZE __nchars =
-        __nout < 0 ? 0 : __nout / _RWSTD_STREAMSIZE (sizeof *__first);
-
-    if (0 == __nchars)
-        return __first;
-
-    _C_cur_pos += __nchars + _C_crlf_intern_count (
-        __first, __first + __nchars);
-
-    this->_C_out_last (true);   // needed by close ()
-
-    return __first + __nchars;
-}
-
-
-// conversion in chunks, to avoid dynamic memory allocation
-template <class _CharT, class _Traits>
-const _CharT*
-basic_filebuf<_CharT, _Traits>::
-_C_write_conv (const codecvt<char_type, char,
-                             typename traits_type::state_type> &__cvt,
-               const char_type* __first, const char_type* __last)
-{
-    typedef typename traits_type::state_type _StateT;
-
-    char        __xbuf [_RWSTD_DEFAULT_BUFSIZE];
-    char* const __xbuf_end = __xbuf + sizeof __xbuf;
-
-    while (__first != __last) {
-        // the state is stored when the chunk it belongs to is written
-        _StateT          __state     = _C_cur_pos.state ();
-        const char_type* __from_next = 0;
-        char*            __to_next   = 0;
-
-        const codecvt_base::result __res =
-            __cvt.out (__state, __first, __last, __from_next,
-                       __xbuf, __xbuf_end, __to_next);
-
-        // the rest of the sequence goes out as it is; the result leaves
-        // the state unchanged (22.2.1.5.2, p2), so none is stored
-        if (codecvt_base::noconv == __res)
-            return _C_write_noconv (__first, __last);
-
-        _RWSTD_ASSERT (   codecvt_base::ok == __res
-                       || codecvt_base::partial == __res
-                       || codecvt_base::error == __res);
-
-        // __xbuf to __to_next converts the characters __first to
-        // __from_next: all of them, or those that fit __xbuf (partial),
-        // or those before one that does not convert (error; 22.2.1.5.2,
-        // p2)
-        const _RWSTD_STREAMSIZE __nbytes = __to_next - __xbuf;
-
-        // the bytes of a short write map to no whole character, so
-        // the chunk counts as not written and a retry writes it again
-        if (__nbytes != __rw::__rw_fwrite (_C_file, this->_C_state,
-                                          __xbuf, __nbytes))
-            return __first;
-
-        _C_cur_pos += __nbytes + _C_crlf_extern_count (__xbuf, __to_next);
-        _C_cur_pos.state (__state);
-        this->_C_out_last (true);   // needed by close ()
-
-        // 27.8.1.4, p8: "If r == codecvt_base::error then fail."
-        if (codecvt_base::error == __res)
-            return __from_next;
-
-        __first = __from_next;
-    }
-
-    return __last;
-}
-
-
-template<class _CharT, class _Traits>
-typename basic_filebuf<_CharT, _Traits>::int_type
-basic_filebuf<_CharT, _Traits>::
-pbackfail (int_type __c)
-{
-    _RWSTD_ASSERT (this->_C_is_valid ());
-
-    if (!is_open ())
-        return traits_type::eof ();
-
-    // we could get here if gptr = eback or if __c != *(gptr-1)
-    if (!this->_C_putback_avail ()) {
-        // try to make a putback area available
-
-        if (this->seekoff (-1, ios_base::cur) == pos_type (off_type (-1)))
-            return traits_type::eof ();
-
-        if (this->_C_is_eof (underflow ()))
-            return traits_type::eof ();
-
-        this->gbump (1);
-    }
-
-    if (traits_type::eq (traits_type::to_char_type (__c), *(this->gptr () - 1))
-        || this->_C_is_eof (__c)) {
-        // "put back" original value
-        this->gbump (-1);
-        return traits_type::not_eof (__c);
-    }
-    else if (this->_C_is_out ()) {
-        // overwrite existing value with new value
-        this->gbump (-1);
-        *this->gptr () = traits_type::to_char_type (__c);
-        return __c;
-    }
-    else
-        return traits_type::eof ();
-}
-
-
-template<class _CharT, class _Traits>
-basic_streambuf<_CharT, _Traits>*
-basic_filebuf<_CharT, _Traits>::
-setbuf (char_type *__buf, streamsize __ssize)
-{
-    _RWSTD_ASSERT (this->_C_is_valid ());
-
-    if (__ssize < 0)
-        return 0;
-
-    const _RWSTD_SIZE_T __bufsize =
-        static_cast< _RWSTD_SIZE_T >(__ssize);
-
-    // sync the buffer to the external file so it can be deallocated
-    if ((this->gptr () || this->pptr ()) && is_open () && sync () != 0)
-        return 0;
-
-    bool __reset = true;
-
-    if (0 < __bufsize) {
-
-        if (!__buf && (this->_C_bufsize < __bufsize || !this->_C_buffer)) {
-            // if `buf' is 0 and the requested size is greater than
-            // the size of the object's buffer, or of the object's
-            // buffer is 0, try to allocate a new buffer of the
-            // specified size
-            __buf = new char_type [__bufsize];
-
-            // delete old buffer if the object owns it
-            if (this->_C_own_buf ())
-                delete [] this->_C_buffer;
-
-            // take ownership of the newly allocated buffer
-            this->_C_own_buf (true);
-        }
-        else if (!__buf && __bufsize <= this->_C_bufsize) {
-            // if `buf' is 0 and the requested size is less than
-            // the size of the object's buffer, simply reuse the
-            // object's buffer
-
-            __buf   = this->_C_buffer;
-            __reset = false;
-        }
-        else if (__buf && __buf != this->_C_buffer) {
-            // if `buf' is non-0 and different from the existing
-            // buffer, use it
-
-            // delete old buffer if the object owns it
-            if (this->_C_own_buf ())
-                delete [] this->_C_buffer;
-
-            // the object does not own of the new buffer
-            this->_C_own_buf (false);
-        }
-
-        this->_C_buffer  = __buf;
-        this->_C_bufsize = __bufsize;
-        this->_C_set_unbuffered (false);
-    }
-    else {
-        // unbuffer this stream object
-
-        // character buffer is preserved (used as get area only),
-        // streambuf object unbuffered for writing
-
-        // to put a streambuf object into an unbuffered mode (see 27.8.1.4,
-        // p10) and affect the size of the get area, setbuf() should first
-        // be called with the desired (non-zero) size and then again with
-        // both arguments being 0
-        this->_C_set_unbuffered (true);
-    }
-
-    if (__reset) {
-        this->setg (0, 0, 0);
-        this->setp (0, 0);
-    }
-
-    // a character buffer of nonzero size must exist even in unbuffered mode
-    _RWSTD_ASSERT (0 != this->_C_buffer);
-    _RWSTD_ASSERT (0 != this->_C_bufsize);
-
-    return this;
-}
-
-
-// 27.8.1.4, p 11
-template<class _CharT, class _Traits>
-typename basic_filebuf<_CharT, _Traits>::pos_type
-basic_filebuf<_CharT, _Traits>::
-seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode)
-{
-    _RWSTD_ASSERT (this->_C_is_valid ());
-
-    if (!is_open ())
-        return pos_type (off_type (-1));
-
-    typedef typename traits_type::state_type _StateT;
-    typedef codecvt<char_type, char, _StateT> _Codecvt;
-
-    const int __width = use_facet< _Codecvt >(this->_C_getloc ()).encoding ();
-
-    // offset must be zero with state-dependent encoding
-    if (0 != __off && __width <= 0)
-        return pos_type (off_type (-1));
-
-    // sync the buffer... (this also invalidates the get/put area)
-    if (sync () != 0)
-        return pos_type (off_type (-1));
-
-    // ...and, if last operation was output, append an unshift sequence
-    if (this->_C_out_last ())
-        _C_unshift ();
-
-    if (__width > 1)
-        __off *= __width;
-
-    // perform the seek and save the result
-    pos_type __pos = __rw::__rw_fseek (_C_file, this->_C_state, __off, __way);
-
-    if (__pos != pos_type (off_type (-1))) {
-
-        // preserve the current state if not changing position
-        // (only matters for state-dependent encodings for which
-        // the offset is required and guaranteed to be 0)
-        if (__way == ios_base::cur)
-            __pos.state (_C_cur_pos.state ());
-
-        _C_beg_pos = _C_cur_pos = __pos;
-    }
-
-    this->_C_out_last (false);  // needed by close()
-
-    return __pos;
-}
-
-
-template<class _CharT, class _Traits>
-typename basic_filebuf<_CharT, _Traits>::pos_type
-basic_filebuf<_CharT, _Traits>::
-seekpos (pos_type __pos, ios_base::openmode)
-{
-    _RWSTD_ASSERT (this->_C_is_valid ());
-
-    if (!is_open ())
-        return pos_type (off_type (-1));
-
-    // flush the output area if it exists
-    if (this->pptr () != 0) {
-        if (this->_C_is_eof (this->overflow (traits_type::eof ())))
-            return pos_type (off_type (-1));
-    }
-
-    if (   __rw::__rw_fseek (_C_file, this->_C_state, __pos, ios_base::beg)
-        == pos_type (off_type (-1)))
-        return pos_type (off_type (-1));
-
-    _C_cur_pos = _C_beg_pos = __pos;
-
-    this->setg (0, 0, 0);
-    this->setp (0, 0);
-
-    this->_C_out_last (false);  // needed by close()
-
-    return __pos;
 }
 
 
@@ -919,6 +766,213 @@ sync ()
 }
 
 
+// 27.8.1.4, p 11
+template<class _CharT, class _Traits>
+typename basic_filebuf<_CharT, _Traits>::pos_type
+basic_filebuf<_CharT, _Traits>::
+seekoff (off_type __off, ios_base::seekdir __way, ios_base::openmode)
+{
+    _RWSTD_ASSERT (this->_C_is_valid ());
+
+    if (!is_open ())
+        return pos_type (off_type (-1));
+
+    typedef typename traits_type::state_type _StateT;
+    typedef codecvt<char_type, char, _StateT> _Codecvt;
+
+    const int __width = use_facet< _Codecvt >(this->_C_getloc ()).encoding ();
+
+    // offset must be zero with state-dependent encoding
+    if (0 != __off && __width <= 0)
+        return pos_type (off_type (-1));
+
+    // sync the buffer... (this also invalidates the get/put area)
+    if (sync () != 0)
+        return pos_type (off_type (-1));
+
+    // ...and, if last operation was output, append an unshift sequence
+    if (this->_C_out_last ())
+        _C_unshift ();
+
+    if (__width > 1)
+        __off *= __width;
+
+    // perform the seek and save the result
+    pos_type __pos = __rw::__rw_fseek (_C_file, this->_C_state, __off, __way);
+
+    if (__pos != pos_type (off_type (-1))) {
+
+        // preserve the current state if not changing position
+        // (only matters for state-dependent encodings for which
+        // the offset is required and guaranteed to be 0)
+        if (__way == ios_base::cur)
+            __pos.state (_C_cur_pos.state ());
+
+        _C_beg_pos = _C_cur_pos = __pos;
+    }
+
+    this->_C_out_last (false);  // needed by close()
+
+    return __pos;
+}
+
+
+template<class _CharT, class _Traits>
+typename basic_filebuf<_CharT, _Traits>::int_type
+basic_filebuf<_CharT, _Traits>::
+pbackfail (int_type __c)
+{
+    _RWSTD_ASSERT (this->_C_is_valid ());
+
+    if (!is_open ())
+        return traits_type::eof ();
+
+    // we could get here if gptr = eback or if __c != *(gptr-1)
+    if (!this->_C_putback_avail ()) {
+        // try to make a putback area available
+
+        if (this->seekoff (-1, ios_base::cur) == pos_type (off_type (-1)))
+            return traits_type::eof ();
+
+        if (this->_C_is_eof (underflow ()))
+            return traits_type::eof ();
+
+        this->gbump (1);
+    }
+
+    if (traits_type::eq (traits_type::to_char_type (__c), *(this->gptr () - 1))
+        || this->_C_is_eof (__c)) {
+        // "put back" original value
+        this->gbump (-1);
+        return traits_type::not_eof (__c);
+    }
+    else if (this->_C_is_out ()) {
+        // overwrite existing value with new value
+        this->gbump (-1);
+        *this->gptr () = traits_type::to_char_type (__c);
+        return __c;
+    }
+    else
+        return traits_type::eof ();
+}
+
+
+template<class _CharT, class _Traits>
+basic_streambuf<_CharT, _Traits>*
+basic_filebuf<_CharT, _Traits>::
+setbuf (char_type *__buf, streamsize __ssize)
+{
+    _RWSTD_ASSERT (this->_C_is_valid ());
+
+    if (__ssize < 0)
+        return 0;
+
+    const _RWSTD_SIZE_T __bufsize =
+        static_cast< _RWSTD_SIZE_T >(__ssize);
+
+    // sync the buffer to the external file so it can be deallocated
+    if ((this->gptr () || this->pptr ()) && is_open () && sync () != 0)
+        return 0;
+
+    bool __reset = true;
+
+    if (0 < __bufsize) {
+
+        if (!__buf && (this->_C_bufsize < __bufsize || !this->_C_buffer)) {
+            // if `buf' is 0 and the requested size is greater than
+            // the size of the object's buffer, or of the object's
+            // buffer is 0, try to allocate a new buffer of the
+            // specified size
+            __buf = new char_type [__bufsize];
+
+            // delete old buffer if the object owns it
+            if (this->_C_own_buf ())
+                delete [] this->_C_buffer;
+
+            // take ownership of the newly allocated buffer
+            this->_C_own_buf (true);
+        }
+        else if (!__buf && __bufsize <= this->_C_bufsize) {
+            // if `buf' is 0 and the requested size is less than
+            // the size of the object's buffer, simply reuse the
+            // object's buffer
+
+            __buf   = this->_C_buffer;
+            __reset = false;
+        }
+        else if (__buf && __buf != this->_C_buffer) {
+            // if `buf' is non-0 and different from the existing
+            // buffer, use it
+
+            // delete old buffer if the object owns it
+            if (this->_C_own_buf ())
+                delete [] this->_C_buffer;
+
+            // the object does not own of the new buffer
+            this->_C_own_buf (false);
+        }
+
+        this->_C_buffer  = __buf;
+        this->_C_bufsize = __bufsize;
+        this->_C_set_unbuffered (false);
+    }
+    else {
+        // unbuffer this stream object
+
+        // character buffer is preserved (used as get area only),
+        // streambuf object unbuffered for writing
+
+        // to put a streambuf object into an unbuffered mode (see 27.8.1.4,
+        // p10) and affect the size of the get area, setbuf() should first
+        // be called with the desired (non-zero) size and then again with
+        // both arguments being 0
+        this->_C_set_unbuffered (true);
+    }
+
+    if (__reset) {
+        this->setg (0, 0, 0);
+        this->setp (0, 0);
+    }
+
+    // a character buffer of nonzero size must exist even in unbuffered mode
+    _RWSTD_ASSERT (0 != this->_C_buffer);
+    _RWSTD_ASSERT (0 != this->_C_bufsize);
+
+    return this;
+}
+
+
+template<class _CharT, class _Traits>
+typename basic_filebuf<_CharT, _Traits>::pos_type
+basic_filebuf<_CharT, _Traits>::
+seekpos (pos_type __pos, ios_base::openmode)
+{
+    _RWSTD_ASSERT (this->_C_is_valid ());
+
+    if (!is_open ())
+        return pos_type (off_type (-1));
+
+    // flush the output area if it exists
+    if (this->pptr () != 0) {
+        if (this->_C_is_eof (this->overflow (traits_type::eof ())))
+            return pos_type (off_type (-1));
+    }
+
+    if (   __rw::__rw_fseek (_C_file, this->_C_state, __pos, ios_base::beg)
+        == pos_type (off_type (-1)))
+        return pos_type (off_type (-1));
+
+    _C_cur_pos = _C_beg_pos = __pos;
+
+    this->setg (0, 0, 0);
+    this->setp (0, 0);
+
+    this->_C_out_last (false);  // needed by close()
+
+    return __pos;
+}
+
+
 template<class _CharT, class _Traits>
 basic_filebuf<_CharT, _Traits>*
 basic_filebuf<_CharT, _Traits>::
@@ -953,59 +1007,6 @@ _C_open (int __fd, void *__file, char_type *__buf, streamsize __n)
     _C_cur_pos = _C_beg_pos = pos_type ();
 
     return this;
-}
-
-
-//  write out an unshift sequence if not in initial shift state
-template<class _CharT, class _Traits>
-bool
-basic_filebuf<_CharT, _Traits>::
-_C_unshift ()
-{
-    typedef typename traits_type::state_type _StateT;
-    typedef codecvt<char_type, char, _StateT> _Codecvt;
-
-    const _Codecvt &__cvt = use_facet< _Codecvt >(this->_C_getloc ());
-
-    // unshifting isn't necessary if encoding isn't state dependent
-    // or if the state is equivalent to initial state (determined
-    // by codecvt::unshift())
-    if (__cvt.encoding () >= 0)
-        return true;
-
-    // buf to hold unshift sequence - assumes that the shift
-    // sequence will be less than 64 chars (we can't safely
-    // use dynamic allocation because this function could be
-    // called as a result of memory allocation exception)
-
-    char  __useq [64];
-    char* __useq_end = 0;
-
-    _StateT __state = _C_cur_pos.state ();
-
-    const int __res =
-        __cvt.unshift (__state, __useq, __useq + sizeof __useq, __useq_end);
-
-    const _RWSTD_STREAMSIZE __nbytes = __useq_end - __useq;
-
-    // in the unlikely event that the buffer isn't big enough, assert
-    _RWSTD_ASSERT (__res != codecvt_base::partial);
-
-    if (__res == codecvt_base::error)
-        return false;
-
-    if (__res == codecvt_base::noconv)
-        return true;
-
-    const off_type __nwrote =
-        __rw::__rw_fwrite (_C_file, this->_C_state, __useq, __nbytes);
-
-    if (__nwrote < 0)
-        return false;
-
-    _C_cur_pos += __nwrote;     // CR/LF conversion not an issue here
-
-    return __nwrote == __nbytes;
 }
 
 
