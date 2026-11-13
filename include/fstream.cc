@@ -155,6 +155,14 @@ _C_write_conv (const codecvt<char_type, char,
         if (codecvt_base::error == __res)
             return __from_next;
 
+        // 27.8.1.4, p8 repeats a call that left characters: after
+        // partial "using characters from end to p", after ok with a
+        // larger buffer ("increase BSIZE"); departure: __xbuf does not
+        // grow, and a call that consumed nothing and stored nothing
+        // would be repeated without end, so the write fails
+        if (__from_next == __first && __to_next == __xbuf)
+            return __first;
+
         __first = __from_next;
     }
 

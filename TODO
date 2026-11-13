@@ -26,26 +26,6 @@ at the top.
 
 ** Streams
 
-*** TODO A =partial= result that consumes nothing spins the flush of =basic_filebuf=
-
-The loop of =basic_filebuf::_C_write_conv= (=include/fstream.cc=
-118-159) ends when =__first= reaches =__last= or a write fails. A
-facet whose =out= returns =partial= with =from_next= equal to =from=
-and nothing stored gets the same call again without end. 14882:2003
-22.2.1.5.2, Table 53's note allows the result where "additional
-source elements are needed before another destination element can be
-produced", and 27.8.1.4, p8 reads as the loop does: "repeat using
-characters from end to p". Measured, 2026-11-09: =pubsync= over
-="ab?"= under a facet that returns =partial= at ='?'= does not
-return; libstdc++ of GCC 16 repeats once and reports success with the
-character unwritten.
-
-Fix: a decision: the loop fails when a call consumes nothing and
-stores nothing, a departure from the letter of p8; or the loop stays
-and the note records the limit.
-
-Check: the measurement as a =27.filebuf.codecvt= row that returns.
-
 *** TODO =basic_stringbuf::xsputn= copies an argument that overlaps the put position with =memcpy=
 
 =basic_stringbuf::xsputn= (=include/sstream.cc= 200) copies its
@@ -733,7 +713,7 @@ finds it equal to =to=.
 
 ** TODO =27.filebuf.codecvt= compares a =size_t= index with a =long= length
 
-=run_test= in =tests/iostream/27.filebuf.codecvt.cpp= (1589-1590)
+=run_test= in =tests/iostream/27.filebuf.codecvt.cpp= (1708-1709)
 defines ~const long len~ from two =size_t= values and runs a =size_t=
 index up to it, so GCC 16 warns of a comparison between signed and
 unsigned on the loop's condition. Seen 2026-11-10.

@@ -1173,6 +1173,125 @@ test_error_out (const char *fname, const char *cname)
 
 /***********************************************************************/
 
+// copies characters up to a '?' and stops there with the result it
+// was constructed with; a call that starts at a '?' thus consumes
+// nothing and stores nothing
+class stallcvt_t: public std::codecvt<char, char, std::mbstate_t>
+{
+    const result res;   // returned at a '?'
+
+public:
+    stallcvt_t (std::size_t ref, result r)
+        : std::codecvt<char, char, std::mbstate_t> (ref),
+          res (r) { /* empty */ }
+
+protected:
+
+    virtual result
+    do_out (state_type&,
+            const intern_type *from, const intern_type *from_end,
+            const intern_type *&from_next,
+            extern_type *to, extern_type *to_end,
+            extern_type *&to_next) const {
+        from_next = from;
+        to_next   = to;
+
+        for (; from_next != from_end && to_next != to_end
+               && '?' != *from_next; ++from_next, ++to_next)
+            *to_next = *from_next;
+
+        return from_next == from_end ? ok : res;
+    }
+
+    virtual bool
+    do_always_noconv () const _THROWS (()) {
+        return false;   // out copies
+    }
+};
+
+
+// 27.8.1.4, p8 repeats a conversion that left characters: after partial
+// "using characters from end to p", after ok with a larger buffer; a
+// conversion that consumes nothing and stores nothing would be repeated
+// without end, and fails the write instead: the file holds the
+// characters before it and the put area the rest (27.5.2.4.5, p5)
+static void
+test_stall (const char *fname, std::codecvt_base::result cvtres,
+            const char *rname)
+{
+    rw_info (0, 0, __LINE__,
+             "filebuf output with a conversion that makes no progress "
+             "and returns %s", rname);
+
+    const stallcvt_t cvt (1 /* prevent locale from deleting */, cvtres);
+
+    const std::locale loc (std::locale::classic (), &cvt);
+
+    const std::ios::openmode mode = std::ios::out | std::ios::binary;
+
+    // the sequence fits the put area and the flush stops at '?'
+    {
+        pubfilebuf<char> fb;
+        fb.pubimbue (loc);
+        fb.open (fname, mode);
+
+        const std::streamsize n = fb.sputn ("ab?cd", 5);
+        rw_assert (5 == n, 0, __LINE__,
+                   "filebuf::sputn (\"ab?cd\", 5) == 5, got %ld", long (n));
+
+        const int res = fb.pubsync ();
+        rw_assert (-1 == res, 0, __LINE__,
+                   "filebuf::pubsync () == -1, got %d", res);
+
+        const long nleft = long (fb.pubpptr () - fb.pubpbase ());
+        const char left  = nleft ? *fb.pubpbase () : '\0';
+
+        rw_assert (3 == nleft && '?' == left, 0, __LINE__,
+                   "filebuf: pptr () - pbase () == 3 and *pbase () == '?' "
+                   "after pubsync (), got %ld and %{#c}", nleft, left);
+
+        assert_file (__LINE__, fname, "ab", 2);
+
+        const bool closed = 0 != fb.close ();
+        rw_assert (!closed, 0, __LINE__, "filebuf::close () == 0");
+
+        // the flush in close () writes no character twice
+        assert_file (__LINE__, fname, "ab", 2);
+    }
+
+    // the buffer has no put area and the characters go to the file
+    // directly, up to the '?'
+    {
+        std::filebuf fb;
+        fb.pubimbue (loc);
+        fb.open (fname, mode);
+        fb.pubsetbuf (0, 0);
+
+        const std::streamsize n = fb.sputn ("ab?cd", 5);
+        rw_assert (2 == n, 0, __LINE__,
+                   "filebuf::sputn (\"ab?cd\", 5) == 2 with no put area, "
+                   "got %ld", long (n));
+
+        const int c = fb.sputc ('?');
+        rw_assert (std::char_traits<char>::eof () == c, 0, __LINE__,
+                   "filebuf::sputc ('?') == EOF with no put area, got %d",
+                   c);
+
+        assert_file (__LINE__, fname, "ab", 2);
+    }
+}
+
+
+// the stalls under each result that lets the conversion loop go on
+static void
+test_stalls (const char *fname)
+{
+    test_stall (fname, std::codecvt_base::partial, "partial");
+    test_stall (fname, std::codecvt_base::ok, "ok");
+}
+
+/***********************************************************************/
+
 // exchanges 'x' and 'y' in both directions and leaves every other
 // character as it is; for a sequence with neither, the conversion
 // stores nothing and returns noconv (22.2.1.5.2, p2), though
@@ -1614,6 +1733,9 @@ run_test (int, char*[])
     // test with errors during conversion on output
     test_error_out<char> (fname, "char");
     test_error_out<wchar_t> (fname, "wchar_t");
+
+    // test conversions that make no progress on output
+    test_stalls (fname);
 
     // test writes the file takes in part
     test_short_writes (fname);

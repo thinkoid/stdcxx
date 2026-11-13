@@ -232,7 +232,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 27.basic_ios.copyfmt.stdcxx-1058         FORMAT    0                      
 27.cstdio.stdcxx-195                       NOUT    0                      
 27.filebuf.close.stdcxx-969                NOUT    0                      
-27.filebuf.codecvt                            0    0  205568      0   100%
+27.filebuf.codecvt                            0    0  205586      0   100%
 27.filebuf.members.stdcxx-308              NOUT    0                      
 27.filebuf                                    0    0     182      0   100%
 27.filebuf.sgetn.stdcxx-161                NOUT    0                      
@@ -274,5 +274,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            33
-  Assertions:            12538894
+  Assertions:            12538912
   Failed assertions:            0

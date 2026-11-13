@@ -1126,7 +1126,7 @@ design (e6c7726b); no recorded decision. Pinned by: no test.
 | `22.locale.codecvt.length` | `length` over the same three, and the byname narrow facet | 484 |
 | `22.locale.codecvt.mt` | first mapping of each component database of `ISO-2022-JP-2`, one per round, gated | 48 |
 | `22.locale.codecvt.stdcxx-435` | `in` of one character in a multibyte locale | NOUT |
-| `27.filebuf.codecvt` | a derived `codecvt<char, char, mbstate_t>` under `basic_filebuf` | 205568 |
+| `27.filebuf.codecvt` | a derived `codecvt<char, char, mbstate_t>` under `basic_filebuf` | 205586 |
 
 Rows from `doc/notes/baseline/15D.txt`; NOUT is a regression program
 that writes no table. The two warnings of `ctype.narrow` are its
