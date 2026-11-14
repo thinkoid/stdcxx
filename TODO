@@ -65,25 +65,6 @@ type in a 15D build of the tests, before and after.
 
 ** Numerics
 
-*** TODO A second =cv[g]= with one =gslice= may read its start twice
-
-=_C_next_ind= at the end of its walk wraps, sets =_C_reset= and returns
-=start=, and the next call clears the flag and returns =start= again
-(=src/valarray.cpp= 40-77). ~valarray<T>::operator[] (const gslice&)
-const~ (=include/valarray= 2117-2135) calls it =_C_ind_numb ()= times on
-the caller's =gslice= and never takes the wrapping call, so the state
-stays at the last index. Hypothesis, by reading and a hand trace over
-a 2-by-3 =gslice=: a second ~cv[g]~ with the same =g= reads =start=
-twice and drops the last element. The =gslice_array= paths take the
-wrap in their loop condition and start clean. Seen in passing by the
-extension sweep, 2026-11-04.
-
-Fix: the const subscript steps a copy of the =gslice=, as
-=gslice_array= does.
-
-Check: ~a = cv[g]; b = cv[g];~ for a 2-by-3 =gslice=, with =a= and =b=
-equal element by element.
-
 *** TODO =accumulate= and =inner_product= apply ~operator+=~
 
 14882:2003 26.4.1, p1 has =accumulate= modify its accumulator "with
@@ -588,10 +569,10 @@ Fix: rows for the four in =23.list.splice=, or a test of
 
 Check: each of 23.2.2.4, p15 to p32 has a row.
 
-** TODO The container tests build with warnings of their own
+** TODO Ten tests build with warnings of their own
 
-GCC 16 in 15D warns on the sources of eight container tests, apart
-from what the library's headers draw:
+GCC 16 in 15D warns on the sources of eight container tests and two
+=valarray= ones, apart from what the library's headers draw:
 
 - =-Wunused-local-typedefs=: =23.bitset.cons= 295 (=String=),
   =23.list.assign= 278 and 280, =23.list.capacity= 307,
@@ -603,17 +584,21 @@ from what the library's headers draw:
   =std::length_error= by value.
 - =23.vector.stdcxx-494= 49: an =operator new= that returns null
   without ~throw ()~.
+- =-Wsized-deallocation=: =26.valarray.members.stdcxx-313= and
+  =26.valarray.unary.stdcxx-314= replace =operator delete= without
+  the sized form.
 
 Hypothesis: the rest of the suite has more of each; only the list,
-vector and bitset tests were built and read. Seen while the
+vector, bitset and =valarray= tests were built and read. Seen while the
 Containers entries were closed, 2026-11-14.
 
 Fix: the unused typedefs leave, the catch takes a reference, the
-local takes another name; the =operator new= is the regression
-test's subject and is read before it is touched.
+local takes another name; the replaced =operator new= and =operator
+delete= are the regression tests' subjects and are read before they
+are touched.
 
-Check: the list, vector and bitset tests build in 15D with no
-warning that names a file under =tests=.
+Check: the list, vector, bitset and =valarray= tests build in 15D
+with no warning that names a file under =tests=.
 
 ** TODO =27.ostream= never runs its unformatted tests
 

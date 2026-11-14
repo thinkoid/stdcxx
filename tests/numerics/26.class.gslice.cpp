@@ -145,6 +145,32 @@ get_index_array (const std::gslice &gsl)
 
 /**************************************************************************/
 
+// verifies that array_slice holds the elements of va that indices names
+static void
+check_slice (const std::valarray<std::size_t> &array_slice,
+             const std::valarray<std::size_t> &indices,
+             const std::valarray<std::size_t> &va)
+{
+    bool equal = array_slice.size () == indices.size ();
+
+    rw_assert (equal, 0, __LINE__,
+               "size() == %zu, got %zu",
+               indices.size (), array_slice.size ());
+
+    if (equal) {
+        for (std::size_t j = 0; j != array_slice.size (); ++j) {
+
+            equal = array_slice [j] == va [indices [j]];
+
+            rw_assert (equal, 0, __LINE__,
+                       "mismatch at %u, index %u: expected %u, got %u",
+                       j, indices [j], va [indices [j]],
+                       array_slice [j]);
+        }
+    }
+}
+
+
 static void
 test_gslice (std::size_t  start,
              const char  *sizes,
@@ -175,23 +201,18 @@ test_gslice (std::size_t  start,
         const std::valarray<std::size_t> array_slice =
             i < 2 ? va [gsl] : va [std::gslice (gsl)];
 
-        bool equal = array_slice.size () == indices.size ();
+        check_slice (array_slice, indices, va);
+    }
 
-        rw_assert (equal, 0, __LINE__,
-                   "size() == %zu, got %zu",
-                   indices.size (), array_slice.size ());
+    // the same thrice for the subscript of a const valarray,
+    // which steps through the gslice itself, with no gslice_array
+    const std::valarray<std::size_t> &cva = va;
 
-        if (equal) {
-            for (std::size_t j = 0; j != array_slice.size (); ++j) {
+    for (int i = 0; i != 3; ++i) {
+        const std::valarray<std::size_t> array_slice =
+            i < 2 ? cva [gsl] : cva [std::gslice (gsl)];
 
-                equal = array_slice [j] == va [indices [j]];
-
-                rw_assert (equal, 0, __LINE__,
-                           "mismatch at %u, index %u: expected %u, got %u",
-                           j, indices [j], va [indices [j]],
-                           array_slice [j]);
-            }
-        }
+        check_slice (array_slice, indices, va);
     }
 }
 

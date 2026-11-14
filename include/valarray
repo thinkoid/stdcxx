@@ -2144,11 +2144,12 @@ valarray<_TypeT>::operator[](const gslice& __sl) const
     __rw::__rw_array<_TypeT> __tmp =
         __rw::__rw_array<_TypeT>(_TypeT (), __maxinx);
 
-    gslice* const __gsl = const_cast< gslice* >(&__sl);
+    // step through a copy: a copy starts at the first index,
+    // and the argument keeps its state
+    gslice __gsl (__sl);
 
     for (_RWSTD_SIZE_T __i = 0; __i != __maxinx; ++__i) {
-
-        const _RWSTD_SIZE_T __inx = __gsl->_C_next_ind ();
+        const _RWSTD_SIZE_T __inx = __gsl._C_next_ind ();
 
         __tmp [__i] = _C_array [__inx];
     }
