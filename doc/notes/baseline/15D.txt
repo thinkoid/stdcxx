@@ -146,7 +146,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 23.list.iterators                             0    0    2042      0   100%
 23.list.special                               0    0    1327      0   100%
 23.list.special.stdcxx-334                 NOUT    0                      
-23.list.splice                                0    0      29      0   100%
+23.list.splice                                0    0      33      0   100%
 23.set.stdcxx-216                          NOUT    0                      
 23.vector.allocator                           0    1       3      0   100%
 23.vector.bool                                0    0      20      0   100%
@@ -275,5 +275,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            33
-  Assertions:            12538932
+  Assertions:            12538936
   Failed assertions:            0

@@ -26,24 +26,6 @@ at the top.
 
 ** Containers
 
-*** TODO The range =splice= checks 23.2.2.4 p12 with the wrong iterators
-
-The range =splice= (=include/list.cc=) asserts
-~__i != __j && __i != __k~ when the source is the list itself, and in
-a debug build walks ~[__j, __k)~ asserting ~__i != __j~ at every
-step, an invariant of the loop. 14882:2003 23.2.2.4 p12 leaves the
-result undefined only for a position in ~[first, last)~: a position
-inside the range past =first= is never caught, and a position equal
-to =last=, which the paragraph allows and which changes nothing,
-fails the assertion; a release build returns at once. From the 2005
-import. Seen in passing while retiring the node buffer, 2026-11-04.
-
-Fix: the loop asserts ~__i != __it~, and the first assertion drops
-~__i != __k~.
-
-Check: ~l.splice (l.end (), l, l.begin (), l.end ())~ runs in 15D; a
-position inside the range fails the assertion.
-
 *** TODO =bitset= sizes its array with an enumerator in a boolean context
 
 =include/bitset= 92 declares ~unsigned long _C_bits [_C_nelems ?
@@ -57,6 +39,43 @@ Seen in passing while building =23.bitset=, 2026-11-05.
 Fix: the condition compares, ~_C_nelems != 0~.
 
 Check: =23.bitset= builds in 15D without the warning.
+
+*** TODO =list='s range insert macro ends in a typedef nothing uses
+
+=include/list= 250-266 define =_RWSTD_LIST_SAFE_INSERT_RANGE=, a
+block that ends in ~typedef void __dummy_t~ so that its one use (467)
+takes a semicolon. GCC 16 under =-Wall= warns "typedef '__dummy_t'
+locally defined but not used" (=-Wunused-local-typedefs=) once for
+each instantiation of the range =insert=: building the eleven
+=23.list= tests prints it eleven times, and so does any program that
+inserts a range into a =list= under =-Wall=. The typedef came in
+2007 (c1b34759). Seen in passing while building =23.list.splice=,
+2026-11-14.
+
+Fix: the macro's body moves into its one caller, or the block ends
+in a form that declares nothing.
+
+Check: =23.list.insert= builds in 15D without the warning.
+
+*** TODO A copy constructor without a copy assignment draws =-Wdeprecated-copy=
+
+=__rw_list_iter= (=include/list= 105) and =allocator=
+(=include/rw/_allocator.h= 102) declare a copy constructor and leave
+the copy assignment to the compiler, as 14882:2003 20.4.1 does for
+=allocator=. GCC 16 compiles the tree in its default dialect, where
+that implicit assignment is deprecated, and under =-W= warns
+"implicitly-declared ... operator= ... is deprecated"
+(=-Wdeprecated-copy=) where one is assigned: the build of the eleven
+=23.list= tests prints it 34 times for the library's own types.
+Hypothesis: other class templates of the library do the same; the
+count over a whole build of the tests has not been taken. Seen in
+passing while building =23.list.splice=, 2026-11-14.
+
+Fix: a decision: each such class declares its assignment, or the
+warning is recorded as the dialect's.
+
+Check: the count of =-Wdeprecated-copy= lines that name a library
+type in a 15D build of the tests, before and after.
 
 ** Numerics
 
@@ -562,6 +581,22 @@ collate & ctype)= and the two-locale form named "C" with the classic
 2026-11-03, by probe only).
 
 Check: the rows run and the six pins gain a row.
+
+** TODO =list='s =sort=, =reverse=, =unique= and =remove= have no test
+
+=tests/include/rw_lists.h= 162-192 names the signatures of =remove=,
+=remove_if=, =unique=, =merge=, =sort= and =reverse=, and no test
+under =tests/containers= calls one of them through it:
+=23.list.splice= covers =splice= and =merge= with rows of its own,
+and nothing covers the other four. =sort= and =reverse= are built on
+the range =splice=, so a change there is checked by a probe alone.
+Seen while the range =splice='s assertions were corrected,
+2026-11-14.
+
+Fix: rows for the four in =23.list.splice=, or a test of
+[lib.list.ops] on the harness.
+
+Check: each of 23.2.2.4, p15 to p32 has a row.
 
 ** TODO =27.ostream= never runs its unformatted tests
 

@@ -298,6 +298,20 @@ test_splice_within ()
     rw_assert (&*d == &lst.front (), 0, __LINE__,
                "splice (it, *this, first, last): an iterator to a "
                "spliced element refers to it in its new place");
+
+    // 23.2.2.4, p12: a position equal to last is not in [first, last)
+    reset_counts ();
+    lst.splice (lst.end (), lst, lst.begin (), lst.end ());
+
+    check_counts (__LINE__, "splice (last, *this, first, last)");
+    check_list (__LINE__, "splice (last, *this, first, last)", lst, "defabc");
+
+    // and an empty range holds no position
+    reset_counts ();
+    lst.splice (d, lst, d, d);
+
+    check_counts (__LINE__, "splice (it, *this, it, it)");
+    check_list (__LINE__, "splice (it, *this, it, it)", lst, "defabc");
 }
 
 

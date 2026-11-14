@@ -184,9 +184,6 @@ splice (iterator __i, list &__x, iterator __j, iterator __k)
     _RWSTD_ASSERT_RANGE (__x.begin (), __j);
     _RWSTD_ASSERT_RANGE (__j, __k);
 
-    // 23.2.2.4, p12 - check undefined behavior
-    _RWSTD_ASSERT (&__x != this || (__i != __j && __i != __k));
-
     // a splice before last within one list changes nothing, and the
     // relinking below would cut [j, k) out of the list as a cycle
     if (__j == __k || __i == __k)
@@ -197,7 +194,7 @@ splice (iterator __i, list &__x, iterator __j, iterator __k)
 
         for (iterator __it = __j; __it != __k; ++__it) {
             // 23.2.2.4, p12 - check undefined behavior (linear time)
-            _RWSTD_ASSERT (&__x != this || __i != __j);
+            _RWSTD_ASSERT (&__x != this || __i != __it);
 
             ++_C_length;
             --__x._C_length;
