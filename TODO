@@ -24,32 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Streams
-
-*** TODO =basic_stringbuf::xsputn= copies an argument that overlaps the put position with =memcpy=
-
-=basic_stringbuf::xsputn= (=include/sstream.cc= 200) copies its
-argument to =pptr ()= with =traits_type::copy=. The argument may lie
-inside the buffer and run past =pptr ()=, since the assertion at 182
-bounds it by =epptr ()=. =char_traits<char>::copy= and
-=char_traits<wchar_t>::copy= call =memcpy= and =wmemcpy=
-(=include/rw/_traits.h= 331, 406), and C99 7.21.2.1, p2 leaves an
-overlapping =memcpy= undefined. 14882:2003 21.1.1, Table 37 asks of
-=copy= only "p not in [s,s+n)", which an argument that starts before
-=pptr ()= meets, and defines the result as "for each i in [0,n),
-performs X::assign(s[i],p[i])", the order of 27.5.2.4.5, p1's
-repeated =sputc=. A probe on glibc 2.44, with an argument 5 before
-=pptr ()= and 10 long, and one 10 before and 20 long that grows the
-buffer, gets the =sputc= sequence, under ASan too: the defect is by
-the letter, not measured. Hypothesis, by reading, 2026-11-08.
-
-Fix: a decision: =copy= assigns forward where the ranges overlap as
-Table 37 allows, or =xsputn= copies an overlapping argument in the
-=sputc= order itself.
-
-Check: the probe's two calls as =27.stringbuf.virtuals= rows,
-comparing =str ()= to the =sputc= sequence.
-
 ** Containers
 
 *** TODO =vector<bool>='s range constructor takes no allocator and no integers

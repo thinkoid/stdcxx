@@ -197,6 +197,8 @@ xsputn (const char_type* __s, streamsize __n)
     }
 
     // copy the whole string
+    // 27.5.2.4.5, p1; departure: an argument that starts before pptr ()
+    // and runs past it overlaps the copy, which is not in sputc order
     traits_type::copy (this->pptr (), __s, __n);
 
     this->pbump (__n);
