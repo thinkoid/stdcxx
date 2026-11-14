@@ -26,20 +26,6 @@ at the top.
 
 ** Containers
 
-*** TODO =bitset= sizes its array with an enumerator in a boolean context
-
-=include/bitset= 92 declares ~unsigned long _C_bits [_C_nelems ?
-_C_nelems : 1]~, where =_C_nelems= is an enumerator. GCC 16 under
-=-Wall= warns "enum constant in boolean context"
-(=-Wint-in-bool-context=) once for each instantiation: building
-=23.bitset= prints it ten times, and so does any program that
-instantiates =bitset= under =-Wall=. From the 2005 import (e6c7726b).
-Seen in passing while building =23.bitset=, 2026-11-05.
-
-Fix: the condition compares, ~_C_nelems != 0~.
-
-Check: =23.bitset= builds in 15D without the warning.
-
 *** TODO =list='s range insert macro ends in a typedef nothing uses
 
 =include/list= 250-266 define =_RWSTD_LIST_SAFE_INSERT_RANGE=, a
@@ -597,6 +583,33 @@ Fix: rows for the four in =23.list.splice=, or a test of
 [lib.list.ops] on the harness.
 
 Check: each of 23.2.2.4, p15 to p32 has a row.
+
+** TODO The container tests build with warnings of their own
+
+GCC 16 in 15D warns on the sources of eight container tests, apart
+from what the library's headers draw:
+
+- =-Wunused-local-typedefs=: =23.bitset.cons= 295 (=String=),
+  =23.list.assign= 278 and 280, =23.list.capacity= 307,
+  =23.list.cons= 397 and 641, =23.list.erase= 275 (=ListIter=,
+  =ListState=), =23.vector.modifiers= 1054 to 1056.
+- =-Wshadow=: =23.vector.modifiers= 717, a local =Vector= over the
+  global one.
+- =-Wcatch-value=: =23.vector.capacity= 137 catches
+  =std::length_error= by value.
+- =23.vector.stdcxx-494= 49: an =operator new= that returns null
+  without ~throw ()~.
+
+Hypothesis: the rest of the suite has more of each; only the list,
+vector and bitset tests were built and read. Seen while the
+Containers entries were closed, 2026-11-14.
+
+Fix: the unused typedefs leave, the catch takes a reference, the
+local takes another name; the =operator new= is the regression
+test's subject and is read before it is touched.
+
+Check: the list, vector and bitset tests build in 15D with no
+warning that names a file under =tests=.
 
 ** TODO =27.ostream= never runs its unformatted tests
 

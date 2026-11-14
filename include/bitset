@@ -89,7 +89,7 @@ class bitset
     enum { _C_nelems   = _Size ? 1 + (_Size - 1) / _C_elembits : 0 };
 
     // must have at least one element even if size is 0
-    unsigned long _C_bits [_C_nelems ? _C_nelems : 1];
+    unsigned long _C_bits [_C_nelems != 0 ? _C_nelems : 1];
 
     bool _C_valid_pos (_RWSTD_SIZE_T __pos) const _THROWS (()) {
         // prevent warnings if _Size == 0
@@ -226,7 +226,7 @@ public:
     bitset& flip () _THROWS (()) {
         for (_RWSTD_SIZE_T __i = 0; __i != _C_nelems; __i++)
             _C_bits [__i] = ~_C_bits [__i];
-        _C_bits [_C_nelems - !!_C_nelems] &=
+        _C_bits [_C_nelems - (_C_nelems != 0)] &=
           _RWSTD_ULONG_MAX >> (_C_elembits - _Size % _C_elembits) % _C_elembits;
         return *this;
     }
@@ -354,7 +354,7 @@ bitset<_Size>::set () _THROWS (())
     else
         _RWSTD_MEMSET (_C_bits, -1, sizeof _C_bits);
 
-    _C_bits [_C_nelems - !!_C_nelems] >>=
+    _C_bits [_C_nelems - (_C_nelems != 0)] >>=
         (_C_elembits - _Size % _C_elembits) % _C_elembits;
 
     return *this;
@@ -393,7 +393,7 @@ bitset<_Size>::operator<<= (_RWSTD_SIZE_T __n) _THROWS (())
     // clear bits shifted past the MSB
     if (_Size % _C_elembits) {
         // prevent warnings about shifting too far
-        _C_bits [_C_nelems - !!_C_nelems] &=
+        _C_bits [_C_nelems - (_C_nelems != 0)] &=
           _RWSTD_ULONG_MAX >> (_C_elembits - _Size % _C_elembits) % _C_elembits;
     }
 
