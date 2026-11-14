@@ -218,6 +218,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 26.valarray.cassign                           0    1    7702      0   100%
 26.valarray.cons                              0    0     396      0   100%
 26.valarray.cshift.stdcxx-316              NOUT    0                      
+26.valarray.members                           0    0       4      0   100%
 26.valarray.members.stdcxx-313             NOUT    0                      
 26.valarray.members.stdcxx-318             NOUT    0                      
 26.valarray.sub.stdcxx-224                 NOUT    0                      
@@ -269,11 +270,11 @@ atomic_add                                    0    0      66      0   100%
 atomic_xchg                                   0    0      22      0   100%
 once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   269
+  Programs:                   270
   Non-zero exit status:         0
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            33
-  Assertions:            12538936
+  Assertions:            12538940
   Failed assertions:            0

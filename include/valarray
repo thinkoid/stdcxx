@@ -166,7 +166,20 @@ public:
 
     // 26.3.2.7, p2
     value_type sum () const {
-        return accumulate (_C_array.begin (), _C_array.end (), value_type ());
+        const value_type*       __first = _C_array.begin ();
+        const value_type* const __last  = _C_array.end ();
+
+        // undefined for an array of length 0; the sum is T ()
+        if (__first == __last)
+            return value_type ();
+
+        // a copy of an element, then operator+= for each of the others
+        value_type __sum (*__first);
+
+        while (++__first != __last)
+            __sum += *__first;
+
+        return __sum;
     }
 
     // 26.3.2.7, p3

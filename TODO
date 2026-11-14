@@ -65,21 +65,6 @@ type in a 15D build of the tests, before and after.
 
 ** Numerics
 
-*** TODO =valarray::sum= adds with ~operator+~ from =T ()=
-
-14882:2003 26.3.2.7, p2 computes =sum= "by applying ~operator+=~ to a
-copy of an element of the array and all other elements".
-=include/valarray= 167-169 return ~accumulate (begin, end, value_type
-())~, which starts from =T ()= and applies ~operator+~: a =T= with
-~+=~ and no ~+~ does not compile, and one whose =T ()= is not an
-additive identity gives another sum. Seen in passing by the extension
-sweep, 2026-11-04.
-
-Fix: =sum= copies the first element and applies ~+=~ for the rest.
-
-Check: =sum= of a =valarray= over a type with ~+=~ alone compiles, and
-over one whose =T ()= is 1 gives the elements' sum.
-
 *** TODO A second =cv[g]= with one =gslice= may read its start twice
 
 =_C_next_ind= at the end of its walk wraps, sets =_C_reset= and returns
@@ -98,6 +83,25 @@ Fix: the const subscript steps a copy of the =gslice=, as
 
 Check: ~a = cv[g]; b = cv[g];~ for a 2-by-3 =gslice=, with =a= and =b=
 equal element by element.
+
+*** TODO =accumulate= and =inner_product= apply ~operator+=~
+
+14882:2003 26.4.1, p1 has =accumulate= modify its accumulator "with
+acc = acc + *i", and 26.4.2, p1 has =inner_product= do it "with acc =
+acc + (*i1) * (*i2)". =include/numeric= 59 and 80 apply ~__n +=~
+instead, since the 2005 import (e6c7726b). Measured in 15D: with a
+type that has ~operator+~ and no ~operator+=~ neither call compiles,
+"no match for operator+=". The tree's own test holds the library to
+it: =26.accumulate= instantiates =accumulate= on a type with
+~operator+=~ and no ~operator+~ (=plus_asgn=, 39-48). =partial_sum=
+(=include/numeric= 105) applies ~operator+~, as 26.4.3 has it. Seen
+while =valarray::sum= was taken off =accumulate=, 2026-11-14.
+
+Fix: a decision: the two apply ~operator+~ and the tests' types
+follow, or the departure is recorded in =ref-conformance.md=.
+
+Check: ~std::accumulate~ and ~std::inner_product~ over a type with
+~operator+~ alone compile and add; or the row is in chapter 2.
 
 ** Algorithms
 
