@@ -555,10 +555,10 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
 #ifndef _RWSTD_NO_VECTOR_BOOL
 
 template <class _Allocator>
-template<class _InputIter>
-void vector<bool, _Allocator >::_C_insert
-(iterator __it, _InputIter __first, _InputIter __last, void*)
-
+template <class _FwdIter>
+void vector<bool, _Allocator >::
+_C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
+                 forward_iterator_tag)
 {
     if (__first == __last) return;
     size_type __n = std::distance (__first, __last);
@@ -581,6 +581,23 @@ void vector<bool, _Allocator >::_C_insert
         _C_bufend = __q + (__len + _RWSTD_WORD_BIT - 1)/_RWSTD_WORD_BIT;
         _C_begin = iterator(__q, 0);
     }
+}
+
+
+template <class _Allocator>
+template <class _InputIter>
+void vector<bool, _Allocator >::
+_C_insert_range (iterator __it, _InputIter __first, _InputIter __last,
+                 input_iterator_tag)
+{
+    // 24.1.1, p3: an input range can be read once; copy it
+    // to a temporary whose elements can be counted and read again
+    vector __tmp (get_allocator ());
+
+    for ( ; !(__first == __last); ++__first)
+        __tmp.push_back (*__first);
+
+    insert (__it, __tmp.begin (), __tmp.end ());
 }
 
 // Duplicates of the following functions exist in src/stl/vecbool.cpp.

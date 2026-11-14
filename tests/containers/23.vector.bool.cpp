@@ -28,6 +28,7 @@
 #include <cstddef>          // for size_t
 #include <cstring>          // for strlen
 
+#include <rw_alg_test.h>    // for InputIter
 #include <rw_allocator.h>   // for SharedAlloc, UserAlloc
 #include <rw_driver.h>      // for rw_test(), rw_assert()
 
@@ -184,6 +185,46 @@ test_insert ()
     check_vector (__LINE__, "insert (end (), 2, 0)", vec, "0111101100000");
 }
 
+
+// 24.1.1, p3: a range of input iterators is read once
+static void
+test_input_range ()
+{
+    rw_info (0, 0, 0, "std::vector<bool> constructor, assign and insert "
+             "on a range of input iterators");
+
+    typedef InputIter<bool> Iter;
+
+    bool buf [sizeof bits];
+
+    const std::size_t n   = to_bools (buf, bits);
+    const bool* const end = buf + n;
+
+    const Vector ctor (Iter (buf, buf, end), Iter (end, end, end));
+    check_vector (__LINE__, "vector (first, last)", ctor, bits);
+
+    Vector vec (2, false);
+
+    vec.assign (Iter (buf, buf, end), Iter (end, end, end));
+    check_vector (__LINE__, "assign (first, last)", vec, bits);
+
+    // more elements than the capacity: the storage is reallocated
+    Vector grown;
+
+    grown.insert (grown.end (), Iter (buf, buf, end), Iter (end, end, end));
+    check_vector (__LINE__, "insert (it, first, last), reallocating",
+                  grown, bits);
+
+    // fewer than the capacity left: the elements are inserted in place
+    Vector fits (4, false);
+
+    const bool* const mid = buf + 4;
+
+    fits.insert (fits.begin () + 1, Iter (buf, buf, mid), Iter (mid, mid, mid));
+    check_vector (__LINE__, "insert (it, first, last), in place",
+                  fits, "01011000");
+}
+
 /**************************************************************************/
 
 static int
@@ -193,6 +234,7 @@ run_test (int, char**)
     test_ctor_range ();
     test_assign ();
     test_insert ();
+    test_input_range ();
 
     return 0;
 }

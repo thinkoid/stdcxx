@@ -951,9 +951,24 @@ private:
 
     void _C_insert (iterator, bool);
 
+    // implements range insert for ForwardIterators
+    template <class _FwdIter>
+    void _C_insert_range (iterator, _FwdIter, _FwdIter,
+                          forward_iterator_tag);
+
+    // implements range insert for InputIterators
+    template <class _InputIter>
+    void _C_insert_range (iterator, _InputIter, _InputIter,
+                          input_iterator_tag);
+
     // implements range insert
     template <class _InputIter>
-    void _C_insert (iterator, _InputIter, _InputIter, void*);
+    void _C_insert (iterator __it,
+                    _InputIter __first, _InputIter __last, void*) {
+        // dispatch to an insert suitable for the category of InputIter
+        _C_insert_range (__it, __first, __last,
+                         _RWSTD_ITERATOR_CATEGORY (_InputIter));
+    }
 
     // implements insert with repetition for an integral type
     template <class _IntType>

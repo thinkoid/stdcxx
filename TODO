@@ -26,23 +26,6 @@ at the top.
 
 ** Containers
 
-*** TODO =vector<bool>='s range =insert= reads an input range twice
-
-=include/vector.cc= 564 takes ~std::distance (first, last)~ over the
-range and then copies it (568 or 577), so an input iterator range is
-spent on the count and the copy reads nothing. The range constructor
-and the range =assign= insert through the same function. 14882:2003
-24.1.1, p3: "Algorithms on input iterators should never attempt to
-pass through the same iterator twice." Seen in passing by the
-extension sweep, 2026-11-04.
-
-Fix: the range =insert= reads an input range once, into a temporary or
-element by element.
-
-Check: =insert= at =begin ()= from an =istream_iterator<bool>= over "1
-0 1" inserts three elements, and the constructor and =assign= hold
-the same three; the rows go in =23.vector.bool=.
-
 *** TODO The range =splice= checks 23.2.2.4 p12 with the wrong iterators
 
 The range =splice= (=include/list.cc=) asserts
@@ -238,7 +221,7 @@ Check: the library builds; =22.locale.codecvt= at pin.
 =src/vecbool.cpp= 50-52 holds an empty ~#ifndef _RWSTD_NO_VECTOR_BOOL~
 block: e9980bcd removed the definitions the partial specialization
 gate selected, and the library still builds =vecbool.o= from the
-includes alone. =include/vector.cc= 586-587 says "Duplicates of the
+includes alone. =include/vector.cc= 603-604 says "Duplicates of the
 following functions exist in src/stl/vecbool.cpp. Which set is used
 depends on the availability of partial specialization."; the tree has
 no =src/stl=, no duplicates and no such choice. Seen while the range
