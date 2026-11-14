@@ -149,6 +149,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 23.list.splice                                0    0      29      0   100%
 23.set.stdcxx-216                          NOUT    0                      
 23.vector.allocator                           0    1       3      0   100%
+23.vector.bool                                0    0      16      0   100%
 23.vector.bool.stdcxx-1062                 NOUT    0                      
 23.vector.bool.stdcxx-235                  NOUT    0                      
 23.vector.capacity                            0    0  857048      0   100%
@@ -268,11 +269,11 @@ atomic_add                                    0    0      66      0   100%
 atomic_xchg                                   0    0      22      0   100%
 once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   268
+  Programs:                   269
   Non-zero exit status:         0
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            33
-  Assertions:            12538912
+  Assertions:            12538928
   Failed assertions:            0

@@ -26,37 +26,22 @@ at the top.
 
 ** Containers
 
-*** TODO =vector<bool>='s range constructor takes no allocator and no integers
-
-14882:2003 23.2.5's synopsis declares the range constructor with
-~const Allocator& = Allocator ()~, and 23.1.1, p9 has a range
-constructor on an integral type behave as the count-and-value one.
-=include/vector= 978-985 declare ~vector (InputIter first, InputIter
-last)~ alone, with no integral dispatch: by reading,
-~std::vector<bool> v (5, 1);~ picks the template and fails in
-~std::distance (int, int)~. Seen in passing by the extension sweep,
-2026-11-04.
-
-Fix: the allocator parameter, and the integral dispatch the primary
-=vector= has.
-
-Check: ~std::vector<bool> v (5, 1)~ compiles and holds five =true=
-elements, and the range constructor takes an allocator.
-
 *** TODO =vector<bool>='s range =insert= reads an input range twice
 
-=include/vector.cc= 562 takes ~std::distance (first, last)~ over the
-range and then copies it (565 or 574), so an input iterator range is
-spent on the count and the copy reads nothing. 14882:2003 24.1.1, p3:
-"Algorithms on input iterators should never attempt to pass through
-the same iterator twice." Seen in passing by the extension sweep,
-2026-11-04.
+=include/vector.cc= 564 takes ~std::distance (first, last)~ over the
+range and then copies it (568 or 577), so an input iterator range is
+spent on the count and the copy reads nothing. The range constructor
+and the range =assign= insert through the same function. 14882:2003
+24.1.1, p3: "Algorithms on input iterators should never attempt to
+pass through the same iterator twice." Seen in passing by the
+extension sweep, 2026-11-04.
 
 Fix: the range =insert= reads an input range once, into a temporary or
 element by element.
 
 Check: =insert= at =begin ()= from an =istream_iterator<bool>= over "1
-0 1" inserts three elements.
+0 1" inserts three elements, and the constructor and =assign= hold
+the same three; the rows go in =23.vector.bool=.
 
 *** TODO The range =splice= checks 23.2.2.4 p12 with the wrong iterators
 
@@ -247,6 +232,23 @@ and -CN converters were surveyed, 2026-11-08.
 Fix: the two declarations and the two definitions leave.
 
 Check: the library builds; =22.locale.codecvt= at pin.
+
+*** TODO =src/vecbool.cpp= compiles nothing, and a comment still points at it
+
+=src/vecbool.cpp= 50-52 holds an empty ~#ifndef _RWSTD_NO_VECTOR_BOOL~
+block: e9980bcd removed the definitions the partial specialization
+gate selected, and the library still builds =vecbool.o= from the
+includes alone. =include/vector.cc= 586-587 says "Duplicates of the
+following functions exist in src/stl/vecbool.cpp. Which set is used
+depends on the availability of partial specialization."; the tree has
+no =src/stl=, no duplicates and no such choice. Seen while the range
+members of =vector<bool>= were given their dispatch, 2026-11-14.
+
+Fix: the comment leaves; a decision for the file: remove it, or keep
+it for an explicit instantiation.
+
+Check: the library builds without =vecbool.o=, or with the file's
+purpose stated in it; a sanity build.
 
 *** TODO The =__rw_once= comment names a static mutex path that is gone
 

@@ -951,6 +951,16 @@ private:
 
     void _C_insert (iterator, bool);
 
+    // implements range insert
+    template <class _InputIter>
+    void _C_insert (iterator, _InputIter, _InputIter, void*);
+
+    // implements insert with repetition for an integral type
+    template <class _IntType>
+    void _C_insert (iterator __it, _IntType __n, _IntType __x, int) {
+        insert (__it, size_type (__n), bool (__x));
+    }
+
 public:
 
     explicit
@@ -974,15 +984,13 @@ public:
         _C_copy (__x.begin (), __x.end (), _C_begin);
     }
 
-    template<class _InputIter>
-    vector  (_InputIter __first, _InputIter __last)
-        : allocator_type (), _C_bufend ()
-    {
-      size_type __n = std::distance (__first, __last);
-      _C_init(__n); 
-      _C_copy(__first, __last, _C_begin);
+    template <class _InputIter>
+    vector (_InputIter __first, _InputIter __last,
+            const _Allocator &__alloc = allocator_type ())
+        : allocator_type (__alloc), _C_bufend () {
+        insert (begin (), __first, __last);
     }
-  
+
     ~vector () {
       _C_value_alloc_type(*this).deallocate(_C_begin._C_p,  
         _C_bufend - _C_begin._C_p); 
@@ -1146,9 +1154,11 @@ public:
     }
     void insert (iterator __it, size_type __n, const bool& __x);
 
-    template<class _InputIter>
-    void insert (iterator __it, _InputIter __first,
-                 _InputIter __last);
+    template <class _InputIter>
+    void insert (iterator __it, _InputIter __first, _InputIter __last) {
+        // dispatch either to a range insert or to an insert with repetition
+        _C_insert (__it, __first, __last, _RWSTD_DISPATCH (_InputIter));
+    }
 
     iterator erase (iterator __it)
     {

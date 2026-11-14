@@ -556,8 +556,8 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
 
   template <class _Allocator>
   template<class _InputIter>
-  void vector<bool, _Allocator >::insert 
-  (iterator __it, _InputIter __first, _InputIter __last)
+  void vector<bool, _Allocator >::_C_insert
+  (iterator __it, _InputIter __first, _InputIter __last, void*)
 
   {
     if (__first == __last) return;
