@@ -34,20 +34,6 @@
 #include <typeinfo>
 #include <string.h>
 
-
-namespace __rw {
-
-inline int
-__rw_ticmp (const std::type_info &lhs, const std::type_info &rhs)
-{
-    const char* const n1 = lhs.name ();
-    const char* const n2 = rhs.name ();
-
-    return strcmp (n1 ? n1 : "", n2 ? n2 : "");
-}
-
-}   // namespace __rw
-
 /**************************************************************************/
 // class type_info members
 
@@ -86,7 +72,24 @@ type_info::~type_info () { }
 
 bool type_info::before (const type_info &rhs) const
 {
-    return 0 > __rw::__rw_ticmp (*this, rhs);
+#      ifdef __GNUG__
+
+    // GCC begins the name of a type local to its file with '*':
+    // two such types can have one name, and the address of the
+    // name is what tells them apart
+    if ('*' == *_C_name && '*' == *rhs._C_name)
+        return _C_name < rhs._C_name;
+
+    return 0 > strcmp (_C_name, rhs._C_name);
+
+#      else   // if !defined (__GNUG__)
+
+    const char* const n1 = name ();
+    const char* const n2 = rhs.name ();
+
+    return 0 > strcmp (n1 ? n1 : "", n2 ? n2 : "");
+
+#      endif   // __GNUG__
 }
 
 #    endif   // _RWSTD_NO_TYPE_INFO_BEFORE
@@ -106,7 +109,8 @@ const char* type_info::name () const
     _RWSTD_UNUSED (std::_C_name);
 #endif   // _RWSTD_NO_STD_TYPE_INFO
 
-    return _C_name;
+    // without the mark of a name that is compared by its address
+    return '*' == *_C_name ? _C_name + 1 : _C_name;
 }
 
 #    endif   // _RWSTD_NO_TYPE_INFO_NAME

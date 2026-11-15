@@ -43,12 +43,20 @@ void foo ()
 #include <typeinfo>
 
 #include <rw_driver.h>
+#include <rw_typeinfo.h>
 #include <rw_valcmp.h>
 
 // polymorphic classes (10.3, p1) used in tests below
 struct B { virtual ~B () { } };
 struct D1: B { };
 struct D2: B { };
+
+namespace {
+
+// another type than the Unnamed of the test library
+struct Unnamed { int i_; };
+
+}   // unnamed namespace
 
 /**************************************************************************/
 
@@ -171,6 +179,81 @@ run_test (int, char* [])
         rw_assert (0 != rw_strncmp (d1_name, d2_name), 0, __LINE__,
                    "std::type_info::name (): \"%s\" == \"%s\"",
                    d1_name, d2_name);
+    }
+
+    if (1) {
+        // exercise 18.5.1 with two types of one name, this file's
+        // Unnamed and the test library's, each local to its file
+        const std::type_info &ti_here  = typeid (Unnamed);
+        const std::type_info &ti_there = rw_unnamed_typeid ();
+        const std::type_info &ti_D1    = typeid (D1);
+
+        const char* const here_name =
+            ti_here.name () ? ti_here.name () : "(here null)";
+        const char* const there_name =
+            ti_there.name () ? ti_there.name () : "(there null)";
+
+        // a handler for one of the two that takes an object of the
+        // other says the implementation cannot tell them apart
+        bool same = false;
+
+        try {
+            rw_throw_unnamed ();
+        }
+        catch (Unnamed&) {
+            same = true;
+        }
+        catch (...) {
+        }
+
+        const char* const verdict = same ? "takes for one" : "tells apart";
+
+        // 18.5.1, p3
+        rw_assert (ti_here == ti_here && ti_there == ti_there, 0, __LINE__,
+                   "std::type_info::operator==(): \"%s\" != \"%s\", "
+                   "the same type", here_name, here_name);
+        rw_assert ((ti_here == ti_there) == same, 0, __LINE__,
+                   "std::type_info::operator==(): %s for the two types "
+                   "\"%s\" that a handler %s",
+                   same ? "false" : "true", here_name, verdict);
+        rw_assert ((ti_there == ti_here) == same, 0, __LINE__,
+                   "std::type_info::operator==(): %s for the two types "
+                   "\"%s\" that a handler %s, the other way round",
+                   same ? "false" : "true", there_name, verdict);
+
+        // 18.5.1, p4
+        rw_assert ((ti_here != ti_there) == !same, 0, __LINE__,
+                   "std::type_info::operator!=(): %s for the two types "
+                   "\"%s\" that a handler %s",
+                   same ? "true" : "false", here_name, verdict);
+
+        // 18.5.1, p6
+        rw_assert (!ti_here.before (ti_here) && !ti_there.before (ti_there),
+                   0, __LINE__,
+                   "std::type_info::before (): \"%s\" before itself",
+                   here_name);
+        rw_assert (   (ti_here.before (ti_there) || ti_there.before (ti_here))
+                   == !same, 0, __LINE__,
+                   "std::type_info::before (): one of the two types "
+                   "\"%s\" that a handler %s is %sbefore the other",
+                   here_name, verdict, same ? "" : "not ");
+        rw_assert (!(ti_here.before (ti_there) && ti_there.before (ti_here)),
+                   0, __LINE__,
+                   "std::type_info::before (): each of the two types "
+                   "\"%s\" before the other", here_name);
+
+        // a type local to its file and one that is not
+        rw_assert (   ti_here != ti_D1
+                   && ti_here.before (ti_D1) != ti_D1.before (ti_here),
+                   0, __LINE__,
+                   "std::type_info: \"%s\" and \"%s\" are two types, "
+                   "one before the other", here_name, ti_D1.name ());
+
+        // 18.5.1, p7: the name is without the mark GCC puts before
+        // the name of a type that it compares by the name's address
+        rw_assert ('*' != *here_name && '*' != *there_name, 0, __LINE__,
+                   "std::type_info::name (): \"%s\" begins with "
+                   "the compiler's mark", here_name);
     }
 
     if (1) {

@@ -356,6 +356,9 @@ all six tables:
   six tables, 272 programs in each. 15D took the row by hand with
   the test; the other five take it from one run of the six
   configurations on x86-64, in which no other row moved.
+- 2026-11-15: `18.support.rtti`, 24 to 33 in 15D: nine assertions on
+  two types of one name, each local to its file; the other five
+  tables are to move by the same 9.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, and to 33 when `2.smartptr.shared` and

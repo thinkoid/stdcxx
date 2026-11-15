@@ -24,34 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Language support
-
-*** TODO =type_info= compares by name where GCC marks a name to compare by address
-
-In 15D under GCC =_RWSTD_NO_TYPE_INFO_BEFORE=, =_EQUALITY= and =_NAME=
-are defined (=config.h= 484-487), so =src/typeinfo.cpp= 87-130
-compiles =before=, =name= and the comparisons. =name= returns the raw
-mangled name and equality compares names with =strcmp=; GCC's support
-library skips a leading =*=, its mark for a name to compare by
-address. Measured in 15D, 2026-11-15, with a struct =S= in an unnamed
-namespace in each of two files, the two of different members:
-=name ()= is ~*N12_GLOBAL__N_11SE~ for both, ~==~ is true, ~!=~ is
-false and =before= is false both ways, for two =type_info= objects
-at two addresses. GCC's own library gives the name without the
-mark, ~==~ false, and =before= true one way. Seen in passing by the
-extension sweep, 2026-11-04.
-
-Clang emits no mark. Measured with Clang 23 on x86-64, 2026-11-15:
-the name of both is ~N12_GLOBAL__N_11SE~ and the two compare equal,
-with this library and with GCC's own alike. The fix changes nothing
-under Clang, and a test of the two files cannot expect the two to
-differ there.
-
-Fix: per the check: =name= skips the mark and a marked name compares
-by address, as the support library does.
-
-Check: those two calls in a two-file program.
-
 ** Configuration and the C library
 
 *** TODO =DIV_OVERLOADS= emits two macros nothing reads
@@ -289,6 +261,25 @@ the guard of =src/typeinfo.cpp= need no visit to be judged.
 
 Check: the object of the file before and after, the same symbols and
 code; for =gcc.config=, the compile lines of a 15D build unchanged.
+
+*** TODO =_RWSTD_TEST_SRC= selects nothing, and two MSVC leftovers around =type_info=
+
+=tests/include/rw_testdefs.h= 37-43 reads =_RWSTD_TEST_SRC= for one
+thing, to undefine =__PURE_CNAME=, a macro of Compaq C++. 31 files
+under =tests= name =_RWSTD_TEST_SRC=; the sources of the test driver
+define it under the comment "expand _TEST_EXPORT macros".
+=src/time_put.cpp= 33, =tests/self/0.printf.cpp= 31,
+=tests/self/0.process.cpp= 30 and
+=tests/regress/18.limits.stdcxx-436.cpp= 32 undefine =__PURE_CNAME=
+themselves. =tests/support/18.support.rtti.cpp= 34-38 defines a
+=foo= that throws before =<typeinfo>= is included, to verify "that
+typeid is correctly declared for MSVC (see PR #25603)", and
+=include/typeinfo= 53-55 explains its member-by-member export by the
+same report. Seen while =type_info= took GCC's mark, 2026-11-15.
+
+Fix: each goes when its file is visited.
+
+Check: the suite builds and =18.support.rtti= holds its count.
 
 * Tests
 
