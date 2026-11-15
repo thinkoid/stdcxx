@@ -24,23 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Utilities
-
-*** TODO =allocator::allocate= does not check its count against =max_size ()=
-
-=include/rw/_allocator.h= 134 passes ~__n * sizeof (value_type)~ to
-=__rw_allocate= unchecked. For =n= past =max_size ()= the product
-wraps and a short block comes back, where 14882:2003 20.4.1.1, p5
-returns storage of size ~n * sizeof(T)~ and p7 throws =bad_alloc= when
-it cannot be obtained. The containers check =max_size= first; a direct
-caller does not. =__rw_tmpbuf= checks its product (=src/tmpbuf.cpp=
-64-70). Seen in passing by the extension sweep, 2026-11-04.
-
-Fix: =allocate= throws =bad_alloc= for a count past =max_size ()=.
-
-Check: ~std::allocator<int> ().allocate (std::allocator<int>
-().max_size () + 1)~ throws =bad_alloc=.
-
 ** Language support
 
 *** TODO =type_info= compares by name where GCC marks a name to compare by address
@@ -219,6 +202,19 @@ short one, the category kept; not a sweep.
 
 Check: =git grep -w= for the five long names under =include= finds
 nothing.
+
+*** TODO =allocator::deallocate= passes a count where =__rw_deallocate= takes bytes
+
+=include/rw/_allocator.h= 60-65 declares =__rw_allocate= and
+=__rw_deallocate= under the comment "[de]allocate storage (in
+bytes)". =allocate= passes bytes; =deallocate= (144) passes its
+element count ~__n~ unscaled. =__rw_deallocate= (=src/memory.cpp= 79)
+ignores the parameter, so nothing goes wrong today. Seen while
+=allocate= was made to check its count, 2026-11-15.
+
+Fix: =deallocate= passes ~__n * sizeof (value_type)~.
+
+Check: by reading; the function ignores the value.
 
 *** TODO =examples/include/alg3.h= is included by nothing and calls a function that does not exist
 
@@ -575,6 +571,19 @@ Fix: the three corrections of =src/random.cpp=, in both widths; then
 =23.bitset='s count is read against its pin.
 
 Check: the low bit of 2^20 draws of =rw_rand32= has no period.
+
+** TODO The other members of =allocator= have no test
+
+=20.allocator.members= covers =allocate= and =max_size= of 14882:2003
+20.4.1.1. =address=, =deallocate= (p8-10), =construct= and =destroy=
+(p12-13), =rebind=, the converting constructor and the two
+comparisons of 20.4.1.2 have no row; the tests of the containers
+reach them and compare nothing of theirs. Seen while =allocate= was
+made to check its count, 2026-11-15.
+
+Fix: rows for each in =20.allocator.members=.
+
+Check: each paragraph of 20.4.1.1 and of 20.4.1.2 has a row.
 
 ** TODO Ten tests build with warnings of their own
 

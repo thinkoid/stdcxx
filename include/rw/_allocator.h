@@ -46,9 +46,13 @@
 #ifndef _RWSTD_RW_ALLOCATOR_H_INCLUDED
 #define _RWSTD_RW_ALLOCATOR_H_INCLUDED
 
-#ifndef _RWSTD_SPECIALIZED_H_INCLUDED
+#ifndef _RWSTD_RW_ERROR_H_INCLUDED
+#  include <rw/_error.h>
+#endif   // _RWSTD_RW_ERROR_H_INCLUDED
+
+#ifndef _RWSTD_RW_SPECIALIZED_H_INCLUDED
 #  include <rw/_specialized.h>
-#endif   // _RWSTD_SPECIALIZED_H_INCLUDED
+#endif   // _RWSTD_RW_SPECIALIZED_H_INCLUDED
 
 
 namespace __rw {
@@ -127,6 +131,11 @@ public:
     }
 
     pointer allocate (size_type __n, allocator<void>::const_pointer = 0) {
+        // 20.4.1.1, p7: the bytes of a count past max_size () are no
+        // size_type, and no storage of that size can be obtained
+        if (max_size () < __n)
+            __rw::__rw_throw (_RWSTD_ERROR_FIRST + 3 /* == bad_alloc */);
+
         return static_cast< pointer >(
             __rw::__rw_allocate (__n * sizeof (value_type)));
     }
