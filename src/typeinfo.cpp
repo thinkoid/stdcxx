@@ -137,61 +137,6 @@ bool type_info::operator!= (const type_info &rhs) const
 
 #    endif   // _RWSTD_NO_STD_TYPE_INFO
 
-#  else   // if _RWSTD_NO_STD_TYPEINFO && _RWSTD_NO_GLOBAL_TYPEINFO
-
-// both config tests for class type_info failed so config test
-// results for each individual member are likely to be unreliable
-// rely on platform knowledge instead
-
-#    ifndef _RWSTD_NO_RUNTIME_IN_STD
-
-namespace std {
-
-#    endif   // _RWSTD_NO_RUNTIME_IN_STD
-
-#    ifdef __GNUG__
-
-// define member functions inline in namespace std (they are defined
-// as members of ::type_info (as opposed to std::type_info) in libstdc++
-// unless lib is built with -fhonor-std
-
-const char* type_info::name () const
-{
-    return _C_name;
-}
-
-bool type_info::operator== (const type_info &rhs) const
-{
-    return !this->before (rhs) && !rhs.before (*this);
-}
-
-bool type_info::operator!= (const type_info &rhs) const
-{
-    return !(*this == rhs);
-}
-
-#    endif   // __GNUG__
-
-
-#    ifdef __GNUG__
-
-// define member function in namespace std (it is defined as a member
-// of ::type_info (as opposed to std::type_info) in libstdc++
-// unless lib is built with -fhonor-std
-bool type_info::before (const type_info &rhs) const
-{
-    return 0 > __rw::__rw_ticmp (*this, rhs);
-}
-
-#    endif   // __GNUG__
-
-
-#    ifndef _RWSTD_NO_RUNTIME_IN_STD
-
-}   // namespace std
-
-#    endif   // _RWSTD_NO_RUNTIME_IN_STD
-
 #  endif   // !_RWSTD_NO_STD_TYPEINFO || !_RWSTD_NO_GLOBAL_TYPEINFO
 
 
