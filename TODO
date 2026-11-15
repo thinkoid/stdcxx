@@ -26,59 +26,28 @@ at the top.
 
 ** Containers
 
-*** TODO A =map= iterator converts from a =const_iterator=
-
-=__rw_tree_iter= (=include/rw/_tree.h= 156-159) has a constructor
-template that takes the tree iterator of any pointer and reference
-types, beside the constructor from the mutable iterator (154).
-14882:2003 23.1, Table 65 has =X::iterator= "convertible to
-X::const_iterator"; the template converts the other way as well.
-Measured in 11S under GCC, 2026-11-15: for a const =map= =cm=,
-~std::map<int, int>::iterator it = cm.begin ();~ compiles, and
-~it->second = 1;~ after it, so a program writes an element of a const
-=map= without a cast. In 15D the same line does not compile: the
-debug iterator of =include/rw/_iterbase.h= does not convert. =list=
-rejects it in both. The template is from the 2005 import (e6c7726b).
-=multimap= shares the iterator; =set= and =multiset= were not probed.
-Seen while the =-Wdeprecated-copy= warnings were read, 2026-11-15.
-
-Fix: the template leaves, if nothing in the library needs the
-conversion; the constructor from =_C_iterator= serves Table 65.
-
-Check: the two lines do not compile in 11S; the six tests that
-include =<map>= or =<set>= hold at pin.
-
-*** TODO Three classes draw =-Wdeprecated-copy=
+*** TODO Two classes draw =-Wdeprecated-copy=
 
 C++11 D.3 deprecates the implicit copy assignment of a class that
 declares a copy constructor, and the implicit copy constructor of one
 that declares a copy assignment; 14882:2003 has no such rule. GCC 16
 and Clang 23 compile the tree in their default dialect and warn where
 such a member is used (=-Wdeprecated-copy=, under =-W=). In the 15D
-build of the tests at 36122d95, 18 lines name these three:
+build of the tests at 36122d95, 9 lines name these two:
 
-- =__rw_tree_iter= (=include/rw/_tree.h= 154), 9: its constructor
-  from the mutable iterator is the copy constructor of =iterator= and
-  a converting constructor of =const_iterator=, so a copy assignment
-  declared beside it would move the warning to =const_iterator='s
-  implicit copy constructor. The same constructor makes =iterator=
-  of =map= not trivially copyable where =const_iterator= is.
-  =__rw_list_iter= had the same shape, 36 lines, until it was split
-  into two classes.
 - =vector<bool>::reference= (=include/vector= 658), 7: it declares the
   assignment, which writes the bit, and no copy constructor.
 - =allocator= (=include/rw/_allocator.h= 102), 2: it declares the copy
   constructor as 20.4.1 does, and no assignment.
 
-Fix: the tree iterator is split as =list='s was, and the constructor
-template of the entry above leaves with it. For the other two a
-decision: each declares the member it lacks, or the warning is
+The iterators of =list= and of the tree drew the other 45 lines until
+each was split into two classes.
+
+Fix: a decision: each declares the member it lacks, or the warning is
 recorded as the dialect's in =ref-conformance.md=.
 
-Check: no =-Wdeprecated-copy= line of a 15D build of the tests names
-=__rw_tree_iter=; =map<int, int>::iterator= is trivially copyable in
-a build without debug iterators; =23.associative.iterators= holds at
-pin.
+Check: the count of =-Wdeprecated-copy= lines that name a library
+type in a 15D build of the tests, before and after.
 
 ** Numerics
 

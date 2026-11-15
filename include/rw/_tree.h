@@ -112,14 +112,58 @@ struct __rw_rb_tree_node
         return _C_minmax (__lnk, true);
     }
 
+    // the node that follows __lnk in order: nodes are visited
+    // recursively left subtree, root, right subtree
+    static _C_link_t _C_next (_C_link_t __lnk) {
+        if (_C_link_t () != __lnk->_C_child [1]) {
+            __lnk = _C_min (__lnk->_C_child [1]);
+        }
+        else {
+            _C_link_t __tmp = __lnk->_C_parent;
+
+            while (__lnk == __tmp->_C_child [1]) {
+                __lnk = __tmp;
+                __tmp = __tmp->_C_parent;
+            }
+
+            if (__lnk->_C_child [1] != __tmp)
+                __lnk = __tmp;
+        }
+
+        return __lnk;
+    }
+
+    // the node that precedes __lnk in order; the header's is the rightmost
+    static _C_link_t _C_prev (_C_link_t __lnk) {
+        if (   __lnk->_C_color == _C_red
+            && __lnk->_C_parent->_C_parent == __lnk) {
+            // the header
+            __lnk = __lnk->_C_child [1];
+        }
+        else if (_C_link_t () != __lnk->_C_child [0]) {
+            __lnk = _C_max (__lnk->_C_child [0]);
+        }
+        else {
+            _C_link_t __tmp = __lnk->_C_parent;
+
+            while (__lnk == __tmp->_C_child [0]) {
+                __lnk = __tmp;
+                __tmp = __tmp->_C_parent;
+            }
+
+            __lnk = __tmp;
+        }
+
+        return __lnk;
+    }
+
     _C_const_key_ref _C_key () const {
         return _KeyOf ()(_C_value);
     }
 };
 
 
-// iterator implements inorder traversal; i.e., nodes are visited
-// recursively in this order: left subtree, root, right subtree
+// the iterator of the tree: it visits the nodes in order
 template <class _TypeT, class _DiffT,
           class _Pointer, class _Reference, class _Node>
 class __rw_tree_iter
@@ -139,66 +183,20 @@ public:
     typedef typename _C_node_t::allocator_type        allocator_type;
     typedef typename _C_node_t::_C_link_t             _C_link_t;
 
-    typedef const value_type*                         const_pointer; 
-    typedef const value_type&                         const_reference; 
-
-    typedef __rw_tree_iter<_TypeT, _DiffT, value_type*, value_type&, _C_node_t>
-    _C_iterator;
-
     _C_link_t _C_node;
 
     __rw_tree_iter () { /* empty */ }
-
-    // no copy ctor other than the one below is defined
-    // will use a compiler generated one if __rw_tree_iter != _C_iterator
-    __rw_tree_iter (const _C_iterator &__rhs)
-        : _C_node (__rhs._C_node) { }
-
-    template <class _Ptr, class _Ref>
-    __rw_tree_iter (const __rw_tree_iter<_TypeT, _DiffT, _Ptr, _Ref, _Node>&
-                    __rhs)
-        : _C_node (__rhs._C_node) { }
 
     __rw_tree_iter (_C_link_t __lnk)
         : _C_node (__lnk) {}        
 
     __rw_tree_iter& operator++ () {
-        if (_C_link_t () != _C_node->_C_child [1]) {
-            _C_node = _C_node_t::_C_min (_C_node->_C_child [1]);
-        }
-        else {
-            _C_link_t __tmp = _C_node->_C_parent;
-
-            while (_C_node == __tmp->_C_child [1]) {
-                _C_node = __tmp;
-                __tmp     = __tmp->_C_parent;
-            }
-
-            if (_C_node->_C_child [1] != __tmp)
-                _C_node = __tmp;
-        }
+        _C_node = _C_node_t::_C_next (_C_node);
         return *this;
     }
     
     __rw_tree_iter& operator-- () {
-        if (   _C_node->_C_color == _C_node_t::_C_red
-            && _C_node->_C_parent->_C_parent == _C_node)  
-            //
-            // Check for header.
-            //
-            _C_node = _C_node->_C_child [1];   // Return rightmost.
-        else if (_C_link_t () != _C_node->_C_child [0]) {
-            _C_node = _C_node_t::_C_max (_C_node->_C_child [0]);
-        }
-        else {
-            _C_link_t __tmp = _C_node->_C_parent;
-
-            while (_C_node == __tmp->_C_child [0]) {
-                _C_node = __tmp;
-                __tmp     = __tmp->_C_parent;
-            }
-            _C_node = __tmp;
-        }
+        _C_node = _C_node_t::_C_prev (_C_node);
         return *this;
     }
 
@@ -217,17 +215,98 @@ public:
     }
 
     pointer operator-> () const { return &**this; };
+
+    bool operator== (const __rw_tree_iter &__rhs) const {
+        return _C_node == __rhs._C_node;
+    }
+
+    bool operator!= (const __rw_tree_iter &__rhs) const {
+        return !(*this == __rhs);
+    }
 };
 
 
-#define _RWSTD_TREE_ITER(n) \
-        __rw_tree_iter <_TypeT, _DiffT, _Ptr##n, _Ref##n, _Node>
+// the const_iterator of the tree: a class of its own, so that its
+// constructor from the iterator is never a copy constructor and
+// both classes copy and assign by the implicit members
+template <class _TypeT, class _DiffT,
+          class _Pointer, class _Reference, class _Node>
+class __rw_tree_const_iter
+    : public std::iterator <std::bidirectional_iterator_tag,
+                            _TypeT, _DiffT, _Pointer, _Reference>
+{
+    typedef std::iterator <std::bidirectional_iterator_tag,
+                           _TypeT, _DiffT, _Pointer, _Reference> _C_iter_base;
+public:
+
+    typedef typename _C_iter_base::value_type         value_type;
+    typedef typename _C_iter_base::difference_type    difference_type;
+    typedef typename _C_iter_base::pointer            pointer;
+    typedef typename _C_iter_base::reference          reference;
+    typedef typename _C_iter_base::iterator_category iterator_category;
+    typedef _Node                                     _C_node_t;
+    typedef typename _C_node_t::allocator_type        allocator_type;
+    typedef typename _C_node_t::_C_link_t             _C_link_t;
+
+    typedef __rw_tree_iter<_TypeT, _DiffT, value_type*, value_type&, _C_node_t>
+    _C_iterator;
+
+    _C_link_t _C_node;
+
+    __rw_tree_const_iter () { /* empty */ }
+
+    __rw_tree_const_iter (_C_link_t __lnk)
+        : _C_node (__lnk) {}
+
+    // 23.1, Table 65: iterator converts to const_iterator
+    __rw_tree_const_iter (const _C_iterator &__rhs)
+        : _C_node (__rhs._C_node) { }
+
+    __rw_tree_const_iter& operator++ () {
+        _C_node = _C_node_t::_C_next (_C_node);
+        return *this;
+    }
+
+    __rw_tree_const_iter& operator-- () {
+        _C_node = _C_node_t::_C_prev (_C_node);
+        return *this;
+    }
+
+    __rw_tree_const_iter operator++ (int) {
+        __rw_tree_const_iter __tmp (*this);
+        return ++*this, __tmp;
+    }
+
+    __rw_tree_const_iter operator-- (int) {
+        __rw_tree_const_iter __tmp (*this);
+        return --*this, __tmp;
+    }
+
+    reference operator* () const {
+        return _C_node->_C_value;
+    }
+
+    pointer operator-> () const { return &**this; }
+
+    bool operator== (const __rw_tree_const_iter &__rhs) const {
+        return _C_node == __rhs._C_node;
+    }
+
+    bool operator!= (const __rw_tree_const_iter &__rhs) const {
+        return !(*this == __rhs);
+    }
+};
+
+
+// an iterator on the left of a const_iterator; with the const_iterator
+// on the left its member takes the iterator through the conversion
 
 template <class _TypeT, class _DiffT,
           class _Ptr1, class _Ref1, class _Ptr2, class _Ref2, class _Node>
 inline bool
-operator== (const _RWSTD_TREE_ITER (1) &__lhs,
-            const _RWSTD_TREE_ITER (2) &__rhs)
+operator== (const __rw_tree_iter<_TypeT, _DiffT, _Ptr1, _Ref1, _Node> &__lhs,
+            const __rw_tree_const_iter<_TypeT, _DiffT, _Ptr2, _Ref2, _Node>
+            &__rhs)
 {
     return __lhs._C_node == __rhs._C_node;
 }
@@ -235,14 +314,13 @@ operator== (const _RWSTD_TREE_ITER (1) &__lhs,
 template <class _TypeT, class _DiffT,
           class _Ptr1, class _Ref1, class _Ptr2, class _Ref2, class _Node>
 inline bool
-operator!= (const _RWSTD_TREE_ITER (1) &__lhs,
-            const _RWSTD_TREE_ITER (2) &__rhs)
+operator!= (const __rw_tree_iter<_TypeT, _DiffT, _Ptr1, _Ref1, _Node> &__lhs,
+            const __rw_tree_const_iter<_TypeT, _DiffT, _Ptr2, _Ref2, _Node>
+            &__rhs)
 {
     return !(__lhs == __rhs);
 }
 
-
-#undef _RWSTD_TREE_ITER
 
 // for convenience
 #undef _ITER_NODE
@@ -279,8 +357,9 @@ private:
     typedef __rw_tree_iter<value_type, difference_type, pointer,
                               reference, _C_node_t>        _C_tree_iter;
 
-    typedef __rw_tree_iter<value_type, difference_type, const_pointer,
-                              const_reference, _C_node_t>  _C_tree_citer;
+    typedef __rw_tree_const_iter<value_type, difference_type, const_pointer,
+                                 const_reference, _C_node_t>
+    _C_tree_citer;
 
 public:
 
