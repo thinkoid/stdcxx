@@ -45,7 +45,7 @@ Seen while the =-Wdeprecated-copy= warnings were read, 2026-11-15.
 Fix: the template leaves, if nothing in the library needs the
 conversion; the constructor from =_C_iterator= serves Table 65.
 
-Check: the two lines do not compile in 11S; the five tests that
+Check: the two lines do not compile in 11S; the six tests that
 include =<map>= or =<set>= hold at pin.
 
 *** TODO Three classes draw =-Wdeprecated-copy=
@@ -77,9 +77,8 @@ recorded as the dialect's in =ref-conformance.md=.
 
 Check: no =-Wdeprecated-copy= line of a 15D build of the tests names
 =__rw_tree_iter=; =map<int, int>::iterator= is trivially copyable in
-a build without debug iterators; rows that walk a =map= and a =set=
-forward and backward, written first (Tests, "The associative
-containers have no test"), pass before and after.
+a build without debug iterators; =23.associative.iterators= holds at
+pin.
 
 ** Numerics
 
@@ -597,21 +596,21 @@ collate & ctype)= and the two-locale form named "C" with the classic
 
 Check: the rows run and the six pins gain a row.
 
-** TODO The associative containers have no test
+** TODO The members of the associative containers have no test
 
 =tests/containers= holds tests of =bitset=, =deque=, =list= and
-=vector= and none of =map=, =multimap=, =set= or =multiset=. Five
-programs include =<map>= or =<set>=: =17.names= and =20.operators=,
-which instantiate, and the regressions =23.set.stdcxx-216=,
-=23.containers.stdcxx-152= and =23.associative.stdcxx-16=. So
-[lib.associative] is checked by three regressions, and a change to
-=include/rw/_tree.h=, the iterator's increment and decrement
-included, by a probe alone. Seen while the split of the tree iterator
-was sized, 2026-11-15.
+=vector=. For =map=, =multimap=, =set= and =multiset= it holds
+=23.associative.iterators=, which walks the four with each iterator
+type, and nothing else: =17.names= and =20.operators= instantiate
+them, and three regressions call a few members (=23.set.stdcxx-216=,
+=23.containers.stdcxx-152=, =23.associative.stdcxx-16=). So the
+members of [lib.associative], insertion with a hint, =erase=,
+=find=, the bounds, =equal_range=, =count=, the comparisons and
+=swap=, are checked by a probe alone. Seen while the split of the
+tree iterator was sized, 2026-11-15.
 
-Fix: a =23.map= and a =23.set= test: insertion, lookup, erasure and a
-walk of the range forward and backward, for the unique and the
-multiple containers.
+Fix: a =23.map= and a =23.set= test on the harness, for the unique
+and the multiple containers.
 
 Check: each member of 23.3.1 to 23.3.4 has a row.
 
