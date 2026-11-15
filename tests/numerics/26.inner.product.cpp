@@ -35,40 +35,34 @@
 
 /**************************************************************************/
 
-// plus-assign
+// addable and multipliable: has operator+ and operator*, and
+// no operator+= (26.4.2, p1)
 template <class T>
-struct plus_asgn: T
-{
-    plus_asgn& operator+= (const plus_asgn& rhs) {
-        unused = rhs.unused;
-        return *this;
-    }
-private:
-    // unused member prevents bogus HP aCC warnings (see Onyx #23561)
-    int unused;
-};
+struct plus_op: T { };
 
 template <class T>
-const plus_asgn<T>&
-operator* (const plus_asgn<T> &lhs, const plus_asgn<T> &rhs)
+inline const plus_op<T>&
+operator+ (const plus_op<T> &lhs, const plus_op<T>&)
 {
-    _RWSTD_UNUSED (rhs);
+    return lhs;
+}
 
+template <class T>
+inline const plus_op<T>&
+operator* (const plus_op<T> &lhs, const plus_op<T>&)
+{
     return lhs;
 }
 
 
 namespace std { 
 
-// disable explicit instantiation for compilers (like MSVC)
-// that can't handle it
-
 template 
-plus_asgn<assign<base<cpy_ctor> > >
-inner_product (InputIter<plus_asgn<assign<base<cpy_ctor> > > >,
-               InputIter<plus_asgn<assign<base<cpy_ctor> > > >,
-               InputIter<plus_asgn<assign<base<cpy_ctor> > > >,
-               plus_asgn<assign<base<cpy_ctor> > >);
+plus_op<assign<base<cpy_ctor> > >
+inner_product (InputIter<plus_op<assign<base<cpy_ctor> > > >,
+               InputIter<plus_op<assign<base<cpy_ctor> > > >,
+               InputIter<plus_op<assign<base<cpy_ctor> > > >,
+               plus_op<assign<base<cpy_ctor> > >);
 
 template 
 assign<base<cpy_ctor> > 
@@ -82,6 +76,11 @@ inner_product (InputIter<assign<base<cpy_ctor> > >,
 }   // namespace std
 
 /**************************************************************************/
+
+UserClass operator+ (const UserClass& lhs, const UserClass& rhs)
+{
+    return UserClass (lhs) += rhs;
+}
 
 UserClass operator* (const UserClass& lhs, const UserClass& rhs)
 {
@@ -251,7 +250,7 @@ void test_inner_product (const std::size_t       N,
         const UserClass res = alg.inner_product (buf1, buf1_end, buf2, buf2_end, 
                                                  init, pbinop1, pbinop2);
 
-        // verify the result 26.4.1, p1
+        // verify the result 26.4.2, p1
         bool success = sum == res.data_.val_;
         rw_assert (success, 0, __LINE__,
                    "inner_product <%s, %s, %s%{?}, %s, %s%{;}>"

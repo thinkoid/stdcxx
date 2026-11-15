@@ -35,29 +35,25 @@
 
 /**************************************************************************/
 
-// plus-assign
+// addable: has operator+ and no operator+= (26.4.1, p1)
 template <class T>
-struct plus_asgn: T
+struct plus_op: T { };
+
+template <class T>
+inline const plus_op<T>&
+operator+ (const plus_op<T> &lhs, const plus_op<T>&)
 {
-    plus_asgn& operator+= (const plus_asgn& rhs) {
-        unused = rhs.unused;
-        return *this;
-    }
-private:
-    // unused member prevents bogus HP aCC warnings (see Onyx #23561)
-    int unused;
-};
+    return lhs;
+}
 
-namespace std { 
 
-// disable explicit instantiation for compilers (like MSVC)
-// that can't handle it
+namespace std {
 
 template 
-plus_asgn<assign<base<cpy_ctor> > >
-accumulate (InputIter<plus_asgn<assign<base<cpy_ctor> > > >,
-            InputIter<plus_asgn<assign<base<cpy_ctor> > > >,
-            plus_asgn<assign<base<cpy_ctor> > >);
+plus_op<assign<base<cpy_ctor> > >
+accumulate (InputIter<plus_op<assign<base<cpy_ctor> > > >,
+            InputIter<plus_op<assign<base<cpy_ctor> > > >,
+            plus_op<assign<base<cpy_ctor> > >);
 
 template 
 assign<base<cpy_ctor> > 
@@ -70,68 +66,24 @@ accumulate (InputIter<assign<base<cpy_ctor> > >,
 
 /**************************************************************************/
 
+// has operator+ and no operator+= that accumulate could apply
 struct Y: public UserClass
 {
-    // number of times the object's += operator has been invoked,
-    // regardless of whether the operation threw an exception or not
-    std::size_t n_op_plus_assign_;
-
-    static std::size_t n_total_op_plus_assign_;   // ... += operators ...
-
-    // class thrown from the respective functions
-    struct OpPlusAssign: Exception { };
-
-    // throw object's `id' wrapped in the appropriate struct when the
-    // corresponding n_total_xxx_ counter reaches the value pointed to
-    // by the respective pointer below
-    static std::size_t* op_plus_assign_throw_ptr_;
-
-    // objects to which the pointers above initally point
-    static std::size_t op_plus_assign_throw_count_;
-
     Y (): UserClass () { /* empty */ }
 
     Y (const Y &rhs): UserClass (rhs) { /* empty */ }
 
-    Y& operator+= (const Y& rhs) {
-
-        // verify id validity and uniqueness
-        RW_ASSERT (id_ && id_ <= id_gen_);
-        RW_ASSERT (rhs.id_ && rhs.id_ <= id_gen_);
-        RW_ASSERT (this == &rhs || id_ != rhs.id_);
-
-        // increment the number of times each distinct object
-        // has been used as the argument to operator+=
-        // (do so even if the function throws an exception below)
-        ++n_op_plus_assign_;
-
-        if (this != &rhs)
-            ++const_cast< Y* >(&rhs)->n_op_plus_assign_;
-
-        // increment the total number of invocations of the operator
-        // (do so even if the function throws an exception below)
-        ++n_total_op_plus_assign_;
-
-        // throw an exception if the number of calls
-        // to operator== reaches the given value
-
-        if (   op_plus_assign_throw_ptr_
-            && n_total_op_plus_assign_ == *op_plus_assign_throw_ptr_) {
-            OpPlusAssign ex;
-            ex.id_ = id_;
-            throw ex;
-        }
-
-        data_.val_ += rhs.data_.val_;
-        return *this;
-    }
+private:
+    void operator+= (const Y&);   // not defined
 };
 
-/* static */ std::size_t  Y::n_total_op_plus_assign_;
-/* static */ std::size_t* Y::op_plus_assign_throw_ptr_ =
-    &Y::op_plus_assign_throw_count_;
-/* static */ std::size_t  Y::op_plus_assign_throw_count_ =
-    std::size_t (-1);
+
+Y operator+ (const Y &lhs, const Y &rhs)
+{
+    Y res (lhs);
+    res.data_.val_ += rhs.data_.val_;
+    return res;
+}
 
 /**************************************************************************/
 

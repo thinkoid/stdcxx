@@ -24,27 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Numerics
-
-*** TODO =accumulate= and =inner_product= apply ~operator+=~
-
-14882:2003 26.4.1, p1 has =accumulate= modify its accumulator "with
-acc = acc + *i", and 26.4.2, p1 has =inner_product= do it "with acc =
-acc + (*i1) * (*i2)". =include/numeric= 59 and 80 apply ~__n +=~
-instead, since the 2005 import (e6c7726b). Measured in 15D: with a
-type that has ~operator+~ and no ~operator+=~ neither call compiles,
-"no match for operator+=". The tree's own test holds the library to
-it: =26.accumulate= instantiates =accumulate= on a type with
-~operator+=~ and no ~operator+~ (=plus_asgn=, 39-48). =partial_sum=
-(=include/numeric= 105) applies ~operator+~, as 26.4.3 has it. Seen
-while =valarray::sum= was taken off =accumulate=, 2026-11-14.
-
-Fix: a decision: the two apply ~operator+~ and the tests' types
-follow, or the departure is recorded in =ref-conformance.md=.
-
-Check: ~std::accumulate~ and ~std::inner_product~ over a type with
-~operator+~ alone compile and add; or the row is in chapter 2.
-
 ** Algorithms
 
 *** TODO The =random_shuffle= generator's warm-up may run four table entries
@@ -566,6 +545,23 @@ Fix: rows for the four in =23.list.splice=, or a test of
 [lib.list.ops] on the harness.
 
 Check: each of 23.2.2.4, p15 to p32 has a row.
+
+** TODO =26.accumulate= and =26.inner.product= count calls and read no count
+
+=Accumulator= of =26.accumulate= (116-136), and =Accumulator= and
+=Multiplicator= of =26.inner.product= (118-165), add to a static
+=funcalls_= on each call, and neither test reads it; =26.partial.sum=
+and =26.adjacent.diff= read theirs against a complexity paragraph.
+14882:2003 26.4.1 and 26.4.2 have none; p1 of each applies the
+operation "for every iterator" of the range "in order", one
+application for an element. Seen while the two algorithms were made
+to apply ~operator+~, 2026-11-15.
+
+Fix: each step asserts that the count is the length of its range, in
+both forms of each algorithm; or the counters leave.
+
+Check: a second application for an element in =include/numeric= turns
+a row red; or no =funcalls_= is left in the two tests.
 
 ** TODO Ten tests build with warnings of their own
 
