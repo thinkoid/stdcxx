@@ -68,8 +68,9 @@ static const __rw_random_t
 __rw_table_size = __rw_random_t (sizeof __rw_table / sizeof *__rw_table);
 
 
+// seeds the table of the subtractive generator with lags 55 and 24
 static void
-__rw_seed ( __rw_random_t seed)
+__rw_seed (__rw_random_t seed)
 {
     __rw_table [__rw_table_size - 1] = seed;
 
@@ -77,21 +78,25 @@ __rw_seed ( __rw_random_t seed)
 
     __rw_random_t k = 1;
 
-    for (i = 0; i != __rw_table_size - 1; ++i) {
-        const size_t ii = 21U * i % __rw_table_size;
+    // 21 * i % 55 is another of 1 to 54 for each i: every slot
+    // below the seed's is written once
+    for (i = 1; i != __rw_table_size; ++i) {
+        const size_t ii = 21U * i % __rw_table_size - 1U;
         __rw_table [ii] = k;
         k               = seed - k;
         seed            = __rw_table [ii];
     }
 
+    // four passes over the table before the first draw
     for (i = 0; i != 4U; ++i) {
         for (size_t ii = 0; ii != __rw_table_size; ++ii)
-            __rw_table [i] =
-                __rw_table [i] - __rw_table [(i + 31U) % __rw_table_size];
+            __rw_table [ii] -= __rw_table [(ii + 31U) % __rw_table_size];
     }
 
+    // the second index runs 31 slots ahead of the first, at
+    // the value drawn 24 draws before
     __rw_inx [0] = 0U;
-    __rw_inx [1] = __rw_table_size * 2U / 3U - 1U;
+    __rw_inx [1] = 31U;
 }
 
 

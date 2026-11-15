@@ -24,24 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Algorithms
-
-*** TODO The =random_shuffle= generator's warm-up may run four table entries
-
-=src/random.cpp= 87-91: the warm-up loop indexes ~__rw_table [i]~
-inside the loop over =ii=, so it runs entries 0 to 3 fifty-five times
-each where the subtractive generator it follows runs all fifty-five
-four times. The line is unchanged since the 2005 import. Hypothesis,
-by reading: the inner index is meant to be =ii=. A fix moves every
-result and =25.random.shuffle='s expected array. Seen in passing by
-the extension sweep, 2026-11-04.
-
-Fix: the inner loop runs over ~__rw_table [ii]~, then the test's
-expected array.
-
-Check: the loop read against Knuth's subtractive generator or
-Numerical Recipes' =ran3=.
-
 ** Utilities
 
 *** TODO =allocator::allocate= does not check its count against =max_size ()=
@@ -237,6 +219,19 @@ short one, the category kept; not a sweep.
 
 Check: =git grep -w= for the five long names under =include= finds
 nothing.
+
+*** TODO =examples/include/alg3.h= is included by nothing and calls a function that does not exist
+
+=examples/include/alg3.h= 52 has its =RandomInteger= return
+~__rw::__rw_random (m)~. Nothing under =include= or =src= declares a
+=__rw_random=, and no file under =examples= or =tests= includes the
+header: =examples/tutorial/alg3.cpp= defines a =RandomInteger= of its
+own. Seen while the =random_shuffle= generator was corrected,
+2026-11-15.
+
+Fix: the header leaves.
+
+Check: the examples build; no file in the tree names =alg3.h=.
 
 * Tests
 
@@ -562,6 +557,24 @@ both forms of each algorithm; or the counters leave.
 
 Check: a second application for an element in =include/numeric= turns
 a row red; or no =funcalls_= is left in the two tests.
+
+** TODO The test driver's generator has the three departures the library's had
+
+=tests/src/rand.cpp= carries the subtractive generator of
+=src/random.cpp= twice, in 32-bit and in 64-bit words (=rw_seed32=
+44-68, =rw_seed64= 94-118), with the three departures the library's
+had: the second index starts 35 slots ahead of the first, where lags
+55 and 24 put it 31 ahead; the seeding loop never writes slot 34; the
+warm-up loop indexes ~[i]~ inside the loop over =ii=. In the
+library's the low bit of the output repeated every 7665 draws; this
+copy is read, not measured. =23.bitset= is its one user and draws
+that bit, ~rw_rand (2U)~ at 88. Seen while the library's generator
+was corrected, 2026-11-15.
+
+Fix: the three corrections of =src/random.cpp=, in both widths; then
+=23.bitset='s count is read against its pin.
+
+Check: the low bit of 2^20 draws of =rw_rand32= has no period.
 
 ** TODO Ten tests build with warnings of their own
 
