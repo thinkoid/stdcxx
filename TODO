@@ -265,6 +265,25 @@ with them; the comment names =ignore=.
 Check: a sanity build; =27.istream.unformatted.get= and
 =27.istream.get= at pin.
 
+*** TODO Five iterator parameter names are spelled two ways
+
+The library's templates name an iterator parameter for the
+requirement its argument meets, as 14882:2003 25, p4 does, in a
+spelling 17.4.3.1.2, p1 reserves. The tree's spelling is the short
+one: =_InputIter= 340 times under =include=, =_FwdIter= 260,
+=_BidirIter= 125, =_RandomAccessIter= 267, =_OutputIter= 174. Four
+files hold the long one: =_InputIterator= 39 times,
+=_ForwardIterator= 34, =_BidirectionalIterator= 5,
+=_RandomAccessIterator= 5 and =_OutputIterator= 3, in =include/list=,
+=include/rw/_rawiter.h=, =include/rw/_specialized.h= and
+=include/rw/_iterbase.h=. Counted 2026-11-15.
+
+Fix: a change that touches a template with a long name gives it the
+short one, the category kept; not a sweep.
+
+Check: =git grep -w= for the five long names under =include= finds
+nothing.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -424,9 +443,9 @@ Fix: the =rm= that fails, or the directory it meets.
 
 Check: the =RUNTARGET= scripts pass in a 15D build.
 
-** TODO =22.locale.codecvt= counts 668 assertions in 11S and 672 in 11s
+** TODO =22.locale.codecvt= counts 688 assertions in 11S and 692 in 11s
 
-The pins have =22.locale.codecvt= at 668 in 11S and 15D and 672 in
+The pins have =22.locale.codecvt= at 688 in 11S and 15D and 692 in
 11s (and the same under Clang). The four between 11S and 11s are
 explained nowhere; =ref-test-baseline.md= chapter 4 lists no reason
 for them. Hypothesis: a wide-only or narrow-only case counted under
@@ -727,38 +746,6 @@ Check: the test compiles without the warning and holds at pin.
 The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
-
-** TODO The summary of =15D.txt= is below the sum of its rows
-
-The =PROGRAM SUMMARY= of =doc/notes/baseline/15D.txt= says 12540297
-assertions; the =ASSERTS= column of its 181 rows sums to 12543909,
-3612 more. A run's summary equals its sum (the harness adds the
-column), so the pin was re-pinned row by row without the summary at
-least once. The nightly diffs the whole table against the pin, so a
-clean run shows the gap as a summary difference. Seen at the codecvt
-landing, 2026-11-07.
-
-Fix: the summary line; the re-pin of a row adds its difference to
-the summary in the same edit, or the pin is replaced whole from a
-run.
-
-Check: the summary of each pin under =doc/notes/baseline= equals the
-sum of its =ASSERTS= column.
-
-** TODO The configuration table of =ref-test-baseline.md= lags the pins
-
-=doc/notes/ref-test-baseline.md= chapter 4 gives =22.locale.codecvt=
-634 assertions in 11S, 638 in 11s and 618 in 15D; the pins have 668,
-672 and 676. The commits that moved the row since 499174d2 added
-their lines to the list of chapter 3 and left the table, so it gives
-the counts of 2026-11-03. Seen while re-pinning =22.locale.codecvt.mt=,
-2026-11-08.
-
-Fix: the row takes the pins' counts, and a re-pin of a row the table
-holds updates it in the same commit.
-
-Check: every row of the chapter 4 table equals the row of each pin
-it names.
 
 * Locales
 
@@ -1638,6 +1625,19 @@ the table row it produced.
 
 Check: =git grep stdcxx-build -- doc= finds the build recipes alone.
 
+** TODO =ref-test-baseline.md= compares a one-locale host with an old count
+
+Chapter 2 of =doc/notes/ref-test-baseline.md= says a host with
+=en_US.UTF-8= alone runs "=22.locale.codecvt= 306 for 618 in 15D".
+The pin has 688 since 2026-11-08, and the 306 dates from the same
+measurement as the 618, so neither number describes the tree. Seen
+while the six pins were replaced, 2026-11-15.
+
+Fix: the row measured again on a host with =en_US.UTF-8= alone, or
+the sentence without the numbers.
+
+Check: the pair equals the row of such a host's table and of the pin.
+
 ** TODO The pin counts in =ref-locale.md= 10.4 lag the baseline
 
 The "What the tests pin" tables carry the 15D assertion count of each
@@ -1660,10 +1660,10 @@ Check: every count in the two tables equals the row's =ASSERTS= in
 The known gaps of =ref-locale.md= 9.4 name the =TODO= entry
 "=22.locale.codecvt= counts 634 assertions in 11S and 638 in 11s" and
 say "the 16 between 15D and 11S are the skipped libc facets; the
-other 4 are unexplained". fd8f964d renamed the entry to 668 and 672
-and left the list, so the quote names no entry and its arithmetic
-fits no pins: the 15D pin is now 688, 20 above 11S's 668. Seen at the
-UTF-8 codecvt change, 2026-11-08.
+other 4 are unexplained". The entry has been renamed twice since, to
+668 and 672 (fd8f964d) and to 688 and 692, and the list was left, so
+the quote names no entry and its arithmetic fits no pins: 15D and 11S
+both count 688. Seen at the UTF-8 codecvt change, 2026-11-08.
 
 Fix: the bullet quotes the entry's heading as it stands and gives the
 difference from the pins of one nightly, or no number.

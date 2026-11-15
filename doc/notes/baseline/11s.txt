@@ -38,7 +38,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 20.specialized                                0    0    1756      0   100%
 20.specialized.stdcxx-390                  NOUT    0                      
 20.temp.buffer.mt                             0    0       0      0   100%
-20.temp.buffer                                0    0   10792      0   100%
+20.temp.buffer                                0    0   10788      0   100%
 21.c.strings.stdcxx-843                    NOUT    0                      
 21.cctype                                     0    0     281      0   100%
 21.char.traits.compare                     NOUT    0                      
@@ -86,9 +86,10 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 21.string.substr                              0    0    1660      0   100%
 21.string.swap                                0    0    4134      0   100%
 22.locale.codecvt.do_out                      0    0    1494      0   100%
+22.locale.codecvt.iso2022                     0    0    1500      0   100%
 22.locale.codecvt.length                      0    0     484      0   100%
-22.locale.codecvt.mt                          0    0     400      0   100%
-22.locale.codecvt                             0    0     672      0   100%
+22.locale.codecvt.mt                          0    0      12      0   100%
+22.locale.codecvt                             0    0     692      0   100%
 22.locale.codecvt.stdcxx-435               NOUT    0                      
 22.locale.collate                             0    0  145883      0   100%
 22.locale.collate.stdcxx-1010              NOUT    0                      
@@ -97,12 +98,12 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 22.locale.ctype.is                            0    0   25438      0   100%
 22.locale.ctype.mt                            0    0     200      0   100%
 22.locale.ctype.narrow                        0    2    9768      0   100%
-22.locale.ctype                               0    0   91098      0   100%
+22.locale.ctype                               0    0   91101      0   100%
 22.locale.ctype.scan                          0    0   17132      0   100%
 22.locale.ctype.tolower                       0    0   19396      0   100%
 22.locale.ctype.toupper                       0    0   19396      0   100%
 22.locale.facet.mt                            0    0       8      0   100%
-22.locale.globals                             0    0   78320      0   100%
+22.locale.globals                             0    0   78327      0   100%
 22.locale.id.mt                               0    0     999      0   100%
 22.locale.messages.mt                         0    0     600      0   100%
 22.locale.messages                            0    0     366      0   100%
@@ -111,20 +112,21 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 22.locale.money.get.stdcxx-62              NOUT    0                      
 22.locale.money.put                           0    0    1354      0   100%
 22.locale.moneypunct.mt                       0    0     600      0   100%
-22.locale.moneypunct                          0    0  135020      0   100%
+22.locale.moneypunct                          0    0  135028      0   100%
 22.locale.name                                0    0       1      0   100%
 22.locale.num.get                             0    0   55206      0   100%
 22.locale.num.put                             0    2    1463      0   100%
 22.locale.num.put.stdcxx-2                 NOUT    0                      
 22.locale.numpunct.mt                         0    0     600      0   100%
-22.locale.numpunct                            0    0    5366      0   100%
+22.locale.numpunct                            0    0    8950      0   100%
 22.locale.statics.mt                          0    0     200      0   100%
 22.locale.stdcxx-554                       NOUT    0                      
 22.locale.synopsis                            0    0      39      0   100%
-22.locale.time.get                            0    6    3332      0   100%
+22.locale.time.get                            0    6    3352      0   100%
 22.locale.time.put.libc.mt                    0    0     200      0   100%
-22.locale.time.put                            0    0    2438      0   100%
+22.locale.time.put                            0    0    2450      0   100%
 22.locale.use_facet.mt                        0    0     200      0   100%
+23.associative.iterators                      0    0    1344      0   100%
 23.associative.stdcxx-16                   NOUT    0                      
 23.bitset.cons                                0    0    1677      0   100%
 23.bitset.cons.stdcxx-297                  NOUT    0                      
@@ -135,18 +137,20 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 23.deque.special                              0    0   61465      0   100%
 23.deque.special.stdcxx-127                NOUT    0                      
 23.deque.storage                              0    0 1311766      0   100%
-23.list.assign                                0    0   20542      0   100%
-23.list.capacity                              0    0    2416      0   100%
-23.list.cons                                  0    0   13164      0   100%
+23.list.assign                                0    0   50000      0   100%
+23.list.capacity                              0    0    7742      0   100%
+23.list.cons                                  0    0   12434      0   100%
 23.list.cons.stdcxx-268                    NOUT    0                      
 23.list.erase                                 0    0    2152      0   100%
-23.list.insert                                0    0   35892      0   100%
+23.list.insert                                0    0   61308      0   100%
 23.list.insert.stdcxx-331                  NOUT    0                      
 23.list.iterators                             0    0    2042      0   100%
 23.list.special                               0    0    1327      0   100%
 23.list.special.stdcxx-334                 NOUT    0                      
+23.list.splice                                0    0      33      0   100%
 23.set.stdcxx-216                          NOUT    0                      
 23.vector.allocator                           0    1       3      0   100%
+23.vector.bool                                0    0      20      0   100%
 23.vector.bool.stdcxx-1062                 NOUT    0                      
 23.vector.bool.stdcxx-235                  NOUT    0                      
 23.vector.capacity                            0    0  857048      0   100%
@@ -204,7 +208,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 26.accumulate                                 0    0    2048      0   100%
 26.adjacent.diff                              0    0   12224      0   100%
 26.c.math                                     0    0    1143      0   100%
-26.class.gslice                               0    0   46230      0   100%
+26.class.gslice                               0    0   92460      0   100%
 26.gslice.array.cassign                       0    0     400      0   100%
 26.indirect.array                             0    0     114      0   100%
 26.inner.product                              0    0    2048      0   100%
@@ -215,6 +219,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 26.valarray.cassign                           0    1    7702      0   100%
 26.valarray.cons                              0    0     396      0   100%
 26.valarray.cshift.stdcxx-316              NOUT    0                      
+26.valarray.members                           0    0       4      0   100%
 26.valarray.members.stdcxx-313             NOUT    0                      
 26.valarray.members.stdcxx-318             NOUT    0                      
 26.valarray.sub.stdcxx-224                 NOUT    0                      
@@ -225,29 +230,29 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 26.valarray.transcend.stdcxx-315           NOUT    0                      
 26.valarray.unary.stdcxx-314               NOUT    0                      
 27.basic.ios.copyfmt.stdcxx-766            NOUT    0                      
-27.basic.ios                                  0    0       7      0   100%
+27.basic.ios                                  0    0      11      0   100%
 27.basic.ios.tie.stdcxx-804                NOUT    0                      
 27.basic_ios.copyfmt.stdcxx-1058         FORMAT    0                      
 27.cstdio.stdcxx-195                       NOUT    0                      
 27.filebuf.close.stdcxx-969                NOUT    0                      
-27.filebuf.codecvt                            0    0  205514      0   100%
+27.filebuf.codecvt                            0    0  205586      0   100%
 27.filebuf.members.stdcxx-308              NOUT    0                      
-27.filebuf                                    0    0      86      0   100%
+27.filebuf                                    0    0     182      0   100%
 27.filebuf.sgetn.stdcxx-161                NOUT    0                      
 27.filebuf.virtuals.stdcxx-522             NOUT    0                      
 27.forward                                    0    0      42      0   100%
 27.ios.members.static                         0    0       3      0   100%
-27.istream.fmat.arith                         0   12   26648      0   100%
+27.istream.fmat.arith                         0   12   26728      0   100%
 27.istream.get                                0    0     528      0   100%
 27.istream.get.stdcxx-60                   NOUT    0                      
 27.istream.getline.stdcxx-59               NOUT    0                      
 27.istream.manip                              0    0    3584      0   100%
 27.istream.readsome                           0    0   30720      0   100%
-27.istream.sentry                             0    0     832      0   100%
-27.istream.unformatted.get                    0    0    1650      0   100%
-27.objects                                    0    0      22      0   100%
+27.istream.sentry                             0    0     836      0   100%
+27.istream.unformatted.get                    0    0    1674      0   100%
+27.objects                                    0    0      36      0   100%
 27.ostream.inserters.stdcxx-51             NOUT    0                      
-27.ostream                                    0    0    5788      0   100%
+27.ostream                                    0    0    6452      0   100%
 27.ostream.unformatted.stdcxx-626          NOUT    0                      
 27.std.manip                                  0    0      48      0   100%
 27.streambuf.buffer.stdcxx-808             NOUT    0                      
@@ -258,18 +263,19 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 27.stringbuf.overflow.stdcxx-795           NOUT    0                      
 27.stringbuf.seekoff.stdcxx-295            NOUT    0                      
 27.stringbuf.str.stdcxx-514                NOUT    0                      
-27.stringbuf.virtuals                         0    0   86124      0   100%
+27.stringbuf.virtuals                         0    0   86156      0   100%
 27.stringbuf.xsputn.stdcxx-515             NOUT    0                      
 27.stringbuf.xsputn.stdcxx-576             NOUT    0                      
+27.strstream                                  0    0      12      0   100%
 atomic_add                                    0    0       0      0   100%
 atomic_xchg                                   0    0       0      0   100%
 once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   265
+  Programs:                   271
   Non-zero exit status:         0
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            33
-  Assertions:            12474539
+  Assertions:            12587404
   Failed assertions:            0

@@ -10,7 +10,7 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 265 programs per configuration.
+- Every test builds. The harness runs 271 programs per configuration.
 - No assertion fails, no program exits non-zero or dies of a signal,
   in any configuration, under either compiler.
 - The tables come from a host with every glibc locale installed. A
@@ -21,7 +21,7 @@ harness's own table without the timing columns.
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
 
-Toolchain: GCC 16.2.1, Clang 23.1.1, glibc 2.44, x86-64 Linux.
+Toolchain: GCC 16.2.1, Clang 23.1.4, glibc 2.44, x86-64 Linux.
 
 ## 1. Running the suite
 
@@ -97,9 +97,9 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 265 | 12,474,653 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 265 | 12,474,539 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 267 | 12,538,163 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 271 | 12,587,599 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 271 | 12,587,404 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 271 | 12,590,123 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -134,7 +134,9 @@ two are normalized by `bin/norm`, which keeps the table from its
 heading to the failed assertions line, drops the timing columns and
 squeezes the blanks. The verdict counts the tables identical to their
 pins; one that differs fails the run, with the difference beside the
-log. `bin/derive-pin` writes a pin from a run log.
+log. `bin/derive-pin` writes a pin from a run log. A pin edited by
+hand for one row takes the row's difference in its `Assertions` total
+in the same edit; a pin derived from a full run has both.
 
 The tables were pinned on 2026-09-30 from full rebuilds, after the
 address-space limit was scaled to the processor count (chapter 3.2)
@@ -340,6 +342,16 @@ all six tables:
 - 2026-11-05: `27.stringbuf.virtuals`, 86,140 to 86,152 in 15D: `app`
   keeps the put pointer at the end, a put-side seek reports it; the
   other five tables are to move by the same 12.
+- dc5300f5, 2026-11-15: all six tables replaced whole from one run of
+  the six configurations on x86-64. The five other than 15D take
+  every row 15D moved since 71bcb14e, the lines above that say "the
+  other five tables are to move" among them, and the rows they
+  lacked. 15D, edited row by row since then from runs on aarch64,
+  keeps every row and takes the sum of its rows for its total, which
+  had fallen 3,612 behind. 271 programs in each: new since 71bcb14e
+  are `22.locale.codecvt.iso2022`, `23.associative.iterators`,
+  `23.list.splice`, `23.vector.bool`, `26.valarray.members` and
+  `27.strstream`.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, and to 33 when `2.smartptr.shared` and
@@ -404,9 +416,9 @@ and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 | row | 11S | 11s | 15D |
 |---|---|---|---|
 | `18.numeric.special.float` | 134 | 119 | 134 |
-| `20.temp.buffer` | 10891 | 10792 | 10891 |
-| `22.locale.num.put` | 1499 | 1495 | 1499 |
-| `22.locale.codecvt` | 634 | 638 | 618 |
+| `20.temp.buffer` | 10888 | 10788 | 10888 |
+| `22.locale.num.put` | 1467 | 1463 | 1467 |
+| `22.locale.codecvt` | 688 | 692 | 688 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
 | `22.locale.codecvt.mt` | 12 | 12 | 48 |
 | `22.locale.ctype.mt` | 200 | 200 | 800 |
@@ -430,7 +442,7 @@ Reasons, in order:
   between 11S and 11s have no known reason; they date from the first
   pins of a host with every locale
   (3c882e6a). `TODO` holds the entry, "`22.locale.codecvt` counts
-  634 assertions in 11S and 638 in 11s".
+  688 assertions in 11S and 692 in 11s".
 - The atomic operation tests count only in the thread-safe build.
 - `22.locale.codecvt.mt` counts two checks per thread and round,
   `22.locale.ctype.mt` one, `22.locale.numpunct.mt` and
@@ -447,6 +459,8 @@ count nothing in any build, `19.exceptions.mt` and
 `22.locale.id.mt` 999, `22.locale.facet.mt` 8, `21.string.cons.mt` 16
 and `21.string.push_back.mt` 2.
 
+A commit that re-pins a row of the table above edits the row here.
+
 ## 5. The same suite under Clang
 
 `11S-clang.txt`, `11s-clang.txt` and `15D-clang.txt` are the same
@@ -455,9 +469,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,474,653 | 0 | 0 | 0 |
-| 11s-clang | 12,474,554 | 0 | 0 | 0 |
-| 15D-clang | 12,478,341 | 0 | 0 | 0 |
+| 11S-clang | 12,587,599 | 0 | 0 | 0 |
+| 11s-clang | 12,587,419 | 0 | 0 | 0 |
+| 15D-clang | 12,590,123 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134
@@ -470,3 +484,7 @@ row for row, `21.string.stdcxx-162` included, but for the
 takes a Clang configuration as the build type with `-clang` appended
 and runs it through the same `buildntest` call with `CXX=clang` on
 the make line.
+
+Measured again at dc5300f5 on 2026-11-15 with Clang 23.1.4, the same
+holds: the 11S and 15D tables equal GCC's, and the 32-bit ones differ
+in that one row.
