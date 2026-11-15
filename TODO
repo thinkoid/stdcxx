@@ -26,25 +26,60 @@ at the top.
 
 ** Containers
 
-*** TODO A copy constructor without a copy assignment draws =-Wdeprecated-copy=
+*** TODO A =map= iterator converts from a =const_iterator=
 
-=__rw_list_iter= (=include/list= 105) and =allocator=
-(=include/rw/_allocator.h= 102) declare a copy constructor and leave
-the copy assignment to the compiler, as 14882:2003 20.4.1 does for
-=allocator=. GCC 16 compiles the tree in its default dialect, where
-that implicit assignment is deprecated, and under =-W= warns
-"implicitly-declared ... operator= ... is deprecated"
-(=-Wdeprecated-copy=) where one is assigned: the build of the eleven
-=23.list= tests prints it 34 times for the library's own types.
-Hypothesis: other class templates of the library do the same; the
-count over a whole build of the tests has not been taken. Seen in
-passing while building =23.list.splice=, 2026-11-14.
+=__rw_tree_iter= (=include/rw/_tree.h= 156-159) has a constructor
+template that takes the tree iterator of any pointer and reference
+types, beside the constructor from the mutable iterator (154).
+14882:2003 23.1, Table 65 has =X::iterator= "convertible to
+X::const_iterator"; the template converts the other way as well.
+Measured in 11S under GCC, 2026-11-15: for a const =map= =cm=,
+~std::map<int, int>::iterator it = cm.begin ();~ compiles, and
+~it->second = 1;~ after it, so a program writes an element of a const
+=map= without a cast. In 15D the same line does not compile: the
+debug iterator of =include/rw/_iterbase.h= does not convert. =list=
+rejects it in both. The template is from the 2005 import (e6c7726b).
+=multimap= shares the iterator; =set= and =multiset= were not probed.
+Seen while the =-Wdeprecated-copy= warnings were read, 2026-11-15.
 
-Fix: a decision: each such class declares its assignment, or the
-warning is recorded as the dialect's.
+Fix: the template leaves, if nothing in the library needs the
+conversion; the constructor from =_C_iterator= serves Table 65.
 
-Check: the count of =-Wdeprecated-copy= lines that name a library
-type in a 15D build of the tests, before and after.
+Check: the two lines do not compile in 11S; the five tests that
+include =<map>= or =<set>= hold at pin.
+
+*** TODO Three classes draw =-Wdeprecated-copy=
+
+C++11 D.3 deprecates the implicit copy assignment of a class that
+declares a copy constructor, and the implicit copy constructor of one
+that declares a copy assignment; 14882:2003 has no such rule. GCC 16
+and Clang 23 compile the tree in their default dialect and warn where
+such a member is used (=-Wdeprecated-copy=, under =-W=). In the 15D
+build of the tests at 36122d95, 18 lines name these three:
+
+- =__rw_tree_iter= (=include/rw/_tree.h= 154), 9: its constructor
+  from the mutable iterator is the copy constructor of =iterator= and
+  a converting constructor of =const_iterator=, so a copy assignment
+  declared beside it would move the warning to =const_iterator='s
+  implicit copy constructor. The same constructor makes =iterator=
+  of =map= not trivially copyable where =const_iterator= is.
+  =__rw_list_iter= had the same shape, 36 lines, until it was split
+  into two classes.
+- =vector<bool>::reference= (=include/vector= 658), 7: it declares the
+  assignment, which writes the bit, and no copy constructor.
+- =allocator= (=include/rw/_allocator.h= 102), 2: it declares the copy
+  constructor as 20.4.1 does, and no assignment.
+
+Fix: the tree iterator is split as =list='s was, and the constructor
+template of the entry above leaves with it. For the other two a
+decision: each declares the member it lacks, or the warning is
+recorded as the dialect's in =ref-conformance.md=.
+
+Check: no =-Wdeprecated-copy= line of a 15D build of the tests names
+=__rw_tree_iter=; =map<int, int>::iterator= is trivially copyable in
+a build without debug iterators; rows that walk a =map= and a =set=
+forward and backward, written first (Tests, "The associative
+containers have no test"), pass before and after.
 
 ** Numerics
 
@@ -266,6 +301,32 @@ Check: a sanity build; =27.istream.unformatted.get= and
 
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
+
+** TODO =20.temp.buffer= fails two overflow rows in the 32-bit builds
+
+=test_failure= in =tests/utilities/20.temp.buffer.cpp= (237-251) asks
+for ~_RWSTD_PTRDIFF_MAX / i + 1~ elements for each power of two =i=
+below ~sizeof (T)~ and expects a null pointer and zero: "a total size
+that exceeds SIZE_MAX must fail". The product exceeds =SIZE_MAX= only
+while =i= is at most half of ~sizeof (T)~. In 11s and 11s-clang two
+types have a size that is not a power of two and a last =i= above its
+half: =long double=, 12 bytes, at 268435456 elements, and
+=char[134217727]= at 32. Both products fit in =size_t=, the request is
+no overflow, and since 14e3e588 =get_temporary_buffer= halves a request
+the free store refuses: the two calls return 67108864 elements and 1,
+which 14882:2003 20.4.3, p1-2 allow. Before 14e3e588 the refused
+allocation gave the pair of zeros the rows expect. Hypothesis, by
+reading: in the 64-bit builds one element of the test's big types is
+past the address space, so the halving ends at zero and the rows
+pass. Measured by the
+six-table run of 2026-11-15 at 36122d95: 2 failed of 10792 in 11s
+and 11s-clang, 0 in the other four.
+
+Fix: the loop runs while =i= is at most ~sizeof (T) / 2~, the requests
+whose size does exceed =SIZE_MAX=.
+
+Check: =20.temp.buffer= fails no assertion in 11s and 11s-clang; the
+six pins take the row's new counts.
 
 ** TODO Three tests guard their =wchar_t= run with a macro nothing defines
 
@@ -535,6 +596,24 @@ collate & ctype)= and the two-locale form named "C" with the classic
 2026-11-03, by probe only).
 
 Check: the rows run and the six pins gain a row.
+
+** TODO The associative containers have no test
+
+=tests/containers= holds tests of =bitset=, =deque=, =list= and
+=vector= and none of =map=, =multimap=, =set= or =multiset=. Five
+programs include =<map>= or =<set>=: =17.names= and =20.operators=,
+which instantiate, and the regressions =23.set.stdcxx-216=,
+=23.containers.stdcxx-152= and =23.associative.stdcxx-16=. So
+[lib.associative] is checked by three regressions, and a change to
+=include/rw/_tree.h=, the iterator's increment and decrement
+included, by a probe alone. Seen while the split of the tree iterator
+was sized, 2026-11-15.
+
+Fix: a =23.map= and a =23.set= test: insertion, lookup, erasure and a
+walk of the range forward and backward, for the unique and the
+multiple containers.
+
+Check: each member of 23.3.1 to 23.3.4 has a row.
 
 ** TODO =list='s =sort=, =reverse=, =unique= and =remove= have no test
 

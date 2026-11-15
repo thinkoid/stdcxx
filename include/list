@@ -81,17 +81,7 @@ public:
     typedef typename _C_iter_base::pointer          pointer;
     typedef typename _C_iter_base::reference        reference;
 
-    // const_pointer and const_reference must be explicity typedef'ed to
-    // const value_type* and const value_type& since we don't know if
-    // _Pointer and _Reference are const types (they aren't if this isn't
-    // a const iterator)
-    typedef const value_type*                       const_pointer; 
-    typedef const value_type&                       const_reference; 
-
     typedef bidirectional_iterator_tag              iterator_category;
-
-    typedef __rw_list_iter <value_type, difference_type,
-                            value_type*, value_type&>      _C_mutable_iter;
 
     typedef  __rw_list_node<value_type>*                   _C_link_type;
     
@@ -99,11 +89,6 @@ public:
 
     __rw_list_iter (const _C_link_type& __rhs)
         : _C_node (__rhs) { }
-
-    // no copy ctor other than the one below defined; will use
-    // a compiler generated one if __rw_list_iter != _C_mutable_iter
-    __rw_list_iter (const _C_mutable_iter &__rhs)
-        : _C_node (__rhs._C_node) { }
 
     __rw_list_iter& operator++ () {
         _C_node = (_C_link_type)((*_C_node)._C_next); 
@@ -145,16 +130,93 @@ public:
 };
 
 
+// the const_iterator of list: a class of its own, so that its
+// constructor from the iterator is never a copy constructor and
+// both classes copy and assign by the implicit members
+template <class _TypeT, class _DiffT, class _Pointer, class _Reference>
+class __rw_list_const_iter
+    : public iterator <bidirectional_iterator_tag,
+                       _TypeT, _DiffT, _Pointer, _Reference>
+{
+    typedef iterator <bidirectional_iterator_tag,
+                     _TypeT, _DiffT, _Pointer, _Reference>
+              _C_iter_base;
+
+public:
+
+    typedef typename _C_iter_base::value_type       value_type;
+    typedef typename _C_iter_base::difference_type difference_type;
+    typedef typename _C_iter_base::pointer          pointer;
+    typedef typename _C_iter_base::reference        reference;
+
+    typedef bidirectional_iterator_tag              iterator_category;
+
+    typedef __rw_list_iter <value_type, difference_type,
+                            value_type*, value_type&>      _C_mutable_iter;
+
+    typedef  __rw_list_node<value_type>*                   _C_link_type;
+
+    __rw_list_const_iter () { }
+
+    __rw_list_const_iter (const _C_link_type& __rhs)
+        : _C_node (__rhs) { }
+
+    // 23.1, Table 65: iterator converts to const_iterator
+    __rw_list_const_iter (const _C_mutable_iter &__rhs)
+        : _C_node (__rhs._C_node) { }
+
+    __rw_list_const_iter& operator++ () {
+        _C_node = (_C_link_type)((*_C_node)._C_next);
+        return *this;
+    }
+
+    __rw_list_const_iter& operator-- () {
+        _C_node = (_C_link_type)((*_C_node)._C_prev);
+        return *this;
+    }
+
+    __rw_list_const_iter operator++ (int) {
+        __rw_list_const_iter __tmp = *this;
+        return ++*this, __tmp;
+    }
+
+    __rw_list_const_iter operator-- (int) {
+        __rw_list_const_iter __tmp = *this;
+        return --*this, __tmp;
+    }
+
+    reference operator* () const {
+        return (*_C_node)._C_data;
+    }
+
+    pointer operator-> () const { return &**this; }
+
+    bool operator== (const __rw_list_const_iter& __iter) const {
+        return _C_node == __iter._C_node;
+    }
+
+    bool operator!= (const __rw_list_const_iter& __iter) const {
+        return !(*this == __iter);
+    }
+
+// private:
+
+    _C_link_type _C_node;
+};
+
+
 #undef _ITER_NODE
 #define _ITER_NODE(it)   (_ITER_BASE (it)._C_node)
 
-        
+
+// an iterator on the left of a const_iterator; with the const_iterator
+// on the left its member takes the iterator through the conversion
+
 template <class _TypeT, class _DiffT, class _Ptr1, class _Ref1,
                                       class _Ptr2, class _Ref2>
 inline bool
-operator== (const __rw_list_iter<_TypeT, _DiffT, _Ptr1, _Ref1> &__x,
-            const __rw_list_iter<_TypeT, _DiffT, _Ptr2, _Ref2> &__y)
-
+operator== (const __rw_list_iter<_TypeT, _DiffT, _Ptr1, _Ref1>       &__x,
+            const __rw_list_const_iter<_TypeT, _DiffT, _Ptr2, _Ref2> &__y)
 {
     return __x._C_node == __y._C_node;
 }
@@ -163,8 +225,8 @@ operator== (const __rw_list_iter<_TypeT, _DiffT, _Ptr1, _Ref1> &__x,
 template <class _TypeT, class _DiffT, class _Ptr1, class _Ref1,
                                       class _Ptr2, class _Ref2>
 inline bool
-operator!= (const __rw_list_iter<_TypeT, _DiffT, _Ptr1, _Ref1> &__x,
-            const __rw_list_iter<_TypeT, _DiffT, _Ptr2, _Ref2> &__y)
+operator!= (const __rw_list_iter<_TypeT, _DiffT, _Ptr1, _Ref1>       &__x,
+            const __rw_list_const_iter<_TypeT, _DiffT, _Ptr2, _Ref2> &__y)
 {
     return !(__x == __y);
 }
@@ -193,8 +255,8 @@ public:
     typedef __rw_list_iter<value_type, difference_type, pointer, reference>
     _C_list_iter; 
 
-    typedef __rw_list_iter<value_type, difference_type, const_pointer,
-                           const_reference>
+    typedef __rw_list_const_iter<value_type, difference_type, const_pointer,
+                                 const_reference>
     _C_list_citer;
 
 

@@ -215,7 +215,12 @@ void test_iterators (T*, Allocator*,
 
         case ListIds::begin_void:
             it = lst.begin();
-            it_relations = it == lst.rend ().base ();
+            // the iterator converts to a const_iterator (23.1, Table 65)
+            // and compares with it, either way round
+            cit = it;
+            it_relations =    it == lst.rend ().base ()
+                           && it == cit && cit == it
+                           && !(it != cit) && !(cit != it);
             if (s_size) res_ptr = &*it;
             break;
 
@@ -227,7 +232,10 @@ void test_iterators (T*, Allocator*,
 
         case ListIds::end_void:
             it = lst.end();
-            it_relations = it == lst.rbegin ().base ();
+            cit = it;
+            it_relations =    it == lst.rbegin ().base ()
+                           && it == cit && cit == it
+                           && !(it != cit) && !(cit != it);
             if (s_size) res_ptr = &*--it;
             break;
 
