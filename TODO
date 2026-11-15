@@ -24,30 +24,6 @@ clause order; the configuration and the C library headers, and the
 tree's own housekeeping, come last. Within a bin the easiest entry is
 at the top.
 
-** Containers
-
-*** TODO =vector<bool>::reference= draws =-Wdeprecated-copy=
-
-C++11 D.3 deprecates the implicit copy constructor of a class that
-declares a copy assignment; 14882:2003 has no such rule.
-=vector<bool>::reference= (=include/vector= 658) declares the
-assignment, as 23.2.5 does: it writes the bit, where the copy
-constructor copies the position, so the two cannot both be implicit.
-GCC 16 and Clang 23 compile the tree in their default dialect and
-warn where a =reference= is copied (=-Wdeprecated-copy=, under =-W=):
-7 lines in the 15D build of the tests at 36122d95. C++20 declares the
-constructor ~= default~, a spelling C++98 lacks; written out, the
-constructor is user-provided, and a function then returns the
-=reference= through memory where it returns it in registers now
-(hypothesis from the ABI's rule, not measured).
-
-Fix: a decision: the constructor written out, or the warning recorded
-as the dialect's in =ref-conformance.md=.
-
-Check: the count of =-Wdeprecated-copy= lines that name
-=vector<bool>::reference= in a 15D build of the tests; for the
-constructor, how =operator[]= returns before and after.
-
 ** Numerics
 
 *** TODO =accumulate= and =inner_product= apply ~operator+=~

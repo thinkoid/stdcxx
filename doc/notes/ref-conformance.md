@@ -239,6 +239,21 @@ helpers do not supply public `<type_traits>` or `<atomic>`. The
 copy-on-write string itself is outside C++11. **New headers alone
 would not make a later library.**
 
+A later dialect also deprecates what C++03 code may rely on. C++11
+D.3 deprecates the implicit copy constructor of a class that declares
+a copy assignment. `vector<bool>::reference` is such a class, as
+23.2.5 declares it: its assignment writes the bit, where its copy
+constructor copies the position, so the two cannot both be implicit.
+GCC and Clang compile the tree in their default dialect and warn
+where a `reference` is copied (`-Wdeprecated-copy`): 7 lines in a 15D
+build of the tests under GCC 16. C++20 declares the constructor
+`= default`, which C++98 cannot spell. Written out, the constructor
+is user-provided, and a function then takes and returns a `reference`
+through memory where it passes it in registers now (measured in 11S
+on aarch64). So the class stays as 23.2.5 has it, and the warning is
+the dialect's. The iterators of `list` and of the tree, and
+`allocator`, drew the same warning until each was changed.
+
 ## 6. Direction of the conformance work
 
 The target is C++03. The revival does not raise the implementation
