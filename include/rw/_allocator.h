@@ -99,9 +99,12 @@ public:
 
     allocator () _THROWS (()) { }
 
-    allocator (const allocator &__rhs) _THROWS (()) {
-        // working around an HP aCC warning 431
-        _RWSTD_UNUSED (__rhs);
+    allocator (const allocator&) _THROWS (()) { }
+
+    // 20.4.1 declares no assignment and leaves it implicit; C++11 D.3
+    // deprecates the implicit one beside a declared copy constructor
+    allocator& operator= (const allocator&) _THROWS (()) {
+        return *this;
     }
 
     template <class _TypeU>
