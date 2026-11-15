@@ -234,7 +234,10 @@ void test_failure (T*, const char *tname)
                "got { %#p, %td }",
                tname, nelems, pa.first, pa.second);
 
-    for (std::size_t i = 2; i && i < sizeof (T); i <<= 1) {
+    // PTRDIFF_MAX / i + 1 elements exceed SIZE_MAX bytes for a power
+    // of two i up to half the size of T; for a greater i the request
+    // fits, and may be granted in part (20.4.3, p1-2)
+    for (std::size_t i = 2; i && i <= sizeof (T) / 2; i <<= 1) {
         // exercise arithmetic overflow (not to be confused
         // with the out-of-memory tests below)
 

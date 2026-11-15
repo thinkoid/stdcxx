@@ -270,32 +270,6 @@ Check: a sanity build; =27.istream.unformatted.get= and
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
 
-** TODO =20.temp.buffer= fails two overflow rows in the 32-bit builds
-
-=test_failure= in =tests/utilities/20.temp.buffer.cpp= (237-251) asks
-for ~_RWSTD_PTRDIFF_MAX / i + 1~ elements for each power of two =i=
-below ~sizeof (T)~ and expects a null pointer and zero: "a total size
-that exceeds SIZE_MAX must fail". The product exceeds =SIZE_MAX= only
-while =i= is at most half of ~sizeof (T)~. In 11s and 11s-clang two
-types have a size that is not a power of two and a last =i= above its
-half: =long double=, 12 bytes, at 268435456 elements, and
-=char[134217727]= at 32. Both products fit in =size_t=, the request is
-no overflow, and since 14e3e588 =get_temporary_buffer= halves a request
-the free store refuses: the two calls return 67108864 elements and 1,
-which 14882:2003 20.4.3, p1-2 allow. Before 14e3e588 the refused
-allocation gave the pair of zeros the rows expect. Hypothesis, by
-reading: in the 64-bit builds one element of the test's big types is
-past the address space, so the halving ends at zero and the rows
-pass. Measured by the
-six-table run of 2026-11-15 at 36122d95: 2 failed of 10792 in 11s
-and 11s-clang, 0 in the other four.
-
-Fix: the loop runs while =i= is at most ~sizeof (T) / 2~, the requests
-whose size does exceed =SIZE_MAX=.
-
-Check: =20.temp.buffer= fails no assertion in 11s and 11s-clang; the
-six pins take the row's new counts.
-
 ** TODO Three tests guard their =wchar_t= run with a macro nothing defines
 
 =tests/localization/22.locale.numpunct.cpp= 424,
