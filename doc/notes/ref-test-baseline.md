@@ -10,7 +10,7 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 271 programs per configuration.
+- Every test builds. The harness runs 272 programs per configuration.
 - No assertion fails, no program exits non-zero or dies of a signal,
   in any configuration, under either compiler.
 - The tables come from a host with every glibc locale installed. A
@@ -352,6 +352,10 @@ all six tables:
   are `22.locale.codecvt.iso2022`, `23.associative.iterators`,
   `23.list.splice`, `23.vector.bool`, `26.valarray.members` and
   `27.strstream`.
+- a653fdbb, 2026-11-15: `20.allocator.members` (40) is new in all
+  six tables, 272 programs in each. 15D took the row by hand with
+  the test; the other five take it from one run of the six
+  configurations on x86-64, in which no other row moved.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, and to 33 when `2.smartptr.shared` and
