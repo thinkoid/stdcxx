@@ -26,23 +26,6 @@ at the top.
 
 ** Containers
 
-*** TODO =list='s range insert macro ends in a typedef nothing uses
-
-=include/list= 250-266 define =_RWSTD_LIST_SAFE_INSERT_RANGE=, a
-block that ends in ~typedef void __dummy_t~ so that its one use (467)
-takes a semicolon. GCC 16 under =-Wall= warns "typedef '__dummy_t'
-locally defined but not used" (=-Wunused-local-typedefs=) once for
-each instantiation of the range =insert=: building the eleven
-=23.list= tests prints it eleven times, and so does any program that
-inserts a range into a =list= under =-Wall=. The typedef came in
-2007 (c1b34759). Seen in passing while building =23.list.splice=,
-2026-11-14.
-
-Fix: the macro's body moves into its one caller, or the block ends
-in a form that declares nothing.
-
-Check: =23.list.insert= builds in 15D without the warning.
-
 *** TODO A copy constructor without a copy assignment draws =-Wdeprecated-copy=
 
 =__rw_list_iter= (=include/list= 105) and =allocator=

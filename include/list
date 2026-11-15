@@ -247,25 +247,6 @@ protected:
         _C_node_alloc_type (*this).deallocate (__link, 1);
     }
 
-#  define _RWSTD_LIST_SAFE_INSERT_RANGE(__it, __first, __last)  \
-    _RWSTD_ASSERT_RANGE (begin (), __it);                       \
-    _RWSTD_ASSERT_RANGE (__first, __last);                      \
-                                                                \
-    if (!(__first == __last)) {                                 \
-        iterator __start = __it;                                \
-                                                                \
-        try {                                                   \
-            __start = insert (__it, *__first);                  \
-                                                                \
-            while (!(++__first == __last))                      \
-                insert (__it, *__first);                        \
-        } catch (...) {                                         \
-            erase (__start, __it);                              \
-            throw;                                              \
-        }                                                       \
-    } typedef void __dummy_t
-
-
     // here and only here is _C_node initialized
     void _C_init () {
         _C_node = _C_get_node ();
@@ -463,8 +444,22 @@ public:
     template<class _InputIterator>
     void _C_insert (const iterator &__it,
                     _InputIterator  __first, _InputIterator __last, void*) {
+        _RWSTD_ASSERT_RANGE (begin (), __it);
+        _RWSTD_ASSERT_RANGE (__first, __last);
 
-        _RWSTD_LIST_SAFE_INSERT_RANGE (__it, __first, __last);
+        if (!(__first == __last)) {
+            iterator __start = __it;
+
+            try {
+                __start = insert (__it, *__first);
+
+                while (!(++__first == __last))
+                    insert (__it, *__first);
+            } catch (...) {
+                erase (__start, __it);
+                throw;
+            }
+        }
     }
 
     // handles integral types
