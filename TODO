@@ -19,8 +19,37 @@ longer investigations.
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses. The entries are binned by
 the clause of the standard they fall under, in clause order, and the
-tree's own housekeeping comes last; the housekeeping is the one bin
-today. Within a bin the easiest entry is at the top.
+tree's own housekeeping comes last. Within a bin the easiest entry is
+at the top.
+
+** Language support
+
+*** TODO =numeric_limits= says =is_modulo= for the signed integer types
+
+=_RWSTD_LIMITS_BODY= in =include/limits= gives =is_modulo= as
+~1 != cpfx##_MAX~: true for every integer type but =bool=, since the
+import of 2005. C++03 18.2.1.2, p56-57 defines a modulo type as one
+where adding two positive numbers can wrap to a third that is less,
+and says it is "generally" true for signed integers on most
+machines, which is the value the library gives. C++11 18.3.2.4, p60
+defines it by the result of any =+=, =-= or =*= that leaves the range,
+and an example of C++17 [numeric.limits.members], p62 says that
+=is_modulo= is false for signed integer types unless an implementation
+defines signed overflow to wrap. GCC and Clang do not, without
+=-fwrapv=: both fold ~INT_MAX + 1 < INT_MAX~ to false at =-O1= and
+above, so a program that reads =is_modulo= and relies on the wrap gets
+wrong results in an optimized build. libstdc++ of GCC 16 gives false
+for =int=. The library declares conformance to 14882:2003 (=README=
+1). Seen while the =is_modulo= oracle of =18.numeric.special.int= was
+read, 2026-11-16.
+
+Fix: a decision. Keep the C++03 value, and say so in
+=include/limits=; or give false for the signed types, with
+=18.numeric.special.int= and its oracle following, perhaps true under
+a characterization of =-fwrapv=.
+
+Check: =18.numeric.special.int= and =18.limits.cvqual= at pin in 15D
+and green in 12D.
 
 ** Tree hygiene
 
@@ -69,7 +98,7 @@ pin.
 
 *** TODO The probe for the size of =long= in =gcc.config= names its file with a literal =$=
 
-=etc/config/gcc.config= 125-129 compiles and runs a program in
+=etc/config/gcc.config= 128-132 compiles and runs a program in
 =/tmp= to learn whether the compiler makes =long= 8 bytes, under the
 name ~tmpfile=stdcxx-longsize-$$~. Inside =$(shell ...)= make turns
 =$$= into =$=, and the shell reads a =$= before =;= as itself, so the
@@ -79,7 +108,7 @@ configurations generating their =makefile.in= at once on one machine
 share the file and fail with "Text file busy" or "No such file".
 5e7c8f0d added the probe in 2008 (STDCXX-929), with =$$= meant as the
 shell's process ID. A failed probe prints a nonzero status, and
-131-148 take a nonzero status for a 64-bit default, so on an LP64
+134-151 take a nonzero status for a 64-bit default, so on an LP64
 host the result is the same; on an ILP32 host it would be the wrong
 branch. Seen while two configurations of this pass ran at once,
 2026-11-16.
@@ -113,6 +142,38 @@ Check: a 15D build directory at =/src/stdcxx-build/15D= of the tree
 at =/src/stdcxx= writes =$(BUILDDIR)/include/config.h= in each =.d=
 file.
 
+*** TODO Clang warns that 18 definitions lack the =nothrow= of their declarations
+
+A 15D build under Clang warns with =-Wmissing-exception-spec= where a
+declaration carries =_RWSTD_ATTRIBUTE_NOTHROW= and the definition
+does not. Four are template destructors of the headers:
+=include/loc/_codecvt.cc= 41 and 51 (=~codecvt=, =~codecvt_byname=)
+and =include/loc/_ctype.cc= 38 and 152 (=~ctype=, =~ctype_byname=),
+declared with the attribute in =loc/_codecvt.h= and =loc/_ctype.h=.
+Each translation unit that instantiates them draws the warnings: in
+the Clang 15D build, the one of =_codecvt.cc= 41 appears 47 times in
+the compiles of the tests, 24 in the examples', 4 in the test
+driver's and 2 in the utilities'. Fourteen are functions of =src=, one
+warning each in the library's build: =__rw_stack_trace= and
+=__rw_assert_fail= (=src/assert.cpp= 51 and 76), the ten =__rw_f*=
+functions of =src/file.cpp= 180 to 350, declared in =rw/_file.h= and
+=<ostream>=, and =__rw_mmap= and =__rw_munmap= (=src/mman.cpp= 54 and
+115), which the export change showed to =mman.cpp= through
+=src/mman.h=. GCC does not warn. GCC rejects the attribute after the
+declarator of a definition ("attributes are not allowed on a
+function-definition"), so =_RWSTD_DEFINE_NOTHROW=, which the two of
+=src/assert.cpp= carry, is empty where the attribute is used
+(=include/rw/_defs.h= 685, e670765c); before the declarator both
+compilers take it. Seen while =22.locale.category= was built under
+Clang, 2026-11-16.
+
+Fix: each definition carries the attribute before its declarator;
+=_RWSTD_DEFINE_NOTHROW= and the =/* nothrow */= comments of
+=_codecvt.cc= give way to it.
+
+Check: a 15D build under Clang has no =-Wmissing-exception-spec=; the
+15D table under GCC at pin.
+
 *** TODO 1198 lines under =src= and =include= end in whitespace
 
 =src/memory.cpp= 167 and 188 read =namespace std {= and a space
@@ -144,7 +205,7 @@ for a =streamsize= among them, by a reading of a sample. The library
 exports 2558 names, so 1626 of them are not in the map. The node
 names 4.1.3; the library is 4.2.2 (=include/rw/_config.h= 50). The
 map is linked only when =MAPFLAGS= is set (=etc/config/gcc.config=
-55-58), and nothing sets it, but bd48eb9e keeps the map consistent
+58-61), and nothing sets it, but bd48eb9e keeps the map consistent
 with the built library all the same. Seen while the library's
 allocation functions were read, 2026-11-16.
 
@@ -162,7 +223,7 @@ files: six in the original =README= 1882-1887, its list of the
 platforms of 2008, and two in =doc/notes= records, which stay; and 14
 in the code. The grep misses one more, the commented-out block of
 =etc/config/gcc.config= 41-44 for "gcc > 3.3". The 15 places:
-- =etc/config/gcc.config= 62-68 adds =-shared-libgcc= for g++ 3
+- =etc/config/gcc.config= 65-71 adds =-shared-libgcc= for g++ 3
   before 3.4 (STDCXX-369); GCC and Clang report a major version above
   3, so the block is never taken; 41-44 is a comment;
 - =include/vector= 681-686 makes the members of =vector<bool>='s
@@ -196,6 +257,37 @@ visit to be judged.
 Check: the object of the file before and after, the same symbols and
 code; for =gcc.config=, the =makefile.in= of a 15D build under GCC
 and under Clang unchanged.
+
+*** TODO The =ti_*.cpp= objects instantiate each other's specializations implicitly
+
+Each =ti_*.cpp= defines =_RWSTD_INSTANTIATE_TEMPLATES=, under which
+~_RWSTD_INSTANTIATE (name, type)~ is false for every specialization
+the source does not instantiate itself, so the header emits neither
+the explicit instantiation nor its =extern template= declaration.
+The source then instantiates the members it uses implicitly. Measured
+in a 15D library built under GCC with =-fvisibility-inlines-hidden=:
+34 =ti_*.cpp= objects hold hidden copies of 302 inline members of
+other objects' explicit instantiations (=basic_string=,
+=basic_streambuf=, =basic_ios=, =basic_ostream=, =num_get=,
+=num_put=, =numpunct=, =moneypunct=), each defined with default
+visibility in the object that instantiates it. The copies are
+duplicate code, and their visibility is why the export marks stand on
+the primary templates and why =-fvisibility-inlines-hidden= hides the
+302 from programs. Seen while =-fvisibility-inlines-hidden= was
+measured, 2026-11-16.
+
+Fix: in a source that defines =_RWSTD_INSTANTIATE_TEMPLATES=, give
+the specializations it does not instantiate their =extern template=
+declaration instead of nothing. A two-object probe under GCC 16.2.1
+shows the explicit instantiation's inline members then stay exported
+under =-fvisibility-inlines-hidden=; without the declaration they are
+hidden at =-O0=, where the second object emits its copies.
+
+Check: the objects of the library before and after: no =ti_*.cpp=
+object defines a member of another's explicit instantiation; the
+dynamic symbol table of 15D under GCC and Clang unchanged; 15D at
+pin. Then the flag can be measured again; derived, not measured, it
+would remove the other 223 of the 525 names it removes today.
 
 * Tests
 
@@ -693,7 +785,7 @@ finds it equal to =to=.
 
 ** TODO =27.filebuf.codecvt= compares a =size_t= index with a =long= length
 
-=run_test= in =tests/iostream/27.filebuf.codecvt.cpp= (1708-1709)
+=run_test= in =tests/iostream/27.filebuf.codecvt.cpp= (1707-1708)
 defines ~const long len~ from two =size_t= values and runs a =size_t=
 index up to it, so GCC 16 warns of a comparison between signed and
 unsigned on the loop's condition. Seen 2026-11-10.
@@ -701,6 +793,23 @@ unsigned on the loop's condition. Seen 2026-11-10.
 Fix: =len= is a =std::size_t=.
 
 Check: the test compiles without the warning and holds at pin.
+
+** TODO =test_noconv= of =27.filebuf.codecvt= reads =gptr= twice
+
+=test_noconv= in =tests/iostream/27.filebuf.codecvt.cpp= sets both
+=gptr= and =egptr= from =pubbuf::pubgptr (rdbuf)= (739-740);
+=pubegptr= is never called. The =in_avail= assertion after them takes
+~gptr < egptr~ as false whatever the buffer holds, so it always
+expects the file size and never the =egptr () - gptr ()= of a filled
+get area. Right after the open the get area is empty, so the assertion
+passes either way today. The line came with the test in 7a43da7d.
+Seen while the =showmanyc= call of the same function was fixed,
+2026-11-16.
+
+Fix: =egptr= from =pubbuf::pubegptr (rdbuf)=.
+
+Check: =27.filebuf.codecvt= at pin in 15D; the assertion count does
+not change.
 
 ** TODO The macro that keeps the replacement =operator new= out of the driver is named =_RWSTD_TEST_SRC=
 
@@ -746,11 +855,90 @@ Fix: the comment names =open= and =O_RDONLY=.
 
 Check: none; a comment.
 
+** TODO =22.locale.time.get= fails 287 assertions in 12D on x86-64
+
+A 12D build under GCC 16.2.1 on an x86-64 host fails about 287 of
+3,352 assertions of =22.locale.time.get= (287 in two runs, 286 in a
+third: the count moves from run to run). The 12D build on aarch64 and
+every pinned configuration pass. Each failure is the =memcmp= of
+=do_test= (182), and the message prints the same fields for the
+result and the expectation, as in ~get_weekday ("Fri", ..., "a") got {
+tm_mday=0 [1,31], tm_wday=5 Fri }, expected { ... tm_wday=5 Fri }~.
+The first suspect, not verified: =memcmp= compares the four bytes of
+padding glibc's =struct tm= has after =tm_isdst= on LP64 (and
+=tm_zone=), which a copy of the structure at =-O2= need not preserve.
+Seen while the 12D table of x86-64 was read, 2026-11-16.
+
+Fix: compare the fields of =std::tm= one by one, or zero both objects
+with =memset= before they are filled, once the suspect is confirmed.
+
+Check: =22.locale.time.get= green in 12D on x86-64 and at pin in 15D.
+
+** TODO =18.limits.traps= fails 13 assertions in 12D on x86-64
+
+A 12D build under GCC 16.2.1 on an x86-64 host fails 13 of the 16
+assertions of =18.limits.traps=: ~numeric_limits<T>::traps == false,
+got true~ for every integer type from =bool= to =wchar_t= (163-182).
+The library gives true, since integer division by zero raises
+=SIGFPE= there; the test's oracle divides by a volatile zero between
+=sigsetjmp= and the handler's =siglongjmp=, and at =-O2= it records
+no trap. On aarch64 division does not trap, the library gives false
+and the row passes. The EDG porting entry "Run-time differences from
+GCC" records the same row under =eccp= and names undefined behavior
+surviving the optimizer as the first suspect. Seen while the 12D
+table of x86-64 was read, 2026-11-16.
+
+Fix: read the oracle at =-O2=; it must observe the trap without
+undefined behavior the optimizer can remove.
+
+Check: =18.limits.traps= green in 12D on x86-64 and at pin in 15D.
+
 * Certification
 
 The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
+
+** TODO =bin/driver= does not compare the exported names
+
+=bin/driver= compares the table of each configuration with its pin
+under =doc/notes/baseline=, but not the names a shared build exports
+with =15D.exports= or =15D-clang.exports=; only the nightly run of
+the six configurations does. A certification run through the driver
+alone misses a name that left. Seen while the exported names were
+pinned, 2026-11-16.
+
+Fix: =bin/driver= derives the names of each shared build with
+=bin/derive-exports=, compares them with =<config>.exports= of the
+exported revision, writes the difference beside the table's, and
+counts it in its verdict.
+
+Check: a driver run of 15D at the pin reports the names identical;
+one with the mark taken off =time_get_byname= reports the 16 names it
+hides and fails.
+
+** TODO No optimized configuration is pinned
+
+The six certified configurations are all debug builds, so no table
+compares a build at =-O2=. Each failure an optimized build found in
+2026-11 lies in a test, and only the optimizer shows it: two were
+undefined behavior, the =is_modulo= oracle of
+=18.numeric.special.int= (a signed overflow) and the cast of
+=27.filebuf.codecvt= (a member called for an object of another type,
+which GCC devirtualizes); the cause of the two x86-64 rows of the
+Tests chapter is a suspect. After the first two were fixed, the 12D
+table of aarch64 has no failed assertion: 274 programs, 12,590,260
+assertions. It differs from the 15D pin in one row,
+=23.deque.iterators= with one assertion more, the iterator-size check
+that the test compiles under =_RWSTD_NO_DEBUG_ITER=, which
+=rw/_defs.h= defines without =_RWSTDDEBUG=. The 12D table of x86-64
+adds the two rows, 300 failed assertions. Seen while the 12D tables
+were compared, 2026-11-16.
+
+Fix: once the two x86-64 rows are settled, a 12D pin under
+=doc/notes/baseline/=, run by the nightly beside the six.
+
+Check: the nightly derives the 12D table and compares it with the pin.
 
 * Locales
 
@@ -1077,12 +1265,12 @@ front end, gave the same table.
 
 ** TODO =time_put= calls =snprintf= and =swprintf=, which strict C++03 does not declare
 
-=src/time_put.cpp= 2704 and 2830 call =snprintf= and =swprintf=,
+=src/time_put.cpp= 2706 and 2832 call =snprintf= and =swprintf=,
 since e197b804 and a0eb3805 (2026-11-04) format a number through
 them. Under =eccp -A= glibc declares neither: =snprintf= is C99, and
 =swprintf= enters =<wchar.h>= under =__USE_ISOC95= only, so the 11S
 library stops at =time_put.o= with error #20, "identifier "snprintf"
-is undefined", and the other 97 sources compile. The rest of the
+is undefined", and the other 96 sources compile. The rest of the
 library takes a C90 fallback behind a characterization for every C99
 function it calls (the entry "The pure C headers"). Seen in the EDG
 build of 2026-11-06.
@@ -1092,7 +1280,7 @@ Fix: the same fallback: a characterization of the two (=NO_SNPRINTF=,
 and =swprintf= into a buffer sized from the width and precision bound
 of d69bfa0b.
 
-Check: =make -j16 lib= in an =eccp -A= 11S build compiles 98 of 98;
+Check: =make -j16 lib= in an =eccp -A= 11S build compiles 97 of 97;
 =22.locale.time.put= holds at pin in 15D.
 
 ** TODO The =eccp= configuration
@@ -1127,7 +1315,7 @@ fails. The file leaves when EDG enters the keyword.
 With no feature macro on the command line, =make config= under
 =eccp -A= (11S) configures (what differs from gcc's =config.h= is the
 entry "The configuration under =eccp= against GCC's"), and
-=make lib= then compiles 97 of the 98 sources (=src/time_put.cpp=
+=make lib= then compiles 96 of the 97 sources (=src/time_put.cpp=
 calls =snprintf= and =swprintf= since 2026-11-04; the entry below):
 the C99 functions the library calls fall back on C90 behind their
 characterizations, and the library's own C header facts moved from
@@ -1156,9 +1344,11 @@ Under =eccp -A=:
 - =18.limits.traps=: =numeric_limits<bool>::traps= is true, as for
   every integer type, but the test's =bool= division by zero did not
   trap. Outside the test, =bool= division by zero traps under =eccp=
-  too. The same row fails in an optimized GCC build (12D, 13
-  assertions) and once in 12D with Clang: the test counts on undefined
-  behavior surviving the optimizer, which is the first suspect.
+  too. The same row fails in an optimized GCC build on x86-64 (12D,
+  13 assertions; the Tests entry "=18.limits.traps= fails 13
+  assertions in 12D on x86-64") and once in 12D with Clang: the test
+  counts on undefined behavior surviving the optimizer, which is the
+  first suspect.
 - =18.support.dynamic=: =bad_alloc::what ()= returns a bad string.
   The first question is whose =bad_alloc= runs, the library's or that
   of EDG's runtime.
@@ -1404,6 +1594,20 @@ linkage or report to EDG.
 
 Check: each compiles under =eccp -A=, the characterization passes,
 and the GCC and Clang tables do not move.
+
+** TODO The prelinker warns that =nm= failed on the links of nine characterizations
+
+=config.log= of an 11S =eccp= configuration has "C++ prelinker:
+warning: nm returned a nonzero error status" 15 times, on the links
+of nine probes (=ABS_OVERLOADS=, =DIV_OVERLOADS=, =VA_LIST= among
+them); the configuration of 2026-10-17 had it 40 times, on 23. The
+cause is not read, nor whether any answer depends on it. Seen while
+the =eccp= build was measured for the export marks, 2026-11-16.
+
+Fix: undecided; first read which object =nm= fails on and why.
+
+Check: the warning is gone from =config.log=, or its cause is recorded
+as harmless.
 
 ** WAITING =src/punct.cpp= under the export model
 
@@ -1791,7 +1995,7 @@ Check: none; this is prose.
 The original =README= 6.1 has a program compiled with
 =-I${PREFIX}/include=. The =<cname>= and =<name.h>= headers are in
 =include/ansi=, which the build puts first on its own search path
-(=etc/config/gcc.config= 76). Measured under GCC with =-nostdinc++=
+(=etc/config/gcc.config= 79). Measured under GCC with =-nostdinc++=
 and =include= alone: =<string>= and =<iostream>= compile, =<cstdlib>=
 is not found, and =<complex>= fails on its own =<cmath>=.
 

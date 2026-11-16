@@ -194,8 +194,8 @@ resolutions.
 
 The [baseline record](ref-test-baseline.md) covers six debug
 configurations: GCC and Clang, each with 64-bit archive, 32-bit archive
-and 64-bit reentrant shared builds. The pinned tables contain 268
-programs apiece. No table records a failed assertion, a non-zero
+and 64-bit reentrant shared builds. Its chapter 2 counts the
+programs of each table. No table records a failed assertion, a non-zero
 exit or a signal. **These are test counts, not
 percentages of the standard implemented.** Assertions have unequal scope, and
 process failures can prevent later assertions from running.
