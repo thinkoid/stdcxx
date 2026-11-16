@@ -56,7 +56,7 @@
 // declare fileno in case it's not declared (for strict ANSI conformance)
 extern "C" {
 
-_RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
+int (fileno)(FILE*) _LIBC_THROWS ();
 
 }   // extern "C"
 

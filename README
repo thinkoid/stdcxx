@@ -1435,14 +1435,9 @@
      #defined when no  printf() format modifier for type  long long is
      known.
 
-  o  _RWSTD_EXPORT        [auto]
-     _RWSTD_CLASS_EXPORT  [auto]
-     _RWSTD_MEMBER_EXPORT [auto]
+  o  _RWSTD_EXPORT [auto]
 
-     These  three macros  control the  exporting of  symbols  from the
-     library; the  latter two are used in  selectively controlling the
-     exporting  of symbols  from  classes that  have member  templates
-     (e.g. locale class).
+     Controls the exporting of symbols from the library.
 
   8.3.8  Macros Controlling Implementation Properties
   ---------------------------------------------------

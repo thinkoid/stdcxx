@@ -144,7 +144,7 @@ class messages;
 
  
 // 22.1.1
-struct _RWSTD_CLASS_EXPORT locale
+struct _RWSTD_EXPORT locale
 {
     // 22.1.1.1.1, p1
     typedef int category;
@@ -166,16 +166,16 @@ struct _RWSTD_CLASS_EXPORT locale
     static const category all      = __rw::__rw_cat_all;
 
     // 22.1.1.2, p1
-    _RWSTD_MEMBER_EXPORT locale () _THROWS (());
+    locale () _THROWS (());
 
     // 22.1.1.2, p3
-    _RWSTD_MEMBER_EXPORT locale (const locale&) _THROWS (());
+    locale (const locale&) _THROWS (());
 
     // 22.1.1.2, p6
-    _RWSTD_MEMBER_EXPORT explicit locale (const char*);
+    explicit locale (const char*);
 
     // 22.1.1.2, p9
-    _RWSTD_MEMBER_EXPORT locale (const locale&, const char*, category);
+    locale (const locale&, const char*, category);
 
     // 22.1.1.2, p12
     template <class _Facet>
@@ -192,44 +192,44 @@ struct _RWSTD_CLASS_EXPORT locale
 
 
     // 22.1.1.2, p14
-    _RWSTD_MEMBER_EXPORT locale (const locale&, const locale&, category);
+    locale (const locale&, const locale&, category);
 
     // 22.1.1.2, p16
-    _RWSTD_MEMBER_EXPORT ~locale() _THROWS (());
+    ~locale() _THROWS (());
 
     // 22.1.1.2, p4
-    _RWSTD_MEMBER_EXPORT const locale& operator= (const locale&) _THROWS (());
+    const locale& operator= (const locale&) _THROWS (());
 
     // 22.1.1.3, p5
-    _RWSTD_MEMBER_EXPORT string name () const;
+    string name () const;
 
     // 22.1.1.4, p1
-    _RWSTD_MEMBER_EXPORT bool operator== (const locale&) const;
+    bool operator== (const locale&) const;
 
     // 22.1.1.4, p2
-    _RWSTD_MEMBER_EXPORT bool operator!= (const locale &__rhs) const {
+    bool operator!= (const locale &__rhs) const {
         return !(*this == __rhs);
     }
 
     // 22.1.1.5, p1
-    _RWSTD_MEMBER_EXPORT static locale global (const locale&);
+    static locale global (const locale&);
 
     // 22.1.1.5, p4
-    _RWSTD_MEMBER_EXPORT static const locale& classic ();
+    static const locale& classic ();
 
 private:
 
-    _RWSTD_MEMBER_EXPORT explicit locale (__rw::__rw_locale &__rhs) 
+    explicit locale (__rw::__rw_locale &__rhs)
         _THROWS (())
         : _C_body (&__rhs) { }
 
-    _RWSTD_MEMBER_EXPORT locale (__rw::__rw_locale&, const facet*);
+    locale (__rw::__rw_locale&, const facet*);
 
     __rw::__rw_locale *_C_body;    // reference-counted body
 
     // (try to) retrieve a facet from a locale given an id
     // may initialize the id if it isn't initialized yet
-    _RWSTD_MEMBER_EXPORT const facet*
+    const facet*
     _C_get_facet (const id&) const;
 
     friend class  __rw::__rw_locale;

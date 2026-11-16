@@ -342,8 +342,6 @@
 // _RWSHARED - defined for libstd built/used as a shared lib
    // disable MSVC hacks
 #define _RWSTD_EXPORT          /* empty */
-#define _RWSTD_CLASS_EXPORT    /* empty */
-#define _RWSTD_MEMBER_EXPORT   /* empty */
 
 
 #define _RWSTD_MB_CUR_MAX 16  // FIXME: must be determined dynamically

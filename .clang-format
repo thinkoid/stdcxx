@@ -92,5 +92,5 @@ ReflowComments: false
 FixNamespaceComments: false
 SortIncludes: Never
 
-AttributeMacros: [_RWSTD_INTERNAL, _RWSTD_EXPORT, _RWSTD_MEMBER_EXPORT,
+AttributeMacros: [_RWSTD_INTERNAL, _RWSTD_EXPORT,
                   _RWSTD_SPECIALIZED_FUNCTION, _RWSTD_SPECIALIZED_CLASS]

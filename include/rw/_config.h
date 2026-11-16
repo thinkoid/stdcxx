@@ -171,11 +171,6 @@
 #  define _RWSTD_LDBL_SCANF_PREFIX   "L"
 #endif   // _RWSTD_LDBL_SCANF_PREFIX
 
-// the default expansion of dllimport is empty (unless #defined above)
-#ifndef _RWSTD_DLLIMPORT
-#  define _RWSTD_DLLIMPORT   /* empty */
-#endif   // _RWSTD_DLLIMPORT
-
 // the default name of a libc symbol is itself (unless #defined above)
 #ifndef _RWSTD_LIBC_SYM
 #  define _RWSTD_LIBC_SYM(name)   name

@@ -44,7 +44,7 @@
 
 namespace std { 
 
-struct _RWSTD_CLASS_EXPORT locale;
+struct _RWSTD_EXPORT locale;
 
 }   // namespace std
 

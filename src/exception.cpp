@@ -72,7 +72,7 @@ void unexpected ()  _RWSTD_GNUC_ATTRIBUTE ((__noreturn__));
 #  define UNCAUGHT_EXCEPTION   uncaught_exception
 #endif   // UNCAUGHT_EXCEPTION
 
-_RWSTD_DLLIMPORT bool UNCAUGHT_EXCEPTION () _THROWS (());
+bool UNCAUGHT_EXCEPTION () _THROWS (());
 
 
 namespace std { 
