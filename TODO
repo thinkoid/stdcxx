@@ -24,20 +24,6 @@ today. Within a bin the easiest entry is at the top.
 
 ** Tree hygiene
 
-*** TODO =CONFIG_H= is written to =makefile.in= and read by nothing
-
-=GNUmakefile= 463 sets ~CONFIG_H := $(CXX)-$(CCVER)-$(BUILDTYPE)~ and
-530 writes it to =makefile.in=, =gcc-16-15D= in a 15D build under GCC.
-9d3a02f1 added it in 2006 as a future replacement of the name
-=config.h=. The replacement never came, and no makefile, script or
-header reads the variable. Seen while the install target was read,
-2026-11-16.
-
-Fix: the two lines leave.
-
-Check: =grep -rn CONFIG_H GNUmakefile etc bin util= prints nothing;
-the =makefile.in= of a 15D build differs by that line alone.
-
 *** TODO Three comments of =cstdlib= and =cmath= speak for Visual C++
 
 =include/ansi/cstdlib= 92-93 and =include/ansi/cmath= 645-646 say

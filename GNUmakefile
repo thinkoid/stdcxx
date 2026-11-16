@@ -460,8 +460,6 @@ ifeq ($(in_topdir),1)
   PLATFORM := $(subst i686,i86,$(PLATFORM))
   PLATFORM := $(shell echo $(PLATFORM) | tr "[:upper:]" "[:lower:]")
 
-  CONFIG_H := $(CXX)-$(CCVER)-$(BUILDTYPE)
-
   # name of the library w/o the prefix and suffix
   # suitable for use by the linker after the -l option
   LIBBASE = std$(BUILDTYPE)
@@ -527,7 +525,6 @@ $(MAKEFILE_IN): $(configpath)
           && echo "BUILDDIR   = $(buildpath)"            >> $(MAKEFILE_IN)  \
           && echo "CONFIG     = $$""(TOPDIR)/etc/config/$(CONFIG)"          \
                                                          >> $(MAKEFILE_IN)  \
-          && echo "CONFIG_H   = $(CONFIG_H)"             >> $(MAKEFILE_IN)  \
           && echo "BUILDTYPE  = $(BUILDTYPE)"            >> $(MAKEFILE_IN)  \
           && echo "BUILDMODE  = $(BUILDMODE)"            >> $(MAKEFILE_IN)  \
           && echo "CXX        = $(CXX)"                  >> $(MAKEFILE_IN)  \
