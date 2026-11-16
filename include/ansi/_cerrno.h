@@ -29,38 +29,25 @@
 
 #ifndef _RWSTD_CERRNO_H_INCLUDED
 #define _RWSTD_CERRNO_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
 #ifdef __linux__
-
-namespace std { 
-
+namespace std {
 extern "C" {
-
 extern int* __errno_location ();
 
+   // 17.4.1.2, p5 - errno may be a macro
+   // lwg issue 310 - errno must be a macro
+#  define errno (*std::__errno_location ())
 
- // 17.4.1.2, p5 - errno may be a macro
- // lwg issue 310 - errno must be a macro
-#define errno (*std::__errno_location ())
-
-
-#define EDOM     33
-#define ERANGE   34
+#  define EDOM     33
+#  define ERANGE   34
 
 // lwg issue 288
-#define EILSEQ   84
-
+#  define EILSEQ   84
 }   // extern "C"
-
 }   // namespace std
-
 #else   // !defined (__linux__)
 #  include _RWSTD_ANSI_C_ERRNO_H
 #endif   // __linux__
-
-
 #endif   // _RWSTD_CERRNO_H_INCLUDED

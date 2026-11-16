@@ -29,14 +29,9 @@
 
 #ifndef _RWSTD_CSTDLIB_H_INCLUDED
 #define _RWSTD_CSTDLIB_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
-
+namespace std {
 #ifndef EXIT_FAILURE
 #  define EXIT_FAILURE   1
 #endif
@@ -46,7 +41,7 @@ namespace std {
 #endif
 
 #ifndef MB_CUR_MAX
-#   define MB_CUR_MAX _RWSTD_MB_CUR_MAX
+#  define MB_CUR_MAX _RWSTD_MB_CUR_MAX
 #endif
 
 #ifndef NULL
@@ -57,10 +52,7 @@ namespace std {
 #  define RAND_MAX   _RWSTD_RAND_MAX
 #endif
 
-
 extern "C" {
-
-
 struct div_t
 {
     // traditional layout (e.g., HP-UX, Linux, Solaris)
@@ -75,13 +67,11 @@ struct ldiv_t
     long rem;
 };
 
-
 #ifdef _RWSTD_SIZE_T
 typedef _RWSTD_SIZE_T size_t;
 #else
 typedef unsigned long size_t;
 #endif   // _RWSTD_SIZE_T
-
 
 double atof (const char*);
 int atoi (const char*);
@@ -112,54 +102,44 @@ int mbtowc (wchar_t*, const char*, size_t);
 int wctomb (char*, wchar_t);
 size_t mbstowcs (wchar_t*, const char*, size_t);
 size_t wcstombs (char*, const wchar_t*, size_t);
-
-
 }   // extern "C"
 
 #ifndef _RWSTD_NO_EXTERN_C_OVERLOAD
+extern "C" {
+    typedef int (*__rw_compar_t)(const void*, const void*);
+}
 
-    extern "C" {
-        typedef int (*__rw_compar_t)(const void*, const void*);
-    }
+extern "C++" {
+// 25.4, p3 of ISO/IEC 14882:1998
+inline void*
+bsearch (const void *__key, const void *__base, size_t __n, size_t __size,
+         int (*__cmp)(const void*, const void*))
+{
+    return bsearch (__key, __base, __n, __size,
+                    reinterpret_cast< __rw_compar_t >(__cmp));
+}
 
-    extern "C++" {
+// 25.4, p4 of ISO/IEC 14882:1998
+inline void
+qsort (void *__base, size_t __n, size_t __size,
+       int (*__cmp)(const void*, const void*))
+{
+    return _RWSTD_C::qsort (__base, __n, __size,
+                           reinterpret_cast< __rw_compar_t >(__cmp));
+}
 
-    // 25.4, p3 of ISO/IEC 14882:1998
-    inline void*
-    bsearch (const void *__key, const void *__base, size_t __n, size_t __size,
-             int (*__cmp)(const void*, const void*))
-    {
-        return bsearch (__key, __base, __n, __size,
-                        reinterpret_cast< __rw_compar_t >(__cmp));
-    }
+inline long
+abs (long __x)
+{
+    return labs (__x);
+}
 
-    // 25.4, p4 of ISO/IEC 14882:1998
-    inline void
-    qsort (void *__base, size_t __n, size_t __size,
-           int (*__cmp)(const void*, const void*))
-    {
-        return _RWSTD_C::qsort (__base, __n, __size,
-                               reinterpret_cast< __rw_compar_t >(__cmp));
-    }
-
-    inline long
-    abs (long __x)
-    {
-        return labs (__x);
-    }
-
-    inline ldiv_t
-    div (long __x, long __y)
-    {
-        return ldiv (__x, __y);
-    }
-
-    }   // extern "C++"
-
+inline ldiv_t
+div (long __x, long __y)
+{
+    return ldiv (__x, __y);
+}
+}   // extern "C++"
 #endif   // _RWSTD_NO_EXTERN_C_OVERLOAD
-
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CSTDLIB_H_INCLUDED

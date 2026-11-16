@@ -32,12 +32,8 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_cfloat.h>
 #else
-
 #  ifndef _RWSTD_CFLOAT_INCLUDED
 #  define _RWSTD_CFLOAT_INCLUDED
-
-#include _RWSTD_ANSI_C_FLOAT_H
-
+#  include _RWSTD_ANSI_C_FLOAT_H
 #  endif   // _RWSTD_CFLOAT_INCLUDED
-
 #endif   // _RWSTD_NO_PURE_C_HEADERS

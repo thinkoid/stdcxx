@@ -32,18 +32,12 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_cstdarg.h>
 #else
-
-#ifndef _RWSTD_CSTDARG_INCLUDED
-#define _RWSTD_CSTDARG_INCLUDED
-
-#include _RWSTD_ANSI_C_STDARG_H
+#  ifndef _RWSTD_CSTDARG_INCLUDED
+#  define _RWSTD_CSTDARG_INCLUDED
+#  include _RWSTD_ANSI_C_STDARG_H
 
 namespace std {
-
-    using ::va_list;
-
+using ::va_list;
 }   // std
-
-#endif   // _RWSTD_CSTDARG_INCLUDED
-
+#  endif   // _RWSTD_CSTDARG_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS

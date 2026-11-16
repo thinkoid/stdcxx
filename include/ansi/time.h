@@ -29,11 +29,9 @@
 #include <rw/_defs.h>
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
 #  ifndef _RWSTD_TIME_H_INCLUDED
-#    define _RWSTD_TIME_H_INCLUDED
-
-#    include <ctime>
+#  define _RWSTD_TIME_H_INCLUDED
+#  include <ctime>
 
 using std::clock_t;
 using std::size_t;
@@ -49,11 +47,7 @@ using std::localtime;
 using std::mktime;
 using std::strftime;
 using std::time;
-
 #  endif   // _RWSTD_TIME_H_INCLUDED
-
 #else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #  include _RWSTD_ANSI_C_TIME_H
-
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

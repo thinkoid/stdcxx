@@ -30,9 +30,8 @@
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
 #  ifndef _RWSTD_LOCALE_H_INCLUDED
-#    define _RWSTD_LOCALE_H_INCLUDED
-
-#    include <clocale>
+#  define _RWSTD_LOCALE_H_INCLUDED
+#  include <clocale>
 
 using std::lconv;
 

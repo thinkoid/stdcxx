@@ -29,14 +29,9 @@
 
 #ifndef _RWSTD_CLOCALE_H_INCLUDED
 #define _RWSTD_CLOCALE_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
-
+namespace std {
 #ifndef LC_ALL
 #  define LC_ALL   _RWSTD_LC_ALL
 #endif   // LC_ALL
@@ -65,18 +60,11 @@ namespace std {
 #  define NULL   0
 #endif   // NULL
 
-
 extern "C" {
-
 struct lconv _RWSTD_LCONV;
 
 char* setlocale (int, const char*);
 struct lconv* localeconv ();
-
 }    // extern "C"
-
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CLOCALE_H_INCLUDED

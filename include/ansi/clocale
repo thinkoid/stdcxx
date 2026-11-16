@@ -32,22 +32,16 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_clocale.h>
 #else
-
-#ifndef _RWSTD_CLOCALE_INCLUDED
-#define _RWSTD_CLOCALE_INCLUDED
-
-#include _RWSTD_ANSI_C_LOCALE_H
+#  ifndef _RWSTD_CLOCALE_INCLUDED
+#  define _RWSTD_CLOCALE_INCLUDED
+#  include _RWSTD_ANSI_C_LOCALE_H
 
 namespace std {
+// 7.4 of C89
+using ::lconv;
 
-    // 7.4 of C89
-    using ::lconv;
-
-    using ::localeconv;
-    using ::setlocale;
-
+using ::localeconv;
+using ::setlocale;
 }   // std
-
-#endif   // _RWSTD_CLOCALE_INCLUDED
-
+#  endif   // _RWSTD_CLOCALE_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS

@@ -32,81 +32,68 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_cwchar.h>
 #else
-
 // glibc declares the C++ overloads of wcschr, wcspbrk, wcsrchr, wcsstr
 // and wmemchr only when this is defined, and defines it only for GCC;
 // the overloads carry asm labels not every compiler accepts
-#ifndef _RWSTD_NO_CORRECT_ISO_CPP_WCHAR_H_PROTO
-#  ifndef __CORRECT_ISO_CPP_WCHAR_H_PROTO
-#    define __CORRECT_ISO_CPP_WCHAR_H_PROTO
-#  endif   // __CORRECT_ISO_CPP_WCHAR_H_PROTO
-#endif   // _RWSTD_NO_CORRECT_ISO_CPP_WCHAR_H_PROTO
+#  ifndef _RWSTD_NO_CORRECT_ISO_CPP_WCHAR_H_PROTO
+#    ifndef __CORRECT_ISO_CPP_WCHAR_H_PROTO
+#      define __CORRECT_ISO_CPP_WCHAR_H_PROTO
+#    endif   // __CORRECT_ISO_CPP_WCHAR_H_PROTO
+#  endif   // _RWSTD_NO_CORRECT_ISO_CPP_WCHAR_H_PROTO
 
-#ifndef _RWSTD_CWCHAR_INCLUDED
-#define _RWSTD_CWCHAR_INCLUDED
-
-#include _RWSTD_ANSI_C_WCHAR_H
-#include <rw/_mbstate.h>
-
+#  ifndef _RWSTD_CWCHAR_INCLUDED
+#  define _RWSTD_CWCHAR_INCLUDED
+#  include _RWSTD_ANSI_C_WCHAR_H
+#  include <rw/_mbstate.h>
 
 // #define WEOF when not #defined (see also <cwctype>)
-#if !defined WEOF
-#  ifndef _RWSTD_NO_WINT_T
-#    define WEOF static_cast< _RWSTD_WINT_T >(-1)
-#  else
-#    define WEOF (-1)
-#  endif
-#endif   // WEOF
+#  if !defined WEOF
+#    ifndef _RWSTD_NO_WINT_T
+#      define WEOF static_cast< _RWSTD_WINT_T >(-1)
+#    else
+#      define WEOF (-1)
+#    endif
+#  endif   // WEOF
 
+#  ifndef NULL
+#    define NULL 0
+#  endif   // NULL
 
-#ifndef NULL
-#  define NULL 0
-#endif   // NULL
+#  ifndef WCHAR_MIN
+#    define WCHAR_MIN   _RWSTD_WCHAR_MIN
+#  endif   // WCHAR_MIN
 
-
-
-#ifndef WCHAR_MIN
-#define WCHAR_MIN   _RWSTD_WCHAR_MIN
-#endif   // WCHAR_MIN
-
-#ifndef WCHAR_MAX
-#define WCHAR_MAX   _RWSTD_WCHAR_MAX
-#endif   // WCHAR_MAX
-
+#  ifndef WCHAR_MAX
+#    define WCHAR_MAX   _RWSTD_WCHAR_MAX
+#  endif   // WCHAR_MAX
 
 namespace std {
-
-#ifndef _RWSTD_NO_SIZE_T
+#  ifndef _RWSTD_NO_SIZE_T
 using ::size_t;
-#elif defined (_RWSTD_SIZE_T)
-    typedef _RWSTD_SIZE_T size_t;
-#endif   // _RWSTD_NO_SIZE_T
+#  elif defined (_RWSTD_SIZE_T)
+typedef _RWSTD_SIZE_T size_t;
+#  endif   // _RWSTD_NO_SIZE_T
 
-#ifdef _RWSTD_NO_STD_MBSTATE_T
-
+#  ifdef _RWSTD_NO_STD_MBSTATE_T
 using ::mbstate_t;
+#  endif   // _RWSTD_NO_STD_MBSTATE_T
 
-#endif   // _RWSTD_NO_STD_MBSTATE_T
-
-#ifndef _RWSTD_NO_WINT_T
+#  ifndef _RWSTD_NO_WINT_T
 using ::wint_t;
-#elif defined (_RWSTD_WINT_T)
-    typedef _RWSTD_WINT_T wint_t;
-#endif   // _RWSTD_NO_WINT_T
+#  elif defined (_RWSTD_WINT_T)
+typedef _RWSTD_WINT_T wint_t;
+#  endif   // _RWSTD_NO_WINT_T
 
-#ifndef _RWSTD_NO_STRUCT_TM_IN_WCHAR_H
+#  ifndef _RWSTD_NO_STRUCT_TM_IN_WCHAR_H
 using ::tm;
-#elif !defined (_RWSTD_NO_STRUCT_TM)
-
+#  elif !defined (_RWSTD_NO_STRUCT_TM)
 }   // namespace std
 
-#include _RWSTD_ANSI_C_TIME_H
+#    include _RWSTD_ANSI_C_TIME_H
 
 namespace std {
-
 using ::tm;
-
-#endif   // NO_STRUCT_TM
+#  endif   // NO_STRUCT_TM
 
 using ::btowc;
 using ::fgetwc;
@@ -160,9 +147,6 @@ using ::wmemcmp;
 using ::wmemcpy;
 using ::wmemmove;
 using ::wmemset;
-
 }   // std
-
-#endif   // _RWSTD_CWCHAR_INCLUDED
-
+#  endif   // _RWSTD_CWCHAR_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS

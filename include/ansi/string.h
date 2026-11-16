@@ -30,8 +30,8 @@
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
 #  ifndef _RWSTD_STRING_H_INCLUDED
-#    define _RWSTD_STRING_H_INCLUDED
-#    include <cstring>
+#  define _RWSTD_STRING_H_INCLUDED
+#  include <cstring>
 
 using std::size_t;
 
@@ -58,36 +58,31 @@ using std::strspn;
 using std::strstr;
 using std::strtok;
 using std::strxfrm;
-
 #  endif   // _RWSTD_STRING_H_INCLUDED
-
 #else
-
-#ifndef _RWSTD_STRING_H_INCLUDED
-#define _RWSTD_STRING_H_INCLUDED
-
+#  ifndef _RWSTD_STRING_H_INCLUDED
+#  define _RWSTD_STRING_H_INCLUDED
 #  include _RWSTD_ANSI_C_STRING_H
 
-#    undef index
-#    undef rindex
+#  undef index
+#  undef rindex
 
-#    undef strcpy
-#    undef strcmp
+#  undef strcpy
+#  undef strcmp
 
-#    undef strlen
-#    undef strchr
-#    undef strrchr
-#    undef strcat
-#    undef memchr
-#    undef memcpy
-#    undef memmove
-#    undef memcmp
-#    undef memset
+#  undef strlen
+#  undef strchr
+#  undef strrchr
+#  undef strcat
+#  undef memchr
+#  undef memcpy
+#  undef memmove
+#  undef memcmp
+#  undef memset
 
-#    undef memccpy
-#    undef strncat
-#    undef strncmp
-#    undef strncpy
-
+#  undef memccpy
+#  undef strncat
+#  undef strncmp
+#  undef strncpy
 #  endif   // _RWSTD_STRING_H_INCLUDED
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

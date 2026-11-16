@@ -29,26 +29,19 @@
 
 #ifndef _RWSTD_CSTRING_H_INCLUDED
 #define _RWSTD_CSTRING_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
-
+namespace std {
 #ifndef NULL
 #  define NULL 0
 #endif   // NULL
 
 extern "C" {
-
 #ifdef _RWSTD_SIZE_T
 typedef _RWSTD_SIZE_T size_t;
 #else
 typedef unsigned long size_t;
 #endif   // _RWSTD_SIZE_T
-
 
 void* memcpy (void*, const void*, size_t);
 void* memmove (void*, const void*, size_t);
@@ -72,10 +65,7 @@ char* strtok (char*, const char*);
 void* memset (void*, int, size_t);
 char* strerror (int);
 size_t strlen (const char*);
-
-
 }   // extern "C"
-
 
 // 21.4, p12 of ISO/IEC 14882:1998
 inline const void* memchr (const void *__p, int __c, size_t __n)
@@ -106,9 +96,5 @@ inline const char* strstr (const char *__s1, const char *__s2)
 {
     return strstr (const_cast< char* >(__s1), __s2);
 }
-
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CSTRING_H_INCLUDED

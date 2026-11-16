@@ -29,14 +29,10 @@
 
 #ifndef _RWSTD_CCTYPE_H_INCLUDED
 #define _RWSTD_CCTYPE_H_INCLUDED
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
+namespace std {
 extern "C" {
-
 int isalnum (int);
 int isalpha (int);
 int iscntrl (int);
@@ -50,10 +46,6 @@ int isupper (int);
 int isxdigit (int);
 int tolower (int);
 int toupper (int);
-
 }
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CCTYPE_H_INCLUDED

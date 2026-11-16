@@ -30,9 +30,8 @@
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
 #  ifndef _RWSTD_MATH_H_INCLUDED
-#    define _RWSTD_MATH_H_INCLUDED
-
-#    include <cmath>
+#  define _RWSTD_MATH_H_INCLUDED
+#  include <cmath>
 
 using std::acos;
 using std::asin;
@@ -56,24 +55,22 @@ using std::sinh;
 using std::sqrt;
 using std::tan;
 using std::tanh;
-
 #  endif   // _RWSTD_MATH_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_MATH_H
 
-#undef exception
-#undef abs
-#undef acos
-#undef asin
-#undef atan
-#undef atan2
-#undef cos
-#undef exp
-#undef fabs
-#undef log
-#undef log10
-#undef sin
-#undef sqrt
-#undef tan
-
+#  undef exception
+#  undef abs
+#  undef acos
+#  undef asin
+#  undef atan
+#  undef atan2
+#  undef cos
+#  undef exp
+#  undef fabs
+#  undef log
+#  undef log10
+#  undef sin
+#  undef sqrt
+#  undef tan
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

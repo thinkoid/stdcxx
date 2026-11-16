@@ -29,21 +29,14 @@
 
 #ifndef _RWSTD_CWCTYPE_H_INCLUDED
 #define _RWSTD_CWCTYPE_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
-
+namespace std {
 #ifndef WEOF
 #  define WEOF   _RWSTD_WEOF
 #endif   // WEOF
 
 extern "C" {
-
-
 #ifdef _RWSTD_WCTRANS_T
 typedef _RWSTD_WCTRANS_T wctrans_t;
 #else
@@ -62,7 +55,6 @@ typedef _RWSTD_WINT_T wint_t;
 typedef long wint_t;
 #endif   // _RWSTD_WINT_T
 
-
 int iswalnum (wint_t);
 int iswalpha (wint_t);
 int iswcntrl (wint_t);
@@ -80,12 +72,6 @@ wint_t towlower (wint_t);
 wint_t towupper (wint_t);
 wctrans_t wctrans (const char*);
 wint_t towctrans (wint_t, wctrans_t);
-
-
 }   // extern "C"
-
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CWCTYPE_H_INCLUDED

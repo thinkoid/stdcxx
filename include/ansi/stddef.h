@@ -30,13 +30,11 @@
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
 #  ifndef _RWSTD_STDDEF_H_INCLUDED
-#    define _RWSTD_STDDEF_H_INCLUDED
-
-#    include <cstddef>
+#  define _RWSTD_STDDEF_H_INCLUDED
+#  include <cstddef>
 
 using std::ptrdiff_t;
 using std::size_t;
-
 #  endif   // _RWSTD_STDDEF_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_STDDEF_H

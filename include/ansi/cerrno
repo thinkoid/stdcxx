@@ -32,27 +32,21 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_cerrno.h>
 #else
-
-#ifndef _RWSTD_CERRNO_INCLUDED
-#define _RWSTD_CERRNO_INCLUDED
-
-#if    !defined (errno) \
-    || !defined (EDOM) || !defined (ERANGE) || !defined (EAGAIN)
-#  include _RWSTD_ANSI_C_ERRNO_H
-#endif   // errno ...
+#  ifndef _RWSTD_CERRNO_INCLUDED
+#  define _RWSTD_CERRNO_INCLUDED
+#  if    !defined (errno) \
+      || !defined (EDOM) || !defined (ERANGE) || !defined (EAGAIN)
+#    include _RWSTD_ANSI_C_ERRNO_H
+#  endif   // errno ...
 
 namespace std {
-
 // 17.4.1.2, p5 - errno may be a macro
-#ifndef errno
+#  ifndef errno
 using ::errno;
 
-   // lwg issue 310 - errno shall be a macro
-#define errno errno
-#endif   // errno
-
+     // lwg issue 310 - errno shall be a macro
+#    define errno errno
+#  endif   // errno
 }   // std
-
-#endif   // _RWSTD_CERRNO_INCLUDED
-
+#  endif   // _RWSTD_CERRNO_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS

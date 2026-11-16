@@ -148,7 +148,7 @@ has paid all three:
 
 - **Declare everything again**, inside `std`. The declarations must
   match the C library's types and layouts, which the C++ library can
-  only measure or assume: `_csetjmp.h` 41-49 hardcodes the size of
+  only measure or assume: `_csetjmp.h` 36-43 hardcodes the size of
   `jmp_buf` for Linux, and `_cstdlib.h` gives `div_t` "the
   traditional layout". Nothing the C library declares beyond the
   standard exists for the program, POSIX included.
@@ -483,15 +483,15 @@ Included by its absolute path it has no next directory to search, and
 gcc 4.3 made that an error: "no include path in which to search for
 limits.h" (STDCXX-768). So under GCC these two wrappers use
 `#include_next <limits.h>` themselves and not the path macro
-(`climits` 110, `limits.h` 109).
+(`climits` 105, `limits.h` 103).
 
 `limits.h` then includes it a second time with `_GCC_NEXT_LIMITS_H`
-defined (113-114). The first inclusion gives the compiler's limits;
+defined (107-108). The first inclusion gives the compiler's limits;
 the second makes GCC's header chain to the system's, for the POSIX
 macros (STDCXX-988, f6a07654).
 
 Both end by setting `MB_LEN_MAX` to the value the configuration
-measured, whatever the headers said (`climits` 117, `limits.h` 121).
+measured, whatever the headers said (`climits` 111, `limits.h` 114).
 
 In the pure model these two define the C90 macros from the
 configuration's `_RWSTD_CHAR_BIT` and its like; there is no
@@ -502,10 +502,10 @@ configuration's `_RWSTD_CHAR_BIT` and its like; there is no
 `errno` must be a macro (17.4.1.2 p5, and LWG issue 310), so:
 
 - the C header is included only while `errno`, `EDOM`, `ERANGE` or
-  `EAGAIN` is still undefined (`cerrno` 39), which also serves as the
+  `EAGAIN` is still undefined (`cerrno` 37), which also serves as the
   include guard;
 - if `errno` is not a macro after that, `cerrno` names it in `std`
-  and then defines `errno` as `errno` (48-51).
+  and then defines `errno` as `errno` (45-48).
 
 ### 5.3 `<cwchar>`
 
@@ -515,7 +515,7 @@ Three things are particular to it:
   when `__CORRECT_ISO_CPP_WCHAR_H_PROTO` is defined, and defines it
   for GCC alone. The wrappers define it first, where the
   `CORRECT_ISO_CPP_WCHAR_H_PROTO` characterization found that the
-  compiler accepts the declarations (`cwchar` 39-43, e4707fd8).
+  compiler accepts the declarations (`cwchar` 38-42, e4707fd8).
   `analysis-glibc-wchar-proto.md` has the story.
 - `mbstate_t` comes through `rw/_mbstate.h`, which the library's own
   headers use to name the type without including `<wchar.h>`
@@ -589,27 +589,27 @@ from going further:
   `rw/_mbstate.h` fetches `__mbstate_t`, the library's C++ headers
   compile and a program with `<string>` and `<iostream>` links and
   runs.
-- **`va_list`.** `_cstdarg.h` 42 declares it as the configuration's
+- **`va_list`.** `_cstdarg.h` 37 declares it as the configuration's
   `_RWSTD_VA_LIST`, a layout-compatible structure, inside `std`, and
   defines `va_start` and `va_arg` by pointer arithmetic that names
-  `va_list` unqualified (48-53). A function that calls `va_start`
+  `va_list` unqualified (42-47). A function that calls `va_start`
   does not compile, and on an ABI that passes arguments in registers
-  the arithmetic would be wrong if it did. `_cstdio.h` 151-153
+  the arithmetic would be wrong if it did. `_cstdio.h` 141-143
   declares the `v` functions with the same type, against the
   compiler's built-in declarations.
-- **`abs` and `div` for `long`.** `_cstdlib.h` 146 and 152 define
+- **`abs` and `div` for `long`.** `_cstdlib.h` 132 and 138 define
   them inside the block for the linkage twins, under
-  `_RWSTD_NO_EXTERN_C_OVERLOAD` (119-159), where 50b33c68 put them.
+  `_RWSTD_NO_EXTERN_C_OVERLOAD` (107-143), where 50b33c68 put them.
   GCC defines that macro, so under GCC the pure `<cstdlib>` has
   neither.
 - **The floating overloads.** `_cmath.h` declares the 22 `double`
   functions and nothing else. The overloads of 26.5 p5 and p6 exist
   only in the wrapper body of `cmath`.
-- **`jmp_buf`.** `_csetjmp.h` 41-49 declares it as 25 `long` on a
+- **`jmp_buf`.** `_csetjmp.h` 36-43 declares it as 25 `long` on a
   64-bit Linux, 200 bytes, which is glibc's size on x86-64. On
   aarch64 glibc's is 312, so `setjmp` would write past the object.
-- **`qsort`.** `_cstdlib.h` 141 qualifies its call with `_RWSTD_C`,
-  while `bsearch` ten lines above does not.
+- **`qsort`.** `_cstdlib.h` 127 qualifies its call with `_RWSTD_C`,
+  while `bsearch` nine lines above does not.
 
 The library's own sources are safe from the model. They include the
 `.h` forms, which hand them the C library's full header, POSIX and

@@ -29,20 +29,14 @@
 
 #ifndef _RWSTD_CMATH_H_INCLUDED
 #define _RWSTD_CMATH_H_INCLUDED
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
-
+namespace std {
 #ifndef HUGE_VAL
 #  define HUGE_VAL _RWSTD_DBL_MAX
-#endif   // HUGE_VAL 
-
+#endif   // HUGE_VAL
 
 extern "C" {
-
 double acos (double);
 double asin (double);
 double atan (double);
@@ -65,11 +59,6 @@ double ceil (double);
 double fabs (double);
 double floor (double);
 double fmod (double, double);
-
-
 }
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CMATH_H_INCLUDED

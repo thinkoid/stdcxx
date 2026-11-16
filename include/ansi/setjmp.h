@@ -28,19 +28,14 @@
 
 #ifndef _RWSTD_SETJMP_H_INCLUDED
 #define _RWSTD_SETJMP_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
 #  include <csetjmp>
 
 using std::jmp_buf;
 
 using std::longjmp;
-
 #else
 #  include _RWSTD_ANSI_C_SETJMP_H
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
@@ -48,5 +43,4 @@ using std::longjmp;
 #ifndef setjmp
 #  define setjmp(env) setjmp (env)
 #endif
-
 #endif   // _RWSTD_SETJMP_H_INCLUDED

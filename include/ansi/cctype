@@ -32,46 +32,40 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_cctype.h>
 #else
-
-#ifndef _RWSTD_CCTYPE_INCLUDED
-#define _RWSTD_CCTYPE_INCLUDED
-
-#include _RWSTD_ANSI_C_CTYPE_H
+#  ifndef _RWSTD_CCTYPE_INCLUDED
+#  define _RWSTD_CCTYPE_INCLUDED
+#  include _RWSTD_ANSI_C_CTYPE_H
 
 // 17.4.1.2, p6 - masking macros are not allowed
-#undef isalnum
-#undef isalpha
-#undef iscntrl
-#undef isdigit
-#undef isgraph
-#undef islower
-#undef isprint
-#undef ispunct
-#undef isspace
-#undef isupper
-#undef isxdigit
-#undef tolower
-#undef toupper
+#  undef isalnum
+#  undef isalpha
+#  undef iscntrl
+#  undef isdigit
+#  undef isgraph
+#  undef islower
+#  undef isprint
+#  undef ispunct
+#  undef isspace
+#  undef isupper
+#  undef isxdigit
+#  undef tolower
+#  undef toupper
 
 namespace std {
-
-    // 7.3 of C89
-    using ::isalnum;
-    using ::isalpha;
-    using ::iscntrl;
-    using ::isdigit;
-    using ::isgraph;
-    using ::islower;
-    using ::isprint;
-    using ::ispunct;
-    using ::isspace;
-    using ::isupper;
-    using ::isxdigit;
-    using ::tolower;
-    using ::toupper;
-
+// 7.3 of C89
+using ::isalnum;
+using ::isalpha;
+using ::iscntrl;
+using ::isdigit;
+using ::isgraph;
+using ::islower;
+using ::isprint;
+using ::ispunct;
+using ::isspace;
+using ::isupper;
+using ::isxdigit;
+using ::tolower;
+using ::toupper;
 }   // std
-
-#endif   // _RWSTD_CCTYPE_INCLUDED
-
+#  endif   // _RWSTD_CCTYPE_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS

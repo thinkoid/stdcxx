@@ -32,7 +32,7 @@ at the top.
 in the global namespace. =include/rw/_config.h= 97-106 defines
 =_RWSTD_NO_DEPRECATED_C_HEADERS= unless a program asks for the pure
 headers, and under it =include/ansi/stdlib.h= and =math.h= include the
-C library's header and nothing more (=stdlib.h= 73-74). The overloads
+C library's header and nothing more (=stdlib.h= 69-70). The overloads
 26.5 adds are thus in =std= alone. Measured in a 15D build under GCC,
 2026-11-16: after =<stdlib.h>= ~sizeof (abs (0L))~ is 4 and
 ~abs (-5000000000L)~ is 705032704, with a warning; after =<math.h>=
@@ -65,9 +65,9 @@ the =makefile.in= of a 15D build differs by that line alone.
 
 *** TODO Three comments of =cstdlib= and =cmath= speak for Visual C++
 
-=include/ansi/cstdlib= 105-106 and =include/ansi/cmath= 703-704 say
+=include/ansi/cstdlib= 91-92 and =include/ansi/cmath= 644-645 say
 that the using-declarations must come after the overloads, "working
-around MSVC6 PR# 27677". =cmath= 732 says "MSVC provides its own
+around MSVC6 PR# 27677". =cmath= 670 says "MSVC provides its own
 complex macro" and nothing follows it: d743fa8d removed the
 ~#undef complex~ it introduced and left the comment. The tree no
 longer builds with Visual C++, and the standard lets a
@@ -78,6 +78,20 @@ order. Seen while the nested body left the =<cname>= headers,
 Fix: the three comments leave; the order of the declarations stays.
 
 Check: the preprocessed output of the two headers is unchanged.
+
+*** TODO Three closing comments of =stddef.h= and =limits.h= name the wrong macro
+
+=include/ansi/stddef.h= 41 closes ~#ifndef
+_RWSTD_NO_DEPRECATED_C_HEADERS~ and says
+=_RWSTD_STDDEF_H_INCLUDED=, the guard that 38 has already closed.
+=include/ansi/limits.h= 98 and 112, the =#else= and the =#endif= of
+the condition at 33, name =_RWSTD_NO_DEPRECATED_C_HEADERS=; 33 tests
+=_RWSTD_NO_PURE_C_HEADERS= and =_RWSTD_NO_LIMITS_H=. Seen while the
+directory was laid out, 2026-11-16.
+
+Fix: each comment names the condition it closes.
+
+Check: none; the three lines are comments.
 
 *** TODO Three characterizations of the C headers have their answers discarded
 
@@ -1281,10 +1295,10 @@ line pinned =_XOPEN_SOURCE=.
 - =tests/src/thread.cpp= (=popen=, =pclose=),
   =tests/src/environ.cpp= (=unsetenv=), =tests/src/process.cpp=
   (=include/ansi/signal.h= under =_RWSTD_NO_DEPRECATED_C_HEADERS=
-  stops at line 63), =util/memchk.cpp= (=getpagesize=,
+  stops at line 56), =util/memchk.cpp= (=getpagesize=,
   =mkstemp=).
 - Fifteen test programs stop in =include/ansi/cwchar=, lines
-  116-130: =using ::fwprintf;= and the other wide I/O functions of
+  103-117: =using ::fwprintf;= and the other wide I/O functions of
   C95, which glibc declares under =__USE_ISOC95= only. C++03's C
   library is C90 with Amendment 1, so the names are the library's
   to provide; glibc exports them. Dropping them from =std= is not
@@ -1318,14 +1332,14 @@ them:
   =<string>= fails with four errors. With glibc's
   =<bits/types/clockid_t.h>= included first the library's C++ headers
   compile and a program links and runs.
-- =_cstdlib.h= 146 and 152 define ~abs (long)~ and ~div (long, long)~
+- =_cstdlib.h= 132 and 138 define ~abs (long)~ and ~div (long, long)~
   inside the block for the linkage twins of =bsearch= and =qsort=,
-  under =_RWSTD_NO_EXTERN_C_OVERLOAD= (119-159), which GCC defines:
+  under =_RWSTD_NO_EXTERN_C_OVERLOAD= (107-143), which GCC defines:
   ~sizeof (std::abs (0L))~ is 4.
 - =_cmath.h= declares the =double= functions alone; the =float= and
   =long double= overloads of 26.5 p5 and p6 are in the other body of
   =cmath=: ~sizeof (std::sin (0.0f))~ is 8.
-- =_csetjmp.h= 41-49 makes =jmp_buf= 200 bytes on a 64-bit Linux;
+- =_csetjmp.h= 36-43 makes =jmp_buf= 200 bytes on a 64-bit Linux;
   glibc's is 312 on aarch64.
 - =_cstdio.h= declares =vfprintf=, =vprintf= and =vsprintf= with
   =_RWSTD_VA_LIST=, the layout-compatible =__rw_va_list= of
@@ -1335,9 +1349,9 @@ them:
   with a real =va_list= does not compile and the macros compute the
   wrong thing. =eccp= resolves =<stdarg.h>= to its own header first,
   so the library sees the compiler's =va_list=.
-- =_cstdlib.h:141= qualifies =qsort= with =_RWSTD_C=, which is empty
+- =_cstdlib.h:127= qualifies =qsort= with =_RWSTD_C=, which is empty
   under =_RWSTD_NO_LIBC_IN_STD=; the pure model has no global
-  =qsort= at that point. =bsearch= ten lines above calls its C
+  =qsort= at that point. =bsearch= nine lines above calls its C
   function unqualified. Since the library facts moved to =_config.h=
   the macro is undefined for every compiler and the line compiles;
   the inconsistency stays.
@@ -1397,7 +1411,7 @@ GCC 4.4 and Clang 3.5 or later (=/usr/include/string.h= 40-43).
 declares. Under =eccp -A= that is C's one prototype, so
 ~char* p = std::strchr (cs, 'x')~ with =cs= a ~const char*~ compiles
 (measured 2026-11-16, 11S); under GCC it is an error. The pure
-=_cstring.h= declares the pairs itself (65-107). Seen while
+=_cstring.h= declares the pairs itself (58-97). Seen while
 =ref-c-headers.md= was written.
 
 Fix: with the entry above: the const-correct pair in =std= for a
@@ -1828,7 +1842,7 @@ bias is a defect to fix is a decision for the Library chapter.
 
 4.1 lists "=abs= and =div=" among what depends on =_RWSTD_LONG_LONG=;
 =<cstdlib>= defines no ~div (long long)~ (=include/ansi/cstdlib=
-66-73 has the =long= overload alone). 4.3 calls
+58-63 has the =long= overload alone). 4.3 calls
 =_RWSTD_NO_CLASS_PARTIAL_SPEC= the sole condition on the cv-qualified
 =numeric_limits=; since e9980bcd they are unconditional
 (=include/limits= 501-510). Found by the extension sweep's reading,

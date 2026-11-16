@@ -30,9 +30,8 @@
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
 #  ifndef _RWSTD_WCTYPE_H_INCLUDED
-#    define _RWSTD_WCTYPE_H_INCLUDED
-
-#    include <cwctype>
+#  define _RWSTD_WCTYPE_H_INCLUDED
+#  include <cwctype>
 
 using std::wctrans_t;
 using std::wctype_t;
@@ -55,9 +54,7 @@ using std::towlower;
 using std::towupper;
 using std::wctrans;
 using std::wctype;
-
 #  endif   // _RWSTD_WCTYPE_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_WCTYPE_H
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
-

@@ -30,15 +30,14 @@
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
 #  ifndef _RWSTD_STDIO_H_INCLUDED
-#    define _RWSTD_STDIO_H_INCLUDED
-
-#    include <cstdio>
+#  define _RWSTD_STDIO_H_INCLUDED
+#  include <cstdio>
 
 using std::FILE;
 
-#ifndef _RWSTD_NO_FPOS_T
+#  ifndef _RWSTD_NO_FPOS_T
 using std::fpos_t;
-#endif   // _RWSTD_NO_FPOS_T
+#  endif   // _RWSTD_NO_FPOS_T
 
 using std::size_t;
 
@@ -82,7 +81,6 @@ using std::ungetc;
 using std::vfprintf;
 using std::vprintf;
 using std::vsprintf;
-
 #  endif   // _RWSTD_STDIO_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_STDIO_H

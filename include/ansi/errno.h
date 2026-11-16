@@ -29,28 +29,19 @@
 #include <rw/_defs.h>
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
 #  ifndef _RWSTD_ERRNO_H_INCLUDED
-#    define _RWSTD_ERRNO_H_INCLUDED
+#  define _RWSTD_ERRNO_H_INCLUDED
+#  include <cerrno>
 
-#    include <cerrno>
-
-#    ifndef errno
-
+#  ifndef errno
 // be prepared to handle 17.4.1.2, p5 and lwg issue 310
 // which say that errno may and must be a macro, respectively
-
 using std::errno;
-
-#    endif   // errno
-
+#  endif   // errno
 #  endif   // _RWSTD_ERRNO_H_INCLUDED
-
 #else
-
 #  if    !defined (errno) \
       || !defined (EDOM) || !defined (ERANGE) || !defined (EAGAIN)
 #    include _RWSTD_ANSI_C_ERRNO_H
 #  endif   // errno ...
-
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

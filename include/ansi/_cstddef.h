@@ -29,21 +29,14 @@
 
 #ifndef _RWSTD_CSTDDEF_H_INCLUDED
 #define _RWSTD_CSTDDEF_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
-
+namespace std {
 #ifndef NULL
 #  define NULL 0
 #endif   // NULL
 
-
 extern "C" {
-
 #ifdef _RWSTD_PTRDIFF_T
 typedef _RWSTD_PTRDIFF_T ptrdiff_t;
 #else
@@ -56,14 +49,7 @@ typedef _RWSTD_SIZE_T size_t;
 typedef unsigned long size_t;
 #endif   // _RWSTD_SIZE_T
 
-
 #define offsetof(class, member)  ((size_t)&(((class*)0)->member))
-
-
 }   // extern "C"
-
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CSTDDEF_H_INCLUDED

@@ -30,34 +30,27 @@
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
 #  ifndef _RWSTD_SIGNAL_H_INCLUDED
-#    define _RWSTD_SIGNAL_H_INCLUDED
-
-#    include <csignal>
+#  define _RWSTD_SIGNAL_H_INCLUDED
+#  include <csignal>
 
 using std::sig_atomic_t;
 
 using std::raise;
 using std::signal;
 
-#    ifdef __linux__
-
-         // hackery needed by <pthread.h>
-
-#      ifndef _SIGSET_H_types
-#        define _SIGSET_H_types   1
-
+#  ifdef __linux__
+     // hackery needed by <pthread.h>
+#    ifndef _SIGSET_H_types
+#      define _SIGSET_H_types   1
 typedef int __sig_atomic_t;
 
-#        define _SIGSET_NWORDS (1024 / (8 * sizeof (unsigned long int)))
+#      define _SIGSET_NWORDS (1024 / (8 * sizeof (unsigned long int)))
 
 typedef struct {
     unsigned long int __val[_SIGSET_NWORDS];
 } __sigset_t;
-
-#      endif   // _SIGSET_H_types
-#    endif   // __linux__
-
-
+#    endif   // _SIGSET_H_types
+#  endif   // __linux__
 #  endif   // _RWSTD_SIGNAL_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_SIGNAL_H

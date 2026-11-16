@@ -29,17 +29,11 @@
 
 #ifndef _RWSTD_CSETJMP_H_INCLUDED
 #define _RWSTD_CSETJMP_H_INCLUDED
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
-
+namespace std {
 extern "C" {
-
 #ifdef _RWSTD_OS_LINUX
-
 #  if 4 == _RWSTD_LONG_SIZE
 // ILP32: sizeof (jmp_buf) == 156
 typedef long jmp_buf [39];
@@ -47,19 +41,13 @@ typedef long jmp_buf [39];
 // ILP64: sizeof (jmp_buf) == 200
 typedef long jmp_buf [25];
 #  endif
-
 #endif
 
 int setjmp (jmp_buf);
 void longjmp (jmp_buf, int);
-
 }   // extern "C"
-
 }   // namespace std
-
 
 // 18.7, p1, Table 20
 #define setjmp   _RWSTD_C::setjmp
-
-
 #endif   // _RWSTD_CSETJMP_H_INCLUDED

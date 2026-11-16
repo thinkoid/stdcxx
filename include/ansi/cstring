@@ -32,67 +32,60 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_cstring.h>
 #else
+#  ifndef _RWSTD_CSTRING_INCLUDED
+#  define _RWSTD_CSTRING_INCLUDED
+#  include _RWSTD_ANSI_C_STRING_H
 
-#ifndef _RWSTD_CSTRING_INCLUDED
-#define _RWSTD_CSTRING_INCLUDED
+#  undef index
+#  undef rindex
 
-#include _RWSTD_ANSI_C_STRING_H
+#  undef strcpy
+#  undef strcmp
 
-#    undef index
-#    undef rindex
+#  undef strlen
+#  undef strchr
+#  undef strrchr
+#  undef strcat
+#  undef memchr
+#  undef memcpy
+#  undef memmove
+#  undef memcmp
+#  undef memset
 
-#    undef strcpy
-#    undef strcmp
+#  undef memccpy
+#  undef strncat
+#  undef strncmp
+#  undef strncpy
 
-#    undef strlen
-#    undef strchr
-#    undef strrchr
-#    undef strcat
-#    undef memchr
-#    undef memcpy
-#    undef memmove
-#    undef memcmp
-#    undef memset
-
-#    undef memccpy
-#    undef strncat
-#    undef strncmp
-#    undef strncpy
-
-#ifndef NULL
-#  define NULL 0
-#endif   // NULL
-
+#  ifndef NULL
+#    define NULL 0
+#  endif   // NULL
 
 namespace std {
+using ::size_t;
 
-    using ::size_t;
-
-    using ::memchr;
-    using ::memcmp;
-    using ::memcpy;
-    using ::memmove;
-    using ::memset;
-    using ::strcat;
-    using ::strchr;
-    using ::strcmp;
-    using ::strcoll;
-    using ::strcpy;
-    using ::strcspn;
-    using ::strerror;
-    using ::strlen;
-    using ::strncat;
-    using ::strncmp;
-    using ::strncpy;
-    using ::strpbrk;
-    using ::strrchr;
-    using ::strspn;
-    using ::strstr;
-    using ::strtok;
-    using ::strxfrm;
-
+using ::memchr;
+using ::memcmp;
+using ::memcpy;
+using ::memmove;
+using ::memset;
+using ::strcat;
+using ::strchr;
+using ::strcmp;
+using ::strcoll;
+using ::strcpy;
+using ::strcspn;
+using ::strerror;
+using ::strlen;
+using ::strncat;
+using ::strncmp;
+using ::strncpy;
+using ::strpbrk;
+using ::strrchr;
+using ::strspn;
+using ::strstr;
+using ::strtok;
+using ::strxfrm;
 }   // std
-
-#endif   // _RWSTD_CSTRING_INCLUDED
-
+#  endif   // _RWSTD_CSTRING_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS

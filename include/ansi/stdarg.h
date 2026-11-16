@@ -29,20 +29,14 @@
 #include <rw/_defs.h>
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
 #  ifndef _RWSTD_STDARG_H_INCLUDED
-#    define _RWSTD_STDARG_H_INCLUDED
-
-#    include <cstdarg>
+#  define _RWSTD_STDARG_H_INCLUDED
+#  include <cstdarg>
 
 // not implemented - va_list is declared in the global namespace
 // see <ansi/_cstdarg.h>
 // using std::va_list;
-
 #  endif   // _RWSTD_STDARG_H_INCLUDED
-
 #else
-
-#include _RWSTD_ANSI_C_STDARG_H
-
+#  include _RWSTD_ANSI_C_STDARG_H
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

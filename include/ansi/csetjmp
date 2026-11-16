@@ -32,24 +32,18 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_csetjmp.h>
 #else
-
-#ifndef _RWSTD_CSETJMP_INCLUDED
-#define _RWSTD_CSETJMP_INCLUDED
-
-#include _RWSTD_ANSI_C_SETJMP_H
+#  ifndef _RWSTD_CSETJMP_INCLUDED
+#  define _RWSTD_CSETJMP_INCLUDED
+#  include _RWSTD_ANSI_C_SETJMP_H
 
 namespace std {
-
 using ::jmp_buf;
 
 using ::longjmp;
-
 }   // std
+#  endif   // _RWSTD_CSETJMP_INCLUDED
 
-#endif   // _RWSTD_CSETJMP_INCLUDED
-
-#ifndef setjmp
-#  define setjmp(env) setjmp (env)
-#endif
-
+#  ifndef setjmp
+#    define setjmp(env) setjmp (env)
+#  endif
 #endif   // _RWSTD_NO_PURE_C_HEADERS

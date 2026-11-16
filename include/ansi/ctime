@@ -32,31 +32,25 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_ctime.h>
 #else
-
-#ifndef _RWSTD_CTIME_INCLUDED
-#define _RWSTD_CTIME_INCLUDED
-
-#include _RWSTD_ANSI_C_TIME_H
+#  ifndef _RWSTD_CTIME_INCLUDED
+#  define _RWSTD_CTIME_INCLUDED
+#  include _RWSTD_ANSI_C_TIME_H
 
 namespace std {
+using ::size_t;
+using ::clock_t;
+using ::time_t;
+using ::tm;
 
-    using ::size_t;
-    using ::clock_t;
-    using ::time_t;
-    using ::tm;
-
-    using ::asctime;
-    using ::clock;
-    using ::ctime;
-    using ::difftime;
-    using ::gmtime;
-    using ::localtime;
-    using ::mktime;
-    using ::strftime;
-    using ::time;
-
+using ::asctime;
+using ::clock;
+using ::ctime;
+using ::difftime;
+using ::gmtime;
+using ::localtime;
+using ::mktime;
+using ::strftime;
+using ::time;
 }   // std
-
-#endif   // _RWSTD_CTIME_INCLUDED
-
+#  endif   // _RWSTD_CTIME_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS

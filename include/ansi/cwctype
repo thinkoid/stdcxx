@@ -32,65 +32,57 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_cwctype.h>
 #else
-
-#ifndef _RWSTD_CWCTYPE_INCLUDED
-#define _RWSTD_CWCTYPE_INCLUDED
-
-#include _RWSTD_ANSI_C_WCTYPE_H
+#  ifndef _RWSTD_CWCTYPE_INCLUDED
+#  define _RWSTD_CWCTYPE_INCLUDED
+#  include _RWSTD_ANSI_C_WCTYPE_H
 
 // #define WEOF when not #defined (see also <cwchar>)
-#if !defined WEOF
-#  ifndef _RWSTD_NO_WINT_T
-#    define WEOF static_cast< _RWSTD_WINT_T >(-1)
-#  else
-#    define WEOF (-1)
-#  endif
-#endif   // WEOF
+#  if !defined WEOF
+#    ifndef _RWSTD_NO_WINT_T
+#      define WEOF static_cast< _RWSTD_WINT_T >(-1)
+#    else
+#      define WEOF (-1)
+#    endif
+#  endif   // WEOF
 
-#ifndef _RWSTD_NO_WCTYPE_H
-
+#  ifndef _RWSTD_NO_WCTYPE_H
 namespace std {
+#    ifndef _RWSTD_NO_WCTRANS_T
+using ::wctrans_t;
+#    else
+typedef int wctrans_t;
+#    endif   // _RWSTD_NO_WCTRANS_T
 
-#ifndef _RWSTD_NO_WCTRANS_T
-    using ::wctrans_t;
-#else
-    typedef int wctrans_t;
-#endif   // _RWSTD_NO_WCTRANS_T
+#    ifndef _RWSTD_NO_WCTYPE_T
+using ::wctype_t;
+#    else
+typedef unsigned wctype_t;
+#    endif   // _RWSTD_NO_WCTYPE_T
 
-#ifndef _RWSTD_NO_WCTYPE_T
-    using ::wctype_t;
-#else
-    typedef unsigned wctype_t;
-#endif   // _RWSTD_NO_WCTYPE_T
+#    ifndef _RWSTD_NO_WINT_T
+using ::wint_t;
+#    else
+typedef unsigned wint_t;
+#    endif   // _RWSTD_NO_WINT_T
 
-#ifndef _RWSTD_NO_WINT_T
-    using ::wint_t;
-#else
-    typedef unsigned wint_t;
-#endif   // _RWSTD_NO_WINT_T
-
-    using ::iswalnum;
-    using ::iswalpha;
-    using ::iswcntrl;
-    using ::iswctype;
-    using ::iswdigit;
-    using ::iswgraph;
-    using ::iswlower;
-    using ::iswprint;
-    using ::iswpunct;
-    using ::iswspace;
-    using ::iswupper;
-    using ::iswxdigit;
-    using ::towctrans;
-    using ::towlower;
-    using ::towupper;
-    using ::wctrans;
-    using ::wctype;
-
+using ::iswalnum;
+using ::iswalpha;
+using ::iswcntrl;
+using ::iswctype;
+using ::iswdigit;
+using ::iswgraph;
+using ::iswlower;
+using ::iswprint;
+using ::iswpunct;
+using ::iswspace;
+using ::iswupper;
+using ::iswxdigit;
+using ::towctrans;
+using ::towlower;
+using ::towupper;
+using ::wctrans;
+using ::wctype;
 }   // std
-
-#endif   // _RWSTD_NO_WCTYPE_H
-
-#endif   // _RWSTD_CWCTYPE_INCLUDED
-
+#  endif   // _RWSTD_NO_WCTYPE_H
+#  endif   // _RWSTD_CWCTYPE_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS

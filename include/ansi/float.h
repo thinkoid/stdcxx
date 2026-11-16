@@ -32,5 +32,4 @@
 #  include <cfloat>
 #else
 #  include _RWSTD_ANSI_C_FLOAT_H
-
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

@@ -29,11 +29,9 @@
 #include <rw/_defs.h>
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
 #  ifndef _RWSTD_CTYPE_H_INCLUDED
-#    define _RWSTD_CTYPE_H_INCLUDED
-
-#    include <cctype>
+#  define _RWSTD_CTYPE_H_INCLUDED
+#  include <cctype>
 
 using std::isalnum;
 using std::isalpha;
@@ -48,7 +46,6 @@ using std::isupper;
 using std::isxdigit;
 using std::tolower;
 using std::toupper;
-
 #  endif   // _RWSTD_CTYPE_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_CTYPE_H

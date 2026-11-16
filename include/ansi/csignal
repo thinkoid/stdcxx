@@ -32,20 +32,14 @@
 #ifndef _RWSTD_NO_PURE_C_HEADERS
 #  include <ansi/_csignal.h>
 #else
-
-#ifndef _RWSTD_CSIGNAL_INCLUDED
-#define _RWSTD_CSIGNAL_INCLUDED
-
-#include _RWSTD_ANSI_C_SIGNAL_H
+#  ifndef _RWSTD_CSIGNAL_INCLUDED
+#  define _RWSTD_CSIGNAL_INCLUDED
+#  include _RWSTD_ANSI_C_SIGNAL_H
 
 namespace std {
-
-    using ::sig_atomic_t;
-    using ::raise;
-    using ::signal;
-
+using ::sig_atomic_t;
+using ::raise;
+using ::signal;
 }   // std
-
-#endif   // _RWSTD_CSIGNAL_INCLUDED
-
+#  endif   // _RWSTD_CSIGNAL_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS

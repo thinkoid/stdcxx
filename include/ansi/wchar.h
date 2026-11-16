@@ -30,16 +30,15 @@
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
 #  ifndef _RWSTD_WCHAR_H_INCLUDED
-#    define _RWSTD_WCHAR_H_INCLUDED
+#  define _RWSTD_WCHAR_H_INCLUDED
+#  include <cwchar>
 
-#    include <cwchar>
-
-#ifndef _RWSTD_NO_MBSTATE_T
+#  ifndef _RWSTD_NO_MBSTATE_T
 using std::mbstate_t;
-#endif
-#ifndef _RWSTD_NO_WINT_T
+#  endif
+#  ifndef _RWSTD_NO_WINT_T
 using std::wint_t;
-#endif
+#  endif
 using std::size_t;
 using std::btowc;
 using std::fgetwc;
@@ -90,11 +89,8 @@ using std::wmemmove;
 using std::wmemset;
 using std::wprintf;
 using std::wscanf;
-
 #  endif   // _RWSTD_WCHAR_H_INCLUDED
-
 #else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 // glibc declares the C++ overloads of wcschr, wcspbrk, wcsrchr, wcsstr
 // and wmemchr only when this is defined, and defines it only for GCC;
 // the overloads carry asm labels not every compiler accepts
@@ -117,11 +113,8 @@ using std::wscanf;
 #  endif
 
 extern "C" {
-
 #  if defined (_RWSTD_NO_MBSTATE_T) && defined (_RWSTD_MBSTATE_T)
 typedef _RWSTD_MBSTATE_T mbstate_t;
 #  endif   // _RWSTD_NO_MBSTATE_T && _RWSTD_MBSTATE_T
-
 }   // extern "C"
-
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

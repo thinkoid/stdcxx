@@ -29,19 +29,14 @@
 
 #ifndef _RWSTD_CSTDIO_H_INCLUDED
 #define _RWSTD_CSTDIO_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
+namespace std {
 #ifdef __linux__
    // prevent multiple definitions of SEEK_XXX constants
    // when Linux glibc's <unistd.h> is #included
 #  define _STDIO_H
 #endif   // __linux__
-
 
 #ifndef _IOFBF
 #  define _IOFBF   _RWSTD_IOFBF
@@ -110,27 +105,22 @@ struct FILE;
 #endif
 
 extern "C" {
-
 #ifdef _RWSTD_SIZE_T
 typedef _RWSTD_SIZE_T size_t;
 #else
 typedef unsigned long size_t;
 #endif   // _RWSTD_SIZE_T
 
-
 #ifdef _RWSTD_FPOS_T
 typedef _RWSTD_FPOS_T fpos_t;
 #elif defined (_RWSTD_FPOS_T_SIZE)
-
 struct fpos_t
 {
     char _C_fill [_RWSTD_FPOS_T_SIZE];
 };
-
 #else
 typedef long fpos_t;
 #endif   // _RWSTD_FPOS_T
-
 
 int remove (const char*);
 int rename (const char*, const char*);
@@ -172,21 +162,12 @@ void clearerr (FILE*);
 int feof  (FILE*);
 int ferror (FILE*);
 void perror (const char*);
-
 }   // extern "C"
-
-
 }   // namespace std
 
-
-namespace __rw { 
-
+namespace __rw {
 extern std::FILE* __rw_stdin;
 extern std::FILE* __rw_stdout;
 extern std::FILE* __rw_stderr;
-
 }   // namespace __rw
-
-
-
 #endif   // _RWSTD_CSTDIO_H_INCLUDED

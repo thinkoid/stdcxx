@@ -29,15 +29,10 @@
 
 #ifndef _RWSTD_CWCHAR_H_INCLUDED
 #define _RWSTD_CWCHAR_H_INCLUDED
-
-
 #include <rw/_mbstate.h>   // for _RWSTD_MBSTATE_T
 #include <rw/_defs.h>
 
-
 namespace std {
-
-
 #ifndef NULL
 #  define NULL 0
 #endif   // NULL
@@ -49,7 +44,6 @@ typedef unsigned long size_t;
 #endif   // _RWSTD_SIZE_T
 
 extern "C" {
-
 // _RWSTD_MBSTATE_T is defined in <rw/_mbstate.h>
 typedef _RWSTD_MBSTATE_T mbstate_t;
 
@@ -130,10 +124,7 @@ size_t mbrtowc (wchar_t*, const char*, size_t, mbstate_t*);
 size_t wcrtomb (char*, wchar_t, mbstate_t*);
 size_t mbsrtowcs (wchar_t*, const char**, size_t, mbstate_t*);
 size_t wcsrtombs (char*, const wchar_t**, size_t, mbstate_t*);
-
-
 }   // extern "C"
-
 
 // 21.4, p14 of ISO/IEC 14882:1998
 inline const wchar_t* wcschr (const wchar_t *__s, wchar_t __c)
@@ -141,13 +132,11 @@ inline const wchar_t* wcschr (const wchar_t *__s, wchar_t __c)
     return wcschr (const_cast< wchar_t* >(__s), __c);
 }
 
-
 // 21.4, p16 of ISO/IEC 14882:1998
 inline const wchar_t* wcspbrk (const wchar_t *__s1, const wchar_t *__s2)
 {
     return wcspbrk (const_cast< wchar_t* >(__s1), __s2);
 }
-
 
 // 21.4, p18 of ISO/IEC 14882:1998
 inline const wchar_t* wcsrchr (const wchar_t *__s, wchar_t __c)
@@ -155,22 +144,16 @@ inline const wchar_t* wcsrchr (const wchar_t *__s, wchar_t __c)
     return wcsrchr (const_cast< wchar_t* >(__s), __c);
 }
 
-
 // 21.4, p20 of ISO/IEC 14882:1998
 inline const wchar_t* wcsstr (const wchar_t *__s1, const wchar_t *__s2)
 {
     return wcsstr (const_cast< wchar_t* >(__s1), __s2);
 }
 
-
 // 21.4, p22 of ISO/IEC 14882:1998
 inline const wchar_t* wmemchr (const wchar_t *__p, wchar_t __c, size_t __n)
 {
     return wmemchr (const_cast< wchar_t* >(__p), __c, __n);
 }
-
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CWCHAR_H_INCLUDED

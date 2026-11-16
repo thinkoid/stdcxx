@@ -29,17 +29,10 @@
 
 #ifndef _RWSTD_CTIME_H_INCLUDED
 #define _RWSTD_CTIME_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
-
+namespace std {
 extern "C" {
-
-
 #ifndef CLOCKS_PER_SEC
 #  define CLOCKS_PER_SEC   _RWSTD_CLOCKS_PER_SEC
 #endif
@@ -47,7 +40,6 @@ extern "C" {
 #ifndef NULL
 #  define NULL 0
 #endif
-
 
 #ifdef _RWSTD_CLOCK_T
 typedef _RWSTD_CLOCK_T clock_t;
@@ -67,9 +59,7 @@ typedef _RWSTD_SIZE_T size_t;
 typedef unsigned long size_t;
 #endif   // _RWSTD_SIZE_T
 
-
 struct tm _RWSTD_STRUCT_TM;
-
 
 clock_t clock ();
 double difftime (time_t, time_t);
@@ -80,12 +70,6 @@ char* ctime (const time_t*);
 struct tm* gmtime (const time_t*);
 struct tm* localtime (const time_t*);
 size_t strftime (char*, size_t, const char*, const struct tm*);
-
-
 }   // extern "C"
-
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CTIME_H_INCLUDED

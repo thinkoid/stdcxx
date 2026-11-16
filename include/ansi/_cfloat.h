@@ -29,10 +29,7 @@
 
 #ifndef _RWSTD_CFLOAT_H_INCLUDED
 #define _RWSTD_CFLOAT_H_INCLUDED
-
-
 #include <rw/_defs.h>
-
 
 #define FLT_ROUNDS       _RWSTD_FLT_ROUNDS
 
@@ -66,5 +63,4 @@
 #define LDBL_MAX         _RWSTD_LDBL_MAX
 #define LDBL_MIN         _RWSTD_LDBL_MIN
 #define LDBL_EPSILON     _RWSTD_LDBL_EPSILON
-
 #endif   // _RWSTD_CFLOAT_H_INCLUDED

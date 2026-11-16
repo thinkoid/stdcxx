@@ -29,11 +29,9 @@
 #include <rw/_defs.h>
 
 #ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
 #  ifndef _RWSTD_STDLIB_H_INCLUDED
-#    define _RWSTD_STDLIB_H_INCLUDED
-
-#    include <cstdlib>
+#  define _RWSTD_STDLIB_H_INCLUDED
+#  include <cstdlib>
 
 using std::div_t;
 using std::ldiv_t;
@@ -67,12 +65,9 @@ using std::strtoul;
 using std::system;
 using std::wcstombs;
 using std::wctomb;
-
 #  endif   // _RWSTD_STDLIB_H_INCLUDED
-
 #else
 #  include _RWSTD_ANSI_C_STDLIB_H
 
 #  undef ldiv
-
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

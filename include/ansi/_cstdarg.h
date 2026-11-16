@@ -29,21 +29,15 @@
 
 #ifndef _RWSTD_CSTDARG_H_INCLUDED
 #define _RWSTD_CSTDARG_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
+namespace std {
 extern "C" {
-
 #ifdef _RWSTD_VA_LIST
 typedef _RWSTD_VA_LIST va_list;
 #else
 typedef void* va_list;
 #endif   // _RWSTD_VA_LIST
-
 
 #define va_arg(va, T) \
     ((T*)(va = (va_list)((char*)va + sizeof (T))))[-1]
@@ -53,10 +47,6 @@ typedef void* va_list;
            + ((sizeof (name) + (sizeof (int) - 1)) & ~(sizeof (int) - 1))))
 
 #define va_end(ignore)   (void)0
-
 }   // extern "C"
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CSTDARG_H_INCLUDED

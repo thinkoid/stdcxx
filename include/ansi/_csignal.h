@@ -29,13 +29,9 @@
 
 #ifndef _RWSTD_CSIGNAL_H_INCLUDED
 #define _RWSTD_CSIGNAL_H_INCLUDED
-
-
 #include <rw/_defs.h>
 
-
-namespace std { 
-
+namespace std {
 #ifndef SIGABRT
 #  define SIGABRT _RWSTD_SIGABRT
 #endif   // SIGABRT
@@ -60,15 +56,12 @@ namespace std {
 #  define SIGTERM _RWSTD_SIGTERM
 #endif   // SIGTERM
 
-
 extern "C" {
-
 #ifdef _RWSTD_SIG_ATOMIC_T
 typedef _RWSTD_SIG_ATOMIC_T sig_atomic_t;
 #else
 typedef long sig_atomic_t;
 #endif   // _RWSTD_SIG_ATOMIC_T
-
 
 // helper type (necessary in order to be extern "C")
 typedef void __rw_sighandler_t (int);
@@ -88,14 +81,8 @@ typedef void __rw_sighandler_t (int);
        reinterpret_cast< std::__rw_sighandler_t* >(_RWSTD_SIG_IGN)
 #endif   // SIG_IGN
 
-
 void (*signal(int, void (*)(int))) (int);
 int raise (int);
-
 }   // extern "C"
-
-
 }   // namespace std
-
-
 #endif   // _RWSTD_CSIGNAL_H_INCLUDED
