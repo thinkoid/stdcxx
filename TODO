@@ -1298,7 +1298,9 @@ line pinned =_XOPEN_SOURCE=.
   C95, which glibc declares under =__USE_ISOC95= only. C++03's C
   library is C90 with Amendment 1, so the names are the library's
   to provide; glibc exports them. Dropping them from =std= is not
-  conforming; declaring them is right while the symbols exist.
+  conforming; declaring them is right while the symbols exist. The
+  pure =_cwchar.h= declares them, and =<cwchar>= compiles under
+  =eccp -A= with =_RWSTD_USE_PURE_C_HEADERS= (measured 2026-11-16).
 - The programs the first build could not compile either (the entries
   below) are unchanged.
 
@@ -1323,7 +1325,9 @@ library's C++ headers. Six defects stand in the way of a build with
 them:
 - A thread-safe build includes =<pthread.h>=, which needs =clockid_t=
   from =<time.h>= and gets the pure =<ctime>=, which has none:
-  =<string>= fails with four errors.
+  =<string>= fails with four errors. With glibc's
+  =<bits/types/clockid_t.h>= included first the library's C++ headers
+  compile and a program links and runs.
 - =_cstdlib.h= 146 and 152 define ~abs (long)~ and ~div (long, long)~
   inside the block for the linkage twins of =bsearch= and =qsort=,
   under =_RWSTD_NO_EXTERN_C_OVERLOAD= (119-159), which GCC defines:
@@ -1348,13 +1352,31 @@ them:
   the macro is undefined for every compiler and the line compiles;
   the inconsistency stays.
 
-Fix: a decision. The pure headers either defer to the compiler's
-=<stdarg.h>= for =va_list= and the macros, which makes =<cstdarg>=
-and the v-functions of =<cstdio>= wrappers, and take the four
-repairs above, or they retire. If they retire, the second body of the
-=<cname>= headers and the first arm of every =<name.h>= wrapper go
-with them (Library, "Fifteen =<cname>= headers keep a body no
-configuration reaches").
+Under =eccp -A= (11S, EDG 7.0, measured 2026-11-16,
+=ref-c-headers.md= 7.2) all 35 pure headers compile, and the pure
+model meets requirements the wrapper model cannot: =<cwchar>=
+compiles and declares the wide I/O functions of Amendment 1,
+=std::strchr= and =std::wcschr= are the const-correct pairs, ~abs
+(long)~ is there after =<stdlib.h>=, and =::atoi= is not declared
+after =<cstdlib>=. The =abs= and =div= defect does not arise there,
+since EDG overloads on language linkage. It fails on the =float=
+overloads, =va_list= and =jmp_buf=. At the tip of 4.2.x the pure
+model was the one =eccp= took (=_config-eccp.h= undefined both
+macros), and nothing turned it off for Sun C++ or Compaq C++.
+
+Fix: a decision, and the two outcomes differ for this chapter.
+- The pure headers are repaired: =va_list= and the macros from the
+  compiler's =<stdarg.h>=, which makes =<cstdarg>= and the
+  v-functions of =<cstdio>= wrappers; the four repairs above; and
+  =eccp= takes the model again. The entries on the wide I/O
+  functions and on the overloads of the string functions then close
+  for =eccp= by construction.
+- They retire, and the first arm of every =<name.h>= wrapper goes
+  with them. Each thing glibc withholds from a strict compiler is
+  then declared in a wrapper behind a characterization of its own.
+The second body of the =<cname>= headers goes in either case
+(Library, "Fifteen =<cname>= headers keep a body no configuration
+reaches").
 
 Check: a build with =_RWSTD_USE_PURE_C_HEADERS= under =eccp -A= and
 under gcc, or the headers gone.
@@ -1375,6 +1397,28 @@ pair in =std=, the way the Clang repair did.
 
 Check: =21.cwchar= passes under =eccp -A= and its GCC and Clang rows
 do not move.
+
+** TODO =std::strchr= is not const-correct under =eccp=
+
+14882:2003 21.4 p4 replaces =strchr= by two declarations, one taking
+and returning a pointer to const and one a pointer to non-const, and
+p6 to p12 do the same for =strpbrk=, =strrchr=, =strstr= and
+=memchr=. glibc's =<string.h>= declares the pairs only where
+=__CORRECT_ISO_CPP_STRING_H_PROTO= is defined, which it defines for
+GCC 4.4 and Clang 3.5 or later (=/usr/include/string.h= 40-43).
+=include/ansi/cstring= names in =std= whatever the C header
+declares. Under =eccp -A= that is C's one prototype, so
+~char* p = std::strchr (cs, 'x')~ with =cs= a ~const char*~ compiles
+(measured 2026-11-16, 11S); under GCC it is an error. The pure
+=_cstring.h= declares the pairs itself (65-107). Seen while
+=ref-c-headers.md= was written.
+
+Fix: with the entry above: the const-correct pair in =std= for a
+compiler without glibc's, behind a characterization; or the pure
+model for =eccp= ("The pure C headers").
+
+Check: the assignment above does not compile under =eccp -A=; the
+GCC and Clang tables do not move.
 
 ** TODO Tests that GCC and Clang let through
 

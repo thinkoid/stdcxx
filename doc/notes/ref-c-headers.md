@@ -16,13 +16,14 @@ selected by two macros.
 
 - **Pure.** The library's own C90 declarations inside `std`; the C
   library's header is never read. This is 2003 to the letter.
-- **Wrap.** The C library's header included inside `namespace std`.
-- **Using.** The C library's header included at global scope, then a
-  using-declaration for each name inside `std`.
+- **Nested.** The C library's header included inside `namespace std`.
+- **Wrapper.** The C library's header included at global scope, then
+  a using-declaration for each name inside `std`.
 
-Every build takes the third. The first is selected by a macro and
-compiles header by header, but a program cannot get far with it. The
-second is reached by no configuration.
+Every build takes the third. The first is selected by a macro. It was
+the model under three compilers of 2012; today it compiles header by
+header and has six defects. The second is reached by no
+configuration.
 
 Four consequences follow from the third model, and a reader should
 know them before reading anything else:
@@ -42,6 +43,14 @@ know them before reading anything else:
 - A wrapper cannot include the C library's header by its name,
   because the name finds the wrapper. The configuration records each
   header's absolute path, and the wrappers include that.
+
+How the two live models compare depends on the compiler. Under GCC
+glibc declares most of what C++ adds, and the models differ in the
+global namespace and in the pure model's defects (chapter 6). Under
+a strict compiler, EDG's front end with `-A`, glibc withholds those
+additions and the wide functions of Amendment 1 with them. The
+wrapper model cannot name what the C header does not declare; the
+pure model declares it itself (7.2).
 
 Chapter 1 is the standard and how its rule moved. Chapters 2 to 5 are
 the files and the three models. Chapter 6 measures what a program
@@ -343,8 +352,8 @@ A `<cname>` header tests both macros and has three bodies
 | the program defines | `NO_PURE` | `NO_DEPRECATED` | `<cstdlib>` is | `<stdlib.h>` is |
 |---|---|---|---|---|
 | `_RWSTD_USE_PURE_C_HEADERS` | no | no | pure | `<cstdlib>` + using |
-| nothing | yes | yes | using | the C library's |
-| (no way to select) | yes | no | wrap | `<cstdlib>` + using |
+| nothing | yes | yes | wrapper | the C library's |
+| (no way to select) | yes | no | nested | `<cstdlib>` + using |
 
 The third row cannot happen: the second macro is defined wherever
 the first is.
@@ -368,7 +377,7 @@ using-declaration a name: 31 in `stdlib.h`, 43 in `stdio.h`.
 This is 17.4.1.2 p4 and D.5 p2 as written. Chapter 7 says what it
 can do today.
 
-### 3.3 Wrap
+### 3.3 Nested
 
 ```cpp
 #ifndef _RWSTD_NAMESPACE_STD_OPEN
@@ -392,7 +401,7 @@ Fourteen `<cname>` headers have this body under the macro, and
 `cmath` has it without. No configuration compiles it, and under GCC
 none has since the 2005 import.
 
-### 3.4 Using
+### 3.4 Wrapper
 
 ```
 <stdlib.h>   include/ansi/stdlib.h
@@ -415,13 +424,29 @@ at global scope, and `<cname>` then does three things:
   using-declaration.
 
 The `.h` wrapper is the C library's header and nothing more. The
-overloads are therefore in `std` alone, which is the second
+overloads are therefore in `std` alone, which is the third
 consequence of chapter 0. `<cwchar>` put this model in words when it
 adopted it throughout (STDCXX-129, a6ca23c8): all declarations go
 "into the global scope first, before injecting each into namespace
 std via a using declaration".
 
-## 4. The using model, header by header
+### 3.5 Who took which
+
+The three models were not three experiments. At the tip of 4.2.x
+(bcdd75c7, 2012) each compiler's configuration header chose one:
+
+- **wrapper:** GCC, HP aC++, Intel C++, MIPSpro, Visual C++ and XL
+  C++, each of which defined both macros;
+- **pure:** EDG's `eccp`, whose header undefined both, and Sun C++
+  and Compaq C++, for which nothing in the tree turned the pure
+  model off;
+- **nested:** none.
+
+The platform retirement of 2026 removed those headers, and 2c76243c
+put the two macros in `_config.h` for every compiler. GCC, Clang and
+`eccp` all take the wrapper model since.
+
+## 4. The wrapper model, header by header
 
 | header | names in `std` | what the wrapper adds |
 |---|---|---|
@@ -527,7 +552,7 @@ model.
 Each row is a program compiled against the library's headers. The
 second column is what 14882:2003 requires.
 
-| program | 2003 | using | pure |
+| program | 2003 | wrapper | pure |
 |---|---|---|---|
 | `std::atoi ("1")` after `<cstdlib>` | compiles | compiles | compiles |
 | `::atoi ("1")` after `<cstdlib>` | error: 17.4.1.2 p4 | compiles | error |
@@ -542,7 +567,7 @@ second column is what 14882:2003 requires.
 | the program of 1.1 returns | 1 | 4 | 1 |
 | a global `int random;` after `<cstdlib>` | compiles: 1.4 p2 | error | compiles |
 
-The using model departs from 2003 in rows 2, 3, 6, 7, 9, 11 and 12:
+The wrapper model departs from 2003 in rows 2, 3, 6, 7, 9, 11 and 12:
 
 - **Rows 2 and 11** are the model itself, the global declaration
   beside the one in `std`. C++11 permits it (1.4).
@@ -562,6 +587,8 @@ and 12. It departs in rows 4 to 9, for the reasons of chapter 7.
 
 ## 7. The pure model today
 
+### 7.1 Under GCC
+
 Each of the 35 headers compiles alone with
 `-D_RWSTD_USE_PURE_C_HEADERS`, and without threads so do the
 library's C++ headers, `<string>`, `<iostream>`, `<locale>`,
@@ -574,7 +601,11 @@ from going further:
   and has none. `<string>` then fails with four errors, all inside
   `/usr/include/pthread.h`. This is the first cost of 1.3 at work:
   the system's own headers need more of the C library than the
-  standard names.
+  standard names. The repair is one include: with glibc's
+  `<bits/types/clockid_t.h>` ahead of `<pthread.h>`, the way
+  `rw/_mbstate.h` fetches `__mbstate_t`, the library's C++ headers
+  compile and a program with `<string>` and `<iostream>` links and
+  runs.
 - **`va_list`.** `_cstdarg.h` 42 declares it as the configuration's
   `_RWSTD_VA_LIST`, a layout-compatible structure, inside `std`, and
   defines `va_start` and `va_arg` by pointer arithmetic that names
@@ -590,7 +621,7 @@ from going further:
   neither.
 - **The floating overloads.** `_cmath.h` declares the 22 `double`
   functions and nothing else. The overloads of 26.5 p5 and p6 exist
-  only in the using body of `cmath`.
+  only in the wrapper body of `cmath`.
 - **`jmp_buf`.** `_csetjmp.h` 41-49 declares it as 25 `long` on a
   64-bit Linux, 200 bytes, which is glibc's size on x86-64. On
   aarch64 glibc's is 312, so `setjmp` would write past the object.
@@ -601,6 +632,51 @@ The library's own sources are safe from the model. They include the
 `.h` forms, which hand them the C library's full header, POSIX and
 all, and `src/file.cpp` 31-38 defines both switches before its first
 include so that it gets that header whatever the build asked for.
+
+### 7.2 Under a strict compiler
+
+EDG's front end with `-A` is not GCC to glibc and defines no
+`_GNU_SOURCE`. glibc then shows it C90 and withholds two things 2003
+requires:
+
+- the wide I/O functions of Amendment 1, `swprintf` and nine more,
+  which it declares under `__USE_ISOC95`;
+- the const-correct pairs of 21.4, which `<string.h>` declares only
+  where `__CORRECT_ISO_CPP_STRING_H_PROTO` is defined, for GCC 4.4
+  and Clang 3.5 or later (`/usr/include/string.h` 40-43).
+
+The wrapper model can only name what the C header declares. The pure
+model declares all of it itself. Each row below is a requirement of
+2003 and whether the model meets it, measured with an 11S
+configuration under EDG 7.0 and the same glibc:
+
+| requirement | wrapper | pure |
+|---|---|---|
+| `<cwchar>` compiles | no: 10 errors | yes |
+| `std::swprintf` is declared | no | yes |
+| `std::wcschr` is the const-correct pair (21.4 p14) | no | yes |
+| `std::strchr` is the const-correct pair (21.4 p4) | no | yes |
+| `::atoi` is not declared after `<cstdlib>` (17.4.1.2 p4) | no | yes |
+| the program of 1.1 returns 1 | no | yes |
+| `random` is not declared after `<cstdlib>` | yes | yes |
+| `std::abs (long)` and `std::div (long, long)` (26.5 p4) | yes | yes |
+| `abs (long)` after `<stdlib.h>` (D.5 p2) | no | yes |
+| `std::sin (float)` (26.5 p6) | yes | no |
+| `sin (float)` after `<math.h>` (D.5 p2) | no | no |
+| `va_start`, then `std::vprintf` | yes | no |
+| `sizeof (std::jmp_buf)` is glibc's | yes | no |
+
+All 35 headers compile alone in the pure model there, and `<string>`,
+`<iostream>`, `<locale>`, `<fstream>`, `<complex>` and `<valarray>`
+with them. EDG overloads on language linkage, so the `abs` and `div`
+defect of 7.1 does not arise. The four rows the pure model fails are
+three defects of 7.1: the floating overloads, `va_list` and
+`jmp_buf`. A thread-safe configuration was not tried.
+
+The library's sources gain nothing from the pure model under either
+compiler: they include the C library's headers, and what glibc
+withholds there (`snprintf`, `strtof`) is characterized and replaced
+one function at a time.
 
 ## 8. What the library's own headers include
 
@@ -634,14 +710,14 @@ Where a library header does call a C function by name it writes
 | `etc/config/src/libc_headers.sh` | the path macros |
 | `etc/config/src/{ABS,DIV,MATH}_OVERLOADS.cpp`, `C99_MATH.cpp`, `EXTERN_C_OVERLOAD.cpp` | the gates of chapter 4 |
 | `etc/config/gcc.config` 73, 86 | the search path |
-| `tests/strings/21.cctype.cpp`, `21.cwchar.cpp`, `21.cwctype.cpp`, `tests/numerics/26.c.math.cpp`, `tests/algorithms/25.libc.cpp`, `tests/diagnostics/19.cerrno.cpp`, `tests/support/18.csetjmp.cpp` | the tests, all run in the using model |
+| `tests/strings/21.cctype.cpp`, `21.cwchar.cpp`, `21.cwctype.cpp`, `tests/numerics/26.c.math.cpp`, `tests/algorithms/25.libc.cpp`, `tests/diagnostics/19.cerrno.cpp`, `tests/support/18.csetjmp.cpp` | the tests, all run in the wrapper model |
 
 `TODO` carries what this note found open:
 
 - "`<stdlib.h>` and `<math.h>` leave the C++ overloads out of the
   global namespace" is rows 6, 7 and 9 of chapter 6: a decision.
 - "Fifteen `<cname>` headers keep a body no configuration reaches" is
-  the wrap model of 3.3.
+  the nested model of 3.3.
 - "The pure C headers" is chapter 7: the model is repaired, or it
   retires.
 - "Three characterizations of the C headers have their answers
@@ -649,8 +725,16 @@ Where a library header does call a C function by name it writes
 - "A program needs two include directories, and the original README
   names one" is 2.2.
 
-The three models are one question asked three times. If the pure
-model retires, the wrap body and the D.5 arm of every `.h` wrapper
-go with it, and what remains is the using model with one decision
-left in it: whether `<stdlib.h>` and `<math.h>` bring the overloads
-to the global namespace.
+Two of these do not wait on the pure model: the nested body and the
+three characterizations can go whatever is decided. The pure model is
+the decision the rest hangs on:
+
+- If it retires, the D.5 arm of every `.h` wrapper goes with it, and
+  each thing a strict compiler's C library withholds is declared in
+  a wrapper behind a characterization of its own, as 7.2 lists.
+- If it stays, it takes the repairs of 7.1 and is the model for a
+  strict compiler, as it was in 2012 (3.5).
+
+Either way the wrapper model has one decision left in it: whether
+`<stdlib.h>` and `<math.h>` bring the overloads to the global
+namespace.
