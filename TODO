@@ -763,29 +763,6 @@ decision.
 
 Check: =22.locale.codecvt= at pin in 15D.
 
-** TODO No test checks that a facet the library makes has the program's =type_info=
-
-The byname facets the library creates for a named locale are
-polymorphic types a program also names: =typeid= and =dynamic_cast=
-on them must see one =type_info= and one vtable. With a template left
-unmarked, the library's copy is hidden: =dynamic_cast= still succeeds,
-since GCC's =type_info= compares names as strings, while
-~&typeid (f) == &typeid (std::time_get_byname<char>)~ fails. The suite
-does not look at the address, so it passes either way: a build of the
-export change in which =time_get_byname= and =time_put_byname= were
-hidden held the 15D table at pin. Seen in the identity audit,
-2026-11-16.
-
-Fix: a test that takes each facet of a named locale through
-=use_facet= and compares the address of its =type_info= with the
-program's, for the twelve byname specializations of =numpunct=,
-=moneypunct=, =time_get=, =time_put= and =messages= and the six of
-=ctype=, =collate= and =codecvt=, and catches one exception the
-library throws by its type.
-
-Check: the test passes in 15D under GCC and Clang, and fails with the
-mark taken off one byname template.
-
 * Certification
 
 The scripts under =bin= and the nightly run: building the

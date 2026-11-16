@@ -11,7 +11,7 @@ harness's own table without the timing columns.
 ## 0. The short version
 
 - Every test builds. The harness runs 272 programs per configuration,
-  and 273 in 15D, which has the newest test (chapter 2).
+  and 274 in 15D, which has the two newest tests (chapter 2).
 - No assertion fails, no program exits non-zero or dies of a signal,
   in any configuration, under either compiler.
 - The tables come from a host with every glibc locale installed. A
@@ -100,7 +100,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 272 | 12,587,648 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 272 | 12,587,453 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 273 | 12,590,231 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 274 | 12,590,259 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -365,6 +365,11 @@ all six tables:
 - 2026-11-16: `26.c.math.depr` is new, 59 assertions in 15D, 273
   programs: `<stdlib.h>` and `<math.h>` bring the overloads of 26.5
   to the global namespace; the other five tables are to gain the
+  row at the next run of the six.
+- 2026-11-16: `22.locale.category` is new, 28 assertions in 15D, 274
+  programs: each standard facet of a named locale has the program's
+  `type_info` object, and the program catches the library's
+  `runtime_error` by its type; the other five tables are to gain the
   row at the next run of the six.
 
 The runtime warnings of every table fell from 60 to 42 with those of
