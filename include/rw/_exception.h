@@ -50,8 +50,15 @@ class _RWSTD_EXPORT basic_string;
 template <class _CharT>
 struct char_traits;
 
+#ifndef _RWSTD_RW_ALLOCATOR_H_INCLUDED
+
+// marked: string names allocator<char>, and a specialization named
+// before any marked declaration of its template is hidden; after the
+// definition in rw/_allocator.h a marked declaration draws a warning
 template <class _TypeT>
-class allocator;
+class _RWSTD_EXPORT allocator;
+
+#endif   // _RWSTD_RW_ALLOCATOR_H_INCLUDED
 
 
 typedef basic_string<char, char_traits<char>, allocator<char> > string;
