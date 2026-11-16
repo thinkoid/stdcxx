@@ -50,9 +50,9 @@ namespace std {
 class type_info
 {
 public:
-    // individual members rather than the entire class exported
-    // to prevent compiler errors (see PR #25603); this prevents
-    // type_info virtuals from being overriden
+    // the members are marked one by one, not the class: the language
+    // support library defines the class's vtable, and src/typeinfo.cpp
+    // defines the members that library lacks
 
     _RWSTD_EXPORT virtual ~type_info ();
     

@@ -380,8 +380,10 @@ __rw_fflush (void *file, int flags)
 }
 
 
-FILE* __rw_stderr = stderr;
-FILE* __rw_stdin  = stdin;
-FILE* __rw_stdout = stdout;
+// what stderr, stdin and stdout expand to under the pure C headers
+// (<ansi/_cstdio.h>), which the library's sources do not include
+_RWSTD_EXPORT FILE* __rw_stderr = stderr;
+_RWSTD_EXPORT FILE* __rw_stdin  = stdin;
+_RWSTD_EXPORT FILE* __rw_stdout = stdout;
 
 }   // namespace __rw

@@ -48,7 +48,7 @@ SRCDIRS      = $(TOPDIR)/src
 # include common variables setting for all makefiles
 include ../makefile.common
 
-CXXFLAGS    += $(PICFLAGS)
+CXXFLAGS    += $(PICFLAGS) $(VISFLAGS)
 LDFLAGS     += $(LDSOFLAGS) $(MAPFLAGS) $(MAPFILE)
 
 # the prelink command, for compilers that assign template

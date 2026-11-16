@@ -60,7 +60,7 @@ namespace std {
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
 template <class _CharT, class _Traits = char_traits<_CharT> >
-class basic_ostream;
+class _RWSTD_EXPORT basic_ostream;
 
 typedef basic_ostream<char> ostream;
 
@@ -75,13 +75,13 @@ namespace __rw {
 
 // helper - implements insertion of arithmetic and pointer types
 template <class _CharT, class _Traits, class _NativeType>
-std::basic_ostream<_CharT, _Traits>&
+_RWSTD_EXPORT std::basic_ostream<_CharT, _Traits>&
 __rw_insert (std::basic_ostream<_CharT, _Traits>&, _NativeType);
 
 
 // helper - implements insertion of character strigs
 template<class _CharT, class _Traits, class _StringT>
-std::basic_ostream<_CharT, _Traits>&
+_RWSTD_EXPORT std::basic_ostream<_CharT, _Traits>&
 __rw_insert (std::basic_ostream<_CharT, _Traits>&, const _StringT*,
              _RWSTD_STREAMSIZE, _RWSTD_STREAMSIZE);
 
@@ -164,7 +164,7 @@ _RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::ostream&
 
 #  ifndef _RWSTD_NO_NATIVE_BOOL
 
-_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_EXPORT std::wostream&
+_RWSTD_INSTANTIATE_FUN_1 (_RWSTD_TI_EXPORT std::wostream&
                           __rw_insert (std::wostream&, bool));
 
 #  endif   // _RWSTD_NO_NATIVE_BOOL

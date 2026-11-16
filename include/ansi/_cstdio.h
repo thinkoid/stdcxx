@@ -166,8 +166,8 @@ void perror (const char*);
 }   // namespace std
 
 namespace __rw {
-extern std::FILE* __rw_stdin;
-extern std::FILE* __rw_stdout;
-extern std::FILE* __rw_stderr;
+_RWSTD_EXPORT extern std::FILE* __rw_stdin;
+_RWSTD_EXPORT extern std::FILE* __rw_stdout;
+_RWSTD_EXPORT extern std::FILE* __rw_stderr;
 }   // namespace __rw
 #endif   // _RWSTD_CSTDIO_H_INCLUDED

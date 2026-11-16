@@ -82,7 +82,7 @@ namespace std {
 template <class _CharT,
           class _Traits = char_traits<_CharT>, 
           class _Allocator = allocator<_CharT> >
-class basic_string;
+class _RWSTD_EXPORT basic_string;
 
 
 }   // namespace std

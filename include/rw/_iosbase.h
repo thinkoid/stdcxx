@@ -312,7 +312,7 @@ protected:
     _C_usr_data *_C_usr;      // user data (iword, pword, callbacks)
     locale       _C_loc;      // locale associated with stream
 
-    friend struct _RWSTD_EXPORT Init;
+    friend struct Init;
 
     template <class _CharT, class _Traits>
     friend class basic_ios;

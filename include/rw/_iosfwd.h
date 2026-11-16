@@ -40,7 +40,7 @@
 namespace std {
 
 template<class _CharT>
-struct char_traits;
+struct _RWSTD_EXPORT char_traits;
 
 template <>
 struct char_traits<char>;
@@ -52,10 +52,10 @@ struct char_traits<wchar_t>;
 struct _RWSTD_EXPORT ios_base;
 
 template <class _CharT, class _Traits>
-class basic_ios;
+class _RWSTD_EXPORT basic_ios;
 
 template <class _CharT, class _Traits>
-class basic_streambuf;
+class _RWSTD_EXPORT basic_streambuf;
 
 // 27.2, p4
 template <class _CharT, class _Traits>
@@ -63,17 +63,17 @@ class basic_istream;
 
 // 27.2, p5
 template <class _CharT, class _Traits>
-class basic_ostream;
+class _RWSTD_EXPORT basic_ostream;
 
 // 27.2, p6
 template <class _CharT, class _Traits>
 class basic_iostream;
 
 template <class _CharT, class _Traits>
-struct ostreambuf_iterator;
+struct _RWSTD_EXPORT ostreambuf_iterator;
 
 template <class _CharT, class _Traits>
-struct istreambuf_iterator;
+struct _RWSTD_EXPORT istreambuf_iterator;
 
 }   // namespace std
 
@@ -84,14 +84,6 @@ struct istreambuf_iterator;
 
 
 namespace __rw {
-
-// for convenience
-typedef std::istreambuf_iterator<char, std::char_traits<char> >
-    __rw_istreambuf_iterator;
-
-typedef std::istreambuf_iterator<wchar_t, std::char_traits<wchar_t> >
-    __rw_wistreambuf_iterator;
-
 
 enum __rw_fmtflags {
     __rw_boolalpha   = _RWSTD_IOS_BOOLALPHA,

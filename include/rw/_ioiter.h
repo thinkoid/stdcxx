@@ -47,17 +47,17 @@ namespace std {
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
 template <class _CharT, class _Traits = char_traits<_CharT> >
-struct istreambuf_iterator;
+struct _RWSTD_EXPORT istreambuf_iterator;
 
 template <class _CharT, class _Traits = char_traits<_CharT> >
-struct ostreambuf_iterator;
+struct _RWSTD_EXPORT ostreambuf_iterator;
 
 #endif   // _RWSTD_IOSFWD_INCLUDED
 
 
 // 24.5.3
 template <class _CharT, class _Traits>
-struct istreambuf_iterator
+struct _RWSTD_EXPORT istreambuf_iterator
     : iterator<input_iterator_tag, _CharT, 
                typename _Traits::off_type, _CharT*, _CharT&>
 {
@@ -209,7 +209,7 @@ operator!= (const istreambuf_iterator<_CharT, _Traits>& __x,
 
 // 24.5.4
 template <class _CharT, class _Traits>
-struct ostreambuf_iterator 
+struct _RWSTD_EXPORT ostreambuf_iterator
     : public iterator<output_iterator_tag, void, void, void, void>
 {
     typedef _CharT                                  char_type;

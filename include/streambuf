@@ -46,7 +46,7 @@ namespace std {
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
 template <class _CharT, class _Traits = char_traits<_CharT> >
-class basic_streambuf;
+class _RWSTD_EXPORT basic_streambuf;
 
 typedef basic_streambuf<char> streambuf;
 
@@ -56,7 +56,7 @@ typedef basic_streambuf<wchar_t> wstreambuf;
 
 
 template<class _CharT, class _Traits>
-class basic_streambuf: private __rw::__rw_synchronized
+class _RWSTD_EXPORT basic_streambuf: private __rw::__rw_synchronized
 {
 public:
     typedef _CharT                          char_type;

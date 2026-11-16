@@ -49,13 +49,13 @@
 
 namespace __rw {
 
-int __rw_cat_open (const std::string&, const std::locale&);
+_RWSTD_EXPORT int __rw_cat_open (const std::string&, const std::locale&);
 
-const char* __rw_get_message (int, int, int);
+_RWSTD_EXPORT const char* __rw_get_message (int, int, int);
 
-const std::locale& __rw_get_locale (int);
+_RWSTD_EXPORT const std::locale& __rw_get_locale (int);
 
-void __rw_cat_close (int);
+_RWSTD_EXPORT void __rw_cat_close (int);
 
 }   // namespace __rw
 
@@ -123,7 +123,7 @@ __rw::__rw_facet_id messages<wchar_t>::id;
 
 // 22.2.7.2
 template <class _CharT>
-class messages_byname: public messages<_CharT>
+class _RWSTD_EXPORT messages_byname: public messages<_CharT>
 {
     char _C_namebuf [32];
 

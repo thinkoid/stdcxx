@@ -48,7 +48,7 @@ namespace std {
 
 
 // 22.2.6.3
-struct money_base
+struct _RWSTD_EXPORT money_base
 {
     enum part { none, space, symbol, sign, value };
     struct pattern { char field [4]; };
@@ -57,7 +57,7 @@ struct money_base
 
 // 22.2.6.3
 template <class _CharT, bool _Intl = false>
-struct moneypunct: __rw::__rw_facet, public money_base
+struct _RWSTD_EXPORT moneypunct: __rw::__rw_facet, public money_base
 {
     typedef _CharT char_type;
     typedef
@@ -199,7 +199,7 @@ moneypunct<_CharT, _Intl>::_C_get (const __rw::__rw_facet *__pf, int __fl)
 
 // 22.2.6.4
 template <class _CharT, bool _Intl = false>
-class moneypunct_byname: public moneypunct<_CharT, _Intl>
+class _RWSTD_EXPORT moneypunct_byname: public moneypunct<_CharT, _Intl>
 {
     char _C_namebuf [32];
 

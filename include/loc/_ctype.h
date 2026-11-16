@@ -64,7 +64,7 @@ _RWSTD_DEFINE_BITMASK_OPERATORS (__rw_ctype_mask);
 
 namespace std { 
 
-struct _RWSTD_EXPORT locale;
+struct locale;
 
 // 22.2.1
 struct _RWSTD_EXPORT ctype_base

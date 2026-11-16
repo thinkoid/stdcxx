@@ -183,7 +183,7 @@ __rw::__rw_facet_id time_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
 
 // 22.2.5.2
 template <class _CharT, class _InputIter = istreambuf_iterator<_CharT> >
-class time_get_byname: public time_get<_CharT, _InputIter>
+class _RWSTD_EXPORT time_get_byname: public time_get<_CharT, _InputIter>
 {
     char _C_namebuf [32];
 

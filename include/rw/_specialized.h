@@ -166,7 +166,7 @@ __rw_uninitialized_fill_n (_FwdIter __first, _Size __n,
 namespace std { 
 
 template <class _TypeT>
-class allocator;
+class _RWSTD_EXPORT allocator;
 
 
 // 20.4.4.1

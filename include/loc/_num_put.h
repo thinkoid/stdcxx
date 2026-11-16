@@ -50,7 +50,7 @@ namespace std {
 
 // 22.2.2.2
 template <class _CharT, class _OutputIter = ostreambuf_iterator<_CharT> >
-struct num_put: __rw::__rw_facet
+struct _RWSTD_EXPORT num_put: __rw::__rw_facet
 {
     typedef _CharT      char_type;
     typedef _OutputIter iter_type;

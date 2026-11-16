@@ -39,10 +39,12 @@ namespace __rw {
 // maps a named file into memory as shared, read-only, returns
 // the beginning address on success and fills 'size' with the
 // size of the file; returns 0 on failure
-void* __rw_mmap (const char*, _RWSTD_SIZE_T*) _RWSTD_ATTRIBUTE_NOTHROW;
+_RWSTD_EXPORT void*
+__rw_mmap (const char*, _RWSTD_SIZE_T*) _RWSTD_ATTRIBUTE_NOTHROW;
 
 // unmaps a memory region
-void __rw_munmap (const void*, _RWSTD_SIZE_T) _RWSTD_ATTRIBUTE_NOTHROW;
+_RWSTD_EXPORT void
+__rw_munmap (const void*, _RWSTD_SIZE_T) _RWSTD_ATTRIBUTE_NOTHROW;
 
 
 }   // namespace __rw

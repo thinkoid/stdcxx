@@ -48,7 +48,7 @@ namespace std {
 
 // 22.2.1.5 - Template class codecvt
 
-struct codecvt_base
+struct _RWSTD_EXPORT codecvt_base
 {
     enum result { ok, partial, error, noconv };
 };

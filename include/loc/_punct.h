@@ -112,10 +112,11 @@ const wchar_t* __rw_get_punct (const __rw::__rw_facet*, int, wchar_t);
 // while trying to match a name (note that the returned iterator
 // may be equal to the end iterator and eofbit may not be set)
 template <class _CharT, class _InputIter>
-_InputIter __rw_match_name (_InputIter, _InputIter,
-                            const _CharT* const*, const _RWSTD_SIZE_T*,
-                            _RWSTD_SIZE_T, _RWSTD_SIZE_T&, int&,
-                            std::ios_base*);
+_RWSTD_EXPORT _InputIter
+__rw_match_name (_InputIter, _InputIter,
+                 const _CharT* const*, const _RWSTD_SIZE_T*,
+                 _RWSTD_SIZE_T, _RWSTD_SIZE_T&, int&,
+                 std::ios_base*);
 
 }   // namespace __rw
 
@@ -127,6 +128,14 @@ _InputIter __rw_match_name (_InputIter, _InputIter,
 
 
 namespace __rw {
+
+// for convenience; named after <rw/_ioiter.h> defines the template, since
+// a specialization named before then keeps the visibility it had there
+typedef std::istreambuf_iterator<char, std::char_traits<char> >
+    __rw_istreambuf_iterator;
+
+typedef std::istreambuf_iterator<wchar_t, std::char_traits<wchar_t> >
+    __rw_wistreambuf_iterator;
 
 #define _RWSTD_ARG_LIST(charT)                                          \
         _RWSTD_ISTREAMBUF_ITER (charT), _RWSTD_ISTREAMBUF_ITER (charT), \

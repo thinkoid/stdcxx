@@ -45,7 +45,7 @@ namespace std {
 
 // forward declarations avoid circular dependencies
 template <class _CharT, class _Traits, class _Allocator>
-class basic_string;
+class _RWSTD_EXPORT basic_string;
 
 template <class _CharT>
 struct char_traits;

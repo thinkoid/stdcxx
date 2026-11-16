@@ -24,6 +24,21 @@ today. Within a bin the easiest entry is at the top.
 
 ** Tree hygiene
 
+*** TODO =eccp.config= defines =_RWSTD_SHARED_LIB=, which nothing reads
+
+=etc/config/eccp.config= 101 sets ~SHARED_CPPFLAGS = -D_RWSTD_SHARED_LIB~.
+=git grep -w _RWSTD_SHARED_LIB= finds that line alone, and the history
+finds no reader since the import of 2005, where four configuration
+files set it: =como.config=, =eccp.config=, =osf_cxx.config= and
+=reliant_cds.config=. dd1128a5 retired the other three and 93d8b4e9
+restored =eccp.config= with the line. Seen while the export marks
+took the ELF meaning, 2026-11-16.
+
+Fix: the line leaves; =SHARED_CPPFLAGS= stays, empty, as in
+=gcc.config=.
+
+Check: =git grep -w _RWSTD_SHARED_LIB= finds nothing.
+
 *** TODO The =ctype_byname<wchar_t>= constructor's comment gives efficiency as its reason
 
 =src/wctype.cpp= 556 reads "delayed initialization not used for
@@ -69,7 +84,7 @@ pin.
 
 *** TODO The probe for the size of =long= in =gcc.config= names its file with a literal =$=
 
-=etc/config/gcc.config= 121-125 compiles and runs a program in
+=etc/config/gcc.config= 125-129 compiles and runs a program in
 =/tmp= to learn whether the compiler makes =long= 8 bytes, under the
 name ~tmpfile=stdcxx-longsize-$$~. Inside =$(shell ...)= make turns
 =$$= into =$=, and the shell reads a =$= before =;= as itself, so the
@@ -79,7 +94,7 @@ configurations generating their =makefile.in= at once on one machine
 share the file and fail with "Text file busy" or "No such file".
 5e7c8f0d added the probe in 2008 (STDCXX-929), with =$$= meant as the
 shell's process ID. A failed probe prints a nonzero status, and
-127-144 take a nonzero status for a 64-bit default, so on an LP64
+131-148 take a nonzero status for a 64-bit default, so on an LP64
 host the result is the same; on an ILP32 host it would be the wrong
 branch. Seen while two configurations of this pass ran at once,
 2026-11-16.
@@ -113,14 +128,14 @@ Check: a 15D build directory at =/src/stdcxx-build/15D= of the tree
 at =/src/stdcxx= writes =$(BUILDDIR)/include/config.h= in each =.d=
 file.
 
-*** TODO 1202 lines under =src= and =include= end in whitespace
+*** TODO 1198 lines under =src= and =include= end in whitespace
 
 =src/memory.cpp= 167 and 188 read =namespace std {= and a space
 after the brace. They are two of 149 such namespace openings in 105
-files. Of the lines under =src= and =include=, 1466 end in
+files. Of the lines under =src= and =include=, 1462 end in
 whitespace; 264 are the =" * "= line of a comment block, the license
-blocks' among them, which stay as they are. The other 1202 stand in
-144 files, 223 lines in 47 files under =src= and 979 in 97 under
+blocks' among them, which stay as they are. The other 1198 stand in
+144 files, 223 lines in 47 files under =src= and 975 in 97 under
 =include=; none under =include/ansi=, since 482755cb. Seen while the
 =_RWSTD_NEW_INCLUDED= guard left =src/memory.cpp=, 2026-11-16.
 
@@ -141,10 +156,10 @@ the library defines =_ZN4__rw13__rw_allocateEmi=. 184 of the 263 hold
 a =j=, and 179 of them are names of the library when each =j= reads
 =m=; the other 84 spell another type at its 32-bit width, an =int=
 for a =streamsize= among them, by a reading of a sample. The library
-exports 3044 names, so 2112 of them are not in the map. The node
+exports 2558 names, so 1626 of them are not in the map. The node
 names 4.1.3; the library is 4.2.2 (=include/rw/_config.h= 50). The
 map is linked only when =MAPFLAGS= is set (=etc/config/gcc.config=
-51-54), and nothing sets it, but bd48eb9e keeps the map consistent
+55-58), and nothing sets it, but bd48eb9e keeps the map consistent
 with the built library all the same. Seen while the library's
 allocation functions were read, 2026-11-16.
 
@@ -158,11 +173,11 @@ library; a build with =MAPFLAGS= set links, and its suite is at pin.
 *** TODO What remains for g++ 3
 
 =git grep -n -i -e 'gcc 3' -e 'g++ 3' -e 'egcs'= finds 22 lines in 13
-files: six in the original =README= 1873-1878, its list of the
+files: six in the original =README= 1882-1887, its list of the
 platforms of 2008, and two in =doc/notes= records, which stay; and 14
 in the code. The grep misses one more, the commented-out block of
 =etc/config/gcc.config= 41-44 for "gcc > 3.3". The 15 places:
-- =etc/config/gcc.config= 58-64 adds =-shared-libgcc= for g++ 3
+- =etc/config/gcc.config= 62-68 adds =-shared-libgcc= for g++ 3
   before 3.4 (STDCXX-369); GCC and Clang report a major version above
   3, so the block is never taken; 41-44 is a comment;
 - =include/vector= 681-686 makes the members of =vector<bool>='s
@@ -197,35 +212,28 @@ Check: the object of the file before and after, the same symbols and
 code; for =gcc.config=, the =makefile.in= of a 15D build under GCC
 and under Clang unchanged.
 
-*** TODO The export macros expand to nothing
+*** TODO The library's objects keep their inline members visible
 
-=include/rw/_defs.h= 344-346 defines =_RWSTD_EXPORT=,
-=_RWSTD_CLASS_EXPORT= and =_RWSTD_MEMBER_EXPORT= empty, with no
-condition, since d743fa8d took out the MSVC branch that gave them
-~__declspec~. Their uses remain: =_RWSTD_EXPORT= 252 times (155
-under =include=, 96 under =src=, one under =tests=),
-=_RWSTD_MEMBER_EXPORT= 16 and =_RWSTD_CLASS_EXPORT= 5. Two more
-names reduce to them and so to nothing: =_RWSTD_TI_EXPORT= (64 uses;
-=_defs.h= 791-795 and 810-811 choose between empty and
-=_RWSTD_EXPORT=) and =_RWSTD_EXPORT_NOTHROW= (4 uses; =include/new=
-76-80). 77 files under =include=, =src= and =tests= name one of the
-five.
-=include/typeinfo= 53-55 explains the member-by-member marks of
-=type_info= by a Visual C++ report, PR #25603; the comment goes or
-stays with the marks. Nothing in the tree sets a symbol visibility:
-the 15D library under GCC exports 3044 names, each one by default.
-=_RWSTD_DEFINE_EXPORTS= is unrelated: it selects the definitions of
-=include/limits.cc=. Seen while the =type_info= entry was read,
-2026-11-15.
+The objects of a shared library are compiled =-fvisibility=hidden=
+and export the names their headers mark with =_RWSTD_EXPORT=: 2558
+names in the 15D library under GCC, of which 1325 are weak (type =W=),
+inline members and template instantiations that a program also emits
+for itself. =-fvisibility-inlines-hidden= would hide the inline
+members of the marked classes, but a program takes the members of
+=basic_string<char>=, =basic_streambuf<char>= and the other
+specializations its headers declare =extern template= from the
+library, inline members included: an unoptimized program calls them
+out of line. Seen while the visibility of the library was set,
+2026-11-16.
 
-Fix: the macros and their uses leave, each file's when the file is
-visited, and the comment of =include/typeinfo= with the marks of
-=type_info=; or a decision to give them the ELF meaning, a default
-visibility in a library built with hidden visibility, for which the
-marks are the one record of the intended interface.
+Fix: measure the flag as the export change was measured: the
+exported set, every program of 15D and 12D under GCC and Clang
+linked, the tables at pin. Take it only if it removes names no
+program can reach.
 
-Check: the dynamic symbol table of the 15D library before and after:
-identical for the removal.
+Check: the exported set before and after, each name that leaves
+classified; 15D and 12D under GCC and Clang link and hold their
+tables.
 
 * Tests
 
@@ -776,11 +784,92 @@ Fix: the comment names =open= and =O_RDONLY=.
 
 Check: none; a comment.
 
+** TODO =22.locale.codecvt= declares the library's mapper itself
+
+=tests/localization/22.locale.codecvt.cpp= 2588-2593 declares
+=__rw::__rw_mmap= and =__rw::__rw_munmap= in a namespace block of its
+own, where =src/mman.h= 42-47 declares them for the library. The two
+agree today, but the test's copy lacks the =nothrow= attribute and the
+=_RWSTD_EXPORT= of the header, and a change of signature in
+=src/mman.h= would leave the test calling a function that is not
+there. =src/mman.h= sits in =src=, outside the include path of the
+tests. Seen while the export marks took the ELF meaning, 2026-11-16.
+
+Fix: the test includes =mman.h= from =src= through its include path,
+or the declarations stay and a comment ties them to =src/mman.h=; a
+decision.
+
+Check: =22.locale.codecvt= at pin in 15D.
+
+** TODO No test checks that a facet the library makes has the program's =type_info=
+
+The byname facets the library creates for a named locale are
+polymorphic types a program also names: =typeid= and =dynamic_cast=
+on them must see one =type_info= and one vtable. With a template left
+unmarked, the library's copy is hidden: =dynamic_cast= still succeeds,
+since GCC's =type_info= compares names as strings, while
+~&typeid (f) == &typeid (std::time_get_byname<char>)~ fails. The suite
+does not look at the address, so it passes either way: a build of the
+export change in which =time_get_byname= and =time_put_byname= were
+hidden held the 15D table at pin. Seen in the identity audit,
+2026-11-16.
+
+Fix: a test that takes each facet of a named locale through
+=use_facet= and compares the address of its =type_info= with the
+program's, for the twelve byname specializations of =numpunct=,
+=moneypunct=, =time_get=, =time_put= and =messages= and the six of
+=ctype=, =collate= and =codecvt=, and catches one exception the
+library throws by its type.
+
+Check: the test passes in 15D under GCC and Clang, and fails with the
+mark taken off one byname template.
+
+** TODO A 12D build on aarch64 fails four assertions
+
+A 12D build under GCC on an aarch64 host fails four assertions, with
+and without the export change (the joined tree of 2026-11-16).
+=18.numeric.special.int= prints three, ~std::numeric_limits<int>::is_modulo == "false"~
+and the same for =long= and =long long= (its line 554), and
+=27.filebuf.codecvt= one, ~streambuf::showmanyc () == 2111, got 0~
+(its line 733). The first is the test's oracle: its =is_modulo=
+(63-71) increments =INT_MAX= and compares, a signed overflow that
+GCC folds to =false= at =-O2= and computes as =true= at =-O0=, where
+=numeric_limits= says =true=. The second was not looked into; the 15D
+build passes both tests. No 12D pin exists, so no run compares the
+table. Seen while the export change was checked, 2026-11-16.
+
+Fix: the oracle reads the answer without an overflow; =showmanyc=
+under =-O2= is read.
+
+Check: a 12D table on aarch64 without a failed assertion; 15D at pin.
+
 * Certification
 
 The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
+
+** TODO The exported names are not pinned
+
+Nothing records which names the shared library exports. A mark lost
+or added changes the dynamic symbol table silently, and the suite
+notices only when a program of the tree calls the name. The export
+change took the 15D library under GCC from 3044 names to 2558, and
+under Clang from 2930 to 2479. GCC and Clang compute the visibility
+of a template specialization at the point the specialization is
+first named, so a typedef or a forward declaration placed above a
+template's definition can hide a set of names without any warning:
+four of the byname facets under GCC, and every member of
+=basic_string<char>= under Clang, went that way before the change put
+them right. Seen while the export marks took the ELF meaning,
+2026-11-16.
+
+Fix: a pin per shared configuration of the names
+=nm -D --defined-only= lists, derived with the tables and compared by
+the nightly run; a name that joins or leaves is a reported event.
+
+Check: a scratch build with the mark taken off one template shows the
+names it hid as a difference from the pin.
 
 * Locales
 
@@ -1435,6 +1524,26 @@ linkage or report to EDG.
 Check: each compiles under =eccp -A=, the characterization passes,
 and the GCC and Clang tables do not move.
 
+** TODO =eccp= takes no export marks
+
+=eccp -A= rejects =__attribute__=, so the =VISIBILITY_ATTRIBUTE=
+characterization fails under the 11S-eccp flags and defines
+=_RWSTD_NO_VISIBILITY_ATTRIBUTE=; =_RWSTD_EXPORT= is empty and
+=eccp.config= gives no =VISFLAGS=. The =eccp= configurations are
+archives, where hidden visibility changes no program: an 11S build
+under GCC with and without it links the same 411 programs with the
+same code. A configuration made before the change has no answer in
+its =config.h= and expands the mark to the attribute; it is
+reconfigured before its next build. Seen while the export change was
+characterized, 2026-11-16.
+
+Fix: none while =eccp= builds archives only; a shared =eccp= build
+would characterize the attribute in the front end's GNU mode and give
+the back-end compiler the flag.
+
+Check: the 11S-eccp configuration, reconfigured, has the macro
+defined, and the 35 C headers preprocess as before under =eccp -A=.
+
 ** WAITING =src/punct.cpp= under the export model
 
 The library uses neither =export= nor implicit inclusion since
@@ -1821,7 +1930,7 @@ Check: none; this is prose.
 The original =README= 6.1 has a program compiled with
 =-I${PREFIX}/include=. The =<cname>= and =<name.h>= headers are in
 =include/ansi=, which the build puts first on its own search path
-(=etc/config/gcc.config= 72). Measured under GCC with =-nostdinc++=
+(=etc/config/gcc.config= 76). Measured under GCC with =-nostdinc++=
 and =include= alone: =<string>= and =<iostream>= compile, =<cstdlib>=
 is not found, and =<complex>= fails on its own =<cmath>=.
 
@@ -1833,12 +1942,12 @@ Check: none; this is prose.
 
 ** TODO The original README describes macros the tree no longer has
 
-Chapter 8.3 of the original =README= (lines 841-1724) lists the
-configuration macros, 225 names once its abbreviations are expanded,
-221 of them distinct, and the pattern =_RWSTD_OS_<os-name>=. Counted by
+Chapter 8.3 of the original =README= (lines 847-1733) lists the
+configuration macros, 226 names once its abbreviations are expanded,
+222 of them distinct, and the pattern =_RWSTD_OS_<os-name>=. Counted by
 name with =git grep -w= outside =README=, =README.md=, =TODO= and
 =doc=:
-- 105 are named by a file of the tree;
+- 106 are named by a file of the tree;
 - 36 the configuration writes to =config.h= or a probe names, and no
   source reads: the eighteen =_RWSTD_NO_C...= header macros, the
   =_RWSTD_OS_= version strings and numbers, the =_RWSTD_NO_GLOBAL_=

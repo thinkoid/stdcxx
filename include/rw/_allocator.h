@@ -90,7 +90,7 @@ public:
 
 
 template <class _TypeT>
-class allocator
+class _RWSTD_EXPORT allocator
 {
 public:
     typedef _RWSTD_SIZE_T       size_type;

@@ -56,7 +56,7 @@ namespace std {
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
 template <class _CharT, class _Traits = char_traits<_CharT> >
-class basic_ios;
+class _RWSTD_EXPORT basic_ios;
 
 typedef basic_ios<char> ios;
 
@@ -66,7 +66,7 @@ typedef basic_ios<wchar_t> wios;
 
 
 template <class _CharT, class _Traits>
-class basic_ios: public ios_base
+class _RWSTD_EXPORT basic_ios: public ios_base
 {
 public:
 

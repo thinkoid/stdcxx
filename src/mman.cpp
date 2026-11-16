@@ -42,6 +42,8 @@
 #include <fcntl.h>
 #include <stdlib.h>       // for size_t
 
+#include "mman.h"
+
 
 namespace __rw {
 

@@ -57,7 +57,7 @@ _RWSTD_EXPORT int __rw_fflush (void*, int) _RWSTD_ATTRIBUTE_NOTHROW;
 namespace std { 
 
 template<class _CharT, class _Traits>
-class basic_ostream: virtual public basic_ios<_CharT, _Traits>
+class _RWSTD_EXPORT basic_ostream: virtual public basic_ios<_CharT, _Traits>
 {
 public:
     typedef _CharT                             char_type;

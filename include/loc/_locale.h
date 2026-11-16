@@ -37,6 +37,7 @@
 
 #include <loc/_facet.h>
 #include <rw/_defs.h>
+#include <rw/_ioiter.h>   // before the iterators are named below
 
 
 namespace __rw { 
@@ -122,16 +123,16 @@ template <class _CharT, class _Iter>
 struct money_put;
 
 template <class _CharT, bool _Intl>
-struct moneypunct;
+struct _RWSTD_EXPORT moneypunct;
 
 template <class _CharT, class _Iter>
-struct num_get;
+struct _RWSTD_EXPORT num_get;
 
 template <class _CharT, class _Iter>
-struct num_put;
+struct _RWSTD_EXPORT num_put;
 
 template <class _CharT>
-struct numpunct;
+struct _RWSTD_EXPORT numpunct;
 
 template <class _CharT, class _Iter>
 class time_get;

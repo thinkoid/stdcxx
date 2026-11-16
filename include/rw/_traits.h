@@ -180,11 +180,11 @@ private:
 
 
 template <class  _CharT> 
-struct char_traits;
+struct _RWSTD_EXPORT char_traits;
 
 
 template <class  _CharT> 
-struct char_traits
+struct _RWSTD_EXPORT char_traits
 {
     typedef _CharT           char_type;
     typedef int              int_type;
@@ -276,7 +276,7 @@ struct char_traits
 
 // 21.1.3.1
 template <>               
-struct char_traits<char> 
+struct _RWSTD_EXPORT char_traits<char>
 {
     typedef char             char_type;
     typedef _RWSTD_INT_T     int_type;
@@ -357,7 +357,7 @@ struct char_traits<char>
 
 // 21.1.3.2
 template <>               
-struct char_traits<wchar_t> 
+struct _RWSTD_EXPORT char_traits<wchar_t>
 {
     typedef wchar_t          char_type;
     typedef _RWSTD_WINT_T    int_type;

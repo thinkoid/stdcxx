@@ -151,6 +151,10 @@
 #
 #   SHARED    - set to `true' if building a shared lib, `false' otherwise
 #
+#   VISFLAGS  - flags that give the objects of a shared library hidden
+#               visibility, so that the library exports only the
+#               names marked _RWSTD_EXPORT
+#
 #   WARNFLAGS - any compiler warning options
 #
 #   WITH_PURIFY - set to `true' to build with purify. additional flags
@@ -425,6 +429,7 @@ ifeq ($(in_topdir),1)
 
     # not applicable to non-shared builds
     PICFLAGS   =
+    VISFLAGS   =
     LDSOFLAGS  =
     RPATH      =
   endif
@@ -530,6 +535,7 @@ $(MAKEFILE_IN): $(configpath)
           && echo "CXX        = $(CXX)"                  >> $(MAKEFILE_IN)  \
           && echo "CXXFLAGS   = $(CXXFLAGS)"             >> $(MAKEFILE_IN)  \
           && echo "PICFLAGS   = $(PICFLAGS)"             >> $(MAKEFILE_IN)  \
+          && echo "VISFLAGS   = $(VISFLAGS)"             >> $(MAKEFILE_IN)  \
           && echo "CPPFLAGS   = $(CPPFLAGS)"             >> $(MAKEFILE_IN)  \
           && echo "WARNFLAGS  = $(WARNFLAGS)"            >> $(MAKEFILE_IN)  \
           && echo "DEPENDFLAGS     = $(DEPENDFLAGS)"     >> $(MAKEFILE_IN)  \

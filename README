@@ -666,6 +666,12 @@
   compatibility  of the  library leads  to undefined  behavior  of the
   produced executables.
 
+  The shared library exports the names its headers mark with
+  _RWSTD_EXPORT and nothing else. A declaration that programs call
+  into or refer to must carry the mark. A template the library
+  instantiates for programs carries it on the primary template, and so
+  do the class templates among its arguments.
+
 
   6.1  Library Installation on UNIX Systems
   -----------------------------------------
@@ -1199,6 +1205,11 @@
      When #defined the vector<bool> partial specialization is disabled
      and the primary template is used instead.
 
+  o  _RWSTD_NO_VISIBILITY_ATTRIBUTE [auto]
+
+     #defined when the visibility attribute (a common extension) is
+     not accepted where _RWSTD_EXPORT stands; the macro is then empty.
+
 
   8.3.3  Runtime Library Configuration Macros
   -------------------------------------------
@@ -1437,7 +1448,10 @@
 
   o  _RWSTD_EXPORT [auto]
 
-     Controls the exporting of symbols from the library.
+     Marks a name the library exports. It expands to the visibility
+     attribute, or to nothing when _RWSTD_NO_VISIBILITY_ATTRIBUTE is
+     #defined. A shared library is compiled with hidden visibility
+     (VISFLAGS) and exports the marked names only.
 
   8.3.8  Macros Controlling Implementation Properties
   ---------------------------------------------------

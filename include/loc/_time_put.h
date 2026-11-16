@@ -94,7 +94,7 @@ __rw::__rw_facet_id time_put<wchar_t, ostreambuf_iterator<wchar_t> >::id;
 
 // 22.2.5.2
 template <class _CharT, class _OutputIter = ostreambuf_iterator<_CharT> >
-class time_put_byname: public time_put<_CharT, _OutputIter>
+class _RWSTD_EXPORT time_put_byname: public time_put<_CharT, _OutputIter>
 {
     char _C_namebuf [32];
 

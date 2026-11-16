@@ -49,7 +49,7 @@ namespace std {
 
 // 22.2.3.1
 template <class _CharT>
-struct numpunct: __rw::__rw_facet
+struct _RWSTD_EXPORT numpunct: __rw::__rw_facet
 {
     typedef _CharT char_type;
     typedef
@@ -160,7 +160,7 @@ numpunct<_CharT>::falsename () const
 
 // 22.2.3.2
 template <class _CharT>
-class numpunct_byname: public numpunct<_CharT>
+class _RWSTD_EXPORT numpunct_byname: public numpunct<_CharT>
 {
     char _C_namebuf [32];
 

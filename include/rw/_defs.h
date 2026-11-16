@@ -336,12 +336,14 @@
 #define _RWSTD_NEW_CAPACITY(ignore, what, from)   \
       __rw::__rw_new_capacity (from, what)
 
-// set up MSVC DLL export/import directives
-// _DLL - defined by the compiler when either -MD or -MDd is used
-// RWDLL - defined for all Rogue Wave(R) products built as shared libs
-// _RWSHARED - defined for libstd built/used as a shared lib
-   // disable MSVC hacks
-#define _RWSTD_EXPORT          /* empty */
+// marks a name the library exports: the library's own objects are
+// compiled with hidden visibility, and a declaration a program calls
+// into or refers to takes default visibility from this mark
+#ifndef _RWSTD_NO_VISIBILITY_ATTRIBUTE
+#  define _RWSTD_EXPORT   __attribute__ ((__visibility__ ("default")))
+#else
+#  define _RWSTD_EXPORT   /* empty */
+#endif   // _RWSTD_NO_VISIBILITY_ATTRIBUTE
 
 
 #define _RWSTD_MB_CUR_MAX 16  // FIXME: must be determined dynamically
@@ -786,11 +788,9 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #define _RWSTD_USING_SNI(ignore)    typedef void __rw_unused_type
 
 
-#ifdef _RWSTD_LIB_SRC
-#  define _RWSTD_TI_EXPORT    /* empty */
-#else    // #ifndef _RWSTD_LIB_SRC
-#  define _RWSTD_TI_EXPORT    _RWSTD_EXPORT
-#endif   // _RWSTD_LIB_SRC
+// marks an explicit instantiation of a library template, declared
+// extern in the headers and defined in the library's ti_*.cpp sources
+#define _RWSTD_TI_EXPORT    _RWSTD_EXPORT
 
 
 #if     defined (_RWSTD_INSTANTIATE_TEMPLATES)       \
@@ -804,9 +804,6 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #  define _RWSTD_INSTANTIATE_1(arg)          template arg
 #  define _RWSTD_INSTANTIATE_2(a1, a2)       template a1, a2
 #  define _RWSTD_INSTANTIATE_3(a1, a2, a3)   template a1, a2, a3
-
-#  undef  _RWSTD_TI_EXPORT
-#  define _RWSTD_TI_EXPORT    _RWSTD_EXPORT
 
 #  ifdef _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
      // replace explicit function template instantiations with
