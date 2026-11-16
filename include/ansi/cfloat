@@ -33,35 +33,11 @@
 #  include <ansi/_cfloat.h>
 #else
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-#ifndef _RWSTD_NAMESPACE_STD_OPEN
-#define _RWSTD_NAMESPACE_STD_OPEN 4
-
-namespace std { 
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN
-
-
-#include _RWSTD_ANSI_C_FLOAT_H
-
-
-#if _RWSTD_NAMESPACE_STD_OPEN == 4
-#  undef _RWSTD_NAMESPACE_STD_OPEN
-
-}   // namespace std
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN == 4
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #  ifndef _RWSTD_CFLOAT_INCLUDED
 #  define _RWSTD_CFLOAT_INCLUDED
 
 #include _RWSTD_ANSI_C_FLOAT_H
 
 #  endif   // _RWSTD_CFLOAT_INCLUDED
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 #endif   // _RWSTD_NO_PURE_C_HEADERS

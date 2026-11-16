@@ -33,43 +33,6 @@
 #  include <ansi/_cctype.h>
 #else
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-#ifndef _RWSTD_NAMESPACE_STD_OPEN
-#define _RWSTD_NAMESPACE_STD_OPEN 2
-
-namespace std { 
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN
-
-
-#include _RWSTD_ANSI_C_CTYPE_H
-
-// 17.4.1.2, p6 - masking macros are not allowed
-#undef isalnum
-#undef isalpha
-#undef iscntrl
-#undef isdigit
-#undef isgraph
-#undef islower
-#undef isprint
-#undef ispunct
-#undef isspace
-#undef isupper
-#undef isxdigit
-#undef tolower
-#undef toupper
-
-
-#if _RWSTD_NAMESPACE_STD_OPEN == 2
-#  undef _RWSTD_NAMESPACE_STD_OPEN
-
-}   // namespace std
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN == 2
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #ifndef _RWSTD_CCTYPE_INCLUDED
 #define _RWSTD_CCTYPE_INCLUDED
 
@@ -110,7 +73,5 @@ namespace std {
 }   // std
 
 #endif   // _RWSTD_CCTYPE_INCLUDED
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 #endif   // _RWSTD_NO_PURE_C_HEADERS

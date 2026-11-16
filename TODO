@@ -63,25 +63,21 @@ Fix: the two lines leave.
 Check: =grep -rn CONFIG_H GNUmakefile etc bin util= prints nothing;
 the =makefile.in= of a 15D build differs by that line alone.
 
-*** TODO Fifteen =<cname>= headers keep a body no configuration reaches
+*** TODO Three comments of =cstdlib= and =cmath= speak for Visual C++
 
-=include/ansi/cstdlib= has three bodies. The first, under
-=_RWSTD_USE_PURE_C_HEADERS=, is the pure header. The second includes
-the C library's header inside ~namespace std~, where
-=_RWSTD_NO_PURE_C_HEADERS= is defined and
-=_RWSTD_NO_DEPRECATED_C_HEADERS= is not (36-80). The third includes it
-at global scope and names its functions in =std= with
-using-declarations. =include/rw/_config.h= 97-106 defines the second
-macro wherever it defines the first, so the second body compiles
-nowhere: for every compiler since 2c76243c, and under GCC since the
-2005 import, where =_config-gcc.h= carried the same two rules.
-Thirteen more headers have the same body under
-=_RWSTD_NAMESPACE_STD_OPEN=, a macro nothing else reads (=cctype=,
-=cerrno=, =cfloat=, =clocale=, =csetjmp=, =csignal=, =cstdarg=,
-=cstddef=, =cstdio=, =cstring=, =ctime=, =cwchar=, =cwctype=), and
-=cmath= has it without the macro (39-56). =cstring= and =cstdlib=
-both write 15 in the macro. =ref-c-headers.md= 3.3 describes the
-body. Seen while the =<stdlib.h>= entry was read, 2026-11-16.
+=include/ansi/cstdlib= 105-106 and =include/ansi/cmath= 703-704 say
+that the using-declarations must come after the overloads, "working
+around MSVC6 PR# 27677". =cmath= 732 says "MSVC provides its own
+complex macro" and nothing follows it: d743fa8d removed the
+~#undef complex~ it introduced and left the comment. The tree no
+longer builds with Visual C++, and the standard lets a
+using-declaration and an overload of the same name stand in either
+order. Seen while the nested body left the =<cname>= headers,
+2026-11-16.
+
+Fix: the three comments leave; the order of the declarations stays.
+
+Check: the preprocessed output of the two headers is unchanged.
 
 *** TODO Three characterizations of the C headers have their answers discarded
 
@@ -106,12 +102,6 @@ its retired table.
 
 Check: the =config.h= of a 15D build has none of the three macros;
 the library and the tests build; the suite at pin.
-
-Fix: the second body leaves the fifteen headers; or it rides with
-the decision on the pure headers (EDG porting, "The pure C headers").
-
-Check: the preprocessed library and tests of a 15D build are
-unchanged; =grep -rn NAMESPACE_STD_OPEN include= prints nothing.
 
 *** TODO Four =always_noconv= helpers of the ISO-2022 converters are dead
 
@@ -1294,7 +1284,7 @@ line pinned =_XOPEN_SOURCE=.
   stops at line 63), =util/memchk.cpp= (=getpagesize=,
   =mkstemp=).
 - Fifteen test programs stop in =include/ansi/cwchar=, lines
-  143-157: =using ::fwprintf;= and the other wide I/O functions of
+  116-130: =using ::fwprintf;= and the other wide I/O functions of
   C95, which glibc declares under =__USE_ISOC95= only. C++03's C
   library is C90 with Amendment 1, so the names are the library's
   to provide; glibc exports them. Dropping them from =std= is not
@@ -1374,9 +1364,6 @@ Fix: a decision, and the two outcomes differ for this chapter.
 - They retire, and the first arm of every =<name.h>= wrapper goes
   with them. Each thing glibc withholds from a strict compiler is
   then declared in a wrapper behind a characterization of its own.
-The second body of the =<cname>= headers goes in either case
-(Library, "Fifteen =<cname>= headers keep a body no configuration
-reaches").
 
 Check: a build with =_RWSTD_USE_PURE_C_HEADERS= under =eccp -A= and
 under gcc, or the headers gone.
@@ -1841,7 +1828,7 @@ bias is a defect to fix is a decision for the Library chapter.
 
 4.1 lists "=abs= and =div=" among what depends on =_RWSTD_LONG_LONG=;
 =<cstdlib>= defines no ~div (long long)~ (=include/ansi/cstdlib=
-113-120 has the =long= overload alone). 4.3 calls
+66-73 has the =long= overload alone). 4.3 calls
 =_RWSTD_NO_CLASS_PARTIAL_SPEC= the sole condition on the cv-qualified
 =numeric_limits=; since e9980bcd they are unconditional
 (=include/limits= 501-510). Found by the extension sweep's reading,
@@ -1884,7 +1871,7 @@ Check: none; this is prose.
 
 Written: =doc/notes/ref-c-headers.md=, current as of 2026-11-16:
 chapter 1 the standard from 1998 to 2023, 2 to 5 the files and the
-three models, 6 the measurements, 7 the pure model. The entry leaves
+two models, 6 the measurements, 7 the pure model. The entry leaves
 after a reading.
 
 =ref-c-headers.md=. The 51 files of =include/ansi=: the eighteen

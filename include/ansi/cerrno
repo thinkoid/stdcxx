@@ -33,28 +33,6 @@
 #  include <ansi/_cerrno.h>
 #else
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-#ifndef _RWSTD_NAMESPACE_STD_OPEN
-#define _RWSTD_NAMESPACE_STD_OPEN 3
-
-namespace std { 
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN
-
-
-#include _RWSTD_ANSI_C_ERRNO_H
-
-
-#if _RWSTD_NAMESPACE_STD_OPEN == 3
-#  undef _RWSTD_NAMESPACE_STD_OPEN
-
-}   // namespace std
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN == 3
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #ifndef _RWSTD_CERRNO_INCLUDED
 #define _RWSTD_CERRNO_INCLUDED
 
@@ -76,7 +54,5 @@ using ::errno;
 }   // std
 
 #endif   // _RWSTD_CERRNO_INCLUDED
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 #endif   // _RWSTD_NO_PURE_C_HEADERS

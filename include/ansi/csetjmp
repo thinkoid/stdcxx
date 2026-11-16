@@ -33,28 +33,6 @@
 #  include <ansi/_csetjmp.h>
 #else
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-#ifndef _RWSTD_NAMESPACE_STD_OPEN
-#define _RWSTD_NAMESPACE_STD_OPEN 9
-
-namespace std { 
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN
-
-
-#include _RWSTD_ANSI_C_SETJMP_H
-
-
-#if _RWSTD_NAMESPACE_STD_OPEN == 9
-#  undef _RWSTD_NAMESPACE_STD_OPEN
-
-}   // namespace std
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN == 9
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #ifndef _RWSTD_CSETJMP_INCLUDED
 #define _RWSTD_CSETJMP_INCLUDED
 
@@ -69,8 +47,6 @@ using ::longjmp;
 }   // std
 
 #endif   // _RWSTD_CSETJMP_INCLUDED
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 #ifndef setjmp
 #  define setjmp(env) setjmp (env)

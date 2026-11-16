@@ -33,53 +33,6 @@
 #  include <ansi/_cstdlib.h>
 #else
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-#ifndef _RWSTD_NAMESPACE_STD_OPEN
-#define _RWSTD_NAMESPACE_STD_OPEN 15
-
-namespace std { 
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN
-
-
-#include _RWSTD_ANSI_C_STDLIB_H
-
-#ifndef _RWSTD_CSTDLIB_INCLUDED
-#define _RWSTD_CSTDLIB_INCLUDED
-
-
-#ifdef _RWSTD_NO_ABS_LONG
-
-inline long abs (long __x)
-{
-    return __x < 0L ? -__x : __x;
-}
-
-#endif   // _RWSTD_NO_ABS_LONG
-
-#ifdef _RWSTD_NO_DIV_LONG
-
-inline ldiv_t div (long __x, long __y)
-{
-    return ldiv (__x, __y);
-}
-
-#endif   // _RWSTD_NO_DIV_LONG
-
-
-#endif   // _RWSTD_CSTDLIB_INCLUDED
-
-
-#if _RWSTD_NAMESPACE_STD_OPEN == 15
-#  undef _RWSTD_NAMESPACE_STD_OPEN
-
-}   // namespace std
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN == 15
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #ifndef _RWSTD_CSTDLIB_INCLUDED
 #define _RWSTD_CSTDLIB_INCLUDED
 
@@ -187,7 +140,5 @@ inline _RWSTD_LONG_LONG abs (_RWSTD_LONG_LONG __x)
 }   // namespace std
 
 #endif   // _RWSTD_CSTDLIB_INCLUDED
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 #endif   // _RWSTD_NO_PURE_C_HEADERS

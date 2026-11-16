@@ -33,28 +33,6 @@
 #  include <ansi/_ctime.h>
 #else
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-#ifndef _RWSTD_NAMESPACE_STD_OPEN
-#define _RWSTD_NAMESPACE_STD_OPEN 16
-
-namespace std { 
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN
-
-
-#include _RWSTD_ANSI_C_TIME_H
-
-
-#if _RWSTD_NAMESPACE_STD_OPEN == 16
-#  undef _RWSTD_NAMESPACE_STD_OPEN
-
-}   // namespace std
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN == 16
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #ifndef _RWSTD_CTIME_INCLUDED
 #define _RWSTD_CTIME_INCLUDED
 
@@ -80,7 +58,5 @@ namespace std {
 }   // std
 
 #endif   // _RWSTD_CTIME_INCLUDED
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 #endif   // _RWSTD_NO_PURE_C_HEADERS

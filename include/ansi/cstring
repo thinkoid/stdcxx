@@ -33,74 +33,6 @@
 #  include <ansi/_cstring.h>
 #else
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-#ifndef _RWSTD_NAMESPACE_STD_OPEN
-#define _RWSTD_NAMESPACE_STD_OPEN 15
-
-namespace std { 
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN
-
-
-#include _RWSTD_ANSI_C_STRING_H
-
-
-#if _RWSTD_NAMESPACE_STD_OPEN == 15
-#undef _RWSTD_NAMESPACE_STD_OPEN
-
-}   // namespace std
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN == 15
-
-
-namespace std { 
-
-#if 0
-
-const char* strchr (const char *__s, int __c);
-const char* strpbrk (const char *__s1, const char *__s2);
-const char* strrchr (const char *__s, int __c);
-const char* strstr (const char *__s1, const char *__s2);
-const void* memchr (const void *__p, int __c, size_t __n);
-
-#endif   // 0/1
-
-
-#ifndef _RWSTD_CSTRING_INCLUDED
-#define _RWSTD_CSTRING_INCLUDED
-
-inline char* strchr (char *__s, int __c)
-{
-    return strchr ((const char*)__s, __c);
-}
-
-inline char* strpbrk (char *__s1, const char *__s2)
-{
-    return strpbrk ((const char*)__s1, __s2);
-}
-
-inline char* strrchr (char *__s, int __c)
-{
-    return strrchr ((const char*)__s, __c);
-}
-
-inline char* strstr (char *__s1, const char *__s2)
-{
-    return strstr ((const char*)__s1, __s2);
-}
-
-inline void* memchr (void *__p, int __c, size_t __n)
-{
-    return memchr ((const void*)__p, __c, __n);
-}
-
-#endif   // _RWSTD_CSTRING_INCLUDED
-
-}   // namespace std
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #ifndef _RWSTD_CSTRING_INCLUDED
 #define _RWSTD_CSTRING_INCLUDED
 
@@ -162,7 +94,5 @@ namespace std {
 }   // std
 
 #endif   // _RWSTD_CSTRING_INCLUDED
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 #endif   // _RWSTD_NO_PURE_C_HEADERS

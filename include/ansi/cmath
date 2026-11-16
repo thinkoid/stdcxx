@@ -36,26 +36,6 @@
 #  include <ansi/_cmath.h>
 #else
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-namespace std { 
-
-// avoid a conflicting exception structure on platforms where
-// struct exception is defined unguarded in <math.h>
-#ifndef _RWSTD_NO_MATH_EXCEPTION
-#  undef exception
-#  define exception _Math_exception
-#endif   // _RWSTD_NO_MATH_EXCEPTION
-
-#include _RWSTD_ANSI_C_MATH_H
-
-#undef exception
-
-}   // namespace std
-
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 // avoid a conflicting exception structure on platforms where
 // struct exception is defined unguarded in <math.h>
 #ifndef _RWSTD_NO_MATH_EXCEPTION
@@ -747,9 +727,6 @@ using ::tan;
 using ::tanh;
 
 }   // namespace std
-
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 
 // MSVC provides its own complex macro

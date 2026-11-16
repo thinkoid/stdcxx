@@ -42,33 +42,6 @@
 #  endif   // __CORRECT_ISO_CPP_WCHAR_H_PROTO
 #endif   // _RWSTD_NO_CORRECT_ISO_CPP_WCHAR_H_PROTO
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-#ifndef _RWSTD_NAMESPACE_STD_OPEN
-#define _RWSTD_NAMESPACE_STD_OPEN 17
-
-namespace std { 
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN
-
-
-#include _RWSTD_ANSI_C_WCHAR_H
-
-
-// 17.4.1.2, p6 - masking macros are not allowed
-#  undef getwc
-#  undef putwc
-
-
-#if _RWSTD_NAMESPACE_STD_OPEN == 17
-#undef _RWSTD_NAMESPACE_STD_OPEN
-
-}   // namespace std
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN == 17
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #ifndef _RWSTD_CWCHAR_INCLUDED
 #define _RWSTD_CWCHAR_INCLUDED
 
@@ -191,7 +164,5 @@ using ::wmemset;
 }   // std
 
 #endif   // _RWSTD_CWCHAR_INCLUDED
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 #endif   // _RWSTD_NO_PURE_C_HEADERS

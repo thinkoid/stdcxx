@@ -33,28 +33,6 @@
 #  include <ansi/_cstddef.h>
 #else
 
-#ifndef _RWSTD_NO_DEPRECATED_C_HEADERS
-
-#ifndef _RWSTD_NAMESPACE_STD_OPEN
-#define _RWSTD_NAMESPACE_STD_OPEN 12
-
-namespace std { 
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN
-
-
-#include _RWSTD_ANSI_C_STDDEF_H
-
-
-#if _RWSTD_NAMESPACE_STD_OPEN == 12
-#  undef _RWSTD_NAMESPACE_STD_OPEN
-
-}   // namespace std
-
-#endif   // _RWSTD_NAMESPACE_STD_OPEN == 12
-
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
-
 #ifndef _RWSTD_CSTDDEF_INCLUDED
 #define _RWSTD_CSTDDEF_INCLUDED
 
@@ -68,7 +46,5 @@ namespace std {
 }   // std
 
 #endif   // _RWSTD_CSTDDEF_INCLUDED
-
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
 
 #endif   // _RWSTD_NO_PURE_C_HEADERS
