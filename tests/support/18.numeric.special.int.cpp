@@ -58,16 +58,24 @@ struct Limits
 };
 
 
-// edg (DEC cxx and others) gives an error in strict ANSI mode
-// for things like INT_MAX + 1; this works around that error...
+// max () + 1 overflows in int, long and long long, and in a signed
+// wchar_t, which promotes to int; the behavior is undefined (5, p5),
+// and GCC and Clang fold the comparison to false at -O1 and above.
+// The sum in the widest unsigned type is defined, and its conversion
+// back to T is implementation-defined (4.7, p3): both compilers
+// reduce it modulo 2^N, where N is the width of T.
 template <class T>
 inline bool is_modulo (T _max)
 {
-    // avoid MSVC warning C4800: 'int' :
-    //     forcing value to bool 'true' or 'false' (performance warning)
-    T max_plus_one = _max;
+#ifdef _RWSTD_LONG_LONG
+    typedef unsigned _RWSTD_LONG_LONG UMax;
+#else
+    typedef unsigned long UMax;
+#endif   // _RWSTD_LONG_LONG
 
-    return ++max_plus_one < _max;
+    const T max_plus_one = T (UMax (_max) + 1U);
+
+    return max_plus_one < _max;
 }
 
 template <>
