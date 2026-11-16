@@ -212,29 +212,6 @@ Check: the object of the file before and after, the same symbols and
 code; for =gcc.config=, the =makefile.in= of a 15D build under GCC
 and under Clang unchanged.
 
-*** TODO The library's objects keep their inline members visible
-
-The objects of a shared library are compiled =-fvisibility=hidden=
-and export the names their headers mark with =_RWSTD_EXPORT=: 2558
-names in the 15D library under GCC, of which 1325 are weak (type =W=),
-inline members and template instantiations that a program also emits
-for itself. =-fvisibility-inlines-hidden= would hide the inline
-members of the marked classes, but a program takes the members of
-=basic_string<char>=, =basic_streambuf<char>= and the other
-specializations its headers declare =extern template= from the
-library, inline members included: an unoptimized program calls them
-out of line. Seen while the visibility of the library was set,
-2026-11-16.
-
-Fix: measure the flag as the export change was measured: the
-exported set, every program of 15D and 12D under GCC and Clang
-linked, the tables at pin. Take it only if it removes names no
-program can reach.
-
-Check: the exported set before and after, each name that leaves
-classified; 15D and 12D under GCC and Clang link and hold their
-tables.
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
