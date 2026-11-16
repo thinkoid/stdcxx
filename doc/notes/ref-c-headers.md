@@ -24,12 +24,16 @@ Every build takes the third. The first is selected by a macro and
 compiles header by header, but a program cannot get far with it. The
 second is reached by no configuration.
 
-Three consequences follow from the third model, and a reader should
+Four consequences follow from the third model, and a reader should
 know them before reading anything else:
 
-- After `<cstdlib>` a name is in `std` and in the global namespace,
-  and everything else the C library's header declares is visible too.
-  2003 forbids the first; C++11 permits it.
+- After `<cstdlib>` a name such as `atoi` is declared twice over, in
+  `std` and in the global namespace. 2003 has it in `std` only;
+  C++11 permits the global declaration as well.
+- After `<cstdlib>` the C library's own additions are declared too,
+  `random` for one. No edition permits that, and it is not the
+  wrapper's doing: glibc shows them because GCC defines `_GNU_SOURCE`
+  for every C++ translation unit.
 - The overloads C++ adds to the C library, `abs (long)` and the
   `float` math functions among them, are defined in `std` alone. So
   `<stdlib.h>` and `<math.h>` give C's set: `abs (-5000000000L)`
@@ -76,6 +80,30 @@ defined in terms of the new ones:
 A footnote states the intent: "The ".h" headers dump all their names
 into the global namespace, whereas the newer forms keep their names
 in namespace std" (footnote 160).
+
+"In `std`" means in `std` and not in the global namespace as well.
+The text does not say "only", but the rest of the standard does the
+work. A program that calls `atoi` unqualified after `<cstdlib>` alone
+names something no declaration in scope provides, which 3.4.1 p1
+makes ill-formed ("If no declaration is found, the program is
+ill-formed"), and an ill-formed program is owed a diagnostic (1.4
+p2). An implementation that also declares `::atoi` compiles it in
+silence.
+
+A well-formed program can see the difference too:
+
+```cpp
+#include <cstdlib>
+
+namespace A { char abs (...); }
+using namespace A;
+
+int main () { return sizeof (abs (1)); }
+```
+
+Where `abs` is declared in `std` alone, the call finds `A::abs` and
+`main` returns 1. Where `::abs (int)` is declared as well, it is the
+better match, and `main` returns `sizeof (int)`.
 
 The C library meant here is C90's with Amendment 1 (1.2 p2): C90's
 fifteen headers and the amendment's `<iso646.h>`, `<wchar.h>` and
@@ -129,9 +157,9 @@ The third costs a program little, since the standard reserves those
 global names in any case: "Each name from the Standard C library
 declared with external linkage is reserved to the implementation for
 use as a name with extern "C" linkage, both in namespace std and in
-the global namespace" (17.4.3.1.3 p4). A conforming program cannot
-tell the difference by declaring one of them; it can tell only by
-using one unqualified after `<cname>`.
+the global namespace" (17.4.3.1.3 p4). A program cannot declare one
+of them for itself under either model; the difference shows only in
+lookup, as in the program of 1.1.
 
 ### 1.4 2011: the rule follows the practice
 
@@ -511,15 +539,26 @@ second column is what 14882:2003 requires.
 | `sizeof (std::sin (0.0f))` after `<cmath>` | 4: 26.5 p6 | 4 | 8 |
 | `sizeof (sin (0.0f))` after `<math.h>` | 4: D.5 p2 | 8 | 8 |
 | `char* p = std::strchr (cs, 'x')`, `cs` a `const char*` | error: 21.4 p4 | error | error |
+| the program of 1.1 returns | 1 | 4 | 1 |
+| a global `int random;` after `<cstdlib>` | compiles: 1.4 p2 | error | compiles |
 
-The using model departs from 2003 in rows 2, 3, 6, 7 and 9. Rows 2
-and 3 are the model itself, and C++11 permits them. Rows 6, 7 and 9
-are the overloads missing from the `.h` headers, and no edition
-permits those (1.6). GCC warns about row 7; nothing warns about
-row 9.
+The using model departs from 2003 in rows 2, 3, 6, 7, 9, 11 and 12:
 
-The pure model was written to conform, and it does in rows 2 and 3.
-It departs in rows 4 to 9, for the reasons of chapter 7.
+- **Rows 2 and 11** are the model itself, the global declaration
+  beside the one in `std`. C++11 permits it (1.4).
+- **Rows 3 and 12** are the C library's additions, and no edition
+  permits them: `random` is not a name the standard reserves, so a
+  program may use it, and row 12 is a well-formed program the
+  implementation rejects. The cause is outside the wrapper. GCC
+  defines `_GNU_SOURCE` for every C++ translation unit, and glibc
+  then declares everything it has. With `-U_GNU_SOURCE -std=c++98`
+  row 12 compiles.
+- **Rows 6, 7 and 9** are the overloads missing from the `.h`
+  headers, and no edition permits those either (1.6). GCC warns
+  about row 7; nothing warns about row 9.
+
+The pure model was written to conform, and it does in rows 2, 3, 11
+and 12. It departs in rows 4 to 9, for the reasons of chapter 7.
 
 ## 7. The pure model today
 
