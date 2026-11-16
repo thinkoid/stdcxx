@@ -47,7 +47,7 @@ struct rw_thread_t
 
 
 // same as POSIX pthread_create()
-_TEST_EXPORT int
+int
 rw_thread_create (rw_thread_t*,
                   rw_thread_attr_t*,
                   rw_thread_proc*,
@@ -55,7 +55,7 @@ rw_thread_create (rw_thread_t*,
 
 
 // same as POSIX pthread_join()
-_TEST_EXPORT int
+int
 rw_thread_join (rw_thread_t, void**);
 
 
@@ -75,7 +75,7 @@ rw_thread_join (rw_thread_t, void**);
 // of rw_get_processors() plus 1, or to 2 otherwise
 // returns 0 on success, or a non-zero value indicating the thread
 // number that failed to create on error
-_TEST_EXPORT int
+int
 rw_thread_pool (rw_thread_t*      /* tidarray */,
                 _RWSTD_SIZE_T     /* nthreads */,
                 rw_thread_attr_t* /* attr */,
@@ -87,20 +87,20 @@ rw_thread_pool (rw_thread_t*      /* tidarray */,
 // be polled periodically by threads created by rw_thread_pool() so
 // that they know that the soft timeout has expired
 // see notes above for details
-_TEST_EXPORT int
+int
 rw_thread_pool_timeout_expired ();
 
 // counts the calling thread in and spins until nthreads have: the
 // threads of a pool that gate this way make their first call at the
 // same time instead of as the pool creates them; the caller zeroes
 // *nstarted before each pool
-_TEST_EXPORT void
+void
 rw_thread_gate (int* /* nstarted */, int /* nthreads */);
 
 
 // returns the number of logical processors/cores on the system,
 // or -1 on error
-_TEST_EXPORT int
+int
 rw_get_cpus ();
 
 #endif   // RW_RWTHREAD_H_INCLUDED

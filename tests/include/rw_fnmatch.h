@@ -40,7 +40,7 @@
 // The third argument is reserved and ignored. Returns 0 for a match,
 // 1 otherwise.
 
-_TEST_EXPORT int
+int
 rw_fnmatch (const char*, const char*, int);
 
 

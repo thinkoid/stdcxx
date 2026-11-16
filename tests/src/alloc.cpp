@@ -422,7 +422,7 @@ _rw_getenvflags ()
 
 /************************************************************************/
 
-_TEST_EXPORT void*
+void*
 rw_alloc (size_t nbytes, int flags /* = -1 */)
 {
     static const int RWSTD_ALLOC_FLAGS = _rw_getenvflags ();
@@ -506,7 +506,7 @@ rw_alloc (size_t nbytes, int flags /* = -1 */)
 
 /************************************************************************/
 
-_TEST_EXPORT void
+void
 rw_free (void* addr)
 {
     if (Pair *it = _rw_find_by_addr (addr)) {

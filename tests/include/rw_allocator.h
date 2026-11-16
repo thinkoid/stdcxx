@@ -43,7 +43,7 @@ class allocator;
 }   // namespace std
 
 
-struct _TEST_EXPORT SharedAlloc
+struct SharedAlloc
 {
     // identifies each member function of a standard allocator class
     enum MemFun {
@@ -246,7 +246,7 @@ public:
 // when (line > 0) reports the difference between the the number
 // and size of blocks of storage allocated at the last checkpoint
 // and the values specified by expect_blocks and expect_bytes
-_TEST_EXPORT void
+void
 rw_check_leaks (const SharedAlloc* /* palloc        */ = 0,
                 int                /* line          */ = 0,
                 _RWSTD_SIZE_T      /* expect_blocks */ = 0,

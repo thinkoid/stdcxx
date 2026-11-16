@@ -443,7 +443,7 @@ _rw_getbounds (const char *next, char sep, RW_VA_LIST_ARG_PTR pva)
 }
 
 
-_TEST_EXPORT int
+int
 rw_vsetopts (const char *opts, va_list va)
 {
     if (0 == opts) {
@@ -645,7 +645,7 @@ rw_vsetopts (const char *opts, va_list va)
 
 /**************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_setopts (const char *opts, ...)
 {
     va_list va;
@@ -868,7 +868,7 @@ _rw_set_bits (int val)
 }
 
 
-_TEST_EXPORT int
+int
 rw_runopts (int argc, char *argv[])
 {
     _rw_set_myopts ();
@@ -1081,7 +1081,7 @@ rw_runopts (int argc, char *argv[])
 
 /**************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_runopts (const char *str)
 {
     RW_ASSERT (0 != str);

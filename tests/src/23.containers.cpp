@@ -1343,7 +1343,7 @@ _rw_run_test  (int                       argc,
 
 
 
-_TEST_EXPORT int
+int
 rw_run_cont_test (int                        argc,
                   char                      *argv [],
                   const char                *file,
@@ -1358,7 +1358,7 @@ rw_run_cont_test (int                        argc,
 }
 
 
-_TEST_EXPORT int
+int
 rw_run_cont_test (int                        argc,
                   char                      *argv [],
                   const char                *file,

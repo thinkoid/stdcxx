@@ -38,7 +38,7 @@
 // environment variables specified in the RW_PUTENV environment
 // variable (e.g., RW_PUTENV=:foo=1:bar=2 will cause the variables
 // foo=1 and bar=2 to be defined in the environment)
-_TEST_EXPORT int
+int
 rw_putenv (const char*, int = -1);
 
 

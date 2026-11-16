@@ -35,7 +35,7 @@
 
 /**************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_vasnprintf (char**, size_t*, const char*, va_list);
 
 static int
@@ -258,7 +258,7 @@ _rw_format (char** pbuf, size_t* pbufsize, const char* file, int line,
     return 0 > nchars3 ? nchars1 : nchars1 + nchars3;
 }
 
-_TEST_EXPORT void
+void
 rw_throw (ExceptionId exid, const char *file, int line,
           const char *function, const char *fmt, ...)
 {

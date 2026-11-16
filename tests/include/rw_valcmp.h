@@ -38,7 +38,7 @@
 #define CMP_FP        8   /* safe floating pointing comparison */
 
 
-_TEST_EXPORT int
+int
 rw_valcmp (const void*, const void*,
            _RWSTD_SIZE_T, _RWSTD_SIZE_T, _RWSTD_SIZE_T, int);
 
@@ -86,19 +86,19 @@ rw_valcmp (const T*      buf1,
 // rw_strncmp(s1, s2, n, cmp_nul) with (n != ~0U) is equivalent to
 // a call to memcmp(s1, s2, n) or wmemcmp(s1, s2, n), respectively
 
-_TEST_EXPORT int
+int
 rw_strncmp (const char*, const char*,
             _RWSTD_SIZE_T = _RWSTD_SIZE_MAX, int = CMP_NULTERM);
 
-_TEST_EXPORT int
+int
 rw_strncmp (const char*, const wchar_t*,
             _RWSTD_SIZE_T = _RWSTD_SIZE_MAX, int = CMP_NULTERM);
 
-_TEST_EXPORT int
+int
 rw_strncmp (const wchar_t*, const char*,
             _RWSTD_SIZE_T = _RWSTD_SIZE_MAX, int = CMP_NULTERM);
 
-_TEST_EXPORT int
+int
 rw_strncmp (const wchar_t*, const wchar_t*,
             _RWSTD_SIZE_T = _RWSTD_SIZE_MAX, int = CMP_NULTERM);
 
@@ -115,20 +115,20 @@ rw_strncmp (const wchar_t*, const wchar_t*,
  *          indicates the number of distinct values representable in
  *          the type of the number between the two arguments.
  */
-_TEST_EXPORT int
+int
 rw_fltcmp (float x, float y);
 
 
 /**
  * @see rw_fltcmp.
  */
-_TEST_EXPORT int
+int
 rw_dblcmp (double x, double y);
 
 /**
  * @see rw_fltcmp.
  */
-_TEST_EXPORT int
+int
 rw_ldblcmp (long double x, long double y);
 
 /**************************************************************************/

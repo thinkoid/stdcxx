@@ -43,7 +43,7 @@ enum ExceptionId
 };
 
 
-struct _TEST_EXPORT Exception
+struct Exception
 {
     const ExceptionId id_;
 
@@ -55,7 +55,7 @@ struct _TEST_EXPORT Exception
 };
 
 
-_TEST_EXPORT void
+void
 rw_throw (ExceptionId exid, const char *file, int line,
           const char *function, const char *fmt, ...);
 

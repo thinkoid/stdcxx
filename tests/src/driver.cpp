@@ -202,7 +202,7 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 /************************************************************************/
 
 // defined in printf.cpp but not declared in printf.h
-_TEST_EXPORT int
+int
 rw_vasnprintf (char**, size_t*, const char*, va_list);
 
 /************************************************************************/
@@ -502,7 +502,7 @@ _rw_setopt_output_file (int argc, char *argv[])
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_vsetopts (const char *opts, va_list va);
 
 /************************************************************************/
@@ -796,7 +796,7 @@ _rw_setopts_compat ()
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_vtest (int argc, char **argv,
           const char *file_name,
           const char *clause,
@@ -1000,7 +1000,7 @@ rw_vtest (int argc, char **argv,
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_test (int argc, char **argv,
          const char *fname,
          const char *clause,
@@ -1318,7 +1318,7 @@ _rw_vdiag (diag_t diag, int severity, const char *file, int line,
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_fatal (int success, const char *file, int line, const char *fmt, ...)
 {
     CHECK_INIT (true, "rw_fatal()");
@@ -1335,7 +1335,7 @@ rw_fatal (int success, const char *file, int line, const char *fmt, ...)
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_error (int success, const char *file, int line, const char *fmt, ...)
 {
     CHECK_INIT (true, "rw_error()");
@@ -1352,7 +1352,7 @@ rw_error (int success, const char *file, int line, const char *fmt, ...)
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_assert (int success, const char *file, int line, const char *fmt, ...)
 {
     CHECK_INIT (true, "rw_assert()");
@@ -1369,7 +1369,7 @@ rw_assert (int success, const char *file, int line, const char *fmt, ...)
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_warn (int success, const char *file, int line, const char *fmt, ...)
 {
     CHECK_INIT (true, "rw_warn()");
@@ -1386,7 +1386,7 @@ rw_warn (int success, const char *file, int line, const char *fmt, ...)
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_note (int success, const char *file, int line, const char *fmt, ...)
 {
     CHECK_INIT (true, "rw_note()");
@@ -1403,7 +1403,7 @@ rw_note (int success, const char *file, int line, const char *fmt, ...)
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_info (int success, const char *file, int line, const char *fmt, ...)
 {
     CHECK_INIT (true, "rw_info()");
@@ -1420,7 +1420,7 @@ rw_info (int success, const char *file, int line, const char *fmt, ...)
 
 /************************************************************************/
 
-_TEST_EXPORT bool
+bool
 rw_enable (int (*fun) (int, const char*, int, const char*, ...), bool enable)
 {
     diag_t diag;

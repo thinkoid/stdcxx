@@ -36,12 +36,12 @@
 // seeds the 32-bit random number generator
 // if the seed is equal UINT32_MAX picks a random value to seed
 // the generator with
-_TEST_EXPORT void
+void
 rw_seed32 (_RWSTD_UINT32_T);
 
 // returns a 32-bit random number in the range [0, limit)
 // if limit is non-zero, otherwise in the range [0, UINT32_MAX)
-_TEST_EXPORT _RWSTD_UINT32_T
+_RWSTD_UINT32_T
 rw_rand32 (_RWSTD_UINT32_T = 0);
 
 #ifdef _RWSTD_UINT64_T
@@ -49,12 +49,12 @@ rw_rand32 (_RWSTD_UINT32_T = 0);
 // seeds the 64-bit random number generator
 // if the seed is equal UINT64_MAX picks a random value to seed
 // the generator with
-_TEST_EXPORT void
+void
 rw_seed64 (_RWSTD_UINT64_T);
 
 // returns a 64-bit random number in the range [0, limit)
 // if limit is non-zero, otherwise in the range [0, UINT64_MAX)
-_TEST_EXPORT _RWSTD_UINT64_T
+_RWSTD_UINT64_T
 rw_rand64 (_RWSTD_UINT64_T = 0);
 
 #  if 32 == _RWSTD_INT_SIZE

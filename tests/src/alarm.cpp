@@ -37,20 +37,16 @@
 #include <rw_printf.h>   // for rw_fprintf()
 
 
-// avoid re-declaring the constants below extern exported to prevent
-// MSVC error: object must have external linkage in order to be
-// exported/imported
-
-/* extern _TEST_EXPORT */ rw_signal_handler_t* const
+rw_signal_handler_t* const
 rw_sig_dfl = (rw_signal_handler_t*)0;
 
-/* extern _TEST_EXPORT */ rw_signal_handler_t* const
+rw_signal_handler_t* const
 rw_sig_ign = (rw_signal_handler_t*)1;
 
-/* extern _TEST_EXPORT */ rw_signal_handler_t* const
+rw_signal_handler_t* const
 rw_sig_hold = (rw_signal_handler_t*)2;
 
-/* extern _TEST_EXPORT */ rw_signal_handler_t* const
+rw_signal_handler_t* const
 rw_sig_restore = (rw_signal_handler_t*)3;
 
 
@@ -109,7 +105,6 @@ _rw_handle_sigalrm (int signo)
 }   // extern "C"
 
 
-_TEST_EXPORT
 unsigned
 rw_alarm (unsigned int nsec, rw_signal_handler_t* handler /* = 0 */)
 {

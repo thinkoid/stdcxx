@@ -108,7 +108,7 @@
 
 /**************************************************************************/
 
-_TEST_EXPORT const char*
+const char*
 rw_topdir ()
 {
     const char* const topdir = getenv (TOPDIR);
@@ -136,7 +136,7 @@ rw_topdir ()
 
 /**************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_locale (const char *args, const char *fname)
 {
     // use BINDIR to determine the location of the locale command
@@ -158,7 +158,7 @@ rw_locale (const char *args, const char *fname)
 
 /**************************************************************************/
 
-_TEST_EXPORT const char*
+const char*
 rw_localedef (const char *args,
               const char* src, const char *charmap, const char *locname)
 {
@@ -311,7 +311,7 @@ static void atexit_rm_locale_root ()
 
 }
 
-_TEST_EXPORT const char*
+const char*
 rw_set_locale_root ()
 {
     // set any additional environment variables defined in
@@ -350,7 +350,7 @@ rw_set_locale_root ()
 
 /**************************************************************************/
 
-_TEST_EXPORT char*
+char*
 rw_locales (int loc_cat, const char* grep_exp, bool prepend_c_loc)
 {
     static char deflocname [3] = "C\0";
@@ -571,7 +571,7 @@ _get_mb_char (char *buf, size_t bytes)
 }
 
 
-_TEST_EXPORT size_t
+size_t
 rw_get_mb_chars (rw_mbchar_array_t mb_chars)
 {
     _RWSTD_ASSERT (0 != mb_chars);
@@ -615,7 +615,7 @@ rw_get_mb_chars (rw_mbchar_array_t mb_chars)
 }
 
 
-_TEST_EXPORT size_t
+size_t
 rw_get_wchars (wchar_t *wbuf, size_t bufsize, int nbytes /* = 0 */)
 {
     if (0 == bufsize)
@@ -677,7 +677,7 @@ rw_get_wchars (wchar_t *wbuf, size_t bufsize, int nbytes /* = 0 */)
 }
 
 
-_TEST_EXPORT const char*
+const char*
 rw_find_mb_locale (size_t            *mb_cur_max,
                    rw_mbchar_array_t  mb_chars)
 {
@@ -745,7 +745,7 @@ rw_find_mb_locale (size_t            *mb_cur_max,
 
 /**************************************************************************/
 
-_TEST_EXPORT const char*
+const char*
 rw_create_locale (const char *charmap, const char *locale)
 {
     // only one locale is enough (avoid invoking localedef more than once)
@@ -815,11 +815,11 @@ rw_create_locale (const char *charmap, const char *locale)
 static const char*
 _rw_locale_names;
 
-_TEST_EXPORT const char* const&
+const char* const&
 rw_opt_locales = _rw_locale_names;
 
 
-_TEST_EXPORT int
+int
 rw_opt_setlocales (int argc, char* argv[])
 {
     if (1 == argc && argv && 0 == argv [0]) {
@@ -873,7 +873,7 @@ rw_opt_setlocales (int argc, char* argv[])
 
 /**************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_create_catalog (const char * catname, const char * catalog)
 {
     RW_ASSERT (catname && catalog);
@@ -1282,7 +1282,7 @@ _rw_all_locales ()
     return result;
 }
 
-_TEST_EXPORT char*
+char*
 rw_locale_query (int loc_cat, const char* query, size_t wanted)
 {
     // query format <language>-<COUNTRY>-<MB_CUR_LEN>-<CODESET>

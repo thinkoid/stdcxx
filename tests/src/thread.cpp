@@ -58,7 +58,7 @@ _rw_timeout_expired = 0;
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_thread_pool_timeout_expired ()
 {
     // cast the volatile flag to int& (see STDCXX-792)
@@ -86,7 +86,7 @@ _rw_timeout_handler (int)
 
 #  include <pthread.h>
 
-_TEST_EXPORT int
+int
 rw_thread_create (rw_thread_t *thr_id,
                   rw_thread_attr_t*,
                   rw_thread_proc *thr_proc,
@@ -119,7 +119,7 @@ rw_thread_create (rw_thread_t *thr_id,
 }
 
 
-_TEST_EXPORT int
+int
 rw_thread_join (rw_thread_t thr_id, void **parg)
 {
     const int result = pthread_join ((pthread_t)thr_id.id, parg);
@@ -141,7 +141,7 @@ rw_thread_join (rw_thread_t thr_id, void **parg)
 #    endif
 #  endif   // ENOTSUP
 
-_TEST_EXPORT int
+int
 rw_thread_create (rw_thread_t*,
                   rw_thread_attr_t*,
                   rw_thread_proc*,
@@ -153,7 +153,7 @@ rw_thread_create (rw_thread_t*,
 }
 
 
-_TEST_EXPORT int
+int
 rw_thread_join (rw_thread_t, void**)
 {
     return ENOTSUP;
@@ -164,7 +164,7 @@ rw_thread_join (rw_thread_t, void**)
 /**************************************************************************/
 
 // retrieves the number of processors/cores on the system
-_TEST_EXPORT void
+void
 rw_thread_gate (int *nstarted, int nthreads)
 {
     _RWSTD_ATOMIC_PREINCREMENT (*nstarted, false);
@@ -173,7 +173,7 @@ rw_thread_gate (int *nstarted, int nthreads)
 }
 
 
-_TEST_EXPORT int
+int
 rw_get_cpus ()
 {
 
@@ -232,7 +232,7 @@ rw_get_cpus ()
 
 /**************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_thread_pool (rw_thread_t        *thr_id,
                 size_t              nthrs,
                 rw_thread_attr_t*,

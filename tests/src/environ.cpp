@@ -52,7 +52,7 @@ _RWSTD_DLLIMPORT int putenv (char*) _LIBC_THROWS ();
 
 
 // sets (or unsets) one or more sep-separated environment variables
-_TEST_EXPORT int
+int
 rw_putenv (const char* str, int sep /* = -1 */)
 {
     int nset = 0;

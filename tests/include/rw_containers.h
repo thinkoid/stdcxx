@@ -223,14 +223,14 @@ struct ContainerTest
 
 typedef void ContainerTestFunc (const ContainerFunc&, const ContainerTestCase&);
 
-_TEST_EXPORT int
+int
 rw_run_cont_test (int, char**, const char*, const char*,
                   ContainerIds::ContainerId, ContainerTestFunc*,
                   const ContainerTest*, _RWSTD_SIZE_T);
 
 typedef void VoidFunc ();
 
-_TEST_EXPORT int
+int
 rw_run_cont_test (int, char**, const char*, const char*,
                   ContainerIds::ContainerId, VoidFunc* const*,
                   const ContainerTest*, _RWSTD_SIZE_T);

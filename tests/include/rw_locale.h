@@ -38,19 +38,19 @@
 
 // get a list of all native locales that match the cannonical
 // locale name query strings
-_TEST_EXPORT char*
+char*
 rw_locale_query (int = _UNUSED_CAT, const char* = 0, _RWSTD_SIZE_T = 0);
 
 
 // this function will likely be deprecated!
-_TEST_EXPORT char*
+char*
 rw_locales (int = _UNUSED_CAT, const char* = 0, bool = true);
 
 
 // invokes the locale utility with the arguments specified by 'arg',
 // redirecting its output to the file named by 'fname' if non-null
 // returns the exit status of the utility
-_TEST_EXPORT int
+int
 rw_locale (const char* /* args */, const char* /* fname */);
 
 
@@ -60,7 +60,7 @@ rw_locale (const char* /* args */, const char* /* fname */);
 // environment variable when it is set and not empty, otherwise the
 // directory derived from the pathname of the test driver's own source,
 // or 0 when neither is available
-_TEST_EXPORT const char*
+const char*
 rw_topdir ();
 
 
@@ -72,7 +72,7 @@ rw_topdir ();
 // additional environment variable(s) specified by it (by calling
 // rw_putenv(0))
 // returns the absolute pathname of the directory
-_TEST_EXPORT const char*
+const char*
 rw_set_locale_root ();
 
 
@@ -83,7 +83,7 @@ rw_set_locale_root ();
 // returns the name of the locale; successive calls to the function may
 // change the contents of the character array pointed to by the pointer
 // returned from prior calls
-_TEST_EXPORT const char*
+const char*
 rw_localedef (const char*, const char*, const char*, const char*);
 
 
@@ -92,7 +92,7 @@ rw_localedef (const char*, const char*, const char*, const char*);
 // non-zero only wide characters with multibyte sequences of the
 // specified length will be stored (as determined by mblen())
 // returns the number of elements stored
-_TEST_EXPORT _RWSTD_SIZE_T
+_RWSTD_SIZE_T
 rw_get_wchars (wchar_t*      /* wbuf */,
                _RWSTD_SIZE_T /* size */,
                int           /* nbytes */ = 0);
@@ -106,14 +106,14 @@ rw_mbchar_array_t [_RWSTD_MB_LEN_MAX][_RWSTD_MB_LEN_MAX];
 // characters between 1 and MB_CUR_MAX bytes long for the currently
 // set locale
 // returns the number of elements populated (normally, MB_CUR_MAX)
-_TEST_EXPORT _RWSTD_SIZE_T
+_RWSTD_SIZE_T
 rw_get_mb_chars (rw_mbchar_array_t /* mb_chars */);
 
 
 // finds the multibyte locale with the largest MB_CUR_MAX value and
 // fills consecutive elements of the `mb_chars' array with multibyte
 // characters between 1 and MB_CUR_MAX bytes long for such a locale
-_TEST_EXPORT const char*
+const char*
 rw_find_mb_locale (_RWSTD_SIZE_T* /* mb_cur_max */,
                    rw_mbchar_array_t /* mb_chars */);
 
@@ -122,20 +122,20 @@ rw_find_mb_locale (_RWSTD_SIZE_T* /* mb_cur_max */,
 // variable, if it is defined, otherwise in the current working
 // directory
 // returns the name of the locale
-_TEST_EXPORT const char*
+const char*
 rw_create_locale (const char* /* charmap */, const char* /* locale */);
 
 
 // NUL-separated list of locale names specified by the --locales
 // command line option (set by the rw_opt_setlocales handler)
-_TEST_EXPORT extern const char* const&
+extern const char* const&
 rw_opt_locales;
 
 
 // callback function invoked in response to the --locales=<locale-list>
 // command line option to set the rw_opt_locales global variable to the
 // NUL-separated list of locale names to exercise
-_TEST_EXPORT int
+int
 rw_opt_setlocales (int, char*[]);
 
 
@@ -144,7 +144,7 @@ rw_opt_setlocales (int, char*[]);
 // catalog is a '\0' separated list of strings, each of which representing
 // a single message, and with a blank line separating one set from another
 // returns 0 in success
-_TEST_EXPORT int
+int
 rw_create_catalog (const char * /* catname */, const char * /* catalog */);
 
 #endif   // RW_LOCALE_H_INCLUDED

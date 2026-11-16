@@ -85,7 +85,7 @@
  * @return  On success, returns the number of command line options
  *          currently defined for the process, negative value on error.
  */
-_TEST_EXPORT int
+int
 rw_setopts (const char *optspec, ...);
 
 
@@ -100,7 +100,7 @@ rw_setopts (const char *optspec, ...);
  *
  * @return  Returns the status of last evaluated command line option handler.
  */
-_TEST_EXPORT int
+int
 rw_runopts (int argc, char *argv[]);
 
 
@@ -113,7 +113,7 @@ rw_runopts (int argc, char *argv[]);
  *
  * @return  Returns the status of last evaluated command line option handler.
  */
-_TEST_EXPORT int
+int
 rw_runopts (const char *argvstr);
 
 
@@ -125,7 +125,7 @@ rw_runopts (const char *argvstr);
  * @return  Returns a non-zero value if the named feature is enabled,
  *          otherwise 0.
  */
-_TEST_EXPORT int
+int
 rw_enabled (const char *name);
 
 
@@ -137,7 +137,7 @@ rw_enabled (const char *name);
  * @return  Returns a non-zero value if the case (line) is enabled,
  *          otherwise 0.
  */
-_TEST_EXPORT int
+int
 rw_enabled (int line);
 
 

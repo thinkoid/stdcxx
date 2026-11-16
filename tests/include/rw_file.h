@@ -57,14 +57,13 @@
 // or using the <U00XX> notations for narrow characters outside that set
 // if teh second argument is 0, writes out the CHARMAP section of the locale
 // definition file for the Portable Character Set (in POSIX-compliant format) 
-_TEST_EXPORT void
+void
 pcs_write (void*, const char*);
 
 
 // creates a unique temporary file name as if by calling tmpnam()
 // but avoiding various platform-specific quirks (such as HP-UX
 // failure when _REENTRANT is #defined or GNU glibc warnings)
-_TEST_EXPORT
 const char* rw_tmpnam (char*);
 
 // tries to open file named by the first argument and, if successful,
@@ -77,7 +76,7 @@ const char* rw_tmpnam (char*);
 // the function takes the third argument as a pointer to the buffer that
 // it will use to read the contents of files into in subsequent calls,
 // provided the buffer is large enough
-_TEST_EXPORT void*
+void*
 rw_fread (const char*,
           _RWSTD_SIZE_T* = 0   /* size in bytes */,
           const char*    = "r" /* stdio open mode */);
@@ -88,14 +87,14 @@ rw_fread (const char*,
 // as the result of calling strlen() on the buffer pointed to by
 // the second argument; if the second argument is 0, the function
 // removes the named file; returns the number of bytes written
-_TEST_EXPORT _RWSTD_SIZE_T
+_RWSTD_SIZE_T
 rw_fwrite (const char*,
            const void*,
            _RWSTD_SIZE_T = ~0  /* size in bytes */,
            const char*   = "w" /* stdio open mode */ );
 
 
-_TEST_EXPORT int
+int
 rw_nextfd (int*);
 
 #endif   // RW_FILE_H_INCLUDED

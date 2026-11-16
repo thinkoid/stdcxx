@@ -936,7 +936,7 @@ fail: // function failed
 }
 
 
-_TEST_EXPORT int
+int
 rw_vasnprintf (char **pbuf, size_t *pbufsize, const char *fmt, va_list varg)
 {
     va_list *pva;
@@ -3113,7 +3113,7 @@ _rw_fmtnested (const FmtSpec &spec,
 
 /********************************************************************/
 
-_TEST_EXPORT int
+int
 rw_asnprintf (char **pbuf, size_t *pbufsize, const char *fmt, ...)
 {
     RW_ASSERT (0 == pbuf || 0 == *pbuf || pbufsize);
@@ -3155,7 +3155,7 @@ rw_asnprintf (char **pbuf, size_t *pbufsize, const char *fmt, ...)
 
 /********************************************************************/
 
-_TEST_EXPORT char*
+char*
 rw_snprintfa (char *buf, size_t bufsize, const char* fmt, ...)
 {
     if (buf)
@@ -3180,7 +3180,7 @@ rw_snprintfa (char *buf, size_t bufsize, const char* fmt, ...)
 
 /********************************************************************/
 
-_TEST_EXPORT char*
+char*
 rw_sprintfa (const char *fmt, ...)
 {
     char* buf = 0;
@@ -3206,7 +3206,7 @@ rw_sprintfa (const char *fmt, ...)
 
 /********************************************************************/
 
-_TEST_EXPORT int
+int
 rw_sprintf (char *buf, const char *fmt, ...)
 {
     char *tmpbuf = 0;
@@ -3230,7 +3230,7 @@ rw_sprintf (char *buf, const char *fmt, ...)
 
 /********************************************************************/
 
-_TEST_EXPORT int
+int
 rw_snprintf (char *buf, size_t bufsize, const char *fmt, ...)
 {
     char *tmpbuf = 0;
@@ -3261,16 +3261,10 @@ rw_snprintf (char *buf, size_t bufsize, const char *fmt, ...)
 
 /********************************************************************/
 
-// avoid re-declaring these as exported here and instead rely on the
-// declaration in the header #included above in order to prevent the
-// bogus MSVC error:
-// error C2201: 'rw_stdout' : must have external linkage in order to
-// be exported/imported
-
-/* _TEST_EXPORT */ rw_file* const
+rw_file* const
 rw_stdout = reinterpret_cast< rw_file* >(stdout);
 
-/* _TEST_EXPORT */ rw_file* const
+rw_file* const
 rw_stderr = reinterpret_cast< rw_file* >(stderr);
 
 /********************************************************************/
@@ -3314,7 +3308,7 @@ _rw_vfprintf (rw_file *file, const char *fmt, va_list va)
 
 /********************************************************************/
 
-_TEST_EXPORT int
+int
 rw_fprintf (rw_file *file, const char *fmt, ...)
 {
     va_list va;
@@ -3329,7 +3323,7 @@ rw_fprintf (rw_file *file, const char *fmt, ...)
 
 /********************************************************************/
 
-_TEST_EXPORT int
+int
 rw_printf (const char *fmt, ...)
 {
     va_list va;

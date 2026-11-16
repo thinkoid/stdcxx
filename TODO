@@ -204,13 +204,12 @@ and under Clang unchanged.
 condition, since d743fa8d took out the MSVC branch that gave them
 ~__declspec~. Their uses remain: =_RWSTD_EXPORT= 252 times (155
 under =include=, 96 under =src=, one under =tests=),
-=_RWSTD_MEMBER_EXPORT= 16 and =_RWSTD_CLASS_EXPORT= 5. Three more
+=_RWSTD_MEMBER_EXPORT= 16 and =_RWSTD_CLASS_EXPORT= 5. Two more
 names reduce to them and so to nothing: =_RWSTD_TI_EXPORT= (64 uses;
 =_defs.h= 791-795 and 810-811 choose between empty and
-=_RWSTD_EXPORT=), =_RWSTD_EXPORT_NOTHROW= (4 uses; =include/new=
-76-80) and the test driver's =_TEST_EXPORT= (237 uses;
-=tests/include/rw_testdefs.h= 38). 77 files under =include=, =src=
-and =tests= name one of the first five, 48 under =tests= the last.
+=_RWSTD_EXPORT=) and =_RWSTD_EXPORT_NOTHROW= (4 uses; =include/new=
+76-80). 77 files under =include=, =src= and =tests= name one of the
+five.
 =include/typeinfo= 53-55 explains the member-by-member marks of
 =type_info= by a Visual C++ report, PR #25603; the comment goes or
 stays with the marks. Nothing in the tree sets a symbol visibility:

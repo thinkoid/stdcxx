@@ -489,7 +489,6 @@ eof ()
 
 /**************************************************************************/
 
-_TEST_EXPORT
 char*
 rw_widen (char *dst, const char *src, size_t len /* = SIZE_MAX */)
 {
@@ -734,7 +733,6 @@ _rw_expand (void *dst, size_t elemsize,
 
 /**************************************************************************/
 
-_TEST_EXPORT
 char*
 rw_expand (char *dst, const char *src, size_t src_len /* = SIZE_MAX */,
            size_t *dst_len /* = 0 */)
@@ -745,7 +743,6 @@ rw_expand (char *dst, const char *src, size_t src_len /* = SIZE_MAX */,
 }
 
 
-_TEST_EXPORT
 char*
 rw_narrow (char *dst, const char *src, size_t len /* = SIZE_MAX */)
 {
@@ -753,7 +750,6 @@ rw_narrow (char *dst, const char *src, size_t len /* = SIZE_MAX */)
 }
 
 
-_TEST_EXPORT
 size_t
 rw_match (const char *s1, const char *s2, size_t len /* = SIZE_MAX */)
 {
@@ -829,7 +825,6 @@ rw_match (const char *s1, const char *s2, size_t len /* = SIZE_MAX */)
 }
 
 
-_TEST_EXPORT
 wchar_t*
 rw_widen (wchar_t *dst, const char *src, size_t len /* = SIZE_MAX */)
 {
@@ -862,7 +857,6 @@ rw_widen (wchar_t *dst, const char *src, size_t len /* = SIZE_MAX */)
 }
 
 
-_TEST_EXPORT
 wchar_t*
 rw_expand (wchar_t *dst, const char *src, size_t src_len /* = SIZE_MAX */,
            size_t *dst_len /* = 0 */)
@@ -873,7 +867,6 @@ rw_expand (wchar_t *dst, const char *src, size_t src_len /* = SIZE_MAX */,
 }
 
 
-_TEST_EXPORT
 char*
 rw_narrow (char *dst, const wchar_t *src, size_t len /* = SIZE_MAX */)
 {
@@ -911,7 +904,6 @@ rw_narrow (char *dst, const wchar_t *src, size_t len /* = SIZE_MAX */)
 }
 
 
-_TEST_EXPORT
 size_t
 rw_match (const char *s1, const wchar_t *s2, size_t len /* = SIZE_MAX */)
 {
@@ -975,7 +967,6 @@ rw_match (const char *s1, const wchar_t *s2, size_t len /* = SIZE_MAX */)
 }
 
 
-_TEST_EXPORT
 UserChar*
 rw_widen (UserChar *dst, const char *src, size_t len /* = SIZE_MAX */)
 {
@@ -1009,7 +1000,6 @@ rw_widen (UserChar *dst, const char *src, size_t len /* = SIZE_MAX */)
 }
 
 
-_TEST_EXPORT
 UserChar*
 rw_expand (UserChar *dst, const char *src, size_t src_len /* = SIZE_MAX */,
            size_t *dst_len /* = 0 */)
@@ -1020,7 +1010,6 @@ rw_expand (UserChar *dst, const char *src, size_t src_len /* = SIZE_MAX */,
 }
 
 
-_TEST_EXPORT
 char*
 rw_narrow (char *dst, const UserChar *src, size_t len /* = SIZE_MAX */)
 {
@@ -1058,7 +1047,6 @@ rw_narrow (char *dst, const UserChar *src, size_t len /* = SIZE_MAX */)
 }
 
 
-_TEST_EXPORT
 size_t
 rw_match (const char *s1, const UserChar *s2, size_t len /* = SIZE_MAX */)
 {

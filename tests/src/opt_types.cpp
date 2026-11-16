@@ -131,7 +131,7 @@ int _rw_setopts_types ()
 
 /**************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_enabled (const char *name)
 {
     int enabled = -1;

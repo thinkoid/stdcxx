@@ -32,7 +32,7 @@
 
 
 // generate a unique sequential number starting from 0
-_TEST_EXPORT int gen_seq ()
+int gen_seq ()
 {
     static int val;
 
@@ -41,7 +41,7 @@ _TEST_EXPORT int gen_seq ()
 
 
 // generate numbers in the sequence 0, 0, 1, 1, 2, 2, 3, 3, etc... 
-_TEST_EXPORT int gen_seq_2lists ()
+int gen_seq_2lists ()
 {
     static int vals [2];
 
@@ -50,7 +50,7 @@ _TEST_EXPORT int gen_seq_2lists ()
 
 
 // generate a sequence of subsequences (i.e., 0, 1, 2, 3, 4, 0, 1, 2, etc...)
-_TEST_EXPORT int gen_subseq ()
+int gen_subseq ()
 {
     static int val;
 
@@ -60,13 +60,13 @@ _TEST_EXPORT int gen_subseq ()
 
 // wrapper around a (possibly) extern "C" int rand()
 // extern "C++" 
-_TEST_EXPORT int gen_rnd ()
+int gen_rnd ()
 {
     return rand ();
 }
 
 
-_TEST_EXPORT unsigned
+unsigned
 ilog2 (size_t n)
 {
     unsigned result = 0;
@@ -78,7 +78,7 @@ ilog2 (size_t n)
 }
 
 
-_TEST_EXPORT unsigned
+unsigned
 ilog10 (size_t n)
 {
     unsigned result = 0;

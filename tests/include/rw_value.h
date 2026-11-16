@@ -41,7 +41,7 @@ struct UserData
 
 /**************************************************************************/
 
-struct _TEST_EXPORT UserPOD
+struct UserPOD
 {
     UserData data_;
 
@@ -74,7 +74,7 @@ struct _TEST_EXPORT UserPOD
 // objects of class UserClass maintain a count of their instances in existence,
 // the number of defaut and copy ctor calls, assignment operators, and
 // the number of calls to operator==() and operator<()
-struct _TEST_EXPORT UserClass
+struct UserClass
 {
     UserData   data_;
 
@@ -265,7 +265,7 @@ private:
 
 /**************************************************************************/
 
-struct _TEST_EXPORT UnaryPredicate
+struct UnaryPredicate
 {
     // total number of times operator() was invoked
     static _RWSTD_SIZE_T n_total_op_fcall_;
@@ -282,7 +282,7 @@ struct _TEST_EXPORT UnaryPredicate
 };
 
 
-struct _TEST_EXPORT BinaryPredicate
+struct BinaryPredicate
 {
     // total number of times operator() was invoked
     static _RWSTD_SIZE_T n_total_op_fcall_;
@@ -321,7 +321,7 @@ struct UserClass::Less: BinaryPredicate
 };
 
 
-static const struct _TEST_EXPORT UserClassFmatInit {
+static const struct UserClassFmatInit {
     UserClassFmatInit ();
 } _rw_user_class_fmat_init;
 

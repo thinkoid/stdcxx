@@ -78,7 +78,7 @@
  * inactive).
  * 
  */
-_TEST_EXPORT int
+int
 rw_test (int           argc,
          char*         argv[],
          const char*   filename,
@@ -112,7 +112,7 @@ rw_test (int           argc,
  * Instead, it causes the driver the exit the process with the staus equal
  * to 9, the severity of the diagnostic.
  */
-_TEST_EXPORT int
+int
 rw_fatal (int         expr,
           const char* filename,
           int         line,
@@ -124,7 +124,7 @@ rw_fatal (int         expr,
  *
  * @see #rw_fatal
  */
-_TEST_EXPORT int
+int
 rw_error (int, const char*, int, const char*, ...);
 
 /**
@@ -132,7 +132,7 @@ rw_error (int, const char*, int, const char*, ...);
  *
  * @see #rw_fatal
  */
-_TEST_EXPORT int
+int
 rw_assert (int, const char*, int, const char*, ...);
 
 /**
@@ -140,7 +140,7 @@ rw_assert (int, const char*, int, const char*, ...);
  *
  * @see #rw_fatal
  */
-_TEST_EXPORT int
+int
 rw_warn (int, const char*, int, const char*, ...);
 
 /**
@@ -148,7 +148,7 @@ rw_warn (int, const char*, int, const char*, ...);
  *
  * @see #rw_fatal
  */
-_TEST_EXPORT int
+int
 rw_note (int, const char*, int, const char*, ...);
 
 /**
@@ -156,7 +156,7 @@ rw_note (int, const char*, int, const char*, ...);
  *
  * @see #rw_fatal
  */
-_TEST_EXPORT int
+int
 rw_info (int, const char*, int, const char*, ...);
 
 /**
@@ -173,7 +173,7 @@ rw_info (int, const char*, int, const char*, ...);
  *   rw_enable (rw_error, false); // disable all rw_error diagnostics
  *   rw_enable (rw_error);        // enable all rw_error diagnostics
  */
-_TEST_EXPORT bool
+bool
 rw_enable (int (*fun) (int, const char*, int, const char*, ...),
            bool enable = true);
 

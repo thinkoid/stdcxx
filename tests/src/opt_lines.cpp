@@ -300,7 +300,7 @@ _rw_expected (int line)
 
 /************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_enabled (int line)
 {
     int nenabled = 0;

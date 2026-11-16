@@ -37,14 +37,14 @@ extern "C" {
 
 typedef void rw_signal_handler_t (int);
 
-extern _TEST_EXPORT rw_signal_handler_t* const rw_sig_dfl;
-extern _TEST_EXPORT rw_signal_handler_t* const rw_sig_ign;
-extern _TEST_EXPORT rw_signal_handler_t* const rw_sig_hold;
-extern _TEST_EXPORT rw_signal_handler_t* const rw_sig_restore;
+extern rw_signal_handler_t* const rw_sig_dfl;
+extern rw_signal_handler_t* const rw_sig_ign;
+extern rw_signal_handler_t* const rw_sig_hold;
+extern rw_signal_handler_t* const rw_sig_restore;
 
 }
 
-_TEST_EXPORT unsigned
+unsigned
 rw_alarm (unsigned int, rw_signal_handler_t* = 0);
 
 

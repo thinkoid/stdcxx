@@ -34,8 +34,8 @@
 struct rw_file;
 
 // the equivalent of stdout and stderr
-extern _TEST_EXPORT rw_file* const rw_stdout;
-extern _TEST_EXPORT rw_file* const rw_stderr;
+extern rw_file* const rw_stdout;
+extern rw_file* const rw_stderr;
 
 
 /************************************************************************
@@ -45,13 +45,13 @@ extern _TEST_EXPORT rw_file* const rw_stderr;
 /**
  *  Prints to rw_stdout.
  */
-_TEST_EXPORT int
+int
 rw_printf (const char*, ...);
 
 /**
  * Prints to a file.
  */
-_TEST_EXPORT int
+int
 rw_fprintf (rw_file*, const char*, ...);
 
 
@@ -62,13 +62,13 @@ rw_fprintf (rw_file*, const char*, ...);
 /**
  * Prints to a character buffer.
  */
-_TEST_EXPORT int
+int
 rw_sprintf (char*, const char*, ...);
 
 /**
  * Prints to a character buffer of given size.
  */
-_TEST_EXPORT int
+int
 rw_snprintf (char*, _RWSTD_SIZE_T, const char*, ...);
 
 
@@ -84,7 +84,7 @@ rw_snprintf (char*, _RWSTD_SIZE_T, const char*, ...);
  * @return  On success, returns a pointer to the dynamically allocated
  *          character buffer. Otherwise, returns 0.
  */
-_TEST_EXPORT char*
+char*
 rw_sprintfa (const char* fmt, ...);
 
 
@@ -102,7 +102,7 @@ rw_sprintfa (const char* fmt, ...);
  *          sufficient, returns a pointer to the newly allocated character
  *          buffer of sufficient size. Returns 0 on failure.
  */
-_TEST_EXPORT char*
+char*
 rw_snprintfa (char *buf, _RWSTD_SIZE_T bufsize, const char* fmt, ...);
 
 
@@ -130,7 +130,7 @@ rw_snprintfa (char *buf, _RWSTD_SIZE_T bufsize, const char* fmt, ...);
  * @return  On success, returns the number of characters formatted into
  *          the buffer, otherwise -1.
  */
-_TEST_EXPORT int
+int
 rw_asnprintf (char** pbuf, _RWSTD_SIZE_T *pbufsize, const char *fmt, ...);
 
 

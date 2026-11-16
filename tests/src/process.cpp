@@ -75,7 +75,7 @@
 
 /**************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_vasnprintf (char**, size_t*, const char*, va_list);
 
 /**************************************************************************/
@@ -197,7 +197,7 @@ _rw_vsystem (const char *cmd, va_list va)
 
 /**************************************************************************/
 
-_TEST_EXPORT int
+int
 rw_system (const char *cmd, ...)
 {
     va_list va;
@@ -239,7 +239,7 @@ _rw_vprocess_create (const char* cmd, va_list va)
 
 /**************************************************************************/
 
-_TEST_EXPORT rw_pid_t
+rw_pid_t
 rw_process_create (const char* cmd, ...)
 {
     va_list va;
@@ -253,7 +253,7 @@ rw_process_create (const char* cmd, ...)
 
 /**************************************************************************/
 
-_TEST_EXPORT rw_pid_t
+rw_pid_t
 rw_process_create (const char* path, char* const argv[])
 {
 
@@ -301,7 +301,7 @@ typedef void (*signal_handler_t) (int);
 
 }
 
-_TEST_EXPORT rw_pid_t
+rw_pid_t
 rw_waitpid (rw_pid_t pid, int* presult, int timeout/* = -1*/)
 {
 
@@ -426,7 +426,7 @@ rw_waitpid (rw_pid_t pid, int* presult, int timeout/* = -1*/)
 }
 
 
-_TEST_EXPORT int
+int
 rw_process_kill (rw_pid_t pid, int signo)
 {
     // timeout for rw_wait_pid

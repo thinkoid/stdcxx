@@ -67,7 +67,7 @@
 // contains an unmatched unescaped open brace.  the function can also fail
 // and return null if a memory allocation request fails.
 //
-_TEST_EXPORT char*
+char*
 rw_brace_expand (const char* brace_expr, _RWSTD_SIZE_T sz,
                  char* s, _RWSTD_SIZE_T n, char sep);
 
@@ -85,7 +85,7 @@ rw_brace_expand (const char* brace_expr, _RWSTD_SIZE_T sz,
 // this  function only does tokenization and brace expansion at this time.
 // at some point it may make  sense to add environment variable expansion.
 //
-_TEST_EXPORT char*
+char*
 rw_shell_expand (const char* shell_expr, _RWSTD_SIZE_T sz,
                  char* s, _RWSTD_SIZE_T n, char sep);
 

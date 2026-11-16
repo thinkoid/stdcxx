@@ -46,11 +46,11 @@ enum {
 // if RWSTD_ALLOC_FLAGS environment variable is defined and != 0
 // and flags == -1, then rw_alloc will use value of RWSTD_ALLOC_FLAGS
 // instead of flags variable
-_TEST_EXPORT void*
+void*
 rw_alloc(_RWSTD_SIZE_T, int /*flags*/ = -1);
 
 // free the memory block, allocated by rw_alloc()
-_TEST_EXPORT void
+void
 rw_free(void*);
 
 #endif   // RW_ALLOC_H_INCLUDED

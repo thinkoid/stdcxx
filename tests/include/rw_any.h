@@ -34,7 +34,7 @@
 #include <rw_testdefs.h>
 
 
-class _TEST_EXPORT rw_any_t
+class rw_any_t
 {
 public:
 

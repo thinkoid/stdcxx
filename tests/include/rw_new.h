@@ -103,7 +103,7 @@ struct rwt_free_store
 // returns a pointer to the global rwt_free_store object
 // with a non-zero argument sets the global pointer to the rwt_free_store
 // object to the value of the argument
-_TEST_EXPORT rwt_free_store*
+rwt_free_store*
 rwt_get_free_store (rwt_free_store*);
 
 // computes the difference between two states of the free store
@@ -117,7 +117,7 @@ rwt_get_free_store (rwt_free_store*);
 // when the second argument is 0, returns the difference between
 // the state specified by the first argument and the current state
 // of the free store
-_TEST_EXPORT rwt_free_store*
+rwt_free_store*
 rwt_checkpoint (const rwt_free_store*, const rwt_free_store*);
 
 // returns the number of blocks allocated and not freed since
@@ -125,15 +125,15 @@ rwt_checkpoint (const rwt_free_store*, const rwt_free_store*);
 // when the second argument is 0, returns the number of blocks
 // allocated and not freed since the last established checkpoint
 // and establishes a new checkpoint
-_TEST_EXPORT _RWSTD_SIZE_T
+_RWSTD_SIZE_T
 rwt_check_leaks (_RWSTD_SIZE_T*, const rwt_free_store*);
 
 
 // define replacement operator new and delete to keep track
 // of allocated memory and allow for exceptions to be thrown
 
-_TEST_EXPORT void* operator_new (_RWSTD_SIZE_T, bool);
-_TEST_EXPORT void  operator_delete (void*, bool);
+void* operator_new (_RWSTD_SIZE_T, bool);
+void  operator_delete (void*, bool);
 
 #  ifndef _RWSTD_BAD_ALLOC
      // #define if not #defined by <new> (SunPro #includes its
@@ -142,7 +142,7 @@ _TEST_EXPORT void  operator_delete (void*, bool);
 #  endif   // _RWSTD_BAD_ALLOC
 
 
-struct _TEST_EXPORT MyNewInit
+struct MyNewInit
 {
     MyNewInit ();
     ~MyNewInit ();

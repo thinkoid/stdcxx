@@ -34,7 +34,7 @@
 #include <rw_testdefs.h>
 
 
-struct _TEST_EXPORT UserCtypeBase: std::ctype_base
+struct UserCtypeBase: std::ctype_base
 {
     enum MemFunc {
         mf_is,
@@ -113,7 +113,7 @@ class UserCtype;
 
 
 template <>
-class _TEST_EXPORT UserCtype<char>
+class UserCtype<char>
     : public std::ctype<char>, public UserCtypeBase
 {
     typedef std::ctype<char_type> Base;
@@ -155,7 +155,7 @@ protected:
 
 
 template <>
-class _TEST_EXPORT UserCtype<wchar_t>
+class UserCtype<wchar_t>
     : public std::ctype<wchar_t>, public UserCtypeBase
 {
     typedef std::ctype<char_type> Base;
@@ -212,7 +212,7 @@ protected:
 namespace std {
 
 template <>
-class _TEST_EXPORT ctype<UserChar>
+class ctype<UserChar>
     : public std::locale::facet, public UserCtypeBase
 {
     typedef std::locale::facet Base;
@@ -332,7 +332,7 @@ protected:
 
 
 template <>
-class _TEST_EXPORT UserCtype<UserChar>
+class UserCtype<UserChar>
     : public std::ctype<UserChar>
 {
     typedef std::ctype<UserChar> Base;

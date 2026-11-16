@@ -32,18 +32,18 @@
 
 typedef _RWSTD_SSIZE_T rw_pid_t;
 
-_TEST_EXPORT int
+int
 rw_system (const char*, ...);
 
 // returns pid of the created process or -1 on error
 // (in which case errno is set to an appropriate value)
-_TEST_EXPORT rw_pid_t
+rw_pid_t
 rw_process_create (const char*, ...);
 
 // note: argv[0] should be equal to path
 // returns pid of the created process or -1 on error
 // (in which case errno is set to an appropriate value)
-_TEST_EXPORT rw_pid_t
+rw_pid_t
 rw_process_create (const char* /*path*/, char* const /*argv*/[]);
 
 // result is a pointer to a buffer where the result code
@@ -64,7 +64,7 @@ rw_process_create (const char* /*path*/, char* const /*argv*/[]);
 //
 // errors:
 //   ECHILD: no specified process exists
-_TEST_EXPORT rw_pid_t
+rw_pid_t
 rw_waitpid (rw_pid_t /*pid*/, int* /*result*/, int /*timeout*/ = -1);
 
 // returns:
@@ -76,7 +76,7 @@ rw_waitpid (rw_pid_t /*pid*/, int* /*result*/, int /*timeout*/ = -1);
 //   ESRCH: the pid does not exist
 //   EPERM: the calling process does not have permission
 //          to terminate the specified process
-_TEST_EXPORT int
+int
 rw_process_kill (rw_pid_t, int = -1);
 
 #endif   // RW_PROCESS_H_INCLUDED

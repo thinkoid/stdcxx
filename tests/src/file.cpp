@@ -76,7 +76,7 @@ extern "C" int mkstemp (char*);
 // or using the <U00XX> notations for narrow characters outside that set
 // if (0 == str), writes out the CHARMAP section of the locale definition
 // file for the Portable Character Set (in POSIX-compliant format) 
-_TEST_EXPORT void pcs_write (void *fpv, const char *str)
+void pcs_write (void *fpv, const char *str)
 {
     FILE* const fp = static_cast< FILE* >(fpv);
 
@@ -187,7 +187,6 @@ _TEST_EXPORT void pcs_write (void *fpv, const char *str)
 }
 
 
-_TEST_EXPORT
 const char* rw_tmpnam (char *buf)
 {
 #  define TMP_TEMPLATE      "tmpfile-XXXXXX"
@@ -239,7 +238,6 @@ const char* rw_tmpnam (char *buf)
 }
 
 
-_TEST_EXPORT
 size_t rw_fsize (const char *fname)
 {
 
@@ -253,7 +251,6 @@ size_t rw_fsize (const char *fname)
 }
 
 
-_TEST_EXPORT
 void* rw_fread (const char *fname,
                 size_t     *size   /* = 0 */,
                 const char *mode   /* = "r" */)
@@ -336,7 +333,6 @@ void* rw_fread (const char *fname,
 }
 
 
-_TEST_EXPORT
 size_t rw_fwrite (const char *fname,
                   const void *buf,
                   size_t      size /* = -1 */,
@@ -371,7 +367,7 @@ size_t rw_fwrite (const char *fname,
 
 // get the file descriptor that will be returned by the next call
 // to creat() or open() (used to detect file descriptor leaks)
-_TEST_EXPORT int
+int
 rw_nextfd (int *count)
 {
     if (count) {

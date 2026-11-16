@@ -28,7 +28,7 @@
 #include <fnmatch.h>   // for fnmatch()
 
 
-_TEST_EXPORT int
+int
 rw_fnmatch (const char *pattern, const char *string, int)
 {
     RW_ASSERT (pattern);

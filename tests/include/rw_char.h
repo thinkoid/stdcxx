@@ -230,7 +230,7 @@ struct TraitsMemFunc
 
 // required specialization on char
 template <>
-struct _TEST_EXPORT UserTraits<char>: std::char_traits<char>
+struct UserTraits<char>: std::char_traits<char>
 {
     typedef std::char_traits<char> Base;
     typedef Base::char_type        char_type;
@@ -299,7 +299,7 @@ private:
 
 // required specialization on wchar_t
 template <>
-struct _TEST_EXPORT UserTraits<wchar_t>: std::char_traits<wchar_t>
+struct UserTraits<wchar_t>: std::char_traits<wchar_t>
 {
     typedef std::char_traits<wchar_t> Base;
     typedef Base::char_type           char_type;
@@ -367,7 +367,7 @@ private:
 
 
 template <>
-struct _TEST_EXPORT UserTraits<UserChar>   // user-defined character traits
+struct UserTraits<UserChar>   // user-defined character traits
 {
     typedef TraitsMemFunc MemFun;
 
@@ -436,7 +436,7 @@ private:
 // of dst to NUL (i.e., such a call is the equivalent of calling
 // memset(dst, 0, len * sizeof *dst))
 // returns dst
-_TEST_EXPORT char*
+char*
 rw_widen (char*         /* dst */,
           const char*   /* src */,
           _RWSTD_SIZE_T /* len */ = _RWSTD_SIZE_MAX);
@@ -453,7 +453,7 @@ rw_widen (char*         /* dst */,
 // produced characters not counting the terminating NUL
 // the function returns the dynamically allocated buffer; the caller
 // must deallocate the buffer using the delete expression
-_TEST_EXPORT char*
+char*
 rw_expand (char*          /* dst     */,
            const char*    /* src     */,
            _RWSTD_SIZE_T  /* src_len */ = _RWSTD_SIZE_MAX,
@@ -462,7 +462,7 @@ rw_expand (char*          /* dst     */,
 
 // rw_narrow() narrows successive elements of src into the buffer dst
 // (see rw_widen() for details)
-_TEST_EXPORT char*
+char*
 rw_narrow (char*         /* dst */,
            const char*   /* src */,
            _RWSTD_SIZE_T /* len */ = _RWSTD_SIZE_MAX);
@@ -476,44 +476,44 @@ rw_narrow (char*         /* dst */,
 // directive parser looks past every character for a repeat count,
 // and the char overload parses s2 as well as s1
 // returns the number of matching elements
-_TEST_EXPORT _RWSTD_SIZE_T 
+_RWSTD_SIZE_T
 rw_match (const char*   /* s1  */,
           const char*   /* s2  */,
           _RWSTD_SIZE_T /* len */ = _RWSTD_SIZE_MAX);
 
 #ifndef _RWSTD_WCHAR_T
 
-_TEST_EXPORT wchar_t*
+wchar_t*
 rw_widen (wchar_t*, const char*, _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);
 
-_TEST_EXPORT wchar_t*
+wchar_t*
 rw_expand (wchar_t*       /* dst     */,
            const char*    /* src     */,
            _RWSTD_SIZE_T  /* src_len */ = _RWSTD_SIZE_MAX,
            _RWSTD_SIZE_T* /* dst_len */ = 0);
 
-_TEST_EXPORT char*
+char*
 rw_narrow (char*, const wchar_t*, _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);
 
-_TEST_EXPORT _RWSTD_SIZE_T
+_RWSTD_SIZE_T
 rw_match (const char*, const wchar_t*,
           _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);
 
 #endif   // _RWSTD_WCHAR_T
 
-_TEST_EXPORT UserChar*
+UserChar*
 rw_widen (UserChar*, const char*, _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);
 
-_TEST_EXPORT UserChar*
+UserChar*
 rw_expand (UserChar*      /* dst     */,
            const char*    /* src     */,
            _RWSTD_SIZE_T  /* src_len */ = _RWSTD_SIZE_MAX,
            _RWSTD_SIZE_T* /* dst_len */ = 0);
 
-_TEST_EXPORT char*
+char*
 rw_narrow (char*, const UserChar*, _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);
 
-_TEST_EXPORT _RWSTD_SIZE_T
+_RWSTD_SIZE_T
 rw_match (const char*, const UserChar*, _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);
 
 
@@ -533,7 +533,7 @@ rw_get_call_counters (UserTraits<charT>*, charT*)
 }
 
 
-static const struct _TEST_EXPORT UserCharFmatInit {
+static const struct UserCharFmatInit {
     UserCharFmatInit ();
 } _rw_user_char_fmat_init;
 

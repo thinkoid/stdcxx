@@ -246,7 +246,7 @@ _rw_print_heap ()
 static size_t seq_gen;   // sequence number generator
 
 
-_TEST_EXPORT void*
+void*
 operator_new (size_t nbytes, bool array)
 {
     if (0 == trace_sequence [0] && trace_sequence [0] == trace_sequence [1]) {
@@ -433,7 +433,7 @@ operator_new (size_t nbytes, bool array)
 }
 
 
-_TEST_EXPORT void
+void
 operator_delete (void *ptr, bool array)
 {
     static const char* const name[] = {
@@ -536,7 +536,7 @@ operator_delete (void *ptr, bool array)
     }
 }
 
-_TEST_EXPORT rwt_free_store*
+rwt_free_store*
 rwt_get_free_store (rwt_free_store *st)
 {
     rwt_free_store* const ret = pst;
@@ -559,7 +559,7 @@ rwt_checkpoint_compare (size_t* diffs, size_t n,
     }
 }
 
-_TEST_EXPORT rwt_free_store*
+rwt_free_store*
 rwt_checkpoint (const rwt_free_store *st0, const rwt_free_store *st1)
 {
     static rwt_free_store checkpoint;
@@ -623,7 +623,7 @@ rwt_checkpoint (const rwt_free_store *st0, const rwt_free_store *st1)
 }
 
 
-_TEST_EXPORT _RWSTD_SIZE_T
+_RWSTD_SIZE_T
 rwt_check_leaks (_RWSTD_SIZE_T *bytes, const rwt_free_store *st)
 {
     const rwt_free_store* const ckpt = rwt_checkpoint (st, 0);

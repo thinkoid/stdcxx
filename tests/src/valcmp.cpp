@@ -633,7 +633,7 @@ _rw_cmpxx (const void* buf1,
 }
 
 
-_TEST_EXPORT int
+int
 rw_valcmp (const void* buf1,
            const void* buf2,
            size_t      nelems,
@@ -657,7 +657,7 @@ rw_valcmp (const void* buf1,
 }
 
 
-_TEST_EXPORT int
+int
 rw_strncmp (const char* str1,
             const char* str2,
             size_t      nelems /* = _RWSTD_SIZE_MAX */,
@@ -667,7 +667,7 @@ rw_strncmp (const char* str1,
 }
 
 
-_TEST_EXPORT int
+int
 rw_strncmp (const char*    str1,
             const wchar_t* str2,
             size_t         nelems /* = _RWSTD_SIZE_MAX */,
@@ -677,7 +677,7 @@ rw_strncmp (const char*    str1,
 }
 
 
-_TEST_EXPORT int
+int
 rw_strncmp (const wchar_t* str1,
             const char*    str2,
             size_t         nelems /* = _RWSTD_SIZE_MAX */,
@@ -687,7 +687,7 @@ rw_strncmp (const wchar_t* str1,
 }
 
 
-_TEST_EXPORT int
+int
 rw_strncmp (const wchar_t* str1,
             const wchar_t* str2,
             size_t         nelems /* = _RWSTD_SIZE_MAX */,
@@ -701,7 +701,7 @@ rw_strncmp (const wchar_t* str1,
 // floating point comparison helpers based on
 // http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm
 
-_TEST_EXPORT int
+int
 rw_fltcmp (float x, float y)
 {
 #if _RWSTD_FLT_SIZE == _RWSTD_SHRT_SIZE
@@ -742,7 +742,7 @@ rw_fltcmp (float x, float y)
 #define Abs(x) ((x) < 0 ? -(x) : (x))
 
 
-_TEST_EXPORT int
+int
 rw_dblcmp (double x, double y)
 {
 #if _RWSTD_DBL_SIZE == _RWSTD_INT_SIZE
@@ -900,7 +900,7 @@ _rw_ordinal_distance (_rw_uint64 hi1, _rw_uint64 lo1,
 #endif   // _RW_LDBL_ORDINAL
 
 
-_TEST_EXPORT int
+int
 rw_ldblcmp (long double x, long double y)
 {
     if (sizeof (long double) == sizeof (double))

@@ -34,7 +34,7 @@
 typedef unsigned char UChar;
 
 
-_TEST_EXPORT int
+int
 rw_vasnprintf (char**, size_t*, const char*, va_list);
 
 

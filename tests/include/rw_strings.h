@@ -625,18 +625,18 @@ struct StringTest
 // FUNCALL: a string describing the call to the basic_string function
 //          with function with function arguments expanded (as specified
 //          by the TestCase argument)
-_TEST_EXPORT void
+void
 rw_setvars (const StringFunc&, const StringTestCase* = 0);
 
 typedef void StringTestFunc (const StringFunc&, const StringTestCase&);
 
-_TEST_EXPORT int
+int
 rw_run_string_test (int, char**, const char*, const char*,
                     StringTestFunc*, const StringTest*, _RWSTD_SIZE_T);
 
 typedef void VoidFunc ();
 
-_TEST_EXPORT int
+int
 rw_run_string_test (int, char**, const char*, const char*,
                     VoidFunc* const*, const StringTest*, _RWSTD_SIZE_T);
 
@@ -729,7 +729,7 @@ public:
 // encapsulates the state of a string object without regard to type
 // used in exception safety tests to determine changes to the state
 // after a modifying operation throws an exception
-struct _TEST_EXPORT StringState
+struct StringState
 {
     const void*   data_;
     _RWSTD_SIZE_T size_;

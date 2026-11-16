@@ -35,14 +35,6 @@
 #include <rw/_defs.h>
 
 
-#  define _TEST_EXPORT
-
-
-
-
-// give the for-init-variable a local scope
-
-
 // convenience macro for exception specification on function pointers
 #ifndef _RWSTD_NO_PTR_EXCEPTION_SPEC
 

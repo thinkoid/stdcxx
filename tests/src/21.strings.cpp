@@ -402,7 +402,7 @@ _rw_argno (StringIds::OverloadId which, int arg)
 
 /**************************************************************************/
 
-_TEST_EXPORT void
+void
 rw_setvars (const StringFunc     &func,
             const StringTestCase *pcase /* = 0 */)
 {
@@ -1661,7 +1661,7 @@ _rw_run_test  (int               argc,
 
 
 
-_TEST_EXPORT int
+int
 rw_run_string_test (int               argc,
                     char             *argv [],
                     const char       *file,
@@ -1674,7 +1674,7 @@ rw_run_string_test (int               argc,
 }
 
 
-_TEST_EXPORT int
+int
 rw_run_string_test (int               argc,
                     char             *argv [],
                     const char       *file,

@@ -285,7 +285,7 @@ _rw_check_leaks (int line, size_t expect_blocks, size_t expect_bytes)
 }
 
 
-_TEST_EXPORT void
+void
 rw_check_leaks (const SharedAlloc *palloc        /* =  0 */,
                 int                line          /* =  0 */, 
                 size_t             expect_blocks /* =  0 */,
