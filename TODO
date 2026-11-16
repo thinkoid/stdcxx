@@ -18,34 +18,9 @@ longer investigations.
 
 The library itself, =include= and =src=: its behaviour, its interface
 and what it carries that it no longer uses. The entries are binned by
-the clause of the standard they fall under, localization first since
-it holds the most, then the streams and the rest of the library in
-clause order; the configuration and the C library headers, and the
-tree's own housekeeping, come last. Within a bin the easiest entry is
-at the top.
-
-** Configuration and the C library
-
-*** TODO =<stdlib.h>= and =<math.h>= leave the C++ overloads out of the global namespace
-
-14882:2003 D.5, p2 has each =name.h= place the =cname= header's names
-in the global namespace. =include/rw/_config.h= 97-106 defines
-=_RWSTD_NO_DEPRECATED_C_HEADERS= unless a program asks for the pure
-headers, and under it =include/ansi/stdlib.h= and =math.h= include the
-C library's header and nothing more (=stdlib.h= 69-70). The overloads
-26.5 adds are thus in =std= alone. Measured in a 15D build under GCC,
-2026-11-16: after =<stdlib.h>= ~sizeof (abs (0L))~ is 4 and
-~abs (-5000000000L)~ is 705032704, with a warning; after =<math.h>=
-~sizeof (sin (0.0f))~ is 8. After =<cstdlib>= ~std::abs (0L)~ has
-size 8 and ~::abs (0L)~ size 4. Every edition of the standard has
-the =name.h= header provide the overloads (=ref-c-headers.md= 1.6,
-and chapter 6 for the table). Seen in passing by the extension
-sweep, 2026-11-04.
-
-Fix: a decision: the =name.h= headers bring the =cname= overloads to
-global scope, or record the C library's set.
-
-Check: ~sizeof (abs (0L))~ after =<stdlib.h>= alone.
+the clause of the standard they fall under, in clause order, and the
+tree's own housekeeping comes last; the housekeeping is the one bin
+today. Within a bin the easiest entry is at the top.
 
 ** Tree hygiene
 
@@ -65,9 +40,9 @@ the =makefile.in= of a 15D build differs by that line alone.
 
 *** TODO Three comments of =cstdlib= and =cmath= speak for Visual C++
 
-=include/ansi/cstdlib= 91-92 and =include/ansi/cmath= 644-645 say
+=include/ansi/cstdlib= 92-93 and =include/ansi/cmath= 645-646 say
 that the using-declarations must come after the overloads, "working
-around MSVC6 PR# 27677". =cmath= 670 says "MSVC provides its own
+around MSVC6 PR# 27677". =cmath= 672 says "MSVC provides its own
 complex macro" and nothing follows it: d743fa8d removed the
 ~#undef complex~ it introduced and left the comment. The tree no
 longer builds with Visual C++, and the standard lets a
@@ -1360,13 +1335,13 @@ Under =eccp -A= (11S, EDG 7.0, measured 2026-11-16,
 =ref-c-headers.md= 7.2) all 35 pure headers compile, and the pure
 model meets requirements the wrapper model cannot: =<cwchar>=
 compiles and declares the wide I/O functions of Amendment 1,
-=std::strchr= and =std::wcschr= are the const-correct pairs, ~abs
-(long)~ is there after =<stdlib.h>=, and =::atoi= is not declared
-after =<cstdlib>=. The =abs= and =div= defect does not arise there,
-since EDG overloads on language linkage. It fails on the =float=
-overloads, =va_list= and =jmp_buf=. At the tip of 4.2.x the pure
-model was the one =eccp= took (=_config-eccp.h= undefined both
-macros), and nothing turned it off for Sun C++ or Compaq C++.
+=std::strchr= and =std::wcschr= are the const-correct pairs, and
+=::atoi= is not declared after =<cstdlib>=. The =abs= and =div=
+defect does not arise there, since EDG overloads on language linkage.
+It fails on the =float= overloads, =va_list= and =jmp_buf=. At the tip
+of 4.2.x the pure model was the one =eccp= took (=_config-eccp.h=
+undefined both macros), and nothing turned it off for Sun C++ or
+Compaq C++.
 
 Fix: a decision, and the two outcomes differ for this chapter.
 - The pure headers are repaired: =va_list= and the macros from the
@@ -1842,7 +1817,7 @@ bias is a defect to fix is a decision for the Library chapter.
 
 4.1 lists "=abs= and =div=" among what depends on =_RWSTD_LONG_LONG=;
 =<cstdlib>= defines no ~div (long long)~ (=include/ansi/cstdlib=
-58-63 has the =long= overload alone). 4.3 calls
+59-64 has the =long= overload alone). 4.3 calls
 =_RWSTD_NO_CLASS_PARTIAL_SPEC= the sole condition on the cv-qualified
 =numeric_limits=; since e9980bcd they are unconditional
 (=include/limits= 501-510). Found by the extension sweep's reading,
@@ -1900,9 +1875,10 @@ global namespace, against 17.4.1.2 p4, D.5 p2 and 26.5 of
 characterizations that gate them. The material is in pieces: the
 original =README= 4.1 and its =_RWSTD_NO_PURE_C_HEADERS= paragraph,
 =ref-locale.md= 8.2 on =<clocale>=, =history-libc-declarations.md=
-4.1 on =<cwchar>=, and the message of 2c76243c. Three entries turn
-on it: the =<stdlib.h>= overloads, the body no configuration
-reaches, and "The pure C headers".
+4.1 on =<cwchar>=, and the message of 2c76243c. Of the three
+entries that turned on it, "The pure C headers" remains; the
+=<stdlib.h>= overloads and the body no configuration reached have
+left.
 
 ** TODO A tour of the locale subsystem
 

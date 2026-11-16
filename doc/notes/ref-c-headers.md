@@ -34,10 +34,11 @@ know them before reading anything else:
   wrapper's doing: glibc shows them because GCC defines `_GNU_SOURCE`
   for every C++ translation unit.
 - The overloads C++ adds to the C library, `abs (long)` and the
-  `float` math functions among them, are defined in `std` alone. So
-  `<stdlib.h>` and `<math.h>` give C's set: `abs (-5000000000L)`
-  after `<stdlib.h>` is 705032704. Every edition of the standard
-  requires the overloads there.
+  `float` math functions among them, are defined in `std`, and
+  `<stdlib.h>` and `<math.h>` name them in the global namespace, as
+  every edition of the standard requires. So `abs (-5000000000L)`
+  after `<stdlib.h>` is 5000000000, and `sqrt (2)` after `<math.h>`
+  is ambiguous, as `std::sqrt (2)` is after `<cmath>`.
 - A wrapper cannot include the C library's header by its name,
   because the name finds the wrapper. The configuration records each
   header's absolute path, and the wrappers include that.
@@ -320,6 +321,17 @@ includes `<stddef.h>` for one typedef, several times over, and a
 guard in the wrapper would cut every inclusion after the first. The
 wrapper is transparent: `#include <rw/_defs.h>`, then the C header.
 
+Two wrappers do more. `<stdlib.h>` and `<math.h>` go on to include
+`<cstdlib>` and `<cmath>` and name the overloads of 26.5 in the
+global namespace (3.3). The C header still comes first, so an
+inclusion by the C library gets the C header before anything of
+C++. What follows needs no guard: the `<cname>` header has its own,
+and a using-declaration may be repeated at namespace scope. It
+relies on one fact of glibc: no header reached from the two includes
+`<stdlib.h>` or `<math.h>` by name, and `g++ -H` shows each wrapper
+once, at depth 1. A nested passage would reach the using-declarations
+before `std` has the names.
+
 ## 3. The two models
 
 ### 3.1 Two switches
@@ -350,7 +362,7 @@ A `<cname>` header tests the first macro and has two bodies
 | the program defines | `NO_PURE` | `NO_DEPRECATED` | `<cstdlib>` is | `<stdlib.h>` is |
 |---|---|---|---|---|
 | `_RWSTD_USE_PURE_C_HEADERS` | no | no | pure | `<cstdlib>` + using |
-| nothing | yes | yes | wrapper | the C library's |
+| nothing | yes | yes | wrapper | the C library's; for `<stdlib.h>` and `<math.h>`, then `<cname>` + using for the overloads |
 
 The second macro is defined wherever the first is, so the two
 switches move together.
@@ -379,11 +391,15 @@ can do today.
 ```
 <stdlib.h>   include/ansi/stdlib.h
                #include "/usr/include/stdlib.h"
+               #include <cstdlib>
+               using std::abs;  using std::div;
 <cstdlib>    include/ansi/cstdlib
                #include "/usr/include/stdlib.h"
+               extern "C++" {
                namespace std {
                    inline long abs (long);      // where the C library has none
                    using ::abs;  using ::atoi;  ...
+               }
                }
 ```
 
@@ -396,9 +412,24 @@ at global scope, and `<cname>` then does three things:
 - names each standard function and type in `std` with a
   using-declaration.
 
-The `.h` wrapper is the C library's header and nothing more. The
-overloads are therefore in `std` alone, which is the third
-consequence of chapter 0. `<cwchar>` put this model in words when it
+Fifteen `.h` wrappers are the C library's header and nothing more.
+`<stdlib.h>` and `<math.h>` are the C library's header followed by
+their `<cname>` header and a using-declaration in the global
+namespace for each function the `<cname>` header defines in `std`
+itself: in `<stdlib.h>` `abs` and `div`, and `bsearch` and `qsort`
+where they have linkage twins; in `<math.h>` `abs` and the 22
+functions of `<cmath>`. The overloads are thus in both namespaces,
+as D.5 p2 has them; this is the third consequence of chapter 0.
+
+`<cstdlib>` and `<cmath>` hold their part of `std` in an
+`extern "C++"` block. A program may include `<stdlib.h>` inside an
+`extern "C"` block of its own. Without the `extern "C++"` block the
+definition of `std::abs (long)` would then have C linkage: a second
+C function named `abs`, which GCC, Clang and EDG reject. With it,
+such a program compiles with the `.h` forms and with `<cstdlib>` and
+`<cmath>` alike.
+
+`<cwchar>` put this model in words when it
 adopted it throughout (STDCXX-129, a6ca23c8): all declarations go
 "into the global scope first, before injecting each into namespace
 std via a using declaration".
@@ -440,13 +471,13 @@ the 2005 import, so it left the tree in November 2026.
 | `<ciso646>` | none | nothing: the compiler's header, no models |
 | `<climits>` | none; all macros | see 5.1 |
 | `<clocale>` | `lconv`, `localeconv`, `setlocale` | nothing |
-| `<cmath>` | 22 functions | the `float` and `long double` overloads, `abs` for the three floating types, `pow` with an `int` exponent; undefines masking macros |
+| `<cmath>` | 22 functions | the `float` and `long double` overloads, `abs` for the three floating types, `pow` with an `int` exponent, in an `extern "C++"` block, and `<math.h>` names them in the global namespace; undefines masking macros |
 | `<csetjmp>` | `jmp_buf`, `longjmp` | defines `setjmp` as a macro if the C library made it a function (STDCXX-670) |
 | `<csignal>` | `sig_atomic_t`, `raise`, `signal` | nothing |
 | `<cstdarg>` | `va_list` | nothing |
 | `<cstddef>` | `size_t`, `ptrdiff_t` | nothing |
 | `<cstdio>` | `FILE`, `fpos_t`, `size_t`, 40 functions | undefines 42 names a C library may mask with macros (STDCXX-195); defines `stdin`, `stdout` and `stderr` as macros if they are not |
-| `<cstdlib>` | `size_t`, `div_t`, `ldiv_t`, 28 functions | `abs (long)`, `abs (long long)`, `div (long, long)`; the `extern "C++"` twins of `bsearch` and `qsort` |
+| `<cstdlib>` | `size_t`, `div_t`, `ldiv_t`, 28 functions | `abs (long)`, `abs (long long)`, `div (long, long)`; the `extern "C++"` twins of `bsearch` and `qsort`; all in an `extern "C++"` block, and `<stdlib.h>` names them in the global namespace |
 | `<cstring>` | `size_t`, 22 functions | undefines masking macros |
 | `<ctime>` | `clock_t`, `time_t`, `size_t`, `tm`, 9 functions | nothing |
 | `<cwchar>` | `mbstate_t`, `wint_t`, `size_t`, `tm`, the wide functions | see 5.3 |
@@ -542,15 +573,15 @@ second column is what 14882:2003 requires.
 | `random ()` after `<cstdlib>` | error: C90 has no such function | compiles | error |
 | `sizeof (std::abs (0L))` after `<cstdlib>` | 8: 26.5 p4 | 8 | 4 |
 | `std::div (7L, 2L)` as an `ldiv_t` | compiles: 26.5 p4 | compiles | error |
-| `sizeof (abs (0L))` after `<stdlib.h>` | 8: D.5 p2 | 4 | 4 |
-| `abs (-5000000000L)` after `<stdlib.h>` | 5000000000 | 705032704 | 705032704 |
+| `sizeof (abs (0L))` after `<stdlib.h>` | 8: D.5 p2 | 8 | 4 |
+| `abs (-5000000000L)` after `<stdlib.h>` | 5000000000 | 5000000000 | 705032704 |
 | `sizeof (std::sin (0.0f))` after `<cmath>` | 4: 26.5 p6 | 4 | 8 |
-| `sizeof (sin (0.0f))` after `<math.h>` | 4: D.5 p2 | 8 | 8 |
+| `sizeof (sin (0.0f))` after `<math.h>` | 4: D.5 p2 | 4 | 8 |
 | `char* p = std::strchr (cs, 'x')`, `cs` a `const char*` | error: 21.4 p4 | error | error |
 | the program of 1.1 returns | 1 | 4 | 1 |
 | a global `int random;` after `<cstdlib>` | compiles: 1.4 p2 | error | compiles |
 
-The wrapper model departs from 2003 in rows 2, 3, 6, 7, 9, 11 and 12:
+The wrapper model departs from 2003 in rows 2, 3, 11 and 12:
 
 - **Rows 2 and 11** are the model itself, the global declaration
   beside the one in `std`. C++11 permits it (1.4).
@@ -561,9 +592,17 @@ The wrapper model departs from 2003 in rows 2, 3, 6, 7, 9, 11 and 12:
   defines `_GNU_SOURCE` for every C++ translation unit, and glibc
   then declares everything it has. With `-U_GNU_SOURCE -std=c++98`
   row 12 compiles.
-- **Rows 6, 7 and 9** are the overloads missing from the `.h`
-  headers, and no edition permits those either (1.6). GCC warns
-  about row 7; nothing warns about row 9.
+
+Rows 6, 7 and 9 hold because `<stdlib.h>` and `<math.h>` name the
+overloads of 26.5 in the global namespace (3.3). So an unqualified
+call with an integer argument meets the overload sets of 2003, which
+have no overload for most integer types. `sqrt (2)` after
+`<math.h>` is ambiguous among the three floating functions, as
+`std::sqrt (2)` is after `<cmath>`, and `abs (u)` for an
+`unsigned u` after `<stdlib.h>` is ambiguous among the three integer
+ones. A program writes the conversion: `sqrt (2.0)`. C++11 adds the
+overloads that make `sqrt (2)` a call of the `double` function
+(N3242 26.8 p11).
 
 The pure model was written to conform, and it does in rows 2, 3, 11
 and 12. It departs in rows 4 to 9, for the reasons of chapter 7.
@@ -643,13 +682,15 @@ configuration under EDG 7.0 and the same glibc:
 | the program of 1.1 returns 1 | no | yes |
 | `random` is not declared after `<cstdlib>` | yes | yes |
 | `std::abs (long)` and `std::div (long, long)` (26.5 p4) | yes | yes |
-| `abs (long)` after `<stdlib.h>` (D.5 p2) | no | yes |
+| `abs (long)` after `<stdlib.h>` (D.5 p2) | yes | yes |
 | `std::sin (float)` (26.5 p6) | yes | no |
-| `sin (float)` after `<math.h>` (D.5 p2) | no | no |
+| `sin (float)` after `<math.h>` (D.5 p2) | yes | no |
 | `va_start`, then `std::vprintf` | yes | no |
 | `sizeof (std::jmp_buf)` is glibc's | yes | no |
 
-All 35 headers compile alone in the pure model there, and `<string>`,
+The wrapper meets `sin (float)` after `<math.h>` with
+`_RWSTD_NO_C99_MATH`, the answer `C99_MATH` gives under `eccp`. All
+35 headers compile alone in the pure model there, and `<string>`,
 `<iostream>`, `<locale>`, `<fstream>`, `<complex>` and `<valarray>`
 with them. EDG overloads on language linkage, so the `abs` and `div`
 defect of 7.1 does not arise. The four rows the pure model fails are
@@ -693,12 +734,10 @@ Where a library header does call a C function by name it writes
 | `etc/config/src/libc_headers.sh` | the path macros |
 | `etc/config/src/{ABS,DIV,MATH}_OVERLOADS.cpp`, `C99_MATH.cpp`, `EXTERN_C_OVERLOAD.cpp` | the gates of chapter 4 |
 | `etc/config/gcc.config` 73, 86 | the search path |
-| `tests/strings/21.cctype.cpp`, `21.cwchar.cpp`, `21.cwctype.cpp`, `tests/numerics/26.c.math.cpp`, `tests/algorithms/25.libc.cpp`, `tests/diagnostics/19.cerrno.cpp`, `tests/support/18.csetjmp.cpp` | the tests, all run in the wrapper model |
+| `tests/strings/21.cctype.cpp`, `21.cwchar.cpp`, `21.cwctype.cpp`, `tests/numerics/26.c.math.cpp`, `26.c.math.depr.cpp`, `tests/algorithms/25.libc.cpp`, `tests/diagnostics/19.cerrno.cpp`, `tests/support/18.csetjmp.cpp` | the tests, all run in the wrapper model |
 
 `TODO` carries what this note found open:
 
-- "`<stdlib.h>` and `<math.h>` leave the C++ overloads out of the
-  global namespace" is rows 6, 7 and 9 of chapter 6: a decision.
 - "The pure C headers" is chapter 7: the model is repaired, or it
   retires.
 - "Three characterizations of the C headers have their answers
@@ -715,7 +754,3 @@ decision the rest hangs on:
   a wrapper behind a characterization of its own, as 7.2 lists.
 - If it stays, it takes the repairs of 7.1 and is the model for a
   strict compiler, as it was in 2012 (3.4).
-
-Either way the wrapper model has one decision left in it: whether
-`<stdlib.h>` and `<math.h>` bring the overloads to the global
-namespace.

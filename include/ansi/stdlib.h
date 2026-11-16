@@ -70,4 +70,14 @@ using std::wctomb;
 #  include _RWSTD_ANSI_C_STDLIB_H
 
 #  undef ldiv
+
+#  include <cstdlib>
+
+// D.5, p2: the overloads <cstdlib> adds to std
+using std::abs;
+using std::div;
+#  ifndef _RWSTD_NO_EXTERN_C_OVERLOAD
+using std::bsearch;
+using std::qsort;
+#  endif   // _RWSTD_NO_EXTERN_C_OVERLOAD
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

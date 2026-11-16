@@ -58,6 +58,7 @@
 #  undef sqrt
 #  undef tan
 
+extern "C++" {
 namespace std {
 // float overloads
 #  if defined (_RWSTD_NO_ABS_FLT)
@@ -666,6 +667,7 @@ using ::sqrt;
 using ::tan;
 using ::tanh;
 }   // namespace std
+}   // extern "C++"
 
 // MSVC provides its own complex macro
 #endif   // _RWSTD_NO_PURE_C_HEADERS

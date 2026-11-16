@@ -10,7 +10,8 @@ harness's own table without the timing columns.
 
 ## 0. The short version
 
-- Every test builds. The harness runs 272 programs per configuration.
+- Every test builds. The harness runs 272 programs per configuration,
+  and 273 in 15D, which has the newest test (chapter 2).
 - No assertion fails, no program exits non-zero or dies of a signal,
   in any configuration, under either compiler.
 - The tables come from a host with every glibc locale installed. A
@@ -99,7 +100,7 @@ uppercase 64-bit.
 |---|---|---|---|---|---|---|
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 272 | 12,587,648 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 272 | 12,587,453 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 272 | 12,590,172 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 273 | 12,590,231 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -361,6 +362,10 @@ all six tables:
   its file. 15D took the row by hand with the test; the other five
   take it from one run of the six configurations on x86-64 at
   482755cb, in which no other row moved.
+- 2026-11-16: `26.c.math.depr` is new, 59 assertions in 15D, 273
+  programs: `<stdlib.h>` and `<math.h>` bring the overloads of 26.5
+  to the global namespace; the other five tables are to gain the
+  row at the next run of the six.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, and to 33 when `2.smartptr.shared` and

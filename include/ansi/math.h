@@ -73,4 +73,31 @@ using std::tanh;
 #  undef sin
 #  undef sqrt
 #  undef tan
+
+#  include <cmath>
+
+// D.5, p2: the overloads <cmath> adds to std
+using std::abs;
+using std::acos;
+using std::asin;
+using std::atan;
+using std::atan2;
+using std::ceil;
+using std::cos;
+using std::cosh;
+using std::exp;
+using std::fabs;
+using std::floor;
+using std::fmod;
+using std::frexp;
+using std::ldexp;
+using std::log;
+using std::log10;
+using std::modf;
+using std::pow;
+using std::sin;
+using std::sinh;
+using std::sqrt;
+using std::tan;
+using std::tanh;
 #endif   // _RWSTD_NO_DEPRECATED_C_HEADERS

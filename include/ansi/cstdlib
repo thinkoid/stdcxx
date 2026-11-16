@@ -38,6 +38,7 @@
 
 #  undef ldiv
 
+extern "C++" {
 namespace std {
 #  ifdef _RWSTD_NO_ABS_LONG
 inline long abs (long __x)
@@ -123,5 +124,6 @@ using ::system;
 using ::wcstombs;
 using ::wctomb;
 }   // namespace std
+}   // extern "C++"
 #  endif   // _RWSTD_CSTDLIB_INCLUDED
 #endif   // _RWSTD_NO_PURE_C_HEADERS
