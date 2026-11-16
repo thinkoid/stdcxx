@@ -26,54 +26,65 @@ at the top.
 
 ** Configuration and the C library
 
-*** TODO =DIV_OVERLOADS= emits two macros nothing reads
-
-=etc/config/src/DIV_OVERLOADS.cpp= checks =div= on =int=, =long= and
-=long long= and emits =_RWSTD_NO_DIV_INT=, =_RWSTD_NO_DIV_LONG= and
-=_RWSTD_NO_DIV_LLONG= (=config.h= 123-125 of a 15D build under GCC).
-=include/ansi/cstdlib= reads only =_RWSTD_NO_DIV_LONG= (61, 140);
-nothing reads the other two, and no ~div (long long)~ or =lldiv_t=
-appears in =include=. They are the kind 55ceb9b6 trimmed from
-=ABS_OVERLOADS=. Seen in passing by the extension sweep, 2026-11-04.
-
-Fix: the probe checks =long= alone, as 55ceb9b6 did for =abs=; or a
-decision to add ~div (long long)~, which chapter 2's "Compiler types
-beyond 2003" row then names.
-
-Check: the =config.h= of a 15D build has no =_RWSTD_NO_DIV_INT= or
-=_RWSTD_NO_DIV_LLONG= line.
-
 *** TODO =<stdlib.h>= and =<math.h>= leave the C++ overloads out of the global namespace
 
 14882:2003 D.5, p2 has each =name.h= place the =cname= header's names
 in the global namespace. =include/rw/_config.h= 97-106 defines
 =_RWSTD_NO_DEPRECATED_C_HEADERS= unless a program asks for the pure
 headers, and under it =include/ansi/stdlib.h= and =math.h= include the
-C library's header and nothing more (=stdlib.h= 73-74). Hypothesis, by
-reading: under glibc =<stdlib.h>= then gives no ~::abs (long)~ and
-=<math.h>= no ~::sin (float)~, so ~abs (-1L)~ after =<stdlib.h>= calls
-~abs (int)~. Seen in passing by the extension sweep, 2026-11-04.
+C library's header and nothing more (=stdlib.h= 73-74). The overloads
+26.5 adds are thus in =std= alone. Measured in a 15D build under GCC,
+2026-11-16: after =<stdlib.h>= ~sizeof (abs (0L))~ is 4 and
+~abs (-5000000000L)~ is 705032704, with a warning; after =<math.h>=
+~sizeof (sin (0.0f))~ is 8. After =<cstdlib>= ~std::abs (0L)~ has
+size 8 and ~::abs (0L)~ size 4. Seen in passing by the extension
+sweep, 2026-11-04.
 
 Fix: a decision: the =name.h= headers bring the =cname= overloads to
 global scope, or record the C library's set.
 
 Check: ~sizeof (abs (0L))~ after =<stdlib.h>= alone.
 
-*** TODO An installed =config.h= shares its name with the programs'
-
-=include/rw/_config.h= 36 includes =<config.h>=, a name many programs'
-build systems use, and =make install= copies the library's to the top
-of =$(PREFIX)/include= (=GNUmakefile= 633). Hypothesis, by reading: a
-program whose own =config.h= is earlier on the search path configures
-the library with it, and one whose own is later gets the library's.
-Seen in passing by the extension sweep, 2026-11-04.
-
-Fix: a decision: a name of the library's own, under =rw/=, or record.
-
-Check: ~#include <string>~ with =-I= of a directory holding an empty
-=config.h= ahead of the library's.
-
 ** Tree hygiene
+
+*** TODO =CONFIG_H= is written to =makefile.in= and read by nothing
+
+=GNUmakefile= 463 sets ~CONFIG_H := $(CXX)-$(CCVER)-$(BUILDTYPE)~ and
+530 writes it to =makefile.in=, =gcc-16-15D= in a 15D build under GCC.
+9d3a02f1 added it in 2006 as a future replacement of the name
+=config.h=. The replacement never came, and no makefile, script or
+header reads the variable. Seen while the install target was read,
+2026-11-16.
+
+Fix: the two lines leave.
+
+Check: =grep -rn CONFIG_H GNUmakefile etc bin util= prints nothing;
+the =makefile.in= of a 15D build differs by that line alone.
+
+*** TODO Fifteen =<cname>= headers keep a body no configuration reaches
+
+=include/ansi/cstdlib= has three bodies. The first, under
+=_RWSTD_USE_PURE_C_HEADERS=, is the pure header. The second includes
+the C library's header inside ~namespace std~, where
+=_RWSTD_NO_PURE_C_HEADERS= is defined and
+=_RWSTD_NO_DEPRECATED_C_HEADERS= is not (36-80). The third includes it
+at global scope and names its functions in =std= with
+using-declarations. =include/rw/_config.h= 97-106 defines the second
+macro wherever it defines the first, so the second body compiles
+nowhere: for every compiler since 2c76243c, and under GCC since the
+2005 import, where =_config-gcc.h= carried the same two rules.
+Thirteen more headers have the same body under
+=_RWSTD_NAMESPACE_STD_OPEN=, a macro nothing else reads (=cctype=,
+=cerrno=, =cfloat=, =clocale=, =csetjmp=, =csignal=, =cstdarg=,
+=cstddef=, =cstdio=, =cstring=, =ctime=, =cwchar=, =cwctype=), and
+=cmath= has it without the macro (39-56). Seen while the =<stdlib.h>=
+entry was read, 2026-11-16.
+
+Fix: the second body leaves the fifteen headers; or it rides with
+the decision on the pure headers (EDG porting, "The pure C headers").
+
+Check: the preprocessed library and tests of a 15D build are
+unchanged; =grep -rn NAMESPACE_STD_OPEN include= prints nothing.
 
 *** TODO Four =always_noconv= helpers of the ISO-2022 converters are dead
 
@@ -1739,8 +1750,8 @@ bias is a defect to fix is a decision for the Library chapter.
 ** TODO =analysis-post-strict-ansi.md= 4.1 names a =div= for =long long=, and 4.3 a gate that is gone
 
 4.1 lists "=abs= and =div=" among what depends on =_RWSTD_LONG_LONG=;
-=<cstdlib>= defines no ~div (long long)~ (Library, "=DIV_OVERLOADS=
-emits two macros nothing reads"). 4.3 calls
+=<cstdlib>= defines no ~div (long long)~ (=include/ansi/cstdlib=
+113-120 has the =long= overload alone). 4.3 calls
 =_RWSTD_NO_CLASS_PARTIAL_SPEC= the sole condition on the cv-qualified
 =numeric_limits=; since e9980bcd they are unconditional
 (=include/limits= 501-510). Found by the extension sweep's reading,
@@ -1763,6 +1774,24 @@ describes is a defect to move away from. =README.md= says so; the
 original README stays as it is.
 
 Check: none; this is prose.
+
+** TODO A tour of the C library headers
+
+=ref-c-headers.md=. The 51 files of =include/ansi=: the eighteen
+=<cname>= headers, the seventeen =<name.h>= forms and the sixteen
+pure =_cname.h= behind them. What it must answer: which file
+includes which under each of the three models, and the two macros
+that select one (=include/rw/_config.h= 97-106); how a header reaches
+the C library's own (=_RWSTD_ANSI_C_STDLIB_H=, from
+=libc_headers.sh=); what each model puts in =std= and what in the
+global namespace, against 17.4.1.2 p4, D.5 p2 and 26.5 of
+14882:2003; the overloads the library adds and the
+characterizations that gate them. The material is in pieces: the
+original =README= 4.1 and its =_RWSTD_NO_PURE_C_HEADERS= paragraph,
+=ref-locale.md= 8.2 on =<clocale>=, =history-libc-declarations.md=
+4.1 on =<cwchar>=, and the message of 2c76243c. Three entries turn
+on it: the =<stdlib.h>= overloads, the body no configuration
+reaches, and "The pure C headers".
 
 ** TODO A tour of the locale subsystem
 

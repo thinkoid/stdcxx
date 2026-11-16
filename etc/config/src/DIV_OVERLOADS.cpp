@@ -31,10 +31,6 @@
 
 #include "config.h"
 
-#ifndef _RWSTD_NO_LONG_LONG
-#  define LONG_LONG   long long
-#endif   // _RWSTD_NO_LONG_LONG
-
 
 int template_used;
 
@@ -61,12 +57,8 @@ void check_div (T t, const char *tname)
 
 int main ()
 {
-    check_div ((int)1, "INT");
+    // <cstdlib> reads this one: it declares the overload libc lacks
     check_div ((long)1, "LONG");
-
-#if defined (LONG_LONG)
-    check_div ((LONG_LONG)1, "LLONG");
-#endif   // LONG_LONG
 
     return 0;
 }
