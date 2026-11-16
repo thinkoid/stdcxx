@@ -73,19 +73,6 @@ short one, the category kept; not a sweep.
 Check: =git grep -w= for the five long names under =include= finds
 nothing.
 
-*** TODO =examples/include/alg3.h= is included by nothing and calls a function that does not exist
-
-=examples/include/alg3.h= 52 has its =RandomInteger= return
-~__rw::__rw_random (m)~. Nothing under =include= or =src= declares a
-=__rw_random=, and no file under =examples= or =tests= includes the
-header: =examples/tutorial/alg3.cpp= defines a =RandomInteger= of its
-own. Seen while the =random_shuffle= generator was corrected,
-2026-11-15.
-
-Fix: the header leaves.
-
-Check: the examples build; no file in the tree names =alg3.h=.
-
 *** TODO The export macros expand to nothing
 
 =include/rw/_defs.h= 381-383 defines =_RWSTD_EXPORT=,
