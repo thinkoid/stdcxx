@@ -706,27 +706,26 @@ test_noconv (const char *fname)
     // make sure file stream has been successfully opened
     RW_ASSERT_STATE (f, std::ios::goodbit);
 
-    // gain public access to protected members
+    // gain public access to protected members of the stream's own
+    // buffer: a pointer to member formed in a derived class names the
+    // member of streambuf, and a call through it is virtual; a cast of
+    // the buffer to pubbuf* would call members for an object that is
+    // not a pubbuf, which is undefined (9.3.1, p1)
     struct pubbuf: std::streambuf {
-
-        // working around an MSVC 6.0 bug (PR #26330)
-        typedef std::streambuf Base;
-
-        virtual std::streamsize showmanyc () {
-            return Base::showmanyc ();
+        static std::streamsize pubshowmanyc (std::streambuf *sb) {
+            return (sb->*&pubbuf::showmanyc)();
         }
-        char* pubgptr () {
-            return Base::gptr ();
+        static char* pubgptr (std::streambuf *sb) {
+            return (sb->*&pubbuf::gptr)();
         }
-        char* pubegptr () {
-            return Base::egptr ();
+        static char* pubegptr (std::streambuf *sb) {
+            return (sb->*&pubbuf::egptr)();
         }
     };
 
-    // use static cast through void* to avoid using reinterpret_cast
-    pubbuf *rdbuf = static_cast< pubbuf* >((void*)f.rdbuf ());
+    std::streambuf* const rdbuf = f.rdbuf ();
 
-    std::streamsize filesize = rdbuf->showmanyc ();
+    std::streamsize filesize = pubbuf::pubshowmanyc (rdbuf);
 
     // exercise 27.5.2.4.3, p1: showmanyc() returns the "estimated"
     // size of the sequence (i.e., the file size in this case)
@@ -737,8 +736,8 @@ test_noconv (const char *fname)
     // exercise 27.5.2.2.3, p1
     filesize = f.rdbuf ()->in_avail ();
 
-    const char *gptr  = rdbuf->pubgptr ();
-    const char *egptr = rdbuf->pubgptr ();
+    const char *gptr  = pubbuf::pubgptr (rdbuf);
+    const char *egptr = pubbuf::pubgptr (rdbuf);
 
     rw_assert (filesize == (gptr < egptr ? egptr - gptr : fsize (fname)),
                0, __LINE__,

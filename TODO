@@ -786,25 +786,6 @@ library throws by its type.
 Check: the test passes in 15D under GCC and Clang, and fails with the
 mark taken off one byname template.
 
-** TODO A 12D build on aarch64 fails four assertions
-
-A 12D build under GCC on an aarch64 host fails four assertions, with
-and without the export change (the joined tree of 2026-11-16).
-=18.numeric.special.int= prints three, ~std::numeric_limits<int>::is_modulo == "false"~
-and the same for =long= and =long long= (its line 554), and
-=27.filebuf.codecvt= one, ~streambuf::showmanyc () == 2111, got 0~
-(its line 733). The first is the test's oracle: its =is_modulo=
-(63-71) increments =INT_MAX= and compares, a signed overflow that
-GCC folds to =false= at =-O2= and computes as =true= at =-O0=, where
-=numeric_limits= says =true=. The second was not looked into; the 15D
-build passes both tests. No 12D pin exists, so no run compares the
-table. Seen while the export change was checked, 2026-11-16.
-
-Fix: the oracle reads the answer without an overflow; =showmanyc=
-under =-O2= is read.
-
-Check: a 12D table on aarch64 without a failed assertion; 15D at pin.
-
 * Certification
 
 The scripts under =bin= and the nightly run: building the
