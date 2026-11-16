@@ -357,8 +357,8 @@ where the type system has proved it safe.
 ### 6.3 Why not a trait
 
 A compile-time `is_pointer<InputIter>` could select a specialization
-instead of an overload; the effect would be the same, and the library
-has `__rw_is_pointer`. The overloads were chosen because they are the
+instead of an overload; the effect would be the same. The overloads
+were chosen because they are the
 idiom the class already used, at `insert`, since 2005; because they
 read as ordinary C++98 without a second mechanism; and because the
 ranking rule that makes the `pointer` overload necessary is the same

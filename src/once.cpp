@@ -92,9 +92,9 @@ __rw_once_store (int &state, int value)
 
 #else   // if defined (_RWSTD_NO_ATOMIC_OPS)
 
-// the atomic accesses to an int lock the static mutex of int, which
-// is itself constructed through __rw_once where mutexes cannot be
-// initialized statically; every access to the flag holds the mutex
+// without lock-free int operations, an ordered access to an int
+// locks the static mutex of int; __rw_once instead has no unlocked
+// fast path, and every access to the flag holds the mutex
 static inline bool
 __rw_once_is_done (int&)
 {

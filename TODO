@@ -54,96 +54,6 @@ Fix: each comment names the condition it closes.
 
 Check: none; the three lines are comments.
 
-*** TODO Four =always_noconv= helpers of the ISO-2022 converters are dead
-
-=src/iso2022.h= 75 and 99 declare =__rw_iso2022_do_always_noconv=
-and =__rw_iso2022jp2_do2_always_noconv=, which nothing defines;
-=src/iso2022.cpp= 1895 and 2095 define
-=__rw_iso2022jp_do_always_noconv= and
-=__rw_iso2022jp2_do_always_noconv=, which nothing declares or calls.
-=codecvt<wchar_t, char, mbstate_t>::do_always_noconv=
-(=src/wcodecvt.cpp= 900), which the byname facet inherits, answers
-for every encoding without them.
-Dead since the 2005 import (e6c7726b). Seen while the ISO-2022-KR
-and -CN converters were surveyed, 2026-11-08.
-
-Fix: the two declarations and the two definitions leave.
-
-Check: the library builds; =22.locale.codecvt= at pin.
-
-*** TODO =src/vecbool.cpp= compiles nothing, and a comment still points at it
-
-=src/vecbool.cpp= 50-52 holds an empty ~#ifndef _RWSTD_NO_VECTOR_BOOL~
-block: e9980bcd removed the definitions the partial specialization
-gate selected, and the library still builds =vecbool.o= from the
-includes alone. =include/vector.cc= 603-604 says "Duplicates of the
-following functions exist in src/stl/vecbool.cpp. Which set is used
-depends on the availability of partial specialization."; the tree has
-no =src/stl=, no duplicates and no such choice. Seen while the range
-members of =vector<bool>= were given their dispatch, 2026-11-14.
-
-Fix: the comment leaves; a decision for the file: remove it, or keep
-it for an explicit instantiation.
-
-Check: the library builds without =vecbool.o=, or with the file's
-purpose stated in it; a sanity build.
-
-*** TODO The =__rw_once= comment names a static mutex path that is gone
-
-=src/once.cpp= 95-97 says the static mutex of =int= "is itself
-constructed through =__rw_once= where mutexes cannot be initialized
-statically". 92d18f73 removed that branch with
-=_RWSTD_NO_STATIC_MUTEX_INIT=; =__rw_get_static_mutex= returns the
-statically initialized mutex (=include/rw/_mutex.h= 193-198) and
-calls no =__rw_once=.
-
-Fix: the comment says what the code does.
-
-Check: reading.
-
-*** TODO =include/rw/_typetraits.h= is included by nothing
-
-The header defines type-trait helper templates, and no file in the
-tree includes it: =git grep _typetraits= finds only the header itself.
-=make install= copies it with the rest of =include=. Seen in passing
-by the extension sweep, 2026-11-04.
-
-Fix: a decision: remove the header, or keep it for a later use; for
-removal, nothing reads it.
-
-Check: =git grep -n _typetraits= is empty; a sanity build.
-
-*** TODO The =ctype_byname<char>= constructor's comment gives a reason that does not hold
-
-=src/ctype.cpp= 865 reads "delayed initialization not used for
-efficiency" over the constructor's lookup of the database and the C
-locale. Nothing in the constructor is faster for being eager; what the
-eager lookup decides is where a bad name throws.
-
-Fix: the comment states that: the constructor resolves the name so
-that a bad one throws from the constructor, where 22.1.1.2, p7 places
-the throw for a locale.
-
-Check: none; a comment.
-
-*** TODO =_C_read= keeps a =getline= path no caller takes
-
-=basic_istream::_C_read= (=include/istream.cc= 288-293, 308-317 and
-350) sets =__getline= when its flags hold both =_C_failend= and
-=_C_nullterm=, and acts on =_C_failend= after it. No caller passes
-=_C_failend=: the callers are =ignore= (=include/istream= 275) and the
-two character extractors (514, 532), and =getline= and =read= have
-definitions of their own. The comment at 298 says "read and getline
-are unformatted (noskipws), others are formatted"; the unformatted
-caller is =ignore=. From the 2005 import (e6c7726b). Seen in passing
-by the =gcount ()= change, 2026-11-08.
-
-Fix: the =__getline= and =_C_failend= branches leave, and the flag
-with them; the comment names =ignore=.
-
-Check: a sanity build; =27.istream.unformatted.get= and
-=27.istream.get= at pin.
-
 *** TODO Five iterator parameter names are spelled two ways
 
 The library's templates name an iterator parameter for the
@@ -162,19 +72,6 @@ short one, the category kept; not a sweep.
 
 Check: =git grep -w= for the five long names under =include= finds
 nothing.
-
-*** TODO =allocator::deallocate= passes a count where =__rw_deallocate= takes bytes
-
-=include/rw/_allocator.h= 60-65 declares =__rw_allocate= and
-=__rw_deallocate= under the comment "[de]allocate storage (in
-bytes)". =allocate= passes bytes; =deallocate= (144) passes its
-element count ~__n~ unscaled. =__rw_deallocate= (=src/memory.cpp= 79)
-ignores the parameter, so nothing goes wrong today. Seen while
-=allocate= was made to check its count, 2026-11-15.
-
-Fix: =deallocate= passes ~__n * sizeof (value_type)~.
-
-Check: by reading; the function ignores the value.
 
 *** TODO =examples/include/alg3.h= is included by nothing and calls a function that does not exist
 

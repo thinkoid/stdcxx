@@ -1908,11 +1908,6 @@ int __rw_iso2022jp_do_encoding ()
     return -1;
 }
 
-bool __rw_iso2022jp_do_always_noconv ()
-{
-    return false;
-}
-
 /****************************************************************************/
 
 // Conversion from ISO-2022-JP to UCS-4
@@ -2105,12 +2100,6 @@ __rw_iso2022jp2_do_max_length ()
 int __rw_iso2022jp2_do_encoding ()
 {
     return -1;
-}
-
-
-bool __rw_iso2022jp2_do_always_noconv ()
-{
-    return false;
 }
 
 }   // namespace __rw

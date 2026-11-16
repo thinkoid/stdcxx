@@ -141,7 +141,7 @@ public:
     }
 
     void deallocate (pointer __p, size_type __n) _THROWS (()) {
-        __rw::__rw_deallocate (__p, __n);
+        __rw::__rw_deallocate (__p, __n * sizeof (value_type));
     }
 
     // 20.4.1.1, p11 - the largest N for which allocate (N) might succeed

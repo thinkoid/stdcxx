@@ -597,9 +597,6 @@ _C_insert_range (iterator __it, _InputIter __first, _InputIter __last,
     insert (__it, __tmp.begin (), __tmp.end ());
 }
 
-// Duplicates of the following functions exist in src/stl/vecbool.cpp.
-// Which set is used depends on the availability of partial specialization.
-
 template <class _Allocator>
 void vector<bool,_Allocator >::flip ()
 {

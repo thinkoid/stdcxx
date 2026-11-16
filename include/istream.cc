@@ -285,39 +285,17 @@ _C_read (char_type *__s, streamsize __n, int_type __delim, int __flags)
 
     const char_type __eos = char_type ();
 
-    const bool __getline =     (_C_failend | _C_nullterm)
-                           == ((_C_failend | _C_nullterm) & __flags);
-
-    // "clear" buffer if reading a null-terminated string
-    // follows the proposed resolution of lwg issue 243
-    if (__getline)
-        traits_type::assign (*__s, __eos);
-
     _C_gcount = 0;
 
-    // read and getline are unformatted (noskipws), others are formatted
+    // ignore is unformatted (noskipws), the extractors are formatted
     const sentry __ipfx (*this, !(_C_skipws & __flags));
 
     // 27.6.1.2.1, p1 and 27.6.1.3, p1: proceed iff sentry is okay
     if (__ipfx) {
         // read at most n - 1 characters when null-terminating
         while (__n) {
-
-            // handle 27.6.1.3, p17 and p18
-            if (0 == --__n && _C_nullterm & __flags) {
-                if (!__getline)
-                    break;
-
-                const int_type __c (this->rdbuf ()->sgetc ());
-                
-                if (   !traits_type::eq_int_type (__c, traits_type::eof ())
-                    && !traits_type::eq_int_type (__c, __delim))
-                    break;
-
-                __flags &= ~_C_failend;   // prevent failbit from being set
-
-                // will break out in the check below...
-            }
+            if (0 == --__n && _C_nullterm & __flags)
+                break;
 
             // get (possibly extract) next char
             const int_type __c (_C_unsafe_get (&_C_gcount, __delim, __flags));
@@ -345,9 +323,8 @@ _C_read (char_type *__s, streamsize __n, int_type __delim, int __flags)
             traits_type::assign (*__s, __eos);
     }
 
-    // fail if no chars extracted or if end of buffer has been reached
-    if (   _C_failnoi & __flags && !gcount ()
-        || _C_failend & __flags && !__n)
+    // fail if no chars extracted
+    if (_C_failnoi & __flags && !gcount ())
         this->setstate (ios_base::failbit);
 
     return *this;

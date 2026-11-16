@@ -323,7 +323,6 @@ protected:
         _C_skipws   = 0x04,   // skip leading whitespace
         _C_eatdelim = 0x08,   // extract delimiter
         _C_faileof  = 0x10,   // set ios_base::failbit on eof
-        _C_failend  = 0x20,   // set ios_base::failbit on end of buffer
         _C_failnoi  = 0x40,   // set ios_base::failbit on no input
         _C_eatnull  = 0x80    // extract null char
     };

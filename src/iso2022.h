@@ -72,8 +72,6 @@ _RWSTD_SIZE_T __rw_iso2022jp_do_length (_RWSTD_MBSTATE_T&, const char*,
 
 _RWSTD_SIZE_T __rw_iso2022jp_do_max_length ();
 
-bool __rw_iso2022_do_always_noconv ();
-
 
 // Conversions for ISO-2022-JP-2
 std::codecvt_base::result
@@ -95,8 +93,6 @@ _RWSTD_SIZE_T __rw_iso2022jp2_do_length (_RWSTD_MBSTATE_T&, const char*,
                                          const char*, _RWSTD_SIZE_T);
 
 _RWSTD_SIZE_T __rw_iso2022jp2_do_max_length ();
-
-bool __rw_iso2022jp2_do2_always_noconv ();
 
 
 }   // namespace __rw

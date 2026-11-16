@@ -862,7 +862,9 @@ ctype_byname<char>::ctype_byname (const char *name, size_t refs)
     if ('C' == name [0] && '\0' == name [1])
         return;
 
-    // delayed initialization not used for efficiency
+    // the tables are filled here, not on first use: ctype<char>::is
+    // reads them inline (22.2.1.3.2, p5), and a bad name throws from
+    // the constructor, where 22.1.1.2, p7 places the throw for a locale
     __rw::__rw_ctype_t* impl =
         const_cast< __rw::__rw_ctype_t* >(
             static_cast< const __rw::__rw_ctype_t* >(
