@@ -752,28 +752,6 @@ The scripts under =bin= and the nightly run: building the
 configurations, running their suites and comparing the tables with
 their pins.
 
-** TODO The exported names are not pinned
-
-Nothing records which names the shared library exports. A mark lost
-or added changes the dynamic symbol table silently, and the suite
-notices only when a program of the tree calls the name. The export
-change took the 15D library under GCC from 3044 names to 2558, and
-under Clang from 2930 to 2479. GCC and Clang compute the visibility
-of a template specialization at the point the specialization is
-first named, so a typedef or a forward declaration placed above a
-template's definition can hide a set of names without any warning:
-four of the byname facets under GCC, and every member of
-=basic_string<char>= under Clang, went that way before the change put
-them right. Seen while the export marks took the ELF meaning,
-2026-11-16.
-
-Fix: a pin per shared configuration of the names
-=nm -D --defined-only= lists, derived with the tables and compared by
-the nightly run; a name that joins or leaves is a reported event.
-
-Check: a scratch build with the mark taken off one template shows the
-names it hid as a difference from the pin.
-
 * Locales
 
 The locale sources and charmaps under =etc/nls=, the =localedef= that

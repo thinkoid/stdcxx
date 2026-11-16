@@ -6,7 +6,9 @@ The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
 and why, where that is known. The numbers are pinned under
 `doc/notes/baseline/`, one file per configuration. Each file is the
-harness's own table without the timing columns.
+harness's own table without the timing columns. The two shared
+configurations have a second pin, of the names their library exports
+(chapter 6).
 
 ## 0. The short version
 
@@ -21,6 +23,11 @@ harness's own table without the timing columns.
   row.
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
+- The shared library of 15D exports 2391 names of its own under GCC
+  and 2323 under Clang, pinned in `15D.exports` and
+  `15D-clang.exports` (chapter 6). It re-exports 167 and 157 names of
+  the compiler's support library besides, which the pins leave out.
+  An aarch64 build exports the same names.
 
 Toolchain: GCC 16.2.1, Clang 23.1.4, glibc 2.44, x86-64 Linux.
 
@@ -507,3 +514,65 @@ the make line.
 Measured again at dc5300f5 on 2026-11-15 with Clang 23.1.4, the same
 holds: the 11S and 15D tables equal GCC's, and the 32-bit ones differ
 in that one row.
+
+## 6. The exported names
+
+The shared library exports the names its headers mark and no others
+(README, 6). The suite sees that set only where a program of the
+tree calls a name that left it, so the two shared configurations pin
+it: `15D.exports` and `15D-clang.exports`, one mangled name per line,
+sorted bytewise. A mangled name is exact; the
+demangled form of a constructor or destructor stands for two or
+three symbols. `c++filt` reads a pin or a difference.
+
+`bin/derive-exports` writes the pin from a build's library:
+
+```
+bin/derive-exports <build>/lib/libstd15D.so > doc/notes/baseline/15D.exports
+```
+
+It takes the names `nm -D --defined-only` lists, without a symbol
+version, and keeps those that one of the library's own objects
+defines, the `.o` files beside it in the build's `lib` directory.
+The rest come from `libsupc++.a`: `gcc.config` links the library
+with `-lsupc++`, and the archive's members keep their default
+visibility, so the library re-exports their names, 167 under GCC
+and 157 under Clang of the 2558 and 2480 that `nm` lists. None of
+them is defined by an object of the library. They follow the
+compiler release and the archive members the library's objects call
+for, not the marks: GCC's objects call `__cxa_bad_cast`,
+`__cxa_bad_typeid` and `__cxa_throw_bad_array_new_length` and take
+ten names that Clang's do not. The pins leave them out, so a compiler
+upgrade that changes the archive does not move them.
+
+The pins come from x86-64 builds. A 15D build on aarch64 exports the
+same names under either compiler, so one pin serves both, as one
+table does. Two builds of the same sources and toolchain give the
+same pin. No exported name carries a source line: the four static
+mutexes that `_RWSTD_MT_STATIC_GUARD` keys on `__LINE__` and their
+getters, eight names the library exported before the marks, are
+hidden.
+
+GCC and Clang differ in 76 names, all variants of inline and template
+constructors and destructors. Each compiler defines the variants a
+library source uses, and GCC also defines the complete-object variant
+(`C1`, `D1`) as an alias of the base-object one (`C2`, `D2`): 72
+names of the GCC pin are such aliases, and four of the Clang pin are
+the base-object destructors of `basic_istream` and `basic_ostream`,
+which no object of the GCC build defines. No mark works for one
+compiler alone.
+
+A difference from the pin is a name that joined or left the
+interface. A name leaves when a mark is lost, or when a typedef or
+a forward declaration that names a specialization moves above its
+template's marked declaration or definition: both compilers fix the
+visibility of a specialization where it is first named. A name joins
+with a new mark, or when a library source starts to use an inline
+member of a marked class, of which the library then keeps a copy;
+it leaves when the last such use goes. The nightly run of the six
+configurations derives the names of each shared build and compares
+them with the pin, and its summary reports a difference as it
+reports a table's. `bin/driver` does not compare them.
+
+A commit that moves the set derives the pin again and names in its
+message the names that joined or left, and why.
