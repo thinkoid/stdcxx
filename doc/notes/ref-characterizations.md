@@ -308,7 +308,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [UNAME](../../etc/config/src/UNAME.cpp) / `NO_UNAME` + output | OS name and version | none |
 | [UNISTD_DECL](../../etc/config/src/UNISTD_DECL.cpp) / `NO_UNISTD_DECL` + output | the contents of &lt;unistd.h&gt; | none |
 | [VA_LIST](../../etc/config/src/VA_LIST.cpp) / `NO_VA_LIST` + output | the type of va_list | none |
-| [VISIBILITY_ATTRIBUTE](../../etc/config/src/VISIBILITY_ATTRIBUTE.cpp) / `NO_VISIBILITY_ATTRIBUTE` | the visibility attribute where `_RWSTD_EXPORT` stands | L; `include/rw/_defs.h` |
+| [VISIBILITY_ATTRIBUTE](../../etc/config/src/VISIBILITY_ATTRIBUTE.cpp) / `NO_VISIBILITY_ATTRIBUTE` | the visibility attribute where `_RWSTD_EXPORT` stands; `eccp -A` rejects it, so the mark is empty there; an archive needs none, and the `eccp` builds are archives | L; `include/rw/_defs.h` |
 | [VSNPRINTF](../../etc/config/src/VSNPRINTF.cpp) / `NO_VSNPRINTF` | vsnprintf() in &lt;stdio.h&gt; | L; `src/exception.cpp` |
 | [VSNPRINTF_RETURN](../../etc/config/src/VSNPRINTF_RETURN.cpp) / `NO_VSNPRINTF_RETURN` + output | vsnprintf() return value | none |
 | [WCTRANS_T](../../etc/config/src/WCTRANS_T.cpp) / `NO_WCTRANS_T` + output | wctrans_t in &lt;wchar.h&gt; and &lt;wctype.h&gt; | L; `include/ansi/cwctype` |

@@ -24,21 +24,6 @@ today. Within a bin the easiest entry is at the top.
 
 ** Tree hygiene
 
-*** TODO =eccp.config= defines =_RWSTD_SHARED_LIB=, which nothing reads
-
-=etc/config/eccp.config= 101 sets ~SHARED_CPPFLAGS = -D_RWSTD_SHARED_LIB~.
-=git grep -w _RWSTD_SHARED_LIB= finds that line alone, and the history
-finds no reader since the import of 2005, where four configuration
-files set it: =como.config=, =eccp.config=, =osf_cxx.config= and
-=reliant_cds.config=. dd1128a5 retired the other three and 93d8b4e9
-restored =eccp.config= with the line. Seen while the export marks
-took the ELF meaning, 2026-11-16.
-
-Fix: the line leaves; =SHARED_CPPFLAGS= stays, empty, as in
-=gcc.config=.
-
-Check: =git grep -w _RWSTD_SHARED_LIB= finds nothing.
-
 *** TODO The =ctype_byname<wchar_t>= constructor's comment gives efficiency as its reason
 
 =src/wctype.cpp= 556 reads "delayed initialization not used for
@@ -1500,26 +1485,6 @@ linkage or report to EDG.
 
 Check: each compiles under =eccp -A=, the characterization passes,
 and the GCC and Clang tables do not move.
-
-** TODO =eccp= takes no export marks
-
-=eccp -A= rejects =__attribute__=, so the =VISIBILITY_ATTRIBUTE=
-characterization fails under the 11S-eccp flags and defines
-=_RWSTD_NO_VISIBILITY_ATTRIBUTE=; =_RWSTD_EXPORT= is empty and
-=eccp.config= gives no =VISFLAGS=. The =eccp= configurations are
-archives, where hidden visibility changes no program: an 11S build
-under GCC with and without it links the same 411 programs with the
-same code. A configuration made before the change has no answer in
-its =config.h= and expands the mark to the attribute; it is
-reconfigured before its next build. Seen while the export change was
-characterized, 2026-11-16.
-
-Fix: none while =eccp= builds archives only; a shared =eccp= build
-would characterize the attribute in the front end's GNU mode and give
-the back-end compiler the flag.
-
-Check: the 11S-eccp configuration, reconfigured, has the macro
-defined, and the 35 C headers preprocess as before under =eccp -A=.
 
 ** WAITING =src/punct.cpp= under the export model
 
