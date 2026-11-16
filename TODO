@@ -37,7 +37,9 @@ C library's header and nothing more (=stdlib.h= 73-74). The overloads
 2026-11-16: after =<stdlib.h>= ~sizeof (abs (0L))~ is 4 and
 ~abs (-5000000000L)~ is 705032704, with a warning; after =<math.h>=
 ~sizeof (sin (0.0f))~ is 8. After =<cstdlib>= ~std::abs (0L)~ has
-size 8 and ~::abs (0L)~ size 4. Seen in passing by the extension
+size 8 and ~::abs (0L)~ size 4. Every edition of the standard has
+the =name.h= header provide the overloads (=ref-c-headers.md= 1.6,
+and chapter 6 for the table). Seen in passing by the extension
 sweep, 2026-11-04.
 
 Fix: a decision: the =name.h= headers bring the =cname= overloads to
@@ -77,8 +79,33 @@ Thirteen more headers have the same body under
 =_RWSTD_NAMESPACE_STD_OPEN=, a macro nothing else reads (=cctype=,
 =cerrno=, =cfloat=, =clocale=, =csetjmp=, =csignal=, =cstdarg=,
 =cstddef=, =cstdio=, =cstring=, =ctime=, =cwchar=, =cwctype=), and
-=cmath= has it without the macro (39-56). Seen while the =<stdlib.h>=
-entry was read, 2026-11-16.
+=cmath= has it without the macro (39-56). =cstring= and =cstdlib=
+both write 15 in the macro. =ref-c-headers.md= 3.3 describes the
+body. Seen while the =<stdlib.h>= entry was read, 2026-11-16.
+
+*** TODO Three characterizations of the C headers have their answers discarded
+
+=NEW_HEADER=, =LIBC_IN_STD= and =DEPRECATED_LIBC_IN_STD= ask whether
+the compiler has =<cname>= headers and whether they put the C library
+in =std=. They run without =include/ansi= on the search path and with
+=-nostdinc++=, so they measure headers the library does not use, and
+a 15D build under GCC defines all three macros. =include/rw/_config.h=
+108-114 then undefines the three under every compiler, since
+2c76243c: the library's own headers exist and use =std=. What reads
+the macros therefore has one live arm:
+- =include/rw/_defs.h= 75-105, the =<name.h>= arm of the include
+  macros, and 518, the empty =_RWSTD_C=;
+- =examples/include/examples.h= 41-51;
+- the conditions at =tests/intro/17.names.cpp= 632 and
+  =tests/localization/22.locale.messages.cpp= 44, which always hold.
+Seen while =ref-c-headers.md= was written, 2026-11-16.
+
+Fix: the three characterizations, the three =#undef= lines and the
+dead arms leave; =ref-characterizations.md= moves the three rows to
+its retired table.
+
+Check: the =config.h= of a 15D build has none of the three macros;
+the library and the tests build; the suite at pin.
 
 Fix: the second body leaves the fifteen headers; or it rides with
 the decision on the pure headers (EDG porting, "The pure C headers").
@@ -1290,7 +1317,22 @@ table is pinned, and the GCC and Clang tables do not move.
 model a strict compiler would want: exactly the C++03 C library,
 whatever glibc hides. They are selected by =_RWSTD_USE_PURE_C_HEADERS=
 and no configuration has compiled them since the platform retirement.
-Two defects stand in the way of a strict build with them:
+Measured under GCC 16 on 2026-11-16 (=ref-c-headers.md= chapter 7):
+each of the 35 headers compiles alone, and without threads so do the
+library's C++ headers. Six defects stand in the way of a build with
+them:
+- A thread-safe build includes =<pthread.h>=, which needs =clockid_t=
+  from =<time.h>= and gets the pure =<ctime>=, which has none:
+  =<string>= fails with four errors.
+- =_cstdlib.h= 146 and 152 define ~abs (long)~ and ~div (long, long)~
+  inside the block for the linkage twins of =bsearch= and =qsort=,
+  under =_RWSTD_NO_EXTERN_C_OVERLOAD= (119-159), which GCC defines:
+  ~sizeof (std::abs (0L))~ is 4.
+- =_cmath.h= declares the =double= functions alone; the =float= and
+  =long double= overloads of 26.5 p5 and p6 are in the other body of
+  =cmath=: ~sizeof (std::sin (0.0f))~ is 8.
+- =_csetjmp.h= 41-49 makes =jmp_buf= 200 bytes on a 64-bit Linux;
+  glibc's is 312 on aarch64.
 - =_cstdio.h= declares =vfprintf=, =vprintf= and =vsprintf= with
   =_RWSTD_VA_LIST=, the layout-compatible =__rw_va_list= of
   =VA_LIST.cpp=, and =_cstdarg.h= defines =va_start= and =va_arg= by
@@ -1308,7 +1350,11 @@ Two defects stand in the way of a strict build with them:
 
 Fix: a decision. The pure headers either defer to the compiler's
 =<stdarg.h>= for =va_list= and the macros, which makes =<cstdarg>=
-and the v-functions of =<cstdio>= wrappers, or they retire.
+and the v-functions of =<cstdio>= wrappers, and take the four
+repairs above, or they retire. If they retire, the second body of the
+=<cname>= headers and the first arm of every =<name.h>= wrapper go
+with them (Library, "Fifteen =<cname>= headers keep a body no
+configuration reaches").
 
 Check: a build with =_RWSTD_USE_PURE_C_HEADERS= under =eccp -A= and
 under gcc, or the headers gone.
@@ -1775,7 +1821,27 @@ original README stays as it is.
 
 Check: none; this is prose.
 
+** TODO A program needs two include directories, and the original README names one
+
+The original =README= 6.1 has a program compiled with
+=-I${PREFIX}/include=. The =<cname>= and =<name.h>= headers are in
+=include/ansi=, which the build puts first on its own search path
+(=etc/config/gcc.config= 86). Measured under GCC with =-nostdinc++=
+and =include= alone: =<string>= and =<iostream>= compile, =<cstdlib>=
+is not found, and =<complex>= fails on its own =<cmath>=.
+
+Fix: prose, no patch to the original. =README.md= gains the command
+line of a program built against the library: both directories,
+=include/ansi= first, and the build directory's =include=.
+
+Check: none; this is prose.
+
 ** TODO A tour of the C library headers
+
+Written: =doc/notes/ref-c-headers.md=, current as of 2026-11-16:
+chapter 1 the standard from 1998 to 2023, 2 to 5 the files and the
+three models, 6 the measurements, 7 the pure model. The entry leaves
+after a reading.
 
 =ref-c-headers.md=. The 51 files of =include/ansi=: the eighteen
 =<cname>= headers, the seventeen =<name.h>= forms and the sixteen

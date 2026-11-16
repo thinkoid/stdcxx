@@ -229,7 +229,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [LCONV_INT_FMAT](../../etc/config/src/LCONV_INT_FMAT.cpp) / `NO_LCONV_INT_FMAT` | C99 international lconv members | L/P/T; `src/punct.cpp` |
 | [LDBL_PRINTF_PREFIX](../../etc/config/src/LDBL_PRINTF_PREFIX.cpp) / `NO_LDBL_PRINTF_PREFIX` + output | long double printf format prefix | none |
 | [LIBC_EXCEPTION_SPEC](../../etc/config/src/LIBC_EXCEPTION_SPEC.cpp) / `NO_LIBC_EXCEPTION_SPEC` | exception specification in libc | L/P; `include/rw/_defs.h` |
-| [LIBC_IN_STD](../../etc/config/src/LIBC_IN_STD.cpp) / `NO_LIBC_IN_STD` | C library in namespace std | L/E; `include/rw/_config-gcc.h` |
+| [LIBC_IN_STD](../../etc/config/src/LIBC_IN_STD.cpp) / `NO_LIBC_IN_STD` | C library in namespace std | L/E; `include/rw/_defs.h` |
 | [LIMITS](../../etc/config/src/LIMITS.cpp) / `NO_LIMITS` + output | numerical limits | none |
 | [LLONG_ATOMIC_OPS](../../etc/config/src/LLONG_ATOMIC_OPS.cpp) / `NO_LLONG_ATOMIC_OPS` | the five __atomic built-ins on an unsigned long long, run without libatomic | L; `include/rw/_atomic-builtins.h`; facet counts since dcb5dc92 |
 | [LLONG_PRINTF_PREFIX](../../etc/config/src/LLONG_PRINTF_PREFIX.cpp) / `NO_LLONG_PRINTF_PREFIX` + output | long long printf format prefix | none |
@@ -243,7 +243,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [MMAP](../../etc/config/src/MMAP.cpp) / `NO_MMAP` | mmap() and munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [MUNMAP](../../etc/config/src/MUNMAP.cpp) / `NO_MUNMAP` + output | munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [NEWLINE](../../etc/config/src/NEWLINE.cpp) / `NO_NEWLINE` + output | newline (CR or CR-LF) | none |
-| [NEW_HEADER](../../etc/config/src/NEW_HEADER.cpp) / `NO_NEW_HEADER` | C++-style C library headers | L/P/T; `include/rw/_config-gcc.h` |
+| [NEW_HEADER](../../etc/config/src/NEW_HEADER.cpp) / `NO_NEW_HEADER` | C++-style C library headers | L/P/T; `include/rw/_defs.h` |
 | [NEW_OFLOW_SAFE](../../etc/config/src/NEW_OFLOW_SAFE.cpp) / `NO_NEW_OFLOW_SAFE` | if operator new() checks the argument for overflow | L/P; `src/memory.cpp` |
 | [NEW_THROWS](../../etc/config/src/NEW_THROWS.cpp) / `NO_NEW_THROWS` | if operator new() throws | L/P/T; `src/iostore.cpp` |
 | [NL_LANGINFO](../../etc/config/src/NL_LANGINFO.cpp) / `NO_NL_LANGINFO` | nl_langinfo() in &lt;langinfo.h&gt; | L/T/V; `src/time_put.cpp` |
