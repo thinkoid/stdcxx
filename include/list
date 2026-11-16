@@ -347,8 +347,8 @@ public:
         _C_init (__n, __x);
     }
 
-    template<class _InputIterator>
-    void _C_init (_InputIterator __first, _InputIterator __last, void*) {
+    template<class _InputIter>
+    void _C_init (_InputIter __first, _InputIter __last, void*) {
         _RWSTD_ASSERT_RANGE (__first, __last);
         _C_init ();
 
@@ -361,18 +361,18 @@ public:
         }
     }
 
-    template<class _InputIterator>
-    void _C_init (_InputIterator __first, _InputIterator __last, int) {
+    template<class _InputIter>
+    void _C_init (_InputIter __first, _InputIter __last, int) {
         _RWSTD_ASSERT_RANGE (__first, __last);
         _C_init (__first, __last);
     }
 
-    template<class _InputIterator>
-    list (_InputIterator __first, _InputIterator __last, 
+    template<class _InputIter>
+    list (_InputIter __first, _InputIter __last, 
           const allocator_type& __alloc = allocator_type ())
         : allocator_type (__alloc), _C_node (0), _C_length (0) {
         _RWSTD_ASSERT_RANGE (__first, __last);
-        _C_init (__first, __last, _RWSTD_DISPATCH (_InputIterator));
+        _C_init (__first, __last, _RWSTD_DISPATCH (_InputIter));
     }
 
     list (const list &__rhs)
@@ -392,13 +392,13 @@ public:
 
     list& operator= (const list&);   
 
-    template<class _InputIterator>
-    void assign (_InputIterator __first, _InputIterator __last) {
+    template<class _InputIter>
+    void assign (_InputIter __first, _InputIter __last) {
         _RWSTD_ASSERT_RANGE (__first, __last);
 
         clear ();
         _C_insert (begin (), __first, __last,
-                   _RWSTD_DISPATCH (_InputIterator));
+                   _RWSTD_DISPATCH (_InputIter));
     }
 
     void assign (size_type __n, const_reference __val) {
@@ -503,9 +503,9 @@ public:
     iterator insert (iterator __it, const_reference __x);
 
     // handles nonintegral types
-    template<class _InputIterator>
+    template<class _InputIter>
     void _C_insert (const iterator &__it,
-                    _InputIterator  __first, _InputIterator __last, void*) {
+                    _InputIter      __first, _InputIter __last, void*) {
         _RWSTD_ASSERT_RANGE (begin (), __it);
         _RWSTD_ASSERT_RANGE (__first, __last);
 
@@ -525,15 +525,15 @@ public:
     }
 
     // handles integral types
-    template<class _InputIterator>
+    template<class _InputIter>
     void _C_insert (const iterator &__it, 
-                    _InputIterator  __first, _InputIterator __last, int) {
+                    _InputIter      __first, _InputIter __last, int) {
         _C_insert (__it, size_type (__first), const_reference (__last));
     }
 
-    template<class _InputIterator>
+    template<class _InputIter>
     void insert (iterator __it, 
-                 _InputIterator __first, _InputIterator __last) {
+                 _InputIter __first, _InputIter __last) {
 
         _RWSTD_ASSERT_RANGE (begin (), __it);
         _RWSTD_ASSERT_RANGE (__first, __last);
@@ -544,7 +544,7 @@ public:
         // the dispatch mechanism determines whether the arguments
         // really are iterators or whether they are just integral types
         // and calls the appropriate implementation function
-        _C_insert  (__it, __first, __last, _RWSTD_DISPATCH (_InputIterator));
+        _C_insert  (__it, __first, __last, _RWSTD_DISPATCH (_InputIter));
     }
 
     void insert (iterator __it, size_type __n, const_reference __val) {

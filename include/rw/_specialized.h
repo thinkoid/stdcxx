@@ -101,9 +101,9 @@ __rw_destroy (_TypeT &__ref)
 }
 
 
-template <class _ForwardIterator> 
+template <class _FwdIter> 
 inline void
-__rw_destroy (_ForwardIterator __first, _ForwardIterator __last)
+__rw_destroy (_FwdIter __first, _FwdIter __last)
 {
     for (; __first != __last; ++__first)
         __rw_destroy (*__first);
@@ -118,12 +118,12 @@ inline void __rw_destroy (_TypeT**, _TypeT**)
 
 // copies [first, last) into raw storage at res through the allocator;
 // the vector's helper
-template <class _InputIterator, class _ForwardIterator, class _Allocator>
-inline _ForwardIterator
-__rw_uninitialized_copy (_InputIterator __first, _InputIterator __last,
-                         _ForwardIterator __res, _Allocator &__alloc)
+template <class _InputIter, class _FwdIter, class _Allocator>
+inline _FwdIter
+__rw_uninitialized_copy (_InputIter __first, _InputIter __last,
+                         _FwdIter __res, _Allocator &__alloc)
 {
-    _ForwardIterator __start = __res;
+    _FwdIter __start = __res;
 
     try {
         for (; __first != __last; ++__first, ++__res)
@@ -141,12 +141,12 @@ __rw_uninitialized_copy (_InputIterator __first, _InputIterator __last,
 
 // fills n elements of raw storage at first through the allocator;
 // the vector's helper
-template <class _ForwardIter, class _Size, class _TypeT, class _Allocator>
+template <class _FwdIter, class _Size, class _TypeT, class _Allocator>
 inline void
-__rw_uninitialized_fill_n (_ForwardIter __first, _Size __n,
+__rw_uninitialized_fill_n (_FwdIter __first, _Size __n,
                            const _TypeT& __x, _Allocator& __alloc)
 {
-    _ForwardIter __start = __first;
+    _FwdIter __start = __first;
 
     try {
         for (; __n; --__n, ++__first)
@@ -170,13 +170,13 @@ class allocator;
 
 
 // 20.4.4.1
-template <class _InputIterator, class _ForwardIterator>
-inline _ForwardIterator
-uninitialized_copy (_InputIterator __first, _InputIterator __last,
-                    _ForwardIterator __res)
+template <class _InputIter, class _FwdIter>
+inline _FwdIter
+uninitialized_copy (_InputIter __first, _InputIter __last,
+                    _FwdIter __res)
 {
-    const _ForwardIterator __start = __res;
-    typedef typename iterator_traits<_ForwardIterator>::value_type _TypeT;
+    const _FwdIter __start = __res;
+    typedef typename iterator_traits<_FwdIter>::value_type _TypeT;
 
     try {
         for (; __first != __last; ++__first, ++__res) {
@@ -196,12 +196,12 @@ uninitialized_copy (_InputIterator __first, _InputIterator __last,
 
 
 // 20.4.4.2
-template <class _ForwardIterator, class _TypeT>
+template <class _FwdIter, class _TypeT>
 inline void
-uninitialized_fill (_ForwardIterator __first, _ForwardIterator __last,
+uninitialized_fill (_FwdIter __first, _FwdIter __last,
                     const _TypeT& __x)
 {
-    const _ForwardIterator __start = __first;
+    const _FwdIter __start = __first;
 
     try {
         for (; __first != __last; ++__first)
@@ -215,11 +215,11 @@ uninitialized_fill (_ForwardIterator __first, _ForwardIterator __last,
 
 
 // 20.4.4.3
-template <class _ForwardIterator, class _Size, class _TypeT>
+template <class _FwdIter, class _Size, class _TypeT>
 inline void
-uninitialized_fill_n (_ForwardIterator __first, _Size __n, const _TypeT& __x)
+uninitialized_fill_n (_FwdIter __first, _Size __n, const _TypeT& __x)
 {
-    const _ForwardIterator __start = __first;
+    const _FwdIter __start = __first;
 
     try {
         for (; __n; --__n, ++__first)

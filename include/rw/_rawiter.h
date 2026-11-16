@@ -60,15 +60,15 @@ namespace std {
 
 
 // 20.4.2
-template <class _OutputIterator, class _TypeT>
+template <class _OutputIter, class _TypeT>
 class raw_storage_iterator
     : public iterator<output_iterator_tag, void, void, void, void>
 {
-    _OutputIterator _C_iter;
+    _OutputIter _C_iter;
 public:
 
     // 20.4.2, p2
-    explicit raw_storage_iterator (_OutputIterator __x): _C_iter (__x) { }
+    explicit raw_storage_iterator (_OutputIter __x): _C_iter (__x) { }
 
     // 20.4.2, p3
     raw_storage_iterator& operator* () {

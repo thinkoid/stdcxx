@@ -161,8 +161,8 @@ inline bool __is_random_access_iterator (random_access_iterator_tag)
 
 // 24.3.4 - Iterator operations
 
-template <class _InputIterator, class _Distance>
-inline void __advance (_InputIterator &__it, _Distance __n, input_iterator_tag)
+template <class _InputIter, class _Distance>
+inline void __advance (_InputIter &__it, _Distance __n, input_iterator_tag)
 {
     _RWSTD_ASSERT (__n == 0 || __n > 0);
 
@@ -173,16 +173,16 @@ inline void __advance (_InputIterator &__it, _Distance __n, input_iterator_tag)
 }
 
 
-template <class _ForwardIterator, class _Distance>
-inline void __advance (_ForwardIterator &__it, _Distance __n,
+template <class _FwdIter, class _Distance>
+inline void __advance (_FwdIter &__it, _Distance __n,
                        forward_iterator_tag)
 {
     __advance (__it, __n, input_iterator_tag ());
 }
 
 
-template <class _BidirectionalIterator, class _Distance>
-inline void __advance (_BidirectionalIterator &__it, _Distance __n, 
+template <class _BidirIter, class _Distance>
+inline void __advance (_BidirIter &__it, _Distance __n, 
                        bidirectional_iterator_tag)
 {
     if (__n > 0)
@@ -195,8 +195,8 @@ inline void __advance (_BidirectionalIterator &__it, _Distance __n,
 }
 
 
-template <class _RandomAccessIterator, class _Distance>
-inline void __advance (_RandomAccessIterator& __it, _Distance __n, 
+template <class _RandomAccessIter, class _Distance>
+inline void __advance (_RandomAccessIter& __it, _Distance __n, 
                        random_access_iterator_tag)
 {
     __it += __n;
@@ -204,47 +204,47 @@ inline void __advance (_RandomAccessIterator& __it, _Distance __n,
 
 
 // 24.3.4, p2
-template <class _InputIterator, class _Distance>
-inline void advance (_InputIterator& __it, _Distance __n)
+template <class _InputIter, class _Distance>
+inline void advance (_InputIter& __it, _Distance __n)
 {
-    __advance (__it, __n, _RWSTD_ITERATOR_CATEGORY (_InputIterator));
+    __advance (__it, __n, _RWSTD_ITERATOR_CATEGORY (_InputIter));
 }
 
 
-template <class _InputIterator, class _Distance>
-inline void __distance (const _InputIterator &__first,
-                        const _InputIterator &__last,
-                        _Distance            &__n,
+template <class _InputIter, class _Distance>
+inline void __distance (const _InputIter &__first,
+                        const _InputIter &__last,
+                        _Distance        &__n,
                         input_iterator_tag)
 {
-    for (_InputIterator __it = __first; !(__it == __last); ++__it)
+    for (_InputIter __it = __first; !(__it == __last); ++__it)
         ++__n;
 }
 
 
-template <class _ForwardIterator, class _Distance>
-inline void __distance (const _ForwardIterator &__first,
-                        const _ForwardIterator &__last,
-                        _Distance              &__n,
+template <class _FwdIter, class _Distance>
+inline void __distance (const _FwdIter &__first,
+                        const _FwdIter &__last,
+                        _Distance      &__n,
                         forward_iterator_tag)
 {
     __distance (__first, __last, __n, input_iterator_tag ());
 }
 
-template <class _BidirectionalIterator, class _Distance>
-inline void __distance (const _BidirectionalIterator &__first,
-                        const _BidirectionalIterator &__last, 
-                        _Distance                    &__n,
+template <class _BidirIter, class _Distance>
+inline void __distance (const _BidirIter &__first,
+                        const _BidirIter &__last, 
+                        _Distance        &__n,
                         bidirectional_iterator_tag)
 {
     __distance (__first, __last, __n, input_iterator_tag ());
 }
 
 
-template <class _RandomAccessIterator, class _Distance>
-inline void __distance (const _RandomAccessIterator &__first,
-                        const _RandomAccessIterator &__last, 
-                        _Distance                   &__n,
+template <class _RandomAccessIter, class _Distance>
+inline void __distance (const _RandomAccessIter &__first,
+                        const _RandomAccessIter &__last, 
+                        _Distance               &__n,
                         random_access_iterator_tag)
 {
     __n = __last - __first;
@@ -252,14 +252,14 @@ inline void __distance (const _RandomAccessIterator &__first,
 
 
 // 24.3.4, p4
-template <class _ForwardIterator>
-inline typename iterator_traits<_ForwardIterator>::difference_type
-distance (_ForwardIterator __first, _ForwardIterator __last)
+template <class _FwdIter>
+inline typename iterator_traits<_FwdIter>::difference_type
+distance (_FwdIter __first, _FwdIter __last)
 {
-    typename iterator_traits<_ForwardIterator>::difference_type __n = 0;
+    typename iterator_traits<_FwdIter>::difference_type __n = 0;
 
     __distance (__first, __last, __n,
-                _RWSTD_ITERATOR_CATEGORY (_ForwardIterator));
+                _RWSTD_ITERATOR_CATEGORY (_FwdIter));
 
     return __n;
 }
@@ -273,14 +273,14 @@ namespace __rw {
 // __rw_distance: Same purpose as 3-parameter distance function, but
 // with return value.
 
-template <class _ForwardIterator, class _Distance>
+template <class _FwdIter, class _Distance>
 inline _Distance
-__rw_distance (const _ForwardIterator &__first,
-               const _ForwardIterator &__last,
-               _Distance               __n)
+__rw_distance (const _FwdIter &__first,
+               const _FwdIter &__last,
+               _Distance       __n)
 {
     std::__distance (__first, __last, __n,
-                      _RWSTD_ITERATOR_CATEGORY (_ForwardIterator));
+                      _RWSTD_ITERATOR_CATEGORY (_FwdIter));
     return __n;
 }
 

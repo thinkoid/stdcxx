@@ -54,25 +54,6 @@ Fix: each comment names the condition it closes.
 
 Check: none; the three lines are comments.
 
-*** TODO Five iterator parameter names are spelled two ways
-
-The library's templates name an iterator parameter for the
-requirement its argument meets, as 14882:2003 25, p4 does, in a
-spelling 17.4.3.1.2, p1 reserves. The tree's spelling is the short
-one: =_InputIter= 340 times under =include=, =_FwdIter= 260,
-=_BidirIter= 125, =_RandomAccessIter= 267, =_OutputIter= 174. Four
-files hold the long one: =_InputIterator= 39 times,
-=_ForwardIterator= 34, =_BidirectionalIterator= 5,
-=_RandomAccessIterator= 5 and =_OutputIterator= 3, in =include/list=,
-=include/rw/_rawiter.h=, =include/rw/_specialized.h= and
-=include/rw/_iterbase.h=. Counted 2026-11-15.
-
-Fix: a change that touches a template with a long name gives it the
-short one, the category kept; not a sweep.
-
-Check: =git grep -w= for the five long names under =include= finds
-nothing.
-
 *** TODO The export macros expand to nothing
 
 =include/rw/_defs.h= 381-383 defines =_RWSTD_EXPORT=,
