@@ -22,11 +22,6 @@
  * 
  **************************************************************************/
 
-// working around a Compaq C++ headers problem (PR #27459)
-#if defined (__PURE_CNAME)
-#  undef __PURE_CNAME
-#endif // __PURE_CNAME
-
 #include "config.h"
 
 enum {

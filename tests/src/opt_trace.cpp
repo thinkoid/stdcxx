@@ -26,9 +26,6 @@
  *
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include "opt_trace.h"
 
 #include <stdio.h>    // for fprintf()

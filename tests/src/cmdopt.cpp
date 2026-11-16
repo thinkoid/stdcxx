@@ -24,9 +24,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include <rw_cmdopt.h>
 
 #include <ctype.h>    // isdigit(), isspace()

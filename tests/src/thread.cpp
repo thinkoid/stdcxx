@@ -26,9 +26,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include <rw_thread.h>
 #include <rw_alarm.h>   // for rw_alarm()
 

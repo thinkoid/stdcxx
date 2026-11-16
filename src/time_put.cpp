@@ -29,9 +29,6 @@
 #define _RWSTD_LIB_SRC
 #include <rw/_defs.h>
 
-// disable Compaq C++ pure C headers
-#undef __PURE_CNAME
-
 
 #include <ctype.h>    // for isspace(), ...
 #include <stdio.h>    // for sprintf()

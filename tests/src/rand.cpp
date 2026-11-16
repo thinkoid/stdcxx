@@ -28,8 +28,6 @@
 
 #include <time.h>   // for clock()
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
 #include <rw_rand.h>
 
 

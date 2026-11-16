@@ -24,9 +24,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include <ctype.h>        // for isspace()
 #include <errno.h>        // for EACCES, errno
 #include <signal.h>       // for SIGXXX, kill()

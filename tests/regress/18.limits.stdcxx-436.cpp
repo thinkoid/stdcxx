@@ -26,10 +26,6 @@
 
 #include <assert.h>  // for assert()
 #include <limits.h>  // for MB_LEN_MAX
-
-// tell Compaq C++ we need the declaration of the POSIX popen() function
-// that's guarded (not declared) in the compiler's pure C++ libc headers
-#undef __PURE_CNAME
 #include <stdio.h>   // for popen(), fscanf(), pclose(), ...
 
 int main ()

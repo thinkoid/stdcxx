@@ -26,7 +26,8 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
+// prevent <rw_new.h> from defining the replacement operator
+// when compiling in the test suite framework
 #define _RWSTD_TEST_SRC
 
 #include <stdlib.h>   // for abort(), getenv()

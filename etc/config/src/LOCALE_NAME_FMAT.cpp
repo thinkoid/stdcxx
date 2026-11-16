@@ -22,13 +22,6 @@
  * 
  **************************************************************************/
 
-// If strict_ansi_errors is present, the definition of __PURE_CNAME 
-// dictates inclusion of  locale_cname_impl & locale_ansi_impl which 
-// do not define LC_MESSAGES locale category
-#if defined (__PURE_CNAME)
-#  undef __PURE_CNAME
-#endif // __PURE_CNAME
-
 #include <locale.h>
 #include <stdio.h>
 #include <string.h>

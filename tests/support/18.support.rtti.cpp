@@ -31,15 +31,6 @@
 /**************************************************************************/
 
 
-// verifies that typeid is correctly declared for MSVC (see PR #25603)
-void foo ()
-{
-    throw 0;   // must appear before #include <typeinfo>
-}
-
-/**************************************************************************/
-
-
 #include <typeinfo>
 
 #include <rw_driver.h>

@@ -26,9 +26,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include "opt_types.h"
 
 #include <rw_cmdopt.h>

@@ -26,9 +26,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include <ctype.h>      // for isdigit()
 #include <stdarg.h>     // for va_arg, va_list, ...
 #include <stdlib.h>     // for strtol()

@@ -24,9 +24,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include <rw_exception.h>
 #include <rw_driver.h>   
 #include <rw_printf.h>

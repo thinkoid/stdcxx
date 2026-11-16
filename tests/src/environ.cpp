@@ -26,9 +26,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include <rw_environ.h>
 
 #include <assert.h>   // for assert

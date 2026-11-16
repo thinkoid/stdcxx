@@ -82,25 +82,6 @@ marks are the one record of the intended interface.
 Check: the dynamic symbol table of the 15D library before and after:
 identical for the removal.
 
-*** TODO =_RWSTD_TEST_SRC= selects nothing, and two MSVC leftovers around =type_info=
-
-=tests/include/rw_testdefs.h= 37-43 reads =_RWSTD_TEST_SRC= for one
-thing, to undefine =__PURE_CNAME=, a macro of Compaq C++. 31 files
-under =tests= name =_RWSTD_TEST_SRC=; the sources of the test driver
-define it under the comment "expand _TEST_EXPORT macros".
-=src/time_put.cpp= 33, =tests/self/0.printf.cpp= 31,
-=tests/self/0.process.cpp= 30 and
-=tests/regress/18.limits.stdcxx-436.cpp= 32 undefine =__PURE_CNAME=
-themselves. =tests/support/18.support.rtti.cpp= 34-38 defines a
-=foo= that throws before =<typeinfo>= is included, to verify "that
-typeid is correctly declared for MSVC (see PR #25603)", and
-=include/typeinfo= 53-55 explains its member-by-member export by the
-same report. Seen while =type_info= took GCC's mark, 2026-11-15.
-
-Fix: each goes when its file is visited.
-
-Check: the suite builds and =18.support.rtti= holds its count.
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it

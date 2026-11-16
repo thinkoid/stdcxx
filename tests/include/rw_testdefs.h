@@ -34,14 +34,6 @@
 
 #include <rw/_defs.h>
 
-#ifdef _RWSTD_TEST_SRC
-   // #undef-ine the Compaq C++ macro #defined in response to
-   // the -std strict_ansi_errors compiler option in order to
-   // allow C++ extensions (such POSIX names) to be declared
-   // by C++ libc headers when building the test driver
-#  undef __PURE_CNAME
-#endif   // _RWSTD_TEST_SRC
-
 
 #  define _TEST_EXPORT
 

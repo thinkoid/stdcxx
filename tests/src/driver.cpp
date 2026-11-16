@@ -26,9 +26,6 @@
  *
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include "opt_diags.h"
 #include "opt_lines.h"
 #include "opt_trace.h"
@@ -63,8 +60,6 @@ _RWSTD_DLLIMPORT int (fileno)(FILE*) _LIBC_THROWS ();
 
 }   // extern "C"
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
 #include <rw_driver.h>
 
 /************************************************************************/

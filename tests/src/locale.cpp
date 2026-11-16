@@ -26,10 +26,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
-
 #include <rw_locale.h>
 #include <rw_environ.h>   // for rw_putenv()
 #include <rw_file.h>      // for SHELL_RM_RF, rw_tmpnam

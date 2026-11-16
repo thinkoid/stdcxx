@@ -24,9 +24,6 @@
 * 
 **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include <memory>           // for allocator
 
 #include <rw_containers.h>

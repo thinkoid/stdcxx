@@ -26,9 +26,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 // including <time.h> first works around a SunPro/SunOS bug (PR #26255)
 #include <time.h>     // for time_t
 

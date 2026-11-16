@@ -24,9 +24,6 @@
  * 
  **************************************************************************/
 
-// expand _TEST_EXPORT macros
-#define _RWSTD_TEST_SRC
-
 #include <stdlib.h>   // for atoi(), getenv(), malloc(), free()
 #include <string.h>   // for memset()
 

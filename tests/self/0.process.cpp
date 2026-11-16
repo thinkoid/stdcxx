@@ -25,9 +25,6 @@
 *
 **************************************************************************/
 
-// tell Compaq C++ we need POSIX errno constants that are otherwise
-// guarded (not defined) in the compiler's pure C++ libc headers
-#undef __PURE_CNAME
 #include <errno.h>          // for ENOENT, ECHILD, ESRCH, errno
 #include <string.h>         // for strcmp()
 
