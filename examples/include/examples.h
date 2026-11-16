@@ -38,18 +38,6 @@
 
 #include <cstddef>  // for ptrdiff_t
 
-#ifdef _RWSTD_NO_LIBC_IN_STD
-
-namespace std { 
-
-// accomdate compilers that don't have size_t in namespace std
-using ::size_t;
-using ::ptrdiff_t;
-
-}   // namespace std
-
-#endif   // _RWSTD_NO_LIBC_IN_STD
-
 
 
 

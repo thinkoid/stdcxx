@@ -10,7 +10,7 @@ stays C++98 and the branches are its portability record. Sizes,
 layouts, calling interfaces and runtime behavior are platform
 questions.
 
-The source census contains 155 named C++ probes, five supporting C++
+The source census contains 152 named C++ probes, five supporting C++
 translation units, one shell driver and 11 other support files. The
 makefile discovers all `.cpp` and `.sh` files; the support translation
 units are part of that machinery, not nine independent capabilities.
@@ -52,7 +52,7 @@ configuration's compiler and flags come from `makefile.in`.
 ## 2. Reachability and retirement
 
 **A scheduled probe, a referenced answer and an active fallback are
-three different things.** All 155 named probes are discoverable by
+three different things.** All 152 named probes are discoverable by
 the current configuration rule. The catalogue's references answer
 the second question conservatively: where the exact macro token is
 read outside its producer. Determining whether a conditional branch
@@ -121,6 +121,7 @@ its row is gone from the catalogue below.
 | `WCHAR_T`, `NATIVE_WCHAR_T` | `NO_WCHAR_T`, `NO_NATIVE_WCHAR_T` | 2026-10-18, three commits | `wchar_t` has been a keyword since C++98 and every compiler of the matrix has it; `NATIVE_WCHAR_T` was Visual C++'s `/Zc:wchar_t-`, and `rw/_config.h` derived it from `WCHAR_T`. The gate hid the wide half of the library: the `w` typedefs of `<iosfwd>`, the wide facets and their instantiation units, `wcodecvt.cpp`, `wctype.cpp`, 31 conditions in `time_put.cpp` alone, and the wide cases of 74 tests. `LIMITS` prints `_RWSTD_WCHAR_SIZE` and the `wchar_t` limits unconditionally. |
 | `HONOR_STD`, `PLACEMENT_DELETE` | `NO_HONOR_STD`, `NO_PLACEMENT_DELETE` | 2026-10-18 | g++ 2.9x's `-fhonor-std` and its placement-delete internal error. The tree no longer claims that compiler: every `__GNUG__ <= 2` block went with the two gates, in `rw/_config-gcc.h`, `rw/_config.h`, `<new>`, `<valarray>`, the `<cxxx>` headers, the sources, five probes, two tests and the locale utility. The 25 probes that put their names in `std` under `HONOR_STD` do so unconditionally. `RUNTIME_IN_STD` stays, by decision (`analysis-feature-gates.md` 2.5). |
 | `WCSFTIME_WCHAR_T_FMAT` | `NO_WCSFTIME_WCHAR_T_FMAT`, `_RWSTD_WCSFTIME_ARG3_T` | 2026-10-18 | Whether `wcsftime` takes a `const char*` format, as HP-UX 11's did. Six calls in `time_put.cpp` have passed wide literals since 2006 whatever the answer, so a C library that failed the probe had not built the library for twenty years; the one branch that honored it, and the two `_RWSTD_FMT_*` macros nothing read, went with the probe. |
+| `NEW_HEADER`, `LIBC_IN_STD`, `DEPRECATED_LIBC_IN_STD` | `NO_NEW_HEADER`, `NO_LIBC_IN_STD`, `NO_DEPRECATED_LIBC_IN_STD` | 2026-11-16 | Whether the compiler has `<cname>` headers, and whether they and the `.h` headers put the C library in `std`. The probes ran without `include/ansi` and with `-nostdinc++`, so they measured headers the library does not use, and GCC failed all three; `rw/_config.h` had undefined the three macros under every compiler since 2c76243c: the library's own headers exist and use `std`. The `<name.h>` arm of the include macros and the empty `_RWSTD_C` in `rw/_defs.h`, the `size_t` using-declarations of `examples/include/examples.h` and the conditions of two tests went with them. |
 
 ## 3. Outputs beyond the status macro
 
@@ -188,7 +189,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [CORRECT_ISO_CPP_WCHAR_H_PROTO](../../etc/config/src/CORRECT_ISO_CPP_WCHAR_H_PROTO.cpp) / `NO_CORRECT_ISO_CPP_WCHAR_H_PROTO` | glibc's C++ overloads in &lt;wchar.h&gt; compile | L; `include/ansi/cwchar`, `include/ansi/wchar.h` |
 | [CTYPE_BITS](../../etc/config/src/CTYPE_BITS.cpp) / `NO_CTYPE_BITS` + output | ctype constants | none |
 | [DAYLIGHT](../../etc/config/src/DAYLIGHT.cpp) / `NO_DAYLIGHT` | daylight variable in &lt;time.h&gt; | L; `src/time_put.cpp` |
-| [DEPRECATED_LIBC_IN_STD](../../etc/config/src/DEPRECATED_LIBC_IN_STD.cpp) / `NO_DEPRECATED_LIBC_IN_STD` | deprecated C headers and namespace std | none |
 | [DIV_OVERLOADS](../../etc/config/src/DIV_OVERLOADS.cpp) / `NO_DIV_OVERLOADS` + output | overloads of div() | none |
 | [EQUAL_CTYPE_MASK](../../etc/config/src/EQUAL_CTYPE_MASK.cpp) / `NO_EQUAL_CTYPE_MASK` | that ctype mask's for char and wchar_t are equal | L; `src/wctype.cpp` |
 | [EXCEPTION_ASSIGNMENT](../../etc/config/src/EXCEPTION_ASSIGNMENT.cpp) / `NO_EXCEPTION_ASSIGNMENT` | exception assignment operator | L; `src/exception.cpp` |
@@ -229,7 +229,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [LCONV_INT_FMAT](../../etc/config/src/LCONV_INT_FMAT.cpp) / `NO_LCONV_INT_FMAT` | C99 international lconv members | L/P/T; `src/punct.cpp` |
 | [LDBL_PRINTF_PREFIX](../../etc/config/src/LDBL_PRINTF_PREFIX.cpp) / `NO_LDBL_PRINTF_PREFIX` + output | long double printf format prefix | none |
 | [LIBC_EXCEPTION_SPEC](../../etc/config/src/LIBC_EXCEPTION_SPEC.cpp) / `NO_LIBC_EXCEPTION_SPEC` | exception specification in libc | L/P; `include/rw/_defs.h` |
-| [LIBC_IN_STD](../../etc/config/src/LIBC_IN_STD.cpp) / `NO_LIBC_IN_STD` | C library in namespace std | L/E; `include/rw/_defs.h` |
 | [LIMITS](../../etc/config/src/LIMITS.cpp) / `NO_LIMITS` + output | numerical limits | none |
 | [LLONG_ATOMIC_OPS](../../etc/config/src/LLONG_ATOMIC_OPS.cpp) / `NO_LLONG_ATOMIC_OPS` | the five __atomic built-ins on an unsigned long long, run without libatomic | L; `include/rw/_atomic-builtins.h`; facet counts since dcb5dc92 |
 | [LLONG_PRINTF_PREFIX](../../etc/config/src/LLONG_PRINTF_PREFIX.cpp) / `NO_LLONG_PRINTF_PREFIX` + output | long long printf format prefix | none |
@@ -243,7 +242,6 @@ Token-pasted and script-generated names need family-level inspection.
 | [MMAP](../../etc/config/src/MMAP.cpp) / `NO_MMAP` | mmap() and munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [MUNMAP](../../etc/config/src/MUNMAP.cpp) / `NO_MUNMAP` + output | munmap() in &lt;sys/mman.h&gt; | L; `src/mman.cpp` |
 | [NEWLINE](../../etc/config/src/NEWLINE.cpp) / `NO_NEWLINE` + output | newline (CR or CR-LF) | none |
-| [NEW_HEADER](../../etc/config/src/NEW_HEADER.cpp) / `NO_NEW_HEADER` | C++-style C library headers | L/P/T; `include/rw/_defs.h` |
 | [NEW_OFLOW_SAFE](../../etc/config/src/NEW_OFLOW_SAFE.cpp) / `NO_NEW_OFLOW_SAFE` | if operator new() checks the argument for overflow | L/P; `src/memory.cpp` |
 | [NEW_THROWS](../../etc/config/src/NEW_THROWS.cpp) / `NO_NEW_THROWS` | if operator new() throws | L/P/T; `src/iostore.cpp` |
 | [NL_LANGINFO](../../etc/config/src/NL_LANGINFO.cpp) / `NO_NL_LANGINFO` | nl_langinfo() in &lt;langinfo.h&gt; | L/T/V; `src/time_put.cpp` |

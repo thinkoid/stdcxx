@@ -41,12 +41,10 @@
 
 #include <cwchar>    // for mbsinit()
 
-#ifndef _RWSTD_NO_NEW_HEADER
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#  include <unistd.h>      // for getcwd()
-#  include <fcntl.h>         // for mode flags for _open
-#endif   // _RWSTD_NO_NEW_HEADER
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>      // for getcwd()
+#include <fcntl.h>         // for mode flags for _open
 
 #undef open
 #undef close

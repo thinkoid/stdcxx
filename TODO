@@ -54,30 +54,6 @@ Fix: each comment names the condition it closes.
 
 Check: none; the three lines are comments.
 
-*** TODO Three characterizations of the C headers have their answers discarded
-
-=NEW_HEADER=, =LIBC_IN_STD= and =DEPRECATED_LIBC_IN_STD= ask whether
-the compiler has =<cname>= headers and whether they put the C library
-in =std=. They run without =include/ansi= on the search path and with
-=-nostdinc++=, so they measure headers the library does not use, and
-a 15D build under GCC defines all three macros. =include/rw/_config.h=
-108-114 then undefines the three under every compiler, since
-2c76243c: the library's own headers exist and use =std=. What reads
-the macros therefore has one live arm:
-- =include/rw/_defs.h= 75-105, the =<name.h>= arm of the include
-  macros, and 518, the empty =_RWSTD_C=;
-- =examples/include/examples.h= 41-51;
-- the conditions at =tests/intro/17.names.cpp= 632 and
-  =tests/localization/22.locale.messages.cpp= 44, which always hold.
-Seen while =ref-c-headers.md= was written, 2026-11-16.
-
-Fix: the three characterizations, the three =#undef= lines and the
-dead arms leave; =ref-characterizations.md= moves the three rows to
-its retired table.
-
-Check: the =config.h= of a 15D build has none of the three macros;
-the library and the tests build; the suite at pin.
-
 *** TODO Four =always_noconv= helpers of the ISO-2022 converters are dead
 
 =src/iso2022.h= 75 and 99 declare =__rw_iso2022_do_always_noconv=

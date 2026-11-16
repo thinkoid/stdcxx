@@ -41,69 +41,34 @@
 // if a header is not available its name is #defined to the name of
 // this file (it's harmless and avoids polluting code with
 // tons of ugly platform-specific #ifdefs)
-#ifndef _RWSTD_NO_NEW_HEADER
+#define _RWSTD_CASSERT   <cassert>
+#define _RWSTD_CCTYPE    <cctype>
+#define _RWSTD_CERRNO    <cerrno>
+#define _RWSTD_CFLOAT    <cfloat>
+#define _RWSTD_CISO646   <ciso646>
+#define _RWSTD_CLIMITS   <climits>
+#define _RWSTD_CLOCALE   <clocale>
+#define _RWSTD_CMATH     <cmath>
+#define _RWSTD_CSETJMP   <csetjmp>
+#define _RWSTD_CSIGNAL   <csignal>
+#define _RWSTD_CSTDARG   <cstdarg>
+#define _RWSTD_CSTDDEF   <cstddef>
+#define _RWSTD_CSTDIO    <cstdio>
+#define _RWSTD_CSTDLIB   <cstdlib>
+#define _RWSTD_CSTRING   <cstring>
+#define _RWSTD_CTIME     <ctime>
 
-#  define _RWSTD_CASSERT   <cassert>
-#  define _RWSTD_CCTYPE    <cctype>
-#  define _RWSTD_CERRNO    <cerrno>
-#  define _RWSTD_CFLOAT    <cfloat>
-#  define _RWSTD_CISO646   <ciso646>
-#  define _RWSTD_CLIMITS   <climits>
-#  define _RWSTD_CLOCALE   <clocale>
-#  define _RWSTD_CMATH     <cmath>
-#  define _RWSTD_CSETJMP   <csetjmp>
-#  define _RWSTD_CSIGNAL   <csignal>
-#  define _RWSTD_CSTDARG   <cstdarg>
-#  define _RWSTD_CSTDDEF   <cstddef>
-#  define _RWSTD_CSTDIO    <cstdio>
-#  define _RWSTD_CSTDLIB   <cstdlib>
-#  define _RWSTD_CSTRING   <cstring>
-#  define _RWSTD_CTIME     <ctime>
+#ifndef _RWSTD_NO_WCHAR_H
+#  define _RWSTD_CWCHAR  <cwchar>
+#else
+#  define _RWSTD_CWCHAR  <rw/_defs.h>
+#endif   // _RWSTD_NO_WCHAR_H
 
-#  ifndef _RWSTD_NO_WCHAR_H
-#    define _RWSTD_CWCHAR  <cwchar>
-#  else
-#    define _RWSTD_CWCHAR  <rw/_defs.h>
-#  endif   // _RWSTD_NO_WCHAR_H
-
-#  ifndef _RWSTD_NO_WCTYPE_H
-#    define _RWSTD_CWCTYPE <cwctype>
-#  else
-#    define _RWSTD_CWCTYPE <rw/_defs.h>
-#  endif   // _RWSTD_NO_WCTYPE_H
-
-#else   // if defined (_RWSTD_NO_NEW_HEADER)
-
-#  define _RWSTD_CASSERT   "assert.h"
-#  define _RWSTD_CCTYPE    <ctype.h>
-#  define _RWSTD_CERRNO    "errno.h"
-#  define _RWSTD_CFLOAT    <float.h>
-#  define _RWSTD_CISO646   <iso646.h>
-#  define _RWSTD_CLIMITS   <limits.h>
-#  define _RWSTD_CLOCALE   <locale.h>
-#  define _RWSTD_CMATH     <math.h>
-#  define _RWSTD_CSETJMP   "setjmp.h"
-#  define _RWSTD_CSIGNAL   <signal.h>
-#  define _RWSTD_CSTDARG   <stdarg.h>
-#  define _RWSTD_CSTDDEF   <stddef.h>
-#  define _RWSTD_CSTDIO    <stdio.h>
-#  define _RWSTD_CSTDLIB   <stdlib.h>
-#  define _RWSTD_CSTRING   <string.h>
-#  define _RWSTD_CTIME     <time.h>
-
-#  ifndef _RWSTD_NO_WCHAR_H
-#    define _RWSTD_CWCHAR  <wchar.h>
-#  else
-#    define _RWSTD_CWCHAR  <rw/_defs.h>
-#  endif   // _RWSTD_NO_WCHAR_H
-
-#  ifndef _RWSTD_NO_WCTYPE_H
-#    define _RWSTD_CWCTYPE <wctype.h>
-#  else
-#    define _RWSTD_CWCTYPE <rw/_defs.h>
-#  endif   // _RWSTD_NO_WCTYPE_H
-
-#endif   // _RWSTD_NO_NEW_HEADER
+#ifndef _RWSTD_NO_WCTYPE_H
+#  define _RWSTD_CWCTYPE <cwctype>
+#else
+#  define _RWSTD_CWCTYPE <rw/_defs.h>
+#endif   // _RWSTD_NO_WCTYPE_H
 
 
 #define _RWSTD_SYS_TYPES_H <sys/types.h>
@@ -512,11 +477,7 @@
 #endif   // _RWSTD_THREAD_SWAP
 
 // macro for qualifying C library names in the std namespace
-#ifndef _RWSTD_NO_LIBC_IN_STD
-#  define _RWSTD_C std
-#else
-#  define _RWSTD_C   /* empty */
-#endif
+#define _RWSTD_C std
 
 #define _RWSTD_INVALID_FILE_DESC -1
 #define _RWSTD_INVALID_FILE_PTR   0

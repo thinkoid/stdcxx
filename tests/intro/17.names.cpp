@@ -629,8 +629,6 @@
 #define start                   !ERROR!
 #include <vector>
 
-#ifndef _RWSTD_NO_NEW_HEADER
-
 #include <cassert>
 #include <cctype>
 #include <cerrno>
@@ -660,8 +658,6 @@
 #ifndef _RWSTD_NO_WCTYPE_H
 #  include <cwctype>
 #endif
-
-#endif   // _RWSTD_NO_NEW_HEADER
 
 /***********************************************************************/
 

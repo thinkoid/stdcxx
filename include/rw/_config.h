@@ -92,7 +92,7 @@
  **************************************************************************/
 
 // facts about the library's own C headers (include/ansi/), the same
-// under every compiler: the configuration measured the native headers
+// under every compiler
 
 #if !defined (_RWSTD_USE_PURE_C_HEADERS)
      // pure C headers disabled except when requested
@@ -104,14 +104,6 @@
      // in terms of the pure C++ C library headers (the <cxxx> kind)
 #  define _RWSTD_NO_DEPRECATED_C_HEADERS
 #endif   // _RWSTD_NO_PURE_C_HEADERS
-
-   // the <cxxx> headers exist
-#undef _RWSTD_NO_NEW_HEADER
-
-   // and put the libc functions in namespace std
-#undef _RWSTD_NO_LIBC_IN_STD
-
-#undef _RWSTD_NO_DEPRECATED_LIBC_IN_STD
 
 
 /**************************************************************************
