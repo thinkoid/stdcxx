@@ -1911,7 +1911,7 @@ so the `position` levels of `TODO`'s ignored-element entry are not in
 the suite. `check_libc` skips multibyte C library locales (a `FIXME`
 in `22.locale.collate.cpp`). `TODO` "Calls EDG matches to no function"
 names `22.locale.collate.cpp:1159`; "Tests that GCC and Clang let
-through" names `22.locale.messages.cpp:616` (`getcwd`) and
+through" names `22.locale.messages.cpp:600` (`getcwd`) and
 `22.locale.collate.stdcxx-1010.cpp:71` (a UTF-8 literal).
 
 ### 11.5 Open

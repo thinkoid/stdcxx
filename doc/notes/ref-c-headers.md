@@ -244,10 +244,10 @@ names; the third is included by the first, as `<ansi/_cstdlib.h>`.
 ### 2.2 How the compiler finds them
 
 The compiler's configuration file puts the directory first on the
-search path (`etc/config/gcc.config` 86, `CPPFLAGS =
+search path (`etc/config/gcc.config` 72, `CPPFLAGS =
 -I$(TOPDIR)/include/ansi`), and `etc/config/makefile.common` 43
 appends `-I$(TOPDIR)/include -I$(BUILDDIR)/include`. `-nostdinc++`
-(`gcc.config` 73) takes the compiler's own C++ library off the path.
+(`gcc.config` 67) takes the compiler's own C++ library off the path.
 Thus:
 
 - `<cstdlib>` can only be `include/ansi/cstdlib`;
@@ -715,12 +715,12 @@ ways:
 - **Built-ins.** Under GCC `rw/_traits.h` 86-92 maps
   `_RWSTD_MEMCPY` and its siblings to `__builtin_memcpy`.
 - **Eight includes in all**, through the macros of `rw/_defs.h`
-  44-73, `_RWSTD_CMATH` for `<cmath>` and so on: `<cmath>` three
+  44-71, `_RWSTD_CMATH` for `<cmath>` and so on: `<cmath>` three
   times, `<ctime>` and `<cwchar>` twice each, `<cstring>` once.
 
 Where a library header does call a C function by name it writes
 `_RWSTD_C::sqrt`, 79 times in all, most of them in `<complex>` and
-`<valarray>`. `_RWSTD_C` is `std` (`rw/_defs.h` 515-519).
+`<valarray>`. `_RWSTD_C` is `std` (`rw/_defs.h` 478).
 
 ## 9. Where to look
 
@@ -729,25 +729,21 @@ Where a library header does call a C function by name it writes
 | `include/ansi/c*` | the eighteen `<cname>` headers, two bodies each but `<ciso646>`, which has one |
 | `include/ansi/*.h` without the underscore | the seventeen `.h` wrappers |
 | `include/ansi/_c*.h` | the sixteen pure headers |
-| `include/rw/_config.h` 97-114 | the two switches, and the facts about the library's own C headers |
-| `include/rw/_defs.h` 44-106, 515-519 | the include macros and `_RWSTD_C` |
+| `include/rw/_config.h` 97-106 | the two switches |
+| `include/rw/_defs.h` 44-71, 478 | the include macros and `_RWSTD_C` |
 | `etc/config/src/libc_headers.sh` | the path macros |
 | `etc/config/src/{ABS,DIV,MATH}_OVERLOADS.cpp`, `C99_MATH.cpp`, `EXTERN_C_OVERLOAD.cpp` | the gates of chapter 4 |
-| `etc/config/gcc.config` 73, 86 | the search path |
+| `etc/config/gcc.config` 67, 72 | the search path |
 | `tests/strings/21.cctype.cpp`, `21.cwchar.cpp`, `21.cwctype.cpp`, `tests/numerics/26.c.math.cpp`, `26.c.math.depr.cpp`, `tests/algorithms/25.libc.cpp`, `tests/diagnostics/19.cerrno.cpp`, `tests/support/18.csetjmp.cpp` | the tests, all run in the wrapper model |
 
 `TODO` carries what this note found open:
 
 - "The pure C headers" is chapter 7: the model is repaired, or it
   retires.
-- "Three characterizations of the C headers have their answers
-  discarded" is the other half of `_config.h` 108-114.
 - "A program needs two include directories, and the original README
   names one" is 2.2.
 
-One of these does not wait on the pure model: the three
-characterizations can go whatever is decided. The pure model is the
-decision the rest hangs on:
+The pure model is the decision the rest hangs on:
 
 - If it retires, the D.5 arm of every `.h` wrapper goes with it, and
   each thing a strict compiler's C library withholds is declared in
