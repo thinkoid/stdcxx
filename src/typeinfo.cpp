@@ -37,19 +37,13 @@
 /**************************************************************************/
 // class type_info members
 
-#if defined _RWSTD_TYPEINFO_INCLUDED
-
-// define type_info members only if our own <typeinfo> header
-// (as opposed to the compiler's native) has been included
-// SunPro always #includes its own, regardless of options
-
-#  if    !defined (_RWSTD_NO_STD_TYPE_INFO) \
-      || !defined (_RWSTD_NO_GLOBAL_TYPE_INFO)
+#if    !defined (_RWSTD_NO_STD_TYPE_INFO) \
+    || !defined (_RWSTD_NO_GLOBAL_TYPE_INFO)
 
 // at least one of the config tests above succeeded,
 // rely on config tests for each individual member
 
-#    ifndef _RWSTD_NO_STD_TYPE_INFO
+#  ifndef _RWSTD_NO_STD_TYPE_INFO
 
 // define type_info et al in namespace std iff they are found to be
 // defined in namespace std in the compiler's language support library
@@ -58,21 +52,21 @@
 
 namespace std {
 
-#    endif   // _RWSTD_NO_STD_TYPE_INFO
+#  endif   // _RWSTD_NO_STD_TYPE_INFO
 
 
-#    ifdef _RWSTD_NO_TYPE_INFO_DTOR
+#  ifdef _RWSTD_NO_TYPE_INFO_DTOR
 
 type_info::~type_info () { }
 
-#    endif   // _RWSTD_NO_TYPE_INFO_DTOR
+#  endif   // _RWSTD_NO_TYPE_INFO_DTOR
 
 
-#    ifdef _RWSTD_NO_TYPE_INFO_BEFORE
+#  ifdef _RWSTD_NO_TYPE_INFO_BEFORE
 
 bool type_info::before (const type_info &rhs) const
 {
-#      ifdef __GNUG__
+#    ifdef __GNUG__
 
     // GCC begins the name of a type local to its file with '*':
     // two such types can have one name, and the address of the
@@ -82,20 +76,20 @@ bool type_info::before (const type_info &rhs) const
 
     return 0 > strcmp (_C_name, rhs._C_name);
 
-#      else   // if !defined (__GNUG__)
+#    else   // if !defined (__GNUG__)
 
     const char* const n1 = name ();
     const char* const n2 = rhs.name ();
 
     return 0 > strcmp (n1 ? n1 : "", n2 ? n2 : "");
 
-#      endif   // __GNUG__
+#    endif   // __GNUG__
 }
 
-#    endif   // _RWSTD_NO_TYPE_INFO_BEFORE
+#  endif   // _RWSTD_NO_TYPE_INFO_BEFORE
 
 
-#    ifdef _RWSTD_NO_TYPE_INFO_NAME
+#  ifdef _RWSTD_NO_TYPE_INFO_NAME
 
 // used in type_info::name() when the class has no member called _C_name
 static const char _C_name[] = "";
@@ -103,66 +97,66 @@ static const char _C_name[] = "";
 const char* type_info::name () const
 {
     // silence warning: _C_name declared but never used
-#ifdef _RWSTD_NO_STD_TYPE_INFO
+#    ifdef _RWSTD_NO_STD_TYPE_INFO
     _RWSTD_UNUSED (::_C_name);
-#else
+#    else
     _RWSTD_UNUSED (std::_C_name);
-#endif   // _RWSTD_NO_STD_TYPE_INFO
+#    endif   // _RWSTD_NO_STD_TYPE_INFO
 
     // without the mark of a name that is compared by its address
     return '*' == *_C_name ? _C_name + 1 : _C_name;
 }
 
-#    endif   // _RWSTD_NO_TYPE_INFO_NAME
+#  endif   // _RWSTD_NO_TYPE_INFO_NAME
 
 
-#    ifdef _RWSTD_NO_TYPE_INFO_EQUALITY
+#  ifdef _RWSTD_NO_TYPE_INFO_EQUALITY
 
 bool type_info::operator== (const type_info &rhs) const
 {
     return !before (rhs) && !rhs.before (*this);
 }
 
-#    endif   // _RWSTD_NO_TYPE_INFO_EQUALITY
+#  endif   // _RWSTD_NO_TYPE_INFO_EQUALITY
 
 
-#    ifdef _RWSTD_NO_TYPE_INFO_INEQUALITY
+#  ifdef _RWSTD_NO_TYPE_INFO_INEQUALITY
 
 bool type_info::operator!= (const type_info &rhs) const
 {
     return !(*this == rhs);
 }
 
-#    endif   // _RWSTD_NO_TYPE_INFO_INEQUALITY
+#  endif   // _RWSTD_NO_TYPE_INFO_INEQUALITY
 
-#    ifndef _RWSTD_NO_STD_TYPE_INFO
+#  ifndef _RWSTD_NO_STD_TYPE_INFO
 
 }   // namespace std
 
-#    endif   // _RWSTD_NO_STD_TYPE_INFO
+#  endif   // _RWSTD_NO_STD_TYPE_INFO
 
-#  endif   // !_RWSTD_NO_STD_TYPEINFO || !_RWSTD_NO_GLOBAL_TYPEINFO
+#endif   // !_RWSTD_NO_STD_TYPE_INFO || !_RWSTD_NO_GLOBAL_TYPE_INFO
 
 
 //**************************************************************************
 // class bad_cast members
 
-#  ifndef _RWSTD_NO_STD_BAD_CAST
+#ifndef _RWSTD_NO_STD_BAD_CAST
 
 namespace std {
 
-#  endif   // _RWSTD_NO_STD_BAD_CAST
+#endif   // _RWSTD_NO_STD_BAD_CAST
 
-#  ifdef _RWSTD_NO_BAD_CAST_DEFAULT_CTOR
+#ifdef _RWSTD_NO_BAD_CAST_DEFAULT_CTOR
 
 bad_cast::bad_cast () _THROWS (())
 {
     // empty
 }
 
-#  endif   // _RWSTD_NO_BAD_CAST_DEFAULT_CTOR
+#endif   // _RWSTD_NO_BAD_CAST_DEFAULT_CTOR
 
-#  ifdef _RWSTD_NO_BAD_CAST_COPY_CTOR
+#ifdef _RWSTD_NO_BAD_CAST_COPY_CTOR
 
 bad_cast::bad_cast (const bad_cast &rhs) _THROWS (())
     : exception (rhs)
@@ -170,18 +164,18 @@ bad_cast::bad_cast (const bad_cast &rhs) _THROWS (())
     // empty
 }
 
-#  endif   // _RWSTD_NO_BAD_CAST_COPY_CTOR
+#endif   // _RWSTD_NO_BAD_CAST_COPY_CTOR
 
-#  ifdef _RWSTD_NO_BAD_CAST_DTOR
+#ifdef _RWSTD_NO_BAD_CAST_DTOR
 
 bad_cast::~bad_cast () _THROWS (())
 {
     // empty
 }
 
-#  endif   // _RWSTD_NO_BAD_CAST_DTOR
+#endif   // _RWSTD_NO_BAD_CAST_DTOR
 
-#  ifdef _RWSTD_NO_BAD_CAST_ASSIGNMENT
+#ifdef _RWSTD_NO_BAD_CAST_ASSIGNMENT
 
 bad_cast&
 bad_cast::operator= (const bad_cast &rhs) _THROWS (())
@@ -191,43 +185,43 @@ bad_cast::operator= (const bad_cast &rhs) _THROWS (())
     return *this;
 }
 
-#  endif   // _RWSTD_NO_BAD_CAST_ASSIGNMENT
+#endif   // _RWSTD_NO_BAD_CAST_ASSIGNMENT
 
-#  ifdef _RWSTD_NO_BAD_CAST_WHAT
+#ifdef _RWSTD_NO_BAD_CAST_WHAT
 
 const char* bad_cast::what () const _THROWS (())
 {
     return "bad_cast";
 }
 
-#  endif   // _RWSTD_NO_BAD_CAST_WHAT
+#endif   // _RWSTD_NO_BAD_CAST_WHAT
 
-#  ifndef _RWSTD_NO_STD_BAD_CAST
+#ifndef _RWSTD_NO_STD_BAD_CAST
 
 }   // namespace std
 
-#  endif   // _RWSTD_NO_STD_BAD_CAST
+#endif   // _RWSTD_NO_STD_BAD_CAST
 
 
 //**************************************************************************
 // class bad_typeid members
 
-#  ifndef _RWSTD_NO_STD_BAD_TYPEID
+#ifndef _RWSTD_NO_STD_BAD_TYPEID
 
 namespace std {
 
-#  endif   // _RWSTD_NO_STD_BAD_TYPEID
+#endif   // _RWSTD_NO_STD_BAD_TYPEID
 
-#  ifdef _RWSTD_NO_BAD_TYPEID_DEFAULT_CTOR
+#ifdef _RWSTD_NO_BAD_TYPEID_DEFAULT_CTOR
 
 bad_typeid::bad_typeid () _THROWS (())
 {
     // empty
 }
 
-#  endif   // _RWSTD_NO_BAD_TYPEID_DEFAULT_CTOR
+#endif   // _RWSTD_NO_BAD_TYPEID_DEFAULT_CTOR
 
-#  ifdef _RWSTD_NO_BAD_TYPEID_COPY_CTOR
+#ifdef _RWSTD_NO_BAD_TYPEID_COPY_CTOR
 
 bad_typeid::bad_typeid (const bad_typeid &rhs) _THROWS (())
     : exception (rhs)
@@ -235,18 +229,18 @@ bad_typeid::bad_typeid (const bad_typeid &rhs) _THROWS (())
     // empty
 }
 
-#  endif   // _RWSTD_NO_BAD_TYPEID_COPY_CTOR
+#endif   // _RWSTD_NO_BAD_TYPEID_COPY_CTOR
 
-#  ifdef _RWSTD_NO_BAD_TYPEID_DTOR
+#ifdef _RWSTD_NO_BAD_TYPEID_DTOR
 
 bad_typeid::~bad_typeid () _THROWS (())
 {
     // empty
 }
 
-#  endif   // _RWSTD_NO_BAD_TYPEID_DTOR
+#endif   // _RWSTD_NO_BAD_TYPEID_DTOR
 
-#  ifdef _RWSTD_NO_BAD_TYPEID_ASSIGNMENT
+#ifdef _RWSTD_NO_BAD_TYPEID_ASSIGNMENT
 
 bad_typeid&
 bad_typeid::operator= (const bad_typeid &rhs) _THROWS (())
@@ -256,21 +250,19 @@ bad_typeid::operator= (const bad_typeid &rhs) _THROWS (())
     return *this;
 }
 
-#  endif   // _RWSTD_NO_BAD_TYPEID_ASSIGNMENT
+#endif   // _RWSTD_NO_BAD_TYPEID_ASSIGNMENT
 
-#  ifdef _RWSTD_NO_BAD_TYPEID_WHAT
+#ifdef _RWSTD_NO_BAD_TYPEID_WHAT
 
 const char* bad_typeid::what () const _THROWS (())
 {
     return "bad_typeid";
 }
 
-#  endif   // _RWSTD_NO_BAD_TYPEID_WHAT
+#endif   // _RWSTD_NO_BAD_TYPEID_WHAT
 
-#  ifndef _RWSTD_NO_STD_BAD_TYPEID
+#ifndef _RWSTD_NO_STD_BAD_TYPEID
 
 }   // namespace std
 
-#  endif   // _RWSTD_NO_STD_BAD_TYPEID
-
-#endif   // _RWSTD_TYPEINFO_INCLUDED
+#endif   // _RWSTD_NO_STD_BAD_TYPEID

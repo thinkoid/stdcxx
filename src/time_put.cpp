@@ -143,9 +143,7 @@ __rw_get_date_fmat (char *fmt)
 
     tmp [0] = '\0';
 
-    // shut up gcc 2.9x warning: `%x' yields only last 2 digits of year
-    const char percent_x[] = "%x";
-    strftime (tmp, sizeof tmp, percent_x, &t);
+    strftime (tmp, sizeof tmp, "%x", &t);
 
     char *pfmt = fmt;
 

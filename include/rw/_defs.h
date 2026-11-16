@@ -317,8 +317,6 @@
 #endif
 
 #if !defined(_RWSTD_NEW_CAPACITY_RATIO)
-   // using long doubles to eliminate bogus warnings on g++ 2.95.2/sparc
-   // (-W -O2/3 only): warning: overflow on truncation to integer
 #  define _RWSTD_NEW_CAPACITY_RATIO 1618U
 #endif
 
@@ -754,7 +752,7 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 
 // will use the deduced native type rather than the typedef to prevent
-// conflicts caused by inconsistent definition of wint_t (gcc 2.95.2/AIX)
+// conflicts caused by inconsistent definition of wint_t
 #ifndef _RWSTD_WINT_T
    // hardcode if wint_t is not available in <wchar.h>
    // used by std::traits and std::basic_[i|o]stream

@@ -307,10 +307,6 @@ private:
 
 // conversion structs
 
-// struct split into 2 to eliminate the following g++ 2.95.2 warning:
-// warning: choosing `convert<T>::operator U&()' over 
-//                   `convert<T>::operator const U&() const'
-
 template <class T, class U>
 struct cvt : T 
 {

@@ -85,14 +85,6 @@ __rw_deallocate (void *p, size_t, int /* = 0 */) _THROWS (())
 }   // namespace __rw
 
 
-#if defined _RWSTD_NEW_INCLUDED
-
-// define operator new and delete and bad_alloc members only if our own
-// implementation's <new> header (as opposed to the compiler's native C++
-// Standard library) has been included; SunPro always #includes its own,
-// regardless of compiler options
-
-
 // The following operators are replaceable; provide definitions if they're
 // missing in the compiler support library. This means that they will no
 // longer be replaceable, but at least they will be callable without the
@@ -138,8 +130,8 @@ operator new[] (size_t __size, const std::nothrow_t&) _NEW_THROWS (())
         return ::operator new (__size);
     }
     catch (...) {
-        void *__nil = 0;    // prevent a g++ 2.95.2 warning
-        return __nil;       // about operator new returning 0
+        void *__nil = 0;    // compilers warn of a null constant returned
+        return __nil;       // by an operator new not declared throw ()
     }
 }
 
@@ -190,15 +182,15 @@ _RWSTD_EXPORT extern const nothrow_t nothrow = nothrow_t ();
 
 // class bad_alloc members
 
-#  if    !defined (_RWSTD_NO_STD_BAD_ALLOC)    \
-      || !defined (_RWSTD_NO_RUNTIME_IN_STD)
+#if    !defined (_RWSTD_NO_STD_BAD_ALLOC)    \
+    || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
 namespace std { 
 
-#  endif   // !_RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD ...
+#endif   // !_RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD ...
 
 
-#  ifdef _RWSTD_NO_BAD_ALLOC_DEFAULT_CTOR
+#ifdef _RWSTD_NO_BAD_ALLOC_DEFAULT_CTOR
 
 bad_alloc::
 bad_alloc () _THROWS (())
@@ -207,9 +199,9 @@ bad_alloc () _THROWS (())
     // empty
 }
 
-#  endif   // _RWSTD_NO_BAD_ALLOC_DEFAULT_CTOR
+#endif   // _RWSTD_NO_BAD_ALLOC_DEFAULT_CTOR
 
-#  ifdef _RWSTD_NO_BAD_ALLOC_COPY_CTOR
+#ifdef _RWSTD_NO_BAD_ALLOC_COPY_CTOR
 
 bad_alloc::
 bad_alloc (const bad_alloc &rhs) _THROWS (())
@@ -218,18 +210,18 @@ bad_alloc (const bad_alloc &rhs) _THROWS (())
     // empty
 }
 
-#  endif   // _RWSTD_NO_BAD_ALLOC_COPY_CTOR
+#endif   // _RWSTD_NO_BAD_ALLOC_COPY_CTOR
 
-#  ifdef _RWSTD_NO_BAD_ALLOC_DTOR
+#ifdef _RWSTD_NO_BAD_ALLOC_DTOR
 
 /* virtual */ bad_alloc::
 ~bad_alloc () _THROWS (())
 {
     // empty
 }
-#  endif   // _RWSTD_NO_BAD_ALLOC_DTOR
+#endif   // _RWSTD_NO_BAD_ALLOC_DTOR
 
-#  ifdef _RWSTD_NO_BAD_ALLOC_ASSIGNMENT
+#ifdef _RWSTD_NO_BAD_ALLOC_ASSIGNMENT
 
 bad_alloc& bad_alloc::
 operator= (const bad_alloc &rhs) _THROWS (())
@@ -239,9 +231,9 @@ operator= (const bad_alloc &rhs) _THROWS (())
     return *this;
 }
 
-#  endif   // _RWSTD_NO_BAD_ALLOC_ASSIGNMENT
+#endif   // _RWSTD_NO_BAD_ALLOC_ASSIGNMENT
 
-#  ifdef _RWSTD_NO_BAD_ALLOC_WHAT
+#ifdef _RWSTD_NO_BAD_ALLOC_WHAT
 
 /* virtual */ const char* bad_alloc::
 what () const _THROWS (())
@@ -249,12 +241,11 @@ what () const _THROWS (())
     return _RWSTD_ERROR_BAD_ALLOC;
 }
 
-#  endif   // _RWSTD_NO_BAD_ALLOC_WHAT
+#endif   // _RWSTD_NO_BAD_ALLOC_WHAT
 
-#  if    !defined (_RWSTD_NO_STD_BAD_ALLOC)    \
-      || !defined (_RWSTD_NO_RUNTIME_IN_STD)
+#if    !defined (_RWSTD_NO_STD_BAD_ALLOC)    \
+    || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
 }   // namespace std
 
-#  endif   // !_RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD ...
-#endif   // _RWSTD_NEW_INCLUDED
+#endif   // !_RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD ...

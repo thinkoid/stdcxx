@@ -78,12 +78,10 @@ _RWSTD_DLLIMPORT bool UNCAUGHT_EXCEPTION () _THROWS (());
 namespace std { 
 
 // define functions in namespace std to wrap any globals defined
-// defined in the compiler support library
+// in the compiler support library
 
 // functions are outlined to prevent linker errors in optimized shared builds
 
-// guard definitions when compiling with gcc with -fno-honor-std   
-    
 #if defined (_RWSTD_NO_STD_TERMINATE)
 
 // 18.6.3.3

@@ -666,8 +666,8 @@ public:
     
     typedef bool const_reference;
 
-    // hacks working around bogus g++ 2.95.2 warnings coming out of
-    // iterators below as well as what's probably an MSVC 6.0 bug
+    // names for the iterators below, whose own typedefs of reference and
+    // difference_type would otherwise change the meaning of those names
     typedef reference       _C_ref;
     typedef const_reference _C_const_ref;
     typedef difference_type _C_diff_t;

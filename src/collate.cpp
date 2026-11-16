@@ -473,10 +473,8 @@ __rw_strnxfrm (const char *src, size_t nchars)
 
         if (src [0]) {
 
-            // using a C-style cast instead of static_cast to avoid
-            // a gcc 2.95.2 bug causing an error on some platforms:
-            //   static_cast from `void *' to `const char *'
-            const char* const last = (const char*)memchr (src, '\0', nchars);
+            const char* const last =
+                static_cast< const char* >(memchr (src, '\0', nchars));
 
             if (0 == last) {
 

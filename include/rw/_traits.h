@@ -310,11 +310,8 @@ struct char_traits<char>
 
     static const char_type*
     find (const char_type* __s, _RWSTD_SIZE_T __n, const char_type& __c) {
-        // cast to const void* used to get around a gcc 2.95 bug
-        // that prevents a static_cast from void* --> const T*
-        // (only occurs if memchr() isn't overloaded on const)
-        return static_cast< const char_type* >((const void*)_RWSTD_MEMCHR (
-__s, static_cast< unsigned char >(__c), __n));
+        return static_cast< const char_type* >(
+            _RWSTD_MEMCHR (__s, static_cast< unsigned char >(__c), __n));
     }
 
     static _RWSTD_SIZE_T length (const char_type *__s) {

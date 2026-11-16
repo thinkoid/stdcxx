@@ -518,9 +518,6 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
 
         __tmp.reserve (size () + __size2);
 
-        // avoid using the name __i or __it below so as not to trigger
-        // a (bogus) gcc 2.95.2 -Wshadow warning: declaration of `__i'
-        // shadows previous local
         iterator __ix;
 
         // copy the initial subsequence of *this, [begin, it),  into

@@ -196,9 +196,6 @@ void* operator new (_RWSTD_SIZE_T, const std::nothrow_t&) _NEW_THROWS (());
 
 void operator delete (void*) _NEW_THROWS (());
 
-// guarded in case a compiler has trouble with these
-// (e.g. gcc 2.95.2 in conjunction with placement new)
-
 #ifdef _RWSTD_NO_OPERATOR_DELETE_NOTHROW
 _RWSTD_EXPORT
 #endif   // _RWSTD_NO_OPERATOR_DELETE_NOTHROW
