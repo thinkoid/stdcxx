@@ -2583,12 +2583,18 @@ test_ascii (const char *locname, const char* native_locname)
 
 // the library's mapper of locale databases (src/mman.cpp): the size
 // it hands back is written only with a mapping, so that a database
-// that cannot be opened or mapped leaves no size beside a null pointer
+// that cannot be opened or mapped leaves no size beside a null pointer;
+// src/mman.h declares the two for the library, outside the include
+// path of the tests, so these are its declarations, attributes and
+// all, and follow any change to them
 
 namespace __rw {
 
-void* __rw_mmap (const char*, std::size_t*);
-void __rw_munmap (const void*, std::size_t);
+_RWSTD_EXPORT void*
+__rw_mmap (const char*, std::size_t*) _RWSTD_ATTRIBUTE_NOTHROW;
+
+_RWSTD_EXPORT void
+__rw_munmap (const void*, std::size_t) _RWSTD_ATTRIBUTE_NOTHROW;
 
 }
 

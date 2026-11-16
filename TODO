@@ -746,23 +746,6 @@ Fix: the comment names =open= and =O_RDONLY=.
 
 Check: none; a comment.
 
-** TODO =22.locale.codecvt= declares the library's mapper itself
-
-=tests/localization/22.locale.codecvt.cpp= 2588-2593 declares
-=__rw::__rw_mmap= and =__rw::__rw_munmap= in a namespace block of its
-own, where =src/mman.h= 42-47 declares them for the library. The two
-agree today, but the test's copy lacks the =nothrow= attribute and the
-=_RWSTD_EXPORT= of the header, and a change of signature in
-=src/mman.h= would leave the test calling a function that is not
-there. =src/mman.h= sits in =src=, outside the include path of the
-tests. Seen while the export marks took the ELF meaning, 2026-11-16.
-
-Fix: the test includes =mman.h= from =src= through its include path,
-or the declarations stay and a comment ties them to =src/mman.h=; a
-decision.
-
-Check: =22.locale.codecvt= at pin in 15D.
-
 * Certification
 
 The scripts under =bin= and the nightly run: building the
