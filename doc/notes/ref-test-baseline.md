@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-11-03 (bc8fa4e7), all six configurations.
+As of 2026-11-16 (482755cb), all six configurations.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -97,9 +97,9 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 271 | 12,587,599 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 271 | 12,587,404 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 271 | 12,590,123 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 272 | 12,587,648 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 272 | 12,587,453 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 272 | 12,590,172 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
 
@@ -356,9 +356,11 @@ all six tables:
   six tables, 272 programs in each. 15D took the row by hand with
   the test; the other five take it from one run of the six
   configurations on x86-64, in which no other row moved.
-- 2026-11-15: `18.support.rtti`, 24 to 33 in 15D: nine assertions on
-  two types of one name, each local to its file; the other five
-  tables are to move by the same 9.
+- 68ff2270, 2026-11-15: `18.support.rtti`, 24 to 33 in all six
+  tables: nine assertions on two types of one name, each local to
+  its file. 15D took the row by hand with the test; the other five
+  take it from one run of the six configurations on x86-64 at
+  482755cb, in which no other row moved.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, and to 33 when `2.smartptr.shared` and
@@ -476,9 +478,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,587,599 | 0 | 0 | 0 |
-| 11s-clang | 12,587,419 | 0 | 0 | 0 |
-| 15D-clang | 12,590,123 | 0 | 0 | 0 |
+| 11S-clang | 12,587,648 | 0 | 0 | 0 |
+| 11s-clang | 12,587,468 | 0 | 0 | 0 |
+| 15D-clang | 12,590,172 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134

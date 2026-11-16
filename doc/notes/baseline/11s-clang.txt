@@ -26,7 +26,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 18.numeric.special.int                        0    0     420      0   100%
 18.setjmp                                     0    0       3      0   100%
 18.support.dynamic                            0    0      47      0   100%
-18.support.rtti                               0    0      24      0   100%
+18.support.rtti                               0    0      33      0   100%
 18.support.runtime.stdcxx-989              NOUT    0                      
 19.cerrno                                     0    0       4      0   100%
 19.exceptions.mt                              0    0       0      0   100%
@@ -278,5 +278,5 @@ PROGRAM SUMMARY:
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            33
-  Assertions:            12587459
+  Assertions:            12587468
   Failed assertions:            0
