@@ -24,36 +24,6 @@ today. Within a bin the easiest entry is at the top.
 
 ** Tree hygiene
 
-*** TODO Three comments of =cstdlib= and =cmath= speak for Visual C++
-
-=include/ansi/cstdlib= 92-93 and =include/ansi/cmath= 645-646 say
-that the using-declarations must come after the overloads, "working
-around MSVC6 PR# 27677". =cmath= 672 says "MSVC provides its own
-complex macro" and nothing follows it: d743fa8d removed the
-~#undef complex~ it introduced and left the comment. The tree no
-longer builds with Visual C++, and the standard lets a
-using-declaration and an overload of the same name stand in either
-order. Seen while the nested body left the =<cname>= headers,
-2026-11-16.
-
-Fix: the three comments leave; the order of the declarations stays.
-
-Check: the preprocessed output of the two headers is unchanged.
-
-*** TODO Three closing comments of =stddef.h= and =limits.h= name the wrong macro
-
-=include/ansi/stddef.h= 41 closes ~#ifndef
-_RWSTD_NO_DEPRECATED_C_HEADERS~ and says
-=_RWSTD_STDDEF_H_INCLUDED=, the guard that 38 has already closed.
-=include/ansi/limits.h= 98 and 112, the =#else= and the =#endif= of
-the condition at 33, name =_RWSTD_NO_DEPRECATED_C_HEADERS=; 33 tests
-=_RWSTD_NO_PURE_C_HEADERS= and =_RWSTD_NO_LIMITS_H=. Seen while the
-directory was laid out, 2026-11-16.
-
-Fix: each comment names the condition it closes.
-
-Check: none; the three lines are comments.
-
 *** TODO The export macros expand to nothing
 
 =include/rw/_defs.h= 381-383 defines =_RWSTD_EXPORT=,

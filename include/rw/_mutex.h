@@ -157,9 +157,9 @@ __rw_mutex_base __rw_static_mutex<_TypeT>::_C_mutex
 
 #  if _RWSTD_INSTANTIATE (_STATIC_MUTEX, _INT)
 
-// explicitly instantiated to work around a g++ 2.95.2 bug on COFF systems
-// (such as IBM AIX or DEC OSF1) where it "forgets" to do so implicitly for
-// explicitly initialized static data members
+// src/instance.cpp alone defines, and so exports, the two mutexes;
+// in every other translation unit these lines declare them extern
+// template, where the compiler has it, so no other object defines them
 _RWSTD_INSTANTIATE_1 (class _RWSTD_TI_EXPORT __rw_static_mutex<int>);
 _RWSTD_INSTANTIATE_1 (class _RWSTD_TI_EXPORT __rw_static_mutex<size_t>);
 

@@ -47,7 +47,4 @@
 
 #undef exception
 
-// MSVC provides its own complex macro
-
-
 #endif   // _RWSTD_RW_MATH_H_INCLUDED

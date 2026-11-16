@@ -642,8 +642,6 @@ inline long double tanh (long double __x)
 }
 #  endif   // _RWSTD_NO_TANH_LDBL
 
-// using statements must come after the overloads.
-// working around MSVC6 PR# 27677
 using ::acos;
 using ::asin;
 using ::atan;
@@ -668,7 +666,5 @@ using ::tan;
 using ::tanh;
 }   // namespace std
 }   // extern "C++"
-
-// MSVC provides its own complex macro
 #endif   // _RWSTD_NO_PURE_C_HEADERS
 #endif   // _RWSTD_CMATH_INCLUDED

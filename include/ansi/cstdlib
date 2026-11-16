@@ -89,8 +89,6 @@ qsort (void *__base, size_t __n, size_t __size,
 }   // extern "C++"
 #  endif   // _RWSTD_NO_EXTERN_C_OVERLOAD
 
-// using statements must come after the overloads.
-// working around MSVC6 PR# 27677
 using ::size_t;
 using ::div_t;
 using ::ldiv_t;

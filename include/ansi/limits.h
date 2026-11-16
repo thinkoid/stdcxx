@@ -95,7 +95,7 @@
 #  ifndef MB_LEN_MAX
 #    define MB_LEN_MAX _RWSTD_MB_LEN_MAX
 #  endif   // MB_LEN_MAX
-#else   // if defined (_RWSTD_NO_DEPRECATED_C_HEADERS)
+#else   // if _RWSTD_NO_PURE_C_HEADERS && !_RWSTD_NO_LIMITS_H
 #  ifdef __GNUC__
 #    pragma GCC system_header
 
@@ -109,7 +109,7 @@
 #  else
 #    include _RWSTD_ANSI_C_LIMITS_H
 #  endif   // gcc
-#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
+#endif   // !_RWSTD_NO_PURE_C_HEADERS || _RWSTD_NO_LIMITS_H
 
 #if (MB_LEN_MAX != _RWSTD_MB_LEN_MAX)
 #  undef MB_LEN_MAX

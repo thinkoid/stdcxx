@@ -38,4 +38,4 @@ using std::size_t;
 #  endif   // _RWSTD_STDDEF_H_INCLUDED
 #else
 #  include _RWSTD_ANSI_C_STDDEF_H
-#endif   // _RWSTD_STDDEF_H_INCLUDED
+#endif   // _RWSTD_NO_DEPRECATED_C_HEADERS
