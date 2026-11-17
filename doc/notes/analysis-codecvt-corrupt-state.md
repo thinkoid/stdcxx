@@ -200,7 +200,7 @@ debug build by glibc's abort, caught by the test's handler like the
 library's own, and its `length` row fails for want of one. In an
 optimized build the `in` row would fail too: glibc's assertion is
 compiled in regardless, so `in` aborts where the test expects
-`error`. No optimized configuration is pinned.
+`error`. No optimized configuration was pinned then.
 
 ## 5. The red row
 

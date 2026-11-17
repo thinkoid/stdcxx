@@ -56,7 +56,7 @@
 #         Specifies the list of configurations. Each is a build type
 #         the GNUmakefile knows, with -clang appended for the build of
 #         the same type under Clang. When omitted, defaults to
-#         "11S 11s 15D".
+#         "11S 11s 15D 12D".
 #
 #     -j <jobs>
 #         Specifies the number of make jobs within a stage. When
@@ -100,7 +100,7 @@ readonly config=gcc.config
 
 # by default (unless otherwise specified on the command line) test the
 # GCC configurations of the certification
-configs="11S 11s 15D"
+configs="11S 11s 15D 12D"
 jobs=$(getconf _NPROCESSORS_ONLN)
 pindir=
 revision=HEAD

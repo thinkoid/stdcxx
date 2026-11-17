@@ -118,6 +118,37 @@ Fix: the name takes the process ID, ~$$$$~ inside =$(shell ...)=.
 Check: two =make config= runs from two trees at once log neither
 message; each =makefile.in= equals that of a run alone.
 
+*** TODO =_RWSTD_LDBL_QNAN_BITS= holds two bytes that differ with every configuration
+
+=etc/config/src/INFINITY.cpp= prints the bytes of a quiet NaN of each
+floating type into =config.h= (814 for =long double=), and
+=src/limits_bits.cpp= 106 initializes =__rw_ldbl_qNaN= with them. On
+x86-64 a =long double= has 10 bytes of value and 6 of padding. Eight
+configurations of one tree with one compiler, GCC 16 on an x86-64
+host, wrote eight different pairs at bytes 10 and 11 of
+=_RWSTD_LDBL_QNAN_BITS=, =0x22 0x13= in one and =0x10 0x2a= in the
+next; every other line of the eight =config.h= files agreed, and the
+infinity and the signalling NaN had zeros there. So =config.h= is not
+a function of the tree, the compiler and the build type alone, and
+the library carries the two bytes: two builds of the library from the
+same sources with the same flags had different checksums, with the
+same size and the same exported names. The value of the NaN does not
+depend on them. The suspect is =ldbl_qnan= (562): the constructor of
+=ldbl_bits= (491) clears the object, and the division that follows
+stores a =long double= into it, whose padding the store need not
+preserve. Not measured: the 32-bit build, where the type has two
+bytes of padding, and whether the two bytes are all that separates
+the two libraries. Seen while two 12D builds of the same sources were
+compared, 2026-11-17.
+
+Fix: read the code generated for =ldbl_qnan= to find where the two
+bytes enter, then have the characterization print zeros for the bytes
+that are not part of the value, as it does for the infinity.
+
+Check: two configurations of one tree in two build directories give
+the same =config.h=; report whether the two libraries built from them
+are then the same file.
+
 *** TODO Dependency files name the build directory through =$(TOPDIR)= when its path begins with the tree's
 
 =makedep= (=etc/config/makefile.rules= 226-246) writes each object's
@@ -364,7 +395,7 @@ rows beside them.
 Fix: ='\xa2'= in the =is= row; braces around the two =TEST= calls.
 
 Check: the =is= row stays green at the same count; =tolower= and
-=toupper= each lose one assertion in the char pass; the six pins take
+=toupper= each lose one assertion in the char pass; the eight pins take
 the new totals.
 
 ** TODO The era format comments of the =time_get= test are swapped
@@ -504,7 +535,7 @@ of the 15D row. Found 2026-11-02.
 
 Fix: rows for =unsigned long long=.
 
-Check: the rows run and the two warnings are gone; six pins moved.
+Check: the rows run and the two warnings are gone; eight pins moved.
 
 ** TODO =22.locale.name= checks nothing on a host without =en_US=
 
@@ -543,7 +574,7 @@ Found 2026-11-03 while adding =test_uint=.
 Fix: a =test_ushrt= in the shape of =test_uint=: the limits, "-1",
 =errno=.
 
-Check: the rows run and the six pins move.
+Check: the rows run and the eight pins move.
 
 ** TODO The =locale= constructors' exceptions have no test
 
@@ -561,7 +592,7 @@ collate & ctype)= and the two-locale form named "C" with the classic
 =ctype=, the extension's =LC_COLLATE= taking that category (fixed
 2026-11-03, by probe only).
 
-Check: the rows run and the six pins gain a row.
+Check: the rows run and the eight pins gain a row.
 
 ** TODO The members of the associative containers have no test
 
@@ -687,7 +718,7 @@ sweep's reading, 2026-11-04.
 Fix: =test_unformatted=: each function's output and its =badbit= on a
 failing buffer.
 
-Check: the rows run; the six pins move.
+Check: the rows run; the eight pins move.
 
 ** TODO A failed output row of =27.ostream= prints the wrong strings
 
@@ -903,7 +934,7 @@ their pins.
 =bin/driver= compares the table of each configuration with its pin
 under =doc/notes/baseline=, but not the names a shared build exports
 with =15D.exports= or =15D-clang.exports=; only the nightly run of
-the six configurations does. A certification run through the driver
+the eight configurations does. A certification run through the driver
 alone misses a name that left. Seen while the exported names were
 pinned, 2026-11-16.
 
@@ -915,36 +946,6 @@ counts it in its verdict.
 Check: a driver run of 15D at the pin reports the names identical;
 one with the mark taken off =time_get_byname= reports the 16 names it
 hides and fails.
-
-** TODO No optimized configuration is pinned
-
-The six certified configurations are all debug builds, so no table
-compares a build at =-O2=. Each failure an optimized build found in
-2026-11 lies in a test, and only the optimizer shows it. Two were
-undefined behavior, the =is_modulo= oracle of
-=18.numeric.special.int= (a signed overflow) and the cast of
-=27.filebuf.codecvt= (a member called for an object of another type,
-which GCC devirtualizes). Two showed on x86-64 alone:
-=22.locale.time.get= compared =std::tm= by =memcmp=, padding
-included, which a copy need not carry; the trap oracle of
-=18.limits.traps= divided by zero for a quotient nothing read, so GCC
-dropped the division; and it folds the division of two =bool= operands
-even where the quotient is read, since a =bool= divisor can only be 1
-where the quotient is defined. After the
-first two were fixed, the 12D table of aarch64 has no failed
-assertion: 274 programs, 12,590,260 assertions. It differs from the
-15D pin in one row, =23.deque.iterators= with one assertion more, the
-iterator-size check that the test compiles under
-=_RWSTD_NO_DEBUG_ITER=, which =rw/_defs.h= defines without
-=_RWSTDDEBUG=. After the other two were fixed, the 12D table of
-x86-64 has the same totals, no failed assertion, and differs from
-the 15D pin in the same row. Seen while the 12D tables were compared,
-2026-11-16.
-
-Fix: once the two x86-64 rows are settled, a 12D pin under
-=doc/notes/baseline/=, run by the nightly beside the six.
-
-Check: the nightly derives the 12D table and compares it with the pin.
 
 * Locales
 
@@ -1336,7 +1337,7 @@ shows no prelink step.
 
 Check: an =eccp= build directory configures, builds the library, the
 utilities and the tests, and runs the suite. Its table is pinned
-beside the six.
+beside the eight.
 
 ** TODO Run-time differences from GCC
 

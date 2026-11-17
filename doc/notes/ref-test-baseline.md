@@ -1,20 +1,22 @@
 # The test-suite baseline
 
-As of 2026-11-17 (fe665b84), all six configurations.
+As of 2026-11-17 (5b56153e), all eight configurations.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
 and why, where that is known. The numbers are pinned under
 `doc/notes/baseline/`, one file per configuration. Each file is the
 harness's own table without the timing columns. The two shared
-configurations have a second pin, of the names their library exports
-(chapter 6).
+debug configurations have a second pin, of the names their library
+exports (chapter 6).
 
 ## 0. The short version
 
 - Every test builds. The harness runs 274 programs per configuration.
 - No assertion fails, no program exits non-zero or dies of a signal,
   in any configuration, under either compiler.
+- One configuration is optimized, 12D. Its table is the 15D one but
+  for one assertion of `23.deque.iterators` (chapter 4).
 - The tables come from a host with every glibc locale installed. A
   host with `en_US.UTF-8` alone differs from them in fourteen locale
   rows (chapter 2). A pin is a configuration's table, whatever the
@@ -97,7 +99,7 @@ alone does not show success.
 
 ## 2. The reference
 
-Three configurations, named as the build system names them. The
+Four configurations, named as the build system names them. The
 number is the debugging, optimization and thread-safety level. `s`
 is an archive, `d` a shared library. Lowercase is 32-bit code,
 uppercase 64-bit.
@@ -107,8 +109,9 @@ uppercase 64-bit.
 | 11S, debug, archive, 64-bit | `baseline/11S.txt` | 274 | 12,587,735 | 0 | 0 | 0 |
 | 11s, debug, archive, 32-bit | `baseline/11s.txt` | 274 | 12,587,538 | 0 | 0 | 0 |
 | 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 274 | 12,590,259 | 0 | 0 | 0 |
+| 12D, optimized, shared, threads, 64-bit | `baseline/12D.txt` | 274 | 12,590,260 | 0 | 0 | 0 |
 
-Chapter 4 lists where the three differ.
+Chapter 4 lists where the four differ.
 
 The host the tables come from has every locale of glibc's
 `SUPPORTED` list and the Shift_JIS one built by hand. The locale
@@ -381,6 +384,18 @@ all six tables:
   has the program's `type_info` object, and the program catches the
   library's `runtime_error` by its type. 15D took the row by hand with
   the test; the other five take it from the run of the line above.
+- 2026-11-17: `12D.txt` is new, the optimized configuration, 274
+  programs and 12,590,260 assertions, none failed. It is derived
+  from one run of 12D on x86-64 at 5b56153e; a second build and run
+  of the same sources equals it. Two test fixes made the table
+  clean. 1679abbd compares the members of `std::tm` in
+  `22.locale.time.get`, where `memcmp` read padding that a copy need
+  not carry. 5b56153e keeps the division of the `18.limits.traps`
+  oracle, which GCC dropped where nothing read the quotient and
+  folded for `bool`. A 12D table on aarch64 has the same total.
+  `12D-clang.txt` is new beside it, the same table row for row. It is
+  derived from one run of 12D-clang on x86-64 at 5b56153e; a second
+  build and run of the same sources equals it.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, and to 33 when `2.smartptr.shared` and
@@ -442,19 +457,20 @@ and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 
 ## 4. Differences between configurations
 
-| row | 11S | 11s | 15D |
-|---|---|---|---|
-| `18.numeric.special.float` | 134 | 119 | 134 |
-| `20.temp.buffer` | 10888 | 10788 | 10888 |
-| `22.locale.num.put` | 1467 | 1463 | 1467 |
-| `22.locale.codecvt` | 688 | 692 | 688 |
-| `26.c.math.depr` | 59 | 57 | 59 |
-| `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
-| `22.locale.codecvt.mt` | 12 | 12 | 48 |
-| `22.locale.ctype.mt` | 200 | 200 | 800 |
-| `22.locale.numpunct.mt` | 600 | 600 | 1200 |
-| `22.locale.moneypunct.mt` | 600 | 600 | 1200 |
-| `22.locale.cons.mt` | 200 | 200 | 800 |
+| row | 11S | 11s | 15D | 12D |
+|---|---|---|---|---|
+| `18.numeric.special.float` | 134 | 119 | 134 | 134 |
+| `20.temp.buffer` | 10888 | 10788 | 10888 | 10888 |
+| `22.locale.num.put` | 1467 | 1463 | 1467 | 1467 |
+| `22.locale.codecvt` | 688 | 692 | 688 | 688 |
+| `26.c.math.depr` | 59 | 57 | 59 | 59 |
+| `23.deque.iterators` | 4921862 | 4921862 | 4921862 | 4921863 |
+| `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 | 66, 22 |
+| `22.locale.codecvt.mt` | 12 | 12 | 48 | 48 |
+| `22.locale.ctype.mt` | 200 | 200 | 800 | 800 |
+| `22.locale.numpunct.mt` | 600 | 600 | 1200 | 1200 |
+| `22.locale.moneypunct.mt` | 600 | 600 | 1200 | 1200 |
+| `22.locale.cons.mt` | 200 | 200 | 800 | 800 |
 
 Reasons, in order:
 
@@ -477,7 +493,10 @@ Reasons, in order:
   `div (long, long)` with an argument an `int` cannot hold, so it
   skips the two checks in 32-bit, where `long` is no wider than `int`,
   and notes that it did.
-- The atomic operation tests count only in the thread-safe build.
+- `23.deque.iterators` checks the size of the deque's iterator only
+  under `_RWSTD_NO_DEBUG_ITER`, which `rw/_defs.h` defines without
+  `_RWSTDDEBUG`, so the optimized build counts one assertion more.
+- The atomic operation tests count only in the thread-safe builds.
 - `22.locale.codecvt.mt` counts two checks per thread and round,
   `22.locale.ctype.mt` one, `22.locale.numpunct.mt` and
   `22.locale.moneypunct.mt` one per thread and two per round, and
@@ -497,8 +516,8 @@ A commit that re-pins a row of the table above edits the row here.
 
 ## 5. The same suite under Clang
 
-`11S-clang.txt`, `11s-clang.txt` and `15D-clang.txt` are the same
-three configurations built with Clang (`CONFIG=gcc.config CXX=clang` on the `config` line), run and
+`11S-clang.txt`, `11s-clang.txt`, `15D-clang.txt` and `12D-clang.txt`
+are the same four configurations built with Clang (`CONFIG=gcc.config CXX=clang` on the `config` line), run and
 pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
@@ -506,6 +525,7 @@ pinned the same way. `analysis-clang.md` records what it took.
 | 11S-clang | 12,587,735 | 0 | 0 | 0 |
 | 11s-clang | 12,587,553 | 0 | 0 | 0 |
 | 15D-clang | 12,590,259 | 0 | 0 | 0 |
+| 12D-clang | 12,590,260 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134
@@ -521,15 +541,16 @@ the make line.
 
 Measured again at dc5300f5 on 2026-11-15 with Clang 23.1.4, the same
 holds: the 11S and 15D tables equal GCC's, and the 32-bit ones differ
-in that one row.
+in that one row. The 12D-clang table, pinned on 2026-11-17 at
+5b56153e, equals the 12D one row for row.
 
 ## 6. The exported names
 
 The shared library exports the names its headers mark and no others
 (README, 6). The suite sees that set only where a program of the
-tree calls a name that left it, so the two shared configurations pin
-it: `15D.exports` and `15D-clang.exports`, one mangled name per line,
-sorted bytewise. A mangled name is exact; the
+tree calls a name that left it, so the two shared debug
+configurations pin it: `15D.exports` and `15D-clang.exports`, one
+mangled name per line, sorted bytewise. A mangled name is exact; the
 demangled form of a constructor or destructor stands for two or
 three symbols. `c++filt` reads a pin or a difference.
 
@@ -577,10 +598,41 @@ template's marked declaration or definition: both compilers fix the
 visibility of a specialization where it is first named. A name joins
 with a new mark, or when a library source starts to use an inline
 member of a marked class, of which the library then keeps a copy;
-it leaves when the last such use goes. The nightly run of the six
+it leaves when the last such use goes. The nightly run of the eight
 configurations derives the names of each shared build and compares
-them with the pin, and its summary reports a difference as it
-reports a table's. `bin/driver` does not compare them.
+those of 15D and 15D-clang with their pins, and its summary reports
+a difference as it reports a table's. `bin/driver` does not compare
+them.
+
+The names of 12D are derived and not pinned, because the set of an
+optimized library follows the optimizer as well as the sources and
+the marks. Built without `_RWSTDDEBUG` and at `-O0`, the library
+exports 2387 names: the 2391 of `15D.exports` less 38 members of
+`basic_string` whose signature holds `__rw_debug_iter`, plus the 34
+that hold a pointer in its place. Of those, 212 are inline functions
+and implicit instantiations, the `char_traits` members and the
+exception constructors among them, and a compiler emits one only
+where a call to it stays out of line. GCC 16 on x86-64, from the same
+sources, exports 2175 names at `-O1`, `-O2` and `-O3`, 6 more at
+`-O2 -finline-limit=20`, 26 more at `-Os`, 145 more at
+`-O2 -fno-inline` and all 212 at `-O0`. No variant exports fewer than
+2175, so those are the names that do not depend on inlining. Clang
+23 at `-O2` exports 2147 names, not pinned either, and keeps
+`__rw_synchronized::_C_lock` out of line where GCC expands it. A pin
+of the 12D names would thus move with a compiler release that
+inlines differently, with no change in the tree.
+
+A program compiled at `-O0` still links against the library built at
+`-O2`: it leaves undefined only the user-declared inline members of
+the explicitly instantiated classes, which the library's explicit
+instantiations emit at every level, and it emits for itself the names
+an optimized library drops, the implicitly declared destructors, the
+instantiations of member templates and the inline functions that are
+not templates. Under GCC 16 and Clang 23 on x86-64, the 274 tests,
+the 134 examples, the test driver and the four utilities, compiled at
+`-O0`, link against the `-O2` library of the same compiler with no
+undefined name, and the suite's table equals that of the build at
+`-O2` throughout.
 
 A commit that moves the set derives the pin again and names in its
 message the names that joined or left, and why.
