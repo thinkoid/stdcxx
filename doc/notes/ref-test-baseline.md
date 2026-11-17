@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-11-16 (482755cb), all six configurations.
+As of 2026-11-17 (fe665b84), all six configurations.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -12,8 +12,7 @@ configurations have a second pin, of the names their library exports
 
 ## 0. The short version
 
-- Every test builds. The harness runs 272 programs per configuration,
-  and 274 in 15D, which has the two newest tests (chapter 2).
+- Every test builds. The harness runs 274 programs per configuration.
 - No assertion fails, no program exits non-zero or dies of a signal,
   in any configuration, under either compiler.
 - The tables come from a host with every glibc locale installed. A
@@ -105,8 +104,8 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 272 | 12,587,648 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 272 | 12,587,453 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 274 | 12,587,735 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 274 | 12,587,538 | 0 | 0 | 0 |
 | 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 274 | 12,590,259 | 0 | 0 | 0 |
 
 Chapter 4 lists where the three differ.
@@ -369,15 +368,19 @@ all six tables:
   its file. 15D took the row by hand with the test; the other five
   take it from one run of the six configurations on x86-64 at
   482755cb, in which no other row moved.
-- 2026-11-16: `26.c.math.depr` is new, 59 assertions in 15D, 273
-  programs: `<stdlib.h>` and `<math.h>` bring the overloads of 26.5
-  to the global namespace; the other five tables are to gain the
-  row at the next run of the six.
-- 2026-11-16: `22.locale.category` is new, 28 assertions in 15D, 274
-  programs: each standard facet of a named locale has the program's
-  `type_info` object, and the program catches the library's
-  `runtime_error` by its type; the other five tables are to gain the
-  row at the next run of the six.
+- ebba8126, 2026-11-16: `26.c.math.depr` is new in all six tables,
+  59 assertions, 57 in the two 32-bit ones, where `long` is no wider
+  than `int` and the test does not check the values of `abs (long)`
+  and `div (long, long)`: `<stdlib.h>` and `<math.h>` bring the
+  overloads of 26.5 to the global namespace. 15D took the row by hand
+  with the test, 273 programs; the other five take it from one run
+  of the six configurations on x86-64 at fe665b84, in which no other
+  row moved but that of the line below.
+- e73a7ec2, 2026-11-16: `22.locale.category` (28) is new in all six
+  tables, 274 programs in each: each standard facet of a named locale
+  has the program's `type_info` object, and the program catches the
+  library's `runtime_error` by its type. 15D took the row by hand with
+  the test; the other five take it from the run of the line above.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, and to 33 when `2.smartptr.shared` and
@@ -445,6 +448,7 @@ and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 | `20.temp.buffer` | 10888 | 10788 | 10888 |
 | `22.locale.num.put` | 1467 | 1463 | 1467 |
 | `22.locale.codecvt` | 688 | 692 | 688 |
+| `26.c.math.depr` | 59 | 57 | 59 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 |
 | `22.locale.codecvt.mt` | 12 | 12 | 48 |
 | `22.locale.ctype.mt` | 200 | 200 | 800 |
@@ -469,6 +473,10 @@ Reasons, in order:
   pins of a host with every locale
   (3c882e6a). `TODO` holds the entry, "`22.locale.codecvt` counts
   688 assertions in 11S and 692 in 11s".
+- `26.c.math.depr` checks the values of `abs (long)` and
+  `div (long, long)` with an argument an `int` cannot hold, so it
+  skips the two checks in 32-bit, where `long` is no wider than `int`,
+  and notes that it did.
 - The atomic operation tests count only in the thread-safe build.
 - `22.locale.codecvt.mt` counts two checks per thread and round,
   `22.locale.ctype.mt` one, `22.locale.numpunct.mt` and
@@ -495,9 +503,9 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,587,648 | 0 | 0 | 0 |
-| 11s-clang | 12,587,468 | 0 | 0 | 0 |
-| 15D-clang | 12,590,172 | 0 | 0 | 0 |
+| 11S-clang | 12,587,735 | 0 | 0 | 0 |
+| 11s-clang | 12,587,553 | 0 | 0 | 0 |
+| 15D-clang | 12,590,259 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134
