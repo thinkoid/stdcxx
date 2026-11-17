@@ -855,24 +855,22 @@ Fix: the comment names =open= and =O_RDONLY=.
 
 Check: none; a comment.
 
-** TODO =22.locale.time.get= fails 287 assertions in 12D on x86-64
+** TODO =%{t}= prints no =tm_gmtoff=
 
-A 12D build under GCC 16.2.1 on an x86-64 host fails about 287 of
-3,352 assertions of =22.locale.time.get= (287 in two runs, 286 in a
-third: the count moves from run to run). The 12D build on aarch64 and
-every pinned configuration pass. Each failure is the =memcmp= of
-=do_test= (182), and the message prints the same fields for the
-result and the expectation, as in ~get_weekday ("Fri", ..., "a") got {
-tm_mday=0 [1,31], tm_wday=5 Fri }, expected { ... tm_wday=5 Fri }~.
-The first suspect, not verified: =memcmp= compares the four bytes of
-padding glibc's =struct tm= has after =tm_isdst= on LP64 (and
-=tm_zone=), which a copy of the structure at =-O2= need not preserve.
-Seen while the 12D table of x86-64 was read, 2026-11-16.
+=_rw_fmttm= (=tests/src/printf.cpp= 1612), which formats the
+driver's =%{t}= directive, prints the nine members of the C standard
+and not =tm_gmtoff=. =22.locale.time.get= compares =tm_gmtoff= where
+the library stores it for =%z=, so a failed =%z= row prints the same
+fields for the result and the expectation: a copy of the test with
+the expected offset of one =%z= row perturbed prints
+~got { tm_mday=0 [1,31] }, expected { tm_mday=0 [1,31] }~. Seen
+while the comparison of =22.locale.time.get= was fixed, 2026-11-17.
 
-Fix: compare the fields of =std::tm= one by one, or zero both objects
-with =memset= before they are filled, once the suspect is confirmed.
+Fix: =_rw_fmttm= prints a nonzero =tm_gmtoff= under the condition
+on which the library stores it,
+~!defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)~.
 
-Check: =22.locale.time.get= green in 12D on x86-64 and at pin in 15D.
+Check: the perturbed copy prints the two offsets; the pins unchanged.
 
 ** TODO =18.limits.traps= fails 13 assertions in 12D on x86-64
 
@@ -921,19 +919,22 @@ hides and fails.
 
 The six certified configurations are all debug builds, so no table
 compares a build at =-O2=. Each failure an optimized build found in
-2026-11 lies in a test, and only the optimizer shows it: two were
+2026-11 lies in a test, and only the optimizer shows it. Two were
 undefined behavior, the =is_modulo= oracle of
 =18.numeric.special.int= (a signed overflow) and the cast of
 =27.filebuf.codecvt= (a member called for an object of another type,
-which GCC devirtualizes); the cause of the two x86-64 rows of the
-Tests chapter is a suspect. After the first two were fixed, the 12D
-table of aarch64 has no failed assertion: 274 programs, 12,590,260
-assertions. It differs from the 15D pin in one row,
-=23.deque.iterators= with one assertion more, the iterator-size check
-that the test compiles under =_RWSTD_NO_DEBUG_ITER=, which
-=rw/_defs.h= defines without =_RWSTDDEBUG=. The 12D table of x86-64
-adds the two rows, 300 failed assertions. Seen while the 12D tables
-were compared, 2026-11-16.
+which GCC devirtualizes). Two showed on x86-64 alone:
+=22.locale.time.get= compared =std::tm= by =memcmp=, padding
+included, which a copy need not carry; the cause of the
+=18.limits.traps= row of the Tests chapter is a suspect. After the
+first two were fixed, the 12D table of aarch64 has no failed
+assertion: 274 programs, 12,590,260 assertions. It differs from the
+15D pin in one row, =23.deque.iterators= with one assertion more, the
+iterator-size check that the test compiles under
+=_RWSTD_NO_DEBUG_ITER=, which =rw/_defs.h= defines without
+=_RWSTDDEBUG=. With =22.locale.time.get= fixed, the 12D table of
+x86-64 adds the =18.limits.traps= row, 13 failed assertions. Seen
+while the 12D tables were compared, 2026-11-16.
 
 Fix: once the two x86-64 rows are settled, a 12D pin under
 =doc/notes/baseline/=, run by the nightly beside the six.

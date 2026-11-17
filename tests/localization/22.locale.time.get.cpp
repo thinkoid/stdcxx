@@ -33,7 +33,7 @@
 #include <clocale>   // for LC_ALL
 #include <cstdio>    // for fprintf()
 #include <cstdlib>   // for getenv()
-#include <cstring>   // for memcmp(), strlen()
+#include <cstring>   // for memchr(), strcpy(), strlen()
 #include <ctime>     // for struct tm
 
 #include <langinfo.h>    // for nl_langinfo(), D_FMT
@@ -43,6 +43,32 @@
 #include <rw_file.h>     // for rw_nextfd()
 #include <rw_locale.h>   // for rw_locale_query()
 #include <rw_printf.h>   // for rw_snprintf()
+
+/**************************************************************************/
+
+// compares the members time_get may store and the test sets, not the
+// storage: a copy of std::tm need not carry its padding (four bytes
+// after tm_isdst in glibc's on LP64), so in an optimized build the
+// expected tm, passed by value, holds there whatever the stack held
+bool tm_equal (const std::tm &x, const std::tm &y)
+{
+    if (   x.tm_sec  != y.tm_sec  || x.tm_min  != y.tm_min
+        || x.tm_hour != y.tm_hour || x.tm_mday != y.tm_mday
+        || x.tm_mon  != y.tm_mon  || x.tm_year != y.tm_year
+        || x.tm_wday != y.tm_wday || x.tm_yday != y.tm_yday
+        || x.tm_isdst != y.tm_isdst)
+        return false;
+
+#if !defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)
+
+    // glibc extension, written by %z
+    if (x.tm_gmtoff != y.tm_gmtoff)
+        return false;
+
+#endif   // !_RWSTD_NO_TM_GMTOFF && _RWSTD_NO_PURE_C_HEADERS
+
+    return true;
+}
 
 /**************************************************************************/
 
@@ -75,10 +101,7 @@ void do_test (int lineno, charT, const char *cname,
     OutIter it (ostrm);
     tp.put (it, ostrm, charT (' '), &val, wpat, wpatend);
 
-    // working around dumb compilers such as MSVC 6.0 that
-    // do not zero initialize POD structs when using tm()
-    static std::tm zero_tm;
-    std::tm x = zero_tm;
+    std::tm x = std::tm ();
 
     std::basic_istringstream<charT> istrm (ostrm.str ());
 
@@ -179,7 +202,7 @@ void do_test (int lineno, charT, const char *cname,
                int (sizeof (charT)), ostrm.str ().data (), fmt,
                extracted, consumed, err_expect, err);
 
-    success = 0 == std::memcmp (&x, &val, sizeof x);
+    success = tm_equal (x, val);
 
     rw_assert (success, __FILE__, lineno,
                "line %d. time_get<%s>::%s (%{*Ac}, ..., \"%s\") got %{t}, "
@@ -908,7 +931,7 @@ void test_posix (charT, const char *cname)
 
         tg.get (InIter (istrm), InIter (), istrm, err, &x, fmt);
 
-        rw_assert (Eof == err && 0 == std::memcmp (&x, &val, sizeof x),
+        rw_assert (Eof == err && tm_equal (x, val),
                    0, __LINE__,
                    "time_get<%s>::get (..., '%c') on \"43\" with tm_yday "
                    "%d: rdstate() == %{Is}, got %{Is}; got %{t}, "
