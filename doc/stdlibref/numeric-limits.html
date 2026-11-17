@@ -279,7 +279,7 @@ namespace std {
 <A NAME="idx1025"></A><PRE>static const bool 
 <B>is_modulo</B>;</PRE>
 <UL>
-<P>This field is <SAMP>true</SAMP> if the type is modulo. Generally, this is <SAMP>false</SAMP> for floating types, <SAMP>true</SAMP> for unsigned integers, and <SAMP>true</SAMP> for signed integers on most machines. A type is modulo if it is possible to add two positive numbers and have a result that wraps around to a third number, which is less.</P>
+<P>This field is <SAMP>true</SAMP> if the type is modulo. This is <SAMP>false</SAMP> for floating types, <SAMP>true</SAMP> for unsigned integers, and <SAMP>false</SAMP> for <SAMP>bool</SAMP> and for signed integers, whose overflow is undefined. A type is modulo if it is possible to add two positive numbers and have a result that wraps around to a third number, which is less.</P>
 </UL>
 
 

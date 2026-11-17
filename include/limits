@@ -188,10 +188,7 @@ _RWSTD_EXPORT extern const long double __rw_ldbl_denorm_min;
     _RWSTD_STATIC (type, int, digits,                                       \
                    _RWSTD_DIGITS (type, cpfx##_MIN, cpfx##_MAX));           \
                                                                             \
-    /* spelled out to work around a bug in IBM xlC 5.0 */                   \
-    _RWSTD_STATIC (type, int, digits10,                                     \
-                   _RWSTD_DIGITS10 (_RWSTD_DIGITS (type, cpfx##_MIN,        \
-                                                         cpfx##_MAX)));     \
+    _RWSTD_STATIC (type, int, digits10, _RWSTD_DIGITS10 (digits));          \
                                                                             \
     _RWSTD_STATIC (type, int, radix, 2);                                    \
                                                                             \
@@ -216,7 +213,12 @@ _RWSTD_EXPORT extern const long double __rw_ldbl_denorm_min;
                                                                             \
     _RWSTD_STATIC (type, bool, is_iec559,  false);                          \
     _RWSTD_STATIC (type, bool, is_bounded, true);                           \
-    _RWSTD_STATIC (type, bool, is_modulo,  1 != cpfx##_MAX);                \
+                                                                            \
+    /* 18.2.1.2, p56: true for an unsigned type, false for bool and for */  \
+    /* a signed type: a sum that leaves its range is undefined (5, p5)  */  \
+    /* whatever the machine does, so no program may rely on the wrap    */  \
+    _RWSTD_STATIC (type, bool, is_modulo,                                   \
+                   cpfx##_MIN == 0 && 1 != cpfx##_MAX);                     \
                                                                             \
     _RWSTD_STATIC (type, bool, traps,           _RWSTD_INT_TRAPS);          \
     _RWSTD_STATIC (type, bool, tinyness_before, false);                     \

@@ -25,7 +25,7 @@ struct std::numeric_limits<int> {
     static int denorm_min () = 0;
     static const bool is_iec559 = false;
     static const bool is_bounded = true;
-    static const bool is_modulo = true;
+    static const bool is_modulo = false;
     static const bool traps = true;
     static const bool tinyness_before = false;
     static const int round_style = 0;

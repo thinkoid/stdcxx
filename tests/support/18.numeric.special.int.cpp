@@ -58,15 +58,19 @@ struct Limits
 };
 
 
-// max () + 1 overflows in int, long and long long, and in a signed
-// wchar_t, which promotes to int; the behavior is undefined (5, p5),
-// and GCC and Clang fold the comparison to false at -O1 and above.
-// The sum in the widest unsigned type is defined, and its conversion
-// back to T is implementation-defined (4.7, p3): both compilers
-// reduce it modulo 2^N, where N is the width of T.
+// 18.2.1.2, p56: a type is modulo if two positive numbers can add to
+// a result that wraps around to a third number that is less. A signed
+// sum that leaves the range is undefined (5, p5), so a signed type is
+// not modulo, whatever the machine does with the sum. For an unsigned
+// type the sum in the widest unsigned type is defined, and its
+// conversion back to T reduces it modulo 2^N, where N is the width of
+// T (4.7, p2).
 template <class T>
 inline bool is_modulo (T _max)
 {
+    if (T (-1) < T (0))
+        return false;
+
 #ifdef _RWSTD_LONG_LONG
     typedef unsigned _RWSTD_LONG_LONG UMax;
 #else

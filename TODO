@@ -22,35 +22,6 @@ the clause of the standard they fall under, in clause order, and the
 tree's own housekeeping comes last. Within a bin the easiest entry is
 at the top.
 
-** Language support
-
-*** TODO =numeric_limits= says =is_modulo= for the signed integer types
-
-=_RWSTD_LIMITS_BODY= in =include/limits= gives =is_modulo= as
-~1 != cpfx##_MAX~: true for every integer type but =bool=, since the
-import of 2005. C++03 18.2.1.2, p56-57 defines a modulo type as one
-where adding two positive numbers can wrap to a third that is less,
-and says it is "generally" true for signed integers on most
-machines, which is the value the library gives. C++11 18.3.2.4, p60
-defines it by the result of any =+=, =-= or =*= that leaves the range,
-and an example of C++17 [numeric.limits.members], p62 says that
-=is_modulo= is false for signed integer types unless an implementation
-defines signed overflow to wrap. GCC and Clang do not, without
-=-fwrapv=: both fold ~INT_MAX + 1 < INT_MAX~ to false at =-O1= and
-above, so a program that reads =is_modulo= and relies on the wrap gets
-wrong results in an optimized build. libstdc++ of GCC 16 gives false
-for =int=. The library declares conformance to 14882:2003 (=README=
-1). Seen while the =is_modulo= oracle of =18.numeric.special.int= was
-read, 2026-11-16.
-
-Fix: a decision. Keep the C++03 value, and say so in
-=include/limits=; or give false for the signed types, with
-=18.numeric.special.int= and its oracle following, perhaps true under
-a characterization of =-fwrapv=.
-
-Check: =18.numeric.special.int= and =18.limits.cvqual= at pin in 15D
-and green in 12D.
-
 ** Tree hygiene
 
 *** TODO The =ctype_byname<wchar_t>= constructor's comment gives efficiency as its reason
@@ -922,6 +893,27 @@ leave with the change, and =RW_SIGSETJMP= with them.
 
 Check: the test builds and passes its 16 assertions in 15D; the
 object of the test before and after, the same code.
+
+** TODO The =limits= example expects the =traps= of an x86-64 host
+
+=examples/manual/out/limits.out= 29 holds ~traps = true~ for
+=numeric_limits<int>=. =include/limits= takes the value from the
+=NO_INT_TRAPS= characterization, which divides by zero: an x86-64
+host raises =SIGFPE=, so =traps= is true there; an aarch64 host
+returns 0, so =config.h= defines =_RWSTD_NO_INT_TRAPS= and the example
+prints false. ~make -C <build>/examples run RUN=limits~ thus reports
+=DIFF= in 15D and 12D under GCC on an aarch64 host, line 29 the only
+difference. =etc/config/xfail.txt= records the same =DIFF= for AIX
+(=STDCXX-458=); =make run= does not read that file. Seen while the
+=is_modulo= line of the example was checked, 2026-11-17.
+
+Fix: a decision: the example stops printing =traps= of =int=; or its
+expected output follows the host, a file per architecture or a line
+the comparison skips; or =xfail.txt= gets an aarch64 record and the
+harness reads it.
+
+Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
+x86-64 and on an aarch64 host.
 
 * Certification
 
@@ -1976,7 +1968,7 @@ bias is a defect to fix is a decision for the Library chapter.
 59-64 has the =long= overload alone). 4.3 calls
 =_RWSTD_NO_CLASS_PARTIAL_SPEC= the sole condition on the cv-qualified
 =numeric_limits=; since e9980bcd they are unconditional
-(=include/limits= 501-510). Found by the extension sweep's reading,
+(=include/limits= 503-512). Found by the extension sweep's reading,
 2026-11-04.
 
 Fix: a decision: a dated note under each, or the note left as the
