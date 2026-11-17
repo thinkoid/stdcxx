@@ -23,10 +23,10 @@
  **************************************************************************/
 
 #include <stdio.h>    // for printf()
-#include <string.h>   // for memset()
+#include <string.h>   // for memcpy(), memset()
 
 #include "config.h"
-#include "float_defs.h"  // for FLT_MIN, DBL_MIN, LDBL_MIN
+#include "float_defs.h"  // for FLT_MIN, DBL_MIN, LDBL_MANT_DIG
 
 /***************************************************************************
  *
@@ -491,6 +491,14 @@ union ldbl_bits
     ldbl_bits () { memset (bits, 0, sizeof (bits)); }
 };
 
+// the number of bytes of a long double that hold its value, at the low
+// addresses of the object; the rest is padding, which a store or a copy
+// of the value leaves unspecified; a little-endian format of 64 digits
+// is the x87 extended one, 10 bytes in an object of 12 or 16, and the
+// other formats, IEEE double and quadruple among them, fill the object
+static const unsigned ldbl_value_size =
+    64 == LDBL_MANT_DIG && e == little_endian ? 10 : sizeof (long double);
+
 static long double ldbl_zero ()
 {
     static long double val = 0.0L;
@@ -575,10 +583,8 @@ static ldbl_bits ldbl_qnan ()
         val.bits [0] &= '\x7f';
     }
     else {
-        unsigned inx = sizeof (val.val) - 1;
-        // skip the trailing zero's
-        while (!val.bits [inx]) --inx;
-        val.bits [inx] &= '\x7f';
+        // the sign is the top bit of the value, below any padding
+        val.bits [ldbl_value_size - 1] &= '\x7f';
     }
 
 #else   // if !defined (_RWSTD_NO_DBL_TRAPS)
@@ -754,6 +760,19 @@ static ldbl_bits ldbl_denorm_min ()
     return val;
 }
 
+// print a long double pattern with zeros past its value: the padding
+// is unspecified after the store or the copy that made the pattern,
+// and config.h must not depend on it
+static void ldbl_print (const char *text, const ldbl_bits &val)
+{
+    char bits [sizeof (long double)];
+
+    memset (bits, 0, sizeof bits);
+    memcpy (bits, val.bits, ldbl_value_size);
+
+    print (text, bits, sizeof bits);
+}
+
 /**************************************************************************/
 
 int main ()
@@ -810,10 +829,10 @@ int main ()
 
     printf ("#define _RWSTD_DBL_HAS_DENORM  %d\n", dbl_has_denorm);
 
-    print ("#define _RWSTD_LDBL_INF_BITS ", &l_inf, sizeof l_inf);
-    print ("#define _RWSTD_LDBL_QNAN_BITS ", &l_qnan, sizeof l_qnan);
-    print ("#define _RWSTD_LDBL_SNAN_BITS ", &l_snan, sizeof l_snan);
-    print ("#define _RWSTD_LDBL_DENORM_MIN_BITS ", &l_den, sizeof l_den);
+    ldbl_print ("#define _RWSTD_LDBL_INF_BITS ", l_inf);
+    ldbl_print ("#define _RWSTD_LDBL_QNAN_BITS ", l_qnan);
+    ldbl_print ("#define _RWSTD_LDBL_SNAN_BITS ", l_snan);
+    ldbl_print ("#define _RWSTD_LDBL_DENORM_MIN_BITS ", l_den);
 
     printf ("#define _RWSTD_LDBL_HAS_DENORM  %d\n", ldbl_has_denorm);
 

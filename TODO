@@ -89,36 +89,67 @@ Fix: the name takes the process ID, ~$$$$~ inside =$(shell ...)=.
 Check: two =make config= runs from two trees at once log neither
 message; each =makefile.in= equals that of a run alone.
 
-*** TODO =_RWSTD_LDBL_QNAN_BITS= holds two bytes that differ with every configuration
+*** TODO =dbl_zero= in =INFINITY.cpp= returns =float=
 
-=etc/config/src/INFINITY.cpp= prints the bytes of a quiet NaN of each
-floating type into =config.h= (814 for =long double=), and
-=src/limits_bits.cpp= 106 initializes =__rw_ldbl_qNaN= with them. On
-x86-64 a =long double= has 10 bytes of value and 6 of padding. Eight
-configurations of one tree with one compiler, GCC 16 on an x86-64
-host, wrote eight different pairs at bytes 10 and 11 of
-=_RWSTD_LDBL_QNAN_BITS=, =0x22 0x13= in one and =0x10 0x2a= in the
-next; every other line of the eight =config.h= files agreed, and the
-infinity and the signalling NaN had zeros there. So =config.h= is not
-a function of the tree, the compiler and the build type alone, and
-the library carries the two bytes: two builds of the library from the
-same sources with the same flags had different checksums, with the
-same size and the same exported names. The value of the NaN does not
-depend on them. The suspect is =ldbl_qnan= (562): the constructor of
-=ldbl_bits= (491) clears the object, and the division that follows
-stores a =long double= into it, whose padding the store need not
-preserve. Not measured: the 32-bit build, where the type has two
-bytes of padding, and whether the two bytes are all that separates
-the two libraries. Seen while two 12D builds of the same sources were
-compared, 2026-11-17.
+=etc/config/src/INFINITY.cpp= 288-293 keeps a =static double= zero
+in =dbl_zero= and returns it as =float=. Its callers, =dbl_infinity=
+and =dbl_qnan=, divide and compare =double= values with it. Zero
+converts exactly, so the patterns do not depend on the type. The
+lines are the import's (e6c7726b, 2005). Seen while the padding of
+the =long double= patterns was read, 2026-11-17.
 
-Fix: read the code generated for =ldbl_qnan= to find where the two
-bytes enter, then have the characterization print zeros for the bytes
-that are not part of the value, as it does for the infinity.
+Fix: =dbl_zero= returns =double=.
 
-Check: two configurations of one tree in two build directories give
-the same =config.h=; report whether the two libraries built from them
-are then the same file.
+Check: =config.h= unchanged in 12D and 15D under GCC and in 15D on an
+aarch64 host.
+
+*** TODO =ldbl_denorm_min= falls back to =DBL_MIN= where its siblings fall back to zero
+
+=flt_denorm_min= and =dbl_denorm_min= in
+=etc/config/src/INFINITY.cpp= halve 1 until it vanishes. A last value
+not below =FLT_MIN= (=DBL_MIN=) means the type has no denormals, so
+the value becomes zero and =main= prints =_RWSTD_FLT_HAS_DENORM 0=
+(=_RWSTD_DBL_HAS_DENORM 0=). =ldbl_denorm_min= (714-715) replaces a
+last value above =DBL_MIN= with =DBL_MIN= instead. Without long
+double denormals its last value is =LDBL_MIN=, below =DBL_MIN=
+wherever =long double= is wider than =double=, so the function
+returns =LDBL_MIN= and =main= prints =_RWSTD_LDBL_HAS_DENORM 1=. Each
+host of the matrix has denormals in the three types, so no
+configuration takes the fallback. The lines are the import's
+(e6c7726b, 2005), and the history gives no reason for the
+difference. Seen while the padding of the =long double= patterns
+was read, 2026-11-17.
+
+Fix: =ldbl_denorm_min= tests ~LDBL_MIN <= val.val~ and sets zero,
+as its siblings do.
+
+Check: =config.h= unchanged in each configuration; the fallback by
+reading.
+
+*** TODO The trapping branch of =INFINITY.cpp= writes the quadruple layout into every =long double=
+
+=etc/config/src/INFINITY.cpp= computes the four special values of
+each type where =NO_DBL_TRAPS= finds that floating point does not
+trap. Where it traps, the =#else= branches write fixed patterns. The
+=long double= ones (=ldbl_infinity= 522-565, =ldbl_qnan= 590-633,
+=ldbl_snan= 656-699, =ldbl_denorm_min= 717-758) are 16 bytes of the
+IEEE quadruple layout, the exponent in bytes 14 and 15 of a
+little-endian object. The x87 extended value is 10 bytes, its
+exponent in bytes 8 and 9, so on an x87 host the patterns are wrong:
+=ldbl_print= prints the 10 bytes of the value alone, and the
+infinity would print as zero. In a 12-byte =long double= (=-m32=)
+the branches also write =bits [12]= to =bits [15]=, past the end of
+the array. No configuration of the matrix takes the branch: each
+=config.h= defines =_RWSTD_NO_DBL_TRAPS=. Seen while the padding of
+the =long double= patterns was read, 2026-11-17.
+
+Fix: the branches write the layout =ldbl_value_size= names, and no
+byte past the object.
+
+Check: the probe compiled against a =config.h= without
+=_RWSTD_NO_DBL_TRAPS= prints the infinity, the signalling NaN and the
+smallest denormal the computed branch prints, and a quiet NaN, in
+12D, in 11s and on an aarch64 host.
 
 *** TODO Dependency files name the build directory through =$(TOPDIR)= when its path begins with the tree's
 
