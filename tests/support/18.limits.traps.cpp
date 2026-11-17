@@ -74,33 +74,28 @@ void handle_fpe (int)
 
 /**************************************************************************/
 
-#define TRY              if (1)
-#define EXCEPT(ignore)   else if (0)
-
-
-template <class numT>
-inline void
-try_trap (const volatile numT &one, const volatile numT &zero,
-           numT &result, bool &trapped)
+// divides in T, the type of the quotient (C++03 5.6, p2); read from
+// volatile objects, the operands have no value the compiler can know,
+// and stored in one, the quotient is computed though nothing reads it
+template <class T>
+void divide (T one, T zero)
 {
-    TRY {
-        result = one / zero;
-    }
-    EXCEPT (1) {
-        // Windows SEH hackery
-        trapped = true;
-    }
+    const volatile T dividend = one;
+    const volatile T divisor  = zero;
+    volatile T       quotient = dividend / divisor;
+
+    _RWSTD_UNUSED (quotient);
 }
 
 
 template <class numT>
-numT test_traps (numT, int lineno, bool)
+void test_traps (numT, int lineno, bool)
 {
     static const char* const tname = rw_any_t (numT ()).type_name ();
 
     if (!rw_enabled (tname)) {
         rw_note (0, 0, 0, "numeric_limits<%s>::traps test disabled", tname);
-        return numT ();
+        return;
     }
 
     const bool traps = std::numeric_limits<numT>::traps;
@@ -113,43 +108,29 @@ numT test_traps (numT, int lineno, bool)
     if (!rw_warn (!traps, 0, lineno,
                   "SIGFPE not #defined and numeric_limits<%s>::traps == %b, "
                   "cannot test", tname, traps)) {
-        return numT ();
+        return;
     }
 #endif   // SIGFPE
 
-    numT result = numT ();
-
-    // set the environment
-    const int jumped = RW_SIGSETJMP (jmp_env, SIGFPE);
-
-    volatile numT zero = numT (jumped);
-    volatile numT one  = numT (1);
-
+    // the call is the whole controlling expression (C99 7.13.1.1, p4),
+    // and trapped changes only after the jump, so its value is not
+    // indeterminate there (C99 7.13.2.1, p3)
     bool trapped = false;
 
-    if (jumped) {
-        // setjmp() call above returned from the SIGFPE handler
-        // as a result of a floating point exception triggered
-        // by the division by zero in the else block below
-        result = zero / one;
-
+    if (RW_SIGSETJMP (jmp_env, SIGFPE)) {
+        // the handler of SIGFPE jumped back from the division below
         trapped = true;
     }
     else {
-        // setjmp() call above returned after setting up the jump
-        // environment; see of division by zero traps (if so, it
-        // will generate a SIGFPE which will be caught by the
-        // signal hanlder above and execution will resume by
-        // returning from setjmp() above again, but this time
-        // with a non-zero value
-        try_trap (one, zero, result, trapped);
+        // the operands are divided as they promote (C++03 5.3.1, p6):
+        // a bool divisor can only be 1 where the quotient is defined,
+        // so GCC folds the division of two bools to the dividend
+        divide (+numT (1), +numT ());
     }
 
     rw_assert (trapped == traps, 0, lineno,
                "numeric_limits<%s>::traps == %b, got %b",
                tname,  trapped, traps);
-
-    return result;
 }
 
 /**************************************************************************/

@@ -872,24 +872,25 @@ on which the library stores it,
 
 Check: the perturbed copy prints the two offsets; the pins unchanged.
 
-** TODO =18.limits.traps= fails 13 assertions in 12D on x86-64
+** TODO =18.limits.traps= passes a =jmp_buf= to =sigsetjmp=
 
-A 12D build under GCC 16.2.1 on an x86-64 host fails 13 of the 16
-assertions of =18.limits.traps=: ~numeric_limits<T>::traps == false,
-got true~ for every integer type from =bool= to =wchar_t= (163-182).
-The library gives true, since integer division by zero raises
-=SIGFPE= there; the test's oracle divides by a volatile zero between
-=sigsetjmp= and the handler's =siglongjmp=, and at =-O2= it records
-no trap. On aarch64 division does not trap, the library gives false
-and the row passes. The EDG porting entry "Run-time differences from
-GCC" records the same row under =eccp= and names undefined behavior
-surviving the optimizer as the first suspect. Seen while the 12D
-table of x86-64 was read, 2026-11-16.
+Under =_RWSTD_OS_LINUX=, =tests/support/18.limits.traps.cpp=
+declares =jmp_env= a =jmp_buf= (45) and passes it to =sigsetjmp= and
+=siglongjmp=, which POSIX declares with a =sigjmp_buf=. glibc defines
+the two types alike, so the test builds. Around it the test keeps
+three things no build takes or reads: the =#else= arm of
+=_RWSTD_OS_LINUX= (57-71), with =setjmp= and =longjmp= for hosts
+other than Linux, which the tree no longer builds on; the =#else= arm
+of ~#ifdef SIGFPE~ in =test_traps= (107-113), though C defines the
+macro in =<signal.h>= on every host; and the unnamed =bool= parameter
+of =test_traps=, which each =TEST= line fills. Seen while the trap
+oracle of the test was fixed, 2026-11-17.
 
-Fix: read the oracle at =-O2=; it must observe the trap without
-undefined behavior the optimizer can remove.
+Fix: declare =jmp_env= a =sigjmp_buf=; the two arms and the parameter
+leave with the change, and =RW_SIGSETJMP= with them.
 
-Check: =18.limits.traps= green in 12D on x86-64 and at pin in 15D.
+Check: the test builds and passes its 16 assertions in 15D; the
+object of the test before and after, the same code.
 
 * Certification
 
@@ -925,16 +926,20 @@ undefined behavior, the =is_modulo= oracle of
 =27.filebuf.codecvt= (a member called for an object of another type,
 which GCC devirtualizes). Two showed on x86-64 alone:
 =22.locale.time.get= compared =std::tm= by =memcmp=, padding
-included, which a copy need not carry; the cause of the
-=18.limits.traps= row of the Tests chapter is a suspect. After the
+included, which a copy need not carry; the trap oracle of
+=18.limits.traps= divided by zero for a quotient nothing read, so GCC
+dropped the division; and it folds the division of two =bool= operands
+even where the quotient is read, since a =bool= divisor can only be 1
+where the quotient is defined. After the
 first two were fixed, the 12D table of aarch64 has no failed
 assertion: 274 programs, 12,590,260 assertions. It differs from the
 15D pin in one row, =23.deque.iterators= with one assertion more, the
 iterator-size check that the test compiles under
 =_RWSTD_NO_DEBUG_ITER=, which =rw/_defs.h= defines without
-=_RWSTDDEBUG=. With =22.locale.time.get= fixed, the 12D table of
-x86-64 adds the =18.limits.traps= row, 13 failed assertions. Seen
-while the 12D tables were compared, 2026-11-16.
+=_RWSTDDEBUG=. After the other two were fixed, the 12D table of
+x86-64 has the same totals, no failed assertion, and differs from
+the 15D pin in the same row. Seen while the 12D tables were compared,
+2026-11-16.
 
 Fix: once the two x86-64 rows are settled, a 12D pin under
 =doc/notes/baseline/=, run by the nightly beside the six.
@@ -1345,11 +1350,11 @@ Under =eccp -A=:
 - =18.limits.traps=: =numeric_limits<bool>::traps= is true, as for
   every integer type, but the test's =bool= division by zero did not
   trap. Outside the test, =bool= division by zero traps under =eccp=
-  too. The same row fails in an optimized GCC build on x86-64 (12D,
-  13 assertions; the Tests entry "=18.limits.traps= fails 13
-  assertions in 12D on x86-64") and once in 12D with Clang: the test
-  counts on undefined behavior surviving the optimizer, which is the
-  first suspect.
+  too. At =-O2= GCC and Clang compiled the same division to no
+  division at all: a =bool= divisor can only be 1 where the quotient
+  is defined, so the quotient is the dividend. The test now divides
+  the promoted operands, read from volatile objects; the row is to be
+  rerun.
 - =18.support.dynamic=: =bad_alloc::what ()= returns a bad string.
   The first question is whose =bad_alloc= runs, the library's or that
   of EDG's runtime.
