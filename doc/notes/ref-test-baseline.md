@@ -24,8 +24,8 @@ exports (chapter 6).
   row.
 - A failure in the tables is a fact to record, not a regression to
   chase, until its `TODO` entry says otherwise.
-- The shared library of 15D exports 2391 names of its own under GCC
-  and 2323 under Clang, pinned in `15D.exports` and
+- The shared library of 15D exports 2168 names of its own under GCC
+  and 2143 under Clang, pinned in `15D.exports` and
   `15D-clang.exports` (chapter 6). It re-exports 167 and 157 names of
   the compiler's support library besides, which the pins leave out.
   An aarch64 build exports the same names.
@@ -554,6 +554,37 @@ mangled name per line, sorted bytewise. A mangled name is exact; the
 demangled form of a constructor or destructor stands for two or
 three symbols. `c++filt` reads a pin or a difference.
 
+The library's objects are compiled `-fvisibility=hidden
+-fvisibility-inlines-hidden` (`VISFLAGS` in `etc/config/gcc.config`).
+The second flag hides each inline member function that has no mark of
+its own, but not a member of an explicit instantiation, which an
+unoptimized program calls in the library. Thus the functions that a
+program defines for itself where it calls them leave the pins, but
+for eleven under GCC (below): the implicitly declared destructors,
+the instantiations of member templates, and the inline members of
+classes that are not templates, of explicit specializations and of
+specializations the library does not explicitly instantiate. The
+flag removes 223 names of 15D under GCC and 180 under Clang, 22 of
+12D under GCC and 20 under Clang, and adds none. The library and a
+program then each hold a copy of such a function at its own address;
+the conformance record's row "Inline functions hidden in the
+library" says why no program can tell (`ref-conformance.md`,
+chapter 2).
+
+The marks stand on the primary templates, not on the `extern
+template` declarations, for two reasons. 72 names of the GCC pin are
+members of the twelve `_byname` specializations of `messages`,
+`numpunct`, `moneypunct`, `time_get` and `time_put` that the library
+instantiates implicitly: their destructors, vtables and type
+information. Their one mark is the primary template's, so a mark on
+the declarations alone would leave them hidden, and
+`22.locale.category` checks that a program sees the type information
+of each facet as its own. GCC also gives an instantiation the most
+restrictive visibility of its template arguments, so `allocator`,
+`char_traits` and the two stream buffer iterators carry the mark too:
+without it, each specialization that takes one of them as an argument
+would be hidden.
+
 `bin/derive-exports` writes the pin from a build's library:
 
 ```
@@ -566,7 +597,7 @@ defines, the `.o` files beside it in the build's `lib` directory.
 The rest come from `libsupc++.a`: `gcc.config` links the library
 with `-lsupc++`, and the archive's members keep their default
 visibility, so the library re-exports their names, 167 under GCC
-and 157 under Clang of the 2558 and 2480 that `nm` lists. None of
+and 157 under Clang of the 2335 and 2300 that `nm` lists. None of
 them is defined by an object of the library. They follow the
 compiler release and the archive members the library's objects call
 for, not the marks: GCC's objects call `__cxa_bad_cast`,
@@ -582,23 +613,30 @@ mutexes that `_RWSTD_MT_STATIC_GUARD` keys on `__LINE__` and their
 getters, eight names the library exported before the marks, are
 hidden.
 
-GCC and Clang differ in 76 names, all variants of inline and template
-constructors and destructors. Each compiler defines the variants a
+GCC and Clang differ in 25 names, all of them in the GCC pin. Each
+compiler defines the variants of a constructor or destructor that a
 library source uses, and GCC also defines the complete-object variant
-(`C1`, `D1`) as an alias of the base-object one (`C2`, `D2`): 72
-names of the GCC pin are such aliases, and four of the Clang pin are
-the base-object destructors of `basic_istream` and `basic_ostream`,
-which no object of the GCC build defines. No mark works for one
-compiler alone.
+(`D1`) as an alias of the base-object one (`D2`): 12 names are the
+complete-object destructors of the twelve `_byname` specializations.
+The other 13 are names of eleven inline functions that a class
+declares without `inline` and defines with it after the class, such
+as `ios_base::width (streamsize)` and the constructor and destructor
+of `__rw_mutex`. GCC takes the visibility of such a member from its
+declaration in the class, so `-fvisibility-inlines-hidden` does not
+hide it; Clang does. No mark works for one compiler alone.
 
 A difference from the pin is a name that joined or left the
 interface. A name leaves when a mark is lost, or when a typedef or
 a forward declaration that names a specialization moves above its
 template's marked declaration or definition: both compilers fix the
 visibility of a specialization where it is first named. A name joins
-with a new mark, or when a library source starts to use an inline
-member of a marked class, of which the library then keeps a copy;
-it leaves when the last such use goes. The nightly run of the eight
+with a new mark, or when a library source starts to use a member of
+a marked class that the flag does not hide, of which the library then
+keeps a copy: a member of a template it does not explicitly
+instantiate, defined outside the class without `inline`, as the
+destructors of the `_byname` facets are, or under GCC an inline
+member its class declares without `inline`. It leaves when the last
+such use goes. The nightly run of the eight
 configurations derives the names of each shared build and compares
 those of 15D and 15D-clang with their pins, and its summary reports
 a difference as it reports a table's. `bin/driver` does not compare
@@ -606,19 +644,17 @@ them.
 
 The names of 12D are derived and not pinned, because the set of an
 optimized library follows the optimizer as well as the sources and
-the marks. Built without `_RWSTDDEBUG` and at `-O0`, the library
-exports 2387 names: the 2391 of `15D.exports` less 38 members of
-`basic_string` whose signature holds `__rw_debug_iter`, plus the 34
-that hold a pointer in its place. Of those, 212 are inline functions
-and implicit instantiations, the `char_traits` members and the
-exception constructors among them, and a compiler emits one only
-where a call to it stays out of line. GCC 16 on x86-64, from the same
-sources, exports 2175 names at `-O1`, `-O2` and `-O3`, 6 more at
-`-O2 -finline-limit=20`, 26 more at `-Os`, 145 more at
-`-O2 -fno-inline` and all 212 at `-O0`. No variant exports fewer than
-2175, so those are the names that do not depend on inlining. Clang
-23 at `-O2` exports 2147 names, not pinned either, and keeps
-`__rw_synchronized::_C_lock` out of line where GCC expands it. A pin
+the marks. Under GCC 16 on x86-64 the 12D library exports 2153
+names. 47 names of `15D.exports` are not among them, and 32 of its
+names are not in the pin. 36 of the 47 and the 32 are members of
+`basic_string` that take or make its iterator, `__rw_debug_iter`
+under `_RWSTDDEBUG` and a pointer in 12D. The other 11 belong to
+inline functions that their class declares without `inline`, which
+the flag does not hide under GCC: the 15D library calls them out of
+line and keeps a copy, and at `-O2` GCC expands every call. Under
+Clang 23 the 12D library exports 2127 names: those of
+`15D-clang.exports` less the 36 and the base-object destructors
+(`D2`) of the twelve `_byname` specializations, plus the 32. A pin
 of the 12D names would thus move with a compiler release that
 inlines differently, with no change in the tree.
 

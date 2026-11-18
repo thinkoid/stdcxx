@@ -292,7 +292,7 @@ the library defines =_ZN4__rw13__rw_allocateEmi=. 184 of the 263 hold
 a =j=, and 179 of them are names of the library when each =j= reads
 =m=; the other 84 spell another type at its 32-bit width, an =int=
 for a =streamsize= among them, by a reading of a sample. The library
-exports 2558 names, so 1626 of them are not in the map. The node
+exports 2335 names, so 1403 of them are not in the map. The node
 names 4.1.3; the library is 4.2.2 (=include/rw/_config.h= 50). The
 map is linked only when =MAPFLAGS= is set (=etc/config/gcc.config=
 59-62), and nothing sets it, but bd48eb9e keeps the map consistent
@@ -412,37 +412,37 @@ comment names the source.
 Check: the preprocessed output of =<ostream>= and =<locale>= in 15D
 unchanged.
 
-*** TODO =-fvisibility-inlines-hidden= was measured while the =ti_*.cpp= objects held copies
+*** TODO Eleven inline functions stay exported under GCC: their class declares them without =inline=
 
-=VISFLAGS= in =etc/config/gcc.config= does without the flag
-(cbbbca23). Measured then in the 15D library under GCC, the flag
-removed 525 of the exported names. 302 were inline members of the
-library's explicit instantiations: each =ti_*.cpp= object held copies
-of the members it used of the others' specializations, 1184
-definitions of 364 names in 34 objects, the flag hid the copies, the
-link kept the hidden visibility, and an unoptimized program calls
-those members out of line. The other 223 are functions a program emits
-for itself. Each source now sees the =extern template= declarations of
-the specializations it does not define, and the copies are gone. What
-the flag removes now is not measured; derived from GCC's manual, it
-would remove the 223 and keep the 302. The copies are also why the
-export marks stand on the primary templates (77ae0f7b). Seen while the
-copies were removed, 2026-11-17.
+Eleven inline member functions are declared in their class without
+=inline= and defined with it after the class:
+- =ios_base::width (streamsize)= (=include/rw/_iosbase.h=);
+- the constructor and destructor of =__rw_mutex= and
+  =__rw_mutex_base::_C_release= (=include/rw/_mutex.h=);
+- =widen (char)= and =narrow (char_type, char)= of =ctype<char>= and
+  of =ctype<wchar_t>= (=include/loc/_ctype.h=);
+- =codecvt<char, char, mbstate_t>::always_noconv=
+  (=include/loc/_codecvt.h=);
+- =__rw_locale::_C_check_category= and =_C_get_facet_type=
+  (=src/locale_body.h=).
+GCC 16 takes the visibility of a member from its declaration in the
+class, so =-fvisibility-inlines-hidden= does not hide these, and the
+15D library under GCC exports their 13 names; Clang hides them. A
+probe shows it: under the flag, a member of a marked class that is
+declared without =inline= and defined inline after the class has
+default visibility under GCC and hidden under Clang, and one defined
+in the class is hidden under both. The 13 are the names of
+=15D.exports= that =15D-clang.exports= lacks, besides the 12
+complete-object destructors of the =_byname= specializations, and 11
+of them are the names of the 15D list under GCC that the 12D list
+lacks, besides those of =basic_string='s debug iterator. Seen while
+=VISFLAGS= took the flag, 2026-11-18.
 
-Fix: build 15D under GCC and under Clang with the flag and list the
-exported names it removes. The lists serve two decisions: whether
-=VISFLAGS= takes the flag, and whether the export marks move from the
-primary templates to the declarations of the explicit instantiations.
-Where the compiler has no =extern template= the headers declare
-nothing, so a source's explicit instantiation definition has no
-declaration to take a mark from, and a mark moved off a primary
-template would have to stand on the definition. In the matrix that is
-the EDG front end under =eccp -A=, whose =config.h= defines
-=_RWSTD_NO_EXTERN_TEMPLATE= and =_RWSTD_NO_VISIBILITY_ATTRIBUTE=, so
-the mark expands to nothing there, and its =VISFLAGS= is empty.
+Fix: the eleven declarations in the class take =inline=.
 
-Check: the two lists, each name classed as one a program emits for
-itself or one it calls in the library.
+Check: =15D.exports= loses the 13 names and gains none,
+=15D-clang.exports= is unchanged, and the four shared configurations
+run at pin.
 
 * Tests
 
@@ -2049,6 +2049,28 @@ Fix: the probe becomes a listing in the note, and the run is cited by
 the table row it produced.
 
 Check: =git grep stdcxx-build -- doc= finds the build recipes alone.
+
+** TODO Two sentences of =ref-test-baseline.md= chapter 6 were measured before the flag
+
+Chapter 6 of =doc/notes/ref-test-baseline.md= says that a 15D build
+on aarch64 exports the same names under either compiler (608-609),
+and that the suite compiled at =-O0= links against the =-O2= library
+of the same compiler and gives its table (661-671). Both were
+measured before the shared library was compiled
+=-fvisibility-inlines-hidden=. With the flag the first is measured
+under GCC alone: the 15D library of an aarch64 host exports the 2168
+names of the pin. By reading, both still hold: the flag hides only
+functions that a program defines for itself. Seen while =VISFLAGS=
+took the flag, 2026-11-18.
+
+Fix: measure both with the flag: the 15D library under Clang on an
+aarch64 host against =15D-clang.exports=, and the suite compiled at
+=-O0= against the 12D library under GCC and under Clang. A sentence
+that fails is corrected.
+
+Check: the aarch64 list equals the pin; the =-O0= programs link with
+no undefined name and their table equals =12D.txt= and
+=12D-clang.txt=.
 
 ** TODO =ref-test-baseline.md= compares a one-locale host with an old count
 
