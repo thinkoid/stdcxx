@@ -244,7 +244,7 @@ basic_ostream<_CharT, _Traits>::operator<< (short __val)
 {
     const ios_base::fmtflags __base = this->flags () & this->basefield;
 
-    // N3242 27.7.3.6.2, p1 (lwg issue 117): the value widens through
+    // C++11 27.7.3.6.2, p1 (lwg issue 117): the value widens through
     // unsigned short when basefield is exactly oct or hex, and as a
     // signed long otherwise; 14882:2003 27.6.2.5.2, p1 hands val to
     // num_put::put, which has no short overload, so the 2003 text has
@@ -262,7 +262,7 @@ basic_ostream<_CharT, _Traits>::operator<< (int __val)
 {
     const ios_base::fmtflags __base = this->flags () & this->basefield;
 
-    // N3242 27.7.3.6.2, p1 (lwg issue 117): the value widens through
+    // C++11 27.7.3.6.2, p1 (lwg issue 117): the value widens through
     // unsigned int when basefield is exactly oct or hex, and as a
     // signed long otherwise; 14882:2003 27.6.2.5.2, p1 hands val to
     // num_put::put, which has no int overload, so the 2003 text has
@@ -282,7 +282,7 @@ basic_ostream<_CharT, _Traits>::_C_opfx ()
 
     if (__tie && this->good ()) {
         // 27.6.2.3, p2: flushes the tie through its own sentry, which
-        // flushes its tie in turn; on a ring of ties, which N3242
+        // flushes its tie in turn; on a ring of ties, which C++11
         // 27.5.5.3, p2 forbids, or on two streams of the chain sharing
         // a buffer, the tie is not flushed (footnote 292; departure)
         const basic_ostream *__p0, *__p1;

@@ -824,7 +824,7 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #      else
          // a source that explicitly instantiates sees no declaration:
          // one before its own explicit instantiation of the function
-         // would leave the instantiation without effect (N3242 14.7.2,
+         // would leave the instantiation without effect (C++11 14.7.2,
          // p5; C++03 14.7, p5 forbids the pair)
 #        define _RWSTD_INSTANTIATE_FUN_1(ignore)             \
            typedef void __rw_unused_type

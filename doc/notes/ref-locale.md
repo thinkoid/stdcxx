@@ -1949,7 +1949,7 @@ C++11's, the one recorded exception to the 2003 baseline.
 
 ### 12.1 The standard's contract
 
-14882:2003 unless N3242 is named. The facets use their `ios_base&`,
+14882:2003 unless C++11 is named. The facets use their `ios_base&`,
 `iostate&` and fill as 22.2 describes, and `ctype<>` for formatting
 details (22.2.5, p1). 22.2, p1: "Formatting facets use the character
 argument fill to fill out the specified width where necessary." 22.2,
@@ -1984,7 +1984,7 @@ edition since 2003 against the clause-wide sentence.
 #### The C++11 members of `time_get`
 
 - `get (s, end, f, err, t, format, modifier)` returns `do_get` with
-  those arguments (N3242 22.4.5.1.1, p6).
+  those arguments (C++11 22.4.5.1.1, p6).
 - `get` over `[fmt, fmtend)` (p7 to p10) starts at `err = goodbit` and
   loops until the pattern ends, `err != goodbit`, or `s == end`, which
   sets `eofbit | failbit`. A specification valid for `strptime`
@@ -2205,9 +2205,9 @@ format writes into the same buffer.
 
 - 22.2.5.1 has five parsing members and no `get` with a format.
 - The library has `get (..., char, char)`, `get` over a range and
-  `do_get`, signature for signature N3242's 22.4.5.1.1, p6-10 and
+  `do_get`, signature for signature C++11's 22.4.5.1.1, p6-10 and
   22.4.5.1.2, p11-15. The 2003 members ride on `do_get` and read the
-  locale's `%X` and `%x`, as 2003 asks, not N3242's `"%H:%M:%S"` and
+  locale's `%X` and `%x`, as 2003 asks, not C++11's `"%H:%M:%S"` and
   Table 92.
 - Why: in the 2005 import; N2070 and N2211 took them into the standard
   from this facet. c40c5d16 brought them back as a ruled exception the
@@ -2216,7 +2216,7 @@ format writes into the same buffer.
 
 #### Each `do_get` updates the `tm`
 
-- N3242 22.4.5.1.2, p14 leaves update or overwrite unspecified; p12
+- C++11 22.4.5.1.2, p14 leaves update or overwrite unspecified; p12
   asks for the `strptime` directive's members.
 - The library updates, and the `tm` is the only carrier. `"%C %y"` on
   `"19 26"` is 2026, since `%y` cannot tell a century 19 from a zeroed
@@ -2262,7 +2262,7 @@ format writes into the same buffer.
 
 #### An era mismatch is not a fallback
 
-- N3242 22.4.5.1.2, p13; XSH takes the plain conversion "If the
+- C++11 22.4.5.1.2, p13; XSH takes the plain conversion "If the
   alternative format or specification does not exist in the current
   locale".
 - With era records the alternative exists: `"19"` under `%EC` in ja_JP
@@ -2272,7 +2272,7 @@ format writes into the same buffer.
 
 #### A zeroed `tm` lies in an era
 
-- Under N3242 22.4.5.1.2, p13, `%Ey` reads in the `tm`'s era; 1900 is
+- Under C++11 22.4.5.1.2, p13, `%Ey` reads in the `tm`'s era; 1900 is
   明治 33, พ.ศ. 2443, 民前 12. A lone `"8"` under `%Ey` in ja_JP is 1875
   (by probe).
 - Why: ffea5ffe; no latch outlives a call. Pins: row "A zeroed `tm`
@@ -2280,13 +2280,13 @@ format writes into the same buffer.
 
 #### `%Ey` reads four digits
 
-- Under N3242 22.4.5.1.2, p12: 0 to 9999, no sign, as glibc. `"%EC
+- Under C++11 22.4.5.1.2, p12: 0 to 9999, no sign, as glibc. `"%EC
   %Ey"` on `"平成 40"` keeps 1990 from `%EC`, with `eofbit` (by probe).
 - Why: ffea5ffe. Pins: row "`%Ey` reads four digits".
 
 #### An era is every record of its name
 
-- Under N3242 22.4.5.1.2, p13, `"%EC %Ey"` reads `"令和 01"`,
+- Under C++11 22.4.5.1.2, p13, `"%EC %Ey"` reads `"令和 01"`,
   `time_put`'s 2019-06-01, as 2019; glibc bounds by one record and
   cannot. `%EY` reads `"令和元年"` as 2019 and `"令和8年"` as 2026 (by probe).
 - Why: ffea5ffe. Pins: 22.locale.time.get, the Heisei and Gannen
@@ -2313,7 +2313,7 @@ format writes into the same buffer.
 #### Extensions of the interface
 
 - A null `t` to `get` or `do_get` parses without storing (no row);
-  N3242 p11 requires a dereferenceable `t`.
+  C++11 p11 requires a dereferenceable `t`.
 - A null `pat_end` to `put` ends the pattern at its null.
 - `do_put` with a null `t` writes the locale's `%c`, `%r`, `%x`, `%X`
   format; 22.locale.time.put pins it in its `T (INT_MAX)` rows.
@@ -2378,18 +2378,18 @@ is a `TODO` entry rather than a decision.
 | Two spaces after an international symbol; `sign_posn` 0 as `"()"` | 22.2.6.3 p2, p7 | 10.3.11 | reading |
 | `collate<char>` orders bytes as `unsigned char` | 22.2.4.1.2 p1, LWG 467 | 11.3 | design |
 | An invalid catalog is diagnosed | 22.2.7.1.2 p5 | 11.3 | extension |
-| The format members are C++11's | 22.2.5.1; N3242 22.4.5.1.1 p6-10, 22.4.5.1.2 p11-15 | 12.3 | decision 2026-10-14 |
-| Each `do_get` updates the `tm` | N3242 22.4.5.1.2 p12, p14 | 12.3 | decision 2026-10-31 |
+| The format members are C++11's | 22.2.5.1; C++11 22.4.5.1.1 p6-10, 22.4.5.1.2 p11-15 | 12.3 | decision 2026-10-14 |
+| Each `do_get` updates the `tm` | C++11 22.4.5.1.2 p12, p14 | 12.3 | decision 2026-10-31 |
 | Years before 0 | C99 7.23.3.5; POSIX.1-2024 | 12.3 | decision 2026-10-31 |
 | Narrow names matched by element | 22.2.5.1.2 p6 | 12.3 | limit |
 | Empty `am_pm` names | 22.2.5.1 p1 | 12.3 | decision 2026-10-30 |
-| An era mismatch is not a fallback | N3242 22.4.5.1.2 p13 | 12.3 | decision 2026-11-01 |
-| A zeroed `tm` lies in an era | N3242 22.4.5.1.2 p13 | 12.3 | decision 2026-11-01 |
-| `%Ey` reads four digits | N3242 22.4.5.1.2 p12 | 12.3 | decision 2026-11-01 |
-| An era is every record of its name | N3242 22.4.5.1.2 p13 | 12.3 | decision 2026-11-01 |
+| An era mismatch is not a fallback | C++11 22.4.5.1.2 p13 | 12.3 | decision 2026-11-01 |
+| A zeroed `tm` lies in an era | C++11 22.4.5.1.2 p13 | 12.3 | decision 2026-11-01 |
+| `%Ey` reads four digits | C++11 22.4.5.1.2 p12 | 12.3 | decision 2026-11-01 |
+| An era is every record of its name | C++11 22.4.5.1.2 p13 | 12.3 | decision 2026-11-01 |
 | A plain digit under `%O` only where no symbol exists | XSH `strptime` | 12.3 | decision 2026-11-01 |
 | Two-digit years in `do_get_year` | 22.2.5.1.2 p8 | 12.3 | design |
-| Extensions of the `time_get` and `time_put` interface | N3242 22.4.5.1.2 p11; 22.2.5.3 | 12.3 | extension |
+| Extensions of the `time_get` and `time_put` interface | C++11 22.4.5.1.2 p11; 22.2.5.3 | 12.3 | extension |
 
 ## 14. Where to look
 

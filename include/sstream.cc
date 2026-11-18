@@ -145,11 +145,11 @@ _C_str (const char_type *__s, _RWSTD_SIZE_T __slen)
         }
         else if (this->_C_state & (ios_base::app | ios_base::ate)) {
             // ate and app start the put pointer at the end (lwg issue
-            // 562, N3797 27.8.2.3, p3); for app, p3's "otherwise
+            // 562, C++11 27.8.2.3, p3); for app, p3's "otherwise
             // pptr() == pbase()" cannot hold: sputc stores in place
-            // (27.5.2.2.5, p1) and cannot seek to the end before each
-            // write (27.4.2.1.4, Table 86), so app keeps the put
-            // pointer at the end, here and in seekoff
+            // (C++03 27.5.2.2.5, p1) and cannot seek to the end before
+            // each write (C++03 27.4.2.1.4, Table 86), so app keeps the
+            // put pointer at the end, here and in seekoff
             this->pbump (__slen);
         }
     }

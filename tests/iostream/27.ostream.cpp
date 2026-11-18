@@ -448,7 +448,7 @@ void test_sentry (charT)
     {
         // verify that two streams on distinct buffers tied to each
         // other form a ring the sentry detects and leaves alone
-        // (N3242 27.5.5.3, p2): neither buffer is synchronized
+        // (C++11 27.5.5.3, p2): neither buffer is synchronized
         test_streambuf<charT> tsb_a (0);
         test_streambuf<charT> tsb_b (0);
 

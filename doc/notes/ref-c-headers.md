@@ -172,7 +172,7 @@ lookup, as in the program of 1.1.
 ### 1.4 2011: the rule follows the practice
 
 LWG issue 456, "Traditional C header files are overspecified", was
-resolved for C++11. The 2011 text (N3242) keeps the sentence that the
+resolved for C++11. The 2011 text keeps the sentence that the
 names are in `std` and adds, in 17.6.1.2 p4:
 
 > It is unspecified whether these names are first declared within the
@@ -602,7 +602,7 @@ have no overload for most integer types. `sqrt (2)` after
 `unsigned u` after `<stdlib.h>` is ambiguous among the three integer
 ones. A program writes the conversion: `sqrt (2.0)`. C++11 adds the
 overloads that make `sqrt (2)` a call of the `double` function
-(N3242 26.8 p11).
+(C++11 26.8 p11).
 
 The pure model was written to conform, and it does in rows 2, 3, 11
 and 12. It departs in rows 4 to 9, for the reasons of chapter 7.

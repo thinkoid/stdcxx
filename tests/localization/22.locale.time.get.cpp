@@ -818,7 +818,7 @@ void test_posix (charT, const char *cname)
     TEST (T ( 3,  2,  1),    "1:2:3 am",  8, "r", 0, Good);
     // C++11 22.4.5.1.1, p8: %S sets eofbit, which ends the walk over
     // the format of %r before %p; the walk adds no failbit, and the
-    // members read are stored (p13 leaves them unspecified)
+    // members read are stored (22.4.5.1.2, p13 leaves them unspecified)
     TEST (T ( 9,  5,  9),    "09:05:09",  8, "r", 0, Eof);
     TEST (T ( 0,  0,  0), "13:00:00 PM",  2, "r", 0, Fail);
 
