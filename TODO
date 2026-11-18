@@ -1774,28 +1774,6 @@ the table row it produced.
 
 Check: =git grep stdcxx-build -- doc= finds the build recipes alone.
 
-** TODO Two sentences of =ref-test-baseline.md= chapter 6 were measured before the flag
-
-Chapter 6 of =doc/notes/ref-test-baseline.md= says that a 15D build
-on aarch64 exports the same names under either compiler (607-608),
-and that the suite compiled at =-O0= links against the =-O2= library
-of the same compiler and gives its table (652-662). Both were
-measured before the shared library was compiled
-=-fvisibility-inlines-hidden=. With the flag the first is measured
-under GCC alone: the 15D library of an aarch64 host exports the 2168
-names of the pin. By reading, both still hold: the flag hides only
-functions that a program defines for itself. Seen while =VISFLAGS=
-took the flag, 2026-11-18.
-
-Fix: measure both with the flag: the 15D library under Clang on an
-aarch64 host against =15D-clang.exports=, and the suite compiled at
-=-O0= against the 12D library under GCC and under Clang. A sentence
-that fails is corrected.
-
-Check: the aarch64 list equals the pin; the =-O0= programs link with
-no undefined name and their table equals =12D.txt= and
-=12D-clang.txt=.
-
 ** TODO =ref-test-baseline.md= compares a one-locale host with an old count
 
 Chapter 2 of =doc/notes/ref-test-baseline.md= says a host with
