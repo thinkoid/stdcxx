@@ -221,7 +221,10 @@ endif   # eq ($(findstring clean,$(MAKECMDGOALS)),)
 # not under $(TOPDIR) or $(BUILDDIR) (e.g., system headers) from the list
 # this is done by splitting up dependencies using tr so that there is just
 # one per line and then replacing the values of $(TOPDIR) and $(BUILDDIR)
-# with the actual make variable names themselves
+# with the actual make variable names themselves; each value is matched
+# with its trailing slash, so that a directory whose name begins with the
+# other's is not taken for it, and $(BUILDDIR) goes first, since it may
+# lie inside $(TOPDIR)
 
 define makedep
     -@(if [ ! -f $@ ] ; then                                                 \
@@ -233,9 +236,9 @@ define makedep
                                                                              \
            sedexp1="s:\([^ :]\)\(  */\):\1 \\\@\2:" ;                        \
            sedexp2="/:[^/]*$$/p;                                             \
-                   s:$$RWTSRCDIR:$$""(TOPDIR)/\.\./rwtest:gp;                \
-                   s:$(TOPDIR):$$""(TOPDIR):gp;                              \
-                   s:$(BUILDDIR):$$""(BUILDDIR):gp" ;                        \
+                   s:$(BUILDDIR)/:$$""(BUILDDIR)/:gp;                        \
+                   s:$$RWTSRCDIR/:$$""(TOPDIR)/\.\./rwtest/:gp;              \
+                   s:$(TOPDIR)/:$$""(TOPDIR)/:gp" ;                          \
            depflags="$(value DEPENDFLAGS$(depsuffix))";                      \
            [ "$$depflags" = "" ] && depflags=$(DEPENDFLAGS);                 \
            echo "$(CXX) $$depflags $(CPPFLAGS) $(CXXFLAGS) $<";              \

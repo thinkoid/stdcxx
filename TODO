@@ -145,30 +145,6 @@ denormal: the =double= denormal and zero).
 
 Check: by reading; no host or compiler flag at hand gives the format.
 
-*** TODO Dependency files name the build directory through =$(TOPDIR)= when its path begins with the tree's
-
-=makedep= (=etc/config/makefile.rules= 226-246) writes each object's
-dependencies with the tree's path replaced by =$(TOPDIR)= and then
-the build directory's by =$(BUILDDIR)= (236-238). The match is a
-plain string, not a path component, and the tree's goes first. A
-build directory whose path begins with the tree's path therefore has
-its =config.h= written through =$(TOPDIR)=: for a tree at =/src/stdcxx=
-and a build directory =/src/stdcxx-build/15D=, the =.d= files name
-=$(TOPDIR)-build/15D/include/config.h=. Measured on such a pair, 584
-of the 587 =.d= files of a 15D build do; a build directory whose path
-does not begin with the tree's has =$(BUILDDIR)/include/config.h= in
-each. The name resolves to the right file only while =TOPDIR= keeps
-its value; with =TOPDIR= pointed at another tree each object would
-depend on a =config.h= that does not exist, by reading. Seen while
-the build of this pass was checked, 2026-11-16.
-
-Fix: the substitutions match a directory with its trailing =/=, the
-build directory's first.
-
-Check: a 15D build directory at =/src/stdcxx-build/15D= of the tree
-at =/src/stdcxx= writes =$(BUILDDIR)/include/config.h= in each =.d=
-file.
-
 *** TODO Clang warns that 18 definitions lack the =nothrow= of their declarations
 
 A 15D build under Clang warns with =-Wmissing-exception-spec= where a
