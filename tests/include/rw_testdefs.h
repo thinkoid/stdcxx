@@ -54,8 +54,6 @@
 // modifier, suitable for use within the format argument of a formatted
 // input/output function when converting the corresponding integer type
 #if _RWSTD_LONG_SIZE < _RWSTD_LLONG_SIZE
-   // using LLONG_SIZE instead of ULLONG_MAX in the preprocessor
-   // conditional above to work around a gcc 3.2 bug (PR #28595)
 #  define _RWSTD_PRIdMAX   _RWSTD_LLONG_PRINTF_PREFIX "d"
 #  define _RWSTD_PRIiMAX   _RWSTD_LLONG_PRINTF_PREFIX "i"
 #  define _RWSTD_PRIoMAX   _RWSTD_LLONG_PRINTF_PREFIX "o"

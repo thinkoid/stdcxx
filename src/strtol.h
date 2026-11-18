@@ -47,8 +47,6 @@ __rw_strtol (const char*, int*, int) _THROWS (());
 
 #ifdef _RWSTD_LONG_LONG
 
-   // using LLONG_SIZE instead of ULLONG_MAX in the preprocessor
-   // conditional below to work around a gcc 3.2 bug (PR #28595)
 #  if (_RWSTD_LLONG_SIZE <= _RWSTD_LONG_SIZE)
 
 inline unsigned _RWSTD_LONG_LONG

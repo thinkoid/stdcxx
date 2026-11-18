@@ -621,8 +621,6 @@ typedef _RWSTD_LONG_LONG          LLong;
 typedef unsigned _RWSTD_LONG_LONG ULLong;
 
 
-   // using LLONG_SIZE instead of ULLONG_MAX in the preprocessor
-   // conditional below to work around a gcc 3.2 bug (PR #28595)
 #  if (_RWSTD_LONG_SIZE < _RWSTD_LLONG_SIZE)
 
 ULLong

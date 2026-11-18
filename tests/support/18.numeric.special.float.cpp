@@ -413,7 +413,7 @@ struct limits_values<float>
     static float denorm_min () {
 
 #if defined (__FLT_DENORM_MIN__)
-        // gcc 3.x predefined macro
+        // GCC and Clang predefine the macro
         return __FLT_DENORM_MIN__;
 #else
         // assume IEEE 754
@@ -636,7 +636,7 @@ struct limits_values<double>
     static double denorm_min () {
 
 #if defined (__DBL_DENORM_MIN__)
-        // gcc 3.x predefined macro
+        // GCC and Clang predefine the macro
         return __DBL_DENORM_MIN__;
 #else
         // assume IEEE 754
@@ -855,7 +855,7 @@ struct limits_values<long double>
     static long double denorm_min () {
 
 #if defined (__LDBL_DENORM_MIN__)
-        // gcc 3.x predefined macro
+        // GCC and Clang predefine the macro
         return __LDBL_DENORM_MIN__;
 #else
         // assume IEEE 754

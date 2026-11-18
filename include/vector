@@ -675,24 +675,15 @@ public:
     class _C_iter {
         friend class iterator;
         friend class const_iterator;
+        friend class vector;
 
     private:
 
-#if defined (__GNUG__)
-        // gcc 3.0.1 and prior take 14.5.3, p9 literally
-    public:
-#else
-        friend class vector;
-#endif
         unsigned int* _C_p;        // pointer to the current word
         unsigned int  _C_offset;   // number of the pointed-to bit
 
         _C_iter (unsigned int* __x = 0, unsigned int __y = 0)
             : _C_p (__x), _C_offset (__y) { }
-
-        // On Sun, gcc 3.1 does generate an incorrect copy constructor
-        // that has as an effect an incompletely/incorrectly initialized 
-        // iterator.
 
         void operator++ () {
             if (_C_offset++ == _RWSTD_WORD_BIT - 1) {

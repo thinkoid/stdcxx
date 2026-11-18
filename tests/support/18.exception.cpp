@@ -868,11 +868,7 @@ test_runtime ()
     rw_info (0, 0, __LINE__, "runtime support for exceptions");
 
 
-    // using static to avoid gcc 3.x warning: variable 
-    // might be clobbered by `longjmp' or `vfork'
-
-    for (static unsigned i = 0; E_error != rt_exceptions [i]; ++i) {
-
+    for (unsigned i = 0; E_error != rt_exceptions [i]; ++i) {
         const RuntimeExceptionId ex_id   = rt_exceptions [i];
         const char* const        ex_name = rt_exception_names [i];
 
