@@ -810,43 +810,29 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #  define _RWSTD_INSTANTIATE_2(a1, a2)     extern template a1, a2
 #  define _RWSTD_INSTANTIATE_3(a1, a2, a3) extern template a1, a2, a3
 
-#  ifndef _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
-#    ifdef _RWSTD_NO_EXTERN_FUNCTION_TEMPLATE
-#      if    !defined (_RWSTD_INSTANTIATE_TEMPLATES)   \
-           ||  defined (_RWSTD_NO_INSTANTIATE)
-         // explicit instantiation of function templates enabled
-         // but extern template declarations of function template
-         // instantiations are disabled, use declarations of
-         // explicit function template specializations instead
-#        define _RWSTD_INSTANTIATE_FUN_1(arg)          template<> arg
-#        define _RWSTD_INSTANTIATE_FUN_2(a1, a2)       template<> a1, a2
-#        define _RWSTD_INSTANTIATE_FUN_3(a1, a2, a3)   template<> a1, a2, a3
-#      else
-         // a source that explicitly instantiates sees no declaration:
-         // one before its own explicit instantiation of the function
-         // would leave the instantiation without effect (C++11 14.7.2,
-         // p5; C++03 14.7, p5 forbids the pair)
-#        define _RWSTD_INSTANTIATE_FUN_1(ignore)             \
-           typedef void __rw_unused_type
-#        define _RWSTD_INSTANTIATE_FUN_2(ign1, ign2)         \
-           typedef void __rw_unused_type
-#        define _RWSTD_INSTANTIATE_FUN_3(ign1, ign2, ign3)   \
-           typedef void __rw_unused_type
-#      endif   // !_RWSTD_INSTANTIATE_TEMPLATES || _RWSTD_NO_INSTANTIATE
-#    endif   // _RWSTD_NO_EXTERN_FUNCTION_TEMPLATE
-#  else   // if defined (_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION)
-     // function templates not explicitly instantiated
-
-     // FIXME: this probably won't work since both class template
-     // and (non-member) function templates are defined in the same
-     // implementation (.c or .cc) files
-#    define _RWSTD_INSTANTIATE_FUN_1(ignore)             \
-       typedef void __rw_unused_type
-#    define _RWSTD_INSTANTIATE_FUN_2(ign1, ign2)         \
-       typedef void __rw_unused_type
-#    define _RWSTD_INSTANTIATE_FUN_3(ign1, ign2, ign3)   \
-       typedef void __rw_unused_type
-#  endif   // _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
+#  ifdef _RWSTD_NO_EXTERN_FUNCTION_TEMPLATE
+#    if    !defined (_RWSTD_INSTANTIATE_TEMPLATES)   \
+         ||  defined (_RWSTD_NO_INSTANTIATE)
+       // explicit instantiation of function templates enabled
+       // but extern template declarations of function template
+       // instantiations are disabled, use declarations of
+       // explicit function template specializations instead
+#      define _RWSTD_INSTANTIATE_FUN_1(arg)          template<> arg
+#      define _RWSTD_INSTANTIATE_FUN_2(a1, a2)       template<> a1, a2
+#      define _RWSTD_INSTANTIATE_FUN_3(a1, a2, a3)   template<> a1, a2, a3
+#    else
+       // a source that explicitly instantiates sees no declaration:
+       // one before its own explicit instantiation of the function
+       // would leave the instantiation without effect (C++11 14.7.2,
+       // p5; C++03 14.7, p5 forbids the pair)
+#      define _RWSTD_INSTANTIATE_FUN_1(ignore)             \
+         typedef void __rw_unused_type
+#      define _RWSTD_INSTANTIATE_FUN_2(ign1, ign2)         \
+         typedef void __rw_unused_type
+#      define _RWSTD_INSTANTIATE_FUN_3(ign1, ign2, ign3)   \
+         typedef void __rw_unused_type
+#    endif   // !_RWSTD_INSTANTIATE_TEMPLATES || _RWSTD_NO_INSTANTIATE
+#  endif   // _RWSTD_NO_EXTERN_FUNCTION_TEMPLATE
 #else
 #  define _RWSTD_INSTANTIATE(ign1, ign2)         0
 #  define _RWSTD_INSTANTIATE_1(ignore)           typedef void __rw_unused_type

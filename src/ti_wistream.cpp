@@ -41,13 +41,9 @@ namespace std {
 
 template class basic_istream<wchar_t, char_traits<wchar_t> >;
 
-#  ifndef _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
-
 template wistream& operator>> (wistream&, wstring&);
 
 template wistream& getline (wistream&, wstring&, wchar_t);
-
-#  endif   // _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
 
 }   // namespace std
 

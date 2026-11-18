@@ -87,25 +87,6 @@ for the version; or the map and =MAPFLAGS= leave.
 Check: every name of the map is in =nm -D --defined-only= of the 15D
 library; a build with =MAPFLAGS= set links, and its suite is at pin.
 
-*** TODO Nothing defines =_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION=
-
-=include/rw/_defs.h= (809-845) and the ten sources that explicitly
-instantiate function templates (=src/ti_*insert_*.cpp=,
-=src/ti_*num_get.cpp=, =src/ti_*istream.cpp=) test
-=_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION=: under it the headers
-declare no function template specialization extern, and the sources
-instantiate none. No characterization writes the macro, the =README=
-does not list it, and no revision since the import (e6c7726b, 2005)
-defines it. =_RWSTD_NO_EXPLICIT_FUNC_INSTANTIATION=, which a probe
-wrote, retired on 2026-10-17 (=doc/notes/analysis-feature-gates.md=).
-Seen while the =ti_*.cpp= sources were given the =extern template=
-declarations, 2026-11-17.
-
-Fix: a decision: the gate leaves, or a probe writes it.
-
-Check: =git grep NO_FUNCTION_EXPLICIT_INSTANTIATION= finds nothing; or
-each =config.h= carries the probe's answer.
-
 *** TODO Under =_RWSTD_NO_INSTANTIATE= a program declares what the library does not instantiate
 
 The =README= (1032-1035) documents =_RWSTD_NO_INSTANTIATE= as an

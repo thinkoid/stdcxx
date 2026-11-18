@@ -44,8 +44,6 @@ template struct num_get<wchar_t>;
 
 }   // namespace std
 
-#  ifndef _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
-
 namespace __rw {
 
 template __rw_wistreambuf_iterator
@@ -54,8 +52,6 @@ __rw_match_name (__rw_wistreambuf_iterator, __rw_wistreambuf_iterator,
                  _RWSTD_SIZE_T&, int&, std::ios_base*);
 
 }   // namespace __rw
-
-#  endif   // _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
 
 #endif   // _RWSTD_NO_INSTANTIATE
 

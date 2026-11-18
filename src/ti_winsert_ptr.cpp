@@ -37,8 +37,7 @@
 #include <ostream>
 #include <rw/_ioinsert.h>
 
-#if    !defined (_RWSTD_NO_INSTANTIATE)                     \
-    && !defined (_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION)
+#ifndef _RWSTD_NO_INSTANTIATE
 
 namespace __rw {
 
@@ -54,4 +53,4 @@ __rw_insert (std::wostream&, const wchar_t*,
 
 }   // namespace __rw
 
-#endif   // !NO_INSTANTIATE && !NO_FUNCTION_EXPLICIT_INSTANTIATION
+#endif   // _RWSTD_NO_INSTANTIATE
