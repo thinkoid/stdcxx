@@ -49,7 +49,7 @@ SRCDIRS      = $(TOPDIR)/src
 include ../makefile.common
 
 CXXFLAGS    += $(PICFLAGS) $(VISFLAGS)
-LDFLAGS     += $(LDSOFLAGS) $(MAPFLAGS) $(MAPFILE)
+LDFLAGS     += $(LDSOFLAGS)
 
 # the prelink command, for compilers that assign template
 # instantiations to the objects before they are archived
@@ -72,7 +72,7 @@ realclean: dependclean clean
 # build an archive or shared library
 ifeq ($(findstring shared,$(BUILDMODE)),shared)
 
-$(LIB): $(OBJS) $(MAPFILE)
+$(LIB): $(OBJS)
 	@echo "$(LD) $(LDFLAGS) $< $(LDLIBS) -o $@" >> $(LOGFILE)
 	$(LD) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@ $(TEEOPTS)
 

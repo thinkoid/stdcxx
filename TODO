@@ -62,31 +62,6 @@ Fix: a decision: one whitespace-only change, as 482755cb was for
 Check: =git diff -w= of the change is empty; the preprocessed output
 of the 15D build is unchanged.
 
-*** TODO =src/mapfile.gcc= spells the library's names for a 32-bit build
-
-The version script of the GCC build lists 1195 names under one node,
-=RWSTD.4.1.3= (26), and hides every other with ~local: *;~. Of the
-1195, 932 are in the dynamic symbol table of a 15D library and 263
-are not. =__rw_allocate= (53) and =__rw_deallocate= (89) spell
-=size_t= as =j=, =unsigned int=: =_ZN4__rw13__rw_allocateEji= where
-the library defines =_ZN4__rw13__rw_allocateEmi=. 184 of the 263 hold
-a =j=, and 179 of them are names of the library when each =j= reads
-=m=; the other 84 spell another type at its 32-bit width, an =int=
-for a =streamsize= among them, by a reading of a sample. The library
-exports 2322 names, so 1390 of them are not in the map. The node
-names 4.1.3; the library is 4.2.2 (=include/rw/_config.h= 50). The
-map is linked only when =MAPFLAGS= is set (=etc/config/gcc.config=
-54-57), and nothing sets it, but bd48eb9e keeps the map consistent
-with the built library all the same. Seen while the library's
-allocation functions were read, 2026-11-16.
-
-Fix: a decision: the map is rewritten from the dynamic symbol table
-of the 15D library, its names in their LP64 spelling, the node named
-for the version; or the map and =MAPFLAGS= leave.
-
-Check: every name of the map is in =nm -D --defined-only= of the 15D
-library; a build with =MAPFLAGS= set links, and its suite is at pin.
-
 *** TODO Under =_RWSTD_NO_INSTANTIATE= the library hides the facets whose primary template carries no export mark
 
 A 15D build under GCC with =_RWSTD_NO_INSTANTIATE= in its =config.h=
@@ -1886,7 +1861,7 @@ Check: none; this is prose.
 The original =README= 6.1 has a program compiled with
 =-I${PREFIX}/include=. The =<cname>= and =<name.h>= headers are in
 =include/ansi=, which the build puts first on its own search path
-(=etc/config/gcc.config= 66). Measured under GCC with =-nostdinc++=
+(=etc/config/gcc.config= 61). Measured under GCC with =-nostdinc++=
 and =include= alone: =<string>= and =<iostream>= compile, =<cstdlib>=
 is not found, and =<complex>= fails on its own =<cmath>=.
 
