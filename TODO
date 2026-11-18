@@ -124,28 +124,6 @@ Check: the preprocessed output of the 15D build differs by that line
 alone; =20.specialized= and =25.uninitialized.copy.stdcxx-976= at
 pin.
 
-*** TODO The probe for the size of =long= in =gcc.config= names its file with a literal =$=
-
-=etc/config/gcc.config= 129-133 compiles and runs a program in
-=/tmp= to learn whether the compiler makes =long= 8 bytes, under the
-name ~tmpfile=stdcxx-longsize-$$~. Inside =$(shell ...)= make turns
-=$$= into =$=, and the shell reads a =$= before =;= as itself, so the
-file is =/tmp/stdcxx-longsize-$= for every run: a make with
-~x := $(shell tmpfile=a-$$; echo $$tmpfile)~ prints =a-$=. Two
-configurations generating their =makefile.in= at once on one machine
-share the file and fail with "Text file busy" or "No such file".
-5e7c8f0d added the probe in 2008 (STDCXX-929), with =$$= meant as the
-shell's process ID. A failed probe prints a nonzero status, and
-134-151 take a nonzero status for a 64-bit default, so on an LP64
-host the result is the same; on an ILP32 host it would be the wrong
-branch. Seen while two configurations of this pass ran at once,
-2026-11-16.
-
-Fix: the name takes the process ID, ~$$$$~ inside =$(shell ...)=.
-
-Check: two =make config= runs from two trees at once log neither
-message; each =makefile.in= equals that of a run alone.
-
 *** TODO The trapping branch of =INFINITY.cpp= writes a quadruple pattern into a double-double =long double=
 
 =etc/config/src/INFINITY.cpp= writes fixed patterns for the four
