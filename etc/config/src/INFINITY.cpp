@@ -26,7 +26,7 @@
 #include <string.h>   // for memcpy(), memset()
 
 #include "config.h"
-#include "float_defs.h"  // for FLT_MIN, DBL_MIN, LDBL_MANT_DIG
+#include "float_defs.h"  // for FLT_MIN, DBL_MIN, LDBL_MIN, LDBL_MANT_DIG
 
 /***************************************************************************
  *
@@ -246,12 +246,11 @@ static flt_bits flt_denorm_min ()
 
 #ifdef _RWSTD_NO_DBL_TRAPS
 
-    // compute denorm min
+    // compute denorm min: the last nonzero value is the smallest
+    // denormal, or FLT_MIN where the type has none, which is what
+    // denorm_min() returns then (C++03 18.2.1.2, p51)
     for (volatile float tmp = 1.0f; tmp; tmp /= 2.0f)
         val.val = tmp;
-
-    if (FLT_MIN <= val.val)
-        val.val = 0.0f;
 
 #else
 
@@ -444,12 +443,11 @@ static dbl_bits dbl_denorm_min ()
 
 #ifdef _RWSTD_NO_DBL_TRAPS
 
-    // compute denorm min
+    // compute denorm min: the last nonzero value is the smallest
+    // denormal, or DBL_MIN where the type has none, which is what
+    // denorm_min() returns then (C++03 18.2.1.2, p51)
     for (volatile double tmp = 1.0; tmp; tmp /= 2.0)
         val.val = tmp;
-
-    if (DBL_MIN <= val.val)
-        val.val = 0.0;
 
 #else
 
@@ -707,12 +705,11 @@ static ldbl_bits ldbl_denorm_min ()
 
 #ifdef _RWSTD_NO_DBL_TRAPS
 
-    // compute denorm min
+    // compute denorm min: the last nonzero value is the smallest
+    // denormal, or LDBL_MIN where the type has none, which is what
+    // denorm_min() returns then (C++03 18.2.1.2, p51)
     for (volatile long double tmp = 1.0L; tmp; tmp /= 2.0L)
         val.val = tmp;
-
-    if (DBL_MIN < val.val)
-        val.val = DBL_MIN;
 
 #else
 
@@ -798,10 +795,10 @@ int main ()
     printf ("// computed infinities and NANs for a %s endian architecture\n",
             e == big_endian ? "big" : "little");
 
-    const int flt_has_denorm = 0.0f != f_den.val;
-    const int dbl_has_denorm = 0.0  != d_den.val;
-
-    const int ldbl_has_denorm = 0.0L != l_den.val;
+    // without denormals the denorm min is the type's minimum
+    const int flt_has_denorm  = f_den.val < FLT_MIN;
+    const int dbl_has_denorm  = d_den.val < DBL_MIN;
+    const int ldbl_has_denorm = l_den.val < LDBL_MIN;
 
 #else   // if !defined (_RWSTD_NO_DBL_TRAPS)
 

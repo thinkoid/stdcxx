@@ -146,29 +146,6 @@ Fix: the name takes the process ID, ~$$$$~ inside =$(shell ...)=.
 Check: two =make config= runs from two trees at once log neither
 message; each =makefile.in= equals that of a run alone.
 
-*** TODO =ldbl_denorm_min= falls back to =DBL_MIN= where its siblings fall back to zero
-
-=flt_denorm_min= and =dbl_denorm_min= in
-=etc/config/src/INFINITY.cpp= halve 1 until it vanishes. A last value
-not below =FLT_MIN= (=DBL_MIN=) means the type has no denormals, so
-the value becomes zero and =main= prints =_RWSTD_FLT_HAS_DENORM 0=
-(=_RWSTD_DBL_HAS_DENORM 0=). =ldbl_denorm_min= (714-715) replaces a
-last value above =DBL_MIN= with =DBL_MIN= instead. Without long
-double denormals its last value is =LDBL_MIN=, below =DBL_MIN=
-wherever =long double= is wider than =double=, so the function
-returns =LDBL_MIN= and =main= prints =_RWSTD_LDBL_HAS_DENORM 1=. Each
-host of the matrix has denormals in the three types, so no
-configuration takes the fallback. The lines are the import's
-(e6c7726b, 2005), and the history gives no reason for the
-difference. Seen while the padding of the =long double= patterns
-was read, 2026-11-17.
-
-Fix: =ldbl_denorm_min= tests ~LDBL_MIN <= val.val~ and sets zero,
-as its siblings do.
-
-Check: =config.h= unchanged in each configuration; the fallback by
-reading.
-
 *** TODO The trapping branch of =INFINITY.cpp= writes the quadruple layout into every =long double=
 
 =etc/config/src/INFINITY.cpp= computes the four special values of
