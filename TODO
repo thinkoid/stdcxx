@@ -146,31 +146,6 @@ Fix: the name takes the process ID, ~$$$$~ inside =$(shell ...)=.
 Check: two =make config= runs from two trees at once log neither
 message; each =makefile.in= equals that of a run alone.
 
-*** TODO The trapping branch of =INFINITY.cpp= writes the quadruple layout into every =long double=
-
-=etc/config/src/INFINITY.cpp= computes the four special values of
-each type where =NO_DBL_TRAPS= finds that floating point does not
-trap. Where it traps, the =#else= branches write fixed patterns. The
-=long double= ones (=ldbl_infinity= 522-565, =ldbl_qnan= 590-633,
-=ldbl_snan= 656-699, =ldbl_denorm_min= 717-758) are 16 bytes of the
-IEEE quadruple layout, the exponent in bytes 14 and 15 of a
-little-endian object. The x87 extended value is 10 bytes, its
-exponent in bytes 8 and 9, so on an x87 host the patterns are wrong:
-=ldbl_print= prints the 10 bytes of the value alone, and the
-infinity would print as zero. In a 12-byte =long double= (=-m32=)
-the branches also write =bits [12]= to =bits [15]=, past the end of
-the array. No configuration of the matrix takes the branch: each
-=config.h= defines =_RWSTD_NO_DBL_TRAPS=. Seen while the padding of
-the =long double= patterns was read, 2026-11-17.
-
-Fix: the branches write the layout =ldbl_value_size= names, and no
-byte past the object.
-
-Check: the probe compiled against a =config.h= without
-=_RWSTD_NO_DBL_TRAPS= prints the infinity, the signalling NaN and the
-smallest denormal the computed branch prints, and a quiet NaN, in
-12D, in 11s and on an aarch64 host.
-
 *** TODO Dependency files name the build directory through =$(TOPDIR)= when its path begins with the tree's
 
 =makedep= (=etc/config/makefile.rules= 226-246) writes each object's

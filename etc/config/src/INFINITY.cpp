@@ -541,6 +541,20 @@ static ldbl_bits ldbl_infinity ()
         val.bits [14] = '\0';
         val.bits [15] = '\0';
     }
+    else if (10 == ldbl_value_size) {
+        // x87 extended: the 10 bytes of the value alone, the integer
+        // bit explicit at the top of byte 7
+        val.bits [0] = '\0';
+        val.bits [1] = '\0';
+        val.bits [2] = '\0';
+        val.bits [3] = '\0';
+        val.bits [4] = '\0';
+        val.bits [5] = '\0';
+        val.bits [6] = '\0';
+        val.bits [7] = '\x80';
+        val.bits [8] = '\xff';
+        val.bits [9] = '\x7f';
+    }
     else {
         val.bits [ 0] = '\0';
         val.bits [ 1] = '\0';
@@ -609,6 +623,20 @@ static ldbl_bits ldbl_qnan ()
         val.bits [14] = '\0';
         val.bits [15] = '\0';
     }
+    else if (10 == ldbl_value_size) {
+        // x87 extended: the 10 bytes of the value alone, the integer
+        // bit explicit at the top of byte 7
+        val.bits [0] = '\0';
+        val.bits [1] = '\0';
+        val.bits [2] = '\0';
+        val.bits [3] = '\0';
+        val.bits [4] = '\0';
+        val.bits [5] = '\0';
+        val.bits [6] = '\0';
+        val.bits [7] = '\xc0';
+        val.bits [8] = '\xff';
+        val.bits [9] = '\x7f';
+    }
     else {
         val.bits [ 0] = '\0';
         val.bits [ 1] = '\0';
@@ -675,6 +703,20 @@ static ldbl_bits ldbl_snan ()
         val.bits [14] = '\0';
         val.bits [15] = '\x01';
     }
+    else if (10 == ldbl_value_size) {
+        // x87 extended: the 10 bytes of the value alone, the integer
+        // bit explicit at the top of byte 7
+        val.bits [0] = '\x01';
+        val.bits [1] = '\0';
+        val.bits [2] = '\0';
+        val.bits [3] = '\0';
+        val.bits [4] = '\0';
+        val.bits [5] = '\0';
+        val.bits [6] = '\0';
+        val.bits [7] = '\x80';
+        val.bits [8] = '\xff';
+        val.bits [9] = '\x7f';
+    }
     else {
         val.bits [ 0] = '\x01';
         val.bits [ 1] = '\0';
@@ -732,6 +774,20 @@ static ldbl_bits ldbl_denorm_min ()
         val.bits [13] = '\0';
         val.bits [14] = '\0';
         val.bits [15] = '\x01';
+    }
+    else if (10 == ldbl_value_size) {
+        // x87 extended: the 10 bytes of the value alone, the integer
+        // bit explicit at the top of byte 7
+        val.bits [0] = '\x01';
+        val.bits [1] = '\0';
+        val.bits [2] = '\0';
+        val.bits [3] = '\0';
+        val.bits [4] = '\0';
+        val.bits [5] = '\0';
+        val.bits [6] = '\0';
+        val.bits [7] = '\0';
+        val.bits [8] = '\0';
+        val.bits [9] = '\0';
     }
     else {
         val.bits [ 0] = '\x01';
