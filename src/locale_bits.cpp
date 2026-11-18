@@ -33,7 +33,7 @@
 #include <loc/_locale.h>
 
 
-namespace std { 
+namespace std {
 
 
 const locale::category locale::none;

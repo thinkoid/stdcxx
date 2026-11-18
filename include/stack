@@ -47,19 +47,19 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 
-template <class _TypeT, class _Container = deque<_TypeT> > 
+template <class _TypeT, class _Container = deque<_TypeT> >
 class stack;
 
 
 template <class _TypeT, class _Container>
-inline bool operator==(const stack<_TypeT, _Container>&, 
+inline bool operator==(const stack<_TypeT, _Container>&,
                        const stack<_TypeT, _Container>&);
 
 template <class _TypeT, class _Container>
-inline bool operator<(const stack<_TypeT, _Container>&, 
+inline bool operator<(const stack<_TypeT, _Container>&,
                       const stack<_TypeT, _Container>&);
 
 template <class _TypeT, class _Container>
@@ -72,7 +72,7 @@ class stack
         (const stack&, const stack&);
 
 public:
-    
+
     typedef _Container                                container_type;
     typedef typename container_type::value_type       value_type;
     typedef typename container_type::size_type        size_type;
@@ -81,13 +81,13 @@ public:
     typedef typename container_type::const_reference const_reference;
 
 protected:
-    
+
     container_type c;
 
 public:
 
     explicit
-    stack (const container_type &__c = container_type ()) 
+    stack (const container_type &__c = container_type ())
         : c (__c) { }
 
     bool empty () const {
@@ -117,42 +117,42 @@ public:
 
 
 template <class _TypeT, class _Container>
-inline bool operator== (const stack<_TypeT, _Container> &__x, 
+inline bool operator== (const stack<_TypeT, _Container> &__x,
                         const stack<_TypeT, _Container> &__y)
 {
     return __x.c == __y.c;
 }
 
 template <class _TypeT, class _Container>
-inline bool operator< (const stack<_TypeT, _Container> &__x, 
+inline bool operator< (const stack<_TypeT, _Container> &__x,
                        const stack<_TypeT, _Container> &__y)
 {
     return __x.c < __y.c;
 }
 
 template <class _TypeT, class _Container>
-inline bool operator!= (const stack<_TypeT, _Container> &__x, 
+inline bool operator!= (const stack<_TypeT, _Container> &__x,
                         const stack<_TypeT, _Container> &__y)
 {
     return !(__x == __y);
 }
 
 template <class _TypeT, class _Container>
-inline bool operator> (const stack<_TypeT, _Container> &__x, 
+inline bool operator> (const stack<_TypeT, _Container> &__x,
                        const stack<_TypeT, _Container> &__y)
 {
     return __y < __x;
 }
 
 template <class _TypeT, class _Container>
-inline bool operator>= (const stack<_TypeT, _Container> &__x, 
+inline bool operator>= (const stack<_TypeT, _Container> &__x,
                         const stack<_TypeT, _Container> &__y)
 {
     return !(__x < __y);
 }
 
 template <class _TypeT, class _Container>
-inline bool operator<= (const stack<_TypeT, _Container> &__x, 
+inline bool operator<= (const stack<_TypeT, _Container> &__x,
                         const stack<_TypeT, _Container> &__y)
 {
     return !(__y <  __x);

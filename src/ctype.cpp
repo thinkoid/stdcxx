@@ -741,7 +741,7 @@ ctype<char>::
 do_toupper (char_type ch) const
 {
 #if _RWSTD_UCHAR_MAX <= 255
-    return _C_upper_tab [_UChar (ch)]; 
+    return _C_upper_tab [_UChar (ch)];
 #else
     return ch < table_size ? _C_upper_tab [_UChar (ch)] : ch;
 #endif

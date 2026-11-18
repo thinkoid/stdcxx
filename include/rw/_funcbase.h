@@ -48,7 +48,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-namespace std { 
+namespace std {
 
 
 // 20.3.1 - Base

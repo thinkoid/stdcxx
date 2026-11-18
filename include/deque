@@ -304,7 +304,7 @@ public:
 
     // following two typedefs are used for convenience with debug iters
     typedef __rw_deque_iter<value_type, difference_type, pointer,
-                            reference, allocator_type>         _C_deque_iter; 
+                            reference, allocator_type>         _C_deque_iter;
 
     typedef __rw_deque_iter<value_type, difference_type, const_pointer,
                             const_reference, allocator_type>   _C_deque_citer;
@@ -318,11 +318,11 @@ public:
 
     typedef __rw::__rw_debug_iter<deque, _C_deque_iter, _C_deque_iter>
         iterator;
-    
+
     typedef __rw::__rw_debug_iter<deque, _C_deque_citer, _C_deque_iter>
         const_iterator;
-    
-    iterator _C_make_iter (const _C_deque_iter &__iter) { 
+
+    iterator _C_make_iter (const _C_deque_iter &__iter) {
         return iterator (*this, __iter);
     }
 
@@ -331,10 +331,10 @@ public:
     }
 
 #else   // if defined (_RWSTD_NO_DEBUG_ITER)
-    
+
     typedef _C_deque_iter  iterator;
     typedef _C_deque_citer const_iterator;
-    
+
     iterator _C_make_iter (const _C_deque_iter &__iter) {
         return __iter;
     }
@@ -359,7 +359,7 @@ public:
     }
 
     explicit
-    deque (size_type __n, const_reference __x = value_type (), 
+    deque (size_type __n, const_reference __x = value_type (),
            const allocator_type &__alloc = allocator_type ())
         : allocator_type (__alloc) {
         _C_init ();
@@ -444,15 +444,15 @@ public:
         return reverse_iterator (end ());
     }
 
-    const_reverse_iterator rbegin () const { 
+    const_reverse_iterator rbegin () const {
         return const_reverse_iterator (end ());
     }
-    
-    reverse_iterator rend () { 
+
+    reverse_iterator rend () {
         return reverse_iterator (begin ());
     }
 
-    const_reverse_iterator rend () const { 
+    const_reverse_iterator rend () const {
         return const_reverse_iterator (begin ());
     }
 
@@ -503,7 +503,7 @@ public:
 #endif
     }
 
-    const_reference at (size_type __inx) const { 
+    const_reference at (size_type __inx) const {
         return const_cast< deque* >(this)->at (__inx);
     }
 

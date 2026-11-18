@@ -129,7 +129,7 @@ _RWSTD_DEFINE_STREAM_OBJECT (wfilebuf, wostream, wclog);
 // which is the only header where they are declared and by the means of
 // which they are initialized - through the static initialization object)
 
-namespace __rw { 
+namespace __rw {
 
 // array of pointers to the 8 standard iostream objects
 extern const void* __rw_std_streams [];

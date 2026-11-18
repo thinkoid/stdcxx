@@ -39,7 +39,7 @@
  * 
  **************************************************************************/
 
-namespace std { 
+namespace std {
 
 
 template <class _TypeT, class _Allocator>
@@ -67,7 +67,7 @@ operator= (const deque &__rhs)
 
 
 template <class _TypeT, class _Allocator>
-typename deque<_TypeT, _Allocator>::iterator 
+typename deque<_TypeT, _Allocator>::iterator
 deque<_TypeT, _Allocator>::
 insert (iterator __it, const_reference __x)
 {
@@ -96,7 +96,7 @@ insert (iterator __it, const_reference __x)
 
 
 template <class _TypeT, class _Allocator>
-typename deque<_TypeT, _Allocator>::iterator 
+typename deque<_TypeT, _Allocator>::iterator
 deque<_TypeT, _Allocator>::
 erase (iterator __it)
 {
@@ -716,7 +716,7 @@ _C_insert_range (iterator __it,
 
 template<class _TypeT, class _Allocator>
 bool deque<_TypeT, _Allocator>::
-_C_is_valid (int __emptyfl) const 
+_C_is_valid (int __emptyfl) const
 {
 #ifdef _RWSTDDEBUG
 

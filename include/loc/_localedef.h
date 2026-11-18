@@ -34,7 +34,7 @@
 
 
 
-namespace __rw { 
+namespace __rw {
 
 // LC_CTYPE structures
 struct __rw_mask_elm
@@ -111,7 +111,7 @@ struct __rw_codecvt_t
     const _RWSTD_UINT32_T* n_to_w_tab () const {
         return _RWSTD_UINT_ARRAY (n_to_w_tab_off);
     }
-    
+
     // pointer to the first table for utf8 to external conversions
     const _RWSTD_UINT32_T* utf8_to_ext_tab () const {
         return _RWSTD_UINT_ARRAY (utf8_to_ext_tab_off);
@@ -198,7 +198,7 @@ struct __rw_ctype_t
     }
 
 };
-    
+
 
 // LC_COLLATE structure
 struct __rw_collate_t
@@ -252,49 +252,49 @@ struct __rw_collate_t
     _RWSTD_UINT32_T get_n_tab_off (_RWSTD_UINT32_T tabno) const {
         return (_RWSTD_UINT32_T)
             (sizeof (_RWSTD_UINT32_T) * (*(const _RWSTD_UINT32_T*)(
-             (_RWSTD_SIZE_T)((const char*)this + sizeof *this 
-                            + n_char_off_tab_off 
+             (_RWSTD_SIZE_T)((const char*)this + sizeof *this
+                            + n_char_off_tab_off
                             + (tabno * sizeof (_RWSTD_UINT32_T))))));
     }
     _RWSTD_UINT32_T get_n_ce_tab_off (_RWSTD_UINT32_T tabno) const {
         return (_RWSTD_UINT32_T)
             (sizeof (_RWSTD_UINT32_T) * (*(const _RWSTD_UINT32_T*)(
-             (_RWSTD_SIZE_T)((const char*)this + sizeof *this 
-                            + n_ce_off_tab_off 
+             (_RWSTD_SIZE_T)((const char*)this + sizeof *this
+                            + n_ce_off_tab_off
                             + (tabno * sizeof (_RWSTD_UINT32_T))))));
     }
 
     _RWSTD_UINT32_T get_w_ce_tab_off (_RWSTD_UINT32_T tabno) const {
         return (_RWSTD_UINT32_T)
             (sizeof (_RWSTD_UINT32_T) * (*(const _RWSTD_UINT32_T*)(
-             (_RWSTD_SIZE_T)((const char*)this + sizeof *this 
-                            + w_ce_off_tab_off 
+             (_RWSTD_SIZE_T)((const char*)this + sizeof *this
+                            + w_ce_off_tab_off
                             + (tabno * sizeof (_RWSTD_UINT32_T))))));
     }
 
     _RWSTD_UINT8_T get_first_char_in_n_tab (_RWSTD_UINT32_T tabno) const {
-        return *((const _RWSTD_UINT8_T*)this + sizeof *this 
+        return *((const _RWSTD_UINT8_T*)this + sizeof *this
                  + n_char_first_char_off + tabno);
-        
+
     }
 
     _RWSTD_UINT8_T get_first_char_in_n_ce_tab (_RWSTD_UINT32_T tabno) const {
-        return *((const _RWSTD_UINT8_T*)this + sizeof *this 
+        return *((const _RWSTD_UINT8_T*)this + sizeof *this
                  + n_ce_first_char_off + tabno);
     }
 
     _RWSTD_UINT8_T get_first_char_in_w_ce_tab (_RWSTD_UINT32_T tabno) const {
-        return *((const _RWSTD_UINT8_T*)this + sizeof *this 
+        return *((const _RWSTD_UINT8_T*)this + sizeof *this
                  + w_ce_first_char_off + tabno);
     }
 
     _RWSTD_UINT8_T get_last_char_in_n_ce_tab (_RWSTD_UINT32_T tabno) const {
-        return *((const _RWSTD_UINT8_T*)this + sizeof *this 
+        return *((const _RWSTD_UINT8_T*)this + sizeof *this
                  + n_ce_last_char_off  + tabno);
     }
 
     _RWSTD_UINT8_T get_last_char_in_w_ce_tab (_RWSTD_UINT32_T tabno) const {
-        return *((const _RWSTD_UINT8_T*)this + sizeof *this 
+        return *((const _RWSTD_UINT8_T*)this + sizeof *this
                  + w_ce_last_char_off + tabno);
     }
 
@@ -336,14 +336,14 @@ struct __rw_collate_t
         return (_RWSTD_UINT32_T)
             (sizeof (_RWSTD_UINT32_T) * (*(const _RWSTD_UINT32_T*)(
              (_RWSTD_SIZE_T)((const char*)this + sizeof *this
-                            + w_char_off_tab_off 
+                            + w_char_off_tab_off
                             + (tabno * sizeof (_RWSTD_UINT32_T))))));
     }
 
     _RWSTD_UINT8_T get_first_char_in_w_tab (_RWSTD_UINT32_T tabno) const {
-        return *((const _RWSTD_UINT8_T*)this + sizeof *this 
+        return *((const _RWSTD_UINT8_T*)this + sizeof *this
                  + w_char_first_char_off + tabno);
-        
+
     }
 
     const _RWSTD_UINT32_T* get_w_tab (_RWSTD_UINT32_T tabno) const {
@@ -354,7 +354,7 @@ struct __rw_collate_t
     }
 
     const _RWSTD_UINT32_T* coll () const {
-        return _RWSTD_UINT_ARRAY (weight_tab_off); 
+        return _RWSTD_UINT_ARRAY (weight_tab_off);
     }
 
     const char* codeset_name () const {
@@ -418,30 +418,30 @@ struct __rw_mon_t
     _RWSTD_UINT32_T monetary_ext_off;      // extended monetary data offset
 
     // monetary format pattern for positive values
-    char pos_format[2][4];    
+    char pos_format[2][4];
 
     // monetary format pattern for negative values
-    char neg_format[2][4];    
+    char neg_format[2][4];
 
-    // num of frac digits to write using currency_symbol 
-    char frac_digits[2];      
+    // num of frac digits to write using currency_symbol
+    char frac_digits[2];
 
     // 0 = currency symbol then pos value
-    // 1 = pos value then currency symbol 
-    char p_cs_precedes[2];    
-                                     
+    // 1 = pos value then currency symbol
+    char p_cs_precedes[2];
+
 
     // separation of curr symbol and value
     // 0 - no separation
-    // 1 = if the symbol and sign are adjacent, a space separates them from 
-    //     the value; otherwise, a space separates the symbol from the value 
-    // 2 = if the symbol and sign are adjacent, a space separates them; 
+    // 1 = if the symbol and sign are adjacent, a space separates them from
+    //     the value; otherwise, a space separates the symbol from the value
+    // 2 = if the symbol and sign are adjacent, a space separates them;
     //     otherwise, a space separates  the sign from the value
-    char p_sep_by_space[2];   
+    char p_sep_by_space[2];
 
     // 0 = currency symbol succeeds the neg value
     // 1 = currency symbol precedes the neg value
-    char n_cs_precedes[2]; 
+    char n_cs_precedes[2];
 
     // 0 = no space seperates curr sym from neg value
     // 1 = space seperates symbol from neg value
@@ -526,7 +526,7 @@ struct __rw_messages_t
 {
     _RWSTD_UINT32_T codeset_off;
     _RWSTD_UINT32_T charmap_off;
-    
+
     _RWSTD_UINT32_T yesexpr_off[2];
     _RWSTD_UINT32_T noexpr_off[2];
 
@@ -564,7 +564,7 @@ struct __rw_time_t
     _RWSTD_UINT32_T num_alt_digits;  // the number of alt_digits
 
     _RWSTD_UINT32_T era_off;            // bute offset of the first era
-    _RWSTD_UINT32_T alt_digits_off;      // byte offset to offset array 
+    _RWSTD_UINT32_T alt_digits_off;      // byte offset to offset array
     _RWSTD_UINT32_T abday_off[2][7];    // byte offset of each abday
     _RWSTD_UINT32_T day_off[2][7];      // byte offset of each day
     _RWSTD_UINT32_T abmon_off[2][12];   // byte offset of each abmon
@@ -678,8 +678,8 @@ struct __rw_time_t
 
     // alternative symbols for digits, corresponding to the %O modifier
     const void* alt_digits (_RWSTD_SIZE_T idx, bool wide) const {
-        return _RWSTD_CHAR_ARRAY (*_RWSTD_ARRAY_ELM 
-                                  (_RWSTD_UINT32_T, alt_digits_off, 
+        return _RWSTD_CHAR_ARRAY (*_RWSTD_ARRAY_ELM
+                                  (_RWSTD_UINT32_T, alt_digits_off,
                                    idx * 2 + wide));
     }
 
@@ -807,7 +807,7 @@ __rw_utf8toucs4 (_RWSTD_INT32_T *ret, const char *from, const char *from_end)
             return from;
 
         *ret = _Int32 (  (byte [0] & 0x07U) << 18
-                       | (byte [1] & 0x3fU) << 12 
+                       | (byte [1] & 0x3fU) << 12
                        | (byte [2] & 0x3fU) <<  6
                        | (byte [3] & 0x3fU));
         return from + 4;
@@ -820,7 +820,7 @@ __rw_utf8toucs4 (_RWSTD_INT32_T *ret, const char *from, const char *from_end)
         *ret = _Int32 (  (byte [0] & 0x03U) << 24
                        | (byte [1] & 0x3fU) << 18
                        | (byte [2] & 0x3fU) << 12
-                       | (byte [3] & 0x3fU) <<  6 
+                       | (byte [3] & 0x3fU) <<  6
                        | (byte [4] & 0x3fU));
         return from + 5;
     }
@@ -830,10 +830,10 @@ __rw_utf8toucs4 (_RWSTD_INT32_T *ret, const char *from, const char *from_end)
             return from;
 
         *ret = _Int32 (  (byte [0] & 0x01U) << 30
-                       | (byte [1] & 0x3fU) << 24 
-                       | (byte [2] & 0x3fU) << 18 
-                       | (byte [3] & 0x3fU) << 12 
-                       | (byte [4] & 0x3fU) <<  6 
+                       | (byte [1] & 0x3fU) << 24
+                       | (byte [2] & 0x3fU) << 18
+                       | (byte [3] & 0x3fU) << 12
+                       | (byte [4] & 0x3fU) <<  6
                        | (byte [5] & 0x3fU));
         return from + 6;
     }
@@ -847,7 +847,7 @@ __rw_utf8toucs4 (_RWSTD_INT32_T *ret, const char *from, const char *from_end)
 // no such wide character exists (i.e., on conversion error), or any value
 // with bit 31 set if the the range [`from', `from_end') forms an incomplete
 // multibyte character (i.e., if it's an initial subsequence of one)
-static inline 
+static inline
 unsigned __rw_mbtowco (const unsigned *cvtbl,
                        const char     *&from,
                        const char     *from_end)
@@ -865,7 +865,7 @@ unsigned __rw_mbtowco (const unsigned *cvtbl,
 
         // check if it is valid and if so, whether we have reached the
         // end of the source sequence and found an incomplete character
-        // note, however, that an incomplete character does not mean 
+        // note, however, that an incomplete character does not mean
         // partial conversion
         if (wc == _RWSTD_UINT_MAX || ++next == from_end)
             return wc;

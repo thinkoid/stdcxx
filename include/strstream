@@ -41,8 +41,8 @@
 #endif
 
 
-namespace std { 
-  
+namespace std {
+
 
 // D.7.1
 class _RWSTD_EXPORT strstreambuf
@@ -60,7 +60,7 @@ public:
         : _Base () {
         _C_init (__alsize, 0, 0, 0, 0, 0, _C_dynamic);
     }
-      
+
     // D.7.1.1, p2
     strstreambuf (void* (*__palloc)(_RWSTD_SIZE_T), void (*__pfree)(void *))
         : _Base () {
@@ -104,7 +104,7 @@ public:
         : _Base () {
         _C_init (0, __gnext, __n, 0, 0, 0, _C_constant);
     }
-      
+
     // D.7.1.1, p8
     virtual ~strstreambuf ();
 
@@ -118,13 +118,13 @@ public:
         else
             _C_state &= ~_C_frozen;
     }
-      
+
     // D.7.1.2, p2
     char_type* str () {
         freeze ();
         return eback ();
     }
-      
+
     // D.7.1.2, p4
     int pcount () const {
         return int (pptr () - pbase ());
@@ -203,7 +203,7 @@ class _RWSTD_EXPORT ostrstream
 {
     typedef basic_ostream<char, char_traits<char> > _Base;
 public:
-  
+
     strstreambuf* rdbuf() const {
         return const_cast< strstreambuf* >(&_C_sb);
     }
@@ -221,11 +221,11 @@ public:
     void freeze (bool __freezefl = true) {
         rdbuf ()->freeze (__freezefl);
     }
-    
+
     char_type *str () {
         return rdbuf ()->str();
     }
-    
+
     int pcount() const {
         return rdbuf ()->pcount();
     }
@@ -243,7 +243,7 @@ class _RWSTD_EXPORT strstream
     typedef basic_iostream<char, char_traits<char> > _Base;
 
 public:
-  
+
     strstreambuf* rdbuf() const {
         return const_cast< strstreambuf* >(&_C_sb);
     }
@@ -265,7 +265,7 @@ public:
     int pcount() const {
         return rdbuf ()->pcount();
     }
-      
+
     char_type *str() {
         return rdbuf ()->str();
     }

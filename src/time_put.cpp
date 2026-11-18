@@ -419,7 +419,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     size_t bufsize = 2048;
 
     const size_t newsize = bufsize + sizeof (__rw_time_t);
- 
+
     // allocate memory using operator new to avoid mismatch with
     // facet destructor
     char *pbuf = static_cast< char* >(::operator new (newsize));
@@ -567,7 +567,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 
             // reallocate, again using operator new to avoid mismatch
             // with facet destructor
-            char* const tmp = 
+            char* const tmp =
                 static_cast< char* >(::operator new (tmpsize));
             memcpy (tmp, pun, sizeof *pun + off);
 
@@ -693,7 +693,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 
         len = strftime (pbuf + off, bufsize - off, "%b", &t);
 
-        pun->abmon_off [0][t.tm_mon]  = 
+        pun->abmon_off [0][t.tm_mon]  =
             static_cast< _RWSTD_UINT32_T >(off);
         off                          += len + 1;
 
@@ -727,7 +727,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     len = strftime (pbuf + off, bufsize - off, "%p", &t);
     pun->am_pm_off [0][0] = static_cast< _RWSTD_UINT32_T >(off);
     off += len + 1;
-    
+
     t.tm_hour = 13;
     len = strftime (pbuf + off, bufsize - off, "%p", &t);
     pun->am_pm_off [0][1] = static_cast< _RWSTD_UINT32_T >(off);
@@ -737,7 +737,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     len                 = __rw_get_date_fmat (pbuf + off);
     pun->d_fmt_off [0]  = static_cast< _RWSTD_UINT32_T >(off);
     off                += len + 1;
-    
+
     // determine the locale's "%X" format (time representation)
     len                 = __rw_get_time_fmat (pbuf + off);
     pun->t_fmt_off [0]  = static_cast< _RWSTD_UINT32_T >(off);
@@ -784,7 +784,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
     len       = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%p", &t);
     pun->am_pm_off [1][0] = static_cast< _RWSTD_UINT32_T >(off);
     off += (len + 1) * sizeof (wchar_t);
-    
+
     t.tm_hour = 13;
     pwbuf     = reinterpret_cast< wchar_t* >(pbuf + off);
     len       = wcsftime (pwbuf, (bufsize - off) / sizeof (*pwbuf), L"%p", &t);
@@ -808,7 +808,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags, size_t inx)
 
     pun->d_fmt_off [1] = static_cast< _RWSTD_UINT32_T >(off);
     off               += size * sizeof (wchar_t);
-    
+
     // convert "%X" to its wide equivalent
     str   = static_cast< const char* >(pun->t_fmt (0));
     pwbuf = reinterpret_cast< wchar_t* >(pbuf + off);
@@ -935,7 +935,7 @@ __rw_get_timepunct (const __rw_facet *pfacet, int flags,
         flags   = __rw_day;
         flags_2 = __rw_abday;
         break;
-        
+
     case __rw_abmon | __rw_month:
         count   = 12;
         flags   = __rw_month;
@@ -1337,7 +1337,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             cnt       = 1;
             break;
         }
-        
+
         case 'r': {   // 12-hour clock time using the AM/PM notation
             const int ampm = _TimeAmPm | (wide ? __rw_wide : 0);
 
@@ -1375,7 +1375,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             cnt       = 1;
             break;
         }
-        
+
         case 'U':   // Sunday-based week number [00..53]
         case 'W':   // Monday-based week number [00..53]
             // std::tm has no member for the week: do_get reads it
@@ -1416,7 +1416,7 @@ __rw_get_timepunct (const __rw_facet *pfacet,
             dig   = 2;
             *pmem = &tmb->tm_year;
             break;
-        
+
         case 'Y':   // 4-digit year, -9999..9999 with its sign
             adj   = -1900;
             lob   = -9999 - 1900;
@@ -1794,7 +1794,7 @@ __rw_iso_week (int& year, int yday, int wday)
         isow = yday - fdoy;
     }
 
-    if (isow < 0) { 
+    if (isow < 0) {
         // the day belongs to last year
         year--;
         return __rw_iso_week (year, yday + 365 + __rw_isleap (year), wday);
@@ -1806,7 +1806,7 @@ __rw_iso_week (int& year, int yday, int wday)
         year++;
         return w;
     }
-        
+
     return isow;
 }
 
@@ -2220,7 +2220,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
     case 'g':
         // %g: the last 2 digits of the week-based year as a decimal number
         //     (00-99). [tm_year, tm_wday, tm_yday]
-        
+
         // get the ISO 8601 year
         tpd.val = tmb->tm_year + 1900;
         __rw_iso_week (tpd.val, tmb->tm_yday, tmb->tm_wday);
@@ -2232,7 +2232,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
     case 'G':
         // %G: the week-based year as a decimal number (e.g., 1997).
         //     [tm_year, tm_wday, tm_yday]
-        
+
         // get the ISO 8601 year
         tpd.val = tmb->tm_year + 1900;
         __rw_iso_week (tpd.val, tmb->tm_yday, tmb->tm_wday);
@@ -2627,7 +2627,7 @@ __rw_get_time_put_data (__rw_time_put_data &tpd,
 
             __rw_get_zone_name (tpd, var, tmb->tm_isdst);
         }
-        
+
         break;
     }
 

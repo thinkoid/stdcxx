@@ -30,7 +30,7 @@
 
 #include <time.h>
 
-#include <rw/_defs.h>   
+#include <rw/_defs.h>
 
 namespace __rw {
 

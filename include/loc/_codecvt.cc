@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 
 template <class _InternT, class _ExternT, class _StateT>

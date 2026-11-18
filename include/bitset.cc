@@ -26,7 +26,7 @@
  * 
  **************************************************************************/
 
-namespace __rw { 
+namespace __rw {
 
 
 #if 8 == _RWSTD_CHAR_BIT
@@ -51,7 +51,7 @@ namespace __rw {
 #   define _RWSTD_LOG2_LONG_SIZE 4
 #endif
 
-    
+
 template <class _CharT, class _Traits>
 void __rw_bitset (unsigned long *__bits, _RWSTD_SIZE_T __maxbits,
                   const _CharT *__str, _RWSTD_SIZE_T __slen,
@@ -88,7 +88,7 @@ void __rw_bitset (unsigned long *__bits, _RWSTD_SIZE_T __maxbits,
 
 #else   // #if !defined (_RWSTD_LOG2_CHAR_BITS) || !defined (_RWSTD_LOG2_LONG_SIZE)
 
-    const _RWSTD_SIZE_T __nbytes = 
+    const _RWSTD_SIZE_T __nbytes =
         (__maxbits / __wordbits + (0 != __maxbits % __wordbits))
         * sizeof (*__bits);
 
@@ -118,8 +118,8 @@ void __rw_bitset (unsigned long *__bits, _RWSTD_SIZE_T __maxbits,
 #undef _RWSTD_LOG2_ULONG_SIZE
 
 
-template <_RWSTD_SIZE_T _Size, class _CharT, class _Traits> 
-std::basic_istream<_CharT, _Traits>&   
+template <_RWSTD_SIZE_T _Size, class _CharT, class _Traits>
+std::basic_istream<_CharT, _Traits>&
 __rw_extract_bitset (std::basic_istream<_CharT, _Traits> &__strm,
                      std::bitset<_Size>                   &__x)
 {

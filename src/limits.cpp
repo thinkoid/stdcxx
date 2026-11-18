@@ -28,8 +28,8 @@
 
 #define _RWSTD_LIB_SRC
 
-#include <rw/_defs.h>  
-                       
+#include <rw/_defs.h>
+
 // define generic template and specializations
 // use the quoted form of the #include directive to fool Sun C++
 // otherwise the compiler fails to #include the header twice,

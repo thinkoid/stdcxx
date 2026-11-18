@@ -57,7 +57,7 @@
 #endif   // _RWSTD_RW_ITERBASE_H_INCLUDED
 
 
-namespace __rw { 
+namespace __rw {
 
 
 // returns a suggested new capacity for a container needing more space
@@ -74,7 +74,7 @@ __rw_new_capacity (typename _Container::size_type __size, const _Container*)
                            + (((__size & 0x3ff) * __ratio) >> 10);
 
     return (__size += _RWSTD_MINIMUM_NEW_CAPACITY) > __cap ? __size : __cap;
-}                     
+}
 
 
 template <class _TypeT, class _TypeU>
@@ -101,7 +101,7 @@ __rw_destroy (_TypeT &__ref)
 }
 
 
-template <class _FwdIter> 
+template <class _FwdIter>
 inline void
 __rw_destroy (_FwdIter __first, _FwdIter __last)
 {
@@ -111,7 +111,7 @@ __rw_destroy (_FwdIter __first, _FwdIter __last)
 
 
 // for compilers that don't optimize "empty" loops
-template <class _TypeT> 
+template <class _TypeT>
 inline void __rw_destroy (_TypeT**, _TypeT**)
 { }
 
@@ -163,7 +163,7 @@ __rw_uninitialized_fill_n (_FwdIter __first, _Size __n,
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 template <class _TypeT>
 class _RWSTD_EXPORT allocator;

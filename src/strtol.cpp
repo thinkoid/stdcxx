@@ -27,7 +27,7 @@
  **************************************************************************/
 
 #define _RWSTD_LIB_SRC
-#include <rw/_defs.h>     
+#include <rw/_defs.h>
 
 #include "strtol.h"
 #include <errno.h>      // for ERANGE, errno
@@ -566,7 +566,7 @@ __rw_strtol (const char *nptr, int *errptr, int base) _THROWS (())
 
 #endif   // 2 < _RWSTD_LONG_SIZE
 
-            
+
             for (unsigned long maxres = _RWSTD_ULONG_MAX / base; *++nptr; ) {
 
                 const unsigned digit = __rw_digit_map [UChar (*nptr)];
@@ -602,7 +602,7 @@ __rw_strtol (const char *nptr, int *errptr, int base) _THROWS (())
         *errptr = ERANGE;
         return _RWSTD_LONG_MAX;
     }
-   
+
     return res;
 
 overflow:
@@ -636,7 +636,7 @@ __rw_strtoull (const char *nptr, int *errptr, int base) _THROWS (())
         *errptr = _RWSTD_EINVAL;
         return 0;
     }
-        
+
     const int shift = __rw_base_bits [base];
 
     ULLong res = __rw_digit_map [UChar (*nptr)];
@@ -1001,7 +1001,7 @@ __rw_strtoll (const char *nptr, int *errptr, int base) _THROWS (())
         *errptr = ERANGE;
         return _RWSTD_LLONG_MAX;
     }
-   
+
     return res;
 
 overflow:

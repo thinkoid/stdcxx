@@ -36,7 +36,7 @@
 #include <rw/_defs.h>
 
 
-namespace __rw { 
+namespace __rw {
 
 // static stream initializer object defined in every translation unit
 // that (directly or otherwise) #includes this header (except the one
@@ -46,7 +46,7 @@ static std::ios_base::Init __rw_stream_initializer;
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 _RWSTD_EXPORT extern istream cin;
 _RWSTD_EXPORT extern ostream cout;

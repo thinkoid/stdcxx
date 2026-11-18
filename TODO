@@ -45,23 +45,6 @@ denormal: the =double= denormal and zero).
 
 Check: by reading; no host or compiler flag at hand gives the format.
 
-*** TODO 1198 lines under =src= and =include= end in whitespace
-
-=src/memory.cpp= 167 and 188 read =namespace std {= and a space
-after the brace. They are two of 149 such namespace openings in 105
-files. Of the lines under =src= and =include=, 1462 end in
-whitespace; 264 are the =" * "= line of a comment block, the license
-blocks' among them, which stay as they are. The other 1198 stand in
-144 files, 223 lines in 47 files under =src= and 975 in 97 under
-=include=; none under =include/ansi=, since 482755cb. Seen while the
-=_RWSTD_NEW_INCLUDED= guard left =src/memory.cpp=, 2026-11-16.
-
-Fix: a decision: one whitespace-only change, as 482755cb was for
-=include/ansi=; or each file's when the file is visited.
-
-Check: =git diff -w= of the change is empty; the preprocessed output
-of the 15D build is unchanged.
-
 *** TODO Under =_RWSTD_NO_INSTANTIATE= the library hides the facets whose primary template carries no export mark
 
 A 15D build under GCC with =_RWSTD_NO_INSTANTIATE= in its =config.h=

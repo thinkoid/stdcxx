@@ -110,7 +110,7 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
             static_cast< const __rw_punct_t* >(pdata);
 
         const __rw_num_t *num;
-    
+
         switch (member) {
 
         case __rw_dp: return pun->decimal_point (winx);
@@ -154,7 +154,7 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
 
     const char* const locname = __rw_access::_C_get_name (*pfacet) ?
         __rw_access::_C_get_name (*pfacet) : "C";
-    
+
     // set all categories -- need LC_NUMERIC and LC_CTYPE
     const __rw_setlocale clocale (locname, _RWSTD_LC_ALL);
 
@@ -212,7 +212,7 @@ __rw_get_numpunct (const __rw_facet *pfacet, int flags)
         + grsz + dpsz + tssz + tnsz + fnsz;
 
     // allocate variable size structure(s)
-    __rw_punct_t* const pun = 
+    __rw_punct_t* const pun =
         static_cast< __rw_punct_t* >(::operator new (size));
 
     // compute offsets into the varaiable size structure
@@ -290,7 +290,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
             static_cast< const __rw_punct_t* >(pdata);
 
         const __rw_mon_t *mon;
-    
+
         switch (member) {
         case __rw_dp: return pun->decimal_point (winx);
         case __rw_ts: return pun->thousands_sep (winx);
@@ -326,7 +326,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
 
         static const void* const cdata[] = {
             ".", L".", ",", L",", "", L"", "", L"", "", L"",
-            "", L"", "", L"", "\2\3\0\4", "\2\3\0\4", 
+            "", L"", "", L"", "\2\3\0\4", "\2\3\0\4",
         };
 
         switch (member) {
@@ -351,7 +351,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
 
     const char* const locname = __rw_access::_C_get_name (*pfacet) ?
         __rw_access::_C_get_name (*pfacet) : "C";
-    
+
     // set all categories -- need LC_NUMERIC and LC_CTYPE
     const __rw_setlocale clocale (locname, _RWSTD_LC_ALL);
 
@@ -415,7 +415,7 @@ __rw_get_moneypunct (const __rw_facet *pfacet, int flags)
         + grsz + dpsz + tssz + pssz + nssz + cssz;
 
     // allocate variable size structure(s)
-    __rw_punct_t* const pun = 
+    __rw_punct_t* const pun =
         static_cast< __rw_punct_t* >(::operator new (size));
 
     // compute offsets into the varaiable size structure
@@ -743,7 +743,7 @@ __rw_get_stdio_fmat (char buf [32], int type, unsigned fmtflags,
             break;
         default:
             *pbuf++ = 'i';
-            
+
         }
     }
 

@@ -50,7 +50,7 @@
 #include <rw/_defs.h>
 
 
-namespace __rw { 
+namespace __rw {
 
 
 // This is used in the implementation of map and multimap.
@@ -66,7 +66,7 @@ struct __select1st : public std::unary_function<_TypeT, _TypeU>
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 template <class _Key, class _TypeT,
           class _Compare = less<_Key>,
@@ -80,11 +80,11 @@ public:
     typedef pair<const key_type, mapped_type>   value_type;
     typedef _Compare                            key_compare;
     typedef _Allocator                          allocator_type;
-    
+
 private:
-    
+
     typedef __rw::__rb_tree<key_type, value_type,
-                           __rw::__select1st<value_type, key_type>, 
+                           __rw::__select1st<value_type, key_type>,
                            key_compare, allocator_type> _C_repT;
     _C_repT _C_rep;
 
@@ -120,12 +120,12 @@ public:
     // 23.3.1.1, p1
     explicit
     map (const key_compare &__cmp   = key_compare (),
-         const allocator_type &__alloc = allocator_type ()) 
+         const allocator_type &__alloc = allocator_type ())
         : _C_rep (__cmp, __alloc) { }
 
     // 23.3.1.1, p3
     template <class _InputIter>
-    map (_InputIter __first, _InputIter __last, 
+    map (_InputIter __first, _InputIter __last,
          const _Compare& __cmp = _Compare (),
          const _Allocator& __alloc = _Allocator ())
       : _C_rep (__first, __last, __cmp, __alloc, false) { }
@@ -133,7 +133,7 @@ public:
     map (const map &__rhs): _C_rep (__rhs._C_rep) { /* empty */ }
 
     map& operator= (const map &__rhs) {
-        _C_rep = __rhs._C_rep; return *this; 
+        _C_rep = __rhs._C_rep; return *this;
     }
 
     allocator_type get_allocator () const {
@@ -251,11 +251,11 @@ public:
     }
 
     const_iterator lower_bound (const key_type& __x) const {
-        return _C_rep.lower_bound (__x); 
+        return _C_rep.lower_bound (__x);
     }
 
     const_iterator upper_bound (const key_type& __x) const {
-        return _C_rep.upper_bound (__x); 
+        return _C_rep.upper_bound (__x);
     }
 
     pair<iterator, iterator> equal_range (const key_type& __x) {
@@ -284,9 +284,9 @@ public:
     typedef _Allocator                          allocator_type;
 
 private:
-    
-    typedef __rw::__rb_tree<key_type, value_type, 
-                           __rw::__select1st<value_type, key_type>, 
+
+    typedef __rw::__rb_tree<key_type, value_type,
+                           __rw::__select1st<value_type, key_type>,
                            key_compare, allocator_type> _C_repT;
     _C_repT _C_rep;
 
@@ -295,11 +295,11 @@ public:
     typedef typename _C_repT::reference               reference;
     typedef typename _C_repT::const_reference         const_reference;
     typedef typename _C_repT::iterator                iterator;
-    typedef typename _C_repT::const_iterator          const_iterator; 
+    typedef typename _C_repT::const_iterator          const_iterator;
     typedef typename _C_repT::size_type               size_type;
     typedef typename _C_repT::difference_type         difference_type;
     typedef typename _C_repT::pointer                 pointer;
-    typedef typename _C_repT::const_pointer           const_pointer; 
+    typedef typename _C_repT::const_pointer           const_pointer;
     typedef typename _C_repT::reverse_iterator        reverse_iterator;
     typedef typename _C_repT::const_reverse_iterator const_reverse_iterator;
 
@@ -324,16 +324,16 @@ public:
       : _C_rep (__cmp, __alloc) { }
 
     template<class _InputIter>
-    multimap (_InputIter __first, _InputIter __last, 
+    multimap (_InputIter __first, _InputIter __last,
               const _Compare& __cmp = _Compare (),
-              const _Allocator& __alloc = _Allocator ()) 
+              const _Allocator& __alloc = _Allocator ())
       : _C_rep (__first, __last, __cmp, __alloc, true) { }
 
     multimap (const multimap &__rhs)
         : _C_rep (__rhs._C_rep) { }
 
     multimap& operator= (const multimap &__rhs) {
-        _C_rep = __rhs._C_rep; return *this; 
+        _C_rep = __rhs._C_rep; return *this;
     }
 
     allocator_type get_allocator () const {
@@ -446,11 +446,11 @@ public:
     }
 
     const_iterator lower_bound (const key_type& __x) const {
-        return _C_rep.lower_bound (__x); 
+        return _C_rep.lower_bound (__x);
     }
 
     const_iterator upper_bound (const key_type& __x) const {
-        return _C_rep.upper_bound (__x); 
+        return _C_rep.upper_bound (__x);
     }
 
     pair<iterator, iterator>
@@ -478,7 +478,7 @@ inline bool operator== (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
 
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
-inline bool operator< (const map<_Key, _TypeT, _Compare, _Allocator> &__x, 
+inline bool operator< (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
                        const map<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return lexicographical_compare (__x.begin (), __x.end (),
@@ -488,7 +488,7 @@ inline bool operator< (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
 
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
-inline bool operator!= (const map<_Key, _TypeT, _Compare, _Allocator> &__x, 
+inline bool operator!= (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
                         const map<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return !(__x == __y);
@@ -497,7 +497,7 @@ inline bool operator!= (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
 
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
-inline bool operator> (const map<_Key, _TypeT, _Compare, _Allocator> &__x, 
+inline bool operator> (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
                        const map<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return __y < __x;
@@ -506,7 +506,7 @@ inline bool operator> (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
 
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
-inline bool operator>= (const map<_Key, _TypeT, _Compare, _Allocator> &__x, 
+inline bool operator>= (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
                         const map<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return !(__x < __y);
@@ -515,7 +515,7 @@ inline bool operator>= (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
 
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
-inline bool operator<= (const map<_Key, _TypeT, _Compare, _Allocator> &__x, 
+inline bool operator<= (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
                         const map<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return !(__y <  __x);
@@ -524,7 +524,7 @@ inline bool operator<= (const map<_Key, _TypeT, _Compare, _Allocator> &__x,
 
 // 23.3.1.4
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
-inline void swap (map<_Key, _TypeT, _Compare, _Allocator> &__y, 
+inline void swap (map<_Key, _TypeT, _Compare, _Allocator> &__y,
                   map<_Key, _TypeT, _Compare, _Allocator> &__x)
 {
     __x.swap (__y);
@@ -534,7 +534,7 @@ inline void swap (map<_Key, _TypeT, _Compare, _Allocator> &__y,
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
 inline bool
-operator== (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x, 
+operator== (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
             const multimap<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return    __x.size () == __y.size ()
@@ -545,7 +545,7 @@ operator== (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
 inline bool
-operator< (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x, 
+operator< (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
            const multimap<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return lexicographical_compare (__x.begin (), __x.end (),
@@ -556,7 +556,7 @@ operator< (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
 inline bool
-operator!= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x, 
+operator!= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
             const multimap<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return !(__x == __y);
@@ -566,7 +566,7 @@ operator!= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
 inline bool
-operator> (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x, 
+operator> (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
            const multimap<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return __y < __x;
@@ -576,7 +576,7 @@ operator> (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
 inline bool
-operator>= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x, 
+operator>= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
             const multimap<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return !(__x < __y);
@@ -586,7 +586,7 @@ operator>= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
 // 23.1, p5 - table 65
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
 inline bool
-operator<= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x, 
+operator<= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
             const multimap<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     return !(__y <  __x);
@@ -595,7 +595,7 @@ operator<= (const multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
 
 // 23.3.2.3
 template <class _Key, class _TypeT, class _Compare, class _Allocator>
-void swap (multimap<_Key, _TypeT, _Compare, _Allocator> &__x, 
+void swap (multimap<_Key, _TypeT, _Compare, _Allocator> &__x,
            multimap<_Key, _TypeT, _Compare, _Allocator> &__y)
 {
     __x.swap (__y);

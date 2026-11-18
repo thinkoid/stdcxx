@@ -34,7 +34,7 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 
 size_t gslice::_C_next_ind ()
@@ -53,7 +53,7 @@ size_t gslice::_C_next_ind ()
         _C_r_length = 0;
         return _C_start;
     }
-     
+
     if (_C_reset) {
         _C_reset = false;
         return _C_start;

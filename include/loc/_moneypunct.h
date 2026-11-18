@@ -44,7 +44,7 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 
 // 22.2.6.3
@@ -225,7 +225,7 @@ protected:
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_MONEYPUNCT, _CHAR)
 

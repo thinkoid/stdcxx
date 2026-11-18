@@ -46,7 +46,7 @@ extern __rw_mutex __rw_setlocale_mutex;
 
 }   // namespace __rw
 
-namespace std { 
+namespace std {
 
 /* static */ locale locale::global (const locale &rhs)
 {

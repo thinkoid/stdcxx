@@ -37,14 +37,14 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 struct _RWSTD_EXPORT locale;
 
 }   // namespace std
 
 
-namespace __rw { 
+namespace __rw {
 
 class _RWSTD_EXPORT __rw_locale;
 

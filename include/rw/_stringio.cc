@@ -27,12 +27,12 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 
 template<class _CharT, class _Traits, class _Allocator>
 basic_istream<_CharT, _Traits>&
-operator>> (basic_istream<_CharT, _Traits>&            __is, 
+operator>> (basic_istream<_CharT, _Traits>&            __is,
             basic_string<_CharT, _Traits, _Allocator>& __str)
 {
     _RWSTD_ASSERT (0 != __is.rdbuf ());
@@ -178,8 +178,8 @@ operator>> (basic_istream<_CharT, _Traits>&            __is,
 
 template<class _CharT, class _Traits, class _Allocator>
 basic_istream<_CharT, _Traits>&
-getline (basic_istream<_CharT, _Traits>&            __is, 
-         basic_string<_CharT, _Traits, _Allocator>& __str, 
+getline (basic_istream<_CharT, _Traits>&            __is,
+         basic_string<_CharT, _Traits, _Allocator>& __str,
          _CharT                                     __delim)
 {
     _RWSTD_ASSERT (0 != __is.rdbuf ());
@@ -193,7 +193,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
 
     _SizeT __gcount = 0;
 
-    if (__ipfx) { 
+    if (__ipfx) {
 
         __str.clear ();
 
@@ -300,7 +300,7 @@ getline (basic_istream<_CharT, _Traits>&            __is,
         __is.setstate (__err);
 
     return __is;
-}  
+}
 
 
 }   // namespace std

@@ -44,7 +44,7 @@ __rw_put_groups (char **, _RWSTD_SIZE_T, _RWSTD_SIZE_T&,
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template <class _CharT, class _OutputIter>
@@ -84,7 +84,7 @@ _C_put (iter_type __it, int __opts, ios_base &__flags, char_type __fill,
     // silence bogus gcc -Wuninitialized warning:
     //   object may be used uninitialized in this function
     // while avoiding bogus HP aCC/cadvise warning 20200:
-    //   potential null pointer dereference 
+    //   potential null pointer dereference
     __pun0 = 0;
     __pun1 = 0;
 #endif   // gcc

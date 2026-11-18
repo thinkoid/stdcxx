@@ -66,7 +66,7 @@ _RWSTD_EXPORT _RWSTD_SIZE_T __rw_rand (_RWSTD_SIZE_T);
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 // 25.1 - Non-modifying sequence operations [lib.alg.nonmodifying]
@@ -118,7 +118,7 @@ find_if (_InputIter __first, _InputIter __last, _Predicate __pred)
 template <class _FwdIter1, class _FwdIter2, class _Dist>
 _FwdIter1 __find_end (_FwdIter1, _FwdIter1, _FwdIter2, _FwdIter2, _Dist*);
 
-template <class _FwdIter1, class _FwdIter2, 
+template <class _FwdIter1, class _FwdIter2,
           class _BinaryPredicate, class _Dist>
 _FwdIter1 __find_end (_FwdIter1, _FwdIter1, _FwdIter2, _FwdIter2,
                       _BinaryPredicate, _Dist*);
@@ -241,7 +241,7 @@ inline _FwdIter1 search (_FwdIter1 __first1,_FwdIter1 __last1,
 // helper to work around the lack of iterator_traits
 template <class _FwdIter, class _Dist, class _Size, class _TypeT>
 _FwdIter __search_n (_FwdIter, _FwdIter, _Dist*, _Size, const _TypeT&);
- 
+
 template <class _FwdIter, class _Dist, class _Size, class _TypeT,
           class _BinaryPredicate>
 _FwdIter __search_n (_FwdIter, _FwdIter, _Dist*, _Size,
@@ -252,7 +252,7 @@ template <class _FwdIter, class _Size, class _TypeT>
 inline _FwdIter search_n (_FwdIter __first, _FwdIter __last,
                           _Size __count, const _TypeT &__val)
 {
-    if (__count) 
+    if (__count)
         return __search_n (__first, __last, _RWSTD_DIFFERENCE_TYPE (_FwdIter),
                            __count, __val);
     return __first;
@@ -264,7 +264,7 @@ inline _FwdIter search_n (_FwdIter __first, _FwdIter __last,
                           _Size __count, const _TypeT &__val,
                           _BinaryPredicate __pred)
 {
-    if (__count) 
+    if (__count)
         return __search_n (__first, __last,
                            _RWSTD_DIFFERENCE_TYPE (_FwdIter),
                            __count, __val, __pred);
@@ -329,7 +329,7 @@ inline void replace (_FwdIter __first, _FwdIter __last,
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
 
-    for (; !(__first == __last); ++__first) 
+    for (; !(__first == __last); ++__first)
         if (*__first == __old_value)
             *__first = __new_value;
 }
@@ -426,7 +426,7 @@ _FwdIter __unique_copy (_InputIter, _InputIter, _FwdIter, forward_iterator_tag);
 
 template <class _InputIter, class _BidirIter>
 inline _BidirIter
-__unique_copy (_InputIter __first, _InputIter __last, _BidirIter __res, 
+__unique_copy (_InputIter __first, _InputIter __last, _BidirIter __res,
                bidirectional_iterator_tag)
 {
     return __unique_copy (__first, __last, __res, forward_iterator_tag ());
@@ -461,7 +461,7 @@ _FwdIter __unique_copy (_InputIter, _InputIter, _FwdIter, _BinaryPredicate,
 
 template <class _InputIter, class _BidirIter, class _BinaryPredicate>
 inline _BidirIter
-__unique_copy (_InputIter __first, _InputIter __last, _BidirIter __res, 
+__unique_copy (_InputIter __first, _InputIter __last, _BidirIter __res,
                _BinaryPredicate __pred, bidirectional_iterator_tag)
 {
     return __unique_copy (__first, __last, __res, __pred,
@@ -471,10 +471,10 @@ __unique_copy (_InputIter __first, _InputIter __last, _BidirIter __res,
 
 template <class _InputIter, class _RandomAccessIter, class _BinaryPredicate>
 inline _RandomAccessIter
-__unique_copy (_InputIter __first, _InputIter __last, _RandomAccessIter __res, 
+__unique_copy (_InputIter __first, _InputIter __last, _RandomAccessIter __res,
                _BinaryPredicate __pred, random_access_iterator_tag)
 {
-    return __unique_copy (__first, __last, __res, __pred, 
+    return __unique_copy (__first, __last, __res, __pred,
                           forward_iterator_tag ());
 }
 
@@ -631,7 +631,7 @@ inline void
 random_shuffle (_RandomAccessIter __first, _RandomAccessIter __last)
 {
     _RWSTD_SIZE_T (*__rand) (_RWSTD_SIZE_T) = __rw::__rw_rand;
-    
+
     std::random_shuffle (__first, __last, __rand);
 }
 
@@ -1072,10 +1072,10 @@ set_intersection (_InputIter1 __first1, _InputIter1 __last1,
 
 
 // 25.3.5.4
-template <class _InputIter1, class _InputIter2, class _OutputIter, 
+template <class _InputIter1, class _InputIter2, class _OutputIter,
           class _Compare>
 _OutputIter
-set_difference (_InputIter1, _InputIter1, _InputIter2, _InputIter2, 
+set_difference (_InputIter1, _InputIter1, _InputIter2, _InputIter2,
                 _OutputIter, _Compare);
 
 template <class _InputIter1, class _InputIter2, class _OutputIter>

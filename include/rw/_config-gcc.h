@@ -51,6 +51,6 @@
 #  endif  // _RWSTD_ANSI_C_LIMITS_H
 #endif   // _RWSTD_OS_LINUX
 
-   // force using /usr/include/math.h 
+   // force using /usr/include/math.h
    // prevent recursion caused by pulling in gcc's own "fixed" header
 #undef _RWSTD_ANSI_C_MATH_H

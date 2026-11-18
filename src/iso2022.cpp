@@ -709,7 +709,7 @@ __rw_iso2022jp_designate (__rw_iso2022_state_t& state,
 
             if (len) {
                 _RWSTD_ASSERT (to && esc);
-                
+
                 memcpy (to, esc, len);
                 to += len;
             }

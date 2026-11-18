@@ -73,7 +73,7 @@
 #endif   // _RWSTD_RW_ITERATOR_H_INCLUDED
 
 
-namespace __rw { 
+namespace __rw {
 
 
 template <class _Alloc, class _Val, class _Key, class _KeyOf>
@@ -92,7 +92,7 @@ struct __rw_rb_tree_node
     typedef typename _C_node_alloc_t::pointer              _C_link_t;
     typedef typename _C_key_alloc_t::const_reference       _C_const_key_ref;
 
-    _C_color_t _C_color; 
+    _C_color_t _C_color;
     _C_link_t  _C_parent;
     _C_link_t  _C_child [2];   // left (0) and right (1) children
     _Val       _C_value;
@@ -107,7 +107,7 @@ struct __rw_rb_tree_node
     static _C_link_t _C_min (_C_link_t __lnk) {
         return _C_minmax (__lnk, false);
     }
-    
+
     static _C_link_t _C_max (_C_link_t __lnk) {
         return _C_minmax (__lnk, true);
     }
@@ -188,13 +188,13 @@ public:
     __rw_tree_iter () { /* empty */ }
 
     __rw_tree_iter (_C_link_t __lnk)
-        : _C_node (__lnk) {}        
+        : _C_node (__lnk) {}
 
     __rw_tree_iter& operator++ () {
         _C_node = _C_node_t::_C_next (_C_node);
         return *this;
     }
-    
+
     __rw_tree_iter& operator-- () {
         _C_node = _C_node_t::_C_prev (_C_node);
         return *this;
@@ -204,7 +204,7 @@ public:
         __rw_tree_iter __tmp (*this);
         return ++*this, __tmp;
     }
-    
+
     __rw_tree_iter operator-- (int) {
         __rw_tree_iter __tmp (*this);
         return --*this, __tmp;
@@ -331,27 +331,27 @@ template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
 class __rb_tree : private _Alloc
 {
 private:
-    
-    typedef __rw_rb_tree_node<_Alloc,_Val,_Key,_KeyOf> _C_node_t; 
+
+    typedef __rw_rb_tree_node<_Alloc,_Val,_Key,_KeyOf> _C_node_t;
     typedef _Alloc                                             _C_val_alloc_t;
     typedef typename _Alloc::template rebind<_Key>::other      _C_key_alloc_t;
     typedef typename _Alloc::template rebind<_C_node_t>::other _C_node_alloc_t;
     typedef typename _C_node_alloc_t::pointer                  _C_link_t;
 
 public:
-    
+
     typedef _Key                                       key_type;
     typedef _Val                                       value_type;
     typedef _Comp                                      key_compare;
     typedef _Alloc                                     allocator_type;
-      
+
     typedef typename _C_val_alloc_t::pointer           pointer;
     typedef typename _C_val_alloc_t::const_pointer     const_pointer;
     typedef typename allocator_type::size_type         size_type;
     typedef typename allocator_type::difference_type   difference_type;
     typedef typename _C_val_alloc_t::reference         reference;
     typedef typename _C_val_alloc_t::const_reference   const_reference;
-    
+
 private:
 
     typedef __rw_tree_iter<value_type, difference_type, pointer,
@@ -400,7 +400,7 @@ private:
         typedef typename allocator_type::template rebind<_C_node_buf>::other
                 _C_buf_alloc_t;
         typedef typename _C_buf_alloc_t::pointer            _C_buf_ptr_t;
-        
+
         _C_buf_ptr_t _C_next_buffer;
         size_type    size;
         _C_link_t    _C_buffer;
@@ -413,19 +413,19 @@ private:
     _C_link_t    _C_free_list;
     _C_link_t    _C_next_avail;
     _C_link_t    _C_last;
-    
+
     void _C_add_new_buffer ();
 
     void _C_deallocate_buffers ();
-    
-    // 
+
+    //
     // Return a node from the free list or new storage
     //
     _C_link_t _C_get_link () {
         _C_link_t __tmp = _C_free_list;
-        _C_link_t __tmp2 = (void*)_C_free_list ? 
-            (_C_free_list = static_cast< _C_link_t >((_C_free_list->_C_child [1])), __tmp) 
-            : (_C_next_avail == _C_last ? (_C_add_new_buffer (), _C_next_avail++) 
+        _C_link_t __tmp2 = (void*)_C_free_list ?
+            (_C_free_list = static_cast< _C_link_t >((_C_free_list->_C_child [1])), __tmp)
+            : (_C_next_avail == _C_last ? (_C_add_new_buffer (), _C_next_avail++)
                : _C_next_avail++);
         __tmp2->_C_parent    = 0;
         __tmp2->_C_child [0] = 0;
@@ -449,25 +449,25 @@ private:
         catch (...) {
             _C_put_node (__tmp2, false);
             throw;
-        }      
+        }
         return __tmp2;
     }
 
     _C_link_t _C_get_node () {
         return _C_get_link ();
     }
-    
-    // 
+
+    //
     // Return a node to the free list and destroy the value in it.
     //
-    void _C_put_node (_C_link_t __p, bool __destroy = true) { 
-        __p->_C_child [1] = _C_free_list; 
+    void _C_put_node (_C_link_t __p, bool __destroy = true) {
+        __p->_C_child [1] = _C_free_list;
         if (__destroy)  {
             allocator_type::destroy (allocator_type::address (__p->_C_value));
         }
-        _C_free_list = __p; 
+        _C_free_list = __p;
     }
-    
+
 private:
 
     // _C_end is end()
@@ -483,7 +483,7 @@ private:
     key_compare _C_cmp;   // comparison object
 
 public:
-    
+
 
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     typedef std::reverse_iterator<iterator>        reverse_iterator;
@@ -519,8 +519,8 @@ public:
                const key_compare &__cmp,
                const allocator_type &__alloc, bool __dup)
         : allocator_type (__alloc), _C_buf_list (0),
-          _C_end (0), _C_size (0), 
-          _C_cmp (__cmp) { 
+          _C_end (0), _C_size (0),
+          _C_cmp (__cmp) {
 
         _C_init ();
 
@@ -563,21 +563,21 @@ public:
         return _C_make_iter (_C_end);
     }
 
-    reverse_iterator rbegin () { 
+    reverse_iterator rbegin () {
         return reverse_iterator (end ());
     }
-    
-    reverse_iterator rend () { 
-        return reverse_iterator (begin ());
-    } 
 
-    const_reverse_iterator rbegin () const { 
+    reverse_iterator rend () {
+        return reverse_iterator (begin ());
+    }
+
+    const_reverse_iterator rbegin () const {
         return const_reverse_iterator (end ());
     }
-    
-    const_reverse_iterator rend () const { 
+
+    const_reverse_iterator rend () const {
         return const_reverse_iterator (begin ());
-    } 
+    }
 
     bool empty () const {
         return 0 == _C_size;
@@ -587,10 +587,10 @@ public:
         return _C_size;
     }
 
-    size_type max_size () const { 
-      return _C_node_alloc_t (*this).max_size (); 
+    size_type max_size () const {
+      return _C_node_alloc_t (*this).max_size ();
     }
-    
+
     void swap (__rb_tree &__rhs) {
       if (get_allocator () == __rhs.get_allocator ()) {
           std::swap (_C_buf_list, __rhs._C_buf_list);
@@ -605,7 +605,7 @@ public:
           __rb_tree __tmp = *this;
           *this = __rhs;
           __rhs = __tmp;
-      } 
+      }
     }
 
     void _C_insert (const value_type&, std::pair<iterator, bool>&, bool);
@@ -727,7 +727,7 @@ operator< (const __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>& __lhs,
 
 
 template <class _Key,class _Val,class _KeyOf,class _Comp,class _Alloc>
-inline void   
+inline void
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 _C_erase_leaf (_C_link_t __lnk)
 {
@@ -769,7 +769,7 @@ _C_erase_leaf (_C_link_t __lnk)
 #ifndef _RWSTD_NO_OPTIMIZE_SPEED
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-inline void 
+inline void
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 _C_rol (_C_link_t __lnk)
 {
@@ -796,12 +796,12 @@ _C_rol (_C_link_t __lnk)
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-inline void 
+inline void
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 _C_ror (_C_link_t __lnk)
 {
     _RWSTD_ASSERT (_C_link_t () != __lnk);
-      
+
     _C_link_t __tmp = __lnk->_C_child [0];
     __lnk->_C_child [0] = __tmp->_C_child [1];
 
@@ -809,7 +809,7 @@ _C_ror (_C_link_t __lnk)
         __tmp->_C_child [1]->_C_parent = __lnk;
 
     __tmp->_C_parent = __lnk->_C_parent;
-    
+
     if (__lnk == _C_end->_C_parent)
         _C_end->_C_parent = __tmp;
     else if (__lnk == __lnk->_C_parent->_C_child [1])
@@ -824,7 +824,7 @@ _C_ror (_C_link_t __lnk)
 #else   // if defined (_RWSTD_NO_OPTIMIZE_SPEED)
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-inline void 
+inline void
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 _C_rotate (_C_link_t __lnk, bool __right)
 {
@@ -862,7 +862,7 @@ erase (const _Key* __first, const _Key* __last)
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-inline typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::size_type 
+inline typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::size_type
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 count (const _Key& __k) const
 {
@@ -874,7 +874,7 @@ count (const _Key& __k) const
 
 #define _RWSTD_RB_TREE_ITER \
         typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator
-                                               
+
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
 inline std::pair<_RWSTD_RB_TREE_ITER , _RWSTD_RB_TREE_ITER >
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::

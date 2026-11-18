@@ -51,7 +51,7 @@
 #include <rw/_iterbase.h>   // for iterator_traits, __rw_debug_iter
 
 
-namespace std { 
+namespace std {
 
 
 // 25.3.7, p1
@@ -167,7 +167,7 @@ inline void __rw_swap (_TypeT& __a, _TypeU& __b)
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 // 25.2.2, p1

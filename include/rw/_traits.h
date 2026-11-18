@@ -113,7 +113,7 @@ _RWSTD_EXPORT _RWSTD_SIZE_T __rw_wcslen (const wchar_t*);
 #endif   // !_RWSTDDEBUG && !(vanilla EDG eccp demo)
 
 
-namespace std { 
+namespace std {
 
 
 // 27.4.1, p2
@@ -131,7 +131,7 @@ public:
 
     // addition: state_type, and a state argument to the constructor
     typedef _StateT state_type;
-      
+
     fpos (_RWSTD_STREAMOFF __off = 0,
           const state_type &__state = state_type ())
         : _C_pos (__off),
@@ -179,11 +179,11 @@ private:
 };
 
 
-template <class  _CharT> 
+template <class  _CharT>
 struct _RWSTD_EXPORT char_traits;
 
 
-template <class  _CharT> 
+template <class  _CharT>
 struct _RWSTD_EXPORT char_traits
 {
     typedef _CharT           char_type;
@@ -217,15 +217,15 @@ struct _RWSTD_EXPORT char_traits
         }
         return 0;
     }
-        
+
     static _RWSTD_SIZE_T length (const char_type *__s) {
         _RWSTD_SIZE_T __len = 0;
         while (!eq (*__s++, char_type ()))
             ++__len;
         return __len;
     }
- 
-    static const char_type* 
+
+    static const char_type*
     find (const char_type* __s, _RWSTD_SIZE_T __n, const char_type& __c) {
         while (__n-- > 0 && !eq (*__s, __c) )
             ++__s;
@@ -249,7 +249,7 @@ struct _RWSTD_EXPORT char_traits
     static char_type*
     assign (char_type* __s, _RWSTD_SIZE_T __n, char_type __c) {
         char_type* __tmp = __s;
-        while (__n-- > 0) 
+        while (__n-- > 0)
             assign (*__tmp++, __c);
         return __s;
     }
@@ -266,7 +266,7 @@ struct _RWSTD_EXPORT char_traits
         // cast to prevent warnings for unusual types
         return static_cast< char_type >(__c);
     }
-      
+
     static int_type to_int_type (const char_type& __c) {
         // cast to prevent warnings for unusual types
         return static_cast< int_type >(__c);
@@ -275,12 +275,12 @@ struct _RWSTD_EXPORT char_traits
 
 
 // 21.1.3.1
-template <>               
+template <>
 struct _RWSTD_EXPORT char_traits<char>
 {
     typedef char             char_type;
     typedef _RWSTD_INT_T     int_type;
-    typedef _RWSTD_STREAMOFF off_type; 
+    typedef _RWSTD_STREAMOFF off_type;
     typedef _RWSTD_MBSTATE_T state_type;
     typedef fpos<state_type> pos_type;
 
@@ -343,11 +343,11 @@ struct _RWSTD_EXPORT char_traits<char>
     static int_type not_eof (const int_type& __c) {
         return eq_int_type (eof (), __c) ? 0 : __c;
     }
-                        
+
     static char_type to_char_type (const int_type& __c) {
         return static_cast< char_type >(__c);
     }
-      
+
     static int_type to_int_type (const char_type& __c) {
         // make sure (signed char)'\xff' converts to 255 and not -1
         return static_cast< unsigned char >(__c);
@@ -356,7 +356,7 @@ struct _RWSTD_EXPORT char_traits<char>
 
 
 // 21.1.3.2
-template <>               
+template <>
 struct _RWSTD_EXPORT char_traits<wchar_t>
 {
     typedef wchar_t          char_type;
@@ -390,7 +390,7 @@ struct _RWSTD_EXPORT char_traits<wchar_t>
         // [harmless] cast necessary on CygWin
         return _RWSTD_WCSLEN (const_cast< char_type* >(__s));
     }
-      
+
     static const char_type*
     find (const char_type* __s, _RWSTD_SIZE_T __n, const char_type& __c) {
         // const cast in case of a const-incorrect wmemchr()
@@ -404,7 +404,7 @@ struct _RWSTD_EXPORT char_traits<wchar_t>
         _RWSTD_WMEMCPY (__dst, __src, __n);
         return __dst;
     }
-      
+
     static char_type*
     move (char_type* __s1, const char_type* __s2, _RWSTD_SIZE_T __n) {
         _RWSTD_WMEMMOVE (__s1, __s2, __n);
@@ -428,7 +428,7 @@ struct _RWSTD_EXPORT char_traits<wchar_t>
     static char_type to_char_type (const int_type& __c) {
         return __c;
     }
-      
+
     static int_type to_int_type (const char_type& __c) {
         return __c;
     }

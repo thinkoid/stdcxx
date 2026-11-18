@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * iostore.cpp - source of the C++ Standard Library 
+ * iostore.cpp - source of the C++ Standard Library
  *               ios_base storage functions [lib.ios.base.storage]
  *
  * $Id$
@@ -265,7 +265,7 @@ _C_copyfmt (const ios_base &rhs, void *dst, const void *src, size_t size)
             a_size [0] = rusr->_C_isize;
             a_size [1] = rusr->_C_psize;
             a_size [2] = rusr->_C_cbsize;
-                
+
             ia = static_cast< long* >(
                 a_size [0] ? operator new (a_size [0] * sizeof *ia) : 0);
 
@@ -434,7 +434,7 @@ long& ios_base::iword (int inx)
 
 
 void*& ios_base::pword (int inx)
-{ 
+{
     _RWSTD_MT_GUARD (_C_nolock ? 0 : &_C_mutex);
 
     if (!_C_usr)

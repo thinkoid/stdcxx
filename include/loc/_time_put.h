@@ -64,9 +64,9 @@ struct time_put: __rw::__rw_facet
     iter_type put (iter_type, ios_base&, char_type, const tm*,
                    const char_type*, const char_type*) const;
 
-    iter_type put (iter_type __it, ios_base& __flags, char_type __fill, 
+    iter_type put (iter_type __it, ios_base& __flags, char_type __fill,
                    const tm* __tmb, char __fmt, char __modifier = 0) const {
-        return do_put (__it, __flags, __fill, __tmb, __fmt, __modifier); 
+        return do_put (__it, __flags, __fill, __tmb, __fmt, __modifier);
     }
 
     static __rw::__rw_facet_id id;
@@ -119,7 +119,7 @@ protected:
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_TIME_PUT, _CHAR)
 

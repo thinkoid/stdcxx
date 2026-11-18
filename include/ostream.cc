@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 
 template<class _CharT, class _Traits>
@@ -58,7 +58,7 @@ basic_ostream<_CharT, _Traits>::flush ()
 
     return *this;
 }
-  
+
 
 template<class _CharT, class _Traits>
 basic_ostream<_CharT, _Traits>&
@@ -136,7 +136,7 @@ template<class _CharT, class _Traits>
 basic_ostream<_CharT, _Traits>&
 basic_ostream<_CharT, _Traits>::
 operator<< (basic_streambuf<char_type, traits_type> *__sb)
-{ 
+{
     if (!__sb) {
         this->setstate (ios_base::badbit);
         return *this;
@@ -145,13 +145,13 @@ operator<< (basic_streambuf<char_type, traits_type> *__sb)
     ios_base::iostate __err = ios_base::goodbit;
 
     streamsize __nget = 0;   // number of extracted characters
-    
+
     if (__sb->_C_mode () & ios_base::in) {
 
         const sentry __opfx (*this);
 
         try {
-            
+
             if (__opfx) {
 
                 basic_streambuf<char_type, traits_type>* const __rdbuf =
@@ -211,9 +211,9 @@ operator<< (basic_streambuf<char_type, traits_type> *__sb)
         }
     }
     // 27.6.2.5.3.8
-    if (!__nget) 
+    if (!__nget)
         __err |= ios_base::failbit;
-    
+
     if (__err)
         this->setstate (__err);
 

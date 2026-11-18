@@ -48,7 +48,7 @@ _RWSTD_EXPORT const void* __rw_std_streams [8];
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 ios_base::ios_base ()
@@ -167,7 +167,7 @@ locale ios_base::_C_unsafe_imbue (const locale &loc)
             (this->*_C_usr->_C_fire)(imbue_event, true /* reentrant */);
     }
 
-    return tmp;  
+    return tmp;
 }
 
 

@@ -55,7 +55,7 @@ getline (basic_istream<_CharT, _Traits>&,
 
 
 template<class _CharT, class _Traits, class _Allocator>
-inline basic_istream<_CharT, _Traits>& 
+inline basic_istream<_CharT, _Traits>&
 getline (basic_istream<_CharT, _Traits>&            __is,
          basic_string<_CharT, _Traits, _Allocator>& __str);
 
@@ -100,7 +100,7 @@ operator<< (basic_ostream<_CharT, _Traits>&                  __os,
 namespace std {
 
 template<class _CharT, class _Traits, class _Allocator>
-inline basic_istream<_CharT, _Traits>& 
+inline basic_istream<_CharT, _Traits>&
 getline (basic_istream<_CharT, _Traits>&            __is,
          basic_string<_CharT, _Traits, _Allocator>& __str)
 {

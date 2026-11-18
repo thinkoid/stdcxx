@@ -69,7 +69,7 @@
 
 #  else   // !defined (_RWSTD_OS_LINUX)
 /*** generic OS ***********************************************************/
-     
+
 #    include _RWSTD_CWCHAR
 #    define _RWSTD_MBSTATE_T   _RWSTD_C::mbstate_t
 

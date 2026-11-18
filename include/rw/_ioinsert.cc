@@ -30,7 +30,7 @@
 #include <rw/_select.h>
 
 
-namespace __rw { 
+namespace __rw {
 
 
 template <class _CharT, class _Traits, class _NativeType>
@@ -120,7 +120,7 @@ __rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
 {
     _RWSTD_ASSERT (0 != __strm.rdbuf ());
     _RWSTD_ASSERT (0 != __s);
-      
+
     std::ios_base::iostate __err = std::ios_base::goodbit;
 
     // writes out max(len, width) characters, padding appropriately
@@ -128,7 +128,7 @@ __rw_insert (std::basic_ostream<_CharT, _Traits> &__strm,
     // calls width(0) if width is nonzero and no exception is thrown
 
     try {
-  
+
         const typename std::basic_ostream<_CharT, _Traits>::sentry
             __opfx (__strm);
 

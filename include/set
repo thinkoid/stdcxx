@@ -50,7 +50,7 @@
 #include <rw/_defs.h>
 
 
-namespace __rw { 
+namespace __rw {
 
 
 template <class _TypeT, class _TypeU>
@@ -65,7 +65,7 @@ struct __ident: std::unary_function<_TypeT, _TypeU>
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template <class _Key,
@@ -84,9 +84,9 @@ public:
     typedef _Allocator          allocator_type;
 
 private:
-    
-    typedef __rw::__rb_tree<key_type, value_type, 
-                           __rw::__ident<value_type, key_type>, 
+
+    typedef __rw::__rb_tree<key_type, value_type,
+                           __rw::__ident<value_type, key_type>,
                            key_compare, allocator_type> __rep_type;
     __rep_type _C_rep;
 
@@ -94,7 +94,7 @@ public:
     //
     // Types
     //
-        // Note that iterator and reverse_iterator are typedefed to 
+        // Note that iterator and reverse_iterator are typedefed to
         // const iterators. This is intentional, the purpose is to
         // prevent the modification of a set element after it has
         // been inserted.
@@ -141,8 +141,8 @@ public:
     const_iterator           begin  () const { return _C_rep.begin ();  }
     iterator                 end    ()       { return _C_rep.end ();    }
     const_iterator           end    () const { return _C_rep.end ();    }
-    reverse_iterator         rbegin ()       { return _C_rep.rbegin (); } 
-    const_reverse_iterator   rbegin () const { return _C_rep.rbegin (); } 
+    reverse_iterator         rbegin ()       { return _C_rep.rbegin (); }
+    const_reverse_iterator   rbegin () const { return _C_rep.rbegin (); }
     reverse_iterator         rend   ()       { return _C_rep.rend ();   }
     const_reverse_iterator   rend   () const { return _C_rep.rend ();   }
 
@@ -158,7 +158,7 @@ public:
     //
     pair<iterator, bool> insert (const value_type& __x) {
         const pair<typename __rep_type::iterator, bool> __p =
-            _C_rep.insert (__x, false); 
+            _C_rep.insert (__x, false);
         return pair<iterator, bool>(__p.first, __p.second);
     }
 
@@ -181,7 +181,7 @@ public:
     }
 
     size_type erase (const key_type& __x)  {
-        return _C_rep.erase (__x); 
+        return _C_rep.erase (__x);
     }
 
     void swap (set& __x) {
@@ -244,13 +244,13 @@ public:
 };
 
 
-template <class _Key, 
+template <class _Key,
           class _Compare = less<_Key>,
           class _Allocator = allocator<_Key> >
 class multiset
 {
 public:
-    //  
+    //
     // types
     //
     typedef _Key       key_type;
@@ -259,9 +259,9 @@ public:
     typedef _Compare   value_compare;
     typedef _Allocator allocator_type;
 private:
-    
-    typedef __rw::__rb_tree<key_type, value_type, 
-                           __rw::__ident<value_type, key_type>, 
+
+    typedef __rw::__rb_tree<key_type, value_type,
+                           __rw::__ident<value_type, key_type>,
                            key_compare, allocator_type> __rep_type;
     __rep_type _C_rep;
 
@@ -290,7 +290,7 @@ public:
         : _C_rep (__cmp, __alloc) { }
 
     template<class _InputIter>
-    multiset (_InputIter __first, _InputIter __last, 
+    multiset (_InputIter __first, _InputIter __last,
               const key_compare &__cmp = key_compare (),
               const allocator_type &__alloc = allocator_type ())
         : _C_rep (__first, __last, __cmp, __alloc, true) { }
@@ -313,8 +313,8 @@ public:
     const_iterator           begin  () const { return _C_rep.begin ();  }
     iterator                 end    ()       { return _C_rep.end ();    }
     const_iterator           end    () const { return _C_rep.end ();    }
-    reverse_iterator         rbegin ()       { return _C_rep.rbegin (); } 
-    const_reverse_iterator   rbegin () const { return _C_rep.rbegin (); } 
+    reverse_iterator         rbegin ()       { return _C_rep.rbegin (); }
+    const_reverse_iterator   rbegin () const { return _C_rep.rbegin (); }
     reverse_iterator         rend   ()       { return _C_rep.rend ();   }
     const_reverse_iterator   rend   () const { return _C_rep.rend ();   }
 
@@ -394,11 +394,11 @@ public:
 
       // follows proposed resolution of lwg issue 214
     iterator upper_bound (const key_type& __x) {
-        return _C_rep.upper_bound (__x); 
+        return _C_rep.upper_bound (__x);
     }
 
     const_iterator upper_bound (const key_type& __x) const {
-        return _C_rep.upper_bound (__x); 
+        return _C_rep.upper_bound (__x);
     }
 
       // follows proposed resolution of lwg issue 214
@@ -416,7 +416,7 @@ public:
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator== (const set<_Key, _Compare, _Allocator>& __x, 
+inline bool operator== (const set<_Key, _Compare, _Allocator>& __x,
                         const set<_Key, _Compare, _Allocator>& __y)
 {
     return    __x.size () == __y.size ()
@@ -425,7 +425,7 @@ inline bool operator== (const set<_Key, _Compare, _Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator< (const set<_Key, _Compare, _Allocator>& __x, 
+inline bool operator< (const set<_Key, _Compare, _Allocator>& __x,
                        const set<_Key, _Compare, _Allocator>& __y)
 {
     return lexicographical_compare (__x.begin (), __x.end (),
@@ -434,7 +434,7 @@ inline bool operator< (const set<_Key, _Compare, _Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator!= (const set<_Key,_Compare,_Allocator>& __x, 
+inline bool operator!= (const set<_Key,_Compare,_Allocator>& __x,
                         const set<_Key,_Compare,_Allocator>& __y)
 {
     return !(__x == __y);
@@ -442,7 +442,7 @@ inline bool operator!= (const set<_Key,_Compare,_Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator> (const set<_Key,_Compare,_Allocator>& __x, 
+inline bool operator> (const set<_Key,_Compare,_Allocator>& __x,
                        const set<_Key,_Compare,_Allocator>& __y)
 {
     return __y < __x;
@@ -450,7 +450,7 @@ inline bool operator> (const set<_Key,_Compare,_Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator>= (const set<_Key,_Compare,_Allocator>& __x, 
+inline bool operator>= (const set<_Key,_Compare,_Allocator>& __x,
                         const set<_Key,_Compare,_Allocator>& __y)
 {
     return !(__x < __y);
@@ -458,7 +458,7 @@ inline bool operator>= (const set<_Key,_Compare,_Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator<= (const set<_Key,_Compare,_Allocator>& __x, 
+inline bool operator<= (const set<_Key,_Compare,_Allocator>& __x,
                         const set<_Key,_Compare,_Allocator>& __y)
 {
     return !(__y <  __x);
@@ -466,7 +466,7 @@ inline bool operator<= (const set<_Key,_Compare,_Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-void swap (set<_Key,_Compare,_Allocator>& __a, 
+void swap (set<_Key,_Compare,_Allocator>& __a,
            set<_Key,_Compare,_Allocator>& __b)
 {
     __a.swap (__b);
@@ -474,7 +474,7 @@ void swap (set<_Key,_Compare,_Allocator>& __a,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator== (const multiset<_Key, _Compare, _Allocator>& __x, 
+inline bool operator== (const multiset<_Key, _Compare, _Allocator>& __x,
                         const multiset<_Key, _Compare, _Allocator>& __y)
 {
     return    __x.size () == __y.size ()
@@ -483,7 +483,7 @@ inline bool operator== (const multiset<_Key, _Compare, _Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator< (const multiset<_Key, _Compare, _Allocator>& __x, 
+inline bool operator< (const multiset<_Key, _Compare, _Allocator>& __x,
                        const multiset<_Key, _Compare, _Allocator>& __y)
 {
     return lexicographical_compare (__x.begin (), __x.end (),
@@ -492,7 +492,7 @@ inline bool operator< (const multiset<_Key, _Compare, _Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator!= (const multiset<_Key,_Compare,_Allocator>& __x, 
+inline bool operator!= (const multiset<_Key,_Compare,_Allocator>& __x,
                         const multiset<_Key,_Compare,_Allocator>& __y)
 {
     return !(__x == __y);
@@ -500,7 +500,7 @@ inline bool operator!= (const multiset<_Key,_Compare,_Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator> (const multiset<_Key,_Compare,_Allocator>& __x, 
+inline bool operator> (const multiset<_Key,_Compare,_Allocator>& __x,
                        const multiset<_Key,_Compare,_Allocator>& __y)
 {
     return __y < __x;
@@ -508,7 +508,7 @@ inline bool operator> (const multiset<_Key,_Compare,_Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator>= (const multiset<_Key,_Compare,_Allocator>& __x, 
+inline bool operator>= (const multiset<_Key,_Compare,_Allocator>& __x,
                         const multiset<_Key,_Compare,_Allocator>& __y)
 {
     return !(__x < __y);
@@ -516,17 +516,17 @@ inline bool operator>= (const multiset<_Key,_Compare,_Allocator>& __x,
 
 
 template <class _Key, class _Compare, class _Allocator>
-inline bool operator<= (const multiset<_Key,_Compare,_Allocator>& __x, 
+inline bool operator<= (const multiset<_Key,_Compare,_Allocator>& __x,
                         const multiset<_Key,_Compare,_Allocator>& __y)
 {
     return !(__y <  __x);
 }
 
 template <class _Key, class _Compare,  class _Allocator>
-void swap (multiset<_Key,_Compare,_Allocator>& __a, 
+void swap (multiset<_Key,_Compare,_Allocator>& __a,
            multiset<_Key,_Compare,_Allocator>& __b)
 {
-    __a.swap (__b); 
+    __a.swap (__b);
 }
 
 

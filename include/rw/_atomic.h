@@ -172,7 +172,7 @@ __rw_atomic_exchange (unsigned long &__x,
 #      undef _RWSTD_NO_LLONG_ATOMIC_OPS
 
 namespace __rw {
-    
+
 inline _RWSTD_LONG_LONG
 __rw_atomic_preincrement (_RWSTD_LONG_LONG &__x, bool)
 {
@@ -227,7 +227,7 @@ __rw_atomic_exchange (unsigned _RWSTD_LONG_LONG &__x,
 #else   // if !defined (_RWSTD_REENTRANT)
 
 namespace __rw {
-    
+
 // atomic in a single-threaded environment
 template <class _TypeT, class _TypeU>
 inline

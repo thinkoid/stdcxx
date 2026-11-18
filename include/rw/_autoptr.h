@@ -38,7 +38,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-namespace std { 
+namespace std {
 
 
 // 20.4.5 - Template class auto_ptr
@@ -50,7 +50,7 @@ class auto_ptr;
 // 20.4.5, p2 (defined outside of auto_ptr<> according to the proposed
 // resolution of lwg issue 127)
 template <class _TypeT>
-class auto_ptr_ref 
+class auto_ptr_ref
 {
 
     template <class _TypeU>
@@ -82,7 +82,7 @@ public:
      : _C_ptr (__rhs.release ()) { }
 
     // 20.4.5.1, p7
-    auto_ptr& operator= (auto_ptr& __rhs) _THROWS (()) { 
+    auto_ptr& operator= (auto_ptr& __rhs) _THROWS (()) {
         reset (__rhs.release ());
         return *this;
     }
@@ -99,7 +99,7 @@ public:
 
     // 20.4.5.1, p10
     template <class _TypeU>
-    auto_ptr& operator= (auto_ptr<_TypeU>& __rhs)  _THROWS (()) { 
+    auto_ptr& operator= (auto_ptr<_TypeU>& __rhs)  _THROWS (()) {
         reset (__rhs.release ());
         return *this;
     }
@@ -112,7 +112,7 @@ public:
     }
 
     // 20.4.5.3, p4
-    template <class _TypeU> 
+    template <class _TypeU>
     operator auto_ptr<_TypeU>() _THROWS (()) {
         return auto_ptr<_TypeU>(release ());
     }
@@ -120,7 +120,7 @@ public:
     // 20.4.5.2, p1
     element_type& operator* () const _THROWS (()) {
         _RWSTD_ASSERT (0 != get ());
-        return *get (); 
+        return *get ();
     }
 
     // 20.4.5.2, p3
@@ -134,14 +134,14 @@ public:
     }
 
     // 20.4.5.2, p5
-    element_type* release () _THROWS (()) { 
+    element_type* release () _THROWS (()) {
         element_type* __tmp = _C_ptr;
         _C_ptr = 0;
-        return __tmp; 
+        return __tmp;
     }
 
     // 20.4.5.2, p7
-    void reset (element_type* __p = 0) _THROWS (()) { 
+    void reset (element_type* __p = 0) _THROWS (()) {
         if (_C_ptr != __p) {
             delete _C_ptr;
             _C_ptr = __p;

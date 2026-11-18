@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 template <class _CharT, bool _Intl>
 __rw::__rw_facet_id moneypunct<_CharT, _Intl>::id;

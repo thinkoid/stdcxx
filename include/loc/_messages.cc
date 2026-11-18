@@ -29,7 +29,7 @@
 #include <loc/_ctype.h>
 
 
-namespace std { 
+namespace std {
 
 
 template <class _CharT>
@@ -72,7 +72,7 @@ messages<_CharT>::do_get (messages_base::catalog __cat,
                           const string_type     &__dfault) const
 {
     const char* const __text = __rw::__rw_get_message (__cat, __set, __msgid);
- 
+
     if (__text) {
         typedef std::codecvt<_CharT, char, _RWSTD_MBSTATE_T>
             _CodeCvt;

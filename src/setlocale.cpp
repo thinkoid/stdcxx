@@ -58,12 +58,12 @@
 #endif   // PATH_MAX
 
 
-namespace __rw { 
+namespace __rw {
 
 // "setlocale" synchronization (internal, not exported)
 __rw_mutex __rw_setlocale_mutex;
 
-// ctor changes the C library locale, saving the old locale to be 
+// ctor changes the C library locale, saving the old locale to be
 // restored by the dtor
 __rw_setlocale::__rw_setlocale (const char *locname, int cat, int nothrow)
     : _C_name (0), _C_guard (1), _C_cat (cat)
@@ -92,7 +92,7 @@ __rw_setlocale::__rw_setlocale (const char *locname, int cat, int nothrow)
         if (::setlocale (cat, locname)) {
 
             // a NULL name is only used when we want to use the object
-            // as a retriever for the name of the current locale; 
+            // as a retriever for the name of the current locale;
             // no need for a lock then
             if (!locname) {
                 _C_guard = 0;
@@ -119,7 +119,7 @@ __rw_setlocale::__rw_setlocale (const char *locname, int cat, int nothrow)
 }
 
 
-// dtor restores the C library locale that 
+// dtor restores the C library locale that
 // was in effect when the object was constructed
 __rw_setlocale::~__rw_setlocale ()
 {

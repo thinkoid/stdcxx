@@ -28,7 +28,7 @@
  * Copyright 1994-2006 Rogue Wave Software.
  * 
  **************************************************************************/
- 
+
 #ifndef _RWSTD_ACCESS_H_INCLUDED
 #define _RWSTD_ACCESS_H_INCLUDED
 
@@ -39,39 +39,39 @@
 
 namespace __rw {
 
-    
+
 struct __rw_access {
-    
+
     static _RWSTD_SIZE_T*&
     _C_get_pid (__rw_facet &__f) {
         return __f._C_pid;
-    }    
-    
+    }
+
     static _RWSTD_SIZE_T&
     _C_get_id (const __rw_facet_id& __id) {
         return __id._C_id;
     }
-    
+
     static __rw_facet::_C_facet_type&
     _C_get_type (__rw_facet &__f) {
         return __f._C_type;
     }
-    
+
     static const __rw_facet::_C_facet_type&
     _C_get_type (const __rw_facet &__f) {
         return __f._C_type;
     }
-       
+
     static const char*
     _C_get_name (const __rw_facet &__f) {
         return __f._C_name;
-    } 
-    
+    }
+
     static const void*&
     _C_get_impdata (__rw_facet &__f) {
         return __f._C_impdata;
     }
-    
+
     static _RWSTD_SIZE_T&
     _C_get_impsize (__rw_facet &__f) {
         return __f._C_impsize;

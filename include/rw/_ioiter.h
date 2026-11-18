@@ -41,7 +41,7 @@
 #endif   // _RWSTD_RW_ITERBASE_H_INCLUDED
 
 
-namespace std { 
+namespace std {
 
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
@@ -58,7 +58,7 @@ struct _RWSTD_EXPORT ostreambuf_iterator;
 // 24.5.3
 template <class _CharT, class _Traits>
 struct _RWSTD_EXPORT istreambuf_iterator
-    : iterator<input_iterator_tag, _CharT, 
+    : iterator<input_iterator_tag, _CharT,
                typename _Traits::off_type, _CharT*, _CharT&>
 {
     typedef _CharT                                  char_type;
@@ -78,7 +78,7 @@ private:
             : _C_keep (__c), _C_sb (__sb) { }
 
     public:
-        
+
         char_type operator* () const {
             return _C_keep;
         }
@@ -124,7 +124,7 @@ istreambuf_iterator (istream_type &__strm) _THROWS (())
     : _C_sb (__strm.rdbuf ())
 {
     // no-op
-} 
+}
 
 
 template <class _CharT, class _Traits>
@@ -154,7 +154,7 @@ operator++()
 
 
 template <class _CharT, class _Traits>
-inline typename istreambuf_iterator<_CharT, _Traits>::_C_proxy 
+inline typename istreambuf_iterator<_CharT, _Traits>::_C_proxy
 istreambuf_iterator<_CharT, _Traits>::
 operator++(int)
 {
@@ -200,7 +200,7 @@ operator== (const istreambuf_iterator<_CharT, _Traits>& __x,
 // 24.5.3.7
 template <class _CharT, class _Traits>
 inline bool
-operator!= (const istreambuf_iterator<_CharT, _Traits>& __x, 
+operator!= (const istreambuf_iterator<_CharT, _Traits>& __x,
             const istreambuf_iterator<_CharT, _Traits>& __y)
 {
     return !__x.equal (__y);
@@ -242,7 +242,7 @@ struct _RWSTD_EXPORT ostreambuf_iterator
     }
 
     // 24.5.4.2, p1
-    ostreambuf_iterator& operator= (char_type __c) { 
+    ostreambuf_iterator& operator= (char_type __c) {
         if (_C_sb && traits_type::eq_int_type (_C_sb->sputc (__c),
                                                traits_type::eof ()))
             _C_sb = 0;

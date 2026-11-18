@@ -42,7 +42,7 @@ __rw_digit_map[];
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template <class _CharT, class _OutputIter>

@@ -61,14 +61,14 @@ _RWSTD_ATTRIBUTE_NOTHROW void* __rw_mmap (const char* fname, size_t *size)
         return 0;
 
     const int fd = open (fname, O_RDONLY);
-   
+
     if (-1 == fd)
         return 0;
 
 #ifndef _RWSTD_NO_MMAP
 
     // On HPUX systems MAP_SHARED will prevent a second mapping of the same
-    // file if the regions are overlapping; one solution is to make the 
+    // file if the regions are overlapping; one solution is to make the
     // mapping private.
     void *data = mmap (0, sb.st_size, PROT_READ, MAP_SHARED, fd, 0);
 

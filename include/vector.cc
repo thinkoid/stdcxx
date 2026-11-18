@@ -39,7 +39,7 @@
  * 
  **************************************************************************/
 
-namespace std { 
+namespace std {
 
 template <class _TypeT, class _Allocator>
 vector<_TypeT, _Allocator>&
@@ -137,7 +137,7 @@ _C_assign_n (size_type __n, const_reference __x)
     // FIXME: implement in-place assignment with repetition
 
     clear ();
-    insert (begin (), __n, __x);   
+    insert (begin (), __n, __x);
 }
 
 
@@ -441,7 +441,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
     // 23.2.4.2, p5: calls to insert() must not reallocate storage
     // unless the new size of the container would exceed its capacity
 
-    // compute the sizes of the ranges of elements to be copied    
+    // compute the sizes of the ranges of elements to be copied
     const size_type __size1 = std::distance (begin (), __it);
     const size_type __size2 = std::distance (__first, __last);
 
@@ -498,7 +498,7 @@ _C_insert_range (iterator __it, _FwdIter __first, _FwdIter __last,
 
             // construct copies of the range of elements [pos, end)
             // past the end of the range of elements inserted above,
-            // as if by a call to 
+            // as if by a call to
             // std::uninitialized_copy (__movbeg, __end, _C_alloc._C_end);
 
             for (pointer __p = __movbeg; !(__p == __end); ++__p)

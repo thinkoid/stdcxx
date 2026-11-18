@@ -37,7 +37,7 @@
 #include <rw/_bitmask.h>
 #include <rw/_defs.h>
 
-namespace __rw { 
+namespace __rw {
 
 struct __rw_ctype_t;
 
@@ -62,7 +62,7 @@ _RWSTD_DEFINE_BITMASK_OPERATORS (__rw_ctype_mask);
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 struct locale;
 
@@ -295,7 +295,7 @@ protected:
     do_toupper (char_type*, const char_type*) const;
 
     virtual const char_type*
-    do_tolower (char_type*, const char_type*) const; 
+    do_tolower (char_type*, const char_type*) const;
 
     virtual char_type do_toupper (char_type) const;
 
@@ -655,7 +655,7 @@ protected:
 
     virtual const char_type*
     do_scan_not (mask, const char_type*, const char_type*) const;
-    
+
     virtual char
     do_narrow(char_type, char) const;
 
@@ -663,7 +663,7 @@ protected:
     do_narrow (const char_type*, const char_type*, char, char*) const;
 
     virtual char_type do_widen (char) const;
- 
+
     virtual const char*
     do_widen (const char*, const char*, char_type*) const;
 

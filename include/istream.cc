@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-namespace __rw { 
+namespace __rw {
 
 
 template <class _CharT, class _Traits, class _NativeType>
@@ -66,7 +66,7 @@ __rw_extract (std::basic_istream<_CharT, _Traits> &__strm,
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template<class _CharT, class _Traits>
@@ -150,7 +150,7 @@ _C_ipfx (bool __noskipws, ios_base::iostate __errbits)
 template<class _CharT, class _Traits>
 typename basic_istream<_CharT, _Traits>::int_type
 basic_istream<_CharT, _Traits>::
-_C_unsafe_get (streamsize *__cnt   /* = 0     */,               
+_C_unsafe_get (streamsize *__cnt   /* = 0     */,
                int_type    __delim /* = eof() */,
                int         __flags /* = 0     */)
 {
@@ -195,7 +195,7 @@ _C_unsafe_get (streamsize *__cnt   /* = 0     */,
     if (__err)
         this->setstate (__err);
 
-    return __c;    
+    return __c;
 }
 
 
@@ -206,7 +206,7 @@ _C_get (basic_streambuf<char_type, traits_type> &__sb, int_type __delim)
 {
     _RWSTD_ASSERT (0 != this->rdbuf ());
 
-    ios_base::iostate __err = ios_base::goodbit;   
+    ios_base::iostate __err = ios_base::goodbit;
 
     _C_gcount = 0;
     const sentry __ipfx (*this, true /* noskipws */);
@@ -243,12 +243,12 @@ _C_get (basic_streambuf<char_type, traits_type> &__sb, int_type __delim)
                 }
 
                 if (traits_type::eq_int_type (__c, traits_type::eof ())) {
-                    __err = ios_base::failbit;  
+                    __err = ios_base::failbit;
                     break;
                 }
 
                 ++_C_gcount;
-                this->rdbuf ()->sbumpc ();  
+                this->rdbuf ()->sbumpc ();
             }
         }
         catch (...) {
@@ -483,7 +483,7 @@ unget ()
 
             try {
 
-                if (!traits_type::eq_int_type (this->rdbuf ()->sungetc (), 
+                if (!traits_type::eq_int_type (this->rdbuf ()->sungetc (),
                                                traits_type::eof ()))
                     return *this;
             }
@@ -494,7 +494,7 @@ unget ()
 
         this->setstate (ios_base::badbit);
     }
-    
+
     return *this;
 }
 

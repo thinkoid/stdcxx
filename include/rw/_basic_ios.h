@@ -51,7 +51,7 @@
 #endif   // _RWSTD_RW_IOSFWD_H_INCLUDED
 
 
-namespace std { 
+namespace std {
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
@@ -78,7 +78,7 @@ public:
 
 protected:
 
-    typedef basic_streambuf<char_type, traits_type> _C_streambuf_type; 
+    typedef basic_streambuf<char_type, traits_type> _C_streambuf_type;
     typedef basic_ostream<char_type, traits_type>   _C_ostream_type;
 
 public:
@@ -305,7 +305,7 @@ basic_ios<_CharT, _Traits>::_C_bufmutex () const
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_BASIC_IOS, _CHAR)
 

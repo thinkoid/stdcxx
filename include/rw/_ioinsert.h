@@ -71,7 +71,7 @@ typedef basic_ostream<wchar_t> wostream;
 }
 
 
-namespace __rw { 
+namespace __rw {
 
 // helper - implements insertion of arithmetic and pointer types
 template <class _CharT, class _Traits, class _NativeType>
@@ -105,7 +105,7 @@ __rw_insert (std::basic_ostream<_CharT, _Traits>&, const _StringT*,
 
 
 
-namespace __rw { 
+namespace __rw {
 
 
 #if _RWSTD_INSTANTIATE (_INSERT_INT, _CHAR)

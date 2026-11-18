@@ -27,7 +27,7 @@
  **************************************************************************/
 
 #define _RWSTD_LIB_SRC
-#include <rw/_defs.h>     
+#include <rw/_defs.h>
 
 #include "setlocale.h"
 #include "strtol.h"
@@ -45,7 +45,7 @@
 #  include <stdio.h>    // for sscanf()
 #endif   // _RWSTD_NO_STRTOLD
 
-#include <rw/_defs.h>     
+#include <rw/_defs.h>
 
 
 // in case EINVAL is not #defined in errno.h
@@ -58,7 +58,7 @@
 
 
 
-namespace __rw { 
+namespace __rw {
 
 
 typedef unsigned char UChar;
@@ -308,7 +308,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
             *static_cast< unsigned short* >(pval) =
                 static_cast< unsigned short >(val.ul);
             break;
-                
+
         case __rw_facet::_C_short:
             // detect and handle overflow
             if (val.l < _RWSTD_SHRT_MIN) {
@@ -378,7 +378,7 @@ __rw_get_num (void *pval, const char *buf, int type, int flags,
         case __rw_facet::_C_ulong:
             *static_cast< unsigned long* >(pval) = val.ul;
             break;
-            
+
         case __rw_facet::_C_long:
             *static_cast< long* >(pval) = val.l;
             break;

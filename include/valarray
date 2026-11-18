@@ -40,7 +40,7 @@
 
 
 
-namespace std { 
+namespace std {
 
 // forward declarations
 class _RWSTD_EXPORT slice;
@@ -221,7 +221,7 @@ public:
 }   // namespace std
 
 
-namespace __rw { 
+namespace __rw {
 
 
 template<class _TypeT, class _UnaryFunction>
@@ -236,7 +236,7 @@ __rw_unary_function (const std::valarray<_TypeT> &__val, _UnaryFunction __fun)
     // apply `fun' to each element of `a' and initialize `tmp'
     std::transform (__val._C_array.begin (), __val._C_array.end (),
                      _Iter (__tmp.begin ()), __fun);
-    
+
     return std::valarray<_TypeT>(__tmp);
 }
 
@@ -244,8 +244,8 @@ __rw_unary_function (const std::valarray<_TypeT> &__val, _UnaryFunction __fun)
 // implements symmetric non-member valarray binary operators
 template<class _TypeT, class _BinaryFunction>
 inline std::valarray<typename _BinaryFunction::result_type>
-__rw_binary_function (const std::valarray<_TypeT> &__lhs, 
-                      const std::valarray<_TypeT> &__rhs, 
+__rw_binary_function (const std::valarray<_TypeT> &__lhs,
+                      const std::valarray<_TypeT> &__rhs,
                       _BinaryFunction               __fun)
 {
     typedef typename _BinaryFunction::result_type                 result_type;
@@ -257,9 +257,9 @@ __rw_binary_function (const std::valarray<_TypeT> &__lhs,
 
     // apply `fun' to each pair of elements of `lhs' and `rhs'
     std::transform (__lhs._C_array.begin (),
-                     __lhs._C_array.begin () + __tmp.size (), 
+                     __lhs._C_array.begin () + __tmp.size (),
                      __rhs._C_array.begin (), _Iter (__tmp.begin ()), __fun);
-    
+
     return std::valarray<result_type>(__tmp);
 }
 
@@ -267,7 +267,7 @@ __rw_binary_function (const std::valarray<_TypeT> &__lhs,
 // implements asymmetric non-member valarray binary operators
 template<class _TypeT, class _BinaryFunction>
 inline std::valarray<typename _BinaryFunction::result_type>
-__rw_binary_function (const std::valarray<_TypeT> &__val, 
+__rw_binary_function (const std::valarray<_TypeT> &__val,
                       _BinaryFunction               __fun)
 {
     typedef typename _BinaryFunction::result_type                 result_type;
@@ -279,7 +279,7 @@ __rw_binary_function (const std::valarray<_TypeT> &__val,
     // apply `fun' to each element of `a' and initialize `tmp'
     std::transform (__val._C_array.begin (), __val._C_array.end (),
                      _Iter (__tmp.begin ()), __fun);
-    
+
     return std::valarray<result_type>(__tmp);
 }
 
@@ -292,7 +292,7 @@ __rw_unary_function (const std::slice_array<_TypeT>&,
 
 
 template <class _TypeT, class _BinaryFunction>
-inline void 
+inline void
 __rw_binary_function (const std::slice_array<_TypeT>&,
                       const std::valarray<_TypeT>&,
                       _BinaryFunction);
@@ -329,7 +329,7 @@ __rw_binary_function (const std::indirect_array<_TypeT>&,
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template<class _TypeT>
@@ -361,9 +361,9 @@ inline valarray<bool> valarray<_TypeT>::operator! () const
 {
     __rw::__rw_array<bool> __tmp = __rw::__rw_array<bool>(size ());
 
-    transform (_C_array.begin (), _C_array.end (), __tmp.begin (), 
+    transform (_C_array.begin (), _C_array.end (), __tmp.begin (),
                logical_not<_TypeT>());
-    
+
     return valarray<bool>(__tmp);
 }
 
@@ -372,9 +372,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator*= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                multiplies<_TypeT>());
 
     return *this;
@@ -385,9 +385,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator/= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                divides<_TypeT>());
 
     return *this;
@@ -398,9 +398,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator+= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                plus<_TypeT>());
 
     return *this;
@@ -411,9 +411,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator-= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                minus<_TypeT>());
 
     return *this;
@@ -424,9 +424,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator%= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                modulus<_TypeT>());
 
     return *this;
@@ -437,9 +437,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator^= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                __rw::exclusive_or<_TypeT>());
 
     return *this;
@@ -450,9 +450,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator&= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                __rw::bitwise_and<_TypeT>());
 
     return *this;
@@ -463,9 +463,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator|= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                __rw::bitwise_or<_TypeT>());
 
     return *this;
@@ -476,9 +476,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator<<= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                __rw::shift_left<_TypeT>());
 
     return *this;
@@ -489,9 +489,9 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator>>= (const valarray<_TypeT>& __rhs)
 {
-    transform (_C_array.begin (), 
-               _C_array.begin () + (std::min)(size (), __rhs.size ()), 
-               __rhs._C_array.begin (), _C_array.begin (), 
+    transform (_C_array.begin (),
+               _C_array.begin () + (std::min)(size (), __rhs.size ()),
+               __rhs._C_array.begin (), _C_array.begin (),
                __rw::shift_right<_TypeT>());
 
     return *this;
@@ -502,7 +502,7 @@ template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator*= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (multiplies<_TypeT>(), __rhs));
 
     return *this;
@@ -512,7 +512,7 @@ valarray<_TypeT>::operator*= (const _TypeT& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>& valarray<_TypeT>::operator/= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (divides<_TypeT>(), __rhs));
 
     return *this;
@@ -522,7 +522,7 @@ inline valarray<_TypeT>& valarray<_TypeT>::operator/= (const _TypeT& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>& valarray<_TypeT>::operator+= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (plus<_TypeT>(), __rhs));
 
     return *this;
@@ -532,7 +532,7 @@ inline valarray<_TypeT>& valarray<_TypeT>::operator+= (const _TypeT& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>& valarray<_TypeT>::operator-= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (minus<_TypeT>(), __rhs));
 
     return *this;
@@ -542,7 +542,7 @@ inline valarray<_TypeT>& valarray<_TypeT>::operator-= (const _TypeT& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>& valarray<_TypeT>::operator%= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (modulus<_TypeT>(), __rhs));
 
     return *this;
@@ -552,7 +552,7 @@ inline valarray<_TypeT>& valarray<_TypeT>::operator%= (const _TypeT& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>& valarray<_TypeT>::operator^= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (__rw::exclusive_or<_TypeT>(), __rhs));
 
     return *this;
@@ -562,7 +562,7 @@ inline valarray<_TypeT>& valarray<_TypeT>::operator^= (const _TypeT& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>& valarray<_TypeT>::operator&= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (__rw::bitwise_and<_TypeT>(), __rhs));
 
     return *this;
@@ -572,7 +572,7 @@ inline valarray<_TypeT>& valarray<_TypeT>::operator&= (const _TypeT& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>& valarray<_TypeT>::operator|= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (__rw::bitwise_or<_TypeT>(), __rhs));
 
     return *this;
@@ -582,7 +582,7 @@ inline valarray<_TypeT>& valarray<_TypeT>::operator|= (const _TypeT& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>& valarray<_TypeT>::operator<<= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (__rw::shift_left<_TypeT>(), __rhs));
 
     return *this;
@@ -592,7 +592,7 @@ inline valarray<_TypeT>& valarray<_TypeT>::operator<<= (const _TypeT& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>& valarray<_TypeT>::operator>>= (const _TypeT& __rhs)
 {
-    transform (_C_array.begin (), _C_array.end (), _C_array.begin (), 
+    transform (_C_array.begin (), _C_array.end (), _C_array.begin (),
                bind2nd (__rw::shift_right<_TypeT>(), __rhs));
 
     return *this;
@@ -612,7 +612,7 @@ inline valarray<_TypeT>
 valarray<_TypeT>::apply (_TypeT __fun (const _TypeT&)) const
 {
     return __rw::__rw_unary_function (*this, __fun);
-} 
+}
 
 
 // 26.3.3 - valarray non-members
@@ -625,14 +625,14 @@ operator* (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
 {
     return valarray<_TypeT>(__lhs) *= __rhs;
 }
- 
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator/ (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
 {
     return valarray<_TypeT>(__lhs) /= __rhs;
 }
- 
+
 
 template<class _TypeT>
 inline valarray<_TypeT>
@@ -647,14 +647,14 @@ operator+ (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
 {
     return valarray<_TypeT>(__lhs) += __rhs;
 }
- 
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator- (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
 {
     return valarray<_TypeT>(__lhs) -= __rhs;
 }
-  
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator^ (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
@@ -710,14 +710,14 @@ operator* (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
 {
     return valarray<_TypeT>(__lhs) *= __rhs;
 }
- 
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator/ (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
 {
     return valarray<_TypeT>(__lhs) /= __rhs;
 }
- 
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator% (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
@@ -731,14 +731,14 @@ operator+ (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
 {
     return valarray<_TypeT>(__lhs) += __rhs;
 }
- 
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator- (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
 {
     return valarray<_TypeT>(__lhs) -= __rhs;
 }
-  
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator^ (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
@@ -800,7 +800,7 @@ operator* (const _TypeT& __lhs, const valarray<_TypeT> &__rhs)
     return __rw::__rw_binary_function (__rhs,
                                       bind1st (multiplies<_TypeT>(), __lhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator/ (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
@@ -808,7 +808,7 @@ operator/ (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
     return __rw::__rw_binary_function (__rhs,
                                       bind1st (divides<_TypeT>(), __lhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator% (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
@@ -823,19 +823,19 @@ operator+ (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
     return __rw::__rw_binary_function (__rhs, bind1st (plus<_TypeT>(), __lhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator- (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
     return __rw::__rw_binary_function (__rhs, bind1st (minus<_TypeT>(), __lhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<_TypeT>
 operator^ (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
-    return __rw::__rw_binary_function (__rhs, 
+    return __rw::__rw_binary_function (__rhs,
                                  bind1st (__rw::exclusive_or<_TypeT>(), __lhs));
 }
 
@@ -843,7 +843,7 @@ template<class _TypeT>
 inline valarray<_TypeT>
 operator& (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
-    return __rw::__rw_binary_function (__rhs, 
+    return __rw::__rw_binary_function (__rhs,
                                  bind1st (__rw::bitwise_and<_TypeT>(), __lhs));
 }
 
@@ -851,7 +851,7 @@ template<class _TypeT>
 inline valarray<_TypeT>
 operator| (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
-    return __rw::__rw_binary_function (__rhs, 
+    return __rw::__rw_binary_function (__rhs,
                                  bind1st (__rw::bitwise_or<_TypeT>(), __lhs));
 }
 
@@ -860,7 +860,7 @@ template<class _TypeT>
 inline valarray<_TypeT>
 operator<< (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
-    return __rw::__rw_binary_function (__rhs, 
+    return __rw::__rw_binary_function (__rhs,
                                  bind1st (__rw::shift_left<_TypeT>(), __lhs));
 }
 
@@ -868,7 +868,7 @@ template<class _TypeT>
 inline valarray<_TypeT>
 operator>>(const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
-    return __rw::__rw_binary_function (__rhs, 
+    return __rw::__rw_binary_function (__rhs,
                                  bind1st (__rw::shift_right<_TypeT>(), __lhs));
 }
 
@@ -876,7 +876,7 @@ template<class _TypeT>
 inline valarray<bool>
 operator&& (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
-    return __rw::__rw_binary_function (__rhs, 
+    return __rw::__rw_binary_function (__rhs,
                                  bind1st (logical_and<_TypeT>(), __lhs));
 }
 
@@ -884,7 +884,7 @@ template<class _TypeT>
 inline valarray<bool>
 operator|| (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
-    return __rw::__rw_binary_function (__rhs, 
+    return __rw::__rw_binary_function (__rhs,
                                  bind1st (logical_or<_TypeT>(), __lhs));
 }
 
@@ -894,28 +894,28 @@ operator== (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
 {
     return __rw::__rw_binary_function (__lhs, __rhs, equal_to<_TypeT>());
 }
-    
+
 template<class _TypeT>
 inline valarray<bool>
 operator!= (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
 {
     return __rw::__rw_binary_function (__lhs, __rhs, not_equal_to<_TypeT>());
 }
-   
+
 template<class _TypeT>
 inline valarray<bool>
 operator< (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
 {
     return __rw::__rw_binary_function (__lhs, __rhs, less<_TypeT>());
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator>(const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
 {
     return __rw::__rw_binary_function (__lhs, __rhs, greater<_TypeT>());
 }
-   
+
 template<class _TypeT>
 inline valarray<bool>
 operator<= (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
@@ -929,7 +929,7 @@ operator>= (const valarray<_TypeT> &__lhs, const valarray<_TypeT> &__rhs)
 {
     return __rw::__rw_binary_function (__lhs, __rhs, greater_equal<_TypeT>());
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator== (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
@@ -937,15 +937,15 @@ operator== (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
     return __rw::__rw_binary_function (__lhs,
                                       bind2nd (equal_to<_TypeT>(), __rhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator!= (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
 {
-    return __rw::__rw_binary_function (__lhs, 
+    return __rw::__rw_binary_function (__lhs,
                                       bind2nd (not_equal_to<_TypeT>(), __rhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator< (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
@@ -960,7 +960,7 @@ operator>(const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
     return __rw::__rw_binary_function (__lhs,
                                       bind2nd (greater<_TypeT>(), __rhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator<= (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
@@ -968,15 +968,15 @@ operator<= (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
     return __rw::__rw_binary_function (__lhs,
                                       bind2nd (less_equal<_TypeT>(), __rhs));
 }
-  
+
 template<class _TypeT>
 inline valarray<bool>
 operator>= (const valarray<_TypeT> &__lhs, const _TypeT &__rhs)
 {
-    return __rw::__rw_binary_function (__lhs, 
+    return __rw::__rw_binary_function (__lhs,
                                       bind2nd (greater_equal<_TypeT>(), __rhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator== (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
@@ -984,22 +984,22 @@ operator== (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
     return __rw::__rw_binary_function (__rhs,
                                       bind1st (equal_to<_TypeT>(), __lhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator!= (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
-    return __rw::__rw_binary_function (__rhs, 
+    return __rw::__rw_binary_function (__rhs,
                                       bind1st (not_equal_to<_TypeT>(), __lhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator< (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
     return __rw::__rw_binary_function (__rhs, bind1st (less<_TypeT>(), __lhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator>(const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
@@ -1007,7 +1007,7 @@ operator>(const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
     return __rw::__rw_binary_function (__rhs,
                                       bind1st (greater<_TypeT>(), __lhs));
 }
- 
+
 template<class _TypeT>
 inline valarray<bool>
 operator<= (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
@@ -1015,14 +1015,14 @@ operator<= (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
     return __rw::__rw_binary_function (__rhs,
                                       bind1st (less_equal<_TypeT>(), __lhs));
 }
-  
+
 template<class _TypeT>
 valarray<bool> operator>= (const _TypeT &__lhs, const valarray<_TypeT> &__rhs)
 {
-    return __rw::__rw_binary_function (__rhs, 
+    return __rw::__rw_binary_function (__rhs,
                                       bind1st (greater_equal<_TypeT>(), __lhs));
 }
- 
+
 
 // 26.3.3.3 - valarray transcendentals
 
@@ -1369,12 +1369,12 @@ public:
 
 private:
     // valarray::operator[] constructs it over the valarray's storage
-    slice_array (__rw::__rw_array<value_type>* __a, const slice &__s) 
+    slice_array (__rw::__rw_array<value_type>* __a, const slice &__s)
         : _C_array (__a),
           _C_slice (__s)
         { }
 
-    slice_array (); 
+    slice_array ();
     slice_array& operator= (const slice_array&);
 
     __rw::__rw_array<value_type> *_C_array;  // the referenced valarray
@@ -1404,7 +1404,7 @@ public:
         : _C_start (0),
           _C_reset (true)
         { }
-         
+
 
     gslice (_RWSTD_SIZE_T                  __start,
             const valarray<_RWSTD_SIZE_T>& __length,
@@ -1417,7 +1417,7 @@ public:
         _RWSTD_ASSERT (_C_length.size () == _C_stride.size ());
         }
 
-    gslice (const gslice &__rhs) 
+    gslice (const gslice &__rhs)
         : _C_start (__rhs._C_start),
           _C_length (__rhs._C_length),
           _C_stride (__rhs._C_stride),
@@ -1494,9 +1494,9 @@ public:
     void operator-= (const valarray<value_type> &__rhs) const;
     void operator%= (const valarray<value_type> &__rhs) const;
     void operator^= (const valarray<value_type> &__rhs) const;
-    void operator&= (const valarray<value_type> &__rhs) const;         
-    void operator|= (const valarray<value_type> &__rhs) const;         
-    void operator<<= (const valarray<value_type> &__rhs) const;        
+    void operator&= (const valarray<value_type> &__rhs) const;
+    void operator|= (const valarray<value_type> &__rhs) const;
+    void operator<<= (const valarray<value_type> &__rhs) const;
     void operator>>= (const valarray<value_type> &__rhs) const;
 
 private:
@@ -1512,7 +1512,7 @@ private:
     __rw::__rw_array<value_type>* _C_array;
     gslice                       _C_slice;
 };
- 
+
 
 template <class _TypeT>
 class mask_array
@@ -1599,7 +1599,7 @@ private:
         { }
 
     mask_array ();
-    mask_array<value_type>& operator= (const mask_array<value_type>&); 
+    mask_array<value_type>& operator= (const mask_array<value_type>&);
 
     __rw::__rw_array<value_type>* _C_array;
     valarray<bool>               _C_valarray;
@@ -1618,7 +1618,7 @@ void mask_array<_TypeT>::operator= (const value_type &__rhs) const
             __a [__i] = __rhs;
     }
 }
- 
+
 /****************************************************************
  *                       INDIRECT_ARRAY                         *
  ****************************************************************/
@@ -1711,13 +1711,13 @@ public:
 private:
     // valarray::operator[] constructs it over the valarray's storage
     indirect_array (__rw::__rw_array<value_type>  *__a,
-                    const valarray<_RWSTD_SIZE_T> &__v) 
+                    const valarray<_RWSTD_SIZE_T> &__v)
         :_C_array (__a),
          _C_valarray (__v)
         { }
 
     indirect_array ();
-    indirect_array& operator= (const indirect_array&); 
+    indirect_array& operator= (const indirect_array&);
 
 
     __rw::__rw_array<value_type>* _C_array;
@@ -1736,7 +1736,7 @@ inline void indirect_array<_TypeT>::operator= (const _TypeT &__rhs) const
 }   // namespace std
 
 
-namespace __rw { 
+namespace __rw {
 
 
 template <class _TypeT, class _UnaryFunction>
@@ -1849,7 +1849,7 @@ __rw_binary_function (const std::indirect_array<_TypeT> &__lhs,
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 /*****************************************************************
@@ -1879,7 +1879,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator= (const _TypeT& value) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -1911,7 +1911,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator/= (const valarray<_TypeT>& __rhs) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -1926,7 +1926,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator+= (const valarray<_TypeT>& __rhs) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -1941,7 +1941,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator-= (const valarray<_TypeT>& __rhs) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -1957,7 +1957,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator%= (const valarray<_TypeT>& __rhs) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -1972,7 +1972,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator^= (const valarray<_TypeT>& __rhs) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -1987,7 +1987,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator&= (const valarray<_TypeT>& __rhs) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -2002,7 +2002,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator|= (const valarray<_TypeT>& __rhs) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -2017,7 +2017,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator<<= (const valarray<_TypeT>& __rhs) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -2032,7 +2032,7 @@ gslice_array<_TypeT>::operator= (const valarray<_TypeT>& __rhs) const
 
   template <class _TypeT>
   inline void gslice_array<_TypeT>::operator>>= (const valarray<_TypeT>& __rhs) const
-  { 
+  {
     gslice *gsl = const_cast< gslice* >(&_C_slice);
     _RWSTD_SIZE_T __i = gsl->_C_next_ind();
     _RWSTD_SIZE_T __cpt = 0;
@@ -2080,7 +2080,7 @@ inline valarray<_TypeT> valarray<_TypeT>::operator[] (slice __sl) const
 
     __rw::__rw_array <_TypeT> __tmp =
         __rw::__rw_array <_TypeT>(_TypeT (), __size);
-      
+
     for (_RWSTD_SIZE_T __i = __sl.start (), __j = 0; __j != __size;
          __i += __sl.stride (), ++__j)
         __tmp [__j] = _C_array [__i];
@@ -2094,9 +2094,9 @@ inline valarray<_TypeT>::valarray (const slice_array<_TypeT>& sl_ar)
 {
     __rw::__rw_array <_TypeT> __tmp =
         __rw::__rw_array <_TypeT>(_TypeT (), sl_ar._C_get_slice ().size());
-      
+
     _RWSTD_SIZE_T __i = sl_ar._C_get_slice().start();
-    _RWSTD_SIZE_T __cpt = 0; 
+    _RWSTD_SIZE_T __cpt = 0;
 
     while( __cpt < sl_ar._C_get_slice().size() )
     {
@@ -2107,17 +2107,17 @@ inline valarray<_TypeT>::valarray (const slice_array<_TypeT>& sl_ar)
 
     _C_array.swap (__tmp);
 }
-   
+
 
 template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator= (const slice_array<_TypeT>& sl_ar)
-{ 
+{
     __rw::__rw_array <_TypeT> __tmp =
         __rw::__rw_array <_TypeT>(_TypeT (), sl_ar._C_get_slice ().size());
 
     _RWSTD_SIZE_T __i = sl_ar._C_get_slice().start();
-    _RWSTD_SIZE_T __cpt = 0; 
+    _RWSTD_SIZE_T __cpt = 0;
 
     while( __cpt < sl_ar._C_get_slice().size() )
     {
@@ -2127,7 +2127,7 @@ valarray<_TypeT>::operator= (const slice_array<_TypeT>& sl_ar)
     }
 
     if ( &_C_array == sl_ar._C_get_storage() )
-      _C_array.resize(0); 
+      _C_array.resize(0);
 
     _C_array.swap (__tmp);
 
@@ -2135,7 +2135,7 @@ valarray<_TypeT>::operator= (const slice_array<_TypeT>& sl_ar)
 }
 
 
-template <class _TypeT> 
+template <class _TypeT>
 inline valarray<_TypeT>
 valarray<_TypeT>::operator[](const gslice& __sl) const
 {
@@ -2184,7 +2184,7 @@ inline valarray<_TypeT>::valarray(const gslice_array<_TypeT>& sl_ar)
 template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator= (const gslice_array<_TypeT>& sl_ar)
-{ 
+{
     gslice __sl(sl_ar._C_get_slice());
 
     const _RWSTD_SIZE_T __maxinx = __sl._C_ind_numb ();
@@ -2203,7 +2203,7 @@ valarray<_TypeT>::operator= (const gslice_array<_TypeT>& sl_ar)
     }
 
     if ( &_C_array == sl_ar._C_get_storage() )
-      _C_array.resize(0); 
+      _C_array.resize(0);
 
     _C_array.swap (__tmp);
 
@@ -2211,7 +2211,7 @@ valarray<_TypeT>::operator= (const gslice_array<_TypeT>& sl_ar)
 }
 
 
-template <class _TypeT> 
+template <class _TypeT>
 inline valarray<_TypeT>
 valarray<_TypeT>::operator[](const valarray<bool>& __rhs) const
 {
@@ -2221,8 +2221,8 @@ valarray<_TypeT>::operator[](const valarray<bool>& __rhs) const
       if ( __rhs[__i]) __n++;
 
     __rw::__rw_array <_TypeT> __tmp = __rw::__rw_array <_TypeT>(_TypeT (), __n);
-      
-    _RWSTD_SIZE_T __cpt = 0; 
+
+    _RWSTD_SIZE_T __cpt = 0;
 
     for( __i=0; __i < __rhs.size(); __i++ )
         if ( __rhs[__i]) __tmp[__cpt++] = _C_array[__i];
@@ -2244,8 +2244,8 @@ inline valarray<_TypeT>::valarray(const mask_array<_TypeT>& __rhs)
         if ( (*__sec)[__i]) __n++;
 
     __rw::__rw_array <_TypeT> __tmp = __rw::__rw_array <_TypeT>(_TypeT (), __n);
-      
-    _RWSTD_SIZE_T __cpt = 0; 
+
+    _RWSTD_SIZE_T __cpt = 0;
 
     for( __i=0; __i < __sec->size(); __i++ )
       if ( (*__sec)[__i]) __tmp[__cpt++] = (*(__rhs._C_get_storage()))[__i];
@@ -2257,7 +2257,7 @@ inline valarray<_TypeT>::valarray(const mask_array<_TypeT>& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator= (const mask_array<_TypeT>& __rhs)
-{ 
+{
     mask_array<_TypeT>  *__msk = const_cast< mask_array<_TypeT>* >(&__rhs);
     const valarray<bool>*__sec = __msk->_C_get_array_ptr();
 
@@ -2268,14 +2268,14 @@ valarray<_TypeT>::operator= (const mask_array<_TypeT>& __rhs)
             __n++;
 
     __rw::__rw_array <_TypeT> __tmp = __rw::__rw_array <_TypeT>(_TypeT (), __n);
-      
-    _RWSTD_SIZE_T __cpt = 0; 
+
+    _RWSTD_SIZE_T __cpt = 0;
 
     for( __i=0; __i < __sec->size(); __i++ )
       if ( (*__sec)[__i]) __tmp[__cpt++] = (*(__rhs._C_get_storage()))[__i];
 
     if ( &_C_array == __rhs._C_get_storage() )
-      _C_array.resize(0); 
+      _C_array.resize(0);
 
     _C_array.swap (__tmp);
 
@@ -2283,7 +2283,7 @@ valarray<_TypeT>::operator= (const mask_array<_TypeT>& __rhs)
 }
 
 
-template <class _TypeT> 
+template <class _TypeT>
 inline valarray<_TypeT>
 valarray<_TypeT>::operator[](const valarray<_RWSTD_SIZE_T>& __rhs) const
 {
@@ -2307,8 +2307,8 @@ inline valarray<_TypeT>::valarray (const indirect_array<_TypeT>& __rhs)
 
     __rw::__rw_array <_TypeT> __tmp =
         __rw::__rw_array <_TypeT>(_TypeT (), __sec->size());
-      
-    _RWSTD_SIZE_T __cpt = 0; 
+
+    _RWSTD_SIZE_T __cpt = 0;
 
     for(_RWSTD_SIZE_T __i=0; __i < __sec->size(); __i++ )
       __tmp[__cpt++] = (*(__rhs._C_get_storage()))[(*__sec)[__i]];
@@ -2320,7 +2320,7 @@ inline valarray<_TypeT>::valarray (const indirect_array<_TypeT>& __rhs)
 template <class _TypeT>
 inline valarray<_TypeT>&
 valarray<_TypeT>::operator= (const indirect_array<_TypeT>& __rhs)
-{ 
+{
     indirect_array<_TypeT> *__ia =
         const_cast< indirect_array<_TypeT>* >(&__rhs);
 
@@ -2328,14 +2328,14 @@ valarray<_TypeT>::operator= (const indirect_array<_TypeT>& __rhs)
 
     __rw::__rw_array <_TypeT> __tmp =
         __rw::__rw_array <_TypeT>(_TypeT (), __sec->size());
-      
-    _RWSTD_SIZE_T __cpt = 0; 
+
+    _RWSTD_SIZE_T __cpt = 0;
 
     for(_RWSTD_SIZE_T __i=0; __i < __sec->size(); __i++ )
       __tmp[__cpt++] = (*(__rhs._C_get_storage()))[(*__sec)[__i]];
 
     if (&_C_array == __rhs._C_get_storage() )
-      _C_array.resize(0); 
+      _C_array.resize(0);
 
     _C_array.swap (__tmp);
 

@@ -54,7 +54,7 @@
 #endif   // _RWSTD_PBACK_SIZE
 
 
-namespace std { 
+namespace std {
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
@@ -171,14 +171,14 @@ protected:
     // 27.8.1.4, p5
     virtual int_type pbackfail (int_type = traits_type::eof ());
 
-    // 27.8.1.4, p10 
+    // 27.8.1.4, p10
     //   setbuf (0, 0) sets unbuffered mode (safe to use at any time)
     //   setbuf (0, N) sets buffered mode with internal buffer of size N
     //   setbuf (b, N) sets buffered mode with user-allocated buffer `b'
     //                 of size `N' (user responsible for deallocation)
     virtual basic_streambuf<char_type, traits_type>*
     setbuf (char_type*, _RWSTD_STREAMSIZE);
- 
+
     // 27.8.1.4, p11
     virtual pos_type
     seekoff (off_type, ios_base::seekdir,
@@ -203,7 +203,7 @@ private:
     // count newlines in char sequence to handle CR/LF translation on win32
     // calculates seek offsets in external representation
     off_type _C_crlf_extern_count (const char*, const char*) const;
-    
+
     // calculates seek offsets in internal representation
     off_type _C_crlf_intern_count (const char_type*, const char_type*) const;
 
@@ -227,9 +227,9 @@ private:
 
     void      *_C_file;               // underlying FILE ptr or file descriptor
     pos_type   _C_cur_pos;            // offset/state in file corresponding to
-                                      //  end of buffer, and actual pos in file 
+                                      //  end of buffer, and actual pos in file
     pos_type   _C_beg_pos;            // offset/state in file corresponding
-                                      //  to the beginning of buffer 
+                                      //  to the beginning of buffer
     _RWSTD_SIZE_T _C_pbacksize;       // size of putback area
 };
 
@@ -407,7 +407,7 @@ public:
     bool is_open () const {
         return rdbuf ()->is_open ();
     }
-     
+
     void open (const char         *__name,
                ios_base::openmode  __mode = ios_base::out) {
         this->clear (rdbuf ()->open (__name, __mode |= ios_base::out)
@@ -488,7 +488,7 @@ private:
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_BASIC_FILEBUF, _CHAR)
 

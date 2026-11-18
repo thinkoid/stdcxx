@@ -43,7 +43,7 @@
 #include <loc/_facet.h>
 
 
-namespace std { 
+namespace std {
 
 struct _RWSTD_EXPORT ios_base;
 
@@ -115,7 +115,7 @@ __rw::__rw_facet_id money_put<wchar_t, ostreambuf_iterator<wchar_t> >::id;
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_MONEY_PUT, _CHAR)
 

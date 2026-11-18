@@ -39,7 +39,7 @@
 
 
 
-namespace std { 
+namespace std {
 
 // 26.2.2
 template <class _TypeT>
@@ -100,7 +100,7 @@ public:
 
     // defined after the definition of the incomplete complex<double>
     explicit complex (const complex<double>&);
-    
+
     // defined after the definition of the incomplete complex<long double>
     explicit complex (const complex<long double>&);
 
@@ -116,7 +116,7 @@ public:
     complex& operator= (const complex<_TypeT>& __rhs) {
         return (_C_re = __rhs.real ()), (_C_im = __rhs.imag ()), *this;
     }
-    
+
     template <class _TypeX>
     complex<value_type>& operator+= (const complex<_TypeX> &__rhs) {
         return (_C_re += __rhs.real ()), (_C_im += __rhs.imag ()), *this;
@@ -175,7 +175,7 @@ public:
     // implicit conversion
     complex (const complex<float> &__rhs)
         : _C_re (__rhs.real ()), _C_im (__rhs.imag ()) { }
-    
+
     // defined after the definition of the incomplete complex<long double>
     explicit complex (const complex<long double>&);
 
@@ -191,7 +191,7 @@ public:
     complex& operator= (const complex<_TypeT>& __rhs) {
         return (_C_re = __rhs.real ()), (_C_im = __rhs.imag ()), *this;
     }
-    
+
     template <class _TypeX>
     complex<value_type>& operator+= (const complex<_TypeX> &__rhs) {
         return (_C_re += __rhs.real ()), (_C_im += __rhs.imag ()), *this;
@@ -250,7 +250,7 @@ public:
     // implicit conversion
     complex (const complex<float> &__rhs)
         : _C_re (__rhs.real ()), _C_im (__rhs.imag ()) { }
-    
+
     // implicit conversion
     complex (const complex<double> &__rhs)
         : _C_re (__rhs.real ()), _C_im (__rhs.imag ()) { }
@@ -313,7 +313,7 @@ inline complex<float>::complex (const complex<double> &__rhs)
     : _C_re (static_cast< value_type >(__rhs.real ())),
       _C_im (static_cast< value_type >(__rhs.imag ()))
 { }
-    
+
 
 inline complex<float>::complex (const complex<long double> &__rhs)
     : _C_re (static_cast< value_type >(__rhs.real ())),
@@ -356,7 +356,7 @@ public:
         // not recursive: calls the compiler-generated operator=()
         return *this = complex (__rhs);
     }
-    
+
     template <class _TypeX>
     complex<value_type>& operator+= (const complex<_TypeX> &__rhs) {
         return *this = *this + __rhs;
@@ -517,21 +517,21 @@ inline bool
 operator== (const complex<_TypeT> &__lhs, const complex<_TypeT> &__rhs)
 {
     return __lhs.real () == __rhs.real () && __lhs.imag () == __rhs.imag ();
-} 
+}
 
 
 template <class _TypeT>
 inline bool operator== (const complex<_TypeT> &__lhs, const _TypeT &__rhs)
 {
     return __lhs.real () == __rhs && __lhs.imag () == _TypeT ();
-} 
+}
 
 
 template <class _TypeT>
 inline bool operator== (const _TypeT &__lhs, const complex<_TypeT> &__rhs)
 {
     return __rhs == __lhs;
-} 
+}
 
 
 // 26.2.6, p11
@@ -540,21 +540,21 @@ inline bool
 operator!= (const complex<_TypeT> &__lhs, const complex<_TypeT> &__rhs)
 {
     return !(__lhs == __rhs);
-} 
+}
 
 
 template <class _TypeT>
 inline bool operator!= (const complex<_TypeT> &__lhs, const _TypeT &__rhs)
 {
     return !(__lhs == __rhs);
-} 
+}
 
 
 template <class _TypeT>
 inline bool operator!= (const _TypeT &__lhs, const complex<_TypeT> &__rhs)
 {
     return !(__lhs == __rhs);
-} 
+}
 
 
 // 26.2.7 - complex value operations

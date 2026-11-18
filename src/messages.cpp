@@ -46,7 +46,7 @@
 #define _RWSTD_BAD_CATD ((nl_catd)-1)
 
 
-namespace __rw { 
+namespace __rw {
 
 
 // Implementation structure private to this module -- __rw_open_cat_data.
@@ -54,7 +54,7 @@ namespace __rw {
 // identified by the nl_catd handle returned by the C library catopen
 // function) and the locale specified by the user for character translation
 // in the call to messages<_CharT>::open.
-// 
+//
 // Also used as a parameter to rw_get_static_mutex to ensure uniqueness
 // of the mutex object used in sync'ing the threads using __rw_cat...
 // (see RWSTD_MT_STATIC_GUARD below)
@@ -78,7 +78,7 @@ struct __rw_open_cat_page
 
 //        cat   _rw_open_cat_data     algorithm
 //        -1         0                invalid
-//        -1       non-0              append the struct into the repository and 
+//        -1       non-0              append the struct into the repository and
 //                                    return a pointer to a struct containing
 //                                    the new catalog and locale
 //      > -1       0                  return the a pointer to a struct
@@ -104,7 +104,7 @@ __rw_manage_cat_data (int &cat,  __rw_open_cat_data *pcat_data)
     static size_t largest_cat     = 0;
 
     if (!catalogs) {
-        
+
         for (size_t i = 0; i < catalog_bufsize; ++i) {
             catalog_page._C_data [i].catd = _RWSTD_BAD_CATD;
             catalog_buf [i] = &catalog_page._C_data [i];
@@ -139,7 +139,7 @@ __rw_manage_cat_data (int &cat,  __rw_open_cat_data *pcat_data)
                     new __rw_open_cat_data* [n_catalogs + __rw_open_cat_page::_C_size];
 
                 memcpy (data, catalogs, n_catalogs * sizeof *data);
-                 
+
                 if (catalogs != catalog_buf)
                     delete[] catalogs;
 
@@ -153,7 +153,7 @@ __rw_manage_cat_data (int &cat,  __rw_open_cat_data *pcat_data)
                 cat = int (n_catalogs);
 
                 catalogs [cat]->catd = pcat_data->catd;
-                memcpy (catalogs [cat]->loc._C_store (), 
+                memcpy (catalogs [cat]->loc._C_store (),
                         pcat_data->loc._C_store (),
                         sizeof (std::locale));
 
@@ -317,7 +317,7 @@ void __rw_cat_close (int cat)
         // guard is local to this scope to avoid reacquiring the mutex
         // if have to generate an exception message string below.
         _RWSTD_MT_CLASS_GUARD (__rw_open_cat_data);
-    
+
         __rw_open_cat_data* const pcat_data =
             cat < 0 ? 0 : __rw_manage_cat_data (cat, 0);
 

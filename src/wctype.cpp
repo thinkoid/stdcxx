@@ -565,7 +565,7 @@ ctype_byname (const char *name, size_t refs)
 
     // Memory map the codecvt database and store it for future use
     if (impl)
-        _C_cvtimpl = __rw::__rw_get_facet_data (LC_CTYPE, _C_cvtsize, 0, 
+        _C_cvtimpl = __rw::__rw_get_facet_data (LC_CTYPE, _C_cvtsize, 0,
                                                impl->codeset_name ());
 
     if (impl == 0) {
@@ -739,7 +739,7 @@ do_narrow (char_type c, char dfault) const
 
 #endif   // _RWSTD_WCHAR_MIN
 
-    const __rw::__rw_codecvt_t* cvt = 
+    const __rw::__rw_codecvt_t* cvt =
         static_cast< const __rw::__rw_codecvt_t* >(_C_cvtimpl);
 
     char ch = 0;
@@ -753,16 +753,16 @@ do_narrow (char_type c, char dfault) const
 
     }
     else {
-        
+
 #if _RWSTD_WCHAR_MIN < 0
         // For a signed wchar_t test if the character has a negative value
         if (c < 0)
             return dfault;
 #endif // _RWSTD_WCHAR_MIN < 0
 
-        // Look up narrow character value in database; be aware that there 
-        // is no way to know what the internal representation is for this 
-        // wide character; we have to assume that the internal representation 
+        // Look up narrow character value in database; be aware that there
+        // is no way to know what the internal representation is for this
+        // wide character; we have to assume that the internal representation
         // was native and use wide-to-narrow tables for conversion
         char_type wc = 0;
 
@@ -781,12 +781,12 @@ do_narrow (char_type c, char dfault) const
 #endif // _RWSTD_WCHAR_MIN < 0
 
         typedef unsigned char UChar;
-        
+
         size_t i = 0;
         wc = ptbl [UChar (*ptmp)];
         while (wc & imask) {
             // check validity of the value
-            if (wc == (imask | _RWSTD_WCHAR_MAX)) 
+            if (wc == (imask | _RWSTD_WCHAR_MAX))
                 return dfault;
 
             ptbl = tbl + 256 * (wc & (~imask));
@@ -803,7 +803,7 @@ do_narrow (char_type c, char dfault) const
         // the resulting ch value is an index to the storage space of
         // the narrow sequence; for our purposes here, that sequence has
         // to have length of one
-        const char* impl_raw = 
+        const char* impl_raw =
             reinterpret_cast< const char* >(cvt);
         size_t offset = wc + sizeof (__rw::__rw_codecvt_t);
 
@@ -846,7 +846,7 @@ do_widen (char c) const
     // a table lookup to get the wide version of this character
     // otherwise we have to call setlocale() and btowc() to get the
     // corresponding wchar_t
-    const __rw::__rw_codecvt_t* cvt = 
+    const __rw::__rw_codecvt_t* cvt =
         static_cast< const __rw::__rw_codecvt_t* >(_C_cvtimpl);
 
     char_type ch;
@@ -868,7 +868,7 @@ do_widen (char c) const
         const char_type imask = char_type (~(_RWSTD_WCHAR_MAX >> 1));
 #endif   // _RWSTD_WCHAR_MIN < 0
 
-        // Lookup the narrow character in the table; be aware that 
+        // Lookup the narrow character in the table; be aware that
         // the result of the lookup might be the index for another
         // table (i.e., the narrow character may be the first byte
         // of a multibyte character) in which case return an error.
@@ -893,7 +893,7 @@ do_widen (const char *lo, const char *hi, char_type *dest) const
     while (lo < hi) {
         *dest++ = widen (*lo++);
     }
-    
+
     return hi;
 }
 

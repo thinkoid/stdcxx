@@ -63,7 +63,7 @@ _C_str (const char_type *__s, _RWSTD_SIZE_T __slen)
     // new buffer and size
     char_type        *__buf;
     _RWSTD_SIZE_T     __bufsize = __slen;
-    // saved offset of pptr 
+    // saved offset of pptr
     _RWSTD_STREAMSIZE __off = -1;
 
     if (__s == this->_C_buffer) {

@@ -33,7 +33,7 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 // required to be defined by 9.4.2, p4, even if initialized inside class
 const ios_base::fmtflags ios_base::boolalpha;

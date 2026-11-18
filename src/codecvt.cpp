@@ -184,7 +184,7 @@ do_unshift (state_type   &state,
 }
 
 
-/* virtual */ int 
+/* virtual */ int
 codecvt<char, char, _RWSTD_MBSTATE_T>::
 do_encoding () const _THROWS (())
 {

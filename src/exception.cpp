@@ -75,7 +75,7 @@ void unexpected ()  _RWSTD_GNUC_ATTRIBUTE ((__noreturn__));
 bool UNCAUGHT_EXCEPTION () _THROWS (());
 
 
-namespace std { 
+namespace std {
 
 // define functions in namespace std to wrap any globals defined
 // in the compiler support library
@@ -214,7 +214,7 @@ _RWSTD_EXPORT bool uncaught_exception () _THROWS (())
 #  if    !defined (_RWSTD_NO_STD_EXCEPTION)    \
       || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
-namespace std { 
+namespace std {
 
 #  endif   // !_RWSTD_NO_STD_EXCEPTION || !_RWSTD_NO_RUNTIME_IN_STD ...
 
@@ -278,7 +278,7 @@ const char* exception::what () const _THROWS (())
 #  if    !defined (_RWSTD_NO_STD_BAD_EXCEPTION)    \
       || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
-namespace std { 
+namespace std {
 
 #  endif   // !_RWSTD_NO_STD_BAD_EXCEPTION || !_RWSTD_NO_RUNTIME_IN_STD ...
 
@@ -622,7 +622,7 @@ __rw_exception::__rw_exception (const __rw_exception &rhs)
     _C_assign (rhs.what ());
 }
 
-  
+
 /* explicit */ __rw_exception::__rw_exception (const char *str)
     : std::exception (), _C_what (0)
 {
@@ -649,7 +649,7 @@ __rw_exception::__rw_exception (const std::string &whatstr)
     // (MSVC 6.0 only)
     _C_dummy_what = 0;
 #endif   // _C_dummy_what
-    
+
 }
 
 

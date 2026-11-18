@@ -164,7 +164,7 @@ operator delete[] (void* __ptr, const std::nothrow_t&) _NEW_THROWS (())
 //**************************************************************************
 
 
-namespace std { 
+namespace std {
 
 // define std::nothrow only if the symbol doesn't appear
 // in the compiler support library to prevent linker errors
@@ -185,7 +185,7 @@ _RWSTD_EXPORT extern const nothrow_t nothrow = nothrow_t ();
 #if    !defined (_RWSTD_NO_STD_BAD_ALLOC)    \
     || !defined (_RWSTD_NO_RUNTIME_IN_STD)
 
-namespace std { 
+namespace std {
 
 #endif   // !_RWSTD_NO_STD_BAD_ALLOC || !_RWSTD_NO_RUNTIME_IN_STD ...
 

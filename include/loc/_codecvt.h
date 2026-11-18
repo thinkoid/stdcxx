@@ -38,13 +38,13 @@
 #include <rw/_mbstate.h>   // for _RWSTD_MBSTATE_T
 
 
-namespace __rw { 
+namespace __rw {
 
 struct __rw_ctype_t;
 
 }   // namespace __rw
 
-namespace std { 
+namespace std {
 
 // 22.2.1.5 - Template class codecvt
 
@@ -201,7 +201,7 @@ class _RWSTD_EXPORT codecvt<char, char, _RWSTD_MBSTATE_T>
 {
 public:
 
-    typedef char             extern_type;   
+    typedef char             extern_type;
     typedef char             intern_type;
     typedef _RWSTD_MBSTATE_T state_type;
 
@@ -416,7 +416,7 @@ public:
 
     typedef _InternT intern_type;
     typedef _ExternT extern_type;
-    typedef _StateT  state_type; 
+    typedef _StateT  state_type;
 
     explicit codecvt_byname (const char *__name, _RWSTD_SIZE_T __ref = 0)
         : codecvt <_InternT, _ExternT, _StateT> (__ref) {
@@ -477,7 +477,7 @@ protected:
     do_unshift (state_type&,
                 extern_type*, extern_type*, extern_type*&) const;
 
-    virtual int do_encoding () const _THROWS (()); 
+    virtual int do_encoding () const _THROWS (());
 
     // signature follows lwg issue 75
     virtual int

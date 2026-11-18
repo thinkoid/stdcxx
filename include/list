@@ -53,7 +53,7 @@
 #include <rw/_error.h>
 
 
-namespace std { 
+namespace std {
 
 template <class _TypeT>
 struct __rw_list_node
@@ -61,7 +61,7 @@ struct __rw_list_node
     __rw_list_node*  _C_next;   // pointer to next node
     __rw_list_node*  _C_prev;   // pointer to previous node
     _TypeT           _C_data;   // client data
-}; 
+};
 
 
 
@@ -84,38 +84,38 @@ public:
     typedef bidirectional_iterator_tag              iterator_category;
 
     typedef  __rw_list_node<value_type>*                   _C_link_type;
-    
+
     __rw_list_iter () { }
 
     __rw_list_iter (const _C_link_type& __rhs)
         : _C_node (__rhs) { }
 
     __rw_list_iter& operator++ () {
-        _C_node = (_C_link_type)((*_C_node)._C_next); 
+        _C_node = (_C_link_type)((*_C_node)._C_next);
         return *this;
     }
-    
+
     __rw_list_iter& operator-- () {
         _C_node = (_C_link_type)((*_C_node)._C_prev);
         return *this;
     }
-    
+
     __rw_list_iter operator++ (int) {
         __rw_list_iter __tmp = *this;
         return ++*this, __tmp;
     }
-    
+
     __rw_list_iter operator-- (int) {
         __rw_list_iter __tmp = *this;
         return --*this, __tmp;
     }
-    
+
     reference operator* () const {
         return (*_C_node)._C_data;
     }
 
     pointer operator-> () const { return &**this; };
-    
+
     bool operator== (const __rw_list_iter& __iter) const {
         return _C_node == __iter._C_node;
     }
@@ -253,7 +253,7 @@ public:
 
 
     typedef __rw_list_iter<value_type, difference_type, pointer, reference>
-    _C_list_iter; 
+    _C_list_iter;
 
     typedef __rw_list_const_iter<value_type, difference_type, const_pointer,
                                  const_reference>
@@ -264,10 +264,10 @@ public:
 
     typedef __rw::__rw_debug_iter <list,_C_list_iter, _C_list_iter>
     iterator;
-    
+
     typedef __rw::__rw_debug_iter <list,_C_list_citer, _C_list_iter>
     const_iterator;
-    
+
 
     iterator _C_make_iter (const _C_link_type &__node) {
         return iterator (*this, _C_list_iter (__node));
@@ -314,9 +314,9 @@ protected:
         _C_node = _C_get_node ();
 
         (*_C_node)._C_next = _C_node;
-        (*_C_node)._C_prev = _C_node; 
+        (*_C_node)._C_prev = _C_node;
     }
-    
+
     // a constructor that throws runs no destructor: the inserts roll back
     // their own nodes, and the catch returns the sentinel
     void _C_init (size_type __n, const value_type& __val) {
@@ -338,9 +338,9 @@ public:
         : allocator_type (__alloc), _C_node (0), _C_length (0) {
         _C_init ();
     }
-    
+
     explicit
-    list (size_type             __n, 
+    list (size_type             __n,
           const_reference       __x     = value_type (),
           const allocator_type &__alloc = allocator_type ())
         : allocator_type (__alloc), _C_node (0), _C_length (0) {
@@ -368,7 +368,7 @@ public:
     }
 
     template<class _InputIter>
-    list (_InputIter __first, _InputIter __last, 
+    list (_InputIter __first, _InputIter __last,
           const allocator_type& __alloc = allocator_type ())
         : allocator_type (__alloc), _C_node (0), _C_length (0) {
         _RWSTD_ASSERT_RANGE (__first, __last);
@@ -390,7 +390,7 @@ public:
 
     ~list ();
 
-    list& operator= (const list&);   
+    list& operator= (const list&);
 
     template<class _InputIter>
     void assign (_InputIter __first, _InputIter __last) {
@@ -426,15 +426,15 @@ public:
         return _C_make_iter (_C_node);
     }
 
-    reverse_iterator rbegin () { 
+    reverse_iterator rbegin () {
         return reverse_iterator (end ());
     }
 
-    const_reverse_iterator rbegin () const { 
+    const_reverse_iterator rbegin () const {
         return const_reverse_iterator (end ());
     }
 
-    reverse_iterator rend () { 
+    reverse_iterator rend () {
         return reverse_iterator (begin ());
     }
 
@@ -489,7 +489,7 @@ public:
         insert (end (), __x);
         _RWSTD_ASSERT (!empty ());
     }
-    
+
     void pop_front () {
         _RWSTD_ASSERT (!empty ());
         erase (begin ());
@@ -526,13 +526,13 @@ public:
 
     // handles integral types
     template<class _InputIter>
-    void _C_insert (const iterator &__it, 
+    void _C_insert (const iterator &__it,
                     _InputIter      __first, _InputIter __last, int) {
         _C_insert (__it, size_type (__first), const_reference (__last));
     }
 
     template<class _InputIter>
-    void insert (iterator __it, 
+    void insert (iterator __it,
                  _InputIter __first, _InputIter __last) {
 
         _RWSTD_ASSERT_RANGE (begin (), __it);
@@ -570,14 +570,14 @@ protected:
         while (__n-- && !(__it == __end))
             ++__it;
     }
-      
+
     // merges two adjacent sorted runs by splicing their nodes
     void _C_adjacent_merge (iterator, iterator, iterator);
 
     // merges two adjacent sorted runs by splicing their nodes
     template<class _Compare>
     void _C_adjacent_merge (iterator, iterator, iterator, _Compare);
-      
+
     void _C_insert (iterator __it, size_type __n, const_reference __x) {
         _RWSTD_ASSERT_RANGE (begin (), __it);
 
@@ -634,7 +634,7 @@ public:
 
 template <class _TypeT, class _Allocator>
 inline bool
-operator== (const list<_TypeT, _Allocator>& __x, 
+operator== (const list<_TypeT, _Allocator>& __x,
             const list<_TypeT, _Allocator>& __y)
 {
     return    __x.size () == __y.size ()
@@ -644,17 +644,17 @@ operator== (const list<_TypeT, _Allocator>& __x,
 
 template <class _TypeT, class _Allocator>
 inline bool
-operator< (const list<_TypeT, _Allocator>& __x, 
+operator< (const list<_TypeT, _Allocator>& __x,
            const list<_TypeT, _Allocator>& __y)
 {
-    return lexicographical_compare (__x.begin (), __x.end (), 
+    return lexicographical_compare (__x.begin (), __x.end (),
                                     __y.begin (), __y.end ());
 }
 
 
 template <class _TypeT, class _Allocator>
 inline bool
-operator!= (const list<_TypeT, _Allocator>& __x, 
+operator!= (const list<_TypeT, _Allocator>& __x,
             const list<_TypeT, _Allocator>& __y)
 {
     return !(__x == __y);
@@ -663,7 +663,7 @@ operator!= (const list<_TypeT, _Allocator>& __x,
 
 template <class _TypeT, class _Allocator>
 inline bool
-operator<= (const list<_TypeT, _Allocator>& __x, 
+operator<= (const list<_TypeT, _Allocator>& __x,
             const list<_TypeT, _Allocator>& __y)
 {
     return !(__y < __x);
@@ -672,7 +672,7 @@ operator<= (const list<_TypeT, _Allocator>& __x,
 
 template <class _TypeT, class _Allocator>
 inline bool
-operator> (const list<_TypeT, _Allocator>& __x, 
+operator> (const list<_TypeT, _Allocator>& __x,
             const list<_TypeT, _Allocator>& __y)
 {
     return __y < __x;
@@ -681,7 +681,7 @@ operator> (const list<_TypeT, _Allocator>& __x,
 
 template <class _TypeT, class _Allocator>
 inline bool
-operator>= (const list<_TypeT, _Allocator>& __x, 
+operator>= (const list<_TypeT, _Allocator>& __x,
             const list<_TypeT, _Allocator>& __y)
 {
     return !(__x < __y);
@@ -689,7 +689,7 @@ operator>= (const list<_TypeT, _Allocator>& __x,
 
 
 template <class _TypeT, class _Allocator>
-inline void swap (list<_TypeT, _Allocator>& __x, 
+inline void swap (list<_TypeT, _Allocator>& __x,
                   list<_TypeT, _Allocator>& __y)
 {
     __x.swap (__y);
@@ -697,7 +697,7 @@ inline void swap (list<_TypeT, _Allocator>& __x,
 
 
 template <class _TypeT, class _Allocator>
-inline typename list<_TypeT, _Allocator>::iterator 
+inline typename list<_TypeT, _Allocator>::iterator
 list<_TypeT, _Allocator>::insert (iterator __it, const_reference __x)
 {
     _RWSTD_ASSERT_RANGE (begin (), __it);
@@ -727,7 +727,7 @@ list<_TypeT, _Allocator>::insert (iterator __it, const_reference __x)
 
 
 template <class _TypeT, class _Allocator>
-inline typename list<_TypeT, _Allocator>::iterator 
+inline typename list<_TypeT, _Allocator>::iterator
 list<_TypeT, _Allocator>::erase (iterator __it)
 {
     _RWSTD_ASSERT_RANGE (begin (), __it);
@@ -758,7 +758,7 @@ inline void
 list<_TypeT, _Allocator>::swap (list &__x)
 {
     if (get_allocator () == __x.get_allocator ()) {
-        std::swap (_C_node, __x._C_node); 
+        std::swap (_C_node, __x._C_node);
         std::swap (_C_length, __x._C_length);
     }
     else {

@@ -40,7 +40,7 @@
 #include <rw/_ioiter.h>   // before the iterators are named below
 
 
-namespace __rw { 
+namespace __rw {
 
 enum __rw_locale_category {
     __rw_cat_none     = 0x0100,
@@ -98,7 +98,7 @@ template <class _Facet>
 inline bool
 has_facet (const locale &__loc)
 {
-    // Facet could be a const SomeFacet; strip the const qualifier 
+    // Facet could be a const SomeFacet; strip the const qualifier
     const __rw::__rw_facet* const __pfacet =
         __rw::__rw_get_facet (__loc, (_Facet*)0);
 
@@ -143,7 +143,7 @@ struct time_put;
 template <class _CharT>
 class messages;
 
- 
+
 // 22.1.1
 struct _RWSTD_EXPORT locale
 {

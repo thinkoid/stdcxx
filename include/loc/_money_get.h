@@ -117,7 +117,7 @@ __rw::__rw_facet_id money_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_MONEY_GET, _CHAR)
 

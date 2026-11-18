@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 
 template <class _TypeT>
@@ -40,7 +40,7 @@ valarray<_TypeT> valarray<_TypeT>::shift (int __n) const
 
     if (__size <= (_RWSTD_SIZE_T)(__n < 0 ? -__n : __n))
         return valarray (__size);
-        
+
     __rw::__rw_array<_TypeT> __tmp (_TypeT (), __size);
 
     // 26.3.2.7, p5 - negative n shifts right, positive left
@@ -50,7 +50,7 @@ valarray<_TypeT> valarray<_TypeT>::shift (int __n) const
         copy (_C_array.begin () + __n, _C_array.end (), __tmp.begin ());
 
     return valarray (__tmp);
-} 
+}
 
 
 template <class _TypeT>
@@ -74,7 +74,7 @@ valarray<_TypeT> valarray<_TypeT>::cshift (int __n) const
                  _C_array.end (), __tmp.begin ());
 
     return valarray (__tmp);
-} 
+}
 
 
 }   // namespace std

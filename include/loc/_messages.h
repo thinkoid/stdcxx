@@ -44,7 +44,7 @@
 #include <loc/_codecvt.h>
 #include <loc/_locale.h>
 
-#include <rw/_defs.h> 
+#include <rw/_defs.h>
 
 
 namespace __rw {
@@ -60,7 +60,7 @@ _RWSTD_EXPORT void __rw_cat_close (int);
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 struct _RWSTD_EXPORT messages_base
@@ -148,7 +148,7 @@ protected:
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_MESSAGES, _CHAR)
 

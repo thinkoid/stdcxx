@@ -49,10 +49,10 @@
 #include "podarray.h"    // for __rw_chararray
 
 
-namespace __rw { 
+namespace __rw {
 
 // retrieves the literal name for a given category value
-static inline 
+static inline
 const char* __rw_get_cat_name (int category) _THROWS (())
 {
     // FIXME: merge this struct and lookup with __rw_cats in locale_body.cpp
@@ -132,7 +132,7 @@ __rw_facet::~__rw_facet () // nothrow
     // to something meaningful)
     if (size_t (-1) == _C_impsize)
         ::operator delete (const_cast< void* >(_C_impdata));
-    else if (_C_impdata && _C_impsize) 
+    else if (_C_impdata && _C_impsize)
         __rw_release_facet_data (_C_impdata, _C_impsize);
 }
 
@@ -259,7 +259,7 @@ const void* __rw_lookup_facet_data (int cat, size_t &impsize,
         else
             pstr = 0;
 
-        // this is the definitive result for facets other than 
+        // this is the definitive result for facets other than
         // codecvt_byname<wchar_t, char, mbstate_t>
         if (!pdata)
             return 0;
@@ -274,11 +274,11 @@ const void* __rw_lookup_facet_data (int cat, size_t &impsize,
         return pdata;
     }
 
-    // for codecvt_byname facet map the database indicated by 
+    // for codecvt_byname facet map the database indicated by
     // codeset_name offset in LC_CTYPE database
-    const __rw::__rw_ctype_t* pctype = 
+    const __rw::__rw_ctype_t* pctype =
         static_cast< const __rw::__rw_ctype_t* >(pdata);
- 
+
     _RWSTD_ASSERT (0 != pctype);
 
     // the facet name may be an ordinary filename or a (relative
@@ -311,8 +311,8 @@ const void* __rw_lookup_facet_data (int cat, size_t &impsize,
 }
 
 
-const void* __rw_get_facet_data (int cat, size_t &impsize, 
-                                 const char* name, const char* encoding) 
+const void* __rw_get_facet_data (int cat, size_t &impsize,
+                                 const char* name, const char* encoding)
 {
     __rw_chararray  pathname;
     const char     *path;
@@ -350,7 +350,7 @@ const void* __rw_get_facet_data (int cat, size_t &impsize,
         if (encoding)
             db = encoding;
         else {
-            // only append the locname if we are not going to be 
+            // only append the locname if we are not going to be
             // appending an encoding
             pathname.append (locname).append ("/", 1);
             db = __rw_get_cat_name (cat);

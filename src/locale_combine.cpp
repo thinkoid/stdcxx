@@ -196,7 +196,7 @@ _C_construct (const __rw_locale &rhs, const __rw_facet *pfacet)
     for (inx = 0; inx != _C_n_std_facets; ++inx) {
         _C_add_ref (*_C_std_facets [inx]);
     }
-    
+
     for (inx = 0; inx != _C_n_usr_facets; ++inx) {
         _C_add_ref (*_C_usr_facets [inx]);
     }

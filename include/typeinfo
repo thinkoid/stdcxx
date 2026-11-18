@@ -55,7 +55,7 @@ public:
     // defines the members that library lacks
 
     _RWSTD_EXPORT virtual ~type_info ();
-    
+
     _RWSTD_EXPORT bool before (const type_info&) const;
 
     _RWSTD_EXPORT const char* name () const;
@@ -98,7 +98,7 @@ using ::type_info;
 
 #ifndef _RWSTD_NO_STD_BAD_CAST
 
-namespace std { 
+namespace std {
 
 #endif   // _RWSTD_NO_STD_BAD_CAST
 

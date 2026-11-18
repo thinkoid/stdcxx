@@ -48,7 +48,7 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 
 // 26.4.1 - Accumulate
@@ -82,14 +82,14 @@ inline _TypeT inner_product (_InputIter1 __first1, _InputIter1 __last1,
 }
 
 
-template <class _InputIter1, class _InputIter2, 
+template <class _InputIter1, class _InputIter2,
           class _TypeT, class _BinaryOperation1, class _BinaryOperation2>
 inline _TypeT
 inner_product (_InputIter1 __first1, _InputIter1 __last1,
                _InputIter2 __first2, _TypeT __n,
                _BinaryOperation1 __oper1, _BinaryOperation2 __oper2)
 {
-    for (; __first1 != __last1; ++__first1, ++__first2) 
+    for (; __first1 != __last1; ++__first1, ++__first2)
         __n = __oper1 (__n, __oper2 (*__first1, *__first2));
     return __n;
 }
@@ -177,7 +177,7 @@ adjacent_difference (_InputIter __first, _InputIter  __last, _OutputIter __res)
 template <class _InputIter, class _OutputIter,
           class _TypeT, class _BinaryOperation>
 inline _OutputIter
-__adjacent_difference (_InputIter __first, _InputIter __last, 
+__adjacent_difference (_InputIter __first, _InputIter __last,
                        _OutputIter __res, _TypeT*, _BinaryOperation __oper)
 {
     _TypeT __val = *__first;

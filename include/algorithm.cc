@@ -40,7 +40,7 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 
 template <class _FwdIter1, class _FwdIter2, class _Dist>
@@ -507,7 +507,7 @@ template <class _FwdIter, class _Dist>
 void __rotate (_FwdIter __first, _FwdIter __middle,
                _FwdIter __last, _Dist*, forward_iterator_tag)
 {
-    _RWSTD_ASSERT_IN_RANGE (__middle, __first, __last); 
+    _RWSTD_ASSERT_IN_RANGE (__middle, __first, __last);
 
     for (_FwdIter __i = __middle; ; ) {
         std::iter_swap (__first, __i);
@@ -566,7 +566,7 @@ void __rotate (_RandomAccessIter __first, _RandomAccessIter __middle,
                random_access_iterator_tag)
 {
     _RWSTD_ASSERT_IN_RANGE (__middle, __first, __last);
-  
+
     for (_Dist __n = __gcd (__last - __first, __middle - __first); __n--; )
         __rotate_cycle (__first, __last, __first + __n, __middle - __first,
                        _RWSTD_VALUE_TYPE (_RandomAccessIter));
@@ -734,7 +734,7 @@ _BidirIter __stable_partition (_BidirIter __first, _BidirIter __last,
 
     if (!__dist)
         return __last;
-    
+
     pair<_TypeT*, _Dist> __pair =
         std::get_temporary_buffer<_TypeT> (_RWSTD_PTRDIFF_T (__dist));
 
@@ -826,7 +826,7 @@ void __quick_sort_loop_aux (_RandomAccessIter __first,
 
 
 template <class _RandomAccessIter, class _TypeT>
-inline void __linear_insert (_RandomAccessIter __first, 
+inline void __linear_insert (_RandomAccessIter __first,
                              _RandomAccessIter __last, _TypeT*)
 {
     const _TypeT __val = *__last;
@@ -1133,7 +1133,7 @@ _FwdIter __lower_bound (_FwdIter __first, _FwdIter __last,
                         _Dist*, forward_iterator_tag)
 {
     _RWSTD_ASSERT_RANGE (__first, __last);
-    
+
     for (_Dist __dist = std::distance (__first, __last); __dist; ) {
 
         const _Dist __half = __dist / 2;
@@ -1487,7 +1487,7 @@ void __merge_adaptive (_BidirIter __first, _BidirIter __middle,
                        _Compare __comp)
 {
     _RWSTD_ASSERT_IN_RANGE (__middle, __first, __last);
-    
+
     if (__dist1 <= __dist2 && __dist1 <= __buf_size)
     {
         _Pointer __buf_end = std::copy (__first, __middle, __buf);
@@ -1541,7 +1541,7 @@ void __inplace_merge (_BidirIter __first, _BidirIter __middle,
 {
     _Dist __dist1 = std::distance (__first, __middle);
     _Dist __dist2 = std::distance (__middle, __last);
- 
+
     pair<_TypeT*, _Dist> __pair =
         std::get_temporary_buffer<_TypeT> (
             _RWSTD_PTRDIFF_T (__dist1 + __dist2));
@@ -1552,7 +1552,7 @@ void __inplace_merge (_BidirIter __first, _BidirIter __middle,
     }
     else {
         _Dist __dist = (std::min)(__pair.second, __dist1 + __dist2);
-        
+
         std::fill_n (raw_storage_iterator<_TypeT*, _TypeT> (__pair.first),
                       __dist, *__first);
         __merge_adaptive (__first, __middle, __last, __dist1, __dist2,

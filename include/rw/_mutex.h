@@ -69,7 +69,7 @@
 
 
 
-namespace __rw { 
+namespace __rw {
 
 // a using declaration (rather than a directive)
 // used to work around yet another MSVC 6.0 bug
@@ -84,7 +84,7 @@ public:
     virtual const char* what () const _THROWS (()) {
         return "thread synchronization error";
     }
-};                            
+};
 
 
 // POD type with no user-defined ctor or dtor facilitates static
@@ -168,12 +168,12 @@ _RWSTD_INSTANTIATE_1 (class _RWSTD_TI_EXPORT __rw_static_mutex<size_t>);
 
 inline __rw_mutex::__rw_mutex ()
 
-{ 
+{
     if (0 != _RWSTD_MUTEX_INIT (_C_mutex))
         __rw::__rw_throw (_RWSTD_ERROR_RUNTIME_ERROR, "synchronization error");
 }
 
-inline __rw_mutex::~__rw_mutex () 
+inline __rw_mutex::~__rw_mutex ()
 
 {
     _RWSTD_MUTEX_DESTROY (_C_mutex);
@@ -212,7 +212,7 @@ class __rw_guard
 
     // undefined
     __rw_guard& operator= (const __rw_guard&);
-    
+
 public:
 
     __rw_guard (__rw_guard &__rhs)
@@ -271,7 +271,7 @@ struct _RWSTD_EXPORT __rw_synchronized
 
 #else   // if !defined (_RWSTD_REENTRANT)
 
-namespace __rw { 
+namespace __rw {
 
 // dummy classes used as a base class in single-threaded environments
 

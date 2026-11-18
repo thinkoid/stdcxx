@@ -39,7 +39,7 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 
 // convenience interfaces: is*(char)

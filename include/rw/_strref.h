@@ -65,12 +65,12 @@
 #endif   // _RWSTD_NO_ATOMIC_OPS
 
 
-namespace std { 
+namespace std {
 
 
 // chooses either a single global mutex or a mutex per string object
 // or no mutex at all when atomic test-and-set instruction is available
-#if !defined (_RWSTD_REENTRANT) || defined (_RWSTD_NO_STRING_MUTEX) 
+#if !defined (_RWSTD_REENTRANT) || defined (_RWSTD_NO_STRING_MUTEX)
 #  define _RWSTD_STRING_MUTEX(ignore)   false
 #elif defined (_RWSTD_ONE_STRING_MUTEX)
 #  define _RWSTD_STRING_MUTEX(ignore)   __rw_string_mutex
@@ -80,7 +80,7 @@ namespace std {
 
 
 template <class _CharT,
-          class _Traits = char_traits<_CharT>, 
+          class _Traits = char_traits<_CharT>,
           class _Allocator = allocator<_CharT> >
 class _RWSTD_EXPORT basic_string;
 
@@ -88,7 +88,7 @@ class _RWSTD_EXPORT basic_string;
 }   // namespace std
 
 
-namespace __rw { 
+namespace __rw {
 
 
 #if    defined (_RWSTD_REENTRANT)        \

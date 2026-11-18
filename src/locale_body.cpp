@@ -180,7 +180,7 @@ __rw_expand_name (__rw_chararray &namebuf, const char *name)
             namebuf.append (_RWSTD_CAT_SEP, 1);
         }
     }
-    
+
     if (*namebuf.data ()) {
 
         if (same_cats && __rw_facet::_C_opts & __rw_facet::_C_condensed_name) {
@@ -577,7 +577,7 @@ _C_get_named_body (const char *locname)
 /***************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 
 const locale&

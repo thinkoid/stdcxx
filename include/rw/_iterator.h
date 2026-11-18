@@ -50,10 +50,10 @@
 #endif   // _RWSTD_RW_ITERBASE_H_INCLUDED
 
 
-namespace std { 
+namespace std {
 
 
-// Reverse iterator.     
+// Reverse iterator.
 
 //
 //  Macros for reverse iterators to accomodate non-standard compilers
@@ -66,10 +66,10 @@ namespace std {
 
 template <class _Iterator>
 class reverse_iterator
-    : public iterator<typename iterator_traits<_Iterator>::iterator_category, 
-                      typename iterator_traits<_Iterator>::value_type, 
+    : public iterator<typename iterator_traits<_Iterator>::iterator_category,
+                      typename iterator_traits<_Iterator>::value_type,
                       typename iterator_traits<_Iterator>::difference_type,
-                      typename iterator_traits<_Iterator>::pointer, 
+                      typename iterator_traits<_Iterator>::pointer,
                       typename iterator_traits<_Iterator>::reference>
 {
     typedef iterator_traits<_Iterator>             traits_type;
@@ -85,7 +85,7 @@ public:
 
     // 24.4.1.3.1, p1
     explicit reverse_iterator (iterator_type __rhs) : current (__rhs) { }
- 
+
 
     // 24.4.1.3.1, p2
     template <class _TypeU>
@@ -180,7 +180,7 @@ inline bool operator< (const _RWSTD_ITER_ID (reverse_iterator)& __x,
 
 // 24.4.1.3.14
 _RWSTD_ITER_TEMPLATE
-inline bool operator!= (const _RWSTD_ITER_ID (reverse_iterator)& __x, 
+inline bool operator!= (const _RWSTD_ITER_ID (reverse_iterator)& __x,
                         const _RWSTD_ITER_ID (reverse_iterator)& __y)
 {
     return !(__x == __y);
@@ -189,7 +189,7 @@ inline bool operator!= (const _RWSTD_ITER_ID (reverse_iterator)& __x,
 
 // 24.4.1.3.15
 _RWSTD_ITER_TEMPLATE
-inline bool operator> (const _RWSTD_ITER_ID (reverse_iterator)& __x, 
+inline bool operator> (const _RWSTD_ITER_ID (reverse_iterator)& __x,
                        const _RWSTD_ITER_ID (reverse_iterator)& __y)
 {
     return __y < __x;
@@ -198,7 +198,7 @@ inline bool operator> (const _RWSTD_ITER_ID (reverse_iterator)& __x,
 
 // 24.4.1.3.16
 _RWSTD_ITER_TEMPLATE
-inline bool operator>= (const _RWSTD_ITER_ID (reverse_iterator)& __x, 
+inline bool operator>= (const _RWSTD_ITER_ID (reverse_iterator)& __x,
                         const _RWSTD_ITER_ID (reverse_iterator)& __y)
 {
     return !(__x < __y);
@@ -217,7 +217,7 @@ inline bool operator<= (const _RWSTD_ITER_ID (reverse_iterator)& __x,
 // 24.4.1.3.18
 _RWSTD_ITER_TEMPLATE
 inline _RWSTD_ITER_DIFF_TYPE (_Iterator, _Distance)
-operator- (const _RWSTD_ITER_ID (reverse_iterator)& __x, 
+operator- (const _RWSTD_ITER_ID (reverse_iterator)& __x,
            const _RWSTD_ITER_ID (reverse_iterator)& __y)
 {
     return __y.base () - __x.base ();
@@ -227,7 +227,7 @@ operator- (const _RWSTD_ITER_ID (reverse_iterator)& __x,
 // 24.4.1.3.19
 _RWSTD_ITER_TEMPLATE
 inline _RWSTD_ITER_ID (reverse_iterator)
-operator+ (_RWSTD_ITER_DIFF_TYPE (_Iterator, _Distance) __n, 
+operator+ (_RWSTD_ITER_DIFF_TYPE (_Iterator, _Distance) __n,
            const _RWSTD_ITER_ID (reverse_iterator)&     __x)
 {
     return __x + __n;
@@ -289,7 +289,7 @@ public:
         : container (&__rhs) { }
 
     front_insert_iterator&
-    operator= (typename container_type::const_reference __x) { 
+    operator= (typename container_type::const_reference __x) {
         return container->push_front (__x), *this;
     }
 
@@ -329,7 +329,7 @@ public:
       : iter (__it), container (&__x) { }
 
     insert_iterator&
-    operator= (typename container_type::const_reference __x) { 
+    operator= (typename container_type::const_reference __x) {
         iter = container->insert (iter, __x);
         return ++iter, *this;
     }

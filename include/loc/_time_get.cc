@@ -357,7 +357,7 @@ __rw_read_era (_InputIter __it, _InputIter __end, std::ios_base &__fl,
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template <class _CharT, class _InputIter>
@@ -624,7 +624,7 @@ do_get (iter_type __it, iter_type __end, ios_base &__fl,
     }
 
     case 'n': case 't': {   // any whitespace
-        
+
         for ( ; ; ++__it) {
 
             if (__it == __end) {

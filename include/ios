@@ -93,7 +93,7 @@ inline ios_base& noshowbase (ios_base &__strm)
 
 // 27.4.5.1, p9
 inline ios_base& showpoint (ios_base &__strm)
-{ 
+{
     return __strm.setf (ios_base::showpoint), __strm;
 }
 

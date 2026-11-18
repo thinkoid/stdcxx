@@ -39,7 +39,7 @@
 #include <iosfwd>
 
 
-namespace std { 
+namespace std {
 
 
 template <class _TypeT, class _CharT, class _Traits, class _Distance>
@@ -65,7 +65,7 @@ class istream_iterator
     typedef iterator<input_iterator_tag, _TypeT, _Distance,
                      const _TypeT*, const _TypeT&> _C_base;
 
-public: 
+public:
 
     typedef _CharT                                char_type;
     typedef _Traits                               traits_type;
@@ -99,7 +99,7 @@ public:
         istream_iterator __tmp = *this;
         return ++*this, __tmp;
     }
-      
+
 protected:
 
     istream_type *_C_strm;   // associated stream
@@ -151,11 +151,11 @@ struct ostream_iterator: iterator<output_iterator_tag, void, void, void, void>
     typedef basic_ostream<char_type, traits_type> ostream_type;
 
     // 24.5.2.1, p1, p2
-    ostream_iterator (ostream_type& __strm, const char_type* __s = 0) 
+    ostream_iterator (ostream_type& __strm, const char_type* __s = 0)
       : _C_strm (&__strm), _C_str (__s) { }
 
     // 24.5.2.2, p1
-    ostream_iterator& operator= (const _TypeT &__val) { 
+    ostream_iterator& operator= (const _TypeT &__val) {
         *_C_strm << __val;
         if (_C_str)
             *_C_strm << _C_str;
@@ -171,7 +171,7 @@ struct ostream_iterator: iterator<output_iterator_tag, void, void, void, void>
     ostream_iterator& operator++ () {
         return *this;
     }
- 
+
     ostream_iterator& operator++ (int) {
         return *this;
     }

@@ -50,7 +50,7 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-namespace std { 
+namespace std {
 
 
 // 24.3.1 - Iterator traits
@@ -96,7 +96,7 @@ struct iterator_traits<const _TypeT*>
 
 
 // 24.3.2 - Basic iterator
-template <class _Category, class _TypeT,  
+template <class _Category, class _TypeT,
           class _Distance = _RWSTD_PTRDIFF_T,
           class _Pointer = _TypeT*,
           class _Reference = _TypeT&>
@@ -131,28 +131,28 @@ inline bool __is_random_access_iterator (_Tag)
 }
 
 
-template <> 
+template <>
 inline bool __is_input_iterator (input_iterator_tag)
 {
     return true;
 }
 
 
-template <> 
+template <>
 inline bool __is_bidirectional_iterator (bidirectional_iterator_tag)
 {
     return true;
 }
 
 
-template <> 
+template <>
 inline bool __is_bidirectional_iterator (random_access_iterator_tag)
 {
     return true;
 }
 
 
-template <> 
+template <>
 inline bool __is_random_access_iterator (random_access_iterator_tag)
 {
     return true;
@@ -182,7 +182,7 @@ inline void __advance (_FwdIter &__it, _Distance __n,
 
 
 template <class _BidirIter, class _Distance>
-inline void __advance (_BidirIter &__it, _Distance __n, 
+inline void __advance (_BidirIter &__it, _Distance __n,
                        bidirectional_iterator_tag)
 {
     if (__n > 0)
@@ -196,7 +196,7 @@ inline void __advance (_BidirIter &__it, _Distance __n,
 
 
 template <class _RandomAccessIter, class _Distance>
-inline void __advance (_RandomAccessIter& __it, _Distance __n, 
+inline void __advance (_RandomAccessIter& __it, _Distance __n,
                        random_access_iterator_tag)
 {
     __it += __n;
@@ -233,7 +233,7 @@ inline void __distance (const _FwdIter &__first,
 
 template <class _BidirIter, class _Distance>
 inline void __distance (const _BidirIter &__first,
-                        const _BidirIter &__last, 
+                        const _BidirIter &__last,
                         _Distance        &__n,
                         bidirectional_iterator_tag)
 {
@@ -243,7 +243,7 @@ inline void __distance (const _BidirIter &__first,
 
 template <class _RandomAccessIter, class _Distance>
 inline void __distance (const _RandomAccessIter &__first,
-                        const _RandomAccessIter &__last, 
+                        const _RandomAccessIter &__last,
                         _Distance               &__n,
                         random_access_iterator_tag)
 {
@@ -268,7 +268,7 @@ distance (_FwdIter __first, _FwdIter __last)
 }   // namespace std
 
 
-namespace __rw { 
+namespace __rw {
 
 // __rw_distance: Same purpose as 3-parameter distance function, but
 // with return value.
@@ -290,7 +290,7 @@ __rw_distance (const _FwdIter &__first,
 
 #ifndef _RWSTD_NO_DEBUG_ITER
 
-namespace __rw { 
+namespace __rw {
 
 // __rw_debug_iter - iterator adapter with debugging support
 // _Iterator is either iterator or const_iterator; if the latter,
@@ -427,7 +427,7 @@ public:
                                       _MutableIterator> &__rhs) const {
         return _C_iter == __rhs._C_iter;
     }
-    
+
     template <class _Iter>
     bool
     operator< (const __rw_debug_iter<container_type, _Iter,
@@ -471,11 +471,11 @@ public:
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template <class _Cont, class _Iter, class _MutIter>
-inline __rw::__rw_debug_iter<_Cont, _Iter, _MutIter> 
+inline __rw::__rw_debug_iter<_Cont, _Iter, _MutIter>
 operator+ (typename _Cont::difference_type                     __n,
            const __rw::__rw_debug_iter<_Cont, _Iter, _MutIter> &__x)
 {
@@ -485,7 +485,7 @@ operator+ (typename _Cont::difference_type                     __n,
 }   // namespace std
 
 
-namespace __rw { 
+namespace __rw {
 
 
 #define _RWSTD_DEBUG_ITER(cont, it, mutit) __rw_debug_iter< cont, it, mutit >

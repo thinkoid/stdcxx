@@ -45,7 +45,7 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 
 // 22.2.2.1
@@ -62,7 +62,7 @@ struct _RWSTD_EXPORT num_get: __rw::__rw_facet
 
 #ifndef _RWSTD_NO_NATIVE_BOOL
 
-    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
+    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, bool &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
@@ -70,49 +70,49 @@ struct _RWSTD_EXPORT num_get: __rw::__rw_facet
 
 #endif   // _RWSTD_NO_NATIVE_BOOL
 
-    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
+    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err,  unsigned short &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
+    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, unsigned int &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
+    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, long &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
+    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, unsigned long &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
+    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, float &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
+    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, double &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
+    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, long double &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
     }
 
-    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags, 
+    iter_type get (iter_type __begin, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, void* &__val) const {
         _RWSTD_ASSERT_RANGE (__begin, __end);
         return do_get (__begin, __end, __flags, __err, __val);
@@ -237,7 +237,7 @@ __rw::__rw_facet_id num_get<wchar_t, istreambuf_iterator<wchar_t> >::id;
 }   // namespace std
 
 
-namespace __rw { 
+namespace __rw {
 
 inline short
 __rw_check_overflow_short (long __lval, _RWSTD_FMTFLAGS __flags,
@@ -338,7 +338,7 @@ __rw_check_overflow_int (long __lval, _RWSTD_FMTFLAGS __flags,
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_NUM_GET, _CHAR)
 

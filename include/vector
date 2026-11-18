@@ -77,7 +77,7 @@ public:
 #ifndef _RWSTD_NO_DEBUG_ITER
 
     typedef __rw::__rw_debug_iter <vector, pointer, pointer> iterator;
-    
+
     typedef __rw::__rw_debug_iter <vector, const_pointer, pointer>
         const_iterator;
 
@@ -131,16 +131,16 @@ public:
         : _C_alloc (__rhs.get_allocator ()) {
         assign (__rhs.begin (), __rhs.end ());
     }
-    
-    
-    ~vector () { 
+
+
+    ~vector () {
         _C_destroy (begin ());
         _C_alloc.deallocate (_C_alloc._C_begin,
                              _C_alloc._C_bufend - _C_alloc._C_begin);
     }
-    
+
     vector& operator= (const vector&);
-    
+
     template <class _InputIter>
     void assign (_InputIter __first, _InputIter __last) {
         // dispatch either to a range assign or to an assign with repetition
@@ -154,7 +154,7 @@ public:
     allocator_type get_allocator () const {
         return _C_alloc;
     }
-    
+
     iterator begin () {
         return _C_make_iter (_C_alloc._C_begin);
     }
@@ -170,20 +170,20 @@ public:
     const_iterator end () const {
         return _C_make_iter (_C_alloc._C_end);
     }
-    
-    reverse_iterator rbegin () { 
+
+    reverse_iterator rbegin () {
         return reverse_iterator (end ());
     }
-    
-    const_reverse_iterator rbegin () const { 
+
+    const_reverse_iterator rbegin () const {
         return const_reverse_iterator (end ());
     }
-    
-    reverse_iterator rend () { 
+
+    reverse_iterator rend () {
         return reverse_iterator (begin ());
     }
-    
-    const_reverse_iterator rend () const { 
+
+    const_reverse_iterator rend () const {
         return const_reverse_iterator (begin ());
     }
 
@@ -194,49 +194,49 @@ public:
     size_type max_size () const {
         return _C_alloc.max_size ();
     }
-    
+
     void resize (size_type, value_type = value_type ());
 
     size_type capacity () const {
         return _C_alloc._C_bufend - _C_alloc._C_begin;
     }
-    
+
     bool empty () const {
         return _C_alloc._C_begin == _C_alloc._C_end;
     }
-    
+
     void reserve (size_type);
 
     reference operator[] (size_type);
-  
+
     const_reference operator[] (size_type) const;
-  
+
     reference at (size_type);
 
     const_reference at (size_type __n)  const;
-    
+
     reference front () {
         _RWSTD_ASSERT (!empty ());
         return *begin ();
     }
-    
+
     const_reference front () const {
         _RWSTD_ASSERT (!empty ());
         return *begin ();
     }
-    
+
     reference back () {
         _RWSTD_ASSERT (!empty ());
         return *(end () - 1);
     }
-    
+
     const_reference back () const {
         _RWSTD_ASSERT (!empty ());
         return *(end () - 1);
     }
 
     void push_back (const_reference);
-    
+
     void pop_back () {
         _RWSTD_ASSERT (!empty ());
         _C_alloc.destroy (_C_alloc._C_end - 1);
@@ -253,13 +253,13 @@ public:
     void insert (iterator __it, size_type __n, const_reference __x) {
         _C_insert_n (__it, __n, __x);
     }
-    
+
     iterator erase (iterator);
 
     iterator erase (iterator, iterator);
 
     void swap (vector&);
-    
+
     void clear ();
 
 private:
@@ -371,7 +371,7 @@ operator[] (size_type __n)
 
     return *(begin () + __n);
 }
-  
+
 
 template <class _TypeT, class _Allocator>
 inline typename vector<_TypeT, _Allocator>::const_reference
@@ -389,7 +389,7 @@ operator[] (size_type __n) const
 
     return *(begin () + __n);
 }
-  
+
 
 template <class _TypeT, class _Allocator>
 inline typename vector<_TypeT, _Allocator>::reference
@@ -400,9 +400,9 @@ at (size_type __n)
                      (_RWSTD_ERROR_OUT_OF_RANGE,
                       _RWSTD_FUNC ("vector::at (size_type)"),
                       __n, size ()));
-    return *(begin () + __n); 
+    return *(begin () + __n);
 }
-    
+
 
 template <class _TypeT, class _Allocator>
 inline typename vector<_TypeT, _Allocator>::const_reference
@@ -413,7 +413,7 @@ at (size_type __n)  const
                      (_RWSTD_ERROR_OUT_OF_RANGE,
                       _RWSTD_FUNC ("vector::at(size_type) const"),
                       __n, size ()));
-    return *(begin () + __n); 
+    return *(begin () + __n);
 }
 
 
@@ -484,7 +484,7 @@ erase (iterator __it)
 
     const iterator __next = __it + 1;
 
-    if (__next != end ()) 
+    if (__next != end ())
         std::copy (__next, end (), __it);
 
     _C_alloc.destroy (_C_alloc._C_end - 1);
@@ -648,7 +648,7 @@ public:
         }
 
         reference& operator= (bool __x) {
-            if (__x)      
+            if (__x)
                 *_C_p |= _C_mask;
             else
                 *_C_p &= ~_C_mask;
@@ -663,7 +663,7 @@ public:
             *_C_p ^= _C_mask;
         }
     };
-    
+
     typedef bool const_reference;
 
     // names for the iterators below, whose own typedefs of reference and
@@ -687,14 +687,14 @@ public:
 
         void operator++ () {
             if (_C_offset++ == _RWSTD_WORD_BIT - 1) {
-                _C_offset = 0; 
+                _C_offset = 0;
                 ++_C_p;
             }
         }
 
         void operator-- () {
             if (_C_offset-- == 0) {
-                _C_offset = _RWSTD_WORD_BIT - 1; 
+                _C_offset = _RWSTD_WORD_BIT - 1;
                 --_C_p;
             }
         }
@@ -738,7 +738,7 @@ public:
             return !(*this > __x);
         }
     };
-      
+
     class iterator
         : public _C_iter,
           public std::iterator<random_access_iterator_tag,
@@ -754,8 +754,8 @@ public:
         iterator (unsigned int *__x = 0, unsigned int __y = 0)
             : _C_iter (__x, __y) { }
 
-        reference operator* () const { 
-            return reference (this->_C_p, 1U << this->_C_offset); 
+        reference operator* () const {
+            return reference (this->_C_p, 1U << this->_C_offset);
         }
 
         iterator& operator++ () {
@@ -876,8 +876,8 @@ public:
                    + this->_C_offset - __x._C_offset;
         }
 
-        const_reference operator[] (difference_type __i) { 
-            return *(*this + __i); 
+        const_reference operator[] (difference_type __i) {
+            return *(*this + __i);
         }
 
         friend const_iterator operator+ (difference_type __i,
@@ -892,13 +892,13 @@ public:
   private:
     //
     // These private functions are replicas of generic algorithms.
-    //  We provide them here to avoid putting instantiations of 
+    //  We provide them here to avoid putting instantiations of
     //  the generic algorithms into an archive or shared library.
     //  This gives you full flexibilty in deciding where you want
-    //  to put particular instantiations of the generic 
+    //  to put particular instantiations of the generic
     //  algorithms.
     //
-  
+
     void _C_fill (iterator __first, iterator __last, bool __val) {
         while (__first != __last) *__first++ = __val;
     }
@@ -971,14 +971,14 @@ public:
 
     explicit
     vector (const _Allocator&  __alloc = allocator_type ())
-        : allocator_type (__alloc), _C_begin(iterator()), _C_end(iterator()), 
+        : allocator_type (__alloc), _C_begin(iterator()), _C_end(iterator()),
         _C_bufend () { }
 
     explicit
-    vector (size_type __n, bool __val = bool (), 
+    vector (size_type __n, bool __val = bool (),
        const _Allocator&  __alloc = allocator_type ())
         : allocator_type (__alloc), _C_bufend () {
-      _C_init(__n); 
+      _C_init(__n);
       unsigned int * __first = _C_begin._C_p;
       size_type __m = (__n + _RWSTD_WORD_BIT - 1)/_RWSTD_WORD_BIT;
       while (__m-- > 0) *__first++ = __val ? ~0 : 0;
@@ -986,7 +986,7 @@ public:
 
     vector (const _C_self &__x)
         : allocator_type (__x.get_allocator ()), _C_bufend  () {
-        _C_init (__x.size ()); 
+        _C_init (__x.size ());
         _C_copy (__x.begin (), __x.end (), _C_begin);
     }
 
@@ -998,8 +998,8 @@ public:
     }
 
     ~vector () {
-      _C_value_alloc_type(*this).deallocate(_C_begin._C_p,  
-        _C_bufend - _C_begin._C_p); 
+      _C_value_alloc_type(*this).deallocate(_C_begin._C_p,
+        _C_bufend - _C_begin._C_p);
     }
     _C_self& operator= (const _C_self& __x)
     {
@@ -1007,7 +1007,7 @@ public:
       if (__x.size() > capacity())
       {
         _C_value_alloc_type(*this).deallocate(_C_begin._C_p,
-          _C_bufend - _C_begin._C_p); 
+          _C_bufend - _C_begin._C_p);
         _C_init(__x.size());
       }
       _C_copy(__x.begin(), __x.end(), begin());
@@ -1021,7 +1021,7 @@ public:
         insert (begin (), __first, __last);
     }
 
-    void assign (size_type __n, const bool& __x) { 
+    void assign (size_type __n, const bool& __x) {
         clear ();
         insert (begin (), __n, __x);
     }
@@ -1034,21 +1034,21 @@ public:
     // iterators
     //
     iterator       begin ()       { return _C_begin; }
-    const_iterator begin () const 
+    const_iterator begin () const
     { return const_iterator(_C_begin._C_p,_C_begin._C_offset); }
     iterator       end   ()       { return _C_end; }
-    const_iterator end   () const 
+    const_iterator end   () const
     { return const_iterator(_C_end._C_p,_C_end._C_offset); }
 
     reverse_iterator       rbegin () { return reverse_iterator(end()); }
     const_reverse_iterator rbegin () const
-    { 
-      return const_reverse_iterator(end()); 
+    {
+      return const_reverse_iterator(end());
     }
     reverse_iterator       rend () { return reverse_iterator(begin()); }
     const_reverse_iterator rend () const
-    { 
-      return const_reverse_iterator(begin()); 
+    {
+      return const_reverse_iterator(begin());
     }
 
     //
@@ -1085,8 +1085,8 @@ public:
     //
     // element access
     //
-    reference       operator[] (size_type __n)       
-    { 
+    reference       operator[] (size_type __n)
+    {
 #ifdef _RWSTD_BOUNDS_CHECKING
 
         _RWSTD_REQUIRES (__n < size (),
@@ -1096,10 +1096,10 @@ public:
 
 #endif   // _RWSTD_BOUNDS_CHECKING
 
-      return *(begin() + __n); 
+      return *(begin() + __n);
     }
-    const_reference operator[] (size_type __n) const 
-    { 
+    const_reference operator[] (size_type __n) const
+    {
 #ifdef _RWSTD_BOUNDS_CHECKING
 
         _RWSTD_REQUIRES (__n < size (),
@@ -1109,30 +1109,30 @@ public:
 
 #endif   // _RWSTD_BOUNDS_CHECKING
 
-      return *(begin() + __n); 
+      return *(begin() + __n);
     }
-    reference       at (size_type __n)               
-    { 
+    reference       at (size_type __n)
+    {
         _RWSTD_REQUIRES (__n < size (),
                          (_RWSTD_ERROR_OUT_OF_RANGE,
                           _RWSTD_FUNC ("vector<bool>::at(size_type)"),
                           __n, size ()));
-      return *(begin() + __n); 
+      return *(begin() + __n);
     }
-    const_reference at (size_type __n)   const 
+    const_reference at (size_type __n)   const
     {
         _RWSTD_REQUIRES (__n < size (),
                          (_RWSTD_ERROR_OUT_OF_RANGE,
                           _RWSTD_FUNC ("vector<bool>::at(size_type) const"),
                           __n, size ()));
 
-      return *(begin() + __n); 
+      return *(begin() + __n);
     }
     reference       front ()       { return *begin();     }
     const_reference front () const { return *begin();     }
     reference       back  ()       { return *(end() - 1); }
     const_reference back  () const { return *(end() - 1); }
-    
+
     //
     // modifiers
     //
@@ -1191,7 +1191,7 @@ public:
         _C_self _x = *this;
         *this = __x;
         __x=_x;
-      } 
+      }
     }
     static void swap(reference __x, reference __y);
     void flip ();
@@ -1202,7 +1202,7 @@ public:
 
 };
 
-#undef _Allocator 
+#undef _Allocator
 
 #endif   // _RWSTD_NO_VECTOR_BOOL
 

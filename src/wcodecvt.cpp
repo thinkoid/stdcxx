@@ -185,7 +185,7 @@ __rw_xlit (const __rw::__rw_codecvt_t* impl,
 
         index = ptbl [UChar (*utf8s)];
 
-        if (_RWSTD_UINT_MAX == index) 
+        if (_RWSTD_UINT_MAX == index)
             // transliteration not provided for this character
             return 0;
 
@@ -204,10 +204,10 @@ __rw_xlit (const __rw::__rw_codecvt_t* impl,
 
 static std::codecvt_base::result
 __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
-                 const char       *from, 
+                 const char       *from,
                  const char       *from_end,
                  const char*      &from_next,
-                 wchar_t          *to, 
+                 wchar_t          *to,
                  wchar_t          *to_limit,
                  wchar_t*         &to_next)
 {
@@ -237,7 +237,7 @@ __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
         res = std::codecvt_base::error;
             break;
         }
- 
+
         // -2: the bytes form an incomplete but potentially valid
         // character; mbrtowc has processed all of them into `state'
         // (C99 7.24.6.3.2, p4), so they are consumed here, the state
@@ -252,7 +252,7 @@ __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
         }
 
         // 0 indicates the NUL character (skip over it)
-        if (nbytes == 0) 
+        if (nbytes == 0)
             ++nbytes;
 
         // > 0 indicates the number of bytes in the successfully
@@ -283,10 +283,10 @@ __rw_libc_do_in (_RWSTD_MBSTATE_T &state,
 
 static std::codecvt_base::result
 __rw_libc_do_out (_RWSTD_MBSTATE_T &state,
-                  const wchar_t    *from, 
+                  const wchar_t    *from,
                   const wchar_t    *from_end,
                   const wchar_t*   &from_next,
-                  char             *to, 
+                  char             *to,
                   char             *to_limit,
                   char*            &to_next)
 {
@@ -344,7 +344,7 @@ __rw_libc_do_out (_RWSTD_MBSTATE_T &state,
             res = std::codecvt_base::error;
             break;
         }
- 
+
         // if the multibyte sequence is the NUL character
         // adjust the result by one (i.e., the length of
         // the multibyte NUL character)
@@ -365,7 +365,7 @@ __rw_libc_do_out (_RWSTD_MBSTATE_T &state,
                 state = save_state;
                 res   = std::codecvt_base::partial;
                 break;
-            } 
+            }
 
             // the destination sequence has sufficient space
             // for the multibyte character
@@ -497,7 +497,7 @@ __rw_libstd_do_in (const char                *from_end,
     const bool strict_utf = 0 != (flags & __rw_strict);
 
     std::codecvt_base::result res;
-    
+
     for (const unsigned* const tab = impl ? impl->n_to_w_tab () : 0; ; ) {
 
         if (from_next == from_end) {
@@ -710,7 +710,7 @@ __rw_libstd_do_out (const wchar_t             *from,
 
 
 // implements do_length() on top of libc mbrlen()
-static size_t 
+static size_t
 __rw_libc_do_length (_RWSTD_MBSTATE_T &state,
                      const char       *from,
                      const char       *from_end,
@@ -811,10 +811,10 @@ __rw_utf8_do_length (const char    *from,
 
 static size_t
 __rw_libstd_do_length (const char*                from,
-                       const char*                from_end, 
+                       const char*                from_end,
                        size_t                     imax,
                        int                        flags,
-                       const __rw::__rw_codecvt_t* impl) 
+                       const __rw::__rw_codecvt_t* impl)
 {
     // use UCS as the internal encoding if `impl' is 0
     // (i.e., if the codecvt database is not available)
@@ -846,16 +846,16 @@ __rw_libstd_do_length (const char*                from,
             for (const unsigned* tbl = tbls; tbl [*next] & 0x80000000; ) {
 
                 // check if the extern character is valid
-                if (_RWSTD_UINT_MAX == tbl [*next]) 
+                if (_RWSTD_UINT_MAX == tbl [*next])
                     return from_next - from;
-                
+
                 // the value here is the table index
                 const unsigned index = tbl [*next] & 0x7fffffff;
                 tbl = tbls + 256 * index;
 
                 ++next;
 
-                if (next == limit) 
+                if (next == limit)
                     return from_next - from;
             }
 
@@ -873,7 +873,7 @@ __rw_libstd_do_length (const char*                from,
 
 
 namespace std {
-        
+
 
 __rw::__rw_facet_id codecvt<wchar_t, char, _RWSTD_MBSTATE_T>::id;
 
@@ -908,7 +908,7 @@ codecvt<wchar_t, char, _RWSTD_MBSTATE_T>::
 do_encoding () const _THROWS (())
 {
     // 22.2.1.5.2 p6    1(ext.) <=> 1(int.)
-    return 1;   
+    return 1;
 }
 
 
@@ -1052,7 +1052,7 @@ do_length (state_type        &state,
 
 
 // codecvt_byname <wchar,char> specialization
-codecvt_byname<wchar_t, char, _RWSTD_MBSTATE_T>:: 
+codecvt_byname<wchar_t, char, _RWSTD_MBSTATE_T>::
 codecvt_byname (const char *name, size_t ref)
     : codecvt<wchar_t, char, _RWSTD_MBSTATE_T>(ref)
 {
@@ -1161,12 +1161,12 @@ codecvt_byname (const char *name, size_t ref)
 /* virtual */ codecvt_base::result
 codecvt_byname<wchar_t, char, _RWSTD_MBSTATE_T>::
 do_in (state_type&         state,
-       const extern_type*  from, 
+       const extern_type*  from,
        const extern_type*  from_end,
        const extern_type*& from_next,
-       intern_type*        to, 
+       intern_type*        to,
        intern_type*        to_limit,
-       intern_type*&       to_next) const 
+       intern_type*&       to_next) const
 {
     // 22.2.1.5.2 p1
     _RWSTD_ASSERT (from <= from_end);
@@ -1192,7 +1192,7 @@ do_in (state_type&         state,
         // obtain the mapping of the database file
         const __rw::__rw_codecvt_t* const impl =
             static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
-    
+
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
             const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
@@ -1202,7 +1202,7 @@ do_in (state_type&         state,
             // across calls (22.2.1.5.2, p1: "equal to the result of
             // converting the preceding characters in the sequence")
 
-            res = __rw::__rw_libc_do_in (state, 
+            res = __rw::__rw_libc_do_in (state,
                                         from, from_end, from_next,
                                         to, to_limit, to_next);
         }
@@ -1222,12 +1222,12 @@ do_in (state_type&         state,
     }
 
     case __rw::iso2022_jp:
-        res =  __rw::__rw_iso2022jp_do_in (state, from_next, from_end, 
+        res =  __rw::__rw_iso2022jp_do_in (state, from_next, from_end,
                                           to_next, to_limit);
         break;
 
     case __rw::iso2022_jp2:
-        res =  __rw::__rw_iso2022jp2_do_in (state, from_next, from_end, 
+        res =  __rw::__rw_iso2022jp2_do_in (state, from_next, from_end,
                                            to_next, to_limit);
         break;
 
@@ -1241,12 +1241,12 @@ do_in (state_type&         state,
 
 /* virtual */ codecvt_base::result
 codecvt_byname<wchar_t, char, _RWSTD_MBSTATE_T>::
-do_out (state_type         &state, 
-        const intern_type  *from, 
-        const intern_type  *from_end, 
+do_out (state_type         &state,
+        const intern_type  *from,
+        const intern_type  *from_end,
         const intern_type *&from_next,
-        extern_type        *to, 
-        extern_type        *to_limit, 
+        extern_type        *to,
+        extern_type        *to_limit,
         extern_type       *&to_next) const
 {
     // 22.2.1.5.2 p1
@@ -1270,9 +1270,9 @@ do_out (state_type         &state,
     case __rw::stateless: {
 
         // obtain the mapping of the database file
-        const __rw::__rw_codecvt_t* impl = 
+        const __rw::__rw_codecvt_t* impl =
             static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
-    
+
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
             const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
@@ -1304,11 +1304,11 @@ do_out (state_type         &state,
         break;
     }
     case __rw::iso2022_jp:
-        res = __rw::__rw_iso2022jp_do_out (state, from_next, from_end, 
+        res = __rw::__rw_iso2022jp_do_out (state, from_next, from_end,
                                           to_next, to_limit);
         break;
     case __rw::iso2022_jp2:
-        res = __rw::__rw_iso2022jp2_do_out (state, from_next, from_end, 
+        res = __rw::__rw_iso2022jp2_do_out (state, from_next, from_end,
                                            to_next, to_limit);
         break;
     default:
@@ -1321,9 +1321,9 @@ do_out (state_type         &state,
 
 /* virtual */ codecvt_base::result
 codecvt_byname<wchar_t, char, _RWSTD_MBSTATE_T>::
-do_unshift (state_type&   state, 
-            extern_type*  to, 
-            extern_type*  to_limit, 
+do_unshift (state_type&   state,
+            extern_type*  to,
+            extern_type*  to_limit,
             extern_type*& to_next) const
 {
     // verify that the range is valid
@@ -1349,7 +1349,7 @@ do_unshift (state_type&   state,
         if (USE_LIBC (impl, _C_flags)) {
 
             const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
-            
+
             if (mbtowc (0, 0, 0) == 0) {
                 // verify that the state is in its initial shift state
                 const int mbstate_valid = __rw::__rw_mbsinit (&state);
@@ -1387,10 +1387,10 @@ do_unshift (state_type&   state,
 
 /* virtual */ int
 codecvt_byname<wchar_t, char, _RWSTD_MBSTATE_T>::
-do_length (state_type&        state, 
-           const extern_type *from, 
-           const extern_type *from_end, 
-           size_t             cmax) const 
+do_length (state_type&        state,
+           const extern_type *from,
+           const extern_type *from_end,
+           size_t             cmax) const
 {
     // 22.2.1.5.2 p1
     _RWSTD_ASSERT (from <= from_end);
@@ -1406,7 +1406,7 @@ do_length (state_type&        state,
     case __rw::stateless: {
 
         // obtain the mapping of the database file
-        const __rw::__rw_codecvt_t* impl = 
+        const __rw::__rw_codecvt_t* impl =
             static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
 
         if (USE_LIBC (impl, _C_flags)) {
@@ -1467,11 +1467,11 @@ do_encoding () const _THROWS (())
 
     case __rw::stateless: {
         // obtain the database file mapping
-        const __rw::__rw_codecvt_t* impl = 
+        const __rw::__rw_codecvt_t* impl =
             static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
 
         if (USE_LIBC (impl, _C_flags)) {
-            // 7.20.7.2 of C99: if first arg is 0, mbtowc() returns non-zero 
+            // 7.20.7.2 of C99: if first arg is 0, mbtowc() returns non-zero
             // or 0 whether or not the encoding is stateful or stateless
             const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);
 
@@ -1529,9 +1529,9 @@ do_max_length () const _THROWS (())
 
     case __rw::stateless: {
         // obtain the database file mapping
-        const __rw::__rw_codecvt_t* impl = 
+        const __rw::__rw_codecvt_t* impl =
             static_cast< const __rw::__rw_codecvt_t* >(this->_C_data ());
-            
+
         if (USE_LIBC (impl, _C_flags)) {
             // use libc locale
             const __rw::__rw_setlocale clocale (_C_name, LC_CTYPE);

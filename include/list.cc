@@ -40,7 +40,7 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 template <class _TypeT, class _Allocator>
 list<_TypeT, _Allocator>::
@@ -54,7 +54,7 @@ list<_TypeT, _Allocator>::
 
 
 template <class _TypeT, class _Allocator>
-typename list<_TypeT, _Allocator>::iterator 
+typename list<_TypeT, _Allocator>::iterator
 list<_TypeT, _Allocator>::erase (iterator __first, iterator __last)
 {
     _RWSTD_ASSERT_RANGE (begin (), __first);
@@ -63,7 +63,7 @@ list<_TypeT, _Allocator>::erase (iterator __first, iterator __last)
     while (!(__first == __last)) {
         __first = erase (__first);
     }
-      
+
     return __first;
 }
 
@@ -143,7 +143,7 @@ void list<_TypeT, _Allocator>::splice (iterator __i, list &__x, iterator __j)
 {
     _RWSTD_ASSERT_RANGE (begin (), __i);
     _RWSTD_ASSERT_RANGE (__x.begin (), __j);
-    
+
     if (   !(__x.end () == __j)
         && !(__i == __j) && !(__i == ++iterator (__j))) {
         if (get_allocator () == __x.get_allocator ()) {
@@ -218,11 +218,11 @@ splice (iterator __i, list &__x, iterator __j, iterator __k)
             _ITER_NODE (__k);
         (*(_C_link_type ((*_ITER_NODE (__i))._C_prev)))._C_next =
             _ITER_NODE (__j);
-        
+
         _C_link_type __tmp = _C_link_type ((*_ITER_NODE (__i))._C_prev);
-        
+
         (*_ITER_NODE (__i))._C_prev = (*_ITER_NODE (__k))._C_prev;
-        (*_ITER_NODE (__k))._C_prev = (*_ITER_NODE (__j))._C_prev; 
+        (*_ITER_NODE (__k))._C_prev = (*_ITER_NODE (__j))._C_prev;
         (*_ITER_NODE (__j))._C_prev = __tmp;
     }
     else {
@@ -441,8 +441,8 @@ void list<_TypeT, _Allocator>::sort (_Compare __cmp)
 {
     for (size_type __n = 1; __n < size (); __n *= 2) {
 
-        iterator __it1 = begin (), 
-                 __it2 = begin (), 
+        iterator __it1 = begin (),
+                 __it2 = begin (),
                  __it3 = begin ();
 
         _C_advance (__it2, __n, end ());
@@ -450,7 +450,7 @@ void list<_TypeT, _Allocator>::sort (_Compare __cmp)
 
         for (size_type __m = 0;
              __m != (size () + (2 * __n)) / (__n * 2); ++__m) {
-            
+
             if (!(__it1 == end ()) && !(__it2 == end ())) {
                 _C_adjacent_merge (__it1, __it2, __it3, __cmp);
                 __it1 = __it3;

@@ -43,7 +43,7 @@
 #include <rw/_defs.h>
 
 
-namespace __rw { 
+namespace __rw {
 
 
 // __rw_aligned_buffer specializations should be objects with static
@@ -56,7 +56,7 @@ struct __rw_aligned_buffer
         long double _C_pad;                     // guarantee suitable alignment
         void       *_C_void_pad;
         void      (*_C_pfn_pad)();
-        char        _C_data [sizeof (_TypeT)];  // data to back _TypeT up with 
+        char        _C_data [sizeof (_TypeT)];  // data to back _TypeT up with
     } _C_buf;
 
     void* _C_store () {
@@ -210,7 +210,7 @@ typedef __rw_pod_array<char, 256> __rw_chararray;
 #endif   // _RWSTD_DEFINE_TEMPLATE_FIRST (_POD_ARRAY)
 
 
-namespace __rw { 
+namespace __rw {
 
 #if _RWSTD_INSTANTIATE (_POD_ARRAY, _CHAR)
 

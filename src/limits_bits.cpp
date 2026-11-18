@@ -35,11 +35,11 @@
 // declared there with a different type than what they are
 // defined with here
 // #include <limits>
-                       
-#include <rw/_defs.h>  
-                       
 
-namespace __rw { 
+#include <rw/_defs.h>
+
+
+namespace __rw {
 
 #ifndef _RWSTD_NO_INFINITY
 

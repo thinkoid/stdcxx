@@ -47,14 +47,14 @@
 #include <rw/_defs.h>
 
 
-namespace __rw { 
+namespace __rw {
 
 _RWSTD_EXPORT int __rw_fflush (void*, int) _RWSTD_ATTRIBUTE_NOTHROW;
 
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 template<class _CharT, class _Traits>
 class _RWSTD_EXPORT basic_ostream: virtual public basic_ios<_CharT, _Traits>
@@ -89,7 +89,7 @@ public:
 
                 // prevent exceptions from propagating
                 _C_strm.setstate (ios_base::badbit | __rw::__rw_nothrow);
-            }    
+            }
         }
 
         operator bool () const {
@@ -222,7 +222,7 @@ private:
     bool _C_is_sync () const {
         return this->_C_sync_with_stdio && this->_C_sync;
     }
-    
+
     // pad output with fill chars, return number of chars written
     streamsize _C_pad (streamsize);
 
@@ -448,7 +448,7 @@ flush (basic_ostream<_CharT, _Traits>& __strm)
 {
     return __strm.flush ();
 }
- 
+
 
 // working around an MSVC bug (both 6.0 and 7.0) that may cause:
 // - warning C4660: template-class specialization is already instantiated

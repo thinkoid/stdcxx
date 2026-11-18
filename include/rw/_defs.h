@@ -357,7 +357,7 @@
 #  define _RWSTD_MT_GUARD(mutex)  \
           __rw::__rw_guard _RWSTD_PASTE (__guard, __LINE__) (mutex)
 
-// synchronizes access by all threads holding the same mutex 
+// synchronizes access by all threads holding the same mutex
 #  define _RWSTD_MT_STATIC_GUARD(type)                               \
           typedef __rw::__rw_type<type,__LINE__> _UniqueType;        \
           _RWSTD_MT_CLASS_GUARD(_UniqueType)
@@ -701,7 +701,7 @@
 // compilation with no runtime overhead; failed assertions are reported
 // as compilation errors
 
-namespace __rw { 
+namespace __rw {
 
 // file may be #included from within an extern "C" block
 extern "C++" {
@@ -856,13 +856,13 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 
 #ifndef _RWSTD_NO_STD_UNCAUGHT_EXCEPTION
-   // function defined in namespace std in compiler support library 
+   // function defined in namespace std in compiler support library
 #  define _UNCAUGHT_EXCEPTION()   std::uncaught_exception()
 #elif !defined (_RWSTD_NO_GLOBAL_UNCAUGHT_EXCEPTION)
-   // function defined in global namespace in compiler support library 
+   // function defined in global namespace in compiler support library
 #  define _UNCAUGHT_EXCEPTION()   uncaught_exception()
 #else   // if NO_STD_UNCAUGHT_EXCEPTION && NO_GLOBAL_UNCAUGHT_EXCEPTION
-   // function not defined in compiler support library 
+   // function not defined in compiler support library
 #  define _UNCAUGHT_EXCEPTION()   true
 #endif   // NO_STD_UNCAUGHT_EXCEPTION && NO_GLOBAL_UNCAUGHT_EXCEPTION
 
@@ -934,7 +934,7 @@ __rw_assert_fail (const char*, const char*, int, const char*)
     std::ostreambuf_iterator<T, std::char_traits<T > >
 
 // introduce namespace std so that "using namespace std;" always works
-namespace std { 
+namespace std {
 }   // namespace std
 
 

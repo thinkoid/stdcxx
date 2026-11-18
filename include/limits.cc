@@ -26,7 +26,7 @@
  * 
  **************************************************************************/
 
-namespace std { 
+namespace std {
 
 #ifndef _RWSTD_DEFINE_EXPORTS
 

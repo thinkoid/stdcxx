@@ -61,10 +61,10 @@ strstreambuf::overflow (int_type c)
 
     if (!_C_is_out () || !(_C_state & _C_dynamic))
         return traits_type::eof ();
-    
+
     if (_C_is_eof (c))
         return traits_type::not_eof (c);
-    
+
     // reallocate space if necessary
     if (!(pptr () < epptr ())) {
 
@@ -276,7 +276,7 @@ strstreambuf::setbuf (char_type* buf, streamsize bufsize)
         return 0;   // failure
 
     const bool free_old_buf = _C_own_buf ();
-    
+
     if (!buf) {
         try {
             // allocate a new buffer
@@ -306,7 +306,7 @@ strstreambuf::setbuf (char_type* buf, streamsize bufsize)
         else
             delete[] _C_buffer;
     }
-    
+
     _C_buffer  = buf;
     _C_bufsize = bufsize;
 

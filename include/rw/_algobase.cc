@@ -40,7 +40,7 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 
 template <class _InputIter1, class _InputIter2>

@@ -28,7 +28,7 @@
  * Copyright 1994-2006 Rogue Wave Software.
  * 
  **************************************************************************/
- 
+
 #ifndef _RWSTD_USE_FACET_H_INCLUDED
 #define _RWSTD_USE_FACET_H_INCLUDED
 
@@ -152,7 +152,7 @@ __rw_init_std_facet (__rw_facet                *pfacet,
       }                                                   \
       typedef void __rw_unused_type
 #else   // if defined (_RWSTD_NO_SPECIALIZED_FACET_ID)
-   // facet id's will not be explicitly specialized 
+   // facet id's will not be explicitly specialized
 #  define _RWSTD_SPECIALIZE_FACET_ID(ignore1, ignore2)    \
       typedef void __rw_unused_type
 #endif   // _RWSTD_NO_SPECIALIZED_FACET_ID

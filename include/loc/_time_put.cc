@@ -50,7 +50,7 @@ __rw_put_time (const __rw_facet*, wchar_t**, _RWSTD_SIZE_T&, _RWSTD_SIZE_T,
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template <class _CharT, class _OutputIter>
@@ -110,9 +110,9 @@ put (iter_type __it, ios_base &__flags, char_type __fill, const tm *__tmb,
     if (!__end)
         __end = __pat + char_traits<char_type>::length (__pat);
 
-    const ctype<char_type> &__ctp = 
+    const ctype<char_type> &__ctp =
       std::use_facet< ctype<char_type> >(__rw::__rw_getloc (__flags));
-    
+
     for (; __pat != __end; ++__pat) {
 
         if ('%' == __ctp.narrow (*__pat, 0) && __pat + 1 < __end) {

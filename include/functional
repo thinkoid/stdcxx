@@ -48,7 +48,7 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 
 // 20.3.2 - Arithmetic operations
@@ -663,7 +663,7 @@ mem_fun_ref (_Result (_TypeT::*__fun)(_Arg) const)
 }   // namespace std
 
 
-namespace __rw { 
+namespace __rw {
 
 
 // helper of valarray: returns the argument

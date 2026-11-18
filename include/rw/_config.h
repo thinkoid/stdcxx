@@ -107,7 +107,7 @@
 
 
 /**************************************************************************
- * COMPILER-SPECIFIC OVERRIDES                                            * 
+ * COMPILER-SPECIFIC OVERRIDES                                            *
  **************************************************************************/
 
 /*** GCC ******************************************************************/
@@ -119,7 +119,7 @@
 #endif   // __GNUG__
 
 /**************************************************************************
- * OPERATING SYSTEM-SPECIFIC OVERRIDES                                    * 
+ * OPERATING SYSTEM-SPECIFIC OVERRIDES                                    *
  **************************************************************************/
 
 #define _RWSTD_PATH_SEP      '/'
@@ -154,8 +154,8 @@
 #  define _RWSTD_NO_STL_SPECIALIZATION
 #endif   // _RWSTD_NO_STL_SPECIALIZATION
 
-// 
-// Macro for path to the ANSI 'C' headers 
+//
+// Macro for path to the ANSI 'C' headers
 // Must be set specifically for each platform when the
 // C++ wrappers for 'C' headers are used.
 //
@@ -196,7 +196,7 @@
    // macros that are enabled in library source files
 #ifdef _RWSTD_LIB_SRC
    // don't instantiate templates in library source code
-   //  (but see _RWSTD_INSTANTIATE_TEMPLATES macro below) 
+   //  (but see _RWSTD_INSTANTIATE_TEMPLATES macro below)
 #  define _RWSTD_NO_TEMPLATE_DEFINITIONS
 #endif  // _RWSTD_LIB_SRC
 

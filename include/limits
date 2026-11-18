@@ -237,7 +237,7 @@ _RWSTD_EXPORT extern const long double __rw_ldbl_denorm_min;
 #  define _RWSTD_LIMITS_PRIMARY_TEMPLATE_DEFINED
 
 
-namespace std { 
+namespace std {
 
 
 enum float_round_style
@@ -326,7 +326,7 @@ struct numeric_limits
 #define _RWSTD_LIMITS_INCLUDED
 
 
-namespace std { 
+namespace std {
 
 
 _RWSTD_CLASS_BEGIN (numeric_limits<float>)
@@ -427,8 +427,8 @@ _RWSTD_CLASS_BEGIN (numeric_limits<long double>)
 
     _RWSTD_STATIC (long double, bool, is_specialized, true);
 
-    _RWSTD_STATIC_FUN (long double, (min), _RWSTD_LDBL_MIN) 
-    _RWSTD_STATIC_FUN (long double, (max), _RWSTD_LDBL_MAX) 
+    _RWSTD_STATIC_FUN (long double, (min), _RWSTD_LDBL_MIN)
+    _RWSTD_STATIC_FUN (long double, (max), _RWSTD_LDBL_MAX)
 
     _RWSTD_STATIC (long double, int, digits,   _RWSTD_LDBL_MANT_DIG);
     _RWSTD_STATIC (long double, int, digits10, _RWSTD_LDBL_DIG);
@@ -438,8 +438,8 @@ _RWSTD_CLASS_BEGIN (numeric_limits<long double>)
     _RWSTD_STATIC (long double, bool, is_exact,   false);
     _RWSTD_STATIC (long double, int,  radix,      _RWSTD_FLT_RADIX);
 
-    _RWSTD_STATIC_FUN (long double, epsilon,     _RWSTD_LDBL_EPSILON) 
-    _RWSTD_STATIC_FUN (long double, round_error, 0.5L) 
+    _RWSTD_STATIC_FUN (long double, epsilon,     _RWSTD_LDBL_EPSILON)
+    _RWSTD_STATIC_FUN (long double, round_error, 0.5L)
 
     _RWSTD_STATIC (long double, int, min_exponent,   _RWSTD_LDBL_MIN_EXP);
     _RWSTD_STATIC (long double, int, min_exponent10, _RWSTD_LDBL_MIN_10_EXP);

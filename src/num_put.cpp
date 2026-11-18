@@ -52,7 +52,7 @@
 #endif   // _RWSTD_NO_SNPRINTF
 
 
-namespace __rw { 
+namespace __rw {
 
 static const char __rw_digits[] =
     "0123456789abcdefghijklmnopqrstuvwxyz"
@@ -65,7 +65,7 @@ __rw_fmat_infinite (char *buf, size_t bufsize, double val, unsigned flags)
     _RWSTD_ASSERT (!__rw_isfinite (val));
     _RWSTD_ASSERT (5 <= bufsize);
 
-    _RWSTD_UNUSED (bufsize); 
+    _RWSTD_UNUSED (bufsize);
 
     char* end = buf;
     const bool cap = !!(flags & _RWSTD_IOS_UPPERCASE);

@@ -39,7 +39,7 @@
 #include "locale_body.h"
 
 
-namespace std { 
+namespace std {
 
 string locale::name () const
 {

@@ -145,7 +145,7 @@ public:
     }
 
     // 20.4.1.1, p11 - the largest N for which allocate (N) might succeed
-    size_type max_size () const _THROWS (()) { 
+    size_type max_size () const _THROWS (()) {
         return size_type (_RWSTD_SIZE_MAX) / sizeof (value_type)
             ? size_type (size_type (_RWSTD_SIZE_MAX) / sizeof (value_type))
             : size_type (1);
@@ -154,10 +154,10 @@ public:
     void construct (pointer __p, const_reference __val) {
         __rw::__rw_construct (__p, __val);
     }
-    
+
     // declared as nothrow since the behavior of programs that
     // instantiate library templates on types whose dtors throw
-    // is undefined 
+    // is undefined
     void destroy (pointer __p) _RWSTD_ATTRIBUTE_NOTHROW {
         _RWSTD_ASSERT (0 != __p);
         __p->~_TypeT ();

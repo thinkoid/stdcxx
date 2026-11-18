@@ -25,7 +25,7 @@
  **************************************************************************/
 
 #define _RWSTD_LIB_SRC
-#include <rw/_defs.h>     
+#include <rw/_defs.h>
 
 #include <stddef.h>   // for size_t
 

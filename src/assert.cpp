@@ -69,7 +69,7 @@ __rw_stack_trace (int fd) _RWSTD_DEFINE_NOTHROW
 #endif   // !defined (STACK_TRACE)
 
 
-namespace __rw { 
+namespace __rw {
 
 
 _RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW void

@@ -66,7 +66,7 @@ struct _RWSTD_EXPORT ios_base: private __rw::__rw_synchronized
     // 27.4.2.1.2
     typedef __rw::__rw_fmtflags fmtflags;
 
-    // insert and extract bool type in alphabetic format 
+    // insert and extract bool type in alphabetic format
     static const fmtflags boolalpha = __rw::__rw_boolalpha;
 
     // converts integer input or generates integer output in decimal base
@@ -125,7 +125,7 @@ struct _RWSTD_EXPORT ios_base: private __rw::__rw_synchronized
     static const iostate goodbit = __rw::__rw_goodbit;
 
     // indicates a loss of integrity in an input or output sequence
-    // (such as an irrecoverable read error from a file); 
+    // (such as an irrecoverable read error from a file);
     static const iostate badbit = __rw::__rw_badbit;
 
     // indicates that an input operation reached the end of an input sequence
@@ -139,7 +139,7 @@ struct _RWSTD_EXPORT ios_base: private __rw::__rw_synchronized
     // 27.4.2.1.4
     typedef __rw::__rw_openmode openmode;
 
-    // seek to end before each write 
+    // seek to end before each write
     static const openmode app = __rw::__rw_app;
 
     // perform input and output in binary mode (as opposed to text mode)
@@ -154,7 +154,7 @@ struct _RWSTD_EXPORT ios_base: private __rw::__rw_synchronized
     // truncate an existing stream when opening
     static const openmode trunc = __rw::__rw_trunc;
 
-    // open and seek to end immediately after opening 
+    // open and seek to end immediately after opening
     static const openmode ate = __rw::__rw_ate;
 
     typedef __rw::__rw_seekdir seekdir;
@@ -164,7 +164,7 @@ struct _RWSTD_EXPORT ios_base: private __rw::__rw_synchronized
     static const seekdir cur = __rw::__rw_cur;
     static const seekdir end = __rw::__rw_end;
 
-#ifndef _RWSTD_NO_DEPRECATED    
+#ifndef _RWSTD_NO_DEPRECATED
 
     // D.6, p1 (must be integer types and not enums)
     typedef int              seek_dir;
@@ -173,8 +173,8 @@ struct _RWSTD_EXPORT ios_base: private __rw::__rw_synchronized
     typedef _RWSTD_STREAMOFF streamoff;
     typedef _RWSTD_STREAMOFF streampos;
 
-#endif // _RWSTD_NO_DEPRECATED    
-    
+#endif // _RWSTD_NO_DEPRECATED
+
     // 27.4.2.1.6
     struct _RWSTD_EXPORT Init {
         Init ();
@@ -249,12 +249,12 @@ struct _RWSTD_EXPORT ios_base: private __rw::__rw_synchronized
 
     // 27.4.2.6, p1
     void register_callback (event_callback, int);
-    
+
     // 27.4.2.4, p1
     static bool sync_with_stdio (bool = true);
 
     // 27.4.2.7, p2
-    virtual ~ios_base ();    
+    virtual ~ios_base ();
 
 protected:
 
@@ -291,7 +291,7 @@ protected:
     unsigned char      _C_except;   // active exceptions
     unsigned char      _C_nolock;   // non-zero: stream and buffer unlocked
     unsigned char      _C_sync;     // non-zero: synchronized with stdio
-    
+
     static bool _C_sync_with_stdio;
 
 private:

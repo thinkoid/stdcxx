@@ -66,12 +66,12 @@ typedef unsigned char UChar;
 
 
 namespace __rw {
- 
+
 #undef min
 #undef max
 
 
-_RWSTD_INTERNAL void 
+_RWSTD_INTERNAL void
 __rw_append_weight (const __rw::__rw_collate_t *impl,
                     const unsigned            *weights,
                     std::wstring              &out)
@@ -86,14 +86,14 @@ __rw_append_weight (const __rw::__rw_collate_t *impl,
         if (wt && wt != _RWSTD_UINT_MAX) {
             out += wchar_t (wt);
         }
-      
+
     }
 }
 
 
-_RWSTD_INTERNAL void 
-__rw_append_weight (const __rw::__rw_collate_t *impl, 
-                    const unsigned int        *weights, 
+_RWSTD_INTERNAL void
+__rw_append_weight (const __rw::__rw_collate_t *impl,
+                    const unsigned int        *weights,
                     std::string               &out)
 {
     // append the weight(s) to the out string
@@ -137,7 +137,7 @@ __rw_process_offsets (__rw::__rw_collate_t *impl,
                       const unsigned      **end,
                       _STR_T               &out)
 {
-    
+
     // process the offset list for each pass.
 
     for (unsigned int pass = 0; pass < impl->num_weights; pass++) {
@@ -156,7 +156,7 @@ __rw_process_offsets (__rw::__rw_collate_t *impl,
             // different orderings although most likely there will be groups
             // of characters with the same ordering.
             unsigned int cur_ord = (**cur_end >> shift_value) & 0x00000003;
-            while (cur_end != end && ((**cur_end >> shift_value) 
+            while (cur_end != end && ((**cur_end >> shift_value)
                                       & 0x00000003) == cur_ord) {
                cur_end++;
             }
@@ -189,7 +189,7 @@ __rw_process_offsets (__rw::__rw_collate_t *impl,
 
             case 2:
                 // forward,position weight type.
-                // The string with a non-IGNOREd element after the 
+                // The string with a non-IGNOREd element after the
                 // fewest IGNORED elements should collate first
                 for (cur = cur_start; cur < cur_end; cur++) {
                     const unsigned int* weightp = *cur;
@@ -251,7 +251,7 @@ __rw_get_w_ce_offset (const __rw_collate_t *impl,
                       const wchar_t* end)
 {
     // obtain the offset of a wide collating element.  If no collating
-    // elements can be made with the current position of the string 
+    // elements can be made with the current position of the string
     // then return -1
 
     if (impl->largest_ce > 1) {
@@ -280,9 +280,9 @@ __rw_get_w_ce_offset (const __rw_collate_t *impl,
 
                 if (UChar (utf8_enc [i]) < c1 || UChar (utf8_enc [i]) > c2)
                     goto miss;
-        
+
                 tab = impl->get_w_ce_tab (cur_tab);
-            
+
                 const unsigned int next_off = tab [UChar (utf8_enc [i]) - c1];
                 if (next_off == _RWSTD_UINT_MAX) {
                     goto miss;
@@ -338,9 +338,9 @@ __rw_get_wchar_offset (const __rw_collate_t *impl,
             const unsigned c1 = impl->get_first_char_in_w_tab (cur_tab);
             if (UChar (utf8_enc [i]) < c1)
                 return -1;
-        
+
             const unsigned* const tab = impl->get_w_tab (cur_tab);
-            
+
             const unsigned int next_off = tab [UChar (utf8_enc [i]) - c1];
             if (next_off == _RWSTD_UINT_MAX) {
                 return -1;
@@ -361,7 +361,7 @@ __rw_get_wchar_offset (const __rw_collate_t *impl,
 
 static int
 __rw_get_n_ce_offset (const __rw_collate_t *impl,
-                      const char **cur_char, 
+                      const char **cur_char,
                       const char  *end)
 {
     if (impl->largest_ce > 1) {
@@ -414,7 +414,7 @@ __rw_get_n_ce_offset (const __rw_collate_t *impl,
 
 static int
 __rw_get_char_offset (const __rw_collate_t *impl,
-                      const char** cur_char, 
+                      const char** cur_char,
                       const char* end)
 {
     unsigned int cur_tab = 0;
@@ -538,14 +538,14 @@ __rw_strnxfrm (const char *src, size_t nchars)
         }
         else {
 
-            // count and append the consecutive NULs embedded in the 
+            // count and append the consecutive NULs embedded in the
             // input string
 
             size_t i = 0;
             for (; i < nchars && 0 == src [i]; ++i) ;
 
             try {
-                // resize the result string to fit itself plus the 
+                // resize the result string to fit itself plus the
                 // embedded NULs
                 res.resize (res.size () + i);
             }
@@ -655,14 +655,14 @@ __rw_wcsnxfrm (const wchar_t *src, size_t nchars)
         }
         else {
 
-            // count and append the consecutive NULs embedded in the 
+            // count and append the consecutive NULs embedded in the
             // input string
 
             size_t i = 0;
             for (; i < nchars && 0 == src [i]; ++i) ;
 
             try {
-                // resize the result string to fit itself plus the 
+                // resize the result string to fit itself plus the
                 // embedded NULs
                 res.resize (res.size () + i);
             }
@@ -753,7 +753,7 @@ private:
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 __rw::__rw_facet_id collate<char>::id;
@@ -847,7 +847,7 @@ do_transform (const char* low, const char* high) const
 
     const int ccvt_cat = __rw::__rw_get_cat ((_C_wcodecvt_byname + 1) / 2);
 
-    __rw::__rw_collate_t* const impl = 
+    __rw::__rw_collate_t* const impl =
         const_cast< __rw::__rw_collate_t* >(
             static_cast< const __rw::__rw_collate_t* >(_C_data ()));
 
@@ -887,9 +887,9 @@ do_transform (const char* low, const char* high) const
             if (ret == -1) {
                 // The character is not explicitely defined, but it
                 // may have been defined implicitly by UNDEFINED.
-                // because we cannot tell the difference between 
+                // because we cannot tell the difference between
                 // an UNDEFINED character and an invalid character
-                // in the collate database we must use the codecvt 
+                // in the collate database we must use the codecvt
                 // database to discover this information
                 if (impl->undefined_optimization) {
 
@@ -1026,13 +1026,13 @@ do_compare (const wchar_t* low1, const wchar_t* high1,
 }
 
 
-collate_byname<wchar_t>::string_type 
+collate_byname<wchar_t>::string_type
 collate_byname<wchar_t>::
 do_transform (const wchar_t* low, const wchar_t* high) const
 {
     const int ccvt_cat = __rw::__rw_get_cat ((_C_wcodecvt_byname + 1) / 2);
 
-    __rw::__rw_collate_t *impl = 
+    __rw::__rw_collate_t *impl =
         const_cast< __rw::__rw_collate_t* >(static_cast< const __rw::__rw_collate_t* >(_C_data ()));
 
     if (!impl) {
@@ -1067,10 +1067,10 @@ do_transform (const wchar_t* low, const wchar_t* high) const
                 if (ret == -1) {
                     // The character is not explicitely defined, but it
                     // may have been defined implicitly by UNDEFINED.
-                    // because we cannot tell the difference between 
+                    // because we cannot tell the difference between
                     // an UNDEFINED character and an invalid character
-                    // in the collate database we must use the codecvt 
-                    // database to discover this information 
+                    // in the collate database we must use the codecvt
+                    // database to discover this information
                     if (impl->undefined_optimization) {
 
                         if (0 == cvtmap._C_cvt) {

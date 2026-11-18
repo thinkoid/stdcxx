@@ -47,7 +47,7 @@
 
 
 
-namespace std { 
+namespace std {
 
 #ifndef _RWSTD_IOSFWD_INCLUDED
 
@@ -110,7 +110,7 @@ public:
                      ios_base::openmode = __rw::__rw_in_out);
 
     virtual ~basic_stringbuf ();
-    
+
     _C_string_type str () const;
 
     void str (const _C_string_type &__str) {
@@ -118,13 +118,13 @@ public:
     }
 
 protected:
-    
+
     // departure: xsputn overridden for speed, and showmanyc to count
     // the characters written past the end of the get area
     virtual streamsize xsputn (const char_type*, streamsize);
 
     virtual streamsize showmanyc ();
-    
+
     virtual int_type overflow (int_type = traits_type::eof ());
 
     virtual int_type pbackfail (int_type = traits_type::eof ());
@@ -134,7 +134,7 @@ protected:
     virtual pos_type
     seekoff (off_type, ios_base::seekdir, ios_base::openmode =
              __rw::__rw_in_out);
-    
+
     virtual pos_type
     seekpos (pos_type, ios_base::openmode = __rw::__rw_in_out);
 
@@ -206,7 +206,7 @@ _C_catchup (char_type *__gbeg)
     if (this->egptr () < this->pptr ()) {
 
         if (this->_C_is_in ()) {
-        
+
             // in in|out mode use the relative offset of gptr ()
             // from eback() to set the new gptr() and use egptr()
             // as the "high mark" (see LWG issue 432)
@@ -239,14 +239,14 @@ public:
     typedef typename traits_type::int_type   int_type;
     typedef typename traits_type::pos_type   pos_type;
     typedef typename traits_type::off_type   off_type;
-  
+
     explicit
     basic_istringstream (ios_base::openmode __mode = ios_base::in)
         : basic_istream<char_type, traits_type>(rdbuf ()),
           _C_sb (__mode | ios_base::in) { }
 
     explicit
-    basic_istringstream (const _C_string_type& __str, 
+    basic_istringstream (const _C_string_type& __str,
                          ios_base::openmode __mode = ios_base::in)
         : basic_istream<char_type, traits_type>(rdbuf ()),
           _C_sb (__str, __mode | ios_base::in) { }
@@ -293,9 +293,9 @@ public:
     basic_ostringstream (ios_base::openmode __mode = ios_base::out)
         : basic_ostream<char_type, traits_type> (rdbuf ()),
           _C_sb (__mode | ios_base::out) { }
-        
+
     explicit
-    basic_ostringstream (const _C_string_type  &__str, 
+    basic_ostringstream (const _C_string_type  &__str,
                          ios_base::openmode  __mode = ios_base::out)
         : basic_ostream<char_type, traits_type>(rdbuf ()),
           _C_sb (__str, __mode | ios_base::out) { }
@@ -376,7 +376,7 @@ private:
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_BASIC_STRINGBUF, _CHAR)
 

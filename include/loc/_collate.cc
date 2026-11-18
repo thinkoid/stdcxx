@@ -27,7 +27,7 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 
 template <class _CharT>

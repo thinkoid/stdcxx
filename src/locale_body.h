@@ -42,14 +42,14 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 struct locale;
 
 }   // namespace std
 
 
-namespace __rw { 
+namespace __rw {
 
 
 // the factories of the standard facets (src/use_facet.h,

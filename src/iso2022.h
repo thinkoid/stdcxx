@@ -37,7 +37,7 @@
 #include <rw/_defs.h>
 
 
-namespace __rw { 
+namespace __rw {
 
 enum encoding_type
 {
@@ -62,12 +62,12 @@ __rw_iso2022jp_do_out (_RWSTD_MBSTATE_T&,
                        const wchar_t*&, const wchar_t*,
                        char*&, char*);
 
-std::codecvt_base::result 
+std::codecvt_base::result
 __rw_iso2022jp_do_unshift (_RWSTD_MBSTATE_T&, char*&, char*);
 
 int  __rw_iso2022jp_do_encoding ();
- 
-_RWSTD_SIZE_T __rw_iso2022jp_do_length (_RWSTD_MBSTATE_T&, const char*, 
+
+_RWSTD_SIZE_T __rw_iso2022jp_do_length (_RWSTD_MBSTATE_T&, const char*,
                                         const char*, _RWSTD_SIZE_T);
 
 _RWSTD_SIZE_T __rw_iso2022jp_do_max_length ();
@@ -84,12 +84,12 @@ __rw_iso2022jp2_do_out (_RWSTD_MBSTATE_T&,
                        const wchar_t*&, const wchar_t*,
                        char*&, char*);
 
-std::codecvt_base::result 
+std::codecvt_base::result
 __rw_iso2022jp2_do_unshift (_RWSTD_MBSTATE_T&, char*&, char*);
 
 int  __rw_iso2022jp2_do_encoding  ();
 
-_RWSTD_SIZE_T __rw_iso2022jp2_do_length (_RWSTD_MBSTATE_T&, const char*, 
+_RWSTD_SIZE_T __rw_iso2022jp2_do_length (_RWSTD_MBSTATE_T&, const char*,
                                          const char*, _RWSTD_SIZE_T);
 
 _RWSTD_SIZE_T __rw_iso2022jp2_do_max_length ();

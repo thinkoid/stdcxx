@@ -43,7 +43,7 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 
 template <class _CharT>
@@ -88,7 +88,7 @@ protected:
     virtual int
     do_compare (const char_type*, const char_type*,
                 const char_type*, const char_type*) const;
-        
+
     virtual string_type
     do_transform (const char_type*, const char_type*) const;
 
@@ -134,7 +134,7 @@ protected:
     virtual int
     do_compare (const char_type*, const char_type*,
                 const char_type*, const char_type*) const;
-        
+
     virtual string_type
     do_transform (const char_type*, const char_type*) const;
 
@@ -214,7 +214,7 @@ class _RWSTD_EXPORT collate_byname<char>: public collate<char>
 public:
 
     explicit collate_byname (const char* __name, _RWSTD_SIZE_T __ref = 0)
-        :  collate<char_type>(__ref){ 
+        :  collate<char_type>(__ref){
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
 
@@ -238,7 +238,7 @@ class _RWSTD_EXPORT collate_byname<wchar_t>: public collate<wchar_t>
 public:
 
     explicit collate_byname (const char* __name, _RWSTD_SIZE_T __ref = 0)
-        :  collate<char_type>(__ref){ 
+        :  collate<char_type>(__ref){
         this->_C_set_name (__name, _C_namebuf, sizeof _C_namebuf);
     }
 

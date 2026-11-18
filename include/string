@@ -44,7 +44,7 @@
 #include <rw/_defs.h>
 
 
-namespace std { 
+namespace std {
 
 
 #ifdef _RWSTD_NO_EXTERN_MEMBER_TEMPLATE
@@ -56,14 +56,14 @@ namespace std {
 
 template <class _CharT, class _Traits, class _Alloc,
           class _StringIter, class _InputIter>
-std::basic_string<_CharT, _Traits, _Alloc>& 
-__rw_replace (std::basic_string<_CharT, _Traits, _Alloc>&, 
+std::basic_string<_CharT, _Traits, _Alloc>&
+__rw_replace (std::basic_string<_CharT, _Traits, _Alloc>&,
               _StringIter, _StringIter, _InputIter, _InputIter);
 
 template <class _CharT, class _Traits, class _Alloc,
           class _StringIter, class _InputIter>
-std::basic_string<_CharT, _Traits, _Alloc>& 
-__rw_replace_aux (std::basic_string<_CharT, _Traits, _Alloc>&, 
+std::basic_string<_CharT, _Traits, _Alloc>&
+__rw_replace_aux (std::basic_string<_CharT, _Traits, _Alloc>&,
                   _StringIter, _StringIter, _InputIter, _InputIter);
 
 #endif   // _RWSTD_NO_STRING_OUTLINED_MEMBER_TEMPLATES
@@ -73,7 +73,7 @@ template <class _CharT, class _Traits, class _Allocator>
 class _RWSTD_EXPORT basic_string: private _Allocator
 {
 public:
-  
+
     typedef _Traits                               traits_type;
     typedef typename traits_type::char_type       value_type;
     typedef _Allocator                            allocator_type;
@@ -95,7 +95,7 @@ public:
 
     typedef __rw::__rw_debug_iter <basic_string, pointer, pointer>
         iterator;
-    
+
     typedef __rw::__rw_debug_iter <basic_string, const_pointer, pointer>
         const_iterator;
 
@@ -136,11 +136,11 @@ public:
     basic_string (const basic_string&);
 
     // 21.3.1, p3
-    basic_string (const basic_string&, size_type, size_type = npos, 
+    basic_string (const basic_string&, size_type, size_type = npos,
                   const allocator_type& = allocator_type ());
 
     // 21.3.1, p6
-    basic_string (const_pointer, size_type, 
+    basic_string (const_pointer, size_type,
                   const allocator_type& = allocator_type ());
 
     // 21.3.1, p9
@@ -153,7 +153,7 @@ public:
 
     // 21.3.1, p15
     template <class _InputIter>
-    basic_string (_InputIter __first, _InputIter __last, 
+    basic_string (_InputIter __first, _InputIter __last,
                   const allocator_type &__alloc = allocator_type ())
         : allocator_type (__alloc), _C_data (_C_nullref ()->data ()) {
         replace (_C_make_iter (_C_data), _C_make_iter (_C_data),
@@ -222,7 +222,7 @@ public:
     void resize (size_type, value_type);
 
     void resize (size_type __n) {
-        resize (__n, value_type ()); 
+        resize (__n, value_type ());
     }
 
     size_type capacity () const {
@@ -423,7 +423,7 @@ private:
 public:
 
     template <class _InputIter>
-    basic_string& __replace_aux (iterator __first1, iterator __last1, 
+    basic_string& __replace_aux (iterator __first1, iterator __last1,
                                  _InputIter __first2, _InputIter __last2) {
         return __rw_replace_aux (*this, __first1, __last1, __first2, __last2);
     }
@@ -488,14 +488,14 @@ public:
 
     template<class _InputIter>
     basic_string&
-    _C_replace (iterator __first1, iterator __last1, 
+    _C_replace (iterator __first1, iterator __last1,
                 _InputIter __first2, _InputIter __last2, void*);
 
 #else   // if defined (_RWSTD_NO_STRING_OUTLINED_MEMBER_TEMPLATES)
 
     template<class _InputIter>
     basic_string&
-    _C_replace (iterator __first1, iterator __last1, 
+    _C_replace (iterator __first1, iterator __last1,
                 _InputIter __first2, _InputIter __last2, void*) {
         return __rw_replace (*this, __first1, __last1, __first2, __last2);
     }
@@ -623,7 +623,7 @@ public:
     // 21.3.6.2, p7
     size_type rfind (value_type __c, size_type __pos = npos) const {
         return rfind (&__c, __pos, 1);
-    }    
+    }
 
     // 21.3.6.3, p1
     size_type find_first_of (const basic_string &__str,
@@ -664,7 +664,7 @@ public:
     }
 
     // 21.3.6.5, p1
-    size_type find_first_not_of (const basic_string &__str, 
+    size_type find_first_not_of (const basic_string &__str,
                                  size_type __pos = 0) const {
         return find_first_not_of (__str.c_str (), __pos, __str.size ());
     }
@@ -673,7 +673,7 @@ public:
     size_type find_first_not_of (const_pointer, size_type, size_type) const;
 
     // 21.3.6.5, p5
-    size_type find_first_not_of (const_pointer __s, 
+    size_type find_first_not_of (const_pointer __s,
                                  size_type __pos = 0) const {
         return find_first_not_of (__s, __pos, traits_type::length(__s));
     }
@@ -684,7 +684,7 @@ public:
     }
 
     // 21.3.6.6, p1
-    size_type find_last_not_of (const basic_string &__str, 
+    size_type find_last_not_of (const basic_string &__str,
                                 size_type __pos = npos) const {
         return find_last_not_of (__str.c_str (), __pos, __str.size ());
     }
@@ -702,10 +702,10 @@ public:
     size_type find_last_not_of (value_type __c, size_type __pos = npos) const {
         return find_last_not_of (&__c, __pos, size_type (1));
     }
-  
+
     // 21.3.6.7
     basic_string substr (size_type = 0, size_type = npos) const;
-  
+
     // 21.3.6.8, p1
     int compare (const basic_string &__str) const;
 
@@ -716,7 +716,7 @@ public:
     }
 
     // 21.3.6.8, p4
-    int compare (size_type, size_type, const basic_string&, 
+    int compare (size_type, size_type, const basic_string&,
                 size_type, size_type) const;
 
     // 21.3.6.8, p5
@@ -760,10 +760,10 @@ public:
         // use two static_casts in favor of reinterpret_cast
         // to prevent "increased alignment" warnings
         return static_cast< _C_string_ref_type* >(
-            static_cast< void* >(_C_data)) - 1; 
+            static_cast< void* >(_C_data)) - 1;
     }
 
-    void _C_unlink (pointer);   
+    void _C_unlink (pointer);
 
     friend struct __rw::__string_ref<value_type, traits_type, allocator_type>;
 
@@ -893,7 +893,7 @@ erase (size_type __pos, size_type __n)
 
 
 template <class _CharT, class _Traits , class _Allocator>
-inline typename basic_string<_CharT, _Traits, _Allocator>::const_reference 
+inline typename basic_string<_CharT, _Traits, _Allocator>::const_reference
 basic_string<_CharT, _Traits, _Allocator>::
 operator[] (size_type __pos) const
 {
@@ -1019,14 +1019,14 @@ replace (size_type __pos1, size_type __n1, const basic_string &__str,
          size_type __pos2, size_type __n2)
 {
     _RWSTD_REQUIRES (__pos1 <= size (),
-                     (_RWSTD_ERROR_OUT_OF_RANGE, 
+                     (_RWSTD_ERROR_OUT_OF_RANGE,
                       _RWSTD_FUNC ("basic_string::replace(size_type, "
                                    "size_type, const basic_string&, "
                                    "size_type, size_type)"),
                       __pos1, size ()));
 
     _RWSTD_REQUIRES (__pos2 <= __str.size (),
-                     (_RWSTD_ERROR_OUT_OF_RANGE, 
+                     (_RWSTD_ERROR_OUT_OF_RANGE,
                       _RWSTD_FUNC ("basic_string::replace(size_type, "
                                    "size_type, const basic_string&, "
                                    "size_type, size_type)"),
@@ -1147,7 +1147,7 @@ append (size_type __n, value_type __c)
 // 21.3.7.1, p1
 template <class _CharT, class _Traits , class _Allocator>
 inline basic_string<_CharT, _Traits, _Allocator>
-operator+ (const basic_string<_CharT, _Traits, _Allocator> &__lhs, 
+operator+ (const basic_string<_CharT, _Traits, _Allocator> &__lhs,
            const basic_string<_CharT, _Traits, _Allocator> &__rhs)
 {
     typedef basic_string<_CharT, _Traits, _Allocator> string_type;
@@ -1160,7 +1160,7 @@ operator+ (const basic_string<_CharT, _Traits, _Allocator> &__lhs,
 // 21.3.7.1, p2
 template <class _CharT, class _Traits , class _Allocator>
 inline basic_string<_CharT, _Traits, _Allocator>
-operator+ (const _CharT*                                    __lhs, 
+operator+ (const _CharT*                                    __lhs,
            const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return basic_string<_CharT, _Traits, _Allocator>(__lhs) += __rhs;
@@ -1180,7 +1180,7 @@ operator+ (_CharT                                           __lhs,
 // 21.3.7.1, p5
 template <class _CharT, class _Traits , class _Allocator>
 inline basic_string<_CharT, _Traits, _Allocator>
-operator+ (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator+ (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
            const _CharT*                                    __rhs)
 {
     typedef basic_string<_CharT, _Traits, _Allocator> string_type;
@@ -1193,7 +1193,7 @@ operator+ (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.1, p7
 template <class _CharT, class _Traits , class _Allocator>
 inline basic_string<_CharT, _Traits, _Allocator>
-operator+ (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator+ (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
            _CharT                                           __rhs)
 {
     typedef basic_string<_CharT, _Traits, _Allocator> string_type;
@@ -1206,7 +1206,7 @@ operator+ (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.2, p1
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator== (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator== (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
             const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     // avoid using basic_string<>::compare() for efficiency
@@ -1218,7 +1218,7 @@ operator== (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.2, p2
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator== (const _CharT*                                    __lhs, 
+operator== (const _CharT*                                    __lhs,
             const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     const typename basic_string<_CharT, _Traits, _Allocator>::size_type
@@ -1233,7 +1233,7 @@ operator== (const _CharT*                                    __lhs,
 // 21.3.7.2, p3
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator== (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator== (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
             const _CharT*                                    __rhs)
 {
     return __rhs == __lhs;
@@ -1243,7 +1243,7 @@ operator== (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.4, p1
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator< (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator< (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
            const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return 0 > __lhs.compare (__rhs);
@@ -1253,7 +1253,7 @@ operator< (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.4, p2
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator< (const _CharT*                                    __lhs, 
+operator< (const _CharT*                                    __lhs,
            const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return 0 < __rhs.compare (__lhs);
@@ -1273,7 +1273,7 @@ operator< (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.3, p1
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator!= (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator!= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
             const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return !(__lhs == __rhs);
@@ -1283,7 +1283,7 @@ operator!= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.5, p1
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator> (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator> (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
            const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return __rhs < __lhs;
@@ -1293,7 +1293,7 @@ operator> (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.6, p1
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator<= (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator<= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
             const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return !(__rhs < __lhs);
@@ -1303,7 +1303,7 @@ operator<= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.7, p1
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator>= (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator>= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
             const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return !(__lhs < __rhs);
@@ -1312,7 +1312,7 @@ operator>= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.8, p1
 
 template <class _CharT, class _Traits, class _Allocator>
-inline void swap (basic_string<_CharT, _Traits, _Allocator>& __a, 
+inline void swap (basic_string<_CharT, _Traits, _Allocator>& __a,
                   basic_string<_CharT, _Traits, _Allocator>& __b)
 {
     __a.swap (__b);
@@ -1322,7 +1322,7 @@ inline void swap (basic_string<_CharT, _Traits, _Allocator>& __a,
 // 21.3.7.3, p2
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator!= (const _CharT*                                    __lhs, 
+operator!= (const _CharT*                                    __lhs,
             const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return !(__lhs == __rhs);
@@ -1332,7 +1332,7 @@ operator!= (const _CharT*                                    __lhs,
 // 21.3.7.3, p3
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator!= (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator!= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
             const _CharT*                                    __rhs)
 {
     return !(__lhs == __rhs);
@@ -1342,7 +1342,7 @@ operator!= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.5, p2
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator> (const _CharT*                                    __lhs, 
+operator> (const _CharT*                                    __lhs,
            const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return __rhs < __lhs;
@@ -1352,7 +1352,7 @@ operator> (const _CharT*                                    __lhs,
 // 21.3.7.5, p3
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator> (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator> (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
            const _CharT*                                    __rhs)
 {
     return __rhs < __lhs;
@@ -1362,7 +1362,7 @@ operator> (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.6, p2
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator<= (const _CharT*                                    __lhs, 
+operator<= (const _CharT*                                    __lhs,
             const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return !(__rhs < __lhs);
@@ -1372,7 +1372,7 @@ operator<= (const _CharT*                                    __lhs,
 // 21.3.7.6, p3
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator<= (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator<= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
             const _CharT*                                    __rhs)
 {
     return !(__rhs < __lhs);
@@ -1382,7 +1382,7 @@ operator<= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 // 21.3.7.7, p2
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator>= (const _CharT*                                    __lhs, 
+operator>= (const _CharT*                                    __lhs,
             const basic_string<_CharT, _Traits, _Allocator>& __rhs)
 {
     return !(__lhs < __rhs);
@@ -1392,7 +1392,7 @@ operator>= (const _CharT*                                    __lhs,
 // 21.3.7.7, p3
 template <class _CharT, class _Traits , class _Allocator>
 inline bool
-operator>= (const basic_string<_CharT, _Traits, _Allocator>& __lhs, 
+operator>= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
             const _CharT*                                    __rhs)
 {
     return !(__lhs < __rhs);
@@ -1407,7 +1407,7 @@ operator>= (const basic_string<_CharT, _Traits, _Allocator>& __lhs,
 #endif   // _RWSTD_RW_STRINGIO_H_INCLUDED
 
 
-namespace __rw { 
+namespace __rw {
 
 // more specialized version for basic_string<>; may be further specialized
 // in user code for example on a user-defined allocator
@@ -1428,7 +1428,7 @@ __rw_new_capacity (
                            + (((__size & 0x3ff) * __ratio) >> 10);
 
     return (__size += _RWSTD_MINIMUM_STRING_CAPACITY) > __cap ? __size : __cap;
-}                     
+}
 
 }   // namespace __rw
 
@@ -1439,7 +1439,7 @@ __rw_new_capacity (
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_BASIC_STRING, _CHAR)
 

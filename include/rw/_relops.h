@@ -48,13 +48,13 @@
 #endif   // _RWSTD_RW_DEFS_H_INCLUDED
 
 
-namespace std { 
+namespace std {
 
 
 // rel_ops contents not available if namespaces are disabled
 // to avoid ambiguities with other overloaded operators
 
-namespace rel_ops { 
+namespace rel_ops {
 
 
 template <class _TypeT>

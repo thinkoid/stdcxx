@@ -36,7 +36,7 @@
 #include "podarray.h"
 
 
-namespace __rw { 
+namespace __rw {
 
 // static buffer for the classic "C" locale object
 static __rw_aligned_buffer<std::locale> __rw_classic;
@@ -71,7 +71,7 @@ __rw_init_classic ()
 namespace std {
 
 
-/* static */ const locale& 
+/* static */ const locale&
 locale::classic ()
 {
     // initialize classic locale in the static buffer exactly once

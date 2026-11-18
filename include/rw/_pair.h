@@ -48,7 +48,7 @@
 #endif   // _RWSTD_RW_FUNCBASE_H_INCLUDED
 
 
-namespace std { 
+namespace std {
 
 
 // 20.2.2
@@ -71,7 +71,7 @@ struct pair
 
     // 20.2.2, p4
     template <class _TypeX, class _TypeY>
-    pair (const pair <_TypeX, _TypeY> &__rhs) 
+    pair (const pair <_TypeX, _TypeY> &__rhs)
         : first (__rhs.first), second (__rhs.second) { }
 
     // lwg issue 353, resolved in C++11 20.3.2, p20-22
@@ -87,15 +87,15 @@ struct pair
 template <class _TypeT, class _TypeU>
 inline bool
 operator== (const pair<_TypeT, _TypeU>& __x, const pair<_TypeT, _TypeU>& __y)
-{ 
-    return __x.first == __y.first && __x.second == __y.second; 
+{
+    return __x.first == __y.first && __x.second == __y.second;
 }
 
 
 template <class _TypeT, class _TypeU>
 inline bool
 operator!= (const pair<_TypeT, _TypeU>& __x, const pair<_TypeT, _TypeU>& __y)
-{ 
+{
     return !(__x == __y);
 }
 
@@ -117,7 +117,7 @@ operator< (const pair<_TypeT, _TypeU>& __x, const pair<_TypeT, _TypeU>& __y)
 template <class _TypeT, class _TypeU>
 inline bool
 operator> (const pair<_TypeT, _TypeU>& __x, const pair<_TypeT, _TypeU>& __y)
-{ 
+{
     return __y < __x;
 }
 
@@ -125,7 +125,7 @@ operator> (const pair<_TypeT, _TypeU>& __x, const pair<_TypeT, _TypeU>& __y)
 template <class _TypeT, class _TypeU>
 inline bool
 operator>= (const pair<_TypeT, _TypeU>& __x, const pair<_TypeT, _TypeU>& __y)
-{ 
+{
     return !(__x < __y);
 }
 
@@ -133,7 +133,7 @@ operator>= (const pair<_TypeT, _TypeU>& __x, const pair<_TypeT, _TypeU>& __y)
 template <class _TypeT, class _TypeU>
 inline bool
 operator<= (const pair<_TypeT, _TypeU>& __x, const pair<_TypeT, _TypeU>& __y)
-{ 
+{
     return !(__y < __x);
 }
 

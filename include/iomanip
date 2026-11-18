@@ -106,11 +106,11 @@ struct __rw_setw
 
 
 }   // namespace __rw
- 
 
-namespace std { 
 
-  
+namespace std {
+
+
 // manipulator implementation
 template <class _Functor, class _TypeT>
 struct __rw_smanip
@@ -121,11 +121,11 @@ struct __rw_smanip
 
     __rw_smanip (_Functor __fun, _TypeT __arg)
         : _C_fun (__fun), _C_arg (__arg) { /* empty */ }
-      
+
     _Functor _C_fun;
     _TypeT   _C_arg;
 };
- 
+
 
 // 27.6.3, p3
 inline __rw_smanip<__rw::__rw_resetiosflags, ios_base::fmtflags>
@@ -133,7 +133,7 @@ resetiosflags (ios_base::fmtflags __mask)
 {
     return __rw_smanip<__rw::__rw_resetiosflags, ios_base::fmtflags>(__mask);
 }
- 
+
 
 // 27.6.3, p4
 inline __rw_smanip<__rw::__rw_setiosflags, ios_base::fmtflags>
@@ -188,7 +188,7 @@ operator>> (basic_istream<_CharT, _Traits>      &__strm,
     catch (...) {
         __strm.setstate (ios_base::badbit);
     }
-  
+
     return __strm;
 }
 

@@ -70,7 +70,7 @@ private:
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template <class _CharT, class _InputIter>
@@ -93,7 +93,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
     typedef moneypunct<_CharT, false> _Punct0;
     typedef moneypunct<_CharT, true> _Punct1;
 
-    const _Punct0 &__pun = __intl ? 
+    const _Punct0 &__pun = __intl ?
           reinterpret_cast< const _Punct0& >(
               std::use_facet< _Punct1 >(__rw::__rw_getloc (__flags)))
         : std::use_facet< _Punct0 >(__rw::__rw_getloc (__flags));
@@ -118,7 +118,7 @@ _C_get (iter_type __it, iter_type __end, bool __intl, ios_base &__flags,
     // available to them
     _RWSTD_SIZE_T __wscredit = 0;
 
-    const ctype<_CharT> &__ctp = 
+    const ctype<_CharT> &__ctp =
         std::use_facet< ctype<_CharT> >(__rw::__rw_getloc (__flags));
 
     char __buf [304];

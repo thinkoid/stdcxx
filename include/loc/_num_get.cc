@@ -33,7 +33,7 @@
 #include <rw/_basic_ios.h>
 
 
-namespace __rw { 
+namespace __rw {
 
 _RWSTD_EXPORT int
  __rw_get_num (void*, const char*, int, int,
@@ -73,7 +73,7 @@ private:
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 template <class _CharT, class _InputIter>
@@ -117,7 +117,7 @@ do_get (iter_type __begin, iter_type __end, ios_base &__flags,
 
     __err = __rw::__rw_goodbit;
 
-    const numpunct<char_type> &__pun = 
+    const numpunct<char_type> &__pun =
         std::use_facet< numpunct<char_type> >(__rw::__rw_getloc (__flags));
 
     // lwg issue 17
@@ -170,7 +170,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
 
     const locale &__loc = __rw::__rw_getloc (__flags);
 
-    const numpunct<char_type> &__pun = 
+    const numpunct<char_type> &__pun =
         std::use_facet< numpunct<char_type> >(__loc);
 
     // 22.2.2.1.2, p8: Stage 2
@@ -311,7 +311,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
             if (0 == __len) {
                 // fatal error: thousands_sep characters must be separated
                 // by groups of one or more digits
-                __err |= __rw::__rw_failbit;               
+                __err |= __rw::__rw_failbit;
                 return __begin;
             }
 
@@ -358,7 +358,7 @@ _C_get (iter_type __begin, iter_type __end, ios_base &__flags,
 
                         if (2 == __diff && '.' == __pcur [-1])
                             break;
-                            
+
                         if (!__grpend)
                             __grpend = __pcur;
                         *__pcur++ = 'e';

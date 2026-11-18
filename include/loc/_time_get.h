@@ -31,7 +31,7 @@
 
 #ifndef _RWSTD_LOC_TIME_GET_H_INCLUDED
 #define _RWSTD_LOC_TIME_GET_H_INCLUDED
- 
+
 
 #ifdef __GNUG__
 #  pragma GCC system_header
@@ -53,7 +53,7 @@ const void* __rw_get_timepunct (const __rw::__rw_facet*, int, _RWSTD_SIZE_T);
 }   // namespace __rw
 
 
-namespace std { 
+namespace std {
 
 
 // 22.2.5.1
@@ -74,38 +74,38 @@ public:
     explicit time_get (_RWSTD_SIZE_T __ref = 0)
         : __rw::__rw_facet (__ref) { }
 
-    dateorder date_order() const { 
-        return do_date_order(); 
+    dateorder date_order() const {
+        return do_date_order();
     }
 
     iter_type
     get_time (iter_type __start, iter_type __end, ios_base &__flags,
               _RWSTD_IOSTATE &__err, tm *__time) const {
-        return do_get_time (__start, __end, __flags, __err, __time); 
+        return do_get_time (__start, __end, __flags, __err, __time);
     }
 
     iter_type
     get_date (iter_type __start, iter_type __end, ios_base &__flags,
               _RWSTD_IOSTATE &__err, tm *__time) const {
-        return do_get_date(__start, __end, __flags, __err, __time); 
+        return do_get_date(__start, __end, __flags, __err, __time);
     }
 
     iter_type
     get_weekday (iter_type __start, iter_type __end, ios_base &__flags,
                  _RWSTD_IOSTATE &__err, tm *__time) const {
-        return do_get_weekday (__start, __end, __flags, __err, __time); 
+        return do_get_weekday (__start, __end, __flags, __err, __time);
     }
 
     iter_type
-    get_monthname (iter_type __start, iter_type __end, ios_base &__flags, 
+    get_monthname (iter_type __start, iter_type __end, ios_base &__flags,
                    _RWSTD_IOSTATE &__err, tm *__time) const {
         return do_get_monthname (__start, __end, __flags, __err, __time);
     }
 
     iter_type
     get_year (iter_type __start, iter_type __end, ios_base &__flags,
-              _RWSTD_IOSTATE &__err, tm *__time) const { 
-        return do_get_year (__start, __end, __flags, __err, __time); 
+              _RWSTD_IOSTATE &__err, tm *__time) const {
+        return do_get_year (__start, __end, __flags, __err, __time);
     }
 
 
@@ -208,7 +208,7 @@ protected:
 
 
 
-namespace std { 
+namespace std {
 
 #if _RWSTD_INSTANTIATE (_TIME_GET, _CHAR)
 

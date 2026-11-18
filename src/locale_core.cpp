@@ -36,7 +36,7 @@
 #include "locale_body.h"
 
 
-namespace std { 
+namespace std {
 
 
 // outlined to hide implementation details

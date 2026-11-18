@@ -37,7 +37,7 @@
 #endif   // _RWSTD_RW_SPECIALIZED_H_INCLUDED
 
 
-namespace __rw { 
+namespace __rw {
 
 
 template <class _TypeT>
@@ -141,7 +141,7 @@ inline __rw_array<_TypeT>::__rw_array (const_reference __val, size_type __n)
 
 template <class _TypeT>
 inline __rw_array<_TypeT>::__rw_array (const_pointer __data, size_type __n)
-{ 
+{
     if (__n) {
         _C_data = static_cast< pointer >(
             ::operator new (__n * sizeof *_C_data));
@@ -157,7 +157,7 @@ inline __rw_array<_TypeT>::__rw_array (const_pointer __data, size_type __n)
 template <class _TypeT>
 inline __rw_array<_TypeT>::__rw_array (const __rw_array<_TypeT> &__rhs)
     : _C_size (__rhs.size ())
-{ 
+{
     if (__rhs.size ()) {
         _C_data = static_cast< pointer >(
             ::operator new (_C_size * sizeof *_C_data));

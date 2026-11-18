@@ -28,7 +28,7 @@
  **************************************************************************/
 
 
-namespace std { 
+namespace std {
 
 
 // complex number `a' raised to an integer power `n'
@@ -113,7 +113,7 @@ pow (const complex<_TypeT>& __x, const complex<_TypeT>& __y)
 
     return complex<_TypeT>(__rho * _RWSTD_C::cos (__phi),
                            __rho * _RWSTD_C::sin (__phi));
-}      
+}
 
 
 template <class _TypeT, class _CharT, class _Traits>

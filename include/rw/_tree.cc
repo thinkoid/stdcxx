@@ -40,13 +40,13 @@
  **************************************************************************/
 
 
-namespace __rw { 
+namespace __rw {
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 __rb_tree (const key_compare    &__cmp /* = key_compare () */,
-           const allocator_type &__alloc /* = allocator_type () */) 
+           const allocator_type &__alloc /* = allocator_type () */)
     : allocator_type (__alloc),
     _C_buf_list (0),
     _C_end (0),
@@ -58,7 +58,7 @@ __rb_tree (const key_compare    &__cmp /* = key_compare () */,
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-__rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>& 
+__rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>&
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 operator= (const __rb_tree &__x)
 {
@@ -136,17 +136,17 @@ _C_add_new_buffer ()
     if (__newsize <= __bufsize)
         __newsize = __bufsize + 1;
 
-    _C_buf_ptr_t __buf = 
+    _C_buf_ptr_t __buf =
         _C_buf_alloc_t (*this).allocate (size_type (1), (void*)_C_buf_list);
 
     try {
-        __buf->_C_buffer = 
+        __buf->_C_buffer =
             _C_node_alloc_t (*this).allocate (__newsize, (void*)_C_last);
     }
     catch (...) {
         _C_buf_alloc_t (*this).deallocate (__buf, 1);
         throw;
-    } 
+    }
     __buf->_C_next_buffer = _C_buf_list;
     __buf->size           = __newsize;
     _C_buf_list           = __buf;
@@ -224,7 +224,7 @@ _C_insert (_C_link_t __x, _C_link_t __y, const value_type &__v)
             }
             else {
                 if (__x == __x->_C_parent->_C_child [1]) {
-                    __x = __x->_C_parent; 
+                    __x = __x->_C_parent;
                     _C_rol (__x);
                 }
                 __x->_C_parent->_C_color            = _Black;
@@ -243,7 +243,7 @@ _C_insert (_C_link_t __x, _C_link_t __y, const value_type &__v)
             }
             else {
                 if (__x == __x->_C_parent->_C_child [0]) {
-                    __x = __x->_C_parent; 
+                    __x = __x->_C_parent;
                     _C_ror (__x);
                 }
                 __x->_C_parent->_C_color            = _Black;
@@ -268,7 +268,7 @@ _C_insert (_C_link_t __x, _C_link_t __y, const value_type &__v)
         }
         else {
             if (__x == __x->_C_parent->_C_child [__left]) {
-                __x = __x->_C_parent; 
+                __x = __x->_C_parent;
                 _C_rotate (__x, __right);
             }
             __x->_C_parent->_C_color            = _Black;
@@ -311,7 +311,7 @@ _C_insert (const value_type &__v, std::pair<iterator, bool> &__ret,
         return;
     }
 
-    iterator __j = _C_make_iter (__y);   
+    iterator __j = _C_make_iter (__y);
     if (__right) {
         if (__j == begin ()) {
             __ret = _IterPair (_C_insert (__x, __y, __v), true);
@@ -328,7 +328,7 @@ _C_insert (const value_type &__v, std::pair<iterator, bool> &__ret,
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator 
+typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 insert (iterator __it, const value_type &__v, bool __dup)
 {
@@ -388,7 +388,7 @@ insert (iterator __it, const value_type &__v, bool __dup)
         // if there is no right child of __prev, then __prev is the
         // left child of __it and we insert to right of __prev
         if (_C_link_t () == _ITER_NODE (__prev)->_C_child [1])
-            return _C_insert (0, _ITER_NODE (__prev), __v); 
+            return _C_insert (0, _ITER_NODE (__prev), __v);
 
         // otherwise we insert on the left of __it
         return _C_insert (_ITER_NODE (__it), _ITER_NODE (__it), __v);
@@ -400,7 +400,7 @@ insert (iterator __it, const value_type &__v, bool __dup)
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator 
+typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
 {
     _RWSTD_ASSERT_RANGE (begin (), __it);
@@ -429,7 +429,7 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
     const _C_link_t                       _Null  = _C_link_t ();
 
     // returned iterator pointing to the element just past `it'
-    const iterator __next = ++iterator (__it); 
+    const iterator __next = ++iterator (__it);
 
     _C_link_t __z (_ITER_NODE (__it));   // `it's node
     _C_link_t __y (__z);                 // node to be erased
@@ -440,10 +440,10 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
 
     _RWSTD_ASSERT (_Null != __z);
 
-    if (_Null == __y->_C_child [0]) { 
-        // __z might have one non-null child. x 
+    if (_Null == __y->_C_child [0]) {
+        // __z might have one non-null child. x
         // holds that child (might be null though).
-        __x = __y->_C_child [1]; 
+        __x = __y->_C_child [1];
     }
     else if (_Null == __y->_C_child [1]) {
         // __z HAS one non-null child and __x points to it now.
@@ -463,9 +463,9 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
 
         // __y REPLACES __z
 
-        // relink `y' in place of `z' (at this point __y 
+        // relink `y' in place of `z' (at this point __y
         // is __z's immediate predecessor)
-        __z->_C_child [0]->_C_parent = __y; 
+        __z->_C_child [0]->_C_parent = __y;
         __y->_C_child [0]            = __z->_C_child [0];
 
         if (__y != __z->_C_child [1]) {
@@ -489,9 +489,9 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
         }
         else {
 
-            // in the case when __y is a direct child of __z, 
-            // save __y value as __x's parent 
-            __x_parent = __y;  
+            // in the case when __y is a direct child of __z,
+            // save __y value as __x's parent
+            __x_parent = __y;
 
         }
 
@@ -500,7 +500,7 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
             _C_end->_C_parent = __y;
         }
         else {
-            // nice shot; 
+            // nice shot;
             // when __z is not root/end, then its parent's
             // child on __z's side becomes __y
             __z->_C_parent->_C_child [__z->_C_parent->_C_child [0] != __z]
@@ -514,7 +514,7 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
         // swap y and z colors
         std::swap (__y->_C_color, __z->_C_color);
 
-        // __y now points to the deleted node 
+        // __y now points to the deleted node
         __y = __z;
     }
     else {
@@ -524,7 +524,7 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
 
         // save __y's/__z's parent (will later become x's parent)
         __x_parent = __y->_C_parent;
-        
+
         if (_Null != __x) {
             // for a non-null __x, set its parent to point to __y's parent
             __x->_C_parent = __y->_C_parent;
@@ -545,7 +545,7 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
             // __z is the left corner of the tree (smallest element)
 
             if (_Null == __z->_C_child [1])
-                // when __z leaves the tree, leftmost will be invalidated; 
+                // when __z leaves the tree, leftmost will be invalidated;
                 // adjust left corner to point to __z's  parent
                 _C_end->_C_child [0] = __z->_C_parent;
             else {
@@ -559,11 +559,11 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
             // __z is in the right corner of the tree
 
             if (_Null == __z->_C_child [0])
-                // when __z leaves the tree, right corner will be invalidated; 
+                // when __z leaves the tree, right corner will be invalidated;
                 // adjust right corner to point to __z's  parent
                 _C_end->_C_child [1] = __z->_C_parent;
             else {
-                // otherwise, find z's predecessor in z's 
+                // otherwise, find z's predecessor in z's
                 // left subtree; that becomes the new rightmost element
                 _C_end->_C_child [1] = _C_node_t::_C_max (__x);
             }
@@ -576,14 +576,14 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
 
     if (__y->_C_color != _Red) {
 
-            // __y's color is not red; had it been red, we would have been 
+            // __y's color is not red; had it been red, we would have been
             // done because it would not have altered the "blackness"
-            
+
 
             // At the loop's beginning, __x can be one of the two:
             // 1. either the strict predecessor of __z's strict predecessor
             //    and in this case is down the subtree on z's left
-            // 2. is the node that replaced __z when __z has had only one 
+            // 2. is the node that replaced __z when __z has had only one
             //    child; that child has replaced __z and its changes
             //    will be propagated upward
 
@@ -609,9 +609,9 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
                     __w = __x_parent->_C_child [1];
                 }
 
-                if ((_Null  == __w->_C_child [0] || 
-                     _Black == __w->_C_child [0]->_C_color) && 
-                    (_Null  == __w->_C_child [1] || 
+                if ((_Null  == __w->_C_child [0] ||
+                     _Black == __w->_C_child [0]->_C_color) &&
+                    (_Null  == __w->_C_child [1] ||
                      _Black == __w->_C_child [1]->_C_color)) {
                     // __x's sibling (__w) has black children (or null);
                     // color __x's sibling as RED and move up in the tree
@@ -622,7 +622,7 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
                 else {
                     // __w (__x's sibling) has a child which is RED
 
-                    if (_Null  == __w->_C_child [1] || 
+                    if (_Null  == __w->_C_child [1] ||
                         _Black == __w->_C_child [1]->_C_color) {
 
                         // __w's left is RED
@@ -665,16 +665,16 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
                     __w = __x_parent->_C_child [0];
                 }
 
-                if ((_Null  == __w->_C_child [1] || 
-                     _Black == __w->_C_child [1]->_C_color) && 
-                    (_Null  == __w->_C_child [0] || 
+                if ((_Null  == __w->_C_child [1] ||
+                     _Black == __w->_C_child [1]->_C_color) &&
+                    (_Null  == __w->_C_child [0] ||
                      _Black == __w->_C_child [0]->_C_color)) {
                     __w->_C_color = _Red;
                     __x           = __x_parent;
                     __x_parent    = __x_parent->_C_parent;
                 }
                 else {
-                    if (_Null  == __w->_C_child [0] || 
+                    if (_Null  == __w->_C_child [0] ||
                         _Black == __w->_C_child [0]->_C_color) {
                         if (_Null != __w->_C_child [1])
                             __w->_C_child [1]->_C_color = _Black;
@@ -714,16 +714,16 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
                 __w = __x_parent->_C_child [__left];
             }
 
-            if ((_Null  == __w->_C_child [__right] || 
+            if ((_Null  == __w->_C_child [__right] ||
                  _Black == __w->_C_child [__right]->_C_color) &&
-                (_Null  == __w->_C_child [__left ] || 
+                (_Null  == __w->_C_child [__left ] ||
                  _Black == __w->_C_child [__left ]->_C_color)) {
                 __w->_C_color = _Red;
                 __x           = __x_parent;
                 __x_parent    = __x->_C_parent;
             }
             else {
-                if (_Null  == __w->_C_child [__left] || 
+                if (_Null  == __w->_C_child [__left] ||
                     _Black == __w->_C_child [__left]->_C_color) {
 
                     if (_Null != __w->_C_child [__right])
@@ -749,22 +749,22 @@ __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::erase (iterator __it)
 #endif   // _RWSTD_NO_OPTIMIZE_SPEED
 
         }
-         
+
         if (_Null != __x)
             __x->_C_color = _Black;
-        
+
     }
-    
+
     _C_put_node (__y);
-    
+
     --_C_size;
-    
+
     return __next;
 }
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::size_type 
+typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::size_type
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 erase (const key_type &__x)
 {
@@ -779,7 +779,7 @@ erase (const key_type &__x)
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::_C_link_t 
+typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::_C_link_t
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 _C_copy (_C_link_t __x, _C_link_t __p)
 {
@@ -820,7 +820,7 @@ _C_erase (_C_link_t __x)
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator 
+typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 erase (iterator __first, iterator __last)
 {
@@ -854,7 +854,7 @@ erase (iterator __first, iterator __last)
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator 
+typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 find (const key_type &__k)
 {
@@ -866,7 +866,7 @@ find (const key_type &__k)
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator 
+typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 lower_bound (const key_type &__k)
 {
@@ -887,7 +887,7 @@ lower_bound (const key_type &__k)
 
 
 template <class _Key, class _Val, class _KeyOf, class _Comp, class _Alloc>
-typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator 
+typename __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::iterator
 __rb_tree<_Key, _Val, _KeyOf, _Comp, _Alloc>::
 upper_bound (const key_type &__k)
 {
