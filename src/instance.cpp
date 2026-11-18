@@ -29,8 +29,19 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES      1
-#define _RWSTD_INSTANTIATE_STATIC_MUTEX   1
-#define _RWSTD_INSTANTIATE_INT            1
 
 #include <string>
 #include <rw/_mutex.h>
+
+#if    !defined (_RWSTD_NO_INSTANTIATE)   \
+    &&  defined (_RWSTD_REENTRANT)
+
+namespace __rw {
+
+template class __rw_static_mutex<int>;
+
+template class __rw_static_mutex<size_t>;
+
+}   // namespace __rw
+
+#endif   // !_RWSTD_NO_INSTANTIATE && _RWSTD_REENTRANT

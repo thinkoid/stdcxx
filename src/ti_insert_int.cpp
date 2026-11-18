@@ -30,9 +30,6 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES    1
-#define _RWSTD_INSTANTIATE_INSERTER     1
-#define _RWSTD_INSTANTIATE_INSERT_INT   1
-#define _RWSTD_INSTANTIATE_CHAR         1
 
 #include <rw/_defs.h>
 
@@ -40,3 +37,31 @@
 
 #include <ostream>
 #include <rw/_ioinsert.h>
+
+#if    !defined (_RWSTD_NO_INSTANTIATE)                     \
+    && !defined (_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION)
+
+namespace __rw {
+
+#  ifndef _RWSTD_NO_NATIVE_BOOL
+
+template std::ostream& __rw_insert (std::ostream&, bool);
+
+#  endif   // _RWSTD_NO_NATIVE_BOOL
+
+template std::ostream& __rw_insert (std::ostream&, long);
+
+template std::ostream& __rw_insert (std::ostream&, unsigned long);
+
+#  ifdef _RWSTD_LONG_LONG
+
+template std::ostream& __rw_insert (std::ostream&, _RWSTD_LONG_LONG);
+
+template std::ostream&
+__rw_insert (std::ostream&, unsigned _RWSTD_LONG_LONG);
+
+#  endif   // _RWSTD_LONG_LONG
+
+}   // namespace __rw
+
+#endif   // !NO_INSTANTIATE && !NO_FUNCTION_EXPLICIT_INSTANTIATION

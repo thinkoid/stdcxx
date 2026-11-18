@@ -30,8 +30,6 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES   1
-#define _RWSTD_INSTANTIATE_MESSAGES    1
-#define _RWSTD_INSTANTIATE_WCHAR_T     1
 
 #include <rw/_defs.h>
 
@@ -39,6 +37,16 @@
 
 #include <loc/_locale.h>
 #include <loc/_messages.h>
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace std {
+
+template class messages<wchar_t>;
+
+}   // namespace std
+
+#endif   // _RWSTD_NO_INSTANTIATE
 
 #include "use_facet.h"
 

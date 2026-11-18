@@ -30,12 +30,21 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES       1
-#define _RWSTD_INSTANTIATE_POD_ARRAY       1
-#define _RWSTD_INSTANTIATE_CHAR            1
-#define _RWSTD_INSTANTIATE_UINT            1
 
 #include <rw/_defs.h>
 
 #undef _RWSTD_NO_TEMPLATE_DEFINITIONS
 
 #include "podarray.h"
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace __rw {
+
+template class __rw_pod_array<char, 256>;
+
+template class __rw_pod_array<const unsigned int*, 1024>;
+
+}   // namespace __rw
+
+#endif   // _RWSTD_NO_INSTANTIATE

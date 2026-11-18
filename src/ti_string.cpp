@@ -29,14 +29,23 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES      1
-#define _RWSTD_INSTANTIATE_BASIC_STRING   1
-#define _RWSTD_INSTANTIATE_CHAR           1
 
 #include <rw/_defs.h>
 
 #undef _RWSTD_NO_TEMPLATE_DEFINITIONS
 
 #include <string>
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace std {
+
+template class basic_string<char, char_traits<char>,
+                            allocator<char> >;
+
+}   // namespace std
+
+#endif   // _RWSTD_NO_INSTANTIATE
 
 // verify that the macros are defined in a consistent way:
 // when _RWSTD_DEFINE_TEMPLATE() is non-zero, exactly one

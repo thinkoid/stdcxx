@@ -29,8 +29,6 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES   1
-#define _RWSTD_INSTANTIATE_MONEY_PUT   1
-#define _RWSTD_INSTANTIATE_CHAR        1
 
 #include <rw/_defs.h>
 
@@ -38,6 +36,16 @@
 
 #include <loc/_locale.h>
 #include <loc/_money_put.h>
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace std {
+
+template struct money_put<char>;
+
+}   // namespace std
+
+#endif   // _RWSTD_NO_INSTANTIATE
 
 #define _RWSTD_NO_BYNAME_FACET
 #include "use_facet.h"

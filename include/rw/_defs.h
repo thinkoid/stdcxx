@@ -788,37 +788,19 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #define _RWSTD_USING_SNI(ignore)    typedef void __rw_unused_type
 
 
-// marks an explicit instantiation of a library template, declared
-// extern in the headers and defined in the library's ti_*.cpp sources
+// marks a specialization the library explicitly instantiates, at its
+// extern template declaration in the headers; the declaration fixes
+// the visibility of the specialization, so the explicit instantiation
+// definition that follows it in the library's source carries no mark
+// (GCC ignores a type attribute there, -Wattributes)
 #define _RWSTD_TI_EXPORT    _RWSTD_EXPORT
 
 
-#if     defined (_RWSTD_INSTANTIATE_TEMPLATES)       \
-    && !defined (_RWSTD_NO_INSTANTIATE)
-
-#  define _RWSTD_INSTANTIATE(name, type)   \
-       (   _RWSTD_INSTANTIATE ## name      \
-        && _RWSTD_INSTANTIATE ## type      \
-        && !_RWSTD_NO ## type)
-
-#  define _RWSTD_INSTANTIATE_1(arg)          template arg
-#  define _RWSTD_INSTANTIATE_2(a1, a2)       template a1, a2
-#  define _RWSTD_INSTANTIATE_3(a1, a2, a3)   template a1, a2, a3
-
-#  ifdef _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
-     // replace explicit function template instantiations with
-     // declarations of explicit function template specializations
-#    define _RWSTD_INSTANTIATE_FUN_1(ignore)             \
-       typedef void __rw_unused_type
-#    define _RWSTD_INSTANTIATE_FUN_2(ign1, ign2)         \
-       typedef void __rw_unused_type
-#    define _RWSTD_INSTANTIATE_FUN_3(ign1, ign2, ign3)   \
-       typedef void __rw_unused_type
-#  endif   // _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
-#elif !defined (_RWSTD_NO_EXTERN_TEMPLATE)
+#ifndef _RWSTD_NO_EXTERN_TEMPLATE
    // use the extern template extension to declare template
    // specializations that are explicitly instantiated in
-   // source (.cpp) files
+   // source (.cpp) files; the ti_*.cpp source that defines one
+   // sees the declarations of the others, as every other source does
 #  define _RWSTD_INSTANTIATE(ign1, type)   (!_RWSTD_NO ## type)
 #  define _RWSTD_INSTANTIATE_1(arg)        extern template arg
 #  define _RWSTD_INSTANTIATE_2(a1, a2)     extern template a1, a2
@@ -826,13 +808,27 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 
 #  ifndef _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
 #    ifdef _RWSTD_NO_EXTERN_FUNCTION_TEMPLATE
-       // explicit instantiation of function templates enabled
-       // but extern template declarations of function template
-       // instantiations are disabled, use declarations of
-       // explicit function template specializations instead
-#      define _RWSTD_INSTANTIATE_FUN_1(arg)          template<> arg
-#      define _RWSTD_INSTANTIATE_FUN_2(a1, a2)       template<> a1, a2
-#      define _RWSTD_INSTANTIATE_FUN_3(a1, a2, a3)   template<> a1, a2, a3
+#      if    !defined (_RWSTD_INSTANTIATE_TEMPLATES)   \
+           ||  defined (_RWSTD_NO_INSTANTIATE)
+         // explicit instantiation of function templates enabled
+         // but extern template declarations of function template
+         // instantiations are disabled, use declarations of
+         // explicit function template specializations instead
+#        define _RWSTD_INSTANTIATE_FUN_1(arg)          template<> arg
+#        define _RWSTD_INSTANTIATE_FUN_2(a1, a2)       template<> a1, a2
+#        define _RWSTD_INSTANTIATE_FUN_3(a1, a2, a3)   template<> a1, a2, a3
+#      else
+         // a source that explicitly instantiates sees no declaration:
+         // one before its own explicit instantiation of the function
+         // would leave the instantiation without effect (N3242 14.7.2,
+         // p5; C++03 14.7, p5 forbids the pair)
+#        define _RWSTD_INSTANTIATE_FUN_1(ignore)             \
+           typedef void __rw_unused_type
+#        define _RWSTD_INSTANTIATE_FUN_2(ign1, ign2)         \
+           typedef void __rw_unused_type
+#        define _RWSTD_INSTANTIATE_FUN_3(ign1, ign2, ign3)   \
+           typedef void __rw_unused_type
+#      endif   // !_RWSTD_INSTANTIATE_TEMPLATES || _RWSTD_NO_INSTANTIATE
 #    endif   // _RWSTD_NO_EXTERN_FUNCTION_TEMPLATE
 #  else   // if defined (_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION)
      // function templates not explicitly instantiated
@@ -852,7 +848,7 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #  define _RWSTD_INSTANTIATE_1(ignore)           typedef void __rw_unused_type
 #  define _RWSTD_INSTANTIATE_2(ign1, ign2)       typedef void __rw_unused_type
 #  define _RWSTD_INSTANTIATE_3(ign1, ign2, ign3) typedef void __rw_unused_type
-#endif   // _RWSTD_INSTANTIATE_TEMPLATES
+#endif   // _RWSTD_NO_EXTERN_TEMPLATE
 
 #ifndef _RWSTD_INSTANTIATE_FUN_1
   // default to the same definition as _RWSTD_INSTANTIATE_{1,2,3}
@@ -924,23 +920,12 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #  endif   // _RWSTD_LIB_SRC
 #else   // if defined (_RWSTD_NO_TEMPLATE_DEFINITIONS)
      // this block is active when the definitions of the templates are
-     // not wanted; a library source still gets those it names with
-     // _RWSTD_INSTANTIATE_<name>
+     // not wanted: in a library source that instantiates none, and in
+     // a program that defines the macro
 
-#  ifndef _RWSTD_LIB_SRC
-#    define _RWSTD_DEFINE_TEMPLATE(ignore)         0
-#    define _RWSTD_DEFINE_TEMPLATE_FIRST(ignore)   0
-#    define _RWSTD_DEFINE_TEMPLATE_LAST(ignore)    0
-#  else   // if defined (_RWSTD_LIB_SRC)
-#    define _RWSTD_DEFINE_TEMPLATE(name)   _RWSTD_INSTANTIATE ## name
-#    ifndef _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
-#      define _RWSTD_DEFINE_TEMPLATE_FIRST(ignore) 0
-#      define _RWSTD_DEFINE_TEMPLATE_LAST(name)    _RWSTD_INSTANTIATE ## name
-#    else
-#      define _RWSTD_DEFINE_TEMPLATE_FIRST(name)  _RWSTD_INSTANTIATE ## name
-#      define _RWSTD_DEFINE_TEMPLATE_LAST(ignore) 0
-#    endif   // _RWSTD_NO_EXPLICIT_INSTANTIATION_BEFORE_DEFINITION
-#  endif   // _RWSTD_LIB_SRC
+#  define _RWSTD_DEFINE_TEMPLATE(ignore)         0
+#  define _RWSTD_DEFINE_TEMPLATE_FIRST(ignore)   0
+#  define _RWSTD_DEFINE_TEMPLATE_LAST(ignore)    0
 #endif
 
 

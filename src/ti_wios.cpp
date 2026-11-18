@@ -29,11 +29,19 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES   1
-#define _RWSTD_INSTANTIATE_BASIC_IOS   1
-#define _RWSTD_INSTANTIATE_WCHAR_T     1
 
 #include <rw/_defs.h>
 
 #undef _RWSTD_NO_TEMPLATE_DEFINITIONS
 
 #include <rw/_basic_ios.h>
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace std {
+
+template class basic_ios<wchar_t, char_traits<wchar_t> >;
+
+}   // namespace std
+
+#endif   // _RWSTD_NO_INSTANTIATE

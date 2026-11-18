@@ -43,6 +43,36 @@ Fix: the comment states the second reason.
 
 Check: none; a comment.
 
+*** TODO =ti_collate.cpp= and =ti_wcollate.cpp= call themselves explicit instantiation directives
+
+The header comments of =src/ti_collate.cpp= and =src/ti_wcollate.cpp=
+read "explicit instantiation directives for collate<char>" (and
+=<wchar_t>=). The files hold none: =collate<char>= and
+=collate<wchar_t>= are explicit specializations
+(=include/loc/_collate.h= 100 and 146), whose members =src/collate.cpp=
+defines. The two files define the facet factory and the =use_facet=
+specialization. Seen while the ownership of the =ti_*.cpp= sources was
+derived for an audit of their objects, 2026-11-17.
+
+Fix: the comment says what the file holds.
+
+Check: none; a comment.
+
+*** TODO 41 =ti_*.cpp= sources undefine a macro that is already undefined
+
+Each =src/ti_*.cpp= defines =_RWSTD_INSTANTIATE_TEMPLATES=, includes
+=<rw/_defs.h>=, then undefines =_RWSTD_NO_TEMPLATE_DEFINITIONS=. But
+=<rw/_defs.h>= includes =<rw/_config.h>= first, which undefines the
+macro under =_RWSTD_INSTANTIATE_TEMPLATES= (203-209), and only
+=_defs.h= 882 reads it after that, behind the include guard. So the
+line has no effect. It is the import's (e6c7726b, 2005);
+=src/instance.cpp= has none. Seen while the =ti_*.cpp= sources were
+given the =extern template= declarations, 2026-11-17.
+
+Fix: the line leaves the 41 sources.
+
+Check: the 41 objects of a 15D build the same before and after.
+
 *** TODO An HP aCC 3 workaround in =uninitialized_copy=
 
 =include/rw/_specialized.h= 183-185 declares the pointer through
@@ -69,7 +99,7 @@ pin.
 
 *** TODO The probe for the size of =long= in =gcc.config= names its file with a literal =$=
 
-=etc/config/gcc.config= 128-132 compiles and runs a program in
+=etc/config/gcc.config= 129-133 compiles and runs a program in
 =/tmp= to learn whether the compiler makes =long= 8 bytes, under the
 name ~tmpfile=stdcxx-longsize-$$~. Inside =$(shell ...)= make turns
 =$$= into =$=, and the shell reads a =$= before =;= as itself, so the
@@ -238,7 +268,7 @@ for a =streamsize= among them, by a reading of a sample. The library
 exports 2558 names, so 1626 of them are not in the map. The node
 names 4.1.3; the library is 4.2.2 (=include/rw/_config.h= 50). The
 map is linked only when =MAPFLAGS= is set (=etc/config/gcc.config=
-58-61), and nothing sets it, but bd48eb9e keeps the map consistent
+59-62), and nothing sets it, but bd48eb9e keeps the map consistent
 with the built library all the same. Seen while the library's
 allocation functions were read, 2026-11-16.
 
@@ -256,7 +286,7 @@ files: six in the original =README= 1882-1887, its list of the
 platforms of 2008, and two in =doc/notes= records, which stay; and 14
 in the code. The grep misses one more, the commented-out block of
 =etc/config/gcc.config= 41-44 for "gcc > 3.3". The 15 places:
-- =etc/config/gcc.config= 65-71 adds =-shared-libgcc= for g++ 3
+- =etc/config/gcc.config= 66-72 adds =-shared-libgcc= for g++ 3
   before 3.4 (STDCXX-369); GCC and Clang report a major version above
   3, so the block is never taken; 41-44 is a comment;
 - =include/vector= 681-686 makes the members of =vector<bool>='s
@@ -291,36 +321,101 @@ Check: the object of the file before and after, the same symbols and
 code; for =gcc.config=, the =makefile.in= of a 15D build under GCC
 and under Clang unchanged.
 
-*** TODO The =ti_*.cpp= objects instantiate each other's specializations implicitly
+*** TODO Nothing defines =_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION=
 
-Each =ti_*.cpp= defines =_RWSTD_INSTANTIATE_TEMPLATES=, under which
-~_RWSTD_INSTANTIATE (name, type)~ is false for every specialization
-the source does not instantiate itself, so the header emits neither
-the explicit instantiation nor its =extern template= declaration.
-The source then instantiates the members it uses implicitly. Measured
-in a 15D library built under GCC with =-fvisibility-inlines-hidden=:
-34 =ti_*.cpp= objects hold hidden copies of 302 inline members of
-other objects' explicit instantiations (=basic_string=,
-=basic_streambuf=, =basic_ios=, =basic_ostream=, =num_get=,
-=num_put=, =numpunct=, =moneypunct=), each defined with default
-visibility in the object that instantiates it. The copies are
-duplicate code, and their visibility is why the export marks stand on
-the primary templates and why =-fvisibility-inlines-hidden= hides the
-302 from programs. Seen while =-fvisibility-inlines-hidden= was
-measured, 2026-11-16.
+=include/rw/_defs.h= (809-845) and the ten sources that explicitly
+instantiate function templates (=src/ti_*insert_*.cpp=,
+=src/ti_*num_get.cpp=, =src/ti_*istream.cpp=) test
+=_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION=: under it the headers
+declare no function template specialization extern, and the sources
+instantiate none. No characterization writes the macro, the =README=
+does not list it, and no revision since the import (e6c7726b, 2005)
+defines it. =_RWSTD_NO_EXPLICIT_FUNC_INSTANTIATION=, which a probe
+wrote, retired on 2026-10-17 (=doc/notes/analysis-feature-gates.md=).
+Seen while the =ti_*.cpp= sources were given the =extern template=
+declarations, 2026-11-17.
 
-Fix: in a source that defines =_RWSTD_INSTANTIATE_TEMPLATES=, give
-the specializations it does not instantiate their =extern template=
-declaration instead of nothing. A two-object probe under GCC 16.2.1
-shows the explicit instantiation's inline members then stay exported
-under =-fvisibility-inlines-hidden=; without the declaration they are
-hidden at =-O0=, where the second object emits its copies.
+Fix: a decision: the gate leaves, or a probe writes it.
 
-Check: the objects of the library before and after: no =ti_*.cpp=
-object defines a member of another's explicit instantiation; the
-dynamic symbol table of 15D under GCC and Clang unchanged; 15D at
-pin. Then the flag can be measured again; derived, not measured, it
-would remove the other 223 of the 525 names it removes today.
+Check: =git grep NO_FUNCTION_EXPLICIT_INSTANTIATION= finds nothing; or
+each =config.h= carries the probe's answer.
+
+*** TODO Under =_RWSTD_NO_INSTANTIATE= a program declares what the library does not instantiate
+
+The =README= (1032-1035) documents =_RWSTD_NO_INSTANTIATE= as an
+override: the library then explicitly instantiates no template. The
+sources state their explicit instantiation definitions under
+~#ifndef _RWSTD_NO_INSTANTIATE~, and =include/rw/_defs.h= (882-883)
+gives every translation unit the template definitions. The =extern
+template= declarations of the headers do not test the macro
+(=include/rw/_defs.h= 799). So where the compiler has =extern
+template=, a program built against such a library still declares each
+specialization extern, instantiates none of its non-inline members
+and calls the library's, which defines none. By reading: no
+configuration of the matrix defines the macro. The import (e6c7726b,
+2005) tested it only in the declarations' MSVC branch, which
+d743fa8d removed. Seen while the =ti_*.cpp= sources were given the
+declarations, 2026-11-17.
+
+Fix: a decision: the declarations give way under the macro too, or
+the override leaves, with its =README= entry and the block of
+=src/collate.cpp= it guards.
+
+Check: a 15D build with the macro in its =config.h= builds and runs
+its tests; or the macro is gone from the tree.
+
+*** TODO The condition at each instantiation site no longer reads its name
+
+The headers guard each =extern template= declaration of a library
+specialization with ~#if _RWSTD_INSTANTIATE (_NAME, _TYPE)~: 43 sites
+in 20 headers under =include=, and two in =src/podarray.h=.
+=include/rw/_defs.h= (804) defines the macro as ~(!_RWSTD_NO ## type)~,
+which ignores the name, and 847 as 0 without =extern template=.
+Nothing defines =_RWSTD_NO_CHAR=, =_RWSTD_NO_INT= or =_RWSTD_NO_UINT=,
+and =_RWSTD_NO_WCHAR_T= left with its probe (7fa82c0c). So each
+condition is 1 where the compiler has the extension and 0 where it
+does not. The name records which source defines the specialization,
+and nothing checks it. Seen while the =ti_*.cpp= sources were given
+the declarations, 2026-11-17.
+
+Fix: a decision: the sites keep the condition as the record of the
+defining source; or each tests a macro without arguments, and a
+comment names the source.
+
+Check: the preprocessed output of =<ostream>= and =<locale>= in 15D
+unchanged.
+
+*** TODO =-fvisibility-inlines-hidden= was measured while the =ti_*.cpp= objects held copies
+
+=VISFLAGS= in =etc/config/gcc.config= does without the flag
+(cbbbca23). Measured then in the 15D library under GCC, the flag
+removed 525 of the exported names. 302 were inline members of the
+library's explicit instantiations: each =ti_*.cpp= object held copies
+of the members it used of the others' specializations, 1184
+definitions of 364 names in 34 objects, the flag hid the copies, the
+link kept the hidden visibility, and an unoptimized program calls
+those members out of line. The other 223 are functions a program emits
+for itself. Each source now sees the =extern template= declarations of
+the specializations it does not define, and the copies are gone. What
+the flag removes now is not measured; derived from GCC's manual, it
+would remove the 223 and keep the 302. The copies are also why the
+export marks stand on the primary templates (77ae0f7b). Seen while the
+copies were removed, 2026-11-17.
+
+Fix: build 15D under GCC and under Clang with the flag and list the
+exported names it removes. The lists serve two decisions: whether
+=VISFLAGS= takes the flag, and whether the export marks move from the
+primary templates to the declarations of the explicit instantiations.
+Where the compiler has no =extern template= the headers declare
+nothing, so a source's explicit instantiation definition has no
+declaration to take a mark from, and a mark moved off a primary
+template would have to stand on the definition. In the matrix that is
+the EDG front end under =eccp -A=, whose =config.h= defines
+=_RWSTD_NO_EXTERN_TEMPLATE= and =_RWSTD_NO_VISIBILITY_ATTRIBUTE=, so
+the mark expands to nothing there, and its =VISFLAGS= is empty.
+
+Check: the two lists, each name classed as one a program emits for
+itself or one it calls in the library.
 
 * Tests
 
@@ -2005,6 +2100,23 @@ bias is a defect to fix is a decision for the Library chapter.
 Fix: a decision: a dated note under each, or the note left as the
 record of 2026-10-14 it is.
 
+** TODO Two analysis notes cite lines of =_config.h= and =_mutex.h= that hold other text
+
+=doc/notes/analysis-basic-ios-flags.md= 128 cites
+=include/rw/_config.h:259= for the definition of
+=_RWSTD_NO_EXT_REENTRANT_IO= under =_RWSTD_STRICT_ANSI=; the file has
+212 lines and no such definition. =doc/notes/analysis-init-flags.md=
+cites =_config.h:147= for =_RWSTD_POSIX_THREADS= (now 144),
+=_config.h:170= for the definition of =_RWSTD_NO_STATIC_MUTEX_INIT=,
+and =include/rw/_mutex.h:286= for the static mutex branch; the macro
+and the branch left with the mutex fallback (92d18f73). Seen while the
+line citations into =_config.h= were brought up to date, 2026-11-17.
+
+Fix: each citation names the line that holds its fact now, or the
+sentence says the fact is gone.
+
+Check: each cited line holds what its sentence says.
+
 ** TODO README section 5 and the configuration
 
 The original README says to set =CPPOPTS= and =CXXOPTS= on the make
@@ -2025,7 +2137,7 @@ Check: none; this is prose.
 The original =README= 6.1 has a program compiled with
 =-I${PREFIX}/include=. The =<cname>= and =<name.h>= headers are in
 =include/ansi=, which the build puts first on its own search path
-(=etc/config/gcc.config= 79). Measured under GCC with =-nostdinc++=
+(=etc/config/gcc.config= 80). Measured under GCC with =-nostdinc++=
 and =include= alone: =<string>= and =<iostream>= compile, =<cstdlib>=
 is not found, and =<complex>= fails on its own =<cmath>=.
 

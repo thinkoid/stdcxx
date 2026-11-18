@@ -30,11 +30,19 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES       1
-#define _RWSTD_INSTANTIATE_BASIC_OSTREAM   1
-#define _RWSTD_INSTANTIATE_WCHAR_T         1
 
 #include <rw/_defs.h>
 
 #undef _RWSTD_NO_TEMPLATE_DEFINITIONS
 
 #include <ostream>
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace std {
+
+template class basic_ostream<wchar_t, char_traits<wchar_t> >;
+
+}   // namespace std
+
+#endif   // _RWSTD_NO_INSTANTIATE

@@ -157,9 +157,9 @@ __rw_mutex_base __rw_static_mutex<_TypeT>::_C_mutex
 
 #  if _RWSTD_INSTANTIATE (_STATIC_MUTEX, _INT)
 
-// src/instance.cpp alone defines, and so exports, the two mutexes;
-// in every other translation unit these lines declare them extern
-// template, where the compiler has it, so no other object defines them
+// these lines declare the two mutexes extern template, where the
+// compiler has it, in every translation unit, and src/instance.cpp
+// alone defines, and so exports, them: no other object defines them
 _RWSTD_INSTANTIATE_1 (class _RWSTD_TI_EXPORT __rw_static_mutex<int>);
 _RWSTD_INSTANTIATE_1 (class _RWSTD_TI_EXPORT __rw_static_mutex<size_t>);
 

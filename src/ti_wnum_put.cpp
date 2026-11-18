@@ -29,8 +29,6 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES   1
-#define _RWSTD_INSTANTIATE_NUM_PUT     1
-#define _RWSTD_INSTANTIATE_WCHAR_T     1
 
 #include <rw/_defs.h>
 
@@ -38,6 +36,16 @@
 
 #include <loc/_locale.h>
 #include <loc/_num_put.h>
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace std {
+
+template struct num_put<wchar_t>;
+
+}   // namespace std
+
+#endif   // _RWSTD_NO_INSTANTIATE
 
 #define _RWSTD_NO_BYNAME_FACET
 #include "use_facet.h"

@@ -29,8 +29,6 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES   1
-#define _RWSTD_INSTANTIATE_COLLATE     1
-#define _RWSTD_INSTANTIATE_WCHAR_T     1
 
 #include <rw/_defs.h>
 

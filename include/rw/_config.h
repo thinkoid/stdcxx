@@ -202,8 +202,9 @@
 
 #ifdef _RWSTD_INSTANTIATE_TEMPLATES
    // instantiate templates (this macro is defined at the top of each
-   // library source file (.cpp file) that explicitly instantiates class
-   // or function templates using the _RWSTD_INSTANTIATE_N() macros
+   // library source file (.cpp file) that instantiates class or function
+   // templates; a source states its explicit instantiation definitions
+   // after the headers that declare them extern)
 #  undef _RWSTD_NO_TEMPLATE_DEFINITIONS
 #endif
 

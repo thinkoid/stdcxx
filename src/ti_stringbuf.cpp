@@ -30,11 +30,19 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES         1
-#define _RWSTD_INSTANTIATE_BASIC_STRINGBUF   1
-#define _RWSTD_INSTANTIATE_CHAR              1
 
 #include <rw/_defs.h>
 
 #undef _RWSTD_NO_TEMPLATE_DEFINITIONS
 
 #include <sstream>
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace std {
+
+template class basic_stringbuf<char>;
+
+}   // namespace std
+
+#endif   // _RWSTD_NO_INSTANTIATE

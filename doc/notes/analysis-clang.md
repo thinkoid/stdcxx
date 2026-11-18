@@ -143,15 +143,16 @@ next reader who has to trace them:
   headers. Without the macro above, `_FIRST` is 0 and `_LAST` includes
   the `.cc` after the instantiation directives, the GCC arrangement.
   With it, `_FIRST` includes the `.cc` before them and `_LAST` is 0,
-  the Clang arrangement. Which templates each expands for depends on
-  `_RWSTD_INSTANTIATE_<name>`, set by the `ti_*.cpp` sources when
-  building the library, and on `_RWSTD_NO_<name>_DEFINITION` when
-  using it.
-- `_RWSTD_INSTANTIATE_TEMPLATES`, defined by the `ti_*.cpp` sources:
-  the `_RWSTD_INSTANTIATE_n` and `_RWSTD_INSTANTIATE_FUN_n` directives
-  expand to `template`, explicit instantiation definitions; without
-  it, and without `_RWSTD_NO_EXTERN_TEMPLATE`, to `extern template`,
-  declarations. `_RWSTD_NO_EXTERN_TEMPLATE` is defined for GCC 2 only.
+  the Clang arrangement. A library source that defines the macro below
+  includes every `.cc` file, any other library source none; a program
+  includes those whose `_RWSTD_NO_<name>_DEFINITION` is not defined.
+- `_RWSTD_INSTANTIATE_TEMPLATES`, defined by the `ti_*.cpp` sources
+  and `src/instance.cpp`: such a source states its explicit
+  instantiation definitions after the headers. In every translation
+  unit, that source's included, the `_RWSTD_INSTANTIATE_n` and
+  `_RWSTD_INSTANTIATE_FUN_n` directives of the headers expand to
+  `extern template`, declarations, and to nothing under
+  `_RWSTD_NO_EXTERN_TEMPLATE`, which `eccp -A` defines.
 - `_RWSTD_NO_EXTERN_FUNCTION_TEMPLATE`,
   `_RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION`,
   `_RWSTD_NO_EXPLICIT_INSTANTIATION`, `_RWSTD_NO_IMPLICIT_INSTANTIATION`,

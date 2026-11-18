@@ -29,8 +29,6 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES  1
-#define _RWSTD_INSTANTIATE_NUMPUNCT   1
-#define _RWSTD_INSTANTIATE_WCHAR_T    1
 
 #include <rw/_defs.h>
 
@@ -41,6 +39,16 @@
 #include <loc/_locale.h>
 #include <loc/_numpunct.h>
 #include <loc/_punct.h>
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace std {
+
+template struct numpunct<wchar_t>;
+
+}   // namespace std
+
+#endif   // _RWSTD_NO_INSTANTIATE
 
 #include "use_facet.h"
 

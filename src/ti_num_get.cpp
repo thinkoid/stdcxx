@@ -29,9 +29,6 @@
 #define _RWSTD_LIB_SRC
 
 #define _RWSTD_INSTANTIATE_TEMPLATES   1
-#define _RWSTD_INSTANTIATE_PUNCT       1
-#define _RWSTD_INSTANTIATE_NUM_GET     1
-#define _RWSTD_INSTANTIATE_CHAR        1
 
 #include <rw/_defs.h>
 
@@ -40,6 +37,29 @@
 #include <loc/_locale.h>
 #include <loc/_num_get.h>
 #include <loc/_punct.h>
+
+#ifndef _RWSTD_NO_INSTANTIATE
+
+namespace std {
+
+template struct num_get<char>;
+
+}   // namespace std
+
+#  ifndef _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
+
+namespace __rw {
+
+template __rw_istreambuf_iterator
+__rw_match_name (__rw_istreambuf_iterator, __rw_istreambuf_iterator,
+                 const char* const*, const _RWSTD_SIZE_T*, _RWSTD_SIZE_T,
+                 _RWSTD_SIZE_T&, int&, std::ios_base*);
+
+}   // namespace __rw
+
+#  endif   // _RWSTD_NO_FUNCTION_EXPLICIT_INSTANTIATION
+
+#endif   // _RWSTD_NO_INSTANTIATE
 
 #define _RWSTD_NO_BYNAME_FACET
 #include "use_facet.h"

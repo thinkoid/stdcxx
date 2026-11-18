@@ -202,7 +202,7 @@ Token-pasted and script-generated names need family-level inspection.
 | [EXTERN_C_OVERLOAD](../../etc/config/src/EXTERN_C_OVERLOAD.cpp) / `NO_EXTERN_C_OVERLOAD` | overloading on extern "C" | L; `include/ansi/_cstdlib.h` |
 | [EXTERN_FUNCTION_TEMPLATE](../../etc/config/src/EXTERN_FUNCTION_TEMPLATE.cpp) / `NO_EXTERN_FUNCTION_TEMPLATE` | extern function template extension | L/P; `include/rw/_defs.h` |
 | [EXTERN_MEMBER_TEMPLATE](../../etc/config/src/EXTERN_MEMBER_TEMPLATE.cpp) / `NO_EXTERN_MEMBER_TEMPLATE` | extern template extension | L; `include/string` |
-| [EXTERN_TEMPLATE](../../etc/config/src/EXTERN_TEMPLATE.cpp) / `NO_EXTERN_TEMPLATE` | extern template extension | L; `include/rw/_config-gcc.h` |
+| [EXTERN_TEMPLATE](../../etc/config/src/EXTERN_TEMPLATE.cpp) / `NO_EXTERN_TEMPLATE` | extern template extension | L; `include/rw/_defs.h` |
 | [EXTERN_TEMPLATE_BEFORE_DEFINITION](../../etc/config/src/EXTERN_TEMPLATE_BEFORE_DEFINITION.cpp) / `NO_EXTERN_TEMPLATE_BEFORE_DEFINITION` | extern template before definition | L; `include/rw/_defs.h` |
 | [FLOAT](../../etc/config/src/FLOAT.cpp) / `NO_FLOAT` + output | floating point properties | none |
 | [FPOS_T](../../etc/config/src/FPOS_T.cpp) / `NO_FPOS_T` | fpos_t in &lt;stdio.h&gt; | L; `include/ansi/cstdio` |
