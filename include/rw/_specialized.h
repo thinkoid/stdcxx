@@ -180,8 +180,7 @@ uninitialized_copy (_InputIter __first, _InputIter __last,
 
     try {
         for (; __first != __last; ++__first, ++__res) {
-            // avoid const-qualifying ptr to prevent an HP aCC 3 bug
-            volatile void* /* const */ __ptr =
+            volatile void* const __ptr =
                 static_cast< volatile void* >(&*__res);
             ::new (const_cast< void* >(__ptr)) _TypeT (*__first);
         }

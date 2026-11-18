@@ -51,30 +51,6 @@ cites N3242 is treated as the code is.
 Check: =git grep -n N3242 -- include src tests util= finds nothing,
 and the list of the 24 with the paragraph each was read from.
 
-*** TODO An HP aCC 3 workaround in =uninitialized_copy=
-
-=include/rw/_specialized.h= 183-185 declares the pointer through
-which =uninitialized_copy= constructs each element as
-~volatile void* /* const */ __ptr~, under the comment "avoid
-const-qualifying ptr to prevent an HP aCC 3 bug". a97a5216 (2008,
-STDCXX-1021) took the =const= out for that compiler. The pointer
-itself is the end of STDCXX-976: 123ba54a cast =*__first= to a const
-reference, d8ac1b27 reverted that for =const _TypeU&= overloads of
-=__rw_construct=, and b8e9def3 reverted those for a placement new
-through a =volatile void*=, which constructs from what =*__first=
-returns, an rvalue included
-(=tests/regress/25.uninitialized.copy.stdcxx-976.cpp=), and takes
-the address of a =volatile= element as well as a plain one. The
-tree no longer builds with HP aCC. Seen while the iterator parameter
-names of the header were respelled, 2026-11-16.
-
-Fix: the pointer is ~volatile void* const~ again and the comment
-leaves; the =volatile= and the placement new stay.
-
-Check: the preprocessed output of the 15D build differs by that line
-alone; =20.specialized= and =25.uninitialized.copy.stdcxx-976= at
-pin.
-
 *** TODO The trapping branch of =INFINITY.cpp= writes a quadruple pattern into a double-double =long double=
 
 =etc/config/src/INFINITY.cpp= writes fixed patterns for the four
