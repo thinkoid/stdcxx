@@ -128,27 +128,6 @@ not the =type_info=.
 Check: a 15D build under GCC with =_RWSTD_NO_INSTANTIATE= in its
 =config.h= runs its tests at the 15D pin.
 
-*** TODO The condition at each instantiation site no longer reads its name
-
-The headers guard each =extern template= declaration of a library
-specialization with ~#if _RWSTD_INSTANTIATE (_NAME, _TYPE)~: 43 sites
-in 20 headers under =include=, and two in =src/podarray.h=.
-=include/rw/_defs.h= (804) defines the macro as ~(!_RWSTD_NO ## type)~,
-which ignores the name, and 847 as 0 without =extern template=.
-Nothing defines =_RWSTD_NO_CHAR=, =_RWSTD_NO_INT= or =_RWSTD_NO_UINT=,
-and =_RWSTD_NO_WCHAR_T= left with its probe (7fa82c0c). So each
-condition is 1 where the compiler has the extension and 0 where it
-does not. The name records which source defines the specialization,
-and nothing checks it. Seen while the =ti_*.cpp= sources were given
-the declarations, 2026-11-17.
-
-Fix: a decision: the sites keep the condition as the record of the
-defining source; or each tests a macro without arguments, and a
-comment names the source.
-
-Check: the preprocessed output of =<ostream>= and =<locale>= in 15D
-unchanged.
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -1865,6 +1844,27 @@ Fix: each citation names the line that holds its fact now, or the
 sentence says the fact is gone.
 
 Check: each cited line holds what its sentence says.
+
+** TODO =analysis-basic-ios-flags.md= 71-73 cites lines of =_defs.h= for macros that left
+
+=doc/notes/analysis-basic-ios-flags.md= 71 cites
+=include/rw/_defs.h:718= for =_RWSTD_IOS_BASEOFF= and
+=_RWSTD_IOS_BASEMASK=, and 72-73 cite lines 698 and 699 for
+=_RWSTD_IOS_NOLOCK= and =_RWSTD_IOS_NOLOCKBUF=. The base bits left
+with the setbase extension (8b5d90ae) and the lock bits with the
+stream locking (1803887b), both the day the note was written; no file
+under =include= defines any of the four, and the three lines of
+=_defs.h= hold other text. The entry "Two analysis notes cite lines
+of =_config.h= and =_mutex.h= that hold other text" lists line 128 of
+the same note and not these. Seen while the line citations of
+=_defs.h= were checked, 2026-11-18.
+
+Fix: the same as that entry's, and the two may be one: each citation
+names the line that holds its fact now, or the sentence says the fact
+is gone.
+
+Check: each of the three citations names a line that holds its fact,
+or the sentence says the fact is gone.
 
 ** TODO README section 5 and the configuration
 

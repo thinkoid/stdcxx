@@ -805,7 +805,11 @@ __rw_assert_fail (const char*, const char*, int, const char*)
    // use the extern template extension to declare template
    // specializations that are explicitly instantiated in
    // source (.cpp) files; the ti_*.cpp source that defines one
-   // sees the declarations of the others, as every other source does
+   // sees the declarations of the others, as every other source does;
+   // the first argument of _RWSTD_INSTANTIATE is not read: with the
+   // second, it names the source that states the explicit instantiation
+   // definition (_BASIC_STRING, _CHAR: ti_string.cpp); the condition
+   // of every site is the condition of this block
 #  define _RWSTD_INSTANTIATE(ign1, type)   (!_RWSTD_NO ## type)
 #  define _RWSTD_INSTANTIATE_1(arg)        extern template arg
 #  define _RWSTD_INSTANTIATE_2(a1, a2)     extern template a1, a2
