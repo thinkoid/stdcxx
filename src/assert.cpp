@@ -47,7 +47,7 @@ static void
 __rw_stack_trace (int fd) _RWSTD_DECLARE_NOTHROW;
 
 
-static void
+static _RWSTD_ATTRIBUTE_NOTHROW void
 __rw_stack_trace (int fd) _RWSTD_DEFINE_NOTHROW
 {
     // limit stacktrace to the depth of 256 calls
@@ -72,7 +72,7 @@ __rw_stack_trace (int fd) _RWSTD_DEFINE_NOTHROW
 namespace __rw { 
 
 
-_RWSTD_EXPORT void
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW void
 __rw_assert_fail (const char *expr,
                   const char *file, int line, const char *func)
      _RWSTD_DEFINE_NOTHROW

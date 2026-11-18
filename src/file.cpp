@@ -176,7 +176,7 @@ __rw_stdio_mode (int openmode)
 }
 
 
-_RWSTD_EXPORT void*
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW void*
 __rw_fopen (const char *fname, int openmode, long prot)
 {
     // the null pointer names no file
@@ -219,7 +219,7 @@ __rw_fopen (const char *fname, int openmode, long prot)
 }
 
 
-_RWSTD_EXPORT void*
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW void*
 __rw_fdopen (int fd)
 {
     if (fd < 0)
@@ -229,7 +229,7 @@ __rw_fdopen (int fd)
 }
 
 
-_RWSTD_EXPORT int
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW int
 __rw_fclose (void *file, int flags)
 {
     if (flags & _RWSTD_IOS_STDIO) {
@@ -244,7 +244,7 @@ __rw_fclose (void *file, int flags)
 }
 
 
-_RWSTD_EXPORT int
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW int
 __rw_fileno (void *file, int flags)
 {
     if (flags & _RWSTD_IOS_STDIO)
@@ -256,7 +256,7 @@ __rw_fileno (void *file, int flags)
 }
 
 
-_RWSTD_EXPORT int
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW int
 __rw_fdmode (int fd)
 {
 // FIXME -- need to have equivalent of fcntl() on win32.
@@ -279,7 +279,7 @@ __rw_fdmode (int fd)
 }
 
 
-_RWSTD_EXPORT int
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW int
 __rw_fmode (void *file, int flags)
 {
     if (flags & _RWSTD_IOS_STDIO) {
@@ -294,7 +294,7 @@ __rw_fmode (void *file, int flags)
 }
 
 
-_RWSTD_EXPORT long
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW long
 __rw_fseek (void *file, int flags, ptrdiff_t offset, int origin)
 {
     if (flags & _RWSTD_IOS_STDIO) {
@@ -313,7 +313,7 @@ __rw_fseek (void *file, int flags, ptrdiff_t offset, int origin)
 }
 
 
-_RWSTD_EXPORT size_t
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW size_t
 __rw_fread (void *file, int flags, void *buf, size_t size)
 {
     if (flags & _RWSTD_IOS_STDIO) {
@@ -328,7 +328,7 @@ __rw_fread (void *file, int flags, void *buf, size_t size)
 }
 
 
-_RWSTD_EXPORT ptrdiff_t
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW ptrdiff_t
 __rw_fwrite (void *file, int flags, const void *buf, size_t size)
 {
     if (flags & _RWSTD_IOS_STDIO) {
@@ -346,7 +346,7 @@ __rw_fwrite (void *file, int flags, const void *buf, size_t size)
 _RWSTD_EXPORT extern const void* __rw_std_streams[];
 
 
-_RWSTD_EXPORT int
+_RWSTD_EXPORT _RWSTD_ATTRIBUTE_NOTHROW int
 __rw_fflush (void *file, int flags)
 {
     if (   file == __rw_std_streams [1] /* cout */

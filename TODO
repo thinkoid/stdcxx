@@ -72,38 +72,6 @@ denormal: the =double= denormal and zero).
 
 Check: by reading; no host or compiler flag at hand gives the format.
 
-*** TODO Clang warns that 18 definitions lack the =nothrow= of their declarations
-
-A 15D build under Clang warns with =-Wmissing-exception-spec= where a
-declaration carries =_RWSTD_ATTRIBUTE_NOTHROW= and the definition
-does not. Four are template destructors of the headers:
-=include/loc/_codecvt.cc= 41 and 51 (=~codecvt=, =~codecvt_byname=)
-and =include/loc/_ctype.cc= 38 and 152 (=~ctype=, =~ctype_byname=),
-declared with the attribute in =loc/_codecvt.h= and =loc/_ctype.h=.
-Each translation unit that instantiates them draws the warnings: in
-the Clang 15D build, the one of =_codecvt.cc= 41 appears 47 times in
-the compiles of the tests, 24 in the examples', 4 in the test
-driver's and 2 in the utilities'. Fourteen are functions of =src=, one
-warning each in the library's build: =__rw_stack_trace= and
-=__rw_assert_fail= (=src/assert.cpp= 51 and 76), the ten =__rw_f*=
-functions of =src/file.cpp= 180 to 350, declared in =rw/_file.h= and
-=<ostream>=, and =__rw_mmap= and =__rw_munmap= (=src/mman.cpp= 54 and
-115), which the export change showed to =mman.cpp= through
-=src/mman.h=. GCC does not warn. GCC rejects the attribute after the
-declarator of a definition ("attributes are not allowed on a
-function-definition"), so =_RWSTD_DEFINE_NOTHROW=, which the two of
-=src/assert.cpp= carry, is empty where the attribute is used
-(=include/rw/_defs.h= 685, e670765c); before the declarator both
-compilers take it. Seen while =22.locale.category= was built under
-Clang, 2026-11-16.
-
-Fix: each definition carries the attribute before its declarator;
-=_RWSTD_DEFINE_NOTHROW= and the =/* nothrow */= comments of
-=_codecvt.cc= give way to it.
-
-Check: a 15D build under Clang has no =-Wmissing-exception-spec=; the
-15D table under GCC at pin.
-
 *** TODO 1198 lines under =src= and =include= end in whitespace
 
 =src/memory.cpp= 167 and 188 read =namespace std {= and a space

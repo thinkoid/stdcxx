@@ -681,7 +681,11 @@
 #ifdef _RWSTD_ATTRIBUTE_NOTHROW
    // gcc (and others) __attribute__ ((nothrow))
 #  define _RWSTD_DECLARE_NOTHROW  _RWSTD_ATTRIBUTE_NOTHROW
-   // attributes cannot appear on function definitions
+   // GCC rejects an attribute after the declarator of a definition,
+   // so a definition carries _RWSTD_ATTRIBUTE_NOTHROW among its
+   // specifiers, before the declarator, where GCC and Clang take it;
+   // the macro is for the empty exception specification below, which
+   // a definition must repeat from its declaration (C++03 15.4, p2)
 #  define _RWSTD_DEFINE_NOTHROW   /* empty */
 #else
    // make the macro usable even when it doesn't do anything

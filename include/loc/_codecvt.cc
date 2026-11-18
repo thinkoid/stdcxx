@@ -37,8 +37,9 @@ __rw::__rw_facet_id codecvt<_InternT, _ExternT, _StateT>::id;
 // outlined to avoid generating a vtable in each translation unit
 // that uses the class
 template <class _InternT, class _ExternT, class _StateT>
-/* virtual */ codecvt<_InternT, _ExternT, _StateT>::
-~codecvt () /* nothrow */
+/* virtual */ _RWSTD_ATTRIBUTE_NOTHROW
+codecvt<_InternT, _ExternT, _StateT>::
+~codecvt ()
 {
     // no-op
 }
@@ -47,8 +48,9 @@ template <class _InternT, class _ExternT, class _StateT>
 // outlined to avoid generating a vtable in each translation unit
 // that uses the class
 template <class _InternT, class _ExternT, class _StateT>
-/* virtual */ codecvt_byname<_InternT, _ExternT, _StateT>::
-~codecvt_byname () /* nothrow */
+/* virtual */ _RWSTD_ATTRIBUTE_NOTHROW
+codecvt_byname<_InternT, _ExternT, _StateT>::
+~codecvt_byname ()
 {
     // no-op
 }

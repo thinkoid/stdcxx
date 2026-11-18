@@ -51,7 +51,7 @@ namespace __rw {
 // maps a named file into memory as shared, read-only, returns
 // the beginning address on success and fills `size' with the
 // size of the file; returns 0 on failure
-void* __rw_mmap (const char* fname, size_t *size)   // nothrow
+_RWSTD_ATTRIBUTE_NOTHROW void* __rw_mmap (const char* fname, size_t *size)
 {
     _RWSTD_ASSERT (0 != fname);
     _RWSTD_ASSERT (0 != size);
@@ -112,7 +112,7 @@ void* __rw_mmap (const char* fname, size_t *size)   // nothrow
 }
 
 
-void __rw_munmap (const void* pcv, size_t size)   // nothrow
+_RWSTD_ATTRIBUTE_NOTHROW void __rw_munmap (const void* pcv, size_t size)
 {
     _RWSTD_ASSERT (pcv && size);
 
