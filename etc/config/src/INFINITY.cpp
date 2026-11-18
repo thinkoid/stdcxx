@@ -285,7 +285,7 @@ union dbl_bits
     dbl_bits () { memset (bits, 0, sizeof (bits)); }
 };
 
-static float dbl_zero ()
+static double dbl_zero ()
 {
     static double val = 0.0;
 

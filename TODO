@@ -146,20 +146,6 @@ Fix: the name takes the process ID, ~$$$$~ inside =$(shell ...)=.
 Check: two =make config= runs from two trees at once log neither
 message; each =makefile.in= equals that of a run alone.
 
-*** TODO =dbl_zero= in =INFINITY.cpp= returns =float=
-
-=etc/config/src/INFINITY.cpp= 288-293 keeps a =static double= zero
-in =dbl_zero= and returns it as =float=. Its callers, =dbl_infinity=
-and =dbl_qnan=, divide and compare =double= values with it. Zero
-converts exactly, so the patterns do not depend on the type. The
-lines are the import's (e6c7726b, 2005). Seen while the padding of
-the =long double= patterns was read, 2026-11-17.
-
-Fix: =dbl_zero= returns =double=.
-
-Check: =config.h= unchanged in 12D and 15D under GCC and in 15D on an
-aarch64 host.
-
 *** TODO =ldbl_denorm_min= falls back to =DBL_MIN= where its siblings fall back to zero
 
 =flt_denorm_min= and =dbl_denorm_min= in
