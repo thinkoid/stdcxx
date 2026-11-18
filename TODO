@@ -24,21 +24,6 @@ at the top.
 
 ** Tree hygiene
 
-*** TODO =ti_collate.cpp= and =ti_wcollate.cpp= call themselves explicit instantiation directives
-
-The header comments of =src/ti_collate.cpp= and =src/ti_wcollate.cpp=
-read "explicit instantiation directives for collate<char>" (and
-=<wchar_t>=). The files hold none: =collate<char>= and
-=collate<wchar_t>= are explicit specializations
-(=include/loc/_collate.h= 100 and 146), whose members =src/collate.cpp=
-defines. The two files define the facet factory and the =use_facet=
-specialization. Seen while the ownership of the =ti_*.cpp= sources was
-derived for an audit of their objects, 2026-11-17.
-
-Fix: the comment says what the file holds.
-
-Check: none; a comment.
-
 *** TODO Comments cite C++11 by its draft N3242, and the standard is now at hand
 
 Eight comments cite the working draft N3242 for a paragraph of C++11:

@@ -1,6 +1,7 @@
 /***************************************************************************
  *
- * ti_collate.cpp - explicit instantiation directives for collate<char>
+ * ti_collate.cpp - the facet factory and the use_facet specialization
+ *                  for collate<char>
  *
  * $Id$
  *

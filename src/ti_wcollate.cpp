@@ -1,6 +1,7 @@
 /***************************************************************************
  *
- * ti_wcollate.cpp - explicit instantiation directives for collate<wchar_t>
+ * ti_wcollate.cpp - the facet factory and the use_facet specialization
+ *                   for collate<wchar_t>
  *
  * $Id$
  *
