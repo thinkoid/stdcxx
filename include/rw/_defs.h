@@ -800,7 +800,8 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #define _RWSTD_TI_EXPORT    _RWSTD_EXPORT
 
 
-#ifndef _RWSTD_NO_EXTERN_TEMPLATE
+#if    !defined (_RWSTD_NO_EXTERN_TEMPLATE)   \
+    && !defined (_RWSTD_NO_INSTANTIATE)
    // use the extern template extension to declare template
    // specializations that are explicitly instantiated in
    // source (.cpp) files; the ti_*.cpp source that defines one
@@ -811,8 +812,7 @@ __rw_assert_fail (const char*, const char*, int, const char*)
 #  define _RWSTD_INSTANTIATE_3(a1, a2, a3) extern template a1, a2, a3
 
 #  ifdef _RWSTD_NO_EXTERN_FUNCTION_TEMPLATE
-#    if    !defined (_RWSTD_INSTANTIATE_TEMPLATES)   \
-         ||  defined (_RWSTD_NO_INSTANTIATE)
+#    ifndef _RWSTD_INSTANTIATE_TEMPLATES
        // explicit instantiation of function templates enabled
        // but extern template declarations of function template
        // instantiations are disabled, use declarations of
@@ -831,14 +831,17 @@ __rw_assert_fail (const char*, const char*, int, const char*)
          typedef void __rw_unused_type
 #      define _RWSTD_INSTANTIATE_FUN_3(ign1, ign2, ign3)   \
          typedef void __rw_unused_type
-#    endif   // !_RWSTD_INSTANTIATE_TEMPLATES || _RWSTD_NO_INSTANTIATE
+#    endif   // _RWSTD_INSTANTIATE_TEMPLATES
 #  endif   // _RWSTD_NO_EXTERN_FUNCTION_TEMPLATE
-#else
+#else   // if _RWSTD_NO_EXTERN_TEMPLATE || _RWSTD_NO_INSTANTIATE
+   // the headers declare no specialization extern: the compiler has
+   // no extern template, or the library instantiates none, so each
+   // translation unit instantiates the members it uses
 #  define _RWSTD_INSTANTIATE(ign1, ign2)         0
 #  define _RWSTD_INSTANTIATE_1(ignore)           typedef void __rw_unused_type
 #  define _RWSTD_INSTANTIATE_2(ign1, ign2)       typedef void __rw_unused_type
 #  define _RWSTD_INSTANTIATE_3(ign1, ign2, ign3) typedef void __rw_unused_type
-#endif   // _RWSTD_NO_EXTERN_TEMPLATE
+#endif   // !_RWSTD_NO_EXTERN_TEMPLATE && !_RWSTD_NO_INSTANTIATE
 
 #ifndef _RWSTD_INSTANTIATE_FUN_1
   // default to the same definition as _RWSTD_INSTANTIATE_{1,2,3}

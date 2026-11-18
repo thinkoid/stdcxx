@@ -87,29 +87,46 @@ for the version; or the map and =MAPFLAGS= leave.
 Check: every name of the map is in =nm -D --defined-only= of the 15D
 library; a build with =MAPFLAGS= set links, and its suite is at pin.
 
-*** TODO Under =_RWSTD_NO_INSTANTIATE= a program declares what the library does not instantiate
+*** TODO Under =_RWSTD_NO_INSTANTIATE= the library hides the facets whose primary template carries no export mark
 
-The =README= (1032-1035) documents =_RWSTD_NO_INSTANTIATE= as an
-override: the library then explicitly instantiates no template. The
-sources state their explicit instantiation definitions under
-~#ifndef _RWSTD_NO_INSTANTIATE~, and =include/rw/_defs.h= (882-883)
-gives every translation unit the template definitions. The =extern
-template= declarations of the headers do not test the macro
-(=include/rw/_defs.h= 799). So where the compiler has =extern
-template=, a program built against such a library still declares each
-specialization extern, instantiates none of its non-inline members
-and calls the library's, which defines none. By reading: no
-configuration of the matrix defines the macro. The import (e6c7726b,
-2005) tested it only in the declarations' MSVC branch, which
-d743fa8d removed. Seen while the =ti_*.cpp= sources were given the
-declarations, 2026-11-17.
+A 15D build under GCC with =_RWSTD_NO_INSTANTIATE= in its =config.h=
+builds and links, but three tests differ from the pin:
+=22.locale.category= fails 4 of 28 assertions, the address of the
+=type_info= of =money_get= and =money_put= (=char= and =wchar_t=),
+which the library and the program hold at two addresses;
+=22.locale.messages= fails 4 of 366, =has_facet<messages_byname<charT>
+>(locale ("C.utf8"))= is false and =use_facet= throws =bad_cast=;
+=22.locale.globals= fails 887 of 13576, the same =has_facet= in every
+named locale, whose =bad_cast= then skips the rest of that locale's
+checks. Under the macro the headers declare no specialization extern,
+so the library's specializations lose the mark that
+=_RWSTD_TI_EXPORT= put on their declarations. The library is compiled
+=-fvisibility=hidden= (=etc/config/gcc.config=, =VISFLAGS=), so an
+implicit instantiation of a class whose primary template is not
+marked is local to it. =nm= of the library shows the =type_info= of
+=money_get<char>= and =messages<char>= local (=d=), and the =id= of
+=messages=, =money_get=, =money_put=, =time_get= and =time_put= local
+(=b=); the program defines its own (=u=). The marked primary
+templates (77ae0f7b: =num_get=, =num_put=, =numpunct=, =moneypunct=,
+=basic_string=, =basic_ostream= and others) keep one copy. Of the
+2155 names of =doc/notes/baseline/15D.exports=, the library exports
+1100; the =type_info= and =vtable= of =messages=, =money_get=,
+=money_put=, =time_get=, =time_put=, =basic_istream=, =basic_filebuf=
+and =basic_stringbuf= are among those that leave. =_defs.h= also
+defines =_RWSTD_NO_SPECIALIZED_FACET_ID= wherever =extern template=
+is available, since the ids are then explicitly instantiated in the
+library, which under the macro they are not. Seen while the =extern
+template= declarations were made to give way under the macro,
+2026-11-18.
 
-Fix: a decision: the declarations give way under the macro too, or
-the override leaves, with its =README= entry and the block of
-=src/collate.cpp= it guards.
+Fix: a decision: the primary templates of the classes the library
+instantiates carry =_RWSTD_EXPORT=, as those of 77ae0f7b do; or the
+facet ids are explicitly specialized under the macro
+(=_RWSTD_NO_SPECIALIZED_FACET_ID= tests it), which covers the ids and
+not the =type_info=.
 
-Check: a 15D build with the macro in its =config.h= builds and runs
-its tests; or the macro is gone from the tree.
+Check: a 15D build under GCC with =_RWSTD_NO_INSTANTIATE= in its
+=config.h= runs its tests at the 15D pin.
 
 *** TODO The condition at each instantiation site no longer reads its name
 
