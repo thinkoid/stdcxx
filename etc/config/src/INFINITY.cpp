@@ -26,7 +26,7 @@
 #include <string.h>   // for memcpy(), memset()
 
 #include "config.h"
-#include "float_defs.h"  // for FLT_MIN, DBL_MIN, LDBL_MIN, LDBL_MANT_DIG
+#include "float_defs.h"  // for the FLT_, DBL_ and LDBL_ constants
 
 /***************************************************************************
  *
@@ -523,7 +523,13 @@ static ldbl_bits ldbl_infinity ()
 
     // assume IEEE 754 floating point format
 
-    if (e == big_endian) {
+    if (DBL_MANT_DIG == LDBL_MANT_DIG) {
+        // the double format: the 8 bytes of the double pattern
+        const dbl_bits d_inf = dbl_infinity ();
+
+        memcpy (val.bits, d_inf.bits, sizeof d_inf.bits);
+    }
+    else if (e == big_endian) {
         val.bits [ 0] = '\x7f';
         val.bits [ 1] = '\xff';
         val.bits [ 2] = '\0';
@@ -605,7 +611,13 @@ static ldbl_bits ldbl_qnan ()
 
     // assume IEEE 754 floating point format
 
-    if (e == big_endian) {
+    if (DBL_MANT_DIG == LDBL_MANT_DIG) {
+        // the double format: the 8 bytes of the double pattern
+        const dbl_bits d_qnan = dbl_qnan ();
+
+        memcpy (val.bits, d_qnan.bits, sizeof d_qnan.bits);
+    }
+    else if (e == big_endian) {
         val.bits [ 0] = '\x7f';
         val.bits [ 1] = '\xff';
         val.bits [ 2] = '\x80';
@@ -685,7 +697,13 @@ static ldbl_bits ldbl_snan ()
 
     // assume IEEE 754 floating point format
 
-    if (e == big_endian) {
+    if (DBL_MANT_DIG == LDBL_MANT_DIG) {
+        // the double format: the 8 bytes of the double pattern
+        const dbl_bits d_snan = dbl_snan ();
+
+        memcpy (val.bits, d_snan.bits, sizeof d_snan.bits);
+    }
+    else if (e == big_endian) {
         val.bits [ 0] = '\x7f';
         val.bits [ 1] = '\xff';
         val.bits [ 2] = '\0';
@@ -757,7 +775,13 @@ static ldbl_bits ldbl_denorm_min ()
 
     // assume IEEE 754 floating point format
 
-    if (e == big_endian) {
+    if (DBL_MANT_DIG == LDBL_MANT_DIG) {
+        // the double format: the 8 bytes of the double pattern
+        const dbl_bits d_den = dbl_denorm_min ();
+
+        memcpy (val.bits, d_den.bits, sizeof d_den.bits);
+    }
+    else if (e == big_endian) {
         val.bits [ 0] = '\0';
         val.bits [ 1] = '\0';
         val.bits [ 2] = '\0';
