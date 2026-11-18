@@ -224,7 +224,7 @@ struct _RWSTD_EXPORT ios_base: private __rw::__rw_synchronized
     }
 
     // 27.4.2.2, p13
-    _RWSTD_STREAMSIZE width (_RWSTD_STREAMSIZE);
+    inline _RWSTD_STREAMSIZE width (_RWSTD_STREAMSIZE);
 
     // 27.4.2.3, p1
     locale imbue (const locale&);

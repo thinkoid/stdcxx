@@ -235,7 +235,7 @@ public:
         return do_encoding ();
     }
 
-    bool always_noconv () const _THROWS (());
+    inline bool always_noconv () const _THROWS (());
 
     // signature follows lwg issue 75
     int length (state_type &__state, const extern_type *__from,

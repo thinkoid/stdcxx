@@ -73,7 +73,7 @@ the library defines =_ZN4__rw13__rw_allocateEmi=. 184 of the 263 hold
 a =j=, and 179 of them are names of the library when each =j= reads
 =m=; the other 84 spell another type at its 32-bit width, an =int=
 for a =streamsize= among them, by a reading of a sample. The library
-exports 2335 names, so 1403 of them are not in the map. The node
+exports 2322 names, so 1390 of them are not in the map. The node
 names 4.1.3; the library is 4.2.2 (=include/rw/_config.h= 50). The
 map is linked only when =MAPFLAGS= is set (=etc/config/gcc.config=
 54-57), and nothing sets it, but bd48eb9e keeps the map consistent
@@ -150,38 +150,6 @@ comment names the source.
 
 Check: the preprocessed output of =<ostream>= and =<locale>= in 15D
 unchanged.
-
-*** TODO Eleven inline functions stay exported under GCC: their class declares them without =inline=
-
-Eleven inline member functions are declared in their class without
-=inline= and defined with it after the class:
-- =ios_base::width (streamsize)= (=include/rw/_iosbase.h=);
-- the constructor and destructor of =__rw_mutex= and
-  =__rw_mutex_base::_C_release= (=include/rw/_mutex.h=);
-- =widen (char)= and =narrow (char_type, char)= of =ctype<char>= and
-  of =ctype<wchar_t>= (=include/loc/_ctype.h=);
-- =codecvt<char, char, mbstate_t>::always_noconv=
-  (=include/loc/_codecvt.h=);
-- =__rw_locale::_C_check_category= and =_C_get_facet_type=
-  (=src/locale_body.h=).
-GCC 16 takes the visibility of a member from its declaration in the
-class, so =-fvisibility-inlines-hidden= does not hide these, and the
-15D library under GCC exports their 13 names; Clang hides them. A
-probe shows it: under the flag, a member of a marked class that is
-declared without =inline= and defined inline after the class has
-default visibility under GCC and hidden under Clang, and one defined
-in the class is hidden under both. The 13 are the names of
-=15D.exports= that =15D-clang.exports= lacks, besides the 12
-complete-object destructors of the =_byname= specializations, and 11
-of them are the names of the 15D list under GCC that the 12D list
-lacks, besides those of =basic_string='s debug iterator. Seen while
-=VISFLAGS= took the flag, 2026-11-18.
-
-Fix: the eleven declarations in the class take =inline=.
-
-Check: =15D.exports= loses the 13 names and gains none,
-=15D-clang.exports= is unchanged, and the four shared configurations
-run at pin.
 
 * Tests
 
@@ -1809,9 +1777,9 @@ Check: =git grep stdcxx-build -- doc= finds the build recipes alone.
 ** TODO Two sentences of =ref-test-baseline.md= chapter 6 were measured before the flag
 
 Chapter 6 of =doc/notes/ref-test-baseline.md= says that a 15D build
-on aarch64 exports the same names under either compiler (608-609),
+on aarch64 exports the same names under either compiler (607-608),
 and that the suite compiled at =-O0= links against the =-O2= library
-of the same compiler and gives its table (661-671). Both were
+of the same compiler and gives its table (652-662). Both were
 measured before the shared library was compiled
 =-fvisibility-inlines-hidden=. With the flag the first is measured
 under GCC alone: the 15D library of an aarch64 host exports the 2168

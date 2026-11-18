@@ -149,7 +149,7 @@ public:
     // converts a LC_XXX constant to a locale::category value
     static int _C_LC2category (int) _THROWS (());
 
-    static bool _C_check_category (int) _THROWS (());
+    static inline bool _C_check_category (int) _THROWS (());
 
     // converts the category argument of a locale constructor to
     // a locale::category value: an LC_XXX constant maps to its
@@ -161,7 +161,7 @@ public:
 
     // returns the type of the standard facet object or `unknown'
     // if the facet is of a user-defined type
-    static __rw_facet::_C_facet_type
+    static inline __rw_facet::_C_facet_type
     _C_get_facet_type (const __rw_facet&) _THROWS (());
 
 private:

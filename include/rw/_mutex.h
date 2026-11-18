@@ -100,7 +100,7 @@ public:
                              "synchronization error");
     }
 
-    void _C_release ();
+    inline void _C_release ();
 
     _RWSTD_MUTEX_T _C_mutex;   // the real thing
 };
@@ -120,9 +120,9 @@ class _RWSTD_EXPORT __rw_mutex: public __rw_mutex_base
 {
 public:
 
-    __rw_mutex ();
+    inline __rw_mutex ();
 
-    ~__rw_mutex ();
+    inline ~__rw_mutex ();
 
 private:
 

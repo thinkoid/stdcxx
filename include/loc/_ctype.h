@@ -256,9 +256,9 @@ public:
     }
 
     // 22.2.1.1.1, p6
-    char_type widen (char) const;
+    inline char_type widen (char) const;
 
-    char narrow (char_type, char) const;
+    inline char narrow (char_type, char) const;
 
     const char_type* (toupper)(char_type *__lo, const char_type *__hi) const {
         return do_toupper (__lo, __hi);
@@ -478,7 +478,7 @@ public:
     }
 
     // 22.2.1.1.1, p6
-    char_type widen (char) const;
+    inline char_type widen (char) const;
 
     const char*
     widen (const char* __lo, const char *__hi, char_type *__to) const {
@@ -486,7 +486,7 @@ public:
     }
 
     // 22.2.1.1.1, p7
-    char narrow (char_type, char) const;
+    inline char narrow (char_type, char) const;
 
     const char_type*
     narrow (const char_type *__lo, const char_type *__hi,
