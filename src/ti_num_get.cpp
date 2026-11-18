@@ -32,8 +32,6 @@
 
 #include <rw/_defs.h>
 
-#undef _RWSTD_NO_TEMPLATE_DEFINITIONS
-
 #include <loc/_locale.h>
 #include <loc/_num_get.h>
 #include <loc/_punct.h>

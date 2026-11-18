@@ -33,8 +33,6 @@
 
 #include <rw/_defs.h>
 
-#undef _RWSTD_NO_TEMPLATE_DEFINITIONS
-
 #include <loc/_locale.h>
 #include <loc/_moneypunct.h>
 

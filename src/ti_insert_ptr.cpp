@@ -34,8 +34,6 @@
 
 #include <rw/_defs.h>
 
-#undef _RWSTD_NO_TEMPLATE_DEFINITIONS
-
 #include <ostream>
 #include <rw/_ioinsert.h>
 

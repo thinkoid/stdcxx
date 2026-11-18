@@ -32,8 +32,6 @@
 
 #include <rw/_defs.h>
 
-#undef _RWSTD_NO_TEMPLATE_DEFINITIONS
-
 #include <streambuf>
 
 #include <loc/_locale.h>

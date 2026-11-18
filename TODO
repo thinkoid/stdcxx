@@ -51,21 +51,6 @@ cites N3242 is treated as the code is.
 Check: =git grep -n N3242 -- include src tests util= finds nothing,
 and the list of the 24 with the paragraph each was read from.
 
-*** TODO 41 =ti_*.cpp= sources undefine a macro that is already undefined
-
-Each =src/ti_*.cpp= defines =_RWSTD_INSTANTIATE_TEMPLATES=, includes
-=<rw/_defs.h>=, then undefines =_RWSTD_NO_TEMPLATE_DEFINITIONS=. But
-=<rw/_defs.h>= includes =<rw/_config.h>= first, which undefines the
-macro under =_RWSTD_INSTANTIATE_TEMPLATES= (203-209), and only
-=_defs.h= 882 reads it after that, behind the include guard. So the
-line has no effect. It is the import's (e6c7726b, 2005);
-=src/instance.cpp= has none. Seen while the =ti_*.cpp= sources were
-given the =extern template= declarations, 2026-11-17.
-
-Fix: the line leaves the 41 sources.
-
-Check: the 41 objects of a 15D build the same before and after.
-
 *** TODO An HP aCC 3 workaround in =uninitialized_copy=
 
 =include/rw/_specialized.h= 183-185 declares the pointer through

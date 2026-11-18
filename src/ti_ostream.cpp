@@ -33,8 +33,6 @@
 
 #include <rw/_defs.h>
 
-#undef _RWSTD_NO_TEMPLATE_DEFINITIONS
-
 #include <ostream>
 
 #ifndef _RWSTD_NO_INSTANTIATE

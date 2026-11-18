@@ -33,8 +33,6 @@
 
 #include <rw/_defs.h>
 
-#undef _RWSTD_NO_TEMPLATE_DEFINITIONS
-
 // include <cstdio> to define the extended member functions that
 // take a FILE* argument
 #include <cstdio>
