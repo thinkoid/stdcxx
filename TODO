@@ -58,6 +58,33 @@ Fix: the comment says what the file holds.
 
 Check: none; a comment.
 
+*** TODO Comments cite C++11 by its draft N3242, and the standard is now at hand
+
+Eight comments cite the working draft N3242 for a paragraph of C++11:
+=include/bitset= 160 and 261, =include/ostream= 247, 265 and 285,
+=include/rw/_defs.h= 823, =include/rw/_pair.h= 77 and
+=tests/iostream/27.ostream.cpp= 451. They name the draft because it
+was the text they were read from. =include/loc/_time_get.cc= and
+=tests/localization/22.locale.time.get.cpp= cite "C++11" in eight
+lines each, written when a draft was the only text at hand. The
+published text, ISO/IEC 14882:2011, differs from N3242: among other
+places it adds the subclause [diff.cpp03], drops the =explicit=
+/class-virt-specifier/ and adds the =nullptr_t= comparisons of
+=unique_ptr= and =shared_ptr=. Of the paragraphs cited, 14.7.2, p5
+was read in both: the same number, and "template arguments" for the
+draft's "template parameters". The others are not compared. Seen when
+the published text arrived, 2026-11-18.
+
+Fix: each of the 24 citations is read in ISO/IEC 14882:2011 and names
+C++11 with the standard's clause and paragraph; a comment whose
+paragraph changed between the draft and the standard is brought in
+line with the standard. The =analysis-= notes under =doc/notes= are
+records and keep the draft they were written from; a =ref-= note that
+cites N3242 is treated as the code is.
+
+Check: =git grep -n N3242 -- include src tests util= finds nothing,
+and the list of the 24 with the paragraph each was read from.
+
 *** TODO 41 =ti_*.cpp= sources undefine a macro that is already undefined
 
 Each =src/ti_*.cpp= defines =_RWSTD_INSTANTIATE_TEMPLATES=, includes
