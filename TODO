@@ -24,25 +24,6 @@ at the top.
 
 ** Tree hygiene
 
-*** TODO The =ctype_byname<wchar_t>= constructor's comment gives efficiency as its reason
-
-=src/wctype.cpp= 556 reads "delayed initialization not used for
-efficiency" over the constructor's lookup of the database and the C
-locale, the words the =ctype_byname<char>= constructor had. The
-narrow comment now gives two reasons. The first does not hold for
-the wide facet: =ctype<char>::is= (=include/loc/_ctype.h= 231-237)
-reads the tables inline, so filling them on first use would put a
-test in every call, but =ctype<wchar_t>::is= (441-443) calls the
-virtual =do_is=, where a test for first use adds little to the
-call. The second holds: the eager lookup makes a bad name throw from
-the constructor, through =__rw_setlocale= (=src/wctype.cpp= 576),
-where 22.1.1.2, p7 places the throw for a locale. Seen while the
-=ctype_byname<char>= comment was corrected, 2026-11-16.
-
-Fix: the comment states the second reason.
-
-Check: none; a comment.
-
 *** TODO =ti_collate.cpp= and =ti_wcollate.cpp= call themselves explicit instantiation directives
 
 The header comments of =src/ti_collate.cpp= and =src/ti_wcollate.cpp=

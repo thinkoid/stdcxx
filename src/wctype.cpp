@@ -553,7 +553,9 @@ ctype_byname (const char *name, size_t refs)
     if ('C' == name [0] && '\0' == name [1])
         return;
 
-    // delayed initialization not used for efficiency
+    // the database is looked up here, not on first use: a bad name
+    // throws from the constructor, where 22.1.1.2, p7 places the
+    // throw for a locale
     __rw::__rw_ctype_t* impl =
         const_cast< __rw::__rw_ctype_t* >(
             static_cast< const __rw::__rw_ctype_t* >(
