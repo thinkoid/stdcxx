@@ -24,27 +24,6 @@ at the top.
 
 ** Tree hygiene
 
-*** TODO The trapping branch of =INFINITY.cpp= writes a quadruple pattern into a double-double =long double=
-
-=etc/config/src/INFINITY.cpp= writes fixed patterns for the four
-special values of =long double= where =NO_DBL_TRAPS= finds that
-floating point traps. The branches know the x87 extended layout, the
-=double= format, and the IEEE quadruple, which they write for every
-other format. The double-double format (=LDBL_MANT_DIG= 106, two
-=double= objects in 16 bytes) thus gets a quadruple pattern, and its
-value is not the infinity, the NaN or the denormal the branch names;
-its infinity and NaNs are those of the =double= in its first 8 bytes.
-No host of the matrix has the format, and no configuration takes the
-branch. The fact stood in the entry for the =double= format, which
-left with its fix. Seen while the =double= format was given its arm,
-2026-11-18.
-
-Fix: where =LDBL_MANT_DIG= is 106, the branches write the =double=
-pattern into the first 8 bytes and zero into the second 8 (the
-denormal: the =double= denormal and zero).
-
-Check: by reading; no host or compiler flag at hand gives the format.
-
 *** TODO Under =_RWSTD_NO_INSTANTIATE= the library hides the facets whose primary template carries no export mark
 
 A 15D build under GCC with =_RWSTD_NO_INSTANTIATE= in its =config.h=
