@@ -97,7 +97,7 @@ void test_default_ctor (std::bitset<N>*)
     all_zeros [N] = '\0';
 
     rw_assert (!bcmp (bset, all_zeros), 0, __LINE__,
-               "bitset<%u>::bitset() expected 0, got { %.*b }",
+               "bitset<%u>::bitset() expected 0, got { %{.*b} }",
                N, int (N), &bset);
 }
 
