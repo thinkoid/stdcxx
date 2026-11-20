@@ -363,15 +363,16 @@ ifeq ($(in_topdir),1)
   endif
 
   ifeq ($(filter /%,$(CONFIG)),)
-    ifeq ($(filter %/%,$(CONFIG)),)
-      configpath = $(TOPDIR)/etc/config/$(CONFIG)
+    ifeq ($(findstring /,$(CONFIG)),)
+      configdir = $(TOPDIR)/etc/config/
     else
-      configpath = $(TOPDIR)/$(CONFIG)
+      configdir = $(TOPDIR)/
     endif
   else
-    configpath = $(CONFIG)
+    configdir =
   endif
 
+  configpath = $(configdir)$(CONFIG)
   include $(configpath)
 
   ETCDIR = $(TOPDIR)/etc/config
@@ -528,7 +529,7 @@ $(MAKEFILE_IN): $(configpath)
              echo "generating $(MAKEFILE_IN) from $(configpath)"            \
           && echo "TOPDIR     = $(TOPDIR)"               >> $(MAKEFILE_IN)  \
           && echo "BUILDDIR   = $(buildpath)"            >> $(MAKEFILE_IN)  \
-          && echo "CONFIG     = $$""(TOPDIR)/etc/config/$(CONFIG)"          \
+          && echo 'CONFIG     = $(value configdir)'"$(CONFIG)"              \
                                                          >> $(MAKEFILE_IN)  \
           && echo "BUILDTYPE  = $(BUILDTYPE)"            >> $(MAKEFILE_IN)  \
           && echo "BUILDMODE  = $(BUILDMODE)"            >> $(MAKEFILE_IN)  \
