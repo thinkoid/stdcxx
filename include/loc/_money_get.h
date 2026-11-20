@@ -49,7 +49,7 @@ namespace std {
 
 
 template <class _CharT, class _InputIter = istreambuf_iterator<_CharT> >
-struct money_get: __rw::__rw_facet
+struct _RWSTD_EXPORT money_get: __rw::__rw_facet
 {
     typedef _CharT     char_type;
     typedef _InputIter iter_type;

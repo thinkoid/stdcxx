@@ -71,8 +71,8 @@ struct _RWSTD_EXPORT messages_base
 
 // 22.2.7.1
 template <class _CharT>
-class messages: public __rw::__rw_facet,
-                public messages_base
+class _RWSTD_EXPORT messages: public __rw::__rw_facet,
+                              public messages_base
 {
 public:
     typedef _CharT char_type;

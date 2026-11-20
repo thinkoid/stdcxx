@@ -117,10 +117,10 @@ template <class _CharT>
 class ctype;
 
 template <class _CharT, class _Iter>
-struct money_get;
+struct _RWSTD_EXPORT money_get;
 
 template <class _CharT, class _Iter>
-struct money_put;
+struct _RWSTD_EXPORT money_put;
 
 template <class _CharT, bool _Intl>
 struct _RWSTD_EXPORT moneypunct;
@@ -135,13 +135,13 @@ template <class _CharT>
 struct _RWSTD_EXPORT numpunct;
 
 template <class _CharT, class _Iter>
-class time_get;
+class _RWSTD_EXPORT time_get;
 
 template <class _CharT, class _Iter>
-struct time_put;
+struct _RWSTD_EXPORT time_put;
 
 template <class _CharT>
-class messages;
+class _RWSTD_EXPORT messages;
 
 
 // 22.1.1
