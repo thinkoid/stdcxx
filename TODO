@@ -27,21 +27,6 @@ at the top.
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
 
-** TODO The header-guard message in =tests/src/new.cpp= reads past its arguments
-
-The lead-guard check's =rw_error= has the format ~"%s:%d: header
-guard corruption at %#p: expected %#p, got %#p"~ and the arguments
-=hdr->ptr_, (const void*)hdr, hdr->self_=: =__FILE__= and
-=__LINE__= are missing, so =%s= reads the user block as a string and
-the last two =%#p= read arguments that are not there. The check
-moved from =_rw_find_block= into =_rw_check_block= as it was. Seen
-2026-11-05.
-
-Fix: =__FILE__, __LINE__,= before =hdr->ptr_=.
-
-Check: a =0.new= case that corrupts =self_= of a live block and then
-calls =rwt_check_leaks (0, 0)= prints the file and line.
-
 ** TODO =_rw_find_block='s =check_heap= parameter is always true
 
 Since =operator_delete= checks the block in hand, every caller of

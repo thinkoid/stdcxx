@@ -126,6 +126,7 @@ _rw_check_block (const Header *hdr)
         rw_error (0, 0, __LINE__,
                   "%s:%d: header guard corruption at %#p: "
                   "expected %#p, got %#p",
+                  __FILE__, __LINE__,
                   hdr->ptr_, (const void*)hdr, hdr->self_);
         abort ();
     }
