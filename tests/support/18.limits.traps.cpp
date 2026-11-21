@@ -36,13 +36,11 @@
 
 /**************************************************************************/
 
-#ifdef _RWSTD_OS_LINUX
+// use siglongjmp() and sigsetjmp() on Linux to avoid
+// http://sourceware.org/bugzilla/show_bug.cgi?id=2351
+#include <setjmp.h>    // for siglongjmp, sigsetjmp
 
-   // use siglongjmp() and sigsetjmp() on Linux to avoid
-   // http://sourceware.org/bugzilla/show_bug.cgi?id=2351
-#  include <setjmp.h>    // for siglongjmp, sigsetjmp
-
-jmp_buf jmp_env;
+sigjmp_buf jmp_env;
 
 extern "C" {
 
@@ -52,24 +50,6 @@ void handle_fpe (int)
 }
 
 }   // extern "C"
-
-#  define RW_SIGSETJMP(env, signo)   sigsetjmp (env, signo)
-#else   // if !defined (_RWSTD_OS_LINUX)
-
-#  include <csetjmp>    // for longjmp, setjmp
-
-std::jmp_buf jmp_env;
-
-extern "C" {
-
-void handle_fpe (int)
-{
-    std::longjmp (jmp_env, 1);
-}
-
-}   // extern "C"
-#  define RW_SIGSETJMP(env, ignore)   setjmp (env)
-#endif   // _RWSTD_OS_LINUX
 
 
 /**************************************************************************/
@@ -89,7 +69,7 @@ void divide (T one, T zero)
 
 
 template <class numT>
-void test_traps (numT, int lineno, bool)
+void test_traps (numT, int lineno)
 {
     static const char* const tname = rw_any_t (numT ()).type_name ();
 
@@ -102,22 +82,14 @@ void test_traps (numT, int lineno, bool)
 
     rw_info (0, 0, 0, "std::numeric_limits<%s>::traps = %b", tname, traps);
 
-#ifdef SIGFPE
     std::signal (SIGFPE, handle_fpe);
-#else   // if !defined (SIGFPE)
-    if (!rw_warn (!traps, 0, lineno,
-                  "SIGFPE not #defined and numeric_limits<%s>::traps == %b, "
-                  "cannot test", tname, traps)) {
-        return;
-    }
-#endif   // SIGFPE
 
     // the call is the whole controlling expression (C99 7.13.1.1, p4),
     // and trapped changes only after the jump, so its value is not
     // indeterminate there (C99 7.13.2.1, p3)
     bool trapped = false;
 
-    if (RW_SIGSETJMP (jmp_env, SIGFPE)) {
+    if (sigsetjmp (jmp_env, SIGFPE)) {
         // the handler of SIGFPE jumped back from the division below
         trapped = true;
     }
@@ -138,34 +110,34 @@ void test_traps (numT, int lineno, bool)
 static int
 run_test (int, char*[])
 {
-#define TEST(T, floating)   test_traps ((T)0, __LINE__, floating)
+#define TEST(T)   test_traps ((T)0, __LINE__)
 
 #ifndef _RWSTD_NO_NATIVE_BOOL
-    TEST (bool, false);
+    TEST (bool);
 #endif   // _RWSTD_NO_NATIVE_BOOL
 
-    TEST (char, false);
-    TEST (signed char, false);
-    TEST (unsigned char, false);
+    TEST (char);
+    TEST (signed char);
+    TEST (unsigned char);
 
-    TEST (short, false);
-    TEST (unsigned short, false);
-    TEST (int, false);
-    TEST (unsigned int, false);
-    TEST (long, false);
-    TEST (unsigned long, false);
+    TEST (short);
+    TEST (unsigned short);
+    TEST (int);
+    TEST (unsigned int);
+    TEST (long);
+    TEST (unsigned long);
 
 #ifndef _RWSTD_NO_LONG_LONG
-    TEST (_RWSTD_LONG_LONG, false);
-    TEST (unsigned _RWSTD_LONG_LONG, false);
+    TEST (_RWSTD_LONG_LONG);
+    TEST (unsigned _RWSTD_LONG_LONG);
 #endif   // _RWSTD_NO_LONG_LONG
 
-    TEST (wchar_t, false);
+    TEST (wchar_t);
 
-    TEST (float, true);
-    TEST (double, true);
+    TEST (float);
+    TEST (double);
 
-    TEST (long double, true);
+    TEST (long double);
 
     return 0;
 }

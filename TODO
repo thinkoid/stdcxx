@@ -340,26 +340,6 @@ failing buffer.
 
 Check: the rows run; the eight pins move.
 
-** TODO =18.limits.traps= passes a =jmp_buf= to =sigsetjmp=
-
-Under =_RWSTD_OS_LINUX=, =tests/support/18.limits.traps.cpp=
-declares =jmp_env= a =jmp_buf= (45) and passes it to =sigsetjmp= and
-=siglongjmp=, which POSIX declares with a =sigjmp_buf=. glibc defines
-the two types alike, so the test builds. Around it the test keeps
-three things no build takes or reads: the =#else= arm of
-=_RWSTD_OS_LINUX= (57-71), with =setjmp= and =longjmp= for hosts
-other than Linux, which the tree no longer builds on; the =#else= arm
-of ~#ifdef SIGFPE~ in =test_traps= (107-113), though C defines the
-macro in =<signal.h>= on every host; and the unnamed =bool= parameter
-of =test_traps=, which each =TEST= line fills. Seen while the trap
-oracle of the test was fixed, 2026-11-17.
-
-Fix: declare =jmp_env= a =sigjmp_buf=; the two arms and the parameter
-leave with the change, and =RW_SIGSETJMP= with them.
-
-Check: the test builds and passes its 16 assertions in 15D; the
-object of the test before and after, the same code.
-
 ** TODO The =limits= example expects the =traps= of an x86-64 host
 
 =examples/manual/out/limits.out= 29 holds ~traps = true~ for
