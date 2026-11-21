@@ -172,6 +172,8 @@ struct ListIds : ContainerIds
         MEMBER_1 (remove_if, cont, pred),
 
         //////////////////////////////////////////////////////////////
+        // unique ()
+        MEMBER_0 (unique, cont),
         // unique (BinaryPredicate)
         MEMBER_1 (unique, cont, bpred),
 

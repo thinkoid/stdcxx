@@ -439,6 +439,7 @@ _rw_list_sigcat (char** pbuf, size_t * pbufsize, ListIds::OverloadId which,
     case ListIds::pop_front_void:
     case ListIds::pop_back_void:
     case ListIds::clear_void:
+    case ListIds::unique_void:
     case ListIds::sort_void:
     case ListIds::reverse_void:
         rw_asnprintf (pbuf, pbufsize,
