@@ -1614,7 +1614,7 @@ void test_flush (charT)
 
         rw_assert (1 + nsyncs == tsb.ncalls_ [Sync], 0, __LINE__,
                    "std::basic_ostream<%s>::flush() called rdbuf()->sync() "
-                   "once; got %zu times",
+                   "once; got %d times",
                    cname, tsb.ncalls_ [Sync] - nsyncs);
 
         rw_assert (std::ios_base::badbit == strm.rdstate (), 0, __LINE__,
@@ -1637,7 +1637,7 @@ void test_flush (charT)
 
         rw_assert (nsyncs == tsb.ncalls_ [Sync], 0, __LINE__,
                    "std::basic_ostream<%s>::flush() unexpectedly made "
-                   "%zu calls to rdbuf()->sync() when rdstate () == "
+                   "%d calls to rdbuf()->sync() when rdstate () == "
                    "failbit",
                    cname, tsb.ncalls_ [Sync] - nsyncs);
 
