@@ -295,7 +295,7 @@ void test_virtual (charT, Traits, const VFun *pfid,
     "line %d. "                                                         \
     "%{?}basic_%{:}%{?}w%{;}%{;}stringbuf%{?}<%s%{?}, %s%{;}>%{;}"      \
     "(%{?}%{*Ac}%{?}, %{Io}%{;}%{:}%{?}%{Io}%{;}%{;})"                  \
-    ".%s (%{?}%{?}%{*Ac}%{:}pptr()%{;}, %d"   /* xsputn */              \
+    ".%s (%{?}%{?}%{*Ac}%{:}pbase()%{;}, %d"   /* xsputn */             \
          "%{:}%{?}" /* pbackfail, over/underflow argument */            \
               "%{?}%{#lc}%{;}"                                          \
          "%{:}" /* seekoff and seekpos */                               \
@@ -575,7 +575,7 @@ test_xsputn (VFun *pfid)
     TEST ("a@2001", in | out | ate, 0, "a@1008", 1008,    0, 3009, MAYBE_1);
 
     //////////////////////////////////////////////////////////////////
-    // exercise calling sputn() with pptr() as the first argument
+    // exercise calling sputn() with pbase() as the first argument
 #undef TEST
 #define TEST(str, mode, len, result, seq, read)                 \
     pfid->strarg_ = 0; pfid->sequence_ = seq;                   \
@@ -1340,7 +1340,7 @@ run_test (int, char*[])
         run_test (&fid);
     }
     else
-        rw_note (0, 0, 0, "char tests disabled");
+        rw_note (0, 0, 0, "wchar_t tests disabled");
 
     return 0;
 }

@@ -417,20 +417,6 @@ its type.
 Check: a row made to fail prints the value, the inserted string and
 the expected one.
 
-** TODO Two messages of =27.stringbuf.virtuals= name the wrong thing
-
-=tests/iostream/27.stringbuf.virtuals.cpp= 578 heads the =xsputn= rows
-that pass no string "exercise calling sputn() with pptr() as the first
-argument", and =CALLFMT= (298) prints =pptr()= for them, but
-=test_virtual= calls ~sputn (Pbase (), n)~ for those rows (245-246).
-The =else= of the =wchar_t= block (1343) notes "char tests disabled".
-Seen in passing by the =xsputn= offset change, 2026-11-08.
-
-Fix: the comment and the format say =pbase()=; the note says
-"wchar_t tests disabled".
-
-Check: reading; the test at its pin.
-
 ** TODO =27.ostream='s =test_streambuf= leaves =pstrm_= unset in its buffer constructor
 
 =tests/iostream/27.ostream.cpp= 73-77: the constructor that takes a
