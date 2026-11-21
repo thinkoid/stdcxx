@@ -654,11 +654,7 @@ run_test (int, char**)
 
     test_empty_sep ();
 
-#ifndef _RWSTD_WCHAR_T
-
     run_test (wchar_t (), "wchar_t");
-
-#endif   // _RWSTD_WCHAR_T
 
     const char charmap[] = {
         "<code_set_name> \"ANSI_X3.4-1968\"\n"

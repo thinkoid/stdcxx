@@ -481,8 +481,6 @@ rw_match (const char*   /* s1  */,
           const char*   /* s2  */,
           _RWSTD_SIZE_T /* len */ = _RWSTD_SIZE_MAX);
 
-#ifndef _RWSTD_WCHAR_T
-
 wchar_t*
 rw_widen (wchar_t*, const char*, _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);
 
@@ -498,8 +496,6 @@ rw_narrow (char*, const wchar_t*, _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);
 _RWSTD_SIZE_T
 rw_match (const char*, const wchar_t*,
           _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);
-
-#endif   // _RWSTD_WCHAR_T
 
 UserChar*
 rw_widen (UserChar*, const char*, _RWSTD_SIZE_T = _RWSTD_SIZE_MAX);

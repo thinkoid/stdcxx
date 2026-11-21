@@ -232,14 +232,10 @@ exec_stdout_setup (const char* stdout_fname)
     std::cout << "[cout,2]";      // flushes the printf() above
     std::printf ("[stdout,2]");
 
-#ifndef _RWSTD_WCHAR_T
-
     std::wcout << "[wcout,1]";    // flushes the printf() above
     std::printf ("[stdout,3]");
     std::wcout << "[wcout,2]";    // flushes the printf() above
     std::printf ("[stdout,4]");   // flushed during termination
-
-#endif   // _RWSTD_WCHAR_T
 
     return 0;
 }
@@ -271,8 +267,6 @@ exec_stderr_setup (const char* stderr_fname)
     std::clog << "[clog,2]";
     std::fprintf (stderr, "[stderr,4]");
 
-#ifndef _RWSTD_WCHAR_T
-
     std::wcerr << "[wcerr,1]";
     std::fprintf (stderr, "[stderr,5]");
     std::wcerr << "[wcerr,2]";
@@ -281,8 +275,6 @@ exec_stderr_setup (const char* stderr_fname)
     std::fprintf (stderr, "[stderr,7]");
     std::wclog << "[wclog,2]";
     std::fprintf (stderr, "[stderr,8]");
-
-#endif   // _RWSTD_WCHAR_T
 
     return 0;
 }
