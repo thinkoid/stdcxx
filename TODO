@@ -1864,6 +1864,61 @@ Check: the row; the new rows of =23.map= and =23.set= pass in 15D and
 turn red with the descent of =__rb_tree::_C_insert= made to go left
 at an equal key.
 
+** TODO =ref-test-baseline.md= 6 links "the 274 tests" at =-O0=
+
+Chapter 6 of =doc/notes/ref-test-baseline.md= says that under GCC 16
+and Clang 23 on x86-64 "the 274 tests, the 134 examples, the test
+driver and the four utilities, compiled at =-O0=, link against the
+=-O2= library of the same compiler with no undefined name, and the
+suite's table equals that of the build at =-O2= throughout". The
+suite has 278 programs since ef11a8c8: =22.locale.cons=,
+=23.list.ops=, =23.set= and =23.map= came after that measurement, so
+the sentence reads as all the tests and covers four fewer. Seen while
+the eight pins were replaced from the run at ef11a8c8, 2026-11-21.
+
+Fix: the four programs compiled at =-O0= against the =-O2= library
+under both compilers and the count brought to 278, or the sentence
+names the revision it measured.
+
+Check: the four link with no undefined name and their rows equal
+those of =12D.txt= and =12D-clang.txt=, or the sentence dated.
+
+** TODO =ref-test-baseline.md= 1 times =22.locale.codecvt= at 24 seconds
+
+Chapter 1 of =doc/notes/ref-test-baseline.md= says the slowest
+single-threaded test, =22.locale.codecvt=, "takes 24 seconds in the
+32-bit debug build". The sentence dates from 5f3b424b (2026-09-28).
+In the two runs of the eight configurations on an x86-64 host on
+2026-11-21 the row took 27.16 s and 27.28 s real in 11s, with the
+same 60-second timeout. Seen while the eight pins were replaced from
+the run at ef11a8c8, 2026-11-21.
+
+Fix: the time of the latest run, or the sentence says the test is
+the slowest without a figure.
+
+Check: the figure equals the REAL column of the row in the latest
+11s run log.
+
+** TODO Two plans quote the entry on the functionality scripts by its old heading
+
+=doc/notes/plan-localedef.md= chapter 9 lists "The functionality
+scripts exit 4 on an =rm= of a directory" among the decisions not
+done, and the Result of =doc/notes/plan-localedef-removal.md= says the
+queue carries the entry under that heading. The entry was replaced
+when its cause proved wrong: the script ignores the status of the
+=rm=, and the exit 4 is that of =localedef= rejecting the dumps of
+=locale=. Two entries hold the facts now: "The functionality scripts
+exit 4: =localedef= rejects the dumps of stage 1" (Locales) and "The
+functionality scripts' =rm= of a stage database meets a directory"
+(Tests). Seen while the plans' lists were brought in line with the
+codecvt oracle, 2026-11-21.
+
+Fix: both plans name the entry that holds the cause. Chapter 1.3 of
+the removal plan keeps its text, the record of what was believed, and
+its Result says what was found.
+
+Check: every queue entry the two plans quote is a heading of =TODO=.
+
 ** TODO README section 5 and the configuration
 
 The original README says to set =CPPOPTS= and =CXXOPTS= on the make

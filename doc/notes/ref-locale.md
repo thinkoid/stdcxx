@@ -597,7 +597,8 @@ requirement". The name-and-category constructor checks the category
 first and throws the same, since a bad category and a malformed
 combined name both come back from `_C_get_body` as a null body; it
 threw the bad-name message for either until 2026-11-03. Why:
-e6c7726b. Pins: nothing; by probe. An extension.
+e6c7726b. Pins: `22.locale.cons`, `test_bad`, for both constructors.
+An extension.
 
 #### `locale::facet` and `locale::id` are the library's classes
 
@@ -624,6 +625,7 @@ categories in `setlocale`'s order. Pins: nothing.
 | program | covers | 15D |
 |---|---|---|
 | `22.locale.globals` | `has_facet` and `use_facet` of every standard facet, narrow and wide, in the classic and every named locale; byname facets present in named locales, `bad_cast` in the classic one | 78327 |
+| `22.locale.cons` | the default, copy, `"C"` and `""` constructors; the `runtime_error` of the constructors for a bad name, a null name and a category outside `all`, its `what ()` naming the argument; the union and the intersection of `collate` and `ctype`, and `LC_COLLATE`, combining the classic locale with `de_DE.UTF-8` of the C library, by name and by locale: each result's name, its round trip through the constructor, and the locale its `collate`, `ctype` and `numpunct` facets come from | 52 |
 | `22.locale.cons.mt` | one named locale constructed by four threads at once; the name and two-locale combinations and their equalities | 800 |
 | `22.locale.facet.mt` | facet reference counts | 8 |
 | `22.locale.id.mt` | the first use of a user facet id | 999 |
@@ -631,10 +633,9 @@ categories in `setlocale`'s order. Pins: nothing.
 | `22.locale.use_facet.mt` | `use_facet` of each of the 26 standard facets by four threads at once on a new named locale; the facets die with it | 200 |
 | `22.locale.cons.stdcxx-485` (regress) | constructors from several threads, `has_facet<collate<char> >` | 128 |
 
-No single-threaded test exercises the constructors' names,
-`combine`, `operator==` of composed locales, the category values or
-`global`'s effect on the C locale; every departure in 8.3 but
-`use_facet`'s is unpinned. No row fails on the 15D pin. `TODO` "Tests
+No single-threaded test exercises `combine` or `global`'s effect on
+the C locale; every departure in 8.3 but `use_facet`'s and the invalid
+category's is unpinned. No row fails on the 15D pin. `TODO` "Tests
 that GCC and Clang let through" names `22.locale.id.mt.cpp:98`, a
 template instantiation 435 deep, for EDG.
 
@@ -1135,7 +1136,14 @@ exercised" there.
 
 Known gaps and their `TODO` entries:
 
-- "A codecvt oracle": none exists.
+- "A codecvt database converts only the characters of its charmap":
+  outside the suite, `bin/oracle/codecvt.cpp` compares `in`,
+  `length` and `out` of the wide byname `codecvt` of a locale with a
+  database against `mbrtowc` and `wcrtomb` under `setlocale` for the
+  same name, and `max_length`, `encoding` and `always_noconv` against
+  `MB_CUR_MAX`, `mbtowc` and the charmap; `codecvt-all.sh` runs it
+  over `SUPPORTED`. Under UTF-8 and GB18030 the database holds the
+  charmap's characters alone, where glibc converts by algorithm.
 - Not covered by any row: `ctype<wchar_t>` at or above 256 beyond
   the classic case maps' one row each, and the
   classic wide `out` above 0xff.

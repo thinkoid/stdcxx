@@ -96,6 +96,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 22.locale.collate                             0    0  145883      0   100%
 22.locale.collate.stdcxx-1010              NOUT    0                      
 22.locale.cons.mt                             0    0     800      0   100%
+22.locale.cons                                0    0      52      0   100%
 22.locale.cons.stdcxx-485                     0    0     128      0   100%
 22.locale.ctype.is                            0    0   25438      0   100%
 22.locale.ctype.mt                            0    0     800      0   100%
@@ -147,9 +148,12 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 23.list.insert                                0    0   61308      0   100%
 23.list.insert.stdcxx-331                  NOUT    0                      
 23.list.iterators                             0    0    2042      0   100%
+23.list.ops                                   0    0    5252      0   100%
 23.list.special                               0    0    1327      0   100%
 23.list.special.stdcxx-334                 NOUT    0                      
-23.list.splice                                0    0      33      0   100%
+23.list.splice                                0    0      43      0   100%
+23.map                                        0    0    4546      0   100%
+23.set                                        0    0    4352      0   100%
 23.set.stdcxx-216                          NOUT    0                      
 23.vector.allocator                           0    1       3      0   100%
 23.vector.bool                                0    0      20      0   100%
@@ -255,7 +259,7 @@ NAME                                     STATUS WARN ASSERTS FAILED PERCNT
 27.istream.unformatted.get                    0    0    1674      0   100%
 27.objects                                    0    0      36      0   100%
 27.ostream.inserters.stdcxx-51             NOUT    0                      
-27.ostream                                    0    0    6452      0   100%
+27.ostream                                    0    0    6564      0   100%
 27.ostream.unformatted.stdcxx-626          NOUT    0                      
 27.std.manip                                  0    0      48      0   100%
 27.streambuf.buffer.stdcxx-808             NOUT    0                      
@@ -274,11 +278,11 @@ atomic_add                                    0    0      66      0   100%
 atomic_xchg                                   0    0      22      0   100%
 once                                          0    0     600      0   100%
 PROGRAM SUMMARY:
-  Programs:                   274
+  Programs:                   278
   Non-zero exit status:         0
   Signalled:                    0
   Compiler warnings:            0
   Linker warnings:              0
   Runtime warnings:            31
-  Assertions:            12598053
+  Assertions:            12612377
   Failed assertions:            0

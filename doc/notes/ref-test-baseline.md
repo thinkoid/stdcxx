@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-11-21 (a8ca14b5), all eight configurations.
+As of 2026-11-21 (ef11a8c8), all eight configurations.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -12,13 +12,13 @@ exports (chapter 6).
 
 ## 0. The short version
 
-- Every test builds. The harness runs 274 programs per configuration.
+- Every test builds. The harness runs 278 programs per configuration.
 - No assertion fails, no program exits non-zero or dies of a signal,
   in any configuration, under either compiler.
 - One configuration is optimized, 12D. Its table is the 15D one but
   for one assertion of `23.deque.iterators` (chapter 4).
 - The tables come from a host with every glibc locale installed. A
-  host with `en_US.UTF-8` alone differs from them in fourteen locale
+  host with `en_US.UTF-8` alone differs from them in fifteen locale
   rows (chapter 2). A pin is a configuration's table, whatever the
   machine: the 15D table of an aarch64 host is the x86-64 one row for
   row.
@@ -106,25 +106,27 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 274 | 12,595,529 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 274 | 12,595,288 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 274 | 12,598,053 | 0 | 0 | 0 |
-| 12D, optimized, shared, threads, 64-bit | `baseline/12D.txt` | 274 | 12,598,054 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 278 | 12,609,853 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 278 | 12,609,612 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 278 | 12,612,377 | 0 | 0 | 0 |
+| 12D, optimized, shared, threads, 64-bit | `baseline/12D.txt` | 278 | 12,612,378 | 0 | 0 | 0 |
 
 Chapter 4 lists where the four differ.
 
 The host the tables come from has every locale of glibc's
 `SUPPORTED` list and the Shift_JIS one built by hand. The locale
 tests run the sections gated on the C library knowing a named locale,
-and fourteen rows depend on it: `22.locale.codecvt`, `collate`,
-`cons.stdcxx-485`, the six `ctype` tests, `globals`, `moneypunct`,
-`name`, `numpunct` and `time.get`. Each was read in its test: the
-program asks the host for its locales with `rw_locale_query` or
-`rw_locales` and runs sections only for the names it finds, or, in
-`22.locale.name`, constructs locales by their C library names. The
-thirteen other than `globals` also moved when the pins first came
-from such a host (3c882e6a). The other programs that ask the host,
-`22.locale.num.get`, `num.put`, `messages`, `codecvt.do_out`,
+and fifteen rows depend on it: `22.locale.codecvt`, `collate`,
+`cons`, `cons.stdcxx-485`, the six `ctype` tests, `globals`,
+`moneypunct`, `name`, `numpunct` and `time.get`. Each was read in its
+test: the program asks the host for its locales with
+`rw_locale_query` or `rw_locales` and runs sections only for the
+names it finds, or, in `22.locale.name`, constructs locales by their
+C library names; `22.locale.cons` runs its category rows where
+`setlocale` knows `de_DE.UTF-8` and warns where it does not. The
+thirteen other than `globals` and `cons` also moved when the pins
+first came from such a host (3c882e6a). The other programs that ask
+the host, `22.locale.num.get`, `num.put`, `messages`, `codecvt.do_out`,
 `codecvt.length` and the MT programs, use one name they find or run
 a fixed number of rounds, and count the same on either host. A host
 with `en_US.UTF-8` alone runs fewer assertions in each,
@@ -415,6 +417,22 @@ all six tables:
   (26,728 to 27,008 on 32-bit): the extractor rows of the four
   unsigned types (8e6572d4, 411ee6b6). No other row moved; 274
   programs in each.
+- ef11a8c8, 2026-11-21: all eight tables replaced whole from one run
+  of the eight configurations on x86-64, in which four rows are new
+  and two moved with the commits that changed their tests, by the
+  same count in every table. `22.locale.cons` is new, 52: the
+  `runtime_error` of the constructors for a bad name, a null name and
+  a bad category, and the categories that combine the classic locale
+  with `de_DE.UTF-8` (38100ab6). `23.list.ops` is new, 5,252:
+  `remove`, `remove_if`, `unique`, `sort` and `reverse` (91bc5c2e;
+  the harness formats their calls since b569103e and 12e9a4dc).
+  `23.set`, 4,352, and `23.map`, 4,546, are new: the members of the
+  four associative containers, the complexity of Table 69 bounded by
+  a counting comparison (82b9f78c). `23.list.splice`, 33 to 43:
+  `merge` keeps the list's elements before the equivalent ones of its
+  argument and bounds its comparisons (3d9f732c). `27.ostream`, 6,452
+  to 6,564: `put` and `write` (51f3193f). The tree's range insert
+  (bb488d5a) moved no row; 278 programs in each.
 
 The runtime warnings of every table fell from 60 to 42 with those of
 `22.locale.time.get`, to 33 when `2.smartptr.shared` and
@@ -547,10 +565,10 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,595,529 | 0 | 0 | 0 |
-| 11s-clang | 12,595,303 | 0 | 0 | 0 |
-| 15D-clang | 12,598,053 | 0 | 0 | 0 |
-| 12D-clang | 12,598,054 | 0 | 0 | 0 |
+| 11S-clang | 12,609,853 | 0 | 0 | 0 |
+| 11s-clang | 12,609,627 | 0 | 0 | 0 |
+| 15D-clang | 12,612,377 | 0 | 0 | 0 |
+| 12D-clang | 12,612,378 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134

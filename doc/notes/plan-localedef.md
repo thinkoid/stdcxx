@@ -80,9 +80,9 @@ The oracles. `bin/oracle` compares a database with the C library
 under `setlocale` for the same locale: every classification and both
 case maps of every code point, and the collation of a word list, of
 random strings and of each printable character against the next.
-They measured the old compiler and will measure the new one. Two
-oracles joined them later: `scalar.cpp` (b68897f4) and `time.cpp`
-(592e858e).
+They measured the old compiler and will measure the new one. Three
+oracles joined them later: `scalar.cpp` (b68897f4), `time.cpp`
+(592e858e) and `codecvt.cpp` (7c4a9e31).
 
 ## 3. The language
 
@@ -311,6 +311,8 @@ the rest. `plan-localedef-backend.md` chapter 7 and
 - The old files: gone wholesale in ec1b536d, after the fixtures
   (1d00e9d5) and the `locale` program (d535a43b).
 - The import: cb1f2768, by `plan-locale-sources.md`.
+- The codecvt oracle, the backend plan's 3.5 (a): 7c4a9e31,
+  `bin/oracle/codecvt.cpp`.
 
 Decided and not done, each a `TODO` entry:
 
@@ -319,6 +321,5 @@ Decided and not done, each a `TODO` entry:
 - "The wide `LC_CTYPE` table covers the charmap, glibc's rule not
   revisited": its 3.3.
 - "The vector of hybrid records": its 2.1 (d).
-- "A codecvt oracle": its 3.5 (a).
 - "The functionality scripts exit 4 on an `rm` of a directory": the
   removal plan's acceptance.

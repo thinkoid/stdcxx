@@ -1094,8 +1094,9 @@ compiler could go: those fixtures rewritten, and a home for the
 `localedef --locale-mode`. 1d00e9d5 and d535a43b did both;
 `plan-localedef-removal.md` chapter 6 has the result.
 
-Four decisions of this plan were not carried out, and each is a
+Three decisions of this plan were not carried out, and each is a
 `TODO` entry: "The transliteration page and its dead reader" (2.2
 (d)), "The wide `LC_CTYPE` table covers the charmap, glibc's rule not
-revisited" (3.3), "The vector of hybrid records" (2.1 (d)) and "A
-codecvt oracle" (3.5 (a)).
+revisited" (3.3) and "The vector of hybrid records" (2.1 (d)). A
+fourth, the codecvt oracle of 3.5 (a), was carried out later:
+7c4a9e31, `bin/oracle/codecvt.cpp`.
