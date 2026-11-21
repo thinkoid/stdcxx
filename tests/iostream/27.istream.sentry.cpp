@@ -254,7 +254,7 @@ void test_ctor (const charT*, const Traits*,
     };
 
     //////////////////////////////////////////////////////////////
-    // exercise 27.6.1.1.2, p1:
+    // exercise 27.6.1.1.2, p2:
     //     -  is.good() is true
     //     -  is.tie() is not null
     //     =  the function calls is.tie().flush()
@@ -327,7 +327,7 @@ void test_ctor (const charT*, const Traits*,
     }
 
     //////////////////////////////////////////////////////////////
-    // exercise 27.6.1.1.2, p1:
+    // exercise 27.6.1.1.2, p2:
     //     -  is.good() is true
     //     -  noskipws is zero
     //     -  is.flags() & ios_base::skipws

@@ -465,18 +465,6 @@ that each constructor sets to 1.
 
 Check: reading; the test at its pin.
 
-** TODO =27.istream.sentry= heads two of its p2 blocks p1
-
-=tests/iostream/27.istream.sentry.cpp= 257 and 329 head the tie block
-and the whitespace block "exercise 27.6.1.1.2, p1". Both exercise the
-constructor's effects, which 14882:2003 numbers p2, as the quotation
-at the top of the file does (60-70); p1 is the class's one-sentence
-description. Seen while adding the tie ring row, 2026-11-09.
-
-Fix: both headings read p2.
-
-Check: reading.
-
 ** TODO =cformat::do_out= stores characters and returns =noconv=
 
 The test facet =cformat= in =tests/iostream/27.filebuf.codecvt.cpp=
