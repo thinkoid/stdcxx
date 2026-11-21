@@ -116,20 +116,6 @@ Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
 =18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
 reads the new guard.
 
-** TODO A codecvt oracle
-
-=doc/notes/plan-localedef-backend.md= 3.5 decided "(a) queued under
-Tests, since a codecvt oracle is wanted whatever the compiler does";
-the entry was never made (no =bin/oracle= program, no commit to
-=TODO= names it). Found by the documentation sweep of 2026-11-02.
-
-Fix: an oracle under =bin/oracle= comparing =codecvt_byname= with the
-C library's conversions over the charmaps, in the shape of the ctype,
-collate, scalar and time oracles.
-
-Check: the oracle runs over =SUPPORTED= and its disagreements are
-explained or queued.
-
 ** TODO The members of the associative containers have no test
 
 =tests/containers= holds tests of =bitset=, =deque=, =list= and
@@ -902,6 +888,40 @@ next field less two.
 
 Check: =locale -ck -h -l LC_ALL= on that database prints =grouping -1=
 and exits 0; =C.UTF-8.sh= gets past stage 1.
+
+** TODO A codecvt database converts only the characters of its charmap
+
+=localedef= writes the codecvt database of a codeset from the
+charmap alone (=util/localedef/wcodecvt.cpp=), and the wide byname
+=codecvt= of a locale with a database converts through it, so a
+character the charmap does not list fails =in= and =out= with
+=error=. glibc converts UTF-8 and the four-byte ranges of GB18030
+algorithmically, whatever its charmap lists. Under the 328 UTF-8
+locales of =SUPPORTED= the library thus rejects 814730 scalar values
+that glibc converts, every one outside the 297334 code points of the
+UTF-8 charmap, the unassigned ones and the noncharacters: =out= of
+U+0378 returns =error=, =wcrtomb= writes =cd b8=, and a character a
+later Unicode assigns fails too. Under =zh_CN.GB18030= it rejects
+867023, assigned characters among them, since the GB18030 charmap
+lists the supplementary planes only as far as an old Unicode: =out=
+of U+1F600 returns =error= with no bytes, =wcrtomb= writes
+=94 39 fc 36=. The facet named =UTF-8= converts
+every value by algorithm (=ref-locale.md= 9.2), so the codeset
+converts differently by the name it is reached through. 22.2.1.5 p3
+leaves the encodings to the implementor and 22.2.1.5.2 p2 lets =in=
+and =out= stop at a character they cannot convert, so this is no
+departure from 14882:2003; it is a departure from the C library that
+no document records. Seen while the codecvt oracle was run over
+=SUPPORTED=, 2026-11-21.
+
+Fix: a decision: the algorithmic converters for the UTF-8 codeset
+and the four-byte ranges of GB18030 behind a locale's facet, as the
+facet named =UTF-8= has them, or the departure documented in
+=ref-locale.md= 9.3.
+
+Check: =bin/oracle/codecvt.cpp= under =de_DE.UTF-8= and
+=zh_CN.GB18030=: no =out= disagreement but the values past U+10FFFF
+that glibc encodes in UTF-8, or the decision recorded.
 
 * EDG porting
 
