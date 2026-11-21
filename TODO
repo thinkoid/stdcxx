@@ -139,24 +139,6 @@ Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
 =18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
 reads the new guard.
 
-** TODO The members of the associative containers have no test
-
-=tests/containers= holds tests of =bitset=, =deque=, =list= and
-=vector=. For =map=, =multimap=, =set= and =multiset= it holds
-=23.associative.iterators=, which walks the four with each iterator
-type, and nothing else: =17.names= and =20.operators= instantiate
-them, and three regressions call a few members (=23.set.stdcxx-216=,
-=23.containers.stdcxx-152=, =23.associative.stdcxx-16=). So the
-members of [lib.associative], insertion with a hint, =erase=,
-=find=, the bounds, =equal_range=, =count=, the comparisons and
-=swap=, are checked by a probe alone. Seen while the split of the
-tree iterator was sized, 2026-11-15.
-
-Fix: a =23.map= and a =23.set= test on the harness, for the unique
-and the multiple containers.
-
-Check: each member of 23.3.1 to 23.3.4 has a row.
-
 ** TODO The =limits= example expects the =traps= of an x86-64 host
 
 =examples/manual/out/limits.out= 29 holds ~traps = true~ for
