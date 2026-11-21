@@ -206,15 +206,6 @@ collate, scalar and time oracles.
 Check: the oracle runs over =SUPPORTED= and its disagreements are
 explained or queued.
 
-** TODO A collate test comment calls =hr_HR= Hungarian
-
-=tests/localization/22.locale.collate.cpp= 1095 describes =hr_HR= as
-"Hungarian, Hungary"; it is Croatian, Croatia. Found 2026-11-02.
-
-Fix: the comment.
-
-Check: reading.
-
 ** TODO The unsigned extractor rows of =27.istream.fmat.arith= never compile
 
 =tests/iostream/27.istream.fmat.arith.cpp= 796 and 887 gate the

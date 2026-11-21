@@ -1170,7 +1170,7 @@ check_libstd (const char* charTname)
         { "cs_CZ", "ISO-8859-2", "collate.cs_CZ.in" },   // Czech, Czech Rep.
         { "da_DK", "ISO-8859-1", "collate.da_DK.in" },   // Danish, Denmark
         { "en_US", "ISO-8859-1", "collate.en_US.in" },   // English, US
-        { "hr_HR", "ISO-8859-2", "collate.hr_HR.in" },   // Hungarian, Hungary
+        { "hr_HR", "ISO-8859-2", "collate.hr_HR.in" },   // Croatian, Croatia
         { "sv_SE", "ISO-8859-1", "collate.sv_SE.in" },   // Swedish, Sweden
         { "th_TH", "TIS-620",    "collate.th_TH.in" }    // Thai, Thailand
     };
