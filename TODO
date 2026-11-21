@@ -340,25 +340,6 @@ failing buffer.
 
 Check: the rows run; the eight pins move.
 
-** TODO A failed output row of =27.ostream= prints the wrong strings
-
-=tests/iostream/27.ostream.cpp= 750-754, in =test_formatted=, format
-a failed comparison as ~operator<<(%s = %{#lc}) inserted "%s",
-expected "%s"~ but pass =line2=, =cname=, =tname=, =cbuf= and =str=,
-no =val=. So =%{#lc}= takes =cbuf=, the inserted field prints the
-expected string and the expected field reads past the arguments: a
-row that expects "-1" and gets "65535" reports that it inserted "-1"
-and expected garbage. The value goes through =%{#lc}=, a character
-directive, in this assertion's siblings too, for every type including
-=double=. Seen while adding the =basefield= rows of the =short= and
-=int= inserters, 2026-11-06.
-
-Fix: pass =val= before =cbuf=; format the value with a directive of
-its type.
-
-Check: a row made to fail prints the value, the inserted string and
-the expected one.
-
 ** TODO =cformat::do_out= stores characters and returns =noconv=
 
 The test facet =cformat= in =tests/iostream/27.filebuf.codecvt.cpp=

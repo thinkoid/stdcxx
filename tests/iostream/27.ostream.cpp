@@ -977,16 +977,16 @@ void test_formatted (charT, int line1, int line2,
             cbuf [i] = char (charbuf [i]);
 
         rw_assert (0 == std::strcmp (cbuf, str), __FILE__, line1,
-                   "%d. std::basic_ostream<%s>::operator<<(%s = %{#lc}) "
+                   "%d. std::basic_ostream<%s>::operator<<(%s = %s) "
                    "inserted \"%s\", expected \"%s\"",
-                   line2, cname, tname, cbuf, str);
+                   line2, cname, tname, TOSTR (val), cbuf, str);
     }
 
     // verify that stream is in the expected state
     rw_assert (rdstate == os.rdstate (), __FILE__, line1,
-               "%d. std::basic_ostream<%s>::operator<<(%s = %{#lc})"
+               "%d. std::basic_ostream<%s>::operator<<(%s = %s)"
                ".rdstate() == %{Is}, got %{Is}",
-               line2, cname, tname, val, rdstate, os.rdstate ());
+               line2, cname, tname, TOSTR (val), rdstate, os.rdstate ());
 
     if (!tsb.throws_ && !tnp.throws_) {
 
@@ -998,19 +998,19 @@ void test_formatted (charT, int line1, int line2,
         pass = !((!exceptions || !tsb.fails_ && !tnp.fails_) && os.width ());
 
         rw_assert (pass, __FILE__, line1,
-                   "%d. std::basic_ostream<%s>::operator<<(%s = %{#lc})"
+                   "%d. std::basic_ostream<%s>::operator<<(%s = %s)"
                    ".width () == 0, got %d",
-                   line2, cname, tname, val, os.width  ());
+                   line2, cname, tname, TOSTR (val), os.width  ());
 
         // verify that ios_base::failure has been thrown (and caught)
         // if badbit is set in exceptions
         pass = !(exceptions & os.rdstate () && caught != E_failure);
 
         rw_assert (pass, __FILE__, line1,
-                   "%d. std::basic_ostream<%s>::operator<<(%s = %{#lc}) "
+                   "%d. std::basic_ostream<%s>::operator<<(%s = %s) "
                    "set %{Is} but failed to throw ios_base::failure "
                    "when the same bit is set in exceptions",
-                   line2, cname, tname, val, rdstate);
+                   line2, cname, tname, TOSTR (val), rdstate);
     }
 
     if (tsb.throws_) {
@@ -1022,17 +1022,17 @@ void test_formatted (charT, int line1, int line2,
         if (exceptions & Bad && caught != tsb.throws_) {
 
             rw_assert (false, __FILE__, line1,
-                       "%d. std::basic_ostream<%s>::operator<<(%s = %{#lc}) "
+                       "%d. std::basic_ostream<%s>::operator<<(%s = %s) "
                        "failed to propagate an exception thrown by "
                        "basic_filebuf; caught %s instead",
-                       line2, cname, tname, val, caught_what);
+                       line2, cname, tname, TOSTR (val), caught_what);
         }
         else {
             rw_assert ((exceptions & Bad) || !caught, 0, line1,
-                       "%d. std::basic_ostream<%s>::operator<<(%s = %{#lc}) "
+                       "%d. std::basic_ostream<%s>::operator<<(%s = %s) "
                        "propagated an exception thrown by basic_filebuf "
                        "when ios_base::badbit is clear in exceptions",
-                       line2, cname, tname, val);
+                       line2, cname, tname, TOSTR (val));
         }
     }
 
@@ -1044,16 +1044,16 @@ void test_formatted (charT, int line1, int line2,
         // been thrown if exceptions is clear
         if (exceptions & Bad)
             rw_assert (caught == tnp.throws_, 0, line1,
-                       "%d. std::basic_ostream<%s>::operator<<(%s = %{#lc}) "
+                       "%d. std::basic_ostream<%s>::operator<<(%s = %s) "
                        "failed to propagate exception thrown by "
                        "basic_filebuf; caught %s instead",
-                       line2, cname, tname, val, caught_what);
+                       line2, cname, tname, TOSTR (val), caught_what);
         else
             rw_assert (!caught, __FILE__, line1,
-                       "%d. std::basic_ostream<%s>::operator<<(%s = %{#lc}) "
+                       "%d. std::basic_ostream<%s>::operator<<(%s = %s) "
                        "propagated an exception thrown by basic_filebuf"
                        "when ios_base::badbit is clear in exceptions",
-                       line2, cname, tname, val);
+                       line2, cname, tname, TOSTR (val));
     }
 }
 
