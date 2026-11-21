@@ -32,12 +32,13 @@
 
 /**************************************************************************/
 
-// counts the copies and destructions a list makes of its elements;
-// a copy throws while throw_on_copy is set
+// counts the copies and destructions a list makes of its elements
+// and the comparisons of two; a copy throws while throw_on_copy is set
 struct Value
 {
     static int  copies;
     static int  destroyed;
+    static int  compares;
     static bool throw_on_copy;
 
     char data;
@@ -56,16 +57,21 @@ struct Value
 
 int  Value::copies;
 int  Value::destroyed;
+int  Value::compares;
 bool Value::throw_on_copy;
 
 bool operator< (const Value &x, const Value &y)
 {
+    ++Value::compares;
+
     return x.data < y.data;
 }
 
 struct Less
 {
     bool operator() (const Value &x, const Value &y) const {
+        ++Value::compares;
+
         return x.data < y.data;
     }
 };
@@ -263,6 +269,88 @@ test_merge_compare ()
 }
 
 
+// the elements of lst are those at the addresses in expect, in order
+static void
+check_nodes (int line, const char *what, const List &lst,
+             const Value* const *expect, std::size_t n)
+{
+    bool same = lst.size () == n;
+
+    List::const_iterator it = lst.begin ();
+
+    std::size_t i = 0;
+
+    for ( ; same && i != n; ++i, ++it)
+        same = &*it == expect [i];
+
+    rw_assert (same, 0, line,
+               "%s: element %zu is not the element expected there",
+               what, i - 1);
+}
+
+
+static void
+test_merge_equivalent ()
+{
+    rw_info (0, 0, 0, "std::list<Value>::merge (list&) and "
+             "merge (list&, Less) with equivalent elements");
+
+    List dst;
+    List src;
+
+    fill (dst, "abbd");
+    fill (src, "abcd");
+
+    // 23.2.2.4, p24: of equivalent elements, those of the list come
+    // before those of the argument
+    const Value* const expect [] = {
+        &*at (dst, 0), &*at (src, 0), &*at (dst, 1), &*at (dst, 2),
+        &*at (src, 1), &*at (src, 2), &*at (dst, 3), &*at (src, 3)
+    };
+
+    const std::size_t n = sizeof expect / sizeof *expect;
+
+    reset_counts ();
+    Value::compares = 0;
+    dst.merge (src);
+
+    check_counts (__LINE__, "merge (x)");
+    check_list (__LINE__, "merge (x), destination", dst, "aabbbcdd");
+    check_list (__LINE__, "merge (x), source", src, "");
+    check_nodes (__LINE__, "merge (x), destination", dst, expect, n);
+
+    // p25: at most size () + x.size () - 1 comparisons
+    rw_assert (Value::compares <= 7, 0, __LINE__,
+               "merge (x): %d comparisons, at most 7 expected",
+               Value::compares);
+
+    dst.clear ();
+    src.clear ();
+
+    fill (dst, "abbd");
+    fill (src, "abcd");
+
+    const Value* const expect_comp [] = {
+        &*at (dst, 0), &*at (src, 0), &*at (dst, 1), &*at (dst, 2),
+        &*at (src, 1), &*at (src, 2), &*at (dst, 3), &*at (src, 3)
+    };
+
+    reset_counts ();
+    Value::compares = 0;
+    dst.merge (src, Less ());
+
+    check_counts (__LINE__, "merge (x, comp)");
+    check_list (__LINE__, "merge (x, comp), destination", dst, "aabbbcdd");
+    check_list (__LINE__, "merge (x, comp), source", src, "");
+    check_nodes (__LINE__, "merge (x, comp), destination", dst,
+                 expect_comp, n);
+
+    rw_assert (Value::compares <= 7, 0, __LINE__,
+               "merge (x, comp): %d comparisons, at most 7 expected",
+               Value::compares);
+}
+
+
 static void
 test_splice_within ()
 {
@@ -363,6 +451,7 @@ run_test (int, char**)
     test_splice_range ();
     test_merge ();
     test_merge_compare ();
+    test_merge_equivalent ();
     test_splice_within ();
     test_throwing_copy ();
 
