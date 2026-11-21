@@ -43,6 +43,29 @@ Fix: an unsigned mask in both scans.
 Check: =22.locale.num.put= under UBSan in a Clang build: no shift
 report on the octal rows.
 
+** Containers: =list=
+
+*** TODO =list::sort= compares an element with itself at the end of each merge
+
+=_C_adjacent_merge= in =include/list.cc= (332-349, and 352-371 for
+the comparison) loops while ~__n >= 0~, where ~__n~ counts the
+elements of the first run still to pass. At 0 the first run is
+passed and ~__first1~ is ~__first2~, so the loop makes one more
+comparison, of the first element left in the second run with itself,
+which is false, and stops. So every merge that passes its first run
+makes one comparison too many. By a probe in 15D under GCC on x86-64:
+=sort ()= of "abcdefgh" makes 19 comparisons, 7 of an element with
+itself, where 12 suffice; "hgfedcba" makes 12, none with itself;
+"aaaa" 7, 3 with itself. The result is right and 23.2.2.4, p32
+allows the count. The loop is from the 2005 import (e6c7726b). Seen
+while =23.list.ops= was written, 2026-11-21.
+
+Fix: loop while ~0 < __n~ in both forms: once the first run is
+passed, the elements left in the second run are in place.
+
+Check: the probe's counts fall to 12 for "abcdefgh" and 4 for
+"aaaa", none with itself; =23.list.ops= at pin.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -1721,6 +1744,64 @@ among them.
 
 Check: the configurations the sentence names are the files under
 =doc/notes/baseline/= that end in =.txt=.
+
+** TODO =ref-locale.md= 8.2 calls the =LC_= category arguments an extension
+
+14882:2003 22.1.1.1.1 p2: "locale member functions expecting a
+category argument require either a valid category value or one of the
+constants LC_CTYPE etc., defined in <clocale>." =ref-locale.md= 8.1
+states that paragraph, but 8.2 (Categories) says "so =LC_CTYPE=
+passed as the extension selects nothing there too", and the message
+of a2d30246 says the same. Thus the record names a requirement an
+extension. It also leaves a departure unrecorded: glibc's =LC_CTYPE=
+is 0, the value p1 makes the intersection of two disjoint categories,
+so the constructors read it as =none= (=_C_arg2category=,
+=src/locale_body.h=), where p2 has it select the =ctype= category.
+Neither 8.3 nor chapter 13 has a row for it. Seen while writing
+=22.locale.cons=, 2026-11-21.
+
+Fix: 8.2 says p2 requires the =LC_= constants; 8.3 takes a departure
+"=LC_CTYPE= selects nothing where it is 0", with p1 and p2 and the
+reason (p1's intersection and p2's constant share the value 0, and
+the library takes p1), a row in chapter 13 and one in
+=ref-conformance.md= chapter 2.
+
+Check: =grep -n 'the extension' doc/notes/ref-locale.md= finds no
+category argument; the row is in the three places.
+
+** TODO The argument order of =unique='s predicate is an open reading
+
+14882:2003 23.2.2.4, p19 (page 485) has =list::unique= erase each
+element of a group "for which ~*i == *(i-1)~ (for the version of
+unique with no arguments) or ~pred(*i, *(i - 1))~ (for the version of
+unique with a predicate argument) holds", and 25.2.8, p1 (page 558)
+writes the same two conditions for the algorithm: the later element
+first. The published C++11 keeps the list's wording in 23.3.5.5, p19
+(page 777) and turns the algorithm's in 25.3.9, p1 (page 883):
+"~*(i - 1) == *i~ or ~pred(*(i - 1), *i) != false~", the earlier
+element first, with p2: "The comparison function shall be an
+equivalence relation." The library passes the earlier element first
+in =list::unique=: ~*__first == *__next~ in =unique ()=
+(=include/list.cc= 259) and ~__pred (*__first, *__next)~ in
+=unique (BinaryPredicate)= (402). =std::unique= passes both orders
+in one call: =adjacent_find= calls ~__pred (*__first, *__next)~
+(=include/algorithm.cc= 167), the scan after it
+~__pred (*__next, *__first)~ (410), and =__unique_copy=
+~__pred (*__res, *__first)~ (471). Only a predicate whose result or
+effects depend on the order of its arguments tells the readings
+apart; =23.list.ops= passes a symmetric one. No document at hand
+names an LWG issue for it. Seen while =23.list.ops= was written,
+2026-11-21.
+
+Fix: a row in the table of chapter 2 of
+=doc/notes/ref-conformance.md=: the two texts of 2003 and of C++11,
+the calls, and the reading the library takes, with =include/list.cc=
+(=list::unique=) and =include/algorithm.cc= (=unique=,
+=adjacent_find=, =__unique_copy=) as its locations. A row in a test,
+with a predicate that is not symmetric, only once the reading is
+decided.
+
+Check: the row is there.
 
 ** TODO README section 5 and the configuration
 
