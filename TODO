@@ -170,20 +170,6 @@ they are absent, as the other host-dependent tests do.
 
 Check: the row on a host without =en_US=: a warning, not 0/0.
 
-** TODO The num.get harness cannot see a missing store on a grouping row
-
-In =tests/localization/22.locale.num.get.cpp= the variable the facet
-stores into starts out equal to the expected value whenever the
-grouping is non-empty, so on every grouping row the value assertion
-holds even when =do_get= stores nothing; only the iostate assertion
-can fail there. Found 2026-11-02 while adding the grouping rows.
-
-Fix: start from the complement, as the rows without grouping do, or
-from a sentinel the facet cannot produce.
-
-Check: a grouping row with the store commented out of the facet goes
-red on the value assertion.
-
 ** TODO =22.locale.num.get= has no =unsigned short= rows
 
 =tests/localization/22.locale.num.get.cpp= tests every =get= overload

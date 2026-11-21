@@ -290,15 +290,15 @@ int do_test (int         lineno,          // line number
     io.flags (std::ios_base::fmtflags (flags));
     pun.grouping_ = grouping;
 
-    // initialize x to a value other than the expected one except when
-    // get() is expected to fail (in which case the value isn't supposed
-    // to be modified, except when the failure is caused by an invalid
-    // grouping)
-    // doing so exercises the requirement that the get() functions not
-    // modify their argument on failure (except when the failure is due
-    // to bad grouping)
+    // initialize x to a value other than the expected one, with or
+    // without grouping, so that a get() that stores nothing fails the
+    // value assertion; when get() is expected to fail, x starts out
+    // equal to the expected value, since a failed parse leaves its
+    // argument unchanged (22.2.2.1.2, p1); the library stores the value
+    // on bad grouping as well as setting failbit, and a row expecting
+    // that cannot tell the store from none
     nativeT x =
-          err_expect & std::ios::failbit || !grouping.empty ()
+          err_expect & std::ios::failbit
         ? val : nativeT (!val);
 
     // large buffer to widen `str' to
