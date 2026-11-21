@@ -22,6 +22,27 @@ the clause of the standard they fall under, in clause order, and the
 tree's own housekeeping comes last. Within a bin the easiest entry is
 at the top.
 
+** Localization: =num_put=
+
+*** TODO The octal leading-zero scan of =num_put= shifts a signed 7 by 63
+
+=src/num_put.cpp= =__rw_itoa= for =_ULLong= scans for the first digit
+with =base << j * bits=, =base= an =_LLong=; under =oct=, =j * bits=
+starts at 63, and 7 << 63 is not representable in =unsigned long
+long=. The =unsigned long= helper does the same with
+=long (basemask) << j * bits=. C++11 5.8 p2 makes a signed shift
+whose result the type cannot represent undefined; C++14 5.8 p2 and
+C++17 8.8 p2 keep that for a result past the unsigned type. 14882:2003
+5.8 p2 reads the operand as a bit pattern, and C++20 defines the
+shift. GCC 16 compiles the tree as C++20 by default (=__cplusplus=
+202002L), Clang as C++17. Hypothesis from reading, 2026-11-21, while
+adding the octal =unsigned long long= rows of =22.locale.num.put=.
+
+Fix: an unsigned mask in both scans.
+
+Check: =22.locale.num.put= under UBSan in a Clang build: no shift
+report on the octal rows.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -94,19 +115,6 @@ Fix: the sanitizer runtimes'. The tests need no change.
 Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
 =18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
 reads the new guard.
-
-** TODO The functionality scripts exit 4 on an =rm= of a directory
-
-=bin/NAME.sh=, the locale functionality scripts, exit 4 on an =rm=
-of a directory in =etc/config/run_locale_utils.sh= (lines 373, 410
-and 447). =doc/notes/plan-localedef-removal.md= recorded it (lines
-80-83) and made the scripts passing part of its acceptance; its
-Result does not report them and no commit has touched the script
-since 2026-10-20. Found by the documentation sweep of 2026-11-02.
-
-Fix: the =rm= that fails, or the directory it meets.
-
-Check: the =RUNTARGET= scripts pass in a 15D build.
 
 ** TODO A codecvt oracle
 
@@ -207,6 +215,359 @@ harness reads it.
 
 Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
 x86-64 and on an aarch64 host.
+
+** TODO The heap dump of =tests/src/new.cpp= prints addresses for its totals
+
+=_rw_print_heap= passes =pst->bytes_= and =pst->blocks_= to the two
+=%zu= of ~"%zu bytes in %zu blocks"~. Both members are arrays of two
+=size_t=, one count for each form of =operator new=, so the directives
+read the addresses of the arrays: an invalid pointer to =operator
+delete[]= with two live blocks prints "94291721241408 bytes in
+94291721241392 blocks". The same dump prints each block's =id_= as
+stored, and an array block stores the complement of its sequence
+number, so the two blocks print as 18446744073709551614 and
+18446744073709551615. Both came with the file in 2006 (6fbffef2).
+Seen while the guard message of =_rw_check_block= was fixed,
+2026-11-21.
+
+Fix: pass the sums =pst->bytes_ [0] + pst->bytes_ [1]= and
+=pst->blocks_ [0] + pst->blocks_ [1]=, and print the sequence number
+of an array block as =operator_delete= recovers it, =~id_=.
+
+Check: a scratch program that allocates two blocks and deletes an
+invalid pointer, run with =--trace=, prints "16 bytes in 2 blocks"
+and the sequence numbers 0 and 1; =0.new= at pin.
+
+** TODO The verbose =%{t}= names the months after July wrongly
+
+=_rw_fmttm= (=tests/src/printf.cpp=) prints a valid =tm_mon= with
+its name from ~months [unsigned (tmb->tm_mon) % 7]~. =months= has
+twelve entries, and the =% 7= is the one of the weekday line below
+it, so August to December print as Jan to May: ~{ tm_mday=1,
+tm_mon=8 Feb }~. =0.printf= has one valid =tm_mon= row, for
+February. Seen while =tm_gmtoff= was added to =%{t}=, 2026-11-21.
+
+Fix: index =months= with ~% 12~; a =0.printf= row for a month after
+July.
+
+Check: the new row passes and fails without the fix; =0.printf=
+passes every assertion.
+
+** TODO Two tests define =DEFINE_REPLACEMENT_NEW_AND_DELETE=, which nothing reads
+
+=tests/localization/22.locale.codecvt.cpp= 52 and
+=tests/containers/23.deque.modifiers.cpp= 33 define
+=DEFINE_REPLACEMENT_NEW_AND_DELETE= before including the driver's
+headers. No header or source of the driver or the library names the
+macro, at any point of the history: =rw_new.h= defines the
+replacement operators unconditionally, unless the driver's own macro
+is defined. The definitions came with the tests (cbd9ba56, 2006;
+4f22508a, 2008). Seen while the driver's macro for the replacement
+operators was renamed, 2026-11-21.
+
+Fix: the two definitions leave.
+
+Check: the two tests preprocess to the same output before and after;
+their rows at pin.
+
+** TODO =rw_rand= is =rw_rand64= wherever a 64-bit type exists
+
+=tests/include/rw_rand.h= 60 picks the generator of =rw_rand= and
+=rw_seed= with ~#if 32 == _RWSTD_INT_SIZE~. =_RWSTD_INT_SIZE= is
+~sizeof (int)~ in bytes (=etc/config/src/LIMITS.cpp= 242), 4 in the
+15D =config.h= of an x86-64 host, so the condition never holds and
+both macros name the 64-bit functions wherever =_RWSTD_UINT64_T= is
+defined. The line is unchanged since the header's import in
+5f4f15e4 (2006). =23.bitset=, the one user, thus draws from
+=rw_rand64=; ~rw_rand (0) & max_mask~ at 430 gets 64 bits, where a
+32-bit =rw_rand= would leave bits 32 to 63 of the value zero for each
+=N= above 32. Seen while the driver's generator was corrected,
+2026-11-21.
+
+Fix: the macros say what they mean: either the 32-bit functions where
+=int= has 32 bits (~4 == _RWSTD_INT_SIZE~), with =23.bitset= 430
+drawing two words for a set wider than 32 bits, or one width
+unconditionally and the dead branch gone.
+
+Check: a probe that prints ~sizeof rw_rand (0)~ prints the width the
+header's comment states; =23.bitset= at its pin.
+
+** TODO =rw_rand32= and =rw_rand64= say their range is half-open
+
+=tests/include/rw_rand.h= 42-43 and 55-56, and the comments above
+the definitions in =tests/src/rand.cpp=, say that with a zero limit
+the result is "in the range [0, UINT32_MAX)" and "[0, UINT64_MAX)".
+The functions return a table word unreduced: on an x86-64 host the
+522617630th draw of =rw_rand32= returns =UINT32_MAX=. Seen while the
+driver's generator was corrected, 2026-11-21.
+
+Fix: the four comments say "[0, UINT32_MAX]" and "[0, UINT64_MAX]".
+
+Check: the comments read against =rw_rand32= and =rw_rand64=.
+
+** TODO The num.get harness cannot see a missing store on a failbit row that stores
+
+=do_test= in =tests/localization/22.locale.num.get.cpp= starts every
+row that expects =failbit= from the expected value, since a failed
+parse leaves the argument unchanged (22.2.2.1.2, p1). Some =failbit=
+rows expect a store all the same: a grouping mismatch stores the value
+(=ref-locale.md= 10.3.7, the =bool= row ="00;0;1"= under ="\1"=), and
+overflow stores the clamped limit (10.3.6, the =ULONG_MAX + 1= rows of
+=test_ulong=, =test_uint=, =test_ushrt=). On those rows the value
+assertion holds when =do_get= stores nothing. The harness has no
+argument that tells a storing =failbit= row from one that leaves the
+value alone. Seen while starting the grouping rows from the
+complement, 2026-11-21.
+
+Fix: an argument or a flag in the row that says the row expects a
+store, so the harness starts such a row from the complement; or a
+second call of each such row from a different start, both expected to
+end at the value.
+
+Check: with the store dropped from =_C_get= in a scratch copy of
+=include/loc/_num_get.cc=, the row ="00;0;1"= under ="\1"= and the
+=ulmax_plus_1= row of =test_ulong= go red on the value assertion.
+
+** TODO The =--enable-num_get= mode of =22.locale.num.put= fails 552 assertions
+
+=tests/localization/22.locale.num.put.cpp= reads each row's output
+back through =num_get= under =--enable-num_get=. Off by default, so no
+pin sees it. In 15D under GCC it fails 552 of 4115 assertions: 6 per
+row of =inf_nan_test= (lines 1365-1473 after the =ullong_test= rows),
+where =num_get= stores 0 with =failbit= for "inf", "INF" and "-inf",
+and 2 per row at 1635-1638, 1722-1724 and 1734-1738 of the
+floating tests. The atoms of stage 2, 14882:2003 22.2.2.1.2 p8, hold
+no "i" or "n", so the infinity rows may be expectations the mode
+should skip, as it skips a negative precision. Seen while adding the
+=ullong_test= rows, 2026-11-21; those rows round-trip clean.
+
+Fix: skip the rows whose output =num_get= is not required to read,
+or record why each fails.
+
+Check: =22.locale.num.put --enable-num_get= in 15D: 0 failed, or each
+failure explained.
+
+** TODO =rw_any_t= takes a =signed char= or =unsigned char= pointer as =const void*=
+
+=tests/include/rw_any.h= declares constructors for =char= and
+=wchar_t= pointers but none for =signed char*= or =unsigned char*=, so
+such a pointer converts to =const void*=. =type_name= then reads
+"const void*" and =tostr= formats the address with =%p=. The rows of
+=27.ostream='s =test_formatted= that insert ~(const signed char*)~ and
+~(const unsigned char*)~ strings thus name their type "const void*"
+and, when they fail, print an address for the value: a scratch row
+that inserts "A" and expects "a" reports ~operator<<(const void* =
+00005563be1b6d70) inserted "A", expected "a"~. Seen while making the
+failed output row of =27.ostream= print its value, 2026-11-21.
+
+Fix: =rw_any_t= takes the =signed char= and =unsigned char= pointers
+(the four cv forms of each, as for =char=), with their type ids and
+names, and =tostr= formats them as strings.
+
+Check: the scratch row prints ~(const signed char* = A)~; the tests
+that include =rw_any.h= hold at pin.
+
+** TODO Two exception messages of =27.ostream= name =basic_filebuf=
+
+=tests/iostream/27.ostream.cpp=, =test_formatted=, the =tsb.throws_=
+and =tnp.throws_= blocks: four messages say the exception was
+"thrown by basic_filebuf", but the buffer is the test's own
+=test_streambuf=, and in the =tnp.throws_= block the exception comes
+from the test's =num_put= facet. The last of them also joins
+"basic_filebuf" and "when" with no space between. By reading, while
+making the failed output row of =27.ostream= print its value,
+2026-11-21.
+
+Fix: the messages name the buffer and the facet that throw; the
+missing space goes in.
+
+Check: reading; the test at its pin.
+
+** TODO =27.ostream= and =27.istream.sentry= build with warnings of their own
+
+GCC 16 in 15D warns on the sources of two stream tests, apart from what
+the library's headers draw (lines as of the =test_formatted= message
+change):
+
+- =27.ostream= 998, in =test_formatted=: =-Wparentheses= on
+  ~!exceptions || !tsb.fails_ && !tnp.fails_~, once per instantiation
+  (40).
+- =27.ostream= 1104 (=Ostream= in the outer =test_formatted=) and 1589
+  (=Streambuf= in =test_flush=): =-Wunused-local-typedefs=.
+- =27.istream.sentry= 190: =-Wmaybe-uninitialized= on the constructor
+  of the test's =Ctype<char>=, which passes its member =table_= to the
+  =ctype<char>= base before the body fills it.
+
+The kinds of the first two are those of "Ten tests build with warnings
+of their own", which read only the container and =valarray= tests.
+Seen while building the stream tests, 2026-11-21.
+
+Fix: the condition takes the parentheses its precedence already
+gives; the unused typedefs leave; for the =Ctype<char>= warning, read
+whether =ctype<char>='s constructor reads the table before deciding.
+
+Check: the two tests build in 15D with no warning that names a file
+under =tests=; both hold at pin.
+
+** TODO The =time_data= comments of the time tests misspell "designator"
+
+=struct time_data= in =tests/localization/22.locale.time.get.cpp= 1765
+and =tests/localization/22.locale.time.put.cpp= 315 describes
+=t_fmt_ampm= as "time with the AM/PM designaror". Seen while the era
+format comments beside it were corrected, 2026-11-21.
+
+Fix: "designator" in both comments.
+
+Check: none; a comment.
+
+** TODO Localization, string and driver sources build with warnings of their own
+
+GCC 16 in 15D, on an x86-64 host, warns on these lines of the suite,
+apart from what the library's headers draw:
+
+- =-Wdangling-reference=: =22.locale.time.get= 85 and 88, and
+  =22.locale.time.put= 196, each a =const= reference bound to the
+  facet that =use_facet= returns for the temporary of =getloc ()=.
+  The stream's own locale holds the facet, so the warning is likely
+  a false positive; to be read before anything is changed.
+- =-Wunused-local-typedefs=: =21.string.append= 579 (=StringIter=).
+- =-Wunused-but-set-variable=: =tests/src/char.cpp= 1140 and 1142
+  (=fl_pound=, =paramno=).
+- =-Wshadow=: =tests/src/value.cpp= 475, a local =UChar= over the
+  global one.
+- =-Wparentheses=: =tests/src/21.strings.cpp= 350, =&&= within =||=
+  in the condition that appends the argument type's name.
+
+Only the tests named below and the driver were built, so the rest of
+the suite may have more; the entry "Ten tests build with warnings of
+their own" lists the container and =valarray= ones. Seen while
+building =22.locale.time.get=, =22.locale.time.put= and
+=21.string.append= and rebuilding the driver, 2026-11-21.
+
+Fix: each warning read in its source, then the unused names leave, the
+local takes another name, the condition takes the parentheses its
+reading needs; the dangling-reference sites change only if the read
+finds a real dangling reference.
+
+Check: the named tests and =rwtest= build in 15D with no warning that
+names a file under =tests=, and hold at pin.
+
+** TODO =UserClass='s destructor throws, and the dialect makes it =noexcept=
+
+=UserClass::~UserClass= (=tests/src/value.cpp= 143) throws =Dtor=
+when =dtor_throw_ptr_= points at the count of destructor calls so far.
+GCC's default dialect is C++17, where a destructor without an
+exception specification is =noexcept=, so the throw calls
+=std::terminate=; GCC 16 says so with =-Wterminate= at line 157. No
+test sets =dtor_throw_ptr_= or the =dtor_throw_count_= it points at
+by default (=git grep dtor_throw tests= finds the declarations in
+=tests/include/rw_value.h= and the uses in =value.cpp= only), so the
+throw is never reached in the suite. Seen
+while rebuilding the driver, 2026-11-21.
+
+Fix: a decision. Either the destructor takes =noexcept (false)= where
+the dialect has it, gated by a characterization as the tree gates any
+dialect feature, or the knob, its =dtor_throw_count_= default and its
+=Dtor= exception leave as an interface no test uses. Read the history
+of =dtor_throw_ptr_= first.
+
+Check: =rwtest= builds without the =-Wterminate= warning; the
+container tests that use =UserClass= hold at pin.
+
+** TODO =23.vector.allocator= draws =-Wdeprecated-copy= from the headers
+
+GCC 16 in 15D warns 15 times in =include/vector= (528-535) and
+=include/vector.cc= (77, 80, 81, 208, 232, 507, 529) on the source of
+=23.vector.allocator=: the implicit copy assignment of
+=Pointer<MyClass>= is deprecated, since =Pointer= (59) has a
+user-provided copy constructor (72) and no copy assignment. The
+warnings name the library's headers, and their notes name the test.
+Seen while the warnings of the container tests were cleared,
+2026-11-21.
+
+Fix: =Pointer= declares its copy assignment, or loses the copy
+constructor, which copies =offset_= as the implicit one would.
+
+Check: =23.vector.allocator= builds in 15D with no
+=-Wdeprecated-copy=; its row at pin.
+
+** TODO The archetypes of the numeric tests draw =-Wdeprecated-copy=
+
+GCC 16 in 15D warns =-Wdeprecated-copy= on =26.accumulate= and
+=26.inner.product=: =Accumulator= (and =Multiplicator=) declare a
+private copy assignment to be not assignable, so their implicit copy
+constructor is deprecated, and the algorithm copies them (16 and 16
+warnings at the call of 26.inner.product 202, 4 at 26.accumulate
+175); =Y= has a user-provided copy constructor, so its implicit copy
+assignment, which =include/numeric= 59 and 69 apply, is deprecated (8
+warnings); =plus_op<assign<base<cpy_ctor> > >= of each test draws two
+more through =rw_alg_test.h=. The archetypes are meant to be copyable
+and not assignable. Hypothesis: =26.partial.sum= and
+=26.adjacent.diff=, whose =Accumulator= has the same shape, and the
+other users of =rw_alg_test.h='s =base= draw the same; only the two
+tests above were built and read. Seen while the call counts of the
+two tests were read, 2026-11-21.
+
+Fix: each archetype declares the copy constructor it relies on, so the
+implicit one is not used; =base= of =rw_alg_test.h= the same.
+
+Check: the =numerics= tests build in 15D with no =-Wdeprecated-copy=;
+their rows at pin.
+
+** TODO Tests outside the containers catch by value and replace the unsized =operator delete= alone
+
+Read, not built: =19.exceptions.mt= 193 catches =std::length_error=
+by value, and =18.support.dynamic= 154 and 417 catch =std::bad_alloc=
+by value, as =23.vector.capacity= did before GCC's =-Wcatch-value=
+was cleared there. =21.string.append.stdcxx-438= 49 and =27.objects=
+391 replace the unsized =operator delete= without the sized form,
+which =26.valarray.members.stdcxx-313= and
+=26.valarray.unary.stdcxx-314= drew =-Wsized-deallocation= for.
+Hypothesis: the rest of the suite has more of each, and of the unused
+local typedefs; only the list, vector, bitset and =valarray= tests
+were built and read. Seen while those were cleared, 2026-11-21.
+
+Fix: the catches take a reference; the replacements add the sized
+form under =_RWSTD_NO_OPERATOR_DELETE_SIZED=, as =rw_new.h= does.
+
+Check: the suite builds in 15D with no warning that names a file
+under =tests=.
+
+** TODO =18.limits.traps= passes =SIGFPE= as the =savemask= of =sigsetjmp=
+
+=test_traps= of =tests/support/18.limits.traps.cpp= calls
+~sigsetjmp (jmp_env, SIGFPE)~. POSIX gives the second parameter as a
+flag, =savemask=: nonzero saves the signal mask for =siglongjmp= to
+restore. =SIGFPE= is nonzero, so the mask is saved, as the jump out of
+the handler needs; but the call reads as if it named the signal. Seen
+while =jmp_env= was made a =sigjmp_buf=, 2026-11-21.
+
+Fix: pass 1.
+
+Check: the row passes its 16 assertions in 15D; the object differs in
+the immediate alone.
+
+** TODO The functionality scripts' =rm= of a stage database meets a directory
+
+=etc/config/run_locale_utils.sh= 373, 410 and 447 remove each stage's
+locale database with a plain =rm=, added by 3aa18cf9 (2007,
+STDCXX-421) "to reduce the amount of wasted disk space". The
+database is a directory, under the old compiler of that day too
+(=util/def.cpp= wrote =NAME/LC_CTYPE=, =util/path.cpp= made the
+directory), so the =rm= has never removed one: it prints "Is a
+directory", the script ignores its status, and the =rm -rf= of the
+three stages at the end removes the database with the rest. The
+compiler now also writes the codeset's codecvt database and the
+shared ctype file beside the locale directory (=ISO-8859-1= and
+=i18n_ctype.ctype.ISO-8859-1= in =stage.1=; the locale's =LC_CTYPE=
+is a link to the latter). Seen while reproducing the exit 4,
+2026-11-21.
+
+Fix: =rm -r= of the database, and of the two files beside it if the
+disk the stage takes is still the point.
+
+Check: no "Is a directory" in a script's output; the scripts'
+statuses unchanged.
 
 * Certification
 
@@ -535,6 +896,59 @@ Fix: a plan note, or a decision that the two tries stay and the
 redesign is dropped, recorded in the plan's Result.
 
 Check: the plan written or the Result amended.
+
+** TODO The functionality scripts exit 4: =localedef= rejects the dumps of stage 1
+
+=etc/config/run_locale_utils.sh= (=test_locale=) builds a locale from
+=etc/nls= (stage 1), dumps it with =locale --charmap -l= and =locale
+-ck -h -l LC_ALL=, and builds stage 2 from the two dumps;
+=generate_locale= exits with =localedef='s status. In a 15D build
+under GCC the stage 2 =localedef= rejects the dumps and exits 4, its
+status when it counted an error (=util/localedef/diag.h=,
+=exit_status=). For =de_DE.ISO-8859-1= it prints 560 diagnostics: 409
+"garbage at end of character code specification" and 140
+"LC_COLLATE: syntax error" on the weights the dump writes as the
+database's bytes
+(~<U0024>  "\x1b\x28";\x22;\x04;"\xf1\x72";~), "trailing garbage
+at end of line" on the charmap dump's first line,
+~<escape_char>   \~, then "invalid character code" on
+=<code_set_name>=, =<mb_cur_max>= and the range ~<U0000>..<U00FF>~,
+six =era= errors and one undefined weight. =en_US.UTF-8=,
+=ja_JP.EUC-JP= and =ru_RU.KOI8-R= also exit 4 at stage 2. The =rm= of
+the stage 1 database fails on a directory just before, but the script
+does not read its status: with the three =rm= made =rm -r= in a
+scratch copy, =de_DE.ISO-8859-1= still exits 4 at the same step.
+=doc/notes/plan-localedef-removal.md= 80-83 records the exit "with
+either compiler". The collate dump is lossy already (the entry "The
+collate dump of =locale= shows neither directions nor multibyte
+keys"). Seen while reproducing the exit 4, 2026-11-21.
+
+Fix, to decide: =locale -h= writes source the compiler reads (the
+weights as collating symbols, a charmap header in the compiler's
+syntax), or the round trip compares something other than a
+recompiled dump; which side moved is to be read from the history of
+=util/locale.cpp= and of the old compiler's reader.
+
+Check: the =RUNTARGET= scripts pass in a 15D build.
+
+** TODO =locale -ck -h -l LC_ALL= dies of =SIGBUS= on the =C.UTF-8= database
+
+=bin/C.UTF-8.sh= exits 135: the stage 1 dump, =locale -ck -h -l
+LC_ALL= on the database =localedef= built from =etc/nls/src/C= and the
+=UTF-8= charmap, dies of =SIGBUS= in =print_grouping=
+(=util/locale.cpp= 1476, under =print_lc_numeric=). The loop runs to
+~punct_ext_off - grouping_off - 2~, a =size_t=; =C='s =grouping= is
+=-1=, an empty grouping, one NUL (=grouping_off= 15, =punct_ext_off=
+16), so the bound is 16 - 15 - 2, which wraps, and the loop prints
+bytes past the grouping until it leaves the mapped file. Measured in
+a 15D build under GCC on an x86-64 host. Seen while reproducing the
+exit 4, 2026-11-21.
+
+Fix: print the grouping by its length, not by the distance to the
+next field less two.
+
+Check: =locale -ck -h -l LC_ALL= on that database prints =grouping -1=
+and exits 0; =C.UTF-8.sh= gets past stage 1.
 
 * EDG porting
 
