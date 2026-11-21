@@ -305,16 +305,7 @@ private:
 };
 
 
-// conversion structs
-
-template <class T, class U>
-struct cvt : T 
-{
-    operator U& () {
-        return reinterpret_cast< U& >(*this);
-    }
-};
-
+// conversion struct
 
 template <class T, class U>
 struct const_cvt : T

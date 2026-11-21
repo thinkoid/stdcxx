@@ -484,19 +484,6 @@ Check: the preprocessed output of the driver and of the tests that
 include =rw_new.h= is unchanged once the rename is applied to the
 output from before; the suite at pin.
 
-** TODO =rw_alg_test.h= defines a =cvt= that no test uses
-
-=tests/include/rw_alg_test.h= 310-316 defines =cvt=, a class that
-converts to =U&=, beside =const_cvt= (319-325), which converts to
-=const U&=. =tests/algorithms/25.copy.cpp= 42-49 instantiates
-=const_cvt=; no file under =tests= names =cvt=. Both came with the
-header in 2005 (6321f38d). Seen while the comment between the two
-left, 2026-11-16.
-
-Fix: =cvt= leaves.
-
-Check: the tests build; the suite at pin.
-
 ** TODO =%{t}= prints no =tm_gmtoff=
 
 =_rw_fmttm= (=tests/src/printf.cpp= 1612), which formats the
