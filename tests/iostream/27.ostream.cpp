@@ -65,14 +65,15 @@ struct test_streambuf: std::basic_streambuf<charT, std::char_traits<charT> >
     test_streambuf (std::basic_ios<char_type, traits_type> *pstrm)
         : Streambuf (), buf_ (0), bufsize_ (0),
           throws_ (streambuf_failure ()), fails_ (streambuf_failure ()),
-          pstrm_ (pstrm) {
+          pstrm_ (pstrm), fail_when_ (1) {
         std::memset (ncalls_, 0, sizeof ncalls_);
         this->setp (buf_, buf_);
     }
 
     test_streambuf (charT *buf, std::streamsize bufsize)
         : Streambuf (), buf_ (buf), bufsize_ (bufsize),
-          throws_ (streambuf_failure ()), fails_ (streambuf_failure ()) {
+          throws_ (streambuf_failure ()), fails_ (streambuf_failure ()),
+          pstrm_ (0), fail_when_ (1) {
         std::memset (ncalls_, 0, sizeof ncalls_);
         this->setp (buf_, buf_);
     }
@@ -151,12 +152,8 @@ struct test_streambuf: std::basic_streambuf<charT, std::char_traits<charT> >
 
     std::basic_ios<char_type, traits_type> *pstrm_;
 
-    static int fail_when_;      // call number on which to fail
+    int fail_when_;             // call number on which to fail
 };
-
-
-template <class charT>
-int test_streambuf<charT>::fail_when_ = 1;
 
 
 template <class charT>
@@ -1609,8 +1606,7 @@ void test_flush (charT)
         test_streambuf<charT> tsb (0);
         Ostream strm (&tsb);
 
-        tsb.fails_     = Sync;
-        tsb.fail_when_ = 1;
+        tsb.fails_ = Sync;
 
         const int nsyncs = tsb.ncalls_ [Sync];
 
@@ -1673,7 +1669,6 @@ void test_unformatted_width (charT)
     const std::streamsize bufsize = sizeof buf / sizeof *buf;
 
     test_streambuf<charT> tsb (buf, bufsize);
-    tsb.pstrm_ = 0;
 
     Ostream strm (&tsb);
 
