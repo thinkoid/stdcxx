@@ -1977,7 +1977,7 @@ void run_test (charT)
     else
         test_formatted (charT ());
 
-    // exercise formatted output functions
+    // exercise unformatted output functions
     if (rw_opt_unformatted < 0)
         rw_note (0, 0, __LINE__, "tests of unformatted functions disabled");
     else {
