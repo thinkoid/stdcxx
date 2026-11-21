@@ -1732,6 +1732,15 @@ _rw_fmttm (const FmtSpec &spec, Buffer &buf, const tm *tmb)
         if (tmb->tm_isdst)
             sprintf (vbuf + strlen (vbuf), "%stm_isdst=%d", sep, tmb->tm_isdst);
 
+#if !defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)
+
+        // glibc extension, stored by time_get for %z
+        if (tmb->tm_gmtoff)
+            sprintf (vbuf + strlen (vbuf), "%stm_gmtoff=%ld",
+                     sep, tmb->tm_gmtoff);
+
+#endif   // !_RWSTD_NO_TM_GMTOFF && _RWSTD_NO_PURE_C_HEADERS
+
         strcat (vbuf, " }");
     }
 

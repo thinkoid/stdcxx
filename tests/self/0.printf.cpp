@@ -2578,6 +2578,13 @@ test_tm ()
     TEST ("%{#t}", TM ( 0,  0,  0, 2),    0, 0, "{ tm_mday=2 }");
     TEST ("%{#t}", TM ( 0,  0,  0, 3, 1), 0, 0, "{ tm_mday=3, tm_mon=1 Feb }");
 
+#if !defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)
+
+    TEST ("%{#t}", TM (0, 0, 0, 1, 0, 0, 0, 0, 0, -18000), 0, 0,
+          "{ tm_mday=1, tm_gmtoff=-18000 }");
+
+#endif   // !_RWSTD_NO_TM_GMTOFF && _RWSTD_NO_PURE_C_HEADERS
+
     // exercise invalid values of tm members (verbose format implied)
     TEST ("%{t}", TM (61),            0, 0, "{ tm_sec=61 [0,60], tm_mday=1 }");
     TEST ("%{t}", TM ( 0, 60),        0, 0, "{ tm_min=60 [0,59], tm_mday=1 }");

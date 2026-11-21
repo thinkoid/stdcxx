@@ -408,23 +408,6 @@ Fix: the function sets =to_next= to =to=.
 Check: a =self_test= row calls =unshift= with =to_next= null and
 finds it equal to =to=.
 
-** TODO =%{t}= prints no =tm_gmtoff=
-
-=_rw_fmttm= (=tests/src/printf.cpp= 1612), which formats the
-driver's =%{t}= directive, prints the nine members of the C standard
-and not =tm_gmtoff=. =22.locale.time.get= compares =tm_gmtoff= where
-the library stores it for =%z=, so a failed =%z= row prints the same
-fields for the result and the expectation: a copy of the test with
-the expected offset of one =%z= row perturbed prints
-~got { tm_mday=0 [1,31] }, expected { tm_mday=0 [1,31] }~. Seen
-while the comparison of =22.locale.time.get= was fixed, 2026-11-17.
-
-Fix: =_rw_fmttm= prints a nonzero =tm_gmtoff= under the condition
-on which the library stores it,
-~!defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)~.
-
-Check: the perturbed copy prints the two offsets; the pins unchanged.
-
 ** TODO =18.limits.traps= passes a =jmp_buf= to =sigsetjmp=
 
 Under =_RWSTD_OS_LINUX=, =tests/support/18.limits.traps.cpp=
