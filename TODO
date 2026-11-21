@@ -340,23 +340,6 @@ failing buffer.
 
 Check: the rows run; the eight pins move.
 
-** TODO =cformat::do_out= stores characters and returns =noconv=
-
-The test facet =cformat= in =tests/iostream/27.filebuf.codecvt.cpp=
-copies each character that needs no escape to the destination (357).
-When no character of the sequence needed one it returns =noconv= with
-the next pointers reset (361-365), and the copies stay stored.
-14882:2003 22.2.1.5.2, p2 asks of a =noconv= result that "there are
-no changes to the values in [to, to_limit)". =basic_filebuf= writes
-the source sequence on =noconv=, so no row sees the stored
-characters. By reading, 2026-11-13.
-
-Fix: =do_out= looks for a character to escape before it stores any.
-
-Check: a =self_test= row calls =out= on a sequence without escapes
-over a destination filled with a sentinel; the =noconv= result leaves
-the sentinel in place.
-
 ** TODO =18.limits.traps= passes a =jmp_buf= to =sigsetjmp=
 
 Under =_RWSTD_OS_LINUX=, =tests/support/18.limits.traps.cpp=

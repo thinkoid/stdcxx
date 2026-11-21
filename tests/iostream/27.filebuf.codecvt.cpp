@@ -56,7 +56,7 @@
 #include <csignal>   // for SIGXFSZ, SIG_IGN, signal()
 #include <cstdio>    // for fclose(), fopen(), fseek(), size_t
 #include <cstdlib>   // for abort()
-#include <cstring>   // for memcmp(), memset(), strcmp(), strlen()
+#include <cstring>   // for memcmp(), memcpy(), memset(), strcmp(), strlen()
 #include <cwchar>    // for mbstate_t
 
 #include <sys/resource.h>   // for getrlimit(), setrlimit()
@@ -170,7 +170,14 @@ cformat::do_out (      state_type& /* unused */,
     // assume no conversion will be performed
     result res = noconv;
 
+    // a noconv result stores nothing (22.2.1.5.2, p2), so the characters
+    // before the first one escaped are stored only when one is found or
+    // the destination runs out; [from, plain_end) are those characters
+    const intern_type *plain_end = from;
+
     for (from_next = from, to_next = to; from_next != from_end; ++from_next) {
+        if (noconv == res)
+            plain_end = from_next;
 
         // out of space
         if (to_next == to_end) {
@@ -354,8 +361,10 @@ cformat::do_out (      state_type& /* unused */,
             *to_next++ = ch;
         }
         else {
-            // not escaped
-            *to_next++ = ch;
+            // not escaped; before the first escape only the room is taken
+            if (noconv != res)
+                *to_next = ch;
+            ++to_next;
         }
     }
 
@@ -364,6 +373,8 @@ cformat::do_out (      state_type& /* unused */,
         from_next = from;
         to_next   = to;
     }
+    else
+        std::memcpy (to, from, std::size_t (plain_end - from));
 
     rw_fatal (from_next >= from && from_next <= from_end, 0, __LINE__,
               "user-defined codecvt: internal inconsistency");
@@ -698,6 +709,27 @@ self_test ()
     rw_assert (extrn_next == extrn, 0, __LINE__,
                "codecvt::unshift (); to_next == %#p, got %#p",
                extrn, extrn_next);
+
+    // 22.2.1.5.2, p2: a noconv result makes "no changes to the values
+    // in [to, to_limit)"; no character of plain needs an escape
+    static const cformat::intern_type plain[] = "plain";
+
+    std::memset (extrn, '\x7f', sizeof extrn);
+
+    res = fmt.out (st,
+                   plain, plain + sizeof plain - 1, intrn_next_0,
+                   extrn, extrn + sizeof extrn, extrn_next);
+
+    std::size_t same = 0;
+    while (same != sizeof extrn && '\x7f' == extrn [same])
+        ++same;
+
+    rw_assert (std::codecvt_base::noconv == res && sizeof extrn == same,
+               0, __LINE__,
+               "codecvt::out (\"%s\"); result == codecvt_base::noconv "
+               "with [to, to_limit) unchanged, got codecvt_base::%s "
+               "with a change at offset %zu",
+               plain, result [res], same);
 }
 
 /***********************************************************************/
