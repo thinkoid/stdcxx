@@ -1137,10 +1137,6 @@ Known gaps and their `TODO` entries:
 
 - "Two ctype test defects": `ctype.is` line 822 tests `'\xa0'` where
   `'\xa2'` is meant; `tolower` and `toupper` have an unbraced `TEST`.
-- "`22.locale.codecvt` reads past the wide buffer it hands
-  `wcsrtombs`": whether the two checks of `test_libstd_do_out`
-  against the C library run depends on what follows the buffer on
-  the heap, so 11s counts 4 more than 11S and 15D.
 - "A codecvt oracle": none exists.
 - Not covered by any row: `ctype<wchar_t>` at or above 256 beyond
   the classic case maps' one row each, and the

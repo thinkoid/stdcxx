@@ -466,9 +466,12 @@ test_libstd_do_in (const char* locale_name, const CodeCvtT& cc,
     const extern_t* pen  = buffe;
     const extern_t* pe_limit = buffe + sze;
 
+    // one character more than in() may write, zeroed, so that the
+    // buffer is a terminated sequence for the wcsrtombs() call of
+    // test_libstd_do_out even when every byte becomes a character
     szi = sze;
-    buffi = new intern_t [szi];
-    std::memset (buffi, 0, szi * sizeof (intern_t));
+    buffi = new intern_t [szi + 1];
+    std::memset (buffi, 0, (szi + 1) * sizeof (intern_t));
 
     intern_t* pi  = buffi;
     intern_t* pin = pi;
