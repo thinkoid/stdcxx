@@ -26,9 +26,9 @@
  * 
  **************************************************************************/
 
-// prevent <rw_new.h> from defining the replacement operator
-// when compiling in the test suite framework
-#define _RWSTD_TEST_SRC
+// keep <rw_new.h> from defining the replacement operators in the
+// test driver; a test defines them by including the header
+#define RW_NO_REPLACEMENT_NEW
 
 #include <stdlib.h>   // for abort(), getenv()
 #include <string.h>   // for memset()

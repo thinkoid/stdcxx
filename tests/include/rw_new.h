@@ -158,10 +158,10 @@ private:
 static MyNewInit mynew_init_tracker;
 
 
-#  ifndef _RWSTD_TEST_SRC
+#  ifndef RW_NO_REPLACEMENT_NEW
 
-// prevent defining the replacement operator
-// when compiling in the test suite framework
+// the replacement operators, defined in each test that includes this
+// header; a source of the test driver defines the macro to leave them out
 
 void* operator new (_RWSTD_SIZE_T n) _THROWS ((_RWSTD_BAD_ALLOC))
 {
@@ -216,5 +216,5 @@ void operator delete[] (void *ptr, _RWSTD_SIZE_T) _THROWS (())
 }
 
 #    endif   // _RWSTD_NO_OPERATOR_DELETE_ARRAY_SIZED
-#  endif   // !_RWSTD_TEST_SRC
+#  endif   // !RW_NO_REPLACEMENT_NEW
 #endif   // RW_NEW_H_INCLUDED

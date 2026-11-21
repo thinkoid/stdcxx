@@ -408,24 +408,6 @@ Fix: the function sets =to_next= to =to=.
 Check: a =self_test= row calls =unshift= with =to_next= null and
 finds it equal to =to=.
 
-** TODO The macro that keeps the replacement =operator new= out of the driver is named =_RWSTD_TEST_SRC=
-
-=tests/include/rw_new.h= 161-219 defines the replacement =operator
-new= and =operator delete= unless =_RWSTD_TEST_SRC= is defined.
-=tests/src/new.cpp= 31 and =tests/src/allocator.cpp= 29 define it,
-under a comment that says so, and nothing else in the tree names the
-macro. The name says neither what it does nor that it belongs to the
-test driver: it takes the library's =_RWSTD_= prefix. Seen while the
-other 27 definitions of the macro left the driver's sources,
-2026-11-16.
-
-Fix: the macro takes a name that says what it does, in the driver's
-=RW_= prefix.
-
-Check: the preprocessed output of the driver and of the tests that
-include =rw_new.h= is unchanged once the rename is applied to the
-output from before; the suite at pin.
-
 ** TODO =%{t}= prints no =tm_gmtoff=
 
 =_rw_fmttm= (=tests/src/printf.cpp= 1612), which formats the
