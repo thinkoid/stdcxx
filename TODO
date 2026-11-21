@@ -357,19 +357,6 @@ Check: a =self_test= row calls =out= on a sequence without escapes
 over a destination filled with a sentinel; the =noconv= result leaves
 the sentinel in place.
 
-** TODO =cformat::do_unshift= leaves =to_next= unset
-
-=cformat::do_unshift= in =tests/iostream/27.filebuf.codecvt.cpp=
-(113-118) returns =noconv= and assigns nothing to =to_next=.
-14882:2003 22.2.1.5.2, p5: "It always leaves the to_next pointer
-pointing one beyond the last element successfully stored", which is
-=to= where nothing is stored. By reading, 2026-11-13.
-
-Fix: the function sets =to_next= to =to=.
-
-Check: a =self_test= row calls =unshift= with =to_next= null and
-finds it equal to =to=.
-
 ** TODO =18.limits.traps= passes a =jmp_buf= to =sigsetjmp=
 
 Under =_RWSTD_OS_LINUX=, =tests/support/18.limits.traps.cpp=

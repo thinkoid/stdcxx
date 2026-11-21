@@ -111,9 +111,10 @@ protected:
            intern_type*, intern_type*, intern_type*&) const;
 
     virtual result
-    do_unshift (state_type&, extern_type*, 
-                extern_type*, extern_type*&) const {
+    do_unshift (state_type&, extern_type *to,
+                extern_type*, extern_type *&to_next) const {
         // stateless encoding, no conversion necessary
+        to_next = to;
         return noconv;
     }
 
@@ -687,6 +688,16 @@ self_test ()
 
     rw_assert (0 == std::strcmp (intrn [0], intrn [1]), 0, __LINE__,
                "codecvt<>::out/in ()");
+
+    // 22.2.1.5.2, p5: unshift leaves to_next one beyond the last element
+    // stored, thus at to for a facet that stores none
+    extrn_next = 0;
+
+    fmt.unshift (st, extrn, extrn + sizeof extrn, extrn_next);
+
+    rw_assert (extrn_next == extrn, 0, __LINE__,
+               "codecvt::unshift (); to_next == %#p, got %#p",
+               extrn, extrn_next);
 }
 
 /***********************************************************************/
