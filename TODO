@@ -68,23 +68,6 @@ report in the self-test, or keep a side table of live pointers.
 
 Check: =0.new= under 15D-asan.
 
-** TODO Two ctype test defects: a wrong character and an unbraced =TEST=
-
-=tests/localization/22.locale.ctype.is.cpp= line 822 tests
-=ct.widen ('\xa0')= for =DIGIT | GRAPH | PRINT= where
-=22.locale.ctype.cpp= tests ='\xa2'=; the row passes only because =is=
-matches any one bit. =22.locale.ctype.tolower.cpp= line 262 and
-=22.locale.ctype.toupper.cpp= line 265 write ~if (sizeof (charT) > 1)
-TEST (...)~ without braces, and =TEST= expands to two statements, so
-the char pass asserts a stale =success=. Seen while adding the wide
-rows beside them.
-
-Fix: ='\xa2'= in the =is= row; braces around the two =TEST= calls.
-
-Check: the =is= row stays green at the same count; =tolower= and
-=toupper= each lose one assertion in the char pass; the eight pins take
-the new totals.
-
 ** TODO A test that generates a locale ends on a driver warning
 
 A test that builds a locale with =rw_localedef= prints

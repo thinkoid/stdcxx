@@ -819,7 +819,7 @@ void test_libstd_mask (charT, const char *cname,
         TEST (ct.widen ('\xa2'), DIGIT);
         TEST (ct.widen ('\xa2'), GRAPH);
         TEST (ct.widen ('\xa2'), PRINT);
-        TEST (ct.widen ('\xa0'), DIGIT | GRAPH | PRINT);
+        TEST (ct.widen ('\xa2'), DIGIT | GRAPH | PRINT);
     }
 
     // a character below the first entry of the mask table, U+0000

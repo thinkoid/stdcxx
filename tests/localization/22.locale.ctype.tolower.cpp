@@ -259,8 +259,9 @@ void test_libstd_tolower (charT, const char *cname,
     // the search must stop at the table's first entry
     TEST ('\0', '\0');
 
-    if (sizeof(charT) > 1)
+    if (sizeof(charT) > 1) {
         TEST ('\xa0', '\xa1');
+    }
 
 #undef TEST
 
