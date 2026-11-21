@@ -497,14 +497,26 @@ _rw_list_sigcat (char** pbuf, size_t * pbufsize, ListIds::OverloadId which,
                       "%{+} (%zu, %{#c})", tcase.size, tcase.val);
         break;
 
+    case ListIds::remove_if_pred:
+        rw_asnprintf (pbuf, pbufsize,
+                      "%{+} (Predicate)");
+        break;
+
+    case ListIds::unique_bpred:
+        rw_asnprintf (pbuf, pbufsize,
+                      "%{+} (BinaryPredicate)");
+        break;
+
+    case ListIds::sort_comp:
+        rw_asnprintf (pbuf, pbufsize,
+                      "%{+} (Compare)");
+        break;
+
     case ListIds::swap_cont_cont:
     case ListIds::splice_iter_cont:
     case ListIds::splice_iter_cont_iter:
     case ListIds::splice_iter_cont_iter_iter:
-    case ListIds::remove_if_pred:
-    case ListIds::unique_bpred:
     case ListIds::merge_cont_comp:
-    case ListIds::sort_comp:
         rw_asnprintf (pbuf, pbufsize,
                       "not yet defined");
         break;
