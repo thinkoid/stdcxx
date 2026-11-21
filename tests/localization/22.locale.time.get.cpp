@@ -1764,8 +1764,8 @@ struct time_data
     const char*        t_fmt;         // %X   time
     const char*        t_fmt_ampm;    // %r   time with the AM/PM designaror
     const char*        era_d_t_fmt;   // %Ec  alternative date and time
-    const char*        era_d_fmt;     // %EX  alternative date
-    const char*        era_t_fmt;     // %Ex  alternative time
+    const char*        era_d_fmt;     // %Ex  alternative date
+    const char*        era_t_fmt;     // %EX  alternative time
     const char* const* alt_digits;    //      alternative numeric symbols
 
     struct era_data {

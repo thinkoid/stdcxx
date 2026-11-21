@@ -100,21 +100,6 @@ Check: the =is= row stays green at the same count; =tolower= and
 =toupper= each lose one assertion in the char pass; the eight pins take
 the new totals.
 
-** TODO The era format comments of the =time_get= test are swapped
-
-=struct time_data= in =tests/localization/22.locale.time.get.cpp=
-labels =era_d_fmt= as =%EX= and =era_t_fmt= as =%Ex=; =era_d_fmt= is
-the date, =%Ex=, and =era_t_fmt= the time, =%EX=. The initializer of
-the generated locale labels its three formats right.
-
-Fix: swap the two comments.
-
-Check: none beyond the build; no assertion moves.
-
-The =time_put= test has the same pair at
-=tests/localization/22.locale.time.put.cpp= 316-317 (=era_d_fmt= labelled
-=%EX=, =era_t_fmt= =%Ex=); found 2026-11-02.
-
 ** TODO A test that generates a locale ends on a driver warning
 
 A test that builds a locale with =rw_localedef= prints
