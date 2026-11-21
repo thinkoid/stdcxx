@@ -170,18 +170,6 @@ they are absent, as the other host-dependent tests do.
 
 Check: the row on a host without =en_US=: a warning, not 0/0.
 
-** TODO =22.locale.num.get= has no =unsigned short= rows
-
-=tests/localization/22.locale.num.get.cpp= tests every =get= overload
-but =unsigned short=; its overflow clamp and =failbit= are pinned by
-nothing (the rows of =27.istream.fmat.arith= never compile, above).
-Found 2026-11-03 while adding =test_uint=.
-
-Fix: a =test_ushrt= in the shape of =test_uint=: the limits, "-1",
-=errno=.
-
-Check: the rows run and the eight pins move.
-
 ** TODO The =locale= constructors' exceptions have no test
 
 No test under =tests/localization= constructs a =locale= from a bad

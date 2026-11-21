@@ -38,7 +38,7 @@
 
 #ifdef NO_GET_INTEGER
 #  define NO_GET_BOOL
-// no NO_GET_USHRT
+#  define NO_GET_USHRT
 // no NO_GET_SHRT
 #  define NO_GET_UINT
 // no NO_GET_INT
@@ -1387,6 +1387,64 @@ test_uint (CharType ctype, const char *cname,
 /**************************************************************************/
 
 static void
+test_ushrt (CharType ctype, const char *cname,
+            IterType itype, const char *iname)
+{
+#ifndef NO_GET_USHRT
+
+    const char* const tname = "unsigned short";
+
+    rw_info (0, 0, 0, "std::num_get<%s, %s>::get (..., %s&)",
+             cname, iname, tname);
+
+    typedef unsigned short UShrt;
+
+    const UShrt ushrt_max = USHRT_MAX;
+
+    TEST (T, UShrt (   0),    "0", 1, 0, Eof);
+    TEST (T, UShrt (   0),   "+0", 2, 0, Eof);
+    TEST (T, UShrt (   0),   "-0", 2, 0, Eof);
+    TEST (T, UShrt (   1),   "+1", 2, 0, Eof);
+    TEST (T, UShrt (1078), "1078", 4, 0, Eof);
+
+    // a negative number is negated modulo ULONG_MAX + 1, as strtoul()
+    // does; unsigned short is narrower than unsigned long, so a small
+    // magnitude gives a result past USHRT_MAX, which is clamped to
+    // USHRT_MAX, and failbit is set (lwg issue 23)
+    TEST (T, ushrt_max, "-1", 2, 0, Eof | Fail);
+    TEST (T, ushrt_max, "-5", 2, 0, Eof | Fail);
+
+    // exercise integer overflow
+#if USHRT_MAX == 0xffffU
+    const char umax[]        = "65535";     // 0xffffU
+    const char umax_plus_1[] = "65536";     // 0xffffU + 1
+    const char umax_plus_2[] = "65537";     // 0xffffU + 2
+    const char umax_x_f[]    = "0xfffff";   // extra 'f' (times 0xf)
+    const char vflow_1[]     = "131061";
+
+    TEST (T, ushrt_max, umax,        INTSIZE (umax) - 1,        0, Eof);
+    TEST (T, ushrt_max, umax_plus_1, INTSIZE (umax_plus_1) - 1, 0, Eof | Fail);
+    TEST (T, ushrt_max, umax_plus_2, INTSIZE (umax_plus_2) - 1, 0, Eof | Fail);
+    TEST (T, ushrt_max, umax_x_f,    INTSIZE (umax_x_f) - 1,    0, Eof | Fail);
+    TEST (T, ushrt_max, vflow_1,     INTSIZE (vflow_1) - 1,     0, Eof | Fail);
+#else   // if USHRT_MAX != 0xffffU
+    rw_note (0, 0, 0, "overflow test for unsigned short of %u bits disabled",
+             unsigned (sizeof (unsigned short) * CHAR_BIT));
+#endif   // USHRT_MAX == 0xffffU
+
+    if (rw_opt_no_errno) {
+        rw_note (0, 0, 0, "errno test disabled");
+    }
+    else {
+        test_errno (ctype, cname, itype, iname, (unsigned short)0);
+    }
+
+#endif   // NO_GET_USHRT
+}
+
+/**************************************************************************/
+
+static void
 test_llong (CharType ctype, const char *cname,
             IterType itype, const char *iname)
 {
@@ -2700,6 +2758,7 @@ run_tests (CharType ctype, const char *cname,
         rw_note (0, __FILE__, __LINE__, "%s test disabled", tname)
 
     TEST (bool,   "bool");
+    TEST (ushrt,  "unsigned short");
     TEST (uint,   "unsigned int");
 
     TEST (long,   "long");

@@ -1499,9 +1499,9 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 - **Why.** LWG 23 (comments in `include/loc/_num_get.h`); C++11
   22.4.2.1.2 p3 stores the most positive or negative value. Underflow
   is the 2005 import.
-- **Pins.** `22.locale.num.get` `test_uint`, `test_long`,
-  `test_ulong`, `test_llong`, `test_ullong`, the three `_uflow`
-  tests. Row: ch. 3, LWG 23.
+- **Pins.** `22.locale.num.get` `test_ushrt`, `test_uint`,
+  `test_long`, `test_ulong`, `test_llong`, `test_ullong`, the three
+  `_uflow` tests. Row: ch. 3, LWG 23.
 
 #### 10.3.7 A grouping mismatch stores the value
 
@@ -1662,9 +1662,10 @@ The two warnings of `22.locale.num.put` are `ullong_test`, a
 placeholder since 2006. `22.locale.numpunct`'s narrow
 separator is compared with `localeconv`'s string under the rule of
 10.3.13, and the expected grouping of both punctuation programs
-follows 10.3.14. No row checks `unsigned short`
-overflow (`22.locale.num.get` has `test_uint`): `test_ushrt` and
-`test_uint` of `27.istream.fmat.arith` gate their rows on `_RWSTD_USHRT_SIZE` and
+follows 10.3.14. `unsigned short` and `unsigned int` overflow is
+checked through the facet alone, by `test_ushrt` and `test_uint` of
+`22.locale.num.get`: those of `27.istream.fmat.arith` gate their rows
+on `_RWSTD_USHRT_SIZE` and
 `_RWSTD_UINT_SIZE`, which nothing defines. The four `get` and `put` MT
 programs were retired on 2026-10-19: the facets hold no state
 (5c1368e6, a701ec25, 72d94f0b, 70070c4b). No row of the family fails
