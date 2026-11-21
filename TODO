@@ -248,23 +248,6 @@ Fix: rows for the four in =23.list.splice=, or a test of
 
 Check: each of 23.2.2.4, p15 to p32 has a row.
 
-** TODO =26.accumulate= and =26.inner.product= count calls and read no count
-
-=Accumulator= of =26.accumulate= (116-136), and =Accumulator= and
-=Multiplicator= of =26.inner.product= (118-165), add to a static
-=funcalls_= on each call, and neither test reads it; =26.partial.sum=
-and =26.adjacent.diff= read theirs against a complexity paragraph.
-14882:2003 26.4.1 and 26.4.2 have none; p1 of each applies the
-operation "for every iterator" of the range "in order", one
-application for an element. Seen while the two algorithms were made
-to apply ~operator+~, 2026-11-15.
-
-Fix: each step asserts that the count is the length of its range, in
-both forms of each algorithm; or the counters leave.
-
-Check: a second application for an element in =include/numeric= turns
-a row red; or no =funcalls_= is left in the two tests.
-
 ** TODO The test driver's generator has the three departures the library's had
 
 =tests/src/rand.cpp= carries the subtractive generator of

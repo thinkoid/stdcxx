@@ -241,6 +241,9 @@ void test_inner_product (const std::size_t       N,
         UserClass* const buf1_end = buf1 + i;
         UserClass* const buf2_end = buf2 + i;
 
+        std::size_t last_n_op_plus  = UserClass::n_total_op_plus_assign_;
+        std::size_t last_n_op_times = UserClass::n_total_op_times_assign_;
+
         const Accumulator   acc  (0, 0);
         const Multiplicator mult (0, 0);
 
@@ -249,6 +252,11 @@ void test_inner_product (const std::size_t       N,
 
         const UserClass res = alg.inner_product (buf1, buf1_end, buf2, buf2_end, 
                                                  init, pbinop1, pbinop2);
+
+        const std::size_t plus_ops = binop ? Accumulator::funcalls_ :
+            UserClass::n_total_op_plus_assign_ - last_n_op_plus;
+        const std::size_t times_ops = binop ? Multiplicator::funcalls_ :
+            UserClass::n_total_op_times_assign_ - last_n_op_times;
 
         // verify the result 26.4.2, p1
         bool success = sum == res.data_.val_;
@@ -260,6 +268,22 @@ void test_inner_product (const std::size_t       N,
                    int (sizeof (*buf2)), int (i), buf2, sum, res.data_.val_);
 
         sum += (buf1 [i].data_.val_ * buf2 [i].data_.val_);
+
+        if (!success)
+            break;
+
+        // verify one application of each operation for each element,
+        // 26.4.2, p1
+        success = plus_ops == i && times_ops == i;
+        rw_assert (success, 0, __LINE__,
+                   "inner_product <%s, %s, %s%{?}, %s, %s%{;}>"
+                   "({%{X=+*}}, {%{X=+*}}) applied %s %zu times and "
+                   "%s %zu times, expected %zu",
+                   it1name, it2name, tname, binop, op1name, op2name,
+                   int (sizeof (*buf1)), int (i), buf1,
+                   int (sizeof (*buf2)), int (i), buf2,
+                   binop ? op1name : "operator+", plus_ops,
+                   binop ? op2name : "operator*", times_ops, i);
 
         if (!success)
             break;

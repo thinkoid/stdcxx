@@ -78,10 +78,11 @@ private:
 };
 
 
+// adds through UserClass::operator+=, which counts the applications
 Y operator+ (const Y &lhs, const Y &rhs)
 {
     Y res (lhs);
-    res.data_.val_ += rhs.data_.val_;
+    res.UserClass::operator+= (rhs);
     return res;
 }
 
@@ -166,11 +167,16 @@ void test_accumulate (const std::size_t    N,
         const InputIterator first (buf,     buf, buf_end);
         const InputIterator last  (buf_end, buf, buf_end);
 
+        std::size_t last_n_op_plus = T::n_total_op_plus_assign_;
+
         BinaryOp bin_op (0, 0);
 
         const T res = op ?
             std::accumulate (first, last, init, bin_op)
           : std::accumulate (first, last, init);
+
+        const std::size_t plus_ops = op ? BinaryOp::funcalls_ :
+            T::n_total_op_plus_assign_ - last_n_op_plus;
 
         // verify the result 26.4.1, p1
         bool success = sum == res.data_.val_;
@@ -180,6 +186,17 @@ void test_accumulate (const std::size_t    N,
                    i + 1, itname, tname, 0 != op, opname, res.data_.val_, sum);
 
         sum += buf [i].data_.val_;
+
+        if (!success)
+            break;
+
+        // verify one application for each element, 26.4.1, p1
+        success = plus_ops == i;
+        rw_assert (success, 0, __LINE__,
+                   "step %zu: accumulate <%s, %s%{?}, %s%{;}> "
+                   "applied %s %zu times, expected %zu",
+                   i + 1, itname, tname, 0 != op, opname,
+                   op ? opname : "operator+", plus_ops, i);
 
         if (!success)
             break;
