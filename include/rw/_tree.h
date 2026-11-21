@@ -620,8 +620,18 @@ public:
 
     template<class _Iterator>
     void insert (_Iterator __first, _Iterator __last, bool __dup) {
-        for (; __first != __last; ++__first)
-            insert (*__first, __dup);
+        for (; __first != __last; ++__first) {
+            const value_type &__v     = *__first;
+            const _C_link_t   __rmost = _C_end->_C_child [1];
+
+            // an element past the rightmost goes on its right, the node
+            // the descent reaches, so a sorted range is linear (23.1.2,
+            // Table 69); the rightmost of an empty tree is the header
+            if (_C_size && _C_cmp (__rmost->_C_key (), _KeyOf ()(__v)))
+                _C_insert (0, __rmost, __v);
+            else
+                insert (__v, __dup);
+        }
     }
 
     iterator erase (iterator);
