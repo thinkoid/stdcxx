@@ -133,16 +133,6 @@ collate, scalar and time oracles.
 Check: the oracle runs over =SUPPORTED= and its disagreements are
 explained or queued.
 
-** TODO =22.locale.num.put= never puts an =unsigned long long=
-
-=tests/localization/22.locale.num.put.cpp= 1222: =ullong_test= has
-only warned since 087f3650 (2006); these are the two runtime warnings
-of the 15D row. Found 2026-11-02.
-
-Fix: rows for =unsigned long long=.
-
-Check: the rows run and the two warnings are gone; eight pins moved.
-
 ** TODO =22.locale.name= checks nothing on a host without =en_US=
 
 =tests/localization/22.locale.name.cpp= hard-codes =en_US= and
@@ -1288,15 +1278,14 @@ Check: the pair equals the row of such a host's table and of the pin.
 ** TODO The pin counts in =ref-locale.md= 10.4 lag the baseline
 
 The "What the tests pin" tables carry the 15D assertion count of each
-test. Three rows of 10.4 lag =doc/notes/baseline/15D.txt=:
-=22.locale.num.get= says 51990, the pin is 55206 (0a3b2cca);
-=22.locale.num.put= says 1465, the pin is 1467 (c3db8028); and
+test. Two rows of 10.4 lag =doc/notes/baseline/15D.txt=:
+=22.locale.num.get= says 51990, the pin is 55206 (0a3b2cca); and
 =22.locale.money.put= says 1346, the pin is 1354 (5438f794, d5572cb8,
 2ec94642). The commits changed the pin and not the table. Seen at the
 codecvt landing, 2026-11-07, and the =num.get= row at the
 empty-separator change, 2026-11-08.
 
-Fix: the three counts; the commit that re-pins a row edits its table
+Fix: the two counts; the commit that re-pins a row edits its table
 row in the same commit.
 
 Check: every count in the two tables equals the row's =ASSERTS= in

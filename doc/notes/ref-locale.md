@@ -1431,8 +1431,8 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
   set; the `LONG_LONG` characterization decides
   (analysis-post-strict-ansi.md 4.1). Two vtables are wider.
 - **Pins.** `22.locale.num.get` (`test_llong`, `test_ullong`);
-  `22.locale.num.put` (`llong_test`; `ullong_test` exercises nothing,
-  10.4). Row: "Compiler types beyond 2003".
+  `22.locale.num.put` (`llong_test`, `ullong_test`). Row: "Compiler
+  types beyond 2003".
 
 #### 10.3.2 Fixed with a negative precision
 
@@ -1649,7 +1649,7 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 | program | covers | 15D |
 |---|---|---|
 | `22.locale.num.get` | every virtual, both widths, three iterator types: bases, signs, grouping, overflow, underflow, long input, `bad_alloc` on wrap | 51990, 0 failed |
-| `22.locale.num.put` | every virtual but `unsigned long long`, inf and NaN, grouping, widening, a negative precision | 1465, 2 warnings |
+| `22.locale.num.put` | every virtual, inf and NaN, grouping, widening, a negative precision | 1559 |
 | `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv`, a multibyte separator, an empty separator on both paths, the bool names and a `boolalpha` round trip under a database locale it builds | 8950 |
 | `22.locale.numpunct.mt` | first use of a fresh facet from many threads (7c93badb) | 1200 |
 | `22.locale.money.get` | patterns, signs, symbols, white-space credit, long input and separators, `frac_digits` 305 and 4000, the digits as they appear | 4160 |
@@ -1659,8 +1659,7 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 | `22.locale.num.put.stdcxx-2` | `showpoint` with a zero value | NOUT |
 | `22.locale.money.get.stdcxx-62` | empty input sets `eofbit | failbit` | NOUT |
 
-The two warnings of `22.locale.num.put` are `ullong_test`, a
-placeholder since 2006. `22.locale.numpunct`'s narrow
+`22.locale.numpunct`'s narrow
 separator is compared with `localeconv`'s string under the rule of
 10.3.13, and the expected grouping of both punctuation programs
 follows 10.3.14. `unsigned short` and `unsigned int` overflow is

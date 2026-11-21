@@ -1237,8 +1237,93 @@ void ullong_test (charT, const char *cname)
 
 #ifndef _RWSTD_NO_LONG_LONG
 
-    rw_warn (0, 0, __LINE__, "num_put<%s>::put (..., %s) not exercised",
-             cname, tname);
+    typedef unsigned _RWSTD_LONG_LONG ULLong;
+
+#  define ULL(number)   number ## ULL
+
+    //////////////////////////////////////////////////////////////////
+    rw_info (0, 0, __LINE__, "std::ios::dec");
+
+#  undef STDIO_FMAT
+#  define STDIO_FMAT   "%" _RWSTD_LLONG_PRINTF_PREFIX "u"
+
+    TEST (T,          ULL (0), dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,          ULL (1), dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,         ULL (21), dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,        ULL (321), dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,       ULL (4321), dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,      ULL (54321), dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,     ULL (654321), dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,    ULL (7654321), dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,   ULL (87654321), dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,  ULL (987654321), dec, 0, 0, ' ', "", STDIO_FMAT);
+
+    TEST (T, ULLong (_RWSTD_LLONG_MAX),     dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T, ULLong (_RWSTD_LLONG_MAX) + 1, dec, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,                     ~ULL (0),  dec, 0, 0, ' ', "", STDIO_FMAT);
+
+    rw_info (0, 0, __LINE__, "std::ios::dec | std::ios::showpos");
+
+#  undef STDIO_FMAT
+#  define STDIO_FMAT   "%+" _RWSTD_LLONG_PRINTF_PREFIX "u"
+
+    TEST (T,  ULL (0), dec | showpos, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,  ULL (1), dec | showpos, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T, ~ULL (0), dec | showpos, 0, 0, ' ', "", STDIO_FMAT);
+
+    //////////////////////////////////////////////////////////////////
+    rw_info (0, 0, __LINE__, "std::ios::oct");
+
+#  undef STDIO_FMAT
+#  define STDIO_FMAT   "%" _RWSTD_LLONG_PRINTF_PREFIX "o"
+
+    TEST (T, ULLong (UINT_MAX),             oct, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T, ULLong (ULONG_MAX),            oct, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T, ULLong (_RWSTD_LLONG_MAX),     oct, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T, ULLong (_RWSTD_LLONG_MIN),     oct, 0, 0, ' ', "", STDIO_FMAT);
+
+    TEST (T,                      ULL (1),  oct, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,                     ~ULL (0),  oct, 0, 0, ' ', "", STDIO_FMAT);
+
+    //////////////////////////////////////////////////////////////////
+    rw_info (0, 0, __LINE__, "std::ios::hex");
+
+#  undef STDIO_FMAT
+#  define STDIO_FMAT   "%" _RWSTD_LLONG_PRINTF_PREFIX "x"
+
+    TEST (T, ULLong (UINT_MAX),             hex, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T, ULLong (ULONG_MAX),            hex, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T, ULLong (_RWSTD_LLONG_MAX),     hex, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T, ULLong (_RWSTD_LLONG_MIN),     hex, 0, 0, ' ', "", STDIO_FMAT);
+
+    TEST (T,                      ULL (1),  hex, 0, 0, ' ', "", STDIO_FMAT);
+    TEST (T,                     ~ULL (0),  hex, 0, 0, ' ', "", STDIO_FMAT);
+
+#  undef FLAGS
+#  define FLAGS   hex | showbase | internal
+
+#  undef OPTS
+#  define OPTS   FLAGS, 0, 20, ' ', "\1\2\3\4\1\2\3\4"
+
+    // internal justfication, hex format, grouping
+    TEST (T, ULL (0),                  OPTS,     "                   0");
+    TEST (T, ULL (0x1),                OPTS,     "0x                 1");
+    TEST (T, ULL (0x12),               OPTS,     "0x               1,2");
+    TEST (T, ULL (0x123),              OPTS,     "0x              12,3");
+    TEST (T, ULL (0x1234),             OPTS,     "0x            1,23,4");
+    TEST (T, ULL (0x12345),            OPTS,     "0x           12,34,5");
+    TEST (T, ULL (0x123456),           OPTS,     "0x          123,45,6");
+    TEST (T, ULL (0x1234567),          OPTS,     "0x        1,234,56,7");
+    TEST (T, ULL (0x12345678),         OPTS,     "0x       12,345,67,8");
+    TEST (T, ULL (0x123456789),        OPTS,     "0x      123,456,78,9");
+    TEST (T, ULL (0x123456789a),       OPTS,     "0x     1234,567,89,a");
+    TEST (T, ULL (0x123456789ab),      OPTS,     "0x   1,2345,678,9a,b");
+    TEST (T, ULL (0x123456789abc),     OPTS,     "0x 1,2,3456,789,ab,c");
+    TEST (T, ULL (0x123456789abcd),    OPTS,     "0x12,3,4567,89a,bc,d");
+    TEST (T, ULL (0x123456789abcde),   OPTS,   "0x1,23,4,5678,9ab,cd,e");
+    TEST (T, ULL (0x123456789abcdef),  OPTS,  "0x12,34,5,6789,abc,de,f");
+    TEST (T, ULL (0x123456789abcdef0), OPTS, "0x123,45,6,789a,bcd,ef,0");
+    TEST (T, ULL (0xfedcba9876543210), OPTS, "0xfed,cb,a,9876,543,21,0");
 
 #else   // if defined (_RWSTD_NO_LONG_LONG)
 
