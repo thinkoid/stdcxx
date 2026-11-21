@@ -165,7 +165,7 @@ _rw_check_block (const Header *hdr)
 
 // find a block by the user pointer in the list of allocated blocks
 static Header*
-_rw_find_block (void *ptr, bool check_heap, const char *caller)
+_rw_find_block (void *ptr, const char *caller)
 {
     size_t nblocks = 0;
     size_t nbytes  = 0;
@@ -173,35 +173,27 @@ _rw_find_block (void *ptr, bool check_heap, const char *caller)
     Header *res = 0;
 
     for (Header *hdr = last; hdr; hdr = hdr->prev_) {
-
         nblocks += 1;
         nbytes  += hdr->size_;
 
-        if (check_heap)
-            _rw_check_block (hdr);
+        _rw_check_block (hdr);
 
-        if (ptr == hdr->ptr_) {
+        if (ptr == hdr->ptr_)
             res = hdr;
-
-            if (!check_heap)
-                return res;
-        }
     }
 
-    if (check_heap) {
-        // check that block and byte counters match the totals computed above
-        const size_t sum_blocks = pst->blocks_ [0] + pst->blocks_ [1];
-        const size_t sum_bytes  = pst->bytes_ [0] + pst->bytes_ [1];
+    // check that block and byte counters match the totals computed above
+    const size_t sum_blocks = pst->blocks_ [0] + pst->blocks_ [1];
+    const size_t sum_bytes  = pst->bytes_ [0] + pst->bytes_ [1];
 
-        if (sum_blocks != nblocks || sum_bytes != nbytes) {
-            rw_error (0, 0, __LINE__,
-                      "%s:%d: counts mismatch: found %zu "
-                      "bytes in %zu blocks, expected "
-                      "%zu in %zu", __FILE__, __LINE__, 
-                      nbytes, nblocks, sum_bytes, sum_blocks);
+    if (sum_blocks != nblocks || sum_bytes != nbytes) {
+        rw_error (0, 0, __LINE__,
+                  "%s:%d: counts mismatch: found %zu "
+                  "bytes in %zu blocks, expected "
+                  "%zu in %zu", __FILE__, __LINE__,
+                  nbytes, nblocks, sum_bytes, sum_blocks);
 
-            abort ();
-        }
+        abort ();
     }
 
     if (caller && ptr && !res) {
@@ -240,7 +232,7 @@ _rw_print_heap ()
 
     if (last) 
         // check heap consistency
-        _rw_find_block (last, true, 0);
+        _rw_find_block (last, 0);
 }
 
 
@@ -453,7 +445,7 @@ operator_delete (void *ptr, bool array)
         // the lead guard check; walk the heap to diagnose it, the
         // call will abort
         if (hdr->self_ != hdr)
-            _rw_find_block (ptr, true, name [array]);
+            _rw_find_block (ptr, name [array]);
 
         // check the block being deallocated; the call will abort
         // if the block has been corrupted
@@ -600,7 +592,7 @@ rwt_checkpoint (const rwt_free_store *st0, const rwt_free_store *st1)
         // and the current state of the free store; store the current
         // state as the new checkpoint
 
-        _rw_find_block (0, true, 0);
+        _rw_find_block (0, 0);
 
         rwt_free_store* const ckpt = rwt_checkpoint (&checkpoint, pst);
 

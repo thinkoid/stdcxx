@@ -27,17 +27,6 @@ at the top.
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
 
-** TODO =_rw_find_block='s =check_heap= parameter is always true
-
-Since =operator_delete= checks the block in hand, every caller of
-=_rw_find_block= (=tests/src/new.cpp=) passes =true=; the =false=
-path, which returned the block on the first match, has no caller.
-Seen 2026-11-05.
-
-Fix: drop the parameter and the branch, or keep them as interface.
-
-Check: a sanity build of the test driver.
-
 ** TODO =operator_delete= reads the header before any pointer it is given
 
 The in-hand check reads 48 bytes before the pointer before it knows
