@@ -66,6 +66,46 @@ passed, the elements left in the second run are in place.
 Check: the probe's counts fall to 12 for "abcdefgh" and 4 for
 "aaaa", none with itself; =23.list.ops= at pin.
 
+** Containers: the associative containers
+
+*** TODO =insert (i, j)= is not linear on a sorted range
+
+14882:2003 Table 69 (23.1.2) gives =a.insert(i,j)= the complexity
+"Nlog(size()+N) (N is the distance from i to j) in general; linear if
+[i, j) is sorted according to value_comp()". =set= and =multiset=
+=insert (i, j)= (=include/set=) loop over the tree's =insert (t)=
+themselves, a descent from the root for each element, as they have
+since the import of 2005 (e6c7726b); =map= and =multimap= pass the
+range to the tree's range insert (=include/rw/_tree.h=), which links
+an element past the rightmost as its right child. Measured with a
+counting comparison in 15D and 11s under GCC on an x86-64 host,
+inserting N sorted keys into a
+container of the N even keys 0 to 2N - 2:
+
+| N | keys | =set::insert (i, j)= | =multiset::insert (i, j)= | =map::insert (i, j)= |
+|------+-------------------------+-------+-------+-------|
+| 4095 | odd, interleaved        | 14.50 | 13.50 | 15.49 |
+| 4095 | 2N to 3N - 1, above all | 24.50 | 23.50 | 2.00  |
+| 255  | odd, interleaved        | 10.49 | 9.49  | 11.43 |
+| 255  | 2N to 3N - 1, above all | 16.50 | 15.50 | 2.00  |
+
+comparisons per element. The tree's range insert is linear for a
+sorted range above the container's keys and N log N for one that
+interleaves with them; =set='s and =multiset='s are N log N for both.
+C++11 Table 102 gives =a.insert(i, j)= "N log(a.size() + N ) (N has
+the value distance(i, j)" and no linear case. Seen while measuring
+the hint of the tree's range insert, 2026-11-21.
+
+Fix: a decision. Either =set= and =multiset= =insert (i, j)= pass the
+range to the tree's range insert, as =map='s does, so a sorted range
+above the keys is linear in all four, and the interleaved case is
+recorded in =doc/notes/ref-conformance.md= as following C++11's row;
+or the whole departure from the 2003 row is recorded there.
+
+Check: the counts above for =set= and =multiset= after the change;
+=23.set= and =23.map= at pin; a row of =ref-conformance.md= for
+whatever stays.
+
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it
@@ -1784,6 +1824,45 @@ with a predicate that is not symmetric, only once the reading is
 decided.
 
 Check: the row is there.
+
+** TODO The order of equal keys in the multiple containers is unrecorded
+
+14882:2003 Table 69 (23.1.2) says of =a_eq.insert(t)= only "inserts t
+and returns the iterator pointing to the newly inserted element", and
+of =a.insert(p,t)= "always inserts t in containers with equivalent
+keys. always returns the iterator pointing to the element with key
+equivalent to the key of t. iterator p is a hint pointing to where the
+insert should start to search", amortized constant "if t is inserted
+right after p": neither places t among the equal keys. C++11 Table 102
+(23.2.4, printed pages 742 and 743) does: =a_eq.insert(t)= "If a range
+containing elements equivalent to t exists in a_eq, t is inserted at
+the end of that range", and =a.insert(p, t)= "t is inserted as close
+as possible to the position just prior to p", amortized constant "if
+t is inserted right before p". A probe in 15D and 11s under GCC on an
+x86-64 host shows the library's choice:
+- the value form keeps the equal keys in the order of insertion:
+  five =insert (1/k)= into a =multimap= give 1/0 1/1 1/2 1/3 1/4,
+  C++11's rule;
+- the range constructor of =multimap= and =multiset= keeps them in the
+  range's order: 2 1 2 3 1 2 3 3 1 2 tagged 0 to 9 give 1/1 1/4 1/8
+  2/0 2/2 2/5 2/9 3/3 3/6 3/7;
+- the hinted form puts t at the end of the equal range wherever p
+  points: into {0/0 1/0 1/1 2/0}, 1/9 with p at 1/0, at 1/1, at 2/0,
+  at =begin ()= and at =end ()= gives 0/0 1/0 1/1 1/9 2/0 each time.
+  C++11 puts it before 1/0 for p at 1/0 and at =begin ()=, and
+  between 1/0 and 1/1 for p at 1/1.
+
+=doc/notes/ref-conformance.md= records none of it, and =23.set= and
+=23.map= check no order among equal keys, since 2003 leaves it open.
+Seen while writing those tests, 2026-11-21.
+
+Fix: a row in =doc/notes/ref-conformance.md= that records the three
+behaviours and which reading each follows; then rows in =23.map= and
+=23.set= that pin the recorded behaviour, by the tags of the elements.
+
+Check: the row; the new rows of =23.map= and =23.set= pass in 15D and
+turn red with the descent of =__rb_tree::_C_insert= made to go left
+at an equal key.
 
 ** TODO README section 5 and the configuration
 
