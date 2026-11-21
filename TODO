@@ -906,7 +906,7 @@ test:
   =tests/localization/22.locale.facet.mt.cpp:130=.
 - No newline at the end of the file:
   =tests/numerics/26.gslice.array.cassign.cpp=.
-- =long long= unguarded: =tests/iostream/27.istream.fmat.arith.cpp:1038=.
+- =long long= unguarded: =tests/iostream/27.istream.fmat.arith.cpp:1042=.
 - POSIX names without a feature macro: =getcwd= in
   =tests/localization/22.locale.messages.cpp:600=, =BC_BASE_MAX= in
   =tests/regress/18.c.limits.stdcxx-988.cpp:53=.

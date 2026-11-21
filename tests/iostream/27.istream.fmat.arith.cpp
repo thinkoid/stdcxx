@@ -1009,25 +1009,29 @@ test_ulong (CharT*, Traits*,
     LocaleData locale_data = { 0, -1, -1, 0, 0, 0 };
     locale_data.whitespace = "";
 
-#if 2 == _RWSTD_ULONG_SIZE
-    const unsigned ulmax = 65535UL;
+#if 2 == _RWSTD_LONG_SIZE
+    const unsigned long ulmax = 65535UL;
 
     TEST_ULONG ("65535",  -1, -1, -1, 0, _e_, 5, 0,  1, ulmax);
     TEST_ULONG ("65536",  -1, -1, -1, 0, _ef, 5, 0,  1, ulmax);
     TEST_ULONG ("99999",  -1, -1, -1, 0, _ef, 5, 0,  1, ulmax);
-#elif 4 == _RWSTD_ULONG_SIZE
-    const unsigned ulmax = 4294967295UL;
+#elif 4 == _RWSTD_LONG_SIZE
+    const unsigned long ulmax = 4294967295UL;
 
-    TEST_ULONG ("4294967295", -1, -1, -1, 0, _e_, 10, 0, -1, ulmax);
-    TEST_ULONG ("4294967296", -1, -1, -1, 0, _ef, 10, 0, -1, ulmax);
-    TEST_ULONG ("9999999999", -1, -1, -1, 0, _ef, 10, 0, -1, ulmax);
-#elif 8 == _RWSTD_ULONG_SIZE
-    const unsigned ulmax = 9223372036854775807UL;
+    TEST_ULONG ("4294967295", -1, -1, -1, 0, _e_, 10, 0, 1, ulmax);
+    TEST_ULONG ("4294967296", -1, -1, -1, 0, _ef, 10, 0, 1, ulmax);
+    TEST_ULONG ("9999999999", -1, -1, -1, 0, _ef, 10, 0, 1, ulmax);
+#elif 8 == _RWSTD_LONG_SIZE
+    const unsigned long ulmax = 18446744073709551615UL;
 
-    TEST_ULONG ("9223372036854775807", -1, -1, -1, 0, _e_, 10, 0, -1, ulmax);
-    TEST_ULONG ("9223372036854775808", -1, -1, -1, 0, _ef, 10, 0, -1, ulmax);
-    TEST_ULONG ("9999999999999999999", -1, -1, -1, 0, _ef, 10, 0, -1, ulmax);
-#endif   // _RWSTD_ULONG_SIZE
+    TEST_ULONG ("18446744073709551615", -1, -1, -1, 0, _e_, 20, 0, 1, ulmax);
+    TEST_ULONG ("18446744073709551616", -1, -1, -1, 0, _ef, 20, 0, 1, ulmax);
+    TEST_ULONG ("99999999999999999999", -1, -1, -1, 0, _ef, 20, 0, 1, ulmax);
+
+    // a negative value wraps modulo ULONG_MAX + 1 and fits: the
+    // wrapped value without failbit, as strtoul gives it
+    TEST_ULONG ("-1",                   -1, -1, -1, 0, _e_,  2, 0, 1, ulmax);
+#endif   // _RWSTD_LONG_SIZE
 
 }
 
@@ -1106,25 +1110,29 @@ test_ullong (CharT*, Traits*,
     LocaleData locale_data = { 0, -1, -1, 0, 0, 0 };
     locale_data.whitespace = "";
 
-#if 2 == _RWSTD_ULLONG_SIZE
+#if 2 == _RWSTD_LLONG_SIZE
     const unsigned long long ullmax = 65535ULL;
 
     TEST_ULLONG ("65535",  -1, -1, -1, 0, _e_, 5, 0,  1, ullmax);
     TEST_ULLONG ("65536",  -1, -1, -1, 0, _ef, 5, 0,  1, ullmax);
     TEST_ULLONG ("99999",  -1, -1, -1, 0, _ef, 5, 0,  1, ullmax);
-#elif 4 == _RWSTD_ULLONG_SIZE
+#elif 4 == _RWSTD_LLONG_SIZE
     const unsigned long long ullmax = 4294967295ULL;
 
-    TEST_ULLONG ("4294967295", -1, -1, -1, 0, _e_, 10, 0, -1, ullmax);
-    TEST_ULLONG ("4294967296", -1, -1, -1, 0, _ef, 10, 0, -1, ullmax);
-    TEST_ULLONG ("9999999999", -1, -1, -1, 0, _ef, 10, 0, -1, ullmax);
-#elif 8 == _RWSTD_ULLONG_SIZE
-    const unsigned long long ullmax = 9223372036854775807ULL;
+    TEST_ULLONG ("4294967295", -1, -1, -1, 0, _e_, 10, 0, 1, ullmax);
+    TEST_ULLONG ("4294967296", -1, -1, -1, 0, _ef, 10, 0, 1, ullmax);
+    TEST_ULLONG ("9999999999", -1, -1, -1, 0, _ef, 10, 0, 1, ullmax);
+#elif 8 == _RWSTD_LLONG_SIZE
+    const unsigned long long ullmax = 18446744073709551615ULL;
 
-    TEST_ULLONG ("9223372036854775807", -1, -1, -1, 0, _e_, 10, 0, -1, ullmax);
-    TEST_ULLONG ("9223372036854775808", -1, -1, -1, 0, _ef, 10, 0, -1, ullmax);
-    TEST_ULLONG ("9999999999999999999", -1, -1, -1, 0, _ef, 10, 0, -1, ullmax);
-#endif   // _RWSTD_ULLONG_SIZE
+    TEST_ULLONG ("18446744073709551615", -1, -1, -1, 0, _e_, 20, 0, 1, ullmax);
+    TEST_ULLONG ("18446744073709551616", -1, -1, -1, 0, _ef, 20, 0, 1, ullmax);
+    TEST_ULLONG ("99999999999999999999", -1, -1, -1, 0, _ef, 20, 0, 1, ullmax);
+
+    // a negative value wraps modulo ULLONG_MAX + 1 and fits: the
+    // wrapped value without failbit, as strtoull gives it
+    TEST_ULLONG ("-1",                   -1, -1, -1, 0, _e_,  2, 0, 1, ullmax);
+#endif   // _RWSTD_LLONG_SIZE
 
 }
 
