@@ -164,19 +164,6 @@ Fix: rows for the four in =23.list.splice=, or a test of
 
 Check: each of 23.2.2.4, p15 to p32 has a row.
 
-** TODO =27.ostream= never runs its unformatted tests
-
-=tests/iostream/27.ostream.cpp= leaves the call of =test_unformatted=
-commented out under "FIXME: implement this" in =run_test=, so =put=
-and =write= have no row there but =test_unformatted_width='s, which
-checks that both leave =width ()= alone. Found by the extension
-sweep's reading, 2026-11-04.
-
-Fix: =test_unformatted=: each function's output and its =badbit= on a
-failing buffer.
-
-Check: the rows run; the eight pins move.
-
 ** TODO The =limits= example expects the =traps= of an x86-64 host
 
 =examples/manual/out/limits.out= 29 holds ~traps = true~ for

@@ -1715,6 +1715,253 @@ void test_unformatted_width (charT)
 
 /***************************************************************************/
 
+enum unformatted_function { Put, Write };
+
+
+// the call a row of test_unformatted() makes, for its messages
+#define CALL                                                            \
+    "std::basic_ostream<%s>::%{?}put('%s')%{:}write(%{*.*Ac}, %d)%{;}"
+
+#define CALLARGS                                                        \
+    cname, Put == fun, TOSTR (src [0]),                                 \
+    int (sizeof *src), int (len), src, int (len)
+
+
+// 27.6.2.6, p1-p6: put(c) or write(s, n) on a stream with the given
+// exceptions(), on a buffer of bufsize characters in which the virtual
+// function that failure names fails or, with Throw, throws; verifies
+// the characters the buffer holds, the stream returned, the state and
+// the exception that escapes
+template <class charT>
+void test_unformatted (charT, int line,
+                       unformatted_function  fun,
+                       const char           *str,
+                       std::streamsize       len,
+                       std::streamsize       bufsize,
+                       int                   failure,
+                       int                   exceptions,
+                       const char           *expect,
+                       std::streamsize       nexpect,
+                       int                   rdstate)
+{
+    static const char* const cname = rw_any_t (charT ()).type_name ();
+
+    typedef std::basic_ostream<charT, std::char_traits<charT> > Ostream;
+
+    charT buf [16];
+    charT src [16] = { charT () };
+
+    test_streambuf<charT> tsb (buf, bufsize);
+
+    if (failure & Throw)
+        tsb.throws_ = streambuf_failure (failure & ~Throw);
+    else
+        tsb.fails_ = streambuf_failure (failure);
+
+    Ostream strm (&tsb);
+
+    // the characters written end at the first asterisk, so a null
+    // character among them is seen
+    const charT mark = strm.widen ('*');
+
+    for (std::size_t i = 0; i != sizeof buf / sizeof *buf; ++i)
+        buf [i] = mark;
+
+    for (std::streamsize i = 0; i != len; ++i)
+        src [i] = strm.widen (str [i]);
+
+    strm.exceptions (std::ios_base::iostate (exceptions));
+
+    enum { E_none, E_failure, E_buffer, E_unknown };
+
+    static const char* const what [] = {
+        "no exception", "std::ios_base::failure",
+        "the buffer's exception", "an unknown exception"
+    };
+
+    const Ostream *ret    = 0;
+    int            caught = E_none;
+
+    try {
+        ret = Put == fun ? &strm.put (src [0]) : &strm.write (src, len);
+    }
+    catch (const std::ios_base::failure&) {
+        caught = E_failure;
+    }
+    catch (streambuf_failure) {
+        caught = E_buffer;
+    }
+    catch (...) {
+        caught = E_unknown;
+    }
+
+    std::streamsize nwrote = 0;
+
+    while (nwrote != bufsize && mark != buf [nwrote])
+        ++nwrote;
+
+    bool same = nexpect == nwrote;
+
+    for (std::streamsize i = 0; same && i != nexpect; ++i)
+        same = strm.widen (expect [i]) == buf [i];
+
+    rw_assert (same, 0, line,
+               CALL " wrote %{*.*Ac}, expected %{*.*Ac}",
+               CALLARGS, int (sizeof *buf), int (nwrote), buf,
+               1, int (nexpect), expect);
+
+    rw_assert (rdstate == strm.rdstate (), 0, line,
+               CALL " with exceptions() == %{Is}: rdstate() == %{Is}, "
+               "got %{Is}",
+               CALLARGS, exceptions, rdstate, strm.rdstate ());
+
+    // p1: an exception from the buffer sets badbit and escapes only
+    // under exceptions() & badbit; p3 and p5: the badbit of a failed
+    // insertion throws ios_base::failure under the same bit
+    const int expect_caught = failure & Throw ?
+          (exceptions & Bad ? E_buffer : E_none)
+        : (rdstate & exceptions ? E_failure : E_none);
+
+    rw_assert (expect_caught == caught, 0, line,
+               CALL " with exceptions() == %{Is}: expected %s, got %s",
+               CALLARGS, exceptions, what [expect_caught], what [caught]);
+
+    rw_assert (E_none != caught || &strm == ret, 0, line,
+               CALL " returns *this", CALLARGS);
+}
+
+
+template <class charT>
+void test_unformatted (charT)
+{
+    static const char* const cname = rw_any_t (charT ()).type_name ();
+
+    rw_info (0, 0, __LINE__,
+             "std::basic_ostream<%s>::put(char_type) and "
+             "write(const char_type*, streamsize)", cname);
+
+    typedef std::basic_ostream<charT, std::char_traits<charT> > Ostream;
+
+#undef T
+#define T   charT (), __LINE__
+
+#undef TEST
+#define TEST test_unformatted
+
+    // the columns: the function, the characters to put or write and
+    // their count, the size of the buffer, the buffer function that
+    // fails (or throws, with Throw), exceptions(), the characters the
+    // buffer is expected to hold and their count, and rdstate()
+    TEST (T, Put,   "a",     1, 8, 0,                0,   "a",    1, Good);
+    TEST (T, Put,   "b",     1, 8, Overflow,         0,   "",     0, Bad);
+    TEST (T, Put,   "c",     1, 8, Overflow,         Bad, "",     0, Bad);
+    TEST (T, Put,   "d",     1, 8, Throw | Overflow, 0,   "",     0, Bad);
+    TEST (T, Put,   "e",     1, 8, Throw | Overflow, Bad, "",     0, Bad);
+
+    TEST (T, Write, "abc",   3, 8, 0,                0,   "abc",  3, Good);
+    TEST (T, Write, "a\0b",  3, 8, 0,                0,   "a\0b", 3, Good);
+    TEST (T, Write, "abc",   0, 8, 0,                0,   "",     0, Good);
+    TEST (T, Write, "abcde", 5, 3, 0,                0,   "abc",  3, Bad);
+    TEST (T, Write, "abcde", 5, 3, 0,                Bad, "abc",  3, Bad);
+    TEST (T, Write, "abc",   3, 8, Throw | Xsputn,   0,   "",     0, Bad);
+    TEST (T, Write, "abc",   3, 8, Throw | Xsputn,   Bad, "",     0, Bad);
+
+    {
+        // 27.6.2.6, p1 and 27.6.2.3, p3: the sentry of a stream that is
+        // not good is false, so neither function writes
+        test_streambuf<charT> tsb (0);
+        Ostream strm (&tsb);
+
+        const charT ab [] = { strm.widen ('a'), strm.widen ('b') };
+
+        strm.setstate (std::ios_base::failbit);
+
+        strm.put (ab [0]);
+
+        rw_assert (0 == tsb.ncalls_ [Overflow], 0, __LINE__,
+                   "std::basic_ostream<%s>::put('a') with rdstate() == "
+                   "%{Is}: expected 0 calls to overflow(), got %d",
+                   cname, strm.rdstate (), tsb.ncalls_ [Overflow]);
+
+        // p1 makes the insertion depend on the sentry, so the
+        // setstate (badbit) of p3 and p5 is for an insertion attempted
+        rw_assert (std::ios_base::failbit == strm.rdstate (), 0, __LINE__,
+                   "std::basic_ostream<%s>::put('a') with rdstate() == "
+                   "failbit: rdstate() == failbit, got %{Is}",
+                   cname, strm.rdstate ());
+
+        strm.write (ab, 2);
+
+        rw_assert (0 == tsb.ncalls_ [Xsputn] && 0 == tsb.ncalls_ [Overflow],
+                   0, __LINE__,
+                   "std::basic_ostream<%s>::write(\"ab\", 2) with rdstate() "
+                   "== %{Is}: expected 0 calls to xsputn() and 0 to "
+                   "overflow(), got %d and %d",
+                   cname, strm.rdstate (), tsb.ncalls_ [Xsputn],
+                   tsb.ncalls_ [Overflow]);
+
+        rw_assert (std::ios_base::failbit == strm.rdstate (), 0, __LINE__,
+                   "std::basic_ostream<%s>::write(\"ab\", 2) with rdstate() "
+                   "== failbit: rdstate() == failbit, got %{Is}",
+                   cname, strm.rdstate ());
+    }
+
+    {
+        // 27.6.2.6, p1 and 27.6.2.3, p2: the sentry flushes the tie
+        // before the function writes; the tie's sync() sets failbit in
+        // the stream, so neither function writes
+        test_streambuf<charT> tsb_strm (0);
+        Ostream strm (&tsb_strm);
+
+        test_streambuf<charT> tsb_tied (&strm);
+        Ostream tied (&tsb_tied);
+
+        strm.tie (&tied);
+
+        const charT ab [] = { strm.widen ('a'), strm.widen ('b') };
+
+        strm.put (ab [0]);
+
+        rw_assert (   1 == tsb_tied.ncalls_ [Sync]
+                   && 0 == tsb_strm.ncalls_ [Overflow], 0, __LINE__,
+                   "std::basic_ostream<%s>::put('a') with a tie whose sync() "
+                   "sets failbit in the stream: expected 1 call to the "
+                   "tie's sync() and 0 to overflow(), got %d and %d",
+                   cname, tsb_tied.ncalls_ [Sync],
+                   tsb_strm.ncalls_ [Overflow]);
+
+        // the tie's sync() set failbit through setstate (failbit), and
+        // the false sentry adds no badbit (p1): rdstate() is failbit
+        rw_assert (std::ios_base::failbit == strm.rdstate (), 0, __LINE__,
+                   "std::basic_ostream<%s>::put('a') with a tie whose sync() "
+                   "sets failbit in the stream: rdstate() == failbit, "
+                   "got %{Is}", cname, strm.rdstate ());
+
+        strm.clear ();
+
+        const int nsyncs = tsb_tied.ncalls_ [Sync];
+
+        strm.write (ab, 2);
+
+        rw_assert (   1 + nsyncs == tsb_tied.ncalls_ [Sync]
+                   && 0 == tsb_strm.ncalls_ [Xsputn]
+                   && 0 == tsb_strm.ncalls_ [Overflow], 0, __LINE__,
+                   "std::basic_ostream<%s>::write(\"ab\", 2) with a tie whose "
+                   "sync() sets failbit in the stream: expected 1 call to "
+                   "the tie's sync(), 0 to xsputn() and 0 to overflow(), "
+                   "got %d, %d and %d",
+                   cname, tsb_tied.ncalls_ [Sync] - nsyncs,
+                   tsb_strm.ncalls_ [Xsputn], tsb_strm.ncalls_ [Overflow]);
+
+        rw_assert (std::ios_base::failbit == strm.rdstate (), 0, __LINE__,
+                   "std::basic_ostream<%s>::write(\"ab\", 2) with a tie whose "
+                   "sync() sets failbit in the stream: rdstate() == failbit, "
+                   "got %{Is}", cname, strm.rdstate ());
+    }
+}
+
+/***************************************************************************/
+
 template <class charT>
 void run_test (charT)
 {
@@ -1736,8 +1983,7 @@ void run_test (charT)
     else {
         test_unformatted_width (charT ());
 
-        // FIXME: implement this
-        // test_unformatted (charT ());
+        test_unformatted (charT ());
     }
 
     // exercise flush()
