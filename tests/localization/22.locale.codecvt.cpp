@@ -1156,9 +1156,11 @@ test_ucs_modifier (const char*       locale_name,
 
         rw_assert (diff >= ilen, __FILE__, __LINE__,
                    "codecvt<wchar_t, char, mbstate_t>::in() mismatch "
-                   "at character %u of %u: '%s' != '%s'; in locale(\"%s\")",
-                   diff, ilen, ibuf_native [diff],
-                   to [diff], locale_name);
+                   "at character %zu of %zu: %{#lc} != %{#lc}; "
+                   "in locale(\"%s\")",
+                   diff, ilen,
+                   diff < ilen ? ibuf_native [diff] : L'\0',
+                   diff < ilen ? to [diff] : L'\0', locale_name);
     }
 
     delete [] ibuf_native;

@@ -208,26 +208,6 @@ harness reads it.
 Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
 x86-64 and on an aarch64 host.
 
-** TODO =22.locale.codecvt= formats two wide characters with =%s=
-
-=tests/localization/22.locale.codecvt.cpp= 1154: the content check of
-=test_ucs_modifier= passes =ibuf_native [diff]= and =to [diff]=, two
-=wchar_t= values, to =%s= directives, so the driver reads them as
-pointers and prints "(null)" or "(invalid address 0x...)". The
-arguments are evaluated on every pass too, where =diff= equals
-=ilen=: for a single-byte locale =ilen= is the size of =ibuf=, so
-=to [diff]= reads one character past it. Under =--trace= in 11S the
-passing row prints "'(null)' != '(invalid address
-0x0000000000006ac1)'" for =de_DE.ISO-8859-1=. Seen while measuring
-the 11S and 11s rows, 2026-11-21.
-
-Fix: the driver's wide-character directive (=%{lc}=, as
-=22.locale.codecvt.do_out.cpp= uses), and the two characters read
-only when =diff < ilen=.
-
-Check: the traced output names the characters, and nothing is read
-past =ibuf= on a pass (valgrind or a sanitizer).
-
 * Certification
 
 The scripts under =bin= and the nightly run: building the
