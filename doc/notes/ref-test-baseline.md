@@ -485,10 +485,21 @@ Reasons, in order:
   when its corrupt-state section stopped running against the two
   libc-backed facets everywhere; 15D had skipped them since
   2a4b5c5f, since their state check sat under the locale lock. The 4
-  between 11S and 11s have no known reason; they date from the first
-  pins of a host with every locale
-  (3c882e6a). `TODO` holds the entry, "`22.locale.codecvt` counts
-  688 assertions in 11S and 692 in 11s".
+  more of 11s are the two checks of `test_libstd_do_out` against the
+  C library, run there for `fr_FR.ISO-8859-1` and `fr_FR.iso88591`.
+  The function passes `wcsrtombs` the characters `in` produced, a
+  heap buffer with no terminating NUL, so the C library reads past
+  its end. In the single-byte locales, `de_DE` and `fr_FR`, every
+  byte of the file is a character and the buffer is full. In 11S the
+  word past it is a value of malloc's, which ISO-8859-1 cannot
+  encode, so `wcsrtombs` fails and the test skips both checks; in
+  11s the `fr_FR` buffer ends in a zero, so the conversion stops at
+  its end and the checks run. The count thus follows the heap's
+  layout: run by hand with `--trace`, the 11s program counts 696,
+  `de_DE` included. The checks came with the first pins of a host
+  with every locale (3c882e6a), the first whose C library knew the
+  two names. `TODO` holds the entry, "`22.locale.codecvt` reads past
+  the wide buffer it hands `wcsrtombs`".
 - `26.c.math.depr` checks the values of `abs (long)` and
   `div (long, long)` with an argument an `int` cannot hold, so it
   skips the two checks in 32-bit, where `long` is no wider than `int`,

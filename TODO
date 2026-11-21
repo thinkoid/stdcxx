@@ -108,17 +108,6 @@ Fix: the =rm= that fails, or the directory it meets.
 
 Check: the =RUNTARGET= scripts pass in a 15D build.
 
-** TODO =22.locale.codecvt= counts 688 assertions in 11S and 692 in 11s
-
-The pins have =22.locale.codecvt= at 688 in 11S and 15D and 692 in
-11s (and the same under Clang). The four between 11S and 11s are
-explained nowhere; =ref-test-baseline.md= chapter 4 lists no reason
-for them. Hypothesis: a wide-only or narrow-only case counted under
-one build mode.
-
-Check: diff the two runs' output; record the reason in
-=ref-test-baseline.md= chapter 4.
-
 ** TODO A codecvt oracle
 
 =doc/notes/plan-localedef-backend.md= 3.5 decided "(a) queued under
@@ -231,6 +220,58 @@ harness reads it.
 
 Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
 x86-64 and on an aarch64 host.
+
+** TODO =22.locale.codecvt= reads past the wide buffer it hands =wcsrtombs=
+
+=tests/localization/22.locale.codecvt.cpp= 562: =test_libstd_do_out=
+passes =rwtest_wcstombs=, thus =wcsrtombs=, the characters =in=
+produced, a heap buffer of =elength= characters with no terminating
+NUL (=test_libstd_do_in= allocates it with =new intern_t [szi]= at
+470), so the C library reads past its end until it meets a zero or a
+character the locale cannot encode. In the single-byte locales,
+=de_DE= and =fr_FR= under their two names each, every byte of the
+file is a character and the buffer is full. Measured on an x86-64
+host under GCC: in 11S the word past the buffer is 0xa011 for =de_DE=
+and 0x3d50 for =fr_FR=, values of malloc's, so =wcsrtombs= returns
+-1 and the test skips its two checks at 570 and 577; in 11s it is 0
+for =fr_FR=, so the checks run for both of its names, the 4
+assertions between 11S (688) and 11s (692). Run by hand with
+=--trace=, the 11s program counts 696: the extra allocations move the
+heap, and =de_DE= runs too. The multibyte locales are not affected:
+their buffer holds fewer characters than bytes and the zeroed rest
+terminates it. The checks first ran on the hosts with every locale
+(3c882e6a); before, the C library knew neither name. Seen while
+measuring the 11S and 11s rows, 2026-11-21.
+
+Fix: hand the C library a terminated sequence (allocate one more
+character in =test_libstd_do_in= and zero it), or convert a counted
+sequence.
+
+Check: valgrind or a sanitizer reports no read past the buffer; the
+four single-byte locales run the two checks in every configuration,
+so the row counts the same in 11S, 11s and 15D (696 predicted), the
+same under =--trace=; =ref-test-baseline.md= chapter 4 drops the
+row's reason.
+
+** TODO =22.locale.codecvt= formats two wide characters with =%s=
+
+=tests/localization/22.locale.codecvt.cpp= 1154: the content check of
+=test_ucs_modifier= passes =ibuf_native [diff]= and =to [diff]=, two
+=wchar_t= values, to =%s= directives, so the driver reads them as
+pointers and prints "(null)" or "(invalid address 0x...)". The
+arguments are evaluated on every pass too, where =diff= equals
+=ilen=: for a single-byte locale =ilen= is the size of =ibuf=, so
+=to [diff]= reads one character past it. Under =--trace= in 11S the
+passing row prints "'(null)' != '(invalid address
+0x0000000000006ac1)'" for =de_DE.ISO-8859-1=. Seen while measuring
+the 11S and 11s rows, 2026-11-21.
+
+Fix: the driver's wide-character directive (=%{lc}=, as
+=22.locale.codecvt.do_out.cpp= uses), and the two characters read
+only when =diff < ilen=.
+
+Check: the traced output names the characters, and nothing is read
+past =ibuf= on a pass (valgrind or a sanitizer).
 
 * Certification
 
@@ -1259,22 +1300,6 @@ row in the same commit.
 
 Check: every count in the two tables equals the row's =ASSERTS= in
 =15D.txt=.
-
-** TODO =ref-locale.md= 9.4 quotes a =22.locale.codecvt= entry by its old counts
-
-The known gaps of =ref-locale.md= 9.4 name the =TODO= entry
-"=22.locale.codecvt= counts 634 assertions in 11S and 638 in 11s" and
-say "the 16 between 15D and 11S are the skipped libc facets; the
-other 4 are unexplained". The entry has been renamed twice since, to
-668 and 672 (fd8f964d) and to 688 and 692, and the list was left, so
-the quote names no entry and its arithmetic fits no pins: 15D and 11S
-both count 688. Seen at the UTF-8 codecvt change, 2026-11-08.
-
-Fix: the bullet quotes the entry's heading as it stands and gives the
-difference from the pins of one nightly, or no number.
-
-Check: the bullet's quote equals the =TODO= heading, and its numbers
-equal the =ASSERTS= of the baseline tables.
 
 ** TODO Two chapter 2 rows of =ref-conformance.md= leave out an effect their source states
 
