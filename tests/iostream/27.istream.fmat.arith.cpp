@@ -801,19 +801,23 @@ test_ushrt (CharT*, Traits*,
     LocaleData locale_data = { 0, -1, -1, 0, 0, 0 };
     locale_data.whitespace = "";
 
-#if 2 == _RWSTD_USHRT_SIZE
+#if 2 == _RWSTD_SHRT_SIZE
     const unsigned short usmax = 65535U;
 
-    TEST_SHRT ("65535",  -1, -1, -1, 0, _e_, 5, 0,  1, usmax);
-    TEST_SHRT ("65536",  -1, -1, -1, 0, _ef, 5, 0,  1, usmax);
-    TEST_SHRT ("99999",  -1, -1, -1, 0, _ef, 5, 0,  1, usmax);
-#elif 4 == _RWSTD_USHRT_SIZE
+    TEST_USHRT ("65535",  -1, -1, -1, 0, _e_, 5, 0,  1, usmax);
+    TEST_USHRT ("65536",  -1, -1, -1, 0, _ef, 5, 0,  1, usmax);
+    TEST_USHRT ("99999",  -1, -1, -1, 0, _ef, 5, 0,  1, usmax);
+
+    // a negative value wraps modulo ULONG_MAX + 1 and so lies past
+    // USHRT_MAX: failbit and the bound (lwg issue 23)
+    TEST_USHRT ("-1",     -1, -1, -1, 0, _ef, 2, 0,  1, usmax);
+#elif 4 == _RWSTD_SHRT_SIZE
     const unsigned short usmax = 4294967295U;
     
-    TEST_SHRT ("4294967295", -1, -1, -1, 0, _e_, 10, 0, -1, usmax);
-    TEST_SHRT ("4294967296", -1, -1, -1, 0, _ef, 10, 0, -1, usmax);
-    TEST_SHRT ("9999999999", -1, -1, -1, 0, _ef, 10, 0, -1, usmax);
-#endif   // _RWSTD_USHRT_SIZE
+    TEST_USHRT ("4294967295", -1, -1, -1, 0, _e_, 10, 0, 1, usmax);
+    TEST_USHRT ("4294967296", -1, -1, -1, 0, _ef, 10, 0, 1, usmax);
+    TEST_USHRT ("9999999999", -1, -1, -1, 0, _ef, 10, 0, 1, usmax);
+#endif   // _RWSTD_SHRT_SIZE
 
 }
 
@@ -897,30 +901,36 @@ test_uint (CharT*, Traits*,
                      cname, tname, "unsigned int", "%u");
 
 #define TEST_UINT(ss, fl, is, ex, ee, es, ne, fw, iv, ev)   \
-    TEST (int, "%u", ss, fl, is, ex, ee, es, ne, fw, iv, ev)
+    TEST (unsigned int, "%u", ss, fl, is, ex, ee, es, ne, fw, iv, ev)
 
     LocaleData locale_data = { 0, -1, -1, 0, 0, 0 };
     locale_data.whitespace = "";
 
-#if 2 == _RWSTD_UINT_SIZE
+#if 2 == _RWSTD_INT_SIZE
     const unsigned uimax = 65535U;
 
-    TEST_INT ("65535",  -1, -1, -1, 0, _e_, 5, 0,  1, uimax);
-    TEST_INT ("65536",  -1, -1, -1, 0, _ef, 5, 0,  1, uimax);
-    TEST_INT ("99999",  -1, -1, -1, 0, _ef, 5, 0,  1, uimax);
-#elif 4 == _RWSTD_UINT_SIZE
+    TEST_UINT ("65535",  -1, -1, -1, 0, _e_, 5, 0,  1, uimax);
+    TEST_UINT ("65536",  -1, -1, -1, 0, _ef, 5, 0,  1, uimax);
+    TEST_UINT ("99999",  -1, -1, -1, 0, _ef, 5, 0,  1, uimax);
+#elif 4 == _RWSTD_INT_SIZE
     const unsigned uimax = 4294967295U;
 
-    TEST_INT ("4294967295", -1, -1, -1, 0, _e_, 10, 0, -1, uimax);
-    TEST_INT ("4294967296", -1, -1, -1, 0, _ef, 10, 0, -1, uimax);
-    TEST_INT ("9999999999", -1, -1, -1, 0, _ef, 10, 0, -1, uimax);
-#elif 8 == _RWSTD_UINT_SIZE
-    const unsigned uimax = 9223372036854775807U;
+    TEST_UINT ("4294967295", -1, -1, -1, 0, _e_, 10, 0, 1, uimax);
+    TEST_UINT ("4294967296", -1, -1, -1, 0, _ef, 10, 0, 1, uimax);
+    TEST_UINT ("9999999999", -1, -1, -1, 0, _ef, 10, 0, 1, uimax);
 
-    TEST_INT ("9223372036854775807", -1, -1, -1, 0, _e_, 10, 0, -1, uimax);
-    TEST_INT ("9223372036854775808", -1, -1, -1, 0, _ef, 10, 0, -1, uimax);
-    TEST_INT ("9999999999999999999", -1, -1, -1, 0, _ef, 10, 0, -1, uimax);
-#endif   // _RWSTD_UINT_SIZE
+#  if _RWSTD_UINT_MAX < _RWSTD_ULONG_MAX
+    // a negative value wraps modulo ULONG_MAX + 1 and so lies past
+    // UINT_MAX: failbit and the bound (lwg issue 23)
+    TEST_UINT ("-1",         -1, -1, -1, 0, _ef,  2, 0, 1, uimax);
+#  endif   // _RWSTD_UINT_MAX < _RWSTD_ULONG_MAX
+#elif 8 == _RWSTD_INT_SIZE
+    const unsigned uimax = 18446744073709551615U;
+
+    TEST_UINT ("18446744073709551615", -1, -1, -1, 0, _e_, 20, 0, 1, uimax);
+    TEST_UINT ("18446744073709551616", -1, -1, -1, 0, _ef, 20, 0, 1, uimax);
+    TEST_UINT ("99999999999999999999", -1, -1, -1, 0, _ef, 20, 0, 1, uimax);
+#endif   // _RWSTD_INT_SIZE
 
 }
 

@@ -133,20 +133,6 @@ collate, scalar and time oracles.
 Check: the oracle runs over =SUPPORTED= and its disagreements are
 explained or queued.
 
-** TODO The unsigned extractor rows of =27.istream.fmat.arith= never compile
-
-=tests/iostream/27.istream.fmat.arith.cpp= 796 and 887 gate the
-=unsigned short= and =unsigned int= overflow rows on
-=_RWSTD_USHRT_SIZE= and =_RWSTD_UINT_SIZE=, which nothing defines;
-the =unsigned int= block also spells its rows =TEST_INT=, which reads
-an =int=. No row extracts either type, so the =unsigned int= clamp
-without =failbit= (Library) is unpinned. Found 2026-11-02.
-
-Fix: the macros the configuration does define, and =TEST_UINT=.
-
-Check: the rows appear in the =.out= file; the Library entry's rows
-red before its fix, green after.
-
 ** TODO =22.locale.num.put= never puts an =unsigned long long=
 
 =tests/localization/22.locale.num.put.cpp= 1222: =ullong_test= has
@@ -930,7 +916,7 @@ test:
   =tests/localization/22.locale.facet.mt.cpp:130=.
 - No newline at the end of the file:
   =tests/numerics/26.gslice.array.cassign.cpp=.
-- =long long= unguarded: =tests/iostream/27.istream.fmat.arith.cpp:1028=.
+- =long long= unguarded: =tests/iostream/27.istream.fmat.arith.cpp:1038=.
 - POSIX names without a feature macro: =getcwd= in
   =tests/localization/22.locale.messages.cpp:600=, =BC_BASE_MAX= in
   =tests/regress/18.c.limits.stdcxx-988.cpp:53=.

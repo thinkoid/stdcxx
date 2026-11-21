@@ -1501,7 +1501,8 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
   is the 2005 import.
 - **Pins.** `22.locale.num.get` `test_ushrt`, `test_uint`,
   `test_long`, `test_ulong`, `test_llong`, `test_ullong`, the three
-  `_uflow` tests. Row: ch. 3, LWG 23.
+  `_uflow` tests; `27.istream.fmat.arith` `test_ushrt`, `test_uint`.
+  Row: ch. 3, LWG 23.
 
 #### 10.3.7 A grouping mismatch stores the value
 
@@ -1663,10 +1664,9 @@ placeholder since 2006. `22.locale.numpunct`'s narrow
 separator is compared with `localeconv`'s string under the rule of
 10.3.13, and the expected grouping of both punctuation programs
 follows 10.3.14. `unsigned short` and `unsigned int` overflow is
-checked through the facet alone, by `test_ushrt` and `test_uint` of
-`22.locale.num.get`: those of `27.istream.fmat.arith` gate their rows
-on `_RWSTD_USHRT_SIZE` and
-`_RWSTD_UINT_SIZE`, which nothing defines. The four `get` and `put` MT
+checked through the facet, by `test_ushrt` and `test_uint` of
+`22.locale.num.get`, and through the extractor, by the functions of
+the same names in `27.istream.fmat.arith`. The four `get` and `put` MT
 programs were retired on 2026-10-19: the facets hold no state
 (5c1368e6, a701ec25, 72d94f0b, 70070c4b). No row of the family fails
 in any pin.
