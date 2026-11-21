@@ -466,23 +466,6 @@ Fix: the function sets =to_next= to =to=.
 Check: a =self_test= row calls =unshift= with =to_next= null and
 finds it equal to =to=.
 
-** TODO =test_noconv= of =27.filebuf.codecvt= reads =gptr= twice
-
-=test_noconv= in =tests/iostream/27.filebuf.codecvt.cpp= sets both
-=gptr= and =egptr= from =pubbuf::pubgptr (rdbuf)= (739-740);
-=pubegptr= is never called. The =in_avail= assertion after them takes
-~gptr < egptr~ as false whatever the buffer holds, so it always
-expects the file size and never the =egptr () - gptr ()= of a filled
-get area. Right after the open the get area is empty, so the assertion
-passes either way today. The line came with the test in 7a43da7d.
-Seen while the =showmanyc= call of the same function was fixed,
-2026-11-16.
-
-Fix: =egptr= from =pubbuf::pubegptr (rdbuf)=.
-
-Check: =27.filebuf.codecvt= at pin in 15D; the assertion count does
-not change.
-
 ** TODO The macro that keeps the replacement =operator new= out of the driver is named =_RWSTD_TEST_SRC=
 
 =tests/include/rw_new.h= 161-219 defines the replacement =operator

@@ -737,7 +737,7 @@ test_noconv (const char *fname)
     filesize = f.rdbuf ()->in_avail ();
 
     const char *gptr  = pubbuf::pubgptr (rdbuf);
-    const char *egptr = pubbuf::pubgptr (rdbuf);
+    const char *egptr = pubbuf::pubegptr (rdbuf);
 
     rw_assert (filesize == (gptr < egptr ? egptr - gptr : fsize (fname)),
                0, __LINE__,
