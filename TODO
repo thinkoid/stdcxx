@@ -198,24 +198,6 @@ Fix: rows for the four in =23.list.splice=, or a test of
 
 Check: each of 23.2.2.4, p15 to p32 has a row.
 
-** TODO The test driver's generator has the three departures the library's had
-
-=tests/src/rand.cpp= carries the subtractive generator of
-=src/random.cpp= twice, in 32-bit and in 64-bit words (=rw_seed32=
-44-68, =rw_seed64= 94-118), with the three departures the library's
-had: the second index starts 35 slots ahead of the first, where lags
-55 and 24 put it 31 ahead; the seeding loop never writes slot 34; the
-warm-up loop indexes ~[i]~ inside the loop over =ii=. In the
-library's the low bit of the output repeated every 7665 draws; this
-copy is read, not measured. =23.bitset= is its one user and draws
-that bit, ~rw_rand (2U)~ at 88. Seen while the library's generator
-was corrected, 2026-11-15.
-
-Fix: the three corrections of =src/random.cpp=, in both widths; then
-=23.bitset='s count is read against its pin.
-
-Check: the low bit of 2^20 draws of =rw_rand32= has no period.
-
 ** TODO The other members of =allocator= have no test
 
 =20.allocator.members= covers =allocate= and =max_size= of 14882:2003

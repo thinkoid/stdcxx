@@ -48,21 +48,25 @@ rw_seed32 (_RWSTD_UINT32_T seed)
 
     _RWSTD_UINT32_T k = 1;
 
-    for (_RWSTD_SIZE_T i = 0; i != TABLE_SIZE - 1U; ++i) {
-
-        const _RWSTD_SIZE_T ii = 21U * i % TABLE_SIZE;
+    // 21 * i % 55 is another of 1 to 54 for each i: every slot
+    // below the seed's is written once
+    for (_RWSTD_SIZE_T i = 1; i != TABLE_SIZE; ++i) {
+        const _RWSTD_SIZE_T ii = 21U * i % TABLE_SIZE - 1U;
         table32 [ii] =  k;
         k            = seed - k;
         seed         = table32 [ii];
     }
 
+    // four passes over the table before the first draw
     for (_RWSTD_SIZE_T i = 0; i != 4U; ++i) {
         for (_RWSTD_SIZE_T ii = 0; ii != TABLE_SIZE; ++ii)
-            table32 [i] = table32 [i] - table32 [(i + 31U) % TABLE_SIZE];
+            table32 [ii] -= table32 [(ii + 31U) % TABLE_SIZE];
     }
 
+    // the second index runs 31 slots ahead of the first, at
+    // the value drawn 24 draws before
     inx32 [0] = 0U;
-    inx32 [1] = TABLE_SIZE * 2U / 3U - 1U;
+    inx32 [1] = 31U;
 }
 
 
@@ -98,21 +102,25 @@ rw_seed64 (_RWSTD_UINT64_T seed)
 
     _RWSTD_UINT64_T k = 1;
 
-    for (_RWSTD_SIZE_T i = 0; i != TABLE_SIZE - 1U; ++i) {
-
-        const _RWSTD_SIZE_T ii = 21U * i % TABLE_SIZE;
+    // 21 * i % 55 is another of 1 to 54 for each i: every slot
+    // below the seed's is written once
+    for (_RWSTD_SIZE_T i = 1; i != TABLE_SIZE; ++i) {
+        const _RWSTD_SIZE_T ii = 21U * i % TABLE_SIZE - 1U;
         table64 [ii] =  k;
         k            = seed - k;
         seed         = table64 [ii];
     }
 
+    // four passes over the table before the first draw
     for (_RWSTD_SIZE_T i = 0; i != 4U; ++i) {
         for (_RWSTD_SIZE_T ii = 0; ii != TABLE_SIZE; ++ii)
-            table64 [i] = table64 [i] - table64 [(i + 31U) % TABLE_SIZE];
+            table64 [ii] -= table64 [(ii + 31U) % TABLE_SIZE];
     }
 
+    // the second index runs 31 slots ahead of the first, at
+    // the value drawn 24 draws before
     inx64 [0] = 0U;
-    inx64 [1] = TABLE_SIZE * 2U / 3U - 1U;
+    inx64 [1] = 31U;
 }
 
 
