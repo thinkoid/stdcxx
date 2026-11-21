@@ -566,19 +566,6 @@ Fix: =cvt= leaves.
 
 Check: the tests build; the suite at pin.
 
-** TODO A comment in =22.locale.messages= names the Visual C++ =_open=
-
-=tests/localization/22.locale.messages.cpp= 47 includes =<fcntl.h>=
-"for mode flags for _open". =_open= is the Visual C++ name; the test
-calls =open= with =O_RDONLY= (639, 671 and 690). The comment came in
-with the include in 2006 (d5f1c0fb). Seen while the
-=_RWSTD_NO_NEW_HEADER= condition around the include left,
-2026-11-16.
-
-Fix: the comment names =open= and =O_RDONLY=.
-
-Check: none; a comment.
-
 ** TODO =%{t}= prints no =tm_gmtoff=
 
 =_rw_fmttm= (=tests/src/printf.cpp= 1612), which formats the

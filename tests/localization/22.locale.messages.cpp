@@ -44,7 +44,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>      // for getcwd()
-#include <fcntl.h>         // for mode flags for _open
+#include <fcntl.h>         // for open(), O_RDONLY
 
 #undef open
 #undef close
