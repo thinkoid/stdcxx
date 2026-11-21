@@ -148,22 +148,6 @@ and the multiple containers.
 
 Check: each member of 23.3.1 to 23.3.4 has a row.
 
-** TODO =list='s =sort=, =reverse=, =unique= and =remove= have no test
-
-=tests/include/rw_lists.h= 162-192 names the signatures of =remove=,
-=remove_if=, =unique=, =merge=, =sort= and =reverse=, and no test
-under =tests/containers= calls one of them through it:
-=23.list.splice= covers =splice= and =merge= with rows of its own,
-and nothing covers the other four. =sort= and =reverse= are built on
-the range =splice=, so a change there is checked by a probe alone.
-Seen while the range =splice='s assertions were corrected,
-2026-11-14.
-
-Fix: rows for the four in =23.list.splice=, or a test of
-[lib.list.ops] on the harness.
-
-Check: each of 23.2.2.4, p15 to p32 has a row.
-
 ** TODO The =limits= example expects the =traps= of an x86-64 host
 
 =examples/manual/out/limits.out= 29 holds ~traps = true~ for
