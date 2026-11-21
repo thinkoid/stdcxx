@@ -1704,7 +1704,8 @@ run_test (int, char*[])
 
         // assert that converted file contents are the same
         // as the originally generated buffer
-        const long len = std::size_t (n) < buflen ? std::size_t (n) : buflen;
+        const std::size_t len =
+            std::size_t (n) < buflen ? std::size_t (n) : buflen;
         for (std::size_t i = 0; i != len; ++i) {
             if (tmpbuf [i] != buffer [i]) {
                 rw_assert (0, 0, __LINE__,

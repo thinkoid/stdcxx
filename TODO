@@ -466,17 +466,6 @@ Fix: the function sets =to_next= to =to=.
 Check: a =self_test= row calls =unshift= with =to_next= null and
 finds it equal to =to=.
 
-** TODO =27.filebuf.codecvt= compares a =size_t= index with a =long= length
-
-=run_test= in =tests/iostream/27.filebuf.codecvt.cpp= (1707-1708)
-defines ~const long len~ from two =size_t= values and runs a =size_t=
-index up to it, so GCC 16 warns of a comparison between signed and
-unsigned on the loop's condition. Seen 2026-11-10.
-
-Fix: =len= is a =std::size_t=.
-
-Check: the test compiles without the warning and holds at pin.
-
 ** TODO =test_noconv= of =27.filebuf.codecvt= reads =gptr= twice
 
 =test_noconv= in =tests/iostream/27.filebuf.codecvt.cpp= sets both
