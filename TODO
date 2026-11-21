@@ -122,19 +122,6 @@ collate, scalar and time oracles.
 Check: the oracle runs over =SUPPORTED= and its disagreements are
 explained or queued.
 
-** TODO =22.locale.name= checks nothing on a host without =en_US=
-
-=tests/localization/22.locale.name.cpp= hard-codes =en_US= and
-=en_US.iso88591= and has no gate on the C library knowing them;
-before 3c882e6a its row counted 0 assertions with status 0 on a host
-with =en_US.UTF-8= alone, a pass that checked nothing. Hypothesis
-from reading, 2026-11-02.
-
-Fix: query the host for the names (=rw_locale_query=) or warn when
-they are absent, as the other host-dependent tests do.
-
-Check: the row on a host without =en_US=: a warning, not 0/0.
-
 ** TODO The =locale= constructors' exceptions have no test
 
 No test under =tests/localization= constructs a =locale= from a bad

@@ -24,6 +24,7 @@
  *
  **************************************************************************/
 
+#include <clocale>    // for LC_ALL, setlocale()
 #include <cstdio>     // for printf()
 #include <cstring>    // for strcmp()
 #include <locale>     // for locale
@@ -59,6 +60,32 @@ void test_combined_name ()
 #endif
     };
 
+    // the locales of the C library the combination names; a host
+    // whose C library lacks one cannot construct it (22.1.1.2, p7),
+    // and the test then has nothing to check
+    const char* const native[] = {
+#if defined __linux
+        "en_US.utf8", "en_US", "en_US.iso88591"
+#else
+        "C"
+#endif
+    };
+
+    const std::size_t nnative = sizeof native / sizeof *native;
+
+    std::size_t i = 0;
+    while (i != nnative && std::setlocale (LC_ALL, native [i]))
+        ++i;
+
+    std::setlocale (LC_ALL, "C");
+
+    if (i != nnative) {
+        rw_warn (0, 0, __LINE__,
+                 "the C library knows no locale %#s, test skipped",
+                 native [i]);
+        return;
+    }
+
     std::locale loc;
 
     try {
@@ -66,8 +93,8 @@ void test_combined_name ()
         loc = std::locale (name);
     }
     catch (...) {
-        rw_error (0, 0, __LINE__,
-                  "std::locale(%#s) threw an exception\n", name);
+        rw_assert (false, 0, __LINE__,
+                   "std::locale(%#s) threw an exception\n", name);
         return;
     }
 
