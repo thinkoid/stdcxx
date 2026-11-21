@@ -394,7 +394,6 @@ void test_cons (T*, Allocator*, const ContRangeBase<
                 const ContainerTestCaseData<T>  &tdata)
 {
     typedef std::list <T, Allocator>      List;
-    typedef typename List::iterator       ListIter;
     typedef typename List::const_iterator ListCIter;
 
     const ContainerFunc     &func  = tdata.func_;
@@ -638,7 +637,6 @@ void test_op_set (T*, Allocator*,
                   const ContainerTestCaseData<T> &tdata)
 {
     typedef std::list <T, Allocator>      List;
-    typedef typename List::iterator       ListIter;
     typedef typename List::const_iterator ListCIter;
 
     const ContainerFunc     &func  = tdata.func_;

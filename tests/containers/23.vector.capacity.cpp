@@ -134,7 +134,7 @@ void test_capacity (Vector::size_type nelems)
     try {
         v.reserve (too_much);
     }
-    catch (std::length_error) {
+    catch (std::length_error&) {
         caught = "";
     }
     catch (...) {

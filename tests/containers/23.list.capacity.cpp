@@ -304,7 +304,6 @@ void test_capacity (T*, Allocator*,
                     const ContainerTestCaseData<T> &tdata)
 {
     typedef std::list<T, Allocator>       List;
-    typedef typename List::iterator       ListIter;
     typedef typename List::const_iterator ListCIter;
     typedef ListState<List>               ListState;
 

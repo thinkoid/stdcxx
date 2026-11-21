@@ -29,6 +29,7 @@
 #include <cassert>   // for assert()
 #include <cstddef>   // for size_t
 #include <memory>    // for allocator
+#include <new>       // for bad_alloc
 #include <vector>    // for vector
 
 
@@ -46,7 +47,12 @@ struct EmptyAllocator: std::allocator<T>
     EmptyAllocator (const EmptyAllocator<U> &rhs)
         : std::allocator<T>(rhs) { }
 
-    void* operator new (std::size_t) { return 0; }
+    // found only if vector derives from its allocator (C++03 5.3.4,
+    // p9); fails the allocation as 3.7.3.1, p3 requires, by throwing,
+    // so a vector that does derive ends the test in terminate; a
+    // throw () function may return null instead, but the new-expression
+    // then constructs nothing and the test passes with such a vector
+    void* operator new (std::size_t) { throw std::bad_alloc (); }
     void operator delete (void*) { }
 };
 

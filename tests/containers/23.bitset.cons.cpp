@@ -292,7 +292,6 @@ void test_string_ctor (std::bitset<N>*,
     static const char* const tpfx = type_prefix (charT ());
 
     typedef std::bitset<N>                              Bitset;
-    typedef std::basic_string<charT, Traits, Allocator> String;
 
     static const char* const exstr[] = {
         "failed to throw",

@@ -714,7 +714,6 @@ void test_complexity ()
     rw_info (0, 0, 0, "std::vector<UserClass>::erase(iterator)");
     rw_info (0, 0, 0, "std::vector<UserClass>::erase(iterator, iterator)");
     
-    typedef std::vector<UserClass, std::allocator<UserClass> > Vector;
     typedef Vector::iterator                                   VectorIter;
     typedef Vector::size_type                                  VectorSize;
     
@@ -1051,9 +1050,6 @@ void test_push_back (const std::vector<T, Allocator>*)
     typedef std::vector<T, Allocator>        MyVector;
     typedef typename MyVector::value_type    ValueType;
     typedef typename MyVector::size_type     SizeType;
-    typedef typename MyVector::pointer       Pointer;
-    typedef typename MyVector::const_pointer ConstPointer;
-    typedef typename MyVector::iterator      Iterator;
 
     MyVector v1;
     MyVector v2;

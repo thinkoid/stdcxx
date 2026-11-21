@@ -275,9 +275,7 @@ void test_assign (T*, Allocator*,
                   const ContainerTestCaseData<T>                  &tdata)
 {
     typedef std::list <T, Allocator>      List;
-    typedef typename List::iterator       ListIter;
     typedef typename List::const_iterator ListCIter;
-    typedef ListState<List>               ListState;
 
     const ContainerFunc     &func  = tdata.func_;
     const ContainerTestCase &tcase = tdata.tcase_;

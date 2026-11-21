@@ -43,6 +43,16 @@ void operator delete (void *ptr) _NEW_THROWS (())
     std::free (ptr);
 }
 
+#ifndef _RWSTD_NO_OPERATOR_DELETE_SIZED
+
+// code compiled with sized deallocation calls this form
+void operator delete (void *ptr, std::size_t) _NEW_THROWS (())
+{
+    std::free (ptr);
+}
+
+#endif   // _RWSTD_NO_OPERATOR_DELETE_SIZED
+
 
 struct S {
     const S* const self;

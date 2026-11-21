@@ -296,37 +296,6 @@ Fix: rows for each in =20.allocator.members=.
 
 Check: each paragraph of 20.4.1.1 and of 20.4.1.2 has a row.
 
-** TODO Ten tests build with warnings of their own
-
-GCC 16 in 15D warns on the sources of eight container tests and two
-=valarray= ones, apart from what the library's headers draw:
-
-- =-Wunused-local-typedefs=: =23.bitset.cons= 295 (=String=),
-  =23.list.assign= 278 and 280, =23.list.capacity= 307,
-  =23.list.cons= 397 and 641, =23.list.erase= 275 (=ListIter=,
-  =ListState=), =23.vector.modifiers= 1054 to 1056.
-- =-Wshadow=: =23.vector.modifiers= 717, a local =Vector= over the
-  global one.
-- =-Wcatch-value=: =23.vector.capacity= 137 catches
-  =std::length_error= by value.
-- =23.vector.stdcxx-494= 49: an =operator new= that returns null
-  without ~throw ()~.
-- =-Wsized-deallocation=: =26.valarray.members.stdcxx-313= and
-  =26.valarray.unary.stdcxx-314= replace =operator delete= without
-  the sized form.
-
-Hypothesis: the rest of the suite has more of each; only the list,
-vector, bitset and =valarray= tests were built and read. Seen while the
-Containers entries were closed, 2026-11-14.
-
-Fix: the unused typedefs leave, the catch takes a reference, the
-local takes another name; the replaced =operator new= and =operator
-delete= are the regression tests' subjects and are read before they
-are touched.
-
-Check: the list, vector, bitset and =valarray= tests build in 15D
-with no warning that names a file under =tests=.
-
 ** TODO =27.ostream= never runs its unformatted tests
 
 =tests/iostream/27.ostream.cpp= leaves the call of =test_unformatted=
