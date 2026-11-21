@@ -1625,30 +1625,14 @@ Check: =git grep stdcxx-build -- doc= finds the build recipes alone.
 
 Chapter 2 of =doc/notes/ref-test-baseline.md= says a host with
 =en_US.UTF-8= alone runs "=22.locale.codecvt= 306 for 618 in 15D".
-The pin has 688 since 2026-11-08, and the 306 dates from the same
-measurement as the 618, so neither number describes the tree. Seen
-while the six pins were replaced, 2026-11-15.
+The pin has 696 since 2026-11-21 (434ebc8b), and the 306 dates from
+the same measurement as the 618, so neither number describes the
+tree. Seen while the six pins were replaced, 2026-11-15.
 
 Fix: the row measured again on a host with =en_US.UTF-8= alone, or
 the sentence without the numbers.
 
 Check: the pair equals the row of such a host's table and of the pin.
-
-** TODO The pin counts in =ref-locale.md= 10.4 lag the baseline
-
-The "What the tests pin" tables carry the 15D assertion count of each
-test. Two rows of 10.4 lag =doc/notes/baseline/15D.txt=:
-=22.locale.num.get= says 51990, the pin is 55206 (0a3b2cca); and
-=22.locale.money.put= says 1346, the pin is 1354 (5438f794, d5572cb8,
-2ec94642). The commits changed the pin and not the table. Seen at the
-codecvt landing, 2026-11-07, and the =num.get= row at the
-empty-separator change, 2026-11-08.
-
-Fix: the two counts; the commit that re-pins a row edits its table
-row in the same commit.
-
-Check: every count in the two tables equals the row's =ASSERTS= in
-=15D.txt=.
 
 ** TODO Two chapter 2 rows of =ref-conformance.md= leave out an effect their source states
 
@@ -1718,6 +1702,52 @@ is gone.
 
 Check: each of the three citations names a line that holds its fact,
 or the sentence says the fact is gone.
+
+** TODO Chapter 4 of =ref-test-baseline.md= leaves out =27.istream.fmat.arith=
+
+Chapter 2 of =doc/notes/ref-test-baseline.md= says "Chapter 4 lists
+where the four differ". =27.istream.fmat.arith= counts 27128
+assertions in =11S.txt=, =15D.txt= and =12D.txt= and 27008 in
+=11s.txt=; the Clang pins have the same pair. The row has differed
+between 64-bit and 32-bit since the pins of 06c93bed (26808 and
+26728), and the table of chapter 4 has no row for it and its reasons
+no line. Seen while the eight pins were replaced from the run at
+a8ca14b5, 2026-11-21.
+
+Fix: a row for the test in the table and a reason among the reasons,
+found in the test: which rows the 32-bit build skips, and why.
+
+Check: every row in which =11S.txt=, =11s.txt=, =15D.txt= and
+=12D.txt= differ is in the table, with its four counts.
+
+** TODO =ref-test-baseline.md= says the re-pins since df2646ee moved all six tables alike
+
+Chapter 2 of =doc/notes/ref-test-baseline.md= opens the re-pin list
+with "From df2646ee on, each commit moved the same rows by the same
+count in all six tables". The tables are eight since 2026-11-17, and
+several lines of the list give a 32-bit count of their own: 76b24202,
+60c683eb, f58562cd, ebba8126 and the line of a8ca14b5. Seen while
+that line was added, 2026-11-21.
+
+Fix: the sentence says the lines give the count of every table unless
+they name a configuration or the 32-bit ones, or goes.
+
+Check: the sentence agrees with every line of the list.
+
+** TODO =ref-conformance.md= 4 counts six debug configurations in the baseline
+
+Chapter 4 of =doc/notes/ref-conformance.md= says the baseline record
+"covers six debug configurations: GCC and Clang, each with 64-bit
+archive, 32-bit archive and 64-bit reentrant shared builds". Since
+b7e9e921 it covers eight, 12D and 12D-clang among them, which are
+optimized. Seen while the pins were replaced from the run at
+a8ca14b5, 2026-11-21.
+
+Fix: the sentence names the eight configurations, the optimized pair
+among them.
+
+Check: the configurations the sentence names are the files under
+=doc/notes/baseline/= that end in =.txt=.
 
 ** TODO README section 5 and the configuration
 

@@ -623,7 +623,7 @@ categories in `setlocale`'s order. Pins: nothing.
 
 | program | covers | 15D |
 |---|---|---|
-| `22.locale.globals` | `has_facet` and `use_facet` of every standard facet, narrow and wide, in the classic and every named locale; byname facets present in named locales, `bad_cast` in the classic one | 78320 |
+| `22.locale.globals` | `has_facet` and `use_facet` of every standard facet, narrow and wide, in the classic and every named locale; byname facets present in named locales, `bad_cast` in the classic one | 78327 |
 | `22.locale.cons.mt` | one named locale constructed by four threads at once; the name and two-locale combinations and their equalities | 800 |
 | `22.locale.facet.mt` | facet reference counts | 8 |
 | `22.locale.id.mt` | the first use of a user facet id | 999 |
@@ -1116,17 +1116,17 @@ design (e6c7726b); no recorded decision. Pinned by: no test.
 | `22.locale.ctype` | classification, case, narrow, widen; classic, byname over generated and libc locales | 91101 |
 | `22.locale.ctype.is` | `is`, both forms, both widths | 25438 |
 | `22.locale.ctype.scan` | `scan_is`, `scan_not` | 17132 |
-| `22.locale.ctype.tolower` | `tolower`, both forms | 19396 |
-| `22.locale.ctype.toupper` | `toupper`, both forms | 19396 |
+| `22.locale.ctype.tolower` | `tolower`, both forms | 19395 |
+| `22.locale.ctype.toupper` | `toupper`, both forms | 19395 |
 | `22.locale.ctype.narrow` | `narrow`, `widen` against the C library | 9768, 2 warnings |
 | `22.locale.ctype.mt` | first fill of the narrow and widen caches, gated | 800 |
-| `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, also in a locale beside a "C" database, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state, unknown names, a facet constructed directly | 688 |
+| `22.locale.codecvt` | the virtuals of the four facets, `in`/`out` tables, the UTF-8 names, also in a locale beside a "C" database, five generated locales against `tests/etc` fixtures and glibc, `@UCS`, invalid state, unknown names, a facet constructed directly | 696 |
 | `22.locale.codecvt.do_out` | `out` over algorithmic, table and libc encodings | 1494 |
 | `22.locale.codecvt.iso2022` | `ISO-2022-JP` and `-JP-2`: `in`, `out`, `unshift` and `length` in one call and across calls, against glibc's `iconv` | 1500 |
 | `22.locale.codecvt.length` | `length` over the same three, and the byname narrow facet | 484 |
 | `22.locale.codecvt.mt` | first mapping of each component database of `ISO-2022-JP-2`, one per round, gated | 48 |
 | `22.locale.codecvt.stdcxx-435` | `in` of one character in a multibyte locale | NOUT |
-| `27.filebuf.codecvt` | a derived `codecvt<char, char, mbstate_t>` under `basic_filebuf` | 205586 |
+| `27.filebuf.codecvt` | a derived `codecvt<char, char, mbstate_t>` under `basic_filebuf` | 205590 |
 
 Rows from `doc/notes/baseline/15D.txt`; NOUT is a regression program
 that writes no table. The two warnings of `ctype.narrow` are its
@@ -1135,8 +1135,6 @@ exercised" there.
 
 Known gaps and their `TODO` entries:
 
-- "Two ctype test defects": `ctype.is` line 822 tests `'\xa0'` where
-  `'\xa2'` is meant; `tolower` and `toupper` have an unbraced `TEST`.
 - "A codecvt oracle": none exists.
 - Not covered by any row: `ctype<wchar_t>` at or above 256 beyond
   the classic case maps' one row each, and the
@@ -1645,12 +1643,12 @@ built with `_RWSTD_NO_BYNAME_FACET`, hold one static facet each.
 
 | program | covers | 15D |
 |---|---|---|
-| `22.locale.num.get` | every virtual, both widths, three iterator types: bases, signs, grouping, overflow, underflow, long input, `bad_alloc` on wrap | 51990, 0 failed |
+| `22.locale.num.get` | every virtual, both widths, three iterator types: bases, signs, grouping, overflow, underflow, long input, `bad_alloc` on wrap | 58410, 0 failed |
 | `22.locale.num.put` | every virtual, inf and NaN, grouping, widening, a negative precision | 1559 |
 | `22.locale.numpunct` | "C" values, a facet used alone, every host locale against `localeconv`, a multibyte separator, an empty separator on both paths, the bool names and a `boolalpha` round trip under a database locale it builds | 8950 |
 | `22.locale.numpunct.mt` | first use of a fresh facet from many threads (7c93badb) | 1200 |
 | `22.locale.money.get` | patterns, signs, symbols, white-space credit, long input and separators, `frac_digits` 305 and 4000, the digits as they appear | 4160 |
-| `22.locale.money.put` | `long double` and string, patterns, the two spaces, grouping | 1346 |
+| `22.locale.money.put` | `long double` and string, patterns, the two spaces, grouping | 1354 |
 | `22.locale.moneypunct` | every host locale against `localeconv`, all four facets, composite names, an empty separator | 135028 |
 | `22.locale.moneypunct.mt` | first use of a fresh facet (79709615) | 1200 |
 | `22.locale.num.put.stdcxx-2` | `showpoint` with a zero value | NOUT |
@@ -1897,7 +1895,7 @@ exception. An extension.
 
 | program | covers | 15D |
 |---|---|---|
-| `22.locale.collate` | the test locale's table order, five pairs, narrow and wide, and their agreement; a `codepoint_collation` locale; the byname facets over sorted fixtures of six definitions built with `-w --no_position`; `transform` and `compare` against `strxfrm` and `strcoll` in the C library's single-byte locales; embedded NULs; `hash`; a wide character outside the charmap | 145873 |
+| `22.locale.collate` | the test locale's table order, five pairs, narrow and wide, and their agreement; a `codepoint_collation` locale; the byname facets over sorted fixtures of six definitions built with `-w --no_position`; `transform` and `compare` against `strxfrm` and `strcoll` in the C library's single-byte locales; embedded NULs; `hash`; a wide character outside the charmap | 145883 |
 | `22.locale.collate.stdcxx-1010` (regress) | sorting with a French locale, falling back on `"C"` | NOUT |
 | `22.locale.messages` | `has_facet`, `open` and `close` with a double close, descriptor leaks, `get` through the catalog locale's `codecvt`, `NLSPATH`, a stress loop | 366 |
 | `22.locale.messages.mt` | racing `open` and `close` | 600 |

@@ -1,6 +1,6 @@
 # The test-suite baseline
 
-As of 2026-11-17 (5b56153e), all eight configurations.
+As of 2026-11-21 (a8ca14b5), all eight configurations.
 
 The whole suite, run under its own harness on the current toolchain.
 It is the reference for every change: which tests fail, by how much,
@@ -106,10 +106,10 @@ uppercase 64-bit.
 
 | configuration | file | programs | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|---|---|
-| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 274 | 12,587,735 | 0 | 0 | 0 |
-| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 274 | 12,587,538 | 0 | 0 | 0 |
-| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 274 | 12,590,259 | 0 | 0 | 0 |
-| 12D, optimized, shared, threads, 64-bit | `baseline/12D.txt` | 274 | 12,590,260 | 0 | 0 | 0 |
+| 11S, debug, archive, 64-bit | `baseline/11S.txt` | 274 | 12,595,529 | 0 | 0 | 0 |
+| 11s, debug, archive, 32-bit | `baseline/11s.txt` | 274 | 12,595,288 | 0 | 0 | 0 |
+| 15D, debug, shared, threads, 64-bit | `baseline/15D.txt` | 274 | 12,598,053 | 0 | 0 | 0 |
+| 12D, optimized, shared, threads, 64-bit | `baseline/12D.txt` | 274 | 12,598,054 | 0 | 0 | 0 |
 
 Chapter 4 lists where the four differ.
 
@@ -396,10 +396,30 @@ all six tables:
   `12D-clang.txt` is new beside it, the same table row for row. It is
   derived from one run of 12D-clang on x86-64 at 5b56153e; a second
   build and run of the same sources equals it.
+- a8ca14b5, 2026-11-21: all eight tables replaced whole from one run
+  of the eight configurations on x86-64, in which ten rows moved with
+  the commits that changed their tests, by the same count in every
+  table but where the line says. `20.allocator.members`, 40 to 112:
+  rows for the members other than `allocate` and `max_size`
+  (bb342522). `22.locale.codecvt`, 688 to 696 (692 to 696 on 32-bit):
+  `wcsrtombs` gets a terminated buffer (434ebc8b).
+  `22.locale.ctype.tolower` and `toupper`, 19,396 to 19,395 each: the
+  braced `TEST` drops the stale assertion of the `char` pass
+  (c678fd18). `22.locale.num.get`, 55,206 to 58,410: `unsigned short`
+  (f5c7bd37). `22.locale.num.put`, 1,467 to 1,559 (1,463 to 1,555 on
+  32-bit): `unsigned long long`, and its runtime warnings, 2 to 0
+  (e90039b9). `26.accumulate` and `26.inner.product`, 2,048 to 4,096
+  each: the call counts (48c779d0). `27.filebuf.codecvt`, 205,586 to
+  205,590: `unshift` and a `noconv` `out` of the test facet
+  (c759e0e6, d4b5e48a). `27.istream.fmat.arith`, 26,808 to 27,128
+  (26,728 to 27,008 on 32-bit): the extractor rows of the four
+  unsigned types (8e6572d4, 411ee6b6). No other row moved; 274
+  programs in each.
 
 The runtime warnings of every table fell from 60 to 42 with those of
-`22.locale.time.get`, and to 33 when `2.smartptr.shared` and
-`2.smartptr.weak` left with `include/tr1`.
+`22.locale.time.get`, to 33 when `2.smartptr.shared` and
+`2.smartptr.weak` left with `include/tr1`, and to 31 when
+`22.locale.num.put` lost its two (e90039b9).
 
 ## 3. What fails
 
@@ -461,8 +481,7 @@ and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 |---|---|---|---|---|
 | `18.numeric.special.float` | 134 | 119 | 134 | 134 |
 | `20.temp.buffer` | 10888 | 10788 | 10888 | 10888 |
-| `22.locale.num.put` | 1467 | 1463 | 1467 | 1467 |
-| `22.locale.codecvt` | 688 | 692 | 688 | 688 |
+| `22.locale.num.put` | 1559 | 1555 | 1559 | 1559 |
 | `26.c.math.depr` | 59 | 57 | 59 | 59 |
 | `23.deque.iterators` | 4921862 | 4921862 | 4921862 | 4921863 |
 | `atomic_add`, `atomic_xchg` | 0 | 0 | 66, 22 | 66, 22 |
@@ -528,10 +547,10 @@ pinned the same way. `analysis-clang.md` records what it took.
 
 | configuration | assertions | failed | non-zero exits | signalled |
 |---|---|---|---|---|
-| 11S-clang | 12,587,735 | 0 | 0 | 0 |
-| 11s-clang | 12,587,553 | 0 | 0 | 0 |
-| 15D-clang | 12,590,259 | 0 | 0 | 0 |
-| 12D-clang | 12,590,260 | 0 | 0 | 0 |
+| 11S-clang | 12,595,529 | 0 | 0 | 0 |
+| 11s-clang | 12,595,303 | 0 | 0 | 0 |
+| 15D-clang | 12,598,053 | 0 | 0 | 0 |
+| 12D-clang | 12,598,054 | 0 | 0 | 0 |
 
 Measured at 44420f7a, they matched the GCC tables of that date row
 for row, with one exception. `18.numeric.special.float` runs 134
