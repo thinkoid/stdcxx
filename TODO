@@ -198,19 +198,6 @@ Fix: rows for the four in =23.list.splice=, or a test of
 
 Check: each of 23.2.2.4, p15 to p32 has a row.
 
-** TODO The other members of =allocator= have no test
-
-=20.allocator.members= covers =allocate= and =max_size= of 14882:2003
-20.4.1.1. =address=, =deallocate= (p8-10), =construct= and =destroy=
-(p12-13), =rebind=, the converting constructor and the two
-comparisons of 20.4.1.2 have no row; the tests of the containers
-reach them and compare nothing of theirs. Seen while =allocate= was
-made to check its count, 2026-11-15.
-
-Fix: rows for each in =20.allocator.members=.
-
-Check: each paragraph of 20.4.1.1 and of 20.4.1.2 has a row.
-
 ** TODO =27.ostream= never runs its unformatted tests
 
 =tests/iostream/27.ostream.cpp= leaves the call of =test_unformatted=
