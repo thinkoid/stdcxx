@@ -300,12 +300,10 @@ static char rw_locale_root [PATH_MAX];
 static void atexit_rm_locale_root ()
 {
     const bool e = rw_enable (rw_error, false);
-    const bool n = rw_enable (rw_note , false);
 
     // remove temporary locale databases created by the test
     rw_system (SHELL_RM_RF "%s", rw_locale_root);
 
-    rw_enable (rw_note , n);
     rw_enable (rw_error, e);
 }
 

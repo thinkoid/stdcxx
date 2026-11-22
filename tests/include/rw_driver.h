@@ -145,6 +145,7 @@ rw_warn (int, const char*, int, const char*, ...);
 
 /**
  * Records and optionally issues a diagnostic of severity 2.
+ * Exit handlers registered by the test may issue notes after the summary.
  *
  * @see #rw_fatal
  */

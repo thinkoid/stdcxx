@@ -27,21 +27,6 @@ at the top.
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
 
-** TODO A test that generates a locale ends on a driver warning
-
-A test that builds a locale with =rw_localedef= prints
-~driver.cpp:1392: rw_note(): warning: test finished, cannot call~ as
-it exits. =atexit_rm_locale_root= (=tests/src/locale.cpp=) disables
-notes and calls =rw_system=, whose =_rw_vsystem=
-(=tests/src/process.cpp= 158) calls =rw_note=; =_rw_check_init=
-warns that the driver is done before the disabled note is dropped.
-Seen in =22.locale.time.get= and =22.locale.time.put=, 2026-11-04.
-
-Fix: the removal without =rw_system='s note, or =_rw_check_init=
-silent for a disabled diagnostic; a decision.
-
-Check: both tests end without the line; the pins unchanged.
-
 ** TODO The suite against other libraries
 
 The suite tests the C++03 library through clauses 18 to 27. Most of

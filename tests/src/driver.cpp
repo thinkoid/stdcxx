@@ -796,6 +796,22 @@ _rw_setopts_compat ()
 
 /************************************************************************/
 
+extern "C" {
+
+static void
+_rw_disable_notes ()
+{
+    rw_enable (rw_note, false);
+
+    if (_rw_ftestout && _rw_ftestout != rw_stdout)
+        fclose ((FILE*)(void*)_rw_ftestout);
+
+    _rw_ftestout = 0;
+    _rw_driver_done = 1;
+}
+
+}
+
 int
 rw_vtest (int argc, char **argv,
           const char *file_name,
@@ -814,6 +830,14 @@ rw_vtest (int argc, char **argv,
     _rw_ftestout = rw_stdout;
 
     _rw_driver_init = 1;
+
+    // Registered before the test installs its own cleanup handlers,
+    // so their notes can still use the test output.
+    if (atexit (_rw_disable_notes)) {
+        rw_fprintf (rw_stderr, "%s:%d: could not register note shutdown\n",
+                    __FILE__, __LINE__);
+        return 1;
+    }
 
     if (optstr && 0 > rw_vsetopts (optstr, va)) {
         rw_fprintf (rw_stderr,
@@ -923,8 +947,6 @@ rw_vtest (int argc, char **argv,
         // fatal test error (via a call to rw_fatal())
     }
 
-    _rw_driver_done = 1;
-
     static const char tblrow[] =
         "+-----------------------+----------+----------+----------+";
 
@@ -988,11 +1010,6 @@ rw_vtest (int argc, char **argv,
                     ndiags [diag_warn][1] + ndiags [diag_xwarn][1],
                     ndiags [diag_assert][0],
                     ndiags [diag_assert][1] + ndiags [diag_xassert][1]);
-    }
-
-    if (_rw_ftestout && _rw_ftestout != rw_stdout) {
-        fclose ((FILE*)(void*)_rw_ftestout);
-        _rw_ftestout = 0;
     }
 
     return status;
