@@ -27,21 +27,6 @@ at the top.
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
 
-** TODO =operator_delete= reads the header before any pointer it is given
-
-The in-hand check reads 48 bytes before the pointer before it knows
-the pointer is a live block. On a freed block that is a read of
-freed memory: harmless under glibc for =0.new='s double delete
-(=self_= reads as the fill), a fault for an =mmap=-served block that
-=malloc= has unmapped (none in the suite), and a heap-use-after-free
-report under AddressSanitizer, where the old walk never touched freed
-memory. Hypothesis, 2026-11-05.
-
-Fix: a decision after the next sanitizer run of =0.new=: accept the
-report in the self-test, or keep a side table of live pointers.
-
-Check: =0.new= under 15D-asan.
-
 ** TODO A test that generates a locale ends on a driver warning
 
 A test that builds a locale with =rw_localedef= prints

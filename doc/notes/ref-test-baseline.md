@@ -493,6 +493,20 @@ that takes the machine's memory. In thread-safe builds the limit
 grows by 128 MiB per processor, since each thread maps an 8 MiB stack
 and a 64 MiB `malloc` arena. On 32 processors 15D runs under 5 GiB.
 
+### 3.3 The double delete in `0.new`
+
+`test_double_delete` in `tests/self/0.new.cpp` frees a block twice
+and expects the test allocator to raise `SIGABRT` on the second call.
+On the first call, `operator_delete` in `tests/src/new.cpp` unlinks
+the block and frees its header. On the second call it reads
+`hdr->self_` from that freed header before it searches the list of
+live blocks. The diagnostic itself therefore reads freed memory.
+
+The ordinary 15D run passes all 26 assertions. AddressSanitizer can
+report the header read before the allocator reaches its intended
+diagnostic. If the allocator has unmapped the block, the read can
+fault there instead.
+
 ## 4. Differences between configurations
 
 | row | 11S | 11s | 15D | 12D |
