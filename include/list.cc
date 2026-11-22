@@ -335,7 +335,7 @@ _C_adjacent_merge (iterator __first1, iterator __last1, iterator __last2)
 {
     difference_type __n = std::distance (__first1, __last1);
 
-    for (iterator __first2 = __last1; __n >= 0 && !(__first2 == __last2); ) {
+    for (iterator __first2 = __last1; 0 < __n && !(__first2 == __last2); ) {
         if (*__first2 < *__first1) {
             iterator __next = __first2;
             splice (__first1, *this, __first2, ++__next);
@@ -357,7 +357,7 @@ _C_adjacent_merge (iterator __first1, iterator __last1, iterator __last2,
 {
     difference_type __n = std::distance (__first1, __last1);
 
-    for (iterator __first2 = __last1; __n >= 0 && !(__first2 == __last2); ) {
+    for (iterator __first2 = __last1; 0 < __n && !(__first2 == __last2); ) {
         if (__cmp (*__first2, *__first1)) {
             iterator __next = __first2;
             splice (__first1, *this, __first2, ++__next);

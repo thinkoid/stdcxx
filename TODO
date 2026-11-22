@@ -22,29 +22,6 @@ the clause of the standard they fall under, in clause order, and the
 tree's own housekeeping comes last. Within a bin the easiest entry is
 at the top.
 
-** Containers: =list=
-
-*** TODO =list::sort= compares an element with itself at the end of each merge
-
-=_C_adjacent_merge= in =include/list.cc= (332-349, and 352-371 for
-the comparison) loops while ~__n >= 0~, where ~__n~ counts the
-elements of the first run still to pass. At 0 the first run is
-passed and ~__first1~ is ~__first2~, so the loop makes one more
-comparison, of the first element left in the second run with itself,
-which is false, and stops. So every merge that passes its first run
-makes one comparison too many. By a probe in 15D under GCC on x86-64:
-=sort ()= of "abcdefgh" makes 19 comparisons, 7 of an element with
-itself, where 12 suffice; "hgfedcba" makes 12, none with itself;
-"aaaa" 7, 3 with itself. The result is right and 23.2.2.4, p32
-allows the count. The loop is from the 2005 import (e6c7726b). Seen
-while =23.list.ops= was written, 2026-11-21.
-
-Fix: loop while ~0 < __n~ in both forms: once the first run is
-passed, the elements left in the second run are in place.
-
-Check: the probe's counts fall to 12 for "abcdefgh" and 4 for
-"aaaa", none with itself; =23.list.ops= at pin.
-
 ** Containers: the associative containers
 
 *** TODO =insert (i, j)= is not linear on a sorted range
