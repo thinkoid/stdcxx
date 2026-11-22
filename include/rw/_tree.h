@@ -624,9 +624,10 @@ public:
             const value_type &__v     = *__first;
             const _C_link_t   __rmost = _C_end->_C_child [1];
 
-            // an element past the rightmost goes on its right, the node
-            // the descent reaches, so a sorted range is linear (23.1.2,
-            // Table 69); the rightmost of an empty tree is the header
+            // the rightmost of an empty tree is the header and holds no key
+            // an element past the rightmost goes on its right
+            // a sorted range interleaved with existing keys can still
+            // require a descent per element (23.1.2, Table 69, departure)
             if (_C_size && _C_cmp (__rmost->_C_key (), _KeyOf ()(__v)))
                 _C_insert (0, __rmost, __v);
             else

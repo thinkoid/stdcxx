@@ -22,46 +22,6 @@ the clause of the standard they fall under, in clause order, and the
 tree's own housekeeping comes last. Within a bin the easiest entry is
 at the top.
 
-** Containers: the associative containers
-
-*** TODO =insert (i, j)= is not linear on a sorted range
-
-14882:2003 Table 69 (23.1.2) gives =a.insert(i,j)= the complexity
-"Nlog(size()+N) (N is the distance from i to j) in general; linear if
-[i, j) is sorted according to value_comp()". =set= and =multiset=
-=insert (i, j)= (=include/set=) loop over the tree's =insert (t)=
-themselves, a descent from the root for each element, as they have
-since the import of 2005 (e6c7726b); =map= and =multimap= pass the
-range to the tree's range insert (=include/rw/_tree.h=), which links
-an element past the rightmost as its right child. Measured with a
-counting comparison in 15D and 11s under GCC on an x86-64 host,
-inserting N sorted keys into a
-container of the N even keys 0 to 2N - 2:
-
-| N | keys | =set::insert (i, j)= | =multiset::insert (i, j)= | =map::insert (i, j)= |
-|------+-------------------------+-------+-------+-------|
-| 4095 | odd, interleaved        | 14.50 | 13.50 | 15.49 |
-| 4095 | 2N to 3N - 1, above all | 24.50 | 23.50 | 2.00  |
-| 255  | odd, interleaved        | 10.49 | 9.49  | 11.43 |
-| 255  | 2N to 3N - 1, above all | 16.50 | 15.50 | 2.00  |
-
-comparisons per element. The tree's range insert is linear for a
-sorted range above the container's keys and N log N for one that
-interleaves with them; =set='s and =multiset='s are N log N for both.
-C++11 Table 102 gives =a.insert(i, j)= "N log(a.size() + N ) (N has
-the value distance(i, j)" and no linear case. Seen while measuring
-the hint of the tree's range insert, 2026-11-21.
-
-Fix: a decision. Either =set= and =multiset= =insert (i, j)= pass the
-range to the tree's range insert, as =map='s does, so a sorted range
-above the keys is linear in all four, and the interleaved case is
-recorded in =doc/notes/ref-conformance.md= as following C++11's row;
-or the whole departure from the 2003 row is recorded there.
-
-Check: the counts above for =set= and =multiset= after the change;
-=23.set= and =23.map= at pin; a row of =ref-conformance.md= for
-whatever stays.
-
 * Tests
 
 The suite and its driver under =tests=: what it covers, what it

@@ -176,8 +176,7 @@ public:
 
     template<class _InputIter>
     void insert (_InputIter __first, _InputIter __last) {
-        for ( ;__first != __last; ++__first)
-            _C_rep.insert (*__first, false);
+        _C_rep.insert (__first, __last, false);
     }
 
     size_type erase (const key_type& __x)  {
@@ -338,8 +337,7 @@ public:
 
     template<class _InputIter>
     void insert (_InputIter __first, _InputIter __last) {
-        for ( ;__first != __last; ++__first)
-            _C_rep.insert (*__first, true);
+        _C_rep.insert (__first, __last, true);
     }
 
     void erase (iterator __it) {
