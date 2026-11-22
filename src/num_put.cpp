@@ -177,8 +177,8 @@ __rw_itoa (char *buf, _ULLong i, unsigned flags)
     const char* const pdigs = flags & _RWSTD_IOS_UPPERCASE ?
         __rw_digits + 36 : __rw_digits;
 
-    _LLong base;   // the value of the largest digit
-    int    bits;   // the number of bits in a digit
+    _ULLong base;   // the value of the largest digit
+    int     bits;   // the number of bits in a digit
 
     char *end = buf;
 
@@ -314,8 +314,8 @@ __rw_itoa (char *buf, unsigned long i, unsigned flags)
     const char* const pdigs = flags & _RWSTD_IOS_UPPERCASE ?
         __rw_digits + 36 : __rw_digits;
 
-    unsigned basemask;   // the value of the largest digit
-    int      bits;       // the number of bits in a digit
+    unsigned long basemask;   // the value of the largest digit
+    int           bits;       // the number of bits in a digit
 
     char *end = buf;
 
@@ -352,7 +352,7 @@ __rw_itoa (char *buf, unsigned long i, unsigned flags)
             (std::numeric_limits<unsigned long>::digits + bits - 1) / bits;
 
         j = digits - 1;
-        while (!(i & (long (basemask) << j * bits)))
+        while (!(i & (basemask << j * bits)))
             --j;
     }
     else

@@ -22,27 +22,6 @@ the clause of the standard they fall under, in clause order, and the
 tree's own housekeeping comes last. Within a bin the easiest entry is
 at the top.
 
-** Localization: =num_put=
-
-*** TODO The octal leading-zero scan of =num_put= shifts a signed 7 by 63
-
-=src/num_put.cpp= =__rw_itoa= for =_ULLong= scans for the first digit
-with =base << j * bits=, =base= an =_LLong=; under =oct=, =j * bits=
-starts at 63, and 7 << 63 is not representable in =unsigned long
-long=. The =unsigned long= helper does the same with
-=long (basemask) << j * bits=. C++11 5.8 p2 makes a signed shift
-whose result the type cannot represent undefined; C++14 5.8 p2 and
-C++17 8.8 p2 keep that for a result past the unsigned type. 14882:2003
-5.8 p2 reads the operand as a bit pattern, and C++20 defines the
-shift. GCC 16 compiles the tree as C++20 by default (=__cplusplus=
-202002L), Clang as C++17. Hypothesis from reading, 2026-11-21, while
-adding the octal =unsigned long long= rows of =22.locale.num.put=.
-
-Fix: an unsigned mask in both scans.
-
-Check: =22.locale.num.put= under UBSan in a Clang build: no shift
-report on the octal rows.
-
 ** Containers: =list=
 
 *** TODO =list::sort= compares an element with itself at the end of each merge
