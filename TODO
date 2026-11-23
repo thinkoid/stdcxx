@@ -86,19 +86,6 @@ harness reads it.
 Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
 x86-64 and on an aarch64 host.
 
-** TODO =rw_rand32= and =rw_rand64= say their range is half-open
-
-=tests/include/rw_rand.h= 42-43 and 55-56, and the comments above
-the definitions in =tests/src/rand.cpp=, say that with a zero limit
-the result is "in the range [0, UINT32_MAX)" and "[0, UINT64_MAX)".
-The functions return a table word unreduced: on an x86-64 host the
-522617630th draw of =rw_rand32= returns =UINT32_MAX=. Seen while the
-driver's generator was corrected, 2026-11-21.
-
-Fix: the four comments say "[0, UINT32_MAX]" and "[0, UINT64_MAX]".
-
-Check: the comments read against =rw_rand32= and =rw_rand64=.
-
 ** TODO The num.get harness cannot see a missing store on a failbit row that stores
 
 =do_test= in =tests/localization/22.locale.num.get.cpp= starts every

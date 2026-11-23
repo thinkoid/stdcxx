@@ -40,7 +40,7 @@ void
 rw_seed32 (_RWSTD_UINT32_T);
 
 // returns a 32-bit random number in the range [0, limit)
-// if limit is non-zero, otherwise in the range [0, UINT32_MAX)
+// if limit is non-zero, otherwise in the range [0, UINT32_MAX]
 _RWSTD_UINT32_T
 rw_rand32 (_RWSTD_UINT32_T = 0);
 
@@ -53,7 +53,7 @@ void
 rw_seed64 (_RWSTD_UINT64_T);
 
 // returns a 64-bit random number in the range [0, limit)
-// if limit is non-zero, otherwise in the range [0, UINT64_MAX)
+// if limit is non-zero, otherwise in the range [0, UINT64_MAX]
 _RWSTD_UINT64_T
 rw_rand64 (_RWSTD_UINT64_T = 0);
 
