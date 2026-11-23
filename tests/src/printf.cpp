@@ -1702,7 +1702,7 @@ _rw_fmttm (const FmtSpec &spec, Buffer &buf, const tm *tmb)
                 strcat (vbuf, " [0,11]");
             else {
                 sprintf (vbuf + strlen (vbuf), " %s",
-                         months [unsigned (tmb->tm_mon) % 7]);
+                         months [unsigned (tmb->tm_mon) % 12]);
             }
         }
 

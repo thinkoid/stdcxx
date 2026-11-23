@@ -2577,6 +2577,7 @@ test_tm ()
     TEST ("%{#t}", TM ( 0,  0, 23),       0, 0, "{ tm_hour=23, tm_mday=1 }");
     TEST ("%{#t}", TM ( 0,  0,  0, 2),    0, 0, "{ tm_mday=2 }");
     TEST ("%{#t}", TM ( 0,  0,  0, 3, 1), 0, 0, "{ tm_mday=3, tm_mon=1 Feb }");
+    TEST ("%{#t}", TM ( 0,  0,  0, 3, 7), 0, 0, "{ tm_mday=3, tm_mon=7 Aug }");
 
 #if !defined (_RWSTD_NO_TM_GMTOFF) && defined (_RWSTD_NO_PURE_C_HEADERS)
 

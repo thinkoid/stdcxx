@@ -86,21 +86,6 @@ harness reads it.
 Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
 x86-64 and on an aarch64 host.
 
-** TODO The verbose =%{t}= names the months after July wrongly
-
-=_rw_fmttm= (=tests/src/printf.cpp=) prints a valid =tm_mon= with
-its name from ~months [unsigned (tmb->tm_mon) % 7]~. =months= has
-twelve entries, and the =% 7= is the one of the weekday line below
-it, so August to December print as Jan to May: ~{ tm_mday=1,
-tm_mon=8 Feb }~. =0.printf= has one valid =tm_mon= row, for
-February. Seen while =tm_gmtoff= was added to =%{t}=, 2026-11-21.
-
-Fix: index =months= with ~% 12~; a =0.printf= row for a month after
-July.
-
-Check: the new row passes and fails without the fix; =0.printf=
-passes every assertion.
-
 ** TODO Two tests define =DEFINE_REPLACEMENT_NEW_AND_DELETE=, which nothing reads
 
 =tests/localization/22.locale.codecvt.cpp= 52 and
