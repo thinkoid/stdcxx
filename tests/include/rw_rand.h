@@ -57,13 +57,13 @@ rw_seed64 (_RWSTD_UINT64_T);
 _RWSTD_UINT64_T
 rw_rand64 (_RWSTD_UINT64_T = 0);
 
-#  if 32 == _RWSTD_INT_SIZE
+#  if 4 == _RWSTD_INT_SIZE
 #    define rw_seed(limit)   rw_seed32 (limit)
 #    define rw_rand(limit)   rw_rand32 (limit)
-#  else   // if 32 != _RWSTD_INT_SIZE
+#  else   // if 4 != _RWSTD_INT_SIZE
 #    define rw_seed(limit)   rw_seed64 (limit)
 #    define rw_rand(limit)   rw_rand64 (limit)
-#  endif   // 32 == _RWSTD_INT_SIZE
+#  endif   // 4 == _RWSTD_INT_SIZE
 #else   // if !defined (_RWSTD_UINT64_T)
 #  define rw_seed(limit)   rw_seed32 (limit)
 #  define rw_rand(limit)   rw_rand32 (limit)

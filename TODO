@@ -86,28 +86,6 @@ harness reads it.
 Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
 x86-64 and on an aarch64 host.
 
-** TODO =rw_rand= is =rw_rand64= wherever a 64-bit type exists
-
-=tests/include/rw_rand.h= 60 picks the generator of =rw_rand= and
-=rw_seed= with ~#if 32 == _RWSTD_INT_SIZE~. =_RWSTD_INT_SIZE= is
-~sizeof (int)~ in bytes (=etc/config/src/LIMITS.cpp= 242), 4 in the
-15D =config.h= of an x86-64 host, so the condition never holds and
-both macros name the 64-bit functions wherever =_RWSTD_UINT64_T= is
-defined. The line is unchanged since the header's import in
-5f4f15e4 (2006). =23.bitset=, the one user, thus draws from
-=rw_rand64=; ~rw_rand (0) & max_mask~ at 430 gets 64 bits, where a
-32-bit =rw_rand= would leave bits 32 to 63 of the value zero for each
-=N= above 32. Seen while the driver's generator was corrected,
-2026-11-21.
-
-Fix: the macros say what they mean: either the 32-bit functions where
-=int= has 32 bits (~4 == _RWSTD_INT_SIZE~), with =23.bitset= 430
-drawing two words for a set wider than 32 bits, or one width
-unconditionally and the dead branch gone.
-
-Check: a probe that prints ~sizeof rw_rand (0)~ prints the width the
-header's comment states; =23.bitset= at its pin.
-
 ** TODO =rw_rand32= and =rw_rand64= say their range is half-open
 
 =tests/include/rw_rand.h= 42-43 and 55-56, and the comments above

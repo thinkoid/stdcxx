@@ -427,7 +427,12 @@ void stress_ctors (const std::bitset<N>*)
         typedef unsigned long ULong;
 
         // exercise 23.3.5.1, p2
-        const ULong n = ULong (rw_rand (0) & max_mask);
+        ULong n = ULong (rw_rand (0));
+#if ULONG_MAX > 0xffffffffUL
+        if (32 < N && 32 == sizeof (rw_rand (0)) * CHAR_BIT)
+            n |= ULong (rw_rand (0)) << 32;
+#endif
+        n &= max_mask;
         const std::bitset<N> b1 (n);
 
         rw_assert (n == b1.to_ulong (), 0, __LINE__,
