@@ -30,7 +30,6 @@
 
 #include <cstdlib>   // for free()
 
-#define DEFINE_REPLACEMENT_NEW_AND_DELETE
 #include <rw_new.h>
 
 #include <rw_value.h>    // for UserClass

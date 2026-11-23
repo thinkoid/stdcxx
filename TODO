@@ -86,23 +86,6 @@ harness reads it.
 Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
 x86-64 and on an aarch64 host.
 
-** TODO Two tests define =DEFINE_REPLACEMENT_NEW_AND_DELETE=, which nothing reads
-
-=tests/localization/22.locale.codecvt.cpp= 52 and
-=tests/containers/23.deque.modifiers.cpp= 33 define
-=DEFINE_REPLACEMENT_NEW_AND_DELETE= before including the driver's
-headers. No header or source of the driver or the library names the
-macro, at any point of the history: =rw_new.h= defines the
-replacement operators unconditionally, unless the driver's own macro
-is defined. The definitions came with the tests (cbd9ba56, 2006;
-4f22508a, 2008). Seen while the driver's macro for the replacement
-operators was renamed, 2026-11-21.
-
-Fix: the two definitions leave.
-
-Check: the two tests preprocess to the same output before and after;
-their rows at pin.
-
 ** TODO =rw_rand= is =rw_rand64= wherever a 64-bit type exists
 
 =tests/include/rw_rand.h= 60 picks the generator of =rw_rand= and

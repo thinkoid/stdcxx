@@ -49,7 +49,6 @@
 #include <langinfo.h>   // for CODESET, nl_langinfo()
 #include <unistd.h>
 
-#define DEFINE_REPLACEMENT_NEW_AND_DELETE
 #include <rw_driver.h>
 #include <rw_file.h>
 #include <rw_locale.h>
