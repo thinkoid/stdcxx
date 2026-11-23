@@ -86,28 +86,103 @@ harness reads it.
 Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
 x86-64 and on an aarch64 host.
 
-** TODO The num.get harness cannot see a missing store on a failbit row that stores
+** TODO =rw_dblcmp= returns a 64-bit distance through =int=, and =rw_equal (1.0, 2.0)= is true
 
-=do_test= in =tests/localization/22.locale.num.get.cpp= starts every
-row that expects =failbit= from the expected value, since a failed
-parse leaves the argument unchanged (22.2.2.1.2, p1). Some =failbit=
-rows expect a store all the same: a grouping mismatch stores the value
-(=ref-locale.md= 10.3.7, the =bool= row ="00;0;1"= under ="\1"=), and
-overflow stores the clamped limit (10.3.6, the =ULONG_MAX + 1= rows of
-=test_ulong=, =test_uint=, =test_ushrt=). On those rows the value
-assertion holds when =do_get= stores nothing. The harness has no
-argument that tells a storing =failbit= row from one that leaves the
-value alone. Seen while starting the grouping rows from the
-complement, 2026-11-21.
+=rw_dblcmp= in =tests/src/valcmp.cpp= reads its two arguments as
+integers of the size of =double= and returns their difference. Where
+=double= is as wide as =long= the difference has 64 bits, and the
+function returns ~int (int_diff)~, its low 32 bits. Two values whose
+patterns differ by a multiple of 2^32 thus compare equal:
+=rw_dblcmp (1.0, 2.0)= is 0, and so is the distance from 0.0, 0.5,
+-1.0 or 7.0 to infinity. =rw_equal (double, double)= is
+~0 == rw_dblcmp (x, y)~, so it calls all of them equal. The comment at
+the cast says the function is not for values that far apart;
+=rw_equal= hands it any two values. =rw_fltcmp= subtracts two =int=
+and overflows: =rw_fltcmp (FLT_MAX, -FLT_MAX)= is -16777218, the wrong
+sign. =rw_ldblcmp= saturates at =_RWSTD_INT_MAX=.
+=tests/self/0.valcmp.cpp= calls none of the three. By probe in 15D
+under GCC on aarch64.
 
-Fix: an argument or a flag in the row that says the row expects a
-store, so the harness starts such a row from the complement; or a
-second call of each such row from a different start, both expected to
-end at the value.
+In =22.locale.num.get= a =get= that never stores fails 2994 assertions
+for =float=, 2910 for =long double= and 348 for =double=: 92 of the
+150 storing rows of =test_floating_point= cannot fail for =double=,
+and the six =double= overflow rows that expect infinity pass from a
+start of 1.0. =22.locale.money.get=, =22.locale.num.put=, =26.c.math=
+and =26.valarray.transcend= use the same functions. Seen while a
+harness change to =22.locale.num.get= was run against a =get= that
+stores nothing, 2026-11-23.
 
-Check: with the store dropped from =_C_get= in a scratch copy of
-=include/loc/_num_get.cc=, the row ="00;0;1"= under ="\1"= and the
-=ulmax_plus_1= row of =test_ulong= go red on the value assertion.
+Fix: =rw_dblcmp= returns the distance saturated at =_RWSTD_INT_MAX=
+and its negative, as =rw_ldblcmp= does; =rw_fltcmp= takes the
+difference in a wider type and saturates the same way.
+
+Check: =0.valcmp= gains rows for the three functions, among them 1.0
+against 2.0, 0.0 against infinity, =FLT_MAX= against =-FLT_MAX= and
+two adjacent values, and passes. The suite in 15D is at its pin, or
+each row that moves is explained: a test that passed by this equality
+fails now.
+
+** TODO The =long double= overflow rows of =22.locale.num.get= read a =double=
+
+The overflow block of =test_ldbl_uflow= in
+=tests/localization/22.locale.num.get.cpp= declares
+~const double inf = std::numeric_limits<long double>::infinity ();~.
+=do_test= takes the type it reads from that argument, so the two rows
+under "long double& on overflow", ="9.999999e+9876543210"= and its
+negative, call =get= for a =double=. No row reads a =long double=
+that overflows.
+
+Fix: the constant is a =long double=.
+
+Check: the two rows report =long double= in a failed assertion's
+text, seen by making one expect a finite value in a scratch copy;
+=22.locale.num.get= in 15D is at its pin on an x86-64 and on an
+aarch64 host.
+
+** TODO Two =float= rows of =22.locale.num.get= take the row before for their upper bound
+
+=test_flt_uflow= in =tests/localization/22.locale.num.get.cpp= sets
+the global =pmax= for its range rows and clears it after two more
+rows, the ones that read =_RWSTD_DBL_MIN= and expect =FLT_MIN= and
+=-FLT_MIN=. =do_test= writes each extracted value back through =pmax=,
+so those two rows accept anything from their value up to what the row
+before them extracted. That is at most 0 after a correct run and the
+rows are then exact, but a wrong result in one row loosens the next:
+with a =get= that never stores, both pass. The pointer is a =void*=
+cast to the type under test.
+
+Fix: =do_test= takes the upper bound and the place for the result as
+arguments of the tested type, the range rows pass them, and the global
+leaves.
+
+Check: with =x= put back to its start after every =get=, in a scratch
+copy, the two rows go red; =22.locale.num.get= in 15D is at its pin.
+
+** TODO =22.locale.num.get= draws =-Wmaybe-uninitialized= when optimized
+
+=do_test= in =tests/localization/22.locale.num.get.cpp= sets
+=consumed= in the three cases of a =switch= over the iterator kind
+that has no default. Under GCC 16 with =-O2= on aarch64 each
+instantiation warns that =consumed= may be used uninitialized, 22
+times in all. The debug configurations do not warn.
+
+Fix: =consumed= starts at 0, or the =switch= gets a default that
+fails the row.
+
+Check: the test builds in 12D with no warning that names a file under
+=tests=, and holds at its pin.
+
+** TODO The integer limit strings of =22.locale.num.get= keep arms for a 16-bit =long=
+
+=test_long= and =test_ulong= in
+=tests/localization/22.locale.num.get.cpp= pick their limit strings
+by ~LONG_MAX == 0x7fffL~ and ~ULONG_MAX == 0xffffUL~ first, and
+=test_pvoid= by ~ULONG_MAX == 0xffffUL~. ISO C gives =LONG_MAX= a
+minimum of 2147483647, so no implementation takes those arms.
+
+Fix: the three arms leave; each chain starts at the 32-bit arm.
+
+Check: =22.locale.num.get= in 15D is at its pin on an LP64 host.
 
 ** TODO The =--enable-num_get= mode of =22.locale.num.put= fails 552 assertions
 

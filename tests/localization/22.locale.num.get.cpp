@@ -256,7 +256,8 @@ int do_test (int         lineno,          // line number
              int         eat_expect = -1, // number of consumed characters
              int         flags = 0,       // initial set of flags
              int         err_expect = -1, // expected iostate
-             const std::string &grouping = "")   // optional grouping string
+             const std::string &grouping = "",   // optional grouping string
+             bool        fail_stores = false)    // a failbit row that stores
 {
     typedef std::char_traits<charT> Traits;
 
@@ -290,16 +291,21 @@ int do_test (int         lineno,          // line number
     io.flags (std::ios_base::fmtflags (flags));
     pun.grouping_ = grouping;
 
-    // initialize x to a value other than the expected one, with or
-    // without grouping, so that a get() that stores nothing fails the
-    // value assertion; when get() is expected to fail, x starts out
-    // equal to the expected value, since a failed parse leaves its
-    // argument unchanged (22.2.2.1.2, p1); the library stores the value
-    // on bad grouping as well as setting failbit, and a row expecting
-    // that cannot tell the store from none
-    nativeT x =
-          err_expect & std::ios::failbit
-        ? val : nativeT (!val);
+    // a row stores when it expects no failbit or when fail_stores is
+    // set; any other row keeps its argument, since a failed parse
+    // leaves it unchanged (22.2.2.1.2, p1)
+    // a storing row runs once, from the complement of val: 1, or 0
+    // when val is 1; 1 lies outside every underflow range used here
+    // a keeping row runs from val and again from the complement and
+    // expects each start unchanged; a wrong store cannot equal both
+    const bool stores = !(err_expect & std::ios::failbit) || fail_stores;
+
+    const nativeT starts [] = {
+        val, val == nativeT (1) ? nativeT () : nativeT (1)
+    };
+
+    nativeT initial;
+    nativeT x;
 
     // large buffer to widen `str' to
     static charT wstr_buf [32767];
@@ -318,51 +324,75 @@ int do_test (int         lineno,          // line number
 
     pnext = rw_widen (wstr_buf, str);
 
-    std::ios_base::iostate err = std::ios_base::goodbit;
+    std::ios_base::iostate err;
+    std::ptrdiff_t         consumed;
 
-    const charT *plast = pnext + std::char_traits<charT>::length (pnext);
+    // if pmax is non-zero it points to the upper bound of the range
+    // that the extracted value can be in
+    const nativeT val_max = pmax ? *(nativeT*)pmax : val;
 
-    std::ptrdiff_t consumed;
+    int eat_ok   = 0;
+    int value_ok = 0;
 
-    switch (itype) {
-    case iter_pointer: {
-        NumGet<charT, const charT*> ng;
-        plast    = ng.get (pnext, plast, iob, err, x);
-        consumed = plast - pnext;
-        break;
+    // the loop stops at the first run that fails a check, so the
+    // assertions below report that run
+    for (int i = stores ? 1 : 0; i != 2; ++i) {
+        initial = starts [i];
+        x       = initial;
+        err     = std::ios_base::goodbit;
+
+        const charT *plast = pnext + std::char_traits<charT>::length (pnext);
+
+        switch (itype) {
+        case iter_pointer: {
+            NumGet<charT, const charT*> ng;
+            plast    = ng.get (pnext, plast, iob, err, x);
+            consumed = plast - pnext;
+            break;
+        }
+
+        case iter_istreambuf: {
+            typedef std::istreambuf_iterator<charT, Traits> IStreambufIter;
+
+            Streambuf<charT, Traits> sb (pnext, plast);
+
+            IStreambufIter sbitnext (&sb);
+            IStreambufIter sbitlast;
+
+            NumGet<charT, IStreambufIter> ng;
+            sbitlast = ng.get (sbitnext, sbitlast, iob, err, x);
+            consumed = sb.gptr_off ();
+            break;
+        }
+
+        case iter_input: {
+            typedef InputIter<charT> UserIter;
+
+            UserIter uitnext (pnext, pnext, plast);
+            UserIter uitlast (plast, pnext, plast);
+
+            NumGet<charT, UserIter> ng;
+            uitlast  = ng.get (uitnext, uitlast, iob, err, x);
+            consumed = uitlast.cur_ - uitnext.cur_;
+            break;
+        }
+
+        }
+
+        // do not test the number of extracted characters
+        // if (eat_expect == -1) holds
+        eat_ok = -1 == eat_expect || consumed == eat_expect;
+
+        value_ok =
+              stores
+            ? rw_equal (x, val) || (val <= x && x <= val_max)
+            : x == initial;
+
+        if (!eat_ok || err != err_expect || !value_ok)
+            break;
     }
 
-    case iter_istreambuf: {
-        typedef std::istreambuf_iterator<charT, Traits> IStreambufIter;
-
-        Streambuf<charT, Traits> sb (pnext, plast);
-
-        IStreambufIter sbitnext (&sb);
-        IStreambufIter sbitlast; 
-
-        NumGet<charT, IStreambufIter> ng;
-        sbitlast = ng.get (sbitnext, sbitlast, iob, err, x);
-        consumed = sb.gptr_off ();
-        break;
-    }
-
-    case iter_input: {
-        typedef InputIter<charT> UserIter;
-
-        UserIter uitnext (pnext, pnext, plast);
-        UserIter uitlast (plast, pnext, plast);
-
-        NumGet<charT, UserIter> ng;
-        uitlast  = ng.get (uitnext, uitlast, iob, err, x);
-        consumed = uitlast.cur_ - uitnext.cur_;
-        break;
-    }
-
-    }
-
-    // do not test the number of extracted characters
-    // if (eat_expect == -1) holds
-    int success = -1 == eat_expect || consumed == eat_expect;
+    int success = eat_ok;
 
     int nfailures = !success;
 
@@ -377,12 +407,7 @@ int do_test (int         lineno,          // line number
                int (grouping.size ()), grouping.data (),
                consumed, eat_expect);
 
-    const nativeT val_max = pmax ? *(nativeT*)pmax : val;
-    // if pmax is non-zero it points to the upper bound of the range
-    // that the extracted value can be in
-    success =
-           err == err_expect
-        && (rw_equal (x, val) || (val <= x && x <= val_max));
+    success = err == err_expect && value_ok;
 
     nfailures += !success;
 
@@ -390,14 +415,14 @@ int do_test (int         lineno,          // line number
                "line %d: num_get<%s, %s>::get (%{*Ac}, ..., %s&); "
                "fmtflags = %{If}; "
                "%{?}grouping = %{.*Ac}; %{;}"
-               "got %s (%{Is}); "
+               "initial %s, got %s (%{Is}); "
                "expected %s%{?} <= %s %{;} "
                "(%{Is})",
                __LINE__, cname, iname, int (sizeof *str), str, tname,
                flags,
                !grouping.empty () && '%' != grouping [0],
                int (grouping.size ()), grouping.data (),
-               TOSTR (x), err,
+               TOSTR (initial), TOSTR (x), err,
                TOSTR (val), 0 != pmax, TOSTR (val_max),
                err_expect);
 
@@ -414,7 +439,7 @@ int do_test (int         lineno,          // line number
         // parsed with sscanf() with that parsed with num_get::get()
         const char* const scanspec = grouping.c_str ();
 
-        nativeT y = nativeT ();
+        nativeT y = initial;
 
         const int n = std::sscanf (str, scanspec, &y);
 
@@ -452,20 +477,24 @@ int do_test (int         lineno,          // line number
              int         eat_expect = -1, // number of consumed characters
              int         flags = 0,       // initial set of flags
              int         err_expect = -1, // expected iostate
-             const std::string &grouping = "")   // optional grouping string
+             const std::string &grouping = "",   // optional grouping string
+             bool        fail_stores = false)    // a failbit row that stores
 {
     switch (ctype) {
     case narrow_char:
         return do_test (lineno, (char*)0, cname, itype, iname,
-                        val, str, eat_expect, flags, err_expect, grouping);
+                        val, str, eat_expect, flags, err_expect, grouping,
+                        fail_stores);
     case wide_char:
         return do_test (lineno, (wchar_t*)0, cname, itype, iname,
-                        val, str, eat_expect, flags, err_expect, grouping);
+                        val, str, eat_expect, flags, err_expect, grouping,
+                        fail_stores);
     case user_char:
         break;
 #if 0   // disabled
         return do_test (lineno, (UserChar*)0, cname, itype, iname,
-                        val, str, eat_expect, flags, err_expect, grouping);
+                        val, str, eat_expect, flags, err_expect, grouping,
+                        fail_stores);
 #endif   // disabled
     }
 
@@ -606,6 +635,7 @@ test_bool (CharType ctype, const char *cname,
     // [e]   (in|out)    -1   expected iostate after parsing
     // [g]   (in)        ""   grouping string, or a scanf
     //                        specifier to parse [s] with
+    // [fs]  (in)     false   [v] is stored although [e] has failbit
 
     // bool, numeric parsing
     TEST (T, false, "0", 1, 0, Eof);
@@ -715,7 +745,7 @@ test_bool (CharType ctype, const char *cname,
     // is satisifed but the positions of the thousands_sep characters
     // in otherwise valid input do not match the specified grouping
 
-    TEST (T, true, "00;0;1", 6, 0, Eof | Fail, "\1");
+    TEST (T, true, "00;0;1", 6, 0, Eof | Fail, "\1", true);
 
     // bool, boolalpha parsing
     TEST (T, false, "false", 5, boolalpha, Good);
@@ -1091,18 +1121,18 @@ test_long (CharType ctype, const char *cname,
     TEST (T,  -0xABCDEFL, "-0xA;B;C;D;E;F", 14, hex, Eof, "\1");
 
     // long parsing, dec base, with bad groups: store value, set failbit
-    TEST (T, 2147483624L,   "21;474;83624; ", 13, dec, Fail, "\5\3");
-    TEST (T, 2147483623L,    "21;47;483623 ", 12, dec, Fail, "\6\3");
-    TEST (T, 2147483622L,     "21;47483622 ", 11, dec, Fail, "\7\3");
-    TEST (T, 2147483621L,    "214;748362;1 ", 12, dec, Fail, "\7\3");
-    TEST (T, 2147483619L,   "2;147;483;619 ", 13, dec, Fail, "\1");
-    TEST (T, 2147483618L,   "2147;48;36;18 ", 13, dec, Fail, "\2");
-    TEST (T, 2147483617L,    "2147;483;617 ", 12, dec, Fail, "\3");
-    TEST (T, 2147483616L,     "21;47483616 ", 11, dec, Fail, "\4");
-    TEST (T, 2147483615L,   "21;47;4836;15 ", 13, dec, Fail, "\2\2");
-    TEST (T, 2147483614L,    "21474;836;14 ", 12, dec, Fail, "\2\3");
+    TEST (T, 2147483623L,    "21;47;483623 ", 12, dec, Fail, "\6\3", true);
+    TEST (T, 2147483622L,     "21;47483622 ", 11, dec, Fail, "\7\3", true);
+    TEST (T, 2147483621L,    "214;748362;1 ", 12, dec, Fail, "\7\3", true);
+    TEST (T, 2147483619L,   "2;147;483;619 ", 13, dec, Fail, "\1",   true);
+    TEST (T, 2147483618L,   "2147;48;36;18 ", 13, dec, Fail, "\2",   true);
+    TEST (T, 2147483617L,    "2147;483;617 ", 12, dec, Fail, "\3",   true);
+    TEST (T, 2147483616L,     "21;47483616 ", 11, dec, Fail, "\4",   true);
+    TEST (T, 2147483615L,   "21;47;4836;15 ", 13, dec, Fail, "\2\2", true);
+    TEST (T, 2147483614L,    "21474;836;14 ", 12, dec, Fail, "\2\3", true);
 
     // thousands_sep at illegal positions, do not store value, set failbit
+    TEST (T, 2147483624L,   "21;474;83624; ", 13, dec, Fail, "\5\3");
     TEST (T, 2147483625L,   ";214;748;3625 ",  0, dec, Fail, "\4\3");
     TEST (T, 2147483620L,   "+214;;7483620 ",  5, dec, Fail, "\7\4");
 
@@ -1154,7 +1184,7 @@ test_long (CharType ctype, const char *cname,
     const char lmax_plus_3[]  = "32770";
     const char lmax_x_f[]     = "0x7ffff";
 
-    const char vflow_1[]      = "";
+    const char vflow_1[]      = "327670";
 #elif LONG_MAX == 0x7fffffffL
     const char lmin[]         = "-2147483648";
     const char lmin_minus_1[] = "-2147483649";
@@ -1166,7 +1196,7 @@ test_long (CharType ctype, const char *cname,
     const char lmax_plus_2[]  = "2147483649";   // 0x7fffffffL + 2
     const char lmax_plus_3[]  = "2147483650";   // 0x7fffffffL + 3
     const char lmax_x_f[]     = "0x7ffffffff";  // extra 'f' (times 0xf)
-    const char vflow_1[]      = "";
+    const char vflow_1[]      = "21474836470";
 #elif LONG_MAX > 0x7fffffffL
     const char lmin[]         = "-9223372036854775808";
     const char lmin_minus_1[] = "-9223372036854775809";
@@ -1178,37 +1208,31 @@ test_long (CharType ctype, const char *cname,
     const char lmax_plus_2[]  = "9223372036854775809";
     const char lmax_plus_3[]  = "9223372036854775810";
     const char lmax_x_f[]     = "0x7ffffffffffffffff";
-    const char vflow_1[]      = "";
-#else
-    // working around a SunPro bug (PR #28279)
-
-    const char lmin[]         = "-999999999999999999990";
-    const char lmin_minus_1[] = "-999999999999999999991";
-    const char lmin_minus_2[] = "-999999999999999999992";
-    const char lmin_minus_3[] = "-999999999999999999993";
-
-    const char lmax[]         = "0";
-    const char lmax_plus_1[]  = "999999999999999999997";
-    const char lmax_plus_2[]  = "999999999999999999998";
-    const char lmax_plus_3[]  = "999999999999999999999";
-    const char lmax_x_f[]     = "0xfffffffffffffffff";
-    const char vflow_1[]      = "999999999999999999990";
+    const char vflow_1[]      = "92233720368547758070";
 #endif
 
 #define INTSIZE(x) static_cast< int >(sizeof (x))
 
     TEST (T, LONG_MIN, lmin,         INTSIZE (lmin) - 1,         0, Eof);
-    TEST (T, LONG_MIN, lmin_minus_1, INTSIZE (lmin_minus_1) - 1, 0, Eof | Fail);
-    TEST (T, LONG_MIN, lmin_minus_2, INTSIZE (lmin_minus_2) - 1, 0, Eof | Fail);
-    TEST (T, LONG_MIN, lmin_minus_3, INTSIZE (lmin_minus_3) - 1, 0, Eof | Fail);
+    TEST (T, LONG_MIN, lmin_minus_1, INTSIZE (lmin_minus_1) - 1, 0,
+          Eof | Fail, "", true);
+    TEST (T, LONG_MIN, lmin_minus_2, INTSIZE (lmin_minus_2) - 1, 0,
+          Eof | Fail, "", true);
+    TEST (T, LONG_MIN, lmin_minus_3, INTSIZE (lmin_minus_3) - 1, 0,
+          Eof | Fail, "", true);
 
     TEST (T, LONG_MAX, lmax,         INTSIZE (lmax) - 1,         0, Eof);
-    TEST (T, LONG_MAX, lmax_plus_1,  INTSIZE (lmax_plus_1) - 1,  0, Eof | Fail);
-    TEST (T, LONG_MAX, lmax_plus_2,  INTSIZE (lmax_plus_2) - 1,  0, Eof | Fail);
-    TEST (T, LONG_MAX, lmax_plus_3,  INTSIZE (lmax_plus_3) - 1,  0, Eof | Fail);
-    TEST (T, LONG_MAX, lmax_x_f,     INTSIZE (lmax_x_f) - 1,     0, Eof | Fail);
+    TEST (T, LONG_MAX, lmax_plus_1,  INTSIZE (lmax_plus_1) - 1,  0,
+          Eof | Fail, "", true);
+    TEST (T, LONG_MAX, lmax_plus_2,  INTSIZE (lmax_plus_2) - 1,  0,
+          Eof | Fail, "", true);
+    TEST (T, LONG_MAX, lmax_plus_3,  INTSIZE (lmax_plus_3) - 1,  0,
+          Eof | Fail, "", true);
+    TEST (T, LONG_MAX, lmax_x_f,     INTSIZE (lmax_x_f) - 1,     0,
+          Eof | Fail, "", true);
 
-    TEST (T, LONG_MAX, vflow_1,      INTSIZE (vflow_1) - 1,      0, Eof | Fail);
+    TEST (T, LONG_MAX, vflow_1,      INTSIZE (vflow_1) - 1,      0,
+          Eof | Fail, "", true);
 
 
     // verify that the combination of ERANGE and LONG_MAX
@@ -1286,23 +1310,20 @@ test_ulong (CharType ctype, const char *cname,
     const char ulmax_plus_3[] = "18446744073709551618";
     const char ulmax_x_f[]    = "0xfffffffffffffffff";
     const char vflow_1[]      = "36893488147419103221";
-#else
-    // working around a SunPro bug (PR #28279)
-    const char ulmax[]        = "0";
-    const char ulmax_plus_1[] = "999999999999999999997";
-    const char ulmax_plus_2[] = "999999999999999999998";
-    const char ulmax_plus_3[] = "999999999999999999999";
-    const char ulmax_x_f[]    = "0xfffffffffffffffff";
-    const char vflow_1[]      = "999999999999999999990";
 #endif
 
     TEST (T, ULONG_MAX, ulmax,        INTSIZE (ulmax) - 1,        0, Eof);
-    TEST (T, ULONG_MAX, ulmax_plus_1, INTSIZE (ulmax_plus_1) - 1, 0, Eof | Fail);
-    TEST (T, ULONG_MAX, ulmax_plus_2, INTSIZE (ulmax_plus_2) - 1, 0, Eof | Fail);
-    TEST (T, ULONG_MAX, ulmax_plus_3, INTSIZE (ulmax_plus_3) - 1, 0, Eof | Fail);
-    TEST (T, ULONG_MAX, ulmax_x_f,    INTSIZE (ulmax_x_f) - 1,    0, Eof | Fail);
+    TEST (T, ULONG_MAX, ulmax_plus_1, INTSIZE (ulmax_plus_1) - 1, 0,
+          Eof | Fail, "", true);
+    TEST (T, ULONG_MAX, ulmax_plus_2, INTSIZE (ulmax_plus_2) - 1, 0,
+          Eof | Fail, "", true);
+    TEST (T, ULONG_MAX, ulmax_plus_3, INTSIZE (ulmax_plus_3) - 1, 0,
+          Eof | Fail, "", true);
+    TEST (T, ULONG_MAX, ulmax_x_f,    INTSIZE (ulmax_x_f) - 1,    0,
+          Eof | Fail, "", true);
 
-    TEST (T, ULONG_MAX, vflow_1,      INTSIZE (vflow_1) - 1,      0, Eof | Fail);
+    TEST (T, ULONG_MAX, vflow_1,      INTSIZE (vflow_1) - 1,      0,
+          Eof | Fail, "", true);
 
     // verify that the combination of ERANGE and ULONG_MAX
     // doesn't trip the facet up if it uses strtoul()
@@ -1349,8 +1370,8 @@ test_uint (CharType ctype, const char *cname,
     // have the same width, otherwise it is clamped to UINT_MAX
     // and failbit is set
 #if UINT_MAX < ULONG_MAX
-    TEST (T, UINT_MAX, "-1", 2, 0, Eof | Fail);
-    TEST (T, UINT_MAX, "-5", 2, 0, Eof | Fail);
+    TEST (T, UINT_MAX, "-1", 2, 0, Eof | Fail, "", true);
+    TEST (T, UINT_MAX, "-5", 2, 0, Eof | Fail, "", true);
 #else   // if UINT_MAX >= ULONG_MAX
     TEST (T, UINT_MAX,      "-1", 2, 0, Eof);
     TEST (T, UINT_MAX - 4U, "-5", 2, 0, Eof);
@@ -1365,10 +1386,14 @@ test_uint (CharType ctype, const char *cname,
     const char vflow_1[]     = "8589934581";
 
     TEST (T, UINT_MAX, umax,        INTSIZE (umax) - 1,        0, Eof);
-    TEST (T, UINT_MAX, umax_plus_1, INTSIZE (umax_plus_1) - 1, 0, Eof | Fail);
-    TEST (T, UINT_MAX, umax_plus_2, INTSIZE (umax_plus_2) - 1, 0, Eof | Fail);
-    TEST (T, UINT_MAX, umax_x_f,    INTSIZE (umax_x_f) - 1,    0, Eof | Fail);
-    TEST (T, UINT_MAX, vflow_1,     INTSIZE (vflow_1) - 1,     0, Eof | Fail);
+    TEST (T, UINT_MAX, umax_plus_1, INTSIZE (umax_plus_1) - 1, 0,
+          Eof | Fail, "", true);
+    TEST (T, UINT_MAX, umax_plus_2, INTSIZE (umax_plus_2) - 1, 0,
+          Eof | Fail, "", true);
+    TEST (T, UINT_MAX, umax_x_f,    INTSIZE (umax_x_f) - 1,    0,
+          Eof | Fail, "", true);
+    TEST (T, UINT_MAX, vflow_1,     INTSIZE (vflow_1) - 1,     0,
+          Eof | Fail, "", true);
 #else   // if UINT_MAX != 0xffffffffU
     rw_note (0, 0, 0, "overflow test for unsigned int of %u bits disabled",
              unsigned (sizeof (unsigned) * CHAR_BIT));
@@ -1411,8 +1436,8 @@ test_ushrt (CharType ctype, const char *cname,
     // does; unsigned short is narrower than unsigned long, so a small
     // magnitude gives a result past USHRT_MAX, which is clamped to
     // USHRT_MAX, and failbit is set (lwg issue 23)
-    TEST (T, ushrt_max, "-1", 2, 0, Eof | Fail);
-    TEST (T, ushrt_max, "-5", 2, 0, Eof | Fail);
+    TEST (T, ushrt_max, "-1", 2, 0, Eof | Fail, "", true);
+    TEST (T, ushrt_max, "-5", 2, 0, Eof | Fail, "", true);
 
     // exercise integer overflow
 #if USHRT_MAX == 0xffffU
@@ -1423,10 +1448,14 @@ test_ushrt (CharType ctype, const char *cname,
     const char vflow_1[]     = "131061";
 
     TEST (T, ushrt_max, umax,        INTSIZE (umax) - 1,        0, Eof);
-    TEST (T, ushrt_max, umax_plus_1, INTSIZE (umax_plus_1) - 1, 0, Eof | Fail);
-    TEST (T, ushrt_max, umax_plus_2, INTSIZE (umax_plus_2) - 1, 0, Eof | Fail);
-    TEST (T, ushrt_max, umax_x_f,    INTSIZE (umax_x_f) - 1,    0, Eof | Fail);
-    TEST (T, ushrt_max, vflow_1,     INTSIZE (vflow_1) - 1,     0, Eof | Fail);
+    TEST (T, ushrt_max, umax_plus_1, INTSIZE (umax_plus_1) - 1, 0,
+          Eof | Fail, "", true);
+    TEST (T, ushrt_max, umax_plus_2, INTSIZE (umax_plus_2) - 1, 0,
+          Eof | Fail, "", true);
+    TEST (T, ushrt_max, umax_x_f,    INTSIZE (umax_x_f) - 1,    0,
+          Eof | Fail, "", true);
+    TEST (T, ushrt_max, vflow_1,     INTSIZE (vflow_1) - 1,     0,
+          Eof | Fail, "", true);
 #else   // if USHRT_MAX != 0xffffU
     rw_note (0, 0, 0, "overflow test for unsigned short of %u bits disabled",
              unsigned (sizeof (unsigned short) * CHAR_BIT));
@@ -1985,16 +2014,12 @@ test_pvoid (CharType ctype, const char *cname,
 #elif ULONG_MAX == 0xffffffffUL
     const char pvmax[]        = "0xffffffff";
     const char pvmax_plus_1[] = "0x100000000";
-#else
-    // working around a SunPro bug (PR #28279)
-    const char pvmax[]        = "0";
-    const char pvmax_plus_1[] = "0xffffffffffffffffffffffffffffffff";
 #endif 
 
 #define PVOIDSTR(name)   name, INTSIZE (name) - 1
 
     TEST (T, PVoid (~0), PVOIDSTR (pvmax),        0, Eof);
-    TEST (T, PVoid (~0), PVOIDSTR (pvmax_plus_1), 0, Eof | Fail);
+    TEST (T, PVoid (~0), PVOIDSTR (pvmax_plus_1), 0, Eof | Fail, "", true);
 
 #undef PVOIDSTR
 
@@ -2373,33 +2398,37 @@ test_flt_uflow (CharType ctype, const char *cname,
 
     // on overflow, get() follows C99 requirements on strtof()
     // it sets failbit
-    TEST (T,  inf, _RWSTD_STRSTR ( _RWSTD_DBL_MAX), -1, 0, Eof | Fail);
-    TEST (T, -inf, _RWSTD_STRSTR (-_RWSTD_DBL_MAX), -1, 0, Eof | Fail);
+    TEST (T,  inf, _RWSTD_STRSTR ( _RWSTD_DBL_MAX), -1, 0,
+          Eof | Fail, "", true);
+    TEST (T, -inf, _RWSTD_STRSTR (-_RWSTD_DBL_MAX), -1, 0,
+          Eof | Fail, "", true);
 
     if (9.876543e+39 > FLT_MAX) {
-        TEST (T,  inf,  "9.876543e+39", 12, 0, Eof | Fail);
-        TEST (T, -inf, "-9.876543e+39", 13, 0, Eof | Fail);
+        TEST (T,  inf,  "9.876543e+39", 12, 0, Eof | Fail, "", true);
+        TEST (T, -inf, "-9.876543e+39", 13, 0, Eof | Fail, "", true);
     }
 
     if (9.876543e+49 > FLT_MAX) {
-        TEST (T,  inf,  "9.876543e+49", 12, 0, Eof | Fail);
-        TEST (T, -inf, "-9.876543e+49", 13, 0, Eof | Fail);
+        TEST (T,  inf,  "9.876543e+49", 12, 0, Eof | Fail, "", true);
+        TEST (T, -inf, "-9.876543e+49", 13, 0, Eof | Fail, "", true);
     }
 
     if (9.876543e+99 > FLT_MAX) {
-        TEST (T,  inf,  "9.876543e+99", 12, 0, Eof | Fail);
-        TEST (T, -inf, "-9.876543e+99", 13, 0, Eof | Fail);
+        TEST (T,  inf,  "9.876543e+99", 12, 0, Eof | Fail, "", true);
+        TEST (T, -inf, "-9.876543e+99", 13, 0, Eof | Fail, "", true);
     }
 
-    TEST (T,  inf,  "9.999999e+9999", 14, 0, Eof | Fail);
-    TEST (T, -inf, "-9.999999e+9999", 15, 0, Eof | Fail);
+    TEST (T,  inf,  "9.999999e+9999", 14, 0, Eof | Fail, "", true);
+    TEST (T, -inf, "-9.999999e+9999", 15, 0, Eof | Fail, "", true);
 
 
     // exercise facet's behavior on overflow:
     //   parsing fails (fail is set) and +/-infinity is stored
 
-    TEST (T,  inf, _RWSTD_STRSTR ( _RWSTD_DBL_MAX), -1, 0, Eof | Fail);
-    TEST (T, -inf, _RWSTD_STRSTR (-_RWSTD_DBL_MAX), -1, 0, Eof | Fail);
+    TEST (T,  inf, _RWSTD_STRSTR ( _RWSTD_DBL_MAX), -1, 0,
+          Eof | Fail, "", true);
+    TEST (T, -inf, _RWSTD_STRSTR (-_RWSTD_DBL_MAX), -1, 0,
+          Eof | Fail, "", true);
 
 #  ifdef _RWSTD_LDBL_MAX
 
@@ -2410,8 +2439,8 @@ test_flt_uflow (CharType ctype, const char *cname,
     if (0 == std::strpbrk (_RWSTD_STRSTR (_RWSTD_LDBL_MAX), "Ll"))
         state |= Eof;
 
-    TEST (T,  inf, _RWSTD_STRSTR ( _RWSTD_LDBL_MAX), -1, 0, state);
-    TEST (T, -inf, _RWSTD_STRSTR (-_RWSTD_LDBL_MAX), -1, 0, state);
+    TEST (T,  inf, _RWSTD_STRSTR ( _RWSTD_LDBL_MAX), -1, 0, state, "", true);
+    TEST (T, -inf, _RWSTD_STRSTR (-_RWSTD_LDBL_MAX), -1, 0, state, "", true);
 
 #  endif   // _RWSTD_LDBL_MAX
 
@@ -2527,13 +2556,15 @@ void test_dbl_uflow (CharType ctype, const char *cname,
 
     if (LDBL_MAX_EXP > DBL_MAX_EXP) {
         // exercise bahvior on overflow
-        TEST (T,  inf, _RWSTD_STRSTR ( _RWSTD_LDBL_MAX), -1, 0, Fail);
-        TEST (T, -inf, _RWSTD_STRSTR (-_RWSTD_LDBL_MAX), -1, 0, Fail);
+        TEST (T,  inf, _RWSTD_STRSTR ( _RWSTD_LDBL_MAX), -1, 0,
+              Fail, "", true);
+        TEST (T, -inf, _RWSTD_STRSTR (-_RWSTD_LDBL_MAX), -1, 0,
+              Fail, "", true);
     }
 
     // long double may have the same range and precision as double
-    TEST (T,  inf,  "9.999999e+9999", 14, 0, Eof | Fail);
-    TEST (T, -inf, "-9.999999e+9999", 15, 0, Eof | Fail);
+    TEST (T,  inf,  "9.999999e+9999", 14, 0, Eof | Fail, "", true);
+    TEST (T, -inf, "-9.999999e+9999", 15, 0, Eof | Fail, "", true);
 
 #  endif   // _RWSTD_LDBL_MAX
 
@@ -2639,8 +2670,8 @@ test_ldbl_uflow (CharType ctype, const char *cname,
 
     const double inf = std::numeric_limits<long double>::infinity ();
 
-    TEST (T,  inf,  "9.999999e+9876543210", 20, 0, Eof | Fail);
-    TEST (T, -inf, "-9.999999e+9876543210", 21, 0, Eof | Fail);
+    TEST (T,  inf,  "9.999999e+9876543210", 20, 0, Eof | Fail, "", true);
+    TEST (T, -inf, "-9.999999e+9876543210", 21, 0, Eof | Fail, "", true);
 
 #  endif   // _RWSTD_LDBL_MAX
 
