@@ -86,28 +86,6 @@ harness reads it.
 Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
 x86-64 and on an aarch64 host.
 
-** TODO The heap dump of =tests/src/new.cpp= prints addresses for its totals
-
-=_rw_print_heap= passes =pst->bytes_= and =pst->blocks_= to the two
-=%zu= of ~"%zu bytes in %zu blocks"~. Both members are arrays of two
-=size_t=, one count for each form of =operator new=, so the directives
-read the addresses of the arrays: an invalid pointer to =operator
-delete[]= with two live blocks prints "94291721241408 bytes in
-94291721241392 blocks". The same dump prints each block's =id_= as
-stored, and an array block stores the complement of its sequence
-number, so the two blocks print as 18446744073709551614 and
-18446744073709551615. Both came with the file in 2006 (6fbffef2).
-Seen while the guard message of =_rw_check_block= was fixed,
-2026-11-21.
-
-Fix: pass the sums =pst->bytes_ [0] + pst->bytes_ [1]= and
-=pst->blocks_ [0] + pst->blocks_ [1]=, and print the sequence number
-of an array block as =operator_delete= recovers it, =~id_=.
-
-Check: a scratch program that allocates two blocks and deletes an
-invalid pointer, run with =--trace=, prints "16 bytes in 2 blocks"
-and the sequence numbers 0 and 1; =0.new= at pin.
-
 ** TODO The verbose =%{t}= names the months after July wrongly
 
 =_rw_fmttm= (=tests/src/printf.cpp=) prints a valid =tm_mon= with

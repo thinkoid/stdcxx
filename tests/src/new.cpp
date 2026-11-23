@@ -114,7 +114,7 @@ static const char Guard [8] = {
 
 
 static void
-_rw_print_heap ();
+_rw_print_heap (size_t nbytes, size_t nblocks);
 
 // check the guards and the stored address of an allocated block;
 // the call will abort if the block has been corrupted
@@ -202,7 +202,7 @@ _rw_find_block (void *ptr, const char *caller)
                   "%s:%d: %s (%#p): invalid pointer",
                   __FILE__, __LINE__, caller, ptr);
 
-        _rw_print_heap ();
+        _rw_print_heap (sum_bytes, sum_blocks);
 
         abort ();
 
@@ -214,11 +214,11 @@ _rw_find_block (void *ptr, const char *caller)
 
 // print the list of allocated blocks and check heap consistency
 static void
-_rw_print_heap ()
+_rw_print_heap (size_t nbytes, size_t nblocks)
 {
     rw_info (0, 0, __LINE__,
              "%s:%d: heap dump:\n%zu bytes in %zu blocks%s",
-             __FILE__, __LINE__, pst->bytes_, pst->blocks_, last ? ":" : "");
+             __FILE__, __LINE__, nbytes, nblocks, last ? ":" : "");
 
     for (Header *hdr = last; hdr; hdr = hdr->prev_) {
 
@@ -227,7 +227,7 @@ _rw_print_heap ()
 
         rw_info (0, 0, __LINE__, 
                  "%zu: %zu bytes at %#p allocated by operator new%s()",
-                 hdr->id_, hdr->size_, hdr->ptr_, array ? "[]" : "");
+                 array ? ~seq : seq, hdr->size_, hdr->ptr_, array ? "[]" : "");
     }
 
     if (last) 
