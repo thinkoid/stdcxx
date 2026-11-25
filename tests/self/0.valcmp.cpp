@@ -29,6 +29,8 @@
 
 #include <rw_valcmp.h>
 
+#include <limits>
+
 #include <stdio.h>   // for fprintf, size_t
 
 
@@ -272,6 +274,46 @@ run_test (const T* /* dummy */, const char *tname)
 }
 
 
+template <class T>
+void
+test_fp (const char *name, int (*cmp)(T, T))
+{
+    typedef std::numeric_limits<T> Limits;
+
+    const T tiny = Limits::denorm_min ();
+    const T min  = (Limits::min) ();
+    const T max  = (Limits::max) ();
+    const T inf  = Limits::infinity ();
+    const T nan  = Limits::quiet_NaN ();
+    const T eps  = Limits::epsilon ();
+
+    const struct {
+        T   x, y;
+        int distance;
+    } rows [] = {
+        { T (0), -T (0), 0 },
+        { -tiny, tiny, -2 },
+        { min - tiny, min, -1 },
+        { T (1) - eps / 2, T (1) + eps, -2 },
+        { -T (1) - eps, -T (1), -1 },
+        { -max, max, -_RWSTD_INT_MAX },
+        { max, inf, -1 },
+        { nan, nan, 0 }
+    };
+
+    for (size_t i = 0; i != sizeof rows / sizeof *rows; ++i) {
+        const int forward = cmp (rows [i].x, rows [i].y);
+        const int reverse = cmp (rows [i].y, rows [i].x);
+        if (forward != rows [i].distance || reverse != -rows [i].distance) {
+            fprintf (stderr, "%s row %u: expected %d and %d, got %d and %d\n",
+                     name, unsigned (i), rows [i].distance, -rows [i].distance,
+                     forward, reverse);
+            exit_status = 1;
+        }
+    }
+}
+
+
 int main ()
 {
 #define RUN_TEST(T) run_test ((T*)0, STR (T))
@@ -295,6 +337,32 @@ int main ()
 #endif   // _RWSTD_LONG_LONG
 
     RUN_TEST (wchar_t);
+
+    test_fp ("rw_fltcmp", rw_fltcmp);
+    test_fp ("rw_dblcmp", rw_dblcmp);
+    test_fp ("rw_ldblcmp", rw_ldblcmp);
+
+#if _RWSTD_INT_SIZE * _RWSTD_CHAR_BIT <= _RWSTD_DBL_MANT_DIG
+
+    // In [1, 2) each step is epsilon. Check both sides of saturation.
+    const double eps = std::numeric_limits<double>::epsilon ();
+    const int    max = _RWSTD_INT_MAX;
+    for (int offset = -1; offset <= 1; ++offset) {
+        const double x = 1.0 + (double (max) + offset) * eps;
+        const int want = offset < 0 ? max - 1 : max;
+        if (rw_dblcmp (x, 1.0) != want || rw_dblcmp (1.0, x) != -want) {
+            fprintf (stderr, "rw_dblcmp at INT_MAX %+d steps failed\n", offset);
+            exit_status = 1;
+        }
+    }
+
+#endif
+
+    const double inf = std::numeric_limits<double>::infinity ();
+    if (rw_equal (1.0, 2.0) || rw_equal (0.0, inf)) {
+        fprintf (stderr, "rw_equal accepted unequal doubles\n");
+        exit_status = 1;
+    }
 
     return exit_status;
 }

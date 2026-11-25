@@ -104,16 +104,17 @@ rw_strncmp (const wchar_t*, const wchar_t*,
 
 
 /**
- * Compares two floating point numbers for equality.
+ * Counts representable steps from y to x.  The two zeros share a rank.
+ * Infinities are adjacent to the finite extrema.  NaNs compare by their
+ * sign and payload bits, so matching NaN results compare equal.
  *
  * @param x  The left hand side of the comparison.
  * @param y  The right hand side of the comparison.
  *
  * @return  Returns a negative value, 0, or a positive value, depending
  *          on whether the first number is less than, equal to, or greater
- *          than the second number. The magnitude of the returned value
- *          indicates the number of distinct values representable in
- *          the type of the number between the two arguments.
+ *          than the second number. The magnitude is the number of steps,
+ *          saturated at the maximum value of int.
  */
 int
 rw_fltcmp (float x, float y);

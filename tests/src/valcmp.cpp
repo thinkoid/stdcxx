@@ -28,7 +28,7 @@
 
 #include <stdio.h>    // for fprintf, stderr
 #include <stdlib.h>   // for abort
-#include <string.h>   // for memcmp
+#include <string.h>   // for memcmp, memcpy
 
 /**************************************************************************/
 
@@ -698,262 +698,167 @@ rw_strncmp (const wchar_t* str1,
 }
 
 
-// floating point comparison helpers based on
-// http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm
+// The exponent and fraction of an IEEE binary interchange format form an
+// ordinal: adjacent magnitudes differ by one, including at the transition
+// from subnormal to normal.  Both zeros occupy the same rank.
+#if _RWSTD_CHAR_BIT != 8 || _RWSTD_FLT_RADIX != 2
+#  error floating point comparison requires binary floating point and octets
+#endif
+
+
+template <class int_type>
+struct _rw_fp_rank {
+    int_type hi, lo;
+};
+
+
+// Bias sign-and-magnitude so unsigned comparison orders the ranks.
+template <class int_type>
+static int_type
+_rw_biased (int_type bits)
+{
+    const int_type sign = int_type (1) << (sizeof bits * _RWSTD_CHAR_BIT - 1);
+    return (bits & sign) ? (int_type (0) - bits) : (bits | sign);
+}
+
+
+template <class int_type>
+static int
+_rw_distance (_rw_fp_rank<int_type> x, _rw_fp_rank<int_type> y)
+{
+    if (x.hi < y.hi || (x.hi == y.hi && x.lo < y.lo))
+        return -_rw_distance (y, x);
+
+    const int_type lo = x.lo - y.lo;
+    const int_type hi = x.hi - y.hi - (x.lo < y.lo);
+
+    return hi || lo > _RWSTD_INT_MAX ? _RWSTD_INT_MAX : int (lo);
+}
+
+
+template <class int_type, class Float>
+static _rw_fp_rank<int_type>
+_rw_word_rank (Float val)
+{
+    int_type bits;
+    memcpy (&bits, &val, sizeof bits);
+
+    const _rw_fp_rank<int_type> rank = { 0, _rw_biased (bits) };
+
+    return rank;
+}
+
+
+template <class int_type, class Float>
+static _rw_fp_rank<int_type>
+_rw_split_rank (Float val, bool extended = false)
+{
+    // Copy just the value bytes. x87 pads its ten bytes to the ABI size.
+    const int    one    = 1;
+    const bool   little = 0 != *(const unsigned char*)&one;
+
+    const size_t size = extended ? 10 : sizeof val;
+
+    int_type words [2] = { 0, 0 };
+
+    const unsigned char *src = (const unsigned char*)&val;
+    unsigned char       *dst = (unsigned char*)words;
+
+    if (!little) {
+        src += sizeof val - size;
+        dst += sizeof words - size;
+    }
+    memcpy (dst, src, size);
+
+    const int_type sign = int_type (1) << (sizeof (int_type) * _RWSTD_CHAR_BIT - 1);
+
+    int_type hi = words [little ? 1 : 0];
+    int_type lo = words [little ? 0 : 1];
+
+    if (extended) {
+        // Drop the explicit integer bit and adjoin the 15 exponent bits
+        // to the 63 fraction bits, so the next exponent is one step away.
+        int_type exponent = hi & 0x7fff;
+        if (0 == exponent && (lo & sign))
+            exponent = 1;   // x87 pseudo-denormal encodes exponent one
+
+        lo = (exponent & 1 ? sign : 0) | (lo & ~sign);
+        hi = (hi & 0x8000 ? sign : 0) | (exponent >> 1);
+    }
+
+    // Negating both words borrows from the high word for a nonzero low.
+    const bool negative = 0 != (hi & sign);
+
+    const _rw_fp_rank<int_type> rank = {
+        _rw_biased (hi) - (negative && lo != 0),
+        negative ? int_type (0) - lo : lo
+    };
+
+    return rank;
+}
+
 
 int
 rw_fltcmp (float x, float y)
 {
-#if _RWSTD_FLT_SIZE == _RWSTD_SHRT_SIZE
-    typedef short IntT;
-    const IntT imin = _RWSTD_SHRT_MIN;
-#elif _RWSTD_FLT_SIZE == _RWSTD_INT_SIZE
-    typedef int IntT;
-    const IntT imin = _RWSTD_INT_MIN;
-#elif _RWSTD_FLT_SIZE == _RWSTD_LONG_SIZE
-    typedef long IntT;
-    const IntT imin = _RWSTD_LONG_MIN;
-#elif _RWSTD_FLT_SIZE == _RWSTD_LLONG_SIZE
-    typedef _RWSTD_LONG_LONG IntT;
-    const IntT imin = _RWSTD_LLONG_MIN;
+#if    _RWSTD_FLT_SIZE == 4 && _RWSTD_FLT_MANT_DIG == 24 \
+    && _RWSTD_FLT_MAX_EXP == 128 && defined (_RWSTD_UINT32_T)
+    typedef _RWSTD_UINT32_T int_type;
+    return _rw_distance (_rw_word_rank<int_type>(x),
+                         _rw_word_rank<int_type>(y));
 #else
-    // ???
-#  error no integral type of the same size as float exists
+#  error rw_fltcmp requires binary32 and a 32-bit unsigned integer
 #endif
-
-    if (x == y)
-        return 0;
-
-    // make both arguments lexicographically ordered as twos-complement ints
-    IntT x_int = *(IntT*)&x;
-    if (x_int < 0)
-        x_int = imin - x_int;
-
-    IntT y_int = *(IntT*)&y;
-    if (y_int < 0)
-        y_int = imin - y_int;
-
-    const IntT int_diff = x_int - y_int;
-
-    return int_diff;
 }
-
-
-#define Abs(x) ((x) < 0 ? -(x) : (x))
 
 
 int
 rw_dblcmp (double x, double y)
 {
-#if _RWSTD_DBL_SIZE == _RWSTD_INT_SIZE
-    typedef int IntT;
-    const IntT imin = _RWSTD_INT_MIN;
-#elif _RWSTD_DBL_SIZE == _RWSTD_LONG_SIZE
-    typedef long IntT;
-    const IntT imin = _RWSTD_LONG_MIN;
-#elif _RWSTD_DBL_SIZE == _RWSTD_LLONG_SIZE
-    typedef _RWSTD_LONG_LONG IntT;
-    const IntT imin = _RWSTD_LLONG_MIN;
+#if    _RWSTD_DBL_SIZE != 8 || _RWSTD_DBL_MANT_DIG != 53 \
+    || _RWSTD_DBL_MAX_EXP != 1024
+#  error rw_dblcmp requires binary64
+#elif defined (_RWSTD_UINT64_T)
+    typedef _RWSTD_UINT64_T int_type;
+    return _rw_distance (_rw_word_rank<int_type>(x),
+                         _rw_word_rank<int_type>(y));
+#elif defined (_RWSTD_UINT32_T)
+    typedef _RWSTD_UINT32_T int_type;
+    return _rw_distance (_rw_split_rank<int_type>(x),
+                         _rw_split_rank<int_type>(y));
+#else
+#  error rw_dblcmp requires a 64-bit or 32-bit unsigned integer
 #endif
-
-#if _RWSTD_LLONG_SIZE < _RWSTD_DBL_SIZE
-
-    if (x == y)
-        return 0;
-
-    // FIXME: use integer math as in the functions above
-
-    const double diff = x - y;
-
-    // check absolute error
-    if (Abs (diff) < _RWSTD_DBL_EPSILON)
-        return 0;
-
-    // check relative error
-    const double relerr =
-        Abs (x) < Abs (y) ? Abs (diff / y) : Abs (diff / x);
-
-    if (relerr <= 0.0000001)
-        return 0;
-
-    return x < y ? -1 : +1;
-
-#else   // if !(_RWSTD_LLONG_SIZE < _RWSTD_DBL_SIZE)
-
-    if (x == y)
-        return 0;
-
-    IntT x_int = *(IntT*)&x;
-    if (x_int < 0)
-        x_int = imin - x_int;
-
-    IntT y_int = *(IntT*)&y;
-    if (y_int < 0)
-        y_int = imin - y_int;
-
-    const IntT int_diff = x_int - y_int;
-
-    // cast a possibly wider type to int to avoid compiler warnings
-    // this should be safe since the function should not be used to
-    // compare numbers that are that far apart
-    return int (int_diff);
-
-#endif   // _RWSTD_LLONG_SIZE < _RWSTD_DBL_SIZE
-
 }
-
-
-#if    !defined (_RWSTD_NO_LONG_LONG) \
-    && (64 == _RWSTD_LDBL_MANT_DIG || 113 == _RWSTD_LDBL_MANT_DIG)
-   // an IEC 559 format wider than double, and the integer to take it apart
-#define _RW_LDBL_ORDINAL
-#endif
-
-
-#ifdef _RW_LDBL_ORDINAL
-
-typedef unsigned _RWSTD_LONG_LONG _rw_uint64;
-
-
-// splits a long double into its sign and the ordinal of its magnitude:
-// the exponent and the significand read as one unsigned number, in a
-// high and a low part, so that adjacent representable values have
-// adjacent ordinals (the scheme rw_fltcmp and rw_dblcmp apply through
-// an integer of the same size); covers the extended format, a 64-bit
-// significand with an explicit integer bit in 12 or 16 bytes, and the
-// 128-bit interchange format
-static void
-_rw_ldbl_ordinal (long double val, bool &neg, _rw_uint64 &hi, _rw_uint64 &lo)
-{
-    unsigned char bytes [sizeof val];
-    memcpy (bytes, &val, sizeof val);
-
-    const int  one    = 1;
-    const bool little = 0 != *(const char*)&one;
-
-    // the bytes that carry the value, least significant first (the
-    // extended format pads its ten to the size of the object)
-    const size_t nbytes = 64 == _RWSTD_LDBL_MANT_DIG ? 10 : sizeof val;
-
-    _rw_uint64 word [2] = { 0, 0 };
-
-    for (size_t i = 0; i != nbytes; ++i) {
-        const size_t pos = little ? i : sizeof val - 1 - i;
-        word [i / 8] |= _rw_uint64 (bytes [pos]) << (8 * (i % 8));
-    }
-
-    lo = word [0];
-    hi = word [1];
-
-    if (64 == _RWSTD_LDBL_MANT_DIG) {
-        // sign and exponent in 16 bits; the explicit integer bit follows
-        // from the exponent and is dropped so that the significands of
-        // consecutive exponents adjoin
-        neg = 0 != (hi & 0x8000);
-        hi &= 0x7fff;
-        lo &= ~(_rw_uint64 (1) << 63);
-    }
-    else {
-        neg = 0 != (hi >> 63);
-        hi &= ~(_rw_uint64 (1) << 63);
-    }
-}
-
-
-// the distance between two ordinals, the larger first, at most INT_MAX
-static int
-_rw_ordinal_distance (_rw_uint64 hi1, _rw_uint64 lo1,
-                      _rw_uint64 hi2, _rw_uint64 lo2)
-{
-    const _rw_uint64 imax = _RWSTD_INT_MAX;
-
-    if (hi1 == hi2) {
-        const _rw_uint64 dist = lo1 - lo2;
-        return dist < imax ? int (dist) : _RWSTD_INT_MAX;
-    }
-
-    if (1 != hi1 - hi2)
-        return _RWSTD_INT_MAX;
-
-    // one unit of the high part plus lo1, less lo2
-
-#if 64 == _RWSTD_LDBL_MANT_DIG
-
-    // the unit is 2^63 ordinals, the low part being the significand
-    // less its integer bit
-    const _rw_uint64 dist = (_rw_uint64 (1) << 63) + lo1 - lo2;
-
-#else   // if 64 != _RWSTD_LDBL_MANT_DIG
-
-    // the unit is 2^64 ordinals: out of range unless lo1 < lo2, where
-    // the unsigned wrap-around of the difference supplies it
-    if (lo2 <= lo1)
-        return _RWSTD_INT_MAX;
-
-    const _rw_uint64 dist = lo1 - lo2;
-
-#endif   // _RWSTD_LDBL_MANT_DIG
-
-    return dist < imax ? int (dist) : _RWSTD_INT_MAX;
-}
-
-#endif   // _RW_LDBL_ORDINAL
 
 
 int
 rw_ldblcmp (long double x, long double y)
 {
-    if (sizeof (long double) == sizeof (double))
-        return rw_dblcmp (double (x), double (y));
-
-    if (x == y)
-        return 0;
-
-#ifdef _RW_LDBL_ORDINAL
-
-    bool       xneg, yneg;
-    _rw_uint64 xhi, xlo, yhi, ylo;
-
-    _rw_ldbl_ordinal (x, xneg, xhi, xlo);
-    _rw_ldbl_ordinal (y, yneg, yhi, ylo);
-
-    if (xneg != yneg) {
-        // the distance runs through zero: the sum of the two magnitudes
-        const _rw_uint64 imax = _RWSTD_INT_MAX;
-        const _rw_uint64 sum  = xlo + ylo;
-
-        const int dist = xhi || yhi || sum < xlo || imax <= sum ?
-            _RWSTD_INT_MAX : int (sum);
-
-        return xneg ? -dist : dist;
-    }
-
-    const bool xlarger = xhi > yhi || (xhi == yhi && xlo > ylo);
-
-    const int dist = xlarger ? _rw_ordinal_distance (xhi, xlo, yhi, ylo)
-                             : _rw_ordinal_distance (yhi, ylo, xhi, xlo);
-
-    // the larger magnitude is the greater value unless both are negative
-    return xlarger != xneg ? dist : -dist;
-
-#else   // if !defined (_RW_LDBL_ORDINAL)
-
-    // FIXME: use integer math as in the functions above
-
-    const long double diff = x - y;
-
-    // check absolute error
-    if (Abs (diff) < _RWSTD_LDBL_EPSILON)
-        return 0;
-
-    // check relative error
-    const long double relerr =
-        Abs (x) < Abs (y) ? Abs (diff / y) : Abs (diff / x);
-
-    if (relerr <= 0.0000001L)
-        return 0;
-
-    return x < y ? -1 : +1;
-
-#endif   // _RW_LDBL_ORDINAL
+#if    _RWSTD_LDBL_SIZE == _RWSTD_DBL_SIZE \
+    && _RWSTD_LDBL_MANT_DIG == 53 && _RWSTD_LDBL_MAX_EXP == 1024
+    return rw_dblcmp (double (x), double (y));
+#elif    _RWSTD_LDBL_SIZE == 16 && _RWSTD_LDBL_MANT_DIG == 113 \
+      && _RWSTD_LDBL_MAX_EXP == 16384
+#  if defined (_RWSTD_UINT128_T)
+    typedef _RWSTD_UINT128_T int_type;
+    return _rw_distance (_rw_word_rank<int_type>(x),
+                         _rw_word_rank<int_type>(y));
+#  elif defined (_RWSTD_UINT64_T)
+    typedef _RWSTD_UINT64_T int_type;
+    return _rw_distance (_rw_split_rank<int_type>(x),
+                         _rw_split_rank<int_type>(y));
+#  else
+#    error binary128 requires a 128-bit or 64-bit unsigned integer
+#  endif
+#elif    _RWSTD_LDBL_MANT_DIG == 64 && _RWSTD_LDBL_MAX_EXP == 16384 \
+      && (_RWSTD_LDBL_SIZE == 10 || _RWSTD_LDBL_SIZE == 12 \
+                                 || _RWSTD_LDBL_SIZE == 16) \
+      && defined (_RWSTD_UINT64_T)
+    typedef _RWSTD_UINT64_T int_type;
+    return _rw_distance (_rw_split_rank<int_type>(x, true),
+                         _rw_split_rank<int_type>(y, true));
+#else
+#  error unsupported long double format or missing integer for rw_ldblcmp
+#endif
 }

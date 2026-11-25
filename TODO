@@ -27,42 +27,6 @@ at the top.
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
 
-** TODO =rw_dblcmp= returns a 64-bit distance through =int=, and =rw_equal (1.0, 2.0)= is true
-
-=rw_dblcmp= in =tests/src/valcmp.cpp= reads its two arguments as
-integers of the size of =double= and returns their difference. Where
-=double= is as wide as =long= the difference has 64 bits, and the
-function returns ~int (int_diff)~, its low 32 bits. Two values whose
-patterns differ by a multiple of 2^32 thus compare equal:
-=rw_dblcmp (1.0, 2.0)= is 0, and so is the distance from 0.0, 0.5,
--1.0 or 7.0 to infinity. =rw_equal (double, double)= is
-~0 == rw_dblcmp (x, y)~, so it calls all of them equal. The comment at
-the cast says the function is not for values that far apart;
-=rw_equal= hands it any two values. =rw_fltcmp= subtracts two =int=
-and overflows: =rw_fltcmp (FLT_MAX, -FLT_MAX)= is -16777218, the wrong
-sign. =rw_ldblcmp= saturates at =_RWSTD_INT_MAX=.
-=tests/self/0.valcmp.cpp= calls none of the three. By probe in 15D
-under GCC on aarch64.
-
-In =22.locale.num.get= a =get= that never stores fails 2994 assertions
-for =float=, 2910 for =long double= and 348 for =double=: 92 of the
-150 storing rows of =test_floating_point= cannot fail for =double=,
-and the six =double= overflow rows that expect infinity pass from a
-start of 1.0. =22.locale.money.get=, =22.locale.num.put=, =26.c.math=
-and =26.valarray.transcend= use the same functions. Seen while a
-harness change to =22.locale.num.get= was run against a =get= that
-stores nothing, 2026-11-23.
-
-Fix: =rw_dblcmp= returns the distance saturated at =_RWSTD_INT_MAX=
-and its negative, as =rw_ldblcmp= does; =rw_fltcmp= takes the
-difference in a wider type and saturates the same way.
-
-Check: =0.valcmp= gains rows for the three functions, among them 1.0
-against 2.0, 0.0 against infinity, =FLT_MAX= against =-FLT_MAX= and
-two adjacent values, and passes. The suite in 15D is at its pin, or
-each row that moves is explained: a test that passed by this equality
-fails now.
-
 ** TODO The =long double= overflow rows of =22.locale.num.get= read a =double=
 
 The overflow block of =test_ldbl_uflow= in
