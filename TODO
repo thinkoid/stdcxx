@@ -27,65 +27,6 @@ at the top.
 The suite and its driver under =tests=: what it covers, what it
 misses, and how it runs.
 
-** TODO The suite against other libraries
-
-The suite tests the C++03 library through clauses 18 to 27. Most of
-its assertions check standard behaviour, not the library's additions.
-Run against libstdc++ and libc++, a disagreement is a defect in one of
-the three or a question the standard leaves open.
-
-Fix: build the driver and the tests of clauses 21 to 27 against
-another library. The tests that need the library's additions or its
-=_RWSTD_= macros are listed and left out, each with the reason.
-
-Check: the census of the tests that build, a table per library, and
-each disagreement read against the standard and filed where it
-belongs.
-
-** WAITING ThreadSanitizer cannot follow =longjmp= on glibc 2.44
-
-Under the sanitizer every =longjmp= and =siglongjmp= dies with "can't
-find longjmp buf" and exit 66. A ten-line program with =sigsetjmp=
-and =siglongjmp= and no signal fails the same way, under GCC 16's
-libtsan and Clang 23's runtime alike. The sanitizer records the stack
-pointer at =setjmp= and, at =longjmp=, demangles the one saved in the
-=jmp_buf= to find the record. glibc 2.44 (a5ec880f80, "Consolidate
-pointer guard to use a relro variable instead of the TCB") moved the
-x86-64 pointer guard from the thread control block slot at =%fs:0x30=
-to the variable =__pointer_chk_guard=; the slot now reads zero, and
-the runtimes still demangle with it. The same series gave aarch64 a
-rotate its runtime does not undo (78f1f0e39c). Reported upstream as
-LLVM issue 228263 (2026-10); GCC's libsanitizer takes the fix at its
-next merge from compiler-rt. The six programs of the spot-check note
-are the ones this stops.
-
-Fix: the sanitizer runtimes'. The tests need no change.
-
-Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
-=18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
-reads the new guard.
-
-** TODO The =limits= example expects the =traps= of an x86-64 host
-
-=examples/manual/out/limits.out= 29 holds ~traps = true~ for
-=numeric_limits<int>=. =include/limits= takes the value from the
-=NO_INT_TRAPS= characterization, which divides by zero: an x86-64
-host raises =SIGFPE=, so =traps= is true there; an aarch64 host
-returns 0, so =config.h= defines =_RWSTD_NO_INT_TRAPS= and the example
-prints false. ~make -C <build>/examples run RUN=limits~ thus reports
-=DIFF= in 15D and 12D under GCC on an aarch64 host, line 29 the only
-difference. =etc/config/xfail.txt= records the same =DIFF= for AIX
-(=STDCXX-458=); =make run= does not read that file. Seen while the
-=is_modulo= line of the example was checked, 2026-11-17.
-
-Fix: a decision: the example stops printing =traps= of =int=; or its
-expected output follows the host, a file per architecture or a line
-the comparison skips; or =xfail.txt= gets an aarch64 record and the
-harness reads it.
-
-Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
-x86-64 and on an aarch64 host.
-
 ** TODO =rw_dblcmp= returns a 64-bit distance through =int=, and =rw_equal (1.0, 2.0)= is true
 
 =rw_dblcmp= in =tests/src/valcmp.cpp= reads its two arguments as
@@ -424,6 +365,65 @@ disk the stage takes is still the point.
 
 Check: no "Is a directory" in a script's output; the scripts'
 statuses unchanged.
+
+** TODO The suite against other libraries
+
+The suite tests the C++03 library through clauses 18 to 27. Most of
+its assertions check standard behaviour, not the library's additions.
+Run against libstdc++ and libc++, a disagreement is a defect in one of
+the three or a question the standard leaves open.
+
+Fix: build the driver and the tests of clauses 21 to 27 against
+another library. The tests that need the library's additions or its
+=_RWSTD_= macros are listed and left out, each with the reason.
+
+Check: the census of the tests that build, a table per library, and
+each disagreement read against the standard and filed where it
+belongs.
+
+** WAITING ThreadSanitizer cannot follow =longjmp= on glibc 2.44
+
+Under the sanitizer every =longjmp= and =siglongjmp= dies with "can't
+find longjmp buf" and exit 66. A ten-line program with =sigsetjmp=
+and =siglongjmp= and no signal fails the same way, under GCC 16's
+libtsan and Clang 23's runtime alike. The sanitizer records the stack
+pointer at =setjmp= and, at =longjmp=, demangles the one saved in the
+=jmp_buf= to find the record. glibc 2.44 (a5ec880f80, "Consolidate
+pointer guard to use a relro variable instead of the TCB") moved the
+x86-64 pointer guard from the thread control block slot at =%fs:0x30=
+to the variable =__pointer_chk_guard=; the slot now reads zero, and
+the runtimes still demangle with it. The same series gave aarch64 a
+rotate its runtime does not undo (78f1f0e39c). Reported upstream as
+LLVM issue 228263 (2026-10); GCC's libsanitizer takes the fix at its
+next merge from compiler-rt. The six programs of the spot-check note
+are the ones this stops.
+
+Fix: the sanitizer runtimes'. The tests need no change.
+
+Check: =0.alloc=, =0.new=, =0.inputiter=, =0.outputiter=,
+=18.setjmp= and =18.csetjmp= exit 0 under a sanitizer runtime that
+reads the new guard.
+
+** TODO The =limits= example expects the =traps= of an x86-64 host
+
+=examples/manual/out/limits.out= 29 holds ~traps = true~ for
+=numeric_limits<int>=. =include/limits= takes the value from the
+=NO_INT_TRAPS= characterization, which divides by zero: an x86-64
+host raises =SIGFPE=, so =traps= is true there; an aarch64 host
+returns 0, so =config.h= defines =_RWSTD_NO_INT_TRAPS= and the example
+prints false. ~make -C <build>/examples run RUN=limits~ thus reports
+=DIFF= in 15D and 12D under GCC on an aarch64 host, line 29 the only
+difference. =etc/config/xfail.txt= records the same =DIFF= for AIX
+(=STDCXX-458=); =make run= does not read that file. Seen while the
+=is_modulo= line of the example was checked, 2026-11-17.
+
+Fix: a decision: the example stops printing =traps= of =int=; or its
+expected output follows the host, a file per architecture or a line
+the comparison skips; or =xfail.txt= gets an aarch64 record and the
+harness reads it.
+
+Check: ~make run RUN=limits~ in the =examples= of 15D passes on an
+x86-64 and on an aarch64 host.
 
 * Certification
 
